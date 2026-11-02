@@ -6,25 +6,55 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 
-import { EuiButton, EuiSpacer, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { usePolicyListContext } from './policy_list_context';
 import { useIsReadOnly } from '../../lib/use_is_read_only';
 import type { PolicyFromES } from '../../../../common/types';
+import { useKibana } from '../../../shared_imports';
 import { getPoliciesListPath, getPolicyCreatePath } from '../../services/navigation';
 import { PolicyTable, ListActionHandler } from './components';
 import { ViewPolicyFlyout } from './policy_flyout';
 
+const createPolicyButtonLabel = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel',
+  { defaultMessage: 'Create policy' }
+);
+
+const policyListTitle = i18n.translate('xpack.indexLifecycleMgmt.policyTable.sectionHeading', {
+  defaultMessage: 'Index Lifecycle Policies',
+});
+
+const policyListDescription = i18n.translate(
+  'xpack.indexLifecycleMgmt.policyTable.sectionDescription',
+  {
+    defaultMessage:
+      'Manage your indices as they age.  Attach a policy to automate when and how to transition an index through its lifecycle.',
+  }
+);
+
 interface Props {
   policies: PolicyFromES[];
   updatePolicies: () => void;
+  isLoading?: boolean;
+  error?: { statusCode?: number | string; message?: string } | null;
 }
 
-export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePolicies }) => {
+export const PolicyList: React.FunctionComponent<Props> = ({
+  policies,
+  updatePolicies,
+  isLoading = false,
+  error,
+}) => {
   const history = useHistory();
+  const {
+    services: { docLinks },
+  } = useKibana();
   const isReadOnly = useIsReadOnly();
   const { setListAction } = usePolicyListContext();
   const [flyoutPolicy, setFlyoutPolicy] = useState<PolicyFromES | null>(null);
@@ -39,31 +69,84 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
     }
   }, [history.location.search, policies, setListAction]);
 
+  const createPolicyPath = getPolicyCreatePath();
   const createPolicyButton = (
     <EuiButton
-      {...reactRouterNavigate(history, getPolicyCreatePath())}
+      {...reactRouterNavigate(history, createPolicyPath)}
       fill
       iconType="plusCircle"
       data-test-subj="createPolicyButton"
     >
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.policyTable.emptyPrompt.createButtonLabel"
-        defaultMessage="Create policy"
-      />
+      {createPolicyButtonLabel}
     </EuiButton>
   );
 
-  if (policies.length === 0) {
-    return (
+  const showCreateInHeader = !isLoading && !error && policies.length > 0 && !isReadOnly;
+  const menu: AppHeaderMenu | undefined = showCreateInHeader
+    ? {
+        primaryActionItem: {
+          id: 'createPolicy',
+          label: createPolicyButtonLabel,
+          iconType: 'plusCircle',
+          testId: 'createPolicyButton',
+          href: history.createHref({ pathname: createPolicyPath }),
+          run: () => history.push(createPolicyPath),
+        },
+      }
+    : undefined;
+
+  let body: React.ReactNode;
+  if (isLoading) {
+    body = (
+      <EuiPageTemplate.EmptyPrompt
+        title={<EuiLoadingSpinner size="xl" />}
+        body={
+          <FormattedMessage
+            id="xpack.indexLifecycleMgmt.policyTable.policiesLoading"
+            defaultMessage="Loading policies..."
+          />
+        }
+      />
+    );
+  } else if (error) {
+    const { statusCode, message } = error;
+    body = (
+      <EuiPageTemplate.EmptyPrompt
+        color="danger"
+        title={
+          <h2>
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.policiesLoadingFailedTitle"
+              defaultMessage="Unable to load existing lifecycle policies"
+            />
+          </h2>
+        }
+        body={
+          <p>
+            {message} ({statusCode})
+          </p>
+        }
+        actions={
+          <EuiButton onClick={updatePolicies} iconType="refresh" color="danger">
+            <FormattedMessage
+              id="xpack.indexLifecycleMgmt.policyTable.policiesReloadButton"
+              defaultMessage="Try again"
+            />
+          </EuiButton>
+        }
+      />
+    );
+  } else if (policies.length === 0) {
+    body = (
       <EuiPageTemplate.EmptyPrompt
         iconType="managementApp"
         title={
-          <h1>
+          <h2>
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.policyTable.emptyPromptTitle"
               defaultMessage="Create your first index lifecycle policy"
             />
-          </h1>
+          </h2>
         }
         body={
           <Fragment>
@@ -75,48 +158,39 @@ export const PolicyList: React.FunctionComponent<Props> = ({ policies, updatePol
             </p>
           </Fragment>
         }
-        actions={createPolicyButton}
+        actions={isReadOnly ? undefined : createPolicyButton}
       />
+    );
+  } else {
+    body = (
+      <>
+        <ListActionHandler
+          deletePolicyCallback={() => {
+            // if a flyout was open, then close it
+            history.push(getPoliciesListPath());
+            // update the policies in the list after 1 was deleted
+            updatePolicies();
+          }}
+        />
+        <PolicyTable policies={policies} />
+        {flyoutPolicy && <ViewPolicyFlyout policy={flyoutPolicy} />}
+      </>
     );
   }
 
-  const rightSideItems = isReadOnly ? [] : [createPolicyButton];
   return (
     <>
-      <ListActionHandler
-        deletePolicyCallback={() => {
-          // if a flyout was open, then close it
-          history.push(getPoliciesListPath());
-          // update the policies in the list after 1 was deleted
-          updatePolicies();
-        }}
-      />
-
-      <EuiPageHeader
-        pageTitle={
-          <span data-test-subj="ilmPageHeader">
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-              defaultMessage="Index Lifecycle Policies"
-            />
-          </span>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.policyTable.sectionDescription"
-            defaultMessage="Manage your indices as they age.  Attach a policy to automate
-                        when and how to transition an index through its lifecycle."
-          />
-        }
-        bottomBorder
-        rightSideItems={rightSideItems}
+      <AppHeader
+        title={policyListTitle}
+        description={policyListDescription}
+        menu={menu}
+        docLink={docLinks.links.elasticsearch.ilm}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />
 
-      <PolicyTable policies={policies} />
-
-      {flyoutPolicy && <ViewPolicyFlyout policy={flyoutPolicy} />}
+      {body}
     </>
   );
 };

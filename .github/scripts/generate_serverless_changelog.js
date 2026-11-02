@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 const GITHUB_OWNER = 'elastic';
 const KIBANA_REPO = 'kibana';
 const SERVERLESS_GITOPS_REPO = 'serverless-gitops';
@@ -88,7 +97,9 @@ const matchKibanaTagsToReleaseCommits = async ({ github, serverlessReleases }) =
     per_page: 100,
   })) {
     for (const tag of response.data) {
-      const release = serverlessReleases.find(({ kibanaSha }) => tag.commit.sha.startsWith(kibanaSha));
+      const release = serverlessReleases.find(({ kibanaSha }) =>
+        tag.commit.sha.startsWith(kibanaSha)
+      );
 
       if (release) {
         tagsByReleaseSha.set(release.kibanaSha, tag);
@@ -145,11 +156,7 @@ const getServerlessReleases = async ({ github, envSearch }) => {
   return matchKibanaTagsToReleaseCommits({ github, serverlessReleases });
 };
 
-const getPrsForServerless = async ({
-  github,
-  serverlessReleases,
-  selectedServerlessSHAs,
-}) => {
+const getPrsForServerless = async ({ github, serverlessReleases, selectedServerlessSHAs }) => {
   if (selectedServerlessSHAs.size !== 2) {
     throw new Error('Exactly two serverless releases must be selected');
   }
@@ -214,7 +221,9 @@ const getPrsForServerless = async ({
   );
 
   const pullRequests = results.flatMap((result) => {
-    return result.nodes.flatMap((node) => node?.associatedPullRequests?.nodes ?? []).filter(Boolean);
+    return result.nodes
+      .flatMap((node) => node?.associatedPullRequests?.nodes ?? [])
+      .filter(Boolean);
   });
 
   return pullRequests.map((pr) => {
@@ -240,7 +249,9 @@ const selectReleases = ({ releases, serviceVersion }) => {
     return (a.releaseTag?.name ?? '').localeCompare(b.releaseTag?.name ?? '');
   });
 
-  const currentReleaseIndex = sortedReleases.findIndex(({ kibanaSha }) => kibanaSha === serviceVersion);
+  const currentReleaseIndex = sortedReleases.findIndex(
+    ({ kibanaSha }) => kibanaSha === serviceVersion
+  );
 
   if (currentReleaseIndex === -1) {
     throw new Error(`Could not find ${serviceVersion} in recent serverless releases`);
@@ -280,7 +291,12 @@ const generateServerlessChangelog = async ({ github }) => {
     selectedServerlessSHAs: new Set([newer.kibanaSha, older.kibanaSha]),
   });
 
-  console.log(prs.map(({ html_url: htmlUrl }) => htmlUrl).sort().join('\n'));
+  console.log(
+    prs
+      .map(({ html_url: htmlUrl }) => htmlUrl)
+      .sort()
+      .join('\n')
+  );
 };
 
 module.exports = generateServerlessChangelog;

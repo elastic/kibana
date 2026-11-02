@@ -9,11 +9,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { isOfQueryType, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { useHasEsqlPanel } from '@kbn/presentation-publishing';
 import { isEqual } from 'lodash';
-import type { DashboardState } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_TIME_RANGE } from '@kbn/agent-builder-dashboards-common';
 
 interface UseDashboardPreviewUnifiedSearchParams {
@@ -49,7 +51,9 @@ export const useDashboardPreviewUnifiedSearch = ({
   );
   const [query, setQuery] = useState<Query>(normalizeQuery(toStoredQuery(dashboardState.query)));
   const [filters, setFilters] = useState<Filter[]>(toStoredFilters(dashboardState.filters) ?? []);
-  const [dataViews, setDataViews] = useState<DataView[]>([]);
+  const [sources, setSources] = useState<FilterableSource[]>([]);
+  const [isApproximate, setIsApproximate] = useState(false);
+  const hasEsqlPanel = useHasEsqlPanel(dashboardApi);
 
   useEffect(() => {
     if (!dashboardApi) {
@@ -63,11 +67,11 @@ export const useDashboardPreviewUnifiedSearch = ({
 
   useEffect(() => {
     if (!dashboardApi) {
-      setDataViews([]);
+      setSources([]);
       return;
     }
 
-    setDataViews(dashboardApi.dataViews$.value ?? []);
+    setSources(dashboardApi.dataSources$.value ?? []);
 
     const querySubscription = dashboardApi.query$.subscribe((nextQuery) => {
       const resolvedQuery = normalizeQuery(
@@ -77,10 +81,10 @@ export const useDashboardPreviewUnifiedSearch = ({
         isEqual(currentQuery, resolvedQuery) ? currentQuery : resolvedQuery
       );
     });
-    const dataViewsSubscription = dashboardApi.dataViews$.subscribe((nextDataViews) => {
-      const resolvedDataViews = nextDataViews ?? [];
-      setDataViews((currentDataViews) =>
-        isEqual(currentDataViews, resolvedDataViews) ? currentDataViews : resolvedDataViews
+    const sourcesSubscription = dashboardApi.dataSources$.subscribe((nextSources) => {
+      const resolvedSources = nextSources ?? [];
+      setSources((currentSources) =>
+        isEqual(currentSources, resolvedSources) ? currentSources : resolvedSources
       );
     });
     const timeRangeSubscription = dashboardApi.timeRange$.subscribe((nextTimeRange) => {
@@ -95,8 +99,21 @@ export const useDashboardPreviewUnifiedSearch = ({
 
     return () => {
       querySubscription.unsubscribe();
-      dataViewsSubscription.unsubscribe();
+      sourcesSubscription.unsubscribe();
       timeRangeSubscription.unsubscribe();
+    };
+  }, [dashboardApi]);
+
+  useEffect(() => {
+    if (!dashboardApi) {
+      setIsApproximate(false);
+      return;
+    }
+
+    const approximationSubscription = dashboardApi.isApproximate$.subscribe(setIsApproximate);
+
+    return () => {
+      approximationSubscription.unsubscribe();
     };
   }, [dashboardApi]);
 
@@ -151,7 +168,7 @@ export const useDashboardPreviewUnifiedSearch = ({
     () => ({
       query,
       filters,
-      indexPatterns: dataViews,
+      indexPatterns: sources,
       dateRangeFrom: timeRange.from,
       dateRangeTo: timeRange.to,
       onQuerySubmit,
@@ -171,12 +188,27 @@ export const useDashboardPreviewUnifiedSearch = ({
       displayStyle: 'inPage' as const,
       disableSubscribingToGlobalDataServices: true,
       enableDateRangePicker: true,
+      esqlApproximation: {
+        isApproximate,
+        onChange: (nextIsApproximate: boolean) =>
+          dashboardApi?.setEsqlApproximation(nextIsApproximate),
+        disabled: !hasEsqlPanel,
+        additionalText: i18n.translate(
+          'xpack.agentBuilderDashboards.esqlApproximationToggle.additionalText',
+          {
+            defaultMessage:
+              'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+          }
+        ),
+      },
     }),
     [
       dashboardApi,
       dashboardState.title,
-      dataViews,
+      sources,
       filters,
+      hasEsqlPanel,
+      isApproximate,
       onFiltersUpdated,
       onQuerySubmit,
       onRefresh,
@@ -187,7 +219,7 @@ export const useDashboardPreviewUnifiedSearch = ({
   );
 
   return {
-    dataViews,
+    sources,
     filters,
     query,
     searchBarProps,

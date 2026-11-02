@@ -124,7 +124,7 @@ components:
   schemas:
     Message:
       type: object
-      name: Message
+      title: Message
       properties:
         '@timestamp':
           type: string

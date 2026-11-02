@@ -14,11 +14,11 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiTitle,
-  EuiCallOut,
   EuiScreenReaderLive,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import styled from 'styled-components';
 import { FAILED_TO_SCHEDULE } from '../manual_test_run_mode/browser_test_results';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
@@ -31,8 +31,17 @@ interface Props {
   testRunId: string;
   expectPings: number;
   onDone: (testRunId: string) => void;
+  // API journeys produce the same step pipeline as browser journeys, so they
+  // also render here — but without screenshots. Default false keeps existing
+  // browser callers unchanged.
+  isApiMonitor?: boolean;
 }
-export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) => {
+export const BrowserTestRunResult = ({
+  expectPings,
+  onDone,
+  testRunId,
+  isApiMonitor = false,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const {
     retriesExceeded,
@@ -52,9 +61,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
   }, [onDone, expectedSummariesLoaded, testRunId]);
 
   if (retriesExceeded) {
-    return (
-      <EuiCallOut announceOnMount title={FAILED_TO_SCHEDULE} color="danger" iconType="warning" />
-    );
+    return <KbnDangerCallout announceOnMount title={FAILED_TO_SCHEDULE} />;
   }
 
   return (
@@ -92,7 +99,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
             )}
 
             {(isStepsLoadingFailed || isDownMonitor) && (
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 data-test-subj="monitorTestRunErrorCallout"
                 style={{
@@ -103,11 +110,8 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 }}
                 title={ERROR_RUNNING_TEST}
                 size="s"
-                color="danger"
-                iconType="warning"
-              >
-                <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
-              </EuiCallOut>
+                text={summaryDoc?.error?.message ?? FAILED_TO_RUN}
+              />
             )}
 
             {(isStepsLoadingFailed || isDownMonitor) &&
@@ -132,6 +136,7 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                   compressed={true}
                   testNowMode={true}
                   showLastSuccessful={false}
+                  showScreenshots={!isApiMonitor}
                 />
               </>
             )}

@@ -5,32 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
 import { useMutation } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
 } from '../../../server/routes/api_schemas/start_transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
-import { ToastNotificationText } from '../components';
+import { useToastNotificationText } from '../components';
 
 import { useRefreshTransformList } from './use_refresh_transform_list';
 
 export const useStartTransforms = () => {
-  const { http, ...startServices } = useAppDependencies();
+  const { http } = useAppDependencies();
   const refreshTransformList = useRefreshTransformList();
   const toastNotifications = useToastNotifications();
+  const getToastNotificationText = useToastNotificationText();
 
   const mutation = useMutation({
     mutationFn: (reqBody: StartTransformsRequestSchema) =>
-      http.post<StartTransformsResponseSchema>(addInternalBasePath('start_transforms'), {
+      http.post<StartTransformsResponseSchema>('/internal/transform/start_transforms', {
         body: JSON.stringify(reqBody),
         version: '1',
       }),
@@ -42,7 +40,7 @@ export const useStartTransforms = () => {
             defaultMessage: 'An error occurred calling the start transforms request.',
           }
         ),
-        text: toMountPoint(<ToastNotificationText text={getErrorMessage(error)} />, startServices),
+        ...getToastNotificationText(getErrorMessage(error)),
       }),
     onSuccess: (results) => {
       for (const transformId in results) {

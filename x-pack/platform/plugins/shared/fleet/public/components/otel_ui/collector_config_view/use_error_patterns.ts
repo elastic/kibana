@@ -38,7 +38,7 @@ export interface UseErrorPatternsResult {
   error?: Error;
 }
 
-const TIME_RANGE_TO_MS: Record<TimeRange, number> = {
+export const TIME_RANGE_TO_MS: Record<TimeRange, number> = {
   '5m': 5 * 60 * 1000,
   '1h': 60 * 60 * 1000,
   '1d': 24 * 60 * 60 * 1000,
@@ -75,49 +75,57 @@ interface ErrorPatternsAggregations {
   };
 }
 
-const buildQuery = (
+export const buildQuery = (
   serviceInstanceId: string,
   level: LogLevel,
   now: number,
-  timeRangeMs: number
-) => ({
-  params: {
-    index: OTEL_LOG_INDEX,
-    track_total_hits: false,
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'service.instance.id': serviceInstanceId } },
-            { terms: { 'log.level': LOG_LEVEL_VALUES[level] } },
-            { range: { '@timestamp': { gte: now - timeRangeMs, lte: now } } },
-          ],
-        },
-      },
-      aggs: {
-        categories: {
-          categorize_text: {
-            field: 'message',
-            size: 20,
+  timeRangeMs: number,
+  enrolledAt?: string
+) => {
+  const enrolledAtMs = enrolledAt ? Date.parse(enrolledAt) : NaN;
+  const timeRangeGte = now - timeRangeMs;
+  // Floor the lower bound at enrolled_at so logs from a previous enrollment on the same
+  // host are never surfaced for the current collector instance.
+  const gte = !isNaN(enrolledAtMs) && enrolledAtMs > timeRangeGte ? enrolledAtMs : timeRangeGte;
+  return {
+    params: {
+      index: OTEL_LOG_INDEX,
+      track_total_hits: false,
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'service.instance.id': serviceInstanceId } },
+              { terms: { 'log.level': LOG_LEVEL_VALUES[level] } },
+              { range: { '@timestamp': { gte, lte: now } } },
+            ],
           },
-          aggs: {
-            min_timestamp: { min: { field: '@timestamp' } },
-            max_timestamp: { max: { field: '@timestamp' } },
-            sample: {
-              top_hits: {
-                size: 1,
-                _source: { includes: ['component.id'] },
-                fields: ['message'],
-                sort: { _score: { order: 'desc' as const } },
+        },
+        aggs: {
+          categories: {
+            categorize_text: {
+              field: 'message',
+              size: 20,
+            },
+            aggs: {
+              min_timestamp: { min: { field: '@timestamp' } },
+              max_timestamp: { max: { field: '@timestamp' } },
+              sample: {
+                top_hits: {
+                  size: 1,
+                  _source: { includes: ['component.id'] },
+                  fields: ['message'],
+                  sort: { _score: { order: 'desc' as const } },
+                },
               },
             },
           },
         },
       },
     },
-  },
-});
+  };
+};
 
 const mapBucketsToPatterns = (buckets: CategorizeTextBucket[]): ErrorPattern[] =>
   buckets.map((bucket) => ({
@@ -133,14 +141,18 @@ const mapBucketsToPatterns = (buckets: CategorizeTextBucket[]): ErrorPattern[] =
 export const useErrorPatterns = ({
   serviceInstanceId,
   timeRange,
+  enrolledAt,
 }: {
   serviceInstanceId: string;
   timeRange: TimeRange;
+  enrolledAt?: string;
 }): UseErrorPatternsResult => {
   const { data: dataService } = useStartServices();
 
-  const { data, isLoading, error } = useQuery(
-    ['errorPatterns', serviceInstanceId, timeRange],
+  // `isInitialLoading` (not `isLoading`): in react-query v4 a query that has never succeeded
+  // goes back to `loading` on every refetch, and a disabled query stays `loading` forever.
+  const { data, isInitialLoading, error } = useQuery(
+    ['errorPatterns', serviceInstanceId, timeRange, enrolledAt],
     async () => {
       const now = Date.now();
       const timeRangeMs = TIME_RANGE_TO_MS[timeRange];
@@ -151,7 +163,7 @@ export const useErrorPatterns = ({
             dataService.search.search<
               IKibanaSearchRequest,
               IKibanaSearchResponse<{ aggregations?: ErrorPatternsAggregations }>
-            >(buildQuery(serviceInstanceId, level, now, timeRangeMs))
+            >(buildQuery(serviceInstanceId, level, now, timeRangeMs, enrolledAt))
           )
         )
       );
@@ -166,7 +178,10 @@ export const useErrorPatterns = ({
     },
     {
       enabled: !!serviceInstanceId,
-      refetchInterval: 30 * 1000, // 30 seconds
+      // Polling every 30 seconds. If the search failed before ever succeeding, stop: each refetch
+      // would put the query back in its initial loading state and re-show the loading bar forever.
+      refetchInterval: (_data, query) =>
+        query.state.status === 'error' && !query.state.dataUpdatedAt ? false : 30 * 1000,
       keepPreviousData: true,
     }
   );
@@ -184,7 +199,7 @@ export const useErrorPatterns = ({
     errorCount: errorPatterns.length,
     warningCount: warningPatterns.length,
     totalLogCount,
-    isLoading,
+    isLoading: isInitialLoading,
     error: error instanceof Error ? error : undefined,
   };
 };

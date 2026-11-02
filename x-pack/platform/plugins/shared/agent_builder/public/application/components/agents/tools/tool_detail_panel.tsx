@@ -6,16 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
@@ -38,7 +29,6 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
   isAutoIncluded,
   canEditAgent,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const { tool, isLoading } = useToolService(toolId);
   const isReadOnly = tool?.readonly ?? false;
 
@@ -48,17 +38,6 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
       isEmpty={!tool}
       title={tool?.id ?? toolId}
       isReadOnly={isReadOnly}
-      headerContent={
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={css`
-            margin-top: ${euiTheme.size.xs};
-          `}
-        >
-          {tool?.id}
-        </EuiText>
-      }
       headerActions={(openConfirmRemove) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <ToolHeaderActions

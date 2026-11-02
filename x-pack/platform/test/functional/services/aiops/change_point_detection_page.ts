@@ -27,6 +27,7 @@ export function ChangePointDetectionPageProvider(
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const dashboardPage = getPageObject('dashboard');
+  const common = getPageObject('common');
   const cases = getService('cases');
 
   return {
@@ -122,6 +123,28 @@ export function ChangePointDetectionPageProvider(
     async closeFlyout() {
       await browser.pressKeys(browser.keys.ESCAPE);
       await testSubjects.missingOrFail('aiopsChangePointDetectionSelectedCharts');
+    },
+
+    async ensureFlyoutClosed() {
+      if (await testSubjects.exists('aiopsChangePointDetectionSelectedCharts')) {
+        await this.closeFlyout();
+      }
+    },
+
+    async ensureNoChangePointsSelected() {
+      if (
+        !(await testSubjects.exists('aiopsChangePointDetectionViewSelected')) ||
+        !(await testSubjects.isEnabled('aiopsChangePointDetectionViewSelected'))
+      ) {
+        return;
+      }
+      // With rows selected, the select all checkbox is checked or indeterminate, so a click clears it.
+      await this.getTable(0).selectAllRows();
+      await retry.waitForWithTimeout(
+        'the change point selection to be cleared',
+        30 * 1000,
+        async () => !(await testSubjects.isEnabled('aiopsChangePointDetectionViewSelected'))
+      );
     },
 
     async addChangePointConfig() {
@@ -242,12 +265,7 @@ export function ChangePointDetectionPageProvider(
         }
 
         await testSubjects.click('confirmSaveSavedObjectButton');
-        await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-          testSubjects
-            .missingOrFail('confirmSaveSavedObjectButton')
-            .then(() => true)
-            .catch(() => false)
-        );
+        await common.waitForSaveModalToClose();
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();

@@ -5,37 +5,23 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
-import type { StreamsKIsOnboardingClient } from '../../lib/workflows/onboarding_workflow_client';
+import type { AgentBuilderPluginSetup, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import { streamsManagementSkill } from './streams_management_skill';
-import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
-import { createKiIdentificationManagementSkill } from './ki_identification_management';
-import { sigEventsManagementSkill } from './sig_events_management';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
-  telemetry,
-  streamsKIsOnboardingClient,
+  availability,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  telemetry: EbtTelemetryClient;
-  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
+  availability: ToolAvailabilityConfig;
 }): void => {
   if (!agentBuilder) {
     return;
   }
 
-  const streamsSkills = [
-    streamsManagementSkill,
-    knowledgeIndicatorsManagementSkill,
-    sigEventsManagementSkill,
-    ...(streamsKIsOnboardingClient
-      ? [createKiIdentificationManagementSkill({ telemetry, streamsKIsOnboardingClient })]
-      : []),
-  ];
+  const streamsSkills = [streamsManagementSkill];
 
   for (const skill of streamsSkills) {
-    agentBuilder.skills.register(skill);
+    agentBuilder.skills.register({ ...skill, availability });
   }
 };

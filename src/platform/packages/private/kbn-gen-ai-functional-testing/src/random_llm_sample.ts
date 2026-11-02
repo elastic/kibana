@@ -9,19 +9,19 @@
 
 import { sampleSize } from 'lodash';
 
+export type FtrGenAiLlmSampleSize = number | 'all';
+
 /**
- * Max number of LLMs (connectors / EIS models) to run per FTR suite when unset.
+ * LLMs (connectors / EIS models) to run per suite when unset: all of them.
  * Override with {@link FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV}.
  */
-export const DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE = 1;
+export const DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE: FtrGenAiLlmSampleSize = 'all';
 
 /**
- * Set to a positive integer to cap how many LLMs are exercised in each FTR run.
- * Set to `all` to run every discovered LLM (slower; useful for local debugging).
+ * Set to a positive integer to cap how many LLMs are exercised in a run
+ * (faster; useful for local debugging). Set to `all` to run every discovered LLM.
  */
 export const FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV = 'FTR_GEN_AI_LLM_SAMPLE_SIZE';
-
-export type FtrGenAiLlmSampleSize = number | 'all';
 
 export function parseFtrGenAiLlmSampleSize(): FtrGenAiLlmSampleSize {
   const raw = process.env[FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV];

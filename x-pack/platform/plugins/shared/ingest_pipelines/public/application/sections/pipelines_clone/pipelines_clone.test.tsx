@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { DeepPartial } from '@kbn/utility-types';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 
 import type { PipelinesCreate } from '../pipelines_create';
 import { PipelinesClone } from './pipelines_clone';
@@ -46,6 +48,9 @@ const createMockServices = (overrides: DeepPartialMockServices = {}): DeepPartia
     toasts: {
       addError: jest.fn(),
     },
+  },
+  documentation: {
+    getCreatePipelineUrl: jest.fn().mockReturnValue('http://docs'),
   },
   ...overrides,
 });
@@ -84,13 +89,15 @@ const renderWithRoute = (initialRouteEntry: string, services: DeepPartialMockSer
 
   mockUseKibana.mockReturnValue({ services });
   return render(
-    <I18nProvider>
-      <Router history={createMemoryHistory({ initialEntries: [initialRouteEntry] })}>
-        <Routes>
-          <Route exact path={'/create/:sourceName'} component={PipelinesClone} />
-        </Routes>
-      </Router>
-    </I18nProvider>
+    <MockAppHeaderProvider>
+      <I18nProvider>
+        <Router history={createMemoryHistory({ initialEntries: [initialRouteEntry] })}>
+          <Routes>
+            <Route exact path={'/create/:sourceName'} component={PipelinesClone} />
+          </Routes>
+        </Router>
+      </I18nProvider>
+    </MockAppHeaderProvider>
   );
 };
 
@@ -117,6 +124,9 @@ describe('PipelinesClone section', () => {
         renderWithRoute('/create/source-name', services);
 
         expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+          'Create pipeline'
+        );
       });
     });
 

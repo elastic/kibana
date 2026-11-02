@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState, useMemo, useCallback } from 'react';
-import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
@@ -100,10 +101,9 @@ export const CategoryStoppedPartitions: FC = () => {
       {stoppedPartitionsError && (
         <>
           <EuiSpacer />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
-            color={'danger'}
-            size={'s'}
+            size="s"
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsErrorCallout"
@@ -123,10 +123,9 @@ export const CategoryStoppedPartitions: FC = () => {
             />
           </div>
           <EuiSpacer size={'s'} />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color={'warning'}
-            size={'s'}
+            size="s"
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.pickFieldsStep.stoppedPartitionsExistCallout"

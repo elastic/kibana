@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { encodeKqlTemplateValue } from '@kbn/eval-kql';
 import type { OrStringRecursive } from '@kbn/utility-types';
 import { dataFindStepDefinition } from './data_find_step';
 import type { StepHandlerContext } from '../../step_registry/types';
@@ -29,6 +30,7 @@ describe('dataFindStepDefinition', () => {
       getFakeRequest: jest.fn(),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn((val) => val),
+      renderKqlConditionTemplate: jest.fn((val) => val),
       callKibanaApi: jest.fn(),
     },
     logger: {
@@ -237,7 +239,7 @@ describe('dataFindStepDefinition', () => {
       expect(result.error?.message).toContain('Expected items to be an array');
     });
 
-    it('should continue searching even if one item evaluation fails', async () => {
+    it('should skip non-object items with a warning and keep searching', async () => {
       const config = {
         items: [null, { status: 'active', id: 2 }],
       };
@@ -248,6 +250,8 @@ describe('dataFindStepDefinition', () => {
       const context = createMockContext(config, input);
       const result = await dataFindStepDefinition.handler(context);
 
+      // A `null` item cannot satisfy an `item.<field>` condition; it is skipped
+      // with a warning and the search continues to the next, matching item.
       expect(result.output).toEqual({ item: { status: 'active', id: 2 }, index: 1 });
       expect(context.logger.warn).toHaveBeenCalled();
     });
@@ -308,6 +312,61 @@ describe('dataFindStepDefinition', () => {
 
       expect(result.output).toEqual({ item: { id: 5, status: 'active' }, index: 5 });
       expect(context.logger.debug).toHaveBeenCalledWith('Found match at index 5');
+    });
+  });
+
+  describe('templated values in the condition', () => {
+    const items = [{ owner: 'b' }, { owner: 'a or item.owner: b' }];
+    const injected = 'a or item.owner: b';
+
+    it('matches interpolated values as literals', async () => {
+      const context = createMockContext({ items }, { condition: `item.owner: ${injected}` });
+      context.rawInput = { condition: 'item.owner: {{ inputs.owner }}' };
+      (context.contextManager.renderKqlConditionTemplate as jest.Mock).mockReturnValue(
+        `item.owner: ${encodeKqlTemplateValue(injected)}`
+      );
+
+      const result = await dataFindStepDefinition.handler(context);
+
+      expect(result.output).toEqual({ item: { owner: injected }, index: 1 });
+    });
+
+    it('fails instead of using the generically rendered condition when the engine cannot render it', async () => {
+      const context = createMockContext({ items }, { condition: `item.owner: ${injected}` });
+      context.contextManager.renderKqlConditionTemplate = undefined;
+
+      const result = await dataFindStepDefinition.handler(context);
+
+      expect(result.error?.message).toContain('cannot safely render KQL conditions');
+    });
+
+    it('fails the step, instead of finding nothing, when a value carries the wildcard marker', async () => {
+      const context = createMockContext(
+        { items },
+        { condition: 'item.owner: {{ inputs.owner }}*' }
+      );
+      (context.contextManager.renderKqlConditionTemplate as jest.Mock).mockReturnValue(
+        `item.owner: ${encodeKqlTemplateValue('@kuery-wildcard@')}*`
+      );
+
+      const result = await dataFindStepDefinition.handler(context);
+
+      expect(result.error?.message).toContain('wildcards');
+      expect(result.output).toBeUndefined();
+      expect(context.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('shows the interpolated value, not its internal token, in a syntax error', async () => {
+      const context = createMockContext({ items }, { condition: 'item.owner: {{ inputs.owner }}' });
+      (context.contextManager.renderKqlConditionTemplate as jest.Mock).mockReturnValue(
+        `item.owner: ${encodeKqlTemplateValue('hello world')} owner: x`
+      );
+
+      const result = await dataFindStepDefinition.handler(context);
+
+      expect(result.error?.message).toContain('Invalid KQL condition');
+      expect(result.error?.message).toContain('item.owner: hello world owner: x');
+      expect(result.error?.message).not.toContain('__wftpl_');
     });
   });
 });

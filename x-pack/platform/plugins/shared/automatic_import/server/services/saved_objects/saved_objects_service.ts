@@ -28,6 +28,12 @@ import {
 } from './constants';
 import type { IntegrationParams, DataStreamParams } from '../../routes/types';
 import { IntegrationAlreadyExistsError } from '../../errors';
+import type { DataStreamPhase } from '../../../common';
+
+export interface IntegrationName {
+  integrationId: string;
+  title: string;
+}
 
 export interface FieldMappingEntry {
   name: string;
@@ -194,6 +200,41 @@ export class AutomaticImportSavedObjectService {
         return [];
       }
       this.logger.error(`Failed to get all integrations: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch only the ID and title of every integration, for name-collision checks.
+   * Projects away `metadata.logo`, which holds a base64 SVG, and never loads data
+   * streams, so this stays cheap regardless of how many integrations exist.
+   */
+  public async getAllIntegrationNames(): Promise<IntegrationName[]> {
+    try {
+      this.logger.debug('Getting all integration names');
+      const names: IntegrationName[] = [];
+      const finder = this.savedObjectsClient.createPointInTimeFinder<IntegrationAttributes>({
+        type: INTEGRATION_SAVED_OBJECT_TYPE,
+        perPage: 1000,
+        fields: ['integration_id', 'metadata.title'],
+      });
+
+      try {
+        for await (const { saved_objects: savedObjects } of finder.find()) {
+          for (const { attributes } of savedObjects) {
+            names.push({
+              integrationId: attributes.integration_id,
+              title: attributes.metadata.title,
+            });
+          }
+        }
+      } finally {
+        await finder.close();
+      }
+
+      return names;
+    } catch (error) {
+      this.logger.error(`Failed to get all integration names: ${error}`);
       throw error;
     }
   }
@@ -513,6 +554,43 @@ export class AutomaticImportSavedObjectService {
       this.logger.debug(`Data stream ${dataStreamId} status updated to ${status}`);
     } catch (error) {
       this.logger.error(`Failed to update data stream ${dataStreamId} status: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Updates only the phase of a data stream's job_info.
+   * @param dataStreamId - The ID of the data stream
+   * @param integrationId - The ID of the integration
+   * @param phase - The new phase to set
+   */
+  public async updateDataStreamPhase(
+    dataStreamId: string,
+    integrationId: string,
+    phase: DataStreamPhase
+  ): Promise<void> {
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      const updatedAttributes: Partial<DataStreamAttributes> = {
+        job_info: {
+          ...dataStream.attributes.job_info,
+          phase,
+        },
+      };
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        compositeId,
+        updatedAttributes
+      );
+
+      this.logger.debug(
+        `[ProgressBar] Data stream "${dataStreamId}" (integration "${integrationId}") phase updated to "${phase}"`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to update data stream ${dataStreamId} phase: ${error}`);
       throw error;
     }
   }

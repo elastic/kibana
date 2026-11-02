@@ -373,7 +373,7 @@ evaluate.describe(
                 },
                 output: {
                   expected:
-                    'Found 2 detection rules covering tactic TA0005 (Defense Evasion). ' +
+                    'Found 2 detection rules covering tactic TA0005 (Stealth). ' +
                     '"Process Injection T1055" is a critical severity eql rule with risk score 95 and is enabled. ' +
                     '"Process Hollowing Detection" is a high severity query rule with risk score 70 and is enabled. ' +
                     'The find_rules tool was called with mitreTactic set to "TA0005".',
@@ -403,7 +403,7 @@ evaluate.describe(
           dataset: {
             name: 'agent builder: security-find-rules-distractors',
             description:
-              'Distractor queries that touch rule-related vocabulary but should activate a different skill (alert-analysis, threat-hunting, entity-analytics, find-security-ml-jobs, detection-rule-edit, rule-management).',
+              'Distractor queries that touch rule-related vocabulary but should activate a different skill (alert-analysis, threat-hunting, entity-analytics, find-security-ml-jobs, detection-rule-edit, rule-authoring).',
             examples: [
               {
                 input: {
@@ -481,7 +481,7 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'V2 Rule Discovery',
-                  expectedSkill: 'rule-management',
+                  expectedSkill: 'rule-authoring',
                 },
               },
             ],

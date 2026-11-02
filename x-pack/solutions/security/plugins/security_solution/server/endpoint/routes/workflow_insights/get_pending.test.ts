@@ -101,9 +101,9 @@ describe('Get Pending Insights Route Handler', () => {
     });
   });
 
-  describe('status filter', () => {
-    it('filters for running, scheduled, failed, and aborted statuses', async () => {
-      await callRoute();
+  describe('status filter (exact combo — both arrays supplied)', () => {
+    it('filters for running, scheduled, failed, aborted, and completed statuses', async () => {
+      await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
 
       expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
         expect.anything(),
@@ -114,10 +114,245 @@ describe('Get Pending Insights Route Handler', () => {
               ExecutionStatus.scheduled,
               ExecutionStatus.failed,
               ExecutionStatus.aborted,
+              ExecutionStatus.completed,
             ],
           }),
         })
       );
+    });
+  });
+
+  describe('query size and sort (exact combo — both arrays supplied)', () => {
+    it('requests size 1 and an explicit `@timestamp desc` sort for a single-combo query', async () => {
+      await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
+
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledTimes(1);
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          size: 1,
+          sort: { field: '@timestamp', order: 'desc' },
+        })
+      );
+    });
+
+    it('requests size 1 and explicit `@timestamp desc` sort for every query in a multi-combo fan-out', async () => {
+      await callRoute({
+        insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+        endpointIds: ['endpoint-1'],
+      });
+
+      expect(mockAgentBuilder.execution.findExecutions).toHaveBeenCalledTimes(2);
+      for (const call of mockAgentBuilder.execution.findExecutions.mock.calls) {
+        expect(call[1]).toEqual(
+          expect.objectContaining({
+            size: 1,
+            sort: { field: '@timestamp', order: 'desc' },
+          })
+        );
+      }
+    });
+  });
+
+  describe('latest-per-combo semantics', () => {
+    const makeExecution = (overrides: Record<string, unknown>) => ({
+      executionId: 'exec',
+      status: ExecutionStatus.running,
+      metadata: {
+        insightType: 'incompatible_antivirus',
+        source: AUTOMATIC_TROUBLESHOOTING_TAG,
+        endpointId: 'endpoint-1',
+      },
+      '@timestamp': '2024-01-01T00:00:00Z',
+      agentId: 'agent-1',
+      executionMode: AgentExecutionMode.conversation,
+      spaceId: 'default',
+      agentParams: { conversationId: 'conv-1' },
+      eventCount: 0,
+      events: [],
+      ...overrides,
+    });
+
+    it('omits a latest completed execution from the response', async () => {
+      mockAgentBuilder.execution.findExecutions.mockResolvedValue([
+        makeExecution({ executionId: 'exec-completed', status: ExecutionStatus.completed }),
+      ]);
+
+      await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { pending: [] } });
+    });
+
+    it('returns a latest failed execution with its failureReason', async () => {
+      mockAgentBuilder.execution.findExecutions.mockResolvedValue([
+        makeExecution({
+          executionId: 'exec-failed',
+          status: ExecutionStatus.failed,
+          error: { message: 'connector timed out' },
+        }),
+      ]);
+
+      await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
+
+      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(callBody.pending).toHaveLength(1);
+      expect(callBody.pending[0].status).toBe(ExecutionStatus.failed);
+      expect(callBody.pending[0].failureReason).toBe('connector timed out');
+    });
+
+    it('returns a latest aborted execution', async () => {
+      mockAgentBuilder.execution.findExecutions.mockResolvedValue([
+        makeExecution({ executionId: 'exec-aborted', status: ExecutionStatus.aborted }),
+      ]);
+
+      await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
+
+      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(callBody.pending).toHaveLength(1);
+      expect(callBody.pending[0].status).toBe(ExecutionStatus.aborted);
+    });
+
+    it('returns a latest active (running) execution', async () => {
+      mockAgentBuilder.execution.findExecutions.mockResolvedValue([
+        makeExecution({ executionId: 'exec-running', status: ExecutionStatus.running }),
+      ]);
+
+      await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
+
+      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(callBody.pending).toHaveLength(1);
+      expect(callBody.pending[0].status).toBe(ExecutionStatus.running);
+    });
+
+    it('returns only the actionable combo when one latest is completed and the other failed', async () => {
+      mockAgentBuilder.execution.findExecutions
+        .mockResolvedValueOnce([
+          makeExecution({
+            executionId: 'exec-completed',
+            status: ExecutionStatus.completed,
+            metadata: {
+              insightType: 'incompatible_antivirus',
+              source: AUTOMATIC_TROUBLESHOOTING_TAG,
+              endpointId: 'endpoint-1',
+            },
+          }),
+        ])
+        .mockResolvedValueOnce([
+          makeExecution({
+            executionId: 'exec-failed',
+            status: ExecutionStatus.failed,
+            error: { message: 'boom' },
+            metadata: {
+              insightType: 'policy_response_failure',
+              source: AUTOMATIC_TROUBLESHOOTING_TAG,
+              endpointId: 'endpoint-1',
+            },
+          }),
+        ]);
+
+      await callRoute({
+        insightTypes: ['incompatible_antivirus', 'policy_response_failure'],
+        endpointIds: ['endpoint-1'],
+      });
+
+      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(callBody.pending).toHaveLength(1);
+      expect(callBody.pending[0].executionId).toBe('exec-failed');
+      expect(callBody.pending[0].insightType).toBe('policy_response_failure');
+    });
+
+    it('returns empty when a historical failure has been superseded by a latest completed run', async () => {
+      mockAgentBuilder.execution.findExecutions.mockResolvedValue([
+        makeExecution({ executionId: 'exec-latest-completed', status: ExecutionStatus.completed }),
+      ]);
+
+      await callRoute({ insightTypes: ['incompatible_antivirus'], endpointIds: ['endpoint-1'] });
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: { pending: [] } });
+    });
+  });
+
+  describe('broad queries (partial or no filters) preserve size:100 and exclude completed', () => {
+    const broadShapes: Array<[string, Record<string, unknown>]> = [
+      ['only insightTypes', { insightTypes: ['incompatible_antivirus'] }],
+      ['only endpointIds', { endpointIds: ['endpoint-1'] }],
+      ['neither filter', {}],
+    ];
+
+    it.each(broadShapes)(
+      'requests size 100 without an explicit sort for %s',
+      async (_label, query) => {
+        await callRoute(query);
+
+        for (const call of mockAgentBuilder.execution.findExecutions.mock.calls) {
+          expect(call[1]).toEqual(expect.objectContaining({ size: 100 }));
+          expect(call[1]).not.toHaveProperty('sort');
+        }
+      }
+    );
+
+    it.each(broadShapes)(
+      'excludes completed from the status filter for %s',
+      async (_label, query) => {
+        await callRoute(query);
+
+        for (const call of mockAgentBuilder.execution.findExecutions.mock.calls) {
+          expect(call[1].filter.status).toEqual([
+            ExecutionStatus.running,
+            ExecutionStatus.scheduled,
+            ExecutionStatus.failed,
+            ExecutionStatus.aborted,
+          ]);
+          expect(call[1].filter.status).not.toContain(ExecutionStatus.completed);
+        }
+      }
+    );
+
+    it('returns multiple actionable executions for a broad query (no size:1 truncation)', async () => {
+      mockAgentBuilder.execution.findExecutions.mockResolvedValue([
+        {
+          executionId: 'exec-running',
+          status: ExecutionStatus.running,
+          metadata: {
+            insightType: 'incompatible_antivirus',
+            source: AUTOMATIC_TROUBLESHOOTING_TAG,
+            endpointId: 'endpoint-1',
+          },
+          '@timestamp': '2024-01-01T00:00:00Z',
+          agentId: 'agent-1',
+          executionMode: AgentExecutionMode.conversation,
+          spaceId: 'default',
+          agentParams: { conversationId: 'conv-1' },
+          eventCount: 0,
+          events: [],
+        },
+        {
+          executionId: 'exec-failed',
+          status: ExecutionStatus.failed,
+          metadata: {
+            insightType: 'incompatible_antivirus',
+            source: AUTOMATIC_TROUBLESHOOTING_TAG,
+            endpointId: 'endpoint-2',
+          },
+          '@timestamp': '2024-01-01T00:00:01Z',
+          agentId: 'agent-2',
+          executionMode: AgentExecutionMode.conversation,
+          spaceId: 'default',
+          agentParams: {},
+          eventCount: 0,
+          events: [],
+          error: { message: 'boom' },
+        },
+      ]);
+
+      await callRoute({ insightTypes: ['incompatible_antivirus'] });
+
+      const callBody = (mockResponse.ok as jest.Mock).mock.calls[0][0].body;
+      expect(callBody.pending).toHaveLength(2);
+      expect(callBody.pending.map((p: { executionId: string }) => p.executionId)).toEqual([
+        'exec-running',
+        'exec-failed',
+      ]);
     });
   });
 

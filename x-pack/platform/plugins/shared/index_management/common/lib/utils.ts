@@ -137,6 +137,13 @@ export const isLegacyTemplate = (
   return {}.hasOwnProperty.call(template, 'template') ? false : true;
 };
 
+/**
+ * Type guard for a plain object (record). Arrays are intentionally excluded so callers can
+ * safely narrow to `Record<string, unknown>` and index string keys.
+ */
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
 export const getTemplateParameter = (
   template: LegacyTemplateSerialized | TemplateSerialized,
   setting: 'aliases' | 'settings' | 'mappings'

@@ -156,6 +156,7 @@ describe('metric suggestions', () => {
               layerId: 'first',
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
+              density: 'default',
               // should ignore bucketed column for initial drag
             },
             title: 'Metric',
@@ -187,6 +188,7 @@ describe('metric suggestions', () => {
               layerId: 'first',
               layerType: LayerTypes.DATA,
               breakdownByAccessor: bucketColumn.columnId,
+              density: 'default',
             },
             title: 'Metric',
             hide: true,
@@ -219,6 +221,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: undefined,
               breakdownByAccessor: bucketColumn.columnId,
+              density: 'default',
             },
             title: 'Metric',
             hide: true,
@@ -292,6 +295,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               breakdownByAccessor: bucketColumn.columnId,
+              density: 'default',
             },
             title: 'Metric',
             hide: true,
@@ -324,6 +328,7 @@ describe('metric suggestions', () => {
               layerType: LayerTypes.DATA,
               metricAccessor: metricColumn.columnId,
               breakdownByAccessor: bucketColumn.columnId,
+              density: 'default',
             },
             title: 'Metric',
             hide: true,
@@ -355,6 +360,7 @@ describe('metric suggestions', () => {
             layerType: LayerTypes.DATA,
             metricAccessor: metricColumn.columnId,
             breakdownByAccessor: bucketColumn.columnId,
+            density: 'default',
           },
           title: 'Metric',
           hide: true,
@@ -362,6 +368,60 @@ describe('metric suggestions', () => {
           score: 0.52,
         },
       ]);
+    });
+  });
+
+  describe('density default', () => {
+    test('applies the default density when switching from another vis type (no incoming state)', () => {
+      const [suggestion] = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [metricColumn],
+          changeType: 'unchanged',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+      });
+
+      expect(suggestion.state.density).toBe('default');
+    });
+
+    test('applies the default density when active state has no density yet', () => {
+      const [suggestion] = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [metricColumn],
+          changeType: 'initial',
+        },
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+        } as MetricVisualizationState,
+        keptLayerIds: ['first'],
+      });
+
+      expect(suggestion.state.density).toBe('default');
+    });
+
+    test('preserves explicit compact density on the incoming state (legacy chart being edited)', () => {
+      const [suggestion] = getSuggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [metricColumn],
+          changeType: 'initial',
+        },
+        state: {
+          layerId: 'first',
+          layerType: LayerTypes.DATA,
+          density: 'compact',
+        } as MetricVisualizationState,
+        keptLayerIds: ['first'],
+      });
+
+      expect(suggestion.state.density).toBe('compact');
     });
   });
 });

@@ -6,10 +6,11 @@
  */
 
 import {
-  SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID,
   AI_CHAT_EXPERIENCE_TYPE,
+  SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING,
+  SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID,
 } from '@kbn/management-settings-ids';
-import { EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import { ENABLE_NEW_FLYOUT_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { rootRequest } from './common';
 
 export const setKibanaSetting = (key: string, value: boolean | number | string) => {
@@ -28,6 +29,14 @@ export const disableRelatedIntegrations = () => {
   setKibanaSetting(SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID, false);
 };
 
+export const enableSiemReadiness = () => {
+  setKibanaSetting(SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING, true);
+};
+
+export const disableSiemReadiness = () => {
+  setKibanaSetting(SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING, false);
+};
+
 export const setPreferredChatExperienceToAgent = () => {
   setKibanaSetting(AI_CHAT_EXPERIENCE_TYPE, 'agent');
 };
@@ -43,6 +52,6 @@ export const setPreferredChatExperienceToClassic = () => {
   });
 };
 
-export const setExtendedRuleExecutionLoggingMinLevel = (level: string) => {
-  setKibanaSetting(EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING, level);
+export const disableNewFlyout = () => {
+  setKibanaSetting(ENABLE_NEW_FLYOUT_SETTING, false);
 };

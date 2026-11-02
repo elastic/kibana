@@ -11,35 +11,34 @@ import { BehaviorSubject } from 'rxjs';
 import { QueryClient } from '@kbn/react-query';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-browser-mocks';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { createMockWorkflowApi } from '@kbn/workflows-ui/mocks';
+import {
+  createMockWorkflowApi,
+  createMockWorkflowsCapabilities,
+  createMockWorkflowsUiServices,
+} from '@kbn/workflows-ui/mocks';
 import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
 import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attachment_renderer';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+// The preview has its own test; stub it so this suite stays on the canvas wiring.
+jest.mock('./workflow_yaml_canvas_preview', () => ({
+  WorkflowYamlCanvasPreview: ({ yaml, showGraph }: { yaml: string; showGraph: boolean }) => (
+    <pre data-test-subj="workflowYamlCanvasPreview" data-show-graph={String(showGraph)}>
+      {yaml}
+    </pre>
+  ),
 }));
 
 const mockWorkflowApi = createMockWorkflowApi();
 
-const allWorkflowCapabilitiesTrue = {
-  canCreateWorkflow: true,
-  canReadWorkflow: true,
-  canUpdateWorkflow: true,
-  canDeleteWorkflow: true,
-  canExecuteWorkflow: true,
-  canReadWorkflowExecution: true,
-  canCancelWorkflowExecution: true,
-};
+const mockAllWorkflowCapabilitiesTrue = createMockWorkflowsCapabilities();
 
 jest.mock('@kbn/workflows-ui', () => {
   const actual = jest.requireActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflowsApi: jest.fn(() => mockWorkflowApi),
-    useWorkflowsCapabilities: jest.fn(() => allWorkflowCapabilitiesTrue),
+    useWorkflowsCapabilities: jest.fn(() => mockAllWorkflowCapabilitiesTrue),
   };
 });
 
@@ -62,6 +61,7 @@ const createMockServices = ({
     core,
     telemetry,
     queryClient: new QueryClient(),
+    workflowsUiServices: createMockWorkflowsUiServices(),
   };
 };
 
@@ -82,7 +82,7 @@ const createAttachment = (
 
 describe('createWorkflowYamlAttachmentUiDefinition', () => {
   beforeEach(() => {
-    mockUseWorkflowsCapabilities.mockReturnValue(allWorkflowCapabilitiesTrue);
+    mockUseWorkflowsCapabilities.mockReturnValue(mockAllWorkflowCapabilitiesTrue);
   });
 
   it('returns an object with the expected shape', () => {
@@ -114,11 +114,11 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
   });
 
   describe('getIcon', () => {
-    it('returns the workflows app icon', () => {
+    it('returns the workflow icon', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
 
-      expect(definition.getIcon!()).toBe('workflowsApp');
+      expect(definition.getIcon!()).toBe('workflow');
     });
   });
 
@@ -245,13 +245,36 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
     });
   });
 
+  describe('renderInlineContent', () => {
+    it('renders the step and trigger icons with the workflows-ui services', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = {
+        ...createAttachment(),
+        data: {
+          yaml: 'name: Test\ntriggers:\n  - type: manual\nsteps:\n  - name: log\n    type: console\n',
+        },
+      };
+
+      const { getByText } = render(
+        <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
+      );
+
+      expect(getByText('1 trigger and 1 step')).toBeInTheDocument();
+      // Step icons resolve through the registry, like the canvas graph.
+      expect(
+        services.workflowsUiServices.workflowsExtensions.getStepDefinition
+      ).toHaveBeenCalledWith('console');
+    });
+  });
+
   describe('renderCanvasContent', () => {
-    it('renders a YAML code editor', () => {
+    it('renders the workflow preview with the attachment YAML', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
       const attachment = createAttachment();
 
-      const { container } = render(
+      const { getByTestId } = render(
         <>
           {definition.renderCanvasContent!(
             { attachment, isSidebar: false },
@@ -260,7 +283,23 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
         </>
       );
 
-      expect(container.querySelector('[data-test-subj="TextBasedLangEditor"]')).toBeDefined();
+      expect(getByTestId('workflowYamlCanvasPreview')).toHaveTextContent('name: Test Workflow');
+    });
+
+    it('always enables the graph view', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+
+      const { getByTestId } = render(
+        <>
+          {definition.renderCanvasContent!(
+            { attachment: createAttachment(), isSidebar: false },
+            { registerActionButtons: jest.fn(), updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+          )}
+        </>
+      );
+
+      expect(getByTestId('workflowYamlCanvasPreview')).toHaveAttribute('data-show-graph', 'true');
     });
 
     it('registers Save button for new workflow', () => {
@@ -346,7 +385,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
     describe('authorization (capabilities)', () => {
       it('omits Save for new workflow when createWorkflow is false', () => {
         mockUseWorkflowsCapabilities.mockReturnValue({
-          ...allWorkflowCapabilitiesTrue,
+          ...mockAllWorkflowCapabilitiesTrue,
           canCreateWorkflow: false,
         });
         const services = createMockServices();
@@ -369,7 +408,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
 
       it('omits Override when updateWorkflow is false but keeps Save as new when createWorkflow is true', () => {
         mockUseWorkflowsCapabilities.mockReturnValue({
-          ...allWorkflowCapabilitiesTrue,
+          ...mockAllWorkflowCapabilitiesTrue,
           canUpdateWorkflow: false,
         });
         const services = createMockServices();
@@ -393,7 +432,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
 
       it('omits Save as new when createWorkflow is false but keeps Override when updateWorkflow is true', () => {
         mockUseWorkflowsCapabilities.mockReturnValue({
-          ...allWorkflowCapabilitiesTrue,
+          ...mockAllWorkflowCapabilitiesTrue,
           canCreateWorkflow: false,
         });
         const services = createMockServices();
@@ -417,7 +456,7 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
 
       it('omits Open in editor when readWorkflow is false', () => {
         mockUseWorkflowsCapabilities.mockReturnValue({
-          ...allWorkflowCapabilitiesTrue,
+          ...mockAllWorkflowCapabilitiesTrue,
           canReadWorkflow: false,
         });
         const services = createMockServices();

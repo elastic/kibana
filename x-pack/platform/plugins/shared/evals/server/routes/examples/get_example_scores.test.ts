@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_EXAMPLE_SCORES_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXAMPLE_SCORES_URL, API_VERSIONS, buildSpaceFilter } from '@kbn/evals-common';
+import { UNBOUNDED_SCORE_FIELDS } from '../utils/score_source_fields';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetExampleScoresRoute } from './get_example_scores';
 
 describe('GET /internal/evals/examples/{exampleId}/scores', () => {
@@ -22,6 +26,8 @@ describe('GET /internal/evals/examples/{exampleId}/scores', () => {
       router,
       logger,
       canEncrypt: false,
+      evaluatorRegistry: createEvaluatorRegistryMock(),
+      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });
@@ -61,10 +67,47 @@ describe('GET /internal/evals/examples/{exampleId}/scores', () => {
       expect.objectContaining({
         query: {
           bool: {
-            must: [{ term: { 'example.id': 'example-123' } }],
+            must: [{ term: { 'example.id': 'example-123' } }, buildSpaceFilter('default')],
           },
         },
         size: 10000,
+      })
+    );
+  });
+
+  it('always excludes unbounded fields to prevent OOM', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+    await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({ _source_excludes: UNBOUNDED_SCORE_FIELDS })
+    );
+  });
+
+  it('adds a dataset filter when dataset_id is provided', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'get',
+      path: EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', 'example-123'),
+      params: { exampleId: 'example-123' },
+      query: { dataset_id: 'dataset-abc' },
+    });
+    await handler(context, request, kibanaResponseFactory);
+
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            must: expect.arrayContaining([
+              { term: { 'example.id': 'example-123' } },
+              { term: { 'example.dataset.id': 'dataset-abc' } },
+            ]),
+          },
+        },
       })
     );
   });
@@ -112,5 +155,24 @@ describe('GET /internal/evals/examples/{exampleId}/scores', () => {
       message: 'Failed to get example scores',
     });
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  it('returns an actionable 400 and logs at warn when the ES response is too large', async () => {
+    const { handler, context, evaluationScoreService, logger } = setup();
+    evaluationScoreService.search.mockRejectedValueOnce(
+      new errors.RequestAbortedError(
+        'The content length (9000) is bigger than the maximum allowed buffer (42)'
+      )
+    );
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(400);
+    expect(response.payload).toEqual({
+      message:
+        'The response is too large to process. error: The content length (9000) is bigger than the maximum allowed buffer (42)',
+    });
+    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });

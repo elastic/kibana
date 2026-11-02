@@ -19,7 +19,7 @@ import {
   saveUserFlyoutWidthsToLocalStorageMiddleware,
   saveUserSectionWidthsToLocalStorageMiddleware,
 } from './middlewares';
-import { createAction } from '@reduxjs/toolkit';
+import { createAction } from 'redux-toolkit-v1';
 import {
   changeUserCollapsedWidthAction,
   changeUserExpandedWidthAction,

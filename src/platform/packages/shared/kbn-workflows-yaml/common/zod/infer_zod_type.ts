@@ -50,7 +50,10 @@ export function inferZodType(
   }
 
   if (type === 'object') {
-    const shape: Record<string, z.ZodSchema> = {};
+    // A plain object literal would swallow a `__proto__` key: assigning it invokes
+    // the prototype setter instead of creating an own property, leaving a shape
+    // whose `__proto__` resolves to Object.prototype rather than a zod schema.
+    const shape = Object.create(null) as Record<string, z.ZodSchema>;
     for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
       shape[key] = inferZodType(value, { isConst });
     }

@@ -46,20 +46,6 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
       value: { type: 'long', _meta: { description: 'Number of rules with this lookback.' } },
     },
   },
-  count_with_recovery_policy: {
-    type: 'long',
-    _meta: { description: 'Number of rules with a recovery policy.' },
-  },
-  count_by_recovery_policy_type: {
-    query: {
-      type: 'long',
-      _meta: { description: 'Number of rules with recovery policy type query.' },
-    },
-    no_breach: {
-      type: 'long',
-      _meta: { description: 'Number of rules with recovery policy type no_breach.' },
-    },
-  },
   avg_pending_count: {
     type: 'float',
     _meta: { description: 'Average configured pending count across rules with state transitions.' },
@@ -98,37 +84,45 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
     type: 'float',
     _meta: { description: 'Average number of grouping fields per rule.' },
   },
-  count_with_no_data: {
-    type: 'long',
-    _meta: { description: 'Number of rules with no data handling configured.' },
-  },
-  count_by_no_data_behavior: {
-    no_data: {
-      type: 'long',
-      _meta: { description: 'Number of rules with no_data behavior.' },
-    },
-    last_status: {
-      type: 'long',
-      _meta: { description: 'Number of rules with last_status behavior.' },
-    },
-    recover: {
-      type: 'long',
-      _meta: { description: 'Number of rules with recover behavior.' },
-    },
-  },
-  count_by_no_data_timeframe: {
-    type: 'array',
-    items: {
-      name: { type: 'keyword', _meta: { description: 'No data timeframe duration string.' } },
-      value: {
-        type: 'long',
-        _meta: { description: 'Number of rules with this no data timeframe.' },
-      },
-    },
-  },
   min_created_at: {
     type: 'date',
     _meta: { description: 'Earliest rule creation date.' },
+  },
+  count_by_recovery_strategy: {
+    no_breach: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+    },
+    condition: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy condition.' },
+    },
+    query: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy query.' },
+    },
+    manual: {
+      type: 'long',
+      _meta: { description: 'Number of rules with recovery strategy manual.' },
+    },
+  },
+  count_by_no_data_strategy: {
+    ignore: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy ignore.' },
+    },
+    keep_last: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy keep_last.' },
+    },
+    resolve: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy resolve.' },
+    },
+    alert: {
+      type: 'long',
+      _meta: { description: 'Number of rules with no-data strategy alert.' },
+    },
   },
 
   executions_count_24hr: {
@@ -201,6 +195,78 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
         _meta: { description: 'Number of action policies with this throttle interval.' },
       },
     },
+  },
+  action_policies_count_by_status: {
+    enabled: {
+      type: 'long',
+      _meta: { description: 'Number of action policies that are enabled and not snoozed.' },
+    },
+    disabled: {
+      type: 'long',
+      _meta: { description: 'Number of action policies that are disabled.' },
+    },
+    snoozed: {
+      type: 'long',
+      _meta: { description: 'Number of action policies that are enabled and currently snoozed.' },
+    },
+  },
+  action_policies_count_by_grouping_mode: {
+    per_alert: {
+      type: 'long',
+      _meta: {
+        description: 'Number of action policies with grouping mode per_alert (the default).',
+      },
+    },
+    per_field: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with grouping mode per_field.' },
+    },
+    all: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with grouping mode all.' },
+    },
+  },
+  action_policies_count_by_throttle_strategy: {
+    on_status_change: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with throttle strategy on_status_change.' },
+    },
+    per_status_interval: {
+      type: 'long',
+      _meta: {
+        description: 'Number of action policies with throttle strategy per_status_interval.',
+      },
+    },
+    time_interval: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with throttle strategy time_interval.' },
+    },
+    every_time: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with throttle strategy every_time.' },
+    },
+    none: {
+      type: 'long',
+      _meta: { description: 'Number of action policies with no throttle strategy.' },
+    },
+  },
+  action_policies_workflows_per_policy: {
+    p50: {
+      type: 'float',
+      _meta: { description: 'P50 of the number of workflows per action policy (max 10).' },
+    },
+    p99: {
+      type: 'float',
+      _meta: { description: 'P99 of the number of workflows per action policy (max 10).' },
+    },
+    avg: {
+      type: 'float',
+      _meta: { description: 'Average number of workflows per action policy (max 10).' },
+    },
+  },
+  action_policies_count_with_multiple_workflows: {
+    type: 'long',
+    _meta: { description: 'Number of action policies with more than one workflow.' },
   },
 
   alerts_count: {

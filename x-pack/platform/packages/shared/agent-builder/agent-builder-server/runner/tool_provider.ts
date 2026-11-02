@@ -9,7 +9,7 @@ import type { z, ZodObject } from '@kbn/zod/v4';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition, ToolType } from '@kbn/agent-builder-common';
-import type { RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
+import type { RequestBoundRunToolParams, RunToolReturn } from './runner';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 
 /**
@@ -57,6 +57,12 @@ export interface ExecutableTool<
    * to replace large tool results with compact summaries.
    */
   summarizeToolReturn?: ToolReturnSummarizerFn;
+  /**
+   * Per-tool override of the tool-result length guardrail's token budget.
+   * When set, replaces the ToolManager-wide default for this tool specifically.
+   * Set to `Infinity` to fully exempt this tool's results from truncation.
+   */
+  maxResultTokens?: number;
 }
 
 export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {
@@ -72,7 +78,7 @@ export type LlmDescriptionHandler<TConfig extends object = {}> = (
  * Param type for {@link ExecutableToolHandlerFn}
  */
 export type ExecutableToolHandlerParams<TParams = Record<string, unknown>> = Omit<
-  ScopedRunnerRunToolsParams<TParams>,
+  RequestBoundRunToolParams<TParams>,
   'toolId'
 >;
 

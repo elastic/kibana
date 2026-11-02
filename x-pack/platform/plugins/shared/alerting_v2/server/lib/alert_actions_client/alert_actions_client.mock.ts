@@ -14,7 +14,8 @@ import { createAlertActionEventPublisher } from '../events/alert_action_event_pu
 import type { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
-import { createUserService, createUserProfile } from '../services/user_service/user_service.mock';
+import { createUserService } from '../services/user_service/user_service.mock';
+import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
 import { AlertActionsClient } from './alert_actions_client';
 
 export function createAlertActionsClient(): {
@@ -23,14 +24,16 @@ export function createAlertActionsClient(): {
   storageServiceEsClient: jest.Mocked<ElasticsearchClient>;
   userProfileService: jest.Mocked<UserProfileServiceStart>;
   alertActionEventPublisher: AlertActionEventPublisher;
+  resourceManager: ReturnType<typeof createMockResourceManager>;
 } {
   const { queryService, mockEsClient: queryServiceEsClient } = createQueryService();
   const { storageService, mockEsClient: storageServiceEsClient } = createStorageService();
   const { userService, userProfileService } = createUserService();
   const { publisher: alertActionEventPublisher } = createAlertActionEventPublisher();
   const request = httpServerMock.createKibanaRequest();
+  const resourceManager = createMockResourceManager();
 
-  userProfileService.getCurrent.mockResolvedValue(createUserProfile('test-uid'));
+  userProfileService.getCurrentProfileId.mockResolvedValue('test-uid');
 
   const alertActionsClient = new AlertActionsClient(
     queryService,
@@ -38,7 +41,8 @@ export function createAlertActionsClient(): {
     userService,
     request,
     'default',
-    alertActionEventPublisher
+    alertActionEventPublisher,
+    resourceManager
   );
 
   return {
@@ -47,12 +51,15 @@ export function createAlertActionsClient(): {
     storageServiceEsClient,
     userProfileService,
     alertActionEventPublisher,
+    resourceManager,
   };
 }
 
 export function createAlertActionsClientMock(): jest.Mocked<PublicMethodsOf<AlertActionsClient>> {
   return {
-    createAction: jest.fn(),
-    createBulkActions: jest.fn(),
+    createSeriesAction: jest.fn(),
+    createEpisodeAction: jest.fn(),
+    createBulkSeriesActions: jest.fn(),
+    createBulkEpisodeActions: jest.fn(),
   };
 }

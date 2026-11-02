@@ -26,9 +26,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -49,9 +51,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -74,9 +78,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -102,9 +108,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -130,9 +138,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -159,9 +169,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -187,9 +199,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -223,9 +237,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -260,9 +276,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const spy = jest.spyOn(generateSecretsModule, 'generateSecretsSchemaFromSpec');
@@ -297,9 +315,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const defaultEars = serializeConnectorSpec(spec);
@@ -425,9 +445,11 @@ describe('serializeConnectorSpec', () => {
         actions: {
           test: {
             input: z.object({}),
+            scope: 'read' as const,
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}), enabled: false },
       };
 
       const result = serializeConnectorSpec(testSpec, {

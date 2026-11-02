@@ -42,8 +42,12 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
+import {
+  RequestValidationFailure,
+  type RequestValidationSource,
+} from './request_validation_failure';
 import { isSafeMethod } from './route';
-import { KibanaSocket } from './socket';
+import { KibanaSocket, resolveRawSocket } from './socket';
 import { patchRequest } from './patch_requests';
 import { RequestTimingImpl } from './timing';
 
@@ -115,9 +119,18 @@ export class CoreKibanaRequest<
     query: Q;
     body: B;
   } {
-    const params = routeValidator.getParams(raw.params, 'request params');
-    const query = routeValidator.getQuery(raw.query, 'request query');
-    const body = routeValidator.getBody(raw.body, 'request body');
+    const params = validateRequestPart(
+      () => routeValidator.getParams(raw.params, 'request params'),
+      'params'
+    );
+    const query = validateRequestPart(
+      () => routeValidator.getQuery(raw.query, 'request query'),
+      'query'
+    );
+    const body = validateRequestPart(
+      () => routeValidator.getBody(raw.body, 'request body'),
+      'body'
+    );
     return { query, params, body };
   }
 
@@ -220,7 +233,7 @@ export class CoreKibanaRequest<
 
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = isRealReq
-      ? new KibanaSocket(request.raw.req.socket)
+      ? new KibanaSocket(resolveRawSocket(request.raw.req))
       : KibanaSocket.getFakeSocket();
     this.events = this.getEvents(request);
 
@@ -319,7 +332,13 @@ export class CoreKibanaRequest<
     }
 
     const options = {
-      ...omitBy({ excludeFromRateLimiter: this.isExcludedFromRateLimiter(request) }, isNil),
+      ...omitBy(
+        {
+          excludeFromRateLimiter: this.isExcludedFromRateLimiter(request),
+          httpResponseLogLevel: this.getHttpResponseLogLevel(request),
+        },
+        isNil
+      ),
       authRequired: this.getAuthRequired(request),
       // TypeScript note: Casting to `RouterOptions` to fix the following error:
       //
@@ -409,6 +428,35 @@ export class CoreKibanaRequest<
     return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
       ?.excludeFromRateLimiter;
   }
+
+  private getHttpResponseLogLevel(request: RawRequest): 'info' | undefined {
+    return ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)
+      ?.httpResponseLogLevel;
+  }
+}
+
+function validateRequestPart<T>(validate: () => T, source: RequestValidationSource): T {
+  try {
+    return validate();
+  } catch (error) {
+    throw new RequestValidationFailure(
+      error instanceof Error ? error.message : String(error),
+      source,
+      getRawValidationError(error)
+    );
+  }
+}
+
+function getRawValidationError(error: unknown): unknown {
+  if (
+    error instanceof Error &&
+    'cause' in error &&
+    error.cause instanceof Error &&
+    'rawError' in error.cause
+  ) {
+    return error.cause.rawError;
+  }
+  return error;
 }
 
 /**
@@ -452,7 +500,12 @@ export function isRealRequest(request: unknown): request is KibanaRequest | Requ
 }
 
 function isCompleted(request: Request) {
-  return request.raw.res.writableFinished;
+  const { res } = request.raw;
+  // For http/1, it is sufficient to check `writableFinished` because `writableEnded` is always true when the response is finished.
+  // For http/2, we need to check both `writableFinished` and `writableEnded` to be true to be sure the response is finished.
+  // This allows Kibana's aborted$ event to be emitted when the client cancels the request, regardless of the protocol.
+  // The addition of `writableEnded` works around inconsistencies in Node.js, which are resolved in Node.js 27+: https://github.com/nodejs/node/pull/63249
+  return res.writableFinished && res.writableEnded;
 }
 
 /**

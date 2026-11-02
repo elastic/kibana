@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
 
 import {
   EuiButtonEmpty,
@@ -57,7 +57,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   onToggleCondensed,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const navigate = useNavigate();
+  const history = useHistory();
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const headerStyles = css`
@@ -65,6 +65,10 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
     padding: ${euiTheme.size.base};
     padding-left: ${euiTheme.size.l};
     flex-grow: 0;
+  `;
+
+  const headingColorStyles = css`
+    color: ${euiTheme.colors.textHeading};
   `;
 
   const condensedHeaderStyles = css`
@@ -88,27 +92,35 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               aria-label={labels.toggleSidebar}
               aria-expanded={false}
               color="text"
+              css={headingColorStyles}
               size="s"
               onClick={onToggleCondensed}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_TOGGLE,
+                detail: AGENT_BUILDER_UI_EBT.detail.sidebarToggle.EXPAND,
+              })}
             />
           </EuiToolTip>
         </EuiFlexItem>
         {sidebarView === 'conversation' && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="plus"
-              display="base"
-              color="text"
-              size="s"
-              aria-label={labels.newConversation}
-              onClick={() => {
-                navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
-              }}
-              {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.sidebar,
-                action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
-              })}
-            />
+            <EuiToolTip content={labels.newConversation} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="plus"
+                display="base"
+                color="text"
+                size="s"
+                aria-label={labels.newConversation}
+                onClick={() => {
+                  navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
+                }}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_START,
+                })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -125,13 +137,14 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
         ) : (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               iconSide="left"
               size="s"
               flush="both"
               color="text"
+              css={headingColorStyles}
               onClick={() => {
-                navigate(appPaths.agent.root({ agentId: getLastAgentId() }));
+                history.push(appPaths.agent.root({ agentId: getLastAgentId() }));
               }}
               {...getEbtProps({
                 element: AGENT_BUILDER_UI_EBT.element.sidebar,
@@ -151,8 +164,14 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
                 aria-label={labels.toggleSidebar}
                 aria-expanded={true}
                 color="text"
+                css={headingColorStyles}
                 size="s"
                 onClick={onToggleCondensed}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.navSidebar.SIDEBAR_TOGGLE,
+                  detail: AGENT_BUILDER_UI_EBT.detail.sidebarToggle.CONDENSE,
+                })}
               />
             </EuiToolTip>
           </EuiFlexItem>

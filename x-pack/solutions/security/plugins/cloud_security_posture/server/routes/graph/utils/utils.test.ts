@@ -8,8 +8,13 @@
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { resolveLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
-import { checkIfEntitiesIndexExists } from './enrichment_utils';
+import { resolveEntitiesIndexName } from './enrichment_utils';
+
+jest.mock('@kbn/entity-store/server', () => ({
+  resolveLatestEntitiesIndexName: jest.fn(),
+}));
 
 describe('utils', () => {
   describe('transformEntityTypeToIconAndShape', () => {
@@ -83,7 +88,7 @@ describe('utils', () => {
     });
   });
 
-  describe('checkIfEntitiesIndexExists', () => {
+  describe('resolveEntitiesIndexName', () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient();
     let logger: Logger;
 
@@ -100,47 +105,41 @@ describe('utils', () => {
       jest.resetAllMocks();
     });
 
-    it('should return true when index exists', async () => {
+    it('should return the resolved index name when the index exists', async () => {
+      const indexName = getEntitiesLatestIndexName('default');
+      (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce(indexName);
       (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
         .mockResolvedValueOnce(true);
 
-      const result = await checkIfEntitiesIndexExists(esClient, logger, 'default');
-      expect(result).toBe(true);
+      const result = await resolveEntitiesIndexName(esClient, logger, 'default');
+      expect(result).toBe(indexName);
     });
 
-    it('should return false when index does not exist', async () => {
+    // Legacy vs neutral resolution itself is covered by the entity_store resolver
+    // tests (resolve_entity_store_indices.test.ts) — this suite only verifies the
+    // pass-through, existence check, and error handling around it.
+
+    it('should return null when the index does not exist', async () => {
+      (resolveLatestEntitiesIndexName as jest.Mock).mockResolvedValueOnce(
+        getEntitiesLatestIndexName('default')
+      );
       (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
         .fn()
         .mockResolvedValueOnce(false);
 
-      const result = await checkIfEntitiesIndexExists(esClient, logger, 'default');
-      expect(result).toBe(false);
+      const result = await resolveEntitiesIndexName(esClient, logger, 'default');
+      expect(result).toBeNull();
     });
 
-    it('should return false and log error on unexpected errors', async () => {
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockRejectedValueOnce(new Error('Network error'));
+    it('should return null and log error on unexpected errors', async () => {
+      (resolveLatestEntitiesIndexName as jest.Mock).mockRejectedValueOnce(
+        new Error('Network error')
+      );
 
-      const result = await checkIfEntitiesIndexExists(esClient, logger, 'default');
-      expect(result).toBe(false);
+      const result = await resolveEntitiesIndexName(esClient, logger, 'default');
+      expect(result).toBeNull();
       expect(logger.error).toHaveBeenCalled();
-    });
-
-    it('should use correct index name for the given spaceId', async () => {
-      const spaceId = 'custom-space';
-      const indexName = getEntitiesLatestIndexName(spaceId);
-
-      (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
-        .fn()
-        .mockResolvedValueOnce(true);
-
-      await checkIfEntitiesIndexExists(esClient, logger, spaceId);
-
-      expect(esClient.asInternalUser.indices.exists).toHaveBeenCalledWith({
-        index: indexName,
-      });
     });
   });
 

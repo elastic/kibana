@@ -6,16 +6,18 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
+import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 
 export interface AgentBuilderDashboardsSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
-  agentContextLayer: AgentContextLayerPluginSetup;
+  agentBuilderSml: AgentBuilderSmlPluginSetup;
 }
 
 export interface AgentBuilderDashboardsStartDependencies {
   dashboard: DashboardPluginStart;
+  embeddable: EmbeddableStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

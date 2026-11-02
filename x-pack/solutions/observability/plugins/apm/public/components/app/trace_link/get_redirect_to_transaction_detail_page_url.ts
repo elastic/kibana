@@ -12,11 +12,13 @@ export const getRedirectToTransactionDetailPageUrl = ({
   transaction,
   rangeFrom,
   rangeTo,
+  environment,
   waterfallItemId,
 }: {
   transaction: TransactionDetailRedirectInfo;
   rangeFrom?: string;
   rangeTo?: string;
+  environment?: string;
   waterfallItemId?: string;
 }) => {
   return format({
@@ -26,6 +28,7 @@ export const getRedirectToTransactionDetailPageUrl = ({
       transactionId: transaction.transaction.id,
       transactionName: transaction.transaction.name,
       transactionType: transaction.transaction.type,
+      ...(environment !== undefined ? { environment } : {}),
       rangeFrom:
         rangeFrom ||
         roundToNearestMinute({

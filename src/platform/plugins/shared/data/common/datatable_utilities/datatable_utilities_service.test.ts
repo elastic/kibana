@@ -108,6 +108,171 @@ describe('DatatableUtilitiesService', () => {
     });
   });
 
+  describe('getDateHistogramMeta', () => {
+    it('should return undefined when there are no source params', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: { type: 'date' },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column)).toBeUndefined();
+    });
+
+    it('should return undefined when used_interval is not a string', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          source: 'esaggs',
+          sourceParams: { params: { used_interval: 20 } },
+        },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column)).toBeUndefined();
+    });
+
+    it('should return meta for an esaggs date_histogram column', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          source: 'esaggs',
+          sourceParams: {
+            appliedTimeRange: { from: '2024-01-01', to: '2024-01-02' },
+            params: {
+              used_interval: '1d',
+              used_time_zone: 'America/New_York',
+              drop_partials: true,
+            },
+          },
+        },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column)).toEqual({
+        interval: '1d',
+        timeZone: 'America/New_York',
+        timeRange: { from: '2024-01-01', to: '2024-01-02' },
+        dropPartials: true,
+      });
+    });
+
+    it('falls back to used_interval for an ES|QL column without bucket metadata', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          sourceParams: { params: { used_interval: '30s', used_time_zone: 'UTC' } },
+        },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column)).toEqual({
+        interval: '30s',
+        timeZone: 'UTC',
+        timeRange: undefined,
+        dropPartials: undefined,
+      });
+    });
+
+    it('should return undefined for an ES|QL date column when bucket metadata is not available', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          esType: 'date',
+          sourceParams: {
+            appliedTimeRange: { from: '2024-02-01', to: '2024-02-02' },
+            params: {},
+            indexPattern: 'logs-*',
+            sourceField: 'test',
+            isSourceFieldFilterable: true,
+          },
+        },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column)).toBeUndefined();
+    });
+
+    it('returns interval, timeRange, dropPartials and domain for an ES|QL bucket column', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          esMeta: { bucket: { interval: 1, unit: 'day' } },
+          sourceParams: {
+            appliedTimeRange: { from: '2026-07-01', to: '2026-07-02' },
+            params: { drop_partials: false },
+            computedDomain: { min: 1000, max: 5000 },
+          },
+        },
+      } as unknown as DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column, { timeZone: 'UTC' })).toEqual({
+        interval: '1d',
+        timeZone: 'UTC',
+        timeRange: { from: '2026-07-01', to: '2026-07-02' },
+        dropPartials: false,
+        domain: { min: 1000, max: 5000 },
+      });
+    });
+
+    it('ignores a malformed computedDomain on an ES|QL column', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          esMeta: { bucket: { interval: 1, unit: 'day' } },
+          sourceParams: { computedDomain: { min: 1000 } },
+        },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getDateHistogramMeta(column, { timeZone: 'UTC' })).toEqual({
+        interval: '1d',
+        timeZone: 'UTC',
+        timeRange: undefined,
+        dropPartials: undefined,
+        domain: undefined,
+      });
+    });
+  });
+
+  describe('getColumnTimeRange', () => {
+    it('should return undefined when there is no applied time range', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: { type: 'date', sourceParams: {} },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getColumnTimeRange(column)).toBeUndefined();
+    });
+
+    it('should return the applied time range regardless of the interval', () => {
+      const column = {
+        id: 'test',
+        name: 'test',
+        meta: {
+          type: 'date',
+          sourceParams: {
+            appliedTimeRange: { from: '2026-01-01', to: '2026-01-02' },
+            params: { used_interval: '6h' },
+          },
+        },
+      } satisfies DatatableColumn;
+
+      expect(datatableUtilitiesService.getColumnTimeRange(column)).toEqual({
+        from: '2026-01-01',
+        to: '2026-01-02',
+      });
+    });
+  });
+
   describe('getNumberHistogramInterval', () => {
     it('should return nothing on column from other data source', () => {
       expect(
@@ -193,6 +358,23 @@ describe('DatatableUtilitiesService', () => {
           },
         })
       ).toEqual(undefined);
+    });
+
+    it('should return interval for a bucketed ES|QL column (non-esaggs source)', () => {
+      expect(
+        datatableUtilitiesService.getNumberHistogramInterval({
+          id: 'test',
+          name: 'test',
+          meta: {
+            type: 'number',
+            sourceParams: {
+              params: {
+                used_interval: 50,
+              },
+            },
+          },
+        } as DatatableColumn)
+      ).toEqual(50);
     });
   });
 

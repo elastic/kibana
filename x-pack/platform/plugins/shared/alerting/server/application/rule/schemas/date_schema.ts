@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
-import { ISO_DATE_REGEX } from '../../../../common/routes/schedule/constants';
+import { ISO_DATE_REGEX } from '@kbn/response-ops-schedule-schema';
 
 const validateDate = (string: Date) => {
   if (moment(string).isValid()) {

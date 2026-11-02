@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Fragment, Component, useMemo } from 'react';
 import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiIcon,
@@ -16,7 +16,13 @@ import {
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
+  shade,
+  transparentize,
+  useEuiScrollBar,
+  useEuiShadow,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { ConfirmModal } from '../confirm_modal';
@@ -60,6 +66,73 @@ interface State {
   showTrayPop: boolean;
   removeId: string | null;
 }
+
+const PageManagerRoot = ({ children }: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+  const scrollBar = useEuiScrollBar();
+  const shadowSmall = useEuiShadow('s');
+  const shadowMedium = useEuiShadow('m');
+  const styles = useMemo(
+    () => css`
+      & .canvasPageManager__pageList {
+        ${scrollBar}
+      }
+
+      & .canvasPageManager__addPage {
+        background: ${euiTheme.colors.primary};
+        color: ${euiTheme.colors.plainLight};
+      }
+
+      & .canvasPageManager__page {
+        &:focus,
+        &.canvasPageManager__page-isActive {
+          background-color: ${transparentize(shade(euiTheme.colors.lightestShade, 0.3), 0.5)};
+        }
+
+        &.canvasPageManager__page-isActive:focus {
+          .canvasPageManager__pagePreview {
+            outline-color: ${euiTheme.colors.vis.euiColorVis0};
+          }
+        }
+
+        &:hover,
+        &:focus {
+          .canvasPageManager__pagePreview {
+            ${shadowMedium}
+          }
+        }
+
+        &.canvasPageManager__page-isActive {
+          .canvasPageManager__pagePreview {
+            ${shadowMedium}
+            outline: ${euiTheme.border.thick};
+            outline-color: ${euiTheme.colors.darkShade};
+          }
+        }
+      }
+
+      & .canvasPageManager__pageNumber {
+        color: ${euiTheme.colors.darkShade};
+      }
+
+      & .canvasPageManager__pagePreview {
+        ${shadowSmall}
+        color: ${euiTheme.colors.text};
+      }
+
+      & .canvasPageManager__controls {
+        background: ${transparentize(euiTheme.colors.plainLight, 0.5)};
+      }
+    `,
+    [euiTheme, scrollBar, shadowSmall, shadowMedium]
+  );
+
+  return (
+    <EuiFlexGroup gutterSize="none" className="canvasPageManager" css={styles}>
+      {children}
+    </EuiFlexGroup>
+  );
+};
 
 export class PageManager extends Component<Props, State> {
   constructor(props: Props) {
@@ -204,7 +277,7 @@ export class PageManager extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiFlexGroup gutterSize="none" className="canvasPageManager">
+        <PageManagerRoot>
           <EuiFlexItem className="canvasPageManager__pages">
             <EuiDragDropContext onDragEnd={this.onDragEnd}>
               <EuiDroppable droppableId="droppable-page-manager" grow={true} direction="horizontal">
@@ -236,7 +309,7 @@ export class PageManager extends Component<Props, State> {
               </EuiToolTip>
             </EuiFlexItem>
           )}
-        </EuiFlexGroup>
+        </PageManagerRoot>
         <ConfirmModal
           isOpen={removeId !== null}
           title={strings.getConfirmRemoveTitle()}

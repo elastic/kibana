@@ -13,7 +13,7 @@ import {
   LENS_INTERNAL_VIS_API_PATH,
   LENS_INTERNAL_API_VERSION,
 } from '../../../../../common/constants';
-import type { LensUpdateIn, LensSavedObject } from '../../../../content_management';
+import type { LensUpdateIn, LensSavedObject } from '../../../../content_management/zod';
 import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../../types';
 import {
   lensUpdateRequestBodySchema,
@@ -112,7 +112,9 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
           throw result.item.error;
         }
 
-        const responseItem = getLensInternalResponseItem(builder, result.item);
+        const responseItem = lensUpdateResponseBodySchema.parse(
+          getLensInternalResponseItem(builder, result.item)
+        );
 
         if (createdNew) {
           return res.created<LensUpdateResponseBody>({

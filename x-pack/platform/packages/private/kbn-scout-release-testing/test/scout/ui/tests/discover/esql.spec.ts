@@ -5,14 +5,10 @@
  * 2.0.
  */
 
+import { EsqlEditor, extendPlaywrightPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, tags } from '@kbn/scout';
-import { SavedObjectsTracker, installLogsSampleData, removeLogsSampleData } from '../../helpers';
-
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
+import { test } from '../../fixtures';
+import { SavedObjectsTracker } from '../../helpers';
 
 // Sample data for `kibana_sample_data_logs` is generated relative to the install
 // time and spans roughly three weeks in the past and one week in the future, so
@@ -33,38 +29,25 @@ const KEPT_FIELDS = ['agent.keyword', 'tags.keyword', 'geo.coordinates'];
 const DROPPED_FIELDS = ['bytes', 'clientip', 'extension', 'response'];
 
 // Stable `data-test-subj` values reused across the suite.
-const ESQL_EDITOR = 'ESQLEditor';
 const METRIC_VIS = 'mtrVis';
 const EDIT_FLYOUT_HEADER = 'editFlyoutHeader';
 const CANCEL_FLYOUT_BUTTON = 'cancelFlyoutButton';
 const PANEL_ACTION_EDIT = 'embeddablePanelAction-editPanel';
-const CREATE_ESQL_CONTROL_FLYOUT = 'create_esql_control_flyout';
-const ESQL_VARIABLE_NAME_INPUT = 'esqlVariableName';
-const ESQL_CONTROL_LABEL_INPUT = 'esqlControlLabel';
-const SAVE_ESQL_CONTROL_BUTTON = 'saveEsqlControlsFlyoutButton';
 const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 
 const tracker = new SavedObjectsTracker();
 
-test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
+test.describe('Discover ES|QL', { tag: '@local-stateful-classic' }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
       'timepicker:timeDefaults': TIME_DEFAULTS,
     });
-    await pageObjects.discover.goto();
+    await pageObjects.discover.goto({ queryMode: 'classic' });
   });
 
   test.afterEach(async ({ kbnClient }) => {
     await tracker.cleanup(kbnClient);
-  });
-
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
   });
 
   test('should switch the query bar to ES|QL and display the default sample query', async ({
@@ -74,7 +57,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     await pageObjects.discover.selectTextBaseLang();
 
     await test.step('verify ES|QL editor is active with a non-empty default query', async () => {
-      await expect(page.testSubj.locator(ESQL_EDITOR)).toBeVisible();
+      await expect(pageObjects.esqlEditor.editor).toBeVisible();
       const defaultQuery = await pageObjects.discover.getEsqlQueryValue();
       expect(defaultQuery.trim().length).toBeGreaterThan(0);
     });
@@ -92,38 +75,15 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
   }) => {
     const variableName = '?agent_keyword';
     const controlLabel = 'Agent keyword';
-    const { codeEditor } = pageObjects.discover;
+    const { discover, esqlEditor } = pageObjects;
 
-    await pageObjects.discover.selectTextBaseLang();
+    await discover.selectTextBaseLang();
 
-    await test.step('open the Create control flyout from the Monaco suggestion list', async () => {
-      await codeEditor.setCodeEditorValue(CREATE_CONTROL_QUERY);
-
-      const suggestWidget = codeEditor.getCodeEditorSuggestWidget();
-      const createControlRow = suggestWidget.locator('.monaco-list-row', {
-        hasText: 'Create control',
+    await test.step('create the control from the editor suggestion list', async () => {
+      await esqlEditor.createControlFromEditorSuggestion(CREATE_CONTROL_QUERY, {
+        variableName,
+        label: controlLabel,
       });
-
-      // The ES|QL language server may take a moment to surface "Create control"
-      // after the model is updated. Retry triggering the suggest widget until
-      // the row appears rather than relying on an arbitrary sleep.
-      await expect(async () => {
-        await codeEditor.triggerSuggest(CREATE_CONTROL_QUERY);
-        await expect(createControlRow).toBeVisible({ timeout: 2_000 });
-      }).toPass({ timeout: 30_000 });
-
-      await createControlRow.click();
-      await expect(page.testSubj.locator(CREATE_ESQL_CONTROL_FLYOUT)).toBeVisible();
-    });
-
-    await test.step('configure the variable name and label, then save the control', async () => {
-      await page.testSubj.fill(ESQL_VARIABLE_NAME_INPUT, variableName);
-      await page.testSubj.fill(ESQL_CONTROL_LABEL_INPUT, controlLabel);
-
-      const saveButton = page.testSubj.locator(SAVE_ESQL_CONTROL_BUTTON);
-      await expect(saveButton).toBeEnabled();
-      await saveButton.click();
-      await expect(page.testSubj.locator(CREATE_ESQL_CONTROL_FLYOUT)).toBeHidden();
     });
 
     await test.step('verify the control renders and the editor query references the variable', async () => {
@@ -194,6 +154,7 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
   test('should edit, explore in Discover, and copy an ES|QL panel from a dashboard', async ({
     page,
+    kbnUrl,
     pageObjects,
   }) => {
     const dashboardName = 'ES|QL Panel Actions Dashboard';
@@ -224,9 +185,9 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
         'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER',
         visName
       );
-      const discoverPage = await newPagePromise;
+      const discoverPage = extendPlaywrightPage({ page: await newPagePromise, kbnUrl });
       await discoverPage.waitForLoadState();
-      await expect(discoverPage.getByTestId(ESQL_EDITOR)).toContainText('kibana_sample_data_logs');
+      await expect(new EsqlEditor(discoverPage).editor).toContainText('kibana_sample_data_logs');
       await discoverPage.close();
     });
 
@@ -303,8 +264,8 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       // Expanding a row proves the embedded saved-search grid is fully
       // interactive end-to-end: rows are rendered, the expand action
       // surfaces, and the document-viewer flyout opens for the row.
-      await pageObjects.discover.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
-      await pageObjects.discover.closeDocViewerFlyout();
+      await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+      await pageObjects.docViewer.close();
     });
   });
 

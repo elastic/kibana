@@ -41,11 +41,18 @@ export class MetricsTab extends ServiceDetailsTab {
     this.noDataForRangeCallout = this.page.getByTestId('apmMetricsNoDataForRange');
     this.mixedAgentTypesCallout = this.page.getByTestId('apmMetricsMixedAgentTypes');
     this.mixedAgentTypesOverlapCallout = this.page.getByTestId('apmMetricsMixedAgentTypesOverlap');
-    this.currentTimeRangeLink = this.page.getByTestId('apmMetricsCurrentTimeRangeLink');
-    this.previousTimeRangeLink = this.page.getByTestId('apmMetricsPreviousTimeRangeLink');
+    this.currentTimeRangeLink = this.page.locator(
+      '[data-test-subj="apmMetricsCurrentTimeRangeLink"]:not([role=status] *)'
+    );
+    this.previousTimeRangeLink = this.page.locator(
+      '[data-test-subj="apmMetricsPreviousTimeRangeLink"]:not([role=status] *)'
+    );
   }
 
   protected async waitForTabLoad(): Promise<void> {
+    await this.page
+      .getByTestId('apmUnifiedSearchBar')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.page
       .getByTestId('apmMainTemplateServiceAgentLoader')
       .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });

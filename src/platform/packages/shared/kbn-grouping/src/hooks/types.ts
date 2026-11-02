@@ -52,6 +52,11 @@ export interface GroupSettings {
    */
   hideOptionsTitle?: boolean;
   /**
+   * Allows to hide the group selection dropdown button entirely.
+   * Useful when grouping is enforced and no alternative options are available.
+   */
+  hideGroupSelector?: boolean;
+  /**
    * Allows to customize the label of the group selection dropdown.
    */
   popoverButtonLabel?: string;

@@ -666,7 +666,7 @@ describe('formatZodError', () => {
       expect(result.message).toBe('Custom validation failed at steps.0.with.param');
     });
 
-    it('should use schema-derived message when schema is available', () => {
+    it('preserves a custom refinement message even when a schema is available', () => {
       const schema = z.object({ field: z.string() });
       const mockError = {
         issues: [
@@ -679,8 +679,13 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError, schema);
-      // Schema-aware enrichment resolves the path and describes the expected type
-      expect(result.message).toContain('field expects');
+      // `custom` refinement messages are author-written and authoritative, so
+      // schema-aware "field expects string" enrichment must not clobber them.
+      // (This matters for e.g. the parallel-mode rule, whose refinement attaches
+      // at the step node where enrichment would otherwise emit the giant
+      // "must be one of ...N more" union dump.)
+      expect(result.message).toContain('Some custom issue');
+      expect(result.message).not.toContain('field expects');
     });
   });
 

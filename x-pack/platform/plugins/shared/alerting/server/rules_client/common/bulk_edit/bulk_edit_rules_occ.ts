@@ -13,6 +13,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { logRuleChanges } from '../../../application/rule/methods/common_utils/log_rule_changes';
@@ -20,7 +21,7 @@ import type { RuleParams } from '../../../application/rule/types';
 import type { ValidateScheduleLimitResult } from '../../../application/rule/methods/get_schedule_frequency';
 import { validateScheduleLimit } from '../../../application/rule/methods/get_schedule_frequency';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import { bulkMigrateLegacyActions } from '../../lib';
+import { bulkMigrateLegacyActions, deleteLegacyActionsForRules } from '../../lib';
 import { bulkCreateRulesSo } from '../../../data/rule';
 import type { BulkOperationError, RulesClientContext } from '../../types';
 import {
@@ -71,7 +72,9 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const prevInterval: string[] = [];
+  const migratedRuleIds = new Set<string>();
 
   for await (const response of rulesFinder.find()) {
     if (options.shouldValidateSchedule) {
@@ -83,7 +86,11 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
       prevInterval.concat(intervals);
     }
 
-    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+    const migratedIds = await bulkMigrateLegacyActions({
+      context,
+      rules: response.saved_objects,
+    });
+    migratedIds.forEach((id) => migratedRuleIds.add(id));
 
     await pMap(
       response.saved_objects,
@@ -95,6 +102,8 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
           skipped,
           errors,
           username,
+          profileUid,
+          hasMigratedLegacyActions: migratedRuleIds.has(rule.id),
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );
@@ -166,6 +175,14 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     changeTracking: options.changeTracking,
   });
 
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  await deleteLegacyActionsForRules(
+    context,
+    result.saved_objects
+      .filter((rule) => !isSavedObjectErrorResult(rule) && migratedRuleIds.has(rule.id))
+      .map(({ id }) => id)
+  );
+
   return {
     apiKeysToInvalidate: options.shouldInvalidateApiKeys ? apiKeysToInvalidate : [],
     resultSavedObjects: result.saved_objects,
@@ -194,8 +211,6 @@ async function saveBulkUpdatedRules({
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
     // bulk_disable, bulk_enable, etc. to fix this cast
-    const bulkEditRulesTimestamp = Date.now();
-
     result = await bulkCreateRulesSo({
       savedObjectsClient: context.unsecuredSavedObjectsClient,
       bulkCreateRuleAttributes: rules as Array<SavedObjectsBulkCreateObject<RawRule>>,
@@ -204,10 +219,15 @@ async function saveBulkUpdatedRules({
 
     await logRuleChanges({
       ruleSOs: result.saved_objects,
+      encryptedFieldsMap: new Map(
+        [...apiKeysMap.entries()].map(([ruleId, { newApiKey, newUiamApiKey }]) => [
+          ruleId,
+          { apiKey: newApiKey ?? null, uiamApiKey: newUiamApiKey ?? null },
+        ])
+      ),
       rulesClientContext: context,
       changesContext: {
         action: changeTracking?.action ?? RuleChangeTrackingAction.ruleUpdate,
-        timestamp: bulkEditRulesTimestamp,
         metadata: changeTracking?.metadata,
       },
     });
@@ -237,7 +257,8 @@ async function saveBulkUpdatedRules({
   }
 
   if (shouldInvalidateApiKeys) {
-    result.saved_objects.map(({ id, error }) => {
+    result.saved_objects.map((so) => {
+      const { id } = so;
       const apiKey = apiKeysMap.get(id);
 
       const oldApiKey = apiKey?.oldApiKey;
@@ -248,17 +269,23 @@ async function saveBulkUpdatedRules({
       const newUiamApiKey = apiKey?.newUiamApiKey;
 
       // if SO wasn't saved and has new API key it will be invalidated
-      if (error && newApiKey && !newApiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(newApiKey);
-        // if SO saved and has old Api Key it will be invalidate
-      } else if (!error && oldApiKey && !oldApiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(oldApiKey);
-      }
+      if (isSavedObjectErrorResult(so)) {
+        if (newApiKey && !newApiKeyCreatedByUser) {
+          apiKeysToInvalidate.push(newApiKey);
+        }
 
-      if (error && newUiamApiKey && !newApiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(newUiamApiKey);
-      } else if (!error && oldUiamApiKey && !oldApiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(oldUiamApiKey);
+        if (newUiamApiKey && !newApiKeyCreatedByUser) {
+          apiKeysToInvalidate.push(newUiamApiKey);
+        }
+      } else {
+        // if SO saved and has old Api Key it will be invalidate
+        if (oldApiKey && !oldApiKeyCreatedByUser) {
+          apiKeysToInvalidate.push(oldApiKey);
+        }
+
+        if (oldUiamApiKey && !oldApiKeyCreatedByUser) {
+          apiKeysToInvalidate.push(oldUiamApiKey);
+        }
       }
     });
   }

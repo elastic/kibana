@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DELAY_MODE } from '../types';
 import type { FormValues } from '../types';
-import { deriveRecoveryDelayModeFromStateTransition } from '../utils/rule_request_mappers';
+import { deriveRecoveryDelayModeFromStateTransition } from '../utils/state_transition_helpers';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { StateTransitionTimeframeField } from './state_transition_timeframe_field';
 import { useRuleFormMeta } from '../contexts';
@@ -87,6 +87,7 @@ export const RecoveryDelayField = () => {
               ...st,
               recoveringCount: null,
               recoveringTimeframe: null,
+              recoveringOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );
@@ -101,6 +102,7 @@ export const RecoveryDelayField = () => {
               ...st,
               recoveringCount: st.recoveringCount || DEFAULT_RECOVERING_COUNT,
               recoveringTimeframe: null,
+              recoveringOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );
@@ -113,6 +115,7 @@ export const RecoveryDelayField = () => {
               ...st,
               recoveringCount: null,
               recoveringTimeframe: st.recoveringTimeframe ?? DEFAULT_RECOVERING_TIMEFRAME,
+              recoveringOperator: null,
             },
             { shouldDirty: true, shouldTouch: true }
           );

@@ -31,6 +31,8 @@ export interface RuleMigrationIntegration {
   elser_embedding: string;
   fields_metadata: Record<string, Record<string, unknown>> | undefined;
   knowledge_base?: string;
+  /** Fleet package version the doc was built from; used to skip re-embedding unchanged packages */
+  version: string;
 }
 
 export interface RuleMigrationPrebuiltRule {
@@ -39,6 +41,8 @@ export interface RuleMigrationPrebuiltRule {
   description: string;
   elser_embedding: string;
   mitre_attack_ids?: string[];
+  /** Prebuilt rule asset version the doc was built from; used to skip re-embedding unchanged rules */
+  version: string;
 }
 
 export type RuleSemanticSearchResult = RuleMigrationPrebuiltRule & RuleVersions;
@@ -61,6 +65,8 @@ export type InternalUpdateRuleMigrationRule = UpdateRuleMigrationRule & {
  *
  **/
 export type SplunkSeverity = '1' | '2' | '3' | '4' | '5';
+
+export type MicrosoftSentinelSeverity = 'high' | 'medium' | 'low' | 'informational';
 
 export interface RuleMigrationAdapters {
   rules: IndexPatternAdapter;

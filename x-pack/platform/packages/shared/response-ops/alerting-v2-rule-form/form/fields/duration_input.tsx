@@ -21,6 +21,8 @@ export interface DurationInputProps {
   dataTestSubj: string;
   idPrefix: string;
   compressed?: boolean;
+  minDurationMs?: number;
+  disabled?: boolean;
 }
 
 /**
@@ -43,6 +45,8 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
       dataTestSubj,
       idPrefix,
       compressed,
+      minDurationMs,
+      disabled,
     },
     ref
   ) => {
@@ -89,6 +93,7 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
               isInvalid={!!errors}
               name="interval"
               compressed={compressed}
+              disabled={disabled}
               data-test-subj={`${idPrefix}NumberInput`}
               id={`${idPrefix}NumberInput`}
               aria-label={numberLabel || undefined}
@@ -98,9 +103,10 @@ export const DurationInput = React.forwardRef<HTMLInputElement, DurationInputPro
             <EuiSelect
               fullWidth
               value={intervalUnit}
-              options={getTimeOptions(intervalNumber ?? 1)}
+              options={getTimeOptions(intervalNumber ?? 1, minDurationMs)}
               onChange={onIntervalUnitChange}
               compressed={compressed}
+              disabled={disabled}
               data-test-subj={`${idPrefix}UnitInput`}
               aria-label={unitAriaLabel}
             />

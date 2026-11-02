@@ -9,9 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server';
-import type { AttachmentToolsOptions } from './types';
 
 const attachmentDiffSchema = z.object({
   attachment_id: z.string().describe('ID of the attachment to compare versions'),
@@ -23,20 +22,20 @@ const attachmentDiffSchema = z.object({
  * Creates the attachment_diff tool.
  * Shows differences between two versions of an attachment.
  */
-export const createAttachmentDiffTool = ({
-  attachmentManager,
-}: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentDiffSchema> => ({
+export const createAttachmentDiffTool = (): InternalBuiltinToolDefinition<
+  typeof attachmentDiffSchema
+> => ({
   id: attachmentTools.diff,
   type: ToolType.builtin,
   description:
     'Compare two versions of an attachment to see what changed. Use this to understand the history of modifications.',
   schema: attachmentDiffSchema,
   tags: ['attachment'],
-  handler: async ({
-    attachment_id: attachmentId,
-    from_version: fromVersion,
-    to_version: toVersion,
-  }) => {
+  excludeFromMcp: true,
+  handler: async (
+    { attachment_id: attachmentId, from_version: fromVersion, to_version: toVersion },
+    { attachments: attachmentManager }
+  ) => {
     const attachment = attachmentManager.getAttachmentRecord(attachmentId);
 
     if (!attachment) {

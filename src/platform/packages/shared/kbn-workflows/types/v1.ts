@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfileAvatarData } from '@kbn/core-user-settings-types';
 import {
   HUMAN_READABLE_ID_MAX_LENGTH,
   HUMAN_READABLE_ID_MIN_LENGTH,
@@ -14,9 +16,17 @@ import {
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
-import type { SerializedError, WorkflowYaml } from '../spec/schema';
+import type {
+  SerializedError,
+  WorkflowEffectiveIdentitySchema,
+  WorkflowStepTokenUsageSchema,
+  WorkflowTokenUsageSchema,
+  WorkflowYaml,
+} from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
+import type { WorkflowValidationRuleId } from '../validation/rules';
 
 export type { WorkflowYaml } from '../spec/schema';
 
@@ -27,6 +37,8 @@ export enum ExecutionStatus {
   WAITING_FOR_INPUT = 'waiting_for_input',
   WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
+  /** Persisted concurrency backlog - does not count toward concurrency max until promoted to pending + scheduled */
+  QUEUED = 'queued',
 
   // Done
   COMPLETED = 'completed',
@@ -47,6 +59,16 @@ export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
 ] as const;
 
 export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
+  ExecutionStatus.RUNNING,
+  ExecutionStatus.QUEUED,
+] as const;
+
+/** Workflow executions occupying a concurrency slot (excludes queued backlog). */
+export const ConcurrencySlotOccupyingExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
@@ -104,15 +126,31 @@ export interface QueueMetrics {
   scheduleDelayMs: number | null;
 }
 
+/**
+ * Normalized LLM token usage. Token-consuming steps (today `ai.agent`, and any
+ * future `ai.*` / connector step) emit this shape under `output.metadata.usage`;
+ * the execution engine extracts it, persists it as a top-level `usage` field on
+ * the step execution, and accumulates the per-execution total. Keeping the
+ * persisted field at the top level (rather than nested under `output`) means
+ * UI and queries read a stable, output-independent shape that survives the
+ * `includeOutput: false` fetch path.
+ */
+export type WorkflowTokenUsage = z.infer<typeof WorkflowTokenUsageSchema>;
+
+export type WorkflowStepTokenUsage = z.infer<typeof WorkflowStepTokenUsageSchema>;
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
   managed?: boolean;
   managedBy?: string | null;
+  billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
+  /** Whether the test uses a submitted definition instead of the saved workflow. */
+  isEphemeral?: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
@@ -124,7 +162,8 @@ export interface EsWorkflowExecution {
   createdAt: string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
-  executedBy?: string; // User who executed the workflow
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
+  executedBy?: string; // User who triggered the workflow
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -154,6 +193,19 @@ export interface EsWorkflowExecution {
   eventChainVisitedWorkflowIds?: string[];
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
+  /**
+   * Aggregated LLM token usage across all token-consuming steps in this
+   * execution, accumulated incrementally as each step finishes. Absent when no
+   * step reported usage. See {@link WorkflowTokenUsage}.
+   */
+  usage?: WorkflowTokenUsage;
+  /** Per-step counterpart to the summed `usage`, in step-finish order. */
+  stepUsage?: WorkflowStepTokenUsage[];
+  /**
+   * Workflow document version (`_source.version`) captured when the execution was
+   * created.
+   */
+  version?: number;
 }
 
 export interface ProviderInput {
@@ -203,11 +255,15 @@ export interface EsWorkflowStepExecution {
   /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
   state?: Record<string, unknown>;
 
+  /** Whether this step belongs to a managed workflow execution. */
+  managed?: boolean;
+
   /**
    * Optional Human-In-The-Loop audit envelope, populated only by
    * HITL-aware steps (today: `wait_for_input`). Both the wrapper and
    * every property inside it are optional and MUST be treated as such
-   * by readers — the engine itself remains field-agnostic.
+   * by readers — the engine itself remains field-agnostic. `null` once a
+   * claim whose response was not applied is released.
    */
   hitl?: {
     /** Server-resolved username (or API-key principal) that submitted the response. */
@@ -216,7 +272,10 @@ export interface EsWorkflowStepExecution {
     respondedAt?: string;
     /** Free-form channel slug identifying the surface that submitted the response. */
     channel?: string;
-  };
+  } | null;
+
+  /** Per-step normalized LLM token usage. See {@link WorkflowTokenUsage}. */
+  usage?: WorkflowTokenUsage;
 }
 
 export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
@@ -241,6 +300,10 @@ export interface WorkflowExecutionLogModel {
 export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
+  managed?: boolean;
+  managedBy?: string | null;
+  originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: string;
@@ -252,26 +315,45 @@ export interface WorkflowExecutionDto {
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
+  /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
+  stepExecutionIds?: string[];
   duration: number | null;
-  executedBy?: string; // User who executed the workflow
+  effectiveIdentity?: z.infer<typeof WorkflowEffectiveIdentitySchema>;
+  executedBy?: string; // User who triggered the workflow
+  /** Profile of `executedBy`, resolved server-side so readers don't need `bulkGetUserProfiles`. */
+  executedByProfile?: UserProfile<{ avatar?: UserProfileAvatarData }>;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
+  /** Aggregated LLM token usage across all `ai.*` steps in this execution. */
+  usage?: WorkflowTokenUsage;
+  /** Per-step LLM token usage broken down by step and connector. See {@link WorkflowStepTokenUsage}. */
+  stepUsage?: WorkflowStepTokenUsage[];
+  /** Workflow document version captured at execution start. See {@link EsWorkflowExecution.version}. */
+  version?: number;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
   WorkflowExecutionDto,
   'stepExecutions' | 'yaml' | 'workflowDefinition'
->;
+> & {
+  tags?: string[];
+  managed?: boolean;
+};
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
   page: number;
   size: number;
   total: number;
+  /**
+   * Opaque `search_after` sort values for the next window.
+   * Absent when there are no further results.
+   */
+  searchAfter?: unknown[];
 }
 
 export interface WorkflowStepExecutionListDto {
@@ -290,6 +372,7 @@ export const EsWorkflowSchema = z.object({
   enabled: z.boolean(),
   managed: z.boolean().optional(),
   managedBy: z.string().nullable().optional(),
+  billable: z.boolean().nullable().optional(),
   originManagedWorkflowId: z.string().nullable().optional(),
   managedVersion: z.number().nullable().optional(),
   tags: z.array(z.string()),
@@ -301,9 +384,11 @@ export const EsWorkflowSchema = z.object({
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
+  /** Monotonic workflow document version counter (`_source.version`). */
+  version: z.number().optional(),
 });
 
-export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
+export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
 
 export type EsWorkflowCreate = Omit<
   EsWorkflow,
@@ -397,7 +482,8 @@ export interface UpdatedWorkflowResponseDto {
   validationErrors: string[];
 }
 
-export interface WorkflowDetailDto {
+export interface WorkflowDetailDto extends WorkflowAccessSubject {
+  permissions?: WorkflowPermissions;
   id: string;
   name: string;
   description?: string;
@@ -415,14 +501,22 @@ export interface WorkflowDetailDto {
   definition: WorkflowYaml | null;
   yaml: string;
   valid: boolean;
+  tags?: string[];
+  version?: number;
 }
+
+export type WorkflowAccessControlUpdateResponseDto = Pick<
+  WorkflowDetailDto,
+  'owner_id' | 'access_control' | 'permissions' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
+>;
 
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
   id: string;
 }
 export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
 
-export interface WorkflowListItemDto {
+export interface WorkflowListItemDto extends WorkflowAccessSubject {
+  permissions?: WorkflowPermissions;
   id: string;
   name: string;
   description: string;
@@ -452,8 +546,10 @@ export interface WorkflowExecutionEngineModel
     | 'yaml'
     | 'managed'
     | 'managedBy'
+    | 'billable'
     | 'originManagedWorkflowId'
     | 'managedVersion'
+    | 'version'
   > {
   isTestRun?: boolean;
   isEphemeral?: boolean;
@@ -504,10 +600,13 @@ export interface ConnectorInstance {
   isPreconfigured: boolean;
   isDeprecated: boolean;
   config?: ConnectorInstanceConfig;
+  connectorType?: string;
+  isInferenceEndpoint?: boolean;
 }
 
 export interface ConnectorInstanceConfig {
   taskType?: string;
+  selectedActions?: string[];
 }
 
 export interface ConnectorTypeInfo {
@@ -525,7 +624,7 @@ export type CompletionFn = () => Promise<
   Array<{ label: string; value: string; detail?: string; documentation?: string }>
 >;
 
-export type StepStabilityLevel = 'stable' | 'beta' | 'tech_preview';
+export type StabilityLevel = 'stable' | 'beta' | 'tech_preview';
 
 export interface BaseConnectorContract {
   type: string;
@@ -538,7 +637,7 @@ export interface BaseConnectorContract {
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
-  stability?: StepStabilityLevel;
+  stability?: StabilityLevel;
   /** Deprecation metadata for this step type. */
   deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
@@ -776,6 +875,10 @@ export interface ConnectorIdSelectionHandler {
    * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
    */
   enableCreation?: boolean;
+  /**
+   * Feature ID used to resolve inference endpoints for this selection.
+   */
+  inferenceFeatureId?: string;
 }
 
 export interface ConnectorExamples {
@@ -788,6 +891,8 @@ export type ConnectorContractUnion =
   | BaseConnectorContract
   | InternalConnectorContract;
 
+export type WorkflowSortField = 'name' | 'enabled';
+
 export interface WorkflowsSearchParams {
   size?: number;
   page?: number;
@@ -795,7 +900,10 @@ export interface WorkflowsSearchParams {
   createdBy?: string[];
   enabled?: boolean[];
   tags?: string[];
+  sortField?: WorkflowSortField;
+  sortOrder?: 'asc' | 'desc';
   managed?: 'all' | 'managed' | 'unmanaged';
+  visibilityContext?: string[];
 }
 
 export interface RequestOptions {
@@ -815,11 +923,24 @@ export interface WorkflowDiagnostic {
   message: string;
   source: string;
   path?: (string | number)[];
+  /**
+   * Stable identity of the check that produced this diagnostic. Prefer this over
+   * matching on `message`, which is translated and reworded freely.
+   * See WORKFLOW_VALIDATION_RULES.
+   */
+  ruleId: WorkflowValidationRuleId;
 }
 export interface ValidateWorkflowResponseDto {
   valid: boolean;
   diagnostics: WorkflowDiagnostic[];
   parsedWorkflow?: WorkflowYaml;
+  /**
+   * What the checks did not cover, each with the reason: a check either never
+   * ran or stopped at a budget part-way through. Reported separately from
+   * `diagnostics` because the absence of a diagnostic here means "not checked",
+   * not "nothing wrong".
+   */
+  notChecked?: string[];
 }
 
 export interface GetAvailableConnectorsResponse {

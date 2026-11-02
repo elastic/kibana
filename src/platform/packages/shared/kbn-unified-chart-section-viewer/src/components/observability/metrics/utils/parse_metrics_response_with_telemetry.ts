@@ -32,8 +32,15 @@ export const createInitialMetricsTelemetry = (): MetricsTelemetry => ({
 /**
  * Dimension names that are internal metadata and should not be exposed to users.
  * See: https://github.com/elastic/observability-dev/issues/5412
+ *
+ * These are genuine time-series dimensions in Elasticsearch (part of the TSID),
+ * so `METRICS_INFO` legitimately returns them and they can only be hidden here,
+ * at the presentation layer. `temporality` in particular originates from OTLP
+ * data (delta vs. cumulative aggregation) rather than being injected by
+ * Elastic, so it carries no `_` prefix and must be excluded by exact name.
+ * See: https://github.com/elastic/kibana/issues/273563
  */
-const INTERNAL_DIMENSION_EXACT_NAMES = new Set(['_metric_names_hash', 'unit']);
+const INTERNAL_DIMENSION_EXACT_NAMES = new Set(['_metric_names_hash', 'unit', 'temporality']);
 
 /**
  * Dimension name prefixes that indicate internal metadata fields.

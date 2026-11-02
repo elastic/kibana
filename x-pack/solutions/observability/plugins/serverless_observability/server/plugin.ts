@@ -9,10 +9,11 @@ import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/c
 import {
   OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS,
   OBSERVABILITY_MACHINE_LEARNING_PROJECT_SETTINGS,
+  OBSERVABILITY_PROFILING_PROJECT_SETTINGS,
   OBSERVABILITY_PROJECT_SETTINGS,
   OBSERVABILITY_STREAMS_TIERED_PROJECT_SETTINGS,
 } from '@kbn/serverless-observability-settings';
-import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
+import { SIGNIFICANT_EVENTS_TIERED_FEATURE } from '@kbn/significant-events-plugin/common';
 import type {
   ServerlessObservabilityPluginSetup,
   ServerlessObservabilityPluginStart,
@@ -63,7 +64,7 @@ export class ServerlessObservabilityPlugin
     ]);
 
     Promise.all([
-      coreSetup.pricing.isFeatureAvailable(STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id),
+      coreSetup.pricing.isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id),
       coreSetup.pricing.isFeatureAvailable(OBSERVABILITY_COMPLETE_OVERVIEW_FEATURE_ID),
     ])
       .then(([isSignificantEventsAvailable, isCompleteOverviewAvailable]) => {
@@ -74,6 +75,7 @@ export class ServerlessObservabilityPlugin
           ...(pluginsSetup.observabilityAIAssistant
             ? OBSERVABILITY_AI_ASSISTANT_PROJECT_SETTINGS
             : []),
+          ...(pluginsSetup.profiling ? OBSERVABILITY_PROFILING_PROJECT_SETTINGS : []),
         ]);
       })
       .catch((error) => {

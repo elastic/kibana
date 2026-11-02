@@ -28,6 +28,7 @@ const INTEGRATIONS_QUERYPARAM_SORT = 'sort';
 const INTEGRATIONS_QUERYPARAM_STATUS = 'status';
 const INTEGRATIONS_QUERYPARAM_SETUP_METHOD = 'setupMethod';
 const INTEGRATIONS_QUERYPARAM_SIGNAL = 'signal';
+const INTEGRATIONS_QUERYPARAM_SHOW_CONTENT = 'showContent';
 
 function isValidStatus(value: string): value is IntegrationStatusFilterType {
   return (VALID_STATUSES as string[]).includes(value);
@@ -61,7 +62,8 @@ export function useAddUrlFilters() {
               INTEGRATIONS_QUERYPARAM_SORT,
               INTEGRATIONS_QUERYPARAM_STATUS,
               INTEGRATIONS_QUERYPARAM_SETUP_METHOD,
-              INTEGRATIONS_QUERYPARAM_SIGNAL
+              INTEGRATIONS_QUERYPARAM_SIGNAL,
+              INTEGRATIONS_QUERYPARAM_SHOW_CONTENT
             ),
             ...(newFilters.q ? { q: newFilters.q } : {}),
             ...(newFilters.sort ? { sort: newFilters.sort } : {}),
@@ -74,6 +76,7 @@ export function useAddUrlFilters() {
             ...(newFilters.signal && newFilters.signal.length > 0
               ? { signal: newFilters.signal }
               : {}),
+            ...(newFilters.showContent ? { showContent: 'true' } : {}),
           },
           {
             skipEmptyString: true,
@@ -146,12 +149,16 @@ export function useUrlFilters(): BrowseIntegrationsFilter {
       }
     }
 
+    const showContent =
+      urlParams[INTEGRATIONS_QUERYPARAM_SHOW_CONTENT] === 'true' ? true : undefined;
+
     return {
       q,
       sort,
       status,
       setupMethod,
       signal,
+      showContent,
     };
   }, [urlParams]);
 }

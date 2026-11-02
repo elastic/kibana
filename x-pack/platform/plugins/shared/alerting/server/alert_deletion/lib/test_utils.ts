@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-1') => ({
+import { asSpaceId } from '@kbn/core-spaces-common';
+
+export const inactiveAlertsQuery = (days: number = 30, spaceId = asSpaceId('space-1')) => ({
   bool: {
     filter: [
       {
@@ -149,7 +151,7 @@ export const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-
   },
 });
 
-export const activeAlertsQuery = (days: number = 45, spaceId: string = 'space-1') => ({
+export const activeAlertsQuery = (days: number = 45, spaceId = asSpaceId('space-1')) => ({
   bool: {
     filter: [
       {

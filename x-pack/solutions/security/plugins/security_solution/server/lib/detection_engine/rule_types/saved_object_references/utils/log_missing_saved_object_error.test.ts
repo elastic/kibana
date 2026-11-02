@@ -27,7 +27,7 @@ describe('log_missing_saved_object_error', () => {
         namespace_type: 'agnostic',
       },
     });
-    expect(logger.error).toBeCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       'The saved object references were not found for our exception list when we were expecting to find it. Kibana migrations might not have run correctly or someone might have removed the saved object references manually. Returning the last known good exception list which might not work. Value being returned is: {"id":"123","list_id":"456","type":"detection","namespace_type":"agnostic"}'
     );
   });

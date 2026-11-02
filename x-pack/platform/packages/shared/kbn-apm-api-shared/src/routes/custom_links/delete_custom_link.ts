@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 
 export interface DeleteCustomLinkResponse {
@@ -13,9 +13,11 @@ export interface DeleteCustomLinkResponse {
 
 export const deleteCustomLinkRoute = defineRoute<DeleteCustomLinkResponse>()({
   endpoint: 'DELETE /internal/apm/settings/custom_links/{id}',
-  params: t.type({
-    path: t.type({
-      id: t.string,
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(1024),
+      }),
+    })
+  ),
 });

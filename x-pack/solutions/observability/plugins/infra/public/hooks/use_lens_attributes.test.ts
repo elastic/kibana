@@ -60,6 +60,7 @@ describe('useLensAttributes hook', () => {
         ],
       },
     ],
+    areaFill: 'solid',
     title: 'Injected Normalized Load',
     dataset: {
       index: 'mock-id',
@@ -108,5 +109,6 @@ describe('useLensAttributes hook', () => {
     });
 
     expect(extraActions).toHaveLength(1);
+    expect(extraActions[0].id).toBe('openInLens');
   });
 });

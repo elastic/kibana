@@ -35,10 +35,19 @@ export async function rollDataStreamIfRequired({
   const skipMessage = 'does not need to be rolled over';
   const scheduleMessage = 'scheduling lazy rollover';
 
-  const indexMappings = await esClient.indices.getMapping({
-    index: dataStreamName,
-    allow_no_indices: true,
-  });
+  let indexMappings: Awaited<ReturnType<typeof esClient.indices.getMapping>>;
+  try {
+    indexMappings = await esClient.indices.getMapping({
+      index: dataStreamName,
+      allow_no_indices: true,
+    });
+  } catch (error) {
+    if ((error as { meta?: { statusCode?: number } }).meta?.statusCode === 404) {
+      logger.debug(`${msgPrefix} does not exist so ${skipMessage}`);
+      return false;
+    }
+    throw error;
+  }
 
   const mappingsArray = Object.values(indexMappings);
   if (mappingsArray.length === 0) {

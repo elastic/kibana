@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs';
 import { PlayButton } from './play_button';
@@ -29,6 +29,7 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
   const [isPaused, setIsPaused] = useState(true);
   const [timeoutId, setTimeoutId] = useState<number | undefined>(undefined);
   const [subscription, setSubscription] = useState<Subscription | undefined>(undefined);
+  const isInteractive = props.viewMode !== 'non-interactive';
 
   const playNextFrame = useCallback(() => {
     // advance to next frame
@@ -54,32 +55,47 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
     playNextFrame();
   }, [props, playNextFrame]);
 
-  const onPause = useCallback(() => {
-    props.setIsPopoverOpen(true);
-    setIsPaused(true);
-    if (subscription) {
-      subscription.unsubscribe();
-      setSubscription(undefined);
+  const onPause = useCallback(
+    (openPopover: boolean = true) => {
+      if (openPopover) props.setIsPopoverOpen(true);
+      setIsPaused(true);
+      if (subscription) {
+        subscription.unsubscribe();
+        setSubscription(undefined);
+      }
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        setTimeoutId(undefined);
+      }
+    },
+    [props, subscription, timeoutId]
+  );
+
+  useEffect(() => {
+    if (!isInteractive) {
+      onPause(false);
     }
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-      setTimeoutId(undefined);
-    }
-  }, [props, subscription, timeoutId]);
+  }, [isInteractive, onPause]);
 
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          onClick={() => {
-            onPause();
-            props.onPrevious();
-          }}
-          iconType="chevronLimitLeft"
-          color="text"
-          aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
-          data-test-subj="timeSlider-previousTimeWindow"
-        />
+        <EuiToolTip
+          content={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => {
+              onPause();
+              props.onPrevious();
+            }}
+            iconType="chevronLimitLeft"
+            color="text"
+            aria-label={TimeSliderStrings.control.getPreviousButtonAriaLabel()}
+            data-test-subj="timeSlider-previousTimeWindow"
+            disabled={!isInteractive}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <PlayButton
@@ -87,21 +103,27 @@ export const TimeSliderPrepend: FC<Props> = (props: Props) => {
           onPause={onPause}
           waitForControlOutputConsumersToLoad$={props.waitForControlOutputConsumersToLoad$}
           viewMode={props.viewMode}
-          disablePlayButton={props.disablePlayButton}
+          disablePlayButton={!isInteractive || props.disablePlayButton}
           isPaused={isPaused}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          onClick={() => {
-            onPause();
-            props.onNext();
-          }}
-          iconType="chevronLimitRight"
-          color="text"
-          aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
-          data-test-subj="timeSlider-nextTimeWindow"
-        />
+        <EuiToolTip
+          content={TimeSliderStrings.control.getNextButtonAriaLabel()}
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={() => {
+              onPause();
+              props.onNext();
+            }}
+            iconType="chevronLimitRight"
+            color="text"
+            aria-label={TimeSliderStrings.control.getNextButtonAriaLabel()}
+            data-test-subj="timeSlider-nextTimeWindow"
+            disabled={!isInteractive}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </>
   );

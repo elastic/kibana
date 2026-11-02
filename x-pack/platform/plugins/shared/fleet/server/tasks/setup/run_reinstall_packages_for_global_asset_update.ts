@@ -14,7 +14,7 @@ import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../../constants';
 import { getInstallations, reinstallPackageForInstallation } from '../../services/epm/packages';
 
 interface RunReinstallPackagesParams {
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
 }
 
@@ -26,7 +26,7 @@ interface RunReinstallPackagesParams {
  * created or updated during Fleet setup, typically during a stack upgrade.
  */
 export async function runReinstallPackagesForGlobalAssetUpdate({
-  abortController,
+  signal,
   logger,
 }: RunReinstallPackagesParams): Promise<void> {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
@@ -55,7 +55,7 @@ export async function runReinstallPackagesForGlobalAssetUpdate({
   await pMap(
     installations,
     async (installation) => {
-      if (abortController.signal.aborted) {
+      if (signal.aborted) {
         return;
       }
 
@@ -78,7 +78,7 @@ export async function runReinstallPackagesForGlobalAssetUpdate({
     { concurrency: maxConcurrency }
   );
 
-  if (abortController.signal.aborted) {
+  if (signal.aborted) {
     logger.warn('Package reinstallation was aborted');
     return;
   }

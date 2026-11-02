@@ -14,32 +14,32 @@ import type { StoredCompositeSLODefinition } from '../domain/models';
 export const SO_SLO_COMPOSITE_TYPE = 'slo-composite';
 
 const compositeSloAttributesSchema = {
-  id: schema.string(),
-  name: schema.string(),
-  description: schema.string(),
-  compositeMethod: schema.string(),
+  id: schema.string({ maxLength: 64 }),
+  name: schema.string({ maxLength: 256 }),
+  description: schema.string({ maxLength: 2048 }),
+  compositeMethod: schema.string({ maxLength: 64 }),
   timeWindow: schema.object({
-    duration: schema.string(),
-    type: schema.string(),
+    duration: schema.string({ maxLength: 32 }),
+    type: schema.string({ maxLength: 64 }),
   }),
-  budgetingMethod: schema.string(),
+  budgetingMethod: schema.string({ maxLength: 64 }),
   objective: schema.object({
     target: schema.number(),
   }),
   members: schema.arrayOf(
     schema.object({
-      sloId: schema.string(),
+      sloId: schema.string({ maxLength: 64 }),
       weight: schema.number(),
-      instanceId: schema.maybe(schema.string()),
+      instanceId: schema.maybe(schema.string({ maxLength: 512 })),
     }),
     { minSize: COMPOSITE_SLO_MIN_MEMBERS, maxSize: COMPOSITE_SLO_MAX_MEMBERS }
   ),
-  tags: schema.arrayOf(schema.string(), { maxSize: 30 }),
+  tags: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 30 }),
   enabled: schema.boolean(),
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
-  createdBy: schema.string(),
-  updatedBy: schema.string(),
+  createdAt: schema.string({ maxLength: 64 }),
+  updatedAt: schema.string({ maxLength: 64 }),
+  createdBy: schema.string({ maxLength: 256 }),
+  updatedBy: schema.string({ maxLength: 256 }),
   version: schema.number(),
 };
 

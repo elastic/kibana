@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
 import {
   createCommonMockServices,
   createIndexFormKibanaMocks,
@@ -22,12 +20,21 @@ import {
 } from './test_utils/workflow_form_test_setup';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { useKibana } from '../../../hooks/use_kibana';
+import { TestProvider } from '../../../shared/mocks/test_providers';
 
 jest.mock('../../../hooks/use_kibana');
 jest.mock('@kbn/unified-search-plugin/public', () => ({
   SearchBar: MockSearchBar,
   DataViewPicker: MockDataViewPicker,
 }));
+
+jest.mock('@kbn/unified-data-table', () => {
+  const actual = jest.requireActual('@kbn/unified-data-table');
+  return {
+    ...actual,
+    UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,
+  };
+});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });
@@ -42,11 +49,7 @@ const mockStorage = {
   remove: jest.fn(),
 };
 
-const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <EuiProvider>
-    <I18nProvider>{children}</I18nProvider>
-  </EuiProvider>
-);
+const TestWrapper = TestProvider;
 
 describe('WorkflowExecuteIndexForm', () => {
   const mockSetValue = jest.fn();
@@ -262,7 +265,30 @@ describe('WorkflowExecuteIndexForm', () => {
   it('shows warning toast when field refresh fails', async () => {
     const mockNotifications = createCommonMockServices().notifications;
 
-    // Reset mockDataViews.get to return data view without fields (may have been modified by previous test)
+    const dataViewWithFields = {
+      id: 'initial-data-view-id',
+      title: 'logs-*',
+      name: 'logs-*',
+      timeFieldName: '@timestamp',
+      getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      getFormatterForField: jest.fn().mockReturnValue(mockFieldFormatter),
+      getFieldByName: jest.fn((name: string) => ({
+        name,
+        type: name === '@timestamp' ? 'date' : 'string',
+        esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
+      })),
+      fields: {
+        replaceAll: jest.fn(),
+        getByName: jest.fn().mockReturnValue(null),
+        getAll: jest.fn().mockReturnValue([{ name: '@timestamp' }, { name: 'message' }]),
+        create: jest.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
+        add: jest.fn(),
+        remove: jest.fn(),
+        update: jest.fn(),
+        length: 2,
+        filter: jest.fn().mockReturnValue([]),
+      },
+    };
     const dataViewWithoutFields = {
       id: 'test-data-view-id',
       title: 'logs-*',
@@ -287,12 +313,17 @@ describe('WorkflowExecuteIndexForm', () => {
         filter: jest.fn().mockReturnValue([]),
       },
     };
-    mockDataViews.get.mockResolvedValue(dataViewWithoutFields);
-
-    // Configure refreshFields to fail on the SECOND call (first is during initial load)
-    mockDataViews.refreshFields
-      .mockResolvedValueOnce(undefined) // Initial load succeeds
-      .mockRejectedValueOnce(new Error('Refresh failed')); // User selection fails
+    mockDataViews.getIdsWithTitle.mockResolvedValueOnce([
+      { id: 'initial-data-view-id', title: 'logs-*' },
+    ]);
+    mockDataViews.get.mockImplementation(async (dataViewId: string) =>
+      dataViewId === 'test-data-view-id' ? dataViewWithoutFields : dataViewWithFields
+    );
+    mockDataViews.refreshFields.mockImplementation(async (dataView: { id?: string }) => {
+      if (dataView.id === 'test-data-view-id') {
+        throw new Error('Refresh failed');
+      }
+    });
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -329,7 +360,8 @@ describe('WorkflowExecuteIndexForm', () => {
 
     // Click the picker to trigger handleDataViewChange
     const pickerButton = getByTestId('data-view-picker').querySelector('button');
-    pickerButton?.click();
+    expect(pickerButton).not.toBeNull();
+    fireEvent.click(pickerButton as HTMLButtonElement);
 
     // Wait for the refresh to fail and warning to be shown
     await waitFor(() => {

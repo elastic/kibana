@@ -27,15 +27,15 @@ export const InputSchema = lazySchema(() =>
       /**
        * Name of the field.
        */
-      fieldName: z.string(),
+      fieldName: z.string().describe('Name of the field.'),
       /**
        * Type of the field.
        */
-      fieldType: z.string(),
+      fieldType: z.string().describe('Type of the field.'),
       /**
        * Description of the field.
        */
-      description: z.string(),
+      description: z.string().describe('Description of the field.'),
     })
   )
 );
@@ -47,15 +47,15 @@ export const KnowledgeBaseEntryErrorSchema = lazySchema(() =>
       /**
        * HTTP status code of the error.
        */
-      statusCode: z.number(),
+      statusCode: z.number().describe('HTTP status code of the error.'),
       /**
        * Error type or category.
        */
-      error: z.string(),
+      error: z.string().describe('Error type or category.'),
       /**
        * Detailed error message.
        */
-      message: z.string(),
+      message: z.string().describe('Detailed error message.'),
     })
     .strict()
 );
@@ -80,11 +80,11 @@ export const Metadata = lazySchema(() =>
     /**
      * Source document name or filepath.
      */
-    source: z.string(),
+    source: z.string().describe('Source document name or filepath.'),
     /**
      * Whether this resource should always be included.
      */
-    required: z.boolean(),
+    required: z.boolean().describe('Whether this resource should always be included.'),
   })
 );
 export type Metadata = z.infer<typeof Metadata>;
@@ -97,11 +97,11 @@ export const Vector = lazySchema(() =>
     /**
      * ID of the model used to create the embeddings.
      */
-    modelId: z.string(),
+    modelId: z.string().describe('ID of the model used to create the embeddings.'),
     /**
      * Tokens with their corresponding values.
      */
-    tokens: z.object({}).catchall(z.number()),
+    tokens: z.object({}).catchall(z.number()).describe('Tokens with their corresponding values.'),
   })
 );
 export type Vector = z.infer<typeof Vector>;
@@ -111,7 +111,7 @@ export const BaseRequiredFields = lazySchema(() =>
     /**
      * Name of the Knowledge Base Entry.
      */
-    name: z.string(),
+    name: z.string().describe('Name of the Knowledge Base Entry.'),
   })
 );
 export type BaseRequiredFields = z.infer<typeof BaseRequiredFields>;
@@ -121,15 +121,23 @@ export const BaseDefaultableFields = lazySchema(() =>
     /**
      * Kibana Space, defaults to 'default' space.
      */
-    namespace: z.string().optional(),
+    namespace: z.string().optional().describe("Kibana Space, defaults to 'default' space."),
     /**
      * Whether this Knowledge Base Entry is global, defaults to false.
      */
-    global: z.boolean().optional(),
+    global: z
+      .boolean()
+      .optional()
+      .describe('Whether this Knowledge Base Entry is global, defaults to false.'),
     /**
      * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
      */
-    users: z.array(User).optional(),
+    users: z
+      .array(User)
+      .optional()
+      .describe(
+        'Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.'
+      ),
   })
 );
 export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
@@ -157,19 +165,19 @@ export const ResponseFields = lazySchema(() =>
     /**
      * Time the Knowledge Base Entry was created.
      */
-    createdAt: z.string(),
+    createdAt: z.string().describe('Time the Knowledge Base Entry was created.'),
     /**
      * User who created the Knowledge Base Entry.
      */
-    createdBy: z.string(),
+    createdBy: z.string().describe('User who created the Knowledge Base Entry.'),
     /**
      * Time the Knowledge Base Entry was last updated.
      */
-    updatedAt: z.string(),
+    updatedAt: z.string().describe('Time the Knowledge Base Entry was last updated.'),
     /**
      * User who last updated the Knowledge Base Entry.
      */
-    updatedBy: z.string(),
+    updatedBy: z.string().describe('User who last updated the Knowledge Base Entry.'),
   })
 );
 export type ResponseFields = z.infer<typeof ResponseFields>;
@@ -192,16 +200,16 @@ export const DocumentEntryRequiredFields = lazySchema(() =>
     /**
      * Entry type.
      */
-    type: z.literal('document'),
+    type: z.literal('document').describe('Entry type.'),
     kbResource: KnowledgeBaseResource,
     /**
      * Source document name or filepath.
      */
-    source: z.string(),
+    source: z.string().describe('Source document name or filepath.'),
     /**
      * Knowledge Base Entry content.
      */
-    text: z.string(),
+    text: z.string().describe('Knowledge Base Entry content.'),
   })
 );
 export type DocumentEntryRequiredFields = z.infer<typeof DocumentEntryRequiredFields>;
@@ -211,7 +219,10 @@ export const DocumentEntryOptionalFields = lazySchema(() =>
     /**
      * Whether this resource should always be included, defaults to false.
      */
-    required: z.boolean().optional(),
+    required: z
+      .boolean()
+      .optional()
+      .describe('Whether this resource should always be included, defaults to false.'),
     vector: Vector.optional(),
   })
 );
@@ -245,23 +256,31 @@ export const IndexEntryRequiredFields = lazySchema(() =>
     /**
      * Entry type.
      */
-    type: z.literal('index'),
+    type: z.literal('index').describe('Entry type.'),
     /**
      * Index or Data Stream to query for Knowledge Base content.
      */
-    index: z.string(),
+    index: z.string().describe('Index or Data Stream to query for Knowledge Base content.'),
     /**
      * Field to query for Knowledge Base content.
      */
-    field: z.string(),
+    field: z.string().describe('Field to query for Knowledge Base content.'),
     /**
      * Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description.
      */
-    description: z.string(),
+    description: z
+      .string()
+      .describe(
+        'Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description.'
+      ),
     /**
      * Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema.
      */
-    queryDescription: z.string(),
+    queryDescription: z
+      .string()
+      .describe(
+        'Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema.'
+      ),
   })
 );
 export type IndexEntryRequiredFields = z.infer<typeof IndexEntryRequiredFields>;
@@ -272,7 +291,12 @@ export const IndexEntryOptionalFields = lazySchema(() =>
     /**
      * Fields to extract from the query result, defaults to all fields if not provided or empty.
      */
-    outputFields: z.array(z.string()).optional(),
+    outputFields: z
+      .array(z.string())
+      .optional()
+      .describe(
+        'Fields to extract from the query result, defaults to all fields if not provided or empty.'
+      ),
   })
 );
 export type IndexEntryOptionalFields = z.infer<typeof IndexEntryOptionalFields>;

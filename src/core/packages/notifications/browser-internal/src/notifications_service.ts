@@ -20,6 +20,7 @@ import { showErrorDialog, ToastsService } from './toasts';
 import { Coordinator, notificationCoordinator } from './notification_coordinator';
 import { FeedbackService } from './feedback';
 import { ToursService } from './tours';
+import { ScreenReaderService } from './screen_reader';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -39,6 +40,7 @@ export class NotificationsService {
   private readonly toasts: ToastsService;
   private readonly feedback: FeedbackService;
   private readonly tours: ToursService;
+  private readonly screenReader: ScreenReaderService;
   private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
   private readonly coordinator = notificationCoordinator.bind(new Coordinator());
@@ -47,6 +49,7 @@ export class NotificationsService {
     this.toasts = new ToastsService();
     this.feedback = new FeedbackService();
     this.tours = new ToursService();
+    this.screenReader = new ScreenReaderService();
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
@@ -75,13 +78,26 @@ export class NotificationsService {
   }: StartDeps): NotificationsStart {
     this.targetDomElement = targetDomElement;
     const toastsContainer = document.createElement('div');
+    // Global toasts must remain visible above full-screen data grids. Full-screen
+    // `UnifiedDataTable` mode (see `useFullScreenWatcher`) resets `z-index` on all
+    // elements except those opted out via `data-kbn-preserve-zindex`, so mark the
+    // toasts container to preserve its stacking context and that of its toasts.
+    toastsContainer.setAttribute('data-kbn-preserve-zindex', 'true');
     targetDomElement.appendChild(toastsContainer);
+
+    const screenReaderContainer = document.createElement('div');
+    targetDomElement.appendChild(screenReaderContainer);
+    const screenReader = this.screenReader.start({
+      rendering: startDeps.rendering,
+      targetDomElement: screenReaderContainer,
+    });
 
     return {
       toasts: this.toasts.start({
         overlays,
         targetDomElement: toastsContainer,
         notificationCoordinator: this.coordinator,
+        screenReader,
         ...startDeps,
       }),
       showErrorDialog: ({ title, error }) =>
@@ -93,11 +109,13 @@ export class NotificationsService {
         }),
       feedback: this.feedback.start({ settings }),
       tours: this.tours.start({ settings }),
+      screenReader,
     };
   }
 
   public stop() {
     this.toasts.stop();
+    this.screenReader.stop();
 
     if (this.targetDomElement) {
       this.targetDomElement.textContent = '';

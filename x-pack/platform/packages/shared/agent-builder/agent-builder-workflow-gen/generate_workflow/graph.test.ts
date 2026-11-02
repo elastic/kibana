@@ -21,6 +21,13 @@ steps:
       message: hi
 `;
 
+  const PARSED_WORKFLOW = {
+    version: '1',
+    name: 'hello world',
+    triggers: [{ type: 'manual' }],
+    steps: [{ name: 'greet', type: 'console', with: { message: 'hi' } }],
+  };
+
   const baseDeps = (chatModel: any) => ({
     model: { chatModel } as any,
     logger: loggerMock.create(),
@@ -33,12 +40,7 @@ steps:
       validateWorkflow: jest.fn().mockResolvedValue({
         valid: true,
         diagnostics: [],
-        parsedWorkflow: {
-          version: '1',
-          name: 'hello world',
-          triggers: [{ type: 'manual' }],
-          steps: [{ name: 'greet', type: 'console', with: { message: 'hi' } }],
-        },
+        parsedWorkflow: PARSED_WORKFLOW,
       }),
     } as any,
   });
@@ -66,6 +68,50 @@ steps:
     });
 
     expect(result.workflow.name).toBe('hello world');
+    expect(result.yaml).toBe(VALID_YAML);
+  });
+
+  it('preserves comments and formatting across a step edit', async () => {
+    const commentedYaml = `version: '1'
+name: hello world
+# One greeting per run.
+triggers:
+  - type: manual # manual only, no schedule yet
+steps:
+  # Says hi to the operator.
+  - name: greet
+    type: console
+    with:
+      message: hi
+`;
+    const responses = [
+      new AIMessage({
+        content: '',
+        tool_calls: [{ id: '1', name: 'set_yaml', args: { yaml: commentedYaml } }],
+      }),
+      new AIMessage({
+        content: '',
+        tool_calls: [
+          {
+            id: '2',
+            name: 'modify_step_property',
+            args: { stepName: 'greet', property: 'with.message', value: 'hello' },
+          },
+        ],
+      }),
+      new AIMessage({ content: 'done' }),
+    ];
+    const chatModel = buildChatModel(responses);
+
+    const result = await generateWorkflow({
+      nlQuery: 'greet with hello instead',
+      ...baseDeps(chatModel),
+    });
+
+    expect(result.yaml).toContain('# One greeting per run.');
+    expect(result.yaml).toContain('# manual only, no schedule yet');
+    expect(result.yaml).toContain('# Says hi to the operator.');
+    expect(result.yaml).toContain('message: hello');
   });
 
   it('retries once when validation fails and succeeds on second attempt', async () => {
@@ -84,26 +130,24 @@ steps:
     const chatModel = buildChatModel(responses);
 
     const deps = baseDeps(chatModel);
-    deps.workflowsApi.validateWorkflow = jest
-      .fn()
-      .mockResolvedValueOnce({
-        valid: false,
-        diagnostics: [{ severity: 'error', source: 'syntax', message: 'bad yaml' }],
-      })
-      .mockResolvedValueOnce({
-        valid: true,
-        diagnostics: [],
-        parsedWorkflow: {
-          version: '1',
-          name: 'hello world',
-          triggers: [{ type: 'manual' }],
-          steps: [{ name: 'greet', type: 'console', with: { message: 'hi' } }],
-        },
-      });
+    // Keyed off the YAML rather than call order: the tools node validates after
+    // every edit, so a call-order mock would hand the "valid" answer to the
+    // first attempt's per-edit check and the graph would never retry.
+    deps.workflowsApi.validateWorkflow = jest.fn().mockImplementation(async (yaml: string) =>
+      yaml === VALID_YAML
+        ? { valid: true, diagnostics: [], parsedWorkflow: PARSED_WORKFLOW }
+        : {
+            valid: false,
+            diagnostics: [{ severity: 'error', source: 'syntax', message: 'bad yaml' }],
+          }
+    );
 
     const result = await generateWorkflow({ nlQuery: 'q', ...deps });
     expect(result.workflow.name).toBe('hello world');
-    expect(deps.workflowsApi.validateWorkflow).toHaveBeenCalledTimes(2);
+    // The returned YAML is the second attempt's, not the rejected first attempt's.
+    expect(result.yaml).toBe(VALID_YAML);
+    // Per-edit + post-loop validation, once per attempt.
+    expect(deps.workflowsApi.validateWorkflow).toHaveBeenCalledTimes(4);
   });
 
   it('throws after maxRetries validation failures', async () => {
@@ -149,12 +193,7 @@ steps:
     deps.workflowsApi.validateWorkflow = jest.fn().mockResolvedValue({
       valid: true,
       diagnostics: [],
-      parsedWorkflow: {
-        version: '1',
-        name: 'hello world',
-        triggers: [{ type: 'manual' }],
-        steps: [{ name: 'greet', type: 'console', with: { message: 'hi' } }],
-      },
+      parsedWorkflow: PARSED_WORKFLOW,
     });
 
     const result = await generateWorkflow({ nlQuery: 'q', ...deps });

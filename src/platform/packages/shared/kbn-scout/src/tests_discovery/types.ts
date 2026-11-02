@@ -8,7 +8,7 @@
  */
 
 // Target type for filtering Playwright configs by deployment target
-import type { ScoutTargetArch, ScoutTargetDomain } from '@kbn/scout-info';
+import type { ScoutTargetArch, ScoutTargetDomain, ScoutTestChannel } from '@kbn/scout-info';
 
 export type TargetType = 'all' | 'local' | 'local-stateful-only' | 'mki' | 'ech';
 
@@ -32,6 +32,7 @@ export interface ModuleDiscoveryInfo {
     tags: string[];
     serverRunFlags: string[];
     usesParallelWorkers: boolean;
+    testChannels?: ScoutTestChannel[];
   }[];
 }
 

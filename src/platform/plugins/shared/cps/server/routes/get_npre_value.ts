@@ -9,7 +9,6 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { AuthzDisabled } from '@kbn/core-security-server';
 import { NpreClient } from '../npre/npre_client';
 
 export const registerGetNpreValueRoute = (
@@ -25,7 +24,11 @@ export const registerGetNpreValueRoute = (
         }),
       },
       security: {
-        authz: AuthzDisabled.delegateToESClient,
+        authz: {
+          enabled: false,
+          reason:
+            'NPRE values are not sensitive and are fetched as the Kibana internal user so that users without the read_project_routing cluster privilege can still resolve them',
+        },
       },
     },
     async (requestHandlerContext, request, response) => {

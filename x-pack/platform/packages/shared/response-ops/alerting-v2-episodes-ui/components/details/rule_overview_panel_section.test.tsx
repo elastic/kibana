@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -25,6 +25,7 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
+const mockGetRuleDetailsHref = jest.fn((ruleId: string) => `/host-aware/rules/${ruleId}`);
 
 const mockRule = createMockRule();
 
@@ -51,7 +52,11 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -59,6 +64,45 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
     expect(
       await screen.findByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
     ).toBeInTheDocument();
+    expect(mockGetRuleDetailsHref).toHaveBeenCalledWith(mockRule.id);
+    expect(screen.getByTestId('alertingV2EpisodeDetailsViewRuleDetailsButton')).toHaveAttribute(
+      'href',
+      `/host-aware/rules/${mockRule.id}`
+    );
+    // Heading shows unless the caller opts out, so the full details page keeps it.
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRuleOverviewHeading')).toBeInTheDocument();
+  });
+
+  it('forwards showTitle=false to the panel', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockResolvedValueOnce(mockRule);
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+          showTitle={false}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(
+      await screen.findByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertingV2EpisodeDetailsRuleOverviewHeading')
+    ).not.toBeInTheDocument();
   });
 
   it('renders a loading spinner while data is loading', () => {
@@ -66,14 +110,20 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
 
     expect(
-      screen.getByTestId('alertingV2EpisodeRuleOverviewPanelSectionLoading')
-    ).toBeInTheDocument();
+      screen
+        .getByTestId('alertingV2EpisodeRuleOverviewPanelSectionLoading')
+        .querySelector('.euiSkeletonText')
+    ).not.toBeNull();
   });
 
   it('renders an error state when the rule fails to load', async () => {
@@ -86,11 +136,18 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
       ],
       values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
     });
-    mockHttp.get.mockRejectedValueOnce(new Error('boom'));
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 500 },
+      body: { code: 'INTERNAL_ERROR', error: 'Internal Server Error', message: 'Failed' },
+    });
 
     render(
       <I18nProvider>
-        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
       </I18nProvider>,
       { wrapper }
     );
@@ -98,5 +155,107 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
     expect(
       await screen.findByTestId('alertingV2EpisodeRuleOverviewPanelSectionError')
     ).toBeInTheDocument();
+  });
+
+  it('shows neither the rule panel nor an error when the rule returns 403', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 403 },
+      body: { code: 'FORBIDDEN', error: 'Forbidden', message: 'Forbidden' },
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('alertingV2EpisodeRuleOverviewPanelSectionError')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows neither the rule panel nor an error when the rule returns 404', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 404 },
+      body: { code: 'RULE_NOT_FOUND', error: 'Not Found', message: 'Rule not found' },
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('alertingV2EpisodeRuleOverviewPanelSectionDeleted')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it.each([403, 404])('shows the unavailable rule panel when the rule returns %s', async (code) => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockRejectedValueOnce({ body: { statusCode: code } });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanelSection
+          episodeId="ep-1"
+          services={mockServices}
+          getRuleDetailsHref={mockGetRuleDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByTestId('alertingV2EpisodeRuleUnavailable')).toHaveTextContent(
+      'Unavailable rule'
+    );
+    // The id stays available to copy, like in the table cell.
+    expect(screen.getByTestId('alertingV2EpisodeRuleUnavailableId')).toBeInTheDocument();
   });
 });

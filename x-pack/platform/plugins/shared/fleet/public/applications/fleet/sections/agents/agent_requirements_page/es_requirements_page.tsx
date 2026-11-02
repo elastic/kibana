@@ -14,7 +14,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiIcon,
-  EuiCallOut,
   EuiFlexItem,
   EuiFlexGroup,
   EuiCode,
@@ -22,6 +21,7 @@ import {
   EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { css } from '@emotion/react';
 
@@ -79,18 +79,17 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
         `}
       >
         <EuiPageSection color="transparent">
-          <EuiCallOut
+          <KbnWarningCallout
             title={i18n.translate('xpack.fleet.setupPage.missingRequirementsCalloutTitle', {
               defaultMessage: 'Missing security requirements',
             })}
-            color="warning"
-            iconType="warning"
-          >
-            <FormattedMessage
-              id="xpack.fleet.setupPage.missingRequirementsCalloutDescription"
-              defaultMessage="To use central management for Elastic Agents, enable the following Elasticsearch security features."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.setupPage.missingRequirementsCalloutDescription"
+                defaultMessage="To use central management for Elastic Agents, enable the following Elasticsearch security features."
+              />
+            }
+          />
           <EuiSpacer size="m" />
           <FormattedMessage
             id="xpack.fleet.setupPage.missingRequirementsElasticsearchTitle"

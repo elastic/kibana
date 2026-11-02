@@ -18,6 +18,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_MAINTENANCE_WINDOW_NAMES,
   ALERT_MUTED,
+  ALERT_SNOOZED,
   ALERT_PENDING_RECOVERED_COUNT,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_TAGS,
@@ -27,6 +28,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -49,6 +51,7 @@ import {
 } from '../format_alert';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
+import { getAlertSnoozedStatus } from '../get_alert_snoozed_status';
 
 interface BuildGraduatedAlertOpts<
   AlertData extends RuleAlertData,
@@ -130,6 +133,7 @@ export const buildGraduatedAlert = <
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
   const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isSnoozed = getAlertSnoozedStatus(alertInstanceId, ruleData);
 
   // Framework-owned fields applied for this run. These always win against
   // anything the predecessor or the executor payload could carry.
@@ -149,7 +153,9 @@ export const buildGraduatedAlert = <
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     [ALERT_MUTED]: isMuted,
+    [ALERT_SNOOZED]: isSnoozed,
     [ALERT_SEVERITY_IMPROVING]: false,
+    [ALERT_TRACKED]: true,
     [ALERT_UUID]: legacyAlert.getUuid(),
     [ALERT_WORKFLOW_STATUS]: get(alert, ALERT_WORKFLOW_STATUS, 'open'),
     ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),

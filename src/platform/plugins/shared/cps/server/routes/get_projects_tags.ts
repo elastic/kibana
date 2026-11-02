@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import type { ProjectTagsResponse } from '@kbn/cps-utils';
+import { errors } from '@elastic/elasticsearch';
 
 export const registerProjectTagsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.post(
@@ -18,7 +19,7 @@ export const registerProjectTagsRoute = (router: IRouter, { logger }: PluginInit
       validate: {
         body: schema.nullable(
           schema.object({
-            project_routing: schema.maybe(schema.string()),
+            project_routing: schema.maybe(schema.string({ maxLength: 1024 })),
           })
         ),
       },
@@ -46,6 +47,15 @@ export const registerProjectTagsRoute = (router: IRouter, { logger }: PluginInit
         });
       } catch (error) {
         logger.get().debug(error);
+
+        if (error instanceof errors.ResponseError && error.statusCode === 403) {
+          return response.forbidden({
+            body: {
+              message: 'Fetching project tags requires the read_project_routing cluster privilege',
+            },
+          });
+        }
+
         throw error;
       }
     }

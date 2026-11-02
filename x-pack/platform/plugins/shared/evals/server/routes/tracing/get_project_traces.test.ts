@@ -16,6 +16,8 @@ import {
 } from '@kbn/evals-common';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetProjectTracesRoute } from './get_project_traces';
 
 const emptySpanCountResponse = {
@@ -32,6 +34,8 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
       router,
       logger,
       canEncrypt: false,
+      evaluatorRegistry: createEvaluatorRegistryMock(),
+      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
       getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
     });
@@ -77,7 +81,12 @@ describe('GET /internal/evals/tracing/projects/{projectName}/traces', () => {
     const searchCall = esClient.search.mock.calls[0][0] as any;
     expect(searchCall.query.bool.must_not).toEqual([
       { exists: { field: 'parent_span_id' } },
-      { exists: { field: 'attributes.evaluator.name' } },
+      {
+        bool: {
+          filter: [{ exists: { field: 'attributes.evaluator.name' } }],
+          must_not: [{ prefix: { name: 'judge · ' } }],
+        },
+      },
     ]);
     expect(searchCall.query.bool.filter).toEqual(
       expect.arrayContaining([

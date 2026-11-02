@@ -34,6 +34,7 @@ import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_syn
 import { registerRoutes as registerCloudConnectorRoutes } from './cloud_connector';
 import { registerRoutes as registerCloudOnboardingDeploymentRoutes } from './cloud_onboarding_deployment';
 import { registerRoutes as registerAgentlessPoliciesRoutes } from './agentless_policy'; //
+import { registerRoutes as registerIacProvisionerRoutes } from './iac_provisioner';
 
 export function registerRoutes(
   fleetAuthzRouter: FleetAuthzRouter,
@@ -68,10 +69,8 @@ export function registerRoutes(
   registerRemoteSyncedIntegrations(fleetAuthzRouter, isServerless);
   registerDebugRoutes(fleetAuthzRouter);
   registerCloudConnectorRoutes(fleetAuthzRouter);
-  if (experimentalFeatures.enableCloudOnboardingDeployments) {
-    registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
-  }
-
+  registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
+  registerIacProvisionerRoutes(fleetAuthzRouter);
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 
   // Conditional config routes

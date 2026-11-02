@@ -7,23 +7,17 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
-import type {
-  ChatEvent,
-  Conversation,
-  ConversationRound,
-  RoundCompleteEvent,
-} from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
-import {
-  ATTACHMENT_REF_OPERATION,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';
-import { registerDashboardAppIntegration } from './dashboard_app_integration';
+import {
+  MANUAL_CHANGES_DEBOUNCE_MS,
+  registerDashboardAppIntegration,
+} from './dashboard_app_integration';
 import type { IdGenerator } from '..';
 
 const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
@@ -85,28 +79,6 @@ const createVersionedAttachment = (
   ],
   current_version: 1,
   origin: attachment.origin,
-});
-
-const createMockRoundCompleteEvent = (
-  attachments: VersionedAttachment[],
-  attachmentRefs: Array<{
-    attachment_id: string;
-    operation: typeof ATTACHMENT_REF_OPERATION.created | typeof ATTACHMENT_REF_OPERATION.updated;
-  }>
-): RoundCompleteEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {
-      input: {
-        attachment_refs: attachmentRefs.map((ref) => ({
-          attachment_id: ref.attachment_id,
-          version: 1,
-          operation: ref.operation,
-        })),
-      },
-    } as ConversationRound,
-    attachments,
-  },
 });
 
 const createDashboardAttachment = (
@@ -187,10 +159,6 @@ describe('registerDashboardAppIntegration', () => {
     };
   });
 
-  const emitChatEvent = (conversationId: string, event: ChatEvent) => {
-    chatEventsByConversationId.get(conversationId)?.next(event);
-  };
-
   afterEach(() => {
     cleanup?.();
     jest.useRealTimers();
@@ -239,7 +207,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(200);
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -272,7 +240,7 @@ describe('registerDashboardAppIntegration', () => {
     });
 
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(200);
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -354,7 +322,7 @@ describe('registerDashboardAppIntegration', () => {
     jest.runOnlyPendingTimers();
     addAttachment.mockClear();
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(200);
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
@@ -411,7 +379,7 @@ describe('registerDashboardAppIntegration', () => {
 
     addAttachment.mockClear();
     simulateDashboardStateChange();
-    jest.advanceTimersByTime(200);
+    jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).not.toHaveBeenCalled();
 
@@ -421,7 +389,7 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('regenerates the pending attachment id after the draft attachment is created in a round', () => {
+  it('regenerates the pending attachment id once the draft attachment is in the conversation', () => {
     register();
 
     emitConversationChange({ id: undefined, attachments: undefined });
@@ -437,13 +405,12 @@ describe('registerDashboardAppIntegration', () => {
 
     addAttachment.mockClear();
     emitConversationChange({ id: 'conversation-1', attachments: [] });
-    emitChatEvent(
-      'conversation-1',
-      createMockRoundCompleteEvent(
-        [createVersionedAttachment(createDashboardAttachment({ id: firstDraftAttachment.id }))],
-        [{ attachment_id: firstDraftAttachment.id, operation: ATTACHMENT_REF_OPERATION.created }]
-      )
-    );
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [
+        createVersionedAttachment(createDashboardAttachment({ id: firstDraftAttachment.id })),
+      ],
+    });
 
     emitConversationChange({ id: undefined, attachments: undefined });
     jest.runOnlyPendingTimers();

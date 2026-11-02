@@ -131,8 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await header.awaitKibanaChrome();
         await header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(false);
+        await testSubjects.existOrFail('dashboardContainer', { timeout: 10000 });
       });
 
       it('title match is case insensitive', async function () {
@@ -145,8 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await header.awaitKibanaChrome();
         await header.waitUntilLoadingHasFinished();
-        const onDashboardLandingPage = await dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(false);
+        await testSubjects.existOrFail('dashboardContainer', { timeout: 10000 });
       });
 
       it('stays on listing page if title matches no dashboards', async function () {
@@ -234,7 +232,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);
-        await listingTable.setSearchFilterValue('new description');
+        await listingTable.searchForItemWithName('new description');
         await listingTable.expectItemsCount('dashboard', 1);
         await listingTable.clickItemLink('dashboard', 'new title');
         await dashboard.waitForRenderComplete();

@@ -154,11 +154,14 @@ export const SAMPLES_NORMALIZED_WARNING_TITLE = i18n.translate(
   }
 );
 
-export const SAMPLES_NORMALIZED_WARNING_LINES_OMITTED = (omittedCount: number, maxLines: number) =>
+export const SAMPLES_NORMALIZED_WARNING_LINES_OMITTED = (
+  omittedCount: number,
+  sampleCount: number
+) =>
   i18n.translate('xpack.automaticImport.dataStreams.samplesNormalizedWarningLinesOmitted', {
     defaultMessage:
-      'Only the first {maxLines} non-empty lines are sent. {omittedCount, plural, one {# additional line was not sent.} other {# additional lines were not sent.}}',
-    values: { omittedCount, maxLines },
+      'Only {sampleCount} samples are sent. {omittedCount, plural, one {# additional sample was not sent.} other {# additional samples were not sent.}}',
+    values: { omittedCount, sampleCount },
   });
 
 export const LOG_FILE_ERROR = {
@@ -379,6 +382,39 @@ export const STATUS_LABELS = Object.freeze({
   }),
   deleting: i18n.translate('xpack.automaticImport.dataStreams.status.deleting', {
     defaultMessage: 'Deleting...',
+  }),
+});
+
+export const PHASE_LABELS = Object.freeze({
+  analyzing_logs: i18n.translate('xpack.automaticImport.dataStreams.phase.analyzingLogs', {
+    defaultMessage: 'Analyzing logs',
+  }),
+  mapping_to_ecs: i18n.translate('xpack.automaticImport.dataStreams.phase.mappingToEcs', {
+    defaultMessage: 'Mapping to ECS',
+  }),
+  building_pipeline: i18n.translate('xpack.automaticImport.dataStreams.phase.buildingPipeline', {
+    defaultMessage: 'Building ingest pipeline',
+  }),
+  fixing_pipeline: i18n.translate('xpack.automaticImport.dataStreams.phase.fixingPipeline', {
+    defaultMessage: 'Fixing ingest pipeline',
+  }),
+  mapping_event_fields: i18n.translate(
+    'xpack.automaticImport.dataStreams.phase.mappingEventFields',
+    {
+      defaultMessage: 'Mapping event fields',
+    }
+  ),
+  mapping_related_fields: i18n.translate(
+    'xpack.automaticImport.dataStreams.phase.mappingRelatedFields',
+    {
+      defaultMessage: 'Mapping related fields',
+    }
+  ),
+  reviewing: i18n.translate('xpack.automaticImport.dataStreams.phase.reviewing', {
+    defaultMessage: 'Reviewing',
+  }),
+  finalizing: i18n.translate('xpack.automaticImport.dataStreams.phase.finalizing', {
+    defaultMessage: 'Finalizing',
   }),
 });
 

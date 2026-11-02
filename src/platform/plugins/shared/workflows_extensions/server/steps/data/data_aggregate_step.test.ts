@@ -366,7 +366,7 @@ describe('dataAggregateStepDefinition', () => {
       expect(result.error?.message).toContain('aborted');
     });
 
-    it('returns error when renderInputTemplate throws', async () => {
+    it('does not re-render already-rendered config items', async () => {
       const context = createMockContext(
         { items: tickets },
         {
@@ -379,8 +379,8 @@ describe('dataAggregateStepDefinition', () => {
       });
 
       const result = await dataAggregateStepDefinition.handler(context);
-      expect(result.error).toBeDefined();
-      expect(result.error?.message).toBe('render failure');
+      expect(result.error).toBeUndefined();
+      expect(context.contextManager.renderInputTemplate).not.toHaveBeenCalled();
     });
 
     it('returns generic error message when non-Error value is thrown', async () => {
@@ -391,7 +391,7 @@ describe('dataAggregateStepDefinition', () => {
           metrics: [{ name: 'count', operation: 'count' }],
         }
       );
-      (context.contextManager.renderInputTemplate as jest.Mock).mockImplementation(() => {
+      (context.logger.debug as jest.Mock).mockImplementation(() => {
         throw 'string-error'; // eslint-disable-line no-throw-literal
       });
 

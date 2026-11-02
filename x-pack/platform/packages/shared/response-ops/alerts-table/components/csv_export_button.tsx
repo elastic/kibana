@@ -14,12 +14,13 @@ import moment from 'moment';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import { useCreateCsvReport } from '../hooks/use_create_csv_report';
 
-const CSV_EXPORT_LABEL = i18n.translate('responseOpsAlertsTable.csvExport.buttonLabel', {
+const CSV_EXPORT_LABEL = i18n.translate('xpack.responseOpsAlertsTable.csvExport.buttonLabel', {
   defaultMessage: 'CSV export',
 });
 
 export const CsvExportButton: React.FC = () => {
-  const { services, ruleTypeIds, consumers, query, sort, columns } = useAlertsTableContext();
+  const { services, kibanaVersion, ruleTypeIds, consumers, query, sort, columns } =
+    useAlertsTableContext();
   const { http, notifications, rendering, settings, application } = services;
   const { data: indexNames } = useFetchAlertsIndexNamesQuery({ http, ruleTypeIds });
 
@@ -80,6 +81,7 @@ export const CsvExportButton: React.FC = () => {
       title: 'Alerts',
       objectType: 'alert',
       browserTimezone,
+      version: kibanaVersion ?? '',
       searchSource: {
         index: {
           title: indexPattern,
@@ -91,7 +93,18 @@ export const CsvExportButton: React.FC = () => {
       },
       columns: columnIds,
     });
-  }, [ruleTypeIds, consumers, query, sort, columns, settings, indexNames, createCsvReport]);
+  }, [
+    indexNames,
+    settings.client,
+    columns,
+    query.bool,
+    query.ids,
+    ruleTypeIds,
+    consumers,
+    createCsvReport,
+    kibanaVersion,
+    sort,
+  ]);
 
   if (!rendering || !hasCsvReportingCapability) {
     return null;
@@ -102,7 +115,7 @@ export const CsvExportButton: React.FC = () => {
       <EuiButtonIcon
         buttonRef={buttonRef}
         color="text"
-        iconType="exportAction"
+        iconType="upload"
         onClick={handleClick}
         isLoading={isExporting}
         aria-label={CSV_EXPORT_LABEL}

@@ -16,9 +16,20 @@ import { AbstractFileSystem } from './abstract_file_system';
 jest.mock('../utils', () => ({
   cleanTypeCheckArtifacts: jest.fn(),
   calculateFileHashes: jest.fn().mockResolvedValue({
-    'yarn.lock': 'hash1',
+    'pnpm-lock.yaml': 'hash1',
   }),
 }));
+
+// Use a per-process TMP_DIR: the sibling type-check CLI package's suite shares the real one,
+// and both suites delete it after each test, so running them concurrently races.
+jest.mock('../constants', () => {
+  const Os = jest.requireActual<typeof import('os')>('os');
+  const Path = jest.requireActual<typeof import('path')>('path');
+  return {
+    ...jest.requireActual<typeof import('../constants')>('../constants'),
+    TMP_DIR: Path.join(Os.tmpdir(), `kibana-ts-type-check-cache-test-${process.pid}`),
+  };
+});
 
 const { cleanTypeCheckArtifacts } = jest.requireMock('../utils') as {
   cleanTypeCheckArtifacts: jest.MockedFunction<(log: SomeDevLog) => Promise<void>>;
@@ -121,13 +132,13 @@ describe('AbstractFileSystem', () => {
       await fs.updateArchive({
         files: ['fileA', 'fileB'],
         sha: 'sha-with-hashes',
-        cacheInvalidationFiles: ['yarn.lock'],
+        cacheInvalidationFiles: ['pnpm-lock.yaml'],
       });
 
       expect(fs.metadata.get('commits/sha-with-hashes/metadata.json')).toEqual({
         commitSha: 'sha-with-hashes',
         prNumber: undefined,
-        fileHashes: { 'yarn.lock': 'hash1' },
+        fileHashes: { 'pnpm-lock.yaml': 'hash1' },
       });
     });
   });
@@ -176,13 +187,13 @@ describe('AbstractFileSystem', () => {
       fs.metadata.set('commits/shaX/metadata.json', {
         commitSha: 'shaX',
         prNumber: undefined,
-        fileHashes: { 'yarn.lock': 'oldhash' },
+        fileHashes: { 'pnpm-lock.yaml': 'oldhash' },
       });
       fs.availableArchives.add('commits/shaX/archive.tar.gz');
 
       await fs.restoreArchive({
         shas: ['shaX'],
-        cacheInvalidationFiles: ['yarn.lock'],
+        cacheInvalidationFiles: ['pnpm-lock.yaml'],
       });
 
       expect(fs.extractCalls).toHaveLength(0);
@@ -200,13 +211,13 @@ describe('AbstractFileSystem', () => {
       fs.metadata.set('commits/shaY/metadata.json', {
         commitSha: 'shaY',
         prNumber: undefined,
-        fileHashes: { 'yarn.lock': 'hash1' },
+        fileHashes: { 'pnpm-lock.yaml': 'hash1' },
       });
       fs.availableArchives.add('commits/shaY/archive.tar.gz');
 
       await fs.restoreArchive({
         shas: ['shaY'],
-        cacheInvalidationFiles: ['yarn.lock'],
+        cacheInvalidationFiles: ['pnpm-lock.yaml'],
       });
 
       expect(cleanTypeCheckArtifacts).toHaveBeenCalledTimes(1);

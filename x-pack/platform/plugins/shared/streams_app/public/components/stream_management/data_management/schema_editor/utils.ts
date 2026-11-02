@@ -143,25 +143,43 @@ export const buildSchemaSavePayload = (
     return acc;
   }, {} as Record<string, FieldDefinitionConfig>);
 
+  if (isWired) {
+    // System fields are never persisted from the schema editor UI. Preserve them
+    // from the current definition so root-stream saves remain additive.
+    for (const [name, config] of Object.entries(definition.stream.ingest.wired.fields)) {
+      if (config.type === 'system' && !persistedFields[name]) {
+        persistedFields[name] = config;
+      }
+    }
+
+    return {
+      ingest: {
+        ...definition.stream.ingest,
+        processing: omit(
+          definition.stream.ingest.processing,
+          'updated_at'
+        ) as Streams.WiredStream.UpsertRequest['stream']['ingest']['processing'],
+        wired: {
+          ...definition.stream.ingest.wired,
+          fields: persistedFields,
+        },
+      },
+    };
+  }
+
   return {
     ingest: {
       ...definition.stream.ingest,
-      processing: omit(definition.stream.ingest.processing, 'updated_at'),
-      ...(isWired
-        ? {
-            wired: {
-              ...definition.stream.ingest.wired,
-              fields: persistedFields,
-            },
-          }
-        : {
-            classic: {
-              ...definition.stream.ingest.classic,
-              // Safe cast: we only add description-only fields for wired streams,
-              // so classic fields will always have a type
-              field_overrides: persistedFields as Record<string, ClassicFieldDefinitionConfig>,
-            },
-          }),
+      processing: omit(
+        definition.stream.ingest.processing,
+        'updated_at'
+      ) as Streams.ClassicStream.UpsertRequest['stream']['ingest']['processing'],
+      classic: {
+        ...definition.stream.ingest.classic,
+        // Safe cast: we only add description-only fields for wired streams,
+        // so classic fields will always have a type
+        field_overrides: persistedFields as Record<string, ClassicFieldDefinitionConfig>,
+      },
     },
   };
 };

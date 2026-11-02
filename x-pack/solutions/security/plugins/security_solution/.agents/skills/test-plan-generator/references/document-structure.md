@@ -8,6 +8,7 @@ This file defines the required sections of a test plan, their order, and the con
 
 - [Template](#template)
 - [Notes](#notes)
+- [Verbosity levels](#verbosity-levels)
 - [Pending work pattern](#pending-work-pattern)
 - [Test Coverage Summary — filling in the table](#test-coverage-summary--filling-in-the-table)
 - [Issue Clarity Assessment section](#issue-clarity-assessment-section)
@@ -15,6 +16,8 @@ This file defines the required sections of a test plan, their order, and the con
 ---
 
 ## Template
+
+**Before filling in the template below**, read [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels) and render `Overview` / `Feature Background` / `Assumptions` at `VERBOSITY_LEVEL`. The prose lengths shown below are the `standard` shape — the actual placeholders (`[One paragraph …]`, `[… 2–4 sentences]`, four `Assumptions` bullets) are only correct for `standard`. Under `lean` / `detailed` the shape changes per that reference; do not follow the placeholders verbatim if `VERBOSITY_LEVEL` is not `standard`.
 
 ```markdown
 # Test Plan: [Feature Name]
@@ -33,7 +36,7 @@ This file defines the required sections of a test plan, their order, and the con
 - [What is explicitly covered by this test plan]
 
 **Out of scope:**
-- [What is explicitly excluded — deferred work, related features not touched by this issue, etc.]
+- [What is excluded] — [one-clause reason on the same line]. [Optional: follow-up issue link.]
 
 ## Terminology
 
@@ -67,7 +70,7 @@ This file defines the required sections of a test plan, their order, and the con
 
 ## Test Scenarios
 
-[Organised by feature area. Each area is wrapped in a collapsible block so the comment remains readable regardless of plan size. Write scenarios in priority order within each area: P0 first, then P1, then P2. See `references/output-formats.md` for the required scenario format and automation coverage rules.]
+[Organised by feature area. Each area is wrapped in a collapsible block so the comment remains readable regardless of plan size. Write scenarios in priority order within each area: P0 first, then P1, then P2. Every scenario must end with the canonical `Execution:` block (Pass / Fail / Blocked task-list checkboxes) so devs can record execution status directly in the published comment. See `references/output-formats.md` for the required scenario format, automation coverage rules, and the execution block format and rules. The execution block participates in the preserve-on-match strategy in `references/mode-update.md` when an existing test plan is updated.]
 
 <details>
 <summary><strong>[Feature area name]</strong> — N scenarios (P0: n, P1: n, P2: n)</summary>
@@ -143,7 +146,12 @@ This file defines the required sections of a test plan, their order, and the con
 
 - **Terminology** is optional — omit the section entirely if the issue uses no domain-specific terms.
 - **RBAC / Permission Testing Matrix** — only include if the issue explicitly mentions roles, permissions, or access control. Do not add speculatively.
+- **Scope** must reflect the [Always-evaluated coverage](optional-scenarios.md#always-evaluated-coverage) triggers (upgrade / CRUD per persisted object / dependency data lifecycle). Every *Out of scope* bullet carries a one-clause reason on the same line — bullets with no reason are indistinguishable from oversights.
 - If a section cannot be filled in due to missing information, apply the Core rule: stop and ask the user rather than leaving placeholder text in the draft.
+
+## Verbosity levels
+
+The template shows the `standard` shape only; every level rule lives in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels) (see the note above the template).
 
 ## Pending work pattern
 

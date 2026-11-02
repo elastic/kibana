@@ -29,7 +29,7 @@ export const SuggestedPromptCard = ({ prompt, onClick }: SuggestedPromptCardProp
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="sparkles" size="m" aria-hidden={true} color="subdued" />
+          <EuiIcon type="sparkles" size="m" aria-hidden color="subdued" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">

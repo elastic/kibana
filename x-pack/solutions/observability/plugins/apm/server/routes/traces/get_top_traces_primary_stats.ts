@@ -11,6 +11,7 @@ import {
   calculateThroughputWithRange,
   getDurationFieldForTransactions,
 } from '@kbn/apm-data-access-plugin/server/utils';
+import type { TopTracesPrimaryStatsResponse } from '@kbn/apm-api-shared';
 import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
@@ -43,19 +44,6 @@ interface TopTracesParams {
   randomSampler: RandomSampler;
 }
 
-export interface TopTracesPrimaryStatsResponse {
-  // sort by impact by default so most impactful services are not cut off
-  items: Array<{
-    key: BucketKey;
-    serviceName: string;
-    transactionName: string;
-    averageResponseTime: number | null;
-    transactionsPerMinute: number;
-    transactionType: string;
-    impact: number;
-    agentName: AgentName;
-  }>;
-}
 export async function getTopTracesPrimaryStats({
   environment,
   kuery,

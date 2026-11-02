@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,6 +22,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
@@ -36,6 +39,7 @@ const mockProductDocBase = {
     }),
     install: jest.fn().mockResolvedValue({}),
     uninstall: jest.fn().mockResolvedValue({}),
+    getDefaultInferenceId: jest.fn().mockResolvedValue('.elser-2-elasticsearch'),
   },
 };
 
@@ -70,6 +74,10 @@ describe('GenAiSettingsApp', () => {
       value: false,
       type: 'boolean',
     },
+    [GEN_AI_SETTINGS_INFERENCE_STREAMING]: {
+      value: true,
+      type: 'boolean',
+    },
     ...overrides,
   });
 
@@ -100,11 +108,6 @@ describe('GenAiSettingsApp', () => {
       advancedSettings: { show: true, save: true },
     };
 
-    // Mock feature flags to enable AI Agents by default
-    jest
-      .spyOn(coreStart.featureFlags, 'getBooleanValue')
-      .mockImplementation((_flagName: string, _fallbackValue: boolean) => true as boolean);
-
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
     coreStart.http.fetch.mockResolvedValue({
@@ -131,13 +134,15 @@ describe('GenAiSettingsApp', () => {
       ...servicesOverrides,
     };
     return renderWithI18n(
-      <QueryClientProvider client={new QueryClient()}>
-        <KibanaContextProvider services={services}>
-          <SettingsContextProvider>
-            <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
-          </SettingsContextProvider>
-        </KibanaContextProvider>
-      </QueryClientProvider>
+      <MockAppHeaderProvider>
+        <QueryClientProvider client={new QueryClient()}>
+          <KibanaContextProvider services={services}>
+            <SettingsContextProvider>
+              <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
+            </SettingsContextProvider>
+          </KibanaContextProvider>
+        </QueryClientProvider>
+      </MockAppHeaderProvider>
     );
   };
 
@@ -174,7 +179,9 @@ describe('GenAiSettingsApp', () => {
 
       // Main page section
       expect(screen.getByTestId('genAiSettingsPage')).toBeInTheDocument();
-      expect(screen.getByTestId('genAiSettingsTitle')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'GenAI Settings'
+      );
 
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
@@ -276,9 +283,6 @@ describe('GenAiSettingsApp', () => {
         }
         return fallback;
       });
-      jest
-        .spyOn(coreStart.featureFlags, 'getBooleanValue')
-        .mockImplementation((_flagName, _fallbackValue) => true);
 
       renderComponent();
 
@@ -594,6 +598,40 @@ describe('GenAiSettingsApp', () => {
           })
         );
       });
+    });
+  });
+
+  describe('Inference streaming', () => {
+    it('renders the setting and saves it when toggled off', async () => {
+      renderComponent();
+
+      const streamingSwitch = await screen.findByTestId(
+        `management-settings-editField-${GEN_AI_SETTINGS_INFERENCE_STREAMING}`
+      );
+      expect(streamingSwitch).toBeChecked();
+      fireEvent.click(streamingSwitch);
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(coreStart.settings.client.set).toHaveBeenCalledWith(
+          GEN_AI_SETTINGS_INFERENCE_STREAMING,
+          false
+        );
+      });
+    });
+
+    it('does not render the setting when it is not registered', () => {
+      const { [GEN_AI_SETTINGS_INFERENCE_STREAMING]: _omitted, ...settingsWithoutStreaming } =
+        createSettingsMock();
+      coreStart.settings.client.getAll.mockReturnValue(settingsWithoutStreaming as any);
+
+      renderComponent();
+
+      expect(
+        screen.queryByTestId(`management-settings-editField-${GEN_AI_SETTINGS_INFERENCE_STREAMING}`)
+      ).not.toBeInTheDocument();
     });
   });
 

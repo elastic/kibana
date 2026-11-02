@@ -10,8 +10,6 @@ import {
   EuiAccordion,
   EuiComboBox,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiMarkdownEditor,
   EuiSpacer,
@@ -21,61 +19,50 @@ import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { labels } from '../../../utils/i18n';
 import { SkillReferencedContentFieldArray } from '../../skills/skill_referenced_content_field_array';
-import type { SkillFormData } from '../../skills/skill_form_validation';
+import { sanitizeSkillNameInput, type SkillFormData } from '../../skills/skill_form_validation';
 
 interface SkillFormProps {
   control: Control<SkillFormData>;
   toolOptions: Array<{ label: string; value: string }>;
   /**
-   * When provided, the ID field is rendered as a disabled static input.
-   * When omitted, the ID field is rendered as an editable Controller-driven input.
+   * When provided, the Name field is rendered as a disabled static input showing this value.
+   * When omitted, the Name field is rendered as an editable Controller-driven input.
    */
-  readonlySkillId?: string;
+  readonlySkillName?: string;
 }
 
-export const SkillForm: React.FC<SkillFormProps> = ({ control, toolOptions, readonlySkillId }) => {
+export const SkillForm: React.FC<SkillFormProps> = ({
+  control,
+  toolOptions,
+  readonlySkillName,
+}) => {
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false}>
-        <EuiFlexItem>
-          {readonlySkillId !== undefined ? (
-            <EuiFormRow label={labels.skills.skillIdLabel} fullWidth>
-              <EuiFieldText value={readonlySkillId} disabled fullWidth />
-            </EuiFormRow>
-          ) : (
-            <Controller
-              name="id"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <EuiFormRow
-                  label={labels.skills.skillIdLabel}
-                  isInvalid={!!error}
-                  error={error?.message}
-                  fullWidth
-                >
-                  <EuiFieldText {...field} fullWidth isInvalid={!!error} />
-                </EuiFormRow>
-              )}
-            />
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <Controller
-            name="name"
-            control={control}
-            render={({ field, fieldState: { error } }) => (
-              <EuiFormRow
-                label={labels.skills.nameLabel}
-                isInvalid={!!error}
-                error={error?.message}
+      {readonlySkillName !== undefined ? (
+        <EuiFormRow label={labels.skills.nameLabel} fullWidth>
+          <EuiFieldText value={readonlySkillName} disabled fullWidth />
+        </EuiFormRow>
+      ) : (
+        <Controller
+          name="name"
+          control={control}
+          render={({ field, fieldState: { error } }) => (
+            <EuiFormRow
+              label={labels.skills.nameLabel}
+              isInvalid={!!error}
+              error={error?.message}
+              fullWidth
+            >
+              <EuiFieldText
+                {...field}
+                onChange={(e) => field.onChange(sanitizeSkillNameInput(e.target.value))}
                 fullWidth
-              >
-                <EuiFieldText {...field} fullWidth isInvalid={!!error} />
-              </EuiFormRow>
-            )}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                isInvalid={!!error}
+              />
+            </EuiFormRow>
+          )}
+        />
+      )}
 
       <EuiSpacer size="m" />
 
@@ -115,7 +102,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({ control, toolOptions, read
 
       <EuiSpacer size="m" />
 
-      <SkillReferencedContentFieldArray control={control} />
+      <SkillReferencedContentFieldArray />
 
       <EuiSpacer size="m" />
 

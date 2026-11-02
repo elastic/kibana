@@ -134,3 +134,22 @@ export const HotPhaseAllRolloverOptions: Story = {
     />
   ),
 };
+
+/** Managed/system policy — the flyout title shows a "Managed" badge. */
+export const ManagedPolicy: Story = {
+  name: 'Managed policy (title badge)',
+  render: () => (
+    <InspectIlmPolicyFlyoutStoryWrapper policyName="alerts-ilm-policy" policy={FULL_POLICY} />
+  ),
+};
+
+/** Non-managed policy — no "Managed" badge in the title. */
+export const NonManagedPolicy: Story = {
+  name: 'Non-managed policy (no badge)',
+  render: () => (
+    <InspectIlmPolicyFlyoutStoryWrapper
+      policyName="all-rollover-thresholds"
+      policy={HOT_ALL_ROLLOVER_POLICY}
+    />
+  ),
+};

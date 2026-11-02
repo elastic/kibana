@@ -13,9 +13,14 @@ import { stableStringify } from '@kbn/std';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  SavedObjectsExportByTypeOptions,
-  SavedObjectsExportByObjectOptions,
+import {
+  type SavedObjectsExportByTypeOptions,
+  type SavedObjectsExportByObjectOptions,
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_SEARCH_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+  MAX_SAVED_OBJECTS_PER_QUERY,
 } from '@kbn/core-saved-objects-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsExportError } from '@kbn/core-saved-objects-import-export-server-internal';
@@ -139,8 +144,8 @@ export const registerExportRoute = (
   const { maxImportExportSize } = config;
 
   const referenceSchema = schema.object({
-    type: schema.string(),
-    id: schema.string(),
+    type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+    id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
   });
 
   router.post(
@@ -169,21 +174,32 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         request: {
           body: schema.object({
             hasReference: schema.maybe(
-              schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })])
+              schema.oneOf([
+                referenceSchema,
+                schema.arrayOf(referenceSchema, { maxSize: MAX_SAVED_OBJECTS_PER_QUERY }),
+              ])
             ),
             type: schema.maybe(
-              schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-                meta: {
-                  description:
-                    'The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.',
-                },
-              })
+              schema.oneOf(
+                [
+                  schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+                  schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }), {
+                    maxSize: MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+                  }),
+                ],
+                {
+                  meta: {
+                    description:
+                      'The saved object types to include in the export. Use `*` to export all the types. Valid options depend on enabled plugins, but may include `visualization`, `dashboard`, `search`, `index-pattern`, `tag`, `config`, `config-global`, `lens`, `map`, `event-annotation-group`, `query`, `url`, `action`, `alert`, `alerting_rule_template`, `apm-indices`, `cases-user-actions`, `cases`, `cases-comments`, `infrastructure-monitoring-log-view`, `ml-trained-model`, `osquery-saved-query`, `osquery-pack`, `osquery-pack-asset`.',
+                  },
+                }
+              )
             ),
             objects: schema.maybe(
               schema.arrayOf(
                 schema.object({
-                  type: schema.string(),
-                  id: schema.string(),
+                  type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+                  id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
                 }),
                 {
                   maxSize: maxImportExportSize,
@@ -196,6 +212,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
             ),
             search: schema.maybe(
               schema.string({
+                maxLength: MAX_SAVED_OBJECT_SEARCH_LENGTH,
                 meta: {
                   description:
                     'Search for documents to export using the Elasticsearch Simple Query String syntax.',

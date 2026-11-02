@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { logEcsReformattingRt } from '@kbn/apm-common';
+export { logEcsReformattingSchema } from '@kbn/apm-common';

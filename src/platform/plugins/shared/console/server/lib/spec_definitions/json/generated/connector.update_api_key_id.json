@@ -6,6 +6,10 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "api_key_id": "",
+      "api_key_secret_id": ""
+    },
     "methods": [
       "PUT"
     ],

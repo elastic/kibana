@@ -11,7 +11,7 @@ import type { IClusterClient } from '@kbn/core-elasticsearch-server';
 import type { FakeRawRequest, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
@@ -108,7 +108,7 @@ export class AnonymousAccessService {
         const spaceId = spaces?.getSpaceId(request);
         const fakeAnonymousRequest = this.createFakeAnonymousRequest({
           authenticateRequest: !useDefaultCapabilities,
-          spaceId: spaceId ? asSpaceId(spaceId) : undefined,
+          spaceId: spaceId ? brandSpaceId(spaceId) : undefined,
         });
 
         try {

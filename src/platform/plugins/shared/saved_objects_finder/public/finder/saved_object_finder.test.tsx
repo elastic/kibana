@@ -76,7 +76,7 @@ const doc4 = { type: 'search', id: '4', attributes: { title: 'Search' } };
 const searchMetaData = [
   {
     defaultSearchField: 'name',
-    getIconForSavedObject: () => 'search' as IconType,
+    getIconForSavedObject: () => 'magnify' as IconType,
     name: 'Search',
     showSavedObject: () => true,
     type: 'search',
@@ -85,7 +85,7 @@ const searchMetaData = [
 
 const metaDataConfig = [
   {
-    getIconForSavedObject: () => 'search' as IconType,
+    getIconForSavedObject: () => 'magnify' as IconType,
     name: 'Search',
     type: 'search',
   },
@@ -436,7 +436,7 @@ describe('SavedObjectsFinder', () => {
       ...baseProps,
       savedObjectMetaData: [
         {
-          getIconForSavedObject: () => 'search',
+          getIconForSavedObject: () => 'magnify',
           name: 'Search',
           showSavedObject: ({ id }) => id !== '1',
           type: 'search',
@@ -501,7 +501,7 @@ describe('SavedObjectsFinder', () => {
       ...baseProps,
       savedObjectMetaData: [
         {
-          getIconForSavedObject: () => 'search',
+          getIconForSavedObject: () => 'magnify',
           name: 'Search',
           type: 'search',
         },
@@ -869,7 +869,7 @@ describe('SavedObjectsFinder', () => {
         ...baseProps,
         savedObjectMetaData: [
           {
-            getIconForSavedObject: () => 'search',
+            getIconForSavedObject: () => 'magnify',
             name: 'Search',
             type: 'search',
           },
@@ -913,7 +913,7 @@ describe('SavedObjectsFinder', () => {
       children: <button>Dummy text</button>,
       savedObjectMetaData: [
         {
-          getIconForSavedObject: () => 'search',
+          getIconForSavedObject: () => 'magnify',
           name: 'Search',
           type: 'search',
         },

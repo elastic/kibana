@@ -10,8 +10,13 @@ import type { IngestScoresRequestBodyInput } from '@kbn/evals-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { BuildkiteCiMetadata } from './ci_metadata';
 import type { GitMetadata } from './git_metadata';
-import type { EvaluationCompleteEvent, DatasetRunResult } from '../types';
+import type { EvaluationCompleteEvent, DatasetRunResult, EvaluatorKind } from '../types';
 
+// TODO: Keep this in sync with `buildScoreDocuments` in `@kbn/evals-runner`, the
+// workflow/plugin implementation of the same score-ingestion contract. The two are
+// separate builders that can drift silently and already differ in evaluator naming
+// (`Factuality` here vs `correctness.factuality` there); the intended fix is to
+// converge this SDK path onto `buildScoreDocuments`.
 const MAX_INGEST_BATCH_SIZE = 1000;
 
 type IngestScore = IngestScoresRequestBodyInput['scores'][number];
@@ -29,6 +34,7 @@ interface BuildIngestRequestArgs {
   suiteId?: string;
   executionId?: string;
   buildkiteMetadata?: BuildkiteCiMetadata;
+  spaceIds?: string[];
   log?: Pick<SomeDevLog, 'warning'>;
   source: BuildIngestRequestSource;
 }
@@ -39,7 +45,10 @@ interface BuildableScore {
   score: IngestScore;
 }
 
-function toModel(model: InferenceModel): IngestScoresRequestBodyInput['task_model'] | undefined {
+/** Narrows an inference model to the `{ id, family?, provider? }` shape scores are stamped with. */
+export function toScoreModel(
+  model: InferenceModel
+): IngestScoresRequestBodyInput['task_model'] | undefined {
   if (!model.id) {
     return undefined;
   }
@@ -53,6 +62,10 @@ function toModel(model: InferenceModel): IngestScoresRequestBodyInput['task_mode
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   value != null && typeof value === 'object' && !Array.isArray(value);
 
+/** The SDK names evaluator kinds `LLM`/`CODE`; the ingest API uses lowercase. */
+const toIngestKind = (kind: EvaluatorKind): IngestScore['evaluator']['kind'] =>
+  kind === 'LLM' ? 'llm' : 'code';
+
 function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
   const { taskRun, evaluationRun } = event;
   const taskOutput = isPlainObject(taskRun.output) ? taskRun.output : undefined;
@@ -63,6 +76,7 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
       id: event.exampleId,
       index: taskRun.exampleIndex,
       ...(isPlainObject(taskRun.input) && { input: taskRun.input }),
+      ...(isPlainObject(taskRun.metadata) && { metadata: taskRun.metadata }),
       dataset: {
         id: event.datasetId,
         name: event.datasetName,
@@ -75,11 +89,15 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
     },
     evaluator: {
       name: evaluationRun.name,
+      ...(evaluationRun.version !== undefined && { version: evaluationRun.version }),
       ...(result?.score !== undefined && { score: result.score }),
       ...(result?.label !== undefined && { label: result.label }),
       ...(result?.explanation !== undefined && { explanation: result.explanation }),
       ...(isPlainObject(result?.metadata) && { metadata: result.metadata }),
       ...(evaluationRun.traceId !== undefined && { trace_id: evaluationRun.traceId }),
+      direction: evaluationRun.direction,
+      ...(evaluationRun.kind !== undefined && { kind: toIngestKind(evaluationRun.kind) }),
+      ...(evaluationRun.model !== undefined && { model: evaluationRun.model }),
     },
   };
 }
@@ -139,11 +157,12 @@ export function buildIngestRequest({
   suiteId,
   executionId,
   buildkiteMetadata,
+  spaceIds,
   log,
   source,
 }: BuildIngestRequestArgs): IngestScoresRequestBodyInput[] {
-  const taskModelPayload = toModel(taskModel);
-  const evaluatorModelPayload = toModel(evaluatorModel);
+  const taskModelPayload = toScoreModel(taskModel);
+  const evaluatorModelPayload = toScoreModel(evaluatorModel);
   const scores = buildScores(source);
 
   if (!taskModelPayload || !evaluatorModelPayload) {
@@ -177,6 +196,7 @@ export function buildIngestRequest({
       requests.push({
         experiment_id: experimentId,
         ...(experimentName != null && { experiment_name: experimentName }),
+        ...(spaceIds != null && spaceIds.length > 0 && { space_ids: spaceIds }),
         task_model: taskModelPayload,
         evaluator_model: evaluatorModelPayload,
         metadata: {

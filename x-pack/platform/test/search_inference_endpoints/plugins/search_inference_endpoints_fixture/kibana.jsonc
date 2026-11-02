@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/search-inference-endpoints-fixture-plugin",
-  "owner": "@elastic/search-kibana",
+  "owner": "@elastic/search-ml-ux",
   "group": "platform",
   "visibility": "private",
   "plugin": {

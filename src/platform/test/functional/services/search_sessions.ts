@@ -12,6 +12,7 @@ import { INITIAL_SEARCH_SESSION_REST_VERSION } from '@kbn/data-plugin/server';
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrService } from '../ftr_provider_context';
 
 const APP_MENU_OVERFLOW_BUTTON = 'app-menu-overflow-button';
@@ -23,6 +24,7 @@ export class SearchSessionsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly retryOnStale = this.ctx.getService('retryOnStale');
   private readonly security = this.ctx.getService('security');
   private readonly toasts = this.ctx.getService('toasts');
   private readonly es = this.ctx.getService('es');
@@ -100,26 +102,30 @@ export class SearchSessionsService extends FtrService {
   }
 
   private async dismissSuccessToast() {
-    const successToast = await this.getSuccessToast();
-    if (!successToast) return;
-    const closeBtn = await successToast.findByTestSubject('toastCloseButton');
-    await closeBtn.click();
+    await this.retryOnStale(async () => {
+      const successToast = await this.getSuccessToast();
+      if (!successToast) return;
+      const closeBtn = await successToast.findByTestSubject('toastCloseButton');
+      await closeBtn.click();
 
-    await this.retry.waitFor('success toast to be dismissed', async () => {
-      const _successToast = await this.getSuccessToast();
-      return !_successToast;
+      await this.retry.waitFor('success toast to be dismissed', async () => {
+        const _successToast = await this.getSuccessToast();
+        return !_successToast;
+      });
     });
   }
 
   private async getSuccessToast() {
-    const toasts = await this.toasts.getAll();
-    for (const toast of toasts) {
-      const text = await toast.getVisibleText();
-      if (text.includes('Background search completed')) {
-        return toast;
+    return await this.retryOnStale(async () => {
+      const toasts = await this.toasts.getAll();
+      for (const toast of toasts) {
+        const text = await toast.getVisibleText();
+        if (text.includes('Background search completed')) {
+          return toast;
+        }
       }
-    }
-    return null;
+      return null;
+    });
   }
 
   public async openFlyoutFromToast() {
@@ -171,14 +177,17 @@ export class SearchSessionsService extends FtrService {
       'Failed to fetch background search info',
     ];
 
-    const toasts = await this.toasts.getAll();
-    for (const toast of toasts) {
-      const text = await toast.getVisibleText();
-      if (messages.some((message) => text.includes(message))) {
-        return true;
+    return await this.retryOnStale(async () => {
+      const toasts = await this.toasts.getAll();
+      for (const toast of toasts) {
+        const text = await toast.getVisibleText();
+        if (messages.some((message) => text.includes(message))) {
+          return true;
+        }
       }
-    }
-    return false;
+
+      return false;
+    });
   }
 
   /*
@@ -194,6 +203,7 @@ export class SearchSessionsService extends FtrService {
         .post('/internal/session/_find')
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
         .set('kbn-xsrf', 'anything')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .set('kbn-system-request', 'true')
         .send({
           page: 1,
@@ -219,6 +229,7 @@ export class SearchSessionsService extends FtrService {
             .delete(`/internal/session/${so.id}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_SEARCH_SESSION_REST_VERSION)
             .set(`kbn-xsrf`, `anything`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .expect(200);
         })
       );

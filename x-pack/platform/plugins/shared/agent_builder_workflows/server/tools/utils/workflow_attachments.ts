@@ -63,6 +63,7 @@ export const emitWorkflowDiff = async (
     const created = await context.attachments.add({
       type: WORKFLOW_YAML_ATTACHMENT_TYPE,
       data: attachmentData,
+      description: input.name ?? 'Workflow',
     });
     attachmentId = created.id;
     attachmentVersion = created.current_version;
@@ -72,6 +73,9 @@ export const emitWorkflowDiff = async (
     proposalId: input.proposalId,
     beforeYaml: input.beforeYaml,
     afterYaml: input.afterYaml,
+    // Stable per-editor id the client scopes edits by (works when workflowId
+    // is undefined on /workflows/create). See AttachmentBridge.
+    attachmentId,
     workflowId: input.workflowId,
     name: input.name,
     attachmentVersion,

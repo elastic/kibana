@@ -105,7 +105,7 @@ node scripts/generate_otel_semconv.js
 
 ```bash
 # From Kibana root
-yarn test:jest src/platform/packages/shared/kbn-otel-semantic-conventions
+pnpm test:jest src/platform/packages/shared/kbn-otel-semantic-conventions
 ```
 
 ## File Structure
@@ -178,9 +178,9 @@ The package includes comprehensive tests covering:
 - Error handling for malformed input
 - Generated output validation
 
-Run tests with `yarn test` or from Kibana root:
+Run tests with `pnpm test` or from Kibana root:
 ```bash
-yarn test:jest src/platform/packages/shared/kbn-otel-semantic-conventions
+pnpm test:jest src/platform/packages/shared/kbn-otel-semantic-conventions
 ```
 
 ## Troubleshooting
@@ -202,7 +202,7 @@ DEBUG=* node scripts/generate_otel_semconv.js
 
 ## Contributing
 
-This package is maintained by the `@elastic/obs-onboarding-team`. When contributing:
+This package is maintained by the `@elastic/streams-ui`. When contributing:
 
 1. Add tests for new functionality
 2. Update type definitions as needed

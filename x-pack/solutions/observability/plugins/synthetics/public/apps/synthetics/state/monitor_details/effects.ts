@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { takeLeading, takeEvery, select, put } from 'redux-saga/effects';
+import type { PayloadAction } from 'redux-toolkit-v1';
+import { takeLeading, takeEvery, takeLatest, select, put } from 'redux-saga/effects';
 
 import type { Ping, PingsResponse } from '../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../common/runtime_types';
@@ -73,7 +73,7 @@ export function* fetchSyntheticsMonitorEffect() {
     }
   );
 
-  yield takeLeading(
+  yield takeLatest(
     getMonitorAction.get,
     fetchEffectFactory(fetchSyntheticsMonitor, getMonitorAction.success, getMonitorAction.fail)
   );

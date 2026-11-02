@@ -181,6 +181,14 @@ describe('prepareRoutes', () => {
       output: [{ path: '/api/baz', options: { access: pub } }],
       filters: { excludePathsMatching: ['/api/bar'], access: pub },
     },
+    {
+      input: [
+        { path: '/api/foo', options: { access: pub, options: { excludeFromOAS: true } } },
+        { path: '/api/baz', options: { access: pub, options: {} } },
+      ],
+      output: [{ path: '/api/baz', options: { access: pub, options: {} } }],
+      filters: { access: pub },
+    },
   ])('returns the expected routes #%#', ({ input, output, filters }) => {
     expect(prepareRoutes(input, filters)).toEqual(output);
   });
@@ -348,6 +356,39 @@ describe('createOpIdGenerator', () => {
   ])('$input.method $input.path -> $output', ({ input, output }) => {
     expect(getOpId(input)).toBe(output);
   });
+
+  describe('explicit operationId', () => {
+    test('is used verbatim instead of the generated value', () => {
+      expect(
+        getOpId({ method: 'put', path: '/api/dashboards/{id}', operationId: 'upsert-dashboard' })
+      ).toBe('upsert-dashboard');
+    });
+
+    test('does not reserve the generated name it replaces', () => {
+      getOpId({ method: 'put', path: '/api/dashboards/{id}', operationId: 'upsert-dashboard' });
+      expect(getOpId({ method: 'put', path: '/api/dashboards/{id}' })).toBe('put-dashboards-id');
+    });
+
+    test('throws when two routes declare the same ID', () => {
+      getOpId({ method: 'get', path: '/api/one', operationId: 'shared-id' });
+      expect(() => getOpId({ method: 'get', path: '/api/two', operationId: 'shared-id' })).toThrow(
+        /Duplicate operationId "shared-id" for route "GET \/api\/two".*Prefer kebab-case verb-resource names such as "create-dashboard"/
+      );
+    });
+
+    test('throws when it collides with an already generated ID', () => {
+      expect(getOpId({ method: 'get', path: '/api/test' })).toBe('get-test');
+      expect(() => getOpId({ method: 'get', path: '/api/other', operationId: 'get-test' })).toThrow(
+        /Duplicate operationId "get-test"/
+      );
+    });
+
+    test('still requires method and path', () => {
+      expect(() => getOpId({ method: '', path: '', operationId: 'x' })).toThrow(
+        /Must provide method and path/
+      );
+    });
+  });
 });
 
 describe('setXState', () => {
@@ -382,16 +423,6 @@ describe('setXState', () => {
         name: 'tech_preview without since',
         availability: { stability: 'tech_preview' as const },
         expected: 'Technical Preview',
-      },
-      {
-        name: 'beta with since',
-        availability: { stability: 'beta' as const, since: '8.0.0' },
-        expected: 'Beta; added in 8.0.0',
-      },
-      {
-        name: 'beta without since',
-        availability: { stability: 'beta' as const },
-        expected: 'Beta',
       },
       {
         name: 'no availability',
@@ -448,16 +479,6 @@ describe('setXState', () => {
         name: 'tech_preview without since',
         availability: { stability: 'tech_preview' as const },
         expected: 'Technical Preview',
-      },
-      {
-        name: 'beta with since',
-        availability: { stability: 'beta' as const, since: '8.0.0' },
-        expected: 'Beta',
-      },
-      {
-        name: 'beta without since',
-        availability: { stability: 'beta' as const },
-        expected: 'Beta',
       },
       {
         name: 'no availability',

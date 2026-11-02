@@ -7,39 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getThemeStylesheetPaths, getCommonStylesheetPaths, getScriptPaths } from './render_utils';
-
-describe('getScriptPaths', () => {
-  it('returns the correct list when darkMode is `system`', () => {
-    expect(
-      getScriptPaths({
-        baseHref: '/base-path',
-        darkMode: 'system',
-        themeName: 'borealis',
-      })
-    ).toEqual(['/base-path/ui/bootstrap_system_theme_borealis.js']);
-  });
-
-  it('returns the correct list when darkMode is `true`', () => {
-    expect(
-      getScriptPaths({
-        baseHref: '/base-path',
-        darkMode: true,
-        themeName: 'borealis',
-      })
-    ).toEqual([]);
-  });
-
-  it('returns the correct list when darkMode is `false`', () => {
-    expect(
-      getScriptPaths({
-        baseHref: '/base-path',
-        darkMode: false,
-        themeName: 'borealis',
-      })
-    ).toEqual([]);
-  });
-});
+import { getThemeStylesheetPaths, getCommonStylesheetPaths } from './render_utils';
 
 describe('getCommonStylesheetPaths', () => {
   it('returns the correct list', () => {

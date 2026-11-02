@@ -26,12 +26,15 @@ dependsOn:
   - '@kbn/core-test-helpers-test-utils'
   - '@kbn/licensing-types'
   - '@kbn/scout'
+  - '@kbn/core-chrome-browser-components'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*
@@ -39,6 +42,4 @@ fileGroups:
     - common/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

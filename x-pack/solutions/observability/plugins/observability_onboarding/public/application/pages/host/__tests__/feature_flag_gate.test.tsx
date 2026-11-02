@@ -46,14 +46,6 @@ jest.mock('../../auto_detect', () => ({
   AutoDetectPage: () => null,
 }));
 
-jest.mock('../../kubernetes', () => ({
-  KubernetesPage: () => null,
-}));
-
-jest.mock('../../otel_kubernetes', () => ({
-  OtelKubernetesPage: () => null,
-}));
-
 jest.mock('../../otel_logs', () => ({
   OtelLogsPage: () => null,
 }));
@@ -85,9 +77,9 @@ beforeAll(() => {
 const renderFlow = (flagEnabled: boolean, path: string) => {
   const services = buildHostPageServices();
   const featureFlags = services.featureFlags as CoreStart['featureFlags'] & {
-    getBooleanValue: jest.Mock;
+    useBooleanValue: jest.Mock;
   };
-  featureFlags.getBooleanValue.mockImplementation((id: string, fallback: boolean) =>
+  featureFlags.useBooleanValue.mockImplementation((id: string, fallback: boolean) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? flagEnabled : fallback
   );
   return renderWithHostPageProviders(

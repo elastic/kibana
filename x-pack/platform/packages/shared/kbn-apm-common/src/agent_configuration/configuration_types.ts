@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type t from 'io-ts';
-import type { agentConfigurationIntakeRt } from './runtime_types/agent_configuration_intake_rt';
+import type { z } from '@kbn/zod/v4';
+import type { agentConfigurationIntakeSchema } from './runtime_types/agent_configuration_intake_rt';
 
-export type AgentConfigurationIntake = t.TypeOf<typeof agentConfigurationIntakeRt>;
+export type AgentConfigurationIntake = z.infer<typeof agentConfigurationIntakeSchema>;
 
 export type AgentConfiguration = {
   '@timestamp': number;

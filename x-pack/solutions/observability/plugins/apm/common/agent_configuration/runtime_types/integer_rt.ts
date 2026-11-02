@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getIntegerRt } from '@kbn/apm-common';
+export { getIntegerSchema } from '@kbn/apm-common';

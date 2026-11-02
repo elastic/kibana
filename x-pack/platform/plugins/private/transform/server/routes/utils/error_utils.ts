@@ -11,28 +11,40 @@ import { i18n } from '@kbn/i18n';
 
 import type { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
 
-import type { CommonResponseStatusSchema, TransformIdsSchema } from '../api_schemas/common';
+import type {
+  CommonResponseStatusSchema,
+  ResponseStatus,
+  TransformIdsSchema,
+} from '../api_schemas/common';
 import type { DeleteTransformsResponseSchema } from '../api_schemas/delete_transforms';
 import type { ResetTransformsResponseSchema } from '../api_schemas/reset_transforms';
 
-const REQUEST_TIMEOUT = 'RequestTimeout';
-
-export function isRequestTimeout(error: any) {
-  return error.displayName === REQUEST_TIMEOUT;
+export function isRequestTimeout(error: { name: string }) {
+  return error.name === 'TimeoutError';
 }
 
-interface Params {
-  results:
-    | CommonResponseStatusSchema
-    | DeleteTransformsResponseSchema
-    | ResetTransformsResponseSchema;
+type TimeoutErrorBody = NonNullable<ResponseStatus['error']>;
+type TimeoutResults =
+  | CommonResponseStatusSchema
+  | DeleteTransformsResponseSchema
+  | ResetTransformsResponseSchema;
+
+interface Params<TResults extends TimeoutResults> {
+  results: TResults;
   id: string;
   items: TransformIdsSchema;
   action: string;
+  getResult?: (error: TimeoutErrorBody, item: TransformIdsSchema[number]) => TResults[string];
 }
 
 // populate a results object with timeout errors for the ids which haven't already been set
-export function fillResultsWithTimeouts({ results, id, items, action }: Params) {
+export function fillResultsWithTimeouts<TResults extends TimeoutResults>({
+  results,
+  id,
+  items,
+  action,
+  getResult,
+}: Params<TResults>): TResults {
   const extra =
     items.length - Object.keys(results).length > 1
       ? i18n.translate(
@@ -55,32 +67,62 @@ export function fillResultsWithTimeouts({ results, id, items, action }: Params) 
     }
   );
 
-  const error = {
+  const error: TimeoutErrorBody = {
+    type: 'timeout_error',
     reason,
     root_cause: [
       {
         reason,
       },
     ],
+    caused_by: {},
+    response: {},
   };
 
-  const newResults:
-    | CommonResponseStatusSchema
-    | DeleteTransformsResponseSchema
-    | ResetTransformsResponseSchema = {};
+  const newResults = {} as TResults;
 
   return items.reduce((accumResults, currentVal) => {
     if (results[currentVal.id] === undefined) {
-      accumResults[currentVal.id] = {
-        success: false,
-        // @ts-ignore
-        error,
-      };
+      accumResults[currentVal.id] =
+        getResult?.(error, currentVal) ??
+        ({
+          success: false,
+          error,
+        } as TResults[string]);
     } else {
       accumResults[currentVal.id] = results[currentVal.id];
     }
     return accumResults;
   }, newResults);
+}
+
+const getErrorReason = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
+};
+
+/**
+ * Returns the ES error body of an error thrown by the ES JS client, or a fallback body for
+ * errors without one (e.g. transport-level errors).
+ */
+export function getErrorBody(error: unknown): NonNullable<ResponseStatus['error']> {
+  const esError = (error as { meta?: { body?: { error?: ResponseStatus['error'] } } }).meta?.body
+    ?.error;
+
+  if (esError) {
+    return esError;
+  }
+
+  return {
+    type: 'error',
+    reason: getErrorReason(error),
+    root_cause: [],
+    caused_by: {},
+    response: {},
+  };
 }
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {

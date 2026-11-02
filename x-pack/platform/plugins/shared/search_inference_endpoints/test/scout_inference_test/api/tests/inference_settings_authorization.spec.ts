@@ -54,26 +54,20 @@ apiTest.describe('Inference settings authorization', { tag: [...INFERENCE_LOCAL_
     expect(response.body.data.features).toStrictEqual(settings.features);
   });
 
-  apiTest(
-    'user without searchInferenceEndpoints privilege gets 403 on GET',
-    async ({ apiClient }) => {
-      const response = await apiClient.get(INFERENCE_SETTINGS_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...viewerCookie },
-      });
+  apiTest('viewer (read privilege) can GET settings', async ({ apiClient }) => {
+    const response = await apiClient.get(INFERENCE_SETTINGS_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...viewerCookie },
+    });
 
-      expect(response).toHaveStatusCode(403);
-    }
-  );
+    expect(response).toHaveStatusCode(200);
+  });
 
-  apiTest(
-    'user without searchInferenceEndpoints privilege gets 403 on PUT',
-    async ({ apiClient }) => {
-      const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
-        headers: { ...COMMON_HEADERS, ...viewerCookie },
-        body: JSON.stringify({ features: [SAMPLE_FEATURES.agentBuilderAnthropic] }),
-      });
+  apiTest('viewer (read privilege) gets 403 on PUT settings', async ({ apiClient }) => {
+    const response = await apiClient.put(INFERENCE_SETTINGS_API_PATH, {
+      headers: { ...COMMON_HEADERS, ...viewerCookie },
+      body: JSON.stringify({ features: [SAMPLE_FEATURES.agentBuilderAnthropic] }),
+    });
 
-      expect(response).toHaveStatusCode(403);
-    }
-  );
+    expect(response).toHaveStatusCode(403);
+  });
 });

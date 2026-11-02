@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
 const EventTriggersConfigSchema = schema.object({
@@ -31,6 +32,18 @@ const EventTriggersConfigSchema = schema.object({
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  storage: schema.object({
+    source: schema.oneOf([schema.literal('plain_index'), schema.literal('data_stream')], {
+      defaultValue: 'plain_index',
+    }),
+    dataRetention: schema.string({
+      defaultValue: '90d',
+      validate: (value) =>
+        /^[1-9]\d*(d|h|m|s)$/.test(value)
+          ? undefined
+          : 'must be a positive duration like "90d", "12h", "30m" or "45s"',
+    }),
+  }),
   eventDriven: EventTriggersConfigSchema,
   /**
    * Maximum depth of nested workflow execution (workflow calling workflow via workflow.execute step).
@@ -38,14 +51,6 @@ const configSchema = schema.object({
   maxWorkflowDepth: schema.number({ defaultValue: 10, min: 1 }),
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
-  }),
-  http: schema.object({
-    allowedHosts: schema.arrayOf(
-      schema.oneOf([schema.string({ hostname: true }), schema.literal('*')]),
-      {
-        defaultValue: ['*'],
-      }
-    ),
   }),
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
   eviction: schema.object({
@@ -65,6 +70,14 @@ const configSchema = schema.object({
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
   }),
+  /**
+   * External HITL resume (API-key public routes + channel notifications).
+   * Disable via `workflowsExecutionEngine.hitlExternalResume.enabled` and
+   * `workflowsManagement.hitlExternalResume.enabled` in `kibana.yml`.
+   */
+  hitlExternalResume: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;
@@ -72,4 +85,21 @@ export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {
   schema: configSchema,
+  deprecations: ({ unused }) => [
+    unused('http', {
+      level: 'warning',
+      message: i18n.translate('workflowsExecutionEngine.deprecations.httpUnusedMessage', {
+        defaultMessage:
+          'workflowsExecutionEngine.http is not used. HTTP step hosts are checked against xpack.actions.allowedHosts.',
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('workflowsExecutionEngine.deprecations.httpUnused.manualStepOneMessage', {
+            defaultMessage:
+              'Remove workflowsExecutionEngine.http from the Kibana config file, CLI flag, or environment variable. If allowedHosts listed specific hosts, set those hosts on xpack.actions.allowedHosts.',
+          }),
+        ],
+      },
+    }),
+  ],
 };

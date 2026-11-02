@@ -71,8 +71,10 @@ export const SkillCreateFlyout: React.FC<SkillCreateFlyoutProps> = ({
 
   const onSubmit = useCallback(
     async (data: SkillFormData) => {
+      // Backend still requires `id`; the UI collapses to a single identifier so we
+      // reuse the (kebab-case-validated) `name` value. Follow-up ticket will drop `id`.
       await createSkill({
-        id: data.id,
+        id: data.name,
         name: data.name,
         description: data.description,
         content: data.content,

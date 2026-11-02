@@ -341,9 +341,5 @@ export enum MASK_OPERATOR {
   BELOW = 'BELOW',
 }
 
-// Maplibre does not provide any feedback when rendering is complete.
-// Workaround is hard-coded timeout period.
-export const RENDER_TIMEOUT = 1000;
-
 export const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
 export const SINGLE_SELECTION_AS_TEXT_PROPS = { asPlainText: true };

@@ -42,12 +42,17 @@ import {
 import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const backToCases = () => {
-  cy.get(BACK_TO_CASES_BTN).click({ force: true });
+  cy.get(BACK_TO_CASES_BTN).click();
 };
 
 export const filterStatusOpen = () => {
   cy.get(ALL_CASES_STATUS_FILTER).click();
   cy.get(ALL_CASES_OPEN_FILTER).click();
+  // The status filter is a multi-select popover that stays open after picking an option and can
+  // cover the case rows below, blocking later clicks (e.g. on the case title link). Toggle it
+  // closed and wait for the option list to unmount before moving on.
+  cy.get(ALL_CASES_STATUS_FILTER).click();
+  cy.get(ALL_CASES_OPEN_FILTER).should('not.exist');
 };
 
 export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
@@ -79,7 +84,9 @@ export const attachTimeline = (newCase: TestCase) => {
         }
       });
     },
-    { interval: 500, timeout: 12000 }
+    // The timeline is created via the API right before this and can take a while to show up in
+    // the selector's search on slower environments (serverless MKI).
+    { interval: 500, timeout: 30000 }
   );
   cy.get(TIMELINE).first().click();
 };

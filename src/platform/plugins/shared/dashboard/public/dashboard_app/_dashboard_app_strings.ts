@@ -182,14 +182,6 @@ export const topNavStrings = {
       defaultMessage: 'Full Screen Mode',
     }),
   },
-  labs: {
-    label: i18n.translate('dashboard.topNav.labsButtonAriaLabel', {
-      defaultMessage: 'labs',
-    }),
-    description: i18n.translate('dashboard.topNav.labsConfigDescription', {
-      defaultMessage: 'Labs',
-    }),
-  },
   edit: {
     label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
       defaultMessage: 'edit',
@@ -318,6 +310,11 @@ export const topNavStrings = {
     }),
     description: i18n.translate('dashboard.topNave.saveMenuDescription', {
       defaultMessage: 'Additional save options',
+    }),
+  },
+  history: {
+    label: i18n.translate('dashboard.topNav.historyLabel', {
+      defaultMessage: 'History',
     }),
   },
   unsavedChangesTooltip: i18n.translate('dashboard.topNav.unsavedChangesTooltip', {

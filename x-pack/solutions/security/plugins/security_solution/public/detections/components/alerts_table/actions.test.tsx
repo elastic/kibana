@@ -22,16 +22,20 @@ import {
 } from './actions';
 import {
   defaultTimelineProps,
+  getSuppressedDetectionAlertAADMock,
   getThresholdDetectionAlertAADMock,
   mockAADEcsDataWithAlert,
   mockEcsDataWithAlert,
   mockGetOneTimelineResult,
+  mockSuppressedAlertExceptionList,
+  mockSuppressedDetectionAlertAADSource,
   mockTimelineData,
   mockTimelineDetails,
 } from '../../../common/mock';
 import type { CreateTimeline } from './types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataProvider } from '../../../../common/types/timeline';
+import { ALERT_GROUP_ID } from '../../../../common/field_maps/field_names';
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type { ISearchStart } from '@kbn/data-plugin/public';
@@ -425,6 +429,10 @@ describe('alert actions', () => {
             savedSearchId: null,
             savedSearch: null,
             isDataProviderVisible: false,
+            isSuperTimeline: false,
+            superTimelineSourceIds: [],
+            superTimelineSourceTitles: [],
+            superTimelineDescriptions: [],
             rowHeight: 3,
             sampleSize: 500,
           },
@@ -901,6 +909,42 @@ describe('alert actions', () => {
       });
     });
 
+    describe('createSuppressedTimeline', () => {
+      test('uses the refetched alert document when building the exception filter', async () => {
+        const originalEcsData = getSuppressedDetectionAlertAADMock();
+
+        fetchMock.mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _id: originalEcsData._id,
+                _index: 'refetched-alert-index',
+                _source: mockSuppressedDetectionAlertAADSource,
+              },
+            ],
+          },
+        });
+
+        await sendAlertToTimelineAction({
+          createTimeline,
+          ecsData: originalEcsData as unknown as Ecs,
+          searchStrategyClient,
+          getExceptionFilter: mockGetExceptionFilter,
+        });
+
+        const exceptionFilterAlertDoc = mockGetExceptionFilter.mock.calls[0][0];
+
+        expect(exceptionFilterAlertDoc._id).toEqual(originalEcsData._id);
+        expect(exceptionFilterAlertDoc._index).toEqual('refetched-alert-index');
+        expect(exceptionFilterAlertDoc.kibana.alert.rule.exceptions_list).toEqual([
+          mockSuppressedAlertExceptionList,
+        ]);
+        expect(exceptionFilterAlertDoc.kibana.alert.rule.parameters.exceptions_list).toEqual([
+          mockSuppressedAlertExceptionList,
+        ]);
+      });
+    });
+
     describe('New terms', () => {
       describe('getNewTermsData', () => {
         it('should return new terms data correctly for single value field', () => {
@@ -1250,6 +1294,120 @@ describe('alert actions', () => {
             key: '_id',
             value: eventIds.join(),
             params: eventIds,
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(
+        from,
+        to,
+        expectedDataProviders,
+        expectedFilters
+      );
+      expect(createTimeline).toHaveBeenCalledWith(expected);
+    });
+
+    test('expands kibana.alert.group.id when every selected alert is an EQL sequence alert with a group id', () => {
+      const eqlEcsA: Ecs = {
+        ...mockEcsDataWithAlert,
+        _id: 'eql-alert-a',
+        signal: {
+          rule: {
+            ...mockEcsDataWithAlert.signal?.rule,
+            type: ['eql'],
+          },
+          group: { id: ['group-a'] },
+        },
+      };
+      const eqlEcsB: Ecs = {
+        ...mockEcsDataWithAlert,
+        _id: 'eql-alert-b',
+        signal: {
+          rule: {
+            ...mockEcsDataWithAlert.signal?.rule,
+            type: ['eql'],
+          },
+          group: { id: ['group-b'] },
+        },
+      };
+      const eqlGroupIds = ['group-a', 'group-b'];
+
+      sendBulkEventsToTimelineAction(createTimeline, [eqlEcsA, eqlEcsB], 'KqlFilter');
+      const { from, to } = determineToAndFrom({ ecs: [eqlEcsA, eqlEcsB] });
+      const expectedDataProviders: DataProvider[] = [];
+      const expectedFilters: Filter[] = [
+        {
+          query: {
+            bool: {
+              filter: {
+                terms: {
+                  [ALERT_GROUP_ID]: eqlGroupIds,
+                },
+              },
+            },
+          },
+          meta: {
+            alias: 'Alert Ids',
+            negate: false,
+            disabled: false,
+            type: 'phrases',
+            key: ALERT_GROUP_ID,
+            value: eqlGroupIds.join(),
+            params: eqlGroupIds,
+          },
+          $state: {
+            store: FilterStateStore.APP_STATE,
+          },
+        },
+      ];
+      const expected = getExpectedcreateTimelineParam(
+        from,
+        to,
+        expectedDataProviders,
+        expectedFilters
+      );
+      expect(createTimeline).toHaveBeenCalledWith(expected);
+    });
+
+    test('keeps _id-based filtering when the selection mixes EQL-with-group and non-EQL alerts', () => {
+      const eqlEcsA: Ecs = {
+        ...mockEcsDataWithAlert,
+        _id: 'eql-alert-a',
+        signal: {
+          rule: {
+            ...mockEcsDataWithAlert.signal?.rule,
+            type: ['eql'],
+          },
+          group: { id: ['group-a'] },
+        },
+      };
+      const nonEqlEcs: Ecs = mockEcsData[0];
+      const mixedIds = [eqlEcsA._id, nonEqlEcs._id];
+
+      sendBulkEventsToTimelineAction(createTimeline, [eqlEcsA, nonEqlEcs], 'KqlFilter');
+      const { from, to } = determineToAndFrom({ ecs: [eqlEcsA, nonEqlEcs] });
+      const expectedDataProviders: DataProvider[] = [];
+      const expectedFilters: Filter[] = [
+        {
+          query: {
+            bool: {
+              filter: {
+                ids: {
+                  values: mixedIds,
+                },
+              },
+            },
+          },
+          meta: {
+            alias: '2 event IDs',
+            negate: false,
+            disabled: false,
+            type: 'phrases',
+            key: '_id',
+            value: mixedIds.join(),
+            params: mixedIds,
           },
           $state: {
             store: FilterStateStore.APP_STATE,

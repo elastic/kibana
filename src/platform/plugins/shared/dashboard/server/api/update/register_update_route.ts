@@ -9,8 +9,9 @@
 
 import { once } from 'lodash';
 
+import { z } from '@kbn/zod';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { schema } from '@kbn/config-schema';
+import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -18,9 +19,10 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { trackCreateDashboardAction, trackUpdateDashboardAction } from '../../user_activity';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getRouteConfig } from '../get_route_config';
-import { writeErrorHandler } from '../write_error_handler';
+import { TransformPanelsInError } from '../transforms/in/transform_panels_in_error';
 import { getUpdateResponseBodySchema } from './schemas';
-import { update } from './update';
+import { InvalidDashboardIdError, update } from './update';
+import { spacesService } from '../../kibana_services';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -33,6 +35,9 @@ export function registerUpdateRoute(
     path: `${basePath}/{id}`,
     ...routeConfig,
     summary: `Upsert a dashboard`,
+    // Only the public route carries a curated ID. The dashboard-app route is
+    // internal and keeps its derived one.
+    ...(isDashboardAppRequest ? {} : { operationId: 'upsert-dashboard' }),
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -45,17 +50,21 @@ export function registerUpdateRoute(
   updateRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).updateDashboardOASOperationObject,
+      },
       validate: () => ({
         request: {
-          params: schema.object({
-            // Can not validate id at route level
-            // existing dashboards may have invalid "as code" ids
-            id: schema.string({
-              meta: {
+          params: z
+            .object({
+              // Can not validate id at route level
+              // existing dashboards may have invalid "as code" ids
+              id: z.string().meta({
                 description: 'The unique ID of the dashboard to be created or updated',
-              },
-            }),
-          }),
+              }),
+            })
+            .strict(),
           body: getDashboardStateSchema(isDashboardAppRequest),
         },
         response: {
@@ -80,15 +89,19 @@ export function registerUpdateRoute(
       }),
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
+          const { core } = await ctx.resolve(['core']);
           const { body, operation } = await update(
-            ctx,
+            core,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.body,
-            req.serverTiming,
-            isDashboardAppRequest
+            {
+              serverTiming: req.serverTiming,
+              spaceId: spacesService?.getSpaceId(req),
+              isDashboardAppRequest,
+            }
           );
           if (operation === 'create') {
             // do not await tracking actions
@@ -99,6 +112,13 @@ export function registerUpdateRoute(
             return res.ok({ body });
           }
         } catch (e) {
+          if (e instanceof TransformPanelsInError) {
+            logRequest(logger, req, 'warn', e.message);
+            return res.custom(e.getCustomResponse());
+          }
+          if (e instanceof InvalidDashboardIdError) {
+            return writeErrorHandler(e.zodError, res, logger, req);
+          }
           return writeErrorHandler(e, res, logger, req);
         }
       })

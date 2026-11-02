@@ -11,7 +11,7 @@ import Path from 'path';
 import { format } from 'url';
 import del from 'del';
 import { v4 as uuidv4 } from 'uuid';
-import globby from 'globby';
+import { glob } from 'fast-glob';
 import createArchiver from 'archiver';
 import Fs from 'fs';
 import { pipeline } from 'stream/promises';
@@ -285,6 +285,7 @@ export function createTestEsCluster<
           password: config.password,
           basePath: config.basePath,
           esArgs: config.esArgs,
+          resources: config.resources,
         }));
       } else if (esFrom === 'snapshot') {
         ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
@@ -317,6 +318,7 @@ export function createTestEsCluster<
           clean,
           background: true,
           files,
+          secureFiles,
           ssl,
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
           waitForReady: true,
@@ -408,7 +410,7 @@ export function createTestEsCluster<
     }
 
     async captureDebugFiles() {
-      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
+      const debugFiles = await glob([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
         cwd: config.installPath,
         absolute: true,
       });

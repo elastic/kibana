@@ -13,12 +13,15 @@ import type {
   SyntheticsJourneyApiResponse,
   Ping,
 } from '../../../../../common/runtime_types';
-import { SyntheticsJourneyApiResponseType, PingType } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
 export interface FetchJourneyStepsParams {
   checkGroup: string;
   remoteName?: string;
+  timestamp?: string;
+  // When true, only `steps` are fetched and the server skips the journey
+  // details (prev/next sibling) lookup. Used by screenshot-only consumers.
+  stepsOnly?: boolean;
 }
 
 export async function fetchScreenshotBlockSet(
@@ -38,10 +41,14 @@ export async function fetchScreenshotBlockSet(
 export async function fetchBrowserJourney(
   params: FetchJourneyStepsParams
 ): Promise<SyntheticsJourneyApiResponse> {
+  const query = {
+    ...(params.remoteName ? { remoteName: params.remoteName } : {}),
+    ...(params.timestamp ? { timestamp: params.timestamp } : {}),
+    ...(params.stepsOnly ? { stepsOnly: true } : {}),
+  };
   return apiService.get(
     SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', params.checkGroup),
-    params.remoteName ? { remoteName: params.remoteName } : undefined,
-    SyntheticsJourneyApiResponseType
+    Object.keys(query).length ? query : undefined
   );
 }
 
@@ -58,17 +65,13 @@ export async function fetchLastSuccessfulCheck({
   location?: string;
   remoteName?: string;
 }): Promise<Ping> {
-  return await apiService.get(
-    SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
-    {
-      monitorId,
-      timestamp,
-      stepIndex,
-      location,
-      ...(remoteName ? { remoteName } : {}),
-    },
-    PingType
-  );
+  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK, {
+    monitorId,
+    timestamp,
+    stepIndex,
+    location,
+    ...(remoteName ? { remoteName } : {}),
+  });
 }
 
 export interface BackoffOptions {

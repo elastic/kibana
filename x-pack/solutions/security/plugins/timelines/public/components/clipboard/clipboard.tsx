@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
 import React from 'react';
@@ -57,20 +57,22 @@ export const Clipboard = ({
   };
 
   const className = classNames(COPY_TO_CLIPBOARD_BUTTON_CLASS_NAME, {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     securitySolution__hoverActionButton: isHoverAction,
   });
 
   return (
-    <EuiButtonIcon
-      aria-label={i18n.COPY_TO_THE_CLIPBOARD}
-      className={className}
-      data-test-subj="clipboard"
-      iconSize="s"
-      iconType="copy"
-      onClick={onClick}
-    >
-      {children}
-    </EuiButtonIcon>
+    <EuiToolTip content={i18n.COPY_TO_THE_CLIPBOARD} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={i18n.COPY_TO_THE_CLIPBOARD}
+        className={className}
+        data-test-subj="clipboard"
+        iconSize="s"
+        iconType="copy"
+        onClick={onClick}
+      >
+        {children}
+      </EuiButtonIcon>
+    </EuiToolTip>
   );
 };

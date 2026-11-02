@@ -70,7 +70,7 @@ describe('Templates', () => {
 
     await userEvent.click(await screen.findByTestId('add-template'));
 
-    expect(props.onAddTemplate).toBeCalled();
+    expect(props.onAddTemplate).toHaveBeenCalled();
   });
 
   it('calls onEditTemplate correctly', async () => {

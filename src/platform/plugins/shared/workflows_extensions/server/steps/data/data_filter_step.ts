@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { evaluateKql } from '@kbn/eval-kql';
-import { isKqlSyntaxError } from './kql_utils';
+import { decodeKqlTemplateValues, evaluateKql } from '@kbn/eval-kql';
+import { parseKqlCondition, renderKqlCondition } from './kql_utils';
 import { dataFilterStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -16,8 +16,9 @@ export const dataFilterStepDefinition = createServerStepDefinition({
   ...dataFilterStepCommonDefinition,
   handler: async (context) => {
     try {
-      const items = context.contextManager.renderInputTemplate(context.config.items);
-      const { condition, limit } = context.input;
+      const items = context.config.items;
+      const { limit } = context.input;
+      const condition = renderKqlCondition(context.contextManager, context.rawInput.condition);
 
       if (!Array.isArray(items)) {
         context.logger.error(`Input items has invalid type: ${typeof items}`);
@@ -34,11 +35,12 @@ export const dataFilterStepDefinition = createServerStepDefinition({
       }
 
       context.logger.debug(
-        `Filtering ${items.length} item(s) with condition: ${condition}${
+        `Filtering ${items.length} item(s) with condition: ${decodeKqlTemplateValues(condition)}${
           limit ? ` (limit: ${limit})` : ''
         }`
       );
 
+      const kqlAst = parseKqlCondition(condition);
       const filteredItems: unknown[] = [];
       let matchedCount = 0;
 
@@ -50,26 +52,33 @@ export const dataFilterStepDefinition = createServerStepDefinition({
           return { error: new Error('Operation was aborted') };
         }
 
-        try {
-          const matches = evaluateKql(condition, { item, index });
+        if (item === null || typeof item !== 'object') {
+          // A non-object item (e.g. `null` or a scalar) cannot satisfy an
+          // `item.<field>` condition. KQL now evaluates such a path to a
+          // non-match rather than throwing, so warn explicitly here to
+          // preserve the visibility operators expect when a malformed item is
+          // skipped.
+          context.logger.warn(
+            `Skipping non-object item at index ${index} (received ${
+              item === null ? 'null' : typeof item
+            })`
+          );
+        } else {
+          try {
+            const matches = evaluateKql(kqlAst, { item, index });
 
-          if (matches) {
-            filteredItems.push(item);
-            matchedCount++;
+            if (matches) {
+              filteredItems.push(item);
+              matchedCount++;
 
-            if (limit && matchedCount >= limit) {
-              context.logger.debug(`Reached limit of ${limit} matches, stopping filter`);
-              break;
+              if (limit && matchedCount >= limit) {
+                context.logger.debug(`Reached limit of ${limit} matches, stopping filter`);
+                break;
+              }
             }
+          } catch (error) {
+            context.logger.warn(`Failed to evaluate condition for item at index ${index}`, error);
           }
-        } catch (error) {
-          if (isKqlSyntaxError(error)) {
-            context.logger.error('Invalid KQL condition', error);
-            return {
-              error: new Error(`Invalid KQL condition: ${(error as Error).message}`),
-            };
-          }
-          context.logger.warn(`Failed to evaluate condition for item at index ${index}`, error);
         }
       }
 

@@ -106,33 +106,6 @@ describe('registerAlertingV2UsageCollector', () => {
             },
             type: 'array',
           },
-          count_by_no_data_behavior: {
-            last_status: {
-              _meta: { description: 'Number of rules with last_status behavior.' },
-              type: 'long',
-            },
-            no_data: {
-              _meta: { description: 'Number of rules with no_data behavior.' },
-              type: 'long',
-            },
-            recover: {
-              _meta: { description: 'Number of rules with recover behavior.' },
-              type: 'long',
-            },
-          },
-          count_by_no_data_timeframe: {
-            items: {
-              name: {
-                _meta: { description: 'No data timeframe duration string.' },
-                type: 'keyword',
-              },
-              value: {
-                _meta: { description: 'Number of rules with this no data timeframe.' },
-                type: 'long',
-              },
-            },
-            type: 'array',
-          },
           count_by_pending_timeframe: {
             items: {
               name: {
@@ -159,16 +132,6 @@ describe('registerAlertingV2UsageCollector', () => {
             },
             type: 'array',
           },
-          count_by_recovery_policy_type: {
-            no_breach: {
-              _meta: { description: 'Number of rules with recovery policy type no_breach.' },
-              type: 'long',
-            },
-            query: {
-              _meta: { description: 'Number of rules with recovery policy type query.' },
-              type: 'long',
-            },
-          },
           count_by_schedule: {
             items: {
               name: { _meta: { description: 'Schedule interval string.' }, type: 'keyword' },
@@ -189,14 +152,6 @@ describe('registerAlertingV2UsageCollector', () => {
           },
           count_with_grouping: {
             _meta: { description: 'Number of rules with grouping enabled.' },
-            type: 'long',
-          },
-          count_with_no_data: {
-            _meta: { description: 'Number of rules with no data handling configured.' },
-            type: 'long',
-          },
-          count_with_recovery_policy: {
-            _meta: { description: 'Number of rules with a recovery policy.' },
             type: 'long',
           },
           dispatcher_executions_count_24hr: {
@@ -247,6 +202,42 @@ describe('registerAlertingV2UsageCollector', () => {
             type: 'boolean',
           },
           min_created_at: { _meta: { description: 'Earliest rule creation date.' }, type: 'date' },
+          count_by_recovery_strategy: {
+            no_breach: {
+              _meta: { description: 'Number of rules with recovery strategy no_breach.' },
+              type: 'long',
+            },
+            condition: {
+              _meta: { description: 'Number of rules with recovery strategy condition.' },
+              type: 'long',
+            },
+            query: {
+              _meta: { description: 'Number of rules with recovery strategy query.' },
+              type: 'long',
+            },
+            manual: {
+              _meta: { description: 'Number of rules with recovery strategy manual.' },
+              type: 'long',
+            },
+          },
+          count_by_no_data_strategy: {
+            ignore: {
+              _meta: { description: 'Number of rules with no-data strategy ignore.' },
+              type: 'long',
+            },
+            keep_last: {
+              _meta: { description: 'Number of rules with no-data strategy keep_last.' },
+              type: 'long',
+            },
+            resolve: {
+              _meta: { description: 'Number of rules with no-data strategy resolve.' },
+              type: 'long',
+            },
+            alert: {
+              _meta: { description: 'Number of rules with no-data strategy alert.' },
+              type: 'long',
+            },
+          },
           action_policies_avg_group_by_fields_count: {
             _meta: { description: 'Average number of group by fields per action policy.' },
             type: 'float',
@@ -269,6 +260,88 @@ describe('registerAlertingV2UsageCollector', () => {
               },
             },
             type: 'array',
+          },
+          action_policies_count_by_status: {
+            enabled: {
+              _meta: { description: 'Number of action policies that are enabled and not snoozed.' },
+              type: 'long',
+            },
+            disabled: {
+              _meta: { description: 'Number of action policies that are disabled.' },
+              type: 'long',
+            },
+            snoozed: {
+              _meta: {
+                description: 'Number of action policies that are enabled and currently snoozed.',
+              },
+              type: 'long',
+            },
+          },
+          action_policies_count_by_grouping_mode: {
+            per_alert: {
+              _meta: {
+                description:
+                  'Number of action policies with grouping mode per_alert (the default).',
+              },
+              type: 'long',
+            },
+            per_field: {
+              _meta: { description: 'Number of action policies with grouping mode per_field.' },
+              type: 'long',
+            },
+            all: {
+              _meta: { description: 'Number of action policies with grouping mode all.' },
+              type: 'long',
+            },
+          },
+          action_policies_count_by_throttle_strategy: {
+            on_status_change: {
+              _meta: {
+                description: 'Number of action policies with throttle strategy on_status_change.',
+              },
+              type: 'long',
+            },
+            per_status_interval: {
+              _meta: {
+                description:
+                  'Number of action policies with throttle strategy per_status_interval.',
+              },
+              type: 'long',
+            },
+            time_interval: {
+              _meta: {
+                description: 'Number of action policies with throttle strategy time_interval.',
+              },
+              type: 'long',
+            },
+            every_time: {
+              _meta: {
+                description: 'Number of action policies with throttle strategy every_time.',
+              },
+              type: 'long',
+            },
+            none: {
+              _meta: { description: 'Number of action policies with no throttle strategy.' },
+              type: 'long',
+            },
+          },
+          action_policies_workflows_per_policy: {
+            p50: {
+              _meta: { description: 'P50 of the number of workflows per action policy (max 10).' },
+              type: 'float',
+            },
+            p99: {
+              _meta: { description: 'P99 of the number of workflows per action policy (max 10).' },
+              type: 'float',
+            },
+            avg: {
+              _meta: { description: 'Average number of workflows per action policy (max 10).' },
+              type: 'float',
+            },
+          },
+          action_policies_count_with_multiple_workflows: {
+            _meta: { description: 'Number of action policies with more than one workflow.' },
+            type: 'long',
           },
           action_policies_count_with_group_by: {
             _meta: { description: 'Number of action policies with group by.' },

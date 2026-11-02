@@ -7,12 +7,10 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export const ProxyWarning: React.FunctionComponent<{}> = () => (
-  <EuiCallOut
-    iconType="warning"
-    color="warning"
+  <KbnWarningCallout
     size="s"
     title={
       <FormattedMessage

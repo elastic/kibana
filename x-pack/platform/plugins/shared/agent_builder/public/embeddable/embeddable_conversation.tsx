@@ -12,12 +12,11 @@ import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
 import { EmbeddableConversationHeader } from '../application/components/conversations/embeddable_conversation_header/embeddable_conversation_header';
-import {
-  conversationBackgroundStyles,
-  headerHeight,
-} from '../application/components/conversations/conversation.styles';
+import { conversationBackgroundStyles } from '../application/components/conversations/conversation.styles';
 import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
 import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
+
+const EMBEDDABLE_HEADER_HEIGHT = 64;
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -34,7 +33,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
 
   const headerStyles = css`
     display: flex;
-    height: ${headerHeight}px;
+    height: ${EMBEDDABLE_HEADER_HEIGHT}px;
     &.euiFlyoutHeader {
       padding-inline: 0;
       padding-block-start: 0;

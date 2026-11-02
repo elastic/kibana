@@ -22,20 +22,19 @@ import {
   EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useInstallProductDoc,
   useUninstallProductDoc,
+  useDefaultInferenceId,
   REACT_QUERY_KEYS,
   type ProductDocBasePluginStart,
 } from '@kbn/product-doc-base-plugin/public';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import { useQueries, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DocumentationItem, DocumentationStatus } from './types';
 import { DOCUMENTATION_ITEMS_CONFIG, type NormalizedDocStatus } from './documentation_items';
-import { enableProductDocumentationToolOnDefaultAgent } from './enable_product_documentation_tool_on_agent';
 import * as i18n from './translations';
 
 interface DocumentationSectionProps {
@@ -51,17 +50,39 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
 
   const queryClient = useQueryClient();
 
+  const { inferenceId: productDocInferenceId, isLoading: isProductDocInferenceIdLoading } =
+    useDefaultInferenceId(productDocBase, ResourceTypes.productDoc);
+  const { inferenceId: securityLabsInferenceId, isLoading: isSecurityLabsInferenceIdLoading } =
+    useDefaultInferenceId(productDocBase, ResourceTypes.securityLabs);
+
+  const inferenceIdByResourceType = useMemo(
+    () => ({
+      [ResourceTypes.productDoc]: productDocInferenceId,
+      [ResourceTypes.securityLabs]: securityLabsInferenceId,
+      [ResourceTypes.openapiSpec]: productDocInferenceId,
+    }),
+    [productDocInferenceId, securityLabsInferenceId]
+  );
+
+  const isInferenceIdLoading = isProductDocInferenceIdLoading || isSecurityLabsInferenceIdLoading;
+
   const docsConfig = DOCUMENTATION_ITEMS_CONFIG;
 
   const statusQueries = useQueries({
     queries: docsConfig.map((doc) => {
-      const inferenceId = defaultInferenceEndpoints.ELSER;
       const resourceType = doc.resourceType;
+      const inferenceId = inferenceIdByResourceType[resourceType];
       return {
         // IMPORTANT: use the shared product-doc-base query key so the existing install/uninstall hooks
         // invalidate these queries automatically (otherwise status only updates on full refresh).
         queryKey: [REACT_QUERY_KEYS.GET_PRODUCT_DOC_STATUS, inferenceId, resourceType],
-        queryFn: async () => doc.getNormalizedStatus({ productDocBase, inferenceId }),
+        queryFn: async () => {
+          if (!inferenceId) {
+            throw new Error('Inference ID is not available');
+          }
+          return doc.getNormalizedStatus({ productDocBase, inferenceId });
+        },
+        enabled: Boolean(inferenceId) && !isInferenceIdLoading,
         keepPreviousData: false,
         refetchOnWindowFocus: false,
         refetchInterval: (queryData?: NormalizedDocStatus) => {
@@ -74,7 +95,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
     }),
   });
 
-  const isLoading = statusQueries.some((q) => q.isLoading);
+  const isLoading = isInferenceIdLoading || statusQueries.some((q) => q.isLoading);
 
   const refetch = useCallback(() => {
     // Invalidate all doc status queries (for all rows) so they refresh together.
@@ -92,7 +113,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         name: doc.name,
         status,
         resourceType: doc.resourceType,
-        inferenceId: defaultInferenceEndpoints.ELSER,
+        inferenceId: inferenceIdByResourceType[doc.resourceType],
         ...(updateAvailable ? { updateAvailable } : {}),
         isTechPreview: doc.isTechPreview,
         isStubbed: doc.isStubbed,
@@ -100,12 +121,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         ...(data?.failureReason ? { failureReason: data.failureReason } : {}),
       };
     });
-  }, [docsConfig, statusQueries]);
+  }, [docsConfig, statusQueries, inferenceIdByResourceType]);
 
   const getErrorSuggestion = useCallback(
-    (failureReason: string, inferenceId: string): string | null => {
+    (failureReason: string, endpointId: string): string | null => {
       if (failureReason.includes('model_deployment_timeout_exception')) {
-        return i18n.getModelDeploymentTimeoutSuggestion(inferenceId);
+        return i18n.getModelDeploymentTimeoutSuggestion(endpointId);
       }
       return null;
     },
@@ -160,11 +181,12 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
           item={item}
           productDocBase={productDocBase}
           hasManagePrivilege={hasManagePrivilege}
+          isInferenceIdLoading={isInferenceIdLoading}
           onRefetch={refetch}
         />
       );
     },
-    [hasManagePrivilege, productDocBase, refetch]
+    [hasManagePrivilege, isInferenceIdLoading, productDocBase, refetch]
   );
 
   const columns: Array<EuiBasicTableColumn<DocumentationItem>> = useMemo(
@@ -249,32 +271,15 @@ const DocumentationRowActions: React.FC<{
   item: DocumentationItem;
   productDocBase: ProductDocBasePluginStart;
   hasManagePrivilege: boolean;
+  isInferenceIdLoading: boolean;
   onRefetch: () => void;
-}> = ({ item, productDocBase, hasManagePrivilege, onRefetch }) => {
+}> = ({ item, productDocBase, hasManagePrivilege, isInferenceIdLoading, onRefetch }) => {
   const { services } = useKibana();
-  const { application, http, notifications, rendering, docLinks } = services;
+  const { notifications, rendering, docLinks } = services;
 
   const installMutation = useInstallProductDoc(productDocBase, {
     onSuccess: () => {
       notifications.toasts.addSuccess({ title: i18n.getInstallSuccessTitle(item.name) });
-
-      enableProductDocumentationToolOnDefaultAgent({ http }).catch(() => {
-        const toolsUrl = application.getUrlForApp('agent_builder', {
-          path: `/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}/tools`,
-        });
-        notifications.toasts.addWarning({
-          title: i18n.getInstallSuccessTitle(item.name),
-          text: toMountPoint(
-            <EuiText size="s">
-              <p>{i18n.TOOL_AUTO_ENABLE_FAILED_DESCRIPTION}</p>
-              <p>
-                <EuiLink href={toolsUrl}>{i18n.TOOL_AUTO_ENABLE_FAILED_LINK}</EuiLink>
-              </p>
-            </EuiText>,
-            rendering
-          ),
-        });
-      });
     },
     onError: (error) => {
       const message = error.body?.message ?? error.message;
@@ -309,14 +314,15 @@ const DocumentationRowActions: React.FC<{
 
   const installVars = useMemo(
     () => ({
-      inferenceId: defaultInferenceEndpoints.ELSER,
+      inferenceId: item.inferenceId,
       resourceType: item.resourceType,
     }),
-    [item.resourceType]
+    [item.inferenceId, item.resourceType]
   );
 
   const isItemInstalling = item.status === 'installing' || installMutation.isLoading;
   const isItemUninstalling = item.status === 'uninstalling' || uninstallMutation.isLoading;
+  const isActionDisabled = !hasManagePrivilege || isInferenceIdLoading;
 
   const wrapWithPrivilegeTooltip = (button: React.ReactElement) => {
     if (!hasManagePrivilege) {
@@ -364,8 +370,8 @@ const DocumentationRowActions: React.FC<{
       <EuiButtonEmpty
         size="xs"
         iconType="refresh"
-        onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-        isDisabled={!hasManagePrivilege}
+        onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+        isDisabled={isActionDisabled}
         data-test-subj={`documentation-retry-${item.id}`}
       >
         {i18n.ACTION_RETRY}
@@ -401,8 +407,8 @@ const DocumentationRowActions: React.FC<{
             <EuiButtonEmpty
               size="xs"
               iconType="refresh"
-              onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-              isDisabled={!hasManagePrivilege}
+              onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+              isDisabled={isActionDisabled}
               data-test-subj={`documentation-update-${item.id}`}
             >
               {i18n.ACTION_UPDATE}
@@ -411,9 +417,9 @@ const DocumentationRowActions: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
-              iconType="returnKey"
-              onClick={hasManagePrivilege ? () => uninstallMutation.mutate(installVars) : undefined}
-              isDisabled={!hasManagePrivilege}
+              iconType="return"
+              onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
+              isDisabled={isActionDisabled}
               data-test-subj={`documentation-uninstall-${item.id}`}
             >
               {i18n.ACTION_UNINSTALL}
@@ -426,9 +432,9 @@ const DocumentationRowActions: React.FC<{
     return wrapWithPrivilegeTooltip(
       <EuiButtonEmpty
         size="xs"
-        iconType="returnKey"
-        onClick={hasManagePrivilege ? () => uninstallMutation.mutate(installVars) : undefined}
-        isDisabled={!hasManagePrivilege}
+        iconType="return"
+        onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
+        isDisabled={isActionDisabled}
         data-test-subj={`documentation-uninstall-${item.id}`}
       >
         {i18n.ACTION_UNINSTALL}
@@ -455,8 +461,8 @@ const DocumentationRowActions: React.FC<{
     <EuiButtonEmpty
       size="xs"
       iconType="download"
-      onClick={hasManagePrivilege ? () => installMutation.mutate(installVars) : undefined}
-      isDisabled={!hasManagePrivilege}
+      onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+      isDisabled={isActionDisabled}
       data-test-subj={`documentation-install-${item.id}`}
     >
       {i18n.ACTION_INSTALL}

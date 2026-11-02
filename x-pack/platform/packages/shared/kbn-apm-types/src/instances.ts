@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const instancesSortFieldRt = t.keyof({
-  serviceNodeName: null,
-  latency: null,
-  throughput: null,
-  errorRate: null,
-  cpuUsage: null,
-  memoryUsage: null,
-});
+export const instancesSortFieldSchema = z.enum([
+  'serviceNodeName',
+  'latency',
+  'throughput',
+  'errorRate',
+  'cpuUsage',
+  'memoryUsage',
+]);
 
-export type InstancesSortField = t.TypeOf<typeof instancesSortFieldRt>;
+export type InstancesSortField = z.infer<typeof instancesSortFieldSchema>;

@@ -36,6 +36,12 @@ describe('BraveSearchConnector', () => {
     mockClient.get.mockResolvedValue(createMockResponse());
   });
 
+  it('supports Context Engine alongside workflows and Agent Builder', () => {
+    expect(BraveSearchConnector.metadata.supportedFeatureIds).toContain('workflows');
+    expect(BraveSearchConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    expect(BraveSearchConnector.metadata.supportedFeatureIds).toContain('contextEngine');
+  });
+
   describe('webSearch action', () => {
     it('should perform a basic web search with default parameters and return correct structure', async () => {
       const mockResponse = createMockResponse({
@@ -103,7 +109,7 @@ describe('BraveSearchConnector', () => {
       await BraveSearchConnector.actions.webSearch.handler(mockContext, {
         q: 'test query',
         count: 10,
-        offset: 10,
+        offset: 9,
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
@@ -112,7 +118,7 @@ describe('BraveSearchConnector', () => {
           params: {
             q: 'test query',
             count: 10,
-            offset: 10,
+            offset: 9,
           },
           headers: {
             Accept: 'application/json',
@@ -120,6 +126,13 @@ describe('BraveSearchConnector', () => {
           },
         }
       );
+    });
+
+    it('accepts an offset of up to 9 pages and rejects anything above it', () => {
+      const { input } = BraveSearchConnector.actions.webSearch;
+
+      expect(input.parse({ q: 'test query', offset: 9 })).toMatchObject({ offset: 9 });
+      expect(() => input.parse({ q: 'test query', offset: 10 })).toThrow();
     });
 
     it('should handle response with no web results', async () => {
@@ -164,11 +177,10 @@ describe('BraveSearchConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = BraveSearchConnector.test;
+
     it('should return success when API is accessible', async () => {
-      if (!BraveSearchConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await BraveSearchConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://api.search.brave.com/res/v1/web/search',
@@ -183,23 +195,13 @@ describe('BraveSearchConnector', () => {
           },
         }
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to Brave Search API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid API key'));
 
-      if (!BraveSearchConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await BraveSearchConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect to Brave Search API');
-      expect(result.message).toContain('Invalid API key');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

@@ -21,15 +21,12 @@ import type {
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsSchemaUpdatedProps,
-  StreamsSignificantEventsCreatedProps,
-  StreamsSignificantEventsSuggestionsGeneratedEventProps,
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsProcessingSimulationSamplesFetchLatencyProps,
   StreamsPartitioningSamplesFetchLatencyProps,
   StreamsTabVisitedProps,
-  StreamsInsightFeedbackProps,
 } from './types';
 import {
   STREAMS_AI_GROK_SUGGESTION_ACCEPTED_EVENT_TYPE,
@@ -46,15 +43,12 @@ import {
   STREAMS_PROCESSING_SAVED_EVENT_TYPE,
   STREAMS_RETENTION_CHANGED_EVENT_TYPE,
   STREAMS_SCHEMA_UPDATED_EVENT_TYPE,
-  STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE,
-  STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE,
   STREAMS_WIRED_STREAMS_STATUS_CHANGED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE,
   STREAMS_FEATURE_IDENTIFICATION_DELETED_EVENT_TYPE,
   STREAMS_PROCESSING_SIMULATION_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_PARTITIONING_SAMPLES_FETCH_LATENCY_EVENT_TYPE,
   STREAMS_TAB_VISITED_EVENT_TYPE,
-  STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE,
 } from './constants';
 
 export class StreamsTelemetryClient {
@@ -116,16 +110,6 @@ export class StreamsTelemetryClient {
     this.analytics.reportEvent(STREAMS_SCHEMA_UPDATED_EVENT_TYPE, props);
   }
 
-  public trackSignificantEventsSuggestionsGenerate(
-    params: StreamsSignificantEventsSuggestionsGeneratedEventProps
-  ) {
-    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_SUGGESTIONS_GENERATED_EVENT_TYPE, params);
-  }
-
-  public trackSignificantEventsCreated(params: StreamsSignificantEventsCreatedProps) {
-    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_CREATED_EVENT_TYPE, params);
-  }
-
   public trackFeaturesSaved(params: StreamsFeatureIdentificationSavedProps) {
     this.analytics.reportEvent(STREAMS_FEATURE_IDENTIFICATION_SAVED_EVENT_TYPE, params);
   }
@@ -136,10 +120,6 @@ export class StreamsTelemetryClient {
 
   public trackTabVisited(params: StreamsTabVisitedProps) {
     this.analytics.reportEvent(STREAMS_TAB_VISITED_EVENT_TYPE, params);
-  }
-
-  public trackInsightFeedback(params: StreamsInsightFeedbackProps) {
-    this.analytics.reportEvent(STREAMS_SIGNIFICANT_EVENTS_INSIGHT_FEEDBACK_EVENT_TYPE, params);
   }
 
   public startTrackingAIDissectSuggestionLatency(

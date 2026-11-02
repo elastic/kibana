@@ -14,7 +14,7 @@ const FAKE_NOW = new Date('2025-01-15T12:00:00.000Z');
 
 describe('evaluateKql', () => {
   it('should throw an error for invalid KQL', () => {
-    expect(() => evaluateKql('invalid "kql', {})).toThrowError();
+    expect(() => evaluateKql('invalid "kql', {})).toThrow();
   });
 
   describe('"is" expressions', () => {
@@ -94,6 +94,45 @@ describe('evaluateKql', () => {
       const kql = 'users.0.name: "Alice"';
       expect(evaluateKql(kql, { users: [{ name: 'Alice' }, { name: 'Bob' }] })).toBe(true);
       expect(evaluateKql(kql, { users: [{ name: 'Charlie' }, { name: 'Bob' }] })).toBe(false);
+    });
+
+    // A field path whose intermediate segment resolves to a non-object (scalar,
+    // null, or undefined) must evaluate to false, NOT throw. Traversing further
+    // into such a value previously hit `'segment' in <non-object>`, which throws
+    // `TypeError: Cannot use 'in' operator ...` and crashed the whole caller
+    // (e.g. a workflow execution or an alerting matcher).
+    describe('traversing through a non-object intermediate value', () => {
+      it('should return false (not throw) when traversing into a string', () => {
+        const kql = 'output.value: true';
+        expect(() => evaluateKql(kql, { output: 'hello' })).not.toThrow();
+        expect(evaluateKql(kql, { output: 'hello' })).toBe(false);
+      });
+
+      it('should return false (not throw) when traversing into a number', () => {
+        const kql = 'output.value: true';
+        expect(evaluateKql(kql, { output: 42 })).toBe(false);
+      });
+
+      it('should return false (not throw) when traversing into a boolean', () => {
+        const kql = 'output.value: true';
+        expect(evaluateKql(kql, { output: true })).toBe(false);
+      });
+
+      it('should return false (not throw) when an intermediate segment is undefined', () => {
+        const kql = 'steps.x.output.field: "y"';
+        expect(evaluateKql(kql, { steps: { x: {} } })).toBe(false);
+      });
+
+      it('should return false (not throw) when an intermediate segment is null', () => {
+        const kql = 'steps.x.output.field: "y"';
+        expect(evaluateKql(kql, { steps: { x: { output: null } } })).toBe(false);
+      });
+
+      it('should return false (not throw) for a deep path through a scalar in a range expression', () => {
+        const kql = 'output.value.deeper > 5';
+        expect(() => evaluateKql(kql, { output: 'hello' })).not.toThrow();
+        expect(evaluateKql(kql, { output: 'hello' })).toBe(false);
+      });
     });
 
     describe('range expressions', () => {

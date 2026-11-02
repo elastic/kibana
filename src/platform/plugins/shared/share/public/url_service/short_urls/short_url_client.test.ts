@@ -19,6 +19,7 @@ import { ShortUrlRedirectLocatorDefinition } from '../../../common/url_service/l
 import type { BrowserShortUrlClientHttp, BrowserShortUrlClient } from './short_url_client';
 import type { BrowserShortUrlClientFactoryCreateParams } from './short_url_client_factory';
 import { BrowserShortUrlClientFactory } from './short_url_client_factory';
+import type { TimeRange } from '@kbn/es-query';
 
 const setup = () => {
   const navigate = jest.fn(async () => {});
@@ -381,6 +382,11 @@ describe('createWithLocator()', () => {
     telemetry: jest.fn(),
     migrations: {},
     useUrl: jest.fn(),
+    getTimeRange: (params: { timeRange?: TimeRange }) => params.timeRange,
+    setTimeRange: (params: { timeRange?: TimeRange }, timeRange?: TimeRange) => ({
+      ...params,
+      timeRange,
+    }),
   };
 
   // Mock Date.now() for consistent results
@@ -410,29 +416,6 @@ describe('createWithLocator()', () => {
     expect(sentBody.params.timeRange.to).toBe('2026-01-12T12:00:00.000Z');
   });
 
-  test('converts both timeRange and time_range when both exist', async () => {
-    const { service, http } = setup();
-    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
-
-    await service.shortUrls.get(null).createWithLocator(
-      {
-        locator: mockLocator,
-        params: {
-          timeRange: { from: 'now-15m', to: 'now' },
-          time_range: { from: 'now-15m', to: 'now' },
-        },
-      },
-      true
-    );
-
-    const sentBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
-    // Both fields should be converted
-    expect(sentBody.params.timeRange.from).toBe('2026-01-12T11:45:00.000Z');
-    expect(sentBody.params.timeRange.to).toBe('2026-01-12T12:00:00.000Z');
-    expect(sentBody.params.time_range.from).toBe('2026-01-12T11:45:00.000Z');
-    expect(sentBody.params.time_range.to).toBe('2026-01-12T12:00:00.000Z');
-  });
-
   test('preserves relative time when isAbsoluteTime is false', async () => {
     const { service, http } = setup();
     const fetchSpy = http.fetch as unknown as jest.SpyInstance;
@@ -451,4 +434,18 @@ describe('createWithLocator()', () => {
     expect(sentBody.params.timeRange.from).toBe('now-15m');
     expect(sentBody.params.timeRange.to).toBe('now');
   });
+});
+
+describe('encoded path parameters', () => {
+  test.each(['get', 'resolve', 'delete'] as const)(
+    '%s encodes its path parameter',
+    async (method) => {
+      const { service, http } = setup();
+      await service.shortUrls.get(null)[method]('../a?b#c%/café');
+      const prefix = method === 'resolve' ? '/api/short_url/_slug/' : '/api/short_url/';
+      expect(http.fetch).toHaveBeenCalledWith(`${prefix}..%2Fa%3Fb%23c%25%2Fcaf%C3%A9`, {
+        method: method === 'delete' ? 'DELETE' : 'GET',
+      });
+    }
+  );
 });

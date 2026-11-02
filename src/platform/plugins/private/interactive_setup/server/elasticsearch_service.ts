@@ -15,7 +15,6 @@ import {
   catchError,
   distinctUntilChanged,
   exhaustMap,
-  firstValueFrom,
   from,
   map,
   of,
@@ -32,7 +31,7 @@ import type {
   Logger,
   ScopeableRequest,
 } from '@kbn/core/server';
-import { pollEsNodesVersion } from '@kbn/core/server';
+import { checkEsNodesVersion } from '@kbn/core/server';
 
 import { CompatibilityError } from './compatibility_error';
 import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
@@ -391,16 +390,11 @@ export class ElasticsearchService {
   }
 
   private async checkCompatibility(internalClient: ElasticsearchClient) {
-    return firstValueFrom(
-      pollEsNodesVersion({
-        internalClient,
-        log: this.logger,
-        kibanaVersion: this.kibanaVersion,
-        ignoreVersionMismatch: false,
-        healthCheckInterval: -1, // Passing a negative number here will result in immediate completion after the first value is emitted
-        healthCheckRetry: 1,
-      })
-    );
+    return checkEsNodesVersion({
+      internalClient,
+      kibanaVersion: this.kibanaVersion,
+      ignoreVersionMismatch: false,
+    });
   }
 
   private static fetchPeerCertificate(host: string, port: string | number) {

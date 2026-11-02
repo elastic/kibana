@@ -93,5 +93,39 @@ describe('formatters', () => {
         )
       ).toEqual('45s');
     });
+
+    it('omits the timeout for lightweight monitors when it matches the Heartbeat default', () => {
+      expect(
+        publicTimeoutFormatter!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: '16',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toBeNull();
+
+      expect(
+        publicTimeoutFormatter!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: 16,
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toBeNull();
+    });
+
+    it('keeps a fractional lightweight timeout that only truncates to the default', () => {
+      expect(
+        publicTimeoutFormatter!(
+          {
+            [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
+            [ConfigKey.TIMEOUT]: '16.5',
+          },
+          ConfigKey.TIMEOUT
+        )
+      ).toEqual('16.5s');
+    });
   });
 });

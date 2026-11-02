@@ -11,15 +11,37 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import { useLeadGenerationPrivileges } from '../../../api/hooks/use_lead_generation_privileges';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
+import { MAX_RECENT_LEADS } from './utils';
+
+const LEADS_LIST_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_list'
+);
+const LEADS_GENERATE_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_generate'
+);
+const LEADS_GENERATION_STATUS_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.THREAT_HUNTING_LEADS,
+  'leads_generation_status'
+);
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
 const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
 
 const POLL_INTERVAL_MS = 2_000;
-const MAX_POLLS = 30;
+// Active-poll window = MAX_POLLS * POLL_INTERVAL_MS = 150s. The UI advertises
+// "up to two minutes"; the extra ~30s of headroom keeps runs that finish a
+// touch late from routinely hitting the "taking longer than expected" warning.
+// Keep this window below IN_FLIGHT_STALE_MS so reload-resume still works.
+const MAX_POLLS = 75;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -29,14 +51,70 @@ const isPermissionDenied = (error: unknown): boolean =>
 const FETCH_LEADS_PARAMS = {
   params: {
     page: 1 as const,
-    perPage: 10 as const,
+    perPage: MAX_RECENT_LEADS,
     sortField: 'priority' as const,
     sortOrder: 'desc' as const,
     status: 'active' as const,
   },
 };
 
-export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) => {
+// ---------------------------------------------------------------------------
+// Reload-resume: persists the currently in-flight generation's executionUuid
+// so that reloading the page while a run is still going doesn't drop the
+// "Generating..." UI. This is a client-only, best-effort mechanism (scoped to
+// the current browser via localStorage): it does not survive a different
+// browser/device, and it can't detect generations triggered from chat.
+// ---------------------------------------------------------------------------
+
+const IN_FLIGHT_STORAGE_KEY_PREFIX = 'securitySolution.entityAnalytics.leadGeneration.inFlight';
+// A run should normally finish within the ~2 min the UI advertises; treat
+// anything older than this as abandoned rather than resuming it forever.
+const IN_FLIGHT_STALE_MS = 5 * 60 * 1000;
+
+interface InFlightGeneration {
+  executionUuid: string;
+  startedAt: number;
+}
+
+const getInFlightStorageKey = (spaceId: string): string =>
+  `${IN_FLIGHT_STORAGE_KEY_PREFIX}.${spaceId}`;
+
+const readInFlightGeneration = (spaceId: string): InFlightGeneration | null => {
+  try {
+    const raw = localStorage.getItem(getInFlightStorageKey(spaceId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<InFlightGeneration>;
+    if (typeof parsed.executionUuid !== 'string' || typeof parsed.startedAt !== 'number') {
+      return null;
+    }
+    return { executionUuid: parsed.executionUuid, startedAt: parsed.startedAt };
+  } catch {
+    return null;
+  }
+};
+
+const writeInFlightGeneration = (spaceId: string, entry: InFlightGeneration): void => {
+  try {
+    localStorage.setItem(getInFlightStorageKey(spaceId), JSON.stringify(entry));
+  } catch {
+    // localStorage may be unavailable (e.g. private browsing); resuming after
+    // a reload is a best-effort enhancement, so failures here are ignored.
+  }
+};
+
+const clearInFlightGeneration = (spaceId: string): void => {
+  try {
+    localStorage.removeItem(getInFlightStorageKey(spaceId));
+  } catch {
+    // See writeInFlightGeneration.
+  }
+};
+
+export const useHuntingLeads = (
+  connectorId: string,
+  isEnabled: boolean = true,
+  spaceId: string = 'default'
+) => {
   const {
     fetchLeads,
     generateLeads: generateLeadsApi,
@@ -51,6 +129,8 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
   const [hasGenerated, setHasGenerated] = useState(false);
   const [readPermissionError, setReadPermissionError] = useState(false);
   const [writePermissionError, setWritePermissionError] = useState(false);
+  const [isResuming, setIsResuming] = useState(false);
+  const hasCheckedResumeRef = useRef(false);
 
   const { data: privileges } = useLeadGenerationPrivileges(isEnabled);
 
@@ -71,7 +151,8 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     refetch,
   } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
-    queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
+    queryFn: ({ signal }) =>
+      fetchLeads({ signal, ...FETCH_LEADS_PARAMS, context: LEADS_LIST_CONTEXT }),
     enabled: isEnabled,
     onError: (error: Error) => {
       if (isPermissionDenied(error)) {
@@ -89,13 +170,20 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
         await delay(POLL_INTERVAL_MS);
         if (signal.aborted) return 'timeout';
 
-        const status = await fetchLeadGenerationStatus({ signal });
+        const status = await fetchLeadGenerationStatus({
+          signal,
+          context: LEADS_GENERATION_STATUS_CONTEXT,
+        });
         if (status.lastExecutionUuid === executionUuid) {
           if (status.lastError) {
             throw new Error(status.lastError);
           }
 
-          const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
+          const result = await fetchLeads({
+            ...FETCH_LEADS_PARAMS,
+            signal,
+            context: LEADS_LIST_CONTEXT,
+          });
           queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
           queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], status);
           return 'success';
@@ -107,8 +195,8 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
       // isGenerating flips to false, preventing a spurious empty-state flash.
       if (!signal.aborted) {
         const [finalResult, finalStatus] = await Promise.all([
-          fetchLeads({ ...FETCH_LEADS_PARAMS, signal }),
-          fetchLeadGenerationStatus({ signal }),
+          fetchLeads({ ...FETCH_LEADS_PARAMS, signal, context: LEADS_LIST_CONTEXT }),
+          fetchLeadGenerationStatus({ signal, context: LEADS_GENERATION_STATUS_CONTEXT }),
         ]);
         queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], finalResult);
         queryClient.setQueryData([LEAD_SCHEDULE_QUERY_KEY], finalStatus);
@@ -118,13 +206,18 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     [fetchLeadGenerationStatus, fetchLeads, queryClient]
   );
 
-  const { mutate: generate, isLoading: isGenerating } = useMutation({
+  const { mutate: generate, isLoading: isGeneratingMutation } = useMutation({
     mutationFn: async () => {
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
       telemetry.reportEvent(EntityEventTypes.LeadGenerationGenerateClicked, {});
-      const { executionUuid } = await generateLeadsApi({ params: { connectorId }, signal });
+      const { executionUuid } = await generateLeadsApi({
+        params: { connectorId },
+        signal,
+        context: LEADS_GENERATE_CONTEXT,
+      });
+      writeInFlightGeneration(spaceId, { executionUuid, startedAt: Date.now() });
       return pollForCompletion(executionUuid, signal);
     },
     onSuccess: (result) => {
@@ -142,11 +235,15 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
         addError(error, { title: i18n.GENERATE_ERROR });
       }
     },
+    onSettled: () => {
+      clearInFlightGeneration(spaceId);
+    },
   });
 
   const { data: statusData, isLoading: isStatusLoading } = useQuery({
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
-    queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
+    queryFn: ({ signal }) =>
+      fetchLeadGenerationStatus({ signal, context: LEADS_GENERATION_STATUS_CONTEXT }),
     enabled: isEnabled,
     onError: (error: Error) => {
       if (isPermissionDenied(error)) {
@@ -157,6 +254,47 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
     },
   });
 
+  // On mount, resume tracking a generation run that was still in progress
+  // before the page was reloaded (see the "Reload-resume" note above). This
+  // only runs once, after the status query settles.
+  useEffect(() => {
+    if (!isEnabled || hasCheckedResumeRef.current || isStatusLoading || !statusData) {
+      return;
+    }
+    hasCheckedResumeRef.current = true;
+
+    const stored = readInFlightGeneration(spaceId);
+    if (!stored) return;
+
+    if (Date.now() - stored.startedAt > IN_FLIGHT_STALE_MS) {
+      clearInFlightGeneration(spaceId);
+      return;
+    }
+
+    if (statusData.lastExecutionUuid === stored.executionUuid) {
+      // The run already finished (successfully or not) while we were away.
+      clearInFlightGeneration(spaceId);
+      return;
+    }
+
+    abortCtrl.current = new AbortController();
+    const { signal } = abortCtrl.current;
+    setIsResuming(true);
+    pollForCompletion(stored.executionUuid, signal)
+      .then(() => {
+        setHasGenerated(true);
+      })
+      .catch((error: Error) => {
+        if (!isPermissionDenied(error)) {
+          addError(error, { title: i18n.GENERATE_ERROR });
+        }
+      })
+      .finally(() => {
+        clearInFlightGeneration(spaceId);
+        setIsResuming(false);
+      });
+  }, [isEnabled, isStatusLoading, statusData, spaceId, pollForCompletion, addError]);
+
   const { mutate: toggleSchedule } = useMutation({
     mutationFn: (enabled: boolean) =>
       enabled ? enableLeadGeneration({ connectorId }) : disableLeadGeneration(),
@@ -165,10 +303,14 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
   });
 
   const isLoading = isLeadsLoading || isStatusLoading;
+  const isGenerating = isGeneratingMutation || isResuming;
 
   return {
     leads: data?.leads?.map(fromApiLead) ?? [],
-    totalCount: data?.total ?? 0,
+    // `total` is a raw count unaffected by `perPage`, so clamp it to the same
+    // cap applied to the fetched leads to avoid the displayed count exceeding
+    // what a consumer (e.g. the flyout) can actually show.
+    totalCount: Math.min(data?.total ?? 0, MAX_RECENT_LEADS),
     isLoading,
     isGenerating,
     hasGenerated,

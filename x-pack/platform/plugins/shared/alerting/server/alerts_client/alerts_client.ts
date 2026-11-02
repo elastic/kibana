@@ -9,10 +9,15 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import {
   ALERT_UUID,
+  ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_SCHEDULED_ACTION_GROUP,
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
+  ALERT_SNOOZED,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_DELAYED,
 } from '@kbn/rule-data-utils';
 import { get, isEmpty } from 'lodash';
 import type {
@@ -64,13 +69,14 @@ import {
   AlertBuilder,
 } from './lib';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
-import { getTrackedAlerts, createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
+import { createEmptyTrackedAlerts } from './lib/get_tracked_alerts';
+import { reconcileTrackedAlertsWithState } from './lib/reconcile_tracked_alerts';
+import { getMaxAlertLimit } from '../../common';
 import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
-import { DEFAULT_MAX_ALERTS } from '../config';
 import { RUNTIME_MAINTENANCE_WINDOW_ID_FIELD } from './lib/get_summarized_alerts_query';
 import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
 
@@ -111,6 +117,7 @@ export class AlertsClient<
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
+  private activeAlertsDataCache: Map<string, Record<string, unknown>> = new Map();
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
@@ -152,29 +159,44 @@ export class AlertsClient<
     if (runTimestamp) {
       this.runTimestampString = runTimestamp.toISOString();
     }
-    await this.legacyAlertsClient.initializeExecution(opts);
 
     // No need to fetch the tracked alerts for the non-lifecycle rules
-    if (this.ruleType.autoRecoverAlerts) {
-      try {
-        this.trackedAlerts = await getTrackedAlerts<AlertData>({
-          ruleId: this.options.rule.id,
-          lookBackWindow: opts.flappingSettings.lookBackWindow,
-          maxAlertLimit: this.legacyAlertsClient.getMaxAlertLimit() || DEFAULT_MAX_ALERTS,
-          activeAlertsFromState: opts.activeAlertsFromState,
-          recoveredAlertsFromState: opts.recoveredAlertsFromState,
-          search: (queryBody) => this.search(queryBody),
-          logger: this.options.logger,
-          ruleInfoMessage: this.ruleInfoMessage,
-          logTags: this.logTags,
-        });
-      } catch (err) {
-        this.options.logger.error(
-          `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
-          this.logTags
-        );
-        throw err;
-      }
+    if (!this.ruleType.autoRecoverAlerts) {
+      await this.legacyAlertsClient.initializeExecution(opts);
+      return;
+    }
+
+    const { trackedAlerts, activeAlertsFromState, recoveredAlertsFromState } =
+      await this.reconcileTrackedAlerts(opts);
+    this.trackedAlerts = trackedAlerts;
+    await this.legacyAlertsClient.initializeExecution({
+      ...opts,
+      activeAlertsFromState,
+      recoveredAlertsFromState,
+    });
+  }
+
+  // Loads the tracked alert documents and makes them agree with the task state, so a run that
+  // persisted alerts and then failed before saving its state does not make this run create
+  // duplicate alert documents with new UUIDs.
+  private async reconcileTrackedAlerts(opts: InitializeExecutionOpts) {
+    try {
+      return await reconcileTrackedAlertsWithState<AlertData>({
+        ruleId: this.options.rule.id,
+        activeAlertsFromState: opts.activeAlertsFromState,
+        recoveredAlertsFromState: opts.recoveredAlertsFromState,
+        maxAlerts: getMaxAlertLimit(opts.maxAlerts),
+        search: (queryBody) => this.search(queryBody),
+        logger: this.options.logger,
+        ruleInfoMessage: this.ruleInfoMessage,
+        logTags: this.logTags,
+      });
+    } catch (err) {
+      this.options.logger.error(
+        `Error searching for tracked alerts by UUID ${this.ruleInfoMessage} - ${err.message}`,
+        this.logTags
+      );
+      throw err;
     }
   }
 
@@ -270,12 +292,8 @@ export class AlertsClient<
   }
 
   public isTrackedAlert(id: string) {
-    const alert = this.trackedAlerts.getById(id);
-    const uuid = alert?.[ALERT_UUID];
-    if (uuid) {
-      return !!this.trackedAlerts.active[uuid];
-    }
-    return false;
+    const status = get(this.trackedAlerts.getById(id), ALERT_STATUS);
+    return status === ALERT_STATUS_ACTIVE || status === ALERT_STATUS_DELAYED;
   }
 
   public hasReachedAlertLimit(): boolean {
@@ -314,6 +332,17 @@ export class AlertsClient<
 
   public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return this.legacyAlertsClient.getRawAlertInstancesForState(shouldOptimizeTaskState);
+  }
+
+  /**
+   * Returns the alert document for a given alert instance ID as it was
+   * constructed and indexed during `persistAlerts()` for this execution.
+   * Returns undefined when the alert was not indexed this execution.
+   */
+  public getBuiltActiveAlertDataByInstanceId(
+    instanceId: string
+  ): Record<string, unknown> | undefined {
+    return this.activeAlertsDataCache.get(instanceId);
   }
 
   public factory() {
@@ -414,6 +443,15 @@ export class AlertsClient<
 
     const alertsToIndex = alertBuilder.buildAlerts();
 
+    this.activeAlertsDataCache = new Map();
+    for (const alert of alertsToIndex) {
+      const instanceId = get(alert, ALERT_INSTANCE_ID) as string | undefined;
+      const status = get(alert, ALERT_STATUS) as string | undefined;
+      if (instanceId && status === ALERT_STATUS_ACTIVE) {
+        this.activeAlertsDataCache.set(instanceId, alert as Record<string, unknown>);
+      }
+    }
+
     if (alertsToIndex.length > 0) {
       const bulkBody = alertBuilder.getBulkBody(alertsToIndex);
 
@@ -453,6 +491,59 @@ export class AlertsClient<
         );
         throw err;
       }
+    }
+  }
+
+  /**
+   * After per-alert snooze condition evaluation, some instances may have their
+   * snooze lifted mid-execution. Their alert documents were already persisted
+   * with `kibana.alert.snoozed: true` (because evaluation happens after persist),
+   * so we need a follow-up update to correct the field for those documents.
+   */
+  public async clearSnoozedStatusForAlerts(conditionExpiredInstanceIds: string[]): Promise<void> {
+    if (!this.ruleType.alerts?.shouldWrite || conditionExpiredInstanceIds.length === 0) {
+      return;
+    }
+
+    const uuidsToUpdate: string[] = [];
+    for (const instanceId of conditionExpiredInstanceIds) {
+      const alertData = this.activeAlertsDataCache.get(instanceId);
+      if (alertData) {
+        const uuid = get(alertData, ALERT_UUID) as string | undefined;
+        if (uuid) {
+          uuidsToUpdate.push(uuid);
+          // Keep the in-memory cache consistent with what will be in ES
+          alertData[ALERT_SNOOZED] = false;
+        }
+      }
+    }
+
+    if (uuidsToUpdate.length === 0) {
+      return;
+    }
+
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      await retryTransientEsErrors(
+        () =>
+          esClient.updateByQuery({
+            query: { terms: { _id: uuidsToUpdate } },
+            conflicts: 'proceed',
+            index: this.indexTemplateAndPattern.alias,
+            refresh: true,
+            script: {
+              source: `ctx._source['${ALERT_SNOOZED}'] = false;`,
+              lang: 'painless',
+            },
+          }),
+        { logger: this.options.logger }
+      );
+    } catch (err) {
+      // Swallow the error
+      this.options.logger.error(
+        `Error clearing snoozed status for condition-expired alerts ${this.ruleInfoMessage}: ${err}`,
+        this.logTags
+      );
     }
   }
 
@@ -681,7 +772,7 @@ export class AlertsClient<
   }
 
   public getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions {
-    const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
+    const { rawActiveAlerts } = this.getRawAlertInstancesForState();
     const result: AlertsToUpdateWithLastScheduledActions = {};
     try {
       for (const key in rawActiveAlerts) {

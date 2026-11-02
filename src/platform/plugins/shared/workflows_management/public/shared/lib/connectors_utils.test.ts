@@ -145,6 +145,12 @@ describe('isCreateConnectorEnabledForStepType', () => {
     } as unknown as ReturnType<typeof stepSchemas.getStepDefinition>);
     expect(isCreateConnectorEnabledForStepType('custom.step')).toBe(true);
   });
+
+  it('returns false for HITL wait steps so Create connector never opens .waitForInput / .waitForApproval', () => {
+    mockGetStepDefinition.mockReturnValue(undefined);
+    expect(isCreateConnectorEnabledForStepType('waitForInput')).toBe(false);
+    expect(isCreateConnectorEnabledForStepType('waitForApproval')).toBe(false);
+  });
 });
 
 describe('getInferenceConnectorTaskTypeFromSubAction', () => {

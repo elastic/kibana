@@ -10,7 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewPageState } from '../../../../../../state';
@@ -21,7 +21,7 @@ import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { SyntheticsRemoteBadge } from '../../../../../common/components/synthetics_remote_badge';
-import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
+import { SyntheticsHeartbeatBadge } from '../../../../../common/components/synthetics_heartbeat_badge';
 import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
 import { getLatestDownSummary } from '../get_latest_down_summary';
@@ -34,18 +34,31 @@ import {
   NO_ERROR,
   TAGS,
   MONITOR_HISTORY,
+  OVERVIEW_DEFAULT_VISIBLE_COLUMN_IDS,
+  OVERVIEW_TABLE_COLUMN_ID,
 } from '../labels';
 import { useKibanaSpace } from '../../../../../../../../hooks/use_kibana_space';
 import type { ClientPluginsStart } from '../../../../../../../../plugin';
+import type { SelectableTableColumn } from '../../../../../common/hooks/use_table_column_selector';
+import { OVERVIEW_TABLE_COLUMNS_STORAGE_KEY } from '../../../../../common/hooks/use_table_column_selector';
+import { usePersistedColumnIds } from '../../../../../common/hooks/use_persisted_column_ids';
+import {
+  CREATED_COLUMN_LABEL,
+  LAST_MODIFIED_COLUMN_LABEL,
+  MonitorTimestamp,
+} from '../../../../../common/components/monitor_timestamp';
+import { useOverviewDisplayOptions } from '../../../../common/use_overview_display_options';
 
 export const useMonitorsTableColumns = ({
   setFlyoutConfigCallback,
   items,
   isFlyoutOpen,
+  isInteractive = true,
 }: {
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
   isFlyoutOpen?: boolean;
+  isInteractive?: boolean;
 }) => {
   const history = useHistory();
   // Skip the histogram fetch while the flyout is open — the column it feeds
@@ -99,7 +112,7 @@ export const useMonitorsTableColumns = ({
       dispatch(
         setFlyoutConfigCallback({
           configId,
-          id: configId,
+          id: monitor.monitorQueryId,
           location: locationLabel,
           locationId,
           spaces: monitor.spaces,
@@ -109,17 +122,30 @@ export const useMonitorsTableColumns = ({
     [dispatch, setFlyoutConfigCallback]
   );
 
+  const { visibleColumnIds } = usePersistedColumnIds(
+    OVERVIEW_TABLE_COLUMNS_STORAGE_KEY,
+    OVERVIEW_DEFAULT_VISIBLE_COLUMN_IDS
+  );
+  const {
+    options: { absoluteTimestamps },
+  } = useOverviewDisplayOptions();
+
   const columns: Array<EuiBasicTableColumn<OverviewStatusMetaData>> = useMemo(() => {
     const LazySpaceList = spaces?.ui.components.getSpaceList ?? (() => null);
+    const visibleSet = new Set(visibleColumnIds);
 
-    return [
+    const allColumns: Array<SelectableTableColumn<OverviewStatusMetaData>> = [
       {
         field: 'overallStatus',
         name: STATUS,
         width: '160px',
-        sortable: true,
+        sortable: isInteractive,
         render: (_overallStatus: string, monitor: OverviewStatusMetaData) => (
-          <MonitorStatusCol monitor={monitor} openFlyout={openFlyout} />
+          <MonitorStatusCol
+            monitor={monitor}
+            openFlyout={openFlyout}
+            isInteractive={isInteractive}
+          />
         ),
       },
       {
@@ -130,7 +156,7 @@ export const useMonitorsTableColumns = ({
         // ellipsis. The URL column it replaced was 15% wide on its own.
         // Reclaimed budget comes from the Tags column (15% → 12%).
         width: '25%',
-        sortable: true,
+        sortable: isInteractive,
         render: (name: OverviewStatusMetaData['name'], monitor) => (
           <EuiFlexGroup
             direction="column"
@@ -146,13 +172,23 @@ export const useMonitorsTableColumns = ({
                 <EuiFlexItem grow={false}>
                   <MonitorTypeBadge
                     monitorType={monitor.type}
-                    ariaLabel={getFilterForTypeMessage(monitor.type)}
-                    onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
+                    onClick={
+                      isInteractive
+                        ? () => onClickMonitorFilter('monitorTypes', monitor.type)
+                        : undefined
+                    }
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SyntheticsRemoteBadge remote={monitor.remote} />
-                </EuiFlexItem>
+                {monitor.remote && (
+                  <EuiFlexItem grow={false}>
+                    <SyntheticsRemoteBadge remote={monitor.remote} />
+                  </EuiFlexItem>
+                )}
+                {monitor.origin === 'heartbeat' && (
+                  <EuiFlexItem grow={false}>
+                    <SyntheticsHeartbeatBadge origin={monitor.origin} />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
                     {i18n.translate('xpack.synthetics.overview.compactView.scheduleInline', {
@@ -176,30 +212,35 @@ export const useMonitorsTableColumns = ({
               >
                 <EuiToolTip position="top" content={monitor.urls}>
                   <EuiText
+                    tabIndex={0}
                     size="xs"
                     color="subdued"
                     className="eui-textTruncate"
                     css={{ display: 'block', width: '100%' }}
                   >
-                    <EuiLink
-                      data-test-subj="syntheticsCompactViewUrl"
-                      href={monitor.urls}
-                      target="_blank"
-                      color="subdued"
-                      external={false}
-                      // `display: block` + `width: 100%` ensure the anchor
-                      // (inline by default) inherits the truncation box from
-                      // its EuiText parent rather than overflowing it.
-                      css={{
-                        display: 'block',
-                        width: '100%',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {monitor.urls}
-                    </EuiLink>
+                    {isInteractive ? (
+                      <EuiLink
+                        data-test-subj="syntheticsCompactViewUrl"
+                        href={monitor.urls}
+                        target="_blank"
+                        color="subdued"
+                        external={false}
+                        // `display: block` + `width: 100%` ensure the anchor
+                        // (inline by default) inherits the truncation box from
+                        // its EuiText parent rather than overflowing it.
+                        css={{
+                          display: 'block',
+                          width: '100%',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {monitor.urls}
+                      </EuiLink>
+                    ) : (
+                      monitor.urls
+                    )}
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
@@ -208,11 +249,16 @@ export const useMonitorsTableColumns = ({
         ),
       },
       {
+        id: OVERVIEW_TABLE_COLUMN_ID.locations,
         name: LOCATIONS,
         width: '120px',
         render: (monitor: OverviewStatusMetaData) => {
           return (
-            <MonitorLocations configId={monitor.configId} locationsWithStatus={monitor.locations} />
+            <MonitorLocations
+              configId={monitor.configId}
+              locationsWithStatus={monitor.locations}
+              isInteractive={isInteractive}
+            />
           );
         },
       },
@@ -220,6 +266,7 @@ export const useMonitorsTableColumns = ({
         ? []
         : [
             {
+              id: OVERVIEW_TABLE_COLUMN_ID.latestError,
               name: LATEST_ERROR,
               // Wide enough that most error reasons fit in 1–2 lines without
               // wrap; longer messages clamp to 3 lines + tooltip below.
@@ -250,6 +297,7 @@ export const useMonitorsTableColumns = ({
                     }
                   >
                     <EuiText
+                      tabIndex={0}
                       size="xs"
                       color="danger"
                       data-test-subj="syntheticsLatestErrorCell"
@@ -269,12 +317,13 @@ export const useMonitorsTableColumns = ({
               },
             },
             {
+              id: OVERVIEW_TABLE_COLUMN_ID.tags,
               name: TAGS,
               width: '12%',
               render: (monitor: OverviewStatusMetaData) => (
                 <TagsList
                   tags={monitor.tags}
-                  onClick={(tag) => onClickMonitorFilter('tags', tag)}
+                  onClick={isInteractive ? (tag) => onClickMonitorFilter('tags', tag) : undefined}
                 />
               ),
             },
@@ -283,6 +332,7 @@ export const useMonitorsTableColumns = ({
         ? []
         : [
             {
+              id: OVERVIEW_TABLE_COLUMN_ID.history,
               align: 'left' as const,
               field: 'configId' as const,
               name: MONITOR_HISTORY,
@@ -324,19 +374,52 @@ export const useMonitorsTableColumns = ({
           ]
         : []),
       {
-        name: ACTIONS,
-        render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
-        align: 'right',
-        width: '40px',
+        id: OVERVIEW_TABLE_COLUMN_ID.createdAt,
+        field: 'created_at',
+        name: CREATED_COLUMN_LABEL,
+        width: '140px',
+        sortable: true,
+        render: (createdAt: string | undefined) => (
+          <MonitorTimestamp timestamp={createdAt} absolute={absoluteTimestamps} />
+        ),
       },
+      {
+        id: OVERVIEW_TABLE_COLUMN_ID.updatedAt,
+        field: 'updated_at',
+        name: LAST_MODIFIED_COLUMN_LABEL,
+        width: '140px',
+        sortable: true,
+        render: (updatedAt: string | undefined) => (
+          <MonitorTimestamp timestamp={updatedAt} absolute={absoluteTimestamps} />
+        ),
+      },
+      ...(isInteractive
+        ? [
+            {
+              name: ACTIONS,
+              render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
+              align: 'right',
+              width: '40px',
+            } as EuiBasicTableColumn<OverviewStatusMetaData>,
+          ]
+        : []),
     ];
+
+    return allColumns
+      .filter((col) => col.id == null || visibleSet.has(col.id))
+      .map(
+        ({ id: _id, selectorName: _selectorName, ...col }) =>
+          col as EuiBasicTableColumn<OverviewStatusMetaData>
+      );
   }, [
+    absoluteTimestamps,
     hasMultipleSpaces,
     histogramsById,
     isFlyoutOpen,
     minInterval,
     onClickMonitorFilter,
     openFlyout,
+    isInteractive,
     showFromAllSpaces,
     // Depending on the resolved space id (a string) instead of the whole
     // `space` object keeps the columns array referentially stable: the hook
@@ -344,6 +427,7 @@ export const useMonitorsTableColumns = ({
     // depending on the object would remount every cell once on resolution.
     spaceId,
     spaces?.ui.components.getSpaceList,
+    visibleColumnIds,
   ]);
 
   return {

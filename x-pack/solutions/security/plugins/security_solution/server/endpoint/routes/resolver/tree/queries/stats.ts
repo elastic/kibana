@@ -38,9 +38,17 @@ export class StatsQuery extends BaseResolverQuery {
     indexPatterns,
     timeRange,
     isInternalRequest,
+    shouldExcludeColdAndFrozenTiers,
     agentId,
   }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest, agentId });
+    super({
+      schema,
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
   }
 
   private query(nodes: NodeID[]): JsonObject {
@@ -87,9 +95,13 @@ export class StatsQuery extends BaseResolverQuery {
     nodes: NodeID[],
     index: string,
     includeHits: boolean
-  ): { size: number; query: object; index: string; aggs: object; fields?: string[] } {
+  ): { size: number; query: object; index: string; aggs: object; _source: false } {
     return {
       size: includeHits ? 5000 : 0,
+      // Only alert counts (aggregations) and ids are consumed from this response, never the
+      // document bodies. Disabling `_source` keeps the response small enough to avoid
+      // exceeding `elasticsearch.maxResponseSize` when `includeHits` pulls up to 5000 hits.
+      _source: false,
       query: {
         bool: {
           filter: [

@@ -34,7 +34,7 @@ import { useDiscoverLocator } from '../../../hooks/use_locator';
 import { useCollectorContext } from './collector_context';
 import { OTEL_LOG_INDEX } from './constants';
 import type { ErrorPattern, LogLevel, SortField, TimeRange } from './use_error_patterns';
-import { useErrorPatterns } from './use_error_patterns';
+import { TIME_RANGE_TO_MS, useErrorPatterns } from './use_error_patterns';
 
 const TIME_RANGE_OPTIONS = [
   {
@@ -116,7 +116,7 @@ const sortPatterns = (patterns: ErrorPattern[], sortField: SortField): ErrorPatt
 };
 
 export const ErrorPatternPanel: React.FC = () => {
-  const { serviceInstanceId } = useCollectorContext();
+  const { serviceInstanceId, enrolledAt } = useCollectorContext();
   const [selectedLevel, setSelectedLevel] = useState<LogLevel>('error');
   const [timeRange, setTimeRange] = useState<TimeRange>('1h');
   const [sortField, setSortField] = useState<SortField>('count');
@@ -124,8 +124,19 @@ export const ErrorPatternPanel: React.FC = () => {
   const backgroundColors = useEuiBackgroundColorCSS();
   const discoverLocator = useDiscoverLocator();
 
-  const { errorPatterns, warningPatterns, errorCount, warningCount, totalLogCount, isLoading } =
-    useErrorPatterns({ serviceInstanceId: serviceInstanceId ?? '', timeRange });
+  const {
+    errorPatterns,
+    warningPatterns,
+    errorCount,
+    warningCount,
+    totalLogCount,
+    isLoading,
+    error,
+  } = useErrorPatterns({ serviceInstanceId: serviceInstanceId ?? '', timeRange, enrolledAt });
+
+  // The counts are only meaningful when a search actually ran and succeeded: without a
+  // service instance id the query is disabled, and after a failure the arrays are just empty.
+  const hideCounts = !serviceInstanceId || !!error;
 
   const patterns = useMemo(
     () => sortPatterns(selectedLevel === 'error' ? errorPatterns : warningPatterns, sortField),
@@ -136,15 +147,21 @@ export const ErrorPatternPanel: React.FC = () => {
     selectedLevel === 'error' ? backgroundColors.danger : backgroundColors.warning;
 
   const getDiscoverUrl = useCallback(
-    (pattern: ErrorPattern) =>
-      discoverLocator?.getRedirectUrl({
+    (pattern: ErrorPattern) => {
+      const enrolledAtMs = enrolledAt ? Date.parse(enrolledAt) : NaN;
+      const timeRangeFromMs = Date.now() - TIME_RANGE_TO_MS[timeRange];
+      // Use enrolledAt as the lower bound when it's more recent than the selected time range,
+      // so the Discover deep-link stays consistent with the query scoping.
+      const discoverFrom =
+        !isNaN(enrolledAtMs) && enrolledAtMs > timeRangeFromMs ? enrolledAt! : `now-${timeRange}`;
+      return discoverLocator?.getRedirectUrl({
         dataViewSpec: {
           id: OTEL_LOG_INDEX,
           name: OTEL_LOG_INDEX,
           title: OTEL_LOG_INDEX,
           timeFieldName: '@timestamp',
         },
-        timeRange: { from: `now-${timeRange}`, to: 'now' },
+        timeRange: { from: discoverFrom, to: 'now' },
         filters: [
           buildCustomFilter(
             OTEL_LOG_INDEX,
@@ -174,8 +191,9 @@ export const ErrorPatternPanel: React.FC = () => {
             FilterStateStore.APP_STATE
           ),
         ],
-      }),
-    [discoverLocator, timeRange, serviceInstanceId]
+      });
+    },
+    [discoverLocator, timeRange, serviceInstanceId, enrolledAt]
   );
 
   const columns: Array<EuiBasicTableColumn<ErrorPattern>> = [
@@ -308,16 +326,18 @@ export const ErrorPatternPanel: React.FC = () => {
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            color={
-              currentCount === 0 ? 'subdued' : selectedLevel === 'error' ? 'danger' : 'warning'
-            }
-          >
-            {summaryText}
-          </EuiText>
-        </EuiFlexItem>
+        {!hideCounts && (
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="xs"
+              color={
+                currentCount === 0 ? 'subdued' : selectedLevel === 'error' ? 'danger' : 'warning'
+              }
+            >
+              {summaryText}
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -343,10 +363,14 @@ export const ErrorPatternPanel: React.FC = () => {
               withNext
               data-test-subj="errorPatternLevelToggle-error"
             >
-              {i18n.translate('xpack.fleet.collectorDetail.errorPatterns.errorsToggle', {
-                defaultMessage: 'Errors ({count})',
-                values: { count: errorCount },
-              })}
+              {hideCounts
+                ? i18n.translate('xpack.fleet.collectorDetail.errorPatterns.errorsToggleNoCount', {
+                    defaultMessage: 'Errors',
+                  })
+                : i18n.translate('xpack.fleet.collectorDetail.errorPatterns.errorsToggle', {
+                    defaultMessage: 'Errors ({count})',
+                    values: { count: errorCount },
+                  })}
             </EuiFilterButton>
             <EuiFilterButton
               isSelected={selectedLevel === 'warning'}
@@ -355,10 +379,17 @@ export const ErrorPatternPanel: React.FC = () => {
               color={selectedLevel === 'warning' && warningCount > 0 ? 'warning' : 'text'}
               data-test-subj="errorPatternLevelToggle-warning"
             >
-              {i18n.translate('xpack.fleet.collectorDetail.errorPatterns.warningsToggle', {
-                defaultMessage: 'Warnings ({count})',
-                values: { count: warningCount },
-              })}
+              {hideCounts
+                ? i18n.translate(
+                    'xpack.fleet.collectorDetail.errorPatterns.warningsToggleNoCount',
+                    {
+                      defaultMessage: 'Warnings',
+                    }
+                  )
+                : i18n.translate('xpack.fleet.collectorDetail.errorPatterns.warningsToggle', {
+                    defaultMessage: 'Warnings ({count})',
+                    values: { count: warningCount },
+                  })}
             </EuiFilterButton>
           </EuiFilterGroup>
         </EuiFlexItem>
@@ -388,6 +419,13 @@ export const ErrorPatternPanel: React.FC = () => {
         })}
         tableLayout="auto"
         loading={isLoading}
+        error={
+          error
+            ? i18n.translate('xpack.fleet.collectorDetail.errorPatterns.loadError', {
+                defaultMessage: 'Unable to load error patterns',
+              })
+            : undefined
+        }
         noItemsMessage={emptyMessage}
         rowProps={() => ({
           css: rowBackgroundCss,

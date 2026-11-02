@@ -53,7 +53,7 @@ describe('JourneyScreenshotDialog', () => {
   });
 
   it('renders without errors', () => {
-    expect(() => render(<JourneyScreenshotDialog {...testProps} />)).not.toThrowError();
+    expect(() => render(<JourneyScreenshotDialog {...testProps} />)).not.toThrow();
   });
 
   it('shows loading indicator when image is loading', async () => {
@@ -98,5 +98,32 @@ describe('getScreenshotUrl', () => {
     expect(
       getScreenshotUrl({ basePath, checkGroup: 'cg-1', stepNumber: 2, remoteName: 'remote a' })
     ).toBe('/abc/internal/synthetics/journey/screenshot/cg-1/2?remoteName=remote%20a');
+  });
+
+  it('appends a url-encoded timestamp query param when provided', () => {
+    expect(
+      getScreenshotUrl({
+        basePath,
+        checkGroup: 'cg-1',
+        stepNumber: 2,
+        timestamp: '2023-01-01T00:00:00.000Z',
+      })
+    ).toBe(
+      '/abc/internal/synthetics/journey/screenshot/cg-1/2?timestamp=2023-01-01T00%3A00%3A00.000Z'
+    );
+  });
+
+  it('appends both remoteName and timestamp query params when provided', () => {
+    expect(
+      getScreenshotUrl({
+        basePath,
+        checkGroup: 'cg-1',
+        stepNumber: 2,
+        remoteName: 'remote a',
+        timestamp: '2023-01-01T00:00:00.000Z',
+      })
+    ).toBe(
+      '/abc/internal/synthetics/journey/screenshot/cg-1/2?remoteName=remote%20a&timestamp=2023-01-01T00%3A00%3A00.000Z'
+    );
   });
 });

@@ -6,7 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { join } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { Location } from '@kbn/esql-language';
+
+// Output directory for the generated files in the @kbn/esql-language package
+export const GENERATED_DEFINITIONS_DIR = join(
+  REPO_ROOT,
+  'src/platform/packages/shared/esql/kbn-esql-language/src/commands/definitions/generated'
+);
 
 export const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -116,17 +124,19 @@ export const mathOperatorsExtraSignatures = [
   },
 ];
 
+const constantHint = { kind: 'constant' as const };
+
 export const comparisonOperatorSignatures = (['ip', 'version'] as const).flatMap((type) => [
   {
     params: [
       { name: 'left', type },
-      { name: 'right', type: 'text' as const, constantOnly: true },
+      { name: 'right', type: 'text' as const, hint: constantHint },
     ],
     returnType: 'boolean' as const,
   },
   {
     params: [
-      { name: 'left', type: 'text' as const, constantOnly: true },
+      { name: 'left', type: 'text' as const, hint: constantHint },
       { name: 'right', type },
     ],
     returnType: 'boolean' as const,

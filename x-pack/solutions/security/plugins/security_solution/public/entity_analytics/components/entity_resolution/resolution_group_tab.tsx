@@ -7,20 +7,31 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useQueryClient } from '@kbn/react-query';
 import type { EntityType } from '@kbn/entity-store/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
+import { useOnResolutionGroupUpdatedToolEvent } from '../../hooks/use_on_resolution_group_updated_tool_event';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './hooks/use_resolution_group';
+import {
+  useResolutionGroup,
+  RESOLUTION_GROUP_ROUTE,
+  RESOLUTION_GROUP_QUERY_KEY,
+} from './hooks/use_resolution_group';
 import type { ResolutionGroup } from './hooks/use_resolution_group';
 import { useLinkEntities } from './hooks/use_link_entities';
 import { useUnlinkEntities } from './hooks/use_unlink_entities';
+import { useCanModifyResolution } from './hooks/use_can_modify_resolution';
 import { ResolutionGroupTable } from './resolution_group_table';
 import { AddEntitiesSection } from './add_entities_section';
 import { ConfirmResolutionModal } from './confirm_resolution_modal';
@@ -41,16 +52,34 @@ interface ResolutionGroupTabProps {
   entityId: string;
   entityType: EntityType;
   scopeId: string;
+  /**
+   * When provided, clicking a related entity name is delegated to this callback (used by the
+   * new EUI system flyout). When omitted, the legacy expandable-flyout `openFlyout` is used.
+   */
+  onShowEntity?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
+  /**
+   * View mode of the flyout the tab was opened from. In `resolved` mode that flyout shows the whole
+   * group, so the target entity's row stays openable and opens its own single-entity view.
+   */
+  mode?: EntityViewMode;
 }
 
 export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   entityId,
   entityType,
   scopeId,
+  onShowEntity,
+  mode = 'single',
 }) => {
   const { http } = useKibana().services;
   const { addError } = useAppToasts();
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
   const { data: group, isLoading, isFetching, isError } = useResolutionGroup(entityId);
   const linkEntities = useLinkEntities();
   const createGroup = useLinkEntities({
@@ -60,6 +89,13 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
     },
   });
   const unlinkEntities = useUnlinkEntities();
+  const queryClient = useQueryClient();
+  useOnResolutionGroupUpdatedToolEvent(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
+    }, [queryClient])
+  );
+  const { canModify, isLoading: isPrivilegesLoading } = useCanModifyResolution();
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -69,6 +105,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   const [removingEntityId, setRemovingEntityId] = useState<string | undefined>();
 
   const targetEntityId = group?.target ? getEntityId(group.target) : undefined;
+  // In the group view no single entity is "open", so every row (the target included) can be opened.
+  const currentEntityId = mode === 'resolved' ? undefined : entityId;
   const hasGroup = group && group.group_size > 1;
   const resolutionRiskScore = hasGroup ? getResolutionRiskScore(group.target) : undefined;
 
@@ -85,24 +123,38 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
     (entity: Record<string, unknown>) => {
       const clickedEntityId = getEntityId(entity);
       const clickedEntityName = getEntityName(entity);
-      const panelKey = EntityPanelKeyByType[entityType as SecurityEntityType];
-      const panelParam = EntityPanelParamByType[entityType as SecurityEntityType];
 
-      if (!panelKey || !panelParam) return;
+      if (onShowEntity) {
+        onShowEntity({
+          engineType: entityType as string,
+          entityId: clickedEntityId,
+          entityName: clickedEntityName,
+        });
+        return;
+      }
 
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: clickedEntityName,
-            entityId: clickedEntityId,
-            contextID: scopeId,
-            scopeId,
-          },
-        },
-      });
+      const secEntityType = entityType as SecurityEntityType;
+      const sharedParams = { entityId: clickedEntityId, contextID: scopeId, scopeId };
+
+      if (enableNewFlyout) {
+        openEntityFlyout({
+          engineType: secEntityType,
+          entityName: clickedEntityName,
+          origin: FLYOUT_ORIGIN.RESOLUTION_ENTITY_LINK,
+          ...sharedParams,
+        });
+        return;
+      }
+
+      const panelKey = EntityPanelKeyByType[secEntityType];
+      const paramName = EntityPanelParamByType[secEntityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: clickedEntityName, ...sharedParams } },
+        });
+      }
     },
-    [openFlyout, entityType, scopeId]
+    [onShowEntity, enableNewFlyout, openFlyout, openEntityFlyout, entityType, scopeId]
   );
 
   const handleRemoveEntity = useCallback(
@@ -210,11 +262,13 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           isLoading={isLoading || isFetching}
           isError={isError}
           showActions
+          canModify={canModify}
+          isPrivilegesLoading={isPrivilegesLoading}
           onRemoveEntity={handleRemoveEntity}
           targetEntityId={targetEntityId}
           removingEntityId={removingEntityId}
           onEntityNameClick={handleEntityNameClick}
-          currentEntityId={entityId}
+          currentEntityId={currentEntityId}
         />
         <EuiSpacer size="l" />
         <AddEntitiesSection
@@ -224,6 +278,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           onEntityNameClick={handleEntityNameClick}
           addingEntityId={addingEntityId}
           disabled={!groupQueryReady}
+          canModify={canModify}
+          isPrivilegesLoading={isPrivilegesLoading}
         />
       </div>
       {modalState.isOpen && modalState.newEntity && currentEntityForModal && (

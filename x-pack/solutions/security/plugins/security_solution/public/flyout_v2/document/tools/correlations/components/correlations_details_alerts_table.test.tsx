@@ -148,7 +148,7 @@ describe('CorrelationsDetailsAlertsTable', () => {
     expect(getAllByTestId(`${TEST_ID}AlertPreviewButton`).length).toBe(2);
 
     getAllByTestId(`${TEST_ID}AlertPreviewButton`)[0].click();
-    expect(mockOnShowAlert).toHaveBeenCalledWith('1', 'index');
+    expect(mockOnShowAlert).toHaveBeenCalledWith('1', 'index', 'Alert: Rule1');
   });
 
   it('opens rule preview when isRulePreview is false', () => {

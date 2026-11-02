@@ -34,6 +34,7 @@ type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
 };
 export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskParams> {
   public readonly exportType = EXPORT_TYPE_SCHEDULED;
+  protected readonly scheduleType = ScheduleType.SCHEDULED;
 
   public get TYPE() {
     return SCHEDULED_REPORTING_EXECUTE_TYPE;
@@ -152,7 +153,7 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
           title,
           filename,
           objectType: scheduledReport.attributes.meta.objectType,
-          date: scheduledReport.attributes.schedule?.rrule?.dtstart,
+          date: runAt.toISOString(),
         } satisfies ScheduledReportTemplateVariables;
         const subject = renderMustacheString(
           this.logger,

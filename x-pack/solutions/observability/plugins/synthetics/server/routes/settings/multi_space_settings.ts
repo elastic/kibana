@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { SyntheticsMultiSpaceSettingsWithSpaces } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { isCCSEnabled } from '../../lib/remote_result_utils';
@@ -15,18 +15,11 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 const MAX_SELECTED_REMOTE_CLUSTERS = 100;
 const MAX_SHARED_SPACES = 1_000;
 
-export const SyntheticsMultiSpaceSettingsSchema = schema.object({
-  useAllRemoteClusters: schema.maybe(schema.boolean()),
-  selectedRemoteClusters: schema.maybe(
-    schema.arrayOf(schema.string(), { maxSize: MAX_SELECTED_REMOTE_CLUSTERS })
-  ),
+export const SyntheticsMultiSpaceSettingsSchema = z.strictObject({
+  useAllRemoteClusters: z.boolean().optional(),
+  selectedRemoteClusters: z.array(z.string().max(256)).max(MAX_SELECTED_REMOTE_CLUSTERS).optional(),
   // Optional list of spaces the settings should be shared with. Accepts `*` for "all spaces".
-  spaces: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1 }), {
-      minSize: 1,
-      maxSize: MAX_SHARED_SPACES,
-    })
-  ),
+  spaces: z.array(z.string().min(1).max(256)).min(1).max(MAX_SHARED_SPACES).optional(),
 });
 
 export const createGetMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
@@ -36,8 +29,8 @@ export const createGetMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.MULTI_SPACE_SETTINGS,
   validate: false,
   handler: async ({ savedObjectsClient, server, response }) => {
-    // Mirror the UI's gating: the endpoint must not exist on serverless or when the
-    // experimental CCS flag is off, so external clients can't write a `synthetics-settings-multi-space`
+    // Mirror the UI's gating: the endpoint must not exist on serverless (where CCS is
+    // unavailable), so external clients can't write a `synthetics-settings-multi-space`
     // SO that nothing else respects.
     if (!isCCSEnabled(server)) {
       return response.notFound();
@@ -62,6 +55,14 @@ export const createPutMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
     }
     const repository = new DefaultSyntheticsMultiSpaceSettingsRepository(savedObjectsClient);
     const { spaces, ...attributes } = request.body;
-    return repository.save(attributes, spaces);
+    try {
+      return await repository.save(attributes, spaces);
+    } finally {
+      // `spaces` can re-share the singleton SO across arbitrary spaces, so a
+      // save can change what any space sees — clear all entries, not just this one.
+      // Run in finally so a partial save (SO updated, space-sharing throws) still
+      // invalidates on this node.
+      server.syntheticsIndicesCache.invalidate();
+    }
   },
 });

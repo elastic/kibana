@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { AgentConfigurationPageStep, agentConfigurationPageStepRt } from '@kbn/apm-common';
+export { AgentConfigurationPageStep } from '@kbn/apm-common';

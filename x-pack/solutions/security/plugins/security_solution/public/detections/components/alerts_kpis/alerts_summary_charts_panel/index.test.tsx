@@ -98,7 +98,7 @@ describe('AlertsSummaryChartsPanel', () => {
         }
       });
 
-      expect(mockSetIsExpanded).toBeCalledWith(false);
+      expect(mockSetIsExpanded).toHaveBeenCalledWith(false);
     });
 
     it('when isExpanded is true, render summary chart', () => {

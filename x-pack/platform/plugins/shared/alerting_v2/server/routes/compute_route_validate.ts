@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type {
+  OnRequestValidationError,
+  RouteValidatorRequestAndResponses,
+} from '@kbn/core-http-server';
 import type { ZodType } from '@kbn/zod/v4';
+import { buildAlertingRouteValidation } from './zod_request_validation';
 
 /**
  * Shape that subclasses of `BaseAlertingRoute` declare on `static schemas`.
  * Mirrors what Kibana core's `RouteConfig['validate']` accepts but lets
  * subclasses supply raw Zod schemas. `computeRouteValidate` wraps the request
- * schemas with `buildRouteValidationWithZod` so individual routes don't repeat
+ * schemas with `buildAlertingRouteValidation` so individual routes don't repeat
  * that boilerplate.
  */
 export interface AlertingRouteSchemas {
@@ -29,6 +32,13 @@ export interface AlertingRouteSchemas {
       description?: string;
     }
   >;
+  /**
+   * Maps request schema-validation failures to a documented Kibana response.
+   * Kibana core invokes this instead of emitting its default bad-request body,
+   * letting alerting v2 return its own `errorResponseSchema` shape. Requires a
+   * matching `response` entry for the status code it emits.
+   */
+  onRequestValidationError?: OnRequestValidationError;
 }
 
 /**
@@ -55,15 +65,18 @@ export const computeRouteValidate = (
   return {
     request: {
       ...(schemas.request?.params && {
-        params: buildRouteValidationWithZod(schemas.request.params),
+        params: buildAlertingRouteValidation(schemas.request.params),
       }),
       ...(schemas.request?.query && {
-        query: buildRouteValidationWithZod(schemas.request.query),
+        query: buildAlertingRouteValidation(schemas.request.query),
       }),
       ...(schemas.request?.body && {
-        body: buildRouteValidationWithZod(schemas.request.body),
+        body: buildAlertingRouteValidation(schemas.request.body),
       }),
     },
     ...(hasResponseSchemas && { response: schemas.response }),
+    ...(schemas.onRequestValidationError && {
+      onRequestValidationError: schemas.onRequestValidationError,
+    }),
   };
 };

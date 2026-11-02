@@ -25,6 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Pin Controls';
 
+  /**
+   * Purpose: Verify pinning and unpinning controls
+   *
+   * Migration: Migrate to scout
+   */
   describe('Pinning and unpinning controls', () => {
     let controlId: string;
 

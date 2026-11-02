@@ -11,16 +11,12 @@ import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
   chatExperience: AIChatExperience,
-  enableAlertsAndAttacksAlignment?: boolean,
-  isNewEAHomePageEnabled?: boolean,
-  securityClassicNavExternalLinks?: boolean
+  enableAlertsAndAttacksAlignment?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: securityClassicNavExternalLinks
-        ? [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards]
-        : [SecurityPageName.dashboards],
+      linkIds: [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards],
     },
     {
       type: LinkCategoryType.separator,
@@ -29,16 +25,12 @@ export const getNavCategories = (
         enableAlertsAndAttacksAlignment
           ? SecurityPageName.alertDetections
           : SecurityPageName.alerts,
-        ...(securityClassicNavExternalLinks
-          ? [
-              // Agent builder for AI agent chat and not classic AI experience
-              ...(chatExperience === AIChatExperience.Agent
-                ? [SecurityPageName.externalLinkAgentBuilder]
-                : []),
-              SecurityPageName.externalLinkWorkflows,
-            ]
+        // Agent builder for AI agent chat and not classic AI experience
+        ...(chatExperience === AIChatExperience.Agent
+          ? [SecurityPageName.externalLinkAgentBuilder]
           : []),
-        SecurityPageName.attackDiscovery,
+        SecurityPageName.externalLinkWorkflows,
+        ...(enableAlertsAndAttacksAlignment ? [] : [SecurityPageName.attackDiscovery]),
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,
       ],
@@ -46,9 +38,7 @@ export const getNavCategories = (
     {
       type: LinkCategoryType.separator,
       linkIds: [
-        isNewEAHomePageEnabled
-          ? SecurityPageName.entityAnalyticsHomePage
-          : SecurityPageName.entityAnalyticsLanding,
+        SecurityPageName.entityAnalyticsHomePage,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,

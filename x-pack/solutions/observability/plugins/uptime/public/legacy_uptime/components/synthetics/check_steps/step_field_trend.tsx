@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';

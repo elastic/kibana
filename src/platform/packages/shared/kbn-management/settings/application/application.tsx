@@ -17,8 +17,8 @@ import {
   EuiLoadingSpinner,
   Query,
   EuiTabs,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { Form } from '@kbn/management-settings-components-form';
 import type { SettingsTabs } from '@kbn/management-settings-types/tab';
@@ -157,9 +157,11 @@ export const SettingsApplication = () => {
             ))}
           </EuiTabs>
           <EuiSpacer size="xl" />
-          <EuiCallOut announceOnMount={false} title={selectedTab.callOutTitle} iconType="warning">
-            <p>{selectedTab.callOutText}</p>
-          </EuiCallOut>
+          <KbnInfoCallout
+            announceOnMount={false}
+            title={selectedTab.callOutTitle}
+            text={selectedTab.callOutText}
+          />
         </>
       )}
       <EuiSpacer size="xl" />

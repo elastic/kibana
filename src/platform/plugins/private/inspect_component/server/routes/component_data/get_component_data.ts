@@ -22,6 +22,8 @@ import { getComponentCodeowners } from '../../lib/codeowners/get_component_codeo
 export const getComponentDataBodySchema = schema.object({
   path: schema.string({
     minLength: 1,
+    // Linux PATH_MAX equivalent
+    maxLength: 4096,
   }),
 });
 

@@ -6,7 +6,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +33,15 @@ interface GenericEntityFlyoutFooterProps {
   scopeId: string;
   entityFields: Record<string, string[]>;
   assetCriticalityLevel?: AssetCriticalityLevel;
+  /**
+   * Overrides forwarded to the outer `EuiFlyoutFooter` (e.g. `css` for compact spacing in the EUI
+   * system flyout). Legacy callers omit this and keep the default.
+   */
+  flyoutFooterProps?: React.ComponentProps<typeof EuiFlyoutFooter>;
+  /**
+   * Overrides for the inner padding wrapper (e.g. `{ paddingSize: 'none' }`). Legacy callers omit this.
+   */
+  panelProps?: Pick<EuiPanelProps, 'paddingSize' | 'css'>;
 }
 
 export const GenericEntityFlyoutFooter = ({
@@ -39,6 +50,8 @@ export const GenericEntityFlyoutFooter = ({
   scopeId,
   entityFields,
   assetCriticalityLevel,
+  flyoutFooterProps,
+  panelProps,
 }: GenericEntityFlyoutFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
@@ -51,6 +64,8 @@ export const GenericEntityFlyoutFooter = ({
   });
 
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const { euiTheme } = useEuiTheme();
+  const paddingSize = panelProps?.paddingSize ?? 'm';
 
   const openDocumentFlyout = useCallback(() => {
     openFlyout({
@@ -85,24 +100,32 @@ export const GenericEntityFlyoutFooter = ({
   );
 
   return (
-    <EuiFlyoutFooter data-test-subj={GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ}>
-      <EuiPanel color="transparent">
-        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-          {isPreviewMode && <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>}
+    <EuiFlyoutFooter data-test-subj={GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ} {...flyoutFooterProps}>
+      <EuiFlexGroup
+        justifyContent="flexEnd"
+        alignItems="center"
+        css={[
+          paddingSize !== 'none' &&
+            css`
+              padding: ${euiTheme.size[paddingSize]};
+            `,
+          panelProps?.css,
+        ]}
+      >
+        {isPreviewMode && <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>}
 
-          {showAssistant && !isAgentChatExperienceEnabled && (
-            <EuiFlexItem grow={false}>
-              <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
-            </EuiFlexItem>
-          )}
+        {showAssistant && !isAgentChatExperienceEnabled && (
           <EuiFlexItem grow={false}>
-            <TakeAction
-              isDisabled={!entityId}
-              kqlQuery={`entity.id: "${entityId}" OR related.entity: "${entityId}"`}
-            />
+            <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+        )}
+        <EuiFlexItem grow={false}>
+          <TakeAction
+            isDisabled={!entityId}
+            kqlQuery={`entity.id: "${entityId}" OR related.entity: "${entityId}"`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
 };

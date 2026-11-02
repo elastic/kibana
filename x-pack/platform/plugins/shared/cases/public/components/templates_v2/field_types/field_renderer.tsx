@@ -6,13 +6,13 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useRef } from 'react';
-import { css } from '@emotion/react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { z } from '@kbn/zod/v4';
-import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
-import { EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { FormProvider, useForm, useFormContext, useFormState, useWatch } from 'react-hook-form';
+import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { isDisplayOnlyField } from '../../../../common/types/domain/template/fields';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { controlRegistry } from './field_types_registry';
 import { evaluateCondition } from '../../../../common/types/domain/template/evaluate_conditions';
@@ -21,7 +21,9 @@ import { getFieldSnakeKey } from '../../../../common/utils';
 import { getYamlDefaultAsString } from '../utils';
 import { useResolvedFields } from '../../field_library/hooks/use_resolved_fields';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { INHERITED_FIELD_TOOLTIP } from '../translations';
+import { FieldValueView } from './field_value_view';
+import { ModifiedFieldAnnouncement, useFieldMarkerStyles } from './section_edit_bar';
+import * as i18n from '../translations';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
@@ -29,39 +31,220 @@ export interface TemplateFieldRendererProps {
   parsedTemplate: ParsedTemplateDefinition;
   owner?: string;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
-  parentFieldNames?: Set<string>;
-  parentTemplateName?: string;
 }
+
+interface TemplateFieldRowProps {
+  field: InlineField;
+  Control: FC<Record<string, unknown>>;
+  value: unknown;
+  isRequired: boolean;
+  isRequiredOnClose: boolean;
+  onFieldConfirm?: (fieldName: string, fieldType: string, onPersisted?: () => void) => void;
+  isSaving: boolean;
+  isSaveDisabled: boolean;
+  marginBottom: string;
+  showValueView: boolean;
+  onEdit?: () => void;
+  onEditCancel?: () => void;
+  showExitEdit: boolean;
+  /** Section edit mode: this field differs from the last saved value. */
+  isModified?: boolean;
+  /** Section edit mode: discard this field's change without leaving edit mode. */
+  onRevert?: () => void;
+}
+
+/**
+ * Builds the initial `extended_fields` form defaults from resolved fields. Display-only fields
+ * (e.g. MARKDOWN) hold no form value and are excluded, so they never seed an `extended_fields` key.
+ */
+export const buildInitialDefaultValues = (
+  resolvedFields: InlineField[]
+): Record<string, Record<string, string>> => {
+  const defaults: Record<string, Record<string, string>> = {
+    [CASE_EXTENDED_FIELDS]: {},
+  };
+  for (const field of resolvedFields) {
+    if (!isDisplayOnlyField(field)) {
+      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
+      const fieldKey = getFieldSnakeKey(field.name, field.type);
+      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
+    }
+  }
+  return defaults;
+};
+
+/** Prevents a field value change from re-rendering sibling controls. */
+const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
+  ({
+    field,
+    Control,
+    value,
+    isRequired,
+    isRequiredOnClose,
+    onFieldConfirm,
+    isSaving,
+    isSaveDisabled,
+    marginBottom,
+    showValueView,
+    onEdit,
+    onEditCancel,
+    showExitEdit,
+    isModified = false,
+    onRevert,
+  }) => {
+    const { euiTheme } = useEuiTheme();
+    const markerStyles = useFieldMarkerStyles();
+
+    const handleConfirm = useCallback(() => {
+      if (onEditCancel) {
+        onFieldConfirm?.(field.name, field.type, onEditCancel);
+        return;
+      }
+      onFieldConfirm?.(field.name, field.type);
+    }, [onFieldConfirm, field.name, field.type, onEditCancel]);
+
+    const controlProps = {
+      ...field,
+      label: field.label ?? field.name,
+      value,
+      isRequired,
+      isRequiredOnClose,
+      patternValidation: field.validation?.pattern,
+      min: field.validation?.min,
+      max: field.validation?.max,
+      minLength: field.validation?.min_length,
+      maxLength: field.validation?.max_length,
+      onConfirm: onFieldConfirm ? handleConfirm : undefined,
+      isSaving,
+      isSaveDisabled,
+    };
+
+    if (showValueView) {
+      return (
+        <div data-test-subj={`template-field-${field.name}`} css={{ marginBottom }}>
+          <FieldValueView
+            field={field}
+            value={value}
+            isRequired={isRequired}
+            isRequiredOnClose={isRequiredOnClose}
+            onEdit={onEdit}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div
+        data-test-subj={`template-field-${field.name}`}
+        css={[{ marginBottom }, markerStyles.row, isModified ? markerStyles.modified : undefined]}
+      >
+        {isModified ? <ModifiedFieldAnnouncement /> : null}
+        <Control {...controlProps} onEditCancel={onEditCancel} />
+        {onRevert ? (
+          // A real button rather than a bare link: this is the only way back for a single field, and
+          // as flush blue text under a filled input it was routinely missed. Unfilled primary reads
+          // as clearly actionable while still deferring to the section's filled Save.
+          <EuiButton
+            size="s"
+            color="primary"
+            fill={false}
+            iconType="undo"
+            onClick={onRevert}
+            css={{ marginBlockStart: euiTheme.size.xs }}
+            data-test-subj={`template-field-revert-${field.name}`}
+          >
+            {i18n.REVERT_FIELD}
+          </EuiButton>
+        ) : null}
+        {showExitEdit && onEditCancel ? (
+          <EuiButtonEmpty
+            size="s"
+            iconType="cross"
+            onClick={onEditCancel}
+            data-test-subj={`template-field-exit-edit-${field.name}`}
+          >
+            {i18n.CANCEL_FIELD_EDIT}
+          </EuiButtonEmpty>
+        ) : null}
+      </div>
+    );
+  }
+);
+TemplateFieldRow.displayName = 'TemplateFieldRow';
 
 export const FieldsRenderer: FC<{
   resolvedFields: InlineField[];
-  parentFieldNames?: Set<string>;
-  parentTemplateName?: string;
-  onFieldConfirm?: () => void;
-}> = ({ resolvedFields, parentFieldNames, parentTemplateName, onFieldConfirm }) => {
+  /**
+   * Additional fields from a sibling renderer whose values should be visible to this renderer's
+   * condition evaluator. Used in `CreateCaseTemplateFields` to let each section's `show_when` /
+   * `required_when` conditions reference fields rendered by the other section — for example, a
+   * global field referenced via `$ref` in the template can have a `show_when` that references
+   * another global field still rendered in the global section, and vice versa.
+   *
+   * Display-only fields and fields whose names already appear in `resolvedFields` are silently
+   * ignored (they hold no form value / would duplicate a watch path).
+   */
+  conditionContextFields?: InlineField[];
+  onFieldConfirm?: (fieldName: string, fieldType: string, onPersisted?: () => void) => void;
+  savingFieldKey?: string;
+  /** Renders read-only values with an explicit per-field Edit control. */
+  viewMode?: boolean;
+  /**
+   * Section edit mode: clicking any value opens the whole section rather than that one field, so
+   * the reader edits a group and commits it once. When set, per-field confirm/cancel is replaced by
+   * the section's own bar, and changed fields get a marker and their own revert.
+   */
+  onSectionEditRequest?: () => void;
+}> = ({
+  resolvedFields,
+  conditionContextFields,
+  onFieldConfirm,
+  savingFieldKey,
+  viewMode = false,
+  onSectionEditRequest,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const { control } = useFormContext();
+  const { control, resetField } = useFormContext();
+  const { dirtyFields } = useFormState({ control });
+  const { permissions } = useCasesContext();
+  const [editingFieldName, setEditingFieldName] = useState<string>();
+
+  const isSectionMode = onSectionEditRequest != null;
+  const dirtyFieldKeys = (dirtyFields?.[CASE_EXTENDED_FIELDS] ?? {}) as Record<string, boolean>;
+
+  // Combine own fields with context fields for condition evaluation. Context fields are
+  // deduplicated against own fields (by name) and display-only fields are excluded since
+  // they hold no form value and can't meaningfully serve as condition controllers.
+  const allConditionFields = useMemo(() => {
+    if (!conditionContextFields?.length) return resolvedFields;
+    const ownNames = new Set(resolvedFields.map((f) => f.name));
+    const uniqueContext = conditionContextFields.filter(
+      (f) => !isDisplayOnlyField(f) && !ownNames.has(f.name)
+    );
+    return uniqueContext.length ? [...resolvedFields, ...uniqueContext] : resolvedFields;
+  }, [resolvedFields, conditionContextFields]);
 
   const fieldTypeMap = useMemo(
-    () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.type])),
-    [resolvedFields]
+    () => Object.fromEntries(allConditionFields.map((f) => [f.name, f.type])),
+    [allConditionFields]
   );
 
   const fieldControlMap = useMemo(
-    () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.control])),
-    [resolvedFields]
+    () => Object.fromEntries(allConditionFields.map((f) => [f.name, f.control])),
+    [allConditionFields]
   );
 
   const allFieldPaths = useMemo(
-    () => resolvedFields.map((f) => `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(f.name, f.type)}`),
-    [resolvedFields]
+    () =>
+      allConditionFields.map((f) => `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(f.name, f.type)}`),
+    [allConditionFields]
   );
 
   const watchedValues = useWatch({ control, name: allFieldPaths });
 
   const fieldValues = useMemo(() => {
-    return Object.fromEntries(resolvedFields.map((f, i) => [f.name, watchedValues?.[i]]));
-  }, [watchedValues, resolvedFields]);
+    return Object.fromEntries(allConditionFields.map((f, i) => [f.name, watchedValues?.[i]]));
+  }, [watchedValues, allConditionFields]);
 
   return (
     <>
@@ -87,48 +270,52 @@ export const FieldsRenderer: FC<{
               )
             : false);
 
+        // Required-on-close is not required *now* (so the field stays fillable), but the label must
+        // say so rather than "Optional". Only surfaced when the field isn't already required.
+        const isRequiredOnClose = !isRequired && field.validation?.required_on_close === true;
+
         const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
         if (!Control) return null;
 
-        const controlProps = {
-          ...field,
-          label: field.label ?? field.name,
-          value: fieldValues[field.name],
-          isRequired,
-          patternValidation: field.validation?.pattern,
-          min: field.validation?.min,
-          max: field.validation?.max,
-          minLength: field.validation?.min_length,
-          maxLength: field.validation?.max_length,
-          onConfirm: onFieldConfirm,
-        };
+        const canEdit =
+          viewMode &&
+          permissions?.update === true &&
+          !isDisplayOnlyField(field) &&
+          (isSectionMode || editingFieldName === undefined || editingFieldName === field.name);
+        const isEditing = !isSectionMode && editingFieldName === field.name;
+        const showValueView = viewMode && !isEditing && !isDisplayOnlyField(field);
+        const snakeKey = getFieldSnakeKey(field.name, field.type);
+        const fieldPath = `${CASE_EXTENDED_FIELDS}.${snakeKey}`;
+        const showExitEdit = isEditing && !control.getFieldState(fieldPath).isDirty;
 
-        const isInherited = parentFieldNames?.has(field.name) ?? false;
+        const handleEdit = canEdit
+          ? isSectionMode
+            ? onSectionEditRequest
+            : () => setEditingFieldName(field.name)
+          : undefined;
+        const handleEditCancel = isEditing ? () => setEditingFieldName(undefined) : undefined;
 
-        const fieldLabel =
-          isInherited && parentTemplateName ? (
-            <span css={css({ display: 'inline-flex', alignItems: 'center', gap: '4px' })}>
-              {field.label ?? field.name}
-              <EuiIconTip
-                content={INHERITED_FIELD_TOOLTIP(parentTemplateName)}
-                type="info"
-                size="s"
-                color="subdued"
-                data-test-subj={`inherited-field-icon-${field.name}`}
-              />
-            </span>
-          ) : (
-            field.label ?? field.name
-          );
+        const isModified = isSectionMode && dirtyFieldKeys[snakeKey] === true;
 
         return (
-          <div
+          <TemplateFieldRow
             key={field.name}
-            data-test-subj={`template-field-${field.name}`}
-            css={{ marginBottom: euiTheme.size.m }}
-          >
-            <Control {...controlProps} label={fieldLabel} />
-          </div>
+            field={field}
+            Control={Control}
+            value={fieldValues[field.name]}
+            isRequired={isRequired}
+            isRequiredOnClose={isRequiredOnClose}
+            onFieldConfirm={onFieldConfirm}
+            isSaving={savingFieldKey === getFieldSnakeKey(field.name, field.type)}
+            isSaveDisabled={savingFieldKey != null}
+            marginBottom={euiTheme.size.m}
+            showValueView={showValueView}
+            onEdit={handleEdit}
+            onEditCancel={handleEditCancel}
+            showExitEdit={showExitEdit}
+            isModified={isModified}
+            onRevert={isModified ? () => resetField(fieldPath) : undefined}
+          />
         );
       })}
     </>
@@ -139,28 +326,12 @@ FieldsRenderer.displayName = 'FieldsRenderer';
 
 const TemplateFieldRendererInner: FC<{
   resolvedFields: InlineField[];
-  parsedTemplate: ParsedTemplateDefinition;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
-  parentFieldNames?: Set<string>;
-  parentTemplateName?: string;
-}> = ({
-  resolvedFields,
-  parsedTemplate,
-  onFieldDefaultChange,
-  parentFieldNames,
-  parentTemplateName,
-}) => {
-  const initialDefaultValues = React.useMemo(() => {
-    const defaults: Record<string, Record<string, string>> = {
-      [CASE_EXTENDED_FIELDS]: {},
-    };
-    for (const field of resolvedFields) {
-      const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
-      const fieldKey = getFieldSnakeKey(field.name, field.type);
-      defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
-    }
-    return defaults;
-  }, [resolvedFields]);
+}> = ({ resolvedFields, onFieldDefaultChange }) => {
+  const initialDefaultValues = React.useMemo(
+    () => buildInitialDefaultValues(resolvedFields),
+    [resolvedFields]
+  );
 
   const form = useForm({
     defaultValues: initialDefaultValues,
@@ -169,12 +340,8 @@ const TemplateFieldRendererInner: FC<{
   useYamlFormSync(form, resolvedFields, onFieldDefaultChange);
 
   return (
-    <FormProvider key={parsedTemplate.name} {...form}>
-      <FieldsRenderer
-        resolvedFields={resolvedFields}
-        parentFieldNames={parentFieldNames}
-        parentTemplateName={parentTemplateName}
-      />
+    <FormProvider {...form}>
+      <FieldsRenderer resolvedFields={resolvedFields} />
     </FormProvider>
   );
 };
@@ -190,26 +357,44 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   parsedTemplate,
   owner,
   onFieldDefaultChange,
-  parentFieldNames,
-  parentTemplateName,
 }) => {
   const { owner: contextOwner } = useCasesContext();
   const resolvedOwner = owner ?? contextOwner[0];
   const { resolvedFields, isLoading } = useResolvedFields(parsedTemplate.fields, resolvedOwner);
 
-  // Content-based key to detect real field definition changes (vs same-content re-parses).
-  const fieldsKey = useMemo(
+  // Full-content signature — changes whenever the resolved fields actually change, INCLUDING a
+  // default value. Drives the stable-reference update below so external default edits (typed in the
+  // YAML editor) flow into the live inner form via useYamlFormSync.
+  const contentKey = useMemo(
     () => resolvedFields.map((f) => JSON.stringify(f)).join('|'),
     [resolvedFields]
   );
 
-  // Stabilize the resolvedFields reference — only update when content actually changes.
-  // This prevents useYamlFormSync effects from re-running when identical YAML is re-parsed
-  // into a new object reference (e.g. on every keystroke in the YAML editor).
+  // Structural signature — deliberately EXCLUDES metadata.default (the two-way-bound value the user
+  // edits in the preview). Only this gates the remount `key` below: keying on the default would
+  // remount the inner form on every keystroke / date click once the debounced YAML round-trip lands,
+  // stealing input focus and closing the date-picker popover. Structural changes (fields
+  // added/removed/renamed, control/type/options/validation/display) still change it and correctly
+  // rebuild the form. useYamlFormSync already syncs default changes into the mounted form.
+  const structuralKey = useMemo(
+    () =>
+      resolvedFields
+        .map((field) => {
+          const metadataWithoutDefault: Record<string, unknown> = { ...(field.metadata ?? {}) };
+          delete metadataWithoutDefault.default;
+          return JSON.stringify({ ...field, metadata: metadataWithoutDefault });
+        })
+        .join('|'),
+    [resolvedFields]
+  );
+
+  // Stabilize the resolvedFields reference — only update when content actually changes (contentKey),
+  // not on every identical re-parse. This keeps useYamlFormSync effects from re-running needlessly
+  // while still handing the inner form fresh defaults when they genuinely change.
   const stableResolvedFieldsRef = useRef(resolvedFields);
-  const prevFieldsKeyRef = useRef(fieldsKey);
-  if (prevFieldsKeyRef.current !== fieldsKey) {
-    prevFieldsKeyRef.current = fieldsKey;
+  const prevContentKeyRef = useRef(contentKey);
+  if (prevContentKeyRef.current !== contentKey) {
+    prevContentKeyRef.current = contentKey;
     stableResolvedFieldsRef.current = resolvedFields;
   }
 
@@ -217,12 +402,9 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
 
   return (
     <TemplateFieldRendererInner
-      key={fieldsKey}
+      key={structuralKey}
       resolvedFields={stableResolvedFieldsRef.current}
-      parsedTemplate={parsedTemplate}
       onFieldDefaultChange={onFieldDefaultChange}
-      parentFieldNames={parentFieldNames}
-      parentTemplateName={parentTemplateName}
     />
   );
 };

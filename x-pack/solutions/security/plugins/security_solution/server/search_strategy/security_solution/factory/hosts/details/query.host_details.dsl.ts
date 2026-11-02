@@ -7,13 +7,11 @@
 
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { cloudFieldsMap, hostFieldsMap } from '@kbn/securitysolution-ecs';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { isEmpty } from 'lodash';
 import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { createQueryFilterClauses, reduceFields } from '../../../../../utils/build_query';
 import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
-
-const EUID_RUNTIME_FIELD = 'entity_id';
 
 export const buildHostDetailsQuery = ({
   defaultIndex,
@@ -31,7 +29,9 @@ export const buildHostDetailsQuery = ({
   const hostNameFilter = isEmpty(filterQuery) ? { term: { 'host.name': hostName } } : undefined;
 
   const filter = [
-    ...(entityStoreV2 ? [euid.dsl.getEuidDocumentsContainsIdFilter('host')] : []),
+    ...(entityStoreV2
+      ? [euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))]
+      : []),
     ...(hostNameFilter ? [hostNameFilter] : []),
     ...createQueryFilterClauses(filterQuery),
     {
@@ -50,9 +50,6 @@ export const buildHostDetailsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    ...(entityStoreV2
-      ? { runtime_mappings: { [EUID_RUNTIME_FIELD]: euid.painless.getEuidRuntimeMapping('host') } }
-      : {}),
     aggregations: {
       ...buildFieldsTermAggregation(esFields.filter((field) => !['@timestamp'].includes(field))),
       endpoint_id: {

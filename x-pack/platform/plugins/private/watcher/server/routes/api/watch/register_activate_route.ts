@@ -22,7 +22,7 @@ function activateWatch(dataClient: IScopedClusterClient, watchId: string) {
 }
 
 const paramsSchema = schema.object({
-  watchId: schema.string(),
+  watchId: schema.string({ maxLength: 1000 }),
 });
 
 export function registerActivateRoute({

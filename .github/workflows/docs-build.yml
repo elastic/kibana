@@ -1,9 +1,12 @@
 name: docs-build
 on:
   pull_request:
+    branches: [main]
     types: [opened, synchronize, reopened]
   push:
     branches: [main]
+  merge_group:
+    types: [checks_requested]
 permissions:
   contents: read
   pull-requests: read

@@ -7,7 +7,7 @@
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { SECURITY_EXTENSION_ID, type CoreStart, SavedObjectsClient } from '@kbn/core/server';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 
 export async function getInternalSavedObjectsClient(coreStart: CoreStart) {
   return new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
@@ -19,7 +19,7 @@ export function getInternalSavedObjectsClientForSpaceId(coreStart: CoreStart, sp
     route: { settings: {} },
     url: { href: '', hash: '' } as URL,
     raw: { req: { url: '/' } } as any,
-    spaceId: spaceId ? asSpaceId(spaceId) : undefined,
+    spaceId: spaceId ? brandSpaceId(spaceId) : undefined,
   });
 
   // soClient as kibana internal users, be careful on how you use it, security is not enabled

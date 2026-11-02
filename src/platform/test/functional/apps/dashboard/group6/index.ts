@@ -23,15 +23,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     );
   }
 
-  async function unloadCurrentData() {
-    await esArchiver.unload(
-      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
-    );
-  }
-
   describe('dashboard app - group 6', function () {
     before(loadCurrentData);
-    after(unloadCurrentData);
 
     loadTestFile(require.resolve('./dashboard_grid'));
     loadTestFile(require.resolve('./view_edit'));
@@ -42,6 +35,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     // If we don't use the timestamp in the URL, the colors in the charts will be different.
     loadTestFile(require.resolve('./dashboard_snapshots'));
     loadTestFile(require.resolve('./dashboard_esql_chart'));
-    loadTestFile(require.resolve('./dashboard_esql_no_data'));
   });
 }

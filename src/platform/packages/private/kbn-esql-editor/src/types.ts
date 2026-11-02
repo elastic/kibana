@@ -24,6 +24,7 @@ import type {
   ESQLCallbacks,
   ESQLTelemetryCallbacks,
   ESQLSourceResult,
+  EsqlView,
 } from '@kbn/esql-types';
 import type { ESQLDependencies } from '@kbn/code-editor';
 
@@ -69,6 +70,8 @@ export interface ESQLEditorProps {
   hideQueryHistory?: boolean;
   /** hide quick search **/
   hideQuickSearch?: boolean;
+  /** set when the quick search visor is rendered next to the editor, so the empty editor doesn't advertise its own AI entry point **/
+  hasExternalVisor?: boolean;
   /** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
@@ -89,9 +92,27 @@ export interface ESQLEditorProps {
   mergeExternalMessages?: boolean;
   /** Enable data source browser suggestion & command integration */
   enableResourceBrowser?: boolean;
+  /**
+   * Shows the action to create an ES|QL view from the current query.
+   */
+  enableCreateView?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
+  /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */
+  onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  /**
+   * Called once the editor has set up its NL-to-ES|QL review handler.
+   * The parent receives `handler` and can pass it as `onNlResult` to a sibling
+   * QuickSearchVisor (the non-inline case where the visor lives outside the editor).
+   */
+  onVisorNlResultReady?: (handler: VisorNlResultHandler) => void;
 }
+
+/** Receives the generated ES|QL for review and the callbacks for the user's decision */
+export type VisorNlResultHandler = (
+  generatedQuery: string,
+  review: { onAccept: () => void; onReject?: () => void }
+) => void;
 
 interface ESQLVariableService {
   isCreateControlSuggestionEnabled: boolean;
@@ -107,6 +128,7 @@ export interface EsqlPluginStartBase {
   getLicense: () => Promise<ILicense | undefined>;
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
+  enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
 }
 
 export interface ESQLEditorDeps {

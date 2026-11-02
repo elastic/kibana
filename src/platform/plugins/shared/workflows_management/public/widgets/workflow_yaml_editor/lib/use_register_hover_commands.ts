@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { monaco } from '@kbn/monaco';
 import type { LineColumnPosition } from '../../../entities/workflows/store';
 import {

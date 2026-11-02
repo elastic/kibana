@@ -139,10 +139,11 @@ export function httpHandlerFromKbnClient({
         // `kbnClient.request` only ever throws `KbnClientRequesterError`.
         const error = err as KbnClientRequesterError;
         const status = error.status;
-        const shouldRetry =
-          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
 
         lastError = error;
+
+        const shouldRetry =
+          attempt < maxRetries && typeof status === 'number' && retryStatuses.has(status);
 
         if (!shouldRetry) {
           throw error;

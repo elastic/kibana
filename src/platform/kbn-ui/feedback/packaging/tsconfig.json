@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // Only override the module resolution map; everything else (bundler
+    // resolution, module: preserve, jsx, strict, esModuleInterop, skipLibCheck)
+    // is inherited from the repo base so this config no longer drifts.
+    "paths": {
+      "@kbn/i18n": [
+        "./react/services/i18n.tsx"
+      ],
+      "@kbn/i18n-react": [
+        "./react/services/i18n.tsx"
+      ]
+    }
+  },
+  "include": [
+    "react/**/*.ts",
+    "react/**/*.tsx",
+    "../src/**/*.ts",
+    "../src/**/*.tsx"
+  ],
+  "exclude": [
+    "../src/**/*.test.*",
+    "../src/**/*.stories.*",
+    "../src/**/__stories__/**",
+    "node_modules"
+  ]
+}

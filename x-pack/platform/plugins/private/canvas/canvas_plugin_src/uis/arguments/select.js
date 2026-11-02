@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../i18n';
 
@@ -23,7 +24,16 @@ const SelectArgInput = ({ typeInstance, onValueChange, argValue, argId }) => {
   };
 
   return (
-    <EuiSelect compressed id={argId} value={argValue} options={choices} onChange={handleChange} />
+    <EuiSelect
+      compressed
+      id={argId}
+      value={argValue}
+      options={choices}
+      onChange={handleChange}
+      aria-label={i18n.translate('xpack.canvas.selectArgument.ariaLabel', {
+        defaultMessage: 'Select an option',
+      })}
+    />
   );
 };
 

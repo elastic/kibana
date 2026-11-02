@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { Logger } from '@kbn/logging';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { PluginConfig } from './config';
 import type {
   PluginSetupDependencies,
@@ -25,6 +26,7 @@ import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
+import { registerGetWorkflowTool } from './tools/get_workflow_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
 import { getWorkflowExecutionStatusTool } from './tools/get_workflow_execution_status';
@@ -46,6 +48,7 @@ export class AgentBuilderWorkflowsPlugin
 {
   private readonly logger: Logger;
   private api: WorkflowsManagementApi | null = null;
+  private security?: SecurityPluginStart;
 
   constructor(context: PluginInitializerContext<PluginConfig>) {
     this.logger = context.logger.get();
@@ -55,37 +58,40 @@ export class AgentBuilderWorkflowsPlugin
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies
   ): AgentBuilderWorkflowsPluginSetup {
-    const { agentBuilder, agentContextLayer, workflowsManagement } = setupDeps;
+    const { agentBuilder, agentBuilderSml, workflowsManagement } = setupDeps;
     const api = workflowsManagement.management;
     this.api = api;
+
+    const getSecurity = () => this.security;
 
     const aiTelemetryClient = new WorkflowsAiTelemetryClient(coreSetup.analytics, this.logger);
 
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
+    registerGetWorkflowTool(agentBuilder, api, getSecurity);
     registerGetStepDefinitionsTool(agentBuilder, api);
     registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(agentBuilder, api);
+    registerWorkflowExecuteStepTool(agentBuilder, api, getSecurity);
 
     // Workflow attachment types
-    registerWorkflowYamlAttachment(agentBuilder, api);
+    registerWorkflowYamlAttachment(agentBuilder, api, getSecurity);
     registerWorkflowYamlDiffAttachment(agentBuilder);
 
     // Workflow authoring skill
     agentBuilder.skills.register(workflowAuthoringSkill);
 
     // Workflow SML type for the agent context layer
-    agentContextLayer.registerType(createWorkflowSmlType(api));
+    agentBuilderSml.registerType(createWorkflowSmlType(api));
 
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
-      getWorkflowExecutionStatusTool({ workflowsManagement }),
-      resumeWorkflowExecutionTool({ workflowsManagement }),
-      listWorkflowExecutionsTool({ workflowsManagement }),
+      getWorkflowExecutionStatusTool({ workflowsManagement, getSecurity }),
+      resumeWorkflowExecutionTool({ workflowsManagement, getSecurity }),
+      listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
-      executeWorkflowTool({ workflowsManagement }),
+      executeWorkflowTool({ workflowsManagement, getSecurity }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
 
@@ -96,11 +102,9 @@ export class AgentBuilderWorkflowsPlugin
     coreStart: CoreStart,
     startDeps: PluginStartDependencies
   ): AgentBuilderWorkflowsPluginStart {
+    this.security = startDeps.security;
     if (this.api) {
-      this.api.setSmlIndexAttachment(
-        startDeps.agentContextLayer.indexAttachment,
-        this.logger.get('sml')
-      );
+      this.api.setSmlClient(startDeps.agentBuilderSml, this.logger.get('sml'));
     }
     return {};
   }

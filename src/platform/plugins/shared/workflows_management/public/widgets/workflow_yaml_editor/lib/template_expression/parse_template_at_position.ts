@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Output } from 'liquidjs';
 import { monaco } from '@kbn/monaco';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
@@ -51,19 +52,15 @@ export function parseTemplateAtPosition(
     const tokens = liquidEngine.parse(lineContent);
     // Find output tokens ({{ }}) that contain the cursor position
     for (const token of tokens) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const tokenAny = token as any;
       // Check if this is an Output token ({{ }})
-      // The constructor name is "Output" not "OutputToken"
-      if (tokenAny.constructor.name === 'Output') {
+      if (token instanceof Output) {
         // Check if cursor is within this token's range
-        // The begin/end positions are in tokenAny.token (the OutputToken)
-        const tokenStart = tokenAny.token.begin;
-        const tokenEnd = tokenAny.token.end;
+        const tokenStart = token.token.begin;
+        const tokenEnd = token.token.end;
         if (cursorOffset >= tokenStart && cursorOffset <= tokenEnd) {
           // Extract the expression content using contentRange for the actual content (without {{ }})
           // contentRange gives us the range of just the expression inside the braces
-          const contentRange = tokenAny.token.contentRange;
+          const contentRange = token.token.contentRange;
           const expression = contentRange
             ? lineContent.substring(contentRange[0], contentRange[1])
             : lineContent.substring(tokenStart + 2, tokenEnd - 2).trim();
@@ -71,10 +68,7 @@ export function parseTemplateAtPosition(
           const pipeIndex = expression.indexOf('|');
           const variablePath =
             pipeIndex >= 0 ? expression.substring(0, pipeIndex).trim() : expression.trim();
-          const filtersString = pipeIndex >= 0 ? expression.substring(pipeIndex + 1).trim() : '';
-          const filters = filtersString
-            ? filtersString.split('|').map((f) => f.trim().split(':')[0].trim())
-            : [];
+          const filters = token.value.filters.map((f) => f.name);
           if (!variablePath) {
             return null;
           }

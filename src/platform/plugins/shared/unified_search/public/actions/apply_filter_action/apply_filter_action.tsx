@@ -15,7 +15,7 @@ import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';
+import { convertRangeFilterToTimeRangeString, extractTimeFilter } from '@kbn/es-query';
 import { getIndexPatterns } from '../../services';
 import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../constants';
@@ -111,7 +111,7 @@ export function createFilterAction(
         );
         filterManager.addFilters(restOfFilters);
         if (timeRangeFilter) {
-          timeFilter.setTime(convertRangeFilterToTimeRange(timeRangeFilter));
+          timeFilter.setTime(convertRangeFilterToTimeRangeString(timeRangeFilter));
         }
       } else {
         filterManager.addFilters(selectedFilters);

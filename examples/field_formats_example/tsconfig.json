@@ -22,5 +22,6 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/field-types",
     "@kbn/i18n",
+    "@kbn/ui-callout",
   ]
 }

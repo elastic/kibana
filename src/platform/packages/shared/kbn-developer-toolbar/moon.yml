@@ -19,10 +19,11 @@ project:
 dependsOn:
   - '@kbn/config'
   - '@kbn/shared-ux-utility'
+  - '@kbn/core-theme-browser-internal-types'
 tags:
   - shared-browser
   - package
-  - prod
+  - dev
   - group-platform
   - shared
   - jest-unit-tests
@@ -31,6 +32,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

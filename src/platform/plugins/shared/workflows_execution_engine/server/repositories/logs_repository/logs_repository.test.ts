@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { LogsRepository } from './logs_repository';
 
 const createDataStreamClientMock = () => ({
@@ -37,7 +38,7 @@ describe('LogsRepository', () => {
   beforeEach(() => {
     dataStreamClient = createDataStreamClientMock();
     (initializeDataStreamClient as jest.Mock).mockResolvedValue(dataStreamClient);
-    repo = new LogsRepository({} as any);
+    repo = new LogsRepository({} as any, loggerMock.create());
   });
 
   describe('createLogs', () => {

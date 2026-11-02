@@ -20,10 +20,11 @@ export const noIndexPrivileges: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
           [ALERTS_FEATURE_ID]: ['read'],
+          [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
+          workflowsManagement: ['all'],
         },
         spaces: ['*'],
       },
@@ -45,10 +46,11 @@ export const noAdhocIndexPrivileges: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
           [ALERTS_FEATURE_ID]: ['read'],
+          [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
+          workflowsManagement: ['all'],
         },
         spaces: ['*'],
       },
@@ -70,10 +72,11 @@ export const noAttacksIndexPrivileges: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
           [ALERTS_FEATURE_ID]: ['read'],
+          [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
+          workflowsManagement: ['all'],
         },
         spaces: ['*'],
       },
@@ -95,10 +98,11 @@ export const allIndexPrivileges: Role = {
     kibana: [
       {
         feature: {
-          [SECURITY_FEATURE_ID]: ['all'],
           [ALERTS_FEATURE_ID]: ['read'],
+          [SECURITY_FEATURE_ID]: ['all'],
           securitySolutionAssistant: ['all'],
           securitySolutionAttackDiscovery: ['all'],
+          workflowsManagement: ['all'],
         },
         spaces: ['*'],
       },

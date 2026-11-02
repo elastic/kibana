@@ -25,13 +25,15 @@ dependsOn:
   - '@kbn/deeplinks-devtools'
   - '@kbn/config-schema'
   - '@kbn/core-plugins-server'
-  - '@kbn/react-kibana-context-render'
   - '@kbn/scout'
+  - '@kbn/app-header'
+  - '@kbn/core-rendering-browser'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
+  - scout-tests
 fileGroups:
   src:
     - common/*

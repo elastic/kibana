@@ -74,7 +74,7 @@ export const MANIFEST_V1: JSONSchema = {
         this plugin to work properly.
 
         The plugins listed here will be loaded in the browser, even if the plugin is
-        disabled. Required by \`@kbn/optimizer\` to support cross-plugin imports.
+        disabled. Required by \`@kbn/rspack-optimizer\` to support cross-plugin imports.
         "core" and plugins already listed in \`requiredPlugins\` do not need to be
         duplicated here.
       `,
@@ -97,7 +97,7 @@ export const MANIFEST_V1: JSONSchema = {
     extraPublicDirs: {
       description: desc`
         Specifies directory names that can be imported by other ui-plugins built
-        using the same instance of the @kbn/optimizer. A temporary measure we plan
+        using the same instance of the @kbn/rspack-optimizer. A temporary measure we plan
         to replace with better mechanisms for sharing static code between plugins
         @deprecated To be deleted when https://github.com/elastic/kibana/issues/101948 is done.
       `,

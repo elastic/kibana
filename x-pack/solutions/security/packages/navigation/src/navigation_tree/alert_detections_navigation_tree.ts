@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { RootNodePanelOpenerDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 import { i18nStrings } from '../i18n_strings';
 
-export const createAlertDetectionsNavigationTree = (): NodeDefinition => ({
+export const createAlertDetectionsNavigationTree = (): RootNodePanelOpenerDefinition => ({
   id: SecurityGroupName.alertDetections,
   title: SecurityLinkGroup[SecurityGroupName.alertDetections].title,
   icon: 'warning',
@@ -22,12 +22,13 @@ export const createAlertDetectionsNavigationTree = (): NodeDefinition => ({
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: SecurityPageName.alerts,
-          link: securityLink(SecurityPageName.alerts),
-        },
-        {
           id: SecurityPageName.attacks,
           link: securityLink(SecurityPageName.attacks),
+          badgeType: 'new',
+        },
+        {
+          id: SecurityPageName.alerts,
+          link: securityLink(SecurityPageName.alerts),
         },
       ],
     },

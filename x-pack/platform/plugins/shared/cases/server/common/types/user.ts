@@ -14,4 +14,7 @@ export interface User {
 
 export interface UserProfile {
   uid: string;
+  username?: string | null;
+  full_name?: string | null;
+  email?: string | null;
 }

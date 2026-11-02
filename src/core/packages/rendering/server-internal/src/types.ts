@@ -22,8 +22,10 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalCustomBrandingSetup } from '@kbn/core-custom-branding-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
-import type { I18nServiceSetup } from '@kbn/core-i18n-server';
-import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
+import type {
+  InternalI18nServicePreboot,
+  InternalI18nServiceSetup,
+} from '@kbn/core-i18n-server-internal';
 import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
@@ -38,7 +40,6 @@ export interface RenderingMetadata {
   themeVersion: ThemeVersion;
   darkMode: DarkModeValue;
   stylesheetPaths: string[];
-  scriptPaths: string[];
   /** Font URLs to preload via <link rel="preload" as="font"> (rspack mode only) */
   preloadFonts?: string[];
   /** When true, adds font-display: swap to @font-face declarations (rspack mode only) */
@@ -63,7 +64,7 @@ export interface RenderingSetupDeps {
   uiPlugins: UiPlugins;
   customBranding: InternalCustomBrandingSetup;
   userSettings: InternalUserSettingsServiceSetup;
-  i18n: I18nServiceSetup;
+  i18n: InternalI18nServiceSetup;
 }
 
 /** @internal */

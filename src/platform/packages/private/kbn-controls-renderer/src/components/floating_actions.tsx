@@ -55,12 +55,13 @@ const getFloatingActionItem = (
         key={tooltipKey}
         id={tooltipKey}
         content={action.getDisplayNameTooltip?.(context) || action.getDisplayName(context)}
+        disableScreenReaderOutput
       >
         <EuiButtonIcon
           iconType={action.getIconType(context) ?? 'empty'}
           color="text"
           onClick={() => action.execute(context)}
-          aria-labelledby={tooltipKey}
+          aria-label={action.getDisplayName(context)}
           data-test-subj={`embeddablePanelAction-${action.id}`}
         />
       </EuiToolTip>
@@ -164,7 +165,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       className={classNames(hasLockedHoverActions ? 'lockHoverActions' : null)}
     >
       {children}
-      {floatingActions.length > 0 && (
+      {floatingActions.length > 0 && viewMode !== 'non-interactive' && (
         <div
           data-test-subj={`hover-actions-${uuid}`}
           key={`presentationUtil__floatingActions__${uuid}`}

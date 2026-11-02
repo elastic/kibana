@@ -6,10 +6,14 @@
  */
 
 import { getTranslateQueryNode } from './translate_query';
+import { formatResourceWithSampledValues } from '@kbn/agent-builder-genai-utils';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
 import type { TranslateDashboardPanelState } from '../../types';
-import type { GetTranslateSplToEsqlParams } from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
+import {
+  getTranslateSplToEsql,
+  type GetTranslateSplToEsqlParams,
+} from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
 
 jest.mock('../../../../../../../common/task/agent/helpers/translate_spl_to_esql', () => ({
   getTranslateSplToEsql: jest.fn(),
@@ -19,6 +23,9 @@ jest.mock('../../../../../../../common/task/agent/helpers/translate_spl_to_esql'
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   formatResourceWithSampledValues: jest.fn(),
 }));
+
+const mockGetTranslateSplToEsql = jest.mocked(getTranslateSplToEsql);
+const mockFormatResourceWithSampledValues = jest.mocked(formatResourceWithSampledValues);
 
 const buildMockEsqlQuery = (indexPattern: string) =>
   `FROM ${indexPattern}\n| WHERE event.category == "process"\n| STATS count = COUNT(*) BY process.name\n| SORT count DESC`;
@@ -55,10 +62,7 @@ describe('getTranslateQueryNode', () => {
       ],
     });
 
-    const { getTranslateSplToEsql } = jest.requireMock(
-      '../../../../../../../common/task/agent/helpers/translate_spl_to_esql'
-    );
-    (getTranslateSplToEsql as jest.Mock).mockReturnValue(mockTranslateFn);
+    mockGetTranslateSplToEsql.mockReturnValue(mockTranslateFn);
   });
 
   it('should default to TRANSLATION_INDEX_PATTERN when no index pattern is provided', async () => {
@@ -103,5 +107,107 @@ describe('getTranslateQueryNode', () => {
       expect.objectContaining({ indexPattern: 'logs-windows.sysmon_operational-default' })
     );
     expect(result.comments![0].message).toBe(buildMockSummary(TRANSLATION_INDEX_PATTERN));
+  });
+
+  it('should include formatted lookup resources in the translation knowledge base', async () => {
+    const node = getTranslateQueryNode(mockParams);
+    const state = {
+      ...baseState,
+      resources: {
+        lookup: [
+          {
+            type: 'lookup',
+            name: 'threat_intel_ip',
+            content: 'lookup_default_threat_intel_ip',
+            fields: [{ path: 'ip', type: 'ip' }],
+          },
+        ],
+      },
+    } as TranslateDashboardPanelState;
+
+    await node(state, {});
+
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.stringContaining('<lookup_resources>'),
+      })
+    );
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.stringContaining(
+          '<lookup_resource source_name="threat_intel_ip" index="lookup_default_threat_intel_ip">'
+        ),
+      })
+    );
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.stringContaining('<field name="ip" type="ip" />'),
+      })
+    );
+  });
+
+  it('should preserve lookup resource context when field metadata is unavailable', async () => {
+    const node = getTranslateQueryNode(mockParams);
+    const state = {
+      ...baseState,
+      resources: {
+        lookup: [
+          {
+            type: 'lookup',
+            name: 'threat_intel_ip',
+            content: 'lookup_default_threat_intel_ip',
+          },
+        ],
+      },
+    } as TranslateDashboardPanelState;
+
+    await node(state, {});
+
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.stringContaining(
+          '<lookup_resource source_name="threat_intel_ip" index="lookup_default_threat_intel_ip">'
+        ),
+      })
+    );
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.not.stringContaining('<fields>'),
+      })
+    );
+  });
+
+  it('should combine resolved resource context and lookup resources in the knowledge base', async () => {
+    const indexResourceContext = 'resolved index mapping and sampled values';
+    mockFormatResourceWithSampledValues.mockReturnValue(indexResourceContext);
+
+    const node = getTranslateQueryNode(mockParams);
+    const state = {
+      ...baseState,
+      resolved_resource: { resource: { name: 'logs-test' } },
+      resources: {
+        lookup: [
+          {
+            type: 'lookup',
+            name: 'threat_intel_ip',
+            content: 'lookup_default_threat_intel_ip',
+            fields: [{ path: 'ip', type: 'ip' }],
+          },
+        ],
+      },
+    } as unknown as TranslateDashboardPanelState;
+
+    await node(state, {});
+
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.stringContaining(indexResourceContext),
+      })
+    );
+    expect(mockTranslateFn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        knowledgeBase: expect.stringContaining('<lookup_resources>'),
+      })
+    );
   });
 });

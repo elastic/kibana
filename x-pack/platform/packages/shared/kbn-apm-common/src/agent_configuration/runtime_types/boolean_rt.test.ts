@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { booleanRt } from './boolean_rt';
-import { isRight } from 'fp-ts/Either';
+import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
+import { booleanSchema } from './boolean_rt';
 
-describe('booleanRt', () => {
+describe('booleanSchema', () => {
   describe('it should not accept', () => {
     [undefined, null, '', 0, 'foo', true, false].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(booleanRt.decode(input))).toBe(false);
+        expectParseError(booleanSchema.safeParse(input));
       });
     });
   });
@@ -20,7 +20,7 @@ describe('booleanRt', () => {
   describe('it should accept', () => {
     ['true', 'false'].map((input) => {
       it(`${JSON.stringify(input)}`, () => {
-        expect(isRight(booleanRt.decode(input))).toBe(true);
+        expectParseSuccess(booleanSchema.safeParse(input));
       });
     });
   });

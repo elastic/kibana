@@ -6,6 +6,8 @@ Extended templates and patterns that are too long to fit in `SKILL.md`. Read thi
 
 A minimal end-to-end step ("process a message") across the common, server, and public layers. Copy and rename for a real step.
 
+> **Key casing:** workflow-owned config keys are kebab-case (`connector-id`); workflow-owned input keys under `with:` are kebab-case or snake_case (`max_count`, `dry-run`) — **never camelCase** (`maxCount`). Only inherited OpenAPI/connector shapes keep their original case. See SKILL.md → [Workflow YAML naming conventions](SKILL.md#workflow-yaml-naming-conventions-read-first).
+
 ### `common/step_types/process_message.ts`
 
 ```ts
@@ -445,39 +447,49 @@ export const transformStepDefinition = createPublicStepDefinition({
 
 ## 4. Conditional / feature-flagged registration
 
-Public side:
+`registerStepDefinition` loaders run **once**. Returning `undefined` from a loader is for a decision that cannot change for the rest of the process (a missing dependency, for example). A feature flag can change after startup, and the loader will not run again.
+
+Do not snapshot the flag with `firstValueFrom(getBooleanValue$)` (or any other one-shot read) and reuse that promise. Subscribe in `start()`, keep the latest value, and gate the **handler** so later changes take effect on the next execution. Unsubscribe in `stop()`.
 
 ```ts
-workflowsExtensions.registerStepDefinition(async () => {
-  if (!(await deps.featureFlags.get('myPlugin.enableProcessMessage'))) {
-    return undefined; // skip silently — no error, no entry in the registry
-  }
-  return (await import('./process_message')).processMessageDefinition;
-});
-```
-
-Server side (resolving a `CoreSetup`-derived feature flag once and reusing it):
-
-```ts
-import type { CoreSetup } from '@kbn/core/server';
+import type { Subscription } from 'rxjs';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { processMessageDefinition } from './step_types/process_message';
 
-export const registerStepDefinitions = (
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  core: CoreSetup
-) => {
-  const isEnabled = core
-    .getStartServices()
-    .then(([coreStart]) =>
-      coreStart.featureFlags.getBooleanValue('myPlugin.enableProcessMessage', false)
+export class MyPlugin implements Plugin {
+  private processMessageEnabled = false;
+  private readonly subscriptions: Subscription[] = [];
+
+  public setup(_core: CoreSetup, plugins: { workflowsExtensions: WorkflowsExtensionsServerPluginSetup }) {
+    plugins.workflowsExtensions.registerStepDefinition({
+      ...processMessageDefinition,
+      handler: async (context) => {
+        if (!this.processMessageEnabled) {
+          throw new Error('Process message is disabled');
+        }
+        return processMessageDefinition.handler(context);
+      },
+    });
+  }
+
+  public start(core: CoreStart) {
+    this.subscriptions.push(
+      core.featureFlags
+        .getBooleanValue$('myPlugin.enableProcessMessage', false)
+        .subscribe((enabled) => {
+          this.processMessageEnabled = enabled;
+        })
     );
+  }
 
-  workflowsExtensions.registerStepDefinition(async () => {
-    if (!(await isEnabled)) return undefined;
-    return (await import('./process_message')).processMessageDefinition;
-  });
-};
+  public stop() {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+  }
+}
 ```
+
+The public registry has the same one-shot loader. Register the editor definition unconditionally. The server handler is what follows the flag. Returning `undefined` from the public loader hides the step until the next process start, even if the flag turns on later.
 
 Loaders that throw are caught by the registry and logged via the plugin logger; a single broken loader cannot prevent other steps (or workflow execution as a whole) from working. If a step seems "missing" at runtime, check the Kibana log for a registration failure before suspecting the schema.
 
@@ -553,7 +565,7 @@ Reuse the local plugin's test style; common minimum:
 - **Common Zod schemas**: a snapshot or fixture round-trip per schema with at least one happy-path object and one rejection case (e.g. wrong type, missing required field).
 - **Server handler**: a Jest unit test mocking `StepHandlerContext` (or the plugin's own helper) — assert the happy path produces the expected `output`, and at least one error path throws / returns the expected `ExecutionError.type`.
 - **Public registration**: there is already a precedent of `register_workflow_steps.test.ts` in `security_solution` — assert each step is registered (including async loaders) and that conditional registrations respect their flags.
-- **Approval test** (Scout API): runs in CI; locally, run it to get the new ID + hash before updating `APPROVED_STEP_DEFINITIONS`.
+- **Approval test** (Scout API): runs in CI; locally, run it to get the `echo … > approved_step_definitions/<step.id>.txt` command(s) you need to run from the kibana directory to add or update each per-step approval file. See [STEPS.md → Step Definition Approval Process](../../dev_docs/STEPS.md#step-definition-approval-process).
 
 Avoid snapshotting the entire definition unless behavior changes; the i18n strings churn.
 
@@ -574,6 +586,6 @@ Useful files to grep for real-world patterns:
 | `connectorIdSelection` example | `x-pack/platform/plugins/shared/agent_builder/public/step_types/run_agent_step.ts` |
 | `BaseStepDefinition` + `StepCategory` | `src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts` |
 | `ExecutionError` | `src/platform/packages/shared/kbn-workflows/server/errors/execution_error.ts` |
-| Approval fixture | `src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions.ts` |
+| Approval fixtures (one file per step) | `src/platform/plugins/shared/workflows_extensions/test/scout/api/fixtures/approved_step_definitions/` |
 | Factory-style server steps | `x-pack/platform/plugins/shared/cases/server/workflows/steps/` |
 | Feature-flagged loader | `x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/register_workflow_steps.ts` |

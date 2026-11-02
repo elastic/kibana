@@ -323,6 +323,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "boolean",
       },
+      "kibana.alert.snoozed": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
+      },
       "kibana.alert.start": Object {
         "array": false,
         "required": false,
@@ -373,6 +378,11 @@ it('matches snapshot', () => {
         "format": "epoch_millis||strict_date_optional_time",
         "required": false,
         "type": "date_range",
+      },
+      "kibana.alert.tracked": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
       },
       "kibana.alert.updated_at": Object {
         "array": false,

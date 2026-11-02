@@ -8,12 +8,12 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { useOverviewTrendsRequests } from './use_overview_trends_requests';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
-import * as reduxHooks from 'react-redux';
+import * as reduxHooks from 'react-redux-v7';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
   useSelector: jest.fn(),
 }));
@@ -61,7 +61,7 @@ describe('useOverviewTrendsRequests', () => {
   });
 
   const createWrapper = () => {
-    return ({ children }: React.PropsWithChildren) => <WrappedHelper>{children}</WrappedHelper>;
+    return ({ children }: React.PropsWithChildren) => <HookWrapper>{children}</HookWrapper>;
   };
 
   it('should dispatch action for all visible monitors when trendData is empty', () => {

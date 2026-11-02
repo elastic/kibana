@@ -16,6 +16,7 @@ export const authTypeSchema = lazySchema(() =>
       z.literal(AuthType.Basic),
       z.literal(AuthType.SSL),
       z.literal(AuthType.OAuth2ClientCredentials),
+      z.literal(AuthType.OAuth2Password),
       z.literal(null),
     ])
     .default(AuthType.Basic)
@@ -92,7 +93,7 @@ export const SecretConfigurationSchemaValidation = {
       return;
     }
 
-    return i18n.translate('xpack.stackConnectors.webhook.invalidSecrets', {
+    return i18n.translate('connectors.webhook.invalidSecrets', {
       defaultMessage:
         'must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)',
     });

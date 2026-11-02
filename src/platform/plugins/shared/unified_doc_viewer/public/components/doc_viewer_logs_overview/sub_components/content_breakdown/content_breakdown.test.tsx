@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { render, screen, within } from '@testing-library/react';
 import { ContentBreakdown } from './content_breakdown';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -58,6 +59,11 @@ const buildHit = (fields: Record<string, unknown> = {}, highlight?: Record<strin
     highlight,
   });
 
+const LOG_LEVEL_BADGE = /^unifiedDocViewLogsOverviewLogLevel/;
+
+const renderWithTheme = (ui: React.ReactElement) =>
+  render(<EuiProvider highContrastMode={false}>{ui}</EuiProvider>);
+
 describe('ContentBreakdown', () => {
   beforeEach(() => {
     mockConvertToReact.mockClear();
@@ -93,6 +99,125 @@ describe('ContentBreakdown', () => {
       render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
 
       expect(screen.getByText('message')).toBeInTheDocument();
+    });
+  });
+
+  describe('With a message field', () => {
+    it('renders the message panel with the field name, the message and the badges', () => {
+      const hit = buildHit({ message: 'log message' });
+      const formattedDoc = {
+        message: 'log message',
+        '@timestamp': '2026-10-01T10:00:00.000Z',
+        'log.level': 'error',
+      } as any;
+
+      renderWithTheme(
+        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
+      );
+
+      const messagePanel = screen.getByTestId('unifiedDocViewLogsOverviewMessage');
+      expect(within(messagePanel).getByText('message')).toBeInTheDocument();
+      expect(within(messagePanel).getByTestId('codeBlock')).toHaveTextContent('log message');
+      expect(
+        within(messagePanel).getByTestId('unifiedDocViewLogsOverviewTimestamp')
+      ).toBeInTheDocument();
+      expect(within(messagePanel).getByTestId(LOG_LEVEL_BADGE)).toBeInTheDocument();
+    });
+
+    it('renders the stream processing link', () => {
+      const hit = buildHit({ message: 'log message' });
+      const formattedDoc = { message: 'log message' } as any;
+      const renderFlyoutStreamProcessingLink = jest.fn(() => (
+        <span data-test-subj="streamProcessingLink" />
+      ));
+
+      render(
+        <ContentBreakdown
+          dataView={mockDataView}
+          formattedDoc={formattedDoc}
+          hit={hit}
+          renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+          cpsHasLinkedProjects
+        />
+      );
+
+      expect(screen.getByTestId('streamProcessingLink')).toBeInTheDocument();
+      expect(renderFlyoutStreamProcessingLink).toHaveBeenCalledWith({
+        dataView: mockDataView,
+        doc: hit,
+        cpsHasLinkedProjects: true,
+      });
+    });
+  });
+
+  describe('Without a message field', () => {
+    it('renders no message panel and no badges when there is nothing to show', () => {
+      const hit = buildHit({ 'service.name': 'payments' });
+      const formattedDoc = { 'service.name': 'payments' } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('codeBlock')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTimestamp')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(LOG_LEVEL_BADGE)).not.toBeInTheDocument();
+    });
+
+    it('treats an empty message as no message', () => {
+      const hit = buildHit({ message: '' });
+      const formattedDoc = { message: '' } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('codeBlock')).not.toBeInTheDocument();
+    });
+
+    it('keeps the timestamp and log level badges', () => {
+      const hit = buildHit({ 'service.name': 'payments' });
+      const formattedDoc = {
+        '@timestamp': '2026-10-01T10:00:00.000Z',
+        'log.level': 'error',
+        'service.name': 'payments',
+      } as any;
+
+      renderWithTheme(
+        <ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />
+      );
+
+      expect(screen.getByTestId('unifiedDocViewLogsOverviewTimestamp')).toBeInTheDocument();
+      expect(screen.getByTestId(LOG_LEVEL_BADGE)).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+    });
+
+    it('keeps the error event type badge when there is no log level', () => {
+      const hit = buildHit({ 'processor.event': 'error' });
+      const formattedDoc = { 'processor.event': 'error' } as any;
+
+      render(<ContentBreakdown dataView={mockDataView} formattedDoc={formattedDoc} hit={hit} />);
+
+      expect(screen.getByTestId('unifiedDocViewLogsOverviewEventType')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewMessage')).not.toBeInTheDocument();
+    });
+
+    it('does not render the stream processing link', () => {
+      const hit = buildHit({ 'service.name': 'payments' });
+      const formattedDoc = { '@timestamp': '2026-10-01T10:00:00.000Z' } as any;
+      const renderFlyoutStreamProcessingLink = jest.fn(() => (
+        <span data-test-subj="streamProcessingLink" />
+      ));
+
+      render(
+        <ContentBreakdown
+          dataView={mockDataView}
+          formattedDoc={formattedDoc}
+          hit={hit}
+          renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+        />
+      );
+
+      expect(screen.queryByTestId('streamProcessingLink')).not.toBeInTheDocument();
+      expect(renderFlyoutStreamProcessingLink).not.toHaveBeenCalled();
     });
   });
 
@@ -142,7 +267,7 @@ describe('ContentBreakdown', () => {
       // Mock the formatter to return React nodes with highlighted content
       mockConvertToReact.mockImplementationOnce(() => (
         <>
-          OTel log message with <mark className="ffSearch__highlight">search</mark> term
+          OTel log message with <mark>search</mark> term
         </>
       ));
 
@@ -163,7 +288,7 @@ describe('ContentBreakdown', () => {
       );
 
       // Verify the highlighted content is rendered
-      const markElement = container.querySelector('mark.ffSearch__highlight');
+      const markElement = container.querySelector('mark');
       expect(markElement).toBeInTheDocument();
       expect(markElement).toHaveTextContent('search');
     });
@@ -196,7 +321,7 @@ describe('ContentBreakdown', () => {
       // Mock the formatter to return React nodes with highlighted content
       mockConvertToReact.mockImplementationOnce(() => (
         <>
-          log message with <mark className="ffSearch__highlight">search</mark> term
+          log message with <mark>search</mark> term
         </>
       ));
 
@@ -216,7 +341,7 @@ describe('ContentBreakdown', () => {
       );
 
       // Verify the highlighted content is rendered
-      const markElement = container.querySelector('mark.ffSearch__highlight');
+      const markElement = container.querySelector('mark');
       expect(markElement).toBeInTheDocument();
       expect(markElement).toHaveTextContent('search');
     });

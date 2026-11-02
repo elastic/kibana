@@ -244,12 +244,12 @@ const PlainFlyoutFooter = ({
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} flush="left">
+          <EuiButtonEmpty onClick={onCancel} flush="left" size="s">
             Cancel
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onApply} disabled={isApplyDisabled}>
+          <EuiButton fill onClick={onApply} disabled={isApplyDisabled} size="s">
             Apply
           </EuiButton>
         </EuiFlexItem>

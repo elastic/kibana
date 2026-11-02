@@ -8,8 +8,11 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { UnifiedBreakdownFieldSelector, resolveBreakdownField } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
+import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
 import { LatencyChart } from './latency';
@@ -31,8 +34,10 @@ function TraceMetricsGrid({
   renderToggleActions,
   chartToolbarCss,
   isComponentVisible,
+  breakdownField,
+  onBreakdownFieldChange,
 }: UnifiedMetricsGridProps) {
-  const { query, dataView } = fetchParams;
+  const { query, dataSource, columns } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
     query: query && 'esql' in query ? query.esql : '',
   });
@@ -55,14 +60,47 @@ function TraceMetricsGrid({
     });
   }, [esqlQuery.metadataFields, filters]);
 
+  const breakdownDataViewField = useMemo(
+    () =>
+      resolveBreakdownField({
+        breakdownField,
+        dataSource,
+        columns,
+      }),
+    [breakdownField, dataSource, columns]
+  );
+
+  const handleBreakdownFieldChange = useCallback(
+    (field: DataViewField | undefined) => {
+      onBreakdownFieldChange?.(field?.name);
+    },
+    [onBreakdownFieldChange]
+  );
+
   const toolbar = useMemo(
     () => ({
       toggleActions: renderToggleActions(),
+      leftSide: (
+        <UnifiedBreakdownFieldSelector
+          dataSource={dataSource}
+          breakdown={{ field: breakdownDataViewField }}
+          onBreakdownFieldChange={handleBreakdownFieldChange}
+          recommendedFields={TRACES_BREAKDOWN_RECOMMENDED_FIELDS}
+          fieldsMetadata={services.fieldsMetadata}
+        />
+      ),
     }),
-    [renderToggleActions]
+    [
+      renderToggleActions,
+      dataSource,
+      breakdownDataViewField,
+      handleBreakdownFieldChange,
+      services.fieldsMetadata,
+    ]
   );
 
-  const indexPattern = dataView?.getIndexPattern();
+  // The source's index pattern, including remote cluster prefixes (`remote:traces-*`).
+  const indexPattern = dataSource.title || undefined;
 
   if (!indexPattern) {
     return undefined;
@@ -87,6 +125,7 @@ function TraceMetricsGrid({
           discoverFetch$,
           actions,
           profileId,
+          breakdownField: breakdownDataViewField?.name,
         }}
       >
         <EuiPanel

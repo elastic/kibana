@@ -29,8 +29,6 @@ describe('validateInternalRuleTypes', () => {
   it('should not throw an error for valid rule types', async () => {
     ruleTypes.set(ruleTypeId, { internallyManaged: false });
 
-    expect(() =>
-      validateInternalRuleType({ ruleTypeId, ruleTypes, operationText })
-    ).not.toThrowError();
+    expect(() => validateInternalRuleType({ ruleTypeId, ruleTypes, operationText })).not.toThrow();
   });
 });

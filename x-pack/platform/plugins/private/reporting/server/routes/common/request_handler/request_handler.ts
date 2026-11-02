@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { BaseParams } from '@kbn/reporting-common/types';
+import type { ScheduleType } from '@kbn/reporting-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
@@ -148,7 +149,11 @@ export abstract class RequestHandler<
     }
 
     // 1. Ensure the incoming params have a version field (should be set by the UI)
-    const version = checkParamsVersion(jobParams, this.opts.logger);
+    const version = checkParamsVersion(
+      jobParams,
+      this.opts.logger,
+      this.opts.reporting.getKibanaPackageInfo().version
+    );
 
     // 2. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
     const job = await exportType.createJob(jobParams, this.opts.context, this.opts.req);
@@ -173,6 +178,19 @@ export abstract class RequestHandler<
 
     if (!licenseResults.enableLinks) {
       return res.forbidden({ body: licenseResults.message });
+    }
+
+    return null;
+  }
+
+  protected async checkExportTypeEnabled(
+    exportTypeId: string,
+    scheduleType: ScheduleType
+  ): Promise<IKibanaResponse | null> {
+    const { reporting, res } = this.opts;
+
+    if (!(await reporting.isExportTypeEnabled(exportTypeId, scheduleType))) {
+      return res.badRequest({ body: `Invalid export-type of ${exportTypeId}` });
     }
 
     return null;

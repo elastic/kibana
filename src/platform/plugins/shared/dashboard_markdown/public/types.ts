@@ -15,6 +15,7 @@ import type {
   HasLibraryTransforms,
   HasType,
   PublishesWritableTitle,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type {
   MarkdownByReferenceState,
@@ -29,4 +30,5 @@ export type MarkdownEditorApi = HasType<typeof MARKDOWN_EMBEDDABLE_TYPE> &
   PublishesUnsavedChanges &
   HasEditCapabilities &
   CanOverrideHoverActions &
-  HasLibraryTransforms<MarkdownByReferenceState, MarkdownByValueState>;
+  HasLibraryTransforms<MarkdownByReferenceState, MarkdownByValueState> &
+  SupportsJsonExport;

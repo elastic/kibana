@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "test/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/discover-plugin",
@@ -18,7 +18,6 @@
     "@kbn/presentation-publishing",
     "@kbn/data-views-plugin",
     "@kbn/unified-search-plugin",
-    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

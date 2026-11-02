@@ -65,11 +65,13 @@ export const UpdateExceptionListItemBase = lazySchema(() =>
     /**
      * Either `id` or `item_id` must be specified
      */
-    id: ExceptionListItemId.optional(),
+    id: ExceptionListItemId.optional().describe('Either `id` or `item_id` must be specified'),
     /**
      * Either `id` or `item_id` must be specified
      */
-    item_id: ExceptionListItemHumanId.optional(),
+    item_id: ExceptionListItemHumanId.optional().describe(
+      'Either `id` or `item_id` must be specified'
+    ),
     type: ExceptionListItemType,
     name: ExceptionListItemName,
     description: ExceptionListItemDescription,
@@ -80,7 +82,12 @@ export const UpdateExceptionListItemBase = lazySchema(() =>
     /**
      * The version ID, normally returned by the API when the item is retrieved. Use it to ensure updates are made against the latest version.
      */
-    _version: z.string().optional(),
+    _version: z
+      .string()
+      .optional()
+      .describe(
+        'The version ID, normally returned by the API when the item is retrieved. Use it to ensure updates are made against the latest version.'
+      ),
   })
 );
 export type UpdateExceptionListItemBase = z.infer<typeof UpdateExceptionListItemBase>;

@@ -20,16 +20,16 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('Get OAuth Client route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
-    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     const coreContext = coreMock.createRequestHandlerContext();
-    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
+
+  const PROJECT_ID = 'test-project-id';
 
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
@@ -39,6 +39,7 @@ describe('Get OAuth Client route', () => {
     oauthMock = authc.oauth as jest.Mocked<UiamOAuthType>;
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
+    mockRouteDefinitionParams.serverlessProjectId = PROJECT_ID;
 
     defineGetOAuthClientRoute(mockRouteDefinitionParams);
 
@@ -76,7 +77,7 @@ describe('Get OAuth Client route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockClient);
-    expect(oauthMock.listClients).toHaveBeenCalledWith(expect.anything(), 'client-1');
+    expect(oauthMock.listClients).toHaveBeenCalledWith(expect.anything(), 'client-1', PROJECT_ID);
   });
 
   it('returns 404 when client is not found', async () => {
@@ -102,18 +103,6 @@ describe('Get OAuth Client route', () => {
 
     expect(response.status).toBe(404);
   });
-
-  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
-    const response = await routeHandler(
-      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
-      httpServerMock.createKibanaRequest({ params: { client_id: 'client-1' } }),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(404);
-    expect(oauthMock.listClients).not.toHaveBeenCalled();
-  });
-
   it('returns error from service', async () => {
     oauthMock.listClients.mockRejectedValue(Boom.forbidden('Forbidden'));
 

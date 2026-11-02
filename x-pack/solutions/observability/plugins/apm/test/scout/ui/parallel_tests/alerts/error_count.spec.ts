@@ -76,7 +76,7 @@ function createAlertDisplayTest(alertIndex: string) {
 
     await test.step('verify alert is visible', async () => {
       const ruleCell = serviceDetailsPage.alertsTab.alertsTable
-        .getAllCellLocatorByColId('kibana.alert.rule.name')
+        .cells('kibana.alert.rule.name')
         .filter({ hasText: RULE_NAME });
       await expect(ruleCell).toBeVisible();
     });
@@ -130,7 +130,9 @@ test.describe('Alerts', () => {
 
       await test.step('create the rule', async () => {
         await alertsControls.addRuleFlyout.saveRule({ saveEmptyActions: true });
-        await expect(page.getByTestId('euiToastHeader')).toHaveText(`Created rule "${RULE_NAME}"`);
+        await expect(page.getByTestId('euiToastHeader__title')).toHaveText(
+          `Created rule "${RULE_NAME}"`
+        );
       });
     }
   );

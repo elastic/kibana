@@ -7,7 +7,9 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
+import { getRelatedEpisodesScope } from '../../../queries/related_episodes_query';
+import { getPanelTitleSize } from '../panel_title_sizes';
 import { RelatedEpisodesRuleSubsection } from './rule_subsection';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
 import * as i18n from './translations';
@@ -15,7 +17,8 @@ import * as i18n from './translations';
 export interface AlertEpisodesRelatedProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
-  rule: RuleResponse;
+  ruleState: RuleState;
+  source?: string;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * Whether to render the "Related episodes" section heading. Defaults to `true`.
@@ -34,19 +37,30 @@ export interface AlertEpisodesRelatedProps {
 export function AlertEpisodesRelated({
   currentEpisodeId,
   groupHash,
-  rule,
+  ruleState,
+  source,
   getEpisodeDetailsHref,
   showHeading = true,
   compressed = false,
 }: AlertEpisodesRelatedProps) {
+  const scope = getRelatedEpisodesScope({ ruleId: getRuleIdFromRuleState(ruleState), source });
+
+  if (!scope) {
+    return null;
+  }
+
   return (
-    <>
+    <div>
       {showHeading ? (
         <>
-          <EuiTitle size="m" data-test-subj="alertingV2RelatedAlertEpisodesSection">
-            <h2>{i18n.RELATED_EPISODES_TITLE}</h2>
+          {/* Panel title when compressed, page section title otherwise. */}
+          <EuiTitle
+            size={compressed ? getPanelTitleSize(true) : 'm'}
+            data-test-subj="alertingV2RelatedAlertEpisodesSection"
+          >
+            <h2>{compressed ? i18n.RELATED_TITLE : i18n.RELATED_EPISODES_TITLE}</h2>
           </EuiTitle>
-          <EuiSpacer size="m" />
+          <EuiSpacer size={compressed ? 's' : 'm'} />
         </>
       ) : null}
       {groupHash ? (
@@ -54,7 +68,8 @@ export function AlertEpisodesRelated({
           <RelatedEpisodesGroupSubsection
             currentEpisodeId={currentEpisodeId}
             groupHash={groupHash}
-            rule={rule}
+            ruleState={ruleState}
+            scope={scope}
             getEpisodeDetailsHref={getEpisodeDetailsHref}
             compressed={compressed}
           />
@@ -64,10 +79,11 @@ export function AlertEpisodesRelated({
       <RelatedEpisodesRuleSubsection
         currentEpisodeId={currentEpisodeId}
         currentGroupHash={groupHash}
-        rule={rule}
+        ruleState={ruleState}
+        scope={scope}
         getEpisodeDetailsHref={getEpisodeDetailsHref}
         compressed={compressed}
       />
-    </>
+    </div>
   );
 }

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { booleanRt } from '@kbn/apm-common';
+export { booleanSchema } from '@kbn/apm-common';

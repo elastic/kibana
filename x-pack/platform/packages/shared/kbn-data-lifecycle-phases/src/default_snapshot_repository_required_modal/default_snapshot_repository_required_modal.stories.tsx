@@ -26,6 +26,24 @@ type Story = StoryObj<typeof DefaultSnapshotRepositoryRequiredModal>;
 export const Default: Story = {
   args: {
     createDefaultRepositoryUrl: '/app/management/data/snapshot_restore/add_repository',
+    manageRepositoriesUrl: '/app/management/data/snapshot_restore/repositories',
+    hasExistingRepositories: false,
+    isRefreshing: false,
+  },
+  render: (args) => (
+    <DefaultSnapshotRepositoryRequiredModal
+      {...args}
+      onCancel={() => action('onCancel')()}
+      onRefresh={() => action('onRefresh')()}
+    />
+  ),
+};
+
+export const WithExistingRepositories: Story = {
+  args: {
+    createDefaultRepositoryUrl: '/app/management/data/snapshot_restore/add_repository',
+    manageRepositoriesUrl: '/app/management/data/snapshot_restore/repositories',
+    hasExistingRepositories: true,
     isRefreshing: false,
   },
   render: (args) => (
@@ -40,6 +58,8 @@ export const Default: Story = {
 export const Refreshing: Story = {
   args: {
     createDefaultRepositoryUrl: '/app/management/data/snapshot_restore/add_repository',
+    manageRepositoriesUrl: '/app/management/data/snapshot_restore/repositories',
+    hasExistingRepositories: false,
     isRefreshing: true,
   },
   render: (args) => (

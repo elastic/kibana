@@ -120,3 +120,89 @@ export const guardedExpandStep = <K extends OptionalStateKey>(
     }
     yield* handler(result.state);
   });
+
+/**
+ * Wraps an async iterable so consumers observe at least one element.
+ *
+ * Yields every element from `source`. If `source` completes without yielding,
+ * emits `fallback` exactly once. Any thrown error from `source` propagates
+ * unchanged.
+ *
+ * Used by streaming steps that must produce at least one `continue`
+ * emission per input state to keep downstream steps running — e.g. an ES|QL
+ * query that returns zero rows still needs the pipeline to progress with an
+ * empty batch so recovery / no-data logic can react.
+ */
+export async function* withAtLeastOne<T>(source: AsyncIterable<T>, fallback: T): AsyncIterable<T> {
+  let yielded = false;
+  for await (const item of source) {
+    yielded = true;
+    yield item;
+  }
+  if (!yielded) {
+    yield fallback;
+  }
+}
+
+/**
+ * Forwards every `continue` result unchanged while folding an accumulator over
+ * their states, then invokes `finalize` once after the stream drains to
+ * optionally emit a single trailing result.
+ *
+ * Semantics:
+ * - Each `continue` is folded into the accumulator via `accumulate` and yielded
+ *   unchanged (streaming is preserved for downstream steps).
+ * - A `halt` is forwarded and ends the stream immediately; `finalize` never runs.
+ * - When the stream yields no `continue` at all (empty, or halted first),
+ *   `finalize` never runs.
+ * - Otherwise `finalize` runs exactly once with the folded accumulator and the
+ *   last forwarded state; returning `undefined` emits nothing.
+ *
+ * This is the emit-on-drain counterpart to {@link withAtLeastOne}, for steps
+ * whose trailing output depends on the whole run — e.g. absence-based
+ * classification that must observe the full-run breach set before it can decide
+ * which active groups recovered.
+ *
+ * `accumulate` may mutate and return `acc` (e.g. a `Set`); it is only ever called
+ * sequentially. Cancellation is handled globally by
+ * `CancellationBoundaryMiddleware`, so it is intentionally not checked here.
+ */
+export const forwardThenFinalize = <A>(
+  input: PipelineStateStream,
+  {
+    seed,
+    accumulate,
+    finalize,
+  }: {
+    seed: A;
+    accumulate: (acc: A, state: RulePipelineState) => A;
+    finalize: (
+      acc: A,
+      lastState: RulePipelineState
+    ) => Promise<StepStreamResult | undefined> | StepStreamResult | undefined;
+  }
+): PipelineStateStream =>
+  (async function* () {
+    let acc = seed;
+    let lastState: RulePipelineState | undefined;
+
+    for await (const result of input) {
+      if (result.type === 'halt') {
+        yield result;
+        return;
+      }
+
+      acc = accumulate(acc, result.state);
+      lastState = result.state;
+      yield result;
+    }
+
+    if (lastState === undefined) {
+      return;
+    }
+
+    const finalResult = await finalize(acc, lastState);
+    if (finalResult !== undefined) {
+      yield finalResult;
+    }
+  })();

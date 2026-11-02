@@ -1,5 +1,8 @@
 {
   "sha1": "d99cd239a25a388a748d16e747a11a5d07436c3c",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "a2f48a1fc624600-de44ded9a5ab9e8",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/monitoring/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 32,
+        "column": 5
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/monitoring/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 50,
-        "column": 7
+        "line": 36,
+        "column": 23
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/monitoring/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 44,
+        "column": 23
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/monitoring/test/scout/ui/tests/feature_controls.spec.ts",
-        "line": 80,
-        "column": 7
+        "line": 59,
+        "column": 5
       }
     }
   ]

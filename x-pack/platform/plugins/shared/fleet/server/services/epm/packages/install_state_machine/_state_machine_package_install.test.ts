@@ -197,8 +197,8 @@ describe('_stateMachineInstallPackage', () => {
         spaceId: DEFAULT_SPACE_ID,
         retryFromLastState: true,
       });
-      expect(mockCleanupLatestExecutedState).not.toBeCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockCleanupLatestExecutedState).not.toHaveBeenCalled();
+      expect(mockHandleState).toHaveBeenCalledWith(
         'create_restart_installation',
         expect.any(Object),
         expect.any(Object)
@@ -246,8 +246,8 @@ describe('_stateMachineInstallPackage', () => {
           },
         },
       });
-      expect(mockCleanupLatestExecutedState).not.toBeCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockCleanupLatestExecutedState).not.toHaveBeenCalled();
+      expect(mockHandleState).toHaveBeenCalledWith(
         'create_restart_installation',
         expect.any(Object),
         expect.any(Object)
@@ -294,8 +294,8 @@ describe('_stateMachineInstallPackage', () => {
           },
         },
       });
-      expect(mockCleanupLatestExecutedState).toBeCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockCleanupLatestExecutedState).toHaveBeenCalled();
+      expect(mockHandleState).toHaveBeenCalledWith(
         'remove_legacy_templates',
         expect.any(Object),
         expect.any(Object)
@@ -348,7 +348,7 @@ describe('_stateMachineInstallPackage', () => {
       installSource: 'registry',
       spaceId: DEFAULT_SPACE_ID,
     });
-    await expect(installPromise).rejects.toThrowError(PackageSavedObjectConflictError);
+    await expect(installPromise).rejects.toThrow(PackageSavedObjectConflictError);
   });
 });
 

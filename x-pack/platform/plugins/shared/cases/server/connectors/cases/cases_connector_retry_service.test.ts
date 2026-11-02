@@ -38,8 +38,8 @@ describe('CasesConnectorRetryService', () => {
       `"My error"`
     );
 
-    expect(cb).toBeCalledTimes(1);
-    expect(nextBackOff).not.toBeCalled();
+    expect(cb).toHaveBeenCalledTimes(1);
+    expect(nextBackOff).not.toHaveBeenCalled();
   });
 
   it('should not retry if the status code is not supported', async () => {
@@ -49,8 +49,8 @@ describe('CasesConnectorRetryService', () => {
       `"My case connector error"`
     );
 
-    expect(cb).toBeCalledTimes(1);
-    expect(nextBackOff).not.toBeCalled();
+    expect(cb).toHaveBeenCalledTimes(1);
+    expect(nextBackOff).not.toHaveBeenCalled();
   });
 
   it('should not retry after trying more than the max attempts', async () => {
@@ -63,8 +63,8 @@ describe('CasesConnectorRetryService', () => {
       `"My transient error"`
     );
 
-    expect(cb).toBeCalledTimes(maxAttempts + 1);
-    expect(nextBackOff).toBeCalledTimes(maxAttempts);
+    expect(cb).toHaveBeenCalledTimes(maxAttempts + 1);
+    expect(nextBackOff).toHaveBeenCalledTimes(maxAttempts);
   });
 
   it.each([409, 429, 503])(
@@ -80,8 +80,8 @@ describe('CasesConnectorRetryService', () => {
 
       const res = await service.retryWithBackoff(cb);
 
-      expect(nextBackOff).toBeCalledTimes(maxAttempts - 1);
-      expect(cb).toBeCalledTimes(maxAttempts);
+      expect(nextBackOff).toHaveBeenCalledTimes(maxAttempts - 1);
+      expect(cb).toHaveBeenCalledTimes(maxAttempts);
       expect(res).toEqual({ status: 'ok' });
     }
   );
@@ -93,8 +93,8 @@ describe('CasesConnectorRetryService', () => {
 
     const res = await service.retryWithBackoff(cb);
 
-    expect(nextBackOff).toBeCalledTimes(0);
-    expect(cb).toBeCalledTimes(1);
+    expect(nextBackOff).toHaveBeenCalledTimes(0);
+    expect(cb).toHaveBeenCalledTimes(1);
     expect(res).toEqual({ status: 'ok' });
   });
 
@@ -108,7 +108,7 @@ describe('CasesConnectorRetryService', () => {
         `"My transient error"`
       );
 
-      expect(mockLogger.warn).toBeCalledTimes(2);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(2);
       expect(mockLogger.warn).toHaveBeenNthCalledWith(
         1,
         '[CasesConnector][retryWithBackoff] Failed with status code 409. Attempt for retry: 1'
@@ -127,7 +127,7 @@ describe('CasesConnectorRetryService', () => {
         `"My error"`
       );
 
-      expect(mockLogger.warn).not.toBeCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
 });

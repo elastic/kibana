@@ -4,14 +4,18 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-SCOUT_SERVER_LOG=".scout/server.log"
+SCOUT_SERVER_LOG=""
 PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
 
 LOAD_IDS=()
+LOAD_CONFIG_SETS=()
 PASSED_INDICES=""
 PASSED=()
 FAILED=()
+FAILED_COUNT_AT_SERVER_START=0
 SKIPPED=()
+RETRY_SPEC_FILES=()
+TOTAL_FLAKY=0
 
 # Fail early if any of the given environment variable names are unset or empty
 check_required_env_vars() {
@@ -34,6 +38,78 @@ check_required_env_vars() {
 download_test_lane_loads() {
   echo "--- Downloading test lane loads file"
   download_tmp_artifact "$SCOUT_TEST_LANE_LOADS_PATH" . "$BUILDKITE_BUILD_ID"
+}
+
+# Per-config, attempt-stamped artifact path for a config's failed-spec snapshot.
+failed_specs_artifact_path() {
+  local idx="$1" attempt="$2"
+  local key="${BUILDKITE_STEP_KEY//[^a-zA-Z0-9_-]/_}"
+  echo ".scout/failed-specs-${key}-${idx}-attempt-${attempt}.json"
+}
+
+# Per-config path for Playwright's JSON report; set via PLAYWRIGHT_JSON_OUTPUT_FILE so it resolves
+# against this script's cwd rather than the config's directory.
+json_report_path() {
+  echo ".scout/test-results-${1}.json"
+}
+
+# Reads stats.flaky from a config's JSON report. Echoes 0 if the report is missing or malformed.
+flaky_count() {
+  local idx="$1" report
+  report="$(json_report_path "$idx")"
+  [[ -f "$report" ]] || { echo 0; return; }
+  jq -r '.stats.flaky // 0' "$report" 2>/dev/null || echo 0
+}
+
+# After a config fails, persist its failed spec files so the next attempt can re-run only those.
+# Spec-file level (not per-test) so state-sharing blocks (e.g. describe.serial) re-run together.
+snapshot_failed_specs() {
+  local idx="$1"
+
+  local report
+  report="$(json_report_path "$idx")"
+  if [[ ! -f "$report" ]]; then
+    echo "No $report produced for index $idx; whole config will re-run on retry"
+    return
+  fi
+
+  # `|| true`: a non-zero jq exit (e.g. truncated report after a crash) must not abort the lane.
+  local failed_specs
+  failed_specs="$(jq -r '[.suites[]? | recurse(.suites[]?) | .specs[]? | select(.ok == false) | .file] | unique[]?' "$report" 2>/dev/null)" || true
+
+  if [[ -z "$failed_specs" ]]; then
+    echo "No failed spec files parsed for index $idx; whole config will re-run on retry"
+    return
+  fi
+
+  local artifact_path
+  artifact_path="$(failed_specs_artifact_path "$idx" "${BUILDKITE_RETRY_COUNT:-0}")"
+  printf '%s\n' "$failed_specs" > "$artifact_path"
+  # Best-effort: on upload failure the retry just re-runs the whole config.
+  buildkite-agent artifact upload "$artifact_path" || echo "Failed to upload failed-specs snapshot for index $idx"
+}
+
+# On retry, load the previous attempt's failed spec files into RETRY_SPEC_FILES. Returns non-zero
+# on any miss (first attempt, agent lost before snapshot, download failure) so we re-run the whole config.
+restore_failed_specs() {
+  local idx="$1"
+  RETRY_SPEC_FILES=()
+
+  local retry_count="${BUILDKITE_RETRY_COUNT:-0}"
+  [[ "$retry_count" -gt 0 ]] || return 1
+
+  local artifact_path
+  artifact_path="$(failed_specs_artifact_path "$idx" "$(( retry_count - 1 ))")"
+
+  # --include-retried-jobs: the snapshot was uploaded by the now-superseded previous attempt, whose
+  # artifacts buildkite-agent excludes by default.
+  if ! download_artifact "$artifact_path" . --include-retried-jobs >/dev/null 2>&1; then
+    return 1
+  fi
+  [[ -f "$artifact_path" ]] || return 1
+
+  mapfile -t RETRY_SPEC_FILES < "$artifact_path"
+  [[ ${#RETRY_SPEC_FILES[@]} -gt 0 ]]
 }
 
 # Read the comma-separated list of previously passed load indices from Buildkite metadata
@@ -64,9 +140,12 @@ mark_index_passed() {
   buildkite-agent meta-data set "$PASSED_LOAD_INDICES_META_KEY" "$PASSED_INDICES"
 }
 
-# Extract the load IDs (Scout test config paths) assigned to this lane from the loads file
+# Extract the load IDs (Scout test config paths) assigned to this lane and the server config set of each load
 read_load_ids() {
-  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].loadIDs[]' "$SCOUT_TEST_LANE_LOADS_PATH")
+  mapfile -t LOAD_IDS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" \
+    '.[$key].loadGroups[]?.loadIDs[]?' "$SCOUT_TEST_LANE_LOADS_PATH")
+  mapfile -t LOAD_CONFIG_SETS < <(jq -r --arg key "$BUILDKITE_STEP_KEY" \
+    '.[$key].loadGroups[]? | .configSet as $configSet | .loadIDs[]? | $configSet' "$SCOUT_TEST_LANE_LOADS_PATH")
 
   if [[ ${#LOAD_IDS[@]} -eq 0 ]]; then
     echo "No test lane load IDs found for step key '$BUILDKITE_STEP_KEY'"
@@ -90,6 +169,7 @@ upload_test_server_log() {
 # Start the Scout test server in the background and wait for it to become ready
 start_server() {
   local timeout_seconds="$1"
+  FAILED_COUNT_AT_SERVER_START=${#FAILED[@]}
   mkdir -p "$(dirname "$SCOUT_SERVER_LOG")"
 
   echo "--- Starting test server (timeout: ${timeout_seconds}s)"
@@ -126,15 +206,20 @@ start_server() {
   exit 1
 }
 
-# Stop the test server if it's still running
+# Stop the test server if it's still running and upload its log if any config failed against it
 stop_server() {
-  if [[ -n "${SCOUT_SERVER_PID:-}" ]] && kill -0 "$SCOUT_SERVER_PID" 2>/dev/null; then
+  if [[ -z "${SCOUT_SERVER_PID:-}" ]]; then
+    return
+  fi
+
+  if kill -0 "$SCOUT_SERVER_PID" 2>/dev/null; then
     echo "--- Stopping test server (PID: $SCOUT_SERVER_PID)"
     kill "$SCOUT_SERVER_PID" 2>/dev/null || true
     wait "$SCOUT_SERVER_PID" 2>/dev/null || true
   fi
+  SCOUT_SERVER_PID=""
 
-  if [[ ${#FAILED[@]} -gt 0 ]]; then
+  if [[ ${#FAILED[@]} -gt $FAILED_COUNT_AT_SERVER_START ]]; then
     upload_test_server_log
   fi
 }
@@ -144,12 +229,22 @@ run_scout_tests() {
   local idx="$1"
   local config_path="$2"
 
-  echo "--- Running: $config_path"
+  # On retry, re-run only the previously-failed spec files (passed as positional path filters).
+  local spec_filter_args=()
+  if restore_failed_specs "$idx"; then
+    echo "--- Retrying ${#RETRY_SPEC_FILES[@]} failed spec file(s): $config_path"
+    printf '  %s\n' "${RETRY_SPEC_FILES[@]}"
+    spec_filter_args=("${RETRY_SPEC_FILES[@]}")
+  else
+    echo "--- Running: $config_path"
+  fi
 
   local pw_args=(
     test
+    "${spec_filter_args[@]+"${spec_filter_args[@]}"}"
     "--config=$config_path"
     "--grep=$PLAYWRIGHT_GREP_TAG"
+    "${PLAYWRIGHT_GREP_INVERT_ARGS[@]+"${PLAYWRIGHT_GREP_INVERT_ARGS[@]}"}"
     "--project=$PLAYWRIGHT_PROJECT"
   )
 
@@ -157,7 +252,9 @@ run_scout_tests() {
     "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
     "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
     "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
-    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/babel-register/install"
+    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/swc-register/install"
+    # Pin the JSON report to a path we control (see json_report_path).
+    "PLAYWRIGHT_JSON_OUTPUT_FILE=$(json_report_path "$idx")"
   )
 
   local start_time
@@ -180,10 +277,18 @@ run_scout_tests() {
     0)
       upload_report_events "$config_path"
       mark_index_passed "$idx"
-      PASSED+=("$config_path ($duration)")
+      local flaky
+      flaky="$(flaky_count "$idx")"
+      if [[ "$flaky" -gt 0 ]]; then
+        TOTAL_FLAKY=$(( TOTAL_FLAKY + flaky ))
+        PASSED+=("$config_path ($duration, ⚠️ $flaky flaky)")
+      else
+        PASSED+=("$config_path ($duration)")
+      fi
       ;;
     *)
       upload_report_events "$config_path"
+      snapshot_failed_specs "$idx"
       FAILED+=("$config_path")
       echo "Exited with code $exit_code for $config_path"
       ;;
@@ -226,7 +331,12 @@ upload_report_events() {
 get_config_status() {
   local config="$1" s
   for s in "${SKIPPED[@]+"${SKIPPED[@]}"}"; do [[ "$s" == "$config" ]] && echo "skipped" && return; done
-  for s in "${PASSED[@]+"${PASSED[@]}"}"; do [[ "$s" == "$config"* ]] && echo "passed" && return; done
+  for s in "${PASSED[@]+"${PASSED[@]}"}"; do
+    if [[ "$s" == "$config"* ]]; then
+      [[ "$s" == *"⚠️"* ]] && echo "passed (⚠️ Flaky)" || echo "passed"
+      return
+    fi
+  done
   for s in "${FAILED[@]+"${FAILED[@]}"}"; do [[ "$s" == "$config" ]] && echo "failed" && return; done
   echo "unknown"
 }
@@ -253,10 +363,14 @@ print_summary() {
   echo "Test server configuration:"
   echo "  Arch: $SCOUT_TEST_TARGET_ARCH"
   echo "  Domain: $SCOUT_TEST_TARGET_DOMAIN"
-  echo "  Server config set: $SCOUT_TEST_SERVER_CONFIG_SET"
+  echo "  Server config set(s): $(jq -r --arg key "$BUILDKITE_STEP_KEY" '[.[$key].loadGroups[]?.configSet] | join(", ")' "$SCOUT_TEST_LANE_LOADS_PATH")"
   echo ""
   echo "Test count by status:"
-  [[ ${#PASSED[@]}   -gt 0 ]] && echo "✅  Passed: ${#PASSED[@]}"
+  if [[ ${#PASSED[@]} -gt 0 ]]; then
+    local passed_suffix=""
+    [[ "$TOTAL_FLAKY" -gt 0 ]] && passed_suffix=" (⚠️ $TOTAL_FLAKY Flaky)"
+    echo "✅  Passed: ${#PASSED[@]}${passed_suffix}"
+  fi
   [[ ${#FAILED[@]}   -gt 0 ]] && echo "❌  Failed: ${#FAILED[@]}"
   [[ ${#SKIPPED[@]}  -gt 0 ]] && echo "⏩️ Skipped: ${#SKIPPED[@]}"
   echo ""
@@ -275,7 +389,6 @@ check_required_env_vars \
   SCOUT_TEST_TARGET_LOCATION \
   SCOUT_TEST_TARGET_ARCH \
   SCOUT_TEST_TARGET_DOMAIN \
-  SCOUT_TEST_SERVER_CONFIG_SET \
   SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS \
   KIBANA_BUILD_LOCATION
 
@@ -287,16 +400,31 @@ download_test_lane_loads
 read_load_ids
 load_passed_indices
 
+# Skips tests whose '@limit/*' tags the distributed target attributes don't satisfy
+PLAYWRIGHT_GREP_INVERT="$(jq -r --arg key "$BUILDKITE_STEP_KEY" '.[$key].playwright.options.grepInvert // empty' "$SCOUT_TEST_LANE_LOADS_PATH")"
+PLAYWRIGHT_GREP_INVERT_ARGS=()
+if [[ -n "$PLAYWRIGHT_GREP_INVERT" ]]; then
+  PLAYWRIGHT_GREP_INVERT_ARGS=("--grep-invert=$PLAYWRIGHT_GREP_INVERT")
+fi
+
 trap stop_server EXIT
-start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
 
 for i in "${!LOAD_IDS[@]}"; do
   config_path="${LOAD_IDS[$i]}"
+  config_set="${LOAD_CONFIG_SETS[$i]}"
 
   if has_load_index_passed "$i"; then
     SKIPPED+=("$config_path")
     echo "~~~ Skipping (already passed): $config_path"
     continue
+  fi
+
+  # Loads are grouped by server config set; (re)start the server only when the next load needs a different one
+  if [[ -z "${SCOUT_SERVER_PID:-}" || "$config_set" != "${SCOUT_TEST_SERVER_CONFIG_SET:-}" ]]; then
+    stop_server
+    SCOUT_TEST_SERVER_CONFIG_SET="$config_set"
+    SCOUT_SERVER_LOG=".scout/server_${i}_${config_set}.log"
+    start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
   fi
 
   run_scout_tests "$i" "$config_path"

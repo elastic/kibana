@@ -9,7 +9,19 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { RuleStateStatus } from '../../../types/rule_state';
 import { AlertEpisodesRelated } from './related';
+
+const mockRule = {
+  id: 'rule-1',
+  metadata: { name: 'Test Rule' },
+} as RuleResponse;
+
+const loadedRuleState = {
+  status: RuleStateStatus.loaded,
+  ruleId: 'rule-1',
+  rule: mockRule,
+} as const;
 
 jest.mock('./group_subsection', () => ({
   RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,
@@ -19,8 +31,6 @@ jest.mock('./rule_subsection', () => ({
   RelatedEpisodesRuleSubsection: () => <div data-test-subj="mockRuleSubsection" />,
 }));
 
-const mockRule = { id: 'rule-1', metadata: { name: 'Test Rule' } } as RuleResponse;
-
 describe('AlertEpisodesRelated', () => {
   it('renders the section heading', () => {
     render(
@@ -28,14 +38,14 @@ describe('AlertEpisodesRelated', () => {
         <AlertEpisodesRelated
           currentEpisodeId="ep-1"
           groupHash={undefined}
-          rule={mockRule}
+          ruleState={loadedRuleState}
           getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
     );
 
     expect(screen.getByTestId('mockRuleSubsection')).toBeInTheDocument();
-    expect(screen.getByText('Related alert episodes')).toBeInTheDocument();
+    expect(screen.getByText('Related alerts')).toBeInTheDocument();
     // should not render since the groupHash is undefined
     expect(screen.queryByTestId('mockGroupSubsection')).not.toBeInTheDocument();
   });
@@ -46,12 +56,64 @@ describe('AlertEpisodesRelated', () => {
         <AlertEpisodesRelated
           currentEpisodeId="ep-1"
           groupHash="gh-1"
-          rule={mockRule}
+          ruleState={loadedRuleState}
           getEpisodeDetailsHref={(id) => `/base/${id}`}
         />
       </I18nProvider>
     );
 
     expect(screen.getByTestId('mockGroupSubsection')).toBeInTheDocument();
+  });
+
+  it('uses the short title at panel size when compressed', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodesRelated
+          currentEpisodeId="ep-1"
+          groupHash={undefined}
+          ruleState={loadedRuleState}
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
+          compressed
+        />
+      </I18nProvider>
+    );
+
+    const heading = screen.getByTestId('alertingV2RelatedAlertEpisodesSection');
+    expect(heading).toHaveTextContent('Related');
+    expect(heading).not.toHaveTextContent('Related alerts');
+    // EuiTitle puts the test subj on its child, so this is the heading itself.
+    expect(heading.tagName).toBe('H2');
+  });
+
+  it('renders the subsections for an episode without a rule when it has an external source', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodesRelated
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          ruleState={{ status: RuleStateStatus.idle }}
+          source="zabbix"
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('mockGroupSubsection')).toBeInTheDocument();
+    expect(screen.getByTestId('mockRuleSubsection')).toBeInTheDocument();
+  });
+
+  it('renders nothing without a rule or a source', () => {
+    const { container } = render(
+      <I18nProvider>
+        <AlertEpisodesRelated
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          ruleState={{ status: RuleStateStatus.idle }}
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
+        />
+      </I18nProvider>
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });

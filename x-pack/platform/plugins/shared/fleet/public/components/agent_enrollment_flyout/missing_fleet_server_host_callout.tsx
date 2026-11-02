@@ -8,7 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut, EuiLink, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { useLink, useStartServices } from '../../hooks';
 
@@ -17,32 +18,38 @@ export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
   const { getHref } = useLink();
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={i18n.translate('xpack.fleet.agentEnrollment.missingFleetHostCalloutTitle', {
         defaultMessage: 'Missing URL for Fleet Server host',
       })}
-    >
-      <FormattedMessage
-        id="xpack.fleet.agentEnrollment.missingFleetHostCalloutText"
-        defaultMessage="A URL for your Fleet Server host is required to enroll agents with Fleet. You can add this information in Fleet Settings. For more information, see the {link}."
-        values={{
-          link: (
-            <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
-              <FormattedMessage
-                id="xpack.fleet.agentEnrollment.missingFleetHostGuideLink"
-                defaultMessage="Fleet and Elastic Agent Guide"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
-      <EuiButton fill iconType="gear" href={getHref('settings')}>
+      text={
         <FormattedMessage
-          id="xpack.fleet.agentEnrollment.fleetSettingsLink"
-          defaultMessage="Fleet Settings"
+          id="xpack.fleet.agentEnrollment.missingFleetHostCalloutText"
+          defaultMessage="A URL for your Fleet Server host is required to enroll agents with Fleet. You can add this information in Fleet Settings. For more information, see the {link}."
+          values={{
+            link: (
+              <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
+                <FormattedMessage
+                  id="xpack.fleet.agentEnrollment.missingFleetHostGuideLink"
+                  defaultMessage="Fleet and Elastic Agent Guide"
+                />
+              </EuiLink>
+            ),
+          }}
         />
-      </EuiButton>
-    </EuiCallOut>
+      }
+      actionProps={{
+        primary: {
+          iconType: 'gear',
+          href: getHref('settings'),
+          children: (
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.fleetSettingsLink"
+              defaultMessage="Fleet Settings"
+            />
+          ),
+        },
+      }}
+    />
   );
 };

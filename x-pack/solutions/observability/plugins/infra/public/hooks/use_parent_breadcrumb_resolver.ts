@@ -5,59 +5,77 @@
  * 2.0.
  */
 
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
+import type { RouteState } from '@kbn/metrics-data-access-plugin/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useLocation } from 'react-router-dom';
 import type { LinkProps } from '@kbn/observability-shared-plugin/public/hooks/use_link_props';
-import { hostsTitle, inventoryTitle } from '../translations';
+import { METRICS_APP } from '../../common/constants';
+import { hostsTitle, inventoryTitle, metricsExplorerTitle } from '../translations';
+import { applyOriginSearchToParentLink } from './apply_origin_search_to_parent_link';
+import { useKibanaContextForPlugin } from './use_kibana';
+import {
+  resolveParentBreadcrumbOption,
+  type ParentBreadcrumbOption,
+} from './resolve_parent_breadcrumb_option';
 
-interface LocationStateProps {
-  originPathname: string;
-}
-
-interface BreadcrumbOptions {
-  text: string;
-  link: LinkProps;
-}
+type BreadcrumbOptions = ParentBreadcrumbOption<LinkProps>;
 
 export function useParentBreadcrumbResolver() {
+  const {
+    services: {
+      application: { navigateToApp },
+    },
+  } = useKibanaContextForPlugin();
+
   const hostsLinkProps = useLinkProps({
-    app: 'metrics',
+    app: METRICS_APP,
     pathname: 'hosts',
   });
 
   const inventoryLinkProps = useLinkProps({
-    app: 'metrics',
+    app: METRICS_APP,
     pathname: 'inventory',
+  });
+
+  const explorerLinkProps = useLinkProps({
+    app: METRICS_APP,
+    pathname: 'explorer',
   });
 
   const breadcrumbMap = new Map<string, BreadcrumbOptions>([
     ['/hosts', { text: hostsTitle, link: hostsLinkProps }],
     ['/inventory', { text: inventoryTitle, link: inventoryLinkProps }],
+    ['/explorer', { text: metricsExplorerTitle, link: explorerLinkProps }],
   ]);
 
   const defaultOption: BreadcrumbOptions = breadcrumbMap.get('/inventory')!;
 
   const { state } = useLocation();
-  const locationState: LocationStateProps = state as LocationStateProps;
+  // Intentional `as Partial<RouteState>` type assertion as react-router location.state is untyped at the history boundary;
+  const locationState = state as Partial<RouteState> | undefined;
 
-  function getOptionsByNodeType(nodeType: InventoryItemType): BreadcrumbOptions {
-    if (nodeType === 'host') {
-      return breadcrumbMap.get('/hosts')!;
+  function getBreadcrumbOptions() {
+    const option = resolveParentBreadcrumbOption({
+      originPathname: locationState?.originPathname,
+      breadcrumbMap,
+      defaultOption,
+    });
+
+    const { originAppId, originPathname, originSearch } = locationState ?? {};
+    if (!originAppId || !originPathname || !originSearch || !breadcrumbMap.has(originPathname)) {
+      return option;
     }
-    return defaultOption;
-  }
 
-  function getBreadcrumbOptions(nodeType: InventoryItemType) {
-    if (locationState === undefined) {
-      return getOptionsByNodeType(nodeType);
-    }
-
-    const originalPathBreadcrumb = locationState.originPathname
-      ? breadcrumbMap.get(locationState.originPathname)
-      : undefined;
-
-    return originalPathBreadcrumb ?? defaultOption;
+    return {
+      text: option.text,
+      link: applyOriginSearchToParentLink({
+        link: option.link,
+        originAppId,
+        originPathname,
+        originSearch,
+        navigateToApp,
+      }),
+    };
   }
 
   return { getBreadcrumbOptions };

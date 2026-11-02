@@ -328,3 +328,10 @@ export const GAP_DETECTION_SCOPE_INCLUDE_DISABLED_LABEL = i18n.translate(
     defaultMessage: 'Include gaps created when a rule was disabled.',
   }
 );
+
+export const RULE_BACKFILLS_TABLE_CAPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleGaps.backfillsTableCaption',
+  {
+    defaultMessage: 'Rule backfills',
+  }
+);

@@ -17,6 +17,7 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
+  CustomYaraSignaturesValidator,
 } from '../validators';
 
 export const getExceptionsPreExportHandler = (
@@ -72,6 +73,15 @@ export const getExceptionsPreExportHandler = (
     if (BlocklistValidator.isBlocklist({ listId })) {
       isEndpointArtifact = true;
       await new BlocklistValidator(endpointAppContextService, request).validatePreExport();
+    }
+
+    // Validate YARA signatures
+    if (CustomYaraSignaturesValidator.isCustomYaraSignature({ listId })) {
+      isEndpointArtifact = true;
+      await new CustomYaraSignaturesValidator(
+        endpointAppContextService,
+        request
+      ).validatePreExport();
     }
 
     // Validate Endpoint Exceptions

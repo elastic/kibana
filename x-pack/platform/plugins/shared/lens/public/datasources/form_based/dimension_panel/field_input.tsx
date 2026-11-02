@@ -8,11 +8,12 @@
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { GenericIndexPatternColumn, FieldBasedIndexPatternColumn } from '@kbn/lens-common';
+import type { FieldBasedIndexPatternColumn } from '@kbn/lens-common';
 import { insertOrReplaceColumn } from '../operations/layer_helpers';
 import { FieldSelect } from './field_select';
 import type { FieldInputProps, OperationType } from '../operations/definitions';
 import { shouldShowTimeSeriesOption } from '../pure_utils';
+import { getColumnParamsForNewBucket } from '../include_empty_rows_defaults';
 
 export function FieldInput({
   layer,
@@ -30,18 +31,22 @@ export function FieldInput({
   groupId,
   dimensionGroups,
   operationDefinitionMap,
+  activeVisualizationTypeId,
 }: FieldInputProps<FieldBasedIndexPatternColumn>) {
   const selectedOperationDefinition =
     selectedColumn && operationDefinitionMap[selectedColumn.operationType];
+  const incompleteOperationDefinition = incompleteOperation
+    ? operationDefinitionMap[incompleteOperation]
+    : undefined;
   // Need to workout early on the error to decide whether to show this or an help text
   const fieldErrorMessage =
     ((selectedOperationDefinition?.input !== 'fullReference' &&
       selectedOperationDefinition?.input !== 'managedReference') ||
       (incompleteOperation && operationDefinitionMap[incompleteOperation].input === 'field')) &&
     getErrorMessage(
-      selectedColumn,
+      Boolean(incompleteField ?? selectedColumn?.sourceField),
       Boolean(incompleteOperation),
-      selectedOperationDefinition?.input,
+      incompleteOperationDefinition?.input ?? selectedOperationDefinition?.input,
       currentFieldIsInvalid
     );
   const fieldLabel = i18n.translate('xpack.lens.indexPattern.chooseField', {
@@ -78,6 +83,10 @@ export function FieldInput({
               visualizationGroups: dimensionGroups,
               targetGroup: groupId,
               incompleteParams,
+              columnParams: getColumnParamsForNewBucket(
+                choice.operationType,
+                activeVisualizationTypeId
+              ),
             })
           );
         }}
@@ -94,13 +103,13 @@ export function FieldInput({
 }
 
 export function getErrorMessage(
-  selectedColumn: GenericIndexPatternColumn | undefined,
+  hasFieldSelected: boolean,
   incompleteOperation: boolean,
   input: 'none' | 'field' | 'fullReference' | 'managedReference' | undefined,
   fieldInvalid: boolean
 ) {
-  if (selectedColumn && incompleteOperation) {
-    if (input === 'field') {
+  if (incompleteOperation) {
+    if (hasFieldSelected && input === 'field') {
       return i18n.translate('xpack.lens.indexPattern.invalidOperationLabel', {
         defaultMessage: 'This field does not work with the selected function.',
       });

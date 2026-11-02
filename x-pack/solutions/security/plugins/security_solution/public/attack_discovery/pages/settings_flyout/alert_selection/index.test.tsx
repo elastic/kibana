@@ -76,14 +76,14 @@ describe('AlertSelection', () => {
     expect(screen.getByText(CUSTOMIZE_THE_CONNECTOR_AND_ALERTS)).toBeInTheDocument();
   });
 
-  it('renders the AlertSelectionQuery', () => {
+  it('renders the ConnectorField description', () => {
     render(
       <TestProviders>
         <AlertSelection {...defaultProps} />
       </TestProviders>
     );
 
-    expect(screen.getByTestId('customizeAlerts')).toBeInTheDocument();
+    expect(screen.getByTestId('connectorFieldDescription')).toBeInTheDocument();
   });
 
   it('renders the AlertSelectionRange', () => {
@@ -130,6 +130,6 @@ describe('AlertSelection', () => {
       </TestProviders>
     );
 
-    expect(screen.queryByTestId('customizeAlerts')).toBeNull();
+    expect(screen.queryByTestId('connectorFieldDescription')).toBeNull();
   });
 });

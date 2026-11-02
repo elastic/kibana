@@ -31,6 +31,7 @@ describe('getStepPropertySuggestions', () => {
     focusedStepInfo: {
       stepId: '1',
       stepYamlNode: new YAMLMap(),
+      path: ['steps', 0],
       lineStart: 1,
       lineEnd: 1,
       stepType: 'custom-type',
@@ -145,6 +146,7 @@ describe('getStepPropertySuggestions', () => {
         focusedStepInfo: {
           stepId: '1',
           stepYamlNode: new YAMLMap(),
+          path: ['steps', 0],
           lineStart: 1,
           lineEnd: 1,
           stepType: null as unknown as string,
@@ -164,6 +166,7 @@ describe('getStepPropertySuggestions', () => {
         focusedStepInfo: {
           stepId: '1',
           stepYamlNode: new YAMLMap(),
+          path: ['steps', 0],
           lineStart: 1,
           lineEnd: 1,
           stepType: undefined as unknown as string,
@@ -332,6 +335,61 @@ describe('getStepPropertySuggestions', () => {
         'input',
         'config.deeply.nested-prop'
       );
+    });
+  });
+
+  describe('array element fields', () => {
+    it('falls back to the array property handler for an indexed input path', async () => {
+      const searchMock = jest.fn().mockResolvedValue([{ label: 'Duplicate', value: 'Duplicate' }]);
+      const context = createMockContext({
+        focusedYamlPair: {
+          keyNode: { value: 'tags_to_add', range: [1, 1, 1] } as Scalar,
+          valueNode: { value: 'Dup', range: [5, 15, 15] } as Scalar,
+          path: ['with', 'tags_to_add', '0'],
+        },
+      });
+      const getPropertyHandler = createMockGetPropertyHandler(searchMock);
+
+      const suggestions = await getStepPropertySuggestions(context, getPropertyHandler);
+
+      expect(getPropertyHandler).toHaveBeenCalledWith('custom-type', 'input', 'tags_to_add');
+      expect(searchMock).toHaveBeenCalledWith('Dup', {
+        stepType: 'custom-type',
+        scope: 'input',
+        propertyKey: 'tags_to_add',
+        values: { config: {}, input: {} },
+      });
+      expect(suggestions.map((s) => s.label)).toEqual(['Duplicate']);
+    });
+
+    it('falls back to the array property handler for an indexed config path', async () => {
+      const getPropertyHandler = createMockGetPropertyHandler();
+      const context = createMockContext({
+        focusedYamlPair: {
+          keyNode: { value: 'indices', range: [1, 1, 1] } as Scalar,
+          valueNode: { value: '', range: [5, 15, 15] } as Scalar,
+          path: ['indices', '2'],
+        },
+      });
+
+      await getStepPropertySuggestions(context, getPropertyHandler);
+
+      expect(getPropertyHandler).toHaveBeenCalledWith('custom-type', 'config', 'indices');
+    });
+
+    it('does not strip a non-trailing numeric segment', async () => {
+      const getPropertyHandler = createMockGetPropertyHandler();
+      const context = createMockContext({
+        focusedYamlPair: {
+          keyNode: { value: 'index', range: [1, 1, 1] } as Scalar,
+          valueNode: { value: '', range: [5, 15, 15] } as Scalar,
+          path: ['with', 'items', '0', 'index'],
+        },
+      });
+
+      await getStepPropertySuggestions(context, getPropertyHandler);
+
+      expect(getPropertyHandler).toHaveBeenCalledWith('custom-type', 'input', 'items.0.index');
     });
   });
 
@@ -530,6 +588,7 @@ describe('getStepPropertySuggestions', () => {
         focusedStepInfo: {
           stepId: '1',
           stepYamlNode: new YAMLMap(),
+          path: ['steps', 0],
           lineStart: 1,
           lineEnd: 1,
           stepType: 'slack',
@@ -546,6 +605,7 @@ describe('getStepPropertySuggestions', () => {
         focusedStepInfo: {
           stepId: '2',
           stepYamlNode: new YAMLMap(),
+          path: ['steps', 0],
           lineStart: 5,
           lineEnd: 10,
           stepType: 'elasticsearch.index',

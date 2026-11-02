@@ -21,12 +21,13 @@ import type {
 import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { asSpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -162,16 +163,23 @@ const createPrivilegeMonitoringTaskRunnerFactory =
       run: async () => {
         const [core] = await deps.getStartServices();
         const config = deps.config;
-        return runPrivilegeMonitoringTask({
-          isCancelled,
-          logger: deps.logger,
-          telemetry: deps.telemetry,
-          taskInstance,
-          experimentalFeatures: deps.experimentalFeatures,
-          core,
-          config,
-          getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
-        });
+        return core.executionContext.withContext(
+          buildEaExecutionContext(
+            EA_EXECUTION_CONTEXT_NAMES.PRIVILEGE_MONITORING_TASK,
+            taskInstance.id
+          ),
+          () =>
+            runPrivilegeMonitoringTask({
+              isCancelled,
+              logger: deps.logger,
+              telemetry: deps.telemetry,
+              taskInstance,
+              experimentalFeatures: deps.experimentalFeatures,
+              core,
+              config,
+              getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
+            })
+        );
       },
       cancel: async () => {
         cancelled = true;
@@ -239,7 +247,7 @@ const runPrivilegeMonitoringTask = async ({
       config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
     const request = kibanaRequestFactory({
       headers: {},
-      spaceId: asSpaceId(state.namespace),
+      spaceId: brandSpaceId(state.namespace),
     });
     const soClient = core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],

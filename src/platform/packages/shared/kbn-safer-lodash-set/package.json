@@ -4,7 +4,7 @@
   "description": "A safer version of the lodash set and setWith functions",
   "scripts": {
     "lint": "node ../../../../../scripts/knip --workspace src/platform/packages/shared/kbn-safer-lodash-set --include unlisted",
-    "test": "npm run lint && ../../../../../node_modules/.bin/tape test/*.js && npm run test:types",
+    "test": "npm run lint && node --test test/*.js && npm run test:types",
     "test:types": "../../../../../node_modules/.bin/tsc --noEmit",
     "update": "./scripts/update.sh",
     "save_state": "./scripts/save_state.sh"

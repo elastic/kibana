@@ -2,28 +2,22 @@ name: Trigger Chromium Build
 
 on:
   issues:
-    types: [labeled, opened, reopened, edited]
-
-permissions:
-  contents: read
-  issues: write
+    types: [labeled, opened]
 
 jobs:
   matches_label:
-    if: ${{ contains(github.event.issue.labels.*.name, 'trigger-chromium-build') && contains(fromJSON('["MEMBER", "COLLABORATOR", "CONTRIBUTOR"]'), github.event.issue.author_association) }}
+    if: ${{ contains(github.event.issue.labels.*.name, 'trigger-chromium-build') && contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.issue.author_association) }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     outputs:
-      version_bump_config: ${{ steps.extract_version_bump_config.outputs.result }}
+      puppeteer_version: ${{ steps.extract_version_bump_config.outputs.puppeteer_version }}
     steps:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install jq wget -y
-      - name: Install mdsh
-        run: |
-          wget https://github.com/bashup/mdsh/raw/master/bin/mdsh && \
-          chmod +x mdsh && \
-          export PATH=$PATH:mdsh
+          sudo apt-get install jq -y
       - name: Extract version bump configuration
         id: extract_version_bump_config
         env:
@@ -69,7 +63,7 @@ jobs:
                   PUPPETEER_VERSION_COUNT=$((PUPPETEER_VERSION_COUNT + 1))
                   if [[ $PUPPETEER_VERSION_COUNT -gt 1 ]]; then
                     # Mark multiple puppeteer_version properties found, exit with error
-                    echo "multiple_puppeteer_version_properties=true" >> $GITHUB_OUTPUT
+                    echo "multiple_puppeteer_version_properties=true" >> "$GITHUB_OUTPUT"
                     exit 0
                   fi
                   UPGRADE_CONFIG="$block_content"
@@ -80,9 +74,15 @@ jobs:
           # Main function to extract code blocks from a markdown file
           extract_code_blocks() {
               mdsh-parse handle_code_block
-              # Output the upgrade config if found
+              # Output the requested puppeteer version if a valid one was found
               if [[ -n "$UPGRADE_CONFIG" ]]; then
-                  echo "result=$UPGRADE_CONFIG" >> $GITHUB_OUTPUT
+                  version=$(echo "$UPGRADE_CONFIG" | jq -r '.puppeteer_version')
+                  # The issue body is untrusted input, only forward a well formed version
+                  if [[ ! $version =~ ^[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}$ ]]; then
+                      echo "invalid_puppeteer_version=true" >> "$GITHUB_OUTPUT"
+                      return 0
+                  fi
+                  echo "puppeteer_version=$version" >> "$GITHUB_OUTPUT"
               fi
           }
 
@@ -99,8 +99,8 @@ jobs:
               repo: context.repo.repo,
               body: 'Multiple JSON blocks with puppeteer_version found. Please provide only one JSON block with the puppeteer_version property.'
             })
-      - name: Report missing puppeteer_version properties
-        if: ${{ steps.extract_version_bump_config.outputs.result == '' }}
+      - name: Report missing or invalid puppeteer_version property
+        if: ${{ steps.extract_version_bump_config.outputs.multiple_puppeteer_version_properties != 'true' && steps.extract_version_bump_config.outputs.puppeteer_version == '' }}
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
@@ -108,21 +108,23 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'No puppeteer_version property found in the issue body. Please provide the puppeteer_version property in a JSON code block.'
+              body: 'No valid puppeteer_version property found in the issue body. Please provide the puppeteer_version property in a JSON code block, set to a version of the form x.y.z.'
             })
 
   trigger_build:
     runs-on: ubuntu-latest
     needs: [matches_label]
-    if: ${{ needs.matches_label.outputs.version_bump_config }}
+    if: ${{ needs.matches_label.outputs.puppeteer_version }}
+    permissions: {}
     steps:
       - uses: elastic/oblt-actions/buildkite/run@v1
         with:
           token: ${{ secrets.SHAREDUX_BUILDKITE_TOKEN }}
+          org: 'elastic'
           pipeline: 'kibana-chromium-linux-build'
           env-vars: |
             GITHUB_ISSUE_BASE_OWNER=${{ github.event.repository.owner.login }}
             GITHUB_ISSUE_BASE_REPO=${{ github.event.repository.name }}
             GITHUB_ISSUE_NUMBER=${{ github.event.issue.number }}
             GITHUB_ISSUE_TRIGGER_USER=${{ github.event.issue.user.login }}
-            PUPPETEER_VERSION=$(echo ${{ fromJSON(needs.matches_label.outputs.version_bump_config) }} | jq -r '.puppeteer_version')
+            PUPPETEER_VERSION=${{ needs.matches_label.outputs.puppeteer_version }}

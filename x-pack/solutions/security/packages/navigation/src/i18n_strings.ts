@@ -8,6 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nStrings = {
+  alertZero: {
+    title: i18n.translate('securitySolutionPackages.navLinks.alertZero', {
+      defaultMessage: 'AlertZero',
+    }),
+  },
   alertDetections: {
     title: i18n.translate('securitySolutionPackages.navLinks.alertDetections', {
       defaultMessage: 'Detections',
@@ -331,12 +336,6 @@ export const i18nStrings = {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.kibana', {
         defaultMessage: 'Kibana',
       }),
-    },
-    v2AlertingPreview: {
-      title: i18n.translate(
-        'securitySolutionPackages.navLinks.stackManagement_v2.v2AlertingPreview',
-        { defaultMessage: 'V2 Alerting Preview' }
-      ),
     },
     // serverless only
     access: {

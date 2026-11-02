@@ -29,13 +29,16 @@ import type {
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
+  apiHasParentApi,
   apiHasType,
   apiIsOfType,
   apiPublishesTitle,
   getInheritedViewMode,
+  getTitle,
   type PublishesSavedObjectId,
   type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -194,11 +197,18 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   ): DiscoverAppLocatorParams => {
     const savedObjectId = api.savedObjectId$?.getValue();
 
+    // Read dashboard-level ES|QL variables so the reporting server can bind named params
+    const esqlVariables =
+      apiHasParentApi(api) && apiPublishesESQLVariables(api.parentApi)
+        ? api.parentApi.esqlVariables$.getValue()
+        : undefined;
+
     return {
       ...(savedObjectId ? { savedSearchId: savedObjectId } : {}),
       query: searchSourceFields.query,
       filters: searchSourceFields.parent?.filter, // time range filter
       columns,
+      ...(esqlVariables?.length ? { esqlVariables } : {}),
     };
   };
 
@@ -215,7 +225,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       return;
     }
 
-    const title = embeddable.title$.getValue() ?? '';
+    // By-value panels have no saved search the server could derive a title from, so always send one
+    const title = getTitle(embeddable) || this.i18nStrings.generate.fallbackDiscoverTitle;
 
     const { columns, getSearchSource } = await this.getSharingData(savedSearch);
     const searchSource = getSearchSource({

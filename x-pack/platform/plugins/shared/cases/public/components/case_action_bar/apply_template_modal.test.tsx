@@ -8,14 +8,18 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
+import type { TemplateFieldsFormReadyProps } from '../case_view/components/template_fields_form_ready';
 
 import { renderWithTestingProviders } from '../../common/mock';
 import { basicCase } from '../../containers/mock';
 import { ApplyTemplateModal } from './apply_template_modal';
 
-const mockMutate = jest.fn();
+const mockChangeAppliedTemplate = jest.fn();
 jest.mock('../case_view/use_change_applied_template', () => ({
-  useChangeAppliedTemplate: () => ({ mutate: mockMutate, isLoading: false }),
+  useChangeAppliedTemplate: () => ({
+    mutate: mockChangeAppliedTemplate,
+    isLoading: false,
+  }),
 }));
 
 const mockUseGetTemplates = jest.fn();
@@ -26,6 +30,19 @@ jest.mock('../templates_v2/hooks/use_get_templates', () => ({
 const mockUseGetTemplate = jest.fn();
 jest.mock('../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+}));
+
+const mockUseTemplateNonGlobalFields = jest.fn();
+jest.mock('../templates_v2/hooks/use_template_non_global_fields', () => ({
+  useTemplateNonGlobalFields: (...args: unknown[]) => mockUseTemplateNonGlobalFields(...args),
+}));
+
+const mockFormApiTrigger = jest.fn();
+const mockFormApiGetValues = jest.fn();
+const mockTemplateFieldsFormReady = jest.fn();
+jest.mock('../case_view/components/template_fields_form_ready', () => ({
+  EMPTY_EXTENDED_FIELDS: {},
+  TemplateFieldsFormReady: (...args: unknown[]) => mockTemplateFieldsFormReady(...args),
 }));
 
 const mockOnClose = jest.fn();
@@ -50,6 +67,12 @@ const mockParsedTemplate = {
     fields: [
       { name: 'priority', type: 'keyword', control: 'INPUT_TEXT', metadata: { default: 'low' } },
     ],
+    connector: {
+      type: '.jira',
+      id: 'jira-1',
+      fields: { issueType: '10006', priority: null, parent: null },
+    },
+    settings: { syncAlerts: true },
   },
 };
 
@@ -75,6 +98,19 @@ describe('ApplyTemplateModal', () => {
 
     mockUseGetTemplates.mockReturnValue({ data: mockTemplatesData, isLoading: false });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isFetching: false });
+    mockUseTemplateNonGlobalFields.mockReturnValue({ resolvedFields: [], isLoading: false });
+
+    // Default: form renders a placeholder and wires the formApiRef
+    mockFormApiTrigger.mockResolvedValue(true);
+    mockFormApiGetValues.mockReturnValue({});
+    mockTemplateFieldsFormReady.mockImplementation(
+      ({ formApiRef }: TemplateFieldsFormReadyProps) => {
+        if (formApiRef) {
+          formApiRef.current = { trigger: mockFormApiTrigger, getValues: mockFormApiGetValues };
+        }
+        return <div data-test-subj="template-fields-form" />;
+      }
+    );
   });
 
   it('renders the modal title', () => {
@@ -134,7 +170,16 @@ describe('ApplyTemplateModal', () => {
     expect(screen.getByTestId('apply-template-modal-apply')).not.toBeDisabled();
   });
 
-  it('calls changeTemplate with the correct arguments when Apply is clicked', async () => {
+  it('renders a notice that the connector will not be changed', () => {
+    renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
+
+    expect(screen.getByTestId('apply-template-modal-connector-notice')).toBeInTheDocument();
+    expect(
+      screen.getByText("Applying a template does not change this case's connector.")
+    ).toBeInTheDocument();
+  });
+
+  it('calls changeAppliedTemplate without a connector when Apply is clicked', async () => {
     mockUseGetTemplate.mockReturnValue({ data: mockParsedTemplate, isFetching: false });
 
     renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
@@ -150,17 +195,20 @@ describe('ApplyTemplateModal', () => {
     await user.click(screen.getByText('Security Template'));
     await user.click(screen.getByTestId('apply-template-modal-apply'));
 
-    expect(mockMutate).toHaveBeenCalledWith(
+    expect(mockChangeAppliedTemplate).toHaveBeenCalledWith(
       {
         caseData: basicCase,
         newTemplate: {
           id: 'tmpl-1',
           version: 3,
           fields: mockParsedTemplate.definition.fields,
+          settings: mockParsedTemplate.definition.settings,
         },
       },
       expect.objectContaining({ onSuccess: mockOnClose })
     );
+    // Applying a template must never reassign the case's connector.
+    expect(mockChangeAppliedTemplate.mock.calls[0][0].newTemplate).not.toHaveProperty('connector');
   });
 
   it('calls onClose when Cancel is clicked', async () => {
@@ -169,6 +217,84 @@ describe('ApplyTemplateModal', () => {
     await user.click(screen.getByTestId('apply-template-modal-cancel'));
 
     expect(mockOnClose).toHaveBeenCalled();
+  });
+
+  describe('extended fields validation', () => {
+    const mockResolvedField = {
+      name: 'priority',
+      type: 'keyword',
+      control: 'INPUT_TEXT',
+      metadata: { required: true },
+    };
+
+    beforeEach(() => {
+      mockUseGetTemplate.mockReturnValue({ data: mockParsedTemplate, isFetching: false });
+      mockUseTemplateNonGlobalFields.mockReturnValue({
+        resolvedFields: [mockResolvedField],
+        isLoading: false,
+      });
+    });
+
+    const selectTemplate = async () => {
+      const combobox = screen.getByTestId('apply-template-modal-select');
+      const input = within(combobox).getByRole('combobox');
+      await user.click(input);
+      await waitFor(() => {
+        expect(screen.getByText('Security Template')).toBeInTheDocument();
+      });
+      await user.click(screen.getByText('Security Template'));
+    };
+
+    it('shows the extended fields form when the selected template has fields', async () => {
+      renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
+      await selectTemplate();
+
+      expect(screen.getByTestId('template-fields-form')).toBeInTheDocument();
+    });
+
+    it('does not call changeAppliedTemplate when form validation fails', async () => {
+      mockFormApiTrigger.mockResolvedValue(false);
+
+      renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
+      await selectTemplate();
+      await user.click(screen.getByTestId('apply-template-modal-apply'));
+
+      expect(mockChangeAppliedTemplate).not.toHaveBeenCalled();
+    });
+
+    it('calls changeAppliedTemplate with extendedFields when form validation passes', async () => {
+      mockFormApiGetValues.mockReturnValue({ priority_keyword: 'high' });
+
+      renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
+      await selectTemplate();
+      await user.click(screen.getByTestId('apply-template-modal-apply'));
+
+      expect(mockChangeAppliedTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extendedFields: { priority_keyword: 'high' },
+        }),
+        expect.objectContaining({ onSuccess: mockOnClose })
+      );
+    });
+
+    it('omits empty and empty-array values from extendedFields', async () => {
+      mockFormApiGetValues.mockReturnValue({
+        priority_keyword: 'high',
+        severity_keyword: '',
+        tags_keyword: '[]',
+      });
+
+      renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
+      await selectTemplate();
+      await user.click(screen.getByTestId('apply-template-modal-apply'));
+
+      expect(mockChangeAppliedTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extendedFields: { priority_keyword: 'high' },
+        }),
+        expect.any(Object)
+      );
+    });
   });
 
   describe('pre-selection', () => {
@@ -191,6 +317,23 @@ describe('ApplyTemplateModal', () => {
       renderWithTestingProviders(<ApplyTemplateModal {...defaultProps} />);
 
       expect(mockUseGetTemplate).toHaveBeenCalledWith(undefined);
+    });
+
+    it('does not fetch the definition when the applied template has been soft-deleted', () => {
+      // The case references a template that is no longer in the active options list.
+      const caseWithDeletedTemplate = {
+        ...basicCase,
+        template: { id: 'deleted-tmpl', version: 1 },
+      };
+
+      renderWithTestingProviders(
+        <ApplyTemplateModal {...defaultProps} caseData={caseWithDeletedTemplate} />
+      );
+
+      // Should not attempt to fetch a deleted template — the query must be disabled.
+      expect(mockUseGetTemplate).toHaveBeenCalledWith(undefined);
+      // Apply button must remain disabled (no valid template selected).
+      expect(screen.getByTestId('apply-template-modal-apply')).toBeDisabled();
     });
   });
 });

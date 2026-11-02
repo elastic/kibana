@@ -18,6 +18,9 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   job_id: {
     type: 'wildcard',
   },
+  retry_count: {
+    type: 'integer',
+  },
   build: {
     type: 'object',
     properties: {
@@ -140,7 +143,40 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       mode: {
         type: 'keyword',
       },
+      attributes: {
+        type: 'keyword',
+      },
+      elastic_cloud: {
+        type: 'object',
+        properties: {
+          project: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+            },
+          },
+          deployment: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'keyword',
+              },
+            },
+          },
+          region: {
+            type: 'keyword',
+          },
+          environment: {
+            type: 'keyword',
+          },
+        },
+      },
     },
+  },
+  scope: {
+    type: 'keyword',
   },
   fully_parallel: {
     type: 'boolean',
@@ -163,6 +199,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       pending: {
         type: 'long',
       },
+      flaky: {
+        type: 'long',
+      },
       total: {
         type: 'long',
       },
@@ -178,6 +217,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       category: {
         type: 'keyword',
       },
+      namespace: {
+        type: 'keyword',
+      },
     },
   },
 };
@@ -185,6 +227,12 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
 export const suiteProperties: Record<PropertyName, MappingProperty> = {
   title: {
     type: 'text',
+    fields: {
+      keyword: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+    },
   },
   type: {
     type: 'keyword',
@@ -197,6 +245,12 @@ export const testProperties: Record<PropertyName, MappingProperty> = {
   },
   title: {
     type: 'text',
+    fields: {
+      keyword: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+    },
   },
   tags: {
     type: 'keyword',
@@ -220,6 +274,15 @@ export const testProperties: Record<PropertyName, MappingProperty> = {
   },
   status: {
     type: 'keyword',
+  },
+  attempt: {
+    type: 'short',
+  },
+  outcome: {
+    type: 'keyword',
+  },
+  attempts: {
+    type: 'short',
   },
   console_errors: {
     type: 'match_only_text',

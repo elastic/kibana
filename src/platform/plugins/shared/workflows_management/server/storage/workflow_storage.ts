@@ -10,7 +10,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowAccessSubject, WorkflowYaml } from '@kbn/workflows';
 import { workflowSystemIndex } from './indices';
 
 export const workflowIndexName = workflowSystemIndex('workflows');
@@ -20,6 +20,22 @@ const storageSettings = {
   schema: {
     properties: {
       // ONLY map fields we actively search/filter/aggregate on
+      owner_id: types.keyword({}),
+      access_control: types.object({
+        dynamic: false,
+        properties: {
+          access_mode: types.keyword({}),
+          entries: types.nested({
+            dynamic: false,
+            properties: {
+              type: types.keyword({}),
+              id: types.keyword({}),
+              role: types.keyword({}),
+              added_at: types.date({}),
+            },
+          }),
+        },
+      }),
       name: types.text({
         fields: {
           keyword: { type: 'keyword', ignore_above: 256 },
@@ -37,11 +53,14 @@ const storageSettings = {
       triggerTypes: types.keyword({}), // We filter by trigger subscription (e.g. event-driven)
       managed: types.boolean({}),
       managedBy: types.keyword({}),
+      billable: types.boolean({ index: false }),
       managedVersion: types.long({ index: false }),
+      version: types.long({ index: false }),
       definitionHash: types.keyword({ index: false }),
       managedTemplateValues: types.object({ enabled: false }),
       originManagedWorkflowId: types.keyword({}),
       lifecycle: types.keyword({}),
+      managedVisibilityContexts: types.keyword({}),
       updated_at: types.date({}), // We sort by this
       // Non-searchable fields (stored but not indexed)
       yaml: types.text({ index: false }),
@@ -54,7 +73,7 @@ const storageSettings = {
   },
 } satisfies IndexStorageSettings;
 
-export interface WorkflowProperties {
+export interface WorkflowProperties extends WorkflowAccessSubject {
   // TODO: we can remove this name, since we use the WorkflowYaml object to get the name
   name: string;
   description?: string;
@@ -68,11 +87,14 @@ export interface WorkflowProperties {
   spaceId: string;
   managed?: boolean;
   managedBy?: string | null;
+  billable?: boolean | null;
   managedVersion?: number | null;
+  version?: number;
   definitionHash?: string | null;
   managedTemplateValues?: Record<string, unknown> | null;
   originManagedWorkflowId?: string | null;
   lifecycle?: 'static' | 'dynamic' | null;
+  managedVisibilityContexts?: string[];
   deleted_at: Date | null;
   valid: boolean;
   created_at: string;

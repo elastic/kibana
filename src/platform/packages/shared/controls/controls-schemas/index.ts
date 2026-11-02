@@ -11,6 +11,7 @@ export { getControlsSchema, getControlsGroupSchema } from './src/controls_group_
 
 export type {
   ControlsGroupState,
+  ControlsGroupStateInput,
   ControlState,
   ControlWidth,
   DataControlState,
@@ -22,10 +23,12 @@ export type {
   OptionsListSearchTechnique,
   OptionsListSelection,
   OptionsListSortingType,
+  PinnedControlInput,
   PinnedControlLayoutState,
   PinnedControlState,
   RangeSliderControlState,
   RangeSliderValue,
+  StrictDataControlState,
   TimeSlice,
   TimeSliderControlState,
 } from './src/types';

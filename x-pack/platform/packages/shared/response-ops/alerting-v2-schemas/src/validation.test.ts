@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { Parser } from '@elastic/esql';
 import {
   parseDurationToMs,
   validateDuration,
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  validateComposedEsqlQuery,
+  composeEsqlQuery,
 } from './validation';
+
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 describe('parseDurationToMs', () => {
   it.each([
@@ -50,6 +57,10 @@ describe('validateDuration', () => {
       expect(validateDuration(value)).not.toBeUndefined();
     }
   );
+
+  it('does not echo the rejected value in the error message', () => {
+    expect(validateDuration('not-a-duration')).not.toContain('not-a-duration');
+  });
 });
 
 describe('validateMaxDuration', () => {
@@ -128,5 +139,72 @@ describe('validateEsqlQuery', () => {
 
   it('rejects invalid ES|QL query', () => {
     expect(validateEsqlQuery('FROM |')).toMatch(/Invalid ES\|QL query/);
+  });
+
+  it('reports a parser crash as an invalid query instead of throwing', () => {
+    jest.spyOn(Parser, 'parseErrors').mockImplementationOnce(() => {
+      throw new Error('boom');
+    });
+
+    expect(validateEsqlQuery('FROM logs-*')).toBe('Invalid ES|QL query: boom');
+  });
+});
+
+describe('validateComposedEsqlQuery', () => {
+  it('accepts a valid composition', () => {
+    expect(validateComposedEsqlQuery('FROM metrics-*', 'WHERE cpu > 0.9')).toBeUndefined();
+  });
+
+  it('rejects a composition that does not parse', () => {
+    expect(validateComposedEsqlQuery('FROM metrics-*', 'WHERE')).toMatch(/Invalid ES\|QL query/);
+  });
+
+  it('reports a compose crash as an invalid query instead of throwing', () => {
+    jest.spyOn(Parser, 'parse').mockImplementationOnce(() => {
+      throw new Error('boom');
+    });
+
+    expect(validateComposedEsqlQuery('FROM metrics-*', 'WHERE cpu > 0.9')).toBe(
+      'Invalid ES|QL query: boom'
+    );
+  });
+});
+
+describe('composeEsqlQuery', () => {
+  it('appends a single pipeline command to the base', () => {
+    const result = composeEsqlQuery('FROM metrics-*', 'WHERE cpu > 0.9');
+    expect(result).toBe('FROM metrics-* | WHERE cpu > 0.9');
+  });
+
+  it('appends multiple pipeline commands to the base', () => {
+    const result = composeEsqlQuery('FROM metrics-*', 'WHERE cpu > 0.9 | STATS count = COUNT(*)');
+    expect(result).toBe('FROM metrics-* | WHERE cpu > 0.9 | STATS count = COUNT(*)');
+  });
+
+  it('preserves existing commands from the base', () => {
+    const result = composeEsqlQuery(
+      'FROM metrics-* | WHERE host.name == "web-1"',
+      'STATS avg_cpu = AVG(cpu)'
+    );
+    expect(result).toBe('FROM metrics-* | WHERE host.name == "web-1" | STATS avg_cpu = AVG(cpu)');
+  });
+
+  it('handles a trailing comment in base without corrupting the result', () => {
+    const result = composeEsqlQuery('FROM logs-* // my query', 'WHERE status == "error"');
+    expect(result).toBe('FROM logs-* | WHERE status == "error"');
+  });
+
+  it('produces a result that re-parses without errors', () => {
+    const result = composeEsqlQuery('FROM metrics-*', 'WHERE cpu > 0.9');
+    expect(validateEsqlQuery(result)).toBeUndefined();
+  });
+
+  it.each([
+    ['| WHERE cpu > 0.9'],
+    [' |WHERE cpu > 0.9'],
+    ['  |  WHERE cpu > 0.9'],
+    ['\n|\tWHERE cpu > 0.9'],
+  ])('tolerates a leading pipe in the segment ("%s")', (segment) => {
+    expect(composeEsqlQuery('FROM metrics-*', segment)).toBe('FROM metrics-* | WHERE cpu > 0.9');
   });
 });

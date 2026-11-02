@@ -44,7 +44,7 @@ export const attackDiscoveryDataGeneratorExecutor = async ({
 }: AttackDiscoveryDataGeneratorExecutorParams & {
   options: AttackDiscoveryDataGeneratorExecutorOptions;
 }) => {
-  const { params, rule, services, spaceId } = options;
+  const { params, rule, services, spaceId, startedAt } = options;
   const { alertsClient } = services;
 
   if (!alertsClient) {
@@ -78,6 +78,7 @@ export const attackDiscoveryDataGeneratorExecutor = async ({
       alertsParams,
       publicBaseUrl,
       spaceId,
+      timestamp: startedAt.toISOString(),
     });
 
     alertsClient.setAlertData({

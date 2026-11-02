@@ -6,7 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { stringOrStringArraySchema } from '../../../../../schemas';
+import {
+  MAX_ID_LENGTH,
+  MAX_TAG_LENGTH,
+  MAX_ARRAY_FIELDS,
+  MAX_SEARCH_LENGTH,
+} from '../../../../../constants';
 
 export const findRuleTemplatesRequestQuerySchema = schema.object({
   per_page: schema.number({
@@ -26,17 +31,10 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
   }),
   search: schema.maybe(
     schema.string({
+      maxLength: MAX_SEARCH_LENGTH,
       meta: {
         description:
-          'An Elasticsearch simple_query_string query that filters the objects in the response.',
-      },
-    })
-  ),
-  default_search_operator: schema.maybe(
-    schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
-      defaultValue: 'OR',
-      meta: {
-        description: 'The default operator to use for the simple_query_string.',
+          'A search string that filters rule templates by name or tags using a case-insensitive substring match.',
       },
     })
   ),
@@ -58,14 +56,21 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
   ),
   rule_type_id: schema.maybe(
     schema.string({
+      maxLength: MAX_ID_LENGTH,
       meta: {
         description: 'Filters the rule templates by rule type identifier.',
       },
     })
   ),
   tags: schema.maybe(
-    stringOrStringArraySchema({
-      meta: { description: 'Filters the rule templates by tags.' },
-    })
+    schema.oneOf(
+      [
+        schema.arrayOf(schema.string({ maxLength: MAX_TAG_LENGTH }), {
+          maxSize: MAX_ARRAY_FIELDS,
+        }),
+        schema.string({ maxLength: MAX_TAG_LENGTH }),
+      ],
+      { meta: { description: 'Filters the rule templates by tags.' } }
+    )
   ),
 });

@@ -6,7 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+// @ts-expect-error style types not defined
+import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
 import { matrixToCSS } from '../../lib/dom';
 import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
@@ -16,11 +20,20 @@ interface Props {
 }
 
 export const TooltipAnnotation: FC<Props> = ({ transformMatrix, text }) => {
+  const euiThemeContext = useEuiTheme();
+  const styles = useMemo(() => {
+    const euiStyles = euiToolTipStyles(euiThemeContext);
+
+    return css`
+      ${euiStyles.euiToolTip}
+    `;
+  }, [euiThemeContext]);
+
   const newStyle = {
     transform: `${matrixToCSS(transformMatrix)} translate(1em, -1em)`,
   };
   return (
-    <div className="tooltipAnnotation canvasLayoutAnnotation" style={newStyle}>
+    <div className="tooltipAnnotation canvasLayoutAnnotation" css={styles} style={newStyle}>
       <p>{text}°</p>
     </div>
   );

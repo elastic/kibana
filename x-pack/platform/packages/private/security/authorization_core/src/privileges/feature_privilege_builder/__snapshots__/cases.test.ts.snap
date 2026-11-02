@@ -12,6 +12,9 @@ Array [
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
   "cases:observability/findConfigurations",
+  "cases:observability/getFieldDefinitions",
+  "cases:observability/getTemplate",
+  "cases:observability/findTemplates",
   "cases:observability/updateCase",
   "cases:observability/updateComment",
   "cases:observability/deleteCase",
@@ -41,19 +44,22 @@ Array [
 `;
 
 exports[
-  `cases feature_privilege_builder within feature grants manageTemplates privileges under feature with id securitySolution 1`
-] = `
-Array [
-  "cases:securitySolution/manageTemplate",
-]
-`;
-
-exports[
   `cases feature_privilege_builder within feature grants delete privileges under feature with id securitySolution 1`
 ] = `
 Array [
   "cases:securitySolution/deleteCase",
   "cases:securitySolution/deleteComment",
+]
+`;
+
+exports[
+  `cases feature_privilege_builder within feature grants manageTemplates privileges under feature with id securitySolution 1`
+] = `
+Array [
+  "cases:securitySolution/manageTemplate",
+  "cases:securitySolution/getFieldDefinitions",
+  "cases:securitySolution/getTemplate",
+  "cases:securitySolution/findTemplates",
 ]
 `;
 
@@ -75,6 +81,9 @@ Array [
   "cases:observability/getReporters",
   "cases:observability/getUserActions",
   "cases:observability/findConfigurations",
+  "cases:observability/getFieldDefinitions",
+  "cases:observability/getTemplate",
+  "cases:observability/findTemplates",
 ]
 `;
 

@@ -93,7 +93,7 @@ describe('JiraActionConnectorFields renders', () => {
       await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.jira',
             name: 'jira',

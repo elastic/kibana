@@ -6,11 +6,9 @@
  */
 
 import type { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { callApmApi } from './create_call_apm_api';
+import { getApmInternalServices } from '../../plugin';
 import { reportFetchError } from './report_fetch_error';
-
-export const FETCH_SPAN_LINKS_OPERATION_ID = 'fetch-span-links';
-
+import { FETCHER_OPERATION_IDS } from '../../hooks/fetcher_operation_ids';
 export const fetchSpanLinks = async (
   {
     traceId,
@@ -29,6 +27,7 @@ export const fetchSpanLinks = async (
   signal: AbortSignal
 ) => {
   try {
+    const { callApmApi } = getApmInternalServices();
     return await callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}', {
       params: {
         path: { traceId, spanId: docId },
@@ -37,7 +36,7 @@ export const fetchSpanLinks = async (
       signal,
     });
   } catch (error) {
-    reportFetchError({ error, operationId: FETCH_SPAN_LINKS_OPERATION_ID });
+    reportFetchError({ error, operationId: FETCHER_OPERATION_IDS.FETCH_SPAN_LINKS });
     throw error;
   }
 };

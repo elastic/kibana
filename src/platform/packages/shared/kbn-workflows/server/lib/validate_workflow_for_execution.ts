@@ -8,7 +8,11 @@
  */
 
 import type { WorkflowDetailDto } from '../..';
-import { WorkflowDisabledError } from '../../common/errors';
+import {
+  WorkflowDisabledError,
+  WorkflowInvalidError,
+  WorkflowNotFoundError,
+} from '../../common/errors';
 
 /**
  * Validates that a workflow is in a runnable state before execution.
@@ -25,15 +29,19 @@ export function validateWorkflowForExecution(
   definition: NonNullable<WorkflowDetailDto['definition']>;
 } {
   if (!workflow) {
-    throw new Error(`Workflow not found: ${workflowId}`);
+    throw new WorkflowNotFoundError(workflowId);
   }
 
   if (!workflow.definition) {
+    // Saving YAML that fails validation stores `definition: null` with `valid: false`.
+    if (!workflow.valid) {
+      throw new WorkflowInvalidError(workflowId);
+    }
     throw new Error(`Workflow definition not found: ${workflowId}`);
   }
 
   if (!workflow.valid) {
-    throw new Error(`Workflow is not valid: ${workflowId}`);
+    throw new WorkflowInvalidError(workflowId);
   }
 
   if (!workflow.enabled) {

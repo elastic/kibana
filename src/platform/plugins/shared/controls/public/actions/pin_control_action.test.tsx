@@ -52,15 +52,15 @@ describe('PinControlAction', () => {
   });
 
   test('calls appropriate function depennding on if panel is pinned or not', async () => {
-    expect(controlApi.parentApi.pinPanel).toBeCalledTimes(0);
-    expect(controlApi.parentApi.unpinPanel).toBeCalledTimes(0);
+    expect(controlApi.parentApi.pinPanel).toHaveBeenCalledTimes(0);
+    expect(controlApi.parentApi.unpinPanel).toHaveBeenCalledTimes(0);
 
     controlApi.parentApi.panelIsPinned.mockReturnValueOnce(false);
     await pinControlAction.execute({ embeddable: controlApi });
-    expect(controlApi.parentApi.pinPanel).toBeCalledTimes(1);
+    expect(controlApi.parentApi.pinPanel).toHaveBeenCalledTimes(1);
     controlApi.parentApi.panelIsPinned.mockReturnValueOnce(true);
     await pinControlAction.execute({ embeddable: controlApi });
-    expect(controlApi.parentApi.unpinPanel).toBeCalledTimes(1);
+    expect(controlApi.parentApi.unpinPanel).toHaveBeenCalledTimes(1);
 
     controlApi.parentApi.pinPanel.mockReset();
     controlApi.parentApi.unpinPanel.mockReset();

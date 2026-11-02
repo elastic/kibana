@@ -11,6 +11,7 @@ import type { Client } from '@elastic/elasticsearch';
 import { omit, uniq } from 'lodash';
 import { systemIndicesSuperuser, createEsClientForFtrConfig } from '@kbn/test';
 import { castArray } from 'lodash';
+import getopts from 'getopts';
 import pLimit from 'p-limit';
 import type {
   IndicesPutIndexTemplateIndexTemplateMapping,
@@ -77,31 +78,40 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     },
   });
 
-  const { index_templates: idxTemplates } = await client.indices.getIndexTemplate({
-    name: '*',
+  const kbnServerOptions = getopts(config.get('kbnTestServer.serverArgs'), {
+    string: ['serverless'],
   });
+  // VectorDB rejects rewriting registry templates: putting them back drops the
+  // registry_installed exemption and ES then rejects non-vectordb_document index modes.
+  const isVectordb = kbnServerOptions.serverless === 'vectordb';
 
-  const limiter = pLimit(10);
+  if (!isVectordb) {
+    const { index_templates: idxTemplates } = await client.indices.getIndexTemplate({
+      name: '*',
+    });
 
-  await Promise.all(
-    idxTemplates.map(async (tpl) => {
-      const next = {
-        name: tpl.name,
-        ...omit(tpl.index_template, 'created_date_millis', 'modified_date_millis', 'version'),
-        ignore_missing_component_templates: castArray(
-          tpl.index_template.ignore_missing_component_templates ?? []
-        ),
-        composed_of: uniq([...tpl.index_template.composed_of, 'fast_refresh']),
-      };
+    const limiter = pLimit(10);
 
-      // there are some templates where the priority is higher than ES' parser supports
-      if (next.priority && next.priority >= Number.MAX_SAFE_INTEGER) {
-        return;
-      }
+    await Promise.all(
+      idxTemplates.map(async (tpl) => {
+        const next = {
+          name: tpl.name,
+          ...omit(tpl.index_template, 'created_date_millis', 'modified_date_millis', 'version'),
+          ignore_missing_component_templates: castArray(
+            tpl.index_template.ignore_missing_component_templates ?? []
+          ),
+          composed_of: uniq([...tpl.index_template.composed_of, 'fast_refresh']),
+        };
 
-      await limiter(() => client.indices.putIndexTemplate(next));
-    })
-  );
+        // there are some templates where the priority is higher than ES' parser supports
+        if (next.priority && next.priority >= Number.MAX_SAFE_INTEGER) {
+          return;
+        }
+
+        await limiter(() => client.indices.putIndexTemplate(next));
+      })
+    );
+  }
 
   const wrapTemplate = (tpl: IndicesPutIndexTemplateIndexTemplateMapping = {}) => ({
     ...tpl,

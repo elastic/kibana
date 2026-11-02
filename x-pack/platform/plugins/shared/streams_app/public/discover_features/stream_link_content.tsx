@@ -10,13 +10,43 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { StreamsAppLocator } from '../../common/locators';
 
+export const REMOTE_SEARCH_TYPE = {
+  CPS: 'cps',
+  CCS: 'ccs',
+} as const;
+
+export type RemoteSearchType = (typeof REMOTE_SEARCH_TYPE)[keyof typeof REMOTE_SEARCH_TYPE];
+
+/**
+ * Resolves how a remote source should be labelled. Cross-project search (CPS)
+ * takes precedence over cross-cluster search (CCS); returns `undefined` when the
+ * source is neither, i.e. purely local.
+ */
+export function getRemoteSearchType({
+  cpsHasLinkedProjects,
+  ccsHasRemoteClusters,
+}: {
+  cpsHasLinkedProjects?: boolean;
+  ccsHasRemoteClusters?: boolean;
+}): RemoteSearchType | undefined {
+  if (cpsHasLinkedProjects) {
+    return REMOTE_SEARCH_TYPE.CPS;
+  }
+  if (ccsHasRemoteClusters) {
+    return REMOTE_SEARCH_TYPE.CCS;
+  }
+  return undefined;
+}
+
 export interface StreamLinkContentProps {
   name: string | undefined;
   existsLocally: boolean | undefined;
   loading: boolean;
   error: Error | undefined;
   locator: StreamsAppLocator;
-  renderCpsWarning?: boolean;
+  remoteSearchType?: RemoteSearchType;
+  renderRemoteWarning?: boolean;
+  remoteName?: string;
 }
 
 export const StreamLinkContent = ({
@@ -25,7 +55,9 @@ export const StreamLinkContent = ({
   loading,
   error,
   locator,
-  renderCpsWarning,
+  remoteSearchType,
+  renderRemoteWarning,
+  remoteName,
 }: StreamLinkContentProps) => {
   if (loading) return <EuiLoadingSpinner size="s" />;
 
@@ -38,28 +70,41 @@ export const StreamLinkContent = ({
           <EuiText size="xs">{name}</EuiText>
         </EuiLink>
       ) : (
-        <EuiText size="xs">{name}</EuiText>
+        <EuiText size="xs">
+          {name}
+          {remoteName && remoteSearchType && ` (${REMOTE_LABELS[remoteSearchType]}: ${remoteName})`}
+        </EuiText>
       )}
-      {renderCpsWarning && <CpsWarningIcon existsLocally={existsLocally ?? false} />}
+      {renderRemoteWarning && remoteSearchType && (
+        <RemoteWarningIcon remoteSearchType={remoteSearchType} />
+      )}
     </EuiFlexGroup>
   );
 };
 
-const CPS_WARNING_MESSAGE = i18n.translate('xpack.streams.discoverFlyout.cpsWarning', {
-  defaultMessage:
-    'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
-});
+const REMOTE_LABELS: Record<RemoteSearchType, string> = {
+  [REMOTE_SEARCH_TYPE.CPS]: i18n.translate('xpack.streams.discoverFlyout.remoteProjectLabel', {
+    defaultMessage: 'Remote project',
+  }),
+  [REMOTE_SEARCH_TYPE.CCS]: i18n.translate('xpack.streams.discoverFlyout.remoteClusterLabel', {
+    defaultMessage: 'Remote cluster',
+  }),
+};
 
-const CPS_WARNING_NOT_LOCAL_MESSAGE = i18n.translate(
-  'xpack.streams.discoverFlyout.cpsWarningNotLocal',
-  {
-    defaultMessage: 'This document comes from a linked project and is not available in Streams.',
-  }
-);
+const WARNING_MESSAGES: Record<RemoteSearchType, string> = {
+  [REMOTE_SEARCH_TYPE.CPS]: i18n.translate('xpack.streams.discoverFlyout.cpsWarning', {
+    defaultMessage:
+      'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
+  }),
+  [REMOTE_SEARCH_TYPE.CCS]: i18n.translate('xpack.streams.discoverFlyout.ccsWarning', {
+    defaultMessage:
+      'Cross-cluster search is active. This document may come from a remote cluster and might not be available in Streams.',
+  }),
+};
 
-const CpsWarningIcon = ({ existsLocally }: { existsLocally: boolean }) => (
+const RemoteWarningIcon = ({ remoteSearchType }: { remoteSearchType: RemoteSearchType }) => (
   <EuiIconTip
-    content={existsLocally ? CPS_WARNING_MESSAGE : CPS_WARNING_NOT_LOCAL_MESSAGE}
+    content={WARNING_MESSAGES[remoteSearchType]}
     type="warning"
     size="s"
     color="warning"
@@ -67,7 +112,7 @@ const CpsWarningIcon = ({ existsLocally }: { existsLocally: boolean }) => (
       css: { display: 'flex' },
     }}
     iconProps={{
-      'data-test-subj': 'cpsStreamsWarningIcon',
+      'data-test-subj': `${remoteSearchType}StreamsWarningIcon`,
     }}
   />
 );

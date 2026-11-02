@@ -8,18 +8,27 @@
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import type { estypes } from '@elastic/elasticsearch';
-import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import type {
+  ClassicIngestStreamEffectiveLifecycle,
+  EffectiveFailureStore,
+} from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import type { StreamSummary } from '../../../../../common';
+import {
+  MAX_RESOLVE_INDEX_PATTERN_LENGTH,
+  MAX_RESOLVE_INDEX_PATTERNS,
+  collectResolvedIndexNames,
+  type StreamSummary,
+} from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';
-import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
+import { getDataStreamLifecycle, getFailureStore } from '../../../../lib/streams/stream_crud';
 
 export interface ListStreamDetail {
   stream: Streams.all.Definition;
   effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
+  effective_failure_store?: EffectiveFailureStore;
   data_stream?: estypes.IndicesDataStream;
   privileges: {
     read_failure_store: boolean;
@@ -76,23 +85,57 @@ export const listStreamsRoute = createServerRoute({
       return dataStreamsChunk;
     });
 
+    const dataStreamsByName = new Map(
+      dataStreams.data_streams.map((dataStream) => [dataStream.name, dataStream])
+    );
+
     const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
       if (Streams.QueryStream.Definition.is(stream)) {
         return { stream, privileges: { read_failure_store: false } };
       }
 
-      const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
+      const match = dataStreamsByName.get(stream.name);
       const privileges = streamPrivilegesMap.get(stream.name);
+      const canReadFailureStore = privileges?.read_failure_store ?? false;
 
       return {
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
+        ...(canReadFailureStore
+          ? {
+              effective_failure_store: getFailureStore({
+                dataStream: match ?? null,
+              }),
+            }
+          : {}),
         data_stream: match,
-        privileges: { read_failure_store: privileges?.read_failure_store ?? false },
+        privileges: { read_failure_store: canReadFailureStore },
       };
     });
 
     return { streams: enrichedStreams };
+  },
+});
+
+export const listClassicStreamsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/classic',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ streams: Streams.ClassicStream.Definition[] }> => {
+    const { streamsClient } = await getScopedClients({ request });
+    return {
+      streams: await streamsClient.listClassicStreams(),
+    };
   },
 });
 
@@ -113,10 +156,10 @@ export const streamDetailRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     query: z.object({
-      start: z.string(),
-      end: z.string(),
+      start: z.string().max(64),
+      end: z.string().max(64),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<StreamDetailsResponse> => {
@@ -161,7 +204,7 @@ export const resolveIndexRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      index: z.string(),
+      index: z.string().max(255),
     }),
   }),
   handler: async ({
@@ -182,6 +225,36 @@ export const resolveIndexRoute = createServerRoute({
   },
 });
 
+export const resolveIndexPatternsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_resolve_index_patterns',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      patterns: z
+        .array(z.string().min(1).max(MAX_RESOLVE_INDEX_PATTERN_LENGTH))
+        .min(1)
+        .max(MAX_RESOLVE_INDEX_PATTERNS),
+    }),
+  }),
+  handler: async ({ request, params, getScopedClients }): Promise<{ indices: string[] }> => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const resolved = await scopedClusterClient.asCurrentUser.indices.resolveIndex({
+      name: params.body.patterns.join(','),
+      expand_wildcards: 'open',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    return { indices: collectResolvedIndexNames(resolved) };
+  },
+});
+
 const BULK_GET_SUMMARIES_MAX_NAMES = 10_000;
 
 export const bulkGetStreamSummariesRoute = createServerRoute({
@@ -196,7 +269,7 @@ export const bulkGetStreamSummariesRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      names: z.array(z.string()).max(BULK_GET_SUMMARIES_MAX_NAMES),
+      names: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).max(BULK_GET_SUMMARIES_MAX_NAMES),
     }),
   }),
   handler: async ({
@@ -212,7 +285,9 @@ export const bulkGetStreamSummariesRoute = createServerRoute({
 
 export const internalCrudRoutes = {
   ...listStreamsRoute,
+  ...listClassicStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
+  ...resolveIndexPatternsRoute,
   ...bulkGetStreamSummariesRoute,
 };

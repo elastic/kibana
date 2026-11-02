@@ -7,8 +7,9 @@
 
 import {
   EuiButtonIcon,
+  EuiContextMenuItem,
   EuiFlexItem,
-  EuiContextMenuPanel,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
@@ -17,15 +18,91 @@ import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
+import { ALERT_UUID, getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
+import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { useKibana } from '../../utils/kibana_react';
+import { useInvestigateAlert } from '../../hooks/use_investigate_alert';
+import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
+import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
+
+function InvestigateAlertActionItem({
+  alertId,
+  enabled,
+  onActionExecuted,
+}: {
+  alertId?: string;
+  enabled?: boolean;
+  onActionExecuted: () => void;
+}) {
+  const {
+    showInvestigateAction,
+    showInvestigateButton,
+    showViewInvestigation,
+    handleInvestigate,
+    isInvestigating,
+    investigateActionLabel,
+    investigateEbtProps,
+    viewInvestigationUrl,
+    viewInvestigationActionLabel,
+    viewInvestigationEbtProps,
+    markInvestigationViewed,
+  } = useInvestigateAlert({
+    alertId,
+    ebtElement: 'alertsTableRowActions',
+    enabled,
+    onInvestigate: onActionExecuted,
+  });
+
+  if (!showInvestigateAction) return null;
+
+  if (isInvestigating) {
+    return (
+      <EuiContextMenuItem
+        data-test-subj="investigateAlert"
+        disabled
+        icon={<EuiLoadingSpinner size="m" />}
+      >
+        {investigateActionLabel}
+      </EuiContextMenuItem>
+    );
+  }
+
+  return (
+    <>
+      {showViewInvestigation && (
+        <EuiContextMenuItem
+          data-test-subj="viewAlertInvestigation"
+          {...viewInvestigationEbtProps}
+          href={viewInvestigationUrl}
+          icon="eye"
+          onClick={() => {
+            markInvestigationViewed();
+            onActionExecuted();
+          }}
+        >
+          {viewInvestigationActionLabel}
+        </EuiContextMenuItem>
+      )}
+      {showInvestigateButton && (
+        <EuiContextMenuItem
+          data-test-subj="investigateAlert"
+          {...investigateEbtProps}
+          icon="inspect"
+          onClick={handleInvestigate}
+        >
+          {investigateActionLabel}
+        </EuiContextMenuItem>
+      )}
+    </>
+  );
+}
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -38,6 +115,7 @@ export function AlertActions(
     parentAlert,
     rowIndex,
     onExpandedAlertIndexChange,
+    onRemoveFromCase,
     services,
   } = props;
   const {
@@ -46,6 +124,12 @@ export function AlertActions(
     },
     cases,
   } = services;
+
+  const canModifyAlerts = useCanModifyAlerts();
+
+  const { authorizedToReadRuleForAlert } = useAuthorizedToReadRuleType();
+
+  const canReadAlertRule = authorizedToReadRuleForAlert(alert);
   const { telemetryClient } = useKibana().services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
 
@@ -108,20 +192,44 @@ export function AlertActions(
   const actionsMenuItems = [
     ...caseAlertActionItems,
 
+    ...(onRemoveFromCase
+      ? [
+          <EuiContextMenuItem
+            key="removeFromCase"
+            data-test-subj="removeAlertFromCase"
+            icon="trash"
+            onClick={() => {
+              closeActionsPopover();
+              onRemoveFromCase(alert._id);
+            }}
+          >
+            {REMOVE_FROM_CASE}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+
+    <InvestigateAlertActionItem
+      key="investigateAlert"
+      alertId={observabilityAlert.fields[ALERT_UUID]}
+      enabled={isPopoverOpen}
+      onActionExecuted={closeActionsPopover}
+    />,
+
     useMemo(
       () => (
         <DefaultAlertActions<ObservabilityAlertsTableContext>
           {...props}
           key="defaultRowActions"
           onActionExecuted={closeActionsPopover}
+          canModifyAlerts={canModifyAlerts}
           resolveRulePagePath={(ruleId, currentPageId) =>
-            currentPageId !== RULE_DETAILS_PAGE_ID
+            canReadAlertRule && currentPageId !== RULE_DETAILS_PAGE_ID
               ? `${rulesAppRoute}${getRulesAppDetailsRoute(ruleId)}`
               : null
           }
         />
       ),
-      [closeActionsPopover, props]
+      [closeActionsPopover, props, canModifyAlerts, canReadAlertRule]
     ),
   ];
 
@@ -190,7 +298,8 @@ export function AlertActions(
         grow={parentAlert ? false : undefined}
       >
         <EuiPopover
-          anchorPosition="downLeft"
+          aria-label={actionsToolTip}
+          anchorPosition="rightCenter"
           button={
             <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -207,8 +316,9 @@ export function AlertActions(
           closePopover={closeActionsPopover}
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
+          panelStyle={{ maxHeight: '80vh', overflowY: 'auto' }}
         >
-          <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
+          <ExpandableContextMenuPanel items={actionsMenuItems} />
         </EuiPopover>
       </EuiFlexItem>
     </>
@@ -221,6 +331,10 @@ export default AlertActions;
 
 const VIEW_DETAILS = i18n.translate('xpack.observability.alertsTable.viewDetailsTextLabel', {
   defaultMessage: 'Alert details',
+});
+
+const REMOVE_FROM_CASE = i18n.translate('xpack.observability.alertsTable.removeFromCaseTextLabel', {
+  defaultMessage: 'Remove from case',
 });
 
 export type AlertActions = typeof AlertActions;

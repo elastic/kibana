@@ -6,87 +6,42 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
-import type { StreamsServer } from '../types';
+import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { StreamsPluginStartDependencies, StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
-import { MemoryServiceImpl } from '../lib/memory';
-import type { MemoryToolsOptions } from './tools/memory';
+
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
-import { registerAgentBuilderAttachments } from './attachments/register_attachments';
-import { registerAgentBuilderSmlTypes } from './sml/register_sml_types';
-import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
-
-export const createMemoryToolsOptions = ({
-  server,
-  logger,
-}: {
-  server: StreamsServer;
-  logger: Logger;
-}): MemoryToolsOptions => {
-  const getMemoryService = (esClient: ElasticsearchClient) =>
-    new MemoryServiceImpl({
-      logger: logger.get('memory'),
-      esClient,
-    });
-
-  return {
-    getMemoryService,
-    getSecurity: () => server.core.security,
-  };
-};
+import { createStreamsToolAvailability } from './utils/get_streams_tool_availability';
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
-  agentContextLayer,
   getScopedClients,
   server,
   logger,
   telemetry,
-  isMemoryEnabled,
-  streamsKIsOnboardingClient,
+  core,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
-  agentContextLayer?: AgentContextLayerPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  isMemoryEnabled: () => Promise<boolean>;
-  streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
-}) => {
-  registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
-  registerAgentBuilderSmlTypes({ agentContextLayer, getScopedClients });
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerAgentBuilderSkills({ agentBuilder, telemetry, streamsKIsOnboardingClient });
-  registerSignificantEventsDiscoveryAgents(agentBuilder);
+  core: CoreSetup<StreamsPluginStartDependencies>;
+}): Promise<void> => {
+  const availability = createStreamsToolAvailability(core, logger);
 
-  const memoryToolsOptions = createMemoryToolsOptions({ server, logger });
-
-  // The memory skill is registered lazily — only once the significant events memory feature flag is on.
-  // This avoids exposing the skill to the agent when memory is not configured.
-  let memorySkillRegistered = false;
-
-  const ensureMemorySkillRegistered = () => {
-    if (memorySkillRegistered) {
-      return;
-    }
-    memorySkillRegistered = true;
-    agentBuilder.skills.register(createSigEventsMemorySkill(memoryToolsOptions));
-    logger.info(
-      'Memory skill registered (streams.significantEventsMemoryEnabled feature flag is enabled)'
-    );
-  };
-
-  if (await isMemoryEnabled()) {
-    ensureMemorySkillRegistered();
-  }
-
-  return {
-    ensureMemorySkillRegistered,
-  };
+  registerAgentBuilderTools({
+    agentBuilder,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    availability,
+  });
+  registerAgentBuilderSkills({
+    agentBuilder,
+    availability,
+  });
 };

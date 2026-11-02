@@ -29,6 +29,7 @@ export const factory: EmbeddablePublicDefinition<{}, Api> = {
   buildEmbeddable: async ({ finalizeApi, parentApi }) => {
     const api = finalizeApi({
       anyStateChange$: of(),
+      latestState$: of({}),
       serializeState: () => ({}),
       applySerializedState: () => undefined,
     });

@@ -58,7 +58,7 @@ Optional. Number of beginning characters left unchanged for fuzzy matching. Defa
 
 #### lenient
 
-Optional. If false, format-based errors, such as providing a text query value for a numeric field, are returned. Defaults to false.
+Optional. If false, format-based errors, such as providing a text query value for a numeric field, are returned. If true, such values do not match. Defaults to true.
 
 #### operator
 

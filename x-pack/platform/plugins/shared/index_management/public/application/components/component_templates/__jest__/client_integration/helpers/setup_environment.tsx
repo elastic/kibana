@@ -15,10 +15,11 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-browser
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   notificationServiceMock,
-  applicationServiceMock,
   coreMock,
   scopedHistoryMock,
+  httpServiceMock,
 } from '@kbn/core/public/mocks';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 
 import { breadcrumbService } from '../../../../../services/breadcrumbs';
@@ -37,11 +38,24 @@ history.createHref.mockImplementation((location: LocationDescriptorObject) => {
 });
 
 // We provide the minimum deps required to make the tests pass
-const createAppDependencies = (): AppDependencies =>
-  ({
+const createAppDependencies = (httpSetup?: HttpSetup): AppDependencies => {
+  const coreStart = coreMock.createStart();
+
+  return {
     docLinks: docLinksServiceMock.createStartContract(),
     url: sharePluginMock.createStartContract().url,
     plugins: { ml: {} } as unknown as AppDependencies['plugins'],
+    config: { isServerless: false } as unknown as AppDependencies['config'],
+    core: {
+      getUrlForApp: coreStart.application.getUrlForApp,
+      executionContext: coreStart.executionContext,
+      http: httpSetup ?? httpServiceMock.createSetupContract(),
+      application: coreStart.application,
+      chrome: coreStart.chrome,
+      fatalErrors: coreStart.fatalErrors,
+      i18n: coreStart.i18n,
+      theme: coreStart.theme,
+    },
     history,
     privs: {
       monitor: true,
@@ -49,7 +63,8 @@ const createAppDependencies = (): AppDependencies =>
       monitorEnrich: true,
       manageIndexTemplates: true,
     },
-  } as unknown as AppDependencies);
+  } as unknown as AppDependencies;
+};
 
 export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?: CoreStart) => {
   const coreMockStart = coreMock.createStart();
@@ -60,7 +75,7 @@ export const componentTemplatesDependencies = (httpSetup: HttpSetup, coreStart?:
     trackMetric: () => {},
     docLinks: docLinksServiceMock.createStartContract(),
     toasts: notificationServiceMock.createSetupContract().toasts,
-    getUrlForApp: applicationServiceMock.createStartContract().getUrlForApp,
+    getUrlForApp: coreMockStart.application.getUrlForApp,
     executionContext: executionContextServiceMock.createInternalStartContract(),
     startServices: coreStart ?? coreMockStart,
   };
@@ -79,16 +94,24 @@ export const WithAppDependencies =
     appContextMerge?: Record<string, unknown>
   ) =>
   (props: P) => {
-    const appDependencies = merge({}, createAppDependencies(), appContextMerge) as AppDependencies;
+    const appDependencies = merge(
+      {},
+      createAppDependencies(httpSetup),
+      appContextMerge
+    ) as AppDependencies;
     return (
-      <AppContextProvider value={appDependencies}>
-        <MappingsEditorProvider>
-          <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup, coreStart)}>
-            <GlobalFlyoutProvider>
-              <Comp {...props} />
-            </GlobalFlyoutProvider>
-          </ComponentTemplatesProvider>
-        </MappingsEditorProvider>
-      </AppContextProvider>
+      <KibanaRenderContextProvider {...(coreStart ?? coreMock.createStart())}>
+        <AppContextProvider value={appDependencies}>
+          <MappingsEditorProvider>
+            <ComponentTemplatesProvider
+              value={componentTemplatesDependencies(httpSetup, coreStart)}
+            >
+              <GlobalFlyoutProvider>
+                <Comp {...props} />
+              </GlobalFlyoutProvider>
+            </ComponentTemplatesProvider>
+          </MappingsEditorProvider>
+        </AppContextProvider>
+      </KibanaRenderContextProvider>
     );
   };

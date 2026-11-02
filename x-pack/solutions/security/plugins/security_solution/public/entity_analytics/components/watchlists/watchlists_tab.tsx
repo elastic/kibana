@@ -8,23 +8,21 @@
 import React, { useMemo } from 'react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { StoreStatusEnum } from '../../../../common/api/entity_analytics/entity_store/common.gen';
+import { StoreStatusEnum } from '../../../../common/entity_analytics/entity_store/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { useUiSetting } from '../../../common/lib/kibana';
-import { WatchlistsFlyoutKey } from '../../../flyout/entity_details/shared/constants';
 import { useEntityStoreStatus } from '../entity_store/hooks/use_entity_store';
 import { useWatchlistsPrivileges } from '../../api/hooks/use_watchlists_privileges';
 import { MissingPrivilegesCallout } from '../missing_privileges_callout';
+import { useOpenWatchlistFromUrl } from './flyout/use_open_watchlist_from_url';
+import { useWatchlistFlyout } from './flyout/use_watchlist_flyout';
 import { Watchlists } from '.';
 
 export const WatchlistsTab: React.FC = () => {
-  const { openFlyout } = useExpandableFlyoutApi();
   const spaceId = useSpaceId();
-  const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
+  const { openCreate, openEdit, flyout } = useWatchlistFlyout(spaceId);
+  useOpenWatchlistFromUrl(openEdit);
   const entityStoreStatusQuery = useEntityStoreStatus({
-    enabled: isEntityStoreV2Enabled,
+    enabled: true,
   });
   const storeStatus = entityStoreStatusQuery.data?.status;
   const isEntityStoreRunning = storeStatus === StoreStatusEnum.running;
@@ -33,21 +31,8 @@ export const WatchlistsTab: React.FC = () => {
   const canWrite = privileges?.has_write_permissions ?? false;
   const hasAllRequired = privileges?.has_all_required ?? false;
 
-  const handleCreateClick = () => {
-    openFlyout({
-      right: {
-        id: WatchlistsFlyoutKey,
-        params: {
-          mode: 'create',
-          spaceId,
-        },
-      },
-    });
-  };
-
   const entityStoreNotRunningCallout = useMemo(() => {
     if (
-      !isEntityStoreV2Enabled ||
       entityStoreStatusQuery.isLoading ||
       entityStoreStatusQuery.isError ||
       isEntityStoreRunning
@@ -89,7 +74,7 @@ export const WatchlistsTab: React.FC = () => {
           />
         }
         color="warning"
-        iconType="alert"
+        iconType="warning"
       >
         <EuiText size="s">{calloutBody}</EuiText>
       </EuiCallOut>
@@ -98,14 +83,13 @@ export const WatchlistsTab: React.FC = () => {
     entityStoreStatusQuery.isError,
     entityStoreStatusQuery.isLoading,
     isEntityStoreRunning,
-    isEntityStoreV2Enabled,
     storeStatus,
   ]);
 
   return (
     <>
       <EuiSpacer size="m" />
-      {isEntityStoreV2Enabled && entityStoreStatusQuery.isError ? (
+      {entityStoreStatusQuery.isError ? (
         <>
           <EuiCallOut
             announceOnMount={false}
@@ -138,9 +122,9 @@ export const WatchlistsTab: React.FC = () => {
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             fill
-            onClick={handleCreateClick}
+            onClick={openCreate}
             isDisabled={isLoading || !!error || !hasAllRequired}
             data-test-subj="watchlistsTabCreateButton"
           >
@@ -173,6 +157,7 @@ export const WatchlistsTab: React.FC = () => {
         canRead={canRead}
         canWrite={canWrite}
       />
+      {flyout}
     </>
   );
 };

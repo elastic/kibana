@@ -7,34 +7,26 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { RoutingStatus, Streams } from '@kbn/streams-schema';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
 import {
-  getImpactLevel,
-  type Insight,
-  type InsightImpactLevel,
-} from '@kbn/streams-schema/src/insights';
+  Streams,
+  emptyAssets,
+  type FailureStore,
+  type IngestStream,
+  type IngestUpsertRequest,
+  type RoutingStatus,
+} from '@kbn/streams-schema';
 import {
-  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
 } from '@kbn/management-settings-ids';
 import type { KbnClient, ScoutLogger } from '@kbn/scout/src/common';
 import { measurePerformanceAsync } from '@kbn/scout/src/common';
-import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../../../../common/feature_flags';
-import { COMMON_API_HEADERS } from '../fixtures/constants';
 
-export type { Insight };
-
-export interface InsightBulkIndexOp {
-  index: Insight;
+// The ES client types `failure_store` without its `lifecycle`.
+export interface DataStreamFailureStore {
+  enabled?: boolean;
+  lifecycle?: { enabled?: boolean; data_retention?: string };
 }
-
-export interface InsightBulkDeleteOp {
-  delete: { id: string };
-}
-
-export type InsightBulkOperation = InsightBulkIndexOp | InsightBulkDeleteOp;
 
 export interface StreamsTestApiService {
   enable: () => Promise<void>;
@@ -68,12 +60,17 @@ export interface StreamsTestApiService {
     documentsWithRuntimeFieldsApplied: Array<Record<string, unknown>> | null;
   }>;
   getLifecycleStats: (streamName: string) => Promise<{ phases: unknown }>;
+  updateFailureStore: (streamName: string, failureStore: FailureStore) => Promise<void>;
+  getDataStreamFailureStore: (
+    streamNames: string[]
+  ) => Promise<Record<string, DataStreamFailureStore | undefined>>;
+  createClassicDataStream: (
+    name: string,
+    failureStore: { enabled: boolean; dataRetention?: string }
+  ) => Promise<void>;
+  deleteClassicDataStream: (name: string) => Promise<void>;
   enableQueryStreams: () => Promise<void>;
   disableQueryStreams: () => Promise<void>;
-  enableSignificantEvents: () => Promise<void>;
-  disableSignificantEvents: () => Promise<void>;
-  enableMemory: () => Promise<void>;
-  disableMemory: () => Promise<void>;
   enableWiredStreamViews: () => Promise<void>;
   disableWiredStreamViews: () => Promise<void>;
   enableDraftStreams: () => Promise<void>;
@@ -87,15 +84,6 @@ export interface StreamsTestApiService {
   deleteEsqlView: (viewName: string) => Promise<void>;
   runEsql: (query: string) => Promise<{ columns: Array<{ name: string }>; values: unknown[][] }>;
   cleanupTestStreams: (prefix?: string) => Promise<void>;
-  // Insights API
-  listInsights: (filters?: {
-    impact?: InsightImpactLevel[];
-  }) => Promise<{ insights: Insight[]; total: number }>;
-  getInsight: (id: string) => Promise<{ insight: Insight }>;
-  saveInsight: (id: string, input: Insight) => Promise<{ insight: Insight }>;
-  deleteInsight: (id: string) => Promise<{ acknowledged: boolean }>;
-  bulkInsights: (operations: InsightBulkOperation[]) => Promise<{ acknowledged: boolean }>;
-  cleanupTestInsights: () => Promise<void>;
 }
 
 export function getStreamsTestApiService({
@@ -283,6 +271,84 @@ export function getStreamsTestApiService({
       });
     },
 
+    async updateFailureStore(streamName: string, failureStore: FailureStore) {
+      await measurePerformanceAsync(log, 'streamsTestApi.updateFailureStore', async () => {
+        const definition = Streams.ingest.all.GetResponse.parse(await this.getStream(streamName));
+        const description = definition.stream.description || '';
+
+        if (Streams.WiredStream.GetResponse.is(definition)) {
+          const { updated_at: _, ...processing } = definition.stream.ingest.processing;
+          await this.createStream(streamName, {
+            ...emptyAssets,
+            stream: {
+              type: 'wired',
+              description,
+              ingest: { ...definition.stream.ingest, processing, failure_store: failureStore },
+            },
+          });
+        } else if (Streams.ClassicStream.GetResponse.is(definition)) {
+          const { updated_at: _, ...processing } = definition.stream.ingest.processing;
+          await this.createStream(streamName, {
+            ...emptyAssets,
+            stream: {
+              type: 'classic',
+              description,
+              ingest: { ...definition.stream.ingest, processing, failure_store: failureStore },
+            },
+          });
+        } else {
+          throw new Error(`Unsupported stream type for ${streamName}`);
+        }
+      });
+    },
+
+    async getDataStreamFailureStore(streamNames: string[]) {
+      return measurePerformanceAsync(log, 'streamsTestApi.getDataStreamFailureStore', async () => {
+        const { data_streams: dataStreams } = await esClient.indices.getDataStream({
+          name: streamNames,
+        });
+        return Object.fromEntries(
+          dataStreams.map((dataStream) => [
+            dataStream.name,
+            (dataStream as { failure_store?: DataStreamFailureStore }).failure_store,
+          ])
+        );
+      });
+    },
+
+    async createClassicDataStream(name, { enabled, dataRetention }) {
+      await measurePerformanceAsync(log, 'streamsTestApi.createClassicDataStream', async () => {
+        await esClient.indices.putIndexTemplate({
+          name,
+          index_patterns: [name],
+          data_stream: {},
+          template: {
+            settings: { 'index.default_pipeline': 'logs@default-pipeline' },
+            data_stream_options: {
+              failure_store: {
+                enabled,
+                ...(enabled && dataRetention
+                  ? { lifecycle: { enabled: true, data_retention: dataRetention } }
+                  : {}),
+              },
+            },
+          },
+        });
+        await esClient.index({ index: name, document: { '@timestamp': new Date() } });
+      });
+    },
+
+    async deleteClassicDataStream(name: string) {
+      await measurePerformanceAsync(log, 'streamsTestApi.deleteClassicDataStream', async () => {
+        await kbnClient.request({
+          method: 'DELETE',
+          path: `/api/streams/${name}`,
+          ignoreErrors: [404],
+        });
+        await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+      });
+    },
+
     async createEsqlView(viewName: string, query: string) {
       await measurePerformanceAsync(log, 'streamsTestApi.createEsqlView', async () => {
         await esClient.transport.request({
@@ -318,52 +384,6 @@ export function getStreamsTestApiService({
       await measurePerformanceAsync(log, 'streamsTestApi.disableQueryStreams', async () => {
         await kbnClient.uiSettings.update({
           'observability:streamsEnableQueryStreams': false,
-        });
-      });
-    },
-
-    async enableSignificantEvents() {
-      await measurePerformanceAsync(log, 'streamsTestApi.enableSignificantEvents', async () => {
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-        });
-      });
-    },
-
-    async disableSignificantEvents() {
-      await measurePerformanceAsync(log, 'streamsTestApi.disableSignificantEvents', async () => {
-        await kbnClient.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-        });
-      });
-    },
-
-    async enableMemory() {
-      await measurePerformanceAsync(log, 'streamsTestApi.enableMemory', async () => {
-        await kbnClient.request({
-          path: '/internal/core/_settings',
-          method: 'PUT',
-          headers: COMMON_API_HEADERS,
-          body: {
-            'feature_flags.overrides': {
-              [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: true,
-            },
-          },
-        });
-      });
-    },
-
-    async disableMemory() {
-      await measurePerformanceAsync(log, 'streamsTestApi.disableMemory', async () => {
-        await kbnClient.request({
-          path: '/internal/core/_settings',
-          method: 'PUT',
-          headers: COMMON_API_HEADERS,
-          body: {
-            'feature_flags.overrides': {
-              [STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG]: false,
-            },
-          },
         });
       });
     },
@@ -443,82 +463,6 @@ export function getStreamsTestApiService({
           } catch (error) {
             log.debug(`Failed to delete stream ${stream.name}: ${error}`);
           }
-        }
-      });
-    },
-
-    // Insights API methods
-    async listInsights(filters?: { impact?: InsightImpactLevel[] }) {
-      return measurePerformanceAsync(log, 'streamsTestApi.listInsights', async () => {
-        const query = new URLSearchParams();
-        if (filters?.impact?.length) query.set('impact', filters.impact.join(','));
-        const queryString = query.toString();
-        const path = `/internal/streams/_insights${queryString ? `?${queryString}` : ''}`;
-        const response = await kbnClient.request({
-          method: 'GET',
-          path,
-        });
-        return response.data as { insights: Insight[]; total: number };
-      });
-    },
-
-    async getInsight(id: string) {
-      return measurePerformanceAsync(log, 'streamsTestApi.getInsight', async () => {
-        const response = await kbnClient.request({
-          method: 'GET',
-          path: `/internal/streams/_insights/${id}`,
-        });
-        return response.data as { insight: Insight };
-      });
-    },
-
-    async saveInsight(id: string, input: Insight) {
-      return measurePerformanceAsync(log, 'streamsTestApi.saveInsight', async () => {
-        const body: Insight = {
-          ...input,
-          id,
-          generated_at: input.generated_at ?? new Date().toISOString(),
-          impact_level: input.impact_level ?? getImpactLevel(input.impact),
-        };
-        const response = await kbnClient.request({
-          method: 'PUT',
-          path: `/internal/streams/_insights/${id}`,
-          body,
-        });
-        return response.data as { insight: Insight };
-      });
-    },
-
-    async deleteInsight(id: string) {
-      return measurePerformanceAsync(log, 'streamsTestApi.deleteInsight', async () => {
-        const response = await kbnClient.request({
-          method: 'DELETE',
-          path: `/internal/streams/_insights/${id}`,
-        });
-        return response.data as { acknowledged: boolean };
-      });
-    },
-
-    async bulkInsights(operations: InsightBulkOperation[]) {
-      return measurePerformanceAsync(log, 'streamsTestApi.bulkInsights', async () => {
-        const response = await kbnClient.request({
-          method: 'POST',
-          path: '/internal/streams/_insights/_bulk',
-          body: { operations },
-        });
-        return response.data as { acknowledged: boolean };
-      });
-    },
-
-    async cleanupTestInsights() {
-      await measurePerformanceAsync(log, 'streamsTestApi.cleanupTestInsights', async () => {
-        try {
-          const { insights } = await this.listInsights();
-          if (insights.length > 0) {
-            await this.bulkInsights(insights.map((insight) => ({ delete: { id: insight.id } })));
-          }
-        } catch (error) {
-          log.debug(`Failed to cleanup insights: ${error}`);
         }
       });
     },

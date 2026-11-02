@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/investigation-output",
+  "owner": ["@elastic/nightshift"],
+  "group": "observability",
+  "visibility": "shared"
+}

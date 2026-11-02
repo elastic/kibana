@@ -15,6 +15,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import * as i18n from './translations';
+import { ALERT_DETAILS_TOGGLE_ARIA_LABEL } from '../common/translations';
 import { KpiPanel } from '../common/components';
 import { FieldSelection } from '../common/field_selection';
 import { getAlertsTableLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_table';
@@ -47,6 +48,7 @@ interface AlertsCountPanelProps {
   signalIndexName: string | null;
 }
 const CHART_HEIGHT = 218; // px
+const COLLAPSED_HEIGHT = 64; // px
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
@@ -89,7 +91,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
           $toggleStatus={Boolean(isExpanded)}
           data-test-subj="alertsCountPanel"
           hasBorder
-          height={panelHeight}
+          height={isExpanded ? panelHeight : COLLAPSED_HEIGHT}
         >
           <HeaderSection
             alignHeader={alignHeader}
@@ -102,6 +104,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
             showInspectButton={chartOptionsContextMenu == null}
             toggleStatus={isExpanded}
             toggleQuery={setIsExpanded}
+            toggleAriaLabel={ALERT_DETAILS_TOGGLE_ARIA_LABEL}
           >
             <FieldSelection
               setStackByField0={setStackByField0}

@@ -55,4 +55,23 @@ export const CUSTOM_ROLES: Record<string, KibanaRole> = {
       },
     ],
   },
+
+  // Read-only enrich access (FTR `index_management_monitor_enrich_only`): can see enrich policies
+  // but not create or delete them.
+  monitorEnrichOnly: {
+    elasticsearch: {
+      cluster: ['monitor_enrich'],
+      indices: [{ names: ['*'], privileges: ['all'] }],
+    },
+    kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
+  },
+
+  // No enrich access (FTR `index_management_monitor_only`): the enrich policies tab is not shown.
+  monitorOnly: {
+    elasticsearch: {
+      cluster: ['monitor'],
+      indices: [{ names: ['*'], privileges: ['all'] }],
+    },
+    kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
+  },
 };

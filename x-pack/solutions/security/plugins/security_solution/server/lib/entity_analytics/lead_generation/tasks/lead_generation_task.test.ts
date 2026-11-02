@@ -44,6 +44,7 @@ import {
 } from './lead_generation_task';
 import { TYPE, VERSION, TIMEOUT, INTERVAL, SCOPE } from './constants';
 import { defaultState } from './state';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 
 describe('Lead Generation Task', () => {
   const logger = loggingSystemMock.createLogger();
@@ -62,6 +63,7 @@ describe('Lead Generation Task', () => {
         experimentalFeatures: { leadGenerationEnabled: true } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
+        ml: undefined,
       });
 
       expect(logger.info).toHaveBeenCalledWith(
@@ -80,6 +82,7 @@ describe('Lead Generation Task', () => {
         experimentalFeatures: { leadGenerationEnabled: false } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
+        ml: undefined,
       });
 
       expect(mockTaskManager.registerTaskDefinitions).not.toHaveBeenCalled();
@@ -96,6 +99,7 @@ describe('Lead Generation Task', () => {
         experimentalFeatures: { leadGenerationEnabled: true } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
+        ml: undefined,
       });
 
       expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledWith({
@@ -208,8 +212,14 @@ describe('Lead Generation Task', () => {
     } as unknown as ConcreteTaskInstance;
 
     // Re-created in each beforeEach so clearAllMocks() doesn't wipe return values
-    let mockCore: { elasticsearch: { client: { asScoped: jest.Mock } } };
-    let mockStartPlugins: { entityStore: { createCRUDClient: jest.Mock }; inference: object };
+    let mockCore: {
+      elasticsearch: { client: { asScoped: jest.Mock } };
+      executionContext: { withContext: jest.Mock };
+    };
+    let mockStartPlugins: {
+      entityStore: { createCRUDClient: jest.Mock; createRelationshipsClient: jest.Mock };
+      inference: object;
+    };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let capturedCreateTaskRunner: any;
 
@@ -222,13 +232,19 @@ describe('Lead Generation Task', () => {
             asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }),
           },
         },
+        executionContext: {
+          withContext: jest.fn().mockImplementation(<T>(_ctx: unknown, fn: () => T): T => fn()),
+        },
       };
       mockStartPlugins = {
-        entityStore: { createCRUDClient: jest.fn().mockReturnValue({}) },
+        entityStore: {
+          createCRUDClient: jest.fn().mockReturnValue({}),
+          createRelationshipsClient: jest.fn().mockReturnValue({}),
+        },
         inference: {},
       };
 
-      (runLeadGenerationPipeline as jest.Mock).mockResolvedValue({ total: 3 });
+      (runLeadGenerationPipeline as jest.Mock).mockResolvedValue(undefined);
       (updateLeadGenerationConfig as jest.Mock).mockResolvedValue(undefined);
       (resolveChatModel as jest.Mock).mockResolvedValue({});
 
@@ -243,6 +259,7 @@ describe('Lead Generation Task', () => {
         experimentalFeatures: { leadGenerationEnabled: true } as never,
         kibanaVersion: '9.0.0',
         config: {} as never,
+        ml: undefined,
       });
 
       capturedCreateTaskRunner =
@@ -296,6 +313,19 @@ describe('Lead Generation Task', () => {
     it('re-throws FRAMEWORK error when fakeRequest is undefined', async () => {
       const runner = capturedCreateTaskRunner({ taskInstance, fakeRequest: undefined });
       await expect(runner.run()).rejects.toThrow('No fakeRequest available in task context');
+    });
+
+    it('wraps the task run in coreStart.executionContext.withContext with the expected label and id', async () => {
+      (getLeadGenerationConfig as jest.Mock).mockResolvedValueOnce({ connectorId: 'c1' });
+      const fakeRequest = httpServerMock.createKibanaRequest();
+      const runner = capturedCreateTaskRunner({ taskInstance, fakeRequest });
+      await runner.run();
+
+      expect(mockCore.executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(mockCore.executionContext.withContext).toHaveBeenCalledWith(
+        buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.LEAD_GENERATION_TASK, taskInstance.id),
+        expect.any(Function)
+      );
     });
   });
 });

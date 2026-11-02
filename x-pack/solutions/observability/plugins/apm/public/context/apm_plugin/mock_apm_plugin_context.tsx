@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { createCallApmApiV2 } from '@kbn/apm-api-shared';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { MlLocatorDefinition, MlManagementLocatorInternal } from '@kbn/ml-plugin/public';
@@ -17,6 +18,7 @@ import {
 } from '@kbn/observability-plugin/public';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
@@ -24,11 +26,11 @@ import { merge, noop } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ConfigSchema } from '../..';
 import { apmRouter } from '../../components/routing/apm_route_config';
-import { mockTelemetryClient } from '../../services/telemetry/__mocks__/telemetry_client_mock';
+import { setApmInternalServices } from '../../plugin';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { mockTelemetryClient } from '../../services/telemetry/__mocks__/telemetry_client_mock';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
 
@@ -280,6 +282,8 @@ export function MockApmPluginContextWrapper({
   if (contextValue.core) {
     createCallApmApi(contextValue.core);
   }
+  const callApmApi = createCallApmApiV2(contextValue.core, { cpsManager: undefined });
+  setApmInternalServices({ callApmApi });
 
   performance.mark = jest.fn();
   performance.clearMeasures = jest.fn();

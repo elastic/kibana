@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesDisabledActionIds,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesSavedObjectId,
@@ -25,6 +28,7 @@ import type {
   PublishesUnsavedChanges,
   SerializedTitles,
   SerializedTimeRange,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type { LensApiConfig } from '@kbn/lens-embeddable-utils';
 import type { Simplify } from '@kbn/chart-expressions-common';
@@ -104,7 +108,7 @@ export type LensApi = Simplify<
     // Let the container know when the rendering has completed rendering
     PublishesRendered &
     // Let the container know the used data views
-    PublishesDataViews &
+    PublishesDataSources<DataView> &
     // Let the container operate on panel title/description
     PublishesWritableTitle &
     PublishesWritableDescription &
@@ -120,13 +124,16 @@ export type LensApi = Simplify<
     // Let the container know about unsaved changes
     PublishesUnsavedChanges &
     PublishesProjectRoutingOverrides &
+    PublishesEsql &
     // Lens specific API methods:
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
     LensRequestHandlersProps &
     LensApiCallbacks &
     LensHasEditPanel &
-    LegacyLensStateApi
+    LegacyLensStateApi &
+    SupportsJsonExport &
+    CanCancelRequests
 >;
 
 /**

@@ -28,27 +28,6 @@ export const LOADING_RISK_ENGINE_SETTINGS = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_STATUS = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.status',
-  {
-    defaultMessage: 'Status',
-  }
-);
-
-export const ENTITY_ANALYTICS_STATUS_ON = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.statusOn',
-  {
-    defaultMessage: 'On',
-  }
-);
-
-export const ENTITY_ANALYTICS_STATUS_OFF = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.statusOff',
-  {
-    defaultMessage: 'Off',
-  }
-);
-
 export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.generalSection',
   {
@@ -81,7 +60,7 @@ export const USEFUL_LINKS = i18n.translate(
 export const EA_DASHBOARD_LINK = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.eaDocsDashboard',
   {
-    defaultMessage: 'Entity Analytics dashboard',
+    defaultMessage: 'Entity analytics',
   }
 );
 
@@ -140,10 +119,10 @@ export const ERROR_PANEL_TITLE = i18n.translate(
 );
 
 export const ERROR_PANEL_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskScore.errorPanel.message',
+  'xpack.securitySolution.entityAnalytics.errorPanel.message',
   {
     defaultMessage:
-      'The risk score maintainer status could not be changed. Fix the following and try again:',
+      'Entity Analytics status could not be changed. Fix the following and try again:',
   }
 );
 
@@ -190,13 +169,6 @@ export const ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TEXT = i18n.translate(
   }
 );
 
-export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
-  'xpack.securitySolution.riskScore.engineRunSuccess',
-  {
-    defaultMessage: 'Entity risk score maintainer run started successfully',
-  }
-);
-
 export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
   {
@@ -234,22 +206,12 @@ export const RISK_ENGINE_INCLUDE_CLOSED_ALERTS_DESCRIPTION = i18n.translate(
   }
 );
 
-export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
-  i18n.translate('xpack.securitySolution.riskScore.engineNextRunTime', {
-    defaultMessage: `Next maintainer run in {timeInMinutes}`,
-    values: { timeInMinutes },
-  });
-
 export const ENTITY_ANALYTICS_STATUS_SWITCH_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.statusSwitchLabel',
   {
     defaultMessage: 'Entity analytics',
   }
 );
-
-export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
-  defaultMessage: 'Run Maintainer',
-});
 
 export const SAVE_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObjectsaveChanges',
@@ -262,13 +224,6 @@ export const DISCARD_CHANGES = i18n.translate(
   'xpack.securitySolution.riskScore.engineSavedObject.discardChanges',
   {
     defaultMessage: 'Discard Changes',
-  }
-);
-
-export const RISK_SCORE_ENGINE_RUN_FAILURE = i18n.translate(
-  'xpack.securitySolution.riskScore.engineRunSuccess',
-  {
-    defaultMessage: 'Entity risk score maintainer run failed to start',
   }
 );
 
@@ -303,6 +258,13 @@ export const APPLIED_TO_RISK_SCORES_OF = i18n.translate(
 export const REMOVE_FILTER = i18n.translate('xpack.securitySolution.riskScore.removeFilter', {
   defaultMessage: 'Remove filter',
 });
+
+export const FILTER_DETAILS_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.filterDetailsAriaLabel',
+  {
+    defaultMessage: 'Alert filter details',
+  }
+);
 
 export const SAVE_FILTERS = i18n.translate('xpack.securitySolution.riskScore.saveFilters', {
   defaultMessage: 'Save changes',

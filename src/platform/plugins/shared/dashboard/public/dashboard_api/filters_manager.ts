@@ -115,7 +115,7 @@ export const initializeFiltersManager = (
     .pipe(
       switchMap(async () => {
         await new Promise((resolve) => {
-          unpublishedChildFilters$.pipe(skip(1), first()).subscribe(resolve);
+          unpublishedChildFilters$.pipe(first()).subscribe(resolve);
         });
       })
     )

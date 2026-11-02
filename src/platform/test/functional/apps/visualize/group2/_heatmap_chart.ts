@@ -11,7 +11,15 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+interface HeatmapChartTestOptions {
+  /** Whether to exercise the deprecated vislib heatmap instead of the elastic-charts one. */
+  isLegacyChart: boolean;
+}
+
+export const heatmapChartTests = (
+  { getService, getPageObjects }: FtrProviderContext,
+  { isLegacyChart }: HeatmapChartTestOptions
+) => {
   const log = getService('log');
   const inspector = getService('inspector');
   const { visualize, visEditor, visChart, timePicker } = getPageObjects([
@@ -23,13 +31,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('heatmap chart', function indexPatternCreation() {
     const vizName1 = 'Visualization HeatmapChart';
-    let isNewChartsLibraryEnabled = false;
 
     before(async function () {
-      isNewChartsLibraryEnabled = await visChart.isNewChartsLibraryEnabled(
-        'visualization:visualize:legacyHeatmapChartsLibrary'
-      );
-      await visualize.initTests(!isNewChartsLibraryEnabled);
+      await visualize.initTests(isLegacyChart);
+      // Which heatmap vis type gets registered is decided at plugin setup, so the browser has to
+      // reload for the charts library setting written above to take effect.
+      await visualize.gotoVisualizationLandingPage({ forceRefresh: true });
       log.debug('navigateToApp visualize');
       await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickHeatmapChart');
@@ -43,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Field = @timestamp');
       await visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await visEditor.clickGo(!isNewChartsLibraryEnabled);
+      await visEditor.clickGo(isLegacyChart);
     });
 
     it('should save and load', async function () {
@@ -90,11 +97,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show 4 color ranges as default colorNumbers param', async function () {
       const legends = await visChart.getLegendEntries();
       let expectedLegends = [];
-      if (isNewChartsLibraryEnabled) {
+      if (isLegacyChart) {
+        expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
+      } else {
         // the bands are different because we always scale to data bounds in the implementation
         expectedLegends = ['27 - 379.5', '379.5 - 732', '732 - 1,084.5', '1,084.5 - 1,437'];
-      } else {
-        expectedLegends = ['0 - 400', '400 - 800', '800 - 1,200', '1,200 - 1,600'];
       }
       expect(legends).to.eql(expectedLegends);
     });
@@ -102,12 +109,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show 6 color ranges if changed on options', async function () {
       await visEditor.clickOptionsTab();
       await visEditor.changeHeatmapColorNumbers(6);
-      await visEditor.clickGo(!isNewChartsLibraryEnabled);
+      await visEditor.clickGo(isLegacyChart);
       await visChart.waitForVisualizationRenderingStabilized();
 
       const legends = await visChart.getLegendEntries();
       let expectedLegends = [];
-      if (isNewChartsLibraryEnabled) {
+      if (isLegacyChart) {
+        expectedLegends = [
+          '0 - 267',
+          '267 - 534',
+          '534 - 800',
+          '800 - 1,067',
+          '1,067 - 1,334',
+          '1,334 - 1,600',
+        ];
+      } else {
         // the bands are different because we always scale to data bounds in the implementation
         expectedLegends = [
           '27 - 262',
@@ -116,15 +132,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '732 - 967',
           '967 - 1,202',
           '1,202 - 1,437',
-        ];
-      } else {
-        expectedLegends = [
-          '0 - 267',
-          '267 - 534',
-          '534 - 800',
-          '800 - 1,067',
-          '1,067 - 1,334',
-          '1,334 - 1,600',
         ];
       }
       expect(legends).to.eql(expectedLegends);
@@ -143,12 +150,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('customize 2 last ranges');
       await visEditor.setCustomRangeByIndex(6, '650', '720');
       await visEditor.setCustomRangeByIndex(7, '800', '905');
-      await visEditor.clickGo(!isNewChartsLibraryEnabled);
+      await visEditor.clickGo(isLegacyChart);
 
       await visChart.waitForVisualizationRenderingStabilized();
       const legends = await visChart.getLegendEntries();
       let expectedLegends = [];
-      if (isNewChartsLibraryEnabled) {
+      if (isLegacyChart) {
+        expectedLegends = [
+          '0 - 100',
+          '100 - 200',
+          '200 - 300',
+          '300 - 400',
+          '400 - 500',
+          '500 - 600',
+          '650 - 720',
+          '800 - 905',
+        ];
+      } else {
         expectedLegends = [
           '0 - 100',
           '100 - 200',
@@ -161,19 +179,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '720 - 800',
           '800 - 905',
         ];
-      } else {
-        expectedLegends = [
-          '0 - 100',
-          '100 - 200',
-          '200 - 300',
-          '300 - 400',
-          '400 - 500',
-          '500 - 600',
-          '650 - 720',
-          '800 - 905',
-        ];
       }
       expect(legends).to.eql(expectedLegends);
     });
   });
+};
+
+export default function (context: FtrProviderContext) {
+  heatmapChartTests(context, { isLegacyChart: true });
 }

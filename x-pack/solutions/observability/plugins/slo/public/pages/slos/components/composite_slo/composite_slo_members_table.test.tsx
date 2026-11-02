@@ -18,7 +18,7 @@ jest.mock('../../../slo_details/shared_flyout/slo_details_flyout', () => ({
 }));
 
 const baseMember = {
-  id: 'member-1',
+  sloId: 'member-1',
   name: 'Member SLO Alpha',
   weight: 2,
   normalisedWeight: 0.5,
@@ -35,9 +35,9 @@ describe('CompositeSloMembersTable', () => {
     render(
       <CompositeSloMembersTable
         members={[
-          { ...baseMember, id: 'm-1', name: 'Healthy member', status: 'HEALTHY' },
-          { ...baseMember, id: 'm-2', name: 'Degrading member', status: 'DEGRADING' },
-          { ...baseMember, id: 'm-3', name: 'Violated member', status: 'VIOLATED' },
+          { ...baseMember, sloId: 'm-1', name: 'Healthy member', status: 'HEALTHY' },
+          { ...baseMember, sloId: 'm-2', name: 'Degrading member', status: 'DEGRADING' },
+          { ...baseMember, sloId: 'm-3', name: 'Violated member', status: 'VIOLATED' },
         ]}
         percentFormat="0.0%"
       />

@@ -11,7 +11,6 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 120
         timeout_in_minutes: 300
         parallelism: 5
         soft_fail:
@@ -29,7 +28,6 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 120
         timeout_in_minutes: 300
         parallelism: 3
         soft_fail:
@@ -109,23 +107,6 @@ steps:
       - label: "API MKI - edr_workflows:policy:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy:qa:serverless
         key: edr_workflows:policy:qa:serverless
-        agents:
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          provider: gcp
-          enableNestedVirtualization: true
-          machineType: n2-standard-4
-        timeout_in_minutes: 120
-        retry:
-          automatic:
-            - exit_status: "1"
-              limit: 2
-        soft_fail:
-          - exit_status: 101
-
-      - label: "API MKI - edr_workflows:policy_response:qa:serverless"
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy_response:qa:serverless
-        key: edr_workflows:policy_response:qa:serverless
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod

@@ -169,31 +169,8 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
         );
       }
 
-      let startTime = Date.now();
-      const logInspectorRequest = () => {
-        if (!inspectorAdapters.requests) {
-          inspectorAdapters.requests = new RequestAdapter();
-        }
-
-        const request = inspectorAdapters.requests.start(
-          i18n.translate('data.search.dataRequest.title', {
-            defaultMessage: 'Data',
-          }),
-          {
-            description: i18n.translate('data.search.es_search.dataRequest.description', {
-              defaultMessage:
-                'This request queries Elasticsearch to fetch the data for the visualization.',
-            }),
-          },
-          startTime
-        );
-        startTime = Date.now();
-
-        return request;
-      };
-
       try {
-        const { rawResponse, took, requestParams } = await searchService.sql(
+        const { rawResponse } = await searchService.sql(
           {
             query,
             params: parameter,
@@ -203,44 +180,22 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
           {
             abortSignal,
             timeZone: timezone,
+            inspector: {
+              adapter: inspectorAdapters.requests ?? new RequestAdapter(),
+              title: i18n.translate('data.search.dataRequest.title', {
+                defaultMessage: 'Data',
+              }),
+              description: i18n.translate('data.search.es_search.dataRequest.description', {
+                defaultMessage:
+                  'This request queries Elasticsearch to fetch the data for the visualization.',
+              }),
+            },
           }
         );
 
-        logInspectorRequest()
-          .stats({
-            hits: {
-              label: i18n.translate('data.search.es_search.hitsLabel', {
-                defaultMessage: 'Hits',
-              }),
-              value: `${rawResponse.rows.length}`,
-              description: i18n.translate('data.search.es_search.hitsDescription', {
-                defaultMessage: 'The number of documents returned by the query.',
-              }),
-            },
-            queryTime: {
-              label: i18n.translate('data.search.es_search.queryTimeLabel', {
-                defaultMessage: 'Query time',
-              }),
-              value: i18n.translate('data.search.es_search.queryTimeValue', {
-                defaultMessage: '{queryTime}ms',
-                values: { queryTime: took },
-              }),
-              description: i18n.translate('data.search.es_search.queryTimeDescription', {
-                defaultMessage:
-                  'The time it took to process the query. ' +
-                  'Does not include the time to send the request or parse it in the browser.',
-              }),
-            },
-          })
-          .json(params)
-          .ok({ json: rawResponse, requestParams });
-
         return mapResponseToDatatable(rawResponse);
       } catch (error) {
-        logInspectorRequest().error({
-          json: 'attributes' in error ? error.attributes : { message: error.message },
-        });
-
+        // Preserve custom error transformation logic
         if (!error.attributes) {
           error.message = `Unexpected error from Elasticsearch: ${error.message}`;
         } else {
@@ -251,7 +206,6 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
             error.message = `Unexpected error from Elasticsearch: ${type} - ${reason}`;
           }
         }
-
         throw error;
       }
     },

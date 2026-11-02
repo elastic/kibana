@@ -23,8 +23,8 @@ import { useDockerRegistry, waitForFleetSetup, getSupertestWithAdminUser } from 
 
 const logFilePath = Path.join(__dirname, 'logs.log');
 
-// Failing 9.0 version update: https://github.com/elastic/kibana/issues/192624
-describe('Fleet preconfiguration reset', () => {
+// Failing: See https://github.com/elastic/kibana/issues/224362
+describe.skip('Fleet preconfiguration reset', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
   let agentPolicyType: string;

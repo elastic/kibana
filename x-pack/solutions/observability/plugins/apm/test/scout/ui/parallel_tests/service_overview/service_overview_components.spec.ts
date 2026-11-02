@@ -61,6 +61,10 @@ test.describe(
         await expect(serviceDetailsPage.overviewTab.serviceOverviewInstancesTable).toBeVisible();
       });
 
+      await test.step('Wait for contextual service map to finish loading', async () => {
+        await serviceDetailsPage.overviewTab.waitForContextualServiceMapToLoad();
+      });
+
       await test.step('Check a11y violations', async () => {
         const { violations } = await page.checkA11y({ include: ['main'] });
         expect(violations).toHaveLength(0);
@@ -80,7 +84,6 @@ test.describe(
         await expect(serviceDetailsPage.overviewTab.tab).toBeVisible();
         await expect(serviceDetailsPage.transactionsTab.tab).toBeVisible();
         await expect(serviceDetailsPage.errorsTab.tab).toBeVisible();
-        await expect(serviceDetailsPage.getServiceMapTab()).toBeVisible();
       });
 
       await test.step('Verify dependencies tab is NOT visible', async () => {

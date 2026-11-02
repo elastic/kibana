@@ -663,7 +663,7 @@ function UserPasswordEditor({
   );
 }
 
-function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
+function UserSpacePreferenceEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
   const rememberSelectedSpaceLabelId = useGeneratedHtmlId({
     prefix: 'rememberSelectedSpace',
   });
@@ -679,14 +679,14 @@ function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserPr
         <h2>
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupTitle"
-            defaultMessage="Space Configuration"
+            defaultMessage="Spaces preferences"
           />
         </h2>
       }
       description={
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceGroupDescription"
-          defaultMessage="Spaces related configuration for Kibana."
+          defaultMessage="Spaces related preferences for Kibana."
         />
       }
     >
@@ -710,7 +710,7 @@ function UserSpaceConfigEditor({ formik }: { formik: ReturnType<typeof useUserPr
               <p>
                 <FormattedMessage
                   id="xpack.security.accountManagement.userProfile.rememberSelectedSpaceSwitchDescription"
-                  defaultMessage="Kibana will redirect to last accessed space on login."
+                  defaultMessage="Kibana will open the last accessed space when logging in."
                 />
               </p>
             </EuiText>
@@ -922,7 +922,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                   )}
                   {/* Cloud users change language via the Language modal in the user menu */}
                   {isCloudUser ? null : <UserLocaleEditor formik={formik} />}
-                  <UserSpaceConfigEditor formik={formik} />
+                  {/* Cloud users modify space configuration via the space configuration modal in the user menu */}
+                  {isCloudUser ? null : <UserSpacePreferenceEditor formik={formik} />}
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
@@ -963,7 +964,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
             imageUrl: data.avatar?.imageUrl || '',
           },
           userSettings: {
-            darkMode: data.userSettings?.darkMode || 'space_default',
+            darkMode: data.userSettings?.darkMode || 'system',
             contrastMode: data.userSettings?.contrastMode || 'system',
             locale:
               data.userSettings?.locale ||
@@ -1028,6 +1029,17 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       ) {
         isRefreshRequired = true;
       }
+
+      if (
+        values.data &&
+        initialValues.data?.userSettings.locale !== values.data.userSettings.locale
+      ) {
+        services.analytics.reportEvent('display_language_changed', {
+          from: initialValues.data?.userSettings.locale ?? '',
+          to: values.data.userSettings.locale,
+        });
+      }
+
       showSuccessNotification({ isRefreshRequired });
     },
     initialValues,

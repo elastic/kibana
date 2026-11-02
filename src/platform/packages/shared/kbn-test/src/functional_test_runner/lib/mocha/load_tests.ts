@@ -83,6 +83,8 @@ export const loadTests = ({
     // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
     const context = decorateMochaUi(lifecycle, global, {
       rootTags: config.get('rootTags'),
+      hookTimeout: config.get('mochaOpts.hookTimeout'),
+      testTimeout: config.get('mochaOpts.timeout'),
     });
     mocha.suite.emit('pre-require', context, debugPath, mocha);
 

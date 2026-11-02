@@ -13,6 +13,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/management-plugin",
@@ -25,6 +26,9 @@
     "@kbn/core-analytics-browser",
     "@kbn/licensing-plugin",
     "@kbn/licensing-types",
-    "@kbn/home-plugin"
+    "@kbn/home-plugin",
+    "@kbn/core-security-server",
+    "@kbn/core-http-server",
+    "@kbn/ui-callout"
   ]
 }

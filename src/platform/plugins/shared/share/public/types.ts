@@ -14,7 +14,6 @@ import { type EuiCodeProps, type EuiIconProps, type EuiFlyoutProps } from '@elas
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { ILicense } from '@kbn/licensing-types';
 import type { Capabilities } from '@kbn/core/public';
-import type { TimeRange } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
@@ -148,6 +147,10 @@ export interface ExportShare<S extends SharingData = SharingData>
        */
       toolTipContent?: string;
       label: string;
+      /**
+       * optional badge, for instance a release stage, rendered next to the export flyout title
+       */
+      badge?: { label: string; tooltipContent?: string };
       exportType: string;
       /**
        * allows disabling the export action, for instance the current app has no data to export
@@ -166,6 +169,7 @@ export interface ExportShare<S extends SharingData = SharingData>
        */
       supportsAbsoluteTime?: boolean;
       renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
+      flyoutAriaLabel?: string;
     } & (
       | {
           generateAssetComponent?: never;
@@ -195,6 +199,7 @@ export interface ExportShareParameters extends Record<string, unknown> {
     flyoutRef: React.RefObject<HTMLDivElement>;
   }>;
   flyoutSizing?: Pick<EuiFlyoutProps, 'size' | 'maxWidth'>;
+  flyoutAriaLabel?: string;
   shouldRender: ({
     availableExportItems,
   }: {
@@ -331,10 +336,6 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClient
 >;
 
-export type ShareableLocatorParams = SerializableRecord & {
-  timeRange: TimeRange | undefined;
-};
-
 /**
  * @public
  * Properties of the current object to share. Registered share
@@ -382,7 +383,7 @@ export interface ShareContext<S extends SharingData = SharingData> {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<SerializableRecord>;
-    params: ShareableLocatorParams;
+    params: SerializableRecord;
   };
   sharingData: S;
   isDirty: boolean;

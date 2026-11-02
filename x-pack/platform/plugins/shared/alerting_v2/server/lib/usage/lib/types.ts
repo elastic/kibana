@@ -36,6 +36,12 @@ export interface ActionPolicyStatsAggregations {
   count_with_group_by: { doc_count: number };
   avg_group_by_fields_count: { value: number | null };
   count_with_matcher: { doc_count: number };
+  count_by_status: { buckets: TermsBucket[] };
+  count_by_grouping_mode: { buckets: TermsBucket[] };
+  count_by_throttle_strategy: { buckets: TermsBucket[] };
+  workflows_per_policy_percentiles: { values: Record<string, number | null> };
+  workflows_per_policy_avg: { value: number | null };
+  count_with_multiple_workflows: { doc_count: number };
 }
 export type ActionPolicyStatsResults = Pick<
   LatestTaskStateSchema,
@@ -45,6 +51,11 @@ export type ActionPolicyStatsResults = Pick<
   | 'action_policies_count_with_group_by'
   | 'action_policies_avg_group_by_fields_count'
   | 'action_policies_count_by_throttle_interval'
+  | 'action_policies_count_by_status'
+  | 'action_policies_count_by_grouping_mode'
+  | 'action_policies_count_by_throttle_strategy'
+  | 'action_policies_workflows_per_policy'
+  | 'action_policies_count_with_multiple_workflows'
 >;
 
 export interface ExecutionStatsAggregations {
@@ -67,18 +78,15 @@ export interface RuleStatsAggregations {
   count_by_kind: { buckets: TermsBucket[] };
   count_by_schedule: { buckets: TermsBucket[] };
   count_by_lookback: { buckets: TermsBucket[] };
-  count_with_recovery_policy: { doc_count: number };
-  count_by_recovery_policy_type: { buckets: TermsBucket[] };
   avg_pending_count: { value: number | null };
   avg_recovering_count: { value: number | null };
   count_by_pending_timeframe: { buckets: TermsBucket[] };
   count_by_recovering_timeframe: { buckets: TermsBucket[] };
   count_with_grouping: { doc_count: number };
   avg_grouping_fields_count: { value: number | null };
-  count_with_no_data: { doc_count: number };
-  count_by_no_data_behavior: { buckets: TermsBucket[] };
-  count_by_no_data_timeframe: { buckets: TermsBucket[] };
   min_created_at: { value: number | null; value_as_string?: string };
+  count_by_recovery_strategy: { buckets: TermsBucket[] };
+  count_by_no_data_strategy: { buckets: TermsBucket[] };
 }
 export type RuleStatsResults = Pick<
   LatestTaskStateSchema,
@@ -87,16 +95,13 @@ export type RuleStatsResults = Pick<
   | 'count_by_kind'
   | 'count_by_schedule'
   | 'count_by_lookback'
-  | 'count_with_recovery_policy'
-  | 'count_by_recovery_policy_type'
   | 'avg_pending_count'
   | 'avg_recovering_count'
   | 'count_by_pending_timeframe'
   | 'count_by_recovering_timeframe'
   | 'count_with_grouping'
   | 'avg_grouping_fields_count'
-  | 'count_with_no_data'
-  | 'count_by_no_data_behavior'
-  | 'count_by_no_data_timeframe'
   | 'min_created_at'
+  | 'count_by_recovery_strategy'
+  | 'count_by_no_data_strategy'
 >;

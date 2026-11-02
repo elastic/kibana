@@ -6,17 +6,34 @@
  */
 
 import { type TypeOf, schema } from '@kbn/config-schema';
+import { APM_INDEX_PATTERN_MAX_LENGTH } from './apm_indices_validation';
+
+export { APM_INDEX_PATTERN_MAX_LENGTH } from './apm_indices_validation';
+
+export const createApmIndexStringSchema = (options: { defaultValue?: string } = {}) =>
+  schema.string({
+    ...options,
+    maxLength: APM_INDEX_PATTERN_MAX_LENGTH,
+  });
 
 /**
  * Schema for APM indices
  */
 export const indicesSchema = schema.object({
-  transaction: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }), // TODO: remove apm-* pattern in 9.0
-  span: schema.string({ defaultValue: 'traces-apm*,apm-*,traces-*.otel-*' }),
-  error: schema.string({ defaultValue: 'logs-apm*,apm-*,logs-*.otel-*' }),
-  metric: schema.string({ defaultValue: 'metrics-apm*,apm-*,metrics-*.otel-*' }),
-  onboarding: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
-  sourcemap: schema.string({ defaultValue: 'apm-*' }), // Unused: to be deleted
+  transaction: createApmIndexStringSchema({
+    defaultValue: 'traces-apm*,apm-*,traces-*.otel-*',
+  }), // TODO: remove apm-* pattern in 9.0
+  span: createApmIndexStringSchema({
+    defaultValue: 'traces-apm*,apm-*,traces-*.otel-*',
+  }),
+  error: createApmIndexStringSchema({
+    defaultValue: 'logs-apm*,apm-*,logs-*.otel-*',
+  }),
+  metric: createApmIndexStringSchema({
+    defaultValue: 'metrics-apm*,apm-*,metrics-*.otel-*',
+  }),
+  onboarding: createApmIndexStringSchema({ defaultValue: 'apm-*' }), // Unused: to be deleted
+  sourcemap: createApmIndexStringSchema({ defaultValue: 'apm-*' }), // Unused: to be deleted
 });
 
 /**

@@ -12,7 +12,11 @@ import {
   versionHandlerResolvers,
   unwrapVersionedResponseBodyValidation,
 } from '@kbn/core-http-router-server-internal';
-import type { RouteMethod, VersionedRouterRoute } from '@kbn/core-http-server';
+import type {
+  RouteMethod,
+  VersionedRouteValidation,
+  VersionedRouterRoute,
+} from '@kbn/core-http-server';
 import type { OpenAPIV3 } from 'openapi-types';
 import { extractAuthzDescription } from './extract_authz_description';
 import type { Env, GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
@@ -116,7 +120,11 @@ export const processVersionedRouter = async ({
       const contentType = extractContentType(route.options.options?.body);
       // If any handler is deprecated we show deprecated: true in the spec
       const hasDeprecations = route.handlers.some(({ options }) => !!options.options?.deprecated);
-      const operationId = getOpId({ path: route.path, method: route.method });
+      const operationId = getOpId({
+        path: route.path,
+        method: route.method,
+        operationId: route.options.operationId,
+      });
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
@@ -215,8 +223,11 @@ export const extractVersionedResponse = (
 
 const extractValidationSchemaFromVersionedHandler = (
   handler: VersionedRouterRoute['handlers'][0]
-) => {
+): VersionedRouteValidation<unknown, unknown, unknown> | undefined => {
   if (handler.options.validate === false) return undefined;
-  if (typeof handler.options.validate === 'function') return handler.options.validate();
-  return handler.options.validate;
+  const validation =
+    typeof handler.options.validate === 'function'
+      ? handler.options.validate()
+      : handler.options.validate;
+  return validation;
 };

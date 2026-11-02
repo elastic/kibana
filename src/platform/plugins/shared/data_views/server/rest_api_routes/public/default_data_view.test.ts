@@ -21,7 +21,7 @@ describe('default data view', () => {
       newDefaultId: '1',
       force: false,
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 
   it('get - calls usageCollection', async () => {
@@ -31,6 +31,6 @@ describe('default data view', () => {
       counterName: 'GET /path',
       usageCollection,
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

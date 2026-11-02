@@ -6,9 +6,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiCallOut, EuiFormRow, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiPopoverTitle, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { ESDistanceSourceDescriptor } from '../../../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../../../kibana_services';
 import { getGeoFields } from '../../../../../index_pattern_util';
@@ -61,14 +62,13 @@ export function SpatialJoinPopoverContent(props: Props) {
 
   const dataViewCallout = unableToLoadDataView ? (
     <>
-      <EuiCallOut announceOnMount color="warning">
-        <p>
-          {i18n.translate('xpack.maps.spatialJoinExpression.noDataViewTitle', {
-            defaultMessage: 'Unable to load data view {dataViewId}.',
-            values: { dataViewId: props.sourceDescriptor.indexPatternId },
-          })}
-        </p>
-      </EuiCallOut>
+      <KbnWarningCallout
+        announceOnMount
+        title={i18n.translate('xpack.maps.spatialJoinExpression.noDataViewTitle', {
+          defaultMessage: 'Unable to load data view {dataViewId}.',
+          values: { dataViewId: props.sourceDescriptor.indexPatternId },
+        })}
+      />
       <EuiSpacer size="s" />
     </>
   ) : null;

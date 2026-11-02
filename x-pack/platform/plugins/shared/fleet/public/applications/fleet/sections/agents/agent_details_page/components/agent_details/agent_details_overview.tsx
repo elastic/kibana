@@ -28,7 +28,7 @@ import type { OutputsForAgentPolicy } from '../../../../../../../../server/types
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion } from '../../../../../hooks';
-import { hasVersionSuffix } from '../../../../../../../../common/services/version_specific_policies_utils';
+import { hasAgentVersionSuffix } from '../../../../../../../../common/services/version_specific_policies_utils';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
@@ -69,7 +69,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         content={
                           <FormattedMessage
                             id="xpack.fleet.agentDetails.cpuTooltip"
-                            defaultMessage="Average CPU usage in the last 5 minutes"
+                            defaultMessage="Average CPU usage by Elastic Agent and reported Agent component processes over the last 5 minutes. This is process-level Agent/component CPU usage, not total host CPU usage. Values are not normalized by CPU core count and can exceed 100% on multi-core hosts."
                           />
                         }
                       >
@@ -83,7 +83,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         </span>
                       </EuiToolTip>
                     ),
-                    description: formatAgentCPU(agent.metrics, agentPolicy),
+                    description: formatAgentCPU(agent.metrics, agentPolicy, agent),
                   },
                   {
                     title: (
@@ -105,7 +105,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                         </span>
                       </EuiToolTip>
                     ),
-                    description: formatAgentMemory(agent.metrics, agentPolicy),
+                    description: formatAgentMemory(agent.metrics, agentPolicy, agent),
                   },
                 ].map(({ title, description }) => {
                   const tooltip =
@@ -180,7 +180,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                   policy={agentPolicy}
                   agent={agent}
                   showPolicyId
-                  isVersionSpecific={hasVersionSuffix(agent.policy_id ?? '')}
+                  isVersionSpecific={hasAgentVersionSuffix(agent.policy_id ?? '')}
                 />
               ) : (
                 <EuiSkeletonText lines={1} />

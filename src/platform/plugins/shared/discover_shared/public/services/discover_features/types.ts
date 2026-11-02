@@ -8,7 +8,11 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type {
+  DocView,
+  DocViewRenderProps,
+  DocViewRestorableStateProps,
+} from '@kbn/unified-doc-viewer/types';
 import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
@@ -16,8 +20,6 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   ErrorsByTraceId,
-  FocusedTraceWaterfallProps,
-  FullTraceWaterfallProps,
   SpanLinks,
   TraceRootSpan,
   UnifiedSpanDocument,
@@ -42,12 +44,12 @@ import type { FeaturesRegistry } from '../../../common';
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
-  renderCpsWarning?: boolean;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export interface ObservabilityStreamsFeatureRenderByStreamNameDeps {
   streamName: string;
-  renderCpsWarning?: boolean;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {
@@ -82,6 +84,26 @@ export interface ObservabilityCreateSLOFeature {
     initialValues: Record<string, unknown>;
     formSettings?: { isEditMode?: boolean; allowedIndicatorTypes?: IndicatorType[] };
   }) => React.ReactNode;
+}
+
+export interface ObservabilityServiceFlyoutFeatureRenderDeps {
+  service: { name: string; agentName?: string };
+  filters: { environment: string; rangeFrom: string; rangeTo: string };
+  source: string;
+  onClose: () => void;
+  flyoutHistoryKey?: symbol;
+  contextActions?: {
+    openInNewDiscoverTab?: (params: {
+      esqlQuery: string;
+      timeRange: TimeRange;
+      tabLabel: string;
+    }) => void;
+  };
+}
+
+export interface ObservabilityServiceFlyoutFeature {
+  id: 'observability-service-flyout';
+  renderServiceFlyout: (deps: ObservabilityServiceFlyoutFeatureRenderDeps) => React.ReactNode;
 }
 
 export interface ObservabilityLogsFetchDocumentByIdFeature {
@@ -130,10 +152,24 @@ interface SecuritySolutionAlertFlyoutRenderProps extends DocViewRenderProps {
   onAlertUpdated: () => void;
 }
 
-export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
-  id: 'security-solution-alert-flyout-overview-tab';
-  render: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+/**
+ * An overview tab of the Security doc views. It takes part in the doc viewer's restorable state,
+ * and may declare which slice of it is deep-linkable.
+ */
+interface SecuritySolutionOverviewTabFeature<
+  TId extends string,
+  TRenderProps extends DocViewRenderProps
+> {
+  id: TId;
+  render: (props: TRenderProps & DocViewRestorableStateProps) => JSX.Element;
+  /** Deep-linkable subset of the overview tab state, registered on the Discover doc view. */
+  shareableStateSchema?: DocView['shareableStateSchema'];
 }
+
+export type SecuritySolutionAlertFlyoutOverviewTabFeature = SecuritySolutionOverviewTabFeature<
+  'security-solution-alert-flyout-overview-tab',
+  SecuritySolutionAlertFlyoutRenderProps
+>;
 
 export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
   id: 'security-solution-alert-flyout-header-title';
@@ -145,10 +181,10 @@ export interface SecuritySolutionAlertFlyoutFooterFeature {
   renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
 }
 
-export interface SecuritySolutionIOCFlyoutOverviewTabFeature {
-  id: 'security-solution-ioc-flyout-overview-tab';
-  render: (props: DocViewRenderProps) => JSX.Element;
-}
+export type SecuritySolutionIOCFlyoutOverviewTabFeature = SecuritySolutionOverviewTabFeature<
+  'security-solution-ioc-flyout-overview-tab',
+  DocViewRenderProps
+>;
 
 export interface SecuritySolutionIOCFlyoutHeaderFeature {
   id: 'security-solution-ioc-flyout-header';
@@ -160,6 +196,25 @@ export interface SecuritySolutionIOCFlyoutFooterFeature {
   renderFooter: (props: DocViewRenderProps) => JSX.Element;
 }
 
+interface SecuritySolutionAttackFlyoutRenderProps extends DocViewRenderProps {
+  onAttackUpdated: () => void;
+}
+
+export type SecuritySolutionAttackFlyoutOverviewTabFeature = SecuritySolutionOverviewTabFeature<
+  'security-solution-attack-flyout-overview-tab',
+  SecuritySolutionAttackFlyoutRenderProps
+>;
+
+export interface SecuritySolutionAttackFlyoutHeaderFeature {
+  id: 'security-solution-attack-flyout-header';
+  renderHeader: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAttackFlyoutFooterFeature {
+  id: 'security-solution-attack-flyout-footer';
+  renderFooter: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
@@ -167,22 +222,14 @@ export type SecuritySolutionFeature =
   | SecuritySolutionAlertFlyoutFooterFeature
   | SecuritySolutionIOCFlyoutOverviewTabFeature
   | SecuritySolutionIOCFlyoutHeaderFeature
-  | SecuritySolutionIOCFlyoutFooterFeature;
+  | SecuritySolutionIOCFlyoutFooterFeature
+  | SecuritySolutionAttackFlyoutOverviewTabFeature
+  | SecuritySolutionAttackFlyoutHeaderFeature
+  | SecuritySolutionAttackFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 
 /** **************** Observability Traces ****************/
-
-interface ObservabilityFocusedTraceWaterfallFeature {
-  id: 'observability-focused-trace-waterfall';
-  render: (props: FocusedTraceWaterfallProps) => JSX.Element;
-}
-
-interface ObservabilityFullTraceWaterfallFeature {
-  id: 'observability-full-trace-waterfall';
-  render: (props: FullTraceWaterfallProps) => JSX.Element;
-}
-
 export interface ObservabilityTracesSpanLinksFeature {
   id: 'observability-traces-fetch-span-links';
   fetchSpanLinks: (
@@ -281,9 +328,7 @@ export type ObservabilityTracesFeature =
   | ObservabilityTracesFetchRootSpanByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
-  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
-  | ObservabilityFocusedTraceWaterfallFeature
-  | ObservabilityFullTraceWaterfallFeature;
+  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature;
 
 /** ****************************************************************************************/
 
@@ -293,6 +338,7 @@ export type DiscoverFeature =
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityLogsAIInsightFeature
   | ObservabilityCreateSLOFeature
+  | ObservabilityServiceFlyoutFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature
   | ObservabilityLogsFetchDocumentByIdFeature

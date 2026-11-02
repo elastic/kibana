@@ -113,25 +113,25 @@ export const ErrorInsightsPanel = ({
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="m" wrap>
         {hasEmergingTerms && (
-          <EuiFlexItem grow={3} style={{ minWidth: 320 }}>
+          <EuiFlexItem grow={3} style={{ minWidth: 'min(320px, 100%)' }}>
             <EmergingTermsCard terms={insights.emergingTerms} onFilter={filterByQuery} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={2} style={{ minWidth: 280 }}>
+        <EuiFlexItem grow={2} style={{ minWidth: 'min(280px, 100%)' }}>
           <FailingDomainsCard domains={insights.failingDomains} onFilter={filterByQuery} />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
+        <EuiFlexItem grow={1} style={{ minWidth: 'min(180px, 100%)' }}>
           <MonitorTypeCard
             types={insights.monitorTypeStats}
             onFilter={toggleMonitorType}
             selected={selectedMonitorTypes}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+        <EuiFlexItem grow={1} style={{ minWidth: 'min(200px, 100%)' }}>
           <TagBreakdownCard tags={insights.tagStats} onFilter={toggleTag} selected={selectedTags} />
         </EuiFlexItem>
         {hasStatusCodes && (
-          <EuiFlexItem grow={1} style={{ minWidth: 180 }}>
+          <EuiFlexItem grow={1} style={{ minWidth: 'min(180px, 100%)' }}>
             <StatusCodesCard
               codes={insights.statusCodes}
               onFilter={toggleStatusCode}
@@ -146,9 +146,10 @@ export const ErrorInsightsPanel = ({
 
 const TYPE_ICONS: Record<string, string> = {
   http: 'globe',
-  browser: 'videoPlayer',
-  tcp: 'link',
-  icmp: 'heart',
+  browser: 'display',
+  tcp: 'ip',
+  icmp: 'bolt',
+  api: 'inputOutput',
 };
 
 function toStringArray(value: string | string[] | undefined): string[] {
@@ -208,6 +209,8 @@ const MonitorTypeCard = ({
             content={isSelected ? CLICK_TO_REMOVE_FILTER : FILTER_BY_TYPE_HINT}
           >
             <EuiFlexGroup
+              tabIndex={0}
+              role="button"
               alignItems="center"
               gutterSize="s"
               responsive={false}
@@ -219,6 +222,12 @@ const MonitorTypeCard = ({
                   : ''}
               `}
               onClick={() => onFilter(t.monitorType)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onFilter(t.monitorType);
+                }
+              }}
             >
               <EuiFlexItem
                 grow={false}
@@ -333,8 +342,12 @@ const FailingDomainsCard = ({
             margin-bottom: 6px;
           `}
         >
-          <EuiFlexItem>
-            <EuiToolTip content={FILTER_BY_DOMAIN_HINT}>
+          <EuiFlexItem
+            css={css`
+              min-width: 0;
+            `}
+          >
+            <EuiToolTip content={FILTER_BY_DOMAIN_HINT} display="block">
               <EuiLink
                 data-test-subj="syntheticsFailingDomainsCardLink"
                 onClick={() => onFilter(d.domain)}
@@ -410,8 +423,15 @@ const TagBreakdownCard = ({
             ? 'warning'
             : 'hollow';
           return (
-            <EuiFlexItem key={t.tag} grow={false}>
+            <EuiFlexItem
+              key={t.tag}
+              grow={false}
+              css={css`
+                min-width: 0;
+              `}
+            >
               <EuiToolTip
+                display="block"
                 content={`${t.downChecks} errors / ${t.totalChecks} checks (${pct}%) — ${
                   isSelected ? CLICK_TO_REMOVE_FILTER : CLICK_TO_FILTER
                 }`}
@@ -440,7 +460,7 @@ const TagBreakdownCard = ({
                 .map((t) => `${t.tag}: ${t.downChecks}`)
                 .join(', ')}
             >
-              <EuiBadge color="hollow">
+              <EuiBadge color="hollow" tabIndex={0}>
                 +{tags.length - MAX_VISIBLE_TAGS}{' '}
                 {i18n.translate('xpack.synthetics.tagBreakdownCard.moreBadgeLabel', {
                   defaultMessage: 'more',
@@ -489,6 +509,8 @@ const StatusCodesCard = ({
             content={isSelected ? CLICK_TO_REMOVE_FILTER : FILTER_BY_CODE_HINT}
           >
             <EuiFlexGroup
+              tabIndex={0}
+              role="button"
               alignItems="center"
               gutterSize="s"
               responsive={false}
@@ -500,6 +522,12 @@ const StatusCodesCard = ({
                   : ''}
               `}
               onClick={() => onFilter(String(c.statusCode))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onFilter(String(c.statusCode));
+                }
+              }}
             >
               <EuiFlexItem grow={false}>
                 <EuiBadge color={codeColor} iconType={isSelected ? 'check' : undefined}>
@@ -573,18 +601,26 @@ const EmergingTermsCard = ({
           const truncated = t.term.length > 80 ? t.term.substring(0, 80) + '...' : t.term;
           const intensity = t.foregroundCount / maxCount;
           const badgeColor = intensity >= 0.7 ? 'danger' : intensity >= 0.3 ? 'warning' : 'hollow';
+          const firstWord = t.term.split(/\s+/).find((w) => w.length > 3) ?? t.term.split(/\s+/)[0];
+
           return (
             <EuiFlexItem key={t.term} grow={false}>
               <EuiToolTip content={`${t.foregroundCount} occurrences — ${CLICK_TO_FILTER}`}>
                 <EuiFlexGroup
+                  tabIndex={0}
+                  role="button"
                   alignItems="center"
                   gutterSize="s"
                   responsive={false}
                   css={clickableRow}
                   onClick={() => {
-                    const firstWord =
-                      t.term.split(/\s+/).find((w) => w.length > 3) ?? t.term.split(/\s+/)[0];
                     onFilter(firstWord);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onFilter(firstWord);
+                    }
                   }}
                 >
                   <EuiFlexItem grow={false}>

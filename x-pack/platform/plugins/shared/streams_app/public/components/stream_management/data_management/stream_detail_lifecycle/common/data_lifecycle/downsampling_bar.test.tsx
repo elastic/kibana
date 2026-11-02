@@ -7,8 +7,109 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { DownsamplingBar } from './downsampling_bar';
+import { DownsamplingBar, getDownsamplingLayout } from './downsampling_bar';
 import type { DownsamplingSegment } from './data_lifecycle_segments';
+
+describe('getDownsamplingLayout', () => {
+  it('spans the last step to the end (before delete)', () => {
+    const segments: DownsamplingSegment[] = [
+      { grow: 1, step: { after: '0d', fixed_interval: '1h' }, stepIndex: 0 },
+      { grow: 1 },
+      { grow: 1 },
+      { grow: false, isDelete: true },
+    ];
+
+    const layout = getDownsamplingLayout(segments);
+    const step = layout.find((entry) => entry.segment.step?.after === '0d');
+    // Spans columns 1..3 (the two trailing non-step columns are covered), delete stays span 1.
+    expect(step?.span).toBe(3);
+    expect(layout.filter((entry) => entry.hidden)).toHaveLength(2);
+  });
+
+  it('spans a middle step across an extra non-step column (frozen boundary between steps)', () => {
+    // Reproduces frozen_after=10d with steps at 1d,2d,4d,8d,16d: a non-step column (the 10d frozen
+    // boundary) sits between the 8d step and the 16d step. The 8d step must span across it to the
+    // 16d mark instead of being cut off at 10d.
+    const segments: DownsamplingSegment[] = [
+      { grow: 1 }, // 0d start, no step
+      { grow: 1, step: { after: '1d', fixed_interval: '1h' }, stepIndex: 0 },
+      { grow: 1, step: { after: '2d', fixed_interval: '1h' }, stepIndex: 1 },
+      { grow: 1, step: { after: '4d', fixed_interval: '1h' }, stepIndex: 2 },
+      { grow: 1, step: { after: '8d', fixed_interval: '1h' }, stepIndex: 3 },
+      { grow: 1 }, // 10d frozen boundary, no step
+      { grow: 1, step: { after: '16d', fixed_interval: '1h' }, stepIndex: 4 },
+      { grow: false, isDelete: true },
+    ];
+
+    const layout = getDownsamplingLayout(segments);
+
+    // The 8d step (column 5) must span 2 columns to reach the 16d step column (covering the 10d
+    // frozen boundary at column 6).
+    const step8d = layout.find((entry) => entry.segment.step?.after === '8d');
+    expect(step8d?.columnStart).toBe(5);
+    expect(step8d?.span).toBe(2);
+
+    // The frozen boundary column is hidden (covered by the 8d step's span), so no empty panel
+    // truncates the 8d bar at 10d.
+    const frozenColumn = layout[5];
+    expect(frozenColumn.segment.step).toBeUndefined();
+    expect(frozenColumn.hidden).toBe(true);
+
+    // The 16d step is the last step and spans to the end before delete.
+    const step16d = layout.find((entry) => entry.segment.step?.after === '16d');
+    expect(step16d?.columnStart).toBe(7);
+    expect(step16d?.span).toBe(1);
+  });
+
+  it('keeps a non-step column before the first step visible', () => {
+    const segments: DownsamplingSegment[] = [
+      { grow: 1 }, // 0d start, no step, before first step
+      { grow: 1, step: { after: '5d', fixed_interval: '1h' }, stepIndex: 0 },
+    ];
+
+    const layout = getDownsamplingLayout(segments);
+    expect(layout[0].hidden).toBe(false);
+    expect(layout[0].span).toBe(1);
+  });
+
+  describe('with canonical column starts (stable layout)', () => {
+    it('places the delete segment at its canonical column instead of a sequential one', () => {
+      // ILM [hot(step), warm, delete]: delete must land at its canonical column (5), not column 3.
+      const segments: DownsamplingSegment[] = [
+        { grow: 5, step: { after: '0d', fixed_interval: '1h' }, stepIndex: 0, phaseName: 'hot' },
+        { grow: 3 },
+        { grow: false, isDelete: true },
+      ];
+
+      const layout = getDownsamplingLayout(segments, [1, 2, 5]);
+
+      const step = layout.find((entry) => entry.segment.step);
+      expect(step?.columnStart).toBe(1);
+      // The step spans up to the column before delete (4); the covered warm column is hidden.
+      expect(step?.span).toBe(4);
+      expect(layout[1].hidden).toBe(true);
+      const deleteSegment = layout.find((entry) => entry.segment.isDelete);
+      expect(deleteSegment?.columnStart).toBe(5);
+      expect(deleteSegment?.span).toBe(1);
+    });
+
+    it('places a step at its canonical column when earlier phases are gaps', () => {
+      // ILM [hot, cold(step)]: warm is a gap at column 2, so cold sits at its canonical column (3).
+      const segments: DownsamplingSegment[] = [
+        { grow: 5 },
+        { grow: 2, step: { after: '20d', fixed_interval: '1h' }, stepIndex: 0, phaseName: 'cold' },
+      ];
+
+      const layout = getDownsamplingLayout(segments, [1, 3]);
+
+      expect(layout[0].hidden).toBe(false);
+      expect(layout[0].columnStart).toBe(1);
+      const step = layout.find((entry) => entry.segment.step);
+      expect(step?.columnStart).toBe(3);
+      expect(step?.span).toBe(1);
+    });
+  });
+});
 
 describe('DownsamplingBar', () => {
   const defaultProps = {

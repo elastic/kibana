@@ -6,93 +6,82 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiIcon, useEuiTheme } from '@elastic/eui';
-import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
-import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
-import { EventKind } from '../../document/main/constants/event_kinds';
-import { getDocumentTitle } from '../../document/main/utils/get_header_title';
-import { useKibana } from '../../../common/lib/kibana';
-import type { CellActionRenderer } from './cell_actions';
-import { noopCellActionRenderer } from './cell_actions';
-import { flyoutProviders } from './flyout_provider';
-import { DocumentFlyout } from '../../document/main';
-import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
+import React, { memo } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
-
-const noop = () => {};
 
 export interface ToolsFlyoutTitleProps {
   /**
-   * The document to display
+   * Callback invoked when the title is clicked. When omitted the title renders as plain text
+   * (no expand icon, no button) — used in rule preview contexts where the source document
+   * cannot be re-opened.
    */
-  hit: DataTableRecord;
+  onTitleClick?: () => void;
   /**
-   * Optional cell action renderer passed to the document flyout.
+   * Text label displayed in the title.
    */
-  renderCellActions?: CellActionRenderer;
+  label: string;
   /**
-   * Optional callback invoked after alert mutations in the document flyout.
+   * EUI icon type rendered next to the label.
    */
-  onAlertUpdated?: () => void;
+  iconType: IconType;
 }
 
 /**
- * Clickable title used in tools flyout headers. Renders an expand icon followed by the
- * document type icon and title. Clicking any part of the component opens the document flyout.
+ * Title used in tools flyout headers. When `onTitleClick` is provided, renders a clickable
+ * button with an expand icon that opens the originating document or entity flyout. When
+ * omitted (rule preview), renders as plain text so the label and badge remain visible without
+ * creating a broken link to a transient document.
  */
 export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
-  ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop }) => {
+  ({ onTitleClick, label, iconType }) => {
     const { euiTheme } = useEuiTheme();
-    const { services } = useKibana();
-    const store = useStore();
-    const history = useHistory();
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
-    const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
-      [hit]
-    );
-    const title = useMemo(() => getDocumentTitle(hit), [hit]);
-    const iconType = isAlert ? 'warning' : 'analyzeEvent';
-
-    const onShowDocument = useCallback(() => {
-      services.overlays?.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <DocumentFlyout
-              hit={hit}
-              renderCellActions={renderCellActions}
-              onAlertUpdated={onAlertUpdated}
-            />
-          ),
-        }),
-        { ...defaultFlyoutProperties, session: 'inherit' }
-      );
-    }, [defaultFlyoutProperties, history, hit, onAlertUpdated, renderCellActions, services, store]);
-
-    return (
-      <EuiButtonEmpty
-        onClick={onShowDocument}
-        iconType="expand"
-        size="xs"
-        flush="left"
-        data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
-      >
+    const inner = (
+      <span css={{ alignItems: 'center', display: 'flex', maxWidth: '100%', minWidth: 0 }}>
         <EuiIcon
           type={iconType}
           size="m"
           aria-hidden={true}
-          css={{ marginRight: euiTheme.size.xs }}
+          data-test-subj={`${TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}Icon`}
+          css={{ flexShrink: 0, marginRight: euiTheme.size.xs }}
         />
-        {title}
-      </EuiButtonEmpty>
+        <span
+          css={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {label}
+        </span>
+      </span>
+    );
+
+    return (
+      <EuiToolTip content={label}>
+        {onTitleClick ? (
+          <EuiButtonEmpty
+            onClick={onTitleClick}
+            iconType="maximize"
+            size="xs"
+            flush="left"
+            css={{ maxWidth: '100%', minWidth: 0 }}
+            data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
+          >
+            {inner}
+          </EuiButtonEmpty>
+        ) : (
+          <EuiText
+            size="xs"
+            css={{ maxWidth: '100%', minWidth: 0 }}
+            data-test-subj={TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}
+          >
+            {inner}
+          </EuiText>
+        )}
+      </EuiToolTip>
     );
   }
 );

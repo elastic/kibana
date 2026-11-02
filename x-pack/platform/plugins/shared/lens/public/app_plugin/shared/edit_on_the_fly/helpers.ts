@@ -6,12 +6,11 @@
  */
 import {
   getIndexPatternFromESQLQuery,
-  getESQLAdHocDataview,
   getESQLResults,
   formatESQLColumns,
   mapVariableToColumn,
 } from '@kbn/esql-utils';
-import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
+import { type AggregateQuery, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -22,10 +21,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
-import type { DatasourceMap, VisualizationMap } from '@kbn/lens-common';
+import type { TypedLensSerializedState, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
+
+import { createEsqlAdHocDataView } from '../../../data_views_service/create_esql_ad_hoc_data_view';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 import { readUserChartTypeFromSessionStorage } from '../../../chart_type_session_storage';
+import { hydrateEsqlMetricTrendlineAfterSuggestion } from '../../../visualizations/metric/state_hydration/esql_trendline';
 
 export interface ESQLDataGridAttrs {
   rows: ESQLRow[];
@@ -87,22 +88,23 @@ export const getGridAttrs = async (
   http: CoreStart['http'],
   uiSettings: IUiSettingsClient,
   abortController?: AbortController,
-  esqlVariables: ESQLControlVariable[] = []
+  esqlVariables: ESQLControlVariable[] = [],
+  approximation?: boolean
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
     return adHoc.title === indexPattern;
   });
 
-  // Fall back to getESQLAdHocDataview when the spec has no timeFieldName,
-  // which detects the time field via HTTP (with a promise cache to avoid
-  // redundant requests).
+  // Resolve the dataset when the spec has no timeFieldName, which detects the time
+  // field via HTTP (with a promise cache to avoid redundant requests).
   const dataView = dataViewSpec?.timeFieldName
-    ? await data.dataViews.create(dataViewSpec)
-    : await getESQLAdHocDataview({
-        dataViewsService: data.dataViews,
+    ? await data.dataViews.create(dataViewSpec, true)
+    : await createEsqlAdHocDataView({
+        dataViews: data.dataViews,
         query: query.esql,
-        options: { skipFetchFields: true, id: dataViewSpec?.id },
+        id: dataViewSpec?.id,
+        skipFetchFields: true,
         http,
       });
 
@@ -117,6 +119,8 @@ export const getGridAttrs = async (
     timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
     timezone,
+    ...(approximation !== undefined ? { approximation } : {}),
+    includeColumnMetadata: true,
   });
 
   const { all_columns: allColumns = [], columns: valueColumns = [], values } = results.response;
@@ -147,7 +151,8 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = [],
   shouldUpdateAttrs = true,
-  preferredVisAttributes?: TypedLensSerializedState['attributes']
+  preferredVisAttributes?: TypedLensSerializedState['attributes'],
+  approximation?: boolean
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
@@ -157,7 +162,8 @@ export const getSuggestions = async (
       http,
       uiSettings,
       abortController,
-      esqlVariables
+      esqlVariables,
+      approximation
     );
     const updatedWithVariablesColumns = esqlVariables.length
       ? mapVariableToColumn(query.esql, esqlVariables, columns)
@@ -211,6 +217,30 @@ export const getSuggestions = async (
       },
       dataView,
     }) as TypedLensSerializedState['attributes'];
+
+    // Suggestions only rebuild the main layer. Restore metric trendline
+    // accessors from the previous attributes and hydrate the hidden layer.
+    if (preferredVisAttributes && isOfAggregateQueryType(query)) {
+      const hydrated = hydrateEsqlMetricTrendlineAfterSuggestion({
+        visualizationType: attrs.visualizationType,
+        visualizationState: attrs.state.visualization,
+        textBasedState: attrs.state.datasourceStates.textBased,
+        previousVisualizationState: preferredVisAttributes.state.visualization,
+        previousTextBasedState: preferredVisAttributes.state.datasourceStates.textBased,
+        esqlQuery: query.esql,
+      });
+      if (hydrated) {
+        attrs.state = {
+          ...attrs.state,
+          visualization: hydrated.visualizationState,
+          datasourceStates: {
+            ...attrs.state.datasourceStates,
+            textBased: hydrated.textBasedState,
+          },
+        };
+      }
+    }
+
     return {
       ...attrs,
       state: {
@@ -219,7 +249,9 @@ export const getSuggestions = async (
       },
     };
   } catch (e) {
-    setErrors?.([e]);
+    if (!abortController?.signal.aborted) {
+      setErrors?.([e]);
+    }
   }
   return undefined;
 };

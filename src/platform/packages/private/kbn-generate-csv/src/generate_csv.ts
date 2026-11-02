@@ -299,6 +299,7 @@ export class CsvGenerator {
         currentFilters,
         forceNow: this.job.forceNow,
         logger: this.logger,
+        timezone: settings.timezone,
       });
       this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`, {
         tags: [this.jobId],
@@ -314,6 +315,7 @@ export class CsvGenerator {
     const indexPatternTitle = index.getIndexPattern();
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
+    let userError: boolean | undefined;
     let first = true;
     let currentRecord = -1;
     let totalRecords: number | undefined;
@@ -323,16 +325,18 @@ export class CsvGenerator {
     this.cancellationToken.on(() => abortController.abort());
 
     // use a class to internalize the paging strategy
+    // Internal-user reports always use PIT: the internal user bypasses alias/index-level
+    // permissions (removing the only reason to prefer scroll), and INTERNAL_ENHANCED_ES_SEARCH_STRATEGY
+    // submits via _async_search which does not accept a `scroll` param in the request body.
     let cursor: SearchCursor;
-    if (this.job.pagingStrategy === 'scroll') {
+    if (this.job.pagingStrategy === 'scroll' && !this.useInternalUser) {
       // Optional strategy: scan-and-scroll
       cursor = new SearchCursorScroll(
         indexPatternTitle,
         settings,
         this.clients,
         abortController,
-        this.logger,
-        this.useInternalUser
+        this.logger
       );
       logger.debug('Using search strategy: scroll', { tags: [this.jobId] });
     } else {
@@ -506,6 +510,7 @@ export class CsvGenerator {
         warnings.push(
           i18nTexts.csvRowCountError({ expected: totalRecords, received: this.csvRowCount })
         );
+        userError = true;
       } else {
         warnings.push(i18nTexts.csvRowCountIndeterminable({ received: this.csvRowCount }));
       }
@@ -539,6 +544,7 @@ export class CsvGenerator {
         csv: { rows: this.csvRowCount },
       },
       warnings,
+      user_error: userError,
       error_code: reportingError?.code,
     };
   }

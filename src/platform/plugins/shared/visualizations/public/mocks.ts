@@ -19,7 +19,6 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
-import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public/mocks';
 import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -48,6 +47,7 @@ const createStartContract = (): VisualizationsStart => ({
   unRegisterAlias: jest.fn(),
   showNewVisModal: jest.fn(),
   findListItems: jest.fn().mockResolvedValue({ total: 0, hits: [] }),
+  updateVisualizationLibraryItem: jest.fn(),
 });
 
 const createInstance = async () => {
@@ -81,7 +81,6 @@ const createInstance = async () => {
       savedObjectsTaggingOss: savedObjectTaggingOssPluginMock.createStart(),
       savedSearch: savedSearchPluginMock.createStartContract(),
       navigation: navigationPluginMock.createStartContract(),
-      presentationUtil: presentationUtilPluginMock.createStartContract(),
       urlForwarding: urlForwardingPluginMock.createStartContract(),
       screenshotMode: screenshotModePluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),

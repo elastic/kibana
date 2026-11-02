@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFieldText,
   EuiFilePicker,
   EuiFlexGroup,
@@ -32,6 +31,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { type ErrorType, extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
@@ -45,12 +45,18 @@ import { useValidateIds } from './validate';
 import type { ImportedAdJob, JobIdObject, SkippedJobs } from './jobs_import_service';
 import { useEnabledFeatures } from '../../../contexts/ml';
 
+const SELECT_FILE_LABEL = i18n.translate('xpack.ml.importExport.importFlyout.fileSelect', {
+  defaultMessage: 'Select or drag and drop a file',
+});
+
 export interface Props {
   isDisabled: boolean;
   onImportComplete: (() => void) | null;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) => {
+export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete, isOpen, onClose }) => {
   const {
     services: {
       notifications: { toasts },
@@ -72,7 +78,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
     [esSearch, validateDatafeedPreview, getFilters]
   );
 
-  const [showFlyout, setShowFlyout] = useState(false);
+  const [internalShowFlyout, setInternalShowFlyout] = useState(false);
+  const isControlled = isOpen !== undefined;
+  const showFlyout = isControlled ? isOpen : internalShowFlyout;
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
   const [dfaJobs, setDfaJobs] = useState<DataFrameAnalyticsConfig[]>([]);
   const [jobIdObjects, setJobIdObjects] = useState<JobIdObject[]>([]);
@@ -121,7 +129,19 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
   );
 
   function toggleFlyout() {
-    setShowFlyout(!showFlyout);
+    if (isControlled) {
+      onClose?.();
+      return;
+    }
+    setInternalShowFlyout(!internalShowFlyout);
+  }
+
+  function closeFlyout() {
+    if (isControlled) {
+      onClose?.();
+      return;
+    }
+    setInternalShowFlyout(false);
   }
 
   const onFilePickerChange = useCallback(async (files: any) => {
@@ -212,7 +232,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
     }
 
     setImporting(false);
-    setShowFlyout(false);
+    closeFlyout();
     if (typeof onImportComplete === 'function') {
       onImportComplete();
     }
@@ -382,11 +402,11 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
 
   return (
     <>
-      <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} />
+      {!isControlled ? <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} /> : null}
 
       {showFlyout === true && isDisabled === false && (
         <EuiFlyout
-          onClose={setShowFlyout.bind(null, false)}
+          onClose={closeFlyout}
           hideCloseButton
           size="m"
           data-test-subj="mlJobMgmtImportJobsFlyout"
@@ -411,12 +431,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                   disabled={importing}
                   fullWidth
                   id="filePicker"
-                  initialPromptText={i18n.translate(
-                    'xpack.ml.importExport.importFlyout.fileSelect',
-                    {
-                      defaultMessage: 'Select or drag and drop a file',
-                    }
-                  )}
+                  aria-label={SELECT_FILE_LABEL}
+                  initialPromptText={SELECT_FILE_LABEL}
                   onChange={onFilePickerChange}
                   className="file-datavisualizer-file-picker"
                 />
@@ -522,7 +538,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                               jobId.datafeedInvalid === true &&
                               jobId.datafeedWarningMessage && (
                                 <EuiFormRow>
-                                  <EuiCallOut
+                                  <KbnWarningCallout
                                     data-test-subj="mlJobImportJobDatafeedWarning"
                                     title={i18n.translate(
                                       'xpack.ml.importExport.importFlyout.datafeedWarning.title',
@@ -530,14 +546,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                                         defaultMessage: 'Datafeed Warning',
                                       }
                                     )}
-                                    color="warning"
                                     size="s"
                                     announceOnMount
-                                  >
-                                    <EuiText size="xs" className="eui-textBreakWord">
-                                      {jobId.datafeedWarningMessage}
-                                    </EuiText>
-                                  </EuiCallOut>
+                                    text={jobId.datafeedWarningMessage}
+                                  />
                                 </EuiFormRow>
                               )}
                           </EuiFlexItem>
@@ -556,11 +568,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={setShowFlyout.bind(null, false)}
-                  flush="left"
-                >
+                <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
                   <FormattedMessage
                     id="xpack.ml.importExport.importFlyout.closeButton"
                     defaultMessage="Close"

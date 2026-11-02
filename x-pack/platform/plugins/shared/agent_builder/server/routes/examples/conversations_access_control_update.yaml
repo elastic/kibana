@@ -1,0 +1,102 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        shareConversationRequestExample:
+          description: "Example request sharing a private conversation with two users. They can read and continue the conversation, provided they also have access to its agent."
+          value:
+            access_mode: private
+            entries:
+              - type: user
+                id: u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0
+                role: member
+              - type: user
+                id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
+                role: member
+        publishConversationRequestExample:
+          description: "Switch the conversation to `public` so any user with access to its agent can read and continue it. A public conversation is already open to everyone with agent access, so `entries` must be empty."
+          value:
+            access_mode: public
+            entries: []
+        unshareConversationRequestExample:
+          description: "Submit an empty entries list to remove every member. Access then falls back to the access mode alone."
+          value:
+            access_mode: private
+            entries: []
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          updateConversationAccessControlResponseExample:
+            description: "Example response returning the persisted access control. `added_at` is stamped by the server for newly added members and preserved for members that were already listed."
+            value:
+              access_mode: private
+              entries:
+                - type: user
+                  id: u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0
+                  role: member
+                  added_at: "2026-08-11T10:00:00.000Z"
+                - type: user
+                  id: u_9xXGnqPB4mLTNhOlHMHXqYbGrGFOTuQIRWlqLpKq0dE_0
+                  role: member
+                  added_at: "2026-08-11T11:30:00.000Z"
+  400:
+    description: "Bad Request — the request body failed validation."
+    content:
+      application/json:
+        examples:
+          tooManyEntriesResponseExample:
+            description: "Request body exceeds the 100-member maximum."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request body.entries]: array size is [101], but cannot be greater than [100]"
+          entriesWithPublicModeResponseExample:
+            description: "`entries` must be empty when `access_mode` is `public` — a public conversation is already open to everyone with agent access."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "ACL entries are not supported when access_mode is \"public\""
+          duplicateEntryResponseExample:
+            description: "Two entries name the same user id."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "Duplicate ACL entry for user \"u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0\""
+  404:
+    description: "Not Found — no conversation with this ID is readable by the caller, or the caller is not its owner. Matches the existing `conversationNotFound` shape, so members cannot distinguish a conversation they may not re-share from one that does not exist."
+    content:
+      application/json:
+        examples:
+          conversationNotFoundResponseExample:
+            value:
+              statusCode: 404
+              error: "Not Found"
+              message: "Conversation my-conversation-id not found"
+              attributes:
+                trace_id: "8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "${KIBANA_URL}/api/agent_builder/conversations/{conversation_id}/access_control" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "access_mode": "private",
+          "entries": [
+            { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
+          ]
+        }'
+  - lang: Console
+    source: |
+      PUT kbn://api/agent_builder/conversations/{conversation_id}/access_control
+      {
+        "access_mode": "private",
+        "entries": [
+          { "type": "user", "id": "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0", "role": "member" }
+        ]
+      }

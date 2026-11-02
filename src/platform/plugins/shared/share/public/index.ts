@@ -31,7 +31,6 @@ export type {
   ExportShareDerivatives,
   ExportShareParameters,
   RegisterShareIntegrationArgs,
-  ShareableLocatorParams,
   SharingData,
   ShareActionConfigArgs,
 } from './types';
@@ -43,7 +42,6 @@ import { SharePlugin } from './plugin';
 
 export { downloadMultipleAs, downloadFileAs } from './lib/download_as';
 export type { DownloadableContent } from './lib/download_as';
-export { convertRelativeTimeStringToAbsoluteTimeString } from './lib/time_utils';
 
 export function plugin(ctx: PluginInitializerContext) {
   return new SharePlugin(ctx);

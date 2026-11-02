@@ -9,12 +9,9 @@ import moment from 'moment-timezone';
 import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import { has, unset, some, mapKeys, mapValues } from 'lodash';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '@kbn/fleet-plugin/common';
+import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -24,18 +21,23 @@ import { buildRouteValidation } from '../../utils/build_validation/route_validat
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { StartPlugins } from '../../types';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import {
   convertSOQueriesToPackConfig,
   convertPackQueriesToSO,
+  fetchAllPackagePolicies,
   findMatchingShards,
   getInitialPolicies,
+  groupAgentPolicyIdsByPackagePolicy,
   makePackKey,
+  resolveSharedPackagePolicyShard,
   validatePackScheduleFields,
   buildScheduleResponseSlice,
+  buildExecutionDefaultsResponseSlice,
+  toPackExecutionDefaults,
   stripPerQueryRruleFields,
+  convergePerQueryIntervals,
 } from './utils';
 import { convertShardsToArray } from '../utils';
 import type { PackSavedObject } from '../../common/types';
@@ -117,6 +119,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           schedule_type: rawScheduleType,
           interval: rawInterval,
           rrule_schedule: rawRruleSchedule,
+          // V5: pack-level execution defaults
+          min_osquery_version: rawMinOsqueryVersion,
+          result_type: rawResultType,
+          platform: rawPlatform,
         } = request.body;
 
         const scheduleType = isRruleFeatureEnabled ? rawScheduleType : undefined;
@@ -138,18 +144,22 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               return rest;
             });
 
+        const convergedQueries = gatedQueries
+          ? convergePerQueryIntervals(gatedQueries as Record<string, PackQueryInput>, scheduleType)
+          : gatedQueries;
+
         const scheduleErr = validatePackScheduleFields({
           packScheduleType: scheduleType,
           packInterval,
           packRrule: rruleSchedule,
-          queries: gatedQueries as Record<string, PackQueryInput>,
+          queries: convergedQueries as Record<string, PackQueryInput>,
         });
         if (scheduleErr) {
-          return response.badRequest({ body: scheduleErr });
+          return response.badRequest({ body: { message: scheduleErr } });
         }
 
         const now = moment().toISOString();
-        const queries = mapValues(gatedQueries, (queryData) => ({
+        const queries = mapValues(convergedQueries, (queryData) => ({
           ...queryData,
           schedule_id: uuidv4(),
           start_date: now,
@@ -166,11 +176,12 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           return response.conflict({ body: `Pack with name "${name}" already exists.` });
         }
 
-        const { items: packagePolicies } = (await packagePolicyService?.list(spaceScopedClient, {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-          perPage: 1000,
-          page: 1,
-        })) ?? { items: [] };
+        // Drain ALL policies via keyset `fetchAllItems`; an offset-capped
+        // `list({ perPage: 1000 })` would drop attachments on policies past 1000.
+        const packagePolicies = await fetchAllPackagePolicies(
+          packagePolicyService,
+          spaceScopedClient
+        );
 
         const { policiesList, invalidPolicies } = getInitialPolicies(
           packagePolicies,
@@ -220,6 +231,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               ? { interval: packInterval }
               : {}),
             ...(scheduleType === 'rrule' && rruleSchedule ? { rrule_schedule: rruleSchedule } : {}),
+            // V5: pack-level execution defaults (stored verbatim; undefined means "not set")
+            ...(rawMinOsqueryVersion != null ? { min_osquery_version: rawMinOsqueryVersion } : {}),
+            ...(rawResultType != null ? { result_type: rawResultType } : {}),
+            ...(rawPlatform != null ? { platform: rawPlatform } : {}),
           },
           {
             references,
@@ -228,13 +243,19 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
 
         if (enabled && policiesList.length) {
+          // Group by resolved package-policy id first: a package policy's
+          // `policy_ids` can span multiple of this pack's agent policies, so
+          // writing per-agent-policy-id (as before) could issue concurrent
+          // updates against the same package policy from the same stale base.
+          const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
+            policiesList,
+            packagePolicies
+          );
+
           await Promise.all(
-            policiesList.map((agentPolicyId) => {
-              const packagePolicy = packagePolicies.find((policy) =>
-                policy.policy_ids.includes(agentPolicyId)
-              );
-              if (packagePolicy) {
-                return packagePolicyService?.update(
+            Array.from(packagePolicyWriteTargets.values()).map(
+              ({ packagePolicy, agentPolicyIds }) =>
+                packagePolicyService?.update(
                   spaceScopedClient,
                   esClient,
                   packagePolicy.id,
@@ -255,20 +276,28 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                           rrule_schedule: rruleSchedule,
                         },
                         isRruleFeatureEnabled,
+                        fallbackStartDate: packSO.attributes.created_at,
+                        packExecutionDefaults: toPackExecutionDefaults({
+                          min_osquery_version: rawMinOsqueryVersion,
+                          result_type: rawResultType,
+                          platform: rawPlatform,
+                        }),
                       }
                     );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
-                      shard: policyShards[agentPolicyId] ?? 100,
+                      shard: resolveSharedPackagePolicyShard(agentPolicyIds, policyShards),
                       pack_id: packSO.id,
+                      // Human-readable name osquerybeat stamps on scheduled
+                      // result docs (config.Pack.pack_name contract).
+                      pack_name: packSO.attributes.name,
                       ...packDefaults,
                       queries: builtQueries,
                     });
 
                     return draft;
                   })
-                );
-              }
-            })
+                )
+            )
           );
         }
 
@@ -296,6 +325,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             { schedule_type: scheduleType, interval: packInterval, rrule_schedule: rruleSchedule },
             isRruleFeatureEnabled
           ),
+          ...buildExecutionDefaultsResponseSlice(packSO.attributes),
         };
 
         return response.ok({

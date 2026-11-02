@@ -22,7 +22,7 @@ import { NoDataViewsPromptStorybookMock } from '@kbn/shared-ux-prompt-no-data-vi
 import type { NoDataCardStorybookParams } from '@kbn/shared-ux-card-no-data-mocks';
 import { NoDataCardStorybookMock } from '@kbn/shared-ux-card-no-data-mocks';
 
-type ServiceArguments = Pick<KibanaNoDataPageServices, 'hasUserDataView' | 'hasESData'>;
+type ServiceArguments = Pick<KibanaNoDataPageServices, 'hasDataView' | 'hasESData'>;
 
 export type Params = ArgumentParams<ServiceArguments> &
   NoDataCardStorybookParams &
@@ -44,7 +44,7 @@ export class StorybookMock extends AbstractStorybookMock<
       control: { control: 'boolean' },
       defaultValue: false,
     },
-    hasUserDataView: {
+    hasDataView: {
       control: { control: 'boolean' },
       defaultValue: false,
     },
@@ -74,7 +74,7 @@ export class StorybookMock extends AbstractStorybookMock<
       ...noDataCardMock.getServices(params),
       ...noDataViewsMock.getServices(params),
       hasESData: () => params.hasESData,
-      hasUserDataView: () => params.hasUserDataView,
+      hasDataView: () => params.hasDataView,
     };
   }
 }

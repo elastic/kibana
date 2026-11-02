@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseThresholdEsql, parseRecoveryBlock } from './parse_esql';
+import { parseThresholdEsql, parseRecoveryBlock, parseDiscoverQueryForBuilder } from './parse_esql';
 import { buildThresholdEsql, buildRecoveryBlock } from './build_esql';
 import { Aggregation, Comparator } from './form_types';
 import type { ThresholdFormValues } from './form_types';
@@ -767,6 +767,20 @@ describe('parseThresholdEsql', () => {
       expect(parsed!.groupByFields).toEqual(['region']);
     });
 
+    it('round-trips stat labels containing spaces', () => {
+      const original = makeValues({
+        stats: [{ id: '1', label: 'error count', aggregation: Aggregation.COUNT }],
+        alertConditions: [
+          { id: '1', metric: 'error count', comparator: Comparator.GT, threshold: [100] },
+        ],
+      });
+      const { esql, parsed } = roundTrip(original);
+      expect(esql).toContain('`error count` = COUNT(*)');
+      expect(parsed).not.toBeNull();
+      expect(parsed!.stats[0].label).toBe('error count');
+      expect(parsed!.alertConditions[0].metric).toBe('error count');
+    });
+
     it('round-trips with no alert conditions (STATS only)', () => {
       const original = makeValues({
         alertConditions: [],
@@ -880,5 +894,358 @@ describe('recovery round-trip', () => {
     const result = parseThresholdEsql(alertQuery);
     expect(result).not.toBeNull();
     expect(result!.recovery).toBeUndefined();
+  });
+});
+
+describe('severity round-trip', () => {
+  const cpuStat = { id: 's1', label: 'cpu_avg', aggregation: Aggregation.AVG, field: 'system.cpu' };
+  const cpuCondition = { id: 'c1', metric: 'cpu_avg', comparator: Comparator.GT, threshold: [0.8] };
+
+  const stripLevelIds = (severity: NonNullable<ThresholdFormValues['severity']>) => ({
+    ...severity,
+    levels: severity.levels.map(({ id, ...rest }) => rest),
+  });
+
+  it('round-trips single severity through build and parse', () => {
+    const original = makeValues({
+      stats: [cpuStat],
+      alertConditions: [cpuCondition],
+      severity: { mode: 'single', singleLevelSeverity: 'info', levels: [] },
+    });
+
+    const query = buildThresholdEsql(original);
+    const parsed = parseThresholdEsql(query);
+
+    expect(parsed).not.toBeNull();
+    expect(parsed!.severity).toEqual({ mode: 'single', singleLevelSeverity: 'info', levels: [] });
+  });
+
+  it('round-trips multi severity through build and parse (ascending >)', () => {
+    const original = makeValues({
+      stats: [cpuStat],
+      alertConditions: [cpuCondition],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'info',
+        // Every level is a band with its own threshold, all beyond the condition (0.8).
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 0.85 },
+          { id: 'l2', severity: 'medium', threshold: 0.9 },
+          { id: 'l3', severity: 'high', threshold: 0.95 },
+        ],
+      },
+    });
+
+    const query = buildThresholdEsql(original);
+    const parsed = parseThresholdEsql(query);
+
+    expect(parsed).not.toBeNull();
+    expect(stripLevelIds(parsed!.severity!)).toEqual({
+      mode: 'multi',
+      singleLevelSeverity: 'info',
+      levels: [
+        { severity: 'low', threshold: 0.85 },
+        { severity: 'medium', threshold: 0.9 },
+        { severity: 'high', threshold: 0.95 },
+      ],
+    });
+    expect(parsed!.alertConditions[0].threshold).toEqual([0.8]);
+  });
+
+  it('round-trips multi severity through build and parse (descending <)', () => {
+    const original = makeValues({
+      stats: [{ id: 's1', label: 'mem_free', aggregation: Aggregation.AVG, field: 'mem' }],
+      alertConditions: [
+        { id: 'c1', metric: 'mem_free', comparator: Comparator.LT, threshold: [500] },
+      ],
+      severity: {
+        mode: 'multi',
+        singleLevelSeverity: 'info',
+        // Every level is a band with its own threshold, all beyond the condition (500, `<`).
+        levels: [
+          { id: 'l1', severity: 'low', threshold: 450 },
+          { id: 'l2', severity: 'medium', threshold: 300 },
+          { id: 'l3', severity: 'high', threshold: 100 },
+        ],
+      },
+    });
+
+    const query = buildThresholdEsql(original);
+    const parsed = parseThresholdEsql(query);
+
+    expect(parsed).not.toBeNull();
+    expect(stripLevelIds(parsed!.severity!).levels).toEqual([
+      { severity: 'low', threshold: 450 },
+      { severity: 'medium', threshold: 300 },
+      { severity: 'high', threshold: 100 },
+    ]);
+  });
+
+  it('has no severity when the query has no severity EVAL', () => {
+    const query = buildThresholdEsql(
+      makeValues({ stats: [cpuStat], alertConditions: [cpuCondition] })
+    );
+    const parsed = parseThresholdEsql(query);
+
+    expect(parsed).not.toBeNull();
+    expect(parsed!.severity).toBeUndefined();
+  });
+
+  it('does not treat a user evaluation named severity-like as severity', () => {
+    // A regular EVAL before the WHERE stays an evaluation, not severity config.
+    const original = makeValues({
+      evaluations: [{ id: 'e1', label: 'error_rate', expression: 'count / 2' }],
+      alertConditions: [
+        { id: 'c1', metric: 'error_rate', comparator: Comparator.GT, threshold: [5] },
+      ],
+      severity: { mode: 'single', singleLevelSeverity: 'critical', levels: [] },
+    });
+
+    const query = buildThresholdEsql(original);
+    const parsed = parseThresholdEsql(query);
+
+    expect(parsed).not.toBeNull();
+    expect(parsed!.evaluations).toHaveLength(1);
+    expect(parsed!.evaluations[0].label).toBe('error_rate');
+    expect(parsed!.severity).toEqual({
+      mode: 'single',
+      singleLevelSeverity: 'critical',
+      levels: [],
+    });
+  });
+
+  it('treats a user evaluation literally named "severity" as an evaluation, not severity config', () => {
+    // Regression: the generated severity EVAL is only ever the last command in the query. A user
+    // evaluation named exactly `severity` (which appears earlier) must round-trip as an evaluation
+    // instead of breaking the parse and forcing the raw ES|QL fallback.
+    const original = makeValues({
+      evaluations: [{ id: 'e1', label: 'severity', expression: 'count / 2' }],
+      alertConditions: [
+        { id: 'c1', metric: 'severity', comparator: Comparator.GT, threshold: [5] },
+      ],
+    });
+
+    const query = buildThresholdEsql(original);
+    const parsed = parseThresholdEsql(query);
+
+    expect(parsed).not.toBeNull();
+    expect(parsed!.evaluations).toHaveLength(1);
+    expect(parsed!.evaluations[0].label).toBe('severity');
+    expect(parsed!.severity).toBeUndefined();
+  });
+
+  it('rejects a multi-severity CASE whose branches test a different metric', () => {
+    // The condition is on `cpu_avg` but the CASE tests `mem_avg`; keeping it would silently
+    // rewrite the branches against `cpu_avg` on save, so the parse must bail to ES|QL mode.
+    const query =
+      'FROM logs-* | STATS cpu_avg = AVG(system.cpu), mem_avg = AVG(system.mem) ' +
+      '| WHERE cpu_avg > 0.8 | EVAL severity = CASE(mem_avg > 0.95, "high", mem_avg > 0.9, "medium")';
+    expect(parseThresholdEsql(query)).toBeNull();
+  });
+
+  it('rejects a multi-severity CASE whose branches use a different comparator', () => {
+    const query =
+      'FROM logs-* | STATS cpu_avg = AVG(system.cpu) ' +
+      '| WHERE cpu_avg > 0.8 | EVAL severity = CASE(cpu_avg >= 0.95, "high", cpu_avg >= 0.9, "medium")';
+    expect(parseThresholdEsql(query)).toBeNull();
+  });
+
+  it('rejects severity when there is more than one alert condition', () => {
+    const query =
+      'FROM logs-* | STATS cpu_avg = AVG(system.cpu), mem_avg = AVG(system.mem) ' +
+      '| WHERE cpu_avg > 0.8 AND mem_avg > 0.5 | EVAL severity = "high"';
+    expect(parseThresholdEsql(query)).toBeNull();
+  });
+});
+
+describe('parseDiscoverQueryForBuilder', () => {
+  describe('returns null for unparseable queries', () => {
+    it('returns null for empty string', () => {
+      expect(parseDiscoverQueryForBuilder('')).toBeNull();
+    });
+
+    it('returns null for whitespace', () => {
+      expect(parseDiscoverQueryForBuilder('   ')).toBeNull();
+    });
+
+    it('returns null for invalid ES|QL', () => {
+      expect(parseDiscoverQueryForBuilder('NOT VALID ESQL AT ALL')).toBeNull();
+    });
+
+    it('returns null for query not starting with FROM', () => {
+      expect(parseDiscoverQueryForBuilder('ROW x = 1')).toBeNull();
+    });
+  });
+
+  describe('delegates to parseThresholdEsql for complete threshold queries', () => {
+    it('returns full builder state for FROM + STATS + WHERE', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | STATS count = COUNT(*) | WHERE count > 100'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.stats[0].aggregation).toBe(Aggregation.COUNT);
+      expect(result!.alertConditions[0].metric).toBe('count');
+      expect(result!.alertConditions[0].comparator).toBe(Comparator.GT);
+      expect(result!.alertConditions[0].threshold).toEqual([100]);
+    });
+
+    it('returns full builder state with filter and STATS', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | WHERE service.name == "api" | STATS errors = COUNT(*) WHERE status >= 500'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.filterQuery).toBe('service.name == "api"');
+      expect(result!.stats[0].label).toBe('errors');
+      expect(result!.stats[0].filter).toBe('status >= 500');
+    });
+
+    it('reconciles empty alert condition metric to the first stat label for STATS-only queries', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | STATS request_rate = COUNT(*) BY container.id'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.stats[0].label).toBe('request_rate');
+      expect(result!.alertConditions[0].metric).toBe('request_rate');
+      expect(result!.alertConditions[0].comparator).toBe(Comparator.GT);
+      expect(result!.alertConditions[0].threshold).toEqual([100]);
+      expect(result!.groupByFields).toEqual(['container.id']);
+    });
+
+    it('reconciles across multiple stats — maps empty metric to first stat label', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | STATS errors = COUNT(*) WHERE status >= 500, total = COUNT(*)'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.alertConditions[0].metric).toBe('errors');
+    });
+  });
+
+  describe('extracts index pattern and filter from Discover queries', () => {
+    it('extracts index pattern and filter from FROM + WHERE', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | WHERE status >= 500');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBe('status >= 500');
+      expect(result!.stats).toHaveLength(1);
+      expect(result!.stats[0].aggregation).toBe(Aggregation.COUNT);
+      expect(result!.alertConditions).toHaveLength(1);
+    });
+
+    it('extracts index pattern from FROM-only query', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBeUndefined();
+    });
+
+    it('extracts compound WHERE filter', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | WHERE service.name == "api" AND status >= 400'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.filterQuery).toContain('service.name == "api"');
+      expect(result!.filterQuery).toContain('status >= 400');
+    });
+
+    it('extracts index pattern with wildcard', () => {
+      const result = parseDiscoverQueryForBuilder('FROM metrics-apm.* | WHERE env == "prod"');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('metrics-apm.*');
+      expect(result!.filterQuery).toBe('env == "prod"');
+    });
+
+    it('extracts index pattern for remote cluster', () => {
+      const result = parseDiscoverQueryForBuilder('FROM remote:logs-* | WHERE status >= 500');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('remote:logs-*');
+    });
+  });
+
+  describe('handles queries with extra commands after FROM/WHERE', () => {
+    it('extracts index and filter when LIMIT follows', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | WHERE status >= 500 | LIMIT 10');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBe('status >= 500');
+    });
+
+    it('extracts index and filter when SORT follows', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | WHERE status >= 500 | SORT @timestamp DESC'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBe('status >= 500');
+    });
+
+    it('extracts index when KEEP follows FROM', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | KEEP status, message');
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBeUndefined();
+    });
+
+    it('only extracts first WHERE as filter, ignoring non-WHERE commands', () => {
+      const result = parseDiscoverQueryForBuilder(
+        'FROM logs-* | WHERE status >= 500 | EVAL doubled = status * 2 | WHERE doubled > 1000'
+      );
+      expect(result).not.toBeNull();
+      expect(result!.indexPattern).toBe('logs-*');
+      expect(result!.filterQuery).toBe('status >= 500');
+    });
+  });
+
+  describe('provides default builder values for non-extracted fields', () => {
+    it('provides default stats with COUNT aggregation', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | WHERE status >= 500');
+      expect(result).not.toBeNull();
+      expect(result!.stats).toHaveLength(1);
+      expect(result!.stats[0].aggregation).toBe(Aggregation.COUNT);
+      expect(result!.stats[0].label).toBe('count');
+    });
+
+    it('provides default alert condition', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-* | WHERE status >= 500');
+      expect(result).not.toBeNull();
+      expect(result!.alertConditions).toHaveLength(1);
+      expect(result!.alertConditions[0].metric).toBe('count');
+      expect(result!.alertConditions[0].comparator).toBe(Comparator.GT);
+      expect(result!.alertConditions[0].threshold).toEqual([100]);
+    });
+
+    it('defaults timeField to @timestamp', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.timeField).toBe('@timestamp');
+    });
+
+    it('defaults conditionOperator to AND', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.conditionOperator).toBe('AND');
+    });
+
+    it('defaults groupByFields to empty array', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.groupByFields).toEqual([]);
+    });
+
+    it('defaults evaluations to empty array', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.evaluations).toEqual([]);
+    });
+  });
+
+  describe('generates unique IDs', () => {
+    it('generates unique IDs for stats and conditions', () => {
+      const result = parseDiscoverQueryForBuilder('FROM logs-*');
+      expect(result).not.toBeNull();
+      expect(result!.stats[0].id).toBeDefined();
+      expect(result!.alertConditions[0].id).toBeDefined();
+      expect(result!.stats[0].id).not.toBe(result!.alertConditions[0].id);
+    });
   });
 });

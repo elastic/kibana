@@ -21,25 +21,51 @@ in their requests. This can cause:
 <li>Degraded performance affecting all users of the system</li>
 </ul>
 <p>
-The query uses a shared exclusion list (defined in <code>KibanaDoSExclusions.qll</code>) to
-skip files whose schemas are known to never validate HTTP request payloads, such as
-saved-object attribute schemas, plugin configuration, UI settings definitions,
-content-management layer schemas, and similar structural/data-at-rest categories. See that
-file for the full set of excluded path patterns.
+The query only reports a string when it can be shown, via data flow, to reach a route's
+<b>request</b> validation &mdash; the <code>body</code>, <code>query</code>, <code>params</code>,
+or <code>path</code> fields of a <code>validate</code> block (including the versioned router's
+<code>validate: { request: ... }</code>), route-factory configs such as
+<code>@kbn/server-route-repository</code>'s <code>createServerRoute</code>, and the
+<code>buildRouteValidationWithZod</code> wrapper. Schemas that validate route <b>responses</b>,
+saved-object attributes, plugin configuration, UI settings, content-management/embeddable
+layers, telemetry, and other data-at-rest categories are not reported, because they do not
+reach a request-validation sink. A shared exclusion list (defined in
+<code>KibanaDoSExclusions.qll</code>) additionally skips browser (<code>public/</code>) code.
 </p>
 <p>
-Some findings will be in schemas that validate route <b>responses</b> or other non-request-payload
-contexts. These are expected false positives. To suppress a legitimate false positive, add a
+Because reporting is scoped to request-reachable strings, false positives are rare. A schema
+assembled through deep cross-file composition may occasionally be missed rather than
+mis-reported. To suppress a legitimate false positive, add a
 <code>codeql[js/kibana/unbounded-string-in-schema]</code> comment on the line above the flagged
-call. If a false positive affects an entire file category, consider proposing an addition to
-<code>KibanaDoSExclusions.qll</code> rather than adding per-line suppressions.
+call.
 </p>
 </overview>
 
 <recommendation>
 <p>
 Always specify a maximum length constraint when using string schemas to validate input from
-untrusted sources.
+untrusted sources. The maximum length should be a reasonable limit based on the business
+requirement. Consider these common categories:
+</p>
+<table>
+<tbody>
+<tr><th>Use case</th><th>Suggested max length</th></tr>
+<tr><td>Identifiers (IDs, keys, slugs)</td><td>100-256</td></tr>
+<tr><td>Names, titles</td><td>256-512</td></tr>
+<tr><td>Descriptions, comments</td><td>1,000-10,000</td></tr>
+<tr><td>Search queries, filters</td><td>256-1,024</td></tr>
+<tr><td>Free-text body content</td><td>10,000-100,000</td></tr>
+<tr><td>URLs</td><td>2,048-4,096</td></tr>
+</tbody>
+</table>
+<p>
+<b>Route as a simple proxy to an Elasticsearch API:</b> the max length should match the
+Elasticsearch field limit. For example, keyword fields default to 32,766 bytes.
+</p>
+<p>
+<b>Route with regex validation:</b> a strict max length is critical. Long strings can trigger
+catastrophic backtracking in poorly written patterns, causing the event loop to block for
+seconds or minutes.
 </p>
 <p>
 For <code>@kbn/config-schema</code>, add a <code>maxLength</code> option:

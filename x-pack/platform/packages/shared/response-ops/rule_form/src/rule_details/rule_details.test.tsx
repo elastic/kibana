@@ -10,6 +10,7 @@ import { fireEvent, render as rtlRender, screen, within } from '@testing-library
 import userEvent from '@testing-library/user-event';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { RuleDetails } from './rule_details';
 
 jest.mock('../hooks', () => ({
@@ -17,7 +18,14 @@ jest.mock('../hooks', () => ({
   useRuleFormDispatch: jest.fn(),
 }));
 
+jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query', () => ({
+  useGetRuleTagsQuery: jest.fn(),
+}));
+
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useGetRuleTagsQuery } = jest.requireMock(
+  '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query'
+);
 
 const render = (toRender: React.ReactElement) =>
   rtlRender(toRender, {
@@ -31,6 +39,8 @@ describe('RuleDetails', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
       },
       formData: {
         name: 'test',
@@ -38,6 +48,7 @@ describe('RuleDetails', () => {
       },
     });
     useRuleFormDispatch.mockReturnValue(mockOnChange);
+    useGetRuleTagsQuery.mockReturnValue({ tags: [], isLoading: false });
   });
 
   afterEach(() => {
@@ -48,6 +59,33 @@ describe('RuleDetails', () => {
     render(<RuleDetails />);
 
     expect(screen.getByTestId('ruleDetails')).toBeInTheDocument();
+  });
+
+  test('shows related dashboards when uiActions is available', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
+        uiActions: uiActionsPluginMock.createStartContract(),
+      },
+      formData: {
+        name: 'test',
+        tags: [],
+      },
+    });
+
+    render(<RuleDetails />);
+
+    const section = screen.getByTestId('ruleLinkedDashboards');
+    expect(section).toBeVisible();
+    expect(within(section).getByText('Related dashboards')).toBeVisible();
+  });
+
+  test('omits related dashboards when uiActions is unavailable', () => {
+    render(<RuleDetails />);
+
+    expect(screen.queryByTestId('ruleLinkedDashboards')).not.toBeInTheDocument();
   });
 
   test('Should allow name to be changed', () => {
@@ -73,10 +111,116 @@ describe('RuleDetails', () => {
     });
   });
 
+  test('Should suggest existing tags and filter suggestions locally with case-insensitive substring matching', async () => {
+    useGetRuleTagsQuery.mockReturnValue({
+      tags: ['Production', 'team-prod', 'staging'],
+      isLoading: false,
+    });
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'prod'
+    );
+
+    expect(await screen.findByText('Production')).toBeInTheDocument();
+    expect(screen.getByText('team-prod')).toBeInTheDocument();
+    expect(screen.queryByText('staging')).not.toBeInTheDocument();
+    // Filtering is client-side: the request must not be narrowed by the typed text.
+    expect(useGetRuleTagsQuery).not.toHaveBeenCalledWith(
+      expect.objectContaining({ search: expect.anything() })
+    );
+
+    await userEvent.click(screen.getByRole('option', { name: 'Production' }));
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['Production'],
+    });
+  });
+
+  test('Should still allow creating a tag that is not among the suggestions', async () => {
+    useGetRuleTagsQuery.mockReturnValue({ tags: ['existing-a'], isLoading: false });
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'brand-new{enter}'
+    );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['brand-new'],
+    });
+  });
+
+  test('Should split a typed comma-separated value into multiple tags', async () => {
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'tag1, tag2 , tag3{enter}'
+    );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['tag1', 'tag2', 'tag3'],
+    });
+  });
+
+  test('Should split a pasted newline-separated value into multiple tags', async () => {
+    render(<RuleDetails />);
+
+    const input = within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput');
+    await userEvent.click(input);
+    await userEvent.paste('tag1\ntag2\ntag3');
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['tag1', 'tag2', 'tag3'],
+    });
+  });
+
+  test('Should de-duplicate tags case-insensitively, keeping the first occurrence casing', async () => {
+    render(<RuleDetails />);
+
+    await userEvent.type(
+      within(screen.getByTestId('ruleDetailsTagsInput')).getByTestId('comboBoxInput'),
+      'Tag1, tag1 , TAG1{enter}'
+    );
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setTags',
+      payload: ['Tag1'],
+    });
+  });
+
+  test('Should disable the copy tags button when there are no tags', () => {
+    render(<RuleDetails />);
+
+    expect(screen.getByTestId('ruleDetailsTagsCopyButton')).toBeDisabled();
+  });
+
+  test('Should enable the copy tags button when tags exist', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
+      },
+      formData: {
+        name: 'test',
+        tags: ['tag1', 'tag2'],
+      },
+    });
+    render(<RuleDetails />);
+
+    expect(screen.getByTestId('ruleDetailsTagsCopyButton')).toBeEnabled();
+  });
+
   test('Should display error', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
       },
       formData: {
         name: 'test',
@@ -97,6 +241,8 @@ describe('RuleDetails', () => {
     useRuleFormState.mockReturnValue({
       plugins: {
         contentManagement: {} as ContentManagementPublicStart,
+        http: {},
+        notifications: { toasts: {} },
       },
       formData: {
         id: 'test-id',

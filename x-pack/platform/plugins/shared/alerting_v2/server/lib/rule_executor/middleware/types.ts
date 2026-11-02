@@ -6,12 +6,14 @@
  */
 
 import type { RuleExecutionStep, PipelineStateStream } from '../types';
+import type { MetricCollectorWriter } from '../metrics/types';
 
 /**
  * Context passed to middleware during step execution.
  */
 export interface RuleExecutionMiddlewareContext {
   readonly step: RuleExecutionStep;
+  readonly collector?: MetricCollectorWriter;
 }
 
 /**

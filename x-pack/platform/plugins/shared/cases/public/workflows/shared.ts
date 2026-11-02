@@ -12,9 +12,11 @@ import {
   type PublicStepDefinition,
 } from '@kbn/workflows-extensions/public';
 
-// createPublicStepDefinition(
-//   definition: PublicStepDefinition<Input, Output, Config>
-// ): PublicStepDefinition<Input, Output, Config>
+export const casesWorkflowIcon: React.ComponentType = React.lazy(() =>
+  import('@elastic/eui/es/components/icon/assets/briefcase').then(({ icon }) => ({
+    default: icon,
+  }))
+);
 
 export function createPublicCaseStepDefinition<
   Input extends z.ZodType = z.ZodType,
@@ -22,11 +24,7 @@ export function createPublicCaseStepDefinition<
   Config extends z.ZodObject = z.ZodObject
 >(definition: PublicStepDefinition<Input, Output, Config>) {
   return createPublicStepDefinition({
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/briefcase').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
+    icon: casesWorkflowIcon,
     ...definition,
   });
 }

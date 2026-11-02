@@ -17,6 +17,8 @@ import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { RULE_NOT_FOUND_DESCRIPTION } from './rule_response_descriptions';
+import { deleteRuleOasExamples } from './delete_rule_oas_example';
 
 @injectable()
 export class DeleteRuleRoute extends BaseAlertingRoute {
@@ -28,7 +30,10 @@ export class DeleteRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Delete a rule',
+    oasOperationObject: deleteRuleOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -40,7 +45,7 @@ export class DeleteRuleRoute extends BaseAlertingRoute {
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates a rule with the given ID does not exist.',
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
     },
   };

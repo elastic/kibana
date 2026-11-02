@@ -36,8 +36,10 @@ export interface IngestChartStatisticsProps {
   /** ES|QL source for the stream (stream name, or query view for query streams). */
   esqlSource: string;
   streamName: string;
-  /** Query streams are views over other streams and have no dedicated index, so storage is not shown. */
+  /** Query streams are views over other streams and have no dedicated index, so storage / total docs are not shown. */
   isQueryStream: boolean;
+  /** Draft streams have no backing data stream, so storage / total docs are not shown. */
+  isDraft: boolean;
 }
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
@@ -50,6 +52,7 @@ export function IngestChartStatistics({
   esqlSource,
   streamName,
   isQueryStream,
+  isDraft,
 }: IngestChartStatisticsProps) {
   const {
     core: { uiSettings },
@@ -62,13 +65,19 @@ export function IngestChartStatistics({
     },
   } = useKibana();
 
+  // Query and Draft streams are temporary in nature and don't have real backing indices.
+  const showTotalDocs = !isQueryStream && !isDraft;
+  const showStorageSize = !isQueryStream && !isDraft && !isServerless;
+
   const totalDocsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
-        signal,
-        params: { query: { stream: streamName } },
-      }),
-    [streamName, streamsRepositoryClient]
+      showTotalDocs
+        ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
+            signal,
+            params: { query: { stream: streamName } },
+          })
+        : Promise.resolve([]),
+    [showTotalDocs, streamName, streamsRepositoryClient]
   );
 
   // Count docs for the equivalent period one week ago to compute trends.
@@ -129,17 +138,23 @@ export function IngestChartStatistics({
       <EuiHorizontalRule margin="m" />
 
       <EuiFlexGroup responsive wrap={false} gutterSize="xl">
-        <StatCell
-          title={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.label', {
-            defaultMessage: 'Docs total',
-          })}
-          value={
-            totalDocsFetch.loading ? <EuiLoadingSpinner size="m" /> : formatNumber(totalDocs, '0,0')
-          }
-          unit={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.unit', {
-            defaultMessage: 'total docs',
-          })}
-        />
+        {showTotalDocs && (
+          <StatCell
+            title={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.label', {
+              defaultMessage: 'Docs total',
+            })}
+            value={
+              totalDocsFetch.loading ? (
+                <EuiLoadingSpinner size="m" />
+              ) : (
+                formatNumber(totalDocs, '0,0')
+              )
+            }
+            unit={i18n.translate('xpack.streams.ingestChartStatistics.docsTotal.unit', {
+              defaultMessage: 'total docs',
+            })}
+          />
+        )}
 
         <StatCell
           title={i18n.translate('xpack.streams.ingestChartStatistics.docsInRange.label', {
@@ -172,7 +187,7 @@ export function IngestChartStatistics({
           }
         />
 
-        {!isQueryStream && !isServerless && (
+        {showStorageSize && (
           <StatCell
             title={i18n.translate('xpack.streams.ingestChartStatistics.storageSize.label', {
               defaultMessage: 'Storage size',

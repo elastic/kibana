@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import type { TimeState } from '@kbn/es-query';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import type { Streams, PhaseName } from '@kbn/streams-schema';
+import { TIER_TO_PHASE, type PhaseName } from '@kbn/streams-schema';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { lastValueFrom } from 'rxjs';
@@ -22,6 +22,8 @@ import { getFailureStoreIndexName } from '../helpers/failure_store_index_name';
 const TIMESTAMP_FIELD = '@timestamp';
 const DEFAULT_SAMPLER_PROBABILITY = 0.1;
 const STATISTICAL_ERROR_THRESHOLD = 0.01;
+
+const MAX_BACKING_INDICES = 1000;
 
 export interface StreamAggregations {
   buckets: Array<{ key: number; doc_count: number }>;
@@ -120,12 +122,14 @@ export const useIngestionRate = ({
 type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
 
 export const useIngestionRatePerTier = ({
-  definition,
+  indexName,
+  isIlm,
   calculatedStats,
   timeState,
   isFailureStore = false,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  indexName: string;
+  isIlm: boolean;
   calculatedStats?: CalculatedStats;
   timeState: TimeState;
   isFailureStore?: boolean;
@@ -155,9 +159,29 @@ export const useIngestionRatePerTier = ({
 
       const { interval, intervalType } = intervalData;
 
-      const indexName = isFailureStore
-        ? getFailureStoreIndexName(definition.stream.name)
-        : definition.stream.name;
+      const queryIndex = isFailureStore ? getFailureStoreIndexName(indexName) : indexName;
+
+      // DSL/disabled streams derive each index's phase from its actual `_tier` allocation.
+      // `_tier` has no fielddata, so we can't aggregate on it directly; instead we run one filter
+      // per tier and collect the matching indices via a nested `_index` agg. (ILM streams skip this
+      // and use the policy's intended phase from `_explain` below.)
+      const useTierAgg = !isFailureStore && !isIlm;
+      const tierFilters = useTierAgg
+        ? {
+            index_tiers: {
+              filters: {
+                filters: Object.fromEntries(
+                  Object.keys(TIER_TO_PHASE).map((tier) => [tier, { term: { _tier: tier } }])
+                ),
+              },
+              aggs: {
+                indices: {
+                  terms: { field: '_index', size: MAX_BACKING_INDICES },
+                },
+              },
+            },
+          }
+        : undefined;
 
       const {
         rawResponse: { aggregations },
@@ -176,19 +200,32 @@ export const useIngestionRatePerTier = ({
                       }>;
                     };
                   };
+                  index_tiers?: {
+                    buckets: Record<string, { indices: { buckets: Array<{ key: string }> } }>;
+                  };
                 }
               | undefined;
           }>
         >(
           {
             params: {
-              index: indexName,
+              index: queryIndex,
               track_total_hits: false,
               body: {
                 size: 0,
                 query: {
                   bool: {
-                    filter: [{ range: { [TIMESTAMP_FIELD]: { gte: start, lte: end } } }],
+                    filter: [
+                      {
+                        range: {
+                          [TIMESTAMP_FIELD]: {
+                            gte: timeState.start,
+                            lte: timeState.end,
+                            format: 'epoch_millis',
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
                 aggs: {
@@ -203,16 +240,17 @@ export const useIngestionRatePerTier = ({
                           field: TIMESTAMP_FIELD,
                           [intervalType]: interval,
                           min_doc_count: 0,
-                          extended_bounds: { min: start, max: end },
+                          extended_bounds: { min: timeState.start, max: timeState.end },
                         },
                         aggs: {
                           indices: {
-                            terms: { field: '_index' },
+                            terms: { field: '_index', size: MAX_BACKING_INDICES },
                           },
                         },
                       },
                     },
                   },
+                  ...tierFilters,
                 },
               },
             },
@@ -225,13 +263,33 @@ export const useIngestionRatePerTier = ({
         return { start, end, interval, buckets: {} };
       }
 
-      // For failure store, use simplified ILM logic since we can't use streams API with failure store selector
-      const ilmExplain = isFailureStore
-        ? { indices: {} } // Simplified for failure store
-        : await streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_explain', {
-            params: { path: { name: definition.stream.name } },
+      const indexToPhase: Record<string, PhaseNameWithoutDelete> = {};
+
+      if (isIlm && !isFailureStore) {
+        const ilmExplain = await streamsRepositoryClient.fetch(
+          'GET /internal/streams/{name}/lifecycle/_explain',
+          {
+            params: { path: { name: indexName } },
             signal,
-          });
+          }
+        );
+
+        for (const [indexKey, explain] of Object.entries(ilmExplain.indices ?? {})) {
+          if (explain?.managed && explain?.phase && explain.phase in ilmPhases) {
+            indexToPhase[indexKey] = explain.phase as PhaseNameWithoutDelete;
+          }
+        }
+      } else {
+        for (const [tier, tierBucket] of Object.entries(aggregations.index_tiers?.buckets ?? {})) {
+          const phase = TIER_TO_PHASE[tier];
+          if (!phase) {
+            continue;
+          }
+          for (const indexBucket of tierBucket.indices.buckets) {
+            indexToPhase[indexBucket.key] = phase;
+          }
+        }
+      }
 
       const fallbackTier = 'hot';
       const buckets = aggregations.sampler.docs_count.buckets.reduce(
@@ -244,12 +302,9 @@ export const useIngestionRatePerTier = ({
           }
 
           const countByTier = indices.buckets.reduce((tiers, index) => {
-            const explain = ilmExplain.indices[index.key];
-            // For failure store, use fallback tier since ILM explain won't exist
+            const phase = indexToPhase[index.key];
             const tier =
-              explain?.managed && explain?.phase && explain.phase in ilmPhases
-                ? (explain.phase as PhaseNameWithoutDelete)
-                : fallbackTier;
+              phase && phase in ilmPhases ? (phase as PhaseNameWithoutDelete) : fallbackTier;
             tiers[tier] = (tiers[tier] ?? 0) + index.doc_count;
             return tiers;
           }, {} as Record<PhaseNameWithoutDelete, number>);
@@ -267,10 +322,27 @@ export const useIngestionRatePerTier = ({
         {} as Record<PhaseNameWithoutDelete, Array<{ key: number; value: number }>>
       );
 
-      return { start, end, interval, buckets };
+      // Tiers only have points at timestamps where they had data, so their series are misaligned.
+      // The stacked bar chart needs shared x values, so fill each tier with 0 at missing timestamps.
+      const allKeys = new Set<number>();
+      for (const series of Object.values(buckets)) {
+        for (const point of series) {
+          allKeys.add(point.key);
+        }
+      }
+      const sortedKeys = Array.from(allKeys).sort((a, b) => a - b);
+      const normalizedBuckets = Object.fromEntries(
+        Object.entries(buckets).map(([tier, series]) => {
+          const byKey = new Map(series.map((p) => [p.key, p.value]));
+          return [tier, sortedKeys.map((key) => ({ key, value: byKey.get(key) ?? 0 }))];
+        })
+      );
+
+      return { start, end, interval, buckets: normalizedBuckets };
     },
     [
-      definition,
+      indexName,
+      isIlm,
       calculatedStats,
       timeState,
       core,
@@ -289,18 +361,16 @@ export const useIngestionRatePerTier = ({
 };
 
 export const getAggregations = async ({
-  definition,
+  indexName,
   timeState,
   totalDocs,
-  isFailureStore = false,
   core,
   search,
   signal,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  indexName: string;
   timeState: TimeState;
   totalDocs?: number;
-  isFailureStore?: boolean;
   core: CoreStart;
   search: ISearchStart;
   signal: AbortSignal;
@@ -313,10 +383,6 @@ export const getAggregations = async ({
   }
 
   const { interval, intervalType } = intervalData;
-
-  const indexName = isFailureStore
-    ? getFailureStoreIndexName(definition.stream.name)
-    : definition.stream.name;
 
   const {
     rawResponse: { aggregations },

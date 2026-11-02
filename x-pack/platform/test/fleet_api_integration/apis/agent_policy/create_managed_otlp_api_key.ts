@@ -39,6 +39,18 @@ export default function (providerContext: FtrProviderContext) {
         expect(res.item.api_key).to.be.a('string');
       });
 
+      it('returns 403 for a user with Fleet: Agents All but no ES api-key privilege', async () => {
+        // fleet_agents_all_only has Kibana Fleet: Agents All but no manage_own_api_key cluster
+        // privilege and no apm event:write application privilege. The handler uses asCurrentUser,
+        // so ES clamps the key's role_descriptors to the intersection of the caller's privileges —
+        // which excludes apm/event:write. The pre-check catches this and returns 403.
+        const apiClient = new SpaceTestApiClient(supertestWithoutAuth, {
+          username: testUsers.fleet_agents_all_only.username,
+          password: testUsers.fleet_agents_all_only.password,
+        });
+        await expectToRejectWithError(() => apiClient.postManagedOtlpApiKey('managed-otlp'), /403/);
+      });
+
       it('returns 403 for a user without Fleet privileges', async () => {
         const apiClient = new SpaceTestApiClient(supertestWithoutAuth, {
           username: testUsers.fleet_no_access.username,

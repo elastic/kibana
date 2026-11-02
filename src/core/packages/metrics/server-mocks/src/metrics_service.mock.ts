@@ -31,12 +31,14 @@ export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
   totalQueuedRequests: 0,
 };
 
+const lowEluMetrics$ = new BehaviorSubject({ short: 0, medium: 0, long: 0 });
+
 const createInternalSetupContractMock = () => {
   const processMock = collectorMock.createOpsProcessMetrics();
 
   const setupContract: jest.Mocked<InternalMetricsServiceSetup> = lazyObject({
     collectionInterval: 30000,
-    getEluMetrics$: jest.fn(),
+    getEluMetrics$: jest.fn().mockReturnValue(lowEluMetrics$),
     getOpsMetrics$: jest.fn().mockReturnValue(
       new BehaviorSubject({
         collected_at: new Date('2020-01-01 01:00:00'),

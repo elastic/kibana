@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -14,7 +15,6 @@ import {
   isNoShardsAvailableError,
   throwHasDataSearchError,
 } from '../../lib/handle_has_data_search_error';
-import { checkPreExistingData } from '../../lib/check_pre_existing_data';
 import { resolveProbe } from './resolve_has_data_probes';
 import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
@@ -39,7 +39,6 @@ export interface HasKubernetesDataRouteResponse {
   hasData: boolean;
   hasLogs?: boolean;
   hasMetrics?: boolean;
-  hasPreExistingData?: boolean;
 }
 
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
@@ -55,7 +54,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
     },
   },
   async handler(resources): Promise<CreateKubernetesOnboardingFlowRouteResponse> {
-    const { context, request, params, plugins, services, kibanaVersion, config } = resources;
+    const { context, request, plugins, services, kibanaVersion, config, params } = resources;
     const {
       elasticsearch: { client },
       featureFlags,
@@ -88,22 +87,19 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
         Boolean(managedOtlpServiceUrl));
 
     const apiKeyPromise =
-      isManagedOtlpServiceAvailable && params.body.pkgName === 'kubernetes_otel'
+      params.body.pkgName === 'kubernetes'
+        ? createShipperApiKey(client.asCurrentUser, 'kubernetes_onboarding', true)
+        : isManagedOtlpServiceAvailable
         ? createManagedOtlpServiceApiKey(client.asCurrentUser, `ingest-otel-k8s`)
-        : createShipperApiKey(
-            client.asCurrentUser,
-            params.body.pkgName === 'kubernetes_otel' ? 'otel-kubernetes' : 'kubernetes',
-            true
-          );
+        : createShipperApiKey(client.asCurrentUser, 'otel-kubernetes', true);
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       apiKeyPromise,
       getAgentVersionInfo(fleetPluginStart, kibanaVersion),
       // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
-      // Kubernetes package is required for both classic kubernetes and otel
+      // The EA flow uses this package directly; EDOT stack values also reference its assets.
       packageClient.ensureInstalledPackage({ pkgName: 'kubernetes' }),
-      // Kubernetes otel package is required only for otel
       params.body.pkgName === 'kubernetes_otel'
         ? packageClient.ensureInstalledPackage({ pkgName: 'kubernetes_otel' })
         : undefined,
@@ -125,12 +121,9 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
 
 const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/kubernetes/{onboardingId}/has-data',
-  params: t.type({
-    path: t.type({
-      onboardingId: t.string,
-    }),
-    query: t.partial({
-      start: t.string,
+  params: z.object({
+    path: z.object({
+      onboardingId: z.string().max(36),
     }),
   }),
   security: {
@@ -141,7 +134,6 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   },
   async handler(resources): Promise<HasKubernetesDataRouteResponse> {
     const { onboardingId } = resources.params.path;
-    const { start } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
     try {
@@ -170,25 +162,6 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         },
       };
 
-      const wiredStreamIndices = ['logs.otel*', 'logs.ecs*', 'metrics.otel*', 'metrics.ecs*'];
-
-      // Check if data was already flowing into wired stream indices before
-      // the user started onboarding. If so, time-range detection on those
-      // indices would produce false positives, so we skip it.
-      const hasPreExistingData = start
-        ? await checkPreExistingData(elasticsearch.client.asCurrentUser, wiredStreamIndices, start)
-        : false;
-
-      // Wired streams (logs.otel*, logs.ecs*) use passthrough mapping where
-      // onboarding.id is not indexed, so we cannot filter by it without a
-      // runtime mapping (which times out on large clusters). Instead, fall
-      // back to a time-range-only query when a start time is provided and
-      // no pre-existing data would cause false positives.
-      const wiredStreamQuery: estypes.QueryDslQueryContainer | undefined =
-        start && !hasPreExistingData
-          ? { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } }
-          : undefined;
-
       const searches: Array<Promise<estypes.SearchResponse>> = [
         elasticsearch.client.asCurrentUser.search({
           index: ['logs-*'],
@@ -202,35 +175,16 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         }),
       ];
 
-      if (wiredStreamQuery) {
-        searches.push(
-          elasticsearch.client.asCurrentUser.search({
-            index: ['logs.otel*', 'logs.ecs*'],
-            ...commonSearchParams,
-            query: wiredStreamQuery,
-          }),
-          elasticsearch.client.asCurrentUser.search({
-            index: ['metrics.otel*', 'metrics.ecs*'],
-            ...commonSearchParams,
-            query: wiredStreamQuery,
-          })
-        );
-      }
-
       const results = await Promise.allSettled(searches);
-      const [logsResult, metricsResult, wiredLogsResult, wiredMetricsResult] = results;
+      const [logsResult, metricsResult] = results;
 
-      const hasLogs =
-        resolveProbe(logsResult) || (wiredLogsResult ? resolveProbe(wiredLogsResult) : false);
-      const hasMetrics =
-        resolveProbe(metricsResult) ||
-        (wiredMetricsResult ? resolveProbe(wiredMetricsResult) : false);
+      const hasLogs = resolveProbe(logsResult);
+      const hasMetrics = resolveProbe(metricsResult);
 
       return {
         hasData: hasLogs || hasMetrics,
         hasLogs,
         hasMetrics,
-        hasPreExistingData: hasPreExistingData || undefined,
       };
     } catch (error) {
       if (isNoShardsAvailableError(error)) {

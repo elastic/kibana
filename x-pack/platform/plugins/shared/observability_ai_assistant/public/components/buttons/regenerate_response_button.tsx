@@ -7,9 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { AiButton, type AiButtonProps } from '@kbn/shared-ux-ai-components';
+import { AiButton, type AiButtonEmptyProps } from '@kbn/shared-ux-ai-components';
 
-export function RegenerateResponseButton(props: AiButtonProps) {
+export function RegenerateResponseButton(
+  props: Omit<AiButtonEmptyProps, 'iconType' | 'size' | 'children'>
+) {
   return (
     <AiButton {...props} iconType="sparkles" size="s" variant="empty">
       {i18n.translate('xpack.observabilityAiAssistant.regenerateResponseButtonLabel', {

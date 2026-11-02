@@ -13,6 +13,7 @@ import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from './mocks';
 import { getDefaultArguments } from '..';
 import { DEFAULT_TIMEOUT } from './constants';
+import { ModelRefusalError } from './model_refusal_error';
 
 const connectorId = 'mock-connector-id';
 
@@ -21,6 +22,11 @@ const actionsClient = actionsClientMock.create();
 const mockLogger = loggerMock.create();
 
 const prompt = 'Do you know my name?';
+
+const getDebugMessages = (): string[] =>
+  (mockLogger.debug as jest.Mock).mock.calls.map(([arg]) =>
+    typeof arg === 'function' ? (arg as () => string)() : String(arg)
+  );
 
 describe('ActionsClientLlm', () => {
   beforeEach(() => {
@@ -130,6 +136,68 @@ describe('ActionsClientLlm', () => {
       expect(result).toEqual(mockActionResponse.message);
     });
 
+    it('logs the response content at debug on success', async () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+      });
+
+      await actionsClientLlm._call(prompt);
+
+      expect(
+        getDebugMessages().some((message) => message.includes(mockActionResponse.message))
+      ).toBe(true);
+    });
+
+    it('logs the response content at debug when llmType is inference', async () => {
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          data: {
+            choices: [
+              {
+                message: { content: mockActionResponse.message },
+              },
+            ],
+          },
+          status: 'ok',
+        })
+      );
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+        llmType: 'inference',
+      });
+
+      await actionsClientLlm._call(prompt);
+
+      expect(
+        getDebugMessages().some((message) => message.includes(mockActionResponse.message))
+      ).toBe(true);
+    });
+
+    it('logs the serviceMessage at debug when the action result status is error', async () => {
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          message: 'action-result-message',
+          serviceMessage: 'action-result-service-message',
+          status: 'error',
+        })
+      );
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+      });
+
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow();
+
+      expect(
+        getDebugMessages().some((message) => message.includes('action-result-service-message'))
+      ).toBe(true);
+    });
+
     it('rejects with the expected error when the action result status is error', async () => {
       actionsClient.execute.mockImplementation(() => {
         throw new Error(
@@ -142,7 +210,7 @@ describe('ActionsClientLlm', () => {
         logger: mockLogger,
       });
 
-      await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow(
         'ActionsClientLlm: action result status is error: action-result-message - action-result-service-message'
       );
     });
@@ -163,7 +231,7 @@ describe('ActionsClientLlm', () => {
         logger: mockLogger,
       });
 
-      await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow(
         'ActionsClientLlm: content should be a string, but it had an unexpected type: number'
       );
     });
@@ -219,6 +287,37 @@ describe('ActionsClientLlm', () => {
         );
       });
 
+      it('logs the response content at debug on success', async () => {
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        await actionsClientLlm._call(prompt);
+
+        expect(getDebugMessages().some((message) => message.includes('Hello, world'))).toBe(true);
+      });
+
+      it('logs the error at debug when inferenceClient.chatComplete rejects', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockRejectedValue(
+          new Error('quota exceeded')
+        );
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow('quota exceeded');
+
+        expect(getDebugMessages().some((message) => message.includes('quota exceeded'))).toBe(true);
+      });
+
       it('rejects when inferenceClient is not provided', async () => {
         const actionsClientLlm = new ActionsClientLlm({
           actionsClient,
@@ -227,7 +326,7 @@ describe('ActionsClientLlm', () => {
           logger: mockLogger,
         });
 
-        await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow(
           'ActionsClientLlm: inferenceClient is required when isInferenceEndpoint is true'
         );
       });
@@ -245,7 +344,31 @@ describe('ActionsClientLlm', () => {
           logger: mockLogger,
         });
 
-        await expect(actionsClientLlm._call(prompt)).rejects.toThrowError('quota exceeded');
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow('quota exceeded');
+      });
+
+      it('throws a ModelRefusalError when the response carries a content filter refusal', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+          content: '{"insights":[{"title":',
+          refusal:
+            'The response was stopped by the provider content filter (finish_reason: content_filter).',
+        });
+
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+          model: 'claude-opus-5-5',
+        });
+
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow(ModelRefusalError);
+        await expect(actionsClientLlm._call(prompt)).rejects.toMatchObject({
+          connectorId,
+          model: 'claude-opus-5-5',
+          partialContentLength: 22,
+        });
       });
     });
   });

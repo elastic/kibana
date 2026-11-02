@@ -20,7 +20,10 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/core-plugins-browser'
+  - '@kbn/core-security-common'
+  - '@kbn/core-ui-settings-browser'
   - '@kbn/core-di-internal'
+  - '@kbn/core-di'
 tags:
   - shared-browser
   - package
@@ -33,6 +36,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

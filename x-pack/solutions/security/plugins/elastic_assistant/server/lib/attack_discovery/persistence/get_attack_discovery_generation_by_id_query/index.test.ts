@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG } from '@kbn/discoveries';
+
 import { getAttackDiscoveryGenerationByIdQuery } from '.';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
 
@@ -68,11 +70,6 @@ describe('getAttackDiscoveryGenerationByIdQuery', () => {
               field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
             },
           },
-          loading_message: {
-            terms: {
-              field: 'kibana.alert.rule.execution.status',
-            },
-          },
           event_actions: {
             terms: {
               field: 'event.action',
@@ -95,6 +92,26 @@ describe('getAttackDiscoveryGenerationByIdQuery', () => {
               format: 'strict_date_optional_time',
             },
           },
+          loading_message: {
+            terms: {
+              field: 'kibana.alert.rule.execution.status',
+            },
+          },
+          workflow_id: {
+            terms: {
+              field: 'event.module',
+            },
+          },
+          workflow_reference: {
+            terms: {
+              field: 'event.reference',
+            },
+          },
+          workflow_run_id: {
+            terms: {
+              field: 'event.id',
+            },
+          },
         },
       },
     });
@@ -110,8 +127,12 @@ describe('getAttackDiscoveryGenerationByIdQuery', () => {
             },
           },
           {
-            term: {
-              'user.name': 'test_user',
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { term: { 'user.name': 'test_user' } },
+                { term: { tags: ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG } },
+              ],
             },
           },
           {

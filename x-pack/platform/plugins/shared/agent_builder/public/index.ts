@@ -22,12 +22,21 @@ export type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
   PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
 } from './types';
 export type { EmbeddableConversationProps } from './embeddable/types';
 export { AGENTBUILDER_FEATURE_ID, AGENTBUILDER_APP_ID, uiPrivileges, MCP_SERVER_PATH };
 export { type CreateSkillResponse, SKILLS_API_PATH };
 export { ConversationInputShell } from '@kbn/agent-builder-browser';
 export type { ConversationInputShellProps } from '@kbn/agent-builder-browser';
+export {
+  AddConnectorMenu,
+  ConnectorLibraryPanel,
+  type AddConnectorMenuProps,
+  type ConnectorLibraryConnector,
+  type ConnectorLibraryPanelProps,
+} from './components/agent_connectors';
 export const plugin: PluginInitializer<
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,

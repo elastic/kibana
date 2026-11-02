@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import type { EuiSetColorMethod } from '@elastic/eui';
 import { EuiColorPicker, EuiFlexGroup, EuiFlexItem, useColorPickerState } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { withDebounceArg } from '../../../../public/components/with_debounce_arg';
 import { ArgumentStrings } from '../../../../i18n';
@@ -31,7 +32,15 @@ const ColorPicker: FC<Props> = ({ onValueChange, argValue }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiColorPicker compressed onChange={pickColor} color={color} isInvalid={!!errors} />
+        <EuiColorPicker
+          compressed
+          onChange={pickColor}
+          color={color}
+          isInvalid={!!errors}
+          aria-label={i18n.translate('xpack.canvas.colorPickerArgument.ariaLabel', {
+            defaultMessage: 'Select color',
+          })}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -9,6 +9,7 @@ import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   ProjectRoutingOverrides,
+  PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
   StateComparators,
@@ -21,6 +22,7 @@ import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '@kbn/lens-common';
+import { getChartScopedFilterQuery, getTextBasedLayerQueries } from '@kbn/lens-common';
 import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import type { LensEmbeddableStartServices } from '../types';
@@ -35,7 +37,13 @@ export const searchContextComparators: StateComparators<LensUnifiedSearchContext
 };
 
 export interface SearchContextConfig {
-  api: PublishesUnifiedSearch & PublishesSearchSession & PublishesProjectRoutingOverrides;
+  api: PublishesUnifiedSearch &
+    PublishesSearchSession &
+    PublishesProjectRoutingOverrides &
+    PublishesEsql;
+  internalApi: {
+    setApproximationApplied: (value: boolean | undefined) => void;
+  };
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
@@ -68,20 +76,28 @@ export function initializeSearchContext(
     injectFilterReferences(attributes.state.filters, attributes.references)
   );
 
-  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(attributes.state.query);
+  // Part of PublishesUnifiedSearch. Contains the top-level KQL/Lucene query
+  // applied across all layers.
+  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+    getChartScopedFilterQuery(attributes.state?.query)
+  );
 
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
 
+  const esql$ = new BehaviorSubject<AggregateQuery[]>(getTextBasedLayerQueries(attributes));
+
   const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
-    getProjectRoutingOverrides(attributes.state.query)
+    getProjectRoutingOverrides(esql$.getValue()[0])
   );
+
+  const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const timeRangeManager = initializeTimeRangeManager(initialState);
 
   const subscriptions = [
     internalApi.attributes$
       .pipe(
-        map((attrs) => attrs.state.query),
+        map((attrs) => getChartScopedFilterQuery(attrs.state?.query)),
         distinctUntilChanged(isEqual)
       )
       .subscribe(query$),
@@ -91,9 +107,18 @@ export function initializeSearchContext(
         distinctUntilChanged(isEqual)
       )
       .subscribe(filters$),
-    query$
-      .pipe(map(getProjectRoutingOverrides), distinctUntilChanged(isEqual))
+    esql$
+      .pipe(
+        map((queries) => getProjectRoutingOverrides(queries[0])),
+        distinctUntilChanged(isEqual)
+      )
       .subscribe(projectRoutingOverrides$),
+    internalApi.attributes$
+      .pipe(
+        map((attrs) => getTextBasedLayerQueries(attrs)),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(esql$),
   ];
 
   return {
@@ -103,8 +128,17 @@ export function initializeSearchContext(
       query$,
       timeslice$,
       projectRoutingOverrides$,
+      esql$,
+      approximationApplied$,
       isCompatibleWithUnifiedSearch: () => true,
       ...timeRangeManager.api,
+    },
+    internalApi: {
+      setApproximationApplied: (value: boolean | undefined) => {
+        if (approximationApplied$.getValue() !== value) {
+          approximationApplied$.next(value);
+        }
+      },
     },
     anyStateChange$: merge(timeRangeManager.anyStateChange$),
     cleanup: () => {

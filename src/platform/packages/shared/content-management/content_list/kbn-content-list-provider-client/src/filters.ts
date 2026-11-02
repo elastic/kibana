@@ -46,7 +46,11 @@ export interface ContentListFilterDefinition<
   queryField?: string;
   /** Extracts the filterable value(s) from a single item. */
   getItemValue: (item: TItem) => MaybeArray<TValue>;
-  /** Static option list or a descriptor for deriving options from a data array. */
+  /**
+   * Static option list or a descriptor for deriving options from a data array.
+   * Omit to let the toolbar control derive options from the values present in
+   * the current list (faceted), like the built-in tag and created-by filters.
+   */
   options?: ContentListFilterOptions<TOption, TValue>;
   /** Shown when the option list is empty. */
   emptyMessage?: string;

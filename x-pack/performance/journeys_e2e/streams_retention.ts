@@ -17,30 +17,28 @@ export const journey = new Journey({
 })
   .step('Go to stream retention page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get('/app/streams/logs.otel.child1/management/retention'));
-    await page.waitForSelector(subj('streamsAppRetentionMetadataEditDataRetentionButton'), {
+    await page.waitForSelector(subj('retention-metric'), {
       timeout: 60000,
     });
   })
-  .step('Open edit retention modal', async ({ page }) => {
-    await page.click(subj('streamsAppRetentionMetadataEditDataRetentionButton'));
-    await page.waitForSelector(subj('editLifecycleModalTitle'));
+  .step('Open edit retention flyout', async ({ page }) => {
+    await page.click(subj('lifecyclePhase-delete-button'));
+    await page.click(subj('lifecyclePhase-delete-editButton'));
+    await page.waitForSelector(subj('streamsEditDataPhasesFlyout'), {
+      timeout: 30000,
+    });
   })
   .step('Set custom retention', async ({ page }) => {
-    const inheritSwitch = page.locator(subj('inheritDataRetentionSwitch'));
-    const isChecked = await inheritSwitch.isChecked();
-    if (isChecked) {
-      await inheritSwitch.click();
-    }
-
-    await page.click(subj('customRetentionButton'));
-
-    await page.waitForSelector(subj('streamsAppDslModalDaysField'), { timeout: 30000 });
-    const daysInput = page.locator(subj('streamsAppDslModalDaysField'));
-    await daysInput.fill('30');
+    const deletePanel = page.locator(subj('streamsEditDataPhasesFlyoutPanel-delete'));
+    const valueField = deletePanel.locator(subj('streamsEditDataPhasesFlyoutMoveAfterValue'));
+    await valueField.fill('');
+    await valueField.fill('60');
+    await deletePanel.locator(subj('streamsEditDataPhasesFlyoutMoveAfterUnit')).selectOption('d');
+    await deletePanel.locator(subj('streamsEditDataPhasesFlyoutMoveAfterUnit')).click();
   })
   .step('Save retention settings', async ({ page }) => {
-    await page.click(subj('streamsAppModalFooterButton'));
-    await page.waitForSelector(subj('editLifecycleModalTitle'), {
+    await page.click(subj('streamsEditDataPhasesFlyoutSaveButton'));
+    await page.waitForSelector(subj('streamsEditDataPhasesFlyout'), {
       state: 'detached',
       timeout: 30000,
     });

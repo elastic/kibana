@@ -20,6 +20,7 @@ import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import { isValidHash } from '../../../../common/endpoint/service/artifacts/validations';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { ENTRY_VALUE_MAX_LENGTH } from './constants';
 
 const allowedHashes: Readonly<string[]> = ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'];
 const allowedFilePaths: Readonly<string[]> = ['file.path', 'file.path.caseless'];
@@ -32,20 +33,34 @@ const FilePath = schema.oneOf(
   allowedFilePaths.map((path) => schema.literal(path)) as [Type<string>]
 );
 
+const FileName = schema.literal('file.name');
+const FileNameCaseless = schema.literal('file.name.caseless');
+
 const FileCodeSigner = schema.literal('file.Ext.code_signature');
 
-const ConditionEntryTypeSchema = schema.literal('match_any');
+// Path and File Name support an additional `wildcard` (Match) entry type, in addition to `match_any`.
+// `file.name.caseless` is the field the UI sends for `wildcard` (Match) entries on Windows/macOS.
+const PathOrFileNameField = schema.oneOf([FilePath, FileName, FileNameCaseless]);
+
+const ConditionEntryTypeSchema = schema.conditional(
+  schema.siblingRef('field'),
+  PathOrFileNameField,
+  schema.oneOf([schema.literal('match_any'), schema.literal('wildcard')]),
+  schema.literal('match_any')
+);
 const ConditionEntryOperatorSchema = schema.literal('included');
 
 type ConditionEntryFieldAllowedType =
   | TypeOf<typeof FileHashField>
   | TypeOf<typeof FilePath>
+  | TypeOf<typeof FileName>
+  | TypeOf<typeof FileNameCaseless>
   | TypeOf<typeof FileCodeSigner>;
 
 type BlocklistConditionEntry =
   | {
       field: ConditionEntryFieldAllowedType;
-      type: 'match_any' | 'match';
+      type: 'match_any' | 'match' | 'wildcard';
       operator: 'included';
       value: string[] | string;
     }
@@ -55,7 +70,7 @@ type BlocklistConditionEntry =
  * A generic Entry schema to be used for a specific entry schema depending on the OS
  */
 const CommonEntrySchema = {
-  field: schema.oneOf([FileHashField, FilePath]),
+  field: schema.oneOf([FileHashField, FilePath, FileName, FileNameCaseless]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
   // If field === HASH then validate hash with custom method, else validate string with minLength = 1
@@ -64,6 +79,7 @@ const CommonEntrySchema = {
     FileHashField,
     schema.arrayOf(
       schema.string({
+        maxLength: ENTRY_VALUE_MAX_LENGTH,
         validate: (hash: string) =>
           isValidHash(hash) ? undefined : `invalid hash value [${hash}]`,
       }),
@@ -71,16 +87,28 @@ const CommonEntrySchema = {
     ),
     schema.conditional(
       schema.siblingRef('field'),
-      FilePath,
-      schema.arrayOf(
+      PathOrFileNameField,
+      // `wildcard` (Match) entries carry a single value, `match_any` (is one of) entries an array
+      schema.conditional(
+        schema.siblingRef('type'),
+        schema.literal('wildcard'),
         schema.string({
+          maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (pathValue: string) =>
             pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
         }),
-        { minSize: 1, maxSize: 2000 }
+        schema.arrayOf(
+          schema.string({
+            maxLength: ENTRY_VALUE_MAX_LENGTH,
+            validate: (pathValue: string) =>
+              pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
+          }),
+          { minSize: 1, maxSize: 2000 }
+        )
       ),
       schema.arrayOf(
         schema.string({
+          maxLength: ENTRY_VALUE_MAX_LENGTH,
           validate: (signerValue: string) =>
             signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
         }),
@@ -101,8 +129,10 @@ const WindowsSignerEntrySchema = schema.object({
       value: schema.conditional(
         schema.siblingRef('type'),
         schema.literal('match'),
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 2000 })
+        schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }),
+        schema.arrayOf(schema.string({ minLength: 1, maxLength: ENTRY_VALUE_MAX_LENGTH }), {
+          maxSize: 2000,
+        })
       ),
       type: schema.oneOf([schema.literal('match'), schema.literal('match_any')]),
       operator: schema.literal('included'),
@@ -111,20 +141,25 @@ const WindowsSignerEntrySchema = schema.object({
   ),
 });
 
+// Windows and macOS are case-insensitive, so `wildcard` (Match) entries must use the `.caseless`
+// fields. Exact-match (`match_any`) entries keep accepting the non-caseless fields.
+const caselessWildcardValidation = (entry: { field: string; type: string }): string | undefined => {
+  if (entry.type === 'wildcard' && ['file.path', 'file.name'].includes(entry.field)) {
+    return `[${entry.field}] is not allowed for a wildcard entry on this OS. Use [${entry.field}.caseless]`;
+  }
+};
+
 const WindowsEntrySchema = schema.oneOf([
   WindowsSignerEntrySchema,
-  schema.object({
-    ...CommonEntrySchema,
-    field: schema.oneOf([FileHashField, FilePath]),
-  }),
+  schema.object(CommonEntrySchema, { validate: caselessWildcardValidation }),
 ]);
 
 const LinuxEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
-const MacEntrySchema = schema.object({
-  ...CommonEntrySchema,
+const MacEntrySchema = schema.object(CommonEntrySchema, {
+  validate: caselessWildcardValidation,
 });
 
 // Hash entries validator method.
@@ -179,12 +214,21 @@ const entriesSchemaOptions = {
 const EntriesSchema = schema.conditional(
   schema.contextRef('os'),
   OperatingSystem.WINDOWS,
-  schema.arrayOf(WindowsEntrySchema, entriesSchemaOptions),
+  schema.arrayOf(WindowsEntrySchema, {
+    ...entriesSchemaOptions,
+    maxSize: entriesSchemaOptions.maxSize,
+  }),
   schema.conditional(
     schema.contextRef('os'),
     OperatingSystem.LINUX,
-    schema.arrayOf(LinuxEntrySchema, entriesSchemaOptions),
-    schema.arrayOf(MacEntrySchema, entriesSchemaOptions)
+    schema.arrayOf(LinuxEntrySchema, {
+      ...entriesSchemaOptions,
+      maxSize: entriesSchemaOptions.maxSize,
+    }),
+    schema.arrayOf(MacEntrySchema, {
+      ...entriesSchemaOptions,
+      maxSize: entriesSchemaOptions.maxSize,
+    })
   )
 );
 

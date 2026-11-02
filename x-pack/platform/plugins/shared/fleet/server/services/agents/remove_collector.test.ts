@@ -7,6 +7,7 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { AGENT_TYPE_OPAMP } from '../../../common/constants';
 import type { Agent } from '../../types';
 
 import * as apiKeys from '../api_keys';
@@ -93,12 +94,24 @@ describe('removeCollector', () => {
     expect(mockedApiKeys.invalidateAPIKeys).not.toHaveBeenCalled();
   });
 
-  it('does not write an agent action document', async () => {
+  it('creates a REMOVE_COLLECTOR action document and result for the agent', async () => {
     mockedCrud.getAgentById.mockResolvedValue(opampAgent);
 
     await removeCollector(esClient, soClient, opampAgent.id);
 
-    expect(mockedActions.createAgentAction).not.toHaveBeenCalled();
+    expect(mockedActions.createAgentAction).toHaveBeenCalledTimes(1);
+    const actionCall = mockedActions.createAgentAction.mock.calls[0][2];
+    expect(actionCall).toMatchObject({
+      agents: [opampAgent.id],
+      type: 'REMOVE_COLLECTOR',
+      total: 1,
+    });
+
+    expect(mockedActions.bulkCreateAgentActionResults).toHaveBeenCalledTimes(1);
+    const resultsCall = mockedActions.bulkCreateAgentActionResults.mock.calls[0][1];
+    expect(resultsCall).toHaveLength(1);
+    expect(resultsCall[0].agentId).toBe(opampAgent.id);
+    expect(resultsCall[0].actionId).toBe(actionCall.id);
   });
 });
 
@@ -119,7 +132,7 @@ describe('removeCollectors (bulk)', () => {
       agentIds: [opampAgent.id, fleetAgent.id],
     });
 
-    expect(result.actionId).toEqual(expect.any(String));
+    expect(result).toHaveProperty('actionId', expect.any(String));
     expect(mockedCrud.bulkUpdateAgents).toHaveBeenCalledTimes(1);
     const [, updates] = mockedCrud.bulkUpdateAgents.mock.calls[0];
     expect(updates).toHaveLength(1);
@@ -127,13 +140,33 @@ describe('removeCollectors (bulk)', () => {
     expect(updates[0].data).toMatchObject({ active: false });
   });
 
-  it('does not invalidate API keys or create action documents', async () => {
+  it('does not invalidate API keys', async () => {
     mockedCrud.getAgents.mockResolvedValue([opampAgent]);
 
     await removeCollectors(esClient, soClient, { agentIds: [opampAgent.id] });
 
     expect(mockedApiKeys.invalidateAPIKeys).not.toHaveBeenCalled();
-    expect(mockedActions.createAgentAction).not.toHaveBeenCalled();
+  });
+
+  it('creates a REMOVE_COLLECTOR action document and results for all matched collectors', async () => {
+    mockedCrud.getAgents.mockResolvedValue([opampAgent]);
+
+    const result = await removeCollectors(esClient, soClient, { agentIds: [opampAgent.id] });
+
+    expect(mockedActions.createAgentAction).toHaveBeenCalledTimes(1);
+    const actionCall = mockedActions.createAgentAction.mock.calls[0][2];
+    expect(actionCall).toMatchObject({
+      agents: [opampAgent.id],
+      type: 'REMOVE_COLLECTOR',
+      total: 1,
+    });
+    expect(result).toHaveProperty('actionId', actionCall.id);
+
+    expect(mockedActions.bulkCreateAgentActionResults).toHaveBeenCalledTimes(1);
+    const resultsCall = mockedActions.bulkCreateAgentActionResults.mock.calls[0][1];
+    expect(resultsCall).toHaveLength(1);
+    expect(resultsCall[0].agentId).toBe(opampAgent.id);
+    expect(resultsCall[0].actionId).toBe(actionCall.id);
   });
 
   it('handles kuery-based selection', async () => {
@@ -148,20 +181,65 @@ describe('removeCollectors (bulk)', () => {
       kuery: 'agent.type:OPAMP',
     });
 
-    expect(result.actionId).toEqual(expect.any(String));
+    expect(result).toHaveProperty('actionId', expect.any(String));
     expect(mockedCrud.bulkUpdateAgents).toHaveBeenCalledTimes(1);
   });
 
-  it('returns an actionId without calling bulkUpdate when no OpAMP agents match', async () => {
+  it('returns an actionId but does not create an action document when no OpAMP agents match', async () => {
     mockedCrud.getAgents.mockResolvedValue([fleetAgent]);
 
     const result = await removeCollectors(esClient, soClient, { agentIds: [fleetAgent.id] });
 
-    expect(result.actionId).toEqual(expect.any(String));
-    // bulkUpdateAgents is called with empty array; service short-circuits internally
-    if (mockedCrud.bulkUpdateAgents.mock.calls.length > 0) {
-      const [, updates] = mockedCrud.bulkUpdateAgents.mock.calls[0];
-      expect(updates).toHaveLength(0);
-    }
+    expect(result).toHaveProperty('actionId', expect.any(String));
+    expect(mockedActions.createAgentAction).not.toHaveBeenCalled();
+    expect(mockedActions.bulkCreateAgentActionResults).not.toHaveBeenCalled();
+  });
+
+  describe('dryRun', () => {
+    it('agentIds path: counts only OPAMP agents, ignores non-OPAMP, makes no writes', async () => {
+      mockedCrud.getAgents.mockResolvedValue([opampAgent, fleetAgent]);
+
+      const result = await removeCollectors(esClient, soClient, {
+        agentIds: [opampAgent.id, fleetAgent.id],
+        dryRun: true,
+      });
+
+      expect(result).toHaveProperty('count', 1);
+      expect(mockedCrud.bulkUpdateAgents).not.toHaveBeenCalled();
+      expect(mockedActions.createAgentAction).not.toHaveBeenCalled();
+      expect(mockedActions.bulkCreateAgentActionResults).not.toHaveBeenCalled();
+    });
+
+    it('kuery path: counts only OPAMP agents via getAgentsByKuery with OPAMP filter, makes no writes', async () => {
+      mockedCrud.getAgentsByKuery.mockResolvedValue({
+        agents: [opampAgent],
+        total: 1,
+        page: 1,
+        perPage: 0,
+      } as any);
+
+      const result = await removeCollectors(esClient, soClient, {
+        kuery: 'status:online',
+        dryRun: true,
+      });
+
+      expect(result).toHaveProperty('count', 1);
+      const kueryArg = mockedCrud.getAgentsByKuery.mock.calls[0][2].kuery as string;
+      expect(kueryArg).toContain(`agent.type:${AGENT_TYPE_OPAMP}`);
+      expect(mockedCrud.bulkUpdateAgents).not.toHaveBeenCalled();
+      expect(mockedActions.createAgentAction).not.toHaveBeenCalled();
+    });
+
+    it('agentIds path: returns count:0 when all agents are non-OPAMP', async () => {
+      mockedCrud.getAgents.mockResolvedValue([fleetAgent]);
+
+      const result = await removeCollectors(esClient, soClient, {
+        agentIds: [fleetAgent.id],
+        dryRun: true,
+      });
+
+      expect(result).toHaveProperty('count', 0);
+      expect(mockedCrud.bulkUpdateAgents).not.toHaveBeenCalled();
+    });
   });
 });

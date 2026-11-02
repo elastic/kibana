@@ -7,7 +7,6 @@
 
 import type React from 'react';
 import { useCallback, useMemo } from 'react';
-import type { ObservablePost } from '../../../../common/types/api';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import type { CaseUI } from '../../../containers/types';
@@ -41,20 +40,20 @@ export const useCasesAddToNewCaseFlyout = ({
   const openFlyout = useCallback(
     ({
       attachments,
+      getAttachments,
       headerContent,
-      observables,
     }: {
       attachments?: CaseAttachmentsWithoutOwner;
+      getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
       headerContent?: React.ReactNode;
-      observables?: ObservablePost[];
     } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
           initialValue,
           attachments,
+          getAttachments,
           headerContent,
-          observables,
           onClose: () => {
             closeFlyout();
             if (onClose) {
@@ -63,10 +62,12 @@ export const useCasesAddToNewCaseFlyout = ({
           },
           onSuccess: async (theCase: CaseUI) => {
             if (theCase) {
+              const resolvedForToast = getAttachments
+                ? getAttachments(theCase.owner)
+                : attachments ?? [];
               casesToasts.showSuccessAttach({
                 theCase,
-                attachments: attachments ?? [],
-                observables,
+                attachments: resolvedForToast,
                 title: toastTitle,
                 content: toastContent,
               });

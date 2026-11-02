@@ -158,6 +158,8 @@ export const ActionTypeMenu = ({
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? {})
     .filter(([id, actionType]) => {
+      if (actionType.isDeprecated) return false;
+
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
       if (actionType.source === ACTION_TYPE_SOURCES.spec) {
         if (shouldHideWorkflowsOnlyConnector(actionType.supportedFeatureIds, uiSettings)) {

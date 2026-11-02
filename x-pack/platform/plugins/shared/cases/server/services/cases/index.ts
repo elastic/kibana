@@ -7,6 +7,7 @@
 
 import type {
   Logger,
+  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
@@ -17,6 +18,7 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
@@ -40,13 +42,14 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
   SavedObjectsBulkResponseWithErrors,
   SOWithErrors,
 } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { STATUS_ESMODEL_TO_EXTERNAL } from '../../common/constants';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
@@ -58,8 +61,13 @@ import {
   transformESModelToCase,
 } from './transform';
 import type { AttachmentService } from '../attachments';
+import type {
+  CasesActivityV2WriterContract,
+  CasesAnalyticsV2WriterContract,
+  CasesAttachmentsV2WriterContract,
+} from '../../cases_analytics_v2';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { createCaseError, isSOError } from '../../common/error';
+import { createCaseError } from '../../common/error';
 import type {
   ResolvedExtendedFieldFilter,
   ResolvedFieldLabelFilter,
@@ -76,15 +84,16 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import {
-  CaseTransformedAttributesRt,
+  CaseTransformedAttributesSchema,
   CasePersistedStatus,
-  getPartialCaseTransformedAttributesRt,
-  OwnerRt,
+  getPartialCaseTransformedAttributesSchema,
+  OwnerSchema,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
   CasesMapWithPageInfo,
+  CasesSearchStats,
   DeleteCaseArgs,
   GetCaseArgs,
   GetCasesArgs,
@@ -106,7 +115,7 @@ import {
   mergeSearchQuery,
 } from './utils';
 
-const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+const PartialCaseTransformedAttributesSchema = getPartialCaseTransformedAttributesSchema();
 
 /**
  * Merges the legacy (`cases-comments`) and unified (`cases-attachments`) responses for
@@ -181,19 +190,52 @@ export class CasesService {
   private readonly log: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
+  /**
+   * Cases-as-data v2 writer. Fire-and-forget hook fired post-success on case
+   * create / patch / delete. When `xpack.cases.analyticsV2.enabled=false` this
+   * is `V2_NOOP_WRITER` and every call compiles down to nothing — the cases
+   * primary write path is unaffected.
+   */
+  private readonly analyticsV2Writer: CasesAnalyticsV2WriterContract;
+  /**
+   * Cases-as-data v2 activity writer. Same lifetime/contract as
+   * `analyticsV2Writer`; consumed here only for cascade-delete on case
+   * removal — every other activity write originates from the user-actions
+   * service.
+   */
+  private readonly analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+  /**
+   * Cases-as-data v2 attachments writer. Same lifetime/contract as
+   * `analyticsV2Writer`; consumed here only for cascade-delete on case
+   * removal — every other attachments write originates from the
+   * AttachmentService. The cascade applies whether the source SO is
+   * the legacy `cases-comments` or the unified `cases-attachments`
+   * type; the analytics doc id is the source SO id (unique across both
+   * types) so a single delete-by-`case.id` query covers both.
+   */
+  private readonly analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
 
   constructor({
     log,
     unsecuredSavedObjectsClient,
     attachmentService,
+    analyticsV2Writer,
+    analyticsV2ActivityWriter,
+    analyticsV2AttachmentsWriter,
   }: {
     log: Logger;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
+    analyticsV2Writer: CasesAnalyticsV2WriterContract;
+    analyticsV2ActivityWriter: CasesActivityV2WriterContract;
+    analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
   }) {
     this.log = log;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
+    this.analyticsV2Writer = analyticsV2Writer;
+    this.analyticsV2ActivityWriter = analyticsV2ActivityWriter;
+    this.analyticsV2AttachmentsWriter = analyticsV2AttachmentsWriter;
   }
 
   private buildCaseIdsAggs = (
@@ -225,29 +267,26 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
 
-      const legacyResponse = await this.findCaseIdsForAlertByType({
-        alertId,
-        soType: CASE_COMMENT_SAVED_OBJECT,
-        alertIdField: 'alertId',
-        filter,
-      });
-
-      if (!this.attachmentService.isUnifiedAttachmentsEnabled) {
-        return legacyResponse;
-      }
-
-      const unifiedResponse = await this.findCaseIdsForAlertByType({
-        alertId,
-        soType: CASE_ATTACHMENT_SAVED_OBJECT,
-        alertIdField: 'attachmentId',
-        extraFilter: buildFilter({
-          filters: UNIFIED_ALERT_TYPES_ARRAY,
-          field: 'type',
-          operator: 'or',
-          type: CASE_ATTACHMENT_SAVED_OBJECT,
+      const [legacyResponse, unifiedResponse] = await Promise.all([
+        this.findCaseIdsForAlertByType({
+          alertId,
+          soType: CASE_COMMENT_SAVED_OBJECT,
+          alertIdField: 'alertId',
+          filter,
         }),
-        filter: unifiedFilter,
-      });
+        this.findCaseIdsForAlertByType({
+          alertId,
+          soType: CASE_ATTACHMENT_SAVED_OBJECT,
+          alertIdField: 'attachmentId',
+          extraFilter: buildFilter({
+            filters: UNIFIED_ALERT_TYPES_ARRAY,
+            field: 'type',
+            operator: 'or',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+          }),
+          filter: unifiedFilter,
+        }),
+      ]);
 
       return mergeCaseIdsByAlertIdResponses(legacyResponse, unifiedResponse);
     } catch (error) {
@@ -296,7 +335,7 @@ export class CasesService {
 
     const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
     for (const so of response.saved_objects) {
-      const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+      const validatedAttributes = decodeOrThrowZod(OwnerSchema)(so.attributes);
 
       owners.push(Object.assign(so, { attributes: validatedAttributes }));
     }
@@ -398,12 +437,20 @@ export class CasesService {
     namespaces,
     extendedFieldFilters,
     fieldLabelFilters,
+    statsOptions,
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
     extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
     fieldLabelFilters?: ResolvedFieldLabelFilter[];
-  }): Promise<CasesMapWithPageInfo> {
+    /**
+     * When provided, status counts and MTTR are computed with the same search query as the
+     * case list (free-text search, extended field filters, attachment matches) but with
+     * `statsOptions.filter` in place of `caseOptions.filter` — the caller passes a filter with
+     * the status clause stripped so all three status counts are always populated.
+     */
+    statsOptions?: { filter?: KueryNode };
+  }): Promise<CasesMapWithPageInfo & { searchStats?: CasesSearchStats }> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
       caseOptions.search,
@@ -443,13 +490,25 @@ export class CasesService {
 
     const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;
 
-    const cases = await this.searchCases({
-      type: [CASE_SAVED_OBJECT],
-      namespaces,
-      query,
-      ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
-      ...convertFindQueryParams(caseOptions),
-    });
+    const [cases, searchStats] = await Promise.all([
+      this.searchCases({
+        type: [CASE_SAVED_OBJECT],
+        namespaces,
+        query,
+        ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+        ...convertFindQueryParams(caseOptions),
+      }),
+      statsOptions !== undefined
+        ? this.computeSearchStats({
+            namespaces,
+            query: mergeSearchQuery(
+              searchQuery,
+              statsOptions.filter ? toElasticsearchQuery(statsOptions.filter) : undefined
+            ),
+            ...(hasRuntimeMappings ? { runtimeMappings } : {}),
+          })
+        : undefined,
+    ]);
 
     const casesMap = cases?.hits?.hits?.reduce((accMap, caseInfo) => {
       // Extract UUID from _id format: "cases:uuid"
@@ -492,6 +551,65 @@ export class CasesService {
       page: caseOptions.page ?? 1,
       perPage: caseOptions.perPage ?? DEFAULT_PER_PAGE,
       total,
+      ...(searchStats !== undefined ? { searchStats } : {}),
+    };
+  }
+
+  /**
+   * Computes the status counts and MTTR over every case matching the given search query in a
+   * single size-0 aggregation search. This mirrors the case-list query exactly (unlike
+   * getCaseStatusStats, which only sees the KQL filter), so metrics shown next to the list
+   * always agree with it.
+   */
+  private async computeSearchStats({
+    namespaces,
+    query,
+    runtimeMappings,
+  }: {
+    namespaces: string[];
+    query?: estypes.QueryDslQueryContainer;
+    runtimeMappings?: estypes.MappingRuntimeFields;
+  }): Promise<CasesSearchStats> {
+    const response = await this.searchCases({
+      type: [CASE_SAVED_OBJECT],
+      namespaces,
+      query,
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      size: 0,
+      // Raw ES search: attributes live directly under the type key (`cases.status`), unlike
+      // the SO client's find aggregations which use `cases.attributes.status`.
+      aggs: {
+        statuses: {
+          terms: {
+            field: `${CASE_SAVED_OBJECT}.status`,
+            size: caseStatuses.length,
+            order: { _key: 'asc' },
+          },
+        },
+        mttr: {
+          avg: {
+            field: `${CASE_SAVED_OBJECT}.duration`,
+          },
+        },
+      },
+    });
+
+    const aggregations = response.aggregations as
+      | {
+          statuses?: { buckets: Array<{ key: string; doc_count: number }> };
+          mttr?: { value: number | null };
+        }
+      | undefined;
+
+    const statusBuckets = CasesService.getStatusBuckets(aggregations?.statuses?.buckets);
+
+    return {
+      statusStats: {
+        open: statusBuckets?.get(CasePersistedStatus.OPEN) ?? 0,
+        'in-progress': statusBuckets?.get(CasePersistedStatus.IN_PROGRESS) ?? 0,
+        closed: statusBuckets?.get(CasePersistedStatus.CLOSED) ?? 0,
+      },
+      mttr: aggregations?.mttr?.value ?? null,
     };
   }
 
@@ -548,6 +666,20 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
       await this.unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId, { refresh });
+
+      // Cases-as-data v2: drop the analytics doc post-success. Fire-and-forget;
+      // the writer swallows 404s internally.
+      this.analyticsV2Writer.deleteCase(caseId);
+      // Cascade to `.cases-activity`. The case SO delete cascades to its
+      // user-action SOs at the SO layer, but reconciliation can't see the
+      // gap (deleted SOs are gone) — mirror the cascade explicitly here.
+      this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds([caseId]);
+      // Same rationale for `.cases-attachments`. The case SO delete
+      // cascades to its attachment SOs (both legacy `cases-comments`
+      // and unified `cases-attachments`) at the SO layer; the
+      // analytics index needs an explicit drop because reconciliation
+      // walks forward in time and can't see the gap.
+      this.analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds([caseId]);
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
@@ -563,7 +695,48 @@ export class CasesService {
   }) {
     try {
       this.log.debug(() => `Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
-      await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+      const bulkDeleteResult = await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+
+      // Cases-as-data v2: drop analytics docs ONLY for entities whose SO
+      // delete actually succeeded. The bulkDelete response carries a
+      // per-entity status; iterating `entities` blindly would remove the
+      // analytics doc even when the underlying SO survives (version
+      // conflict, lost shard, etc.). That state is unrecoverable because
+      // reconciliation can't see it — the surviving SO's `updated_at`
+      // didn't change, so the filter won't pick it up.
+      //
+      // `success: true` covers both 200 (deleted) and 404 (already gone) —
+      // either way the post-state is "SO absent", which is what the
+      // analytics delete is mirroring. Failures (success: false) skip the
+      // analytics call, leaving the doc in place to match the SO.
+      //
+      // Collect successful case ids and dispatch as one bulk delete to the
+      // analytics writer — looping `deleteCase` per item would fan out to
+      // N ES delete requests (same write-amplification concern as the
+      // bulk-upsert paths).
+      //
+      // Comments / attachments / user-actions are tracked by their own
+      // surfaces (added in PR 2) so they're skipped here.
+      const entityById = new Map(entities.map((e) => [`${e.type}:${e.id}`, e]));
+      const idsToDelete: string[] = [];
+      for (const status of bulkDeleteResult.statuses) {
+        if (status.success) {
+          const entity = entityById.get(`${status.type}:${status.id}`);
+          if (entity?.type === CASE_SAVED_OBJECT) {
+            idsToDelete.push(entity.id);
+          }
+        }
+      }
+      this.analyticsV2Writer.bulkDeleteCases(idsToDelete);
+      // Cascade to `.cases-activity` for the same set of case ids — the
+      // SO-layer cascade removes the user-action SOs, and reconciliation
+      // can't see the gap (deleted SOs are gone), so we drop the analytics
+      // mirror explicitly. No-op when `idsToDelete` is empty.
+      this.analyticsV2ActivityWriter.bulkDeleteActionsByCaseIds(idsToDelete);
+      // Same rationale for `.cases-attachments` — covers both legacy
+      // and unified attachment SO sources via a single
+      // delete-by-`case.id` on the analytics index. No-op when empty.
+      this.analyticsV2AttachmentsWriter.bulkDeleteAttachmentsByCaseIds(idsToDelete);
     } catch (error) {
       this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
     }
@@ -578,7 +751,9 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(caseSavedObject);
-      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        res.attributes
+      ) as CaseTransformedAttributes;
 
       return {
         ...res,
@@ -601,8 +776,14 @@ export class CasesService {
           caseId
         );
 
+      if (isSavedObjectErrorResult(resolveCaseResult.saved_object)) {
+        throw new Error(resolveCaseResult.saved_object.error.message);
+      }
+
       const resolvedSO = transformSavedObjectToExternalModel(resolveCaseResult.saved_object);
-      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(resolvedSO.attributes);
+      const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        resolvedSO.attributes
+      ) as CaseTransformedAttributes;
 
       return {
         ...resolveCaseResult,
@@ -624,12 +805,14 @@ export class CasesService {
       );
 
       const res = cases.saved_objects.map((theCase) => {
-        if (isSOError(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           return theCase;
         }
 
         const so = Object.assign(theCase, transformSavedObjectToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(so.attributes);
+        const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          so.attributes
+        ) as CaseTransformedAttributes;
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         return soWithDecodedRes;
@@ -640,6 +823,29 @@ export class CasesService {
       });
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * The status of each case found, reading only the status field; cases not found are left out.
+   */
+  public async getCaseStatuses({ caseIds }: GetCasesArgs): Promise<Map<string, CaseStatuses>> {
+    try {
+      this.log.debug(`Attempting to GET the status of cases ${caseIds.join(', ')}`);
+      const { saved_objects: cases } = await this.unsecuredSavedObjectsClient.bulkGet<
+        Pick<CasePersistedAttributes, 'status'>
+      >(caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id, fields: ['status'] })));
+
+      return new Map(
+        cases.flatMap((theCase): Array<[string, CaseStatuses]> => {
+          if (isSavedObjectErrorResult(theCase)) return [];
+          const status = STATUS_ESMODEL_TO_EXTERNAL[theCase.attributes.status];
+          return status ? [[theCase.id, status]] : [];
+        })
+      );
+    } catch (error) {
+      this.log.error(`Error on GET the status of cases ${caseIds.join(', ')}: ${error}`);
       throw error;
     }
   }
@@ -656,7 +862,7 @@ export class CasesService {
       });
 
       const res = transformFindResponseToExternalModel(cases);
-      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
+      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesSchema);
 
       return {
         ...res,
@@ -709,7 +915,6 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
@@ -719,7 +924,6 @@ export class CasesService {
             sortField: defaultSortField,
             ...options,
           },
-          mode,
         });
       }
 
@@ -730,7 +934,6 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -747,7 +950,6 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
@@ -769,7 +971,6 @@ export class CasesService {
           filter: options?.filter,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);
@@ -907,7 +1108,9 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to create a new case`);
 
-      const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        attributes
+      ) as CaseTransformedAttributes;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       transformedAttributes.attributes.total_alerts = 0;
@@ -920,8 +1123,13 @@ export class CasesService {
         { id, references: transformedAttributes.referenceHandler.build(), refresh }
       );
 
+      // Cases-as-data v2: fire-and-forget upsert. No-op when v2 is disabled.
+      this.analyticsV2Writer.upsertCase(createdCase);
+
       const res = transformSavedObjectToExternalModel(createdCase);
-      const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodedRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        res.attributes
+      ) as CaseTransformedAttributes;
 
       return { ...res, attributes: decodedRes };
     } catch (error) {
@@ -938,7 +1146,9 @@ export class CasesService {
       this.log.debug(`Attempting to bulk create cases`);
 
       const bulkCreateRequest = cases.map(({ id, ...attributes }) => {
-        const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+        const decodedAttributes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          attributes
+        ) as CaseTransformedAttributes;
 
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
@@ -963,16 +1173,29 @@ export class CasesService {
           }
         );
 
+      // Cases-as-data v2: collect successfully-created SOs and dispatch as
+      // a single bulk to the analytics writer. Looping `upsertCase` per
+      // item would fan out to N ES `index` requests, saturating the
+      // connection pool the rest of Kibana shares — `bulkUpsertCases`
+      // collapses that to one `_bulk` request.
+      const successfulAnalyticsV2Mirrors: Array<(typeof bulkCreateResponse.saved_objects)[number]> =
+        [];
       const res = bulkCreateResponse.saved_objects.map((theCase) => {
-        if (isSOError<CasePersistedAttributes>(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           return theCase;
         }
+        successfulAnalyticsV2Mirrors.push(theCase);
 
         const transformedCase = transformSavedObjectToExternalModel(theCase);
-        const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
+        const decodedRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          transformedCase.attributes
+        ) as CaseTransformedAttributes;
 
         return { ...transformedCase, attributes: decodedRes };
       });
+      this.analyticsV2Writer.bulkUpsertCases(
+        successfulAnalyticsV2Mirrors as Array<SavedObject<CasePersistedAttributes>>
+      );
 
       return { saved_objects: res };
     } catch (error) {
@@ -991,10 +1214,16 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
 
-      const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+      const decodedAttributes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
         updatedAttributes
-      );
+      ) as Partial<CaseTransformedAttributes>;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
+      // Compute the merged reference list once and share it between the SO
+      // update and the analytics-writer synthesis. Mirrors the
+      // `builtReferences` pattern in patchCases — without this, the two
+      // callers could subtly diverge if anyone changed how the references
+      // are computed in only one place.
+      const builtReferences = transformedAttributes.referenceHandler.build(originalCase.references);
 
       const updatedCase = await this.unsecuredSavedObjectsClient.update<CasePersistedAttributes>(
         CASE_SAVED_OBJECT,
@@ -1002,13 +1231,31 @@ export class CasesService {
         transformedAttributes.attributes,
         {
           version,
-          references: transformedAttributes.referenceHandler.build(originalCase.references),
+          references: builtReferences,
           refresh,
         }
       );
 
+      // Cases-as-data v2: synthesize the post-patch SO from originalCase + patch
+      // attributes to avoid an extra SO get round-trip.
+      // originalCase is the external model (string status/severity,
+      // external_service.connector_id). Convert to the persisted model first —
+      // using it raw silently drops status/severity for untouched fields and
+      // injects connector_id into the strict mapping.
+      this.analyticsV2Writer.upsertCase({
+        ...originalCase,
+        attributes: {
+          ...transformAttributesToESModel(originalCase.attributes ?? {}).attributes,
+          ...transformedAttributes.attributes,
+        } as CasePersistedAttributes,
+        version: updatedCase.version ?? originalCase.version,
+        references: builtReferences ?? [],
+      });
+
       const res = transformUpdateResponseToExternalModel(updatedCase);
-      const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
+        res.attributes
+      ) as Partial<CaseTransformedAttributes>;
 
       return {
         ...res,
@@ -1027,40 +1274,80 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
-      const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
-        const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+      // Keep the per-case originalCase + transformed-attributes pair around so
+      // we can synthesize a post-update SavedObject for the analytics writer
+      // after `bulkUpdate` succeeds. We can't read `bulkUpdate`'s response for
+      // this because it returns partial attributes, not the full merged state.
+      const perCaseUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
+        const decodedAttributes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
           updatedAttributes
-        );
-
+        ) as Partial<CaseTransformedAttributes>;
         const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
+        const builtReferences = referenceHandler.build(originalCase.references);
         return {
-          type: CASE_SAVED_OBJECT,
-          id: caseId,
-          attributes,
-          references: referenceHandler.build(originalCase.references),
+          caseId,
           version,
+          originalCase,
+          esAttributes: attributes,
+          references: builtReferences,
         };
       });
+
+      const bulkUpdate = perCaseUpdate.map(({ caseId, version, esAttributes, references }) => ({
+        type: CASE_SAVED_OBJECT,
+        id: caseId,
+        attributes: esAttributes,
+        references,
+        version,
+      }));
 
       const updatedCases =
         await this.unsecuredSavedObjectsClient.bulkUpdate<CasePersistedAttributes>(bulkUpdate, {
           refresh,
         });
 
+      // Index of per-case context by id, for cheap lookup during the post-pass.
+      const updateContextById = new Map(perCaseUpdate.map((u) => [u.caseId, u]));
+
+      // Cases-as-data v2: synthesize the post-update SO for each
+      // successfully-patched case (`originalCase + new attributes`) and
+      // dispatch as one bulk write. Same fan-out-collapse rationale as
+      // `bulkCreateCases`.
+      const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
+
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
-        if (isSOError(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           acc.push(theCase);
           return acc;
         }
 
+        // Same synthesize-from-originalCase pattern as patchCase: convert the
+        // external-model base to the persisted model before spreading the patch.
+        const ctx = updateContextById.get(theCase.id);
+        if (ctx) {
+          analyticsV2Mirrors.push({
+            ...ctx.originalCase,
+            attributes: {
+              ...transformAttributesToESModel(ctx.originalCase.attributes ?? {}).attributes,
+              ...ctx.esAttributes,
+            } as CasePersistedAttributes,
+            version: theCase.version ?? ctx.originalCase.version,
+            references: ctx.references ?? [],
+          });
+        }
+
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
+        const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
+          so.attributes
+        ) as Partial<CaseTransformedAttributes>;
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         acc.push(soWithDecodedRes);
 
         return acc;
       }, [] as Array<SavedObjectsUpdateResponse<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
+
+      this.analyticsV2Writer.bulkUpsertCases(analyticsV2Mirrors);
 
       return Object.assign(updatedCases, {
         saved_objects: res,

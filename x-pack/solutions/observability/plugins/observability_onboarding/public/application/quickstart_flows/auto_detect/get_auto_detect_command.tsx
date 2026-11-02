@@ -15,7 +15,6 @@ export function getAutoDetectCommand({
   ingestApiKey,
   elasticAgentVersion,
   metricsEnabled,
-  useWiredStreams,
 }: {
   scriptDownloadUrl: string;
   onboardingId: string;
@@ -24,7 +23,6 @@ export function getAutoDetectCommand({
   ingestApiKey: string;
   elasticAgentVersion: string;
   metricsEnabled: boolean;
-  useWiredStreams?: boolean;
 }) {
   const scriptName = 'auto_detect.sh';
   return oneLine`
@@ -36,7 +34,6 @@ export function getAutoDetectCommand({
       --ingest-key=${ingestApiKey}
       --ea-version=${elasticAgentVersion}
       ${!metricsEnabled ? '--metrics-enabled=false' : ''}
-      ${useWiredStreams ? '--write-to-logs-stream=true' : ''}
   `;
 }
 function oneLine(parts: TemplateStringsArray, ...args: string[]) {

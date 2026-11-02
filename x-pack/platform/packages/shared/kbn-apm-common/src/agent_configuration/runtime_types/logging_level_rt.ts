@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const loggingLevelRt = t.union([
-  t.literal('trace'),
-  t.literal('debug'),
-  t.literal('info'),
-  t.literal('warn'),
-  t.literal('error'),
-  t.literal('fatal'),
-  t.literal('off'),
+export const loggingLevelSchema = z.enum([
+  'trace',
+  'debug',
+  'info',
+  'warn',
+  'error',
+  'fatal',
+  'off',
 ]);

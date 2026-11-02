@@ -1,0 +1,7 @@
+in: path
+name: field_definition_id
+description: The identifier for the field definition.
+required: true
+schema:
+  type: string
+  maxLength: 36

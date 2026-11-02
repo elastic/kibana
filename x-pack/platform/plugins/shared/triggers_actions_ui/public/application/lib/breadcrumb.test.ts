@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getAlertingSectionBreadcrumb } from './breadcrumb';
+import { getAlertingSectionBreadcrumb, getRulesBreadcrumbWithHref } from './breadcrumb';
 import { i18n } from '@kbn/i18n';
-import { routeToConnectors, routeToRules, routeToHome } from '../constants';
+import { routeToConnectors, routeToRules, routeToHome, routeToSettings } from '../constants';
 
 describe('getAlertingSectionBreadcrumb', () => {
   test('if change calls return proper breadcrumb title ', async () => {
@@ -46,6 +46,30 @@ describe('getAlertingSectionBreadcrumb', () => {
       text: i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
         defaultMessage: 'Rules',
       }),
+    });
+  });
+});
+
+describe('getAlertingSectionBreadcrumb settings', () => {
+  test('returns the settings breadcrumb with an optional href', () => {
+    expect(getAlertingSectionBreadcrumb('settings')).toEqual({
+      text: i18n.translate('xpack.triggersActionsUI.rulesSettings.breadcrumbTitle', {
+        defaultMessage: 'Settings',
+      }),
+    });
+    expect(getAlertingSectionBreadcrumb('settings', true)).toMatchObject({
+      href: routeToSettings,
+    });
+  });
+});
+
+describe('getRulesBreadcrumbWithHref', () => {
+  test('returns the rules route relative to the management app', () => {
+    expect(getRulesBreadcrumbWithHref()).toEqual({
+      text: i18n.translate('xpack.triggersActionsUI.rules.breadcrumbTitle', {
+        defaultMessage: 'Rules',
+      }),
+      href: routeToHome,
     });
   });
 });

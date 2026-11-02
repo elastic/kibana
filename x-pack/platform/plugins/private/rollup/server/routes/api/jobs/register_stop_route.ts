@@ -25,10 +25,10 @@ export const registerStopRoute = ({
       },
       validate: {
         body: schema.object({
-          jobIds: schema.arrayOf(schema.string(), { maxSize: 1000 }),
+          jobIds: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
         }),
         query: schema.object({
-          waitForCompletion: schema.maybe(schema.string()),
+          waitForCompletion: schema.maybe(schema.string({ maxLength: 64 })),
         }),
       },
     },

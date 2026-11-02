@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -34,21 +34,17 @@ import type { DataViewSpec } from '../types';
  * and that state is not reset for slices that already have selections.
  *
  * @param dependencies - Core and plugin services required for data view creation and retrieval.
- * @param enableAlertsAndAttacksAlignment - Prevent attacks dataview creation if feature flag is not enabled.
  * @returns An object with the actionCreator and effect for Redux listener middleware.
  */
-export const createInitListener = (
-  dependencies: {
-    http: CoreStart['http'];
-    application: CoreStart['application'];
-    uiSettings: CoreStart['uiSettings'];
-    notifications: CoreStart['notifications'];
-    dataViews: DataViewsServicePublic;
-    spaces: SpacesPluginStart;
-    storage: Storage;
-  },
-  enableAlertsAndAttacksAlignment: boolean
-) => {
+export const createInitListener = (dependencies: {
+  http: CoreStart['http'];
+  application: CoreStart['application'];
+  uiSettings: CoreStart['uiSettings'];
+  notifications: CoreStart['notifications'];
+  dataViews: DataViewsServicePublic;
+  spaces: SpacesPluginStart;
+  storage: Storage;
+}) => {
   return {
     actionCreator: sharedDataViewManagerSlice.actions.init,
     effect: async (

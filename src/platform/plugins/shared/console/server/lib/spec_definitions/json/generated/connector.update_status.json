@@ -6,6 +6,17 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "status": {
+        "__one_of": [
+          "created",
+          "needs_configuration",
+          "configured",
+          "connected",
+          "error"
+        ]
+      }
+    },
     "methods": [
       "PUT"
     ],

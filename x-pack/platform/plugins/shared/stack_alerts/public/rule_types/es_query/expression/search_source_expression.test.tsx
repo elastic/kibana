@@ -23,6 +23,7 @@ import { copyToClipboard } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import type { DataPlugin } from '@kbn/data-plugin/public';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -254,6 +255,7 @@ describe('SearchSourceAlertTypeExpression', () => {
       searchConfiguration: [],
     };
     const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
+    const notificationsMock = notificationServiceMock.createStartContract();
 
     return render(
       <KibanaContextProvider
@@ -263,6 +265,7 @@ describe('SearchSourceAlertTypeExpression', () => {
           uiSettings: uiSettingsMock,
           dataViewEditor: dataViewEditorMock,
           unifiedSearch: unifiedSearchMock,
+          notifications: notificationsMock,
         }}
       >
         <SearchSourceExpression

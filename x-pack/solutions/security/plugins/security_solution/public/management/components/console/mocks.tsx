@@ -480,13 +480,13 @@ export const getCommandListMock = (): CommandDefinition[] => {
         foo: {
           about: 'foo stuff',
           required: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'foo1',
           allowMultiples: false,
         },
         bar: {
           about: 'bar stuff',
           required: false,
-          exclusiveOr: true,
+          exclusiveOrGroupId: 'foo1',
           allowMultiples: false,
         },
       },

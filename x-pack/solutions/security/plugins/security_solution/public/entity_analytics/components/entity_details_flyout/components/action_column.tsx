@@ -25,6 +25,12 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ input }) => {
   return (
     <EuiPopover
       data-test-subj="risk-inputs-actions"
+      aria-label={i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.ariaLabel',
+        {
+          defaultMessage: 'Actions',
+        }
+      )}
       button={
         <EuiToolTip
           content={i18n.translate(

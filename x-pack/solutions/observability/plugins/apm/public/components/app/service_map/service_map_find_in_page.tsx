@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import type { ServiceMapNode } from '../../../../common/service_map';
 import { isServiceNodeData } from '../../../../common/service_map';
 import { NODE_WIDTH, NODE_HEIGHT, CENTER_ANIMATION_DURATION_MS } from './constants';
-import { useServiceMapSearchContext } from '../../shared/service_map/service_map_search_context';
+import { useServiceMapHighlight } from '../../shared/service_map/service_map_search_context';
 
 export const SERVICE_MAP_FIND_INPUT_ID = 'serviceMapFindInPageInput';
 
@@ -81,7 +81,7 @@ export function ServiceMapFindInPage({
   );
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const { setSearchHighlight } = useServiceMapSearchContext();
+  const { setSearchHighlight } = useServiceMapHighlight();
 
   /** False until the user has used next/enter/down at least once for this query (first action centers match 0). */
   const roundStartedRef = useRef(false);

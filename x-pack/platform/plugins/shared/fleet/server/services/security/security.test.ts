@@ -13,7 +13,7 @@ import { securityServiceMock, type SecurityStartMock } from '@kbn/core-security-
 import { appContextService } from '../app_context';
 import type { FleetAuthz } from '../../../common';
 
-import { calculateRouteAuthz, getAuthzFromRequest } from './security';
+import { calculateRouteAuthz, getAuthzFromRequest, isDebugAuthorized } from './security';
 
 jest.mock('../app_context');
 
@@ -1029,5 +1029,63 @@ describe('getAuthzFromRequest', () => {
       const res = await getAuthzFromRequest({} as any);
       expect(res.fleet.generateAgentReports).toBe(false);
     });
+  });
+});
+
+describe('isDebugAuthorized', () => {
+  let mockSecurityCore: SecurityStartMock;
+
+  const setCurrentUser = (user: { roles: string[] } | null) => {
+    jest.mocked(mockSecurityCore.authc.getCurrentUser).mockReturnValue(user as any);
+  };
+
+  beforeEach(() => {
+    mockSecurityCore = securityServiceMock.createStart();
+    jest.mocked(appContextService.getSecurityCore).mockReturnValue(mockSecurityCore);
+    jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
+      isEnabled: () => true,
+    } as any);
+  });
+
+  it('should not authorize when security is disabled', () => {
+    jest.mocked(appContextService.getSecurityLicense).mockReturnValue({
+      isEnabled: () => false,
+    } as any);
+    setCurrentUser({ roles: ['superuser'] });
+
+    expect(isDebugAuthorized({} as any)).toBe(false);
+  });
+
+  it('should not authorize when there is no current user', () => {
+    setCurrentUser(null);
+
+    expect(isDebugAuthorized({} as any)).toBe(false);
+  });
+
+  it('should authorize the superuser role', () => {
+    setCurrentUser({ roles: ['superuser'] });
+
+    expect(isDebugAuthorized({} as any)).toBe(true);
+  });
+
+  it('should authorize the system_indices_superuser role', () => {
+    // system_indices_superuser is a superset of superuser (cluster:all, indices:* with
+    // allow_restricted_indices, applications:*) and is the identity local serverless dev
+    // clusters authenticate as, so accepting it grants nothing the caller cannot already do.
+    setCurrentUser({ roles: ['system_indices_superuser'] });
+
+    expect(isDebugAuthorized({} as any)).toBe(true);
+  });
+
+  it('should not authorize other roles', () => {
+    setCurrentUser({ roles: ['editor', 'fleet_all'] });
+
+    expect(isDebugAuthorized({} as any)).toBe(false);
+  });
+
+  it('should authorize when a superuser role is present alongside others', () => {
+    setCurrentUser({ roles: ['editor', 'superuser'] });
+
+    expect(isDebugAuthorized({} as any)).toBe(true);
   });
 });

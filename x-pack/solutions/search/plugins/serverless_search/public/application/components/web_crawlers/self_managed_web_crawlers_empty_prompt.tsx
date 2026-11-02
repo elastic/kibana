@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { SearchEmptyPrompt } from '@kbn/search-shared-ui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { DecorativeHorizontalStepper } from '@kbn/search-connectors/components';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 export const SelfManagedWebCrawlersEmptyPrompt = () => {
@@ -56,13 +56,13 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
                       justifyContent="center"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type="web" />
+                        <EuiIcon color="primary" size="l" type="web" aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon size="m" type="sortRight" />
+                        <EuiIcon size="m" type="sortRight" aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon color="primary" size="l" type="rocket" />
+                        <EuiIcon color="primary" size="l" type="rocket" aria-hidden />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiFlexItem>
@@ -115,7 +115,7 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
                         gutterSize="s"
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiIcon color="primary" size="l" type="globe" />
+                          <EuiIcon color="primary" size="l" type="globe" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
@@ -144,19 +144,19 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
                         justifyContent="center"
                       >
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="globe" />
+                          <EuiIcon color="primary" size="l" type="globe" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon size="m" type="sortRight" />
+                          <EuiIcon size="m" type="sortRight" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="web" />
+                          <EuiIcon color="primary" size="l" type="web" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon size="m" type="sortRight" />
+                          <EuiIcon size="m" type="sortRight" aria-hidden />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type="logoElasticsearch" />
+                          <EuiIcon color="primary" size="l" type="logoElasticsearch" aria-hidden />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>

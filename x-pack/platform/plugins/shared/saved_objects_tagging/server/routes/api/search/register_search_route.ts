@@ -26,6 +26,10 @@ export const registerSearchRoute = (router: TagsPluginRouter, usageCounter?: Usa
   searchRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: async () =>
+          (await import('../oas_examples')).searchTagsOASOperationObject,
+      },
       validate: {
         request: {
           query: tagsSearchRequestQuerySchema,
@@ -42,7 +46,7 @@ export const registerSearchRoute = (router: TagsPluginRouter, usageCounter?: Usa
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         try {
           return res.ok({
             body: await search(ctx, req.query),

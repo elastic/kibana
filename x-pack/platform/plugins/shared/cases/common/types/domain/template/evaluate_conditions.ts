@@ -54,11 +54,32 @@ const evaluateUserPickerRule = (value: unknown, rule: ConditionRule): boolean | 
   }
 };
 
+const parseBooleanLike = (value: unknown): boolean | undefined => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    if (value === 'true') {
+      return true;
+    }
+    if (value === 'false') {
+      return false;
+    }
+  }
+  return undefined;
+};
+
 const evaluateScalarRule = (current: unknown, rule: ConditionRule): boolean => {
   switch (rule.operator) {
     case 'eq':
+      if (typeof rule.value === 'boolean') {
+        return parseBooleanLike(current) === rule.value;
+      }
       return String(current ?? '') === String(rule.value ?? '');
     case 'neq':
+      if (typeof rule.value === 'boolean') {
+        return parseBooleanLike(current) !== rule.value;
+      }
       return String(current ?? '') !== String(rule.value ?? '');
     case 'contains':
       return typeof current === 'string' && current.includes(String(rule.value ?? ''));

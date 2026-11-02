@@ -8,21 +8,41 @@
 import {
   isAgentBuilderError,
   createInternalError,
+  createBadRequestError,
   createToolNotFoundError,
   isInternalError,
   isToolNotFoundError,
   AgentBuilderErrorCode,
   createAgentBuilderError,
   isAgentNotFoundError,
+  isAgentUnavailableError,
+  createAgentUnavailableError,
   createAgentNotFoundError,
   createHooksExecutionError,
   createWorkflowExecutionError,
   isHooksExecutionError,
   isWorkflowExecutionError,
+  createConversationBusyError,
+  isConversationBusyError,
+  createConversationWriteConflictError,
 } from './errors';
 import { HookLifecycle, HookExecutionMode } from '../hooks/lifecycle';
 
 describe('AgentBuilder errors', () => {
+  describe('createConversationBusyError', () => {
+    it('creates a conversationBusy error with a 409 and the active execution id', () => {
+      const err = createConversationBusyError({ conversationId: 'c1', activeExecutionId: 'e1' });
+
+      expect(err.code).toBe(AgentBuilderErrorCode.conversationBusy);
+      expect(err.meta).toEqual({ conversationId: 'c1', activeExecutionId: 'e1', statusCode: 409 });
+      expect(err.message).toBe('Conversation c1 already has an execution in progress');
+      expect(isConversationBusyError(err)).toBe(true);
+      expect(
+        isConversationBusyError(createConversationWriteConflictError({ conversationId: 'c1' }))
+      ).toBe(false);
+    });
+  });
+
   describe('isAgentBuilderError', () => {
     it('should return true for a AgentBuilderError instance', () => {
       const error = createInternalError('test error');
@@ -158,6 +178,31 @@ describe('AgentBuilder errors', () => {
     it('should return false for a regular Error', () => {
       const error = new Error('test error');
       expect(isAgentNotFoundError(error)).toBe(false);
+    });
+  });
+
+  describe('isAgentUnavailableError', () => {
+    it('should return true for an agent unavailable error regardless of message', () => {
+      const error = createAgentUnavailableError({
+        agentId: 'test-agent',
+        customMessage: 'Custom unavailable message',
+      });
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(true);
+    });
+
+    it('should return false for a bad request with the legacy agent unavailable message', () => {
+      const error = createBadRequestError('Agent test-agent is not available');
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(false);
+    });
+
+    it('should return false for an agent not found error', () => {
+      const error = createAgentNotFoundError({
+        agentId: 'test-agent',
+      });
+
+      expect(isAgentUnavailableError(error, 'test-agent')).toBe(false);
     });
   });
 

@@ -8,6 +8,8 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import moment from 'moment';
 import { getWatchHistory } from '../../__fixtures__';
@@ -71,16 +73,18 @@ describe('<WatchStatusPage />', () => {
       httpRequestsMockHelpers.setLoadWatchHistoryResponse(WATCH_ID, watchHistoryItems);
 
       renderWatchStatusPage(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
 
       // Wait for initial activation state to settle (WatchStatusPage sets this via state update).
-      await waitFor(() => {
-        expect(screen.getByTestId('toggleWatchActivationButton')).toHaveTextContent('Deactivate');
+      await waitFor(async () => {
+        expect(await screen.findByTestId('toggleWatchActivationButton')).toHaveTextContent(
+          'Deactivate'
+        );
       });
     });
 
     test('should set the correct page title', () => {
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent(
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
         `Current status for '${watch.name}'`
       );
     });
@@ -151,13 +155,15 @@ describe('<WatchStatusPage />', () => {
 
     describe('delete watch', () => {
       test('should show a confirmation when clicking the delete button', async () => {
-        fireEvent.click(screen.getByTestId('deleteWatchButton'));
+        await openAppMenuOverflow();
+        fireEvent.click(await screen.findByTestId('deleteWatchButton'));
         const modal = await screen.findByTestId('deleteWatchesConfirmation');
         expect(modal).toHaveTextContent('Delete watch');
       });
 
       test('should send the correct HTTP request to delete watch', async () => {
-        fireEvent.click(screen.getByTestId('deleteWatchButton'));
+        await openAppMenuOverflow();
+        fireEvent.click(await screen.findByTestId('deleteWatchButton'));
         await screen.findByTestId('deleteWatchesConfirmation');
         const confirmButton = screen.getByTestId('confirmModalConfirmButton');
 

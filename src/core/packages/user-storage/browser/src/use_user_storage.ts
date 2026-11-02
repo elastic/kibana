@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext, useMemo, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import deepEqual from 'fast-deep-equal';
 import type { Observable } from 'rxjs';
 import type { IUserStorageClient } from './types';
 import { UserStorageContext } from './user_storage_context';
@@ -35,19 +36,21 @@ export type UserStorageSetter<T> = (newValue: T) => Promise<T>;
 
 /**
  * Subscribes to a single user-storage key and returns a `[value, setter]`
- * tuple. The value reflects the synchronous cache and re-renders on change.
- * The setter persists via HTTP and updates the cache on success.
+ * tuple. The value re-renders on every cache change; the setter persists via
+ * HTTP and updates the cache on success.
  *
  * When called without a `defaultValue` the first element of the tuple is
  * `T | undefined` — it is `undefined` when the key has no cached value.
  * When called with a `defaultValue` it is always `T`.
  *
+ * For a `preload: false` key the value is the default until the lazy fetch
+ * resolves, and stays the default if that fetch fails. Read through
+ * `useUserStorageClient().get()` when a caller must tell a placeholder apart
+ * from a stored value, or observe a failed read.
+ *
  * @example
  * ```tsx
- * const [layout, setLayout] = useUserStorage<NavLayout>(
- *   'navigation:layout',
- *   defaultLayout
- * );
+ * const [layout, setLayout] = useUserStorage<NavLayout>('navigation:layout', defaultLayout);
  * ```
  *
  * @public
@@ -63,17 +66,23 @@ export function useUserStorage<T = unknown>(
 ): [T | undefined, UserStorageSetter<T>] {
   const client = useUserStorageClient();
 
-  const observable$: Observable<T | undefined> = useMemo(
-    () => (defaultValue !== undefined ? client.get$<T>(key, defaultValue) : client.get$<T>(key)),
-    [client, key, defaultValue]
+  // Stabilize by structural identity so an inline default literal doesn't re-subscribe each render.
+  const defaultValueRef = useRef(defaultValue);
+  if (!deepEqual(defaultValueRef.current, defaultValue)) {
+    defaultValueRef.current = defaultValue;
+  }
+  const stableDefault = defaultValueRef.current;
+
+  const value$: Observable<T | undefined> = useMemo(
+    () => (stableDefault !== undefined ? client.get$<T>(key, stableDefault) : client.get$<T>(key)),
+    [client, key, stableDefault]
   );
-  // Use peek (pure, no side effects) for the synchronous initial render value.
-  // The lazy fetch is triggered by the get$() subscription inside useObservable,
-  // which runs inside an effect after the first commit — safe under concurrent mode.
-  const value = useObservable<T | undefined>(
-    observable$,
-    defaultValue !== undefined ? client.peek<T>(key, defaultValue) : client.peek<T>(key)
-  );
+
+  // peek() is side-effect-free, so it's safe to read during render under concurrent mode.
+  // It supplies the pre-subscription value; a preloaded key is already correct on first render.
+  const cached = client.peek<T>(key);
+  const value = useObservable<T | undefined>(value$, cached !== undefined ? cached : stableDefault);
+
   const set = useCallback<UserStorageSetter<T>>(
     (newValue) => client.set<T>(key, newValue),
     [client, key]

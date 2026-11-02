@@ -10,23 +10,26 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const replaceNewLinesWithSpace = (str: string) => str.replace(/\n/g, ' ');
 
+const REPORTED_BY_PREFIX = 'Reported by:';
+
 export function CasesSingleViewServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const common = getPageObject('common');
   const testSubjects = getService('testSubjects');
   const header = getPageObject('header');
   const find = getService('find');
   const lensPage = getPageObject('lens');
+  const appMenu = getPageObject('appMenu');
   const retry = getService('retry');
 
   return {
     async deleteCase() {
-      await retry.try(async () => {
-        await testSubjects.click('property-actions-case-ellipses');
-        await testSubjects.existOrFail('property-actions-case-trash', { timeout: 100 });
-        await testSubjects.click('property-actions-case-trash');
-      });
+      await appMenu.clickMenuItem('case-action-delete', { isInOverflowMenu: true });
       await testSubjects.click('confirmModalConfirmButton');
       await header.waitUntilLoadingHasFinished();
+    },
+
+    async assertDeleteCaseAbsent() {
+      expect(await appMenu.menuItemExists('case-action-delete')).to.be(false);
     },
 
     async verifyUserAction(dataTestSubj: string, contentToMatch: string) {
@@ -109,7 +112,7 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async assertCaseTitle(expectedTitle: string) {
-      const actionTitle = await testSubjects.getVisibleText('editable-title-header-value');
+      const actionTitle = await testSubjects.getVisibleText('appHeaderTitle');
       expect(actionTitle).to.eql(
         expectedTitle,
         `Expected case title to be '${expectedTitle}' (got '${actionTitle}')`
@@ -130,14 +133,14 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async openAssigneesPopover() {
-      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+      await common.clickAndValidate('case-view-assign-users-link', 'euiSelectableList');
       await header.waitUntilLoadingHasFinished();
     },
 
     async closeAssigneesPopover() {
       await retry.try(async () => {
-        // Click somewhere outside the popover
-        await testSubjects.click('editable-title-header-value');
+        // Click the app header title to dismiss the popover
+        await testSubjects.click('appHeaderTitle');
         await header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('euiSelectableList');
       });
@@ -147,26 +150,9 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       await testSubjects.click('case-refresh');
     },
 
-    async getReporter() {
-      await testSubjects.existOrFail('case-view-user-list-reporter');
-
-      const reporter = await testSubjects.findAllDescendant(
-        'user-profile-username',
-        await testSubjects.find('case-view-user-list-reporter')
-      );
-
-      return reporter[0];
-    },
-
-    async getParticipants() {
-      await testSubjects.existOrFail('case-view-user-list-participants');
-
-      const participants = await testSubjects.findAllDescendant(
-        'user-profile-username',
-        await testSubjects.find('case-view-user-list-participants')
-      );
-
-      return participants;
+    async getReporterName(): Promise<string> {
+      const reportedBy = await testSubjects.getVisibleText('case-view-reported-by');
+      return reportedBy.replace(REPORTED_BY_PREFIX, '').trim();
     },
   };
 }

@@ -1,0 +1,631 @@
+{
+  "schema_version": 1,
+  "map_version": "2.2",
+  "obfuscated_class": "p",
+  "original_class": "androidx.concurrent.futures.AbstractResolvableFuture",
+  "source_file": "AbstractResolvableFuture.java",
+  "methods": {
+    "get": {
+      "mappings": [
+        {
+          "obf_range": [
+            7,
+            12
+          ],
+          "orig_range": [
+            359,
+            359
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            13,
+            18
+          ],
+          "orig_range": [
+            361,
+            361
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            19,
+            22
+          ],
+          "orig_range": [
+            364,
+            364
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            23,
+            33
+          ],
+          "orig_range": [
+            366,
+            366
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            34,
+            46
+          ],
+          "orig_range": [
+            369,
+            369
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            47,
+            50
+          ],
+          "orig_range": [
+            372,
+            372
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            51,
+            55
+          ],
+          "orig_range": [
+            374,
+            374
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            56,
+            60
+          ],
+          "orig_range": [
+            143,
+            143
+          ],
+          "method": "setNext",
+          "class": "androidx.concurrent.futures.AbstractResolvableFuture$Waiter"
+        },
+        {
+          "obf_range": [
+            56,
+            60
+          ],
+          "orig_range": [
+            376,
+            376
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            61,
+            66
+          ],
+          "orig_range": [
+            377,
+            377
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            67,
+            69
+          ],
+          "orig_range": [
+            379,
+            379
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            70,
+            75
+          ],
+          "orig_range": [
+            382,
+            382
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            76,
+            79
+          ],
+          "orig_range": [
+            389,
+            389
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            80,
+            84
+          ],
+          "orig_range": [
+            391,
+            391
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            85,
+            94
+          ],
+          "orig_range": [
+            395,
+            395
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            95,
+            98
+          ],
+          "orig_range": [
+            399,
+            399
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            99,
+            101
+          ],
+          "orig_range": [
+            383,
+            383
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            102,
+            107
+          ],
+          "orig_range": [
+            384,
+            384
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            108,
+            111
+          ],
+          "orig_range": [
+            404,
+            404
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            112,
+            122
+          ],
+          "orig_range": [
+            409,
+            409
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            123,
+            126
+          ],
+          "orig_range": [
+            414,
+            414
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            127,
+            131
+          ],
+          "orig_range": [
+            416,
+            416
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            132,
+            137
+          ],
+          "orig_range": [
+            418,
+            418
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            138,
+            144
+          ],
+          "orig_range": [
+            421,
+            421
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            145,
+            150
+          ],
+          "orig_range": [
+            419,
+            419
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            151,
+            154
+          ],
+          "orig_range": [
+            424,
+            424
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            155,
+            164
+          ],
+          "orig_range": [
+            425,
+            425
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            165,
+            200
+          ],
+          "orig_range": [
+            426,
+            426
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            201,
+            207
+          ],
+          "orig_range": [
+            431,
+            431
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            208,
+            213
+          ],
+          "orig_range": [
+            433,
+            433
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            214,
+            232
+          ],
+          "orig_range": [
+            434,
+            434
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            233,
+            255
+          ],
+          "orig_range": [
+            438,
+            438
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            256,
+            261
+          ],
+          "orig_range": [
+            440,
+            440
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            262,
+            267
+          ],
+          "orig_range": [
+            442,
+            442
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            268,
+            287
+          ],
+          "orig_range": [
+            445,
+            445
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            288,
+            293
+          ],
+          "orig_range": [
+            448,
+            448
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            294,
+            299
+          ],
+          "orig_range": [
+            453,
+            453
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            300,
+            311
+          ],
+          "orig_range": [
+            454,
+            454
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            312,
+            337
+          ],
+          "orig_range": [
+            456,
+            456
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            338,
+            343
+          ],
+          "orig_range": [
+            362,
+            362
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            344,
+            344
+          ],
+          "orig_range": [
+            470,
+            470
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            345,
+            345
+          ],
+          "orig_range": [
+            473,
+            473
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            346,
+            346
+          ],
+          "orig_range": [
+            475,
+            475
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            347,
+            347
+          ],
+          "orig_range": [
+            477,
+            477
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            348,
+            348
+          ],
+          "orig_range": [
+            479,
+            479
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            349,
+            349
+          ],
+          "orig_range": [
+            143,
+            143
+          ],
+          "method": "setNext",
+          "class": "androidx.concurrent.futures.AbstractResolvableFuture$Waiter"
+        },
+        {
+          "obf_range": [
+            349,
+            349
+          ],
+          "orig_range": [
+            481,
+            481
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            350,
+            350
+          ],
+          "orig_range": [
+            482,
+            482
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            351,
+            351
+          ],
+          "orig_range": [
+            485,
+            485
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            352,
+            352
+          ],
+          "orig_range": [
+            488,
+            488
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            353,
+            353
+          ],
+          "orig_range": [
+            495,
+            495
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            354,
+            354
+          ],
+          "orig_range": [
+            497,
+            497
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            355,
+            356
+          ],
+          "orig_range": [
+            489,
+            490
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            357,
+            357
+          ],
+          "orig_range": [
+            501,
+            501
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            358,
+            358
+          ],
+          "orig_range": [
+            506,
+            506
+          ],
+          "method": "get"
+        },
+        {
+          "obf_range": [
+            359,
+            359
+          ],
+          "orig_range": [
+            471,
+            471
+          ],
+          "method": "get"
+        }
+      ]
+    }
+  }
+}

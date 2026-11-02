@@ -18,7 +18,9 @@ import {
   getViewModeSubject,
   useBatchedPublishingSubjects,
   apiPublishesSettings,
+  initializeRelatedPanels,
   initializeStateApi,
+  apiHasUseGlobalFiltersSetting,
 } from '@kbn/presentation-publishing';
 
 import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
@@ -249,8 +251,20 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
           setIsAnchored(nextState.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
         },
       });
+      const relatedPanelsApi = initializeRelatedPanels({
+        uuid,
+        parentApi,
+        // Timeslider always applies global filters, so only compare if the sibling uses global filters
+        isRelated: (sibling) => {
+          return apiHasUseGlobalFiltersSetting(sibling)
+            ? Boolean(sibling.useGlobalFilters$.getValue())
+            : true;
+        },
+        siblingDependentObservableNames: ['useGlobalFilters$'],
+      });
 
       const api = finalizeApi({
+        ...relatedPanelsApi,
         ...stateApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
         label$: new BehaviorSubject<string>(displayName),
@@ -323,8 +337,15 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
       return {
         api,
         Component: (controlPanelClassNames) => {
-          const [isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
-            useBatchedPublishingSubjects(isAnchored$, isPopoverOpen$, timeRangeMeta$, timeslice$);
+          const [viewMode, isAnchored, isPopoverOpen, timeRangeMeta, timeslice] =
+            useBatchedPublishingSubjects(
+              viewModeSubject,
+              isAnchored$,
+              isPopoverOpen$,
+              timeRangeMeta$,
+              timeslice$
+            );
+
           useEffect(() => {
             return () => {
               cleanupTimeRangeSubscription();
@@ -362,6 +383,7 @@ export const getTimesliderControlFactory = (): EmbeddablePublicDefinition<
                   formatDate={formatDate}
                   from={from}
                   to={to}
+                  isInteractive={viewMode !== 'non-interactive'}
                 />
               }
               isOpen={isPopoverOpen}

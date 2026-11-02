@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { createFormWrapper } from '../../test_utils';
 import { RuleDetailsFieldGroup } from './rule_details_field_group';
 
@@ -27,7 +26,7 @@ describe('RuleDetailsFieldGroup', () => {
     expect(screen.queryByText('Rule details')).not.toBeInTheDocument();
   });
 
-  it('renders the tags field with optional label', () => {
+  it('renders optional labels on tags and description', () => {
     const Wrapper = createFormWrapper();
 
     render(
@@ -37,10 +36,11 @@ describe('RuleDetailsFieldGroup', () => {
     );
 
     expect(screen.getByText('Tags')).toBeInTheDocument();
-    expect(screen.getByText('optional')).toBeInTheDocument();
+    expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getAllByText('optional')).toHaveLength(2);
   });
 
-  it('renders the add description button initially', () => {
+  it('renders the description field immediately', () => {
     const Wrapper = createFormWrapper();
 
     render(
@@ -48,22 +48,9 @@ describe('RuleDetailsFieldGroup', () => {
         <RuleDetailsFieldGroup />
       </Wrapper>
     );
-
-    expect(screen.getByText('Add description')).toBeInTheDocument();
-  });
-
-  it('renders the description field when add description is clicked', async () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    await userEvent.click(screen.getByText('Add description'));
 
     expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.queryByText('Add description')).not.toBeInTheDocument();
   });
 
   it('does not render enabled or kind fields', () => {

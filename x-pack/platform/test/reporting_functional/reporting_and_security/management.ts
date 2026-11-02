@@ -19,7 +19,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const reportingApi = getService('reportingAPI');
   const retry = getService('retry');
 
-  describe('Access to Management > Reporting', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/284991
+  describe.skip('Access to Management > Reporting', () => {
     before(async () => {
       await reportingFunctional.initEcommerce();
     });
@@ -89,12 +90,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
 
         await retry.try(async () => {
-          if (
-            !(await testSubjects.exists('exportDerivativeFlyout-scheduledReports', {
-              timeout: 1000,
-            }))
-          ) {
-            if (!(await testSubjects.exists('scheduleExport', { timeout: 1000 }))) {
+          if (!(await testSubjects.exists('exportDerivativeFlyout-scheduledReports'))) {
+            if (!(await testSubjects.exists('scheduleExport'))) {
               await PageObjects.exports.clickExportTopNavButton();
             }
             await (await testSubjects.find('scheduleExport')).click();

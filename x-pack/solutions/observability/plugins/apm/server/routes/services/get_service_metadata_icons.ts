@@ -10,6 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { getAgentName } from '@kbn/elastic-agent-utils';
+import type { ServiceMetadataIcons } from '@kbn/apm-api-shared';
 import { maybe } from '../../../common/utils/maybe';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -26,19 +27,11 @@ import {
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
-import type { ContainerType } from '../../../common/service_metadata';
 import { SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metadata';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ServerlessType } from '../../../common/serverless';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
-
-export interface ServiceMetadataIcons {
-  agentName?: string;
-  containerType?: ContainerType;
-  serverlessType?: ServerlessType;
-  cloudProvider?: string;
-}
+import { environmentQuery } from '../../../common/utils/environment_query';
 
 export const should = [
   { exists: { field: CONTAINER_ID } },
@@ -53,18 +46,24 @@ export const should = [
 
 export async function getServiceMetadataIcons({
   serviceName,
+  environment,
   apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
 }: {
   serviceName: string;
+  environment: string;
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }): Promise<ServiceMetadataIcons> {
-  const filter = [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)];
+  const filter = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+  ];
 
   const fields = asMutableArray([
     CLOUD_PROVIDER,
@@ -112,7 +111,11 @@ export async function getServiceMetadataIcons({
       event[TELEMETRY_SDK_NAME] ?? null
     ) ?? undefined;
 
-  const containerType = event.containsFields('kubernetes') ? 'Kubernetes' : 'Docker';
+  const containerType = event.containsFields('kubernetes')
+    ? 'Kubernetes'
+    : event.containsFields(CONTAINER_ID)
+    ? 'Docker'
+    : undefined;
 
   const serverlessType = getServerlessTypeFromCloudData(
     event[CLOUD_PROVIDER],

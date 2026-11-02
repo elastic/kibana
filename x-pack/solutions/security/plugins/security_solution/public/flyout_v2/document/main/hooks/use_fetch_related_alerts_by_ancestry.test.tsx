@@ -69,4 +69,52 @@ describe('useFetchRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current.data).toEqual(['1', '2']);
     expect(hookResult.result.current.dataCount).toEqual(2);
   });
+
+  it('forwards the interval to useAlertPrevalenceFromProcessTree when provided', () => {
+    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: [],
+    });
+    const interval = { from: 'now-1d', to: 'now' };
+
+    renderHook(() => useFetchRelatedAlertsByAncestry({ documentId, indices, interval }));
+
+    expect(useAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      documentId,
+      indices,
+      interval,
+    });
+  });
+
+  it('forwards undefined interval when not provided', () => {
+    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: [],
+    });
+
+    renderHook(() => useFetchRelatedAlertsByAncestry({ documentId, indices }));
+
+    expect(useAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      documentId,
+      indices,
+      interval: undefined,
+    });
+  });
+
+  it('forwards the refetch function from useAlertPrevalenceFromProcessTree', () => {
+    const refetchMock = jest.fn();
+    (useAlertPrevalenceFromProcessTree as jest.Mock).mockReturnValue({
+      loading: false,
+      error: false,
+      alertIds: [],
+      refetch: refetchMock,
+    });
+
+    hookResult = renderHook(() => useFetchRelatedAlertsByAncestry({ documentId, indices }));
+
+    hookResult.result.current.refetch();
+    expect(refetchMock).toHaveBeenCalledTimes(1);
+  });
 });

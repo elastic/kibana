@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiComboBox, EuiFormErrorText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import React, { useEffect, useState } from 'react';
+import type { UseControllerProps } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useFetchWorkflows } from '../../../../hooks/use_fetch_workflows';
@@ -21,6 +22,15 @@ interface SelectedWorkflow {
   id: string;
   name: string;
 }
+
+const DESTINATIONS_RULES: UseControllerProps<ActionPolicyFormState, 'destinations'>['rules'] = {
+  validate: (value, { inlineActions }) =>
+    value.length > 0 || inlineActions.length > 0
+      ? true
+      : i18n.translate('xpack.alertingV2.actionPolicy.form.destination.required', {
+          defaultMessage: 'At least one destination is required',
+        }),
+};
 
 export const WorkflowSelector = () => {
   const { control } = useFormContext<ActionPolicyFormState>();
@@ -33,7 +43,11 @@ export const WorkflowSelector = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
-  const { data: workflowsData, isLoading } = useFetchWorkflows({
+  const {
+    data: workflowsData,
+    isLoading,
+    refetch,
+  } = useFetchWorkflows({
     query: debouncedQuery,
     isEnabled: isWorkflowsEnabled,
   });
@@ -85,6 +99,15 @@ export const WorkflowSelector = () => {
             ),
           }}
         />
+        {/* Keeps the destinations rule active so a policy without destinations can't be submitted. */}
+        <Controller
+          name="destinations"
+          control={control}
+          rules={DESTINATIONS_RULES}
+          render={({ fieldState: { error } }) => (
+            <>{error && <EuiFormErrorText>{error.message}</EuiFormErrorText>}</>
+          )}
+        />
       </EuiCallOut>
     );
   }
@@ -95,14 +118,7 @@ export const WorkflowSelector = () => {
     <Controller
       name="destinations"
       control={control}
-      rules={{
-        validate: (value) =>
-          value.length > 0
-            ? true
-            : i18n.translate('xpack.alertingV2.actionPolicy.form.destination.required', {
-                defaultMessage: 'At least one destination is required',
-              }),
-      }}
+      rules={DESTINATIONS_RULES}
       render={({ field, fieldState: { error } }) => (
         <EuiFormRow
           label={i18n.translate('xpack.alertingV2.actionPolicy.form.destination.workflows', {
@@ -135,6 +151,7 @@ export const WorkflowSelector = () => {
               { defaultMessage: 'Search and select workflows' }
             )}
             selectedOptions={selectedWorkflows.map((w) => ({ label: w.name, value: w.id }))}
+            onFocus={() => refetch()}
             onSearchChange={setSearchQuery}
             onChange={(options) => {
               setSelectedWorkflows(options.map((o) => ({ id: o.value as string, name: o.label })));

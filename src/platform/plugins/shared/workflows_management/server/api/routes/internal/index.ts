@@ -9,11 +9,17 @@
 
 import { registerDisableAllWorkflowsRoute } from './disable';
 import { registerGetConfigRoute } from './get_config';
+import { registerGetReadableWorkflowIdsRoute } from './get_readable_workflow_ids';
+import { registerGetWorkflowHistoryRoute } from './get_workflow_history';
+import { registerRestoreWorkflowVersionRoute } from './restore_workflow_version';
 import { registerTriggerEventsLogRoutes } from './trigger_events_log';
 import type { RouteDependencies } from '../types';
 
 export function registerInternalRoutes(deps: RouteDependencies) {
   registerGetConfigRoute(deps);
+  registerGetReadableWorkflowIdsRoute(deps);
   registerDisableAllWorkflowsRoute(deps);
+  registerGetWorkflowHistoryRoute(deps);
+  registerRestoreWorkflowVersionRoute(deps);
   registerTriggerEventsLogRoutes(deps);
 }

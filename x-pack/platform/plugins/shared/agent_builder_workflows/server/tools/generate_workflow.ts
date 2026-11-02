@@ -15,8 +15,8 @@ import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/u
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
+import { workflowTools } from '../../common/constants';
 import { emitWorkflowDiff, extractConversationId } from './utils/workflow_attachments';
 
 const generateWorkflowSchema = z.object({
@@ -33,7 +33,7 @@ const generateWorkflowSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Additional context that could be useful to generate the workflow (e.g. related conversation, environment hints).'
+      '(optional) Specific grounding facts needed to generate the workflow — e.g. index names, field names/mappings, connector IDs, space IDs, alert field paths, time ranges, logical flow and/or filter requirements, etc.'
     ),
   instructions: z
     .string()
@@ -60,7 +60,6 @@ export const generateWorkflowTool = ({
   return {
     id: platformCoreTools.generateWorkflow,
     type: ToolType.builtin,
-    experimental: true,
     description:
       cleanPrompt(`Generate or update an Elastic workflow definition based on a natural-language description.
 
@@ -80,9 +79,9 @@ The workflow agent has innate knowledge of (meaning you don't need to gather inf
 — The list of connectors available on the current Kibana instance
 — When the 'attachmentId' parameter is specified, the corresponding workflow definition
 
-The workflow agent has **no** knowledge of (meaning you need to provide or eventually gather info about):
-— The current conversation (meaning that if information useful for the workflow generation is present in the conversation, you should explicitly summarize those and mention then as context when calling the tool)
-— Any info related to the state of the Elasticsearch cluster (available indices, their mappings...)
+The workflow agent has **no** knowledge of (meaning you may need to gather and pass additional context):
+— Specific semantics referenced in the conversation: index names, field names/mappings, connector IDs, space IDs, alert field paths, time ranges, logical flow and/or filter requirements, etc, that the workflow needs. Pass only the relevant context as \`context\`.
+— Elasticsearch cluster state: index names and their mappings when relevant to the workflow.
 
 E.g., if the user message is "Ok now that we've identified that log index, now generate a workflow checking every 30mins for error in it and post a summary to slack in the foo channel", you should
 1. Specify which index the workflow should be targeted (inferred from the conversation / previous messages)
@@ -94,11 +93,26 @@ And you should **not**:
 ## Usage notes
 
 — If all you need is to generate a workflow, you do *NOT* need to read the "workflow-authoring" skill first, you can call this tool directly.
-— The tool creates (or updates) a workflow attachment and emits a diff card in chat.
-— Render the diff with "<render_attachment id="{diffAttachmentId}"/>" and the workflow with "<render_attachment id="{attachmentId}" version="{attachmentVersion}"/>".
+— Called by an Agent Builder, the tool returns workflow attachment references plus the instructions for presenting them.
+— Called via MCP server, the tool returns the generated workflow YAML.
+
+## Alert-triggered workflows
+
+When the workflow is alert-triggered (\`type: alert\`), runtime alert data is exposed to Liquid expressions as \`event.*\` — NEVER \`triggers.event\` or \`trigger.event\` (the \`triggers\` block only configures which triggers fire the workflow; it does not carry runtime data). If the user's request names specific alert fields (rule name, severity, alert ID, tags, space), pass them in \`context\` using this schema so the generated Liquid resolves correctly:
+— \`event.alerts\` — array of alert objects that fired
+— \`event.alerts[0]._id\` / \`._index\` / \`.kibana.alert.*\` / \`["@timestamp"]\`
+— \`event.rule.id\` / \`event.rule.name\` / \`event.rule.tags\`
+— \`event.spaceId\` — the space where the event was emitted
 
     `),
     schema: generateWorkflowSchema,
+    annotations: {
+      title: 'Generate Workflow',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     handler: async (
       { query, attachmentId, context: workflowContext, instructions, workflowId },
       toolContext
@@ -108,8 +122,20 @@ And you should **not**:
 
       const sourceAttachment = attachmentId ? attachments.get(attachmentId) : undefined;
       if (attachmentId && !sourceAttachment) {
+        const workflowAttachmentIds = attachments
+          .getActive()
+          .filter((attachment) => attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE)
+          .map((attachment) => attachment.id);
+        const existingAttachmentHint =
+          workflowAttachmentIds.length > 0
+            ? ` Conversation workflow attachment ids: ${workflowAttachmentIds.join(', ')}.`
+            : '';
         return {
-          results: [errorResult(`Attachment with ID '${attachmentId}' not found.`)],
+          results: [
+            errorResult(
+              `Attachment with ID '${attachmentId}' not found.${existingAttachmentHint} To edit a saved workflow that is not yet in the conversation, call \`${workflowTools.getWorkflow}\` with \`attach: true\` first, then pass the returned \`attachmentId\` to this tool. Workflow ids from automation lists are not conversation attachment ids until attached.`
+            ),
+          ],
         };
       }
       if (sourceAttachment && sourceAttachment.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) {
@@ -132,7 +158,11 @@ And you should **not**:
       }
 
       try {
-        const { workflow, response: generationComment } = await generateWorkflow({
+        const {
+          workflow,
+          yaml: afterYaml,
+          response: generationComment,
+        } = await generateWorkflow({
           nlQuery: query,
           workflow: workflowDef,
           additionalContext: workflowContext,
@@ -145,7 +175,6 @@ And you should **not**:
         });
 
         const beforeYaml = sourceData?.yaml ?? '';
-        const afterYaml = stringifyWorkflowDefinition(workflow);
         const proposalId = v4();
 
         const {
@@ -158,7 +187,7 @@ And you should **not**:
           proposalId,
           workflowId: sourceData?.workflowId ?? workflowId,
           name: workflow.name,
-          description: query,
+          description: `Diff for workflow '${workflow.name}'`,
           toolId: platformCoreTools.generateWorkflow,
         });
 
@@ -169,15 +198,27 @@ And you should **not**:
           isCreation: !sourceAttachment,
         });
 
+        // Only an Agent Builder agent can resolve attachment IDs and render attachment
+        // tags. Every other caller (MCP clients, the public `tools/_execute` API, the
+        // CLI) gets the YAML itself.
+        const isAgentBuilderCall = toolContext.callContext.callSource === 'agent';
+
         return {
           results: [
             otherResult({
-              attachment_id: workflowAttachmentId,
-              attachment_version: attachmentVersion,
-              proposal_id: proposalId,
-              diff_attachment_id: diffAttachmentId,
               comment: generationComment,
               success: true,
+              ...(isAgentBuilderCall
+                ? {
+                    // In Agent Builder the YAML lives in the attachment, so keep it out
+                    // of the model context — only the IDs to reference it are returned.
+                    attachment_id: workflowAttachmentId,
+                    attachment_version: attachmentVersion,
+                    proposal_id: proposalId,
+                    diff_attachment_id: diffAttachmentId,
+                    presentation: `Render the diff with "<render_attachment id="${diffAttachmentId}"/>" and the workflow with "<render_attachment id="${workflowAttachmentId}" version="${attachmentVersion}"/>".`,
+                  }
+                : { yaml: afterYaml }),
               ...(sourceAttachment ? { updated: true } : { created: true }),
             }),
           ],

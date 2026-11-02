@@ -7,39 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-console */
-
 import { camelCase } from 'lodash';
-import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-import type { ElasticsearchSettingsDefinition } from '@kbn/esql-language';
-import { readElasticsearchDefinitions } from '../lib/elasticsearch_definitions';
+import { settingDefinitions } from '@elastic/esql-definitions/settings';
 import { clearDocumentationDirectives } from '../lib/docs';
+import type { GeneratedFile } from '../lib/generated_file';
+import { GENERATED_DEFINITIONS_DIR } from './constants';
 
-// We exlude the time_zone setting as we decided that we won't support it in Kibana
-const SETTINGS_TO_EXCLUDE = new Set(['time_zone', 'project_routing']);
-const GENERATED_DEFINITIONS_PATH = join(
-  REPO_ROOT,
-  'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated'
-);
+// We exclude the time_zone setting as we decided that we won't support it in Kibana
+const SETTINGS_TO_EXCLUDE = new Set(['time_zone']);
 
-async function generateElasticsearchSettingsDefinitions(): Promise<void> {
-  const pathToElasticsearch = process.argv[2];
-
-  const esSettingsDefinitions = readElasticsearchDefinitions<ElasticsearchSettingsDefinition>({
-    pathToElasticsearch,
-    keywordType: 'settings',
-    language: 'esql',
-  });
-
-  const outputSettingsDir = GENERATED_DEFINITIONS_PATH;
-  await mkdir(outputSettingsDir, { recursive: true });
-
-  const outputTsPath = join(outputSettingsDir, 'settings.ts');
-
-  // Generate individual setting constants
-  const settingConstants = esSettingsDefinitions
+/** Renders the settings and `EsqlSettingNames` consumed by `@kbn/esql-language`. */
+export const renderSettings = (): GeneratedFile[] => {
+  const settingConstants = settingDefinitions
     .map((setting) => {
       const settingName = setting.name;
       const modifiedSetting = {
@@ -54,12 +34,10 @@ async function generateElasticsearchSettingsDefinitions(): Promise<void> {
     })
     .join('\n\n');
 
-  // Generate array of setting names for export
-  const settingNames = esSettingsDefinitions.map((setting) => camelCase(setting.name)).join(', ');
+  const settingNames = settingDefinitions.map((setting) => camelCase(setting.name)).join(', ');
 
-  // Generate an enum for settings names
   const settingEnum = `export enum EsqlSettingNames {
-${esSettingsDefinitions
+${settingDefinitions
   .map((setting) => `  ${setting.name.toUpperCase()} = '${setting.name}',`)
   .join('\n')}
 }`;
@@ -75,12 +53,5 @@ export const settings = [
 ];
 `;
 
-  await writeFile(outputTsPath, tsContent);
-
-  console.log(`Successfully generated settings to: ${outputTsPath}`);
-}
-
-generateElasticsearchSettingsDefinitions().catch((error) => {
-  console.error('An unhandled error occurred:', error);
-  process.exit(1);
-});
+  return [{ path: join(GENERATED_DEFINITIONS_DIR, 'settings.ts'), content: tsContent }];
+};

@@ -9,14 +9,20 @@
 
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import {
   getKqlFieldNamesFromExpression,
   isOfAggregateQueryType,
   getIsKqlFreeTextExpression,
 } from '@kbn/es-query';
-import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
+import {
+  getQueryColumnsFromESQLQuery,
+  getKqlSearchQueries,
+  getAnySourceCommandFromESQLQuery,
+} from '@kbn/esql-utils';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { TabsEventDataKeys, type TabsEBTEvent, type TabsEventName } from '@kbn/unified-tabs';
 import { LRUCache } from 'lru-cache';
 import {
@@ -62,6 +68,7 @@ type FilterOperation = '+' | '-' | '_exists_';
 enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
   dataTableRemoval = 'dataTableRemoval',
+  dataTableClearSelectedFields = 'dataTableClearSelectedFields',
   filterAddition = 'filterAddition',
 }
 
@@ -74,6 +81,7 @@ interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
+  [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
 }
 
 interface QueryFieldsUsageEventData {
@@ -88,6 +96,19 @@ interface TabsEventData {
 interface ContextualProfileResolvedEventData {
   [CONTEXTUAL_PROFILE_LEVEL]: ContextualProfileLevel;
   [CONTEXTUAL_PROFILE_ID]: string;
+}
+
+type QueryPerformanceFetchType = 'fetchTextBased' | 'fetchDocuments';
+
+interface QueryPerformanceTrackerParams {
+  eventName: string;
+  query: Query | AggregateQuery | undefined;
+  timeRange: TimeRange | undefined;
+}
+
+interface QueryPerformanceReportEventParams {
+  requestAdapter: RequestAdapter | undefined;
+  approximationApplied?: boolean;
 }
 
 export class ScopedDiscoverEBTManager {
@@ -199,6 +220,36 @@ export class ScopedDiscoverEBTManager {
       fieldName,
       fieldsMetadata,
     });
+  }
+
+  public async trackDataTableClearSelectedFields({
+    fieldNames,
+    fieldsMetadata,
+  }: {
+    fieldNames: string[];
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    if (!this.reportEvent || fieldNames.length === 0) {
+      return;
+    }
+
+    const eventData: FieldUsageEventData = {
+      [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName.dataTableClearSelectedFields,
+    };
+
+    if (fieldsMetadata) {
+      const fields = await this.getFieldsFromMetadata({
+        fieldsMetadata,
+        fieldNames,
+      });
+
+      const categorizedFields = fieldNames.map((fieldName) =>
+        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
+      );
+      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [...new Set(categorizedFields)];
+    }
+
+    this.reportEvent(FIELD_USAGE_EVENT_TYPE, eventData);
   }
 
   public async trackFilterAddition({
@@ -375,43 +426,51 @@ export class ScopedDiscoverEBTManager {
     };
   }
 
-  public trackQueryPerformanceEvent(eventName: string) {
+  public trackQueryPerformanceEvent({
+    eventName,
+    query,
+    timeRange,
+  }: QueryPerformanceTrackerParams) {
     const startTime = window.performance.now();
     let reported = false;
 
     return {
-      startTime,
-      reportEvent: (
-        {
-          queryRangeSeconds,
-          requests = [],
-        }: {
-          queryRangeSeconds: number;
-          requests?: InspectedRequest[];
-        },
-        otherEventData?: Omit<PerformanceMetricEvent, 'eventName' | 'duration'>
-      ) => {
+      reportEvent: ({
+        requestAdapter,
+        approximationApplied,
+      }: QueryPerformanceReportEventParams) => {
         if (reported || !this.reportPerformanceEvent) {
           return;
         }
 
         reported = true;
-        const duration = window.performance.now() - startTime;
 
+        const duration = window.performance.now() - startTime;
+        const requests = requestAdapter?.getRequestsSince(startTime) ?? [];
         const queryAnalyses = requests.map((request) =>
           this.queryAnalysisCache.memo(request.id, { context: { request } })
         );
         const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
+        const phraseQueryCount = mergedAnalysis.typeCounts.get('match_phrase') ?? 0;
+        const isEsqlQuery = isOfAggregateQueryType(query);
+        const fetchType: QueryPerformanceFetchType = isEsqlQuery
+          ? 'fetchTextBased'
+          : 'fetchDocuments';
+        const queryRangeSeconds = timeRange ? getTimeDifferenceInSeconds(timeRange) : 0;
+        const querySourceCommand = isEsqlQuery
+          ? getAnySourceCommandFromESQLQuery(query.esql) || undefined
+          : undefined;
 
         this.reportPerformanceEvent({
           key1: 'query_range_secs',
           value1: queryRangeSeconds,
           key2: 'phrase_query_count',
-          value2: mergedAnalysis.typeCounts.get('match_phrase') ?? 0,
-          ...otherEventData,
+          value2: phraseQueryCount,
           meta: {
+            fetchType,
             multi_match_types: mergedAnalysis.rawTypes,
-            ...otherEventData?.meta,
+            ...(querySourceCommand ? { query_source_command: querySourceCommand } : {}),
+            ...(isEsqlQuery ? { approximationApplied: approximationApplied ?? false } : {}),
           },
           eventName,
           duration,

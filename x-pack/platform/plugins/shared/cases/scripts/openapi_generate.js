@@ -12,7 +12,7 @@ const { rename } = require('fs/promises');
 
 const CASES_ROOT = resolve(__dirname, '..');
 
-// This script is also run in CI: to track down the scripts that run it in CI, code search for `yarn openapi` in the `.buildkite` top level directory
+// This script is also run in CI: to track down the scripts that run it in CI, code search for `pnpm openapi` in the `.buildkite` top level directory
 
 (async () => {
   // Generate Zod schemas

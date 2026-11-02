@@ -5,31 +5,135 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntityType as EntityStoreEntityType } from '@kbn/entity-store/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import type { FieldsTableProps } from '../../../flyout/entity_details/generic_right/components/fields_table';
 import { FieldsTableTab } from '../../../cloud_security_posture/components/csp_details/fields_table_tab';
 import type { EntityType } from '../../../../common/search_strategy';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useStableExpandableFlyoutState } from '../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
 import { PREFIX } from '../../../flyout/shared/test_ids';
-import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';
+import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
+import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { RiskInputsTab } from './tabs/risk_inputs/risk_inputs_tab';
 import { InsightsTabCsp } from '../../../cloud_security_posture/components/csp_details/insights_tab_csp';
 import { ResolutionGroupTab } from '../entity_resolution/resolution_group_tab';
 import { RESOLUTION_GROUP_TAB_TEST_ID } from '../entity_resolution/test_ids';
+import { AnomaliesTab } from '../anomalies/anomalies_tab';
 
 export const RISK_INPUTS_TAB_TEST_ID = `${PREFIX}RiskInputsTab` as const;
 export const INSIGHTS_TAB_TEST_ID = `${PREFIX}InsightInputsTab` as const;
 export const FIELDS_TABLE_TAB_TEST_ID = `${PREFIX}FieldsTableTab` as const;
+export const ANOMALIES_TAB_TEST_ID = `${PREFIX}AnomaliesTab` as const;
 
-export const getRiskInputTab = <T extends EntityType>({
+interface RiskInputsTabWithAlertPreviewProps {
+  entityType: EntityType;
+  entityName: string;
+  entityId?: string;
+  scopeId: string;
+}
+
+interface RiskScorePanelProps extends FlyoutPanelProps {
+  params: {
+    path: {
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS;
+      subTab?: RiskScoreLeftPanelSubTab;
+    };
+  };
+}
+
+function isRiskScoreFlyoutPanelProps(
+  panelLeft: FlyoutPanelProps | undefined
+): panelLeft is RiskScorePanelProps {
+  const params = panelLeft?.params;
+  if (!params || typeof params !== 'object' || !('path' in params)) {
+    return false;
+  }
+
+  const path = params.path as { tab?: unknown; subTab?: unknown };
+  if (path?.tab !== EntityDetailsLeftPanelTab.RISK_INPUTS) {
+    return false;
+  }
+
+  return (
+    path.subTab === undefined ||
+    (typeof path.subTab === 'string' &&
+      Object.values(RiskScoreLeftPanelSubTab).includes(path.subTab as RiskScoreLeftPanelSubTab))
+  );
+}
+
+/**
+ * Wires the legacy expandable flyout into {@link RiskInputsTab}: the alert preview, and the
+ * sub-tab, which is read from and written back to the left panel's URL state.
+ */
+const RiskInputsTabWithAlertPreview = ({
+  entityType,
+  entityName,
+  entityId,
+  scopeId,
+}: RiskInputsTabWithAlertPreviewProps) => {
+  const { openPreviewPanel, openLeftPanel } = useExpandableFlyoutApi();
+  const panels = useStableExpandableFlyoutState();
+  const subTab = isRiskScoreFlyoutPanelProps(panels.left)
+    ? panels.left.params.path.subTab
+    : undefined;
+
+  // Keeps the expandable-flyout URL state in sync with the user's manual sub-tab toggle so that
+  // clicking the same right-panel link again produces a URL change, which forces a remount.
+  const onSubTabChange = useCallback(
+    (newSubTab: RiskScoreLeftPanelSubTab) => {
+      if (!isRiskScoreFlyoutPanelProps(panels.left)) return;
+      openLeftPanel({
+        ...panels.left,
+        params: {
+          ...panels.left.params,
+          path: { tab: EntityDetailsLeftPanelTab.RISK_INPUTS, subTab: newSubTab },
+        },
+      });
+    },
+    [openLeftPanel, panels.left]
+  );
+
+  const onShowAlert = useCallback(
+    (id: string, indexName: string) =>
+      openPreviewPanel({
+        id: DocumentDetailsPreviewPanelKey,
+        params: {
+          id,
+          indexName,
+          scopeId,
+          isPreviewMode: true,
+          banner: ALERT_PREVIEW_BANNER,
+        },
+      }),
+    [openPreviewPanel, scopeId]
+  );
+
+  return (
+    <RiskInputsTab
+      entityType={entityType}
+      entityName={entityName}
+      entityId={entityId}
+      onShowAlert={onShowAlert}
+      subTab={subTab}
+      onSubTabChange={onSubTabChange}
+    />
+  );
+};
+
+export const getRiskInputTab = ({
   entityType,
   entityName,
   scopeId,
   entityId,
-}: RiskInputsTabProps<T>) => ({
+}: RiskInputsTabWithAlertPreviewProps) => ({
   id: EntityDetailsLeftPanelTab.RISK_INPUTS,
   'data-test-subj': RISK_INPUTS_TAB_TEST_ID,
   name: (
@@ -39,7 +143,7 @@ export const getRiskInputTab = <T extends EntityType>({
     />
   ),
   content: (
-    <RiskInputsTab
+    <RiskInputsTabWithAlertPreview
       entityType={entityType}
       entityName={entityName}
       scopeId={scopeId}
@@ -114,4 +218,24 @@ export const getResolutionGroupTab = ({
     />
   ),
   content: <ResolutionGroupTab entityId={entityId} entityType={entityType} scopeId={scopeId} />,
+});
+
+export const getAnomaliesTab = ({
+  entityId,
+  entityName,
+  entityType,
+}: {
+  entityId: string;
+  entityName: string;
+  entityType: EntityStoreEntityType;
+}) => ({
+  id: EntityDetailsLeftPanelTab.ANOMALIES,
+  'data-test-subj': ANOMALIES_TAB_TEST_ID,
+  name: (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.anomalyTab.tabLabel"
+      defaultMessage="Behavioral anomalies"
+    />
+  ),
+  content: <AnomaliesTab entityId={entityId} entityName={entityName} entityType={entityType} />,
 });

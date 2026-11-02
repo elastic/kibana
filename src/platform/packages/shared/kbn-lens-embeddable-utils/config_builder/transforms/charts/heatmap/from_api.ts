@@ -14,7 +14,11 @@ import type {
   PersistedIndexPatternLayer,
   TypedLensSerializedState,
 } from '@kbn/lens-common';
-import { HEATMAP_GRID_NAME, LENS_HEATMAP_ID } from '@kbn/lens-common';
+import {
+  HEATMAP_GRID_NAME,
+  LENS_HEATMAP_ID,
+  LENS_HEATMAP_DEFAULT_COLOR_STEPS,
+} from '@kbn/lens-common';
 import type {
   HeatmapGridConfigResult,
   HeatmapLegendConfigResult,
@@ -52,7 +56,7 @@ function buildVisualizationState(config: HeatmapConfig): HeatmapVisualizationSta
   const valueAccessor = getAccessorName('value');
   const basePalette =
     layer.metric.color && !isAutoColor(layer.metric.color)
-      ? fromColorByValueAPIToLensState(layer.metric.color)
+      ? fromColorByValueAPIToLensState(layer.metric.color, LENS_HEATMAP_DEFAULT_COLOR_STEPS)
       : undefined;
   const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axis?.x?.labels?.orientation);
 

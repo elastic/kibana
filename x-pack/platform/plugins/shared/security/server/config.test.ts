@@ -69,6 +69,10 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": true,
+          "requestLifetime": "PT10M",
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -127,6 +131,10 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": true,
+          "requestLifetime": "PT10M",
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -184,6 +192,10 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": true,
+          "requestLifetime": "PT10M",
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -245,6 +257,10 @@ describe('config schema', () => {
         "public": Object {},
         "roleManagementEnabled": true,
         "secureCookies": false,
+        "serviceAccounts": Object {
+          "enabled": false,
+          "requestLifetime": "PT10M",
+        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -1719,6 +1735,68 @@ describe('config schema', () => {
     });
   });
 
+  describe('serviceAccounts', () => {
+    it('should allow xpack.security.serviceAccounts.enabled to be configured outside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            serviceAccounts: { enabled: false },
+          },
+          { serverless: false }
+        ).serviceAccounts
+      ).toMatchObject({ enabled: false });
+    });
+
+    it('should be enabled by default outside of the serverless context', () => {
+      expect(ConfigSchema.validate({}, { serverless: false }).serviceAccounts).toMatchObject({
+        enabled: true,
+      });
+    });
+
+    it('should allow xpack.security.serviceAccounts.enabled to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            serviceAccounts: { enabled: true },
+          },
+          { serverless: true }
+        ).serviceAccounts
+      ).toMatchObject({ enabled: true });
+    });
+
+    it('should be disabled by default inside of the serverless context', () => {
+      expect(ConfigSchema.validate({}, { serverless: true }).serviceAccounts).toMatchObject({
+        enabled: false,
+      });
+    });
+    it('defaults to a ten-minute request refresh lifetime', () => {
+      expect(
+        ConfigSchema.validate(
+          {},
+          { serverless: true }
+        ).serviceAccounts?.requestLifetime.asMilliseconds()
+      ).toBe(600_000);
+    });
+
+    it('accepts a configured request refresh lifetime', () => {
+      expect(
+        ConfigSchema.validate(
+          { serviceAccounts: { requestLifetime: '20m' } },
+          { serverless: true }
+        ).serviceAccounts?.requestLifetime.asMilliseconds()
+      ).toBe(1_200_000);
+    });
+
+    it.each([0, -1, Infinity, -Infinity, NaN, '0m', '-1m', 'invalid'])(
+      'rejects invalid request lifetime %s',
+      (requestLifetime) => {
+        expect(() =>
+          ConfigSchema.validate({ serviceAccounts: { requestLifetime } }, { serverless: true })
+        ).toThrow('serviceAccounts.requestLifetime');
+      }
+    );
+  });
+
   describe('session', () => {
     it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
       expect(() => ConfigSchema.validate({ session: { cleanupInterval: '9s' } })).toThrow(
@@ -1874,6 +1952,47 @@ describe('config schema', () => {
         certificate: '/path/to/cert.pem',
         key: '/path/to/key.pem',
       });
+    });
+
+    it('accepts UIAM unsafe API key default expiration', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'some-secret',
+              unsafe: { grantedApiKeyDefaultExpiration: '4h' },
+            },
+          },
+          { serverless: true }
+        ).uiam.unsafe?.grantedApiKeyDefaultExpiration?.asMilliseconds()
+      ).toBe(14_400_000);
+    });
+
+    it.each([0, -1, Infinity, -Infinity, NaN, '0h', '-1h', 'invalid'])(
+      'rejects invalid UIAM unsafe API key default expiration %s',
+      (grantedApiKeyDefaultExpiration) => {
+        expect(() =>
+          ConfigSchema.validate(
+            {
+              uiam: {
+                enabled: true,
+                url: 'https://uiam.service',
+                sharedSecret: 'some-secret',
+                unsafe: { grantedApiKeyDefaultExpiration },
+              },
+            },
+            { serverless: true }
+          )
+        ).toThrow('uiam.unsafe.grantedApiKeyDefaultExpiration');
+      }
+    );
+
+    it('does not allow UIAM unsafe API key default expiration outside of serverless', () => {
+      expect(() =>
+        ConfigSchema.validate({ uiam: { unsafe: { grantedApiKeyDefaultExpiration: '4h' } } })
+      ).toThrow("[uiam]: a value wasn't expected to be present");
     });
 
     it('should throw error if ssl.certificate is specified without ssl.key', () => {

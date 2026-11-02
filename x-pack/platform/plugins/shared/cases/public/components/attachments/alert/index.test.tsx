@@ -7,7 +7,7 @@
 
 import { getStackAlertAttachmentType } from '.';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
-import { StackAlertAttachmentPayloadSchema } from '../../../../common/types/domain_zod/attachment/alert/v2';
+import { StackAlertAttachmentPayloadSchema } from '../../../../common/types/domain/attachment/alert/v2';
 
 describe('getStackAlertAttachmentType', () => {
   const registration = getStackAlertAttachmentType();
@@ -20,23 +20,28 @@ describe('getStackAlertAttachmentType', () => {
     expect(registration.schema).toBe(StackAlertAttachmentPayloadSchema);
   });
 
-  describe('getAttachmentRemovalObject', () => {
-    const getAttachmentRemovalObject = registration.getAttachmentRemovalObject!;
+  it('labels a count of alerts', () => {
+    expect(registration.getCountLabel?.({ count: 1 })).toBe('1 alert');
+    expect(registration.getCountLabel?.({ count: 3 })).toBe('3 alerts');
+  });
+
+  describe('getRemovalActivity', () => {
+    const getRemovalActivity = registration.getRemovalActivity!;
 
     it('returns a singular removal event when there is one alert id', () => {
-      const removal = getAttachmentRemovalObject({ attachmentId: 'a1' } as never);
+      const removal = getRemovalActivity({ attachmentId: 'a1' } as never);
       expect(removal.event).toBeDefined();
     });
 
     it('returns a plural removal event when there are multiple alert ids', () => {
-      const removal = getAttachmentRemovalObject({ attachmentId: ['a1', 'a2'] } as never);
+      const removal = getRemovalActivity({ attachmentId: ['a1', 'a2'] } as never);
       expect(removal.event).toBeDefined();
     });
   });
 
-  describe('getAttachmentTabViewObject', () => {
+  describe('getAttachmentList', () => {
     it('returns the stack alert tab content', () => {
-      const tab = registration.getAttachmentTabViewObject?.();
+      const tab = registration.getAttachmentList?.();
       expect(tab?.children).toBeDefined();
     });
   });

@@ -7,7 +7,8 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsEsClient } from '../lib';
-import { getSyntheticsCcsIndex } from '../../common/get_synthetics_indices';
+import { getCheckGroupTimeRangeFilter } from '../../common/constants/client_defaults';
+import { getSyntheticsScopedIndex } from '../../common/get_synthetics_indices';
 import type { RefResult, FullScreenshot } from '../../common/runtime_types/ping/synthetics';
 
 interface ResultType {
@@ -23,15 +24,17 @@ export const getJourneyScreenshot = async ({
   stepIndex,
   syntheticsEsClient,
   remoteName,
+  timestamp,
 }: {
   checkGroup: string;
   stepIndex: number;
   remoteName?: string;
+  timestamp?: string;
 } & {
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<ScreenshotReturnTypesUnion> => {
   const body = {
-    index: getSyntheticsCcsIndex(remoteName, syntheticsEsClient.heartbeatIndices),
+    index: getSyntheticsScopedIndex(remoteName, syntheticsEsClient.heartbeatIndices),
     track_total_hits: true,
     size: 0,
     query: {
@@ -47,6 +50,7 @@ export const getJourneyScreenshot = async ({
               'synthetics.type': ['step/screenshot', 'step/screenshot_ref'],
             },
           },
+          ...(timestamp ? [getCheckGroupTimeRangeFilter(timestamp)] : []),
         ] as QueryDslQueryContainer[],
       },
     },

@@ -7,6 +7,7 @@
 
 import { savedObjectsClientMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { DATE_1970, mockTaskInstance, RULE_ID, RULE_NAME, RULE_TYPE_ID } from './fixtures';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ruleRunMetricsStoreMock } from '../lib/rule_run_metrics_store.mock';
@@ -142,7 +143,7 @@ const mockedTaskInstance: ConcreteTaskInstance = {
   timeoutOverride: '3m',
   params: {
     adHocRunParamsId: 'abc',
-    spaceId: 'default',
+    spaceId: asSpaceId('default'),
   },
   ownerId: null,
 };
@@ -188,7 +189,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -303,7 +304,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -421,7 +422,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -533,7 +534,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -645,7 +646,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -687,7 +688,7 @@ describe('RuleTypeRunner', () => {
           maintenanceWindowsService,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -765,7 +766,13 @@ describe('RuleTypeRunner', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `rule execution generated greater than 100 alerts: test:1: 'rule-name'`
+        `rule execution generated greater than 100 alerts: test:1: 'rule-name'`,
+        {
+          labels: {
+            ruleId: '1',
+            ruleType: 'test',
+          },
+        }
       );
       expect(ruleRunMetricsStore.setHasReachedAlertLimit).toHaveBeenCalledWith(true);
       expect(state).toEqual({ foo: 'bar' });
@@ -810,7 +817,7 @@ describe('RuleTypeRunner', () => {
           maintenanceWindowsService,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -888,7 +895,13 @@ describe('RuleTypeRunner', () => {
       });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        `rule execution generated greater than 100 alerts: test:1: 'rule-name'`
+        `rule execution generated greater than 100 alerts: test:1: 'rule-name'`,
+        {
+          labels: {
+            ruleId: '1',
+            ruleType: 'test',
+          },
+        }
       );
       expect(ruleRunMetricsStore.setHasReachedAlertLimit).toHaveBeenCalledWith(true);
       expect(state).toBeUndefined();
@@ -932,7 +945,7 @@ describe('RuleTypeRunner', () => {
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             isServerless: false,
           },
           alertsClient,
@@ -1042,7 +1055,7 @@ describe('RuleTypeRunner', () => {
             maintenanceWindowsService,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             isServerless: false,
           },
           alertsClient,
@@ -1155,7 +1168,7 @@ describe('RuleTypeRunner', () => {
             ruleId: RULE_ID,
             ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
             ruleRunMetricsStore,
-            spaceId: 'default',
+            spaceId: asSpaceId('default'),
             isServerless: false,
           },
           alertsClient,
@@ -1266,7 +1279,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -1309,7 +1322,7 @@ describe('RuleTypeRunner', () => {
         ruleId: RULE_ID,
         ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
         ruleRunMetricsStore,
-        spaceId: 'default',
+        spaceId: asSpaceId('default'),
         isServerless: false,
       },
       alertsClient,
@@ -1370,7 +1383,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -1448,7 +1461,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,
@@ -1508,7 +1521,7 @@ describe('RuleTypeRunner', () => {
           ruleId: RULE_ID,
           ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
           ruleRunMetricsStore,
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           isServerless: false,
         },
         alertsClient,

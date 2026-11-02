@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { BaseEdge, getBezierPath, Position, type EdgeProps } from '@xyflow/react';
-import { useServiceMapSearchContext } from '../../shared/service_map/service_map_search_context';
+import { useServiceMapHighlight } from '../../shared/service_map/service_map_search_context';
 import { useAdjustedEndpoint } from './get_highlight_offset';
 
 export const ServiceMapEdge = memo(
@@ -26,7 +26,7 @@ export const ServiceMapEdge = memo(
     markerStart,
     data,
   }: EdgeProps) => {
-    const { activeMatchNodeId } = useServiceMapSearchContext();
+    const { activeMatchNodeId } = useServiceMapHighlight();
     const adjustEndpoint = useAdjustedEndpoint();
 
     const sourceHighlighted = Boolean(data?.sourceContextHighlight) || activeMatchNodeId === source;

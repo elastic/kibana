@@ -9,10 +9,13 @@ import { useMemo } from 'react';
 import type { HttpStart, IHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
+import { unflattenObject } from '@kbn/object-utils';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import { normalizeMultiValueField } from '../normalize_multi_value_field';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { RiskSeverity, RiskStats } from '../../../../common/search_strategy';
+import { mergeResolutionGroupValues } from '../../../../common/entity_analytics/entity_store/resolution_group_values';
 import type { EntityAttachmentIdentifier } from './types';
 
 export interface EntityForAttachment {
@@ -63,19 +66,40 @@ interface EntityRecordShape {
      * downstream.
      */
     source?: string | string[];
-    attributes?: { watchlists?: string[] };
+    /**
+     * `entity.attributes.watchlists` is a `keyword` field. Elasticsearch only
+     * serialiZes it as an array when the document has multiple values; a single
+     * watchlist membership comes back as a bare string. Accept either shape and
+     * normaliZe downstream via `normalizeMultiValueField`.
+     */
+    attributes?: { watchlists?: string | string[] };
     lifecycle?: { first_seen?: string; last_activity?: string };
     risk?: Partial<RiskStats> & {
       calculated_level?: string;
       calculated_score?: number;
       calculated_score_norm?: number;
     };
+    relationships?: {
+      resolution?: { risk?: { calculated_level?: string; calculated_score_norm?: number } };
+    };
   };
   asset?: { criticality?: string | null };
 }
 
+/** An entity's record and, for a resolution group, the records of its aliases. */
+interface EntityRecords {
+  record: EntityRecordShape | undefined;
+  aliases: EntityRecordShape[];
+}
+
 interface ListEntitiesResponseShape {
   records?: EntityRecordShape[];
+}
+
+/** The resolution group route returns the raw stored records, whose fields may be dotted keys. */
+interface ResolutionGroupResponseShape {
+  target: Record<string, unknown>;
+  aliases: Array<Record<string, unknown>>;
 }
 
 const ENTITY_ATTACHMENT_QUERY_KEY = 'AGENT_BUILDER_ENTITY_ATTACHMENT';
@@ -138,16 +162,32 @@ const buildFilterQuery = (identifier: EntityAttachmentIdentifier): string | unde
 
 const shapeRecord = (
   identifier: EntityAttachmentIdentifier,
-  record: EntityRecordShape | undefined
+  record: EntityRecordShape | undefined,
+  aliases: EntityRecordShape[] = []
 ): EntityForAttachment => {
   const entityField = record?.entity;
   const assetField = record?.asset;
+  const isGroup = identifier.mode === 'resolved' && Boolean(record);
+  // As the entities page shows a group: its risk, the highest criticality, every source and watchlist,
+  // the earliest first seen and the latest last seen.
+  const group = isGroup && record ? mergeResolutionGroupValues([record, ...aliases]) : undefined;
+  const groupRisk = isGroup ? entityField?.relationships?.resolution?.risk : undefined;
 
-  const riskScore = entityField?.risk?.calculated_score_norm ?? entityField?.risk?.calculated_score;
-  const riskLevel = entityField?.risk?.calculated_level as RiskSeverity | undefined;
+  const riskScore =
+    groupRisk?.calculated_score_norm ??
+    entityField?.risk?.calculated_score_norm ??
+    entityField?.risk?.calculated_score;
+  const riskLevel = (
+    groupRisk?.calculated_score_norm !== undefined
+      ? groupRisk.calculated_level
+      : entityField?.risk?.calculated_level
+  ) as RiskSeverity | undefined;
 
-  const assetCriticality =
+  const ownCriticality =
     (assetField?.criticality as CriticalityLevelWithUnassigned | null | undefined) ?? undefined;
+  const assetCriticality = group
+    ? (group.criticality as CriticalityLevelWithUnassigned | undefined) ?? ownCriticality
+    : ownCriticality;
 
   const riskStats = entityField?.risk
     ? ({
@@ -157,31 +197,26 @@ const shapeRecord = (
       } as RiskStats)
     : undefined;
 
-  const rawSource = entityField?.source;
-  const sources = Array.isArray(rawSource)
-    ? rawSource.filter((s): s is string => typeof s === 'string' && s.length > 0)
-    : typeof rawSource === 'string' && rawSource.length > 0
-    ? [rawSource]
-    : [];
-
   return {
     entityType: toEntityType(identifier.identifierType),
     displayName: entityField?.name ?? identifier.identifier,
     entityId: entityField?.id,
     isEntityInStore: Boolean(record),
-    firstSeen: entityField?.lifecycle?.first_seen ?? null,
-    lastSeen: entityField?.lifecycle?.last_activity ?? null,
-    timestamp: record?.['@timestamp'] ?? null,
+    firstSeen: group ? group.firstSeen ?? null : entityField?.lifecycle?.first_seen ?? null,
+    lastSeen: group ? group.lastActivity ?? null : entityField?.lifecycle?.last_activity ?? null,
+    timestamp: group ? group.lastSeen ?? null : record?.['@timestamp'] ?? null,
     riskScore,
     riskLevel,
     riskStats,
     assetCriticality,
-    watchlistIds: entityField?.attributes?.watchlists?.slice() ?? [],
-    sources,
+    watchlistIds: group
+      ? group.watchlists
+      : normalizeMultiValueField(entityField?.attributes?.watchlists),
+    sources: group ? group.sources : normalizeMultiValueField(entityField?.source),
   };
 };
 
-const fetchEntity = async ({
+const fetchSingleRecord = async ({
   http,
   identifier,
   signal,
@@ -213,6 +248,47 @@ const fetchEntity = async ({
   return response?.records?.[0];
 };
 
+/** The group's primary and all its aliases, in one request. */
+const fetchResolutionGroup = async ({
+  http,
+  entityId,
+  signal,
+}: {
+  http: HttpStart;
+  entityId: string;
+  signal?: AbortSignal;
+}): Promise<EntityRecords> => {
+  const { target, aliases } = await http.fetch<ResolutionGroupResponseShape>(
+    ENTITY_STORE_ROUTES.public.RESOLUTION_GROUP,
+    {
+      version: ENTITY_STORE_API_VERSION,
+      method: 'GET',
+      query: { entity_id: entityId },
+      signal,
+    }
+  );
+  return {
+    record: unflattenObject(target) as EntityRecordShape,
+    aliases: aliases.map((alias) => unflattenObject(alias) as EntityRecordShape),
+  };
+};
+
+const fetchEntity = async ({
+  http,
+  identifier,
+  signal,
+}: {
+  http: HttpStart;
+  identifier: EntityAttachmentIdentifier;
+  signal?: AbortSignal;
+}): Promise<EntityRecords> => {
+  const { entityStoreId, mode } = identifier;
+  if (mode === 'resolved' && entityStoreId) {
+    return fetchResolutionGroup({ http, entityId: entityStoreId, signal });
+  }
+  return { record: await fetchSingleRecord({ http, identifier, signal }), aliases: [] };
+};
+
 /**
  * Fetches the entity store record for a single attachment identifier and
  * shapes it for the chat card.
@@ -237,6 +313,7 @@ export const useEntityForAttachment = (
       identifier?.identifierType ?? '',
       identifier?.identifier ?? '',
       identifier?.entityStoreId ?? '',
+      identifier?.mode ?? '',
     ],
     [identifier]
   );
@@ -244,11 +321,11 @@ export const useEntityForAttachment = (
   const enabled = Boolean(http) && !skip && Boolean(identifier?.identifier);
 
   const {
-    data: record,
+    data: records,
     isLoading,
     error,
     refetch,
-  } = useQuery<EntityRecordShape | undefined, IHttpFetchError>({
+  } = useQuery<EntityRecords | undefined, IHttpFetchError>({
     queryKey,
     queryFn: ({ signal }) => {
       if (!identifier || !http) {
@@ -261,8 +338,8 @@ export const useEntityForAttachment = (
 
   const data = useMemo<EntityForAttachment | null>(() => {
     if (!identifier) return null;
-    return shapeRecord(identifier, record);
-  }, [identifier, record]);
+    return shapeRecord(identifier, records?.record, records?.aliases);
+  }, [identifier, records]);
 
   return {
     isLoading: enabled && isLoading,

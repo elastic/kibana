@@ -1,0 +1,396 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { EuiAccordionProps } from '@elastic/eui';
+import { EuiThemeProvider } from '@elastic/eui';
+import type { TraceItem } from '@kbn/apm-types';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
+import { convertTreeToList, TraceWaterfall } from '.';
+import type { TraceWaterfallItem } from './use_trace_waterfall';
+
+let mockListProps: Record<string, any> = {};
+
+// Mock react-virtualized to avoid ResizeObserver issues in jsdom and to capture List props
+jest.mock('react-virtualized', () => {
+  const actual = jest.requireActual('react-virtualized');
+
+  function MockList(props: any) {
+    mockListProps = props;
+    const rows = Array.from({ length: props.rowCount }, (_: any, i: number) =>
+      props.rowRenderer({ index: i, style: {}, key: String(i), parent: {} })
+    );
+    const style: React.CSSProperties = props.autoHeight
+      ? { height: 'auto', overflowY: 'hidden' }
+      : {};
+    return (
+      <div role="grid" style={style}>
+        {rows}
+      </div>
+    );
+  }
+
+  return {
+    ...actual,
+    AutoSizer: ({ children }: { children: (size: { width: number; height: number }) => any }) =>
+      children({ width: 800, height: 600 }),
+    WindowScroller: ({ children }: any) =>
+      children({ height: 600, onChildScroll: jest.fn(), scrollTop: 0, registerChild: jest.fn() }),
+    CellMeasurer: ({ children }: any) => children,
+    List: MockList,
+  };
+});
+
+describe('convertTreeToList', () => {
+  const itemA: TraceWaterfallItem = {
+    id: 'a',
+    parentId: undefined,
+    name: 'A',
+    timestampUs: 0,
+    traceId: 't1',
+    duration: 100,
+    serviceName: 'svcA',
+    depth: 0,
+    offset: 0,
+    skew: 0,
+    color: 'red',
+    errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'transaction',
+  };
+  const itemB: TraceWaterfallItem = {
+    id: 'b',
+    parentId: 'a',
+    name: 'B',
+    timestampUs: 0,
+    traceId: 't1',
+    duration: 50,
+    serviceName: 'svcB',
+    depth: 1,
+    offset: 10,
+    skew: 0,
+    color: 'blue',
+    errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'span',
+  };
+  const itemC: TraceWaterfallItem = {
+    id: 'c',
+    parentId: 'a',
+    name: 'C',
+    timestampUs: 0,
+    traceId: 't1',
+    duration: 30,
+    serviceName: 'svcC',
+    depth: 1,
+    offset: 20,
+    skew: 0,
+    color: 'green',
+    errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'span',
+  };
+  const itemD: TraceWaterfallItem = {
+    id: 'd',
+    parentId: 'b',
+    name: 'D',
+    timestampUs: 0,
+    traceId: 't1',
+    duration: 10,
+    serviceName: 'svcD',
+    depth: 2,
+    offset: 30,
+    skew: 0,
+    color: 'yellow',
+    errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'span',
+  };
+
+  const treeMap = {
+    a: [itemB, itemC],
+    b: [itemD],
+  };
+
+  it('returns an empty array if root is undefined', () => {
+    const result = convertTreeToList(treeMap, {}, undefined);
+    expect(result).toEqual([]);
+  });
+
+  it('returns only the root if there are no children', () => {
+    const result = convertTreeToList({}, {}, itemA);
+    expect(result).toEqual([itemA]);
+  });
+
+  it('returns all items in depth-first order when all accordions are open', () => {
+    const accordionsState: Record<string, EuiAccordionProps['forceState']> = {
+      a: 'open',
+      b: 'open',
+      c: 'open',
+      d: 'open',
+    };
+    const result = convertTreeToList(treeMap, accordionsState, itemA);
+    // Should be: a, b, d, c
+    expect(result).toEqual([itemA, itemB, itemD, itemC]);
+  });
+
+  it('skips children if accordion is closed', () => {
+    const accordionsState: Record<string, EuiAccordionProps['forceState']> = {
+      a: 'open',
+      b: 'closed',
+      c: 'open',
+      d: 'open',
+    };
+    const result = convertTreeToList(treeMap, accordionsState, itemA);
+    // Should be: a, b, c (d is not included because b is closed)
+    expect(result).toEqual([itemA, itemB, itemC]);
+  });
+
+  it('defaults to open if accordion state is missing', () => {
+    const accordionsState = {}; // No state provided, should default to open
+    const result = convertTreeToList(treeMap, accordionsState, itemA);
+    expect(result).toEqual([itemA, itemB, itemD, itemC]);
+  });
+});
+
+describe('TraceWaterfall', () => {
+  afterEach(() => {
+    cleanup();
+    mockListProps = {};
+  });
+
+  const mockTraceItems: TraceItem[] = [
+    {
+      id: 'trace-1',
+      parentId: undefined,
+      traceId: 'trace-1',
+      name: 'Test Transaction',
+      serviceName: 'test-service',
+      duration: 100,
+      timestampUs: 0,
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'transaction',
+    },
+    {
+      id: 'span-1',
+      parentId: 'trace-1',
+      traceId: 'trace-1',
+      name: 'Test Span 1',
+      serviceName: 'test-service',
+      duration: 50,
+      timestampUs: 0,
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
+    },
+    {
+      id: 'span-2',
+      parentId: 'span-1',
+      traceId: 'trace-1',
+      name: 'Test Span 2',
+      serviceName: 'test-service',
+      duration: 30,
+      timestampUs: 0,
+      errors: [],
+      spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
+    },
+  ];
+
+  const renderTraceWaterfall = (
+    props: Partial<React.ComponentProps<typeof TraceWaterfall>> = {}
+  ) => {
+    return render(
+      <EuiThemeProvider>
+        <TraceWaterfall traceItems={mockTraceItems} {...props} />
+      </EuiThemeProvider>
+    );
+  };
+
+  describe('WaterfallAccordionButton', () => {
+    it('renders WaterfallAccordionButton when showAccordion is true', () => {
+      renderTraceWaterfall({ showAccordion: true });
+
+      expect(screen.getByTestId('traceWaterfallAccordionButton')).toBeInTheDocument();
+    });
+
+    it('does not render WaterfallAccordionButton when showAccordion is false', () => {
+      renderTraceWaterfall({ showAccordion: false });
+
+      expect(screen.queryByTestId('traceWaterfallAccordionButton')).not.toBeInTheDocument();
+    });
+
+    it('toggles accordion state when WaterfallAccordionButton is clicked', () => {
+      renderTraceWaterfall({ showAccordion: true });
+
+      const accordionButton = screen.getByTestId('traceWaterfallAccordionButton');
+
+      expect(accordionButton.querySelector('[data-euiicon-type="fold"]')).toBeInTheDocument();
+      expect(accordionButton).toHaveAttribute('aria-label', 'Click to fold the waterfall');
+
+      expect(screen.getByText('Test Transaction')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 1')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 2')).toBeInTheDocument();
+
+      fireEvent.click(accordionButton);
+
+      expect(accordionButton.querySelector('[data-euiicon-type="unfold"]')).toBeInTheDocument();
+      expect(accordionButton).toHaveAttribute('aria-label', 'Click to unfold the waterfall');
+
+      expect(screen.getByText('Test Transaction')).toBeInTheDocument();
+      expect(screen.queryByText('Test Span 1')).not.toBeInTheDocument();
+      expect(screen.queryByText('Test Span 2')).not.toBeInTheDocument();
+
+      fireEvent.click(accordionButton);
+
+      expect(accordionButton.querySelector('[data-euiicon-type="fold"]')).toBeInTheDocument();
+      expect(accordionButton).toHaveAttribute('aria-label', 'Click to fold the waterfall');
+
+      expect(screen.getByText('Test Transaction')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 1')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 2')).toBeInTheDocument();
+    });
+  });
+
+  describe('Scroll to origin button', () => {
+    it('renders when scrollStrategy is parent and contextSpanIds is set', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        contextSpanIds: ['span-1'],
+      });
+
+      expect(screen.getByTestId('waterfallScrollToOriginButton')).toBeInTheDocument();
+    });
+
+    it('does not render when scrollStrategy is window', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'window',
+        contextSpanIds: ['span-1'],
+      });
+
+      expect(screen.queryByTestId('waterfallScrollToOriginButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render when contextSpanIds is not set', () => {
+      renderTraceWaterfall({ scrollStrategy: 'parent' });
+
+      expect(screen.queryByTestId('waterfallScrollToOriginButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render when contextSpanIds is empty', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        contextSpanIds: [],
+      });
+
+      expect(screen.queryByTestId('waterfallScrollToOriginButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Critical Path Control', () => {
+    it('does not render critical path control when showCriticalPathControl is false', () => {
+      renderTraceWaterfall({ showCriticalPathControl: false });
+
+      expect(screen.queryByTestId('criticalPathToggle')).not.toBeInTheDocument();
+    });
+
+    it('renders critical path control when showCriticalPathControl is true', () => {
+      renderTraceWaterfall({ showCriticalPathControl: true });
+
+      expect(screen.getByTestId('criticalPathToggle')).toBeInTheDocument();
+    });
+  });
+
+  describe('Virtualization', () => {
+    it('uses delegated scroll pattern to prevent scroll issues', () => {
+      renderTraceWaterfall({ showAccordion: false });
+
+      const list = screen.getByRole('grid');
+
+      expect(list).toHaveStyle({ height: 'auto' });
+      expect(list).toHaveStyle({ overflowY: 'hidden' });
+    });
+
+    it('renders the waterfall container with virtualized list', () => {
+      renderTraceWaterfall({ showAccordion: false });
+
+      expect(screen.getByTestId('waterfall')).toBeInTheDocument();
+      expect(screen.getByRole('grid')).toBeInTheDocument();
+    });
+
+    it('renders trace items within the virtualized list', () => {
+      renderTraceWaterfall({ showAccordion: false });
+
+      expect(screen.getByText('Test Transaction')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 1')).toBeInTheDocument();
+      expect(screen.getByText('Test Span 2')).toBeInTheDocument();
+    });
+
+    it('renders warning when trace items array is empty', () => {
+      renderTraceWaterfall({ traceItems: [], showAccordion: false });
+
+      expect(screen.getByTestId('traceWarning')).toBeInTheDocument();
+    });
+  });
+
+  describe('Scroll strategy', () => {
+    it('uses auto-height layout for window scroll strategy', () => {
+      renderTraceWaterfall({ scrollStrategy: 'window' });
+
+      expect(screen.getByRole('grid')).toHaveStyle({ height: 'auto' });
+    });
+
+    it('uses fixed-height layout for parent scroll strategy', () => {
+      renderTraceWaterfall({ scrollStrategy: 'parent' });
+
+      expect(screen.getByRole('grid')).not.toHaveStyle({ height: 'auto' });
+    });
+
+    it('passes scrollToIndex when scrollToContextOnMount is true for parent strategy', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        contextSpanIds: ['span-1'],
+        scrollToContextOnMount: true,
+      });
+
+      // span-1 is at index 1 in the visible list (after the root trace-1)
+      expect(mockListProps.scrollToIndex).toBe(1);
+    });
+
+    it('does not pass scrollToIndex for window strategy even when contextSpanIds is set', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'window',
+        contextSpanIds: ['span-1'],
+      });
+
+      expect(mockListProps.scrollToIndex).toBeUndefined();
+    });
+
+    it('does not pass scrollToIndex when scrollToContextOnMount is false', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        contextSpanIds: ['span-1'],
+        scrollToContextOnMount: false,
+      });
+
+      expect(mockListProps.scrollToIndex).toBeUndefined();
+    });
+
+    it('does not pass scrollToIndex when contextSpanIds is not in the trace', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        contextSpanIds: ['nonexistent-span'],
+        scrollToContextOnMount: true,
+      });
+
+      expect(mockListProps.scrollToIndex).toBeUndefined();
+    });
+  });
+});

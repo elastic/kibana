@@ -23,10 +23,24 @@ export const toStringArray = (value: unknown): string[] => {
   return [];
 };
 
-export const toStringOrStringArray = (value: unknown): string | string[] | undefined => {
+/**
+ * Normalizes a value to a string, string[], or undefined (empty values dropped).
+ *
+ * With `preserveArray`, an array input stays an array (even single-item) instead
+ * of collapsing to a scalar — needed so alert/event `attachmentId`/`index`
+ * round-trip to their stored shape (legacy POST arrives as arrays, PATCH as scalars).
+ */
+export const toStringOrStringArray = (
+  value: unknown,
+  { preserveArray = false }: { preserveArray?: boolean } = {}
+): string | string[] | undefined => {
   const values = toStringArray(value);
   if (values.length === 0) {
     return undefined;
+  }
+
+  if (preserveArray && Array.isArray(value)) {
+    return values;
   }
 
   return values.length === 1 ? values[0] : values;

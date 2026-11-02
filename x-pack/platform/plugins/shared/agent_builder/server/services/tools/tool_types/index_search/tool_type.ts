@@ -42,6 +42,7 @@ export const getIndexSearchToolType = (
               pattern,
               row_limit: rowLimit,
               custom_instructions: customInstructions,
+              include_frozen: includeFrozen = false,
             } = config;
 
             // Resolve top snippets config from UI settings
@@ -69,10 +70,12 @@ export const getIndexSearchToolType = (
               rowLimit,
               customInstructions,
               esClient: esClient.asCurrentUser,
-              model: await modelProvider.getDefaultModel(),
+              internalEsClient: esClient.asInternalUser,
+              modelProvider,
               events,
               logger,
               topSnippetsConfig,
+              includeFrozen,
             });
             return { results };
           };

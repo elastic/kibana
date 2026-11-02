@@ -14,13 +14,14 @@ import { mutationKeys } from '../mutation_keys';
 import type { ServerError, ToggleAlertParams } from '../types';
 import { unmuteAlertInstance } from '../apis/unmute_alert_instance';
 
-const ERROR_TITLE = i18n.translate('alertsApis.unmuteAlert.error', {
+const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.unmuteAlert.error', {
   defaultMessage: 'Error unmuting alert',
 });
 
 export interface UseUnmuteAlertInstanceParams {
   http: HttpStart;
   notifications: NotificationsStart;
+  skipAlertsQueryContext?: boolean;
 }
 
 export const getKey = mutationKeys.unmuteAlertInstance;
@@ -28,17 +29,18 @@ export const getKey = mutationKeys.unmuteAlertInstance;
 export const useUnmuteAlertInstance = ({
   http,
   notifications: { toasts },
+  skipAlertsQueryContext,
 }: UseUnmuteAlertInstanceParams) => {
   return useMutation(
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       unmuteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
       mutationKey: getKey(),
-      context: AlertsQueryContext,
+      context: skipAlertsQueryContext ? undefined : AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(
-          i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertUnmuted', {
-            defaultMessage: 'Alert unmuted',
+          i18n.translate('xpack.responseOpsAlertsApis.alertsTable.alertUnsnoozed', {
+            defaultMessage: 'Alert unsnoozed',
           })
         );
       },

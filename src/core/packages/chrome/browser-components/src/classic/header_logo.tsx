@@ -55,8 +55,9 @@ export function HeaderLogo() {
       paddingInline: euiTheme.size.s,
     }),
     logoMarkCss: css({
-      marginLeft: euiTheme.size.s,
+      marginLeft: `calc(${euiTheme.size.s} * -1)`,
       fill: euiTheme.colors.plainLight,
+      scale: '.67',
     }),
   };
 

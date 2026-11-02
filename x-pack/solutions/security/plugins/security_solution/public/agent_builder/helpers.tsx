@@ -6,7 +6,6 @@
  */
 
 import { pick } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentInput, AttachmentGroup } from '@kbn/agent-builder-common/attachments';
 import type { TimelineItem } from '@kbn/response-ops-alerts-table/types';
 
@@ -18,12 +17,26 @@ export type BulkAlertsAttachmentInput = AttachmentInput<
   { alertIds: string[] }
 >;
 
+export const hashIds = (ids: string[]): number => {
+  // Math.imul(1, x) applies ToInt32 — keeps the accumulator in signed 32-bit range each step.
+  const signed = [...ids]
+    .sort()
+    .reduce(
+      (h, id) => [...id].reduce((a, c) => Math.imul(1, Math.imul(31, a) + c.charCodeAt(0)), h),
+      0
+    );
+  // Convert signed 32-bit to unsigned without the >>> bitwise operator (banned by no-bitwise).
+  const uint32Max = 2 ** 32;
+  return signed < 0 ? signed + uint32Max : signed;
+};
+
 const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] => {
   const batches: BulkAlertsAttachmentInput[] = [];
   for (let i = 0; i < alertItems.length; i += ALERTS_BATCH_MAX_SIZE) {
+    const chunk = alertItems.slice(i, i + ALERTS_BATCH_MAX_SIZE);
     batches.push({
       type: SecurityAgentBuilderAttachments.alerts,
-      data: { alertIds: alertItems.slice(i, i + ALERTS_BATCH_MAX_SIZE).map((a) => a._id) },
+      data: { alertIds: chunk.map((a) => a._id) },
     });
   }
   return batches;
@@ -36,7 +49,7 @@ const chunkAlerts = (alertItems: TimelineItem[]): BulkAlertsAttachmentInput[] =>
  */
 export const alertsToAttachmentGroup = (alertItems: TimelineItem[]): AttachmentGroup => ({
   type: 'group',
-  id: uuidv4(),
+  id: `alerts:${hashIds(alertItems.map((a) => a._id))}`,
   label: `${alertItems.length} Alert${alertItems.length !== 1 ? 's' : ''}`,
   items: chunkAlerts(alertItems),
 });

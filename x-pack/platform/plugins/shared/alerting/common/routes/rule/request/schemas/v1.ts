@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
-import { rRuleRequestSchemaV1 } from '../../../r_rule';
+import { rRuleRequestSchemaV1 } from '@kbn/response-ops-schedule-schema';
 import { validateSnoozeScheduleV1 } from '../../validation';
 
 export const MAX_ARTIFACTS_DASHBOARDS_LENGTH = 10;

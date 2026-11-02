@@ -18,6 +18,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import {
   getDiscoverInternalStateMock,
@@ -178,6 +179,7 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
+    onRemoveFields: jest.fn(),
     selectedDataView: dataView,
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
@@ -191,10 +193,12 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
 
 async function setupToolkit({
   query,
+  hideSidebar,
   fieldListUiState,
   services,
 }: {
   query?: Query | AggregateQuery;
+  hideSidebar?: boolean;
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
   services?: DiscoverServices;
 }): Promise<InternalStateMockToolkit> {
@@ -207,6 +211,7 @@ async function setupToolkit({
       appState: {
         query: query ?? { query: '', language: 'lucene' },
         filters: [],
+        hideSidebar,
       },
     })
   );
@@ -224,6 +229,7 @@ async function renderComponent(
   props: TestWrapperProps,
   appStateParams: {
     query?: Query | AggregateQuery;
+    hideSidebar?: boolean;
     fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
   } = {},
   services?: DiscoverServices
@@ -437,6 +443,12 @@ describe('discover responsive sidebar', function () {
     await user.click(within(selectedFields).getByTestId('fieldToggle-extension'));
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
+  it('should allow restarting selected fields', async function () {
+    const { user } = await renderComponent(props);
+    await user.click(screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields'));
+    expect(props.onRemoveFields).toHaveBeenCalledWith(['extension']);
+    expect(props.onRemoveField).not.toHaveBeenCalled();
+  });
   it('should allow adding filters', async function () {
     const { user } = await renderComponent(props);
     const availableFields = screen.getByTestId('fieldListGroupedAvailableFields');
@@ -513,9 +525,7 @@ describe('discover responsive sidebar', function () {
     const { result: collapsedRender } = await renderComponent(
       props,
       {
-        fieldListUiState: {
-          isCollapsed: true,
-        },
+        hideSidebar: true,
       },
       undefined
     );
@@ -527,9 +537,7 @@ describe('discover responsive sidebar', function () {
     const { result: expandedRender } = await renderComponent(
       props,
       {
-        fieldListUiState: {
-          isCollapsed: false,
-        },
+        hideSidebar: false,
       },
       undefined
     );
@@ -556,11 +564,14 @@ describe('discover responsive sidebar', function () {
       documents$: new BehaviorSubject({
         fetchStatus: FetchStatus.COMPLETE,
         result: getDataTableRecords(stubLogstashDataView),
-        esqlQueryColumns: [
-          { id: '1', name: 'extension', meta: { type: 'text' } },
-          { id: '2', name: 'bytes', meta: { type: 'number' } },
-          { id: '3', name: '@timestamp', meta: { type: 'date' } },
-        ],
+        dataSource: createMockEsqlSource(
+          [],
+          [
+            { id: '1', name: 'extension', meta: { type: 'string' } },
+            { id: '2', name: 'bytes', meta: { type: 'number' } },
+            { id: '3', name: '@timestamp', meta: { type: 'date' } },
+          ]
+        ),
       }) as DataDocuments$,
     };
     await renderComponent(
@@ -789,9 +800,7 @@ describe('discover responsive sidebar', function () {
           sidebarToggleState$: collapsedSidebarToggleState$,
         },
         {
-          fieldListUiState: {
-            isCollapsed: true,
-          },
+          hideSidebar: true,
         }
       );
 

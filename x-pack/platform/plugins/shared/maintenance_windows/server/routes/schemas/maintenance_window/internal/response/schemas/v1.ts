@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
 import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../shared';
 import { rRuleResponseSchemaV1 } from '../../../../r_rule';
-import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
+import {
+  alertsFilterQuerySchemaV1,
+  alertingV2ScopeSchemaV1,
+} from '../../../../alerts_filter_query';
 
 export const maintenanceWindowEventSchema = schema.object({
   gte: schema.string(),
@@ -39,4 +42,10 @@ export const maintenanceWindowResponseSchema = schema.object({
   ]),
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
   scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+  scope: schema.maybe(
+    schema.object({
+      alerting: schema.maybe(alertsFilterQuerySchemaV1),
+      alerting_v2: schema.maybe(alertingV2ScopeSchemaV1),
+    })
+  ),
 });

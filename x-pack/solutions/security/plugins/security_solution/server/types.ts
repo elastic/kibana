@@ -20,6 +20,7 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
 import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
 import type { EntityStoreCRUDClient as EntityStoreUpdateClient } from '@kbn/entity-store/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -41,15 +42,12 @@ import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/ri
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
-import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/engine/data_client';
-import type { ApiKeyManager as EntityStoreApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { ApiKeyManager as PrivilegedUsersApiKeyManager } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
 import type { ProductFeaturesService } from './lib/product_features_service';
 import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/privilege_monitoring/data_sources/monitoring_entity_source_data_client';
 import type { MlAuthz } from './lib/machine_learning/authz';
 import type { SiemMigrationClients } from './lib/siem_migrations/types';
-import type { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
 import type { CheckOsqueryResponseActionAuthz } from './endpoint/services/actions/utils/rule_response_actions_validators';
 import type { DetectionRulesAuthz } from '../common/detection_engine/rule_management/authz';
 
@@ -75,14 +73,11 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getLogger: () => Logger;
   getDataViewsService: () => DataViewsService;
   getInternalDataViewsService: () => Promise<DataViewsService>;
-  getEntityStoreApiKeyManager: () => EntityStoreApiKeyManager;
   getExceptionListClient: () => ExceptionListClient | null;
   getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
   getRiskEngineDataClient: () => RiskEngineDataClient;
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
-  getEntityStoreDataClient: () => EntityStoreDataClient;
-  getEntityStoreCrudClient: () => EntityStoreCrudClient;
   getEntityStoreUpdateClient: () => EntityStoreUpdateClient;
   getPrivilegeMonitoringDataClient: () => PrivilegeMonitoringDataClient;
   getMonitoringEntitySourceDataClient: () => MonitoringEntitySourceDataClient;
@@ -93,6 +88,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
   getRulesAuthz: () => DetectionRulesAuthz;
+  getMitreDataClient: () => MitreAttackDataClient | undefined;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

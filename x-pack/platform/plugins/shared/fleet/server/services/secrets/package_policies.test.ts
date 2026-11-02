@@ -6,10 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { fromKueryExpression } from '@kbn/es-query';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
+import { packagePolicyService } from '../package_policy';
 import type {
   NewPackagePolicy,
   PackageInfo,
@@ -22,7 +24,25 @@ import {
   diffSecretPaths,
   extractAndWriteSecrets,
   extractAndUpdateSecrets,
+  assertSecretIdsReusable,
+  findPackagePoliciesUsingSecrets,
+  deleteSecretsIfNotReferenced,
 } from './package_policies';
+
+jest.mock('../package_policy');
+jest.mock('./fleet_policies', () => ({
+  findFleetPoliciesUsingSecrets: jest
+    .fn()
+    .mockResolvedValue({ referencedIds: new Set(), checkFailed: false }),
+}));
+
+const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+
+import { findFleetPoliciesUsingSecrets } from './fleet_policies';
+
+const mockedFindFleetPolicies = findFleetPoliciesUsingSecrets as jest.MockedFunction<
+  typeof findFleetPoliciesUsingSecrets
+>;
 
 describe('Package policy secrets', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
@@ -950,6 +970,29 @@ describe('Package policy secrets', () => {
         noChange: paths,
       });
     });
+    it('keeps the new ref and marks the old secret for deletion when a var points at a different secret', () => {
+      const oldPaths = [
+        { path: ['somepath'], value: { value: { isSecretRef: true, id: 'secret-old' } } },
+      ];
+      const newPaths = [
+        { path: ['somepath'], value: { value: { isSecretRef: true, id: 'secret-new' } } },
+      ];
+      expect(diffSecretPaths(oldPaths, newPaths)).toEqual({
+        toCreate: [],
+        toDelete: oldPaths,
+        noChange: newPaths,
+      });
+    });
+    it('marks the old secrets for deletion when the ids of a multi-secret var change', () => {
+      const oldPaths = [{ path: ['p'], value: { value: { isSecretRef: true, ids: ['a', 'b'] } } }];
+      const newPaths = [{ path: ['p'], value: { value: { isSecretRef: true, ids: ['a', 'c'] } } }];
+      expect(diffSecretPaths(oldPaths, newPaths).toDelete).toEqual(oldPaths);
+    });
+    it('does not mark anything for deletion when the same ids are listed in another order', () => {
+      const oldPaths = [{ path: ['p'], value: { value: { isSecretRef: true, ids: ['a', 'b'] } } }];
+      const newPaths = [{ path: ['p'], value: { value: { isSecretRef: true, ids: ['b', 'a'] } } }];
+      expect(diffSecretPaths(oldPaths, newPaths).toDelete).toEqual([]);
+    });
     it('should return empty array if multiple secrets not changed', () => {
       const paths = [
         {
@@ -1170,6 +1213,29 @@ describe('Package policy secrets', () => {
         noChange: [paths1[0]],
       });
     });
+
+    it('secret cleared (value set to null) marks old secret for deletion', () => {
+      const oldPaths = [
+        {
+          path: ['somepath1'],
+          value: { value: { isSecretRef: true, id: 'secret-1' } },
+        },
+        {
+          path: ['somepath2'],
+          value: { value: { isSecretRef: true, ids: ['secret-2a', 'secret-2b'] } },
+        },
+      ];
+      const newPaths = [
+        { path: ['somepath1'], value: { value: null } },
+        { path: ['somepath2'], value: { value: null } },
+      ];
+
+      expect(diffSecretPaths(oldPaths, newPaths)).toEqual({
+        toCreate: [],
+        toDelete: oldPaths,
+        noChange: [],
+      });
+    });
   });
 
   describe('extractAndWriteSecrets', () => {
@@ -1273,6 +1339,96 @@ describe('Package policy secrets', () => {
 
         expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
         expect(result.secretReferences).toHaveLength(1);
+      });
+    });
+
+    describe('when a var already carries a secret reference', () => {
+      it('keeps the reference, tracks it and does not create a new secret for it', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-secret-1': { value: { isSecretRef: true, id: 'existing-secret-id' } },
+            'pkg-secret-2': { value: 'pkg-secret-2-val' },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+        expect(result.packagePolicy.vars?.['pkg-secret-1'].value).toEqual({
+          isSecretRef: true,
+          id: 'existing-secret-id',
+        });
+        expect(result.secretReferences).toHaveLength(2);
+        expect(result.secretReferences).toContainEqual({ id: 'existing-secret-id' });
+      });
+    });
+
+    describe('when a var carries a multi-id secret reference', () => {
+      it('tracks every id of the reference', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-multi-secret': { value: { isSecretRef: true, ids: ['multi-1', 'multi-2'] } },
+            'pkg-secret-1': { value: 'pkg-secret-1-val' },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(1);
+        expect(result.secretReferences).toHaveLength(3);
+        expect(result.secretReferences).toEqual(
+          expect.arrayContaining([{ id: 'multi-1' }, { id: 'multi-2' }])
+        );
+      });
+    });
+
+    describe('when the policy uses a cloud connector', () => {
+      it('accepts the connector secret refs as they are (the connector may be new)', async () => {
+        const mockPackagePolicy = {
+          supports_cloud_connector: true,
+          cloud_connector_id: 'connector-1',
+          vars: {
+            'pkg-secret-1': { value: { isSecretRef: true, id: 'connector-secret-1' } },
+          },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(result.secretReferences).toEqual([{ id: 'connector-secret-1' }]);
+        expect(esClientMock.transport.request).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when a var references a secret no package policy uses', () => {
+      it('keeps and tracks the reference: the generic create API does not check it', async () => {
+        const mockPackagePolicy = {
+          vars: { 'pkg-secret-1': { value: { isSecretRef: true, id: 'unreferenced-secret' } } },
+          inputs: [],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(result.secretReferences).toEqual([{ id: 'unreferenced-secret' }]);
+        expect(esClientMock.transport.request).not.toHaveBeenCalled();
       });
     });
 
@@ -1974,6 +2130,328 @@ describe('Package policy secrets', () => {
 
         expect(result.secretsToDelete).toHaveLength(0);
       });
+    });
+
+    describe('when a secret var is removed entirely from a newer package version', () => {
+      // Mirrors the `secrets` test fixture package used by the policy_secrets FTR suite:
+      // `package_var_multi_secret` exists in 1.0.0 but is dropped from 1.1.0's manifest.
+      const newPackageInfoWithoutMultiSecret = {
+        name: 'mock-package',
+        title: 'Mock package',
+        version: '1.1.0',
+        description: 'description',
+        type: 'integration',
+        status: 'not_installed',
+        vars: [{ name: 'pkg-secret-1', type: 'text', secret: true, required: true }],
+        data_streams: [],
+        policy_templates: [],
+      } as unknown as PackageInfo;
+
+      it('still marks the orphaned secret for deletion even though the new package no longer declares it', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'pkg-secret-1-id', isSecretRef: true },
+            },
+            'pkg-multi-secret': {
+              value: { ids: ['orphan-id-1', 'orphan-id-2'], isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as PackagePolicy;
+
+        const packagePolicyUpdate = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'pkg-secret-1-id', isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate,
+          packageInfo: newPackageInfoWithoutMultiSecret,
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([{ id: 'orphan-id-1' }, { id: 'orphan-id-2' }]);
+      });
+    });
+  });
+
+  describe('deleteSecretsIfNotReferenced', () => {
+    let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+    const soClientMock = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      esClientMock = elasticsearchServiceMock.createInternalClient();
+      // deleteSecrets calls esClient.transport.request DELETE /_fleet/secret/{id}
+      esClientMock.transport.request.mockResolvedValue({});
+      mockedPackagePolicyService.list.mockReset();
+      mockedPackagePolicyService.list.mockResolvedValue({ total: 0, items: [] } as any);
+      mockedFindFleetPolicies.mockReset();
+      mockedFindFleetPolicies.mockResolvedValue({ referencedIds: new Set(), checkFailed: false });
+    });
+
+    it('deletes a secret that is referenced by neither a package policy SO nor a compiled policy', async () => {
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['unreferenced-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+
+      expect(esClientMock.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'DELETE',
+          path: expect.stringContaining('unreferenced-secret'),
+        })
+      );
+    });
+
+    it('looks for referencing package policies in every Space when asked to', async () => {
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['some-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+        checkAllSpaces: true,
+      });
+      expect(mockedPackagePolicyService.list).toHaveBeenCalledWith(
+        soClientMock,
+        expect.objectContaining({ spaceId: '*' })
+      );
+    });
+
+    it('keeps a secret that only a package policy in another Space references', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({
+        total: 1,
+        items: [
+          {
+            id: 'policy-in-other-space',
+            secret_references: [{ id: 'shared-secret' }],
+            policy_ids: ['agent-policy-other-space'],
+          },
+        ],
+      } as any);
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['shared-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+        checkAllSpaces: true,
+      });
+      expect(esClientMock.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('only looks in the client Space by default', async () => {
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['some-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+      expect(mockedPackagePolicyService.list.mock.calls[0][1]).not.toHaveProperty('spaceId');
+    });
+
+    it('skips deletion when the secret is still referenced by a package policy SO', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({
+        total: 1,
+        items: [
+          {
+            id: 'kept-secret',
+            secret_references: [{ id: 'kept-secret' }],
+            policy_ids: ['agent-policy-1'],
+          },
+        ],
+      } as any);
+
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['kept-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+
+      expect(esClientMock.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('skips deletion when the secret is still referenced by a compiled .fleet-policies document (the fix)', async () => {
+      mockedFindFleetPolicies.mockResolvedValue({
+        referencedIds: new Set(['compiled-secret']),
+        checkFailed: false,
+      });
+
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['compiled-secret'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+
+      expect(esClientMock.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('logs only the candidate ids skipped by the compiled-policy check, not every ref in the compiled docs', async () => {
+      // The compiled doc references both 'candidate' and 'bystander', but only 'candidate'
+      // was passed as a deletion candidate. The log should mention 'candidate' and be silent
+      // about 'bystander' — logging non-candidates was the bug caught during manual testing.
+      mockedFindFleetPolicies.mockResolvedValue({
+        referencedIds: new Set(['candidate', 'bystander']),
+        checkFailed: false,
+      });
+
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['candidate'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+
+      const debugCalls: string[] = (mockContract.logger.debug as jest.Mock).mock.calls.map(
+        (args: unknown[]) => String(args[0])
+      );
+      expect(debugCalls.some((msg) => msg.includes('candidate'))).toBe(true);
+      expect(debugCalls.some((msg) => msg.includes('bystander'))).toBe(false);
+    });
+
+    it('skips all deletions when checkFailed is true', async () => {
+      mockedFindFleetPolicies.mockResolvedValue({ referencedIds: new Set(), checkFailed: true });
+
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['secret-1', 'secret-2'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+
+      expect(esClientMock.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('skips all deletions when agentPolicyIds is omitted', async () => {
+      // findFleetPoliciesUsingSecrets returns checkFailed: true for empty agentPolicyIds
+      mockedFindFleetPolicies.mockResolvedValue({ referencedIds: new Set(), checkFailed: true });
+
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['secret-1'],
+      });
+
+      expect(esClientMock.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('deletes only the unreferenced subset when some ids are referenced by a compiled doc', async () => {
+      mockedFindFleetPolicies.mockResolvedValue({
+        referencedIds: new Set(['still-in-compiled-doc']),
+        checkFailed: false,
+      });
+
+      await deleteSecretsIfNotReferenced({
+        esClient: esClientMock,
+        soClient: soClientMock,
+        ids: ['still-in-compiled-doc', 'safe-to-delete'],
+        agentPolicyIds: ['agent-policy-1'],
+      });
+
+      // Only safe-to-delete should be deleted, not still-in-compiled-doc
+      const deletedPaths: string[] = esClientMock.transport.request.mock.calls.map(
+        (call) => (call[0] as any).path as string
+      );
+      expect(deletedPaths.some((p) => p.includes('safe-to-delete'))).toBe(true);
+      expect(deletedPaths.some((p) => p.includes('still-in-compiled-doc'))).toBe(false);
+    });
+
+    it('does not throw when the underlying deleteSecrets call rejects — logs a warn', async () => {
+      esClientMock.transport.request.mockRejectedValueOnce(new Error('ES error'));
+
+      await expect(
+        deleteSecretsIfNotReferenced({
+          esClient: esClientMock,
+          soClient: soClientMock,
+          ids: ['secret-1'],
+          agentPolicyIds: ['agent-policy-1'],
+        })
+      ).resolves.not.toThrow();
+    });
+  });
+
+  describe('assertSecretIdsReusable', () => {
+    const soClientMock = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      mockedPackagePolicyService.list.mockReset();
+      mockedPackagePolicyService.list.mockResolvedValue({ total: 0, items: [] } as any);
+    });
+
+    it('does nothing and looks nothing up without ids', async () => {
+      await assertSecretIdsReusable(soClientMock, []);
+      expect(mockedPackagePolicyService.list).not.toHaveBeenCalled();
+    });
+
+    it('accepts ids a package policy the caller can see references', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({
+        total: 1,
+        items: [
+          { id: 'sibling', secret_references: [{ id: 'used-1' }], policy_ids: ['agent-policy-1'] },
+        ],
+      } as any);
+      await expect(assertSecretIdsReusable(soClientMock, ['used-1'])).resolves.toBeUndefined();
+    });
+
+    it('rejects ids no package policy references, naming them', async () => {
+      await expect(assertSecretIdsReusable(soClientMock, ['someone-elses-secret'])).rejects.toThrow(
+        /someone-elses-secret/
+      );
+    });
+
+    it('rejects when only some of the ids are in use', async () => {
+      mockedPackagePolicyService.list.mockResolvedValue({
+        total: 1,
+        items: [
+          { id: 'sibling', secret_references: [{ id: 'used' }], policy_ids: ['agent-policy-1'] },
+        ],
+      } as any);
+      await expect(assertSecretIdsReusable(soClientMock, ['used', 'unknown'])).rejects.toThrow(
+        /unknown/
+      );
+    });
+  });
+
+  describe('findPackagePoliciesUsingSecrets', () => {
+    const soClient = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      mockedPackagePolicyService.list.mockReset();
+      mockedPackagePolicyService.list.mockResolvedValue({ total: 0, items: [] } as any);
+    });
+
+    it('quotes each id so the generated kuery is valid even when an id contains a KQL keyword', async () => {
+      // Real-world ids from https://github.com/elastic/kibana/issues/273040 that end in "Not",
+      // which an unquoted kuery would parse as the NOT operator.
+      const ids = ['_3bpqZ4BbB0ae8-cYNot', '_nbpqZ4BbB0ae8-cYNot'];
+
+      await findPackagePoliciesUsingSecrets({ soClient, ids });
+
+      const { kuery } = mockedPackagePolicyService.list.mock.calls[0][1];
+
+      expect(kuery).toBe(
+        'ingest-package-policies.secret_references.id: ("_3bpqZ4BbB0ae8-cYNot" or "_nbpqZ4BbB0ae8-cYNot")'
+      );
+      // This is the actual bug: before quoting, this expression throws KQLSyntaxError.
+      expect(() => fromKueryExpression(kuery as string)).not.toThrow();
+    });
+
+    it('produces a parseable kuery for ids containing other KQL keywords and quote characters', async () => {
+      const ids = ['idAndSuffix', 'idOrSuffix', 'id"with"quotes'];
+
+      await findPackagePoliciesUsingSecrets({ soClient, ids });
+
+      const { kuery } = mockedPackagePolicyService.list.mock.calls[0][1];
+
+      expect(() => fromKueryExpression(kuery as string)).not.toThrow();
     });
   });
 });

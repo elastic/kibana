@@ -132,5 +132,55 @@ describe('DateRangePickerDialog', () => {
 
       expect(screen.getByTestId('day-1')).toHaveFocus();
     });
+
+    it('Tab from the element before the calendar lands on the month in view on first visit', () => {
+      // Two mounted months, each with its own tabindex=0 day, as rendered by
+      // the infinite-scroll Calendar. The scroller is positioned on the second
+      // month, so first-visit Tab entry must skip the first month's day.
+      renderWithEuiTheme(
+        <DateRangePickerDialog>
+          <button data-test-subj="header-button">Back</button>
+          <div data-calendar-scroller data-test-subj="calendar-scroller">
+            <div data-month-index="0">
+              <button data-test-subj="month-0-day" tabIndex={0}>
+                1
+              </button>
+            </div>
+            <div data-month-index="1">
+              <button data-test-subj="month-1-day" tabIndex={0}>
+                1
+              </button>
+            </div>
+          </div>
+          <button data-test-subj="footer-button">Apply</button>
+        </DateRangePickerDialog>
+      );
+
+      const MONTH_HEIGHT = 280;
+      const scroller = screen.getByTestId('calendar-scroller');
+      Object.defineProperty(scroller, 'scrollTop', {
+        configurable: true,
+        get: () => MONTH_HEIGHT,
+      });
+      Object.defineProperty(scroller, 'clientHeight', {
+        configurable: true,
+        get: () => MONTH_HEIGHT,
+      });
+      scroller.querySelectorAll<HTMLElement>('[data-month-index]').forEach((monthItem, index) => {
+        Object.defineProperty(monthItem, 'offsetTop', {
+          configurable: true,
+          get: () => index * MONTH_HEIGHT,
+        });
+        Object.defineProperty(monthItem, 'offsetHeight', {
+          configurable: true,
+          get: () => MONTH_HEIGHT,
+        });
+      });
+
+      screen.getByTestId('header-button').focus();
+      fireEvent.keyDown(screen.getByTestId('header-button'), { key: 'Tab' });
+
+      expect(screen.getByTestId('month-1-day')).toHaveFocus();
+    });
   });
 });

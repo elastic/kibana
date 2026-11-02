@@ -43,10 +43,75 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
     return fresh;
   };
 
-  return new Proxy({} as T, {
+  const self: T = new Proxy({} as T, {
     get(_target, prop) {
       const real = materialize() as unknown as Record<PropertyKey, unknown>;
       const value = real[prop];
+
+      // zod's toJSONSchema registers the schema passed to process() in ctx.seen,
+      // but _zod.processJSONSchema is a closure over `inst` (the real schema) and
+      // passes it to the inner processor, which then does ctx.seen.get(inst).
+      // Because proxy !== inst, the lookup returns undefined and crashes.
+      // Fix: before calling the original processJSONSchema, alias the proxy's
+      // ctx.seen entry under the real object's identity so both lookups hit it.
+      if (
+        prop === '_zod' &&
+        value != null &&
+        typeof (value as Record<PropertyKey, unknown>).processJSONSchema === 'function'
+      ) {
+        const originalPJS = (value as Record<PropertyKey, unknown>).processJSONSchema as (
+          ...args: unknown[]
+        ) => unknown;
+        // Use Object.create to inherit the full _zod object (including non-enumerable
+        // getters like `value`) rather than a spread which silently drops them.
+        const wrapped = Object.create(value as object) as Record<PropertyKey, unknown>;
+        wrapped.processJSONSchema = (
+          ctx: {
+            seen?: Map<unknown, unknown>;
+            metadataRegistry?: {
+              has(k: unknown): boolean;
+              get(k: unknown): unknown;
+              add(k: unknown, v: unknown): void;
+            };
+          },
+          json: unknown,
+          params: unknown
+        ) => {
+          if (ctx?.seen instanceof Map && ctx.seen.has(self) && !ctx.seen.has(real)) {
+            ctx.seen.set(real, ctx.seen.get(self));
+          }
+          // process() calls metadataRegistry.get(proxy) after processJSONSchema returns
+          // to merge title/description into the output. The registry is keyed by real
+          // object identity so the proxy lookup would miss. Rather than mutating the
+          // global registry (ctx.metadataRegistry defaults to zod's module singleton),
+          // shadow it on ctx with a thin wrapper that redirects proxy lookups to real.
+          if (
+            ctx?.metadataRegistry != null &&
+            ctx.metadataRegistry.has(real) &&
+            !ctx.metadataRegistry.has(self)
+          ) {
+            const orig = ctx.metadataRegistry;
+            ctx.metadataRegistry = {
+              has: (k: unknown) => orig.has(k === self ? real : k),
+              get: (k: unknown) => {
+                const meta = orig.get(k === self ? real : k);
+                // Strip `id` when returning metadata for the proxy: both proxy and
+                // real are in ctx.seen (from the ctx.seen alias above), so extractDefs
+                // would see the same id twice and throw a duplicate-id error.
+                if (k === self && meta != null && typeof meta === 'object' && 'id' in meta) {
+                  const { id: _id, ...rest } = meta as Record<string, unknown>;
+                  return Object.keys(rest).length ? rest : undefined;
+                }
+                return meta;
+              },
+              add: (k: unknown, v: unknown) => orig.add(k, v),
+            };
+          }
+          return originalPJS(ctx, json, params);
+        };
+        return wrapped;
+      }
+
       if (typeof value === 'function') {
         return (value as (...args: unknown[]) => unknown).bind(real);
       }
@@ -78,4 +143,6 @@ export function lazyImmutableGCableObject<T extends object>(factory: () => T): T
       throw new Error('lazyImmutableGCableObject produces an immutable object');
     },
   });
+
+  return self;
 }

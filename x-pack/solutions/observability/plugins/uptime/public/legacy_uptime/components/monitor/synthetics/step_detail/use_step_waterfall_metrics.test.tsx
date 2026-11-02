@@ -12,7 +12,7 @@ import {
   BROWSER_TRACE_TYPE,
   useStepWaterfallMetrics,
 } from './use_step_waterfall_metrics';
-import * as reduxHooks from 'react-redux';
+import * as reduxHooks from 'react-redux-v7';
 import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 
 describe('useStepWaterfallMetrics', () => {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GraphGroupedNodePreviewPanel } from './graph_grouped_node_preview_panel';
 import type { AlertItem, EntityItem, EventItem } from './components/grouped_item/types';
@@ -20,6 +20,10 @@ import {
   TOTAL_HITS_TEST_ID,
   ICON_TEST_ID,
   GROUPED_ITEMS_TYPE_TEST_ID,
+  GROUPED_ITEM_TEST_ID,
+  GROUPED_ITEM_ACTOR_TEST_ID,
+  GROUPED_ITEM_TARGET_TEST_ID,
+  GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID,
   PAGINATION_BUTTON_NEXT_TEST_ID,
 } from './test_ids';
 import { DOCUMENT_TYPE_EVENT } from '@kbn/cloud-security-posture-common/schema/graph/v1';
@@ -61,6 +65,12 @@ let defaultProps: {
   dataViewId: string;
   documentIds: string[];
   entityItems: EntityItem[];
+  onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
+  onShowEntity: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
 };
 
 describe('GraphGroupedNodePreviewPanel', () => {
@@ -88,6 +98,8 @@ describe('GraphGroupedNodePreviewPanel', () => {
       dataViewId: TEST_DATA_VIEW_ID,
       documentIds: ['doc-1', 'doc-2', 'doc-3'],
       entityItems: [] as EntityItem[],
+      onShowDocument: jest.fn(),
+      onShowEntity: jest.fn(),
     };
     getOrCreateFilterStore(TEST_SCOPE_ID);
     jest.clearAllMocks();
@@ -414,6 +426,40 @@ describe('GraphGroupedNodePreviewPanel', () => {
         expect(screen.getByTestId(EMPTY_BODY_TEST_ID)).toBeInTheDocument();
       });
 
+      // Regression test for https://github.com/elastic/kibana/issues/275261
+      // When switching between grouped nodes, the flyout reuses the same panel
+      // component instance (same panel key => no remount) and only updates props.
+      // A grouped node can contain several items resolving to the same entity `id`
+      // (one per underlying event permutation). If the list keys are not unique,
+      // React fails to reconcile the list and leaves stale <li> nodes mounted, so
+      // the previous group's entities accumulate on top of the current group's.
+      it('should render exactly the current entityItems when switching groups (no accumulation)', () => {
+        // Group A: 4 items but only 2 unique entity ids (duplicate ids on purpose).
+        const groupA: EntityItem[] = [
+          createEntityItem({ id: 'user-1' }),
+          createEntityItem({ id: 'user-1' }),
+          createEntityItem({ id: 'user-2' }),
+          createEntityItem({ id: 'user-2' }),
+        ];
+        const groupB: EntityItem[] = [
+          createEntityItem({ id: 'bucket-1' }),
+          createEntityItem({ id: 'bucket-2' }),
+        ];
+
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupA} />
+        );
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(4);
+
+        // Switch to group B (same component instance, only props change).
+        rerender(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupB} />);
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(2);
+
+        // Switch back to group A: must show A's items only, not A+B accumulated.
+        rerender(<GraphGroupedNodePreviewPanel {...defaultProps} entityItems={groupA} />);
+        expect(screen.getAllByTestId(GROUPED_ITEM_TEST_ID)).toHaveLength(4);
+      });
+
       it('should use client-side pagination slicing', () => {
         const entityItems = Array.from({ length: 25 }, (_, i) =>
           createEntityItem({ id: `entity-${i}` })
@@ -576,6 +622,120 @@ describe('GraphGroupedNodePreviewPanel', () => {
         render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
 
         expect(screen.getByTestId(GROUPED_ITEMS_TYPE_TEST_ID)).toHaveTextContent('Events');
+      });
+
+      it('should render each row with its actor, first target and a +N badge for extra targets', async () => {
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({
+            data: {
+              page: [
+                {
+                  id: 'event-1',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  action: 'google.iam.admin.v1.CreateRole',
+                  actor: { id: 'user:admin@example.com@gcp' },
+                  target: { ids: ['projects/acme-prod/roles/customRole'] },
+                },
+                {
+                  id: 'event-2',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  action: 'AssumeRole',
+                  actor: { id: 'user:alice@acme.com@aws' },
+                  target: {
+                    ids: [
+                      'service:sts.amazonaws.com',
+                      'arn:aws:iam::123456789012:role/DataPipelineRole',
+                      'arn:aws:iam::123456789012:role/AuditRole',
+                    ],
+                  },
+                },
+              ],
+              total: 2,
+            },
+          })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+
+        const [singleTargetRow, multiTargetRow] = screen.getAllByTestId(GROUPED_ITEM_TEST_ID);
+
+        expect(within(singleTargetRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          'user:admin@example.com@gcp'
+        );
+        expect(within(singleTargetRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'projects/acme-prod/roles/customRole'
+        );
+        expect(
+          within(singleTargetRow).queryByTestId(GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID)
+        ).not.toBeInTheDocument();
+
+        expect(within(multiTargetRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'service:sts.amazonaws.com'
+        );
+        const overflowBadge = within(multiTargetRow).getByTestId(
+          GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID
+        );
+        expect(overflowBadge).toHaveTextContent('+2');
+
+        await userEvent.hover(overflowBadge);
+
+        expect(
+          await screen.findByText(
+            'arn:aws:iam::123456789012:role/DataPipelineRole, arn:aws:iam::123456789012:role/AuditRole'
+          )
+        ).toBeInTheDocument();
+      });
+
+      it('should render a dash for the side that could not be resolved and hide rows with neither', () => {
+        mockUseFetchDocumentDetails.mockReturnValue(
+          createMockHookResult({
+            data: {
+              page: [
+                {
+                  id: 'event-actor-only',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  actor: { id: 'user:admin@example.com@gcp' },
+                },
+                {
+                  id: 'event-target-only',
+                  itemType: DOCUMENT_TYPE_EVENT,
+                  target: { ids: ['host:web-01', 'host:web-02'] },
+                },
+                { id: 'event-no-identity', itemType: DOCUMENT_TYPE_EVENT },
+              ],
+              total: 3,
+            },
+          })
+        );
+
+        render(<GraphGroupedNodePreviewPanel {...defaultProps} docMode="grouped-events" />);
+
+        const [actorOnlyRow, targetOnlyRow, noIdentityRow] =
+          screen.getAllByTestId(GROUPED_ITEM_TEST_ID);
+
+        expect(within(actorOnlyRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          'user:admin@example.com@gcp'
+        );
+        expect(within(actorOnlyRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          '-'
+        );
+
+        expect(within(targetOnlyRow).getByTestId(GROUPED_ITEM_ACTOR_TEST_ID)).toHaveTextContent(
+          '-'
+        );
+        expect(within(targetOnlyRow).getByTestId(GROUPED_ITEM_TARGET_TEST_ID)).toHaveTextContent(
+          'host:web-01'
+        );
+        expect(
+          within(targetOnlyRow).getByTestId(GROUPED_ITEM_TARGET_OVERFLOW_TEST_ID)
+        ).toHaveTextContent('+1');
+
+        expect(
+          within(noIdentityRow).queryByTestId(GROUPED_ITEM_ACTOR_TEST_ID)
+        ).not.toBeInTheDocument();
+        expect(
+          within(noIdentityRow).queryByTestId(GROUPED_ITEM_TARGET_TEST_ID)
+        ).not.toBeInTheDocument();
       });
 
       it('should use server-side pagination (fetch only current page)', async () => {

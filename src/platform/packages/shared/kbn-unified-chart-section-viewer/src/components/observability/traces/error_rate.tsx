@@ -11,8 +11,10 @@ import React, { useMemo } from 'react';
 import type { LensYBoundsConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
+import { buildXySeriesConfig } from '../../chart/build_xy_series_config';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getErrorRateChart } from './trace_charts_definition';
+import { BREAKDOWN_LEGEND_CONFIG } from './constants';
 import { getLensMetricFormat } from '../../../common/utils';
 import type { MetricUnit } from '../../../types';
 
@@ -33,8 +35,16 @@ const ErrorRateChartContent = ({
   color,
   title,
 }: ErrorRateChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
-    useTraceMetricsContext();
+  const {
+    services,
+    fetchParams,
+    discoverFetch$,
+    onBrushEnd,
+    onFilter,
+    actions,
+    profileId,
+    breakdownField,
+  } = useTraceMetricsContext();
 
   const chartLayers = useMemo<LensSeriesLayer[]>(
     () => [
@@ -54,15 +64,29 @@ const ErrorRateChartContent = ({
             ...getLensMetricFormat(unit),
           },
         ],
+        breakdown: breakdownField ? [breakdownField] : undefined,
       },
     ],
-    [seriesType, color, unit]
+    [seriesType, color, unit, breakdownField]
+  );
+
+  const lensConfig = useMemo(
+    () =>
+      buildXySeriesConfig({
+        query,
+        title,
+        chartLayers,
+        legend: breakdownField ? BREAKDOWN_LEGEND_CONFIG : undefined,
+        yBounds: ERROR_RATE_Y_BOUNDS,
+      }),
+    [query, title, chartLayers, breakdownField]
   );
 
   return (
     <Chart
       id="errorRate"
-      esqlQuery={query}
+      isSelected={false}
+      lensConfig={lensConfig}
       size="s"
       discoverFetch$={discoverFetch$}
       fetchParams={fetchParams}
@@ -70,11 +94,7 @@ const ErrorRateChartContent = ({
       onBrushEnd={onBrushEnd}
       onFilter={onFilter}
       onExploreInDiscoverTab={actions.openInNewTab}
-      title={title}
-      chartLayers={chartLayers}
       syncCursor
-      syncTooltips
-      yBounds={ERROR_RATE_Y_BOUNDS}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
       profileId={profileId}
     />
@@ -82,12 +102,13 @@ const ErrorRateChartContent = ({
 };
 
 export const ErrorRateChart = () => {
-  const { filters, indexes, metadataFields } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields, breakdownField } = useTraceMetricsContext();
 
   const errorRateChart = getErrorRateChart({
     indexes,
     filters,
     metadataFields,
+    breakdownField,
   });
 
   if (!errorRateChart) {

@@ -69,6 +69,7 @@ describe('evaluateRule', () => {
       [UNGROUPED_FACTORY_KEY]: {
         value: null,
         trigger: false,
+        warn: false,
         bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
       },
     });
@@ -97,11 +98,12 @@ describe('evaluateRule', () => {
     expect(evaluationKeys).not.toContain(UNGROUPED_FACTORY_KEY);
   });
 
-  it('preserves the * entry when it is the only no-data result (no missing groups)', async () => {
+  it('preserves the * entry for total no-data (e.g. 0 successful shards) when there are no missing groups', async () => {
     mockedGetData.mockResolvedValue({
       [UNGROUPED_FACTORY_KEY]: {
         value: null,
         trigger: false,
+        warn: false,
         bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
       },
     });

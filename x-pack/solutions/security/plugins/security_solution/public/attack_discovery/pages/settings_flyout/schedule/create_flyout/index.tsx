@@ -27,9 +27,12 @@ import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../edit_form';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
-import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
+import { useScheduleApi } from '../logic/use_schedule_api';
 import * as i18n from './translations';
-import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
+import {
+  convertFormDataInBaseSchedule,
+  convertFormDataToWorkflowSchedule,
+} from '../utils/convert_form_data';
 
 interface Props {
   onClose: () => void;
@@ -66,8 +69,10 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
 
   const { dataView, status } = useDataView(PageScope.alerts);
 
+  const { isWorkflowsEnabled, useCreateSchedule } = useScheduleApi();
+
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
-    useCreateAttackDiscoverySchedule();
+    useCreateSchedule();
 
   const onCreateSchedule = useCallback(
     async (scheduleData: AttackDiscoveryScheduleSchema) => {
@@ -81,14 +86,25 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       }
 
       try {
-        const scheduleToCreate = convertFormDataInBaseSchedule(
+        const convertFn = isWorkflowsEnabled
+          ? convertFormDataToWorkflowSchedule
+          : convertFormDataInBaseSchedule;
+
+        const scheduleToCreate = convertFn(
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
           uiSettings,
           dataView
         );
-        await createAttackDiscoverySchedule({ scheduleToCreate });
+        // `createAttackDiscoverySchedule` is a union of public/workflow mutation
+        // functions with incompatible parameter types. `isWorkflowsEnabled`
+        // guarantees the correct converter was used above, making this safe.
+        await (
+          createAttackDiscoverySchedule as (params: {
+            scheduleToCreate: typeof scheduleToCreate;
+          }) => Promise<unknown>
+        )({ scheduleToCreate });
         onClose();
       } catch (err) {
         // Error is handled by the mutation's onError callback, so no need to do anything here
@@ -99,6 +115,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       alertsIndexPattern,
       createAttackDiscoverySchedule,
       dataView,
+      isWorkflowsEnabled,
       onClose,
       status,
       uiSettings,
@@ -107,6 +124,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
 
   const { editForm, actionButtons } = useEditForm({
     isLoading: isLoadingConnectors || isLoadingQuery || status !== 'ready',
+    isWorkflowsEnabled,
     onFormMutated,
     onSave: onCreateSchedule,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,

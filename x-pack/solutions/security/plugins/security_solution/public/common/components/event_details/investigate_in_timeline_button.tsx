@@ -43,6 +43,10 @@ export interface InvestigateInTimelineButtonProps {
   children?: React.ReactNode;
   flush?: EuiButtonEmptyProps['flush'];
   /**
+   * Size of the empty button. Defaults to `xs`.
+   */
+  size?: EuiButtonEmptyProps['size'];
+  /**
    * Data test subject string for testing
    */
   ['data-test-subj']?: string;
@@ -64,6 +68,7 @@ export const InvestigateInTimelineButton: FC<
   dataViewId,
   iconType,
   flush,
+  size = 'xs',
   isDisabled,
   'data-test-subj': dataTestSubj,
   ...rest
@@ -89,7 +94,7 @@ export const InvestigateInTimelineButton: FC<
       aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
       onClick={openTimelineCallback}
       flush={flush ?? 'right'}
-      size="xs"
+      size={size}
       iconType={iconType}
       disabled={disabled}
       data-test-subj={dataTestSubj}

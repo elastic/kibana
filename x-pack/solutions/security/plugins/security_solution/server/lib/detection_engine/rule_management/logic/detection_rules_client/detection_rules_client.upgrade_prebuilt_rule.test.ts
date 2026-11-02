@@ -162,6 +162,18 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
         })
       );
     });
+
+    it('creates a new rule with initialRevision bumped by 1 from the existing rule revision', async () => {
+      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
+
+      expect(rulesClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          options: expect.objectContaining({
+            initialRevision: installedRule.revision + 1,
+          }),
+        })
+      );
+    });
   });
 
   describe('if the new version has the same type than the existing version', () => {

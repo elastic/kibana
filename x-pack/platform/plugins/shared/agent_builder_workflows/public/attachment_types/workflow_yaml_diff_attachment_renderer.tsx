@@ -6,16 +6,24 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButtonEmpty, EuiText, transparentize } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Change } from 'diff';
-import { diffLines } from 'diff';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
-import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import {
+  applyKbnCodeEditorChromeOverrides,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+  monaco,
+} from '@kbn/code-editor';
+import {
+  computeWorkflowYamlDiffStats,
+  workflowsEditorChromeOverrides,
+  type WorkflowYamlDiffStats,
+} from '@kbn/workflows-ui';
 
 interface WorkflowYamlDiffData {
   beforeYaml: string;
@@ -31,8 +39,8 @@ interface WorkflowYamlDiffAttachment {
   data: WorkflowYamlDiffData;
 }
 
-const COLLAPSED_HEIGHT = 160;
-const LINE_HEIGHT = 18;
+const COLLAPSED_HEIGHT = 200;
+const LINE_HEIGHT = 23;
 const PADDING = 8;
 const HIDDEN_REGION_WIDGET_HEIGHT = 24;
 
@@ -89,8 +97,10 @@ const estimateContentHeight = (
 const MonacoDiffViewer: React.FC<{
   beforeYaml: string;
   afterYaml: string;
-}> = ({ beforeYaml, afterYaml }) => {
+  parts: Change[];
+}> = ({ beforeYaml, afterYaml, parts }) => {
   const styles = useMemoCss(componentStyles);
+  const euiThemeContext = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<monaco.editor.IDiffEditor | null>(null);
   const [isActive, setIsActive] = useState(false);
@@ -100,14 +110,15 @@ const MonacoDiffViewer: React.FC<{
   const contextLineCount = 3;
   const minimumLineCount = 3;
 
-  const estimatedHeight = useMemo(() => {
-    const parts = diffLines(beforeYaml, afterYaml);
-    return estimateContentHeight(parts, contextLineCount, minimumLineCount);
-  }, [beforeYaml, afterYaml]);
+  const estimatedHeight = useMemo(
+    () => estimateContentHeight(parts, contextLineCount, minimumLineCount),
+    [parts]
+  );
 
   const contentHeight = measuredHeight ?? estimatedHeight;
   const collapsedHeight = Math.min(contentHeight, COLLAPSED_HEIGHT);
   const needsExpansion = contentHeight > COLLAPSED_HEIGHT;
+  const hiddenLines = Math.max(0, Math.ceil((contentHeight - collapsedHeight) / LINE_HEIGHT));
 
   const handleFocus = useCallback(() => {
     setIsActive(true);
@@ -117,7 +128,12 @@ const MonacoDiffViewer: React.FC<{
     setIsActive(false);
   }, []);
 
-  useWorkflowsMonacoTheme();
+  // The diff editor is created directly with `monaco.editor.createDiffEditor`, so nothing else
+  // guarantees the global Kibana theme is registered before it mounts. Declared before the
+  // editor-creating effect so it runs first.
+  useEffect(() => {
+    initializeRegisteredLanguagesTheme(euiThemeContext);
+  }, [euiThemeContext]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -127,12 +143,13 @@ const MonacoDiffViewer: React.FC<{
     const modifiedModel = monaco.editor.createModel(afterYaml, 'yaml');
 
     const diffEditor = monaco.editor.createDiffEditor(container, {
-      theme: WORKFLOWS_MONACO_EDITOR_THEME,
+      theme: CODE_EDITOR_DEFAULT_THEME_ID,
       readOnly: true,
       renderSideBySide: false,
       minimap: { enabled: false },
       scrollBeyondLastLine: false,
       lineNumbers: 'off',
+      lineNumbersMinChars: 0,
       folding: false,
       glyphMargin: false,
       overviewRulerLanes: 0,
@@ -148,15 +165,15 @@ const MonacoDiffViewer: React.FC<{
         contextLineCount,
       },
       renderOverviewRuler: false,
-      fontSize: 12,
+      fontSize: 14,
       lineHeight: LINE_HEIGHT,
       padding: { top: 4, bottom: 4 },
       contextmenu: false,
       domReadOnly: true,
-      lightbulb: { enabled: false },
+      lightbulb: { enabled: monaco.editor.ShowLightbulbIconMode.Off },
       quickSuggestions: false,
       suggestOnTriggerCharacters: false,
-      hover: { enabled: false },
+      hover: { enabled: 'off' },
       parameterHints: { enabled: false },
       renderIndicators: false,
       renderMarginRevertIcon: false,
@@ -182,6 +199,22 @@ const MonacoDiffViewer: React.FC<{
       editorRef.current = null;
     };
   }, [beforeYaml, afterYaml, minimumLineCount, contextLineCount]);
+
+  // Per-instance chrome (widget surfaces, gutter, diff colours). Keyed on the same inputs that
+  // re-create the editor above, plus the EUI theme so a light/dark switch re-applies without
+  // re-creating the editor.
+  useEffect(() => {
+    const node = editorRef.current?.getContainerDomNode();
+    if (!node) return;
+
+    const chrome = applyKbnCodeEditorChromeOverrides(
+      [node],
+      workflowsEditorChromeOverrides,
+      euiThemeContext
+    );
+
+    return () => chrome.dispose();
+  }, [beforeYaml, afterYaml, minimumLineCount, contextLineCount, euiThemeContext]);
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -218,36 +251,36 @@ const MonacoDiffViewer: React.FC<{
   }, []);
 
   return (
-    <div
-      css={styles.wrapper}
-      style={isExpanded ? undefined : { height: collapsedHeight, overflow: 'hidden' }}
-    >
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
-      <div
-        ref={containerRef}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        role="region"
-        aria-label="Workflow diff"
-        style={{ height: contentHeight, width: '100%' }}
-      />
-      {needsExpansion && !isExpanded && (
-        <div css={styles.expandBar}>
-          <EuiButtonEmpty size="xs" iconType="arrowDown" color="primary" onClick={handleExpand}>
-            {i18n.translate('workflowsManagement.attachmentRenderers.diff.showAll', {
-              defaultMessage: 'Show all',
-            })}
-          </EuiButtonEmpty>
-        </div>
-      )}
-      {needsExpansion && isExpanded && (
-        <div css={styles.collapseBar}>
-          <EuiButtonEmpty size="xs" iconType="arrowUp" color="primary" onClick={handleCollapse}>
-            {i18n.translate('workflowsManagement.attachmentRenderers.diff.collapse', {
-              defaultMessage: 'Collapse',
-            })}
+    <div css={styles.wrapper}>
+      <div style={isExpanded ? undefined : { height: collapsedHeight, overflow: 'hidden' }}>
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+        <div
+          ref={containerRef}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          role="region"
+          aria-label="Workflow diff"
+          style={{ height: contentHeight, width: '100%' }}
+        />
+      </div>
+      {needsExpansion && (
+        <div css={styles.toggleBar}>
+          <EuiButtonEmpty
+            size="xs"
+            color="primary"
+            onClick={isExpanded ? handleCollapse : handleExpand}
+          >
+            {isExpanded
+              ? i18n.translate('workflows.attachmentRenderers.diff.showLess', {
+                  defaultMessage: 'Show less',
+                })
+              : i18n.translate('workflows.attachmentRenderers.diff.showMore', {
+                  defaultMessage:
+                    'Show {hiddenLines, plural, one {# more line} other {# more lines}}',
+                  values: { hiddenLines },
+                })}
           </EuiButtonEmpty>
         </div>
       )}
@@ -259,77 +292,100 @@ const DiffInlineContent: React.FC<{
   attachment: WorkflowYamlDiffAttachment;
 }> = ({ attachment }) => {
   const styles = useMemoCss(componentStyles);
-  const { beforeYaml, afterYaml } = attachment.data;
+  const { beforeYaml, afterYaml, name } = attachment.data;
+
+  const stats: WorkflowYamlDiffStats = useMemo(
+    () => computeWorkflowYamlDiffStats(beforeYaml, afterYaml),
+    [beforeYaml, afterYaml]
+  );
+  const { parts, added, removed } = stats;
+
+  const displayName =
+    name ??
+    i18n.translate('workflows.attachmentRenderers.diff.defaultName', {
+      defaultMessage: 'Workflow',
+    });
 
   if (beforeYaml === afterYaml) {
     return (
       <EuiText size="s" color="subdued" css={styles.noChanges}>
-        {i18n.translate('workflowsManagement.attachmentRenderers.diff.noChanges', {
+        {i18n.translate('workflows.attachmentRenderers.diff.noChanges', {
           defaultMessage: 'No changes detected',
         })}
       </EuiText>
     );
   }
 
-  return <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} />;
+  return (
+    <div>
+      <div css={styles.header}>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          gutterSize="s"
+          responsive={false}
+        >
+          <EuiFlexItem grow={true}>
+            <EuiText size="s" css={styles.headerName}>
+              <strong>{displayName}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <span css={styles.added}>+{added}</span>
+              <span css={styles.removed}>−{removed}</span>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+      <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} parts={parts} />
+    </div>
+  );
 };
 
 const componentStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       '.diff-hidden-lines .center': {
         gap: euiTheme.size.s,
       },
     }),
-  expandBar: ({ euiTheme }: UseEuiTheme) =>
+  toggleBar: ({ euiTheme }: UseEuiTheme) =>
     css({
-      transition: 'opacity 0.15s ease-out',
-      opacity: 0.7,
-      '&:hover': {
-        opacity: 1,
-      },
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderTop: euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       '.euiButtonEmpty': {
         width: '100%',
-        height: '100%',
-        borderTopLeftRadius: 0,
-        borderTopRightRadius: 0,
+        height: 40,
+        borderRadius: 0,
       },
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 48,
-      background: `linear-gradient(
-        to bottom,
-        ${transparentize(euiTheme.colors.backgroundBasePlain, 0)} 0%,
-        ${transparentize(euiTheme.colors.backgroundBasePlain, 0.6)} 40%,
-        ${euiTheme.colors.backgroundBasePlain} 100%
-      )`,
-    }),
-  collapseBar: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      transition: 'opacity 0.15s ease-out',
-      opacity: 0.7,
-      '&:hover': {
-        opacity: 1,
-      },
-      '.euiButtonEmpty': {
-        width: '100%',
-        borderTopLeftRadius: 0,
-        borderTopRightRadius: 0,
-      },
-      background: `linear-gradient(
-        to top,
-        ${transparentize(euiTheme.colors.backgroundBasePlain, 0)} 0%,
-        ${transparentize(euiTheme.colors.backgroundBasePlain, 0.6)} 40%,
-        ${euiTheme.colors.backgroundBasePlain} 100%
-      )`,
     }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.s,
+      padding: `${euiTheme.size.s} ${euiTheme.size.m}`,
       borderBottom: euiTheme.border.thin,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    }),
+  headerName: css({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  }),
+  added: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textSuccess,
+      fontFamily: euiTheme.font.familyCode,
+      marginRight: euiTheme.size.xs,
+    }),
+  removed: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textDanger,
+      fontFamily: euiTheme.font.familyCode,
     }),
   noChanges: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -341,13 +397,13 @@ export const workflowYamlDiffAttachmentUiDefinition: AttachmentUIDefinition<Work
   {
     getLabel: (attachment) =>
       attachment.data.name
-        ? i18n.translate('workflowsManagement.attachmentRenderers.diff.labelWithName', {
+        ? i18n.translate('workflows.attachmentRenderers.diff.labelWithName', {
             defaultMessage: '{name} changes',
             values: { name: attachment.data.name },
           })
-        : i18n.translate('workflowsManagement.attachmentRenderers.diff.label', {
+        : i18n.translate('workflows.attachmentRenderers.diff.label', {
             defaultMessage: 'Workflow changes',
           }),
-    getIcon: () => 'merge',
+    getIcon: () => 'compare',
     renderInlineContent: ({ attachment }) => <DiffInlineContent attachment={attachment} />,
   };

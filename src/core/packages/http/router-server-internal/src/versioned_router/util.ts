@@ -16,6 +16,7 @@ import type {
   VersionedRouteResponseValidation,
   VersionedRouteValidation,
 } from '@kbn/core-http-server';
+import { onceCacheOnSuccess } from '@kbn/std';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 export function isCustomValidation(
@@ -75,7 +76,12 @@ export function prepareVersionedRouteValidation(
   let validate = originalValidate;
 
   if (typeof originalValidate === 'function') {
-    validate = once(() => prepareValidation(originalValidate()));
+    // Deferred path — use onceCacheOnSuccess to retry on failure instead of
+    // silently bypassing validation after the first construction error.
+    // Note: versioned route thunks cannot be called eagerly because they may
+    // depend on other plugins' runtime state (e.g. embeddable schemas) that
+    // is not available until all plugins finish setup.
+    validate = onceCacheOnSuccess(() => prepareValidation(originalValidate())) as any;
   } else if (typeof validate === 'object' && validate !== null) {
     validate = prepareValidation(validate);
   }

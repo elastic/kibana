@@ -31,8 +31,8 @@ import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
-import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -166,21 +166,20 @@ describe('When using get-file action from response actions console', () => {
     );
   });
 
-  it('should display download link once action completes', async () => {
-    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
-      {
-        data: {
-          ...apiMocks.responseProvider.actionDetails({
-            path: '/1',
-          } as HttpFetchOptionsWithPath).data,
-
-          completedAt: new Date().toISOString(),
-          command: 'get-file',
+  it('should display pending status while action is not yet complete', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'get-file',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
         },
-      };
-    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+      }),
+    });
 
-    await render();
+    const { getByTestId } = await render();
     await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
@@ -188,8 +187,40 @@ describe('When using get-file action from response actions console', () => {
     });
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
-        'File retrieved from the host.Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      expect(getByTestId('getFile-pending')).toBeTruthy();
+    });
+
+    expect(getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent('get-file is pending');
+  });
+
+  it('should display download link once action completes', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'get-file',
+        agents: ['a.b.c'],
+      }),
+    });
+
+    const { getByTestId } = await render();
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('getFile-success')).toBeTruthy();
+    });
+
+    expect(getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent(
+      'get-file completed successfully'
+    );
+
+    await waitFor(() => {
+      expect(
+        getByTestId('getFile-actionResult-getFileResults-getFileDownloadLink').textContent
+      ).toEqual(
+        'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
       );
     });
   });
@@ -219,6 +250,7 @@ describe('When using get-file action from response actions console', () => {
       'agent-a': {
         isCompleted: true,
         wasSuccessful: false,
+        wasCanceled: false,
         errors: ['not found'],
         completedAt: new Date().toISOString(),
       },
@@ -241,6 +273,15 @@ describe('When using get-file action from response actions console', () => {
         new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
       );
     });
+
+    expect(renderResult.getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent(
+      'get-file failed'
+    );
+    expect(
+      renderResult.getByTestId(
+        'getFile-actionResult-getFileResults-failure-response-action-failure-info'
+      )
+    ).toHaveTextContent(endpointActionResponseCodes[outputCode]);
   });
 
   describe('And agent type is SentinelOne', () => {

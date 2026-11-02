@@ -13,7 +13,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckableCard,
   EuiFieldText,
   EuiFlexGroup,
@@ -39,6 +38,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -565,7 +565,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
 
       {isSearchOnly ? (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={
               showNodeInfo
@@ -578,15 +578,10 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
                     { defaultMessage: 'Plan for higher ML resource use' }
                   )
             }
-            color="warning"
-            iconType="warning"
+            text={showNodeInfo ? RERANK_WARNING_DESCRIPTION : RERANK_WARNING_SERVERLESS_DESCRIPTION}
             size="s"
             data-test-subj="mlModelsStartDeploymentModalRerankWarning"
-          >
-            <p>
-              {showNodeInfo ? RERANK_WARNING_DESCRIPTION : RERANK_WARNING_SERVERLESS_DESCRIPTION}
-            </p>
-          </EuiCallOut>
+          />
           <EuiSpacer size="m" />
         </>
       ) : null}
@@ -659,9 +654,13 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
           <EuiSpacer size={'s'} />
 
           <EuiFormHelpText id={'vCpuRangeHelp'}>
-            <EuiCallOut size="s" data-test-subj="mlModelsStartDeploymentModalVCPUHelperText">
-              {helperText}
-            </EuiCallOut>
+            {helperText !== undefined ? (
+              <KbnInfoCallout
+                size="s"
+                title={helperText}
+                data-test-subj="mlModelsStartDeploymentModalVCPUHelperText"
+              />
+            ) : null}
           </EuiFormHelpText>
         </EuiPanel>
 

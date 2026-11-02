@@ -38,6 +38,7 @@ export {
   enableInspectEsQueries,
   enableComparisonByDefault,
   apmServiceGroupMaxNumberOfServices,
+  apmMaxNumberOfServices,
   apmEnableTableSearchBar,
 } from '../common/ui_settings_keys';
 export { alertsLocatorID, uptimeOverviewLocatorID } from '../common';
@@ -45,6 +46,9 @@ export { sloDetailsLocatorID, sloEditLocatorID } from '@kbn/deeplinks-observabil
 export { getCoreVitalsComponent } from './pages/overview/components/sections/ux/core_web_vitals/get_core_web_vitals_lazy';
 export { ObservabilityAlertSearchBar } from './components/alert_search_bar/get_alert_search_bar_lazy';
 export { DatePicker } from './pages/overview/components/date_picker';
+export { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
+export { getAlertsNavPanel, shouldIncludeStackManagementRules } from './nav/get_alerts_nav_panel';
+export { AlertingNavPromo } from './nav/alerting_nav_tour';
 
 export type {
   Stat,
@@ -87,6 +91,7 @@ export { useFetchDataViews } from './hooks/use_fetch_data_views';
 export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useSummaryTimeRange } from './hooks/use_summary_time_range';
+export { useInvestigateAlert, useInvestigationAvailability } from './hooks/use_investigate_alert';
 
 export { buildEsQuery } from './utils/build_es_query';
 
@@ -120,6 +125,7 @@ export { Threshold } from './components/custom_threshold/components/threshold';
 export { builtInComparatorsWithInclusive } from './constants/comparators';
 
 export { ObservabilityAlertsTable } from './components/alerts_table/alerts_table_lazy';
+export { AlertsTableCellValue as ObservabilityAlertsTableCellValue } from './components/alerts_table/common/cell_value';
 export { AlertActions } from './components/alert_actions/alert_actions_lazy';
 export type {
   GetObservabilityAlertsTableProp,

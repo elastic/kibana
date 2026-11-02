@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { withOAuthManagementGate } from './with_oauth_management_gate';
 import type { RouteDefinitionParams } from '..';
 import { OAUTH_MAX_STRING_FIELD_LENGTH } from '../../../common/oauth/constants';
 import { wrapIntoCustomErrorResponse } from '../../errors';
@@ -40,35 +39,33 @@ export function defineRevokeOAuthConnectionRoute({
         access: 'internal',
       },
     },
-    withOAuthManagementGate(
-      createLicensedRouteHandler(async (context, request, response) => {
-        try {
-          const { oauth } = getAuthenticationService();
-          if (!oauth) {
-            return response.notFound({
-              body: { message: 'OAuth management is not available: UIAM is not configured' },
-            });
-          }
-
-          const result = await oauth.revokeConnection(
-            request,
-            request.params.client_id,
-            request.params.connection_id,
-            request.body.reason
-          );
-          if (!result) {
-            return response.notFound({
-              body: {
-                message: 'OAuth management is not available: security features are disabled',
-              },
-            });
-          }
-
-          return response.ok({ body: result });
-        } catch (error) {
-          return response.customError(wrapIntoCustomErrorResponse(error));
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        const { oauth } = getAuthenticationService();
+        if (!oauth) {
+          return response.notFound({
+            body: { message: 'OAuth management is not available: UIAM is not configured' },
+          });
         }
-      })
-    )
+
+        const result = await oauth.revokeConnection(
+          request,
+          request.params.client_id,
+          request.params.connection_id,
+          request.body.reason
+        );
+        if (!result) {
+          return response.notFound({
+            body: {
+              message: 'OAuth management is not available: security features are disabled',
+            },
+          });
+        }
+
+        return response.ok({ body: result });
+      } catch (error) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+    })
   );
 }

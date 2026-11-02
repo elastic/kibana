@@ -15,6 +15,49 @@ import { applyProviderTransforms } from './apply_provider_transforms';
 import { createInferenceConnectorMock } from '../../../../test_utils';
 
 describe('applyProviderTransforms', () => {
+  it('injects a dummy tool when history has tool use and tools are omitted', () => {
+    const connector = createInferenceConnectorMock({
+      type: InferenceConnectorType.Inference,
+      config: {
+        provider: InferenceEndpointProvider.OpenAI,
+      },
+    });
+
+    const request = applyProviderTransforms({
+      connector,
+      messages: [
+        { role: MessageRole.User, content: 'question' },
+        {
+          role: MessageRole.Assistant,
+          content: '',
+          toolCalls: [
+            {
+              toolCallId: '1',
+              function: { name: 'myTool', arguments: {} },
+            },
+          ],
+        },
+        {
+          role: MessageRole.Tool,
+          name: 'myTool',
+          toolCallId: '1',
+          response: { ok: true },
+        },
+      ],
+      simulatedFunctionCalling: false,
+    });
+
+    expect(request.tools).toEqual({
+      doNotCallThisTool: {
+        description: 'Do not call this tool, it is strictly forbidden',
+        schema: {
+          type: 'object',
+          properties: {},
+        },
+      },
+    });
+  });
+
   it('fixes array schema definition for rainbow-sprinkles', () => {
     const connector = createInferenceConnectorMock({
       type: InferenceConnectorType.Inference,

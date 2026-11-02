@@ -12,5 +12,6 @@ export * from './composite_summary_writer';
 export * from './compute_composite_summary';
 export * from './create_composite_slo';
 export * from './get_composite_slo';
+export * from './get_composite_slo_definition';
 export * from './get_composite_slo_suggestions';
 export * from './update_composite_slo';

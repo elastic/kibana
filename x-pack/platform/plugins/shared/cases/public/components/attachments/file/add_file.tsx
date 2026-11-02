@@ -11,12 +11,14 @@ import React, { useCallback, useState } from 'react';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { UploadFileModal } from './upload_file_modal';
+import type { AttachedFile } from './utils';
 
 interface AddFileProps {
   caseId: string;
+  existingFiles?: AttachedFile[];
 }
 
-const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
+const AddFileComponent: React.FC<AddFileProps> = ({ caseId, existingFiles }) => {
   const { permissions } = useCasesContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -30,7 +32,9 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
       <EuiButton data-test-subj="cases-files-add" iconType="plusCircle" onClick={showModal}>
         {i18n.ADD_FILE}
       </EuiButton>
-      {isModalVisible && <UploadFileModal caseId={caseId} onClose={closeModal} />}
+      {isModalVisible && (
+        <UploadFileModal caseId={caseId} existingFiles={existingFiles} onClose={closeModal} />
+      )}
     </EuiFlexItem>
   );
 };

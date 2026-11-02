@@ -92,8 +92,12 @@ export function MonitoringClusterOverviewProvider({ getService }) {
       return testSubjects.click('alerts-modal-button');
     }
 
-    confirmWatcherMigrationDone() {
-      return testSubjects.click('alerts-modal-create-button');
+    async confirmWatcherMigrationDone() {
+      // the modal is remounted between steps, so a Create click can land without the handler running
+      await retry.tryForTime(30000, async () => {
+        await testSubjects.click('alerts-modal-create-button');
+        await testSubjects.waitForDeleted('alerts-modal-create-button');
+      });
     }
 
     async getPresentPanels() {

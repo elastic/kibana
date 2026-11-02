@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { queryNumber, routeId } from '../zod_query';
 import { getNetworkEvents } from '../../queries/get_network_events';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -14,20 +15,22 @@ export const createNetworkEventsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.NETWORK_EVENTS,
   validate: {
-    query: schema.object({
-      checkGroup: schema.string(),
-      stepIndex: schema.number(),
-      remoteName: schema.maybe(schema.string({ maxLength: 256 })),
+    query: z.strictObject({
+      checkGroup: routeId,
+      stepIndex: queryNumber,
+      remoteName: z.string().max(256).optional(),
+      timestamp: z.string().max(30).optional(),
     }),
   },
   handler: async ({ syntheticsEsClient, request }): Promise<any> => {
-    const { checkGroup, stepIndex, remoteName } = request.query;
+    const { checkGroup, stepIndex, remoteName, timestamp } = request.query;
 
     return await getNetworkEvents({
       syntheticsEsClient,
       checkGroup,
       stepIndex: String(stepIndex),
       remoteName,
+      timestamp,
     });
   },
 });

@@ -90,7 +90,12 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
-    actions: { validateEmailAddresses, enabledEmailServices, isWebhookSslWithPfxEnabled },
+    actions: {
+      validateEmailAddresses,
+      enabledEmailServices,
+      isWebhookSslWithPfxEnabled,
+      isInboundEventsEnabled,
+    },
     isServerless,
   } = useKibana().services;
 
@@ -101,6 +106,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           validateEmailAddresses,
           enabledEmailServices,
           isWebhookSslWithPfxEnabled,
+          isInboundEventsEnabled,
         },
         isServerless,
       }}

@@ -8,8 +8,23 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import {
+  asNotificationExecutionSource,
+  WORKFLOWS_NOTIFICATION_REQUESTER_ID,
+} from '@kbn/actions-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+
+function getWorkflowConnectorExecutionSource(actionTypeId: string, actionId: string) {
+  if (actionTypeId.replace(/^\./, '') !== 'email') {
+    return undefined;
+  }
+
+  return asNotificationExecutionSource({
+    requesterId: WORKFLOWS_NOTIFICATION_REQUESTER_ID,
+    connectorId: actionId,
+  });
+}
 
 export class ConnectorExecutor {
   // The lifespan of this cache is one workflow execution, then it gets destroyed
@@ -59,10 +74,12 @@ export class ConnectorExecutor {
     abortController: AbortController;
   }): Promise<ActionTypeExecutorResult<unknown>> {
     const { actionTypeId, actionId, input, abortController } = params;
+    const source = getWorkflowConnectorExecutionSource(actionTypeId, actionId);
 
     const executeActionPromise = this.actionsClient.execute({
       actionId,
       params: input,
+      ...(source ? { source } : {}),
       signal: abortController.signal,
     });
 

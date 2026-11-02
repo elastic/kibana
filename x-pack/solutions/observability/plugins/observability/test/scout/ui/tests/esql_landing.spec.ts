@@ -6,15 +6,14 @@
  */
 
 /**
- * NOTE: This suite runs sequentially (not alongside `parallel_tests/`) because it
- * toggles the `discover.isEsqlDefault` feature flag, which is server-wide. Placing
- * it in `parallel_tests/` would cause the flag change to spill into the other parallel
- * workers running `landing.spec.ts` and break their assertions that assume the flag is
- * off by default.
+ * NOTE: This suite runs sequentially (in `tests/`, not alongside `parallel_tests/`) because
+ * it toggles the `discover.isEsqlDefault` feature flag, which is server-wide. Placing it in
+ * `parallel_tests/` would cause the flag change to spill into other parallel workers and
+ * break assertions that assume the flag is off by default.
  *
  * TODO: Once `discover.isEsqlDefault` is enabled by default and the feature flag is
- * removed, merge these tests into the existing parallel suite at:
- *   parallel_tests/landing.spec.ts
+ * removed, merge these tests into the existing suite at:
+ *   tests/landing.spec.ts
  * and update the classic-mode redirect assertion there to expect an ES|QL Discover URL.
  */
 

@@ -24,6 +24,8 @@ const dashboardFileNames = [
   'otel_native-otel_other-python',
   'classic_apm-otel_other-go',
   'otel_native-otel_other-go',
+  'otel_native-edot-php',
+  'otel_native-otel_other-php',
 ] as const;
 
 export type DashboardFileName = (typeof dashboardFileNames)[number];
@@ -205,6 +207,13 @@ export async function loadDashboardFile(filename: DashboardFileName) {
       return import(
         /* webpackChunkName: "lazyGoOtelNativeDashboard" */
         './otel_native-otel_other-go.json'
+      );
+    }
+    case 'otel_native-otel_other-php':
+    case 'otel_native-edot-php': {
+      return import(
+        /* webpackChunkName: "lazyPhpOtelNativeDashboard" */
+        './otel_native-edot-php.json'
       );
     }
     default: {

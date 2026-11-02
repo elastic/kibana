@@ -28,6 +28,7 @@ import type {
   BaseIndexPatternColumn,
   DatasourceFixAction,
 } from '@kbn/lens-common';
+import { isColumnOfType } from '@kbn/lens-common';
 import { nonNullable } from '../../../utils';
 import {
   operationDefinitionMap,
@@ -43,7 +44,6 @@ import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
 import { insertOrReplaceFormulaColumn } from './definitions/formula';
 import { documentField } from '../document_field';
-import { isColumnOfType } from './definitions/helpers';
 import type { DataType, OperationMetadata } from '../../..';
 
 export interface ColumnAdvancedParams {
@@ -584,6 +584,7 @@ export function replaceColumn({
   initialParams,
   shouldResetLabel,
   shouldCombineField,
+  columnParams,
 }: ColumnChange): FormBasedLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
@@ -736,7 +737,10 @@ export function replaceColumn({
     }
 
     if (operationDefinition.input === 'none') {
-      let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer });
+      let newColumn = operationDefinition.buildColumn(
+        { ...baseOptions, layer: tempLayer },
+        columnParams
+      );
       newColumn = copyCustomLabel(newColumn, previousColumn);
       tempLayer = removeOrphanedColumns(
         previousDefinition,
@@ -802,7 +806,10 @@ export function replaceColumn({
 
     tempLayer = removeOrphanedColumns(previousDefinition, previousColumn, tempLayer, indexPattern);
 
-    let newColumn = operationDefinition.buildColumn({ ...baseOptions, layer: tempLayer, field });
+    let newColumn = operationDefinition.buildColumn(
+      { ...baseOptions, layer: tempLayer, field },
+      columnParams
+    );
     if (!shouldResetLabel) {
       newColumn = copyCustomLabel(newColumn, previousColumn);
     }

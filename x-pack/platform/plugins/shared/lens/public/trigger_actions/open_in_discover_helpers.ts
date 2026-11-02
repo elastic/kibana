@@ -18,16 +18,18 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import {
   type EmbeddableApiContext,
   apiIsPresentationContainer,
+  apiPublishesApproximation,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import {
   convertFiltersToESQLExpression,
   convertQueryToESQLExpression,
-  getEsqlControls,
   injectWhereClauseAfterSourceCommand,
 } from '@kbn/esql-utils';
+import { getEsqlControls } from '@kbn/esql-controls-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
+// TODO replace with DiscoverAppLocatorParams type from discover plugin
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
   filters?: Filter[];
@@ -126,6 +128,10 @@ async function getDiscoverLocationParams({
     ? embeddable.parentApi
     : undefined;
 
+  const esqlApproximation = apiPublishesApproximation(embeddable.parentApi)
+    ? embeddable.parentApi.isApproximate$.value
+    : false;
+
   return {
     ...args,
     query: queryToApply,
@@ -134,6 +140,7 @@ async function getDiscoverLocationParams({
     esqlControls: presentationContainer
       ? getEsqlControls(presentationContainer, args.query)
       : undefined,
+    esqlApproximation,
   };
 }
 

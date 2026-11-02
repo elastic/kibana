@@ -6,7 +6,7 @@
  */
 
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
+import { AgentType, AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentsServiceStart, AgentRegistry } from '../services/agents';
 import type { InternalAgentDefinition } from '../services/agents/agent_registry';
 
@@ -21,10 +21,12 @@ export const createMockedAgentRegistry = (): AgentRegistryMock => {
     get: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    setServiceAccount: jest.fn(),
     list: jest.fn(),
+    getIds: jest.fn(),
     delete: jest.fn(),
-    getAcl: jest.fn(),
-    updateAcl: jest.fn(),
+    getAccessControl: jest.fn(),
+    updateAccessControl: jest.fn(),
   };
 };
 
@@ -37,7 +39,7 @@ export const createMockedAgent = (parts: Partial<AgentDefinition> = {}): MockedA
     configuration: {
       tools: [],
     },
-    visibility: AgentVisibility.Public,
+    access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
     created_by: { username: 'test-user' },
     readonly: false,
     ...parts,
@@ -55,10 +57,15 @@ export const createMockedInternalAgent = (
     configuration: {
       tools: [],
     },
-    visibility: AgentVisibility.Public,
+    access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
     created_by: { username: 'test-user' },
     readonly: false,
-    isAvailable: jest.fn() as any,
+    permissions: {
+      update_agent: true,
+      update_access_control: true,
+      update_approvals: true,
+    },
+    isAvailable: jest.fn(async () => ({ status: 'available' as const })) as any,
     ...parts,
   };
 };
@@ -66,11 +73,15 @@ export const createMockedInternalAgent = (
 export const createAgentsServiceStartMock = (): AgentsServiceStartMock => {
   return {
     getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
+    ensure: jest.fn(),
+    resolveAgentConfiguration: jest.fn(),
+    resolveAgentBaseConfiguration: jest.fn().mockResolvedValue({}),
     removeToolRefsFromAgents: jest.fn(),
     getAgentsUsingTools: jest.fn(),
     removePluginRefsFromAgents: jest.fn(),
     getAgentsUsingPlugins: jest.fn(),
     removeSkillRefsFromAgents: jest.fn(),
     getAgentsUsingSkills: jest.fn(),
+    getAiIndexResolver: jest.fn().mockReturnValue(undefined),
   };
 };

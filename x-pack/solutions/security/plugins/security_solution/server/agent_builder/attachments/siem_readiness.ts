@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   AttachmentTypeDefinition,
   AttachmentFormatContext,
@@ -24,94 +24,134 @@ export const SIEM_READINESS_ATTACHMENT_ID = 'security.siem_readiness';
 
 // ---- Shared sub-schemas ----
 
-const actionableFindingSchema = z.object({
-  category: z.string().optional(),
-  severity: z.enum(['critical', 'warning']),
-  message: z.string(),
-  resource: z.string(),
-});
+const affectedRuleSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(100),
+    name: z.string().max(500),
+  })
+);
+
+const affectedTacticSchema = lazySchema(() =>
+  z.object({
+    id: z.string().max(20),
+    name: z.string().max(200),
+    totalRules: z.number(),
+    affectedRulesCount: z.number(),
+  })
+);
+
+const recommendedActionSchema = lazySchema(() =>
+  z.object({
+    label: z.string().max(200),
+    href: z.string().max(2048),
+  })
+);
+
+const actionableFindingSchema = lazySchema(() =>
+  z.object({
+    category: z.string().max(100).optional(),
+    severity: z.enum(['CRITICAL', 'WARNING', 'INFORMATIONAL']),
+    message: z.string().max(5000),
+    resource: z.string().max(500),
+    affectedRules: z.array(affectedRuleSchema).optional(),
+    affectedTactics: z.array(affectedTacticSchema).optional(),
+    affectedPlatform: z.string().max(200).optional(),
+    recommendedActions: z.array(recommendedActionSchema).optional(),
+    blastRadiusStatus: z.enum(['healthy', 'partial', 'unavailable']).optional(),
+  })
+);
 
 // ---- Coverage ----
 
-export const siemReadinessCoverageDataSchema = securityAttachmentDataSchema.extend({
-  dimension: z.literal('coverage'),
-  status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string(),
-  items: z.array(
-    z.object({
-      category: z.string(),
-      indices: z.array(z.object({ indexName: z.string(), docs: z.number() })),
-    })
-  ),
-  actionableFindings: z.array(actionableFindingSchema),
-});
+export const siemReadinessCoverageDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    dimension: z.literal('coverage'),
+    status: z.enum(['healthy', 'actionsRequired', 'noData']),
+    summary: z.string().max(8000),
+    items: z.array(
+      z.object({
+        category: z.string().max(100),
+        indices: z.array(z.object({ indexName: z.string().max(500), docs: z.number() })),
+      })
+    ),
+    actionableFindings: z.array(actionableFindingSchema),
+  })
+);
 
 // ---- Quality ----
 
-export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.extend({
-  dimension: z.literal('quality'),
-  status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string(),
-  items: z.array(
-    z.object({
-      indexName: z.string(),
-      incompatibleFieldCount: z.number(),
-      totalFieldCount: z.number(),
-      ecsFieldCount: z.number(),
-      checkedAt: z.number(),
-    })
-  ),
-  actionableFindings: z.array(actionableFindingSchema),
-});
+export const siemReadinessQualityDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    dimension: z.literal('quality'),
+    status: z.enum(['healthy', 'actionsRequired', 'noData']),
+    summary: z.string().max(8000),
+    items: z.array(
+      z.object({
+        indexName: z.string().max(500),
+        incompatibleFieldCount: z.number(),
+        totalFieldCount: z.number(),
+        ecsFieldCount: z.number(),
+        checkedAt: z.number(),
+      })
+    ),
+    actionableFindings: z.array(actionableFindingSchema),
+  })
+);
 
 // ---- Continuity ----
 
-export const siemReadinessContinuityDataSchema = securityAttachmentDataSchema.extend({
-  dimension: z.literal('continuity'),
-  status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string(),
-  items: z.array(
-    z.object({
-      name: z.string(),
-      indices: z.array(z.string()),
-      docsCount: z.number(),
-      failedDocsCount: z.number(),
-      statsAvailable: z.boolean(),
-      categories: z.array(z.string()).optional(),
-    })
-  ),
-  actionableFindings: z.array(actionableFindingSchema),
-});
+export const siemReadinessContinuityDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    dimension: z.literal('continuity'),
+    status: z.enum(['healthy', 'actionsRequired', 'noData']),
+    summary: z.string().max(8000),
+    items: z.array(
+      z.object({
+        name: z.string().max(500),
+        indices: z.array(z.string().max(500)),
+        docsCount: z.number(),
+        failedDocsCount: z.number(),
+        statsAvailable: z.boolean(),
+        categories: z.array(z.string().max(100)).optional(),
+      })
+    ),
+    actionableFindings: z.array(actionableFindingSchema),
+  })
+);
 
 // ---- Retention ----
 
-export const siemReadinessRetentionDataSchema = securityAttachmentDataSchema.extend({
-  dimension: z.literal('retention'),
-  status: z.enum(['healthy', 'actionsRequired', 'noData']),
-  summary: z.string(),
-  items: z.array(
-    z.object({
-      indexName: z.string(),
-      isDataStream: z.boolean(),
-      retentionType: z.enum(['ilm', 'dsl']).nullable(),
-      retentionPeriod: z.string().nullable(),
-      retentionDays: z.number().nullable(),
-      policyName: z.string().nullable(),
-      status: z.enum(['healthy', 'non-compliant']),
-      categories: z.array(z.string()).optional(),
-    })
-  ),
-  actionableFindings: z.array(actionableFindingSchema),
-});
+export const siemReadinessRetentionDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    dimension: z.literal('retention'),
+    status: z.enum(['healthy', 'actionsRequired', 'noData']),
+    summary: z.string().max(8000),
+    items: z.array(
+      z.object({
+        indexName: z.string().max(500),
+        isDataStream: z.boolean(),
+        retentionType: z.enum(['ilm', 'dsl']).nullable(),
+        retentionPeriod: z.string().max(50).nullable(),
+        retentionDays: z.number().nullable(),
+        policyName: z.string().max(500).nullable(),
+        status: z.enum(['healthy', 'non-compliant']),
+        categories: z.array(z.string().max(100)).optional(),
+      })
+    ),
+    actionableFindings: z.array(actionableFindingSchema),
+  })
+);
 
 // ---- Union schema ----
 
-export const siemReadinessAttachmentDataSchema = z.discriminatedUnion('dimension', [
-  siemReadinessCoverageDataSchema,
-  siemReadinessQualityDataSchema,
-  siemReadinessContinuityDataSchema,
-  siemReadinessRetentionDataSchema,
-]);
+export const siemReadinessAttachmentDataSchema = lazySchema(() =>
+  z.discriminatedUnion('dimension', [
+    siemReadinessCoverageDataSchema,
+    siemReadinessQualityDataSchema,
+    siemReadinessContinuityDataSchema,
+    siemReadinessRetentionDataSchema,
+  ])
+);
 
 export type SiemReadinessAttachmentData = z.infer<typeof siemReadinessAttachmentDataSchema>;
 
@@ -121,9 +161,59 @@ const STATUS_LABELS: Record<string, string> = {
   healthy: 'Healthy',
   actionsRequired: 'Actions Required',
   noData: 'No Data',
+  CRITICAL: 'Critical',
+  WARNING: 'Warning',
+  INFORMATIONAL: 'Informational',
 };
 
 const formatStatus = (status: string): string => STATUS_LABELS[status] ?? status;
+
+const formatFindingWithBlastRadius = (f: z.infer<typeof actionableFindingSchema>): string[] => {
+  const lines: string[] = [];
+  lines.push(`  [${f.severity}] ${f.message}`);
+
+  if (f.blastRadiusStatus === 'unavailable') {
+    // A required reverse-map lookup failed; these fields cannot be trusted — surface the gap
+    // explicitly rather than showing empty values that look like "no impact found".
+    lines.push('    Affected Rules: unavailable (lookup failed)');
+    lines.push('    Affected Tactics: unavailable (lookup failed)');
+    lines.push('    Platform: unavailable (lookup failed)');
+  } else {
+    const partialSuffix = f.blastRadiusStatus === 'partial' ? ' (may be incomplete)' : '';
+
+    if (f.affectedRules && f.affectedRules.length > 0) {
+      lines.push(`    Affected Rules (${f.affectedRules.length})${partialSuffix}:`);
+      f.affectedRules.slice(0, 5).forEach((rule) => {
+        lines.push(`      - ${rule.name}`);
+      });
+      if (f.affectedRules.length > 5) {
+        lines.push(`      ... and ${f.affectedRules.length - 5} more`);
+      }
+    }
+
+    if (f.affectedTactics && f.affectedTactics.length > 0) {
+      lines.push(`    Affected MITRE Tactics${partialSuffix}:`);
+      f.affectedTactics.forEach((tactic) => {
+        lines.push(
+          `      - ${tactic.name} (${tactic.affectedRulesCount}/${tactic.totalRules} rules)`
+        );
+      });
+    }
+
+    if (f.affectedPlatform) {
+      lines.push(`    Platform: ${f.affectedPlatform}`);
+    }
+  }
+
+  if (f.recommendedActions && f.recommendedActions.length > 0) {
+    lines.push(`    Actions:`);
+    f.recommendedActions.forEach((action) => {
+      lines.push(`      - ${action.label}: ${action.href}`);
+    });
+  }
+
+  return lines;
+};
 
 const formatCoverageForAgent = (data: CoveragePayload & { dimension: 'coverage' }): string => {
   const lines = [`SIEM Coverage — ${formatStatus(data.status)}`, data.summary];
@@ -135,7 +225,10 @@ const formatCoverageForAgent = (data: CoveragePayload & { dimension: 'coverage' 
   });
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
-    data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
+    data.actionableFindings.forEach((f) => {
+      const finding = f as z.infer<typeof actionableFindingSchema>;
+      lines.push(...formatFindingWithBlastRadius(finding));
+    });
   }
   return lines.join('\n');
 };
@@ -144,7 +237,10 @@ const formatQualityForAgent = (data: QualityPayload & { dimension: 'quality' }):
   const lines = [`SIEM Quality — ${formatStatus(data.status)}`, data.summary];
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
-    data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
+    data.actionableFindings.forEach((f) => {
+      const finding = f as z.infer<typeof actionableFindingSchema>;
+      lines.push(...formatFindingWithBlastRadius(finding));
+    });
   }
   return lines.join('\n');
 };
@@ -182,7 +278,10 @@ const formatContinuityForAgent = (
 
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
-    data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
+    data.actionableFindings.forEach((f) => {
+      const finding = f as z.infer<typeof actionableFindingSchema>;
+      lines.push(...formatFindingWithBlastRadius(finding));
+    });
   }
   return lines.join('\n');
 };
@@ -214,7 +313,10 @@ const formatRetentionForAgent = (data: RetentionPayload & { dimension: 'retentio
 
   if (data.actionableFindings?.length) {
     lines.push('Findings:');
-    data.actionableFindings.forEach((f) => lines.push(`  [${f.severity}] ${f.message}`));
+    data.actionableFindings.forEach((f) => {
+      const finding = f as z.infer<typeof actionableFindingSchema>;
+      lines.push(...formatFindingWithBlastRadius(finding));
+    });
   }
   return lines.join('\n');
 };
@@ -226,7 +328,26 @@ The attachment contains:
 - status: overall health verdict (healthy | actionsRequired | noData)
 - summary: pre-computed narrative summary
 - items: raw dimension data (pipelines, indices, data streams, or category groups)
-- actionableFindings: pre-shaped findings with category, severity, message, and resource
+- actionableFindings: pre-shaped findings with blast radius context
+
+Each actionable finding includes:
+- category, severity (CRITICAL | WARNING | INFORMATIONAL), message, resource
+- type (continuity only): pipeline_failure | silence | volume_drop_warning | volume_drop_critical
+- affectedRules: detection rules impacted by this finding
+- affectedTactics: MITRE ATT&CK tactics with rule counts (total vs affected)
+- affectedPlatform: primary platform impacted (e.g., AWS, "Crowdstrike (Windows)", "Windows Endpoints")
+- recommendedActions: links to relevant Kibana pages and case creation
+
+Continuity pipeline items include silence and volume health fields:
+- silenceMs: milliseconds since the last event (null if stream never received events)
+- isSilent: true when the silence gap exceeds the category-specific threshold
+- lastFullDayDocs: document count for yesterday (the most recent complete day; the in-progress current day is excluded) (null if stream < 7 days old)
+- baseline7dAvg: average daily doc count over the prior full days (null if stream < 7 days old)
+- volumeDropPct: percentage drop vs baseline clamped to [0, ∞); null when baseline unavailable
+- blastRadiusStatus (optional): reliability of the blast radius fields
+  - 'unavailable': a required lookup failed; affectedRules/Tactics/Platform are omitted and MUST be shown as "unavailable (lookup failed)" — never as "none"
+  - 'partial': at least one rule's index resolution failed; the fields shown may be undercounted — append "(may be incomplete)" when presenting them
+  - omitted/undefined: blast radius is complete and trustworthy
 
 Field mapping (tool output camelCase → attachment snake_case):
 - pipeline name: name → pipeline_name
@@ -234,7 +355,7 @@ Field mapping (tool output camelCase → attachment snake_case):
 - retention days: retentionDays → retention_days
 - policy name: policyName → policy_name
 
-Use these findings to answer dimension-specific questions. Always structure your response using the four-section format: Status → Summary → Findings by dimension then by category → Suggested Actions.
+Use the blast radius information to prioritize findings by impact. Always structure your response using the four-section format: Status → Summary → Findings by dimension then by category → Suggested Actions.
 `;
 
 // ---- Attachment type definition ----

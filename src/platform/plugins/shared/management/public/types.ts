@@ -26,6 +26,10 @@ import type { ManagementAppLocatorParams } from '../common/locator';
 /** @public */
 export interface AutoOpsStatusResult {
   isCloudConnectAutoopsEnabled: boolean;
+  /** The URL to the AutoOps service page for this cluster. Populated when AutoOps is enabled. */
+  autoOpsServiceUrl?: string;
+  /** The URL to the AutoOps documentation. */
+  autoOpsDocsUrl?: string;
   isLoading: boolean;
 }
 

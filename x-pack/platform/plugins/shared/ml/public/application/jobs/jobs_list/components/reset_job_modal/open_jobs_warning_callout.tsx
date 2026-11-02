@@ -9,8 +9,9 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { JOB_STATE } from '../../../../../../common/constants/states';
 
 interface Props {
@@ -29,7 +30,7 @@ export const OpenJobsWarningCallout: FC<Props> = ({ jobs }) => {
 
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         title={
           <FormattedMessage
             id="xpack.ml.jobsList.resetJobModal.openJobsWarningCallout.title"
@@ -37,7 +38,6 @@ export const OpenJobsWarningCallout: FC<Props> = ({ jobs }) => {
             values={{ openJobsCount }}
           />
         }
-        color="warning"
       >
         <FormattedMessage
           id="xpack.ml.jobsList.resetJobModal.openJobsWarningCallout.description1"
@@ -50,7 +50,7 @@ export const OpenJobsWarningCallout: FC<Props> = ({ jobs }) => {
           defaultMessage="{openJobsCount, plural, one {This job} other {These jobs}} will not be reset when clicking the Reset button below."
           values={{ openJobsCount }}
         />
-      </EuiCallOut>
+      </KbnWarningCallout>
 
       <EuiSpacer size="m" />
     </>

@@ -13,23 +13,25 @@ import type { InternalApplicationStart } from '@kbn/core-application-browser-int
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 
 export interface ChromeComponentsDeps {
   application: Pick<
     InternalApplicationStart,
-    'navigateToUrl' | 'currentAppId$' | 'currentActionMenu$'
+    'navigateToUrl' | 'currentAppId$' | 'currentLocation$' | 'currentActionMenu$'
   >;
   http: Pick<HttpStart, 'basePath' | 'getLoadingCount$'>;
   docLinks: DocLinksStart;
   customBranding: Pick<CustomBrandingStart, 'customBranding$'>;
+  notifications: Pick<NotificationsStart, 'screenReader'>;
 }
 
 const ChromeComponentsContext = createContext<ChromeComponentsDeps | null>(null);
 
 /**
- * Provides `ChromeComponentsDeps` to all context-aware Chrome components (`Header`,
- * `ProjectHeader`, `GridLayoutProjectSideNav`, `HeaderTopBanner`, `ChromelessHeader`,
- * `AppMenuBar`, `Sidebar`).
+ * Provides `ChromeComponentsDeps` to all context-aware Chrome components
+ * (`ClassicHeader`, `ChromeHeader`, `GridLayoutProjectSideNav`,
+ * `HeaderTopBanner`, `ChromelessHeader`, `Sidebar`).
  *
  * The layout layer passes whole service contracts (narrowed via `Pick`) and wraps the
  * layout tree once. Chrome-owned state is accessed separately via `useChromeService()` hooks.

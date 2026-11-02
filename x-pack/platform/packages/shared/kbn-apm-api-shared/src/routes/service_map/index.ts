@@ -5,18 +5,29 @@
  * 2.0.
  */
 import { serviceMapRoute } from './service_map';
-import { serviceMapServiceNodeRoute } from './service_node';
 import { serviceMapDependencyNodeRoute } from './dependency_node';
 import { serviceMapServiceBadgesRoute } from './service_badges';
+import { serviceMapConnectionTransactionsRoute } from './connection_transactions';
+import { serviceMapConnectionFailedCallsRoute } from './connection_failed_calls';
 
 export const serviceMapRouteDefinitions = {
   serviceMap: serviceMapRoute,
-  serviceNode: serviceMapServiceNodeRoute,
   dependencyNode: serviceMapDependencyNodeRoute,
   serviceBadges: serviceMapServiceBadgesRoute,
+  connectionTransactions: serviceMapConnectionTransactionsRoute,
+  connectionFailedCalls: serviceMapConnectionFailedCallsRoute,
 };
 
+export { MAX_CONNECTION_RESOURCES } from './connection_params';
 export type { ServiceMapRouteResponse } from './service_map';
-export type { ServiceMapServiceNodeInfoResponse } from './service_node';
 export type { ServiceMapServiceDependencyInfoResponse } from './dependency_node';
 export type { ServiceSloStatsResponse, ServiceMapServiceBadgesResponse } from './service_badges';
+export type {
+  ConnectionTransactionGroup,
+  ConnectionTransactionsResponse,
+} from './connection_transactions';
+export type {
+  FailedCallBucketType,
+  FailedCallBucket,
+  ConnectionFailedCallsResponse,
+} from './connection_failed_calls';

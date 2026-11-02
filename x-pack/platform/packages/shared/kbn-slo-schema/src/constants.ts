@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const ALL_VALUE = '*';
+export { ALL_VALUE, SLO_GROUPINGS_PREFIX, SLO_STATUS } from '@kbn/slo-constants';

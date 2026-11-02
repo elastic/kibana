@@ -7,10 +7,22 @@
 
 import type { Streams } from '@kbn/streams-schema';
 
+/**
+ * Sentinel name for a pack's root stream inside an archive. Export rewrites the root
+ * stream's real name to this token and import maps it back onto the target stream, so a
+ * pack can be imported under any stream name.
+ */
 export const ROOT_STREAM_ID = '__ROOT__';
+
+/**
+ * Content packs bundle portable stream configuration only (routing, mappings,
+ * processing, lifecycle). Significant-event queries are intentionally not part of
+ * content packs. This type therefore matches the wired stream upsert shape exactly.
+ */
+export type ContentPackStreamRequest = Streams.WiredStream.UpsertRequest;
 
 export interface ContentPackStream {
   type: 'stream';
   name: string;
-  request: Streams.WiredStream.UpsertRequest;
+  request: ContentPackStreamRequest;
 }

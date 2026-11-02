@@ -30,7 +30,7 @@ export class AnnotationListingPage {
 
   constructor(private readonly page: ScoutPage) {
     this.contentList = new ContentListWrapper(page);
-    this.tabbedPageHeader = this.page.testSubj.locator('top-nav');
+    this.tabbedPageHeader = this.page.testSubj.locator('appHeader');
     this.emptyPromptCreateButton = this.page.locator('button', {
       hasText: 'Create annotation in Lens',
     });
@@ -48,8 +48,7 @@ export class AnnotationListingPage {
     await this.contentList.searchBox.waitFor({ state: 'visible' });
   }
 
-  async selectTag(tagId: string) {
-    await this.contentList.tagsFilterButton.click();
-    await this.page.testSubj.locator(`tag-searchbar-option-${tagId}`).click();
+  async selectTag(tagName: string) {
+    await this.contentList.selectTag(tagName);
   }
 }

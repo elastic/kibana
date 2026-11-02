@@ -34,13 +34,14 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
 
 /**
  * Translate a filter into a query to support es 5+
+ * The filter is either already a query container (custom filters keep their DSL
+ * at the root once `meta`/`$state` are stripped) or wraps one in `query`.
  * @param  {Object} filter - The filter to translate
  * @return {Object} the query version of that filter
  */
-const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
-  // @ts-expect-error upgrade typescript v5.1.6
-  return filter.query || filter;
-};
+const translateToQuery = (
+  filter: estypes.QueryDslQueryContainer & { query?: estypes.QueryDslQueryContainer }
+): estypes.QueryDslQueryContainer => filter.query || filter;
 
 /**
  * Options for building query for filters

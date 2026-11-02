@@ -8,14 +8,17 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchableSnapshotRepositoryInfo } from '@kbn/data-lifecycle-phases';
-import { FrozenDefaultRepositoryRequiredCallout } from '../../../common/data_lifecycle/frozen_default_repository_required_callout';
+import {
+  FrozenDefaultRepositoryRequiredCallout,
+  SearchableSnapshotRepositoryInfo,
+} from '@kbn/data-lifecycle-phases';
 
 export interface DlmSearchableSnapshotInfoSectionProps {
   dataTestSubj: string;
   manageRepositoriesHref?: string;
   defaultRepositoryName?: string;
-  onCreateDefaultRepository?: () => void;
+  createDefaultRepositoryHref?: string;
+  hasExistingRepositories?: boolean;
   onRefresh?: () => void;
   isRefreshing?: boolean;
 }
@@ -24,7 +27,8 @@ export const DlmSearchableSnapshotInfoSection = ({
   dataTestSubj,
   manageRepositoriesHref,
   defaultRepositoryName,
-  onCreateDefaultRepository,
+  createDefaultRepositoryHref,
+  hasExistingRepositories,
   onRefresh,
   isRefreshing,
 }: DlmSearchableSnapshotInfoSectionProps) => {
@@ -61,11 +65,14 @@ export const DlmSearchableSnapshotInfoSection = ({
         </EuiText>
       ) : (
         <FrozenDefaultRepositoryRequiredCallout
-          onCreateDefaultRepository={onCreateDefaultRepository}
+          createDefaultRepositoryHref={createDefaultRepositoryHref}
+          manageRepositoriesUrl={manageRepositoriesHref}
+          hasExistingRepositories={hasExistingRepositories}
           onRefresh={onRefresh}
           isRefreshing={isRefreshing}
           calloutTestSubj={`${dataTestSubj}FrozenDefaultRepositoryRequiredCallout`}
           createButtonTestSubj={`${dataTestSubj}CreateDefaultRepositoryButton`}
+          manageRepositoriesButtonTestSubj={`${dataTestSubj}ManageRepositoriesButton`}
           refreshButtonTestSubj={`${dataTestSubj}RefreshDefaultRepositoryButton`}
         />
       )}

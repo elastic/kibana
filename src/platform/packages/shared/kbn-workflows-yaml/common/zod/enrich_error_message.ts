@@ -9,7 +9,7 @@
 
 import type { Document } from 'yaml';
 import YAML from 'yaml';
-import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
+import { getSchemaAtPath, unwrapSchema } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getDetailedTypeDescription } from './zod_type_description';
 
@@ -74,6 +74,28 @@ export function enrichErrorMessage(
   return result;
 }
 
+// Schema-aware enrichment replaces the issue message with a description of the
+// *type* expected at the path (e.g. "max expects number"). That is helpful when
+// the author supplied the wrong shape, but it destroys precise, author-written
+// messages carried by the zod issue itself:
+//   - constraint violations (`too_big`, etc.) carrying e.g. "Parallel concurrency
+//     \"max\" cannot exceed 20." would be rewritten to the useless "max expects
+//     number".
+//   - `custom` refinements (e.g. the parallel-mode mutual-exclusivity rule)
+//     carry a hand-written, actionable message; because they attach at the step
+//     node the path points at the step-union, so enrichment would otherwise
+//     replace them with the giant "must be one of ...405 more" union dump.
+// For these codes the zod issue message is already specific and authoritative,
+// so skip the type-describing enrichment and keep it verbatim.
+const AUTHORITATIVE_MESSAGE_ERROR_CODES = new Set([
+  'too_big',
+  'too_small',
+  'not_multiple_of',
+  'invalid_value',
+  'invalid_format',
+  'custom',
+]);
+
 function computeEnrichment(
   path: PropertyKey[],
   originalMessage: string,
@@ -88,7 +110,7 @@ function computeEnrichment(
     return { message: domainEnriched, enriched: true };
   }
 
-  if (path.length > 0) {
+  if (path.length > 0 && !AUTHORITATIVE_MESSAGE_ERROR_CODES.has(errorCode)) {
     const schemaEnriched = trySchemaAwareEnrichment(
       path,
       fieldName,
@@ -197,11 +219,13 @@ function tryDomainSpecificEnrichment(
     return `Unknown step type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, ai.*`;
   }
 
-  if (errorCode === 'invalid_type' && path.length === 1 && path[0] === 'triggers') {
+  const isMissingOrEmptyCollection = errorCode === 'invalid_type' || errorCode === 'too_small';
+
+  if (isMissingOrEmptyCollection && path.length === 1 && path[0] === 'triggers') {
     return 'No triggers found. Add at least one trigger.';
   }
 
-  if (errorCode === 'invalid_type' && path.length === 1 && path[0] === 'steps') {
+  if (isMissingOrEmptyCollection && path.length === 1 && path[0] === 'steps') {
     return 'No steps found. Add at least one step.';
   }
 
@@ -420,28 +444,6 @@ function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<an
 
   const elementType = getTypeDescriptionForError(elementSchema);
   return `${fieldName} expects a list of ${elementType}`;
-}
-
-function unwrapSchema(schema: z.ZodType): z.ZodType {
-  let current = schema;
-
-  while (true) {
-    if (current instanceof z.ZodOptional) {
-      current = current.unwrap() as z.ZodType;
-    } else if (current instanceof z.ZodNullable) {
-      current = current.unwrap() as z.ZodType;
-    } else if (current instanceof z.ZodDefault) {
-      current = current.unwrap() as z.ZodType;
-    } else if (current instanceof z.ZodLazy) {
-      // So that `z.array(z.lazy(stepUnion))` resolves to the union branch in
-      // `generateArrayErrorMessage` / `generateSchemaErrorMessage`.
-      current = current.unwrap() as z.ZodType;
-    } else {
-      break;
-    }
-  }
-
-  return current;
 }
 
 function getObjectPropertiesDescription(

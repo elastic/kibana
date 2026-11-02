@@ -9,19 +9,19 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Step } from '@kbn/workflows';
+import type { Step, WorkflowExecutionHistoryModel } from '@kbn/workflows';
 import { collectAllSteps } from '@kbn/workflows';
+import { getBaseConnectorType } from '@kbn/workflows-ui';
 import type { WorkflowTrigger } from '../../../../common/lib/trigger_types';
 import * as commonI18n from '../../../../common/translations';
-import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
+import { getWorkflowNextExecutionTime } from '../../../lib/next_execution_time';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { triggerSchemas } from '../../../trigger_schemas';
 import { PopoverItems } from '../../../widgets/worflows_triggers_list/popover_items';
-import {
-  getTriggerLabel,
-  TriggerIcon,
-} from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { TriggerIcon } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { getStepTypeLabel } from '../../../widgets/workflows_step_types_list/workflows_step_types_list';
 
 const ICON_SIZE = 16;
@@ -74,12 +74,25 @@ const calculateVisibleStepCount = ({
 interface Props {
   triggers: WorkflowTrigger[];
   steps: Step[];
+  history: WorkflowExecutionHistoryModel[];
 }
 
-export const WorkflowTriggersAndSteps = ({ triggers, steps }: Props) => {
+export const WorkflowTriggersAndSteps = ({ triggers, steps, history }: Props) => {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const getFormattedDateTime = useGetFormattedDateTime();
+
+  const getNextExecution = useCallback(
+    (triggerType: string) => {
+      if (triggerType !== 'scheduled') {
+        return undefined;
+      }
+      const nextExecutionTime = getWorkflowNextExecutionTime(triggers, history);
+      return nextExecutionTime ? getFormattedDateTime(nextExecutionTime) : undefined;
+    },
+    [triggers, history, getFormattedDateTime]
+  );
 
   const uniqueStepBaseTypes = useMemo(() => {
     const allSteps = collectAllSteps(steps);
@@ -150,7 +163,10 @@ export const WorkflowTriggersAndSteps = ({ triggers, steps }: Props) => {
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
         {hasTriggers && (
           <EuiFlexItem grow={false}>
-            <TriggerIcon triggerType={firstTrigger.type} />
+            <TriggerIcon
+              triggerType={firstTrigger.type}
+              nextExecution={getNextExecution(firstTrigger.type)}
+            />
           </EuiFlexItem>
         )}
         {triggerHasOverflow && (
@@ -168,10 +184,14 @@ export const WorkflowTriggersAndSteps = ({ triggers, steps }: Props) => {
                   responsive={false}
                 >
                   <EuiFlexItem grow={false}>
-                    <TriggerIcon triggerType={trigger.type} />
+                    <TriggerIcon
+                      triggerType={trigger.type}
+                      nextExecution={getNextExecution(trigger.type)}
+                      showLabelInTooltip={false}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s">{getTriggerLabel(trigger.type)}</EuiText>
+                    <EuiText size="s">{triggerSchemas.getTriggerName(trigger.type)}</EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

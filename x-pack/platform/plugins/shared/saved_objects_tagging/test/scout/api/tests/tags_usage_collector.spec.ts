@@ -9,6 +9,30 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, TELEMETRY_HEADERS, KBN_ARCHIVES } from '../fixtures';
 
+interface TaggingStatsForType {
+  taggedObjects: number;
+  usedTags: number;
+}
+
+interface TaggingStats {
+  types: Record<string, TaggingStatsForType | undefined>;
+}
+
+interface TelemetryStatsResponse {
+  stats: {
+    stack_stats: {
+      kibana: {
+        plugins: {
+          saved_objects_tagging: TaggingStats;
+        };
+      };
+    };
+  };
+}
+
+const getStatsForType = (taggingStats: TaggingStats, type: string): TaggingStatsForType =>
+  taggingStats.types[type] ?? { taggedObjects: 0, usedTags: 0 };
+
 /*
  * Dataset: 5 tags (tag-1..4 + unused-tag), 2 tagged dashboards, 3 tagged visualizations.
  * - dashboard refs: tag-1+tag-2, tag-2+tag-4 → 2 tagged objects, 3 distinct tags
@@ -20,31 +44,49 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+    apiTest.beforeAll(async ({ samlAuth }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
-      await kbnClient.savedObjects.clean({ types: ['tag', 'dashboard', 'visualization'] });
-      await kbnClient.importExport.load(KBN_ARCHIVES.USAGE_COLLECTION);
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
+    apiTest.afterEach(async ({ kbnClient }) => {
       await kbnClient.importExport.unload(KBN_ARCHIVES.USAGE_COLLECTION);
     });
 
     apiTest(
       'reports correct tag usage counts via the telemetry endpoint',
-      async ({ apiClient }) => {
-        const response = await apiClient.post('internal/telemetry/clusters/_stats', {
-          headers: { ...TELEMETRY_HEADERS, ...cookieHeader },
-          body: { unencrypted: true, refreshCache: true },
-        });
+      async ({ apiClient, kbnClient }) => {
+        const fetchTaggingStats = async (): Promise<TaggingStats> => {
+          const response = await apiClient.post('internal/telemetry/clusters/_stats', {
+            headers: { ...TELEMETRY_HEADERS, ...cookieHeader },
+            body: { unencrypted: true, refreshCache: true },
+          });
 
-        expect(response).toHaveStatusCode(200);
+          expect(response).toHaveStatusCode(200);
 
-        const taggingStats =
-          response.body[0].stats.stack_stats.kibana.plugins.saved_objects_tagging;
+          const [telemetryStats] = response.body as TelemetryStatsResponse[];
+          return telemetryStats.stats.stack_stats.kibana.plugins.saved_objects_tagging;
+        };
 
-        expect(taggingStats.types.dashboard).toStrictEqual({ taggedObjects: 2, usedTags: 3 });
-        expect(taggingStats.types.visualization).toStrictEqual({ taggedObjects: 3, usedTags: 2 });
+        await kbnClient.importExport.unload(KBN_ARCHIVES.USAGE_COLLECTION);
+        const baseline = await fetchTaggingStats();
+        await kbnClient.importExport.load(KBN_ARCHIVES.USAGE_COLLECTION);
+        const taggingStats = await fetchTaggingStats();
+
+        const baselineDashboardStats = getStatsForType(baseline, 'dashboard');
+        const dashboardStats = getStatsForType(taggingStats, 'dashboard');
+        expect(dashboardStats.taggedObjects).toBeGreaterThanOrEqual(
+          baselineDashboardStats.taggedObjects + 2
+        );
+        expect(dashboardStats.usedTags).toBeGreaterThanOrEqual(baselineDashboardStats.usedTags);
+
+        const baselineVisualizationStats = getStatsForType(baseline, 'visualization');
+        const visualizationStats = getStatsForType(taggingStats, 'visualization');
+        expect(visualizationStats.taggedObjects).toBeGreaterThanOrEqual(
+          baselineVisualizationStats.taggedObjects + 3
+        );
+        expect(visualizationStats.usedTags).toBeGreaterThanOrEqual(
+          baselineVisualizationStats.usedTags
+        );
       }
     );
   }

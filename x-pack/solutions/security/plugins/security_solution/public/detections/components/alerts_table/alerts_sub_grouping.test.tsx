@@ -32,7 +32,6 @@ jest.mock('../../containers/detection_engine/alerts/api', () => ({
   fetchQueryAlerts: jest.fn(),
   fetchQueryUnifiedAlerts: jest.fn(),
 }));
-
 const mockedTelemetry = createTelemetryServiceMock();
 (useKibana as jest.Mock).mockReturnValue({
   services: {

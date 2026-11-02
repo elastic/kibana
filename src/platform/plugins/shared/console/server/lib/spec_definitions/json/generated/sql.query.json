@@ -15,6 +15,127 @@
         "smile"
       ]
     },
+    "data_autocomplete_rules": {
+      "allow_partial_search_results": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "catalog": "",
+      "columnar": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "cursor": "",
+      "fetch_size": "",
+      "field_multi_value_leniency": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "filter": {
+        "__scope_link": "GLOBAL.query"
+      },
+      "index_using_frozen": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "keep_alive": "",
+      "keep_on_completion": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "page_timeout": "",
+      "params": [],
+      "query": "",
+      "request_timeout": "",
+      "runtime_mappings": {
+        "*": {
+          "fields": {
+            "*": {
+              "type": {
+                "__one_of": [
+                  "boolean",
+                  "composite",
+                  "date",
+                  "double",
+                  "geo_point",
+                  "geo_shape",
+                  "ip",
+                  "keyword",
+                  "long",
+                  "lookup"
+                ]
+              }
+            }
+          },
+          "fetch_fields": {
+            "__any_of": [
+              {
+                "field": "",
+                "format": ""
+              },
+              ""
+            ]
+          },
+          "format": "",
+          "input_field": "",
+          "target_field": "",
+          "target_index": "",
+          "script": {
+            "__one_of": [
+              {
+                "source": "",
+                "id": "",
+                "params": {},
+                "lang": {
+                  "__one_of": [
+                    "painless",
+                    "expression",
+                    "mustache",
+                    "java"
+                  ]
+                },
+                "options": {
+                  "*": ""
+                }
+              },
+              ""
+            ]
+          },
+          "on_script_error": {
+            "__one_of": [
+              "fail",
+              "continue"
+            ]
+          },
+          "type": {
+            "__one_of": [
+              "boolean",
+              "composite",
+              "date",
+              "double",
+              "geo_point",
+              "geo_shape",
+              "ip",
+              "keyword",
+              "long",
+              "lookup"
+            ]
+          }
+        }
+      },
+      "time_zone": "",
+      "wait_for_completion_timeout": ""
+    },
     "methods": [
       "POST",
       "GET"

@@ -7,11 +7,15 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 
 import type { OTelCollectorConfig } from '../../../../common/types';
 
 import { YamlViewer } from './yaml_viewer';
+
+jest.mock('../../../services/use_yaml', () => ({
+  useYaml: () => require('yaml'),
+}));
 
 const config: OTelCollectorConfig = {
   receivers: {
@@ -58,7 +62,7 @@ describe('YamlViewer', () => {
   it('shows the correct line count in the badge', () => {
     render(<YamlViewer config={config} />);
 
-    const yamlContent = dump(config, { lineWidth: -1, quotingType: '"' });
+    const yamlContent = stringify(config, { lineWidth: 0, singleQuote: false });
     const lineCount = yamlContent.split('\n').filter(Boolean).length;
 
     expect(screen.getByText(`${lineCount} lines`)).toBeInTheDocument();

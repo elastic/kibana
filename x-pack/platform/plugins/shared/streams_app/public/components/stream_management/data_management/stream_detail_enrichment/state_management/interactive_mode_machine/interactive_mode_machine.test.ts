@@ -153,4 +153,60 @@ describe('interactiveModeMachine condition focus behavior', () => {
 
     actor.stop();
   });
+
+  it('auto-selects a persisted condition for filtering when it is edited', () => {
+    const { parentRef, send } = createParentRef();
+
+    // Simulate a saved pipeline being loaded: the condition is part of the initial DSL
+    // (not created in this session), so it is spawned with isNew: false.
+    const conditionId = 'persisted-condition-id';
+    const dsl = {
+      steps: [{ customIdentifier: conditionId, condition: { ...ALWAYS_CONDITION, steps: [] } }],
+    } as unknown as StreamlangDSL;
+
+    const actor = createActor(interactiveModeMachine, {
+      input: {
+        dsl,
+        newStepIds: [],
+        parentRef,
+        privileges: { manage: true, simulate: true },
+        simulationMode: 'partial',
+        streamName: 'test-stream',
+        grokCollection: { setCustomPatterns: jest.fn() } as unknown as GrokCollection,
+      },
+    });
+
+    actor.start();
+
+    // The condition should be loaded as a persisted (non-new) step.
+    const conditionStepRef = actor
+      .getSnapshot()
+      .context.stepRefs.find((ref) => ref.id === conditionId);
+    expect(conditionStepRef).toBeDefined();
+    expect(conditionStepRef!.getSnapshot().context.isNew).toBe(false);
+
+    send.mockClear(); // ignore initial sync/simulation traffic
+
+    // Editing the persisted condition itself should auto-filter the preview by it.
+    actor.send({ type: 'step.edit', id: conditionId });
+
+    const editAutoSelect = send.mock.calls
+      .map(([event]) => event)
+      .find((event) => event?.type === 'simulation.filterByConditionAuto') as
+      | { type: 'simulation.filterByConditionAuto'; conditionId: string }
+      | undefined;
+
+    expect(editAutoSelect?.conditionId).toBe(conditionId);
+
+    // Cancelling the edit should revert the auto-applied condition filter so the
+    // condition is no longer highlighted/active. Clearing is guarded by
+    // `hasAutoSelectedConditionId` in the parent machine, so manual selections are preserved.
+    send.mockClear();
+    actor.send({ type: 'step.cancel', id: conditionId });
+
+    const sentEventTypes = send.mock.calls.map(([event]) => event?.type);
+    expect(sentEventTypes).toContain('simulation.clearAutoConditionFilter');
+
+    actor.stop();
+  });
 });

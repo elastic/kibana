@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -59,8 +59,17 @@ export const NodeDetail = memo(function ({
   nodeEventOnClick?: NodeEventOnClick;
   renderCellActions: CellActionRenderer;
 }) {
+  const originTimestampMs = useSelector((state: State) =>
+    selectors.originTimestamp(state.analyzer[id])
+  );
   const processEvent = useSelector((state: State) =>
     nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
+  );
+  const nameEvent = useSelector((state: State) =>
+    nodeDataModel.eventAtOrBefore(
+      selectors.nodeDataForID(state.analyzer[id])(nodeID),
+      originTimestampMs
+    )
   );
   const nodeStatus = useSelector((state: State) =>
     selectors.nodeDataStatus(state.analyzer[id])(nodeID)
@@ -73,6 +82,7 @@ export const NodeDetail = memo(function ({
       id={id}
       nodeID={nodeID}
       processEvent={processEvent}
+      nameEvent={nameEvent}
       nodeEventOnClick={nodeEventOnClick}
       renderCellActions={renderCellActions}
     />
@@ -94,17 +104,23 @@ export interface NodeDetailsTableView {
 export const NodeDetailView = memo(function ({
   id,
   processEvent,
+  nameEvent,
   nodeID,
   nodeEventOnClick,
   renderCellActions,
 }: {
   id: string;
   processEvent: SafeResolverEvent;
+  /**
+   * The event whose process name is in effect at the analyzed event's time. Only used to derive the
+   * displayed process name; `processEvent` (the node's newest document) still drives the rest of the panel.
+   */
+  nameEvent?: SafeResolverEvent;
   nodeID: string;
   nodeEventOnClick?: NodeEventOnClick;
   renderCellActions: CellActionRenderer;
 }) {
-  const processName = eventModel.processNameSafeVersion(processEvent);
+  const processName = eventModel.processNameSafeVersion(nameEvent ?? processEvent);
   const nodeState = useSelector((state: State) =>
     selectors.nodeDataStatus(state.analyzer[id])(nodeID)
   );

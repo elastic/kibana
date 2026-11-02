@@ -72,4 +72,40 @@ describe('DownsamplingPhase', () => {
     expect(onEditStep).toHaveBeenCalledWith(1, 'hot');
     expect(screen.queryByTestId('downsamplingPopover-step1-title')).not.toBeInTheDocument();
   });
+
+  it('does nothing when disableInteractions is true, even with an edit flyout open', () => {
+    const onEditStep = jest.fn();
+
+    render(
+      <DownsamplingPhase
+        downsample={downsample}
+        stepNumber={1}
+        phaseName="hot"
+        onEditStep={onEditStep}
+        canManageLifecycle
+        isEditLifecycleFlyoutOpen
+        disableInteractions
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
+
+    expect(onEditStep).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('downsamplingPopover-step1-title')).not.toBeInTheDocument();
+  });
+
+  it('does not open the popover when disableInteractions is true', () => {
+    render(
+      <DownsamplingPhase
+        downsample={downsample}
+        stepNumber={1}
+        canManageLifecycle
+        disableInteractions
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
+
+    expect(screen.queryByTestId('downsamplingPopover-step1-title')).not.toBeInTheDocument();
+  });
 });

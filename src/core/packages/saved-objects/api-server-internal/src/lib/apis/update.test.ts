@@ -39,6 +39,7 @@ import {
   mappings,
   mockVersion,
   createRegistry,
+  createType,
   createDocumentMigrator,
   getMockGetResponse,
   createSpySerializer,
@@ -51,6 +52,9 @@ import {
   MULTI_NAMESPACE_TYPE,
 } from '../../test_helpers/repository.test.common';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { schema } from '@kbn/config-schema';
+
+const UPDATE_SCHEMA_TYPE = 'update-schema-type';
 
 describe('#update', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -61,6 +65,18 @@ describe('#update', () => {
   let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
+  const updateSchema = schema.object(
+    { title: schema.string(), count: schema.maybe(schema.number()) },
+    { unknowns: 'ignore' }
+  );
+  registry.registerType(
+    createType(UPDATE_SCHEMA_TYPE, {
+      migrations: {},
+      modelVersions: {
+        1: { changes: [], schemas: { create: updateSchema, update: updateSchema } },
+      },
+    })
+  );
   const documentMigrator = createDocumentMigrator(registry);
 
   const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
@@ -608,13 +624,13 @@ describe('#update', () => {
       const expectNotFoundError = async (type: string, id: string) => {
         await expect(
           repository.update(type, id, {}, { migrationVersionCompatibility: 'raw' })
-        ).rejects.toThrowError(createGenericNotFoundErrorPayload(type, id));
+        ).rejects.toThrow(createGenericNotFoundErrorPayload(type, id));
       };
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.update(type, id, attributes, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`throws when type is invalid`, async () => {
@@ -628,7 +644,7 @@ describe('#update', () => {
       });
 
       it(`throws when id is empty`, async () => {
-        await expect(repository.update(type, '', attributes)).rejects.toThrowError(
+        await expect(repository.update(type, '', attributes)).rejects.toThrow(
           createBadRequestErrorPayload('id cannot be empty')
         );
         expect(client.index).not.toHaveBeenCalled();
@@ -689,7 +705,7 @@ describe('#update', () => {
               },
             }
           )
-        ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.index).not.toHaveBeenCalled();
@@ -717,6 +733,45 @@ describe('#update', () => {
       it(`does not throw when the document does not exist`, async () => {
         expect(client.create).not.toHaveBeenCalled();
         await expectNotFoundError(type, id);
+      });
+    });
+
+    describe('update schema validation', () => {
+      it('indexes the document when the merged document is valid', async () => {
+        await updateSuccess(client, repository, registry, UPDATE_SCHEMA_TYPE, id, { count: 5 });
+        expect(client.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('ignores unknown fields', async () => {
+        await updateSuccess(client, repository, registry, UPDATE_SCHEMA_TYPE, id, {
+          legacyFlag: true,
+        });
+        expect(client.index).toHaveBeenCalledTimes(1);
+      });
+
+      it('throws when a known field is invalid', async () => {
+        client.get.mockResponseOnce(getMockGetResponse(registry, { type: UPDATE_SCHEMA_TYPE, id }));
+        await expect(
+          repository.update(UPDATE_SCHEMA_TYPE, id, { count: 'lots' })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"[attributes.count]: expected value of type [number] but got [string]: Bad Request"`
+        );
+        expect(client.index).not.toHaveBeenCalled();
+      });
+
+      it('validates the provided attributes when mergeAttributes is false', async () => {
+        client.get.mockResponseOnce(getMockGetResponse(registry, { type: UPDATE_SCHEMA_TYPE, id }));
+        await expect(
+          repository.update(UPDATE_SCHEMA_TYPE, id, { count: 5 }, { mergeAttributes: false })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"[attributes.title]: expected value of type [string] but got [undefined]: Bad Request"`
+        );
+        expect(client.index).not.toHaveBeenCalled();
+      });
+
+      it('does not validate types without an update schema', async () => {
+        await updateSuccess(client, repository, registry, 'dashboard', id, { title: 123 });
+        expect(client.index).toHaveBeenCalledTimes(1);
       });
     });
 

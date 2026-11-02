@@ -12,11 +12,11 @@ import {
   EuiAccordion,
   EuiSelect,
   EuiTextArea,
-  EuiCallOut,
   EuiSpacer,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { ESFieldsSelect } from '../../../public/components/es_fields_select';
 import { ESFieldSelect } from '../../../public/components/es_field_select';
@@ -155,9 +155,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
       <EuiSpacer size="m" />
 
-      <EuiCallOut size="s" title={strings.getWarningTitle()} iconType="warning" color="warning">
-        <p>{strings.getWarning()}</p>
-      </EuiCallOut>
+      <KbnWarningCallout size="s" title={strings.getWarningTitle()} text={strings.getWarning()} />
     </div>
   );
 };

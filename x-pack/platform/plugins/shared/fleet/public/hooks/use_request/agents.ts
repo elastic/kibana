@@ -30,9 +30,11 @@ import type {
   PostAgentRollbackResponse,
   PostBulkAgentRollbackRequest,
   PostBulkAgentRollbackResponse,
+  PostAgentRestartResponse,
+  PostBulkAgentRestartRequest,
+  PostBulkAgentRestartResponse,
   PostGenerateAgentsReportRequest,
   PostGenerateAgentsReportResponse,
-  GetCollectorGroupsResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -155,6 +157,25 @@ export function useGetAgentStatus(query: GetAgentStatusRequest['query'], options
     ...options,
   });
 }
+
+export function useGetAgentStatusQuery(
+  query: GetAgentStatusRequest['query'],
+  options: { enabled?: boolean; refetchInterval?: number | false } = {}
+) {
+  const { enabled, refetchInterval } = options;
+  return useQuery(
+    ['agent-status', query],
+    () =>
+      sendRequestForRq<GetAgentStatusResponse>({
+        method: 'get',
+        path: agentRouteService.getStatusPath(),
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
+    { enabled, refetchInterval, refetchIntervalInBackground: false }
+  );
+}
+
 export function sendGetAgentIncomingData(query: GetAgentIncomingDataRequest['query']) {
   return sendRequest<GetAgentIncomingDataResponse>({
     method: 'get',
@@ -504,6 +525,23 @@ export function sendPostBulkAgentRollback(body: PostBulkAgentRollbackRequest['bo
   });
 }
 
+export function sendPostAgentRestart(agentId: string) {
+  return sendRequestForRq<PostAgentRestartResponse>({
+    path: agentRouteService.postAgentRestart(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendPostBulkAgentRestart(body: PostBulkAgentRestartRequest['body']) {
+  return sendRequestForRq<PostBulkAgentRestartResponse>({
+    path: agentRouteService.postBulkAgentRestart(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
 export function sendPostGenerateAgentsReport(body: PostGenerateAgentsReportRequest['body']) {
   return sendRequestForRq<PostGenerateAgentsReportResponse>({
     path: agentRouteService.postGenerateAgentsReport(),
@@ -511,36 +549,4 @@ export function sendPostGenerateAgentsReport(body: PostGenerateAgentsReportReque
     version: API_VERSIONS.internal.v1,
     body,
   });
-}
-
-export function useGetCollectorGroupsQuery(
-  query: {
-    groupBy?: string;
-    kuery?: string;
-    perPage?: number;
-    afterKey?: string;
-    showInactive?: boolean;
-  },
-  options: Partial<{
-    enabled: boolean;
-    refetchInterval: number | false;
-    keepPreviousData: boolean;
-  }> = {}
-) {
-  return useQuery(
-    ['collector-groups', query],
-    () =>
-      sendRequestForRq<GetCollectorGroupsResponse>({
-        path: agentRouteService.getCollectorGroupsPath(),
-        method: 'get',
-        version: API_VERSIONS.public.v1,
-        query,
-      }),
-    {
-      enabled: options.enabled,
-      refetchInterval: options.refetchInterval,
-      refetchIntervalInBackground: false,
-      keepPreviousData: options.keepPreviousData,
-    }
-  );
 }

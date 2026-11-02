@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { resultTypeConfigSchema } from '../result_type_config_schema';
 
 // `ecs_mapping` lives in two shapes:
 // - HTTP request bodies use the record form `{ [field]: { value/field } }`
@@ -48,12 +49,8 @@ export const savedQuerySchemaV2 = savedQuerySchemaV1.extends({
   updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
 });
 
-// `unknowns: 'allow'` is load-bearing — do not tighten. The per-query RRULE
-// overrides (`schedule_type`, `rrule_schedule`) flow through this schema
-// without an explicit `queries.properties` mapping addition because the pack
-// SO's `queries` field is `dynamic: false` and this schema accepts unknown
-// keys at read time. Tightening to `forbid` silently breaks flag-on customers
-// with per-query RRULE overrides. See `design.md` D35.
+// `unknowns: 'allow'` is load-bearing — per-query RRULE overrides round-trip
+// through this. Do not tighten to `forbid`.
 const packQuerySchema = schema.object(
   {
     id: schema.maybe(schema.string()),
@@ -69,6 +66,13 @@ const packQuerySchema = schema.object(
   { unknowns: 'allow' }
 );
 
+// V5-only per-query fields. Do not add these to `packQuerySchema`: V1–V4
+// already feed released `create` / `forwardCompatibility` schemas.
+const packQuerySchemaV5 = packQuerySchema.extends({
+  enabled: schema.maybe(schema.boolean()),
+  result_type: schema.maybe(resultTypeConfigSchema),
+});
+
 const packSchemaV1 = schema.object({
   name: schema.maybe(schema.string()),
   description: schema.maybe(schema.string()),
@@ -79,7 +83,7 @@ const packSchemaV1 = schema.object({
     ])
   ),
   // Pack-asset version (prebuilt-pack version number). Name is taken — a future
-  // V4 / D29 "min osquery version" field MUST use a different name (e.g.
+  // V4 "min osquery version" field MUST use a different name (e.g.
   // `min_osquery_version`) to avoid type collision with this number field.
   version: schema.maybe(schema.number()),
   enabled: schema.maybe(schema.boolean()),
@@ -114,11 +118,35 @@ const rruleScheduleConfigSchema = schema.object(
 
 export const packSchemaV3 = packSchemaV2.extends({
   // Nullable so update routes can clear the prior-mode pack-level field on a
-  // schedule_type transition (D14) — the SO mapping accepts null and the
+  // schedule_type transition — the SO mapping accepts null and the
   // discriminated read/find responses then drop the slot entirely.
   schedule_type: schema.maybe(
     schema.nullable(schema.oneOf([schema.literal('interval'), schema.literal('rrule')]))
   ),
   interval: schema.maybe(schema.nullable(schema.number())),
   rrule_schedule: schema.maybe(schema.nullable(rruleScheduleConfigSchema)),
+});
+
+// V4 adds no new schema surface — new fields live under `queries`, already
+// `unknowns: 'allow'`.
+export const packSchemaV4 = packSchemaV3;
+
+// V5 adds three pack-level execution defaults: `min_osquery_version`,
+// `result_type`, and `platform`. Pack SO root is NOT `dynamic: false`, so
+// these fields also need mappings (see packSavedObjectModelVersion5). The
+// field name `min_osquery_version` avoids colliding with the pack's own
+// `version: long` mapping.
+//
+// These are *defaults that fan out onto inheriting queries*, never pack-level
+// gates — a query's own value always wins.
+export const packSchemaV5 = packSchemaV4.extends({
+  min_osquery_version: schema.maybe(schema.nullable(schema.string())),
+  result_type: schema.maybe(schema.nullable(resultTypeConfigSchema)),
+  platform: schema.maybe(schema.nullable(schema.string())),
+  queries: schema.maybe(
+    schema.oneOf([
+      schema.recordOf(schema.string(), packQuerySchemaV5),
+      schema.arrayOf(packQuerySchemaV5, { maxSize: 1000 }),
+    ])
+  ),
 });

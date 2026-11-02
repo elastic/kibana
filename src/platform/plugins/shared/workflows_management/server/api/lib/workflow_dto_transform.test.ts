@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows/managed';
 import {
   transformStorageDocumentToWorkflowDto,
   transformStoragePartialToWorkflowDto,
@@ -32,6 +33,28 @@ const makeSource = (overrides?: Partial<WorkflowProperties>): WorkflowProperties
 });
 
 describe('transformStorageDocumentToWorkflowDto', () => {
+  it.each([null, false, { entries: [] }, { access_mode: 'private', entries: {} }])(
+    'rejects malformed stored ACLs: %p',
+    (accessControl) => {
+      const source = Object.assign(makeSource(), { access_control: accessControl });
+      expect(() => transformStorageDocumentToWorkflowDto('wf-1', source)).toThrow();
+    }
+  );
+
+  it('preserves stored ACL timestamps', () => {
+    const source = makeSource({
+      access_control: {
+        access_mode: 'private',
+        entries: [
+          { type: 'user', id: 'reader', role: 'viewer', added_at: '2026-09-17T00:00:00.000Z' },
+        ],
+      },
+    });
+    expect(transformStorageDocumentToWorkflowDto('wf-1', source).access_control).toEqual(
+      source.access_control
+    );
+  });
+
   it('maps all WorkflowProperties fields to WorkflowDetailDto correctly', () => {
     const source = makeSource();
     const result = transformStorageDocumentToWorkflowDto('wf-123', source);
@@ -41,6 +64,13 @@ describe('transformStorageDocumentToWorkflowDto', () => {
       name: 'Test Workflow',
       description: 'A test workflow',
       enabled: true,
+      tags: ['tag-a', 'tag-b'],
+      managed: undefined,
+      managedBy: undefined,
+      definitionHash: undefined,
+      originManagedWorkflowId: undefined,
+      managedVersion: undefined,
+      lifecycle: undefined,
       yaml: 'name: Test Workflow',
       definition: source.definition,
       createdBy: 'user-1',
@@ -93,9 +123,29 @@ describe('transformStorageDocumentToWorkflowDto', () => {
 
     expect(result.description).toBeUndefined();
   });
+
+  it('does not expose internal managed selector visibility metadata', () => {
+    const source = makeSource({
+      managedVisibilityContexts: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
+    });
+    const result = transformStorageDocumentToWorkflowDto('wf-1', source);
+
+    expect(result).not.toHaveProperty('managedVisibilityContexts');
+  });
 });
 
 describe('transformStoragePartialToWorkflowDto', () => {
+  it('omits ACL fields even when included in the requested source', () => {
+    const result = transformStoragePartialToWorkflowDto('wf-1', {
+      owner_id: 'owner',
+      access_control: {
+        access_mode: 'public',
+        entries: [{ type: 'user', id: 'recipient', role: 'viewer', added_at: '2026-09-10' }],
+      },
+    });
+    expect(result).toEqual({ id: 'wf-1' });
+  });
+
   it('only copies fields that are present on the partial source', () => {
     const result = transformStoragePartialToWorkflowDto('wf-1', {
       name: 'Just name',

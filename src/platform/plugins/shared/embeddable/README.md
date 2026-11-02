@@ -18,6 +18,7 @@ Embeddables require registration in both server and public.
 
 ### registerEmbeddableServerDefinition
 Server registration defines the embeddable schema and other information required to include embeddables in public REST APIs like "dashboards as code". 
+Dashboard’s public panel union and generated OpenAPI include only embeddable types with a registered server schema (for example: `markdown`, `image`, `vis`).
 
 ### registerEmbeddablePublicDefinition
 Public registration defines the embeddable's UI. Embeddable UI consumes and returns state in the shape defined by the embeddable schema registered in the server. 
@@ -82,7 +83,7 @@ The table below lists optional publishing package interfaces. Embeddables may im
 | HasSupportedTriggers | Inteface for publishing drilldown triggers | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
 | PublishesBlockingError | Interface for publishing unrecoverable errors | Embeddable panel to display error state |
 | PublishesDataLoading | Interface for publishing when embeddable is loading | Auto refresh |  
-| PublishesDataViews | Interface for accessing embeddable data views | Unified search bar type ahead, ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
+| PublishesDataSources | Interface for accessing the data sources (data views or ES\|QL datasets) an embeddable uses | Unified search bar type ahead, ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
 | PublishesDescription | Interface for accessing embeddable description | Panel title bar tooltip content, ACTION_CUSTOMIZE_PANEL |
 | PublishesWritableDescription | Interface for setting embeddable description | ACTION_CUSTOMIZE_PANEL |
 | PublishesRendered | Interface for publishing rendered complete | |
@@ -91,7 +92,7 @@ The table below lists optional publishing package interfaces. Embeddables may im
 | PublishesWritableTimeRange | Interface for setting time range state | ACTION_CUSTOMIZE_PANEL |
 | PublishesTitle | Interface for accessing embeddable title | Panel title bar content, ACTION_CUSTOMIZE_PANEL |
 | PublishesWritableTitle | Interface for setting embeddable title | ACTION_CUSTOMIZE_PANEL |
-| PublishesUnifiedSearch | Interface for publishing unified search state | BADGE_FILTERS_NOTIFICATION |
+| PublishesUnifiedSearch | Interface for publishing unified search state | ACTION_FILTERS_NOTIFICATION |
 | PublishesUnsavedChanges | Interface for publishing when embeddable has unsaved changes | Dashboard unsaved chnages notification and reset |
 
 #### Custom publishing packages
@@ -114,7 +115,6 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 | ------- | ----------- |
 | ON_OPEN_PANEL_MENU | trigger to add an action to a panel's context menu or hover action menu. Only actions listed in QUICK_ACTION_IDS are displayed in hover action menu. |
 | PANEL_BADGE_TRIGGER | trigger to add a badge to a panel's title bar |
-| PANEL_NOTIFICATION_TRIGGER | trigger to add a notification to the top-right corner of a panel |
 
 The embeddable panel passes the embeddable API to UiActions. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 
@@ -125,12 +125,12 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | saveToLibrary | Converts by-value panel to by-reference panel and stores panel configuration to library | ON_OPEN_PANEL_MENU | HasLibraryTransforms |
 | clonePanel | Clones panel in page | ON_OPEN_PANEL_MENU | |
 | copyToDashboard | Opens "copy to dashboard" modal | ON_OPEN_PANEL_MENU | |
-| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | ON_OPEN_PANEL_MENU | PublishesDataViews, PublishesDescription, PublishesWritableDescription, PublishesTitle, PublishesWritableTitle, PublishesTimeRange, PublishesWritableTimeRange |
+| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | ON_OPEN_PANEL_MENU | PublishesDataSources, PublishesDescription, PublishesWritableDescription, PublishesTitle, PublishesWritableTitle, PublishesTimeRange, PublishesWritableTimeRange |
 | ACTION_INPUT_CONTROL_DEPRECATION_BADGE | Displays deprecation badge for Visualize embeddable input controls | PANEL_BADGE_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | ON_OPEN_PANEL_MENU | HasVisualizeConfig |
 | editPanel | Opens embeddable editor | ON_OPEN_PANEL_MENU | HasEditCapabilities |
 | togglePanel | Expands panel so page only displays single panel | ON_OPEN_PANEL_MENU | |
-| ACTION_EXPLORE_DATA | Explore underlying data | ON_OPEN_PANEL_MENU | PublishesDataViews |
+| ACTION_EXPLORE_DATA | Explore underlying data | ON_OPEN_PANEL_MENU | PublishesDataSources |
 | ACTION_EXPORT_CSV | Exports raw data table to CSV | ON_OPEN_PANEL_MENU | HasInspectorAdapters |
 | openInspector | Opens inspector flyout | ON_OPEN_PANEL_MENU | HasInspectorAdapters |
 | ACTION_OPEN_IN_DISCOVER | Opens Discover application with  Lens embeddable data request context | ON_OPEN_PANEL_MENU | LensApiCallbacks |
@@ -140,7 +140,7 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | ACTION_VIEW_SAVED_SEARCH | Open in Discover session in Discover application | ON_OPEN_PANEL_MENU | |
 | embeddable_addToExistingCase | Add to case | ON_OPEN_PANEL_MENU | LensApiCallbacks |
 | alertRule | Create an alert rule from panel | ON_OPEN_PANEL_MENU | |
-| ACTION_FILTERS_NOTIFICATION | Displays filters notification badge | PANEL_NOTIFICATION_TRIGGER | Partial<PublishesUnifiedSearch> |
+| ACTION_FILTERS_NOTIFICATION | Displays filters notification badge | ON_OPEN_PANEL_MENU | Partial<PublishesUnifiedSearch> |
 | CONVERT_LEGACY_MARKDOWN | Converts markdown visualize panel to markdown panel | ON_OPEN_PANEL_MENU | HasVisualizeConfig | 
 | create-ml-ad-job-action | Detect anomalies | ON_OPEN_PANEL_MENU |  |
 | FILTER_BY_MAP_EXTENT | Filters page by map bounds | ON_OPEN_PANEL_MENU | |
@@ -171,7 +171,7 @@ Embeddables should never throw. Instead, use [PublishesBlockingError](https://gi
 ### Examples 
 Examples available at [/examples/embeddable_examples](https://github.com/elastic/kibana/tree/main/examples/embeddable_examples)
 
-Run examples with `yarn start --run-examples`
+Run examples with `pnpm start --run-examples`
 
 #### Embeddable factory examples
 Use the following examples to learn how to create new Embeddable types. To access new Embeddable types, create a new dashboard, click "Add panel" and finally select "Embeddable examples".

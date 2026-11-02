@@ -1,0 +1,168 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Logger } from '@kbn/core/server';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ProposalAttachmentData, ProposalWithMetadata } from '@kbn/proposals-common';
+import {
+  isExpired,
+  PROPOSAL_ATTACHMENT_TYPE,
+  proposalAttachmentDataSchema,
+} from '@kbn/proposals-common';
+import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import type { ProposalsService } from '../services/proposals_service';
+
+export interface ProposalAttachmentTypeDeps {
+  getProposalsService: () => ProposalsService;
+  privileges: ProposalPrivilegesChecker;
+  logger: Logger;
+}
+
+/**
+ * Where the decision stands, as the agent needs to understand it.
+ *
+ * Expiry is reported by the banner instead: an expired proposal has no decision
+ * to report, and `Decision: pending` underneath `EXPIRED` told the agent one was
+ * still coming.
+ */
+const describeOutcome = (proposal: ProposalWithMetadata, expired: boolean): string => {
+  if (proposal.supersededBy !== undefined || proposal.status === 'superseded') {
+    return (
+      'REPLACED: this proposal is historical and cannot be acted on.' +
+      (proposal.supersededBy !== undefined
+        ? ` Replacement proposal ID: ${proposal.supersededBy}. Consult that proposal's attachment for its current state; it may also have been replaced or settled.`
+        : '')
+    );
+  }
+  if (expired) {
+    return '';
+  }
+  if (proposal.status === 'pending') {
+    return 'Awaiting a human decision. Do not attempt to approve or dismiss this proposal yourself.';
+  }
+  return `Decision: ${proposal.status}${
+    proposal.decidedBy?.username ? ` by ${proposal.decidedBy.username}` : ''
+  }`;
+};
+
+/** Formats the complete revision content and state the agent needs to read and revise it. */
+const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
+  const expired = isExpired(proposal);
+
+  const lines: string[] = [
+    `## Proposal: ${proposal.title}`,
+    `Proposal ID: ${proposal.id}`,
+    `Status: ${proposal.status}`,
+    // Its own line now that every proposal carries a title: the agent still has
+    // to know that nothing runs unless the analyst does it themselves.
+    proposal.actionWorkflowId ? '' : 'No automated action — analyst carries this out themselves',
+    // Not "the deadline has passed": the gate can settle a proposal as expired
+    // before its deadline, and `Decision deadline` below would then print a
+    // future date directly under a banner claiming it was behind us.
+    expired ? 'EXPIRED: this proposal can no longer be decided.' : '',
+    describeOutcome(proposal, expired),
+    'Proposal data (comment and actionInput describe this complete revision):',
+    JSON.stringify(
+      {
+        id: proposal.id,
+        title: proposal.title,
+        rootProposalId: proposal.rootProposalId,
+        revision: proposal.revision,
+        supersedes: proposal.supersedes,
+        supersededBy: proposal.supersededBy,
+        status: proposal.status,
+        decision: proposal.decision,
+        expired,
+        comment: proposal.comment,
+        actionWorkflowId: proposal.actionWorkflowId,
+        actionInput: proposal.actionInput,
+        action: proposal.action,
+        impact: proposal.impact,
+        confidence: proposal.confidence,
+        category: proposal.category,
+        origin: proposal.origin,
+        createdAt: proposal.createdAt,
+        expiresAt: proposal.expiresAt,
+        decidedAt: proposal.decidedAt,
+        decidedBy: proposal.decidedBy,
+        dismissReason: proposal.dismissReason,
+        rationale: proposal.rationale,
+        executionError: proposal.executionError,
+      },
+      null,
+      2
+    ),
+  ];
+
+  return lines.filter((l) => l !== '').join('\n');
+};
+
+/**
+ * Server-side attachment type definition for proposals.
+ *
+ * `isReadonly: true` prevents the agent from creating or updating proposal
+ * attachments with `attachment_add` / `attachment_update` — they are created
+ * exclusively by the proposals API.
+ */
+export const createProposalAttachmentType = ({
+  getProposalsService,
+  privileges,
+  logger,
+}: ProposalAttachmentTypeDeps): AttachmentTypeDefinition<
+  typeof PROPOSAL_ATTACHMENT_TYPE,
+  ProposalAttachmentData
+> => ({
+  id: PROPOSAL_ATTACHMENT_TYPE,
+
+  isReadonly: true,
+
+  validate: (input) => {
+    const result = proposalAttachmentDataSchema.safeParse(input);
+    if (result.success) {
+      return { valid: true, data: result.data };
+    }
+    return { valid: false, error: result.error.message };
+  },
+
+  // Read at representation time rather than at add time, so what the agent is
+  // told matches what the analyst sees. `origin` first because attachments
+  // written before the payload shrank carry the id only there.
+  format: (attachment, { request, spaceId }) => ({
+    getRepresentation: async () => {
+      const proposalId = attachment.origin ?? attachment.data.proposalId;
+      try {
+        // The service reads as the internal user, so nothing below this line
+        // enforces the caller's own privileges. Attachments of this type are
+        // `isReadonly`, but that only stops the agent's attachment tools — the
+        // public attachment API still lets any caller name an arbitrary
+        // proposal id here, which without this check would read it back to the
+        // LLM for someone holding no proposals privilege at all.
+        await privileges.assertCanRead(request);
+        const proposal = await getProposalsService().get(proposalId, spaceId, request);
+        return { type: 'text', value: formatProposalForAgent(proposal) };
+      } catch (error) {
+        logger.warn(`Failed to read proposal ${proposalId} for its attachment: ${error}`);
+        // Same text whether the proposal is missing or merely off-limits, so
+        // the representation cannot be used to probe for ids.
+        return { type: 'text', value: '## Proposal: currently unavailable' };
+      }
+    },
+  }),
+
+  getAgentDescription: () =>
+    'A proposal is a structured recommendation from an agent that requires a human decision ' +
+    'before any action is taken.\n\n' +
+    'Rules:\n' +
+    '- Use the Proposal ID from the attachment content when calling proposal tools. The attachment ID is a separate identifier used to render the card.\n' +
+    "- Never approve, dismiss, or execute a proposal yourself — that is exclusively the analyst's decision.\n" +
+    '- When the analyst requests changes, use a revision tool: create a new pending proposal in the same rootProposalId chain, increment revision, and link supersedes/supersededBy. The predecessor becomes superseded, not dismissed. Preserve the full comment and actionInput, applying only the requested edits.\n' +
+    '- Whenever you mention or summarise a proposal in your response, render it inline with ' +
+    '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id) so ' +
+    'the analyst can act on it directly in the chat.\n' +
+    '- Replaced proposals are historical and non-actionable. Consult the replacement attachment for its current state before describing any next steps.\n' +
+    '- If the proposal is expired or already decided, say so in your response but still render the card.',
+});

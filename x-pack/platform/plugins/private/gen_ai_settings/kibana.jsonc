@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/gen-ai-settings-plugin",
-  "owner": ["@elastic/appex-ai-infra"],
+  "owner": ["@elastic/search-ml-ux"],
   "group": "platform",
   "visibility": "private",
   "plugin": {
@@ -10,7 +10,7 @@
     "server": true,
     "configPath": ["xpack", "genAiSettings"],
     "requiredPlugins": ["management", "actions", "inference", "licensing", "productDocBase"],
-    "optionalPlugins": ["spaces", "agentBuilder"],
+    "optionalPlugins": ["spaces", "agentBuilder", "agentBuilderPlatform", "dashboard"],
     "requiredBundles": ["kibanaReact", "productDocBase"]
   }
 }

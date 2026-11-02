@@ -11,7 +11,7 @@ import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 
 import { mapValues } from 'lodash';
-import { load as loadYaml } from 'js-yaml';
+import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { ScoutServerConfig } from '../../../../../types';
@@ -37,7 +37,7 @@ const getConnectorsFromKibanaDevYml = (): Record<string, AvailableConnector> => 
     if (!existsSync(kibanaDevConfigPath)) {
       return {};
     }
-    const parsedConfig = (loadYaml(readFileSync(kibanaDevConfigPath, 'utf8')) || {}) as Record<
+    const parsedConfig = (parse(readFileSync(kibanaDevConfigPath, 'utf8')) || {}) as Record<
       string,
       unknown
     >;

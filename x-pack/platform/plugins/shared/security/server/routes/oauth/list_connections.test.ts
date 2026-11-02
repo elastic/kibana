@@ -20,16 +20,16 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('List OAuth Connections route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
-    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     const coreContext = coreMock.createRequestHandlerContext();
-    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
+
+  const PROJECT_ID = 'test-project-id';
 
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
@@ -39,6 +39,7 @@ describe('List OAuth Connections route', () => {
     oauthMock = authc.oauth as jest.Mocked<UiamOAuthType>;
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
+    mockRouteDefinitionParams.serverlessProjectId = PROJECT_ID;
 
     defineListOAuthConnectionsRoute(mockRouteDefinitionParams);
 
@@ -70,6 +71,232 @@ describe('List OAuth Connections route', () => {
     expect(response.payload).toEqual(mockResponse);
   });
 
+  it('forwards serverless project id as project_id filter to oauth service', async () => {
+    oauthMock.listConnections.mockResolvedValue({ connections: [] });
+
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.listConnections).toHaveBeenCalledWith(
+      expect.anything(),
+      undefined,
+      undefined,
+      PROJECT_ID
+    );
+  });
+
+  it('passes through the client_name from the connection response', async () => {
+    const mockResponse = {
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'non-owned-client',
+          client_name: 'Other user app',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        },
+      ],
+    };
+    oauthMock.listConnections.mockResolvedValue(mockResponse);
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual(mockResponse);
+  });
+
+  it('passes through the expired flag and expiration timestamp from the connection response', async () => {
+    const mockResponse = {
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          expired: true,
+          expiration: '2026-07-12T18:18:32Z',
+        },
+      ],
+    };
+    oauthMock.listConnections.mockResolvedValue(mockResponse);
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual(mockResponse);
+  });
+
+  it('adds user information to connections when available', async () => {
+    oauthMock.listConnections.mockResolvedValue({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+        {
+          id: 'conn2',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-2',
+        },
+      ],
+    });
+    oauthMock.resolveUsers.mockResolvedValue({
+      users: {
+        'user-1': { email: 'a@example.com', first_name: 'Ada', last_name: 'Lovelace' },
+      },
+    });
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(oauthMock.resolveUsers).toHaveBeenCalledWith(expect.anything(), ['user-1', 'user-2']);
+    expect(response.payload).toEqual({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+          user: { email: 'a@example.com', first_name: 'Ada', last_name: 'Lovelace' },
+        },
+        {
+          id: 'conn2',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-2',
+        },
+      ],
+    });
+  });
+
+  it('forwards the user ids from connections for resolution', async () => {
+    oauthMock.listConnections.mockResolvedValue({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+        {
+          id: 'conn2',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+      ],
+    });
+    oauthMock.resolveUsers.mockResolvedValue({ users: {} });
+
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.resolveUsers).toHaveBeenCalledWith(expect.anything(), ['user-1', 'user-1']);
+  });
+
+  it('does not call resolveUsers when no connection has a user id', async () => {
+    oauthMock.listConnections.mockResolvedValue({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+        },
+      ],
+    });
+
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.resolveUsers).not.toHaveBeenCalled();
+  });
+
+  it('degrades gracefully when user resolution fails', async () => {
+    oauthMock.listConnections.mockResolvedValue({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+      ],
+    });
+    oauthMock.resolveUsers.mockRejectedValue(Boom.internal('resolve failed'));
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+      ],
+    });
+  });
+
+  it('degrades gracefully when user resolution is skipped (returns null)', async () => {
+    oauthMock.listConnections.mockResolvedValue({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+      ],
+    });
+    oauthMock.resolveUsers.mockResolvedValue(null);
+
+    const response = await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.payload).toEqual({
+      connections: [
+        {
+          id: 'conn1',
+          client_id: 'c1',
+          resource: 'https://test-project.kb.us-central1.gcp.elastic.cloud',
+          user_id: 'user-1',
+        },
+      ],
+    });
+  });
+
   it('returns 404 when OAuth is not available', async () => {
     authc.oauth = null;
 
@@ -81,18 +308,6 @@ describe('List OAuth Connections route', () => {
 
     expect(response.status).toBe(404);
   });
-
-  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
-    const response = await routeHandler(
-      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
-      httpServerMock.createKibanaRequest({ query: {} }),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(404);
-    expect(oauthMock.listConnections).not.toHaveBeenCalled();
-  });
-
   it('returns error from service', async () => {
     oauthMock.listConnections.mockRejectedValue(Boom.internal('Server error'));
 

@@ -28,26 +28,44 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
   const toasts = getService('toasts');
+
+  async function readRuleEnabledBadge() {
+    // Race both badge variants: the header briefly drops the direct badge while it re-renders.
+    const variant = await testSubjects.waitForFirst([
+      'ruleEnabledBadge',
+      'appHeaderBadgesOverflow',
+    ]);
+    if (variant !== 'appHeaderBadgesOverflow') {
+      return await testSubjects.getVisibleText('ruleEnabledBadge');
+    }
+    await testSubjects.click('appHeaderBadgesOverflow');
+    const text = await testSubjects.getVisibleText('ruleEnabledBadge');
+    await testSubjects.click('appHeaderBadgesOverflow');
+    return text;
+  }
   const alertingApi = getService('alertingApi');
 
   const openFirstRule = async (ruleName: string) => {
     await svlTriggersActionsUI.searchRules(ruleName);
-    await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${ruleName}"]`);
+    await find.clickDisplayedByCssSelector(
+      `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${ruleName}"]`
+    );
   };
 
   const openRulesSection = async () => {
     await svlSearchNavigation.navigateToLandingPage();
 
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
+    // openPanel waits for the admin panel to be rendered before we click a link inside it;
+    // clicking the panel link while the panel is still animating in collapses it again.
+    await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
   };
 
   const navigateToConnectors = async () => {
     await svlSearchNavigation.navigateToLandingPage();
 
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
+    await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActionsConnectors');
-    // await testSubjects.click('app-card-triggersActionsConnectors');
   };
 
   const deleteConnector = async (connectorName: string) => {
@@ -74,8 +92,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/256840
-    describe.skip('Header', () => {
+    describe('Header', () => {
       const testRunUuid = uuidv4();
       const ruleName = `test-rule-${testRunUuid}`;
       const RULE_TYPE_ID = '.es-query';
@@ -104,6 +121,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await openRulesSection();
         await testSubjects.existOrFail('rulesList');
         await openFirstRule(rule.name);
+        // Wait for the rule details panel to finish loading: the rule type value
+        // replaces its loading spinner once `useGetRuleTypesPermissions` resolves.
+        await testSubjects.existOrFail('ruleSummaryRuleType');
       });
 
       after(async () => {
@@ -118,41 +138,40 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('renders the rule details', async () => {
-        const headingText = await testSubjects.getVisibleText('ruleDetailsTitle');
+        const headingText = await testSubjects.getVisibleText('appHeaderTitle');
         expect(headingText.includes(`test-rule-${testRunUuid}`)).toBe(true);
-        const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
-        expect(ruleType).toEqual('Elasticsearch query');
+        // The rule type value resolves asynchronously (`useGetRuleTypesPermissions`
+        // plus the rule-type index) and renders through empty frames before it
+        // settles. Read and assert within the same retry attempt so a re-render
+        // cannot blank the value between the read and the assertion.
+        await retry.tryForTime(120 * 1000, async () => {
+          const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
+          expect(ruleType).toEqual('Elasticsearch query');
+        });
         const { username } = await svlUserManager.getUserData(ADMIN_ROLE);
 
         await retry.tryForTime(15 * 1000, async () => {
           const owner = await testSubjects.getVisibleText('apiKeyOwnerLabel');
-          expect(owner.trim()).toEqual(username);
+          expect(owner.trim()).toEqual(`API key owner ${username}`);
         });
       });
 
       it('should disable the rule', async () => {
-        const actionsDropdown = await testSubjects.find('ruleStatusDropdownBadge');
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).toEqual('Enabled');
+          expect(await readRuleEnabledBadge()).toEqual('Enabled');
         });
 
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(1)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await (await testSubjects.find('confirmModalConfirmButton')).click();
 
         await retry.tryForTime(30 * 1000, async () => {
-          expect(await actionsDropdown.getVisibleText()).toEqual('Disabled');
+          expect(await readRuleEnabledBadge()).toEqual('Disabled');
         });
       });
 
       it('should allow you to snooze a disabled rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
-
-        expect(await actionsDropdown.getVisibleText()).toEqual('Disabled');
+        expect(await readRuleEnabledBadge()).toEqual('Disabled');
 
         let snoozeBadge = await testSubjects.find('rulesListNotifyBadge-unsnoozed');
         await snoozeBadge.click();
@@ -173,18 +192,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should reenable a disabled the rule', async () => {
-        const actionsDropdown = await testSubjects.find('statusDropdown');
+        expect(await readRuleEnabledBadge()).toEqual('Disabled');
 
-        expect(await actionsDropdown.getVisibleText()).toEqual('Disabled');
-
-        await actionsDropdown.click();
-        const actionsMenuElem = await testSubjects.find('ruleStatusMenu');
-        const actionsMenuItemElem = await actionsMenuElem.findAllByClassName('euiContextMenuItem');
-
-        await actionsMenuItemElem.at(0)?.click();
+        await testSubjects.click('ruleEnabledSwitch');
 
         await retry.try(async () => {
-          expect(await actionsDropdown.getVisibleText()).toEqual('Enabled');
+          expect(await readRuleEnabledBadge()).toEqual('Enabled');
         });
       });
 
@@ -296,7 +309,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('should open edit rule flyout', async () => {
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -316,13 +329,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         await retry.tryForTime(30 * 1000, async () => {
-          const headingText = await testSubjects.getVisibleText('ruleDetailsTitle');
+          const headingText = await testSubjects.getVisibleText('appHeaderTitle');
           expect(headingText.includes(updatedRuleName)).toBe(true);
         });
       });
 
       it('should reset rule when canceling an edit', async () => {
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -347,8 +360,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/259893
-    describe.skip('Edit rule with deleted connector', () => {
+    describe('Edit rule with deleted connector', () => {
       const RULE_TYPE_ID = '.es-query';
 
       afterEach(async () => {
@@ -432,7 +444,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await openRulesSection();
         await openFirstRule(rule.name);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
@@ -531,7 +543,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
         await openFirstRule(rule.name);
 
-        const actionsButton = await testSubjects.find('ruleActionsButton');
+        const actionsButton = await testSubjects.find('app-menu-overflow-button');
         await actionsButton.click();
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
