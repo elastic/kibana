@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Evaluator, TaskOutput } from '@kbn/evals';
+import { getToolCallSteps, type Evaluator, type TaskOutput } from '@kbn/evals';
 import type { SecurityDatasetExample } from './evaluate_dataset';
 
 /**
@@ -17,28 +17,13 @@ export const GENERATE_INSIGHT_TOOL_ID = 'automatic_troubleshooting.generate_insi
 
 export const TROUBLESHOOTING_TOOL_USAGE_EVALUATOR_NAME = 'Troubleshooting Tool Usage';
 
-interface ToolCallStep {
-  type?: unknown;
-  tool_id?: unknown;
-  results?: unknown;
-}
+type ToolCallStep = ReturnType<typeof getToolCallSteps>[number];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const getToolCallSteps = (output: TaskOutput): ToolCallStep[] => {
-  if (!isRecord(output) || !Array.isArray(output.steps)) {
-    return [];
-  }
-
-  return output.steps.filter(
-    (step): step is ToolCallStep => isRecord(step) && step.type === 'tool_call'
-  );
-};
-
-const hasErrorResult = (step: ToolCallStep): boolean =>
-  Array.isArray(step.results) &&
-  step.results.some((result) => isRecord(result) && result.type === 'error');
+const hasErrorResult = ({ results = [] }: ToolCallStep): boolean =>
+  results.some((result) => isRecord(result) && result.type === 'error');
 
 const MAX_GENERATE_INSIGHT_CALLS_AFTER_ERROR = 1;
 
