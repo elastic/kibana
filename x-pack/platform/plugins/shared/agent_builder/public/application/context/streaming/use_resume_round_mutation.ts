@@ -122,6 +122,7 @@ export const useResumeRoundMutation = ({
         });
 
         const events$ = rawEvents$.pipe(
+          conversationStreamService.trackStream(vars.conversationId),
           tap((event) => {
             if (isExecutionStartedEvent(event)) {
               markStreamStarted(vars.conversationId);

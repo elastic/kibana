@@ -213,6 +213,7 @@ export const useSendMessageMutation = ({
         });
 
         const events$ = rawEvents$.pipe(
+          conversationStreamService.trackStream(vars.conversationId),
           tap((event) => {
             streamEventArrived = true;
             if (isExecutionStartedEvent(event)) {
