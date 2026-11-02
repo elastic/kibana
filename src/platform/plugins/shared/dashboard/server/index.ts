@@ -41,6 +41,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { DashboardPluginSetup, DashboardPluginStart } from './types';
+export { DashboardValidationError } from './dashboard_validation_error';
 export type {
   DashboardSanitizeResponseBody,
   DashboardCreateResponseBody,

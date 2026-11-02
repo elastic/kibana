@@ -7,29 +7,9 @@
 
 import type { PresetSchedule } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../hooks/use_automations';
-import {
-  createAutomationFormValues,
-  toAutomationFormValues,
-  toPresetSchedule,
-} from './automation_form_values';
+import { toAutomationFormValues, toPresetSchedule } from './automation_form_values';
 
 describe('automation form values', () => {
-  describe('createAutomationFormValues', () => {
-    it('starts with empty, disabled values', () => {
-      expect(createAutomationFormValues()).toEqual({
-        name: '',
-        tags: [],
-        description: '',
-        trigger: undefined,
-        dailyDispatchLimit: '20',
-        instructions: '',
-        mode: 'investigate',
-        slackAction: undefined,
-        isEnabled: false,
-      });
-    });
-  });
-
   it.each(['invalid', '25:00'])('ignores invalid schedules when loading the form: %s', (time) => {
     const automation: Automation = {
       id: 'automation-1',
@@ -118,5 +98,23 @@ describe('automation form values', () => {
       slackAction: { target: 'self', destination: '@me' },
       isEnabled: true,
     });
+  });
+
+  it('maps an automation without a daily limit to unlimited', () => {
+    const automation: Automation = {
+      id: 'automation-1',
+      name: 'Unlimited',
+      automationType: 'custom',
+      isEnabled: true,
+      trigger: { rows: [{ kind: 'alert' }] },
+      execution: {},
+      completions: [],
+      runtime: {},
+      createdAt: '2026-10-01T00:00:00.000Z',
+      updatedAt: '2026-10-01T00:00:00.000Z',
+      author: 'elastic',
+    };
+
+    expect(toAutomationFormValues(automation).dailyDispatchLimit).toBe('unlimited');
   });
 });

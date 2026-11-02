@@ -259,6 +259,11 @@ export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
   { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
 );
 
+export const WORKER_DOCS_LINK_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.docsLinkLabel',
+  { defaultMessage: 'Learn more' }
+);
+
 export const WATCH_SETTINGS_INVALID = i18n.translate(
   'xpack.alertzero.watches.settings.invalidDrafts',
   { defaultMessage: 'Fix invalid settings before saving.' }
@@ -292,6 +297,35 @@ export const NO_MODEL_REASON_PLAIN = i18n.translate(
 export const AUTONOMY_SECTION_TITLE = i18n.translate(
   'xpack.alertzero.watches.settings.autonomy.sectionTitle',
   { defaultMessage: 'Autonomy' }
+);
+
+export const HUNT_INDEX_COVERAGE_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.title',
+  { defaultMessage: "Hunt Watch cannot read part of this space's default data view" }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceStateful',
+  {
+    defaultMessage:
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+  }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL_REMOTE = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceStatefulRemote',
+  {
+    defaultMessage:
+      'Cross-cluster patterns need an Elasticsearch version whose alertzero_threat_hunt role includes remote indices.',
+  }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_SERVERLESS = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceServerless',
+  {
+    defaultMessage:
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only, in this project and in linked Security projects. Linked projects of other types are not searched. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+  }
 );
 
 export const WORKER_SETTINGS_UNAVAILABLE = i18n.translate(
@@ -361,7 +395,7 @@ export const TRIGGER_AMOUNT_ARIA_LABEL = i18n.translate(
 );
 
 export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.trigger.every', {
-  defaultMessage: 'Every',
+  defaultMessage: 'Runs every',
 });
 
 export const TRIGGER_HELP_TEXT = i18n.translate(

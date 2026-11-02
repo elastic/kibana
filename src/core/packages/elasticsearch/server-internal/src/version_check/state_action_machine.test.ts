@@ -8,25 +8,18 @@
  */
 
 import {
-  nextOnGrid,
+  realClock,
   run,
   type Action,
-  type AugmentedState,
   type StateActionMachine,
   type ActionResult,
-  type Scheduled,
+  type Step,
 } from './state_action_machine';
 import { take, virtualClock } from './state_action_machine.test_helpers';
 
-// Overruns and skipped points are covered through the machines' timelines; these are the edges.
-describe('nextOnGrid', () => {
-  it.each([
-    ['a completion at the due time', 1_000, 100, 1_100],
-    ['a completion exactly on a grid point', 1_100, 100, 1_200],
-    ['a completion before the due time, as after an early wake', 995, 100, 1_100],
-    ['a zero interval, which is due at the completion', 1_040, 0, 1_040],
-  ])('schedules after %s', (_, completedAt, interval, expected) => {
-    expect(nextOnGrid(1_000, completedAt, interval)).toBe(expected);
+describe('realClock', () => {
+  it('resolves a sleep early, rather than rejecting, once the signal aborts', async () => {
+    await expect(realClock.sleep(60_000, AbortSignal.abort())).resolves.toBeUndefined();
   });
 });
 
@@ -36,17 +29,14 @@ describe('run turns every failure of an action into an ok: false result', () => 
     readonly type: 'performed';
     readonly result: ActionResult<R>;
   }
-  const recorder = <R>(
-    action: Action<R>,
-    dueAt = 0
-  ): StateActionMachine<Scheduled, R, Recorded<R>> => ({
-    initialState: () => ({ nextActionAt: dueAt }),
+  const recorder = <R>(action: Action<R>, wait = 0): StateActionMachine<null, R, Recorded<R>> => ({
+    initialState: null,
     next: () => action,
-    model: (state, result) => ({ state, event: { type: 'performed', result } }),
+    model: (_state, result) => ({ state: null, event: { type: 'performed', result }, wait }),
   });
 
   const resultOf = async <R>(
-    machine: StateActionMachine<Scheduled, R, Recorded<R>>,
+    machine: StateActionMachine<null, R, Recorded<R>>,
     clock = virtualClock()
   ) => {
     const [, step] = await take(run(machine, clock), 2);
@@ -84,22 +74,24 @@ describe('run turns every failure of an action into an ok: false result', () => 
     }
   });
 
-  it('waits until the action is due and stamps the completion', async () => {
+  it("acts at once, then waits each step's `wait` before the next action, and stamps each completion", async () => {
     const clock = virtualClock(10);
     const action = async () => {
       clock.advance(5);
       return 'value';
     };
-    expect(await resultOf(recorder(action, 100), clock)).toEqual({
-      ok: true,
-      value: 'value',
-      completedAt: 105,
-    });
+    // Each action takes 5 and its step waits 90: the first completes at 15, the second at 110.
+    const [, first, second] = await take(run(recorder(action, 90), clock), 3);
+
+    expect([first.event, second.event]).toEqual([
+      { type: 'performed', result: { ok: true, value: 'value', completedAt: 15 } },
+      { type: 'performed', result: { ok: true, value: 'value', completedAt: 110 } },
+    ]);
   });
 });
 
 describe('run', () => {
-  interface Counter extends Scheduled {
+  interface Counter {
     readonly count: number;
   }
   /** The domain's account of a step: what the request added, or that it added nothing. */
@@ -109,19 +101,19 @@ describe('run', () => {
     request: Action<number>,
     until = Infinity
   ): StateActionMachine<Counter, number, Counted> => ({
-    initialState: (now) => ({ count: 0, nextActionAt: now }),
+    initialState: { count: 0 },
     // The next-action predicate: the one request, until the count is reached.
     next: (state) => (state.count >= until ? null : request),
-    model: (state, result): AugmentedState<Counter, Counted> => ({
+    model: (state, result): Step<Counter, Counted> => ({
       state: {
         count: result.ok ? state.count + result.value : state.count,
-        nextActionAt: nextOnGrid(state.nextActionAt, result.completedAt, 100),
       },
       event: result.ok ? { type: 'added', by: result.value } : { type: 'missed' },
+      wait: 100,
     }),
   });
 
-  it('yields the initial state, then one augmented state per action, with the event the model chose', async () => {
+  it('yields the initial step, then one step per action, as the model made it', async () => {
     const clock = virtualClock();
     let calls = 0;
     const request = async () => {
@@ -134,9 +126,9 @@ describe('run', () => {
     const steps = await take(run(counter(request), clock), 3);
 
     expect(steps).toEqual([
-      { state: { count: 0, nextActionAt: 0 }, event: { type: 'initial' } },
-      { state: { count: 1, nextActionAt: 100 }, event: { type: 'added', by: 1 } },
-      { state: { count: 1, nextActionAt: 200 }, event: { type: 'missed' } },
+      { state: { count: 0 }, event: { type: 'initial' }, wait: 0 },
+      { state: { count: 1 }, event: { type: 'added', by: 1 }, wait: 100 },
+      { state: { count: 1 }, event: { type: 'missed' }, wait: 100 },
     ]);
   });
 
@@ -146,7 +138,7 @@ describe('run', () => {
       counter(async () => 1, 2),
       clock
     );
-    const seen: Array<AugmentedState<Counter, Counted | { type: 'initial' }>> = [];
+    const seen: Array<Step<Counter, Counted | { type: 'initial' }>> = [];
 
     let pulled = await steps.next();
     while (!pulled.done) {
@@ -155,7 +147,7 @@ describe('run', () => {
     }
 
     expect(seen.map(({ state }) => state.count)).toEqual([0, 1, 2]);
-    expect(pulled.value).toEqual({ count: 2, nextActionAt: 200 });
+    expect(pulled.value).toEqual({ count: 2 });
   });
 
   it('drops the result of an action that completed after the abort', async () => {
@@ -194,25 +186,23 @@ describe('run', () => {
   it('does not act once aborted during a wait, even with a sleep that ignores the signal', async () => {
     const controller = new AbortController();
     const request = jest.fn(async () => 1);
-    // Sleeps ignore the signal and cannot reject, as a virtual clock does; the
-    // abort lands while the machine is waiting.
+    // This sleep ignores the signal, as a virtual clock does; the abort lands
+    // while the machine is waiting.
     const clock = { now: () => 0, sleep: async () => controller.abort() };
 
     const steps = run(counter(request, Infinity), clock, controller.signal);
-    await steps.next(); // the initial state
-    await steps.next(); // the first request, due at once, scheduling the next at 100
-    const pending = steps.next(); // waits for 100; the sleep aborts
+    await steps.next(); // the initial step
+    await steps.next(); // the first request, at once; its step waits 100
+    const pending = steps.next(); // waits 100; the sleep aborts
 
-    await expect(pending).resolves.toEqual({ done: true, value: { count: 1, nextActionAt: 100 } });
+    await expect(pending).resolves.toEqual({ done: true, value: { count: 1 } });
     expect(request).toHaveBeenCalledTimes(1);
   });
 
   it('returns the last state once aborted during a wait', async () => {
     const controller = new AbortController();
     const sleepUntilAborted = (_: number, signal?: AbortSignal) =>
-      new Promise<void>((_resolve, reject) =>
-        signal?.addEventListener('abort', () => reject(new Error('aborted')), { once: true })
-      );
+      new Promise<void>((resolve) => signal?.addEventListener('abort', () => resolve()));
     const clock = { now: () => 0, sleep: sleepUntilAborted };
 
     const steps = run(
@@ -220,14 +210,14 @@ describe('run', () => {
       clock,
       controller.signal
     );
-    await steps.next(); // the initial state, due at once
-    await steps.next(); // the first request, scheduling the next at 100
-    const pending = steps.next(); // waits for 100 on a clock that never advances
+    await steps.next(); // the initial step
+    await steps.next(); // the first request, at once; its step waits 100
+    const pending = steps.next(); // waits 100 on a clock that never advances
     controller.abort();
 
     await expect(pending).resolves.toEqual({
       done: true,
-      value: { count: 1, nextActionAt: 100 },
+      value: { count: 1 },
     });
   });
 });

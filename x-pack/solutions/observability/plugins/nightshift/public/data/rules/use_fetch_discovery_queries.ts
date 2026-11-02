@@ -44,13 +44,27 @@ export const useFetchDiscoveryQueries = (
     status?: QueryStatus[];
     /** Only these query ids. */
     queryIds?: string[];
+    /** Only queries linked to these entity slugs, or to no live entity with `unassignedEntities`. */
+    entityIds?: string[];
+    unassignedEntities?: boolean;
     /** Fixed occurrence window; defaults to the global time filter. */
     timeRange?: TimeRange;
     enabled?: boolean;
   },
   deps: unknown[] = []
 ) => {
-  const { name, query, page, perPage, status, queryIds, timeRange, enabled = true } = options;
+  const {
+    name,
+    query,
+    page,
+    perPage,
+    status,
+    queryIds,
+    entityIds,
+    unassignedEntities,
+    timeRange,
+    enabled = true,
+  } = options;
   const {
     significantEvents: { significantEventsRepositoryClient },
     data,
@@ -83,6 +97,8 @@ export const useFetchDiscoveryQueries = (
             perPage,
             status,
             queryIds,
+            entityIds: entityIds?.length ? entityIds : undefined,
+            unassignedEntities: unassignedEntities || undefined,
           },
         },
         signal: signal ?? null,
@@ -130,6 +146,9 @@ export const useFetchDiscoveryQueries = (
       perPage,
       status?.join(','),
       queryIds?.join(','),
+      // The array itself, not a joined string: slugs can contain commas.
+      entityIds,
+      unassignedEntities,
       ...deps,
     ],
     queryFn: fetchDiscoveryQueries,

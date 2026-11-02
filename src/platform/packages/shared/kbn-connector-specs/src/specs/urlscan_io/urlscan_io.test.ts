@@ -1300,7 +1300,8 @@ describe('URLScan.io connector', () => {
     it('bounds the search query and size', () => {
       expect(SearchScansInputSchema.safeParse({ q: 'ip:8.8.8.8' }).success).toBe(true);
       expect(SearchScansInputSchema.safeParse({ q: '' }).success).toBe(false);
-      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(2001) }).success).toBe(false);
+      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(8192) }).success).toBe(true);
+      expect(SearchScansInputSchema.safeParse({ q: 'x'.repeat(8193) }).success).toBe(false);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 10_000 }).success).toBe(true);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 10_001 }).success).toBe(false);
       expect(SearchScansInputSchema.safeParse({ q: 'x', size: 0 }).success).toBe(false);
@@ -1326,6 +1327,26 @@ describe('URLScan.io connector', () => {
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_000 }).success).toBe(true);
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 999 }).success).toBe(false);
       expect(GetDomInputSchema.safeParse({ uuid: UUID, maxLength: 500_001 }).success).toBe(false);
+    });
+  });
+
+  describe.each(['scanUrl', 'scanUrlAndWait'] as const)('%s url length', (actionName) => {
+    const prefix = 'https://example.com/';
+    const url = (length: number) => `${prefix}${'a'.repeat(length - prefix.length)}`;
+
+    it.each([
+      [2083, true],
+      [2084, false],
+    ])('%d characters valid=%s', (length, expected) => {
+      expect(UrlscanIo.actions[actionName].input.safeParse({ url: url(length) }).success).toBe(
+        expected
+      );
+      expect(
+        UrlscanIo.actions[actionName].input.safeParse({
+          url: 'https://example.com',
+          referer: url(length),
+        }).success
+      ).toBe(expected);
     });
   });
 });
