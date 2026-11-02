@@ -330,7 +330,8 @@ export class SecurityPageObject extends FtrService {
 
   /** Ends the session server-side; deleting the browser's `sid` cookie only drops the client copy. */
   private async invalidateBrowserSession() {
-    const sidCookie = await this.browser.getCookie('sid');
+    // `browser.getCookie` throws `NoSuchCookieError` when absent, so read the whole jar instead.
+    const sidCookie = (await this.browser.getCookies()).find(({ name }) => name === 'sid');
     if (!sidCookie?.value) {
       return;
     }
