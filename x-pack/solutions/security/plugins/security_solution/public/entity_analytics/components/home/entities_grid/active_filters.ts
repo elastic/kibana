@@ -27,9 +27,9 @@ import type { ResolvedEntityFilterOverrides } from './queries/resolved_entities'
 export interface ActiveFilters {
   /**
    * Search bar text and filter pills, in both forms. The platform converters build them
-   * (KQL, pills and data view rules), so they come in compiled.
+   * (KQL, pills and data view rules), so they come in compiled, patched with the search's overrides.
    */
-  search: { esql?: string; dsl?: ESBoolQuery };
+  search: { esql?: string; dsl?: QueryDslQueryContainer };
   entityFilters: EntityFilters;
   /** Entities of the active tile, capped; `null` when no tile is active. */
   tileEntityIds: readonly string[] | null;

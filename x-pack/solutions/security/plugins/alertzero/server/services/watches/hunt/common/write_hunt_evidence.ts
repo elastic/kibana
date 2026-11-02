@@ -9,38 +9,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { HuntCompleteness } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
-import { buildHuntSpaceFilterTerms } from './space_filter';
 
 export type LastHuntStatus = 'hit' | 'clean' | 'incomplete';
-
-/**
- * Whether `reportId` is reachable from `spaceId`, using the same filter `loadReportHuntContext`
- * reads through.
- *
- * {@link writeHuntEvidence} runs as the internal user, which can reach every space's reports, and
- * appends a fresh `evidence` element when no element matches the space. So the route's feature
- * privilege -- which only says the caller may write in the space it called from -- is not enough on
- * its own: without this check an id from another space would have hunt evidence stamped onto it.
- */
-export const isReportVisibleToSpace = async (
-  esClient: ElasticsearchClient,
-  { spaceId, reportId }: { spaceId: string; reportId: string }
-): Promise<boolean> => {
-  const response = await esClient.search({
-    index: HUNT_REPORTS_INDEX,
-    size: 1,
-    ignore_unavailable: true,
-    _source: false,
-    track_total_hits: false,
-    query: {
-      bool: {
-        filter: [buildHuntSpaceFilterTerms(spaceId), { ids: { values: [reportId] } }],
-      },
-    },
-  });
-
-  return response.hits.hits.length > 0;
-};
 
 /**
  * Collapses the coordinator's hit/completeness pair to exactly the three statuses
@@ -213,13 +183,13 @@ export const writeHuntEvidence = async (
     replayedWholeReport = false,
   }: WriteHuntEvidenceParams,
   logger: Logger
-): Promise<void> => {
+): Promise<{ settledByCap: boolean }> => {
   const stamp = shouldStampHunt({ hasConfirmedHit, completeness });
   // A retryable run that found nothing, searched nothing and left nothing pending (a blocked
   // scope, no model) has nothing to record: no stamp, and a ledger with no ids says nothing a
   // later run could use.
   if (!stamp && searchedTechniqueIds.length === 0 && (pendingTechniqueIds ?? []).length === 0) {
-    return;
+    return { settledByCap: false };
   }
 
   const coveragePending = completeness === 'incomplete_retryable';
@@ -249,10 +219,12 @@ export const writeHuntEvidence = async (
   });
 
   const stored = response.get?._source?.evidence?.find((element) => element.space_id === spaceId);
-  if (coveragePending && stored?.coverage_pending === false) {
+  const settledByCap = coveragePending && stored?.coverage_pending === false;
+  if (settledByCap) {
     logger.warn(
       `Hunt coverage ledger for report ${reportId} in space ${spaceId} holds more than ` +
         `${MAX_HUNT_TECHNIQUE_IDS} techniques, so coverage was settled with techniques still unsearched.`
     );
   }
+  return { settledByCap };
 };
