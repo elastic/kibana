@@ -289,7 +289,6 @@ describe('rspack compile integration', () => {
         pluginId,
         outputDir,
         dist: false,
-        dllManifestPath,
       });
 
       expect(result.errors).toEqual([]);
