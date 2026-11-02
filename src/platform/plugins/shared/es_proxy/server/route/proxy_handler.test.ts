@@ -60,7 +60,7 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     );
   });
 
-  it('SHOULD request a streamed response without retries and with an abort signal', async () => {
+  it('SHOULD request a streamed response with a timeout and an abort signal', async () => {
     const { run, transportRequest } = setup();
 
     await run();
@@ -70,11 +70,32 @@ describe('WHEN proxying a request to Elasticsearch', () => {
       expect.objectContaining({
         asStream: true,
         meta: true,
-        maxRetries: 0,
         requestTimeout: 120_000,
         signal: expect.any(AbortSignal),
       })
     );
+  });
+
+  describe('WHEN the method is get', () => {
+    it('SHOULD use the client retry settings', async () => {
+      const { run, transportRequest } = setup({ method: 'get' });
+
+      await run();
+
+      const [, options] = transportRequest.mock.calls[0];
+      expect(options).not.toHaveProperty('maxRetries');
+    });
+  });
+
+  describe.each(['post', 'put', 'delete'] as const)('WHEN the method is %s', (method) => {
+    it('SHOULD disable retries', async () => {
+      const { run, transportRequest } = setup({ method });
+
+      await run();
+
+      const [, options] = transportRequest.mock.calls[0];
+      expect(options?.maxRetries).toBe(0);
+    });
   });
 
   it('SHOULD forward the request body stream with chunked framing', async () => {

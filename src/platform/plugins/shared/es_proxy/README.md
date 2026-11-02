@@ -20,7 +20,7 @@ Requests use API version `1` (`elastic-api-version` header). Internal APIs carry
 
 - **Streaming.** Request and response bodies are streamed in both directions; Kibana never parses or buffers them.
 - **Cancellation.** If the client disconnects, the Elasticsearch request is aborted.
-- **No retries.** Proxied requests are never replayed, so writes are not duplicated.
+- **Retries for reads only.** GET and HEAD requests use the Elasticsearch client's retry settings, so a connection failure or a 502/503/504 is retried on another node. POST, PUT and DELETE requests are never replayed, so writes are not duplicated. Timeouts are not retried.
 - **Timeouts.** Elasticsearch requests time out after 120 seconds and return `504`. A connection failure returns `502`.
 - **Path encoding.** The Elasticsearch path is taken from the raw URL, so percent-encoded characters (for example `%2F` in a document id) are preserved.
 - **GET and HEAD have no body.** Kibana does not accept request bodies on GET or HEAD. Use POST for search-style APIs (`_search`, `_count`, `_msearch`, ...), which Elasticsearch accepts.

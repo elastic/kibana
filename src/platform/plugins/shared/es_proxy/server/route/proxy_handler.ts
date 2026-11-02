@@ -30,6 +30,7 @@ const FORWARDED_RESPONSE_HEADERS = [
   'retry-after',
 ] as const;
 const EVENT_STREAM_TYPE = 'text/event-stream';
+const RETRYABLE_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD']);
 
 export const ES_REQUEST_TIMEOUT_MS = 120_000;
 
@@ -131,7 +132,8 @@ export const createProxyHandler =
         {
           asStream: true,
           meta: true,
-          maxRetries: 0,
+          // Writes are never retried so they cannot be applied twice; reads use the client's retry settings.
+          ...(RETRYABLE_METHODS.has(method) ? {} : { maxRetries: 0 }),
           requestTimeout: ES_REQUEST_TIMEOUT_MS,
           headers: proxyHeaders,
           // An already-encoded body must not be compressed a second time by the transport.
