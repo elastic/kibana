@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.24>>
 * <<release-notes-8.19.23>>
 * <<release-notes-8.19.22>>
 * <<release-notes-8.19.21>>
@@ -129,6 +130,58 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.24]]
+== {kib} 8.19.24
+
+The 8.19.24 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.19.24]]
+=== Enhancements
+Elasticsearch solution::
+* Clarify in the Salesforce connector's document-level security tooltip that access applies per object type, not per record ({kibana-pull}297728[#297728]).
+
+[float]
+[[fixes-v8.19.24]]
+=== Fixes
+Alerting::
+* Fix rules creating duplicate alerts, and leaving the original alerts active, when a rule run stops before it saves its state ({kibana-pull}293521[#293521]).
+* Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents their completed run from being recorded ({kibana-pull}295415[#295415]).
+Dashboards and Visualizations::
+* Fix Lens metric panels failing to render when filters return no results and dynamic coloring uses a maximum dimension ({kibana-pull}297429[#297429]).
+Data ingestion and Fleet::
+* Fix deleting an agent policy silently leaving its ID in shared integration policies. The delete now fails with an error that explains the cause ({kibana-pull}300189[#300189]).
+* Fix {fleet} running {es} transforms from uploaded integration packages with {kib}'s internal system identity. Transforms in uploaded packages now run as the user who installed the package ({kibana-pull}297771[#297771]).
+// !!DEFERRED!! Not in the latest BC (8.19.24-2548a7de, built from 0b1457c9); the backport merged after the BC was cut. Re-verify against the next BC.
+// * Fix {fleet} bulk agent action APIs not validating the `agents` input consistently. Invalid input now returns a `400` error instead of running the action. A KQL query can reference only agent fields and is limited to 500,000 characters, and each agent ID is limited to 512 characters ({kibana-pull}299837[#299837]).
+// !!DEFERRED!! Not in the latest BC (8.19.24-2548a7de, built from 0b1457c9); the backport merged after the BC was cut. Re-verify against the next BC.
+// * Fix integration upgrades failing with a `400` error from a proxy in front of {es} when the data stream namespace contains non-ASCII characters ({kibana-pull}301496[#301496]).
+Data management::
+* Fix the runtime field editor discarding the script when you change the field type to or from `composite` ({kibana-pull}299025[#299025]).
+* Fix the runtime field preview not showing a field's custom label, and the preview row disappearing while documents load ({kibana-pull}299810[#299810]).
+* Fix saved object labels showing "index patterns" instead of "data views" when you copy a dashboard that references data views in another space ({kibana-pull}297621[#297621]).
+// !!DEFERRED!! Not in the latest BC (8.19.24-2548a7de, built from 0b1457c9); the backport merged after the BC was cut. Re-verify against the next BC.
+// * Fix creating and fetching {data-sources} with `allowNoIndex: true` that target a nonexistent remote cluster failing with a `400` error ({kibana-pull}299790[#299790]).
+Discover::
+* Fix field type icons staying stale in the field list when you recreate an index with a different mapping type for an existing field ({kibana-pull}301198[#301198]).
+* Fix the **Url** field formatter adding an extra `/app` segment to relative URLs that start with a slash when {kib} runs behind a base path or in a custom space ({kibana-pull}299116[#299116]).
+Elastic Security solution::
+For the Elastic Security 8.19.24 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Elasticsearch solution::
+* Fix content connector indexes created from {kib} failing to ingest documents with large numeric IDs by mapping the document `id` field as `keyword` ({kibana-pull}297711[#297711]).
+* Fix the **Rule ID**, **Metadata field**, and **Values** tooltips on the query rules **Create rule** page not being announced by screen readers in Chrome with VoiceOver ({kibana-pull}295021[#295021]).
+Kibana platform::
+* Fix tag filters in listing pages, such as the dashboards list, returning no results when a tag name contains an ampersand (`&`) ({kibana-pull}297231[#297231]).
+* Fix Permissions-Policy violation reports reaching the configured reporting endpoint only for the last directive. Reports for every directive now reach it ({kibana-pull}299786[#299786]).
+* Fix the Analytics overview page showing the **Ingest your data** section when you can't add data or upload files ({kibana-pull}297717[#297717]).
+* Fix paging through the API keys list showing the same API key on more than one page, or leaving a key out ({kibana-pull}296117[#296117]).
+// !!DEFERRED!! Not in the latest BC (8.19.24-2548a7de, built from 0b1457c9); the backport merged after the BC was cut. Re-verify against the next BC.
+// * Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty ({kibana-pull}301845[#301845]).
+Machine Learning::
+* Fix the data frame analytics audit messages API returning messages for jobs that don't exist in the current {kib} space ({kibana-pull}297821[#297821]).
+* Fix the {esql} field statistics table being left empty when you change the query or time range while statistics are still loading ({kibana-pull}298642[#298642]).
+* Fix streaming {infer} connector requests returning no content when `elasticsearch.compression` is enabled ({kibana-pull}290381[#290381]).
 
 [[release-notes-8.19.23]]
 == {kib} 8.19.23
