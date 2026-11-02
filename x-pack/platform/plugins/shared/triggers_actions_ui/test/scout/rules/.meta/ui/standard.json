@@ -1,5 +1,5 @@
 {
-  "sha1": "78c973c7e9d25b2064d01a37b6f2ba6219658206",
+  "sha1": "09f3d7ca0fabdbe510bbc6757e57fd5aef9f7612",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -234,12 +234,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/rules/ui/tests/rules_create_from_template.spec.ts",
-        "line": 47,
-        "column": 17
+        "line": 50,
+        "column": 15
       }
     },
     {
