@@ -17,16 +17,31 @@ import type {
 import { mlModules } from '../ml_modules';
 
 /**
+ * True when the installed job's revision is behind the packaged definition.
+ * Works for OOTB Kibana modules and Fleet `ml-module` jobs that ship `job_revision`.
+ */
+export const isJobUpdateAvailable = (
+  installedJobRevision: number | undefined,
+  packagedJobRevision: number | undefined
+): boolean =>
+  packagedJobRevision != null && (installedJobRevision ?? 0) < packagedJobRevision;
+
+/**
  * Helper function for converting from ModuleJob -> SecurityJob
  * @param module
  * @param moduleJob
  * @param isCompatible
+ * @param fleetModuleIds module ids installed via Fleet `ml-module` saved objects
  */
 export const moduleToSecurityJob = (
   module: Module,
   moduleJob: ModuleJob,
-  isCompatible: boolean
+  isCompatible: boolean,
+  fleetModuleIds: Set<string> = new Set()
 ): SecurityJob => {
+  const isElasticJob = mlModules.includes(module.id);
+  const packagedJobRevision = moduleJob.config.custom_settings?.job_revision;
+
   return {
     datafeedId: '',
     datafeedIndices: [],
@@ -43,11 +58,15 @@ export const moduleToSecurityJob = (
     moduleId: module.id,
     isCompatible,
     isInstalled: false,
-    isElasticJob: true,
+    isElasticJob,
+    isIntegrationJob: fleetModuleIds.has(module.id),
     awaitingNodeAssignment: false,
     jobTags: {},
     bucketSpanSeconds: 900,
     customSettings: moduleJob.config.custom_settings,
+    packagedJobRevision,
+    installedJobRevision: undefined,
+    isUpdateAvailable: false,
   };
 };
 
@@ -69,13 +88,16 @@ export const getAugmentedFields = (
         moduleId: moduleJob.moduleId,
         defaultIndexPattern: moduleJob.defaultIndexPattern,
         isCompatible: compatibleModuleIds.includes(moduleJob.moduleId),
-        isElasticJob: true,
+        isElasticJob: moduleJob.isElasticJob,
+        isIntegrationJob: moduleJob.isIntegrationJob,
+        packagedJobRevision: moduleJob.packagedJobRevision,
       }
     : {
         moduleId: '',
         defaultIndexPattern: '',
         isCompatible: true,
         isElasticJob: false,
+        isIntegrationJob: false,
       };
 };
 
@@ -88,13 +110,42 @@ export const getAugmentedFields = (
  */
 export const getModuleJobs = (
   modulesData: Module[],
-  compatibleModuleIds: string[]
+  compatibleModuleIds: string[],
+  fleetModuleIds: Set<string> = new Set()
 ): SecurityJob[] =>
   modulesData
     .filter((module) => mlModules.includes(module.id))
     .map((module) => [
       ...module.jobs.map((moduleJob) =>
-        moduleToSecurityJob(module, moduleJob, compatibleModuleIds.includes(module.id))
+        moduleToSecurityJob(
+          module,
+          moduleJob,
+          compatibleModuleIds.includes(module.id),
+          fleetModuleIds
+        )
+      ),
+    ])
+    .flat();
+
+/**
+ * Process Modules[] into SecurityJobs[] for Fleet integration-packaged ML modules
+ * (`ml-module` saved objects installed with Fleet packages).
+ */
+export const getIntegrationModuleJobs = (
+  modulesData: Module[],
+  compatibleModuleIds: string[],
+  fleetModuleIds: Set<string>
+): SecurityJob[] =>
+  modulesData
+    .filter((module) => fleetModuleIds.has(module.id))
+    .map((module) => [
+      ...module.jobs.map((moduleJob) =>
+        moduleToSecurityJob(
+          module,
+          moduleJob,
+          compatibleModuleIds.includes(module.id),
+          fleetModuleIds
+        )
       ),
     ])
     .flat();
@@ -112,11 +163,51 @@ export const getInstalledJobs = (
   moduleJobs: SecurityJob[],
   compatibleModuleIds: string[]
 ): SecurityJob[] =>
-  jobSummaryData.filter(isSecurityJob).map((jobSummary) => ({
-    ...jobSummary,
-    ...getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds),
-    isInstalled: true,
-  }));
+  jobSummaryData.filter(isSecurityJob).map((jobSummary) => {
+    const augmented = getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds);
+    const installedJobRevision = jobSummary.customSettings?.job_revision as number | undefined;
+    const packagedJobRevision = augmented.packagedJobRevision;
+
+    return {
+      ...jobSummary,
+      ...augmented,
+      isInstalled: true,
+      installedJobRevision,
+      packagedJobRevision,
+      isUpdateAvailable: isJobUpdateAvailable(installedJobRevision, packagedJobRevision),
+    };
+  });
+
+/**
+ * Installed jobs that belong to the given module job list (any ML group), used for
+ * Fleet integration modules outside the Security group.
+ */
+export const getInstalledJobsForModules = (
+  jobSummaryData: MlSummaryJob[],
+  moduleJobs: SecurityJob[],
+  compatibleModuleIds: string[]
+): SecurityJob[] => {
+  const moduleJobIds = new Set(moduleJobs.map((job) => job.id));
+
+  return jobSummaryData
+    .filter((jobSummary) => moduleJobIds.has(jobSummary.id))
+    .map((jobSummary) => {
+      const augmented = getAugmentedFields(jobSummary.id, moduleJobs, compatibleModuleIds);
+      const installedJobRevision = jobSummary.customSettings?.job_revision as number | undefined;
+      const packagedJobRevision =
+        augmented.packagedJobRevision ??
+        moduleJobs.find((job) => job.id === jobSummary.id)?.packagedJobRevision;
+
+      return {
+        ...jobSummary,
+        ...augmented,
+        isInstalled: true,
+        installedJobRevision,
+        packagedJobRevision,
+        isUpdateAvailable: isJobUpdateAvailable(installedJobRevision, packagedJobRevision),
+      };
+    });
+};
 
 /**
  * Combines installed jobs + moduleSecurityJobs that don't overlap and sorts by name asc
@@ -135,6 +226,65 @@ export const composeModuleAndInstalledJobs = (
     ...moduleSecurityJobs.filter((mj) => !installedJobsIds.includes(mj.id)),
   ].sort((a, b) => a.id.localeCompare(b.id));
 };
+
+export interface SecurityJobsBySource {
+  jobs: SecurityJob[];
+  integrationJobs: SecurityJob[];
+}
+
+/**
+ * Creates SecurityJobs split by source: SIEM pre-built/custom jobs vs Fleet
+ * integration-packaged ML modules (`ml-module` saved objects).
+ */
+export const createSecurityJobsBySource = (
+  jobSummaryData: MlSummaryJob[],
+  modulesData: Module[],
+  compatibleModules: RecognizerModule[],
+  fleetModules: Module[] = []
+): SecurityJobsBySource => {
+  const compatibleModuleIds = compatibleModules.map((module) => module.id);
+  const fleetModuleIds = new Set(fleetModules.map((module) => module.id));
+
+  // Prefer get_module payloads (same job shape as pre-built); fall back to SO attributes
+  // when a Fleet module is not yet present in the recognizer response.
+  const modulesById = new Map(modulesData.map((module) => [module.id, module]));
+  for (const fleetModule of fleetModules) {
+    if (!modulesById.has(fleetModule.id)) {
+      modulesById.set(fleetModule.id, fleetModule);
+    }
+  }
+  const modulesWithFleet = [...modulesById.values()];
+
+  const prebuiltModuleJobs = getModuleJobs(modulesWithFleet, compatibleModuleIds, fleetModuleIds);
+  const integrationModuleJobs = getIntegrationModuleJobs(
+    modulesWithFleet,
+    compatibleModuleIds,
+    fleetModuleIds
+  );
+  const allModuleJobs = [...prebuiltModuleJobs, ...integrationModuleJobs];
+
+  const securityGroupInstalledJobs = getInstalledJobs(
+    jobSummaryData,
+    allModuleJobs,
+    compatibleModuleIds
+  );
+
+  const integrationModuleIdSet = new Set(integrationModuleJobs.map((job) => job.moduleId));
+  const prebuiltInstalledJobs = securityGroupInstalledJobs.filter(
+    (job) => !integrationModuleIdSet.has(job.moduleId)
+  );
+  const integrationInstalledJobs = getInstalledJobsForModules(
+    jobSummaryData,
+    integrationModuleJobs,
+    compatibleModuleIds
+  );
+
+  return {
+    jobs: composeModuleAndInstalledJobs(prebuiltInstalledJobs, prebuiltModuleJobs),
+    integrationJobs: composeModuleAndInstalledJobs(integrationInstalledJobs, integrationModuleJobs),
+  };
+};
+
 /**
  * Creates a list of SecurityJobs by composing jobs summaries (installed jobs) and Module
  * jobs (pre-packaged Security jobs) into a single job object that can be used throughout the Security app
@@ -146,17 +296,7 @@ export const composeModuleAndInstalledJobs = (
 export const createSecurityJobs = (
   jobSummaryData: MlSummaryJob[],
   modulesData: Module[],
-  compatibleModules: RecognizerModule[]
-): SecurityJob[] => {
-  // Create lookup of compatible modules
-  const compatibleModuleIds = compatibleModules.map((module) => module.id);
-
-  // Process modulesData: Filter to Security specific modules, and unpack jobs from modules
-  const moduleSecurityJobs = getModuleJobs(modulesData, compatibleModuleIds);
-
-  // Process jobSummaryData: Filter to Security jobs, and augment with moduleId/defaultIndexPattern/isCompatible
-  const installedJobs = getInstalledJobs(jobSummaryData, moduleSecurityJobs, compatibleModuleIds);
-
-  // Combine installed jobs + moduleSecurityJobs that don't overlap, and sort by name asc
-  return composeModuleAndInstalledJobs(installedJobs, moduleSecurityJobs);
-};
+  compatibleModules: RecognizerModule[],
+  fleetModules: Module[] = []
+): SecurityJob[] =>
+  createSecurityJobsBySource(jobSummaryData, modulesData, compatibleModules, fleetModules).jobs;

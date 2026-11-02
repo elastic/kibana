@@ -13,7 +13,6 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
-  EuiIcon,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
@@ -39,9 +38,19 @@ interface JobNameProps {
   id: string;
   name?: string;
   description: string;
+  isUpdateAvailable?: boolean;
+  installedJobRevision?: number;
+  packagedJobRevision?: number;
 }
 
-const JobName = ({ id, name, description }: JobNameProps) => {
+const JobName = ({
+  id,
+  name,
+  description,
+  isUpdateAvailable,
+  installedJobRevision,
+  packagedJobRevision,
+}: JobNameProps) => {
   const {
     services: { ml },
   } = useKibana();
@@ -59,6 +68,19 @@ const JobName = ({ id, name, description }: JobNameProps) => {
         <EuiLink data-test-subj="jobs-table-link" href={jobUrl} target="_blank">
           {name ?? id}
         </EuiLink>
+        {isUpdateAvailable && (
+          <>
+            {' '}
+            <EuiBadge color="primary" data-test-subj="ml-job-update-available-badge">
+              {i18n.UPDATE_AVAILABLE_BADGE}
+              {packagedJobRevision != null && (
+                <>
+                  {` (r${installedJobRevision ?? 0} → r${packagedJobRevision})`}
+                </>
+              )}
+            </EuiBadge>
+          </>
+        )}
       </EuiText>
       <EuiText color="subdued" size="xs">
         {description.length > truncateThreshold
@@ -74,11 +96,21 @@ const getJobsTableColumns = (
 ) => [
   {
     name: i18n.COLUMN_JOB_NAME,
-    render: ({ id, description, customSettings }: SecurityJob) => (
+    render: ({
+      id,
+      description,
+      customSettings,
+      isUpdateAvailable,
+      installedJobRevision,
+      packagedJobRevision,
+    }: SecurityJob) => (
       <JobName
         id={id}
         name={customSettings?.security_app_display_name ?? id}
         description={description}
+        isUpdateAvailable={isUpdateAvailable}
+        installedJobRevision={installedJobRevision}
+        packagedJobRevision={packagedJobRevision}
       />
     ),
   },
@@ -106,16 +138,13 @@ const getJobsTableColumns = (
 
   {
     name: i18n.COLUMN_RUN_JOB,
-    render: (job: SecurityJob) =>
-      job.isCompatible ? (
-        <JobSwitch
-          job={job}
-          isSecurityJobsLoading={isLoading}
-          onJobStateChange={onJobStateChange}
-        />
-      ) : (
-        <EuiIcon aria-label="Warning" size="s" type="warning" color="warning" />
-      ),
+    render: (job: SecurityJob) => (
+      <JobSwitch
+        job={job}
+        isSecurityJobsLoading={isLoading}
+        onJobStateChange={onJobStateChange}
+      />
+    ),
     align: CENTER_ALIGNMENT,
     width: '80px',
   } as const,
@@ -130,15 +159,17 @@ const getPaginatedItems = (
 export interface JobTableProps {
   isLoading: boolean;
   jobs: SecurityJob[];
+  /** Kept for call-site compatibility; Run job always renders the switch in this prototype. */
   mlNodesAvailable: boolean;
   onJobStateChange: (job: SecurityJob, latestTimestampMs: number, enable: boolean) => Promise<void>;
+  noItemsMessage?: React.ReactNode;
 }
 
 export const JobsTableComponent = ({
   isLoading,
   jobs,
   onJobStateChange,
-  mlNodesAvailable,
+  noItemsMessage,
 }: JobTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 5;
@@ -159,13 +190,9 @@ export const JobsTableComponent = ({
       data-test-subj="jobs-table"
       tableCaption={i18n.JOBS_TABLE_CAPTION}
       columns={getJobsTableColumns(isLoading, onJobStateChange)}
-      items={getPaginatedItems(
-        jobs.map((j) => ({ ...j, isCompatible: mlNodesAvailable ? j.isCompatible : false })),
-        pageIndex,
-        pageSize
-      )}
+      items={getPaginatedItems(jobs, pageIndex, pageSize)}
       loading={isLoading}
-      noItemsMessage={<NoItemsMessage />}
+      noItemsMessage={noItemsMessage ?? <NoItemsMessage />}
       pagination={pagination}
       responsiveBreakpoint={false}
       onChange={({ page }: { page: { index: number } }) => {

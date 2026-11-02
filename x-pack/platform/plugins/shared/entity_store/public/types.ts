@@ -10,5 +10,5 @@ import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extens
 
 export interface AppPluginSetupDependencies {
   developerExamples: DeveloperExamplesSetup;
-  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
 }

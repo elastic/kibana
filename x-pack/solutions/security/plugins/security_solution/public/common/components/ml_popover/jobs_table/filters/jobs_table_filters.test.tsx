@@ -19,6 +19,26 @@ describe('JobsTableFilters', () => {
     securityJobs = cloneDeep(mockSecurityJobs);
   });
 
+  test('defaults with neither Elastic nor Custom selected (unified list)', () => {
+    const onFilterChanged = jest.fn();
+    const wrapper = mount(
+      <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
+    );
+
+    expect(
+      wrapper
+        .find('[data-test-subj="show-elastic-jobs-filter-button"]')
+        .first()
+        .prop('hasActiveFilters')
+    ).toEqual(false);
+    expect(
+      wrapper
+        .find('[data-test-subj="show-custom-jobs-filter-button"]')
+        .first()
+        .prop('hasActiveFilters')
+    ).toEqual(false);
+  });
+
   test('when you click Elastic Jobs filter, state is updated and it is selected', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
@@ -59,7 +79,7 @@ describe('JobsTableFilters', () => {
     ).toEqual(true);
   });
 
-  test('when you click Custom Jobs filter once, then Elastic Jobs filter, state is updated and  selected changed', () => {
+  test('when you click Custom Jobs filter once, then Elastic Jobs filter, state is updated and selected changed', () => {
     const onFilterChanged = jest.fn();
     const wrapper = mount(
       <JobsTableFiltersComponent securityJobs={securityJobs} onFilterChanged={onFilterChanged} />
