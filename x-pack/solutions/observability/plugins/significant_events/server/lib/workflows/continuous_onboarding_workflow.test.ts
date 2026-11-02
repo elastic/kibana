@@ -232,4 +232,23 @@ describe('createContinuousOnboardingWorkflowService', () => {
     expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
+
+  it('can disable future schedules without draining executions', async () => {
+    getWorkflow.mockResolvedValue({ enabled: true });
+
+    await createService().ensureWorkflow({
+      enabled: false,
+      request,
+      spaceId,
+      skipExecutionDrain: true,
+    });
+
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      workflowDocumentId,
+      { enabled: false },
+      spaceId,
+      request
+    );
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
+  });
 });

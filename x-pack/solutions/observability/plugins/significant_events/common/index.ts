@@ -127,6 +127,7 @@ export type {
   RunQuotaConsumeResponse,
   RunQuotaGroup,
   RunQuotaSettings,
+  RunQuotaSettingsPatch,
   RunQuotaSettingsUpdate,
   RunQuotaWindow,
   RunQuotasResponse,

@@ -8,7 +8,11 @@
 import { union } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import type {
+  SourceChangeEvent,
+  SourceChangeListener,
+  SourcesClient,
+} from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
@@ -296,16 +300,21 @@ export async function applySourceEnabled({
   }
 }
 
-/** Queues the reconciliation of a source whose query or enabled flag changed. */
+/**
+ * Queues the reconciliation of a source whose query or enabled flag changed, and syncs continuous
+ * onboarding independently so either can survive a failure.
+ */
 export const createSourceChangeListener =
   ({
     enqueueReconciliation,
+    syncContinuousOnboarding,
   }: {
     enqueueReconciliation: (args: {
       sourceId: string;
       sourceSlug: string;
       request: KibanaRequest;
     }) => Promise<void>;
+    syncContinuousOnboarding: (event: SourceChangeEvent) => Promise<void>;
   }): SourceChangeListener =>
   async (event) => {
     if (
@@ -315,11 +324,22 @@ export const createSourceChangeListener =
     ) {
       return;
     }
-    await enqueueReconciliation({
-      sourceId: event.source.id,
-      sourceSlug: event.source.slug,
-      request: event.request,
-    });
+    const results = await Promise.allSettled([
+      enqueueReconciliation({
+        sourceId: event.source.id,
+        sourceSlug: event.source.slug,
+        request: event.request,
+      }),
+      syncContinuousOnboarding(event),
+    ]);
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+    if (failures.length > 0) {
+      throw failures.length === 1
+        ? failures[0]
+        : new AggregateError(failures, 'Failed to schedule source reconciliation');
+    }
   };
 
 /**

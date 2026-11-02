@@ -621,8 +621,12 @@ describe('createSourceChangeListener', () => {
   const source = makeSource({ id: 'source' });
   const setup = () => {
     const enqueueReconciliation = jest.fn(async () => {});
-    const listener = createSourceChangeListener({ enqueueReconciliation });
-    return { listener, enqueueReconciliation };
+    const syncContinuousOnboarding = jest.fn(async () => {});
+    const listener = createSourceChangeListener({
+      enqueueReconciliation,
+      syncContinuousOnboarding,
+    });
+    return { listener, enqueueReconciliation, syncContinuousOnboarding };
   };
 
   it.each<SourceChangeEvent>([
@@ -636,14 +640,16 @@ describe('createSourceChangeListener', () => {
       request,
     },
   ])('queues a $type change in its request space', async (event) => {
-    const { listener, enqueueReconciliation } = setup();
+    const { listener, enqueueReconciliation, syncContinuousOnboarding } = setup();
     const otherRequest = { spaceId: 'other' } as KibanaRequest;
-    await listener({ ...event, request: otherRequest });
+    const eventInOtherSpace = { ...event, request: otherRequest };
+    await listener(eventInOtherSpace);
     expect(enqueueReconciliation).toHaveBeenCalledWith({
       sourceId: source.id,
       sourceSlug: source.slug,
       request: otherRequest,
     });
+    expect(syncContinuousOnboarding).toHaveBeenCalledWith(eventInOtherSpace);
   });
 
   it('reports a failure to queue the reconciliation', async () => {
@@ -654,8 +660,19 @@ describe('createSourceChangeListener', () => {
     );
   });
 
+  it('keeps reconciliation tasks when continuous onboarding sync fails', async () => {
+    const { listener, enqueueReconciliation, syncContinuousOnboarding } = setup();
+    syncContinuousOnboarding.mockRejectedValue(new Error('settings unavailable'));
+
+    await expect(listener({ type: 'created', source, request })).rejects.toThrow(
+      'settings unavailable'
+    );
+
+    expect(enqueueReconciliation).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores title changes that preserve the query and enabled flag', async () => {
-    const { listener, enqueueReconciliation } = setup();
+    const { listener, enqueueReconciliation, syncContinuousOnboarding } = setup();
     await listener({
       type: 'updated',
       source: { ...source, title: 'Renamed' },
@@ -663,6 +680,7 @@ describe('createSourceChangeListener', () => {
       request,
     });
     expect(enqueueReconciliation).not.toHaveBeenCalled();
+    expect(syncContinuousOnboarding).not.toHaveBeenCalled();
   });
 });
 
