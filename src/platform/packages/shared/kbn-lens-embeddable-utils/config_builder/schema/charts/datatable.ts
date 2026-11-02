@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import { DEFAULT_HEADER_ROW_HEIGHT_LINES, DEFAULT_ROW_HEIGHT_LINES } from '@kbn/lens-common';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import {
@@ -477,6 +477,7 @@ export const datatableConfigSchemaESQL = lazySchema(() =>
 export const datatableConfigSchema = lazySchema(() =>
   z.union([datatableConfigSchemaNoESQL, datatableConfigSchemaESQL]).meta({
     id: 'visDatatableChart',
+    ...tfUnion({ merge: true }), // ES|QL vs not, no variant key
     title: 'Datatable',
     description: 'Datatable chart configuration: DSL or ES|QL query based',
   })

@@ -472,6 +472,7 @@ src/platform/packages/private/opentelemetry/kbn-metrics @elastic/kibana-core @el
 src/platform/packages/private/opentelemetry/kbn-metrics-config @elastic/kibana-core
 src/platform/packages/private/shared-ux/storybook/config @elastic/appex-sharedux
 src/platform/packages/shared/as-code/dashboard-schema @elastic/kibana-dashboards
+src/platform/packages/shared/as-code/dashboard-terraform @elastic/kibana-dashboards
 src/platform/packages/shared/as-code/data-views-schema @elastic/kibana-discover
 src/platform/packages/shared/as-code/data-views-transforms @elastic/kibana-discover
 src/platform/packages/shared/as-code/discover-schema @elastic/kibana-discover

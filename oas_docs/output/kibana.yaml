@@ -164512,6 +164512,9 @@ components:
           required:
             - view_type
             - query
+      x-tf-union:
+        discriminator: view_type
+        key_template: by_{value}
     Kibana_HTTP_APIs_datasetquality-degradeddocs-create-rule-body-alerting:
       additionalProperties: false
       properties:
@@ -169415,6 +169418,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeGroupFilterSchema'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeDSLFilterSchema'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeSpatialFilterSchema'
+      x-tf-json-leaf:
+        attribute: filter_json
     Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeGroupFilterSchema:
       additionalProperties: false
       description: A filter that combines multiple conditions or nested groups using a logical `and` or `or` operator.
@@ -169740,6 +169745,8 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-static-values'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-values-from-query'
+          x-tf-union:
+            merge: true
         grow:
           default: false
           description: When `true`, the control expands to fill any available horizontal space. Defaults to `false`.
@@ -169747,6 +169754,7 @@ components:
         id:
           description: The unique ID of the control
           type: string
+          x-tf-omit: true
         type:
           enum:
             - esql_control
@@ -169781,6 +169789,12 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'
+          x-tf-union:
+            default_value: field
+            discriminator: values_source
+            variant_keys:
+              esql: by_esql
+              field: by_field
         grow:
           default: false
           description: When `true`, the control expands to fill any available horizontal space. Defaults to `false`.
@@ -169788,6 +169802,7 @@ components:
         id:
           description: The unique ID of the control
           type: string
+          x-tf-omit: true
         type:
           enum:
             - options_list_control
@@ -169822,6 +169837,12 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'
+          x-tf-union:
+            default_value: field
+            discriminator: values_source
+            variant_keys:
+              esql: by_esql
+              field: by_field
         grow:
           default: false
           description: When `true`, the control expands to fill any available horizontal space. Defaults to `false`.
@@ -169829,6 +169850,7 @@ components:
         id:
           description: The unique ID of the control
           type: string
+          x-tf-omit: true
         type:
           enum:
             - range_slider_control
@@ -169882,6 +169904,7 @@ components:
         id:
           description: The unique ID of the control
           type: string
+          x-tf-omit: true
         type:
           enum:
             - time_slider_control
@@ -170013,6 +170036,8 @@ components:
         - esql_query
       title: EsqlOptionsListControl
       type: object
+      x-tf-variant:
+        keep_discriminator: true
     Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field:
       additionalProperties: false
       description: An options list control whose available options come from a data view field.
@@ -170316,6 +170341,8 @@ components:
         - esql_query
       title: EsqlRangeSliderControl
       type: object
+      x-tf-variant:
+        keep_discriminator: true
     Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field:
       additionalProperties: false
       description: A range slider control whose values come from a numeric data view field.
@@ -170390,6 +170417,7 @@ components:
         esql_approximation:
           description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
           type: boolean
+          x-tf-omit: true
         filters:
           description: Filters applied across all panels, including pinned panels.
           items:
@@ -170454,6 +170482,17 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
+                x-tf-union:
+                  content: config
+                  discriminator: type
+                  discriminator_placement: outside
+                  exclusivity: conflicts_with
+                  extra_json_variant:
+                    key: config_json
+                    values:
+                      - markdown
+                      - vis
+                  key_template: '{value}_config'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-section'
           maxItems: 1000
           type: array
@@ -170472,11 +170511,17 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-options-list-control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-range-slider-control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-controls-group-schema-time-slider-control'
+            x-tf-union:
+              content: config
+              discriminator: type
+              discriminator_placement: outside
+              key_template: '{value}_config'
           maxItems: 100
           type: array
         project_routing:
           description: Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.
           type: string
+          x-tf-omit: true
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
         refresh_interval:
@@ -170787,6 +170832,9 @@ components:
                           - type
                         title: url_drilldown
                         type: object
+                    x-tf-union:
+                      discriminator: type
+                      key_template: '{value}'
                   maxItems: 100
                   type: array
                 hide_border:
@@ -171209,6 +171257,10 @@ components:
                 - tabs
               title: By value
               type: object
+              x-tf-variant:
+                key: by_value
+                match:
+                  present: tabs
             - additionalProperties: false
               description: Panel configuration stored in a linked library item
               properties:
@@ -171247,6 +171299,9 @@ components:
                           - type
                         title: url_drilldown
                         type: object
+                    x-tf-union:
+                      discriminator: type
+                      key_template: '{value}'
                   maxItems: 100
                   type: array
                 hide_border:
@@ -171364,6 +171419,12 @@ components:
                 - ref_id
               title: By reference
               type: object
+              x-tf-variant:
+                key: by_reference
+                match:
+                  present: ref_id
+          x-tf-union:
+            structural: true
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -171391,6 +171452,8 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-static-values'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-values-from-query'
+          x-tf-union:
+            merge: true
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -171516,6 +171579,9 @@ components:
                       - type
                     title: url_drilldown
                     type: object
+                x-tf-union:
+                  discriminator: type
+                  key_template: '{value}'
               maxItems: 100
               type: array
             hide_border:
@@ -171578,8 +171644,12 @@ components:
                       title: url
                       type: object
                   description: Image source
+                  x-tf-union:
+                    discriminator: type
+                    key_template: '{value}'
               required:
                 - src
+              x-tf-flatten: true
             title:
               description: The panel title.
               type: string
@@ -171643,6 +171713,10 @@ components:
                 - links
               title: By value
               type: object
+              x-tf-variant:
+                key: by_value
+                match:
+                  present: links
             - additionalProperties: false
               description: Panel configuration stored in a linked library item
               properties:
@@ -171666,7 +171740,13 @@ components:
                 - ref_id
               title: By reference
               type: object
+              x-tf-variant:
+                key: by_reference
+                match:
+                  present: ref_id
           description: Links embeddable schema
+          x-tf-union:
+            structural: true
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -171720,6 +171800,10 @@ components:
                 - content
               title: By value
               type: object
+              x-tf-variant:
+                key: by_value
+                match:
+                  present: content
             - additionalProperties: false
               description: Panel configuration stored in a linked library item
               properties:
@@ -171742,7 +171826,13 @@ components:
                 - ref_id
               title: By reference
               type: object
+              x-tf-variant:
+                key: by_reference
+                match:
+                  present: ref_id
           description: Markdown panel config
+          x-tf-union:
+            structural: true
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -171829,6 +171919,12 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-esql'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field'
+          x-tf-union:
+            default_value: field
+            discriminator: values_source
+            variant_keys:
+              esql: by_esql
+              field: by_field
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -171855,6 +171951,12 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-esql'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field'
+          x-tf-union:
+            default_value: field
+            discriminator: values_source
+            variant_keys:
+              esql: by_esql
+              field: by_field
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -171943,6 +172045,8 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_slo-single-overview-embeddable'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_slo-group-overview-embeddable'
+          x-tf-union:
+            discriminator: overview_mode
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -172134,6 +172238,9 @@ components:
                       - type
                     title: url_drilldown
                     type: object
+                x-tf-union:
+                  discriminator: type
+                  key_template: '{value}'
               maxItems: 100
               type: array
             filters:
@@ -172406,6 +172513,9 @@ components:
                               - type
                             title: url_drilldown
                             type: object
+                        x-tf-union:
+                          discriminator: type
+                          key_template: '{value}'
                       maxItems: 100
                       type: array
                     hide_border:
@@ -172418,6 +172528,7 @@ components:
                       items:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
                       type: array
+                      x-tf-json-leaf: true
                     time_range:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
                     title:
@@ -172425,6 +172536,10 @@ components:
                       type: string
               description: Panel configuration stored inline
               title: By value
+              x-tf-variant:
+                key: by_value
+                match:
+                  absent: ref_id
             - additionalProperties: false
               description: Panel configuration stored in a linked library item
               properties:
@@ -172537,8 +172652,16 @@ components:
                           - type
                         title: url_drilldown
                         type: object
+                    x-tf-union:
+                      discriminator: type
+                      key_template: '{value}'
                   maxItems: 100
                   type: array
+                  x-tf-union-override:
+                    variant_keys:
+                      dashboard_drilldown: dashboard
+                      discover_drilldown: discover
+                      url_drilldown: url
                 hide_border:
                   description: When true, the panel border is hidden. Defaults to false.
                   type: boolean
@@ -172551,6 +172674,7 @@ components:
                   items:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
                   type: array
+                  x-tf-json-leaf: true
                 time_range:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
                 title:
@@ -172560,7 +172684,13 @@ components:
                 - ref_id
               title: By reference
               type: object
+              x-tf-variant:
+                key: by_reference
+                match:
+                  present: ref_id
           description: Lens embeddable schema
+          x-tf-union:
+            structural: true
         grid:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
         id:
@@ -172651,6 +172781,17 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-synthetics_stats_overview'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-time_slider_control'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-vis'
+            x-tf-union:
+              content: config
+              discriminator: type
+              discriminator_placement: outside
+              exclusivity: conflicts_with
+              extra_json_variant:
+                key: config_json
+                values:
+                  - markdown
+                  - vis
+              key_template: '{value}_config'
           maxItems: 1000
           type: array
         title:
@@ -172751,6 +172892,8 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-static-values'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-values-from-query'
+          x-tf-union:
+            merge: true
         grow:
           default: false
           description: When `true`, the control expands to fill any available horizontal space.
@@ -176376,6 +176519,8 @@ components:
             - swimlane_type
             - view_by
       description: Anomaly Swim Lane embeddable
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_ml_single_metric_viewer:
       additionalProperties: false
       description: Single Metric Viewer embeddable
@@ -184699,6 +184844,9 @@ components:
                   - type
                 title: url_drilldown
                 type: object
+            x-tf-union:
+              discriminator: type
+              key_template: '{value}'
           maxItems: 100
           type: array
         hide_border:
@@ -184770,6 +184918,9 @@ components:
                   - type
                 title: url_drilldown
                 type: object
+            x-tf-union:
+              discriminator: type
+              key_template: '{value}'
           maxItems: 100
           type: array
         duration:
@@ -184837,6 +184988,9 @@ components:
                   - type
                 title: url_drilldown
                 type: object
+            x-tf-union:
+              discriminator: type
+              key_template: '{value}'
           maxItems: 100
           type: array
         hide_border:
@@ -184899,6 +185053,9 @@ components:
                   - type
                 title: url_drilldown
                 type: object
+            x-tf-union:
+              discriminator: type
+              key_template: '{value}'
           maxItems: 100
           type: array
         group_filters:
@@ -184912,6 +185069,7 @@ components:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
               maxItems: 500
               type: array
+              x-tf-json-leaf: true
             group_by:
               anyOf:
                 - enum:
@@ -185162,6 +185320,9 @@ components:
                   - type
                 title: url_drilldown
                 type: object
+            x-tf-union:
+              discriminator: type
+              key_template: '{value}'
           maxItems: 100
           type: array
         hide_border:
@@ -189478,6 +189639,15 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleChart'
       description: Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.
       title: Visualizations
+      x-tf-union:
+        discriminator: type
+        key_template: '{value}_config'
+        variant_keys:
+          data_table: datatable_config
+          metric: metric_chart_config
+          pie: pie_chart_config
+          tag_cloud: tagcloud_config
+          xy: xy_chart_config
     Kibana_HTTP_APIs_visApiDirection:
       description: Direction
       enum:
@@ -190142,6 +190312,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDatatableESQL'
       description: 'Datatable chart configuration: DSL or ES|QL query based'
       title: Datatable
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visDatatableDensity:
       additionalProperties: false
       description: Density configuration for the datatable.
@@ -190969,6 +191141,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visGaugeESQL'
       description: A gauge chart with a metric value and optional minimum, maximum, and goal markers, in bullet or circular shape.
       title: Gauge Chart
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visGaugeESQL:
       additionalProperties: false
       description: Gauge configuration using an ES|QL query.
@@ -191363,6 +191537,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visHeatmapESQL'
       description: A grid of colored cells where color intensity represents the metric value at each X/Y intersection.
       title: Heatmap Chart
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visHeatmapESQL:
       additionalProperties: false
       description: Heatmap configuration using an ES|QL query.
@@ -192058,6 +192234,12 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMetricESQL'
       description: One or two metric values with optional color coding, trend line, and breakdown by dimension.
       title: Metric Chart
+      x-tf-union:
+        json_leaves:
+          breakdown_by: breakdown_by_json
+          data_source: data_source_json
+          metrics[]: config_json
+        merge: true
     Kibana_HTTP_APIs_visMetricCompareToBaseline:
       additionalProperties: false
       properties:
@@ -192722,6 +192904,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMosaicESQL'
       description: Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes
       title: Mosaic Chart
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visMosaicESQL:
       additionalProperties: false
       description: Mosaic chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration
@@ -193201,6 +193385,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visPieESQL'
       description: 'Pie chart state: standard query or ES|QL query'
       title: Pie Chart
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visPieESQL:
       additionalProperties: false
       description: Pie chart configuration for ES|QL queries
@@ -193566,6 +193752,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRegionMapESQL'
       description: A choropleth map with geographic regions colored by the aggregated metric value.
       title: Region Map
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visRegionMapESQL:
       additionalProperties: false
       description: Region Map configuration using an ES|QL query, mapping metric values to geographic regions by color.
@@ -193813,6 +194001,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTagcloudESQL'
       description: A word cloud with terms sized by metric value.
       title: Tag Cloud Chart
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visTagcloudESQL:
       additionalProperties: false
       description: Tag Cloud configuration using an ES|QL query.
@@ -194329,6 +194519,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visTreemapESQL'
       description: Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes
       title: Treemap Chart
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visTreemapESQL:
       additionalProperties: false
       description: Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration
@@ -194653,6 +194845,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visWaffleESQL'
       description: 'Waffle chart configuration: DSL or ES|QL query based'
       title: Waffle Chart
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visWaffleESQL:
       additionalProperties: false
       description: Waffle chart configuration for ES|QL queries
@@ -194924,6 +195118,8 @@ components:
         - group_id
       title: Annotation Layer (By Reference)
       type: object
+      x-tf-variant:
+        omit: true
     Kibana_HTTP_APIs_visXyAnnotationLayerESQL:
       additionalProperties: false
       description: Layer containing annotations (points and ranges)
@@ -194950,6 +195146,8 @@ components:
         - events
       title: Annotation Layer (ES|QL)
       type: object
+      x-tf-variant:
+        omit: true
     Kibana_HTTP_APIs_visXyAnnotationLayerNoESQL:
       additionalProperties: false
       description: Layer containing annotations (query-based, points, and ranges)
@@ -194986,6 +195184,8 @@ components:
         - events
       title: Annotation Layer (DSL)
       type: object
+      x-tf-variant:
+        omit: true
     Kibana_HTTP_APIs_visXyAnnotationManualEvent:
       additionalProperties: false
       description: Manual point annotation at specific timestamp
@@ -195292,6 +195492,8 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyChartESQL'
       description: XY chart configuration
       title: XY Chart
+      x-tf-union:
+        merge: true
     Kibana_HTTP_APIs_visXyChartESQL:
       additionalProperties: false
       description: XY chart configuration for ES|QL queries
@@ -195531,6 +195733,13 @@ components:
         - 'y'
       title: Layer (ES|QL)
       type: object
+      x-tf-variant:
+        json_leaves:
+          breakdown_by: breakdown_by_json
+          data_source: data_source_json
+          x: x_json
+          y[]: config_json
+        key: data_layer
     Kibana_HTTP_APIs_visXyLayerNoESQL:
       additionalProperties: false
       description: Data layer for standard queries with metrics and buckets
@@ -195657,6 +195866,13 @@ components:
         - 'y'
       title: Layer (DSL)
       type: object
+      x-tf-variant:
+        json_leaves:
+          breakdown_by: breakdown_by_json
+          data_source: data_source_json
+          x: x_json
+          y[]: config_json
+        key: data_layer
     Kibana_HTTP_APIs_visXyLayersESQL:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerESQL'
@@ -195664,6 +195880,10 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyReferenceLineLayerESQL'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationLayerESQL'
       description: XY chart layer types for ES|QL queries.
+      x-tf-union:
+        discriminator: type
+        discriminator_placement: outside
+        exclusivity: conflicts_with
     Kibana_HTTP_APIs_visXyLayersNoESQL:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLayerNoESQL'
@@ -195671,6 +195891,10 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationLayerNoESQL'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyAnnotationByRefLayer'
       description: XY chart layer types for DSL queries
+      x-tf-union:
+        discriminator: type
+        discriminator_placement: outside
+        exclusivity: conflicts_with
     Kibana_HTTP_APIs_visXyLegend:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_visXyLegendOutsideHorizontal'
@@ -196188,6 +196412,10 @@ components:
         - thresholds
       title: ES|QL Reference Line Layer
       type: object
+      x-tf-variant:
+        json_leaves:
+          data_source: data_source_json
+        key: reference_line_layer
     Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic:
       additionalProperties: false
       description: Reference lines defined by constant numeric values on ES|QL charts.
@@ -196359,6 +196587,10 @@ components:
         - thresholds
       title: Static Reference Line Layer for ES|QL Charts
       type: object
+      x-tf-variant:
+        json_leaves:
+          data_source: data_source_json
+        key: reference_line_layer
     Kibana_HTTP_APIs_visXyReferenceLineLayerNoESQL:
       additionalProperties: false
       description: Reference line layer for standard queries
@@ -196527,6 +196759,10 @@ components:
         - thresholds
       title: Reference Line Layer (DSL)
       type: object
+      x-tf-variant:
+        json_leaves:
+          data_source: data_source_json
+        key: reference_line_layer
     Kibana_HTTP_APIs_visXyRefLineCountMetric:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'
     Kibana_HTTP_APIs_visXyRefLineFormula:

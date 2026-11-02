@@ -5177,6 +5177,9 @@ importers:
       '@kbn/api-contracts':
         specifier: workspace:*
         version: link:packages/kbn-api-contracts
+      '@kbn/as-code-dashboard-terraform':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/as-code/dashboard-terraform
       '@kbn/axe-config':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-axe-config
@@ -7827,6 +7830,8 @@ importers:
   src/platform/packages/private/shared-ux/storybook/config: {}
 
   src/platform/packages/shared/as-code/dashboard-schema: {}
+
+  src/platform/packages/shared/as-code/dashboard-terraform: {}
 
   src/platform/packages/shared/as-code/data-views-schema: {}
 
@@ -14273,6 +14278,7 @@ packages:
   '@smithy/core@3.36.2':
     resolution: {integrity: sha512-oRw0rB9QSUiCZfEs23G5F4Af+b2rQt1lItIICWu5IejFNd+uPM8SWqiKLMpQ6bX1Q7slsLbjuoE2niErFtkVPQ==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}

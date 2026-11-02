@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, tfUnion } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -47,6 +47,7 @@ export const fieldStatsTableEmbeddableSchema = z
   .meta({
     id: 'data_visualizer_field_stats',
     description: 'Field statistics table embeddable schema',
+    ...tfUnion({ discriminator: 'view_type', key_template: 'by_{value}' }),
   });
 
 export type FieldStatsTableEmbeddableState = z.output<typeof fieldStatsTableEmbeddableSchema>;

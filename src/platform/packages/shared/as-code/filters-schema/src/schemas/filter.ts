@@ -14,7 +14,7 @@
  * in * as Code APIs.
  */
 
-import { z } from '@kbn/zod';
+import { z, tfJsonLeaf } from '@kbn/zod';
 import {
   ASCODE_FILTER_OPERATOR,
   ASCODE_GROUPED_CONDITION_TYPE,
@@ -311,4 +311,5 @@ export const asCodeFilterSchema = z
     description:
       'A filter applied to query results. Can be a field condition (`condition`), a logical group of conditions (`group`), a raw Elasticsearch DSL query (`dsl`), or a geo spatial query (`spatial`).',
     id: 'kbn-as-code-filters-schema_asCodeFilterSchema',
+    ...tfJsonLeaf('filter_json'),
   });

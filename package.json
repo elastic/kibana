@@ -1751,6 +1751,7 @@
     "@kbn/ambient-storybook-types": "workspace:*",
     "@kbn/ambient-ui-types": "workspace:*",
     "@kbn/api-contracts": "workspace:*",
+    "@kbn/as-code-dashboard-terraform": "workspace:*",
     "@kbn/axe-config": "workspace:*",
     "@kbn/babel-preset": "workspace:*",
     "@kbn/bench": "workspace:*",

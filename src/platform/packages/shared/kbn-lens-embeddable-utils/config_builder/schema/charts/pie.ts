@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod';
+import { z, lazySchema, tfUnion } from '@kbn/zod';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
@@ -221,6 +221,7 @@ export const pieConfigSchemaESQL = lazySchema(() =>
 export const pieConfigSchema = lazySchema(() =>
   z.union([pieConfigSchemaNoESQL, pieConfigSchemaESQL]).meta({
     id: 'visPieChart',
+    ...tfUnion({ merge: true }), // ES|QL vs not, no variant key
     title: 'Pie Chart',
     description: 'Pie chart state: standard query or ES|QL query',
   })
