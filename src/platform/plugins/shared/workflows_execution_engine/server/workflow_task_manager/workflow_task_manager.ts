@@ -355,6 +355,13 @@ export class WorkflowTaskManager {
       getWorkflowWakeTaskId(executionId),
       getWorkflowGlobalTimeoutResumeTaskId(executionId),
     ]);
+    // A missing task has no identity to keep, but an unreadable one might run as the binding.
+    const unreadable = tasks.find(
+      (result) => result.tag === 'err' && result.error.error.statusCode !== 404
+    );
+    if (unreadable?.tag === 'err') {
+      throw new Error(`Failed to read task ${unreadable.error.id} while resolving its identity`);
+    }
     for (const result of tasks) {
       const { type, workloadType, workloadId, spaceId, expectedServiceAccountId } =
         (result.tag === 'ok' && result.value.credential) || {};

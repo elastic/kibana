@@ -699,13 +699,13 @@ describe('workflow:resume task runner event fields', () => {
       workflowDefinition: { settings: { run_as: 'account-a' } },
     };
     const failedExecution = { ...execution, status: 'failed' };
-    const createRunner = (error: Error, attempts: number) => {
+    const createRunner = (error: Error, state: Record<string, unknown> = {}) => {
       const setCustomTaskRunEventFields = jest.fn();
       const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
         taskManagerMock.createRunContext({
           taskInstance: {
             ...taskManagerMock.createTask(),
-            attempts,
+            state,
             params: { workflowRunId, spaceId: 'default' },
           },
           fakeRequest: undefined,
@@ -724,8 +724,7 @@ describe('workflow:resume task runner event fields', () => {
 
     it('fails the execution when the binding is gone', async () => {
       const { runner, setCustomTaskRunEventFields } = createRunner(
-        Boom.notFound('binding removed'),
-        1
+        Boom.notFound('binding removed')
       );
 
       await expect(runner.run()).resolves.toBeUndefined();
@@ -751,25 +750,49 @@ describe('workflow:resume task runner event fields', () => {
       expect(mockResumeWorkflow).not.toHaveBeenCalled();
     });
 
-    it('lets Task Manager retry a transient failure', async () => {
+    it('runs again later after a transient failure, without spending an attempt', async () => {
       const { runner, setCustomTaskRunEventFields } = createRunner(
         new Error('connect ECONNREFUSED'),
-        1
+        { workflowMintRetries: 1, kept: true }
       );
 
-      await expect(runner.run()).rejects.toThrow('connect ECONNREFUSED');
+      const before = Date.now();
+      const result = await runner.run();
+      const after = Date.now();
+
+      expect(result).toEqual({
+        runAt: expect.any(Date),
+        state: { workflowMintRetries: 2, kept: true },
+      });
+      const delayMs = (result?.runAt?.getTime() ?? 0) - 60_000;
+      expect(delayMs).toBeGreaterThanOrEqual(before);
+      expect(delayMs).toBeLessThanOrEqual(after);
 
       expect(mockFinalizeWorkflowIdentityFailure).not.toHaveBeenCalled();
-      expect(setCustomTaskRunEventFields).toHaveBeenLastCalledWith(
-        expect.objectContaining({ workflow_execution_id: workflowRunId, outcome: 'failed' })
+      expect(mockResumeWorkflow).not.toHaveBeenCalled();
+      expect(setCustomTaskRunEventFields).not.toHaveBeenCalledWith(
+        expect.objectContaining({ outcome: expect.anything() })
       );
     });
 
-    it('fails the execution when a transient failure outlasts the retries', async () => {
+    it('runs again later when the token exchange can be retried', async () => {
       const { runner } = createRunner(
-        new Error('connect ECONNREFUSED'),
-        taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].maxAttempts ?? 1
+        Object.assign(new Error('token exchange unavailable'), {
+          name: 'ServiceAccountTokenExchangeError',
+          retryable: true,
+        })
       );
+
+      await expect(runner.run()).resolves.toEqual(
+        expect.objectContaining({ state: { workflowMintRetries: 1 } })
+      );
+      expect(mockFinalizeWorkflowIdentityFailure).not.toHaveBeenCalled();
+    });
+
+    it('fails the execution when a transient failure outlasts the retries', async () => {
+      const { runner } = createRunner(new Error('connect ECONNREFUSED'), {
+        workflowMintRetries: 3,
+      });
 
       await expect(runner.run()).resolves.toBeUndefined();
 

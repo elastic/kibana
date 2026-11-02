@@ -167,6 +167,14 @@ const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
 const WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS = 3;
 
+/**
+ * A runAs task whose binding request fails to mint for a transient reason runs again later rather
+ * than failing: a failed attempt would reach the runner as an interrupted one. Delays double from
+ * the first one, so the budget below rides out about three and a half minutes of outage.
+ */
+const WORKFLOW_MINT_RETRY_LIMIT = 3;
+const WORKFLOW_MINT_RETRY_DELAY_MS = 30_000;
+
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
 
@@ -324,15 +332,17 @@ export class WorkflowsExecutionEnginePlugin
               if (minted) {
                 throw error;
               }
-              const isLastAttempt = taskInstance.attempts >= (definition.maxAttempts ?? 1);
-              if (!isLastAttempt && !isPermanentMintFailure(error)) {
-                stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
-                  workflow_execution_id: workflowRunId,
-                  workflow_id: execution.workflowId,
-                  space_id: spaceId,
-                  outcome: 'failed',
-                });
-                throw error;
+              const mintRetries = Number(taskInstance.state?.workflowMintRetries ?? 0);
+              if (mintRetries < WORKFLOW_MINT_RETRY_LIMIT && !isPermanentMintFailure(error)) {
+                this.logger.warn(
+                  `Retrying workflow execution ${workflowRunId} later: its service account request could not be minted: ${
+                    error instanceof Error ? error.message : String(error)
+                  }`
+                );
+                return {
+                  runAt: new Date(Date.now() + WORKFLOW_MINT_RETRY_DELAY_MS * 2 ** mintRetries),
+                  state: { ...taskInstance.state, workflowMintRetries: mintRetries + 1 },
+                };
               }
               // Without a request the runner can't start, so fail the execution here rather than
               // leave it waiting for a task that can't mint either.

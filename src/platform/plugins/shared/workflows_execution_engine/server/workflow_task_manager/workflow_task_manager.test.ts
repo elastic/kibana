@@ -732,6 +732,37 @@ describe('WorkflowTaskManager', () => {
         );
       });
 
+      it('fails the handoff when a task cannot be read, rather than falling back to an API key', async () => {
+        mockTaskManager.bulkGet.mockResolvedValue([
+          notFound(getWorkflowImmediateResumeTaskId(executionId)),
+          {
+            tag: 'err' as const,
+            error: {
+              id: getWorkflowWakeTaskId(executionId),
+              type: 'task',
+              error: { statusCode: 503, error: 'Service Unavailable', message: '' },
+            },
+          },
+          storedTask(getWorkflowGlobalTimeoutResumeTaskId(executionId), {
+            type: 'service_account',
+            ...runAs,
+          }),
+        ] as never);
+
+        await expect(
+          workflowTaskManager.scheduleImmediateResume({
+            executionId,
+            spaceId: 'default',
+            fakeRequest,
+            isUserInteractive: true,
+            regenerateApiKey: true,
+          })
+        ).rejects.toThrow(
+          `Failed to read task ${getWorkflowWakeTaskId(executionId)} while resolving its identity`
+        );
+        expect(mockTaskManager.ensureScheduled).not.toHaveBeenCalled();
+      });
+
       it('keeps the binding on the wake task when the runner is busy', async () => {
         mockTaskManager.bulkGet.mockResolvedValue([
           notFound(getWorkflowImmediateResumeTaskId(executionId)),
