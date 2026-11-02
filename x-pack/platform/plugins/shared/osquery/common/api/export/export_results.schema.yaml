@@ -33,7 +33,7 @@ components:
             filter. The filter is wrapped in parentheses so it cannot override or
             escape the built-in action_id / schedule_id gate.
           type: string
-          maxLength: 10000
+          maxLength: 65536
           nullable: true
           example: 'host.name: "prod-host-1"'
         agentIds:
@@ -42,7 +42,7 @@ components:
             reported by the listed agents are included in the export.
           type: array
           nullable: true
-          maxItems: 10000
+          maxItems: 100000
           items:
             type: string
             maxLength: 1024

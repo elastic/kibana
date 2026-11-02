@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_FILTER_PARAM_LENGTH } from '../../../common/constants';
 import {
   exportLiveQueryParamsSchema,
   exportQuerySchema,
@@ -84,14 +85,16 @@ describe('exportRequestBodySchema', () => {
     );
   });
 
-  it('accepts a kuery of exactly 10,000 characters', () => {
-    expect(() => exportRequestBodySchema.validate({ kuery: 'a'.repeat(10_000) })).not.toThrow();
+  it('accepts a kuery at the maximum filter length', () => {
+    expect(() =>
+      exportRequestBodySchema.validate({ kuery: 'a'.repeat(MAX_FILTER_PARAM_LENGTH) })
+    ).not.toThrow();
   });
 
-  it('rejects a kuery longer than 10,000 characters', () => {
-    expect(() => exportRequestBodySchema.validate({ kuery: 'a'.repeat(10_001) })).toThrow(
-      /maximum length of \[10000\]/
-    );
+  it('rejects a kuery longer than the maximum filter length', () => {
+    expect(() =>
+      exportRequestBodySchema.validate({ kuery: 'a'.repeat(MAX_FILTER_PARAM_LENGTH + 1) })
+    ).toThrow(new RegExp(`maximum length of \\[${MAX_FILTER_PARAM_LENGTH}\\]`));
   });
 
   it('accepts an agent ID of exactly 1,024 characters', () => {
@@ -104,14 +107,16 @@ describe('exportRequestBodySchema', () => {
     );
   });
 
-  it('accepts agentIds with exactly 10,000 entries', () => {
-    const agentIds = Array.from({ length: 10_000 }, (_, i) => `agent-${i}`);
+  it('accepts agentIds with exactly 100,000 entries', () => {
+    const agentIds = Array.from({ length: 100_000 }, (_, i) => `agent-${i}`);
     expect(() => exportRequestBodySchema.validate({ agentIds })).not.toThrow();
   });
 
-  it('rejects agentIds with 10,001 entries', () => {
-    const agentIds = Array.from({ length: 10_001 }, (_, i) => `agent-${i}`);
-    expect(() => exportRequestBodySchema.validate({ agentIds })).toThrow(/array size is \[10001\]/);
+  it('rejects agentIds with 100,001 entries', () => {
+    const agentIds = Array.from({ length: 100_001 }, (_, i) => `agent-${i}`);
+    expect(() => exportRequestBodySchema.validate({ agentIds })).toThrow(
+      /array size is \[100001\]/
+    );
   });
 });
 

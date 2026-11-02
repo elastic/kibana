@@ -14,6 +14,7 @@ import {
   API_VERSIONS,
   ACTIONS_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
+  MAX_FILTER_PARAM_LENGTH,
   OSQUERY_INTEGRATION_NAME,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -62,8 +63,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             query: schema.object({
               pageSize: schema.number({ defaultValue: 20, min: 1, max: 100 }),
               nextPage: schema.maybe(schema.string({ maxLength: 4096 })),
-              kuery: schema.maybe(schema.searchFilter()),
-              userIds: schema.maybe(schema.string({ maxLength: 10_000 })),
+              kuery: schema.maybe(schema.searchFilter({ maxLength: MAX_FILTER_PARAM_LENGTH })),
+              userIds: schema.maybe(schema.string({ maxLength: MAX_FILTER_PARAM_LENGTH })),
               sourceFilters: schema.maybe(
                 schema.string({
                   maxLength: 64,
@@ -80,7 +81,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               ),
               startDate: schema.maybe(schema.string({ maxLength: 64 })),
               endDate: schema.maybe(schema.string({ maxLength: 64 })),
-              tags: schema.maybe(schema.string({ maxLength: 10_000 })),
+              tags: schema.maybe(schema.string({ maxLength: MAX_FILTER_PARAM_LENGTH })),
               sortDirection: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
                 defaultValue: 'desc',
               }),

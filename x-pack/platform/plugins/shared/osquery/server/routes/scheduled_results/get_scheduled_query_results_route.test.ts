@@ -10,7 +10,11 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  DEFAULT_MAX_TABLE_QUERY_SIZE,
+  MAX_FILTER_PARAM_LENGTH,
+} from '../../../common/constants';
 import { OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
@@ -108,8 +112,8 @@ describe('getScheduledQueryResultsRoute', () => {
 
     const QUERY_LENGTH_LIMITS = [
       { field: 'sort', limit: 256 },
-      { field: 'kuery', limit: 10_000 },
-      { field: 'esFilters', limit: 16_384 },
+      { field: 'kuery', limit: MAX_FILTER_PARAM_LENGTH },
+      { field: 'esFilters', limit: MAX_FILTER_PARAM_LENGTH },
       { field: 'startDate', limit: 64 },
     ] as const;
 

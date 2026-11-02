@@ -46,7 +46,7 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
      */
     kuery: z
       .string()
-      .max(10000)
+      .max(65536)
       .optional()
       .describe('A search string to filter history entries by pack name, query text, or query ID.'),
     /**
@@ -54,7 +54,7 @@ export const OsqueryGetUnifiedHistoryRequestQuery = lazySchema(() =>
      */
     userIds: z
       .string()
-      .max(10000)
+      .max(65536)
       .optional()
       .describe('Comma-separated list of user IDs to filter live query history.'),
     /**

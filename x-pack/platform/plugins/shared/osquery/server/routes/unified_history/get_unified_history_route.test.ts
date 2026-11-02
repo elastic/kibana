@@ -11,6 +11,7 @@ import {
   ACTIONS_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   API_VERSIONS,
+  MAX_FILTER_PARAM_LENGTH,
 } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { hasConnectedRemoteClusters, prefixIndexPatternsWithCcs } from '../../utils/ccs_utils';
@@ -104,9 +105,9 @@ describe('getUnifiedHistoryRoute', () => {
 
     const LENGTH_LIMITS = [
       { field: 'nextPage', limit: 4096 },
-      { field: 'kuery', limit: 10_000 },
-      { field: 'userIds', limit: 10_000 },
-      { field: 'tags', limit: 10_000 },
+      { field: 'kuery', limit: MAX_FILTER_PARAM_LENGTH },
+      { field: 'userIds', limit: MAX_FILTER_PARAM_LENGTH },
+      { field: 'tags', limit: MAX_FILTER_PARAM_LENGTH },
       { field: 'startDate', limit: 64 },
       { field: 'endDate', limit: 64 },
     ] as const;

@@ -13,7 +13,11 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  DEFAULT_MAX_TABLE_QUERY_SIZE,
+  MAX_FILTER_PARAM_LENGTH,
+} from '../../../common/constants';
 import type {
   ScheduledActionResultsRequestOptions,
   ScheduledActionResultsStrategyResponse,
@@ -73,7 +77,7 @@ export const getScheduledActionResultsRoute = (
               sortOrder: schema.maybe(
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')])
               ),
-              kuery: schema.maybe(schema.searchFilter()),
+              kuery: schema.maybe(schema.searchFilter({ maxLength: MAX_FILTER_PARAM_LENGTH })),
             }),
           },
         },

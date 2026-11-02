@@ -13,7 +13,11 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { isFilters } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  DEFAULT_MAX_TABLE_QUERY_SIZE,
+  MAX_FILTER_PARAM_LENGTH,
+} from '../../../common/constants';
 import type {
   ResultsRequestOptions,
   ResultsStrategyResponse,
@@ -55,9 +59,8 @@ export const getScheduledQueryResultsRoute = (
               sortOrder: schema.maybe(
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')])
               ),
-              kuery: schema.maybe(schema.searchFilter()),
-              // Serialized filter pills repeat each value three times (meta.value, meta.params, query).
-              esFilters: schema.maybe(schema.searchFilter({ maxLength: 16_384 })),
+              kuery: schema.maybe(schema.searchFilter({ maxLength: MAX_FILTER_PARAM_LENGTH })),
+              esFilters: schema.maybe(schema.searchFilter({ maxLength: MAX_FILTER_PARAM_LENGTH })),
               startDate: schema.maybe(schema.string({ maxLength: 64 })),
             }),
           },

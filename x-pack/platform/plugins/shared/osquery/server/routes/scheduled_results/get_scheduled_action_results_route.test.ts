@@ -10,7 +10,11 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import type { RequestHandler } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import {
+  API_VERSIONS,
+  DEFAULT_MAX_TABLE_QUERY_SIZE,
+  MAX_FILTER_PARAM_LENGTH,
+} from '../../../common/constants';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -171,7 +175,7 @@ describe('getScheduledActionResultsRoute', () => {
 
     const QUERY_LENGTH_LIMITS = [
       { field: 'sort', limit: 256 },
-      { field: 'kuery', limit: 10_000 },
+      { field: 'kuery', limit: MAX_FILTER_PARAM_LENGTH },
     ] as const;
 
     it.each(QUERY_LENGTH_LIMITS)(

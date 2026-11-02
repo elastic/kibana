@@ -88,7 +88,7 @@ export const OsqueryGetScheduledActionResultsRequestQuery = lazySchema(() =>
      */
     kuery: z
       .string()
-      .max(10000)
+      .max(65536)
       .nullable()
       .optional()
       .describe('The kuery to filter the results by.'),
@@ -157,7 +157,7 @@ export const OsqueryGetScheduledQueryResultsRequestQuery = lazySchema(() =>
      */
     kuery: z
       .string()
-      .max(10000)
+      .max(65536)
       .nullable()
       .optional()
       .describe('The kuery to filter the results by.'),

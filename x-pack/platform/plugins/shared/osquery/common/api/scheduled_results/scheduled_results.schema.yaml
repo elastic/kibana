@@ -40,7 +40,7 @@ paths:
             description: 'The kuery to filter the results by.'
             example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
             type: string
-            maxLength: 10000
+            maxLength: 65536
             nullable: true
         - name: page
           in: query
@@ -143,7 +143,7 @@ paths:
             description: 'The kuery to filter the results by.'
             example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
             type: string
-            maxLength: 10000
+            maxLength: 65536
             nullable: true
         - name: page
           in: query
