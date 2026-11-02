@@ -53,7 +53,7 @@ const renderCard = (props: React.ComponentProps<typeof InvestigationCard>) =>
   );
 
 describe('InvestigationCard', () => {
-  it('shows the title, summary, impacted entities, and pending proposals, but not the subjects', () => {
+  it('shows the title, summary, and impacted entities, but not subjects or proposals', () => {
     renderCard({ investigation: investigation() });
 
     expect(screen.getByTestId('investigationCardTitle')).toHaveTextContent(
@@ -69,24 +69,24 @@ describe('InvestigationCard', () => {
       'payments',
     ]);
     expect(screen.getByText('+1')).toBeInTheDocument();
-    expect(screen.getByTestId('investigationCardPendingProposals')).toHaveTextContent(
-      '2 proposals to review'
-    );
-    expect(screen.queryByTestId('investigationCardRunning')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
   });
 
-  it('shows the running dot while an agent works on it and leaves out what is missing', () => {
+  it('shows in-progress status beside the age, and leaves out severity and what is missing', () => {
     renderCard({
       investigation: investigation({
         in_progress: true,
-        metadata: { status: 'open' },
+        metadata: { status: 'open', severity: 'critical' },
         subjects: [],
         impact: undefined,
         pending_proposal_count: undefined,
       }),
     });
 
-    expect(screen.getByTestId('investigationCardRunning')).toBeInTheDocument();
+    expect(screen.getByText('•')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationCardRunning')).toHaveTextContent('In progress');
+    expect(screen.getByTestId('investigationCardRunningDots')).toBeInTheDocument();
+    expect(screen.queryByTestId('investigationCardSeverity')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSummary')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
   });
@@ -130,10 +130,30 @@ describe('InvestigationCard', () => {
     const item = investigation();
     renderCard({ investigation: item, onClick });
 
-    fireEvent.click(screen.getByTestId('investigationCard'));
-    fireEvent.keyDown(screen.getByTestId('investigationCard'), { key: 'Enter' });
+    fireEvent.click(screen.getByTestId('investigationCardButton'));
+    fireEvent.keyDown(screen.getByTestId('investigationCardButton'), { key: 'Enter' });
 
     expect(onClick).toHaveBeenCalledTimes(2);
     expect(onClick).toHaveBeenCalledWith(item);
+  });
+
+  it('keeps trailing actions outside the card button so they do not open the card', () => {
+    const onClick = jest.fn();
+    renderCard({
+      investigation: investigation(),
+      onClick,
+      actions: (
+        <button type="button" data-test-subj="cardAction">
+          Action
+        </button>
+      ),
+    });
+
+    const cardButton = screen.getByTestId('investigationCardButton');
+    expect(cardButton).not.toContainElement(screen.getByTestId('cardAction'));
+
+    fireEvent.click(screen.getByTestId('cardAction'));
+
+    expect(onClick).not.toHaveBeenCalled();
   });
 });

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useEffect, useState } from 'react';
 import {
   Comparators,
   EuiInMemoryTable,
   EuiSwitch,
+  EuiToolTip,
   type Criteria,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useToggleAutomation, type Automation } from '../hooks/use_automations';
 import type { RunCounts, RunCountStatus } from '../hooks/use_automation_usage';
 import type { AutomationFacets } from '../utils/filter_automations';
@@ -30,6 +33,7 @@ const INTERACTIVE_ELEMENTS =
 export const AutomationsTable = ({
   automations,
   canManage,
+  editDisabledReason,
   runCounts,
   usedToday,
   getFacets,
@@ -46,6 +50,8 @@ export const AutomationsTable = ({
 }: {
   automations: Automation[];
   canManage: boolean;
+  /** Why the switches are disabled, shown on hover. */
+  editDisabledReason?: string;
   runCounts: Map<string, RunCounts>;
   usedToday: Map<string, number>;
   getFacets: (automation: Automation) => AutomationFacets;
@@ -132,24 +138,31 @@ export const AutomationsTable = ({
       width: '96px',
       sortable: true,
       render: (isEnabled: boolean, automation: Automation) => (
-        <EuiSwitch
-          label={i18n.translate('xpack.nightshift.automations.toggleLabel', {
-            defaultMessage: '{action} {name}',
-            values: { action: isEnabled ? 'Pause' : 'Enable', name: automation.name },
-          })}
-          showLabel={false}
-          compressed
-          checked={isEnabled}
-          disabled={!canManage || toggleAutomation.isLoading}
-          onChange={(event) =>
-            toggleAutomation.mutate({
-              id: automation.id,
-              name: automation.name,
-              isEnabled: event.target.checked,
-            })
-          }
-          data-test-subj={`automationToggle-${automation.id}`}
-        />
+        <EuiToolTip content={editDisabledReason}>
+          <EuiSwitch
+            label={i18n.translate('xpack.nightshift.automations.toggleLabel', {
+              defaultMessage: '{action} {name}',
+              values: { action: isEnabled ? 'Pause' : 'Enable', name: automation.name },
+            })}
+            showLabel={false}
+            compressed
+            checked={isEnabled}
+            disabled={!canManage || toggleAutomation.isLoading}
+            {...getEbtProps({
+              action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_AUTOMATION,
+              element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+              detail: isEnabled ? 'pause' : 'enable',
+            })}
+            onChange={(event) =>
+              toggleAutomation.mutate({
+                id: automation.id,
+                name: automation.name,
+                isEnabled: event.target.checked,
+              })
+            }
+            data-test-subj={`automationToggle-${automation.id}`}
+          />
+        </EuiToolTip>
       ),
     },
     ...(canManage

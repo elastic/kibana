@@ -35,6 +35,8 @@ export {
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_ERROR,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
+  SIGNIFICANT_EVENT_TYPES,
+  significantEventTypeSchema,
   type SignificantEventType,
 } from './src/significant_events/queries/types';
 export {

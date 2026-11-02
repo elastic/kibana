@@ -8,7 +8,10 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AlertsTableOnLoadedProps } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableOnLoadedProps,
+  BulkActionsConfig,
+} from '@kbn/response-ops-alerts-table/types';
 import React, { memo } from 'react';
 import { useCreateEaseAlertsDataView } from '../../../detections/hooks/alert_summary/use_create_data_view';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
@@ -38,6 +41,14 @@ interface EaseAlertsTableProps {
    * Query that contains the id of the alerts to display in the table
    */
   query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
+  /**
+   * Appended to the table's own bulk actions
+   */
+  additionalBulkActionItems?: BulkActionsConfig[];
+  /**
+   * Adds a "Remove from case" item to each row's actions menu
+   */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 /**
@@ -45,7 +56,8 @@ interface EaseAlertsTableProps {
  * It fetches packages (integrations) and creates a local dataView.
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
-export const EaseAlertsTable = memo(({ id, onLoaded, query }: EaseAlertsTableProps) => {
+export const EaseAlertsTable = memo((props: EaseAlertsTableProps) => {
+  const { id, onLoaded, query, additionalBulkActionItems, onRemoveFromCase } = props;
   const { dataView, loading: dataViewLoading } = useCreateEaseAlertsDataView();
 
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();
@@ -73,6 +85,8 @@ export const EaseAlertsTable = memo(({ id, onLoaded, query }: EaseAlertsTablePro
               onLoaded={onLoaded}
               packages={installedPackages}
               query={query}
+              additionalBulkActionItems={additionalBulkActionItems}
+              onRemoveFromCase={onRemoveFromCase}
             />
           </div>
         )}

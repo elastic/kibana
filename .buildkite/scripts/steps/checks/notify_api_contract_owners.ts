@@ -53,6 +53,7 @@ interface ReleaseNoteCopy {
   labelStep: string;
   textStep: string;
   guidance: string;
+  breakingContext: string;
   optionalPrompt: string;
 }
 
@@ -220,6 +221,8 @@ Nothing here blocks merge. The approved breaking change(s) still ship with this 
 
 ${releaseNote.guidance}
 
+${releaseNote.breakingContext}
+
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the allowlist workflow.`;
   }
 
@@ -238,7 +241,7 @@ See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/m
 
   return `## API Contract Breaking Changes
 
-The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes fail the check and should be resolved; Experimental and reported-only changes are informational.
+The following breaking change(s) were detected across the public OpenAPI surface, grouped by stability tier. Stable and Technical Preview changes block merge until they're resolved. Experimental and reported-only changes are informational.
 
 ${sections}
 ${noteBlock}### What to do
@@ -252,6 +255,8 @@ ${noteBlock}### What to do
 ### Release note
 
 ${releaseNote.guidance}
+
+${releaseNote.breakingContext}
 
 See the [\`@kbn/api-contracts\` README](https://github.com/elastic/kibana/blob/main/${README_PATH}) for tier definitions and the allowlist workflow.`;
 };

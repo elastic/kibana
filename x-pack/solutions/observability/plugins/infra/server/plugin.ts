@@ -35,7 +35,6 @@ import {
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import type { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
 import { createIsCpsPlatformGateEnabled } from './lib/log_analysis/common';
-import { createIsPodSchemaSelectorEnabled } from './lib/helpers/is_pod_schema_selector_enabled';
 import { InfraSourceStatus } from './lib/source_status';
 import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import {
@@ -183,9 +182,6 @@ export class InfraServerPlugin
       isCpsPlatformGateEnabled: createIsCpsPlatformGateEnabled({
         serverless: this.serverless,
         cps: plugins.cps,
-        getStartServices: () => core.getStartServices(),
-      }),
-      isPodSchemaSelectorEnabled: createIsPodSchemaSelectorEnabled({
         getStartServices: () => core.getStartServices(),
       }),
       logger: this.logger,

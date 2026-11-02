@@ -45,7 +45,7 @@ const setup = ({ crossSpaceMonitorTotal }: { crossSpaceMonitorTotal: number }) =
   const routeContext = {
     savedObjectsClient,
     syntheticsMonitorClient: {},
-    request: { params: { locationId } },
+    request: { params: { id: locationId } },
     response,
     monitorConfigRepository,
     server: {

@@ -18,12 +18,12 @@ import type {
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
 import { useSignificantEventsCost } from '../hooks/use_significant_events_cost';
-import { useRunQuotas } from '../hooks/use_significant_events_run_quotas';
+import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
 import { CostEstimate } from './cost_estimate';
 import type { TokenTrackingForm } from './use_token_tracking_form';
 
 jest.mock('../hooks/use_significant_events_cost');
-jest.mock('../hooks/use_significant_events_run_quotas');
+jest.mock('../../data/run_quotas/use_significant_events_run_quotas');
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
   const { useState } = jest.requireActual('react') as typeof import('react');
@@ -242,15 +242,6 @@ describe('CostEstimate', () => {
     expect(screen.queryByTestId('nightshiftCostSection')).not.toBeInTheDocument();
   });
 
-  it('shows cost details without requiring expansion', () => {
-    renderCost();
-    expect(screen.getByTestId('nightshiftCostHeader')).toHaveTextContent(
-      'Approximate inference cost across all spaces'
-    );
-    expect(screen.getByTestId('nightshiftTokenTrackingSwitch')).toBeChecked();
-    expect(screen.getByTestId('nightshiftCostHeadline')).toBeVisible();
-  });
-
   it('stages token tracking changes without saving immediately', () => {
     setTracking(false);
     renderCost();
@@ -286,7 +277,7 @@ describe('CostEstimate', () => {
       'Token tracking is enabled in 1 of 2 spaces'
     );
     expect(screen.getByTestId('nightshiftTrackingCoverageCallout')).toHaveTextContent(
-      'This deployment-wide estimate includes all Significant Events calls recorded during the selected period.'
+      'This deployment-wide estimate includes all significant events calls recorded during the selected period.'
     );
   });
 

@@ -12,6 +12,7 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE,
 } from '.';
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -22,6 +23,7 @@ interface ParsedStep {
   'branch-timeout'?: string;
   concurrency?: number;
   foreach?: string;
+  if?: string;
   mode?: string;
   status?: string;
   steps?: ParsedStep[];
@@ -33,6 +35,7 @@ interface ParsedWorkflow {
   enabled?: boolean;
   name?: string;
   outputs?: Array<{ name: string }>;
+  settings?: { timeout?: string };
   steps?: ParsedStep[];
   triggers?: Array<{ type?: string; inputs?: { properties?: Record<string, unknown> } }>;
 }
@@ -62,10 +65,10 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.pluginId).toBe('alertzero');
   });
 
-  // The risk-first retrieval, `max_batches` input and `alerts_not_analysed` output
-  // need installed copies to pick up the new definition.
-  it('carries version 4, the risk-first retrieval and max_batches cap', () => {
-    expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(4);
+  // The risk-first retrieval and the `alerts_eligible` / `alerts_not_analysed`
+  // outputs need installed copies to pick up the new definition.
+  it('carries version 14, the risk-first retrieval and the not-analysed counts', () => {
+    expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(14);
   });
 
   it('is discoverable from the managed registry by id', () => {
@@ -101,13 +104,19 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
   });
 
   describe('inputs', () => {
-    it('exposes exactly batch_size, connector_id, lookback and max_batches', () => {
+    it('exposes exactly batch_size, connector_id, lookback and max_alerts', () => {
       expect(Object.keys(inputs()).sort()).toEqual([
         'batch_size',
         'connector_id',
         'lookback',
-        'max_batches',
+        'max_alerts',
       ]);
+    });
+
+    it('defaults max_alerts to a full day and keeps it inside one page of batches', () => {
+      expect(inputs().max_alerts).toEqual(
+        expect.objectContaining({ default: 10000, minimum: 100, maximum: 10000, type: 'integer' })
+      );
     });
 
     it('defaults batch_size to 100', () => {
@@ -147,10 +156,16 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     });
 
     // The LIMIT cuts whatever sorts last, so the order decides which alerts a
-    // capped run drops: riskiest and newest must be kept, not the oldest.
+    // capped run drops: the highest-risk, newest must be kept.
     it('sorts riskiest first, then newest first, so the cap drops the least important alerts', () => {
-      expect(query()).toContain('| SORT kibana.alert.risk_score DESC, @timestamp DESC');
+      expect(query()).toContain('| SORT kibana.alert.risk_score DESC NULLS LAST, @timestamp DESC');
       expect(query()).not.toContain('@timestamp ASC');
+    });
+
+    // ES|QL sorts a null as the largest value, so a bare `DESC` would put every
+    // unscored alert ahead of the scored ones.
+    it('sorts alerts with no risk score last', () => {
+      expect(query()).toContain('kibana.alert.risk_score DESC NULLS LAST');
     });
 
     it('sorts before limiting', () => {
@@ -181,56 +196,94 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
+    // A true-positive or inconclusive review retires its alerts with
+    // `az:ad_correlated`, and a false positive retires them with `az:ad_fp_chain`.
+    // Correlating either again would only persist a near-duplicate attack.
+    it('excludes alerts tagged az:ad_correlated or az:ad_fp_chain', () => {
+      expect(retrieve().with?.filter).toEqual({
+        bool: {
+          must_not: [
+            {
+              terms: {
+                'kibana.alert.workflow_tags': ['az:ad_correlated', 'az:ad_fp_chain'],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    // A `must_not` keeps untagged alerts, which an ES|QL comparison on the
+    // multi-valued, often-absent tag field would drop unless it had a null arm.
+    it('excludes the tag in the pushed-down filter rather than the ES|QL query', () => {
+      expect(query()).not.toContain('workflow_tags');
+    });
+
     it('selects METADATA _id, which is all the batches need', () => {
       expect(query()).toContain('METADATA _id');
     });
 
-    it('derives the LIMIT from batch_size and max_batches so the fan-out cap cannot be exceeded', () => {
+    it('derives the LIMIT from the alert cap and the 100-branch ceiling', () => {
       expect(query()).toContain(
-        'LIMIT {{ inputs.batch_size | times: inputs.max_batches | at_most: 10000 }}'
+        '{%- assign branch_ceiling = inputs.batch_size | times: 100 | at_most: 10000 -%}'
       );
+      expect(query()).toContain(
+        '{%- assign alert_limit = inputs.max_alerts | default: 10000 | at_most: branch_ceiling -%}'
+      );
+      expect(query()).toContain('| LIMIT {{ alert_limit }}');
     });
 
-    describe('max_batches cap', () => {
+    it('renders the prorated cap, and never more branches than the batch size allows', async () => {
       const engine = createWorkflowLiquidEngine({ strictFilters: true });
-
-      const renderLimit = async (batchSize: number, maxBatches: number) => {
+      const limitOf = async (maxAlerts: number | undefined, batchSize: number) => {
         const rendered = await engine.parseAndRender(query(), {
-          inputs: { batch_size: batchSize, max_batches: maxBatches, lookback: '24h' },
+          inputs: {
+            batch_size: batchSize,
+            lookback: '24h',
+            ...(maxAlerts === undefined ? {} : { max_alerts: maxAlerts }),
+          },
           workflow: { spaceId: 'default' },
         });
         return Number(/\| LIMIT (\d+)/.exec(rendered)?.[1]);
       };
 
-      it.each([
-        [100, 5, 500],
-        [50, 1, 50],
-        [100, 100, 10000],
-        [1000, 100, 10000],
-      ])('retrieves at most batch_size %s x max_batches %s = %s ids', async (size, max, limit) => {
-        expect(await renderLimit(size, max)).toBe(limit);
-      });
-
-      it('declares max_batches as an integer between 1 and 100, defaulting to the engine fan-out ceiling', () => {
-        expect(inputs().max_batches).toMatchObject({
-          default: 100,
-          maximum: 100,
-          minimum: 1,
-          type: 'integer',
-        });
-      });
+      expect(await limitOf(undefined, 100)).toBe(10000);
+      expect(await limitOf(416, 100)).toBe(416);
+      expect(await limitOf(100, 100)).toBe(100);
+      expect(await limitOf(10000, 50)).toBe(5000);
     });
 
-    it('counts eligible alerts with the same filters as the retrieval', () => {
-      const countQuery = String(step('count_eligible_alerts').with?.query);
-      const filters = (text: string) =>
+    it('does not expose a max_batches input, because max_alerts already caps the run', () => {
+      expect(inputs()).not.toHaveProperty('max_batches');
+      expect(query()).not.toContain('max_batches');
+    });
+
+    describe('eligible count', () => {
+      const countQuery = () => String(step('count_eligible_alerts').with?.query);
+      const whereClauses = (text: string) =>
         text
           .split('|')
           .map((clause) => clause.trim())
           .filter((clause) => clause.startsWith('WHERE'));
 
-      expect(filters(countQuery)).toEqual(filters(query()));
-      expect(countQuery).toContain('STATS eligible = COUNT(*)');
+      // A count over a different window or population would report alerts that
+      // were never eligible as "not analysed".
+      it('counts with the same WHERE pipes as the retrieval', () => {
+        expect(whereClauses(countQuery())).toEqual(whereClauses(query()));
+        expect(countQuery()).toContain('STATS eligible = COUNT(*)');
+      });
+
+      it('excludes the same already-reviewed tags as the retrieval', () => {
+        expect(step('count_eligible_alerts').with?.filter).toEqual(retrieve().with?.filter);
+      });
+
+      it('does not sort or limit, so it counts every eligible alert', () => {
+        expect(countQuery()).not.toMatch(/\| (SORT|LIMIT)/);
+      });
+    });
+
+    it('gives the child 12h so a slow scan can return to the runner', () => {
+      expect(parsed.settings?.timeout).toBe('12h');
     });
   });
 
@@ -280,6 +333,14 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     it('has each batch retrieve its own alerts rather than take pre-built alert strings', () => {
       expect(fanOut().steps?.[0].with?.alert_retrieval_mode).toBe('esql');
       expect(fanOut().steps?.[0].with).not.toHaveProperty('alerts');
+    });
+
+    // The YAML cannot import the constant, so this is what keeps the two equal and
+    // stops a deleted key from leaving the Worker deduplicating against manual runs.
+    it('passes the Worker generation source to the run step', () => {
+      expect(fanOut().steps?.[0].with?.generation_source).toBe(
+        ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE
+      );
     });
 
     // The offsets and the per-branch slice are a matched pair — an off-by-one
@@ -340,6 +401,7 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         expect(getInList(query, 'kibana.alert.uuid')).toEqual(getQueryIds(query));
       });
 
+      // The run-level order is risk-first, so this is the only time ordering.
       it('sorts each batch by @timestamp before limiting it', async () => {
         const query = await renderQuery(getContext(5, 2), 0);
 
@@ -383,6 +445,21 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(fanOut().steps?.[0].with?.include_attack_discoveries).toBe(false);
     });
 
+    // The review's FP/TP analysis owns the false-positive decision. With the
+    // gate on, generation dropped false-positive chains before any review ran.
+    it('turns off the ground-truth gate on the run step', () => {
+      expect(fanOut().steps?.[0].with?.ground_truth_gate_enabled).toBe(false);
+    });
+
+    // An unset cyber-domain row resolves to nothing, so the frontier tier stays
+    // in charge. The order is the resolution order.
+    it('tries the cyber-domain row before the frontier tier', () => {
+      expect(fanOut().steps?.[0].with?.feature_id).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
+    });
+
     // Step IO is keyed by step id and returns the latest execution, so two
     // concurrent branches running the same step name would race.
     it('keeps the branch body to a single step', () => {
@@ -398,6 +475,18 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
         index: '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}',
         type: 'elasticsearch.search',
       });
+    });
+
+    // Persistence writes only when the model produced attacks. A zero count must
+    // not search an index that was never created.
+    it('searches only when attacks were generated', () => {
+      expect(fetch().if).toBe('${{ steps.aggregate.output.discoveries_generated > 0 }}');
+    });
+
+    // `ignore_unavailable` also hides an index the caller cannot read. Leaving it
+    // unset makes that 403 fail the run instead of looking like a quiet run.
+    it('fails the run when the search is not authorized', () => {
+      expect(fetch().with?.ignore_unavailable).toBeUndefined();
     });
 
     // The run step's `execution_uuid` is written to each persisted document as
@@ -420,6 +509,12 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       const names = parsed.steps?.map(({ name }) => name) ?? [];
 
       expect(names.indexOf('fetch_discoveries')).toBeGreaterThan(names.indexOf('generate_batches'));
+    });
+
+    it('runs after the generated count, which gates the search', () => {
+      const names = parsed.steps?.map(({ name }) => name) ?? [];
+
+      expect(names.indexOf('fetch_discoveries')).toBeGreaterThan(names.indexOf('aggregate'));
     });
   });
 
@@ -518,7 +613,7 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
 
     it('emits the persisted documents rather than the branch outputs', () => {
       expect(step('emit_result').with?.attack_discoveries).toBe(
-        "${{ steps.fetch_discoveries.output.hits.hits | map: '_source' }}"
+        "${{ steps.fetch_discoveries.output.hits.hits | default: steps.aggregate.output.no_discoveries | map: '_source' }}"
       );
     });
 

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { entityIdSchema, ENTITY_ID_NOTE } from '@kbn/alerting-v2-schemas';
 
 /**
  * Shared path params schema for routes that accept a single rule ID.
  */
-export const ruleIdParamsSchema = z
-  .object({
-    id: entityIdSchema.describe(`The identifier for the rule. ${ENTITY_ID_NOTE}`),
-  })
-  .strict();
+export const ruleIdParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: entityIdSchema.describe(`The identifier for the rule. ${ENTITY_ID_NOTE}`),
+    })
+    .strict()
+);

@@ -45,7 +45,7 @@ export const ContinuousOnboardingSection = ({
               })
             : i18n.translate('xpack.nightshift.settings.continuousKiOnboardingHelp', {
                 defaultMessage:
-                  'Run knowledge indicator onboarding automatically on enabled sources at the configured interval.',
+                  'Turns on when this space gets its first source. Runs knowledge indicator onboarding on enabled sources at the configured interval.',
               })}
         </p>
       }
@@ -77,7 +77,7 @@ export const ContinuousOnboardingSection = ({
             })}
             helpText={i18n.translate('xpack.nightshift.settings.onboardingIntervalHelp', {
               defaultMessage:
-                'Minimum period in hours between onboarding runs for a given stream. Set to 0 for no cooldown between runs.',
+                'Minimum period in hours between onboarding runs for a given source. Set to 0 for no cooldown between runs.',
             })}
           >
             <EuiFieldNumber

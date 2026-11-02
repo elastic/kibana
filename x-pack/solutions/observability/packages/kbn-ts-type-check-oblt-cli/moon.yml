@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/some-dev-log'
   - '@kbn/dev-proc-runner'
+  - '@kbn/ts-type-check-cli'
 tags:
   - shared-common
   - package
@@ -36,6 +37,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

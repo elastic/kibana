@@ -63,8 +63,11 @@ export const MonitorManagementPage: React.FC = () => {
   // the overview-status request), so an empty result under a filter doesn't prove the
   // deployment is empty — see the same guard in `overview_page.tsx`. The date range is
   // excluded on purpose: it scopes status, not which monitors exist.
+  // `includeHeartbeatMonitors: false` empties ping-only overview results the same
+  // way a monitor filter does, and must not onboard away from Management.
   const hasActiveOverviewFilter = Boolean(
-    pageState.query ||
+    pageState.includeHeartbeatMonitors === false ||
+      pageState.query ||
       pageState.tags?.length ||
       pageState.locations?.length ||
       pageState.monitorTypes?.length ||

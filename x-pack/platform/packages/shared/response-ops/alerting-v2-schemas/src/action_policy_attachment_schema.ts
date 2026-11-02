@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
+import { lazySchema, type z } from '@kbn/zod/v4';
 import { actionPolicyResponseSchema } from './action_policy_response_schema';
 
 /** Namespaced to match `ALERTING_NAMESPACE` in `@kbn/alerting-v2-constants`. */
@@ -30,19 +30,21 @@ export const ACTION_POLICY_ATTACHMENT_TYPE = 'platform.alerting.action_policy' a
  * intentionally excluded — nothing on the attachment side reads it, and we
  * don't want per-user identity baked into a conversation attachment.
  */
-export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema
-  .pick({
-    id: true,
-    name: true,
-    description: true,
-    destinations: true,
-    matcher: true,
-    grouping: true,
-    throttle: true,
-    enabled: true,
-    snoozed_until: true,
-    updated_at: true,
-  })
-  .partial();
+export const actionPolicyAttachmentDataSchema = lazySchema(() =>
+  actionPolicyResponseSchema
+    .pick({
+      id: true,
+      name: true,
+      description: true,
+      destinations: true,
+      matcher: true,
+      grouping: true,
+      throttle: true,
+      enabled: true,
+      snoozed_until: true,
+      updated_at: true,
+    })
+    .partial()
+);
 
 export type ActionPolicyAttachmentData = z.infer<typeof actionPolicyAttachmentDataSchema>;

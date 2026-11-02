@@ -11,6 +11,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   connectorTypeIsDual,
   getConnectorSpec,
@@ -34,6 +35,7 @@ import { extractIngestToken, verifyIngestToken } from './verify_ingress_auth';
 import { loadIngressCredential, parseIngestToken } from './ingress_credential';
 import type { InboundEventRateLimiter } from './inbound_event_rate_limiter';
 import { loadInboundConnector } from './load_inbound_connector';
+import { readIngressQuery } from './read_ingress_query';
 import { validateSpokeHttpHeaders } from './spoke_http';
 
 export type IngestInboundEventResult =
@@ -52,12 +54,12 @@ export type IngestInboundEventResult =
 export interface IngestInboundEventInput {
   connectorTypeId: string;
   connectorId: string;
-  spaceId: string;
-  requestId?: string;
-  headers: Record<string, string | string[] | undefined>;
-  query: IngestEventsRequestQuery;
-  body: unknown;
-  remoteAddress: string | undefined;
+  spaceId: SpaceId;
+  /**
+   * The route request. Headers, query, body, the socket address, and the request id are
+   * read from it. A UIAM service-account bearer is authenticated on this same object.
+   */
+  request: KibanaRequest<unknown, IngestEventsRequestQuery, unknown>;
 }
 
 export interface IngestInboundEventParams extends IngestInboundEventInput {
@@ -87,11 +89,7 @@ export async function ingestInboundEvent({
   connectorTypeId: connectorTypeIdParam,
   connectorId,
   spaceId,
-  requestId,
-  headers,
-  query,
-  body,
-  remoteAddress,
+  request,
   inboundEventsEnabled,
   isActionTypeEnabled,
   maxEmitted,
@@ -105,6 +103,8 @@ export async function ingestInboundEvent({
   inMemoryConnectors,
   rateLimiter,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
+  const { headers, query, body, id: requestId } = request;
+  const remoteAddress = request.socket.remoteAddress;
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
   const baseLog = {
     spaceId,
@@ -202,15 +202,18 @@ export async function ingestInboundEvent({
   }
 
   let kibanaScheduleRequest: KibanaRequest | undefined;
+  let authenticatedUser: string | undefined;
   // In-memory events-on connectors have no ingest token. A saved identity stays on the token path.
   if (connectorEventsEnabled && connector.hasInboundEventIdentity !== true) {
     try {
-      kibanaScheduleRequest = await resolveKibanaInboundRequest({
-        headers,
+      const resolvedInboundRequest = await resolveKibanaInboundRequest({
+        inboundRequest: request,
         spaceId,
         elasticsearchClient: await getElasticsearchClient(),
         getKibanaRequestAccess,
       });
+      kibanaScheduleRequest = resolvedInboundRequest?.request;
+      authenticatedUser = resolvedInboundRequest?.authenticatedUser;
     } catch (error) {
       logInboundIngressOutcome(logger, {
         ...baseLog,
@@ -262,6 +265,8 @@ export async function ingestInboundEvent({
     return rateLimited(connectorDecision.retryAfterSeconds);
   }
 
+  const ingressQuery = readIngressQuery(query);
+
   try {
     const parsed = parseHandleEventsResult(
       await spec.events.handleEvents({
@@ -270,7 +275,11 @@ export async function ingestInboundEvent({
         spaceId,
         config: stripIngestTokenHash(connector.config),
         rawBody: body,
+        headers: Object.fromEntries(
+          (spec.events.headers ?? []).map((name) => [name, headers[name]])
+        ),
         log: logger,
+        ...(Object.keys(ingressQuery).length > 0 ? { query: ingressQuery } : {}),
       }),
       { maxEvents: maxEmitted, maxPayloadBytes: maxBodyBytes }
     );
@@ -387,6 +396,7 @@ export async function ingestInboundEvent({
           connectorTypeId,
           correlationKey: event.correlationKey,
           request: scheduleRequest,
+          ...(authenticatedUser ? { authenticatedUser } : {}),
         });
         // HTTP stays 202; ingest logs a single emit_partial outcome.
         if (!emitResult.ok) {

@@ -17,14 +17,14 @@ export interface MappingHeaderProps {
 }
 
 export function MappingHeader({ docLinks }: MappingHeaderProps) {
-  const datasetMappingsDocLink = `${docLinks.links.dataFederation.datasets}#declare-a-dataset-mapping`;
+  const datasetMappingsDocLink = docLinks.links.dataFederation.datasetMappings;
 
   return (
     <>
       <EuiTitle size="m">
         <h3>
           {i18n.translate('xpack.dataFederation.createDatasetWizard.schemaMappingsTitle', {
-            defaultMessage: 'Schema mappings',
+            defaultMessage: 'Schema',
           })}
         </h3>
       </EuiTitle>
@@ -45,7 +45,6 @@ export function MappingHeader({ docLinks }: MappingHeaderProps) {
           </EuiLink>
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
     </>
   );
 }

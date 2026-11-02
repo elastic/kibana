@@ -11,7 +11,7 @@ import {
   AGENT_STATUS_ROUTE,
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../../common/endpoint/constants';
-import { getResponseActionsAccessRole } from '../../ui/fixtures/response_actions_access_role';
+import { getResponseActionsAccessRole } from '../../common/response_actions_access_role';
 import { apiTest, tags } from '../fixtures';
 import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_endpoint_hosts';
 

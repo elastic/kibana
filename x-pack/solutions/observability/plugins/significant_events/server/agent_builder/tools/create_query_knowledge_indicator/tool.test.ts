@@ -14,6 +14,7 @@ import {
   createMockToolContext,
   createSignificantEventsServer,
   invokeHandler,
+  sourceWithSlug,
 } from '../../utils/test_helpers';
 import {
   createQueryKnowledgeIndicatorTool,
@@ -35,7 +36,7 @@ describe('ki_query_create tool', () => {
   } as unknown as EbtTelemetryClient;
 
   const queryParams = {
-    stream_name: 'logs.test',
+    slug: 'logs.test',
     title: 'suspicious query',
     description: 'desc',
     esql: { query: 'FROM logs.test | stats c = count()' },
@@ -45,15 +46,10 @@ describe('ki_query_create tool', () => {
   const createScopedClients = (kiClient: object) =>
     jest.fn(async () => {
       return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({
+            sources: [sourceWithSlug('logs.test', { view_name: 'logs.test' })],
+            total: 1,
           }),
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
@@ -92,7 +88,7 @@ describe('ki_query_create tool', () => {
 
     const confirmation = await tool.confirmation?.getConfirmation?.({
       toolParams: {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         title: 'Checkout 5xx burst detector',
         description: 'Detects 5xx bursts',
         esql: {
@@ -109,7 +105,7 @@ describe('ki_query_create tool', () => {
         cancel_text: 'Cancel',
       })
     );
-    expect(confirmation?.message).toContain('stream "logs.test"');
+    expect(confirmation?.message).toContain('source "logs.test"');
     expect(confirmation?.message).toContain('title: "Checkout 5xx burst detector"');
     expect(confirmation?.message).toContain(
       'esql: "FROM logs.test, logs.test.* | WHERE http.response.status_code >= 500"'
@@ -176,8 +172,7 @@ describe('ki_query_create tool', () => {
         ki_kind: 'query',
         tool_id: 'ki_query_create',
         success: true,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
       })
     );
   });
@@ -206,8 +201,7 @@ describe('ki_query_create tool', () => {
         ki_kind: 'query',
         tool_id: 'ki_query_create',
         success: false,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
         error_message: 'upsert failed',
       })
     );

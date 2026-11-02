@@ -21,6 +21,8 @@ import {
   ATTACK_STATUS_ICON_COLORS,
 } from '../../../../common/utils/action_icons';
 
+const NO_ITEMS: EuiContextMenuPanelItemDescriptor[] = [];
+
 interface AttacksActionMenuProps {
   assigneeItems: EuiContextMenuPanelItemDescriptor[];
   assigneePanels: EuiContextMenuPanelDescriptor[];
@@ -29,6 +31,8 @@ interface AttacksActionMenuProps {
   datasetItems: EuiContextMenuPanelItemDescriptor[];
   isRemoteDocument: boolean;
   navigationItems: EuiContextMenuPanelItemDescriptor[];
+  /** Shown next to the case items, including for a remote document. */
+  removeFromCaseItems?: EuiContextMenuPanelItemDescriptor[];
   runWorkflowItems: EuiContextMenuPanelItemDescriptor[];
   runWorkflowPanels: EuiContextMenuPanelDescriptor[];
   showAiAssistantAction: boolean;
@@ -47,6 +51,7 @@ export const AttacksActionMenu = ({
   datasetItems,
   isRemoteDocument,
   navigationItems,
+  removeFromCaseItems = NO_ITEMS,
   runWorkflowItems,
   runWorkflowPanels,
   showAiAssistantAction,
@@ -60,10 +65,20 @@ export const AttacksActionMenu = ({
     const navigationActionItems = withActionIcons(navigationItems, ACTION_ICONS_BY_ID);
 
     if (isRemoteDocument) {
-      return navigationActionItems;
+      return removeFromCaseItems.length > 0
+        ? withActionIcons(
+            withGroupSeparators([removeFromCaseItems, navigationActionItems]),
+            ACTION_ICONS_BY_ID
+          )
+        : navigationActionItems;
     }
 
-    const attackManagementItems = [...assigneeItems, ...caseItems, ...tagItems];
+    const attackManagementItems = [
+      ...assigneeItems,
+      ...caseItems,
+      ...removeFromCaseItems,
+      ...tagItems,
+    ];
     const actionGroups = [
       withStatusDotIcons(statusItems, ATTACK_STATUS_ICON_COLORS),
       attackManagementItems,
@@ -80,6 +95,7 @@ export const AttacksActionMenu = ({
     datasetItems,
     isRemoteDocument,
     navigationItems,
+    removeFromCaseItems,
     runWorkflowItems,
     showAiAssistantAction,
     statusItems,

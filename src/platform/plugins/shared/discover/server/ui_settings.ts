@@ -16,6 +16,7 @@ import { Parser } from '@elastic/esql';
 import {
   DEFAULT_COLUMNS_SETTING,
   DEFAULT_ESQL_QUERY_SETTING,
+  ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
   SAMPLE_SIZE_SETTING,
   SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -157,6 +158,22 @@ export const getUiSettings: (
     }),
     category: ['discover'],
     schema: schema.boolean(),
+  },
+  [ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING]: {
+    name: i18n.translate('discover.advancedSettings.enableSolutionProfilesInClassicTitle', {
+      defaultMessage: 'Contextual profiles in Classic navigation',
+    }),
+    value: true,
+    type: 'boolean',
+    description: i18n.translate('discover.advancedSettings.enableSolutionProfilesInClassicText', {
+      defaultMessage:
+        'When enabled, Discover adapts to Observability and Security data in Classic navigation by ' +
+        'loading contextual profiles with tailored columns, cell renderers, and document views. ' +
+        'Turn this off to always use the default Discover experience.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    requiresPageReload: true,
   },
   [DOC_HIDE_TIME_COLUMN_SETTING]: {
     name: i18n.translate('discover.advancedSettings.docTableHideTimeColumnTitle', {

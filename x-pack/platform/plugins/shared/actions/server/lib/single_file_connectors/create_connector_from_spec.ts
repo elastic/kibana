@@ -6,7 +6,11 @@
  */
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
-import { TEST_CONNECTOR_SUB_ACTION, connectorSpecHasEvents } from '@kbn/connector-specs';
+import {
+  TEST_CONNECTOR_SUB_ACTION,
+  connectorSpecHasEvents,
+  getSandboxSupportedAuthTypeIds,
+} from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { lazyImmutableGCableObject, z as z4 } from '@kbn/zod/v4';
 
@@ -72,12 +76,14 @@ export const createConnectorTypeFromSpec = (
     throw new Error('No actions or events defined');
   }
 
+  const { signingKey } = spec;
   const executableActions = buildExecutableActions(spec);
   const hasExecutableActions = hasActions || hasTest;
   const schemaForConfig = spec.schema;
 
   const executor = hasExecutableActions
     ? generateExecutorFunction({
+        connectorTypeId: spec.metadata.id,
         actions: executableActions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
         getCredential: actions.getCredential,
@@ -85,6 +91,12 @@ export const createConnectorTypeFromSpec = (
         getRelayClient: actions.getRelayClient,
         networkSettings,
         platform,
+        ...(signingKey
+          ? {
+              getJwtSigner: (connectorId: string) =>
+                actions.getConnectorJwtSigner(connectorId, signingKey),
+            }
+          : {}),
       })
     : undefined;
 
@@ -108,8 +120,10 @@ export const createConnectorTypeFromSpec = (
     ...(executor ? { executor } : {}),
     globalAuthHeaders: spec.auth?.headers,
     source: ACTION_TYPE_SOURCES.spec,
+    spec,
     description: spec.metadata.description,
     isExperimental: spec.metadata.isTechnicalPreview,
     isTestable: Boolean(spec.test.enabled),
+    sandboxSupportedAuthTypes: getSandboxSupportedAuthTypeIds(spec.auth),
   };
 };

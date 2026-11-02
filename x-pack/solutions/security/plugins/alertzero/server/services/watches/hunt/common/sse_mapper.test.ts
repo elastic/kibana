@@ -10,6 +10,7 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
+import type { HuntModels } from '../types';
 import { huntCoordinator } from '../hunt_coordinator';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 import { buildSseData, buildSseAttachmentId } from './sse_mapper';
@@ -166,6 +167,11 @@ const logger = loggingSystemMock.createLogger();
 const esClient = {} as ElasticsearchClient;
 /** Truthy stand-in so the coordinator does not skip Tier 2 with `no_inference`. */
 const mockModel = {} as ScopedModel;
+const mockModels: HuntModels = {
+  efficient: mockModel,
+  balanced: mockModel,
+  frontier: mockModel,
+};
 
 const DEFAULT_INDEX_PATTERNS = ['logs-aws.*'];
 
@@ -174,7 +180,7 @@ const runCoordinator = (
     indexPatterns?: string[];
   }
 ): ReturnType<typeof huntCoordinator> =>
-  huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+  huntCoordinator({ esClient, reportsEsClient: esClient }, mockModels, logger, {
     indexPatterns: DEFAULT_INDEX_PATTERNS,
     ...params,
   });
@@ -1254,5 +1260,155 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     expect(byId.get('evt-garbage')).toBeUndefined();
     expect(byId.get('evt-datemath')).toBeUndefined();
     expect(entry.data.timeline).toHaveLength(2);
+  });
+
+  it('keeps a remote event ref and drops a remote alert ref, which no local exit ramp can open', () => {
+    const remoteBacking = 'infosec_zocalo:.ds-logs-aws.cloudtrail-default-2026.10.26-000001';
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = tier1Result({
+      hits: [
+        { id: 'evt-remote', index: remoteBacking, timestamp: '2026-07-30T13:05:00.000Z' },
+        { id: 'alert-remote', index: remoteAlerts, timestamp: '2026-07-30T13:06:00.000Z' },
+      ],
+      counts: { total_hits: 2, returned_hits: 2, affected_hosts: 0, affected_users: 0 },
+      per_index: [
+        { index: remoteBacking, hit_count: 1, required: true },
+        { index: remoteAlerts, hit_count: 1, required: true },
+      ],
+    });
+
+    expect(schemaIssues(result)).toEqual([]);
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    expect(entry.data.events).toEqual([
+      expect.objectContaining({ event_id: 'evt-remote', source_index: remoteBacking }),
+    ]);
+    // Not filed as an event either: the remote alert gets no ref at all.
+    expect(entry.data.alerts ?? []).toEqual([]);
+    // The hit still counts where the hunt reports it.
+    expect(huntResultOf(entry).tier1.per_index.map((row) => row.index)).toContain(remoteAlerts);
+  });
+
+  it('keeps the Tier 1 verdict of a technique entry whose only Tier 1 hit is a remote alert', () => {
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = withBehaviors(
+      tier1Result({
+        hits: [
+          {
+            id: 'alert-remote',
+            index: remoteAlerts,
+            timestamp: '2026-07-30T13:06:00.000Z',
+            matched: { field: 'file.hash.md5', technique_id: 'T1552.001' },
+          },
+        ],
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+        per_index: [{ index: remoteAlerts, hit_count: 1, required: true }],
+      }),
+      [
+        behaviorFixture({
+          technique_id: 'T1552.001',
+          execution: { executed: true, row_count: 0, hit: false },
+        }),
+      ]
+    );
+
+    const entry = buildSseData(result, 'tr-1', { spaceId: 'default' }).find(
+      (candidate) => candidate.data.corroborated_technique_id === 'T1552.001'
+    );
+    if (!entry) throw new Error('expected a technique entry for T1552.001');
+    expect(entry.data.alerts ?? []).toEqual([]);
+    expect(huntResultOf(entry).has_confirmed_hit).toBe(true);
+    expect(huntResultOf(entry).hit_sources).toEqual(['tier1']);
+    expect(significantSecurityEventAttachmentDataSchema.safeParse(entry.data).success).toBe(true);
+  });
+
+  it('drops a remote alert ref from Tier 2 hits too', () => {
+    const remoteAlerts = 'infosec_zocalo:.alerts-security.alerts-default';
+    const result = withBehaviors(tier1Result({}), [
+      behaviorFixture({
+        hits: [
+          { id: 't2-remote-alert', index: remoteAlerts },
+          { id: 't2-local-alert', index: '.alerts-security.alerts-default' },
+        ],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    const alertIds = buildSseData(result, 'tr-1', { spaceId: 'default' }).flatMap((entry) =>
+      (entry.data.alerts ?? []).map((alert) => alert.alert_id)
+    );
+    expect(alertIds).toContain('t2-local-alert');
+    expect(alertIds).not.toContain('t2-remote-alert');
+  });
+});
+
+describe('buildSseData host entity origins', () => {
+  const withHosts = (hosts: HuntCoordinatorCoreResult['tier1']['affected_assets']['hosts']) =>
+    tier1Result({
+      affected_assets: { hosts, users: [], services: [] },
+      counts: { total_hits: 1, returned_hits: 1, affected_hosts: hosts.length, affected_users: 0 },
+    });
+
+  const hostEntities = (result: HuntCoordinatorCoreResult) => {
+    const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
+    return entry.data.entities.filter((entity) => entity.field === 'host.name');
+  };
+
+  it('carries the Tier 1 origin onto each host entity, and parses', () => {
+    const result = withHosts([
+      { name: 'web-1', hit_count: 1, local: true, remote_clusters: [] },
+      { name: 'ubuntu', hit_count: 1, local: false, remote_clusters: ['cluster_b'] },
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'web-1', local: true, remote_clusters: [] },
+      { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('leaves a host entity without origin when Tier 1 could not tell', () => {
+    expect(hostEntities(withHosts([{ name: 'web-1', hit_count: 1 }]))).toEqual([
+      { field: 'host.name', value: 'web-1' },
+    ]);
+  });
+
+  it('carries the Tier 2 origin onto a host only a behavior named', () => {
+    const result = withBehaviors(withHosts([]), [
+      behaviorFixture({
+        affected_hosts: ['ubuntu'],
+        affected_host_origins: [{ name: 'ubuntu', local: false, remote_clusters: ['cluster_b'] }],
+      }),
+    ]);
+
+    expect(schemaIssues(result)).toEqual([]);
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'ubuntu', local: false, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('merges the origins of a host both tiers named instead of keeping only the Tier 1 copy', () => {
+    const result = withBehaviors(
+      withHosts([{ name: 'web-1', hit_count: 1, local: false, remote_clusters: ['cluster_b'] }]),
+      [
+        behaviorFixture({
+          affected_hosts: ['web-1'],
+          affected_host_origins: [{ name: 'web-1', local: true, remote_clusters: [] }],
+        }),
+      ]
+    );
+
+    expect(hostEntities(result)).toEqual([
+      { field: 'host.name', value: 'web-1', local: true, remote_clusters: ['cluster_b'] },
+    ]);
+  });
+
+  it('leaves a remote host unknown when another tier named it without an origin', () => {
+    // The unknown sighting could have been local, so "remote only" is no longer proven.
+    const result = withBehaviors(
+      withHosts([{ name: 'ubuntu', hit_count: 1, local: false, remote_clusters: ['cluster_b'] }]),
+      [behaviorFixture({ affected_hosts: ['ubuntu'] })]
+    );
+
+    expect(hostEntities(result)).toEqual([{ field: 'host.name', value: 'ubuntu' }]);
   });
 });

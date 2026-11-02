@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TopNType } from '@kbn/profiling-utils';
+import type { ProfilingSchema, TopNType } from '@kbn/profiling-utils';
 import { StackTracesDisplayOption } from '@kbn/profiling-utils';
 import React, { useState } from 'react';
 import { groupSamplesByCategory } from '../../../common/topn';
@@ -19,6 +19,7 @@ export interface StackTracesProps {
   kuery: string;
   rangeFrom: number;
   rangeTo: number;
+  schema?: ProfilingSchema;
   onClick: (category: string) => void;
   onChartBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
 }
@@ -28,6 +29,7 @@ export function StackTraces({
   kuery,
   rangeFrom,
   rangeTo,
+  schema,
   onClick,
   onChartBrushEnd,
 }: StackTracesProps) {
@@ -47,9 +49,10 @@ export function StackTraces({
         timeFrom: rangeFromSec,
         timeTo: rangeToSec,
         kuery,
+        schema,
       }).then(groupSamplesByCategory);
     },
-    [fetchTopN, type, rangeFromSec, rangeToSec, kuery]
+    [fetchTopN, type, rangeFromSec, rangeToSec, kuery, schema]
   );
 
   if (state.error) {

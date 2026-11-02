@@ -67,6 +67,11 @@ export interface LocationRebalancePlan {
   nextHealthySince: Record<string, number>;
   /** Per-agent capacity weight (host RAM in MiB); agents without it are omitted. */
   capacities: Map<string, number>;
+  /**
+   * Healthy agents running `elastic-agent-complete`. Browser monitors are
+   * placed only on these; lightweight monitors still use `healthyAgentIds`.
+   */
+  browserAgentIds: string[];
 }
 
 /**
@@ -96,6 +101,7 @@ export const planLocationRebalance = ({
   activeAgentIds?: ReadonlySet<string>;
 }): LocationRebalancePlan => {
   const healthyAgentIds: string[] = [];
+  const browserAgentIds: string[] = [];
   const capacities = new Map<string, number>();
   const nextHealthySince: Record<string, number> = {};
 
@@ -104,6 +110,9 @@ export const planLocationRebalance = ({
       continue; // stale check-in and no recent data — its monitors fail over
     }
     healthyAgentIds.push(agentId);
+    if (info.complete) {
+      browserAgentIds.push(agentId);
+    }
     if (info.memoryMib != null) {
       capacities.set(agentId, info.memoryMib);
     }
@@ -117,5 +126,5 @@ export const planLocationRebalance = ({
       now - nextHealthySince[healthySinceKey(agentPolicyId, agentId)] >= RECOVERY_STABILITY_MS
   );
 
-  return { healthyAgentIds, recoveryAgentIds, nextHealthySince, capacities };
+  return { healthyAgentIds, recoveryAgentIds, nextHealthySince, capacities, browserAgentIds };
 };

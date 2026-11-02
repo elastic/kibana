@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type AppStateUrl, cleanupUrlState } from './cleanup_url_state';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createMemoryHistory } from 'history';
+import { type AppStateUrl, cleanupUrlState, clearOutdatedTabUrlState } from './cleanup_url_state';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { DataSourceType } from '../../../../../common/data_sources';
+import { createProfileStateRegistry } from '../../../../../common/context_awareness';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../common/constants';
+import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 
 const services = createDiscoverServicesMock();
 
@@ -193,4 +198,67 @@ describe('cleanupUrlState', () => {
       `);
     });
   });
+});
+
+describe('clearOutdatedTabUrlState', () => {
+  const timeRange = { from: 'now-15m', to: 'now' };
+  const tab = getTabStateMock({
+    id: 'tab',
+    appState: { columns: ['message'] },
+    globalState: { timeRange },
+  });
+
+  it.each([
+    {
+      timeRestore: true,
+      expectedGlobalState: {},
+    },
+    {
+      timeRestore: false,
+      expectedGlobalState: { time: timeRange },
+    },
+  ])(
+    'clears the draft URL respecting timeRestore=$timeRestore',
+    async ({ timeRestore, expectedGlobalState }) => {
+      const urlStateStorage = createKbnUrlStateStorage({
+        history: createMemoryHistory(),
+        useHash: false,
+      });
+      await urlStateStorage.set(APP_STATE_URL_KEY, tab.appState);
+      await urlStateStorage.set(GLOBAL_STATE_URL_KEY, { time: timeRange });
+
+      await clearOutdatedTabUrlState({
+        tab,
+        timeRestore,
+        urlStateStorage,
+        profileStateRegistry: createProfileStateRegistry(),
+      });
+
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual(expectedGlobalState);
+    }
+  );
+
+  it.each([true, false])(
+    'clears the draft app state but keeps a different URL time with timeRestore=%s',
+    async (timeRestore) => {
+      const linkedTime = { from: 'now-1y', to: 'now' };
+      const urlStateStorage = createKbnUrlStateStorage({
+        history: createMemoryHistory(),
+        useHash: false,
+      });
+      await urlStateStorage.set(APP_STATE_URL_KEY, tab.appState);
+      await urlStateStorage.set(GLOBAL_STATE_URL_KEY, { time: linkedTime });
+
+      await clearOutdatedTabUrlState({
+        tab,
+        timeRestore,
+        urlStateStorage,
+        profileStateRegistry: createProfileStateRegistry(),
+      });
+
+      expect(urlStateStorage.get(APP_STATE_URL_KEY)).toBeNull();
+      expect(urlStateStorage.get(GLOBAL_STATE_URL_KEY)).toEqual({ time: linkedTime });
+    }
+  );
 });

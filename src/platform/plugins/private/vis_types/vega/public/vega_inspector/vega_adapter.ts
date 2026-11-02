@@ -15,7 +15,7 @@ import { map, switchMap, filter, debounce } from 'rxjs';
 import type { View, Spec } from 'vega';
 import type { Assign } from '@kbn/utility-types';
 
-interface DebugValues {
+export interface DebugValues {
   view: Assign<
     {
       _runtime: {

@@ -23,6 +23,8 @@ const executionContexts = new WeakMap<
 >();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
+  'allowed-workflow-ids': true,
+  'allowed-workflow-tags': true,
   'run-as-mode': true,
 });
 
@@ -82,13 +84,23 @@ export const resolveInheritedWorkflowIdentity = (
   const mode = identityChoice?.success
     ? identityChoice.data['run-as-mode'] ?? 'default'
     : 'default';
+  if (!identityChoice?.success || mode === 'default') {
+    throw Boom.forbidden(
+      'Service account inheritance requires a literal identity choice and, when specified, literal allowed-workflow-ids and allowed-workflow-tags in the parent workflow.'
+    );
+  }
+  const configuredId = identityChoice.data['workflow-id'];
+  const allowedIds = identityChoice.data['allowed-workflow-ids'];
+  const allowedTags = identityChoice.data['allowed-workflow-tags'];
+  const dynamicId = configuredId.includes('{{') || configuredId.includes('{%');
+  // Read delegation limits from the saved definition, never from rendered step inputs.
   if (
-    !identityChoice?.success ||
-    mode === 'default' ||
-    identityChoice.data['workflow-id'] !== workflow.id
+    (dynamicId ? !allowedIds && !allowedTags : configuredId !== workflow.id) ||
+    (allowedIds && !allowedIds.includes(workflow.id)) ||
+    (allowedTags && !workflow.definition?.tags?.some((tag) => allowedTags.includes(tag)))
   ) {
     throw Boom.forbidden(
-      'Service account inheritance requires a literal workflow-id and identity choice in the parent workflow.'
+      'The child workflow is not approved to inherit the parent service account. Templated workflow-id requires literal allowed-workflow-ids or allowed-workflow-tags matching the resolved managed child.'
     );
   }
   if (workflow.managed !== true) {
@@ -149,6 +161,7 @@ export const withWorkflowExecutionIdentity = async <T>(
       workloadId: execution.effectiveIdentity?.inheritedFrom?.workloadId ?? execution.workflowId,
       spaceId: execution.spaceId,
       expectedServiceAccountId: serviceAccountId,
+      executionId: execution.id,
     },
     async (scopedRequest) => {
       executionContexts.set(scopedRequest, { originalRequest, execution });

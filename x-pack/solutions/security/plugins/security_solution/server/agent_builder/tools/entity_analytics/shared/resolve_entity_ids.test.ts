@@ -44,6 +44,58 @@ describe('resolveEntityIds', () => {
     expect(result.unresolved).toEqual([]);
   });
 
+  it('keeps one result per canonical id when several references name the same entity', async () => {
+    mockResolveSingleEntity
+      .mockResolvedValueOnce({
+        status: 'resolved',
+        identity: {
+          identifierType: 'user',
+          identifier: 'jsmith',
+          entityStoreId: 'user:jsmith@okta',
+          namespace: 'okta',
+        },
+      })
+      .mockResolvedValueOnce({
+        status: 'resolved',
+        identity: {
+          identifierType: 'user',
+          identifier: 'user:jsmith@okta',
+          entityStoreId: 'user:jsmith@okta',
+          namespace: 'okta',
+        },
+      })
+      .mockResolvedValueOnce({
+        status: 'resolved',
+        identity: { identifierType: 'user', identifier: 'jdoe', entityStoreId: 'user:jdoe' },
+      });
+
+    const result = await resolveEntityIds({
+      ...baseParams,
+      entityIds: ['jsmith', 'user:jsmith@okta', 'jdoe'],
+    });
+
+    expect(result.resolved).toEqual([
+      { euid: 'user:jsmith@okta', namespace: 'okta' },
+      { euid: 'user:jdoe' },
+    ]);
+  });
+
+  it('carries the identity namespace through when the entity has one', async () => {
+    mockResolveSingleEntity.mockResolvedValueOnce({
+      status: 'resolved',
+      identity: {
+        identifierType: 'user',
+        identifier: 'jsmith',
+        entityStoreId: 'user:jsmith@okta',
+        namespace: 'okta',
+      },
+    });
+
+    const result = await resolveEntityIds({ ...baseParams, entityIds: ['jsmith'] });
+
+    expect(result.resolved).toEqual([{ euid: 'user:jsmith@okta', namespace: 'okta' }]);
+  });
+
   it('reports the group target a resolved alias is linked to', async () => {
     mockResolveSingleEntity.mockResolvedValueOnce({
       status: 'resolved',

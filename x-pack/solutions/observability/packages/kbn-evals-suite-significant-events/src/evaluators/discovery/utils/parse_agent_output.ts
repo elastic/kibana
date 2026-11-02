@@ -7,7 +7,11 @@
 
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type {
+  Severity,
+  SignificantEvent,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import { isToolId } from './tool_usage';
 
 interface EventsWriteToolResult {
@@ -21,6 +25,8 @@ type EventsWriteItemResult =
       index: number;
       event_id: string;
       written: true;
+      status?: SignificantEventStatus;
+      severity?: Severity;
     }
   | {
       index: number;
@@ -30,9 +36,12 @@ type EventsWriteItemResult =
         | 'existing_active_event'
         | 'bulk_error'
         | 'duplicate_in_batch'
+        | 'superseded'
         | 'unchanged_outcome'
         | 'unknown_event_id';
       existing_event_id?: string;
+      status?: SignificantEventStatus;
+      severity?: Severity;
     };
 
 const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
@@ -95,6 +104,22 @@ const isProducedDiscovery = (result: EventsWriteItemResult): boolean => {
 };
 
 /**
+ * Severity and status are decided server-side and returned only on the tool result, never echoed
+ * back on the request item — merge them in alongside event_id, or every evaluator reading
+ * `severity` or `status` off the extracted event sees them as missing.
+ */
+const mergeComputedFields = (
+  item: Partial<SignificantEvent>,
+  result: EventsWriteItemResult
+): SignificantEvent =>
+  ({
+    ...item,
+    event_id: result.event_id,
+    ...(result.status !== undefined ? { status: result.status } : {}),
+    ...(result.severity !== undefined ? { severity: result.severity } : {}),
+  } as SignificantEvent);
+
+/**
  * Extract events from `events_write` tool call steps for continuation seeding.
  * Includes existing_active_event and unchanged_outcome so follow-up cycles can resolve the episode
  * when the handler skipped a no-op write.
@@ -109,12 +134,7 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Significa
     const { items, results } = parsed;
     return results
       .map((result, index) =>
-        isProducedDiscovery(result)
-          ? ({
-              ...items[index],
-              event_id: result.event_id,
-            } as SignificantEvent)
-          : undefined
+        isProducedDiscovery(result) ? mergeComputedFields(items[index], result) : undefined
       )
       .filter((event): event is SignificantEvent => event !== undefined);
   });
@@ -151,12 +171,7 @@ export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): Sig
     const { items, results } = parsed;
     return results
       .map((result, index) =>
-        result.written
-          ? ({
-              ...items[index],
-              event_id: result.event_id,
-            } as SignificantEvent)
-          : undefined
+        result.written ? mergeComputedFields(items[index], result) : undefined
       )
       .filter((event): event is SignificantEvent => event !== undefined);
   });

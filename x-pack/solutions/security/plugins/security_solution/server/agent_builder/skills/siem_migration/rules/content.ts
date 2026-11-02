@@ -10,7 +10,7 @@ import {
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
   SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
 } from '../../../tools/siem_migrations';
-import { RULE_MIGRATION_SKILLS } from './skill_ids';
+import { RULE_MIGRATION_SKILLS } from './skill_catalog';
 
 /**
  * Shared content blocks for the Automatic Migration sibling skills.
@@ -24,6 +24,21 @@ import { RULE_MIGRATION_SKILLS } from './skill_ids';
  */
 
 /**
+ * Every sibling skill as a markdown bullet (id + description), rendered from the skill catalog so the
+ * capability map, the rule_migration_items attachment and the skill definitions share one source.
+ * Bullets (not headings) keep sibling descriptions nested under the capability map.
+ */
+export const RULE_MIGRATION_SKILL_LIST = Object.values(RULE_MIGRATION_SKILLS)
+  .map(({ id, description }) => {
+    const indented = description
+      .split('\n')
+      .map((line) => (line ? `  ${line}` : line))
+      .join('\n');
+    return `- **${id}**\n${indented}`;
+  })
+  .join('\n');
+
+/**
  * Capability map of all Automatic Migration sibling skills. Injected into every skill so the
  * agent can route the user to the right sibling (and give an overview when asked "what can you
  * do"). This is the single source of truth — do not duplicate the list per skill.
@@ -35,16 +50,7 @@ Automatic Rule Migration is split across sibling skills. This skill handles one 
 are available when the user's request shifts. Cross-references are advisory — naming a sibling
 does not auto-load its tools, the user must move to that workflow.
 
-- **${RULE_MIGRATION_SKILLS.SUMMARIZE}** — Overview of all migrations: list every migration with its
-  status and rule counts. Use when the user asks "how are my migrations doing" or wants a summary.
-- **${RULE_MIGRATION_SKILLS.START}** — Start, reprocess, or resume a migration's translation run.
-  Resolves the AI connector, checks for missing resources before starting,
-  and picks START vs REPROCESS vs RESUME.
-- **${RULE_MIGRATION_SKILLS.STOP}** — Stop a running migration (mutating).
-- **${RULE_MIGRATION_SKILLS.UPDATE}** — Rename a migration (mutating).
-- **${RULE_MIGRATION_SKILLS.DELETE}** — Permanently delete a migration and all its rule items (destructive, irreversible).
-- **${RULE_MIGRATION_SKILLS.UPDATE_TRANSLATED_RULE}** — Fix the translated version of a specific rule: correct the ES|QL query, the prebuilt rule match, or the integration. Mutating.
-- **${RULE_MIGRATION_SKILLS.INSTALL}** — Install translated rules into Elastic (mutating, confirms; requires Rules: All).
+${RULE_MIGRATION_SKILL_LIST}
 `;
 
 /**
@@ -76,7 +82,10 @@ the name instead and resolve it to the id internally when calling tools.
    from the UI), verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` before acting on it (stats returns the same fields plus status/counts, using fewer tokens).
 5. **Rule item ids**: some actions (install specific rules, reprocess a subset) need a **rule item
    id**, in addition to the migration id. Resolve a user-provided rule **title** to its item id by calling
-   \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` and matching on the original or translated title.
+   \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` with \`detail: "summary"\` and \`search_term\` set
+   to the title, then matching on the original or translated title. \`search_term\` matches translated
+   titles (original titles only for failed rules): if a title is not found, page through
+   \`detail: "summary"\` results without \`search_term\` and match on the original title.
    Never ask the user for a rule item id; always work from the title.
 `;
 
