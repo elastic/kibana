@@ -18,6 +18,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 
 const OPUS_5 = '.anthropic-claude-5-opus-chat_completion';
 const SONNET_5 = '.anthropic-claude-5-sonnet-chat_completion';
+const SONNET_5_5 = '.anthropic-claude-5.5-sonnet-chat_completion';
 
 const createSetupMock = (result: { ok: boolean; error?: string } = { ok: true }) => {
   const register = jest.fn().mockReturnValue(result);
@@ -108,7 +109,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureDescription:
         'Calls where accuracy matters but that run often or use tools over many steps, such as triaging alerts or diagnosing a noisy rule. Choose a strong mid-size model.',
       recommendedEndpoints: [
-        SONNET_5,
+        SONNET_5_5,
         '.openai-gpt-5.6-terra-chat_completion',
         '.google-gemini-3.6-flash-chat_completion',
       ],

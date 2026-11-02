@@ -39,7 +39,7 @@ const EFFICIENT_RECOMMENDED_ENDPOINTS = [
 // alert) or loop over many tool rounds (diagnosing a rule), so frontier latency and cost would
 // multiply by the call or round count. A strong mid-size model is the right rung.
 const BALANCED_RECOMMENDED_ENDPOINTS = [
-  '.anthropic-claude-5-sonnet-chat_completion', // Claude Sonnet 5, GA 2026-07-03
+  '.anthropic-claude-5.5-sonnet-chat_completion', // Claude Sonnet 5.5
   '.openai-gpt-5.6-terra-chat_completion', // GPT-5.6 Terra
   '.google-gemini-3.6-flash-chat_completion', // Gemini 3.6 Flash
 ];
