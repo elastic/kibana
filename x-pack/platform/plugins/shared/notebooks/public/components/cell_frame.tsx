@@ -9,16 +9,19 @@ import React, { useState, type PropsWithChildren, type ReactNode } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCode,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiInlineEditText,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -57,6 +60,10 @@ const getTypeLabel = (cell: CellDefinition): string => {
   return TYPE_LABELS[kind];
 };
 
+const OUTPUTS_LABEL = i18n.translate('xpack.notebook.cell.outputs', {
+  defaultMessage: 'Outputs',
+});
+
 const RUN_LABEL = i18n.translate('xpack.notebook.cell.run', { defaultMessage: 'Run' });
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
@@ -67,6 +74,8 @@ interface CellFrameProps {
   runtime?: CellRuntime;
   onRun?: () => void;
   headerActions?: ReactNode;
+  /** Variable names the cell exposes to other cells, listed in the cell footer. */
+  outputs?: readonly string[];
 }
 
 export const CellFrame = ({
@@ -74,6 +83,7 @@ export const CellFrame = ({
   runtime,
   onRun,
   headerActions,
+  outputs,
   children,
 }: PropsWithChildren<CellFrameProps>) => {
   const { store } = useNotebook();
@@ -227,6 +237,29 @@ export const CellFrame = ({
         </>
       )}
       {children}
+      {outputs && outputs.length > 0 && (
+        <>
+          <EuiHorizontalRule margin="s" />
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            wrap
+            responsive={false}
+            data-test-subj="notebookCellOutputs"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {OUTPUTS_LABEL}
+              </EuiText>
+            </EuiFlexItem>
+            {outputs.map((output) => (
+              <EuiFlexItem grow={false} key={output}>
+                <EuiCode>{output}</EuiCode>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiPanel>
   );
 };

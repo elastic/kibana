@@ -262,20 +262,10 @@ export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
   const { store } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const { input } = cell;
-  const params = getExposedParamNames(cell)
-    .map((name) => `?${name}`)
-    .join(' ');
+  const outputs = getExposedParamNames(cell).map((name) => `?${name}`);
 
   return (
-    <CellFrame
-      cell={cell}
-      runtime={runtime}
-      headerActions={
-        <EuiFlexItem grow={false}>
-          <code>{params}</code>
-        </EuiFlexItem>
-      }
-    >
+    <CellFrame cell={cell} runtime={runtime} outputs={outputs}>
       {input.kind === 'dropdown' && <DropdownControl cell={cell} input={input} />}
       {input.kind === 'range' && <RangeControl cell={cell} input={input} />}
       {input.kind === 'time' && <TimeControl cell={cell} input={input} />}
