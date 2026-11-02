@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
+import { waitForSearchBarReady } from '../../fixtures/page_helpers';
 
 test.describe(
   'Service Overview - Filters',
@@ -134,27 +135,38 @@ test.describe(
       page,
       pageObjects: { serviceDetailsPage, datePicker },
     }) => {
+      // Typed into the picker, so it uses the picker's display format. Moves the
+      // start 5 minutes later than testData.START_DATE.
+      const newStart = 'Oct 10, 2021 @ 00:05:00.000';
+      const newEnd = 'Oct 10, 2021 @ 00:15:00.000';
+
       await serviceDetailsPage.overviewTab.goToTab({
         serviceName: testData.SERVICE_OPBEANS_NODE,
         rangeFrom: testData.START_DATE,
         rangeTo: testData.END_DATE,
       });
 
-      await test.step('Open date picker and select new time range', async () => {
-        // datePicker.setAbsoluteRange auto-detects the picker variant, opens the
-        // popover, fills both bounds, and clicks the update/submit button.
-        await datePicker.setAbsoluteRange({
-          from: '2021-10-09T23:55:00.000Z',
-          to: testData.END_DATE,
-        });
+      await test.step('Wait for the time picker to be ready', async () => {
+        await waitForSearchBarReady(page);
       });
 
-      await test.step('Verify URL is updated', async () => {
-        await expect(page).toHaveURL(/2021-10-09/, { timeout: EXTENDED_TIMEOUT });
+      await test.step('Change the time range through the time picker', async () => {
+        await datePicker.setAbsoluteRange({ from: newStart, to: newEnd });
       });
 
-      await test.step('Verify page still renders correctly', async () => {
+      await test.step('Verify URL reflects the new time range', async () => {
+        await expect
+          .poll(() => new URL(page.url()).searchParams.get('rangeFrom'), {
+            timeout: EXTENDED_TIMEOUT,
+          })
+          .not.toBe(testData.START_DATE);
+      });
+
+      await test.step('Verify content reloads for the new time range', async () => {
         await expect(serviceDetailsPage.overviewTab.latencyChart).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(serviceDetailsPage.overviewTab.throughputChart).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
