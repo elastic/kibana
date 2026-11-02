@@ -19,10 +19,7 @@ export interface ElasticsearchHomeStartDependencies {
   cloud?: CloudStart;
 }
 
-export type ElasticsearchHomeServices = CoreStart &
-  ElasticsearchHomeStartDependencies & {
-    isServerless: boolean;
-  };
+export type ElasticsearchHomeServices = CoreStart & ElasticsearchHomeStartDependencies;
 
 export interface HomeAddDataLink {
   key: string;

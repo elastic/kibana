@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import { ElasticsearchHomePlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ElasticsearchHomePlugin(initializerContext);
+export const plugin = () => new ElasticsearchHomePlugin();
 
 export type {
   ElasticsearchHomePageProps,

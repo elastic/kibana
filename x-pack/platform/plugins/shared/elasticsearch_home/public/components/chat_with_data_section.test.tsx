@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import { act, fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderWithHomeContext } from '../test_utils';
 import { ChatWithYourDataSection } from './chat_with_data_section';
 
@@ -20,25 +23,34 @@ describe('ChatWithYourDataSection', () => {
     config = {},
     canShowAgentBuilder = true,
     isAgentBuilderEnabled = true,
-  }: { config?: object; canShowAgentBuilder?: boolean; isAgentBuilderEnabled?: boolean } = {}) => {
+    chatExperience = AIChatExperience.Agent,
+  }: {
+    config?: object;
+    canShowAgentBuilder?: boolean;
+    isAgentBuilderEnabled?: boolean;
+    chatExperience?: AIChatExperience;
+  } = {}) => {
     const application = applicationServiceMock.createStartContract();
     application.capabilities = {
       ...application.capabilities,
       agentBuilder: { show: canShowAgentBuilder },
     };
 
+    const settings = settingsServiceMock.createStartContract();
+    settings.client.get$.mockReturnValue(of(chatExperience));
+
     return renderWithHomeContext(<ChatWithYourDataSection />, {
-      services: { agentBuilder: isAgentBuilderEnabled ? agentBuilder : undefined, application },
+      services: {
+        agentBuilder: isAgentBuilderEnabled ? agentBuilder : undefined,
+        application,
+        settings,
+      },
       config,
     });
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    agentBuilder.getAgentBuilderAccess.mockResolvedValue({
-      hasRequiredLicense: true,
-      hasLlmConnector: true,
-    });
   });
 
   it('opens the agent with the host-supplied onboarding message and session tag', async () => {
@@ -67,7 +79,6 @@ describe('ChatWithYourDataSection', () => {
 
     expect(await screen.findByTestId('viewPromptButton')).toBeInTheDocument();
     expect(screen.queryByTestId('openElasticAgentButton')).not.toBeInTheDocument();
-    expect(agentBuilder.getAgentBuilderAccess).not.toHaveBeenCalled();
   });
 
   it('withholds the agent when Agent Builder is disabled', async () => {
@@ -77,17 +88,18 @@ describe('ChatWithYourDataSection', () => {
     expect(screen.queryByTestId('openElasticAgentButton')).not.toBeInTheDocument();
   });
 
-  it('withholds the agent without the license Agent Builder requires', async () => {
-    agentBuilder.getAgentBuilderAccess.mockResolvedValue({
-      hasRequiredLicense: false,
-      hasLlmConnector: true,
-    });
+  it('withholds the agent when the classic chat experience is selected', async () => {
+    renderSection({ chatExperience: AIChatExperience.Classic });
 
+    expect(await screen.findByTestId('viewPromptButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('openElasticAgentButton')).not.toBeInTheDocument();
+  });
+
+  it('offers the agent without checking the license, which the chat prompts for', async () => {
     renderSection();
 
-    await act(() => agentBuilder.getAgentBuilderAccess.mock.results[0].value);
-
-    expect(screen.queryByTestId('openElasticAgentButton')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('openElasticAgentButton')).toBeInTheDocument();
+    expect(agentBuilder.getAgentBuilderAccess).not.toHaveBeenCalled();
   });
 
   it('shows the host-supplied prompt in the modal', async () => {

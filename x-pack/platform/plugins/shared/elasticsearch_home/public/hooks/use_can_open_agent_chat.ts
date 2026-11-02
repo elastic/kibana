@@ -5,41 +5,29 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useHomeServices } from '../context';
 
-/** Whether the user holds the Agent Builder privilege and the license it needs to open a chat. */
+/**
+ * Whether to offer the Agent Builder chat: the user needs the Agent Builder privilege, and the
+ * "Chat experience" setting (`aiAssistant:preferredChatExperience`) must be set to Agent.
+ * The chat itself prompts for a license or an LLM connector when either is missing.
+ */
 export const useCanOpenAgentChat = (): boolean => {
-  const { agentBuilder, application } = useHomeServices();
-  const canShowAgentBuilder = application.capabilities.agentBuilder?.show === true;
+  const { agentBuilder, application, settings } = useHomeServices();
+  const canShowAgentBuilder =
+    agentBuilder !== undefined && application.capabilities.agentBuilder?.show === true;
 
-  const [hasRequiredLicense, setHasRequiredLicense] = useState(false);
-  useEffect(() => {
-    if (!agentBuilder || !canShowAgentBuilder) {
-      return;
-    }
+  const chatExperience$ = useMemo(
+    () =>
+      canShowAgentBuilder ? settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE) : EMPTY,
+    [canShowAgentBuilder, settings]
+  );
+  const chatExperience = useObservable(chatExperience$);
 
-    let cancelled = false;
-
-    const resolveAccess = async () => {
-      try {
-        const access = await agentBuilder.getAgentBuilderAccess();
-        if (!cancelled) {
-          setHasRequiredLicense(access.hasRequiredLicense);
-        }
-      } catch {
-        if (!cancelled) {
-          setHasRequiredLicense(false);
-        }
-      }
-    };
-
-    resolveAccess();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [agentBuilder, canShowAgentBuilder]);
-
-  return canShowAgentBuilder && hasRequiredLicense;
+  return canShowAgentBuilder && chatExperience === AIChatExperience.Agent;
 };

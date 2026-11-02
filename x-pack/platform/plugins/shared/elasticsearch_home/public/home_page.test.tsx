@@ -89,7 +89,6 @@ describe('HomePage', () => {
   const renderHomePage = ({
     isInTrial = false,
     isServerlessEnabled = false,
-    isServerless = false,
     projectType,
     canMonitorAllIndices = true,
     canReadWorkflow = true,
@@ -98,7 +97,6 @@ describe('HomePage', () => {
   }: {
     isInTrial?: boolean;
     isServerlessEnabled?: boolean;
-    isServerless?: boolean;
     projectType?: CloudStart['serverless']['projectType'];
     canMonitorAllIndices?: boolean;
     canReadWorkflow?: boolean;
@@ -121,7 +119,7 @@ describe('HomePage', () => {
     chrome.navLinks.has.mockImplementation((id: string) => navLinks.includes(id));
 
     return renderWithHomeContext(<HomePage />, {
-      services: { cloud, application, chrome, isServerless },
+      services: { cloud, application, chrome },
       config: { docsLink: { href: DOCS_URL, label: DOCS_LABEL }, ...config },
     });
   };
