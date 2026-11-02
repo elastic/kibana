@@ -56,7 +56,6 @@ export function createSignificantEventsClients({
   logger?: Logger;
   space: string;
   triggerEmitter?: TriggerEmitter;
-  /** Reports a status-change EBT event for every written version that changes status. */
   telemetry?: EventStatusChangeReporter;
   getAlertEventsClient: () => Promise<AlertEventsClientApi>;
 }): SignificantEventsClients {

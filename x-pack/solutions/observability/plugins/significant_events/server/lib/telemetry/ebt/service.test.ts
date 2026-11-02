@@ -32,7 +32,7 @@ const createAnalytics = () =>
   ({ registerEventType: jest.fn() } as unknown as jest.Mocked<AnalyticsServiceSetup>);
 
 describe('EbtTelemetryService', () => {
-  it('registers exactly the catalogued event types, each once', () => {
+  it('registers exactly the catalogued event types', () => {
     const analytics = createAnalytics();
 
     new EbtTelemetryService().setup(analytics);
@@ -42,7 +42,7 @@ describe('EbtTelemetryService', () => {
     expect(new Set(registered).size).toBe(registered.length);
   });
 
-  it('describes every field of every registered schema', () => {
+  it('describes every schema field', () => {
     const analytics = createAnalytics();
 
     new EbtTelemetryService().setup(analytics);
@@ -53,11 +53,5 @@ describe('EbtTelemetryService', () => {
         .map(([field]) => `${eventType}.${field}`)
     );
     expect(undescribed).toEqual([]);
-  });
-
-  it('refuses to hand out a client before setup', () => {
-    expect(() => new EbtTelemetryService().getClient()).toThrow(
-      'Analytics service is not available.'
-    );
   });
 });

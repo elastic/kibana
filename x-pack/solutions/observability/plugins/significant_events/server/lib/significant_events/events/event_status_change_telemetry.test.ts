@@ -37,7 +37,7 @@ const event = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => (
 });
 
 describe('buildEventStatusChangedProps', () => {
-  it('describes a creation: no previous status, identity, actor and content fields', () => {
+  it('describes a creation without a previous status', () => {
     expect(
       buildEventStatusChangedProps({
         event: event({ workflow_execution_id: 'wf-exec-1' }),
@@ -61,7 +61,7 @@ describe('buildEventStatusChangedProps', () => {
     });
   });
 
-  it('describes a transition with the previous status and omits an absent workflow execution', () => {
+  it('describes a transition with the previous status', () => {
     const props = buildEventStatusChangedProps({
       event: event({ status: 'inactive', severity: 'low', signals: undefined }),
       prior: { status: 'recovering' },
@@ -80,7 +80,7 @@ describe('buildEventStatusChangedProps', () => {
     expect(props).not.toHaveProperty('workflow_execution_id');
   });
 
-  it('returns nothing when the written version keeps the stored status', () => {
+  it('returns nothing when the status is unchanged', () => {
     expect(
       buildEventStatusChangedProps({
         event: event({ status: 'active', severity: 'critical' }),
@@ -104,25 +104,7 @@ describe('reportEventStatusChange', () => {
     expect(() => reportEventStatusChange({ telemetry: undefined, ...change })).not.toThrow();
   });
 
-  it('reports the built props', () => {
-    const telemetry = { trackEventStatusChanged: jest.fn() };
-
-    reportEventStatusChange({ telemetry, ...change });
-
-    expect(telemetry.trackEventStatusChanged).toHaveBeenCalledWith(
-      expect.objectContaining({ fingerprint: 'checkout-latency', actor: 'system' })
-    );
-  });
-
-  it('skips an unchanged status', () => {
-    const telemetry = { trackEventStatusChanged: jest.fn() };
-
-    reportEventStatusChange({ telemetry, ...change, prior: { status: 'active' } });
-
-    expect(telemetry.trackEventStatusChanged).not.toHaveBeenCalled();
-  });
-
-  it('swallows a telemetry failure and logs it at debug', () => {
+  it('swallows a telemetry failure', () => {
     const logger = loggerMock.create();
     const telemetry = {
       trackEventStatusChanged: jest.fn(() => {

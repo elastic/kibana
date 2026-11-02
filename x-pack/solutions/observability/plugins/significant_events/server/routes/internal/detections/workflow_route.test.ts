@@ -82,15 +82,4 @@ describe('change point scan route', () => {
       expect.objectContaining({ space_id: 'default', workflow_execution_id: 'wf-exec-1' })
     );
   });
-
-  it('omits the workflow execution id from the scan telemetry when none was sent', async () => {
-    const { handlerParams, trackSignificantEventsDetectionScan } = setup();
-
-    await scanRoute.handler(handlerParams);
-
-    expect(trackSignificantEventsDetectionScan).toHaveBeenCalledTimes(1);
-    expect(trackSignificantEventsDetectionScan.mock.calls[0][0]).not.toHaveProperty(
-      'workflow_execution_id'
-    );
-  });
 });

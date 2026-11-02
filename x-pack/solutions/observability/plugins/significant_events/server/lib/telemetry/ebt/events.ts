@@ -94,7 +94,7 @@ const agentToolEventSearchEventType = {
   schema: agentToolEventSearchSchema,
 };
 
-/** Every EBT event type this plugin registers; the service registers exactly this list. */
+/** Every EBT event type this plugin registers. */
 const significantEventsEventTypes = [
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,

@@ -410,7 +410,6 @@ export class RuleEventsClient {
       space: string;
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
       emitTrigger?: TriggerEmitter;
-      /** Reports a status-change EBT event per written version that changes status. */
       telemetry?: EventStatusChangeReporter;
       /** Reads `.alert-actions`, a private Alerting v2 index; falls back to `esClient`. */
       internalEsClient?: ElasticsearchClient;
@@ -987,7 +986,6 @@ export class RuleEventsClient {
     actor,
   }: {
     event: SignificantEvent;
-    /** Who caused the write, recorded on the status-change telemetry. */
     actor: SignificantEventActor;
   }): Promise<void> {
     await this.writeVersion({ event, actor });
@@ -1001,7 +999,6 @@ export class RuleEventsClient {
   }: {
     event: SignificantEvent;
     prior: SignificantEvent;
-    /** Who caused the write, recorded on the status-change telemetry. */
     actor: SignificantEventActor;
   }): Promise<UpdateEventResult> {
     // A head that cannot be read back is not a version to build on.
@@ -1024,10 +1021,7 @@ export class RuleEventsClient {
   }: {
     eventId: string;
     change: StatusChange;
-    /**
-     * Who asked for the change, recorded on the status-change telemetry. Not derived from `change`:
-     * an operator change (`byOperator`) is a human's from the UI but the agent's from a chat tool.
-     */
+    /** Not derived from `change`: a `byOperator` change is a human's from the UI but the agent's from a chat tool. */
     actor: SignificantEventActor;
     assessmentNote?: string;
     /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */

@@ -21,7 +21,6 @@ import type {
   AgentToolEventSearchProps,
 } from './types';
 
-/** Fields every alert-level event carries, so metrics split by source and join by fingerprint. */
 const alertIdentitySchema: RootSchema<AlertIdentityProps> = {
   alert_source: {
     type: 'keyword',

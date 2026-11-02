@@ -791,7 +791,7 @@ describe('events_write tool', () => {
     );
   });
 
-  it('identifies the alert on every telemetry event and carries the workflow execution', async () => {
+  it('identifies the alert and workflow execution on each telemetry event', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       { index: 0, event_id: 'event-1', status: 'active', written: true, severity: 'high' },
       {
@@ -836,7 +836,7 @@ describe('events_write tool', () => {
     expect(second).not.toHaveProperty('workflow_execution_id');
   });
 
-  it('keeps the fingerprint and reports an unknown space when scoping fails', async () => {
+  it('reports an unknown space when scoping fails', async () => {
     const telemetry = { trackAgentToolEventsWrite: jest.fn() };
     const getScopedClients = jest.fn().mockRejectedValue(new Error('no clients'));
     const failingTool = createEventsWriteTool({

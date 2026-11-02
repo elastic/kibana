@@ -409,7 +409,6 @@ const writeVersions = ({
     pendingWrites.map(({ candidate, document }) =>
       writeLimit(async (): Promise<CompactBulkError | undefined> => {
         try {
-          // Every version this handler writes is the agent's: it is the agent tool's writer.
           if (candidate.latest === undefined) {
             await eventSearchClient.createEvent({ event: document, actor: 'agent' });
             return undefined;

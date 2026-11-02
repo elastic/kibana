@@ -28,10 +28,6 @@ const SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_SEARCH_EVENT_TYPE =
 const SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE =
   'significant-events-event-status-changed';
 
-/**
- * Every EBT event about one Significant Event identifies it as an alert does: by `alert_source`
- * (the `source` on its `.rule-events` document) and `fingerprint` (its `event_id`).
- */
 const SIGNIFICANT_EVENT_ENTITY_TYPE = 'significant_event';
 
 export {

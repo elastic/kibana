@@ -8,13 +8,9 @@
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { AlertIdentityProps } from '../../lib/telemetry/ebt';
 
-/** Reported in place of an id or space the tool could not resolve before it failed. */
 export const UNKNOWN_TELEMETRY_VALUE = 'unknown';
 
-/**
- * The alert identity fields of an agent-tool event about one Significant Event. The tools only
- * ever write `elastic.significant_events` alerts, whose `fingerprint` is the `event_id`.
- */
+/** Alert identity of the Significant Event an agent-tool telemetry event is about. */
 export const alertIdentity = (
   eventId: string | undefined,
   spaceId: string

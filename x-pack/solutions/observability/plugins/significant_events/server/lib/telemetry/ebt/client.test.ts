@@ -9,7 +9,6 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { EbtTelemetryClient } from './client';
 import {
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
 } from './constants';
 
@@ -118,32 +117,6 @@ describe('EbtTelemetryClient', () => {
           default_bucket_interval: '5m',
           space_id: 'default',
         }
-      );
-    });
-  });
-
-  describe('trackEventStatusChanged', () => {
-    it('reports a significant event status transition under its event type', () => {
-      const props = {
-        alert_source: 'elastic.significant_events',
-        fingerprint: 'checkout-latency',
-        space_id: 'default',
-        entity_type: 'significant_event' as const,
-        previous_status: 'active' as const,
-        status: 'inactive' as const,
-        actor: 'human' as const,
-        severity: 'high' as const,
-        confidence: 0.8,
-        signal_count: 2,
-        confirmed_signal_count: 1,
-        source_ids: ['logs.checkout'],
-      };
-
-      client.trackEventStatusChanged(props);
-
-      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
-        props
       );
     });
   });

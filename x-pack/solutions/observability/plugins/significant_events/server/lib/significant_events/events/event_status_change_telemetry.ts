@@ -17,13 +17,9 @@ import type {
   SignificantEventActor,
 } from '../../telemetry/ebt';
 
-/** The one telemetry method the write path needs; a test can pass a plain mock. */
 export type EventStatusChangeReporter = Pick<EbtTelemetryClient, 'trackEventStatusChanged'>;
 
-/**
- * The status-change record for a written version, or undefined when the version keeps the status
- * stored before it (a continuation that only merged signals or moved severity is not a transition).
- */
+/** The status-change record for a written version; undefined when the status did not change. */
 export const buildEventStatusChangedProps = ({
   event,
   prior,
@@ -58,7 +54,7 @@ export const buildEventStatusChangedProps = ({
   };
 };
 
-/** Reports a status transition best-effort: telemetry never changes the outcome of the write. */
+/** Reports a status transition; a telemetry failure never fails the write. */
 export const reportEventStatusChange = ({
   telemetry,
   logger,

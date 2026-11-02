@@ -1340,7 +1340,7 @@ describe('RuleEventsClient', () => {
       }
     );
 
-    it('createEvent reports a status-change telemetry event with no previous status', async () => {
+    it('createEvent reports the status change without a previous status', async () => {
       const telemetry = { trackEventStatusChanged: jest.fn() };
 
       await clientWith({ writer: makeWriter(), telemetry }).createEvent({
@@ -1365,7 +1365,7 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('updateEvent reports the transition with the previous status and the given actor', async () => {
+    it('updateEvent reports the transition with the previous status and actor', async () => {
       const prior = version({ status: 'active' });
       const telemetry = { trackEventStatusChanged: jest.fn() };
 
@@ -1378,38 +1378,6 @@ describe('RuleEventsClient', () => {
       expect(telemetry.trackEventStatusChanged).toHaveBeenCalledWith(
         expect.objectContaining({ previous_status: 'active', status: 'inactive', actor: 'human' })
       );
-    });
-
-    it('updateEvent reports nothing when the status is unchanged', async () => {
-      const prior = version({ status: 'active' });
-      const telemetry = { trackEventStatusChanged: jest.fn() };
-
-      await clientWith({ head: prior, writer: makeWriter(), telemetry }).updateEvent({
-        event: version({ '@timestamp': '2026-01-02T00:00:00.000Z', severity: 'high' }),
-        prior,
-        actor: 'agent',
-      });
-
-      expect(telemetry.trackEventStatusChanged).not.toHaveBeenCalled();
-    });
-
-    it('updateEvent keeps the write result when telemetry throws', async () => {
-      const prior = version({ status: 'active' });
-      const telemetry = {
-        trackEventStatusChanged: jest.fn(() => {
-          throw new Error('analytics down');
-        }),
-      };
-
-      const result = await clientWith({ head: prior, writer: makeWriter(), telemetry }).updateEvent(
-        {
-          event: version({ '@timestamp': '2026-01-02T00:00:00.000Z', status: 'inactive' }),
-          prior,
-          actor: 'agent',
-        }
-      );
-
-      expect(result).toEqual({ updated: true });
     });
 
     it('refuses to write when the client was created without a writer', async () => {

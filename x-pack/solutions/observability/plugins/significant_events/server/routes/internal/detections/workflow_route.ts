@@ -152,7 +152,6 @@ const changePointScanRoute = createServerRoute({
     body: z.object({
       lookback: z.string().max(64),
       bucketInterval: z.string().max(64),
-      /** The detection workflow execution requesting the scan; carried onto its telemetry. */
       workflowExecutionId: z.string().max(256).optional(),
     }),
   }),

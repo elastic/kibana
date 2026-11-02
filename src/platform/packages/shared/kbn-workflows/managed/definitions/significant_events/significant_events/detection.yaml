@@ -99,7 +99,6 @@ steps:
       body:
         lookback: '{{ inputs.lookback }}'
         bucketInterval: '{{ inputs.bucketInterval }}'
-        # Carried onto the detection-scan telemetry so a scan joins its workflow execution.
         workflowExecutionId: '{{ execution.id }}'
 
   # -----------------------------------------------------------------------

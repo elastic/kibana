@@ -21,7 +21,6 @@ export const asRuleEventsClient = (
     getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
     emitTrigger?: TriggerEmitter;
     telemetry?: EventStatusChangeReporter;
-    /** The space reported on status-change telemetry; defaults to `default`. */
     space?: string;
   } = {}
 ): RuleEventsClient =>

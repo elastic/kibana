@@ -420,7 +420,6 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
-      // Known once the scoped clients resolved; an earlier failure reports the unknown space.
       let spaceId = UNKNOWN_TELEMETRY_VALUE;
       try {
         const {
