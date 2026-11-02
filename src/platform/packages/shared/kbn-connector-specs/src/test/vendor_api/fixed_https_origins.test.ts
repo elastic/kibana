@@ -72,6 +72,20 @@ describe('fixedHttpsOrigins', () => {
     ]);
   });
 
+  it('keeps a fixed origin whose path has variables', () => {
+    expect(
+      fixedHttpsOrigins({
+        v1: {
+          openapi: '3.0.3',
+          servers: [
+            { url: 'https://api.example.com/{version}', variables: { version: { default: 'v1' } } },
+          ],
+          paths: {},
+        },
+      })
+    ).toEqual(['https://api.example.com']);
+  });
+
   it('leaves out origins that depend on connector config, and plain HTTP', () => {
     expect(
       fixedHttpsOrigins({
@@ -79,6 +93,8 @@ describe('fixedHttpsOrigins', () => {
           openapi: '3.0.3',
           servers: [
             { url: 'https://{subdomain}.example.com', variables: { subdomain: { default: 'a' } } },
+            { url: 'https://api.{region}.example.com/v1', variables: { region: { default: 'a' } } },
+            { url: 'https://api.example.com{base}', variables: { base: { default: '/v1' } } },
             { url: 'http://plain.example.com' },
             { url: '/relative' },
           ],

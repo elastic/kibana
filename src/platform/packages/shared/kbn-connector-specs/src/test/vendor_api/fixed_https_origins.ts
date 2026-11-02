@@ -30,10 +30,16 @@ const tokenUrlsOf = ({ components }: OpenApiDocument): unknown[] => {
     .flatMap((flow) => (isJsonObject(flow) ? [flow.tokenUrl, flow.refreshUrl] : []));
 };
 
+// Variables in the path, such as `https://api.example.com/{version}`, leave the origin fixed.
+const FIXED_HTTPS_ORIGIN = /^https:\/\/[^/?#{}]+(?:[/?#]|$)/;
+
+const isFixedHttpsUrl = (url: unknown): url is string =>
+  typeof url === 'string' && FIXED_HTTPS_ORIGIN.test(url);
+
 /**
  * The HTTPS origins the contract mock serves whatever the connector's config says: those of the
- * specs' servers, at any level, and of absolute OAuth token URLs. URLs with variables, such as
- * `https://{subdomain}.zendesk.com`, depend on connector config, and relative ones on a server.
+ * specs' servers, at any level, and of absolute OAuth token URLs. Origins with variables, such as
+ * `https://{subdomain}.zendesk.com`, depend on connector config, and relative URLs on a server.
  */
 export const fixedHttpsOrigins = (specs: Readonly<Record<string, OpenApiDocument>>): string[] => {
   const urls = Object.values(specs).flatMap((spec) => [
@@ -41,10 +47,6 @@ export const fixedHttpsOrigins = (specs: Readonly<Record<string, OpenApiDocument
     ...operationServerUrlsOf(spec),
     ...tokenUrlsOf(spec),
   ]);
-  const origins = urls.flatMap((url) =>
-    typeof url === 'string' && url.startsWith('https://') && !url.includes('{')
-      ? [new URL(url).origin]
-      : []
-  );
+  const origins = urls.flatMap((url) => (isFixedHttpsUrl(url) ? [new URL(url).origin] : []));
   return [...new Set(origins)].sort();
 };
