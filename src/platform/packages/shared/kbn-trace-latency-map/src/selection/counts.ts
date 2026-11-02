@@ -76,3 +76,30 @@ export function getSelectionCounts({
     ? { spans: failed, failed: 0, estimated }
     : { spans, failed, estimated };
 }
+
+/** The spans and failures of the whole map. */
+export function getGridTotals(grid: LatencyGrid): { spans: number; failed: number } {
+  let spans = 0;
+  let failed = 0;
+  grid.cells.forEach((cell) => {
+    spans += cell.spans;
+    failed += cell.failed;
+  });
+  return { spans, failed };
+}
+
+/**
+ * Whether a region is about failures: they concentrate in it, with at least a tenth of its
+ * spans failed and at least three times the failure rate of the rest of the map. A selection
+ * drawn over such a region is marked failed only, saving the switch for the common intent.
+ */
+export function isFailureRegion(
+  region: { spans: number; failed: number },
+  map: { spans: number; failed: number }
+): boolean {
+  if (region.spans <= 0 || region.failed / region.spans < 0.1) return false;
+  const restSpans = map.spans - region.spans;
+  const restFailed = map.failed - region.failed;
+  const restRate = restSpans > 0 ? Math.max(0, restFailed) / restSpans : 0;
+  return region.failed / region.spans >= 3 * restRate;
+}

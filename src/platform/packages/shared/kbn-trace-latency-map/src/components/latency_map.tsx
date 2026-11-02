@@ -46,7 +46,7 @@ import { endGesture, moveGesture, startGesture } from '../selection/gesture';
 import type { Gesture } from '../selection/gesture';
 import { getKeyboardRange, reduceKeyboard } from '../selection/keyboard';
 import type { KeyboardState } from '../selection/keyboard';
-import { getSelectionCounts } from '../selection/counts';
+import { getGridTotals, getSelectionCounts, isFailureRegion } from '../selection/counts';
 import { selectionToEsqlCondition } from '../selection/to_esql';
 import { CellDetails } from './cell_details';
 import { LatencyHeatmap } from './latency_heatmap';
@@ -55,7 +55,7 @@ import { MapHeader } from './map_header';
 import type { SlowestPercentile } from './map_header';
 import { SelectionBar } from './selection_bar';
 import { OVERLAY_CONTROL_ATTRIBUTE, SelectionOverlay } from './selection_overlay';
-import { getCountText } from './unit_text';
+import { getCountText, getSlowestLabel } from './unit_text';
 
 export interface LatencyMapProps {
   /** The traces to map: index pattern, time range and filters. */
@@ -178,13 +178,18 @@ export function LatencyMap({
   useEffect(() => {
     if (selectionFailedOnly !== undefined) setFailedOnly(selectionFailedOnly);
   }, [selectionFailedOnly]);
+  // Once the user chooses an outcome with the switch, a drawn region keeps it: the failure
+  // inference below only speaks while the user has not.
+  const outcomeChosen = useRef(false);
 
   const commit = useCallback(
-    (next: LatencyMapSelection | undefined) =>
+    (next: LatencyMapSelection | undefined) => {
+      if (!next) outcomeChosen.current = false;
       onSelectionCommit(
         next,
         next && selectionToEsqlCondition(next, { unit, scope: selectionCondition })
-      ),
+      );
+    },
     [onSelectionCommit, unit, selectionCondition]
   );
 
@@ -248,13 +253,20 @@ export function LatencyMap({
 
   // Stable, so renders that change nothing of the chart do not reach the memoized heatmap.
   const commitRange = useCallback(
-    (requested: CellRange) => {
+    (requested: CellRange, label?: string) => {
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
       if (selection && committedRange && isSameRange(range, committedRange)) return;
-      commit(geometry.rangeToSelection(range, failedOnly));
+      let next = geometry.rangeToSelection(range, failedOnly);
+      // A region where failures concentrate is about them: the selection says so on its
+      // own, as long as the user has not chosen an outcome with the switch.
+      if (!failedOnly && !outcomeChosen.current && grid && timeGrid && stats) {
+        const counts = getSelectionCounts({ grid, timeGrid, stats, selection: next });
+        if (isFailureRegion(counts, getGridTotals(grid))) next = { ...next, failedOnly: true };
+      }
+      commit(label ? { ...next, label } : next);
     },
-    [geometry, selection, committedRange, commit, failedOnly]
+    [geometry, selection, committedRange, commit, failedOnly, grid, timeGrid, stats]
   );
 
   const clickCell = useCallback(
@@ -311,16 +323,21 @@ export function LatencyMap({
 
   const selectSlowest = (percentile: SlowestPercentile) => {
     if (!geometry || !stats) return;
-    const row = Math.floor(durationToRow(percentile === 99 ? stats.p99 : stats.p95, stats));
-    commitRange({
-      x0: 0,
-      x1: geometry.bins,
-      y0: Math.min(geometry.rows - 1, Math.max(0, row)),
-      y1: geometry.rows,
-    });
+    const duration = percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
+    const row = Math.floor(durationToRow(duration, stats));
+    commitRange(
+      {
+        x0: 0,
+        x1: geometry.bins,
+        y0: Math.min(geometry.rows - 1, Math.max(0, row)),
+        y1: geometry.rows,
+      },
+      getSlowestLabel(unit, percentile)
+    );
   };
 
   const changeFailedOnly = (next: boolean) => {
+    outcomeChosen.current = true;
     setFailedOnly(next);
     if (selection) {
       commit(next ? { ...selection, failedOnly: true } : withoutFailedOnly(selection));
@@ -442,7 +459,7 @@ export function LatencyMap({
                 defaultMessage: 'No traces in this time range.',
               })
             : i18n.translate('traceLatencyMap.emptySpans', {
-                defaultMessage: 'No spans in this time range.',
+                defaultMessage: 'No spans with a duration in this time range.',
               })}
         </EuiText>
       </EuiFlexGroup>
@@ -487,6 +504,7 @@ export function LatencyMap({
             stats={stats}
             unit={unit}
             sampled={sampled}
+            canClick={Boolean(onCellClick)}
             timeZone={timeZone}
             colors={colors}
             failedOnly={failedOnly}
@@ -552,6 +570,7 @@ export function LatencyMap({
   return (
     <div ref={setContainer} data-test-subj={dataTestSubj}>
       <MapHeader
+        stats={isEmpty ? undefined : stats}
         failedOnly={failedOnly}
         onFailedOnlyChange={changeFailedOnly}
         onSelectSlowest={selectSlowest}

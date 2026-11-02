@@ -213,6 +213,8 @@ describe('LatencyMap', () => {
     expect(screen.getByTestId('traceLatencyMapLegend')).toBeInTheDocument();
     expect(onStats).toHaveBeenCalledWith({ ...stats, sampled: false });
     expect(onLoad).toHaveBeenCalledWith(source);
+    // The header reads the range's statistics.
+    expect(screen.getByTestId('traceLatencyMapStats')).toHaveTextContent('2s max · 10ms p99');
   });
 
   it('gives the chart a time scale of the columns, the rows as categories, one colour scale', async () => {
@@ -423,17 +425,56 @@ describe('LatencyMap', () => {
       expect(onCellClick).not.toHaveBeenCalled();
     });
 
-    it('selects the slowest 1% and 5% across the whole range', async () => {
+    it('marks a region where failures concentrate as failed only on its own', async () => {
+      // The far cell is all failures: 100% against 17% on the rest of the map.
       const { onSelectionCommit } = renderMap();
       await waitForChart();
+      brush([30, 31], [20]);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBe(true);
+      expect(condition).toContain('event.outcome == "failure"');
+    });
+
+    it('does not infer failures over a region that merely has some', async () => {
+      // 10 of the busy region's 60 spans failed: a sixth, not a concentration.
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      brush([3, 5], [5]);
+      expect(onSelectionCommit.mock.calls[0][0].failedOnly).toBeUndefined();
+    });
+
+    it('leaves the outcome alone once the user chose one with the switch', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+      fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+      brush([30, 31], [20]);
+      expect(onSelectionCommit.mock.calls[0][0].failedOnly).toBeUndefined();
+    });
+
+    it('selects the slowest spans across the whole range, labelled, from the menu', async () => {
+      const { onSelectionCommit } = renderMap();
+      await waitForChart();
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
+      // The menu names the percentiles with their durations.
+      expect(screen.getByTestId('traceLatencyMapSlowest99')).toHaveTextContent(/^Above p99 \(/);
       fireEvent.click(screen.getByTestId('traceLatencyMapSlowest99'));
       const [selection] = onSelectionCommit.mock.calls[0];
       expect(selection.from).toBe(source.timeRange.from);
       expect(selection.minDuration).toBeCloseTo(stats.p99);
       expect(selection.maxDuration).toBeGreaterThan(stats.max);
+      expect(selection.label).toBe('Slowest spans (> p99)');
 
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
       fireEvent.click(screen.getByTestId('traceLatencyMapSlowest95'));
       expect(onSelectionCommit.mock.calls[1][0].minDuration).toBeLessThan(stats.p99);
+
+      fireEvent.click(screen.getByTestId('traceLatencyMapSelectSlowest'));
+      fireEvent.click(screen.getByTestId('traceLatencyMapSlowest90'));
+      // Snapped to the row edge at or below the p90.
+      const p90Selection = onSelectionCommit.mock.calls[2][0];
+      expect(p90Selection.minDuration).toBeLessThanOrEqual(stats.p90);
+      expect(p90Selection.minDuration).toBeLessThan(onSelectionCommit.mock.calls[1][0].minDuration);
     });
   });
 
@@ -616,6 +657,12 @@ describe('LatencyMap', () => {
       expect(summary).toHaveTextContent('60 spans');
       expect(summary).toHaveTextContent('10 failed (17%)');
       expect(screen.getByRole('button', { name: /^Filter \(\d+\)$/ })).toBeInTheDocument();
+    });
+
+    it('leads with the label of a selection that has one', async () => {
+      renderMap({ selection: { ...selection, label: 'Slowest spans (> p95)' } });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(summary).toHaveTextContent(/^Slowest spans \(> p95\) · /);
     });
 
     it('counts a selection that does not follow the cells over its own bounds, as an estimate', async () => {

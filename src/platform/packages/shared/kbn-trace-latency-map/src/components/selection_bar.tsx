@@ -44,6 +44,12 @@ export function SelectionBar({
       data-test-subj="traceLatencyMapSelectionBar"
     >
       <EuiText size="xs" data-test-subj="traceLatencyMapSelectionSummary">
+        {selection.label && (
+          <>
+            <strong>{selection.label}</strong>
+            {' · '}
+          </>
+        )}
         <strong>
           {formatDuration(selection.minDuration)} – {formatDuration(selection.maxDuration)}
         </strong>
