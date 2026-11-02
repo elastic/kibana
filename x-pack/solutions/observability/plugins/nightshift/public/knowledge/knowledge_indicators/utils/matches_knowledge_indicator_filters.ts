@@ -7,7 +7,7 @@
 
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { isComputedFeature } from '@kbn/significant-events-schema';
-import { getKnowledgeIndicatorSourceId } from './get_knowledge_indicator_source_id';
+import { getKnowledgeIndicatorSourceIds } from './get_knowledge_indicator_source_id';
 import { getKnowledgeIndicatorSubtype } from './get_knowledge_indicator_subtype';
 import { getKnowledgeIndicatorType } from './get_knowledge_indicator_type';
 
@@ -48,7 +48,9 @@ export const matchesKnowledgeIndicatorFilters = (
   }
 
   if (selectedStreams?.length) {
-    if (!selectedStreams.includes(getKnowledgeIndicatorSourceId(ki))) return false;
+    if (!getKnowledgeIndicatorSourceIds(ki).some((id) => selectedStreams.includes(id))) {
+      return false;
+    }
   }
 
   if (hideComputedTypes && ki.kind === 'feature' && isComputedFeature(ki.feature)) return false;

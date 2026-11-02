@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import {
   esqlCommandRegistry,
   TIME_SYSTEM_PARAMS,
@@ -329,6 +330,52 @@ describe('autocomplete', () => {
 
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM inner_index' });
     });
+    it.each([
+      {
+        context: 'inside a FROM subquery',
+        source: 'logs-*',
+        statement: 'LET selected = (FROM logs-* | KEEP message); FROM (FROM selected | WHERE /)',
+      },
+      {
+        context: 'inside nested FROM subqueries',
+        source: 'logs_nested-*',
+        statement:
+          'LET selected = (FROM logs_nested-* | KEEP message); FROM (FROM (FROM selected | WHERE /))',
+      },
+      {
+        context: 'inside an IN subquery without leaking outer pipeline columns',
+        source: 'logs_in-*',
+        statement:
+          'LET selected = (FROM logs_in-* | KEEP message); FROM selected | EVAL outer_only = 1 | WHERE message IN (FROM selected | WHERE /)',
+      },
+      {
+        context: 'inside a later LET binding',
+        source: 'logs_binding-*',
+        statement:
+          'LET base = (FROM logs_binding-* | KEEP message); LET selected = (FROM base | WHERE /); FROM selected',
+      },
+    ])(
+      'resolves outer LET bindings when suggesting fields $context',
+      async ({ source, statement }) => {
+        const sourceFields: ESQLFieldWithMetadata[] = [
+          { name: 'message', type: 'text', userDefined: false },
+          { name: 'bytes', type: 'long', userDefined: false },
+        ];
+        const getColumnsFor = jest.fn(async (params?: { query: string }) =>
+          params?.query === `FROM ${source}` ? sourceFields : []
+        );
+        const { suggest: suggestTest } = await setup();
+
+        const suggestions = await suggestTest(statement, { callbacks: { getColumnsFor } });
+        const labels = suggestions.map(({ label }) => label);
+
+        expect(getColumnsFor).toHaveBeenCalledWith({ query: `FROM ${source}` });
+        expect(getColumnsFor).not.toHaveBeenCalledWith({ query: 'FROM selected' });
+        expect(labels).toContain('message');
+        expect(labels).not.toContain('bytes');
+        expect(labels).not.toContain('outer_only');
+      }
+    );
     it.each([
       ['EVAL incomplete assignment', 'FROM marker_eval_assignment | EVAL foo = 1, bar = '],
       ['EVAL function argument', 'FROM marker_eval_function | EVAL result = ROUND(doubleField, '],

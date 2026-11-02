@@ -203,7 +203,7 @@ describe('commit', () => {
     ]);
   });
 
-  it('stamps the version with the investigation it was written from', async () => {
+  it('stamps the version with the conversation of the investigation it was written from', async () => {
     const esClient = createEsClient();
 
     await createStore(esClient).commit({
@@ -215,13 +215,10 @@ describe('commit', () => {
       summary: 'Initial tree.',
       learnings: [],
       evidenceGathererMetadata: [],
-      investigationId: 'inv-1',
+      conversationId: 'inv-1',
     });
 
-    const [versionCall, headCall] = esClient.index.mock.calls;
-    expect(versionCall[0].document.attributes.investigation_id).toBe('inv-1');
-    // The head is shared by every investigation that touches the tree.
-    expect(headCall[0].document.attributes).not.toHaveProperty('investigation_id');
+    expect(esClient.index.mock.calls[0][0].document.attributes.conversation_id).toBe('inv-1');
   });
 
   it('leaves the version unstamped for a commit outside an investigation', async () => {
@@ -239,7 +236,7 @@ describe('commit', () => {
     });
 
     expect(esClient.index.mock.calls[0][0].document.attributes).not.toHaveProperty(
-      'investigation_id'
+      'conversation_id'
     );
   });
 });
@@ -266,7 +263,7 @@ describe('listTreeIdsForInvestigation', () => {
           bool: {
             filter: [
               { term: { type: 'decision_tree_version' } },
-              { term: { 'attributes.investigation_id': 'inv-1' } },
+              { term: { 'attributes.conversation_id': 'inv-1' } },
               { term: { 'attributes.space_id': 'default' } },
             ],
           },

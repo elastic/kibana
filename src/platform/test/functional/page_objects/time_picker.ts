@@ -375,7 +375,8 @@ export class TimePickerPageObject extends FtrService {
         'Neither the time picker apply button nor the query bar submit button rendered'
       );
     }
-    await this.testSubjects.click(submitButton);
+    // The picker re-renders as its date popover closes, so a bare resolve-and-click can be swallowed.
+    await this.testSubjects.clickWhenNotDisabled(submitButton);
   }
 
   public async isOff() {

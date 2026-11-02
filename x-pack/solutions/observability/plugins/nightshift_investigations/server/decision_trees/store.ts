@@ -52,8 +52,9 @@ interface DecisionTreeAttributes {
   node_count?: number | string;
   edge_count?: number | string;
   space_id?: string;
-  /** Versions only: the investigation whose round this version was written from. */
-  investigation_id?: string;
+  conversation_id?: string;
+  round_id?: string;
+  workflow_execution_id?: string;
 }
 
 /** The head document, one per tree, holding the current markdown and merged learnings. */
@@ -96,10 +97,14 @@ export interface DecisionTreeStore {
     learnings: LearningRecord[];
     /** Evidence-node descriptions; persisted so later reads can reapply them. */
     evidenceGathererMetadata: string[];
-    /** The investigation whose round this version was written from, when there is one. */
-    investigationId?: string;
+    conversationId?: string;
+    roundId?: string;
+    workflowExecutionId?: string;
   }) => Promise<DecisionTreeDetail>;
-  /** Ids of the trees with a version written from this investigation's rounds. */
+  /**
+   * Ids of the trees with a version written from this investigation's rounds. The investigation id
+   * is its conversation id, which `commit` stamps on each version as `conversation_id`.
+   */
   listTreeIdsForInvestigation: (investigationId: string) => Promise<string[]>;
   listVersions: (treeId: string) => Promise<DecisionTreeVersionSummary[]>;
   getVersion: (treeId: string, version: number) => Promise<DecisionTreeVersionDetail | undefined>;
@@ -180,6 +185,13 @@ const headToSummary = (source: DecisionTreeHeadSource): DecisionTreeSummary => (
   edge_count: toCount(source.attributes?.edge_count),
   learning_count: source.learnings.length,
   updated_at: source['@timestamp'],
+  ...(source.attributes?.conversation_id
+    ? { conversation_id: source.attributes.conversation_id }
+    : {}),
+  ...(source.attributes?.round_id ? { round_id: source.attributes.round_id } : {}),
+  ...(source.attributes?.workflow_execution_id
+    ? { workflow_execution_id: source.attributes.workflow_execution_id }
+    : {}),
 });
 
 const headToDetail = (source: DecisionTreeHeadSource): DecisionTreeDetail => ({
@@ -199,6 +211,13 @@ const versionToSummary = (source: DecisionTreeVersionSource): DecisionTreeVersio
   edge_count: toCount(source.attributes?.edge_count),
   learning_count: source.learnings.length,
   created_at: source['@timestamp'],
+  ...(source.attributes?.conversation_id
+    ? { conversation_id: source.attributes.conversation_id }
+    : {}),
+  ...(source.attributes?.round_id ? { round_id: source.attributes.round_id } : {}),
+  ...(source.attributes?.workflow_execution_id
+    ? { workflow_execution_id: source.attributes.workflow_execution_id }
+    : {}),
 });
 
 const versionToDetail = (source: DecisionTreeVersionSource): DecisionTreeVersionDetail => ({
@@ -280,7 +299,9 @@ export const createDecisionTreeStore = ({
       summary,
       learnings,
       evidenceGathererMetadata,
-      investigationId,
+      conversationId,
+      roundId,
+      workflowExecutionId,
     }) => {
       const symptom = symptomSlugFromTreeId(treeId);
       const existing = await getHead(symptom);
@@ -296,6 +317,11 @@ export const createDecisionTreeStore = ({
       const now = new Date().toISOString();
       const fullTreeId = symptomTreeId(symptom);
       const tags = ['nightshift', DECISION_TREE_TAG];
+      const provenanceAttrs = {
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        ...(roundId ? { round_id: roundId } : {}),
+        ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
+      };
 
       const versionDoc: DecisionTreeVersionSource = {
         '@timestamp': now,
@@ -313,7 +339,7 @@ export const createDecisionTreeStore = ({
           node_count: nodeCount,
           edge_count: edgeCount,
           space_id: spaceId,
-          ...(investigationId ? { investigation_id: investigationId } : {}),
+          ...provenanceAttrs,
         },
         learnings,
         evidence_gatherer_metadata: evidenceGathererMetadata,
@@ -333,6 +359,7 @@ export const createDecisionTreeStore = ({
           node_count: nodeCount,
           edge_count: edgeCount,
           space_id: spaceId,
+          ...provenanceAttrs,
         },
         learnings: mergeLearnings(existing?.learnings ?? [], learnings),
         evidence_gatherer_metadata: evidenceGathererMetadata,
@@ -372,8 +399,10 @@ export const createDecisionTreeStore = ({
           query: {
             bool: {
               filter: [
+                // The head carries the last writer's conversation, so only versions say every
+                // investigation that wrote the tree.
                 { term: { type: 'decision_tree_version' } },
-                { term: { 'attributes.investigation_id': investigationId } },
+                { term: { 'attributes.conversation_id': investigationId } },
                 { term: { [SPACE_ID_FIELD]: spaceId } },
               ],
             },

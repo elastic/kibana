@@ -77,7 +77,6 @@ const runSubmit = async ({
   store,
   markdown,
   submission,
-  getInvestigationId,
 }: {
   store: jest.Mocked<DecisionTreeStore>;
   markdown: string;
@@ -86,14 +85,12 @@ const runSubmit = async ({
     file_path: string;
     evidence_gatherer_metadata: string[];
   }>;
-  getInvestigationId?: (conversationId: string) => string | undefined;
 }) => {
   const { session, getSandboxStart } = createSandboxStart(markdown);
   const tool = createSubmitOptimizerResultTool({
     getSandboxStart: getSandboxStart as never,
     getStore: () => store,
     getSpaceId: () => 'default',
-    getInvestigationId,
     logger: loggerMock.create(),
   });
 
@@ -138,33 +135,6 @@ describe('nightshift_submit_optimizer_result', () => {
       })
     );
     expect('results' in result && result.results[0].type).toBe(ToolResultType.other);
-  });
-
-  // A later round of the investigation finds the trees this run wrote, including a new one.
-  it('stamps the commit with the investigation the run works for', async () => {
-    const store = createStore();
-    const getInvestigationId = jest.fn().mockReturnValue('inv-1');
-
-    await runSubmit({ store, markdown: markdownFor(FULL_TREE), getInvestigationId });
-
-    expect(getInvestigationId).toHaveBeenCalledWith('conv-1');
-    expect(store.commit).toHaveBeenCalledWith(
-      expect.objectContaining({ treeId: TREE_ID, investigationId: 'inv-1' })
-    );
-  });
-
-  it('commits unstamped when the run works for no investigation', async () => {
-    const store = createStore();
-
-    await runSubmit({
-      store,
-      markdown: markdownFor(FULL_TREE),
-      getInvestigationId: () => undefined,
-    });
-
-    expect(store.commit).toHaveBeenCalledWith(
-      expect.objectContaining({ investigationId: undefined })
-    );
   });
 
   it('persists evidence metadata on the committed tree', async () => {
