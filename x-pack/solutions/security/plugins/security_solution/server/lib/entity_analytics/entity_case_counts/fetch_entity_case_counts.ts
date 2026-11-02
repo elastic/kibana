@@ -6,7 +6,6 @@
  */
 
 import { chunk } from 'lodash';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { nodeBuilder } from '@kbn/es-query';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { isBoom } from '@hapi/boom';
