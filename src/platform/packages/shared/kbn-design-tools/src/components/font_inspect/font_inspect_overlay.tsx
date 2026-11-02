@@ -20,6 +20,10 @@ import { isIgnoredElement } from '../../lib/dom/is_ignored_element';
 import { FONT_INSPECT_OVERLAY_ID } from '../../lib/constants';
 import { useEscapeKey } from '../../hooks/use_escape_key';
 import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
+import {
+  useOverlayClickCapture,
+  useThrottledDocumentPointerMove,
+} from '../../hooks/use_overlay_pointer_events';
 import { GlobalCursorOverride } from '../global_cursor_override';
 
 interface Props {
@@ -73,8 +77,6 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
     el.style.top = `${clamped.top}px`;
   }, [hoverRect, hoverElement]);
 
-  const rafRef = useRef<number>(0);
-
   // Attached on `document` (capture phase), not via the backdrop's
   // `onPointerMove`: the pinned card renders above the backdrop with
   // `pointer-events: auto` (so its close button works), which means the
@@ -83,65 +85,56 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
   // which element ends up as the hit-test target.
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      cancelAnimationFrame(rafRef.current);
       const { clientX, clientY } = event;
       const pointerTarget = event.target;
-      rafRef.current = requestAnimationFrame(() => {
-        // getElementFromPoint deliberately "sees through" the backdrop to
-        // reveal real page content underneath it. But when the pointer is
-        // directly over actual devtool UI chrome (e.g. a pinned card), that
-        // same pass-through walks past the card's own (ignored) elements
-        // down to whatever page content happens to sit beneath it on
-        // screen - showing a bogus hover preview for an unrelated element.
-        // Only the backdrop itself should get the pass-through treatment.
-        if (
-          pointerTarget instanceof Element &&
-          pointerTarget.id !== FONT_INSPECT_OVERLAY_ID &&
-          isIgnoredElement(pointerTarget)
-        ) {
-          setHoverRect(null);
-          setHoverElement(null);
-          return;
-        }
+      // getElementFromPoint deliberately "sees through" the backdrop to
+      // reveal real page content underneath it. But when the pointer is
+      // directly over actual devtool UI chrome (e.g. a pinned card), that
+      // same pass-through walks past the card's own (ignored) elements
+      // down to whatever page content happens to sit beneath it on
+      // screen - showing a bogus hover preview for an unrelated element.
+      // Only the backdrop itself should get the pass-through treatment.
+      if (
+        pointerTarget instanceof Element &&
+        pointerTarget.id !== FONT_INSPECT_OVERLAY_ID &&
+        isIgnoredElement(pointerTarget)
+      ) {
+        setHoverRect(null);
+        setHoverElement(null);
+        return;
+      }
 
-        const synth = new MouseEvent('mousemove', { clientX, clientY });
-        const target = getElementFromPoint(synth);
+      const synth = new MouseEvent('mousemove', { clientX, clientY });
+      const target = getElementFromPoint(synth);
 
-        // Drop pinned entries removed from the DOM since they were pinned.
-        setPinnedEntries((entries) => {
-          const stillConnected = entries.filter((entry) => entry.element.isConnected);
-          return stillConnected.length === entries.length ? entries : stillConnected;
-        });
-
-        if (!target) {
-          setHoverRect(null);
-          setHoverElement(null);
-          return;
-        }
-
-        const isTargetPinned = pinnedEntries.some((entry) => entry.element === target);
-        if (isTargetPinned) {
-          // Avoid stacking a transient hover card on top of a pinned one.
-          setHoverRect(null);
-          setHoverElement(null);
-          return;
-        }
-
-        const rect = target.getBoundingClientRect();
-        setHoverRect(rect);
-        setHoverElement(target);
+      // Drop pinned entries removed from the DOM since they were pinned.
+      setPinnedEntries((entries) => {
+        const stillConnected = entries.filter((entry) => entry.element.isConnected);
+        return stillConnected.length === entries.length ? entries : stillConnected;
       });
+
+      if (!target) {
+        setHoverRect(null);
+        setHoverElement(null);
+        return;
+      }
+
+      const isTargetPinned = pinnedEntries.some((entry) => entry.element === target);
+      if (isTargetPinned) {
+        // Avoid stacking a transient hover card on top of a pinned one.
+        setHoverRect(null);
+        setHoverElement(null);
+        return;
+      }
+
+      const rect = target.getBoundingClientRect();
+      setHoverRect(rect);
+      setHoverElement(target);
     },
     [pinnedEntries]
   );
 
-  useEffect(() => {
-    document.addEventListener('pointermove', handlePointerMove, true);
-    return () => {
-      document.removeEventListener('pointermove', handlePointerMove, true);
-      cancelAnimationFrame(rafRef.current);
-    };
-  }, [handlePointerMove]);
+  useThrottledDocumentPointerMove(handlePointerMove);
 
   const handleClick = useCallback((event: MouseEvent) => {
     const target = getElementFromPoint(event);
@@ -164,41 +157,11 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
     setHoverElement(null);
   }, []);
 
-  const handleMouseEvent = useCallback(
-    (event: MouseEvent) => {
-      const eventTarget = event.target;
-      // The overlay backdrop itself (full-viewport, pointer-events: auto) is
-      // the real click target in a browser - exclude it from the ignore
-      // check, which is meant for *other* ignored UI (toolbar, pinned card
-      // chrome incl. its close button) so they handle events normally
-      // instead of being swallowed here.
-      if (
-        eventTarget instanceof Element &&
-        eventTarget.id !== FONT_INSPECT_OVERLAY_ID &&
-        isIgnoredElement(eventTarget)
-      ) {
-        return;
-      }
-      event.stopPropagation();
-      event.preventDefault();
-      const isTargetDisabled =
-        eventTarget instanceof HTMLElement && eventTarget.hasAttribute('disabled');
-      if (event.type === 'click' || isTargetDisabled) {
-        handleClick(event);
-      }
-    },
-    [handleClick]
-  );
-
-  useEffect(() => {
-    document.addEventListener('pointerdown', handleMouseEvent, true);
-    document.addEventListener('click', handleMouseEvent, true);
-
-    return () => {
-      document.removeEventListener('pointerdown', handleMouseEvent, true);
-      document.removeEventListener('click', handleMouseEvent, true);
-    };
-  }, [handleMouseEvent]);
+  useOverlayClickCapture({
+    onActivate: handleClick,
+    shouldSkip: (eventTarget) =>
+      eventTarget.id !== FONT_INSPECT_OVERLAY_ID && isIgnoredElement(eventTarget),
+  });
 
   const hoverHighlightCss = useMemo(
     () =>
@@ -219,7 +182,9 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
         data-test-subj="fontInspectOverlayContainer"
         aria-hidden="true"
       />
-      {hoverRect && <div className={hoverHighlightCss} data-test-subj="fontInspectHighlight" />}
+      {hoverRect && (
+        <div className={hoverHighlightCss} data-test-subj="fontInspectHoverHighlight" />
+      )}
       {hoverElement && hoverRect && (
         <div
           ref={cardRef}

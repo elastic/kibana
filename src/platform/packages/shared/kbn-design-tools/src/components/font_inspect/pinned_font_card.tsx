@@ -50,7 +50,7 @@ export const PinnedFontCard = ({ element, zIndex, onClose }: Props) => {
 
   return (
     <>
-      <div className={highlightCss} data-test-subj="fontInspectHighlight" />
+      <div className={highlightCss} data-test-subj="fontInspectPinnedHighlight" />
       <div
         ref={cardRef}
         css={css({

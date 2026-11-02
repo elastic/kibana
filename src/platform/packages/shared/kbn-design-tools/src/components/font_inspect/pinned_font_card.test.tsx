@@ -68,7 +68,7 @@ describe('PinnedFontCard', () => {
 
     renderWithI18n(<PinnedFontCard element={element} zIndex={zIndex} onClose={jest.fn()} />);
 
-    expect(screen.getByTestId('fontInspectHighlight')).toBeInTheDocument();
+    expect(screen.getByTestId('fontInspectPinnedHighlight')).toBeInTheDocument();
     expect(buildHighlightCssSpy).toHaveBeenCalledWith(
       expect.objectContaining({ top: 10, left: 20, width: 100, height: 40 }),
       expect.any(String),

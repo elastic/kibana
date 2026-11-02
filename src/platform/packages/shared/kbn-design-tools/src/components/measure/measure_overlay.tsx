@@ -20,6 +20,10 @@ import type { SpacingLine } from '../../lib/dom/calculate_spacing';
 import { MEASURE_OVERLAY_ID } from '../../lib/constants';
 import { useEscapeKey } from '../../hooks/use_escape_key';
 import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
+import {
+  useOverlayClickCapture,
+  useThrottledDocumentPointerMove,
+} from '../../hooks/use_overlay_pointer_events';
 import { GlobalCursorOverride } from '../global_cursor_override';
 
 interface Props {
@@ -69,49 +73,38 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
     el.style.top = `${clamped.top}px`;
   }, [anchorRect]);
 
-  const rafRef = useRef<number>(0);
-
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      cancelAnimationFrame(rafRef.current);
       const { clientX, clientY } = event;
-      rafRef.current = requestAnimationFrame(() => {
-        const synth = new MouseEvent('mousemove', { clientX, clientY });
-        const target = getElementFromPoint(synth);
+      const synth = new MouseEvent('mousemove', { clientX, clientY });
+      const target = getElementFromPoint(synth);
 
-        if (!target) {
-          setHoverRect(null);
-          setSpacingLines([]);
-          return;
+      if (!target) {
+        setHoverRect(null);
+        setSpacingLines([]);
+        return;
+      }
+
+      const rect = target.getBoundingClientRect();
+      setHoverRect(rect);
+
+      if (anchorElement && anchorElement.isConnected && anchorElement !== target) {
+        const freshAnchorRect = anchorElement.getBoundingClientRect();
+        setAnchorRect(freshAnchorRect);
+        const lines = calculateSpacingLines(freshAnchorRect, rect);
+        setSpacingLines(lines);
+      } else {
+        if (anchorElement && !anchorElement.isConnected) {
+          setAnchorElement(null);
+          setAnchorRect(null);
         }
-
-        const rect = target.getBoundingClientRect();
-        setHoverRect(rect);
-
-        if (anchorElement && anchorElement.isConnected && anchorElement !== target) {
-          const freshAnchorRect = anchorElement.getBoundingClientRect();
-          setAnchorRect(freshAnchorRect);
-          const lines = calculateSpacingLines(freshAnchorRect, rect);
-          setSpacingLines(lines);
-        } else {
-          if (anchorElement && !anchorElement.isConnected) {
-            setAnchorElement(null);
-            setAnchorRect(null);
-          }
-          setSpacingLines([]);
-        }
-      });
+        setSpacingLines([]);
+      }
     },
     [anchorElement]
   );
 
-  useEffect(() => {
-    document.addEventListener('pointermove', handlePointerMove, true);
-    return () => {
-      document.removeEventListener('pointermove', handlePointerMove, true);
-      cancelAnimationFrame(rafRef.current);
-    };
-  }, [handlePointerMove]);
+  useThrottledDocumentPointerMove(handlePointerMove);
 
   const handleClick = useCallback((event: MouseEvent) => {
     const target = getElementFromPoint(event);
@@ -126,28 +119,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
     setSpacingLines([]);
   }, []);
 
-  const handleMouseEvent = useCallback(
-    (event: MouseEvent) => {
-      event.stopPropagation();
-      event.preventDefault();
-      const eventTarget = event.target as HTMLElement;
-      const isTargetDisabled = eventTarget?.hasAttribute?.('disabled');
-      if (event.type === 'click' || isTargetDisabled) {
-        handleClick(event);
-      }
-    },
-    [handleClick]
-  );
-
-  useEffect(() => {
-    document.addEventListener('pointerdown', handleMouseEvent, true);
-    document.addEventListener('click', handleMouseEvent, true);
-
-    return () => {
-      document.removeEventListener('pointerdown', handleMouseEvent, true);
-      document.removeEventListener('click', handleMouseEvent, true);
-    };
-  }, [handleMouseEvent]);
+  useOverlayClickCapture({ onActivate: handleClick });
 
   const anchorHighlightCss = useMemo(
     () =>
