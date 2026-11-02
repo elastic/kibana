@@ -17,6 +17,7 @@ Set up a local environment, run {{kib}}, and build your first "Hello World" plug
 - [Running Elasticsearch](./running-elasticsearch.md) — start an {{es}} instance against which your local {{kib}} can run
 - [Local cross-cluster search setup](./local-cross-cluster-search-setup.md) — wire up a second cluster for CCS work
 - [WSL on Windows development](./wsl-on-windows-development.md) — supported Windows workflow via WSL2
+- [JetBrains IDE setup](./jetbrains-ide-setup.md) — recommended settings and TypeScript configuration for JetBrains IDEs
 
 ## When things go wrong
 
