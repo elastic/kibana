@@ -43,7 +43,7 @@ const createCloudForwarderOnboardingFlowRoute = createObservabilityOnboardingSer
     /**
      * Check for log monitoring privileges (logs and metrics only, no traces).
      * CloudForwarder only forwards logs from AWS S3 (VPC Flow Logs, ELB Access Logs, CloudTrail).
-     * This is consistent with other log-only flows (firehose, otel_host).
+     * This is consistent with other log-only flows (otel_host).
      */
     const hasPrivileges = await hasLogMonitoringPrivileges(client.asCurrentUser);
 

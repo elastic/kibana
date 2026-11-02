@@ -32,7 +32,6 @@ jest.mock('../..', () => ({
   AutoDetectPage: () => null,
   LandingPage: () => <div data-test-subj="landingPageStub" />,
   OtelLogsPage: () => null,
-  FirehosePage: () => null,
   OtelApmPage: () => null,
   CloudForwarderPage: () => null,
   KubernetesOtelPage: () => <div data-test-subj="kubernetesOtelPageStub" />,

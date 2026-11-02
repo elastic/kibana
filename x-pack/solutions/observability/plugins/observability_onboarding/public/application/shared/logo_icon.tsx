@@ -38,7 +38,6 @@ const SUPPORTED_LOGOS = [
   'apache_tomcat',
   'couchbase',
   'logstash',
-  'firehose',
   'fluentbit',
   'linux',
   'windows',
