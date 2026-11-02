@@ -22,7 +22,8 @@ import {
 import { setupTestUsers, testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
-  describe('Agentless Policies', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/257567
+  describe.skip('Agentless Policies', () => {
     const { getService } = providerContext;
     const es = getService('es');
     const supertest = getService('supertest');
