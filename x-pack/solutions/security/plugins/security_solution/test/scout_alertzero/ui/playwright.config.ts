@@ -7,6 +7,17 @@
 
 import { createPlaywrightConfig } from '@kbn/scout-security';
 
+/**
+ * AlertZero UI e2e: onboarding flow and queue layout (plumbing-only; the stub
+ * `.gen-ai` connector is never invoked, so no real model is required). This directory's name selects the
+ * non-EIS `alertzero` config set, which pins the plugin flags the suite needs
+ * (alertzero/agenticInvestigations/proposals enabled, service accounts on,
+ * restrictInternalApis=true) without any EIS connector dependency — safe in CI.
+ *
+ * Specs mutate shared per-space state (workers, service accounts, inference
+ * settings, the default space's solution view), so they must not run in parallel.
+ */
 export default createPlaywrightConfig({
   testDir: './tests',
+  workers: 1,
 });

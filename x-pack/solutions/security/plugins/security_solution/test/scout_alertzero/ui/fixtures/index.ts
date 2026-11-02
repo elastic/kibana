@@ -5,31 +5,60 @@
  * 2.0.
  */
 
-import { createLazyPageObject, test as baseTest } from '@kbn/scout-security';
+import { spaceTest as spaceBaseTest, test as baseTest, apiTest, tags } from '@kbn/scout-security';
 import type {
   ScoutPage,
   SecurityPageObjects,
   SecurityTestFixtures,
   SecurityWorkerFixtures,
 } from '@kbn/scout-security';
-import { AlertZeroQueuePage } from './page_objects';
+import { extendPageObjects, type AlertZeroPageObjects } from './page_objects';
 
-export interface AlertZeroTestFixtures extends SecurityTestFixtures {
-  pageObjects: SecurityPageObjects & {
-    alertZeroQueue: AlertZeroQueuePage;
-  };
+export interface AlertZeroTestFixtures {
+  pageObjects: AlertZeroPageObjects;
 }
 
-export const test = baseTest.extend<AlertZeroTestFixtures, SecurityWorkerFixtures>({
-  pageObjects: async (
-    { pageObjects, page }: { pageObjects: SecurityPageObjects; page: ScoutPage },
-    use: (pageObjects: AlertZeroTestFixtures['pageObjects']) => Promise<void>
-  ) => {
-    await use({
-      ...pageObjects,
-      alertZeroQueue: createLazyPageObject(AlertZeroQueuePage, page),
-    });
-  },
-});
+const pageObjects = async (
+  { pageObjects: base, page }: { pageObjects: SecurityPageObjects; page: ScoutPage },
+  use: (pageObjects: AlertZeroPageObjects) => Promise<void>
+) => {
+  await use(extendPageObjects(base, page));
+};
 
+export const test = baseTest.extend<
+  SecurityTestFixtures & AlertZeroTestFixtures,
+  SecurityWorkerFixtures
+>({ pageObjects });
+
+export const spaceTest = spaceBaseTest.extend<AlertZeroTestFixtures>({ pageObjects });
+
+export { apiTest, tags };
 export * as testData from './constants';
+export { ALERTZERO_READ_ONLY_ROLE, TI_HEADERS } from './constants';
+export {
+  createApi,
+  createApiFromKbnClient,
+  createWorkerServiceAccount,
+  isWorkerEnableBlocked,
+  listWorkers,
+  ok,
+  patchWorker,
+  pollUntil,
+  seedStubModel,
+  setAlertZeroEnabledInSpace,
+  spaceUrl,
+  type AlertZeroApi,
+  type ApiResult,
+  type WorkerInfo,
+} from './helpers';
+export {
+  createOnboardingSpace,
+  createUiOnboardingSpace,
+  deleteSeededProposals,
+  enableFirstWorker,
+  resetOnboardingState,
+  seedClosedProposal,
+  type OnboardingSpace,
+  type SeededProposal,
+  type SpacesService,
+} from './onboarding';

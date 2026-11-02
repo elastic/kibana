@@ -1,5 +1,5 @@
 {
-  "sha1": "83eca0703e68d77ecd754926e27735318e8b63b9",
+  "sha1": "3ce4447d9a23167db0bffbc77537dc1c8338cc80",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -294,6 +294,20 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_worker_index_coverage_sweep.spec.ts",
         "line": 118,
         "column": 9
+      }
+    },
+    {
+      "id": "015f42f0b6ffc1a-620d18bccc39b7f",
+      "title": "AlertZero onboarding - no-model blocking (API) every worker reports the no_model blocking reason",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/onboarding_no_model.spec.ts",
+        "line": 26,
+        "column": 17
       }
     },
     {
