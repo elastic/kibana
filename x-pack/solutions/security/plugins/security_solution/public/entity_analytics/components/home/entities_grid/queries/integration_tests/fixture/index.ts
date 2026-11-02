@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { QueryArgs, Row } from '../../../common';
@@ -78,6 +79,8 @@ const createRunQuery =
 
 export interface FixtureCluster {
   runQuery: EsqlRunner;
+  /** The ids of the entity docs a DSL query matches, as Group by reads them. */
+  searchEntityIds: (query: QueryDslQueryContainer) => Promise<string[]>;
   /** The fixture's load time: the reference for its relative timestamps. */
   now: number;
   stop: () => Promise<void>;
@@ -92,7 +95,16 @@ export const startFixtureCluster = async (): Promise<FixtureCluster> => {
   const client = esServer.getClient();
   const now = Date.now();
   await Promise.all(FIXTURE_INDICES.map((fixtureIndex) => loadIndex(client, fixtureIndex, now)));
-  return { runQuery: createRunQuery(client), now, stop: () => esServer.stop() };
+  const searchEntityIds = async (query: QueryDslQueryContainer): Promise<string[]> => {
+    const { hits } = await client.search<Record<string, unknown>>({
+      index: ENTITY_INDEX,
+      query,
+      size: 100,
+    });
+    // The fixture writes dotted keys, as the entity store does.
+    return hits.hits.flatMap(({ _source }) => String(_source?.['entity.id'] ?? [])).sort();
+  };
+  return { runQuery: createRunQuery(client), searchEntityIds, now, stop: () => esServer.stop() };
 };
 
 /** Query arguments for the fixture: the 30 day window, resolved rows, one page of 25. */

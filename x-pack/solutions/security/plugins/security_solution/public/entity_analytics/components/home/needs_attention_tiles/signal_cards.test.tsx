@@ -18,7 +18,7 @@ jest.mock('@elastic/charts', () => ({
   AreaSeries: () => null,
   Position: { Left: 'left' },
   ScaleType: { Linear: 'linear' },
-  CurveType: { CURVE_STEP_AFTER: 'curveStepAfter' },
+  CurveType: { CURVE_STEP: 'curveStep' },
 }));
 
 const CARD_IDS: SignalCardId[] = [
@@ -36,13 +36,14 @@ const cards: SignalCardData[] = CARD_IDS.map((id, index) => ({
   description: `Description ${id}`,
   filterLabel: id,
   value: index + 1,
+  hasCount: true,
   delta: 2,
   trend: [1, 2, 3],
 }));
 
 describe('SignalCards', () => {
   it('draws every tile with its title, description and count', () => {
-    render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={jest.fn()} />);
+    render(<SignalCards activeTile={null} cards={cards} onFilterForCard={jest.fn()} />);
 
     cards.forEach(({ id, title, description, value }) => {
       const tile = screen.getByTestId(`eaFaceliftSignalCard-${id}`);
@@ -54,7 +55,7 @@ describe('SignalCards', () => {
 
   it('toggles the table filter for the tile that was clicked', () => {
     const onFilterForCard = jest.fn();
-    render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={onFilterForCard} />);
+    render(<SignalCards activeTile={null} cards={cards} onFilterForCard={onFilterForCard} />);
 
     fireEvent.click(screen.getByTestId('eaFaceliftSignalCard-riskMovers'));
 
@@ -63,13 +64,7 @@ describe('SignalCards', () => {
   });
 
   it('marks only the filtered tile as pressed', () => {
-    render(
-      <SignalCards
-        activeFilter={{ type: 'card', cardId: 'watchlisted', label: 'Watchlisted' }}
-        cards={cards}
-        onFilterForCard={jest.fn()}
-      />
-    );
+    render(<SignalCards activeTile="watchlisted" cards={cards} onFilterForCard={jest.fn()} />);
 
     expect(screen.getByTestId('eaFaceliftSignalCard-watchlisted')).toHaveAttribute(
       'aria-pressed',
@@ -85,7 +80,7 @@ describe('SignalCards', () => {
     const onFilterForCard = jest.fn();
     render(
       <SignalCards
-        activeFilter={null}
+        activeTile={null}
         cards={cards.map((card) =>
           card.id === 'newlyHighCritical' ? { ...card, value: 0 } : card
         )}

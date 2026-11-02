@@ -9,11 +9,12 @@ import type { Logger } from '@kbn/logging';
 import { deepFreeze } from '@kbn/std';
 import type { z } from '@kbn/zod/v4';
 import {
-  entitySchema,
+  entityDefinitionObjectSchema,
   EntityDefinitionManagedBy,
   type EntityDefinitionType,
   type EntityDefinitionWithoutId,
 } from '../../../../common/domain/definitions/entity_schema';
+import { assertDynamicDefinitionRules } from '../../../../common/domain/definitions/dynamic';
 
 /** A definition as accepted by the registry: any valid definition with a required `managedBy`. */
 export type RegistrableEntityDefinition = Omit<EntityDefinitionWithoutId, 'managedBy'> & {
@@ -32,10 +33,12 @@ export interface RegistrationRejection {
 
 // Strict so unknown keys (notably a stale `id` from a full definition) are rejected, not kept.
 // The base schema validates the type name, so a bad name fails here with the rule it broke.
-const registrableEntityDefinitionSchema = entitySchema
+// Derived from the unrefined shape, so the whole-definition rules are applied again here.
+const registrableEntityDefinitionSchema = entityDefinitionObjectSchema
   .omit({ id: true })
   .extend({ managedBy: EntityDefinitionManagedBy })
-  .strict();
+  .strict()
+  .superRefine(assertDynamicDefinitionRules);
 
 const formatSchemaIssues = (error: z.ZodError): string =>
   error.issues

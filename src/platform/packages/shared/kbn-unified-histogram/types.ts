@@ -17,6 +17,7 @@ import type {
   LensPublicStart,
   TypedLensByValueInput,
   LensEmbeddableInput,
+  LensTelemetrySource,
   Suggestion,
 } from '@kbn/lens-plugin/public';
 import type { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -29,7 +30,6 @@ import type {
 import type { ReplaySubject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { ResizableLayoutProps } from '@kbn/resizable-layout';
@@ -60,7 +60,6 @@ export interface UnifiedHistogramServices {
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   storage: Storage;
-  expressions: ExpressionsStart;
   capabilities: Capabilities;
   dataViews: DataViewsPublicPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
@@ -330,4 +329,18 @@ export interface ChartSectionProps {
    * Indicates whether the current tab is selected/active.
    */
   isTabSelected: boolean;
+}
+
+/**
+ * Options forwarded to Lens by the chart's Lens actions
+ */
+export interface UnifiedHistogramLensActionsOptions {
+  /**
+   * Navigation options used when opening the chart in the Lens editor
+   */
+  navigation?: Parameters<LensPublicStart['navigateToPrefilledEditor']>[1];
+  /**
+   * Source reported to Lens telemetry when the chart is saved. Nothing is reported when omitted.
+   */
+  telemetrySource?: LensTelemetrySource;
 }

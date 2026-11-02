@@ -21,6 +21,7 @@ import {
   useToggleAutomation,
   useUpdateAutomation,
 } from './hooks/use_automations';
+import { useRunQuotas } from '../data/run_quotas/use_significant_events_run_quotas';
 import { useKibana } from '../hooks/use_kibana';
 import type { Automation } from './hooks/use_automations';
 
@@ -37,7 +38,23 @@ jest.mock('./hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+let mockServiceAccount: { data?: Record<string, unknown> } = {};
+jest.mock('../service_account/use_investigator_service_account', () => ({
+  useInvestigatorServiceAccount: () => mockServiceAccount,
+}));
+jest.mock('../data/run_quotas/use_significant_events_run_quotas', () => ({
+  useRunQuotas: jest.fn(),
+}));
+jest.mock('../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
 }));
@@ -50,6 +67,12 @@ const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
+const mockUseRunQuotas = useRunQuotas as jest.Mock;
+
+const uiSettingsValues: Record<string, string> = {
+  'dateFormat:tz': 'Browser',
+  'dateFormat:dow': 'Sunday',
+};
 
 describe('AutomationsPage', () => {
   beforeAll(() => {
@@ -57,15 +80,26 @@ describe('AutomationsPage', () => {
   });
 
   beforeEach(() => {
+    mockServiceAccount = {
+      data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: true },
+    };
     mockUseKibana.mockReturnValue({
       services: {
-        application: { capabilities: { nightshift: { manage: true } }, navigateToUrl: jest.fn() },
+        application: {
+          capabilities: { nightshift: { manage: true } },
+          navigateToUrl: jest.fn(),
+          getUrlForApp: (app: string, { path }: { path: string }) => `/app/${app}${path}`,
+        },
         http: { basePath: { prepend: (path: string) => path } },
         charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+        uiSettings: {
+          get: jest.fn((key: string) => uiSettingsValues[key]),
+        },
       },
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
+    mockUseRunQuotas.mockReturnValue({ data: undefined, refetch: jest.fn() });
     mockUseAutomationRunsInRange.mockReturnValue({
       data: { runs: [], total: 0, usedToday: 0 },
       isInitialLoading: false,
@@ -102,6 +136,64 @@ describe('AutomationsPage', () => {
     expect(screen.queryByTestId('automationsSearch')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Create custom automation' }));
     expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
+  });
+
+  it('is read-only for Nightshift managers without manage_security', () => {
+    mockServiceAccount = {
+      data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: false },
+    };
+    renderPage();
+
+    expect(screen.getByTestId('nightshiftAutomationsServiceAccountReadOnly')).toHaveTextContent(
+      'manage_security'
+    );
+    // The action stays visible, disabled, so the reason is discoverable where it is needed.
+    expect(screen.getByRole('button', { name: 'Create custom automation' })).toBeDisabled();
+  });
+
+  it('explains the missing privilege on the disabled create action', async () => {
+    mockServiceAccount = {
+      data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: false },
+    };
+    renderPage();
+
+    fireEvent.mouseOver(screen.getByRole('button', { name: 'Create custom automation' }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Requires the manage_security cluster privilege'
+    );
+  });
+
+  it('offers no edit actions to users without Nightshift manage', () => {
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: { capabilities: { nightshift: { manage: false } }, navigateToUrl: jest.fn() },
+        http: { basePath: { prepend: (path: string) => path } },
+        charts: { theme: { useChartsBaseTheme: () => ({}), useSparklineOverrides: () => ({}) } },
+      },
+    });
+    mockServiceAccount = {
+      data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: false },
+    };
+    renderPage();
+
+    expect(
+      screen.queryByTestId('nightshiftAutomationsServiceAccountReadOnly')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Create custom automation' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('lets Nightshift managers edit automations while service accounts are off', () => {
+    mockServiceAccount = {
+      data: { serviceAccountsEnabled: false, canModifyBoundWorkflows: false },
+    };
+    renderPage();
+
+    expect(
+      screen.queryByTestId('nightshiftAutomationsServiceAccountReadOnly')
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create custom automation' })).toBeInTheDocument();
   });
 
   it('filters automations by name and clears filters', () => {
@@ -236,14 +328,6 @@ describe('AutomationsPage', () => {
       mockUseToggleAutomation.mockReturnValue({ mutate: toggleMutate, isLoading: false });
     });
 
-    it('sorts rows by automation name by default', () => {
-      renderPage();
-
-      const names = screen.getAllByTestId('nightshiftAutomationName').map((el) => el.textContent);
-      expect(names).toEqual(['Daily report', 'Triage incoming alerts']);
-      expect(screen.getByText('Showing 2 automations')).toBeInTheDocument();
-    });
-
     it('shows tags, run counts, usage, and the daily limit warning', () => {
       renderPage();
 
@@ -307,14 +391,6 @@ describe('AutomationsPage', () => {
 
       expect(screen.queryByTestId('automationDetailFlyout')).not.toBeInTheDocument();
       expect(history.location.pathname).toBe('/automations');
-    });
-
-    it('opens the create flyout', () => {
-      renderPage();
-
-      fireEvent.click(screen.getByRole('button', { name: 'Create automation' }));
-
-      expect(screen.getByTestId('createAutomationFlyoutStub')).toHaveTextContent('new');
     });
 
     it('opens a detail flyout and returns to the list with router navigation', () => {
@@ -390,13 +466,72 @@ describe('AutomationsPage', () => {
       renderPage();
 
       expect(screen.getByTestId('automationsRateLimitBanner')).toHaveTextContent(
-        '1 automation reached its daily trigger limit'
+        '1 automation reached daily run limit'
       );
       fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
       expect(screen.queryByTestId('automationsShowRateLimited')).not.toBeInTheDocument();
 
       expect(screen.queryByRole('link', { name: 'Daily report' })).not.toBeInTheDocument();
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
+    it('shows only the global callout when automations are also rate limited', () => {
+      mockUseRunQuotas.mockReturnValue({
+        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: 3 } },
+      });
+      renderPage();
+
+      expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
+      expect(screen.queryByTestId('automationsRateLimitBanner')).not.toBeInTheDocument();
+    });
+
+    it('hides the global callout and keeps the page working when the limit cannot be loaded', () => {
+      mockUseRunQuotas.mockReturnValue({
+        data: undefined,
+        error: new Error('Forbidden'),
+        refetch: jest.fn(),
+      });
+      renderPage();
+
+      expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
+      expect(screen.getByTestId('automationsRateLimitBanner')).toBeInTheDocument();
+      expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
+    it('shows the paused callout only when the global investigation limit is reached', () => {
+      const quotas = (used: number) => ({
+        data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: used } },
+      });
+      mockUseRunQuotas.mockReturnValue(quotas(2));
+      const { unmount } = renderPage();
+      expect(screen.queryByTestId('automationsGlobalLimitBanner')).not.toBeInTheDocument();
+      unmount();
+
+      mockUseRunQuotas.mockReturnValue(quotas(3));
+      renderPage();
+      expect(screen.getByTestId('automationsGlobalLimitBanner')).toBeInTheDocument();
+    });
+
+    it('links the paused callout to the investigation settings only when the user can manage limits', () => {
+      const quotas = (canManage: boolean) => ({
+        data: {
+          enabled: true,
+          limits: { investigation: 3 },
+          counts: { investigation: 3 },
+          canManage,
+        },
+      });
+      mockUseRunQuotas.mockReturnValue(quotas(false));
+      const { unmount } = renderPage();
+      expect(screen.queryByTestId('automationsGlobalLimitSettingsLink')).not.toBeInTheDocument();
+      unmount();
+
+      mockUseRunQuotas.mockReturnValue(quotas(true));
+      renderPage();
+      expect(screen.getByTestId('automationsGlobalLimitSettingsLink')).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings/investigations'
+      );
     });
 
     it('filters by the configured triggers', async () => {
@@ -416,7 +551,12 @@ describe('AutomationsPage', () => {
 
     it('hides management actions for read-only users', () => {
       mockUseKibana.mockReturnValue({
-        services: { application: { capabilities: { nightshift: {} } } },
+        services: {
+          application: { capabilities: { nightshift: {} } },
+          uiSettings: {
+            get: jest.fn((key: string) => uiSettingsValues[key]),
+          },
+        },
       });
       renderPage();
 

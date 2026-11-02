@@ -7,10 +7,9 @@
 
 import { useMemo } from 'react';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import {
   buildRiskTilesSeriesQuery,
   newlyHighCriticalSeriesColumn,
@@ -32,6 +31,9 @@ interface RiskTilesSeriesOptions {
   /** The live counts, which replace the newest dot so each line ends on the number shown. */
   riskMoversCount: number;
   newlyHighCriticalCount: number;
+  /** From each tile's delta hook (its `previous`): the delta's baseline, which starts the line. */
+  riskMoversBaseline: number | undefined;
+  newlyHighCriticalBaseline: number | undefined;
 }
 
 /**
@@ -53,26 +55,24 @@ export const useRiskTilesSeries = ({
   newlyHighCriticalReachesBack,
   riskMoversCount,
   newlyHighCriticalCount,
+  riskMoversBaseline,
+  newlyHighCriticalBaseline,
 }: RiskTilesSeriesOptions): {
   riskMoversTrend: number[] | undefined;
   newlyHighCriticalTrend: number[] | undefined;
   isTrendLoading: boolean;
 } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const index = resolvedIndex?.indexName;
 
   const query = useMemo(
     () =>
-      index
-        ? buildRiskTilesSeriesQuery(
-            spaceId,
-            index,
-            timeRange,
-            buildEntityFilterClauses(entityFilters)
-          )
-        : null,
-    [spaceId, index, timeRange, entityFilters]
+      index ? buildRiskTilesSeriesQuery(spaceId, index, timeRange, entityFilterClauses) : null,
+    [spaceId, index, timeRange, entityFilterClauses]
   );
 
   const moversGate = getSeriesGate({
@@ -106,12 +106,14 @@ export const useRiskTilesSeries = ({
     ...state,
     dots: series?.riskMovers,
     liveCount: riskMoversCount,
+    deltaBaseline: riskMoversBaseline,
     isHidden: moversGate.isHidden,
   });
   const newlyHighCritical = getTileTrend({
     ...state,
     dots: series?.newlyHighCritical,
     liveCount: newlyHighCriticalCount,
+    deltaBaseline: newlyHighCriticalBaseline,
     isHidden: newlyHighGate.isHidden,
   });
 

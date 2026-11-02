@@ -48,7 +48,14 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
   'system-security-floor-alert-triage': {
     settingsVersion: 1,
     scheduleInterval: '15m',
-    extras: { autoCloseConfidenceScoreMinThreshold: 0.85, budgetPerHour: 1300, lookbackHours: 24 },
+    extras: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
     triggerTypes: ['scheduled', 'manual'],
   },
   'system-security-floor-attack-discovery': {
@@ -152,20 +159,20 @@ describe('workerRegistry', () => {
 
   it.each(SYSTEM_SECURITY_WORKER_CATALOG)(
     '$id renders YAML that passes the workflow schema',
-    (catalog) => {
+    async (catalog) => {
       const registration = workerRegistry.get(catalog.id);
       if (!registration) {
         throw new Error(`Worker "${catalog.id}" is not registered`);
       }
       const yaml = getYamlTemplate(catalog.id)(registration.settings.createDefaultValues());
 
-      expect(workflowSchemaFailure(yaml)).toBeUndefined();
+      expect(await workflowSchemaFailure(yaml)).toBeUndefined();
     }
   );
 
   it.each(['1m', '7d'])(
     'attack discovery renders and validates a %s schedule interval',
-    (scheduleInterval) => {
+    async (scheduleInterval) => {
       const registration = workerRegistry.get(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID);
       if (!registration) {
         throw new Error('Attack Discovery worker is not registered');
@@ -177,7 +184,7 @@ describe('workerRegistry', () => {
       const parsed = parse(yaml) as { triggers?: Array<{ with?: { every?: string } }> };
 
       expect(parsed.triggers?.[0]?.with?.every).toBe(scheduleInterval);
-      expect(workflowSchemaFailure(yaml)).toBeUndefined();
+      expect(await workflowSchemaFailure(yaml)).toBeUndefined();
     }
   );
 });

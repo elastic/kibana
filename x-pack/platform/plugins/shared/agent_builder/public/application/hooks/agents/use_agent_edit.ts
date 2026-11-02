@@ -135,6 +135,8 @@ export function useAgentEdit({
       };
       if (isClone) {
         agentState.id = duplicateName(agentState.id);
+        // A clone never inherits a binding: binding is an explicit, authorized action.
+        delete agentState.service_account_id;
       }
       setState(agentState);
     }
@@ -145,16 +147,18 @@ export function useAgentEdit({
       const requestData = cleanInvalidToolReferences(data, tools);
 
       if (editingAgentId) {
-        const { id, access_control, ...editableAgent } = requestData;
+        const { id, access_control, service_account_id, ...editableAgent } = requestData;
         const { approvals, ...configurationWithoutApprovals } = editableAgent.configuration;
         const updatedAgent = canUpdateAgentApprovals
           ? editableAgent
           : { ...editableAgent, configuration: configurationWithoutApprovals };
-        const result = await updateMutation.mutateAsync(
-          access_control
-            ? { ...updatedAgent, access_control: { access_mode: access_control.access_mode } }
-            : updatedAgent
-        );
+        // The binding is managed through the API only; the form never changes it.
+        const result = await updateMutation.mutateAsync({
+          ...updatedAgent,
+          ...(access_control
+            ? { access_control: { access_mode: access_control.access_mode } }
+            : {}),
+        });
 
         const initialEntries = agent?.access_control?.entries;
         const nextEntries = access_control?.entries;

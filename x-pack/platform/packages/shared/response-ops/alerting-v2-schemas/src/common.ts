@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { validateDuration, validateMaxDuration } from './validation';
-import { ID_MAX_LENGTH, MAX_DURATION, MAX_DURATION_LENGTH } from './constants';
+import {
+  ID_MAX_LENGTH,
+  MAX_DURATION,
+  MAX_DURATION_LENGTH,
+  SERIES_ID_MAX_LENGTH,
+} from './constants';
 
 /**
  * Identifier for a resource a client can address and may name itself
@@ -35,6 +40,21 @@ const entityIdSchema = lazySchema(() =>
  */
 const groupHashSchema = lazySchema(() =>
   z.string().regex(/^[a-f0-9]{64}$/, 'Must be a 64-character lowercase hex SHA-256 digest.')
+);
+
+/**
+ * Identifier of one alert series: the series' space, owner (rule or external
+ * source) and `group_hash`, base64url-encoded. Callers echo back a value the
+ * episodes query produced rather than composing one. This only bounds the
+ * input and screens the alphabet; the server decodes and validates the
+ * structure.
+ */
+const seriesIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(SERIES_ID_MAX_LENGTH)
+    .regex(/^[A-Za-z0-9_-]+$/, 'Must contain only letters, digits, underscores, and hyphens.')
 );
 
 /** Semantics every client-addressable id carries; append to its `.describe()`. */
@@ -154,14 +174,27 @@ const queryIntSchema = ({ min, max }: { min: number; max: number }) =>
     z.number().int().min(min).max(max)
   );
 
+/**
+ * An ISO datetime that must lie strictly in the future at validation time.
+ * Used by every snooze body: a snooze until a past instant is already expired,
+ * so it is rejected with 400 rather than stored and echoed back. `now` is read
+ * when the request is parsed, so the check is against the moment of the call.
+ */
+const futureIsoDateTime = () =>
+  isoDateTime().refine((value) => Date.parse(value) > Date.now(), {
+    message: 'Must be an ISO datetime in the future.',
+  });
+
 export {
   durationSchema,
   entityIdSchema,
   groupHashSchema,
+  seriesIdSchema,
   tagsSchema,
   optionalWithDescription,
   arrayOrSingleSchema,
   queryIntSchema,
+  futureIsoDateTime,
   ENTITY_ID_NOTE,
   ESTIMATED_COUNT_NOTE,
 };

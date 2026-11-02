@@ -207,6 +207,8 @@ export const createToolManagerMock = (): ToolManagerMock => {
     getExecutable: jest.fn(),
     getDynamicToolIds: jest.fn(),
     getSummarizer: jest.fn(),
+    getDynamicTool: jest.fn(),
+    listDynamicTools: jest.fn().mockReturnValue([]),
   };
 };
 
@@ -250,7 +252,7 @@ export const createSkillRegistryMock = (): SkillRegistryMock => {
 };
 
 export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock => {
-  return {
+  const mock: AttachmentStateManagerMock = {
     get: jest.fn(),
     getAttachmentRecord: jest.fn(),
     getActive: jest.fn(),
@@ -263,9 +265,8 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     restore: jest.fn(),
     permanentDelete: jest.fn(),
     rename: jest.fn(),
-    getAccessedRefs: jest.fn(),
-    clearAccessTracking: jest.fn(),
     drainChanges: jest.fn().mockReturnValue([]),
+    forToolCall: jest.fn(),
     clearChanges: jest.fn(),
     resolveRefs: jest.fn(),
     evaluateStalenessForActiveAttachments: jest.fn(),
@@ -273,6 +274,8 @@ export const createAttachmentStateManagerMock = (): AttachmentStateManagerMock =
     hasChanges: jest.fn(),
     markClean: jest.fn(),
   };
+  mock.forToolCall.mockReturnValue(mock);
+  return mock;
 };
 
 export const createToolPromptManagerMock = (): ToolPromptManagerMock => {
@@ -373,10 +376,12 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      sml: false,
       relevantSkills: false,
       todos: false,
       bash: false,
       apiDiscovery: false,
+      dynamicTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -390,6 +395,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       list: jest.fn().mockResolvedValue([]),
       create: jest.fn(),
       update: jest.fn(),
+      setServiceAccount: jest.fn(),
       delete: jest.fn().mockResolvedValue(false),
     },
     conversationClient: {
@@ -447,10 +453,12 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      sml: false,
       relevantSkills: false,
       todos: false,
       bash: false,
       apiDiscovery: false,
+      dynamicTools: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
@@ -508,10 +516,12 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
+      sml: false,
       relevantSkills: false,
       todos: false,
       bash: false,
       apiDiscovery: false,
+      dynamicTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),

@@ -11,6 +11,7 @@ import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { isDeltaStillComing, parseReachesBack, usePreviousPeriod } from './use_previous_period';
+import { retryUnlessTimedOut } from './tile_query_timeout';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -159,7 +160,8 @@ describe('usePreviousPeriod', () => {
           cacheTime: 60 * 60_000,
           refetchOnWindowFocus: false,
           keepPreviousData: true,
-          retry: 1,
+          // One retry, but none after a timeout.
+          retry: retryUnlessTimedOut,
         })
       )
     );
@@ -171,21 +173,25 @@ describe('usePreviousPeriod', () => {
     expect(callOf('PrevPeriod')[0]).toEqual(['tilePrevPeriod', 'FROM previous']);
   });
 
-  it('runs each query with the ES|QL strategy, on the local cluster only when asked', async () => {
+  it('runs each query with the ES|QL strategy, in the local project only', async () => {
     mockSearch.mockReturnValue(
       of({ rawResponse: { columns: [{ name: 'value' }], values: [[7]] } })
     );
-    renderHook(() => usePreviousPeriod({ ...options, localOnly: true }));
+    renderHook(() => usePreviousPeriod(options));
     expect(await callOf('PrevPeriod')[1]({ signal: undefined })).toBe(7);
     expect(mockSearch).toHaveBeenCalledWith(
       { params: { query: 'FROM previous' } },
       expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
     );
 
-    mockSearch.mockClear();
-    renderHook(() => usePreviousPeriod(options));
-    await callOf('PrevPeriod')[1]({ signal: undefined });
-    expect(mockSearch.mock.calls[0][1].projectRouting).toBeUndefined();
+    mockSearch.mockReturnValue(
+      of({ rawResponse: { columns: [{ name: 'reaches_back' }], values: [[true]] } })
+    );
+    expect(await callOf('HistoryReachesBack')[1]({ signal: undefined })).toBe(true);
+    expect(mockSearch).toHaveBeenCalledWith(
+      { params: { query: 'FROM guard' } },
+      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+    );
   });
 
   it('fails the previous query when its parser throws, so the delta is left out', async () => {

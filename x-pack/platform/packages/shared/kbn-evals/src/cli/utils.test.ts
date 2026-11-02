@@ -5,15 +5,38 @@
  * 2.0.
  */
 
-import { CI_PROD_VAULT_ADDR, KBN_EVALS_VAULT_PATHS, getKbnEvalsVaultAddr } from './utils';
+import {
+  CI_PROD_VAULT_ADDR,
+  KBN_EVALS_VAULT_PATHS,
+  getKbnEvalsVaultAddr,
+  getKbnEvalsVaultPath,
+} from './utils';
 
-describe('KBN_EVALS_VAULT_PATHS', () => {
-  it('points each vault at the general config', () => {
+describe('getKbnEvalsVaultPath', () => {
+  it('resolves the general config by default', () => {
+    expect(getKbnEvalsVaultPath('ci-prod')).toBe('kv/ci-shared/kbn-evals/golden');
+    expect(getKbnEvalsVaultPath('dev')).toBe('secret/kibana-issues/dev/kbn-evals/golden');
     expect(KBN_EVALS_VAULT_PATHS).toEqual({
       'ci-prod': 'kv/ci-shared/kbn-evals/golden',
       dev: 'secret/kibana-issues/dev/kbn-evals/golden',
     });
   });
+
+  it('resolves a suite secret next to the general config in each vault', () => {
+    expect(getKbnEvalsVaultPath('ci-prod', 'nightshift')).toBe('kv/ci-shared/kbn-evals/nightshift');
+    expect(getKbnEvalsVaultPath('dev', 'nightshift')).toBe(
+      'secret/kibana-issues/dev/kbn-evals/nightshift'
+    );
+  });
+
+  it.each(['', '../golden', 'night/shift', 'Nightshift', '-nightshift'])(
+    'rejects the secret name %p',
+    (secret) => {
+      expect(() => getKbnEvalsVaultPath('ci-prod', secret)).toThrow(
+        'Invalid kbn-evals vault secret name'
+      );
+    }
+  );
 });
 
 describe('getKbnEvalsVaultAddr', () => {

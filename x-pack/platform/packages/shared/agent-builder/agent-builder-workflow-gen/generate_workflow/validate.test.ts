@@ -46,4 +46,59 @@ describe('validateGeneratedYaml', () => {
     expect(result.valid).toBe(false);
     expect(result.errors).toEqual(['[schema] missing field (at steps.0)']);
   });
+
+  describe('unknown ES|QL sources', () => {
+    const parsedWorkflow = { name: 'foo', version: '1', triggers: [{ type: 'manual' }], steps: [] };
+    const unknownSource = {
+      severity: 'error',
+      source: 'esql',
+      ruleId: 'esqlUnknownSource',
+      message: 'ES|QL: Unknown data source "events-archive" (line 9, column 14)',
+      path: ['steps', 0, 'with', 'query'],
+    };
+
+    it('accepts a workflow whose only errors are unknown sources', async () => {
+      const api = {
+        validateWorkflow: jest
+          .fn()
+          .mockResolvedValue({ valid: false, diagnostics: [unknownSource], parsedWorkflow }),
+      } as any;
+
+      const result = await validateGeneratedYaml('y', {
+        api,
+        spaceId: 'default',
+        request: {} as any,
+      });
+      expect(result).toEqual({
+        valid: true,
+        parsedWorkflow,
+        errors: [],
+        unknownSources: [
+          '[esql] ES|QL: Unknown data source "events-archive" (line 9, column 14) (at steps.0.with.query)',
+        ],
+      });
+    });
+
+    it('stays invalid when another error remains, and reports only that error', async () => {
+      const api = {
+        validateWorkflow: jest.fn().mockResolvedValue({
+          valid: false,
+          diagnostics: [
+            unknownSource,
+            { severity: 'error', source: 'esql', ruleId: 'esqlDiagnostic', message: 'ES|QL: x' },
+          ],
+          parsedWorkflow,
+        }),
+      } as any;
+
+      const result = await validateGeneratedYaml('y', {
+        api,
+        spaceId: 'default',
+        request: {} as any,
+      });
+      expect(result.valid).toBe(false);
+      expect(result.errors).toEqual(['[esql] ES|QL: x']);
+      expect(result.unknownSources).toEqual([]);
+    });
+  });
 });

@@ -7,12 +7,19 @@
 
 import type { KbnClient, ScoutLogger, ScoutTestConfig } from '@kbn/scout-oblt';
 import { tryForTime } from '../../../scout/common/fixtures/retry';
+import {
+  ELASTIC_AGENT_COMPLETE_IMAGE,
+  ELASTIC_AGENT_IMAGE,
+  resolveAgentSnapshotTag,
+  type AgentImageKind,
+} from '../../../agent_image/resolve_agent_snapshot_tag';
 import type { ScoutPrivateLocation } from '../../../scout/common/services/synthetics_private_location_api_service';
 import type { SyntheticsApiServicesFixture } from '../../../scout/common/fixtures';
 import {
   containerLogs,
   dockerContainerName,
   isDockerAvailable,
+  isImageAvailableInRegistry,
   publishedHostPort,
   pullImage,
   removeContainer,
@@ -48,7 +55,7 @@ export interface StartAgentStackOptions {
    * `complete` includes Chromium (browser journeys). `agent` is the lightweight
    * image and is enough for HTTP/TCP/ICMP.
    */
-  agentImage?: 'complete' | 'agent';
+  agentImage?: AgentImageKind;
 }
 
 interface EnrollmentApiKeyItem {
@@ -150,15 +157,14 @@ export async function startAgentStack({
   log.info(`Target HTTP server listening on ${target.url}`);
 
   const version = await kbnClient.version.get();
-  // Image tag follows the Kibana under test (8.19.x on an 8.19 backport, 9.6.0
-  // on main). Source/dev Kibana often reports `build_snapshot: false` even when
-  // ES is a SNAPSHOT — always pull the SNAPSHOT agent images for this suite.
-  const imageTag = version.includes('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
-  const fleetServerImage = `docker.elastic.co/elastic-agent/elastic-agent:${imageTag}`;
+  // Image tag follows the Kibana under test (8.19.x on an 8.19 backport, 9.7.0
+  // on main), falling back to the latest published snapshot during version bumps.
+  const imageTag = await resolveAgentSnapshotTag(version, log, agentImage, {
+    hasManifest: isImageAvailableInRegistry,
+  });
+  const fleetServerImage = `${ELASTIC_AGENT_IMAGE}:${imageTag}`;
   const agentImageName =
-    agentImage === 'complete'
-      ? `docker.elastic.co/elastic-agent/elastic-agent-complete:${imageTag}`
-      : fleetServerImage;
+    agentImage === 'complete' ? `${ELASTIC_AGENT_COMPLETE_IMAGE}:${imageTag}` : fleetServerImage;
   const esPort = esPortFromUrl(config.hosts.elasticsearch);
   const dockerEsHost = `http://host.docker.internal:${esPort}`;
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { resetSLOParamsSchema } from '@kbn/slo-schema';
 import { ResetSLO } from '../services/reset_slo';
 import { createSloServerRoute } from './utils/create_slo_server_route';
@@ -12,7 +13,14 @@ import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
 export const resetSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/_reset 2023-10-31',
-  options: { access: 'public' },
+  options: {
+    access: 'public',
+    summary: 'Reset an SLO',
+    description:
+      'You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.',
+    operationId: 'resetSloOp',
+    oasOperationObject: () => path.join(__dirname, 'examples/reset_slo.yaml'),
+  },
   security: {
     authz: {
       requiredPrivileges: ['slo_write'],
@@ -31,8 +39,14 @@ export const resetSLORoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
     await commonResourcesInstalled;
 
-    const { scopedClusterClient, spaceId, repository, transformManager, summaryTransformManager } =
-      await getScopedClients({ request, logger });
+    const {
+      scopedClusterClient,
+      spaceId,
+      repository,
+      transformManager,
+      summaryTransformManager,
+      telemetry,
+    } = await getScopedClients({ request, logger });
 
     const basePath = corePlugins.http.basePath;
 
@@ -43,7 +57,8 @@ export const resetSLORoute = createSloServerRoute({
       summaryTransformManager,
       logger,
       spaceId,
-      basePath
+      basePath,
+      telemetry
     );
 
     return await resetSLO.execute(params.path.id);

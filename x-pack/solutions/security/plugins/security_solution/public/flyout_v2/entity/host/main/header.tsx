@@ -30,7 +30,7 @@ import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared
 import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
 import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
 import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 export interface HeaderProps {
   /** Host name displayed as the flyout title. */
   hostName: string;
@@ -40,6 +40,8 @@ export interface HeaderProps {
   entityId?: string;
   /** Records resolving to `entityId` (aliases); when known, the "Resolved from N" badge counts them. */
   aliasRecords?: readonly EntityStoreRecord[];
+  /** Total number of aliases in the store, so the badge is right when `aliasRecords` is capped. */
+  aliasCount?: number;
   /** Key-value map of identity fields used to resolve the host. */
   identityFields?: IdentityFields;
   /** Whether the host exists in the entity store. */
@@ -65,6 +67,7 @@ export const Header = ({
   lastSeen,
   entityId,
   aliasRecords,
+  aliasCount,
   identityFields,
   isEntityInStore,
   riskLevel,
@@ -78,7 +81,7 @@ export const Header = ({
     () => lastSeenDate && new Date(lastSeenDate),
     [lastSeenDate]
   );
-  const resolvedFromCount = getResolvedFromRecordCount(aliasRecords);
+  const resolvedFromCount = getResolvedFromRecordCount(aliasRecords, aliasCount);
   return (
     <>
       <FlyoutHeaderActions>

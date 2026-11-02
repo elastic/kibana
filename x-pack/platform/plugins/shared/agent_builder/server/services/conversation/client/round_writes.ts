@@ -6,12 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import type {
-  Conversation,
-  ConversationEvent,
-  ConversationRound,
-  RoundInput,
-} from '@kbn/agent-builder-common';
+import type { Conversation, ConversationEvent, ConversationRound } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
   TimelineEventType,
@@ -53,29 +48,16 @@ const storedRoundBlocks = (stored: ConversationEvent[]): Map<string, Conversatio
 
 /**
  * The events of a round present in `rounds`: its stored events when the round spans a resume
- * execution (only the `user_message` attachment refs are refreshed — the folded message belongs
- * to the resume, not the original user message), else regenerated from the round.
+ * execution (the stored `user_message` is never rewritten), else regenerated from the round.
  */
 const eventsForKnownRound = (
   round: ConversationRound,
   storedForRound: ConversationEvent[],
   conversation: Conversation
-): ConversationEvent[] => {
-  if (!hasResumeExecution(round.id, storedForRound)) {
-    return roundToEvents(round, conversation);
-  }
-  const userMessageId = `${round.id}${CONVERSATION_EVENT_ID_DELIMITER}user_message`;
-  return storedForRound.map((event) => {
-    if (event.id !== userMessageId || !round.input.attachment_refs) {
-      return event;
-    }
-    const data = event.data as RoundInput;
-    return {
-      ...event,
-      data: { ...data, attachment_refs: round.input.attachment_refs },
-    };
-  });
-};
+): ConversationEvent[] =>
+  hasResumeExecution(round.id, storedForRound)
+    ? storedForRound
+    : roundToEvents(round, conversation);
 
 /**
  * Whether a stored block absent from the caller's `rounds` was removed on purpose. It was when

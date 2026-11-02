@@ -86,7 +86,9 @@ The Databricks connector exposes the following actions:
 ### Clusters
 
 `listClusters`
-:   List all clusters in the workspace. Returns cluster metadata including `cluster_id`, `cluster_name`, `state` (`RUNNING`, `TERMINATED`, `PENDING`), `spark_version`, and node type.
+:   List clusters in the workspace, a page at a time. Returns cluster metadata including `cluster_id`, `cluster_name`, `state` (`RUNNING`, `TERMINATED`, `PENDING`), `spark_version`, and node type. When the response has a `next_page_token`, pass it as `pageToken` to list the next page.
+    - `pageSize` (optional): Maximum number of clusters to return (default 20, max 100).
+    - `pageToken` (optional): `next_page_token` or `prev_page_token` from a previous response, to list that page.
 
 `startCluster` _(not yet available)_
 :   Start a terminated cluster. Startup is asynchronous — poll `listClusters` until state is `RUNNING`.

@@ -73,6 +73,7 @@ export async function getSandboxCredentials(
   // headers through the optional getSandboxAuthHeaders hook, which wins on conflict.
   const authHeaders = await getCredential({
     connectorId,
+    connectorTypeId: actionTypeId,
     secrets: validatedSecrets,
     connectorTokenClient: context.connectorTokenClient,
     authMode,
