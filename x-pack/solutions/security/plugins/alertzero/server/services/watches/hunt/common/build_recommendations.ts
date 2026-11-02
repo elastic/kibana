@@ -9,6 +9,13 @@ import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { z } from '@kbn/zod/v4';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
+import { invokeHuntStructured } from './invoke_hunt_structured';
+import {
+  HUNT_PROMPT_TEMPLATE_VERSION,
+  HUNT_RECOMMENDATIONS_CONTEXT_MAX_CHARS,
+  HUNT_RECOMMENDATIONS_TEMPLATE_ID,
+  clampHuntTemplateString,
+} from './hunt_prompt_templates';
 
 /** Schema cap: `manual_remediation` on the SSE accepts up to 50, but a hunt should stay short. */
 export const MAX_RECOMMENDATIONS = 8;
@@ -155,11 +162,14 @@ export const templateRecommendations = (result: HuntCoordinatorCoreResult): stri
  */
 export const generateRecommendations = async ({
   model,
+  messagesFallback,
   logger,
   result,
   context,
 }: {
   model: ScopedModel | undefined;
+  /** Tier model used when the gateway rejects the pinned template. */
+  messagesFallback?: ScopedModel;
   logger: Logger;
   result: HuntCoordinatorCoreResult;
   /** Report-derived text (narrative excerpt, behavior evidence) the model reads alongside the prompt. */
@@ -169,10 +179,20 @@ export const generateRecommendations = async ({
     return templateRecommendations(result);
   }
   try {
-    const structured = model.chatModel.withStructuredOutput(recommendationsExtractionSchema);
-    const parsed = (await structured.invoke(
-      `${RECOMMENDATIONS_PROMPT}\n\n--- CONTEXT ---\n${context}`
-    )) as z.infer<typeof recommendationsExtractionSchema>;
+    const parsed = await invokeHuntStructured({
+      model,
+      messagesFallback,
+      schema: recommendationsExtractionSchema,
+      prompt: `${RECOMMENDATIONS_PROMPT}\n\n--- CONTEXT ---\n${context}`,
+      logger,
+      template: {
+        id: HUNT_RECOMMENDATIONS_TEMPLATE_ID,
+        version: HUNT_PROMPT_TEMPLATE_VERSION,
+        variables: {
+          context: clampHuntTemplateString(context, HUNT_RECOMMENDATIONS_CONTEXT_MAX_CHARS),
+        },
+      },
+    });
     const allowed = buildAllowedEntitySet(result);
     const grounded = parsed.recommendations
       .filter((line) => isLineGrounded(line, allowed))

@@ -11,6 +11,7 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_BULK_DELETE_ATTACHMENTS,
   MAX_ATTACHMENT_TYPE_LENGTH,
+  MAX_ATTACHMENT_JSON_DEPTH,
   MAX_ATTACHMENT_JSON_LENGTH,
   MAX_DELETE_FILES,
   MAX_FILENAME_LENGTH,
@@ -137,6 +138,7 @@ const boundedExternalReferenceShape = {
   externalReferenceMetadata: limitedJsonObjectSchema({
     fieldName: 'externalReferenceMetadata',
     max: MAX_COMMENT_LENGTH,
+    maxDepth: MAX_ATTACHMENT_JSON_DEPTH,
   }).nullable(),
   owner: z.string().max(MAX_TITLE_LENGTH),
 };
@@ -170,6 +172,7 @@ const BoundedPersistableStateRequestSchema = PersistableStateAttachmentPayloadSc
   persistableStateAttachmentState: limitedJsonObjectSchema({
     fieldName: 'persistableStateAttachmentState',
     max: MAX_ATTACHMENT_JSON_LENGTH,
+    maxDepth: MAX_ATTACHMENT_JSON_DEPTH,
   }),
 });
 

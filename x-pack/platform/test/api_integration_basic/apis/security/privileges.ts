@@ -226,6 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
               'manage_agents',
               'manage_tools',
               'manage_skills',
+              'invoke_bound_agents',
             ],
             agentBuilderSml: ['all', 'read', 'minimal_all', 'minimal_read'],
             contextEngine: ['all', 'read', 'minimal_all', 'minimal_read'],

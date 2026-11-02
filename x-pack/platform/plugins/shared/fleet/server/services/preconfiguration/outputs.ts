@@ -316,6 +316,8 @@ export async function createOrUpdatePreconfiguredOutputs(
         await outputService.update(soClient, esClient, id, data, {
           fromPreconfiguration: true,
           secretHashes,
+          // the Kibana config file declares the whole output: a secret it no longer names is removed
+          declaresAllSecrets: true,
         });
         // Bump revision of all policies using that output
         await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id, {

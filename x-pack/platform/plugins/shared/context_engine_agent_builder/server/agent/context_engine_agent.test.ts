@@ -130,6 +130,12 @@ describe('Context Engine agent instructions', () => {
       );
     });
 
+    it('says a Bottom-Up run covers at most 2,000 documents when the source holds more', () => {
+      expect(instructions).toMatch(
+        /When that strategy is Bottom-Up and the source holds more than 2,000 documents, say so as you state it/
+      );
+    });
+
     it('asks for intent where it cannot be inferred', () => {
       expect(instructions).toMatch(/where the answer is new coverage, ask which strategy/);
       expect(instructions).toContain(`\`${internalTools.askUserQuestion}\``);

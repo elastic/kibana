@@ -29,14 +29,23 @@ const document = {
       get: {
         operationId: 'listPets',
         tags: ['pets'],
-        'x-speakeasy-pagination': { type: 'cursor' },
+        'x-codeSamples': [{ lang: 'curl', source: 'curl /pets' }],
+        'x-speakeasy-pagination': { type: 'cursor', outputs: { description: 'kept' } },
         responses: { '200': ok({ type: 'array', items: { $ref: '#/components/schemas/Pet' } }) },
       },
       post: { responses: { '201': ok({ $ref: '#/components/schemas/Unused' }) } },
     },
     '/pets/{id}': {
       get: {
-        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            required: true,
+            'x-ms-skip-url-encoding': true,
+            schema: { type: 'string' },
+          },
+        ],
         responses: {
           '200': ok({ $ref: '#/components/schemas/Pet/properties/owner' }),
           '404': { $ref: '#/components/responses/NotFound' },
@@ -95,6 +104,7 @@ describe('projectSpec', () => {
           parameters: [{ $ref: '#/components/parameters/Limit' }],
           get: {
             operationId: 'listPets',
+            'x-speakeasy-pagination': { type: 'cursor', outputs: { description: 'kept' } },
             responses: {
               '200': okProjected({ type: 'array', items: { $ref: '#/components/schemas/Pet' } }),
             },
@@ -102,7 +112,15 @@ describe('projectSpec', () => {
         },
         '/pets/{id}': {
           get: {
-            parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+            parameters: [
+              {
+                name: 'id',
+                in: 'path',
+                required: true,
+                'x-ms-skip-url-encoding': true,
+                schema: { type: 'string' },
+              },
+            ],
             responses: {
               '200': okProjected({ $ref: '#/components/schemas/Pet/properties/owner' }),
               '404': { $ref: '#/components/responses/NotFound' },
@@ -131,6 +149,13 @@ describe('projectSpec', () => {
         responses: { NotFound: okProjected({ $ref: '#/components/schemas/Error' }) },
         securitySchemes: { 'x-key': { type: 'apiKey', in: 'header', name: 'x-key' } },
       },
+    });
+  });
+
+  it('keeps the components that the given refs point to, and what they reference', () => {
+    const { components } = projectSpec(document, operations, ['#/components/schemas/Unused']);
+    expect((components as { schemas: Record<string, unknown> }).schemas.Unused).toEqual({
+      type: 'object',
     });
   });
 
@@ -212,5 +237,41 @@ describe('projectSpec', () => {
     });
     expect(projected.components).toEqual({ schemas: { Thing: { type: 'object' } } });
     expect(loadContractOperations(projected)).toHaveLength(1);
+  });
+
+  it('keeps operations under x-ms-paths, with what they reference', () => {
+    const azure = {
+      openapi: '3.0.3',
+      info: { title: 'Blobs', version: '1' },
+      paths: {},
+      'x-ms-paths': {
+        '/?comp=list': {
+          get: {
+            'x-ms-pageable': { nextLinkName: 'NextMarker' },
+            responses: { '200': ok({ $ref: '#/components/schemas/List' }) },
+          },
+        },
+        '/?comp=properties': { get: { responses: { '200': ok({ type: 'object' }) } } },
+      },
+      components: { schemas: { List: { type: 'object' } } },
+    };
+
+    const projected = projectSpec(azure, [{ method: 'get', path: '/?comp=list' }]);
+
+    expect(projected.paths).toEqual({});
+    expect(projected['x-ms-paths']).toEqual({
+      '/?comp=list': {
+        get: {
+          'x-ms-pageable': { nextLinkName: 'NextMarker' },
+          responses: { '200': okProjected({ $ref: '#/components/schemas/List' }) },
+        },
+      },
+    });
+    expect(projected.components).toEqual({ schemas: { List: { type: 'object' } } });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
+
+  it('leaves out x-ms-paths when no operation is under it', () => {
+    expect(projectSpec(document, operations)).not.toHaveProperty(['x-ms-paths']);
   });
 });
