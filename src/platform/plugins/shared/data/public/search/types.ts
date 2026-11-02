@@ -18,6 +18,7 @@ import type { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies
 import type { SearchUsageCollector } from './collectors';
 import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import type { SearchSessionsConfigSchema } from '../../server/config';
+import type { IReplayRegistry } from './replay/replay_registry';
 
 export { SEARCH_EVENT_TYPE } from './collectors';
 export type { ISearchStartSearchSource, SearchUsageCollector };
@@ -95,6 +96,10 @@ export interface ISearchStart extends ISearchMethods {
    * {@link ISessionsClient}
    */
   sessionsClient: ISessionsClient;
+  /**
+   * Replays recorded Inspector responses instead of searching (Inspector snapshot prototype)
+   */
+  replay: IReplayRegistry;
 }
 
 /** @internal */

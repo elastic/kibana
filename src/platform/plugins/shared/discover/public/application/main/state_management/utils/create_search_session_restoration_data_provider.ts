@@ -49,7 +49,7 @@ export function createSearchSessionRestorationDataProvider(deps: {
   };
 }
 
-function createUrlGeneratorState({
+export function createUrlGeneratorState({
   data,
   getPersistedDiscoverSession,
   getCurrentTab,

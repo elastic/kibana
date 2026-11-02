@@ -61,7 +61,11 @@ const closeButtonLabel = i18n.translate('inspector.closeButton', {
 export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   views: InspectorViewRegistry | undefined;
 
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private readonly kibanaVersion: string;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+  }
 
   public setup(_core: CoreSetup) {
     this.views = new InspectorViewRegistry();
@@ -98,6 +102,8 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
               adapters={adapters}
               title={options.title}
               options={options.options}
+              snapshot={options.snapshot}
+              kibanaVersion={this.kibanaVersion}
               dependencies={{
                 application: core.application,
                 http: core.http,

@@ -9,6 +9,7 @@
 
 import type { OverlayFlyoutOpenOptions, OverlayRef } from '@kbn/core/public';
 import type { Adapters } from '../common';
+import type { InspectorSnapshot } from './snapshot/snapshot';
 
 /**
  * The props interface that a custom inspector view component, that will be passed
@@ -58,9 +59,19 @@ export interface InspectorViewDescription {
  * @property {unknown} options - A set of specific payload to be passed to inspector views
  * @property {object} flyoutProps - Optional props passed to `openLazyFlyout` (e.g. size, className, etc).
  */
+export interface InspectorSnapshotOptions {
+  /** App id stored in exported snapshots; "Restore in app" is offered only for matching snapshots. */
+  appId: string;
+  /** Returns the app state that is stored in an exported snapshot. */
+  getAppState: () => Promise<unknown>;
+  /** Restores an imported snapshot (app state and recorded requests) in the app. */
+  restore?: (snapshot: InspectorSnapshot) => Promise<void>;
+}
+
 export interface InspectorOptions {
   title?: string;
   options?: unknown;
+  snapshot?: InspectorSnapshotOptions;
   flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
     focusedPanelId?: string;
   };

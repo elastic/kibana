@@ -33,4 +33,6 @@ export type {
   InspectorViewDescription,
   InspectorOptions,
   InspectorSession,
+  InspectorSnapshotOptions,
 } from './types';
+export type { InspectorSnapshot, InspectorSnapshotMeta } from './snapshot/snapshot';

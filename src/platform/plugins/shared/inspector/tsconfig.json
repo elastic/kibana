@@ -21,7 +21,8 @@
     "@kbn/shared-ux-utility",
     "@kbn/ui-callout",
     "@kbn/cps",
-    "@kbn/cps-utils"
+    "@kbn/cps-utils",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*",

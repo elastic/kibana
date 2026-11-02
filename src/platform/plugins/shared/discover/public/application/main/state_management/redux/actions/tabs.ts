@@ -15,6 +15,7 @@ import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public';
+import type { InspectorSnapshotMeta, Request } from '@kbn/inspector-plugin/public';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
@@ -589,10 +590,21 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
       profileState?: ProfileStateMap;
+      uiState?: Partial<TabState['uiState']>;
+      visContext?: TabState['attributes']['visContext'];
     }
   ],
   Promise<void>
-> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
+> = ({
+  tabLabel,
+  appState,
+  globalState,
+  searchSessionId,
+  dataViewSpec,
+  profileState,
+  uiState,
+  visContext,
+}) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -605,6 +617,11 @@ export const openInNewTab: InternalStateThunkActionCreator<
       appState: initialAppState,
       globalState: initialGlobalState,
       profileState: cloneDeep(profileState) ?? {},
+      uiState: { ...DEFAULT_TAB_STATE.uiState, ...cloneDeep(uiState) },
+      attributes: {
+        ...DEFAULT_TAB_STATE.attributes,
+        ...(visContext ? { visContext: cloneDeep(visContext) } : {}),
+      },
     };
 
     if (tabLabel) {
@@ -647,27 +664,40 @@ export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
     );
   };
 
-export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
+export interface OpenLocatorParamsReplay {
+  /** Recorded Inspector requests that are replayed instead of searching */
+  requests: Request[];
+  meta: InspectorSnapshotMeta;
+  /** Send requests that are not in the snapshot to the live cluster */
+  passthrough?: boolean;
+}
+
+/**
+ * Opens Discover locator params in a new tab, optionally replaying recorded Inspector requests.
+ */
+export const openLocatorParamsInNewTab: InternalStateThunkActionCreator<
   [
     {
-      searchSession: UISession;
+      params: DiscoverAppLocatorParams;
+      label?: string;
+      uiState?: Partial<TabState['uiState']>;
+      visContext?: TabState['attributes']['visContext'];
+      replay?: OpenLocatorParamsReplay;
     }
   ],
   Promise<void>
-> = ({ searchSession }) =>
-  async function openSearchSessionInNewTabThunkFn(dispatch, _getState, { services }) {
-    const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;
-
-    if (!restoreState.searchSessionId) {
-      return;
-    }
-
+> = ({ params, label, uiState, visContext, replay }) =>
+  async function openLocatorParamsInNewTabThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
     const {
       appState,
       globalState: originalGlobalState,
       profileUrlState,
       state: { dataViewSpec, profileState: persistentProfileState },
-    } = parseAppLocatorParams(restoreState, services.profileStateRegistry);
+    } = parseAppLocatorParams(params, services.profileStateRegistry);
     const profileState = services.profileStateRegistry.mergeState(
       persistentProfileState,
       profileUrlState
@@ -684,16 +714,48 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
       globalState.filters = originalGlobalState.filters;
     }
 
-    return dispatch(
+    // Activate before the tab is created so its first fetch is served from the snapshot
+    const disposeReplay = replay
+      ? services.data.search.replay.activate(replay.requests, { passthrough: replay.passthrough })
+      : undefined;
+
+    await dispatch(
       openInNewTab({
-        tabLabel: searchSession.name,
-        searchSessionId: restoreState.searchSessionId,
+        tabLabel: label,
+        searchSessionId: params.searchSessionId,
         appState,
         globalState,
         dataViewSpec,
         profileState,
+        uiState,
+        visContext,
       })
     );
+
+    if (replay && disposeReplay) {
+      selectTabRuntimeState(runtimeStateManager, getState().tabs.unsafeCurrentId)?.replay$.next({
+        dispose: disposeReplay,
+        meta: replay.meta,
+      });
+    }
+  };
+
+export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
+  [
+    {
+      searchSession: UISession;
+    }
+  ],
+  Promise<void>
+> = ({ searchSession }) =>
+  async function openSearchSessionInNewTabThunkFn(dispatch) {
+    const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;
+
+    if (!restoreState.searchSessionId) {
+      return;
+    }
+
+    return dispatch(openLocatorParamsInNewTab({ params: restoreState, label: searchSession.name }));
   };
 
 export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
@@ -711,6 +773,8 @@ export const clearRecentlyClosedTabs: InternalStateThunkActionCreator = () =>
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> = ({ tabId }) =>
   function disconnectTabThunkFn(dispatch, __, { runtimeStateManager }) {
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    tabRuntimeState.replay$.getValue()?.dispose();
+    tabRuntimeState.replay$.next(undefined);
     tabRuntimeState.dataStateContainer$.getValue()?.cancel();
     dispatch(stopSyncing({ tabId }));
     tabRuntimeState.customizationService$.getValue()?.cleanup();

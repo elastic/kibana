@@ -31,6 +31,12 @@ export class RequestResponder {
     return this;
   }
 
+  /** Sets the key used to replay this request's response from a snapshot. */
+  public replayKey(replayKey: string | undefined): RequestResponder {
+    this.request.replayKey = replayKey;
+    return this;
+  }
+
   public stats(stats: RequestStatistics): RequestResponder {
     this.request.stats = {
       ...(this.request.stats || {}),

@@ -13,6 +13,7 @@ import { getRegisteredEsqlDataView, type DataSource, type EsqlSource } from '@kb
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
+import type { InspectorSnapshotMeta } from '@kbn/inspector-plugin/public';
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { ConnectedCustomizationService } from '../../../../customizations';
@@ -28,6 +29,12 @@ import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded
 import { CascadedDocumentsFetcher } from '../../data_fetching/cascaded_documents_fetcher';
 import type { DiscoverServices } from '../../../../build_services';
 import { createSearchSource } from '../utils/create_search_source';
+
+/** An active Inspector snapshot replay for a tab. */
+export interface TabReplayState {
+  dispose: () => void;
+  meta: InspectorSnapshotMeta;
+}
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -51,6 +58,7 @@ interface TabRuntimeState {
   /** Source of the cascade leaf rows; keeps the parent id, so never publish it as the current source. */
   cascadedLeafDataSource: DataSource;
   unsubscribeFn: (() => void) | undefined;
+  replay: TabReplayState;
 }
 
 type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
@@ -61,7 +69,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<
   TabRuntimeState,
-  'currentDataSource' | 'cascadedLeafDataSource'
+  'currentDataSource' | 'cascadedLeafDataSource' | 'replay'
 >;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
@@ -128,6 +136,7 @@ export const createTabRuntimeState = ({
     currentDataSource$,
     cascadedLeafDataSource$,
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
+    replay$: new BehaviorSubject<TabReplayState | undefined>(undefined),
   };
 };
 
