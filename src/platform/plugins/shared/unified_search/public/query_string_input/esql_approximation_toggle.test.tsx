@@ -130,7 +130,9 @@ describe('EsqlApproximationToggle', () => {
 
   describe('additionalDisabledText', () => {
     const getTooltipText = async () => {
-      await userEvent.hover(screen.getByTestId('esqlApproximationToggleButton'));
+      await userEvent.hover(screen.getByTestId('esqlApproximationToggleButton'), {
+        pointerEventsCheck: 0,
+      });
       return screen.findByRole('tooltip');
     };
 

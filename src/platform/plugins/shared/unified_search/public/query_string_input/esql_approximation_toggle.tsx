@@ -50,7 +50,7 @@ const getLabels = (
         }),
       };
     }
-    const additionalDisabledText = invalidLicense
+    const disabledText = invalidLicense
       ? i18n.translate('unifiedSearch.esqlApproximationToggle.invalidLicenseText', {
           defaultMessage: 'Upgrade to Enterprise license to enable fast mode.',
         })
@@ -59,11 +59,11 @@ const getLabels = (
       tooltipContent: (
         <>
           <strong>{ariaLabel}</strong>
-          {additionalDisabledText && (
+          {disabledText && (
             <>
               <br />
               <br />
-              {additionalDisabledText}
+              {disabledText}
             </>
           )}
         </>
