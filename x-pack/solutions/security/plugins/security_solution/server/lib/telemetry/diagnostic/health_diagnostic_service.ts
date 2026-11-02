@@ -49,7 +49,6 @@ import {
   shouldExecute as isDueForExecution,
   applyFilterlist,
   mergeByPriority,
-  toDateOnly,
 } from './health_diagnostic_utils';
 import { parseHealthDiagnosticQueries } from './health_diagnostic_query_parser';
 import { type CircuitBreaker, ValidationError } from './health_diagnostic_circuit_breakers.types';
