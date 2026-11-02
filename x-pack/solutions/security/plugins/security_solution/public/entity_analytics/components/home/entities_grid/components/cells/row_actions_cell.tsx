@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table/translations';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -55,18 +56,22 @@ export interface RowActions {
   onOpenEntityGraph: (row: Row) => void;
   /** Absent when the agent chat is unavailable, which hides the item. */
   onAddToChat?: (row: Row) => void;
+  /** Absent when attaching to cases is unavailable, which hides the item. */
+  onAddToCase?: (row: Row) => void;
 }
 
 interface RowActionsCellProps {
   onInvestigateInTimeline?: () => void;
   onOpenEntityGraph: () => void;
   onAddToChat?: () => void;
+  onAddToCase?: () => void;
 }
 
 export const RowActionsCell: React.FC<RowActionsCellProps> = ({
   onInvestigateInTimeline,
   onOpenEntityGraph,
   onAddToChat,
+  onAddToCase,
 }) => {
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
   const moreActionsButton = (
@@ -110,7 +115,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
           />
         </EuiToolTip>
       </EuiFlexItem>
-      {onAddToChat && (
+      {(onAddToChat || onAddToCase) && (
         <EuiFlexItem grow={false}>
           {/* Mounted only once opened: a mounted popover scans its button for focusables, too costly per row. */}
           {isMoreActionsOpen ? (
@@ -124,17 +129,34 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
             >
               <EuiContextMenuPanel
                 items={[
-                  <EuiContextMenuItem
-                    key="addToChat"
-                    data-test-subj="eaGridRowAddToChat"
-                    icon="addToChat"
-                    onClick={() => {
-                      setIsMoreActionsOpen(false);
-                      onAddToChat();
-                    }}
-                  >
-                    {i18nStrings.addToChat}
-                  </EuiContextMenuItem>,
+                  ...(onAddToChat
+                    ? [
+                        <EuiContextMenuItem
+                          key="addToChat"
+                          icon="addToChat"
+                          onClick={() => {
+                            setIsMoreActionsOpen(false);
+                            onAddToChat();
+                          }}
+                        >
+                          {i18nStrings.addToChat}
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
+                  ...(onAddToCase
+                    ? [
+                        <EuiContextMenuItem
+                          key="addToCase"
+                          icon="briefcase"
+                          onClick={() => {
+                            setIsMoreActionsOpen(false);
+                            onAddToCase();
+                          }}
+                        >
+                          {ADD_TO_CASE}
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
                 ]}
               />
             </EuiPopover>

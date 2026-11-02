@@ -203,6 +203,15 @@ describe('RowActionsCell', () => {
     expect(onAddToChat).toHaveBeenCalledTimes(1);
   });
 
+  it('adds the entity to a case from the more actions menu', async () => {
+    const onAddToCase = jest.fn();
+    renderInProviders(<RowActionsCell onOpenEntityGraph={jest.fn()} onAddToCase={onAddToCase} />);
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }));
+    expect(screen.queryByText('Add to chat')).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByText('Add to case'));
+    expect(onAddToCase).toHaveBeenCalledTimes(1);
+  });
+
   it('hides the more actions menu without the agent chat', () => {
     renderActions({ canAddToChat: false });
     expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();
