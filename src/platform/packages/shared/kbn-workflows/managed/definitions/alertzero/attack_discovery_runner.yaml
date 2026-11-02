@@ -78,9 +78,10 @@ triggers:
           type: string
           maxLength: 32
           description: >-
-            Schedule interval of the worker that launched this run (for example
-            `24h`). Recorded for traceability only; no step reads it. Echoed in the
-            output so a run's cadence is visible in its execution history.
+            Schedule interval of this run (for example `1h`). Required: generation
+            uses it as the alert lookback, plus one minute so a tick covers the
+            seam with the previous one. Echoed in the output so a run's cadence
+            is visible in its execution history.
         max_alerts:
           type: integer
           minimum: 100
@@ -97,6 +98,8 @@ triggers:
             this run. No step reads it. It stays readable in this execution's inputs,
             which is the only link back to the parent the engine keeps. Empty on a
             standalone run.
+      required:
+        - schedule_interval
       additionalProperties: false
 outputs:
   # Declared as string because the editor type-checks the YAML source of
@@ -160,12 +163,14 @@ steps:
       workflow-id: system-security-attack-discovery-batched-generation
       run-as-mode: inherit
       inputs:
-        # `batch_size` and `lookback` are left at the child's defaults. Surfacing
-        # them as Worker settings means threading new values through the Worker
-        # settings template, and is tracked separately. `max_alerts` defaults to a
-        # full day when this run was not launched by the per-space worker.
+        # `batch_size` stays at the child's default. `lookback` is this run's
+        # schedule interval, so an hourly worker reads the last hour rather than
+        # the last day. The child also reads one minute further, covering the
+        # seam between ticks. `max_alerts` defaults to a full day when this run
+        # was not launched by the per-space worker.
         connector_id: "{{ inputs.connector_id }}"
         max_alerts: "${{ inputs.max_alerts | default: 10000 }}"
+        lookback: "{{ inputs.schedule_interval }}"
 
   # The fan-out list, resolved once so the batches, the parallel step, and the
   # summary agree on it. `| default: consts.no_discoveries` normalizes the three
@@ -386,7 +391,19 @@ steps:
                 summary_markdown: "{{ foreach.item.summary_markdown }}"
                 investigation_id: "{{ foreach.item.investigation_id }}"
                 tag_correlated_alerts: "${{ foreach.item.tag_correlated_alerts }}"
+                tag_fp_chain_alerts: "${{ foreach.item.tag_fp_chain_alerts }}"
                 journal_alerts_retired: "${{ foreach.item.journal_alerts_retired }}"
+                fingerprint_pending: "${{ foreach.item.fingerprint_pending }}"
+                retarget_if_missing: "${{ foreach.item.retarget_if_missing }}"
+                own_fingerprint_id: "{{ foreach.item.own_fingerprint_id }}"
+                host_entity_ids: "${{ foreach.item.host_entity_ids }}"
+                user_entity_ids: "${{ foreach.item.user_entity_ids }}"
+                entity_pairs: "${{ foreach.item.entity_pairs }}"
+                tactics: "${{ foreach.item.tactics }}"
+                first_alert_at: "{{ foreach.item.first_alert_at }}"
+                last_alert_at: "{{ foreach.item.last_alert_at }}"
+                expires_at: "{{ foreach.item.expires_at }}"
+                autonomy: "${{ inputs.autonomy }}"
                 parent_run_id: "{{ execution.id }}"
 
   # Telemetry: Attack Discovery's own run event (alerts, batches, attacks), once every batch has

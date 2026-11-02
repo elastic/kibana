@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { getDateRange } from '@kbn/timerange';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -90,13 +90,15 @@ const attachmentHasDataField = z
     '(optional, custom content only) Omit to keep the panel\'s current data state. true: ensure the panel has data — keeps the stored query, generating one from "query" only when the panel has none. false: drop the stored query so the panel has no data. A supplied esql always means data: it wins over false. Ignored for Lens and Vega. Never pass false to get past a failed query generation.'
   );
 
-const attachmentRegenerateEsqlField = z
-  .boolean()
-  .nullable()
-  .optional()
-  .describe(
-    '(optional, custom content only) true: the edit changes what the panel shows, so the stored query is regenerated from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the stored query. A supplied esql wins. Ignored for Lens and Vega.'
-  );
+const attachmentRegenerateEsqlField = lazySchema(() =>
+  z
+    .boolean()
+    .nullable()
+    .optional()
+    .describe(
+      '(optional, custom content only) true: the edit needs different data (a new measure, grouping, filter or time window, for example "also show the average bytes"), so the stored query is regenerated from "query", keeping the parts the request does not change. Without it the stored query is kept and the new data can never appear. Omit for edits that only change the look (colors, sizes, wording, layout). A supplied esql wins. Ignored for Lens and Vega.'
+    )
+);
 
 const requiredChartTypeField = z
   .nativeEnum(SupportedChartType)
@@ -268,7 +270,7 @@ You say what to build via "target", discriminated by "target.type":
     )}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
 - "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Always set "has_data": true (a query is generated unless you pass "esql") or false when the panel genuinely has no data (a banner, a legend, a note).
-- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none). For a custom content edit that changes what the panel shows, pass "regenerate_esql": true: the stored query is regenerated from "query", keeping the parts the request does not change; layout, copy and style edits keep the stored query.
+- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none). For a custom content edit that needs different data (a new measure, grouping, filter or time window, for example "also show the average bytes"), pass "regenerate_esql": true: without it the stored query is kept and the new data can never appear; with it the stored query is regenerated from "query", keeping the parts the request does not change. Layout, copy and style edits (colors, sizes, wording) keep the stored query.
 
 Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
 
