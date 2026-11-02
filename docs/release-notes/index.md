@@ -56,6 +56,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Alerting and cases**:
 * Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows, so to turn it off, for example because you don't have a Workflows license, set `alerting:v2:enabled` to `false` [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
+* Add an `alert_url` field, a link to the alert details page, to each alert in the payload of Universal Alerting action policy workflows [#300017]({{kib-pull}}300017).
+% The PR and its backport carry release_note:fix, but the release note in the PR says it adds a field. Listed as an enhancement.
 * Add support for recurring maintenance windows and scheduled reports on the last day of the month [#288008]({{kib-pull}}288008).
 * Add a public API to create, read, update, and delete case templates [#280144]({{kib-pull}}280144).
 * Add a public API to discover the extended fields (`extended_fields`) that you can apply to a case, for a given owner and optional template [#279684]({{kib-pull}}279684).
@@ -316,6 +318,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the **Disk Usage** rule to ignore frozen nodes [#278374]({{kib-pull}}278374).
 * Fix the `FormatDate` mustache lambda rejecting epoch-millisecond values that arrive as strings, for example from nested templates that use the `x` format [#277391]({{kib-pull}}277391).
 * Fix context variables not working in the **Additional fields** of the ServiceNow ITSM, ServiceNow SecOps, and Jira connectors [#286578]({{kib-pull}}286578).
+* Fix the ServiceNow ITSM, ServiceNow SecOps, and ServiceNow ITOM connectors showing duplicate choices for severity, urgency, impact, category, and subcategory when the same choice exists in more than one ServiceNow table [#300449]({{kib-pull}}300449).
 * Fix updating alert tags in one space also changing alerts in other spaces [#285874]({{kib-pull}}285874).
 * Fix rules that you created with your own API key failing with an `api key has been invalidated` error after a workflow edits them [#300667]({{kib-pull}}300667).
 * Fix workflows that a Universal Alerting action policy dispatches in a non-default space failing with `Connector <id> not found` for connectors that exist only in that space [#300939]({{kib-pull}}300939).
@@ -356,7 +359,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix duration metrics with different units on the same axis plotting on different scales in multi-series XY charts [#289007]({{kib-pull}}289007).
 * Fix the value text color of metric charts to use the default text color when the value is out of range [#280816]({{kib-pull}}280816).
 * Fix formulas with many KQL or Lucene filters being rejected for exceeding the expression length limit [#290314]({{kib-pull}}290314).
-* Fix metric background trendlines for {{esql}} queries that use `EVAL` to alias or overwrite a time-bucket column, rename the source time field before aggregation, use multiple piped `STATS` commands, use `FORK`, or use `TBUCKET(...)` [#297591]({{kib-pull}}297591), [#294577]({{kib-pull}}294577), [#287819]({{kib-pull}}287819), [#284839]({{kib-pull}}284839).
+* Fix metric background trendlines for {{esql}} queries that use `EVAL` to alias or overwrite a time-bucket column, rename the source time field before aggregation, use multiple piped `STATS` commands, use `FORK`, or use `TBUCKET(...)` [#297591]({{kib-pull}}297591), [#294577]({{kib-pull}}294577), [#287819]({{kib-pull}}287819), [#284839]({{kib-pull}}284839), [#299104]({{kib-pull}}299104).
 * Fix {{esql}} metric panels crashing on empty results when dynamic coloring uses a maximum dimension [#297429]({{kib-pull}}297429).
 * Fix an invalid-column error when you add a **Maximum value** dimension to an {{esql}} metric visualization [#296545]({{kib-pull}}296545).
 * Fix date buckets from {{esql}} queries stopping behaving as time after you save and reload a visualization, which affected the heatmap time scale and sort, chart-switch suggestions, XY current-time and partial-data markers, and dimension drag and drop [#289058]({{kib-pull}}289058).
@@ -377,6 +380,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix bundled packages matching by name when the package registry is unreachable [#285279]({{kib-pull}}285279).
 * Fix the {{fleet}} integration sync task running intensive searches when no follower index exists [#285526]({{kib-pull}}285526).
 * Fix {{fleet}} setup failing repeatedly with a circuit breaker error on deployments with large `.fleet-policies` documents, by running its data update in small batches in the background instead of during the setup request [#300777]({{kib-pull}}300777).
+* Fix the {{es}} output on a {{fleet-server}} agent policy being replaced when the {{fleet-server}} host has SSL settings [#301068]({{kib-pull}}301068).
 * Fix deleting a package policy waiting on a full, synchronous agent policy deploy [#282580]({{kib-pull}}282580).
 * Fix false-positive errors when you delete an OpenTelemetry input policy with a shared dataset, and policies that fail on a non-string agent condition [#291679]({{kib-pull}}291679), [#290497]({{kib-pull}}290497).
 * Fix agentless policies that use dynamic dataset streams, including Okta, Active Directory, and Microsoft Entra ID Entity Analytics, incorrectly showing `0` throughput [#286758]({{kib-pull}}286758).
@@ -389,7 +393,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix updating an output or a {{fleet}} Server host through the API deleting secrets that the update doesn't mention or that it sends as plain text, such as the `ssl.key` of an output and Kafka passwords [#299235]({{kib-pull}}299235).
 * Fix the **Agent policies** page failing or timing out for agent policies with thousands of integration policies [#297979]({{kib-pull}}297979).
 * Fix the agent policy YAML download failing with `Unresolved alias` when a policy reuses an object by reference [#280669]({{kib-pull}}280669).
-* Fix deleting an agent policy succeeding when {{fleet}} can't remove it from integration policies that other agent policies share. That left the integration policies pointing to a deleted agent policy and made the **Edit integration** page fail with `Agent policies not found`. The delete now fails with an error that lists each integration policy that failed [#300189]({{kib-pull}}300189).
+* Fix deleting an agent policy succeeding when {{fleet}} can't remove it from integration policies that other agent policies share. That left the integration policies pointing to a deleted agent policy and made the **Edit integration** page fail with `Agent policies not found`. The delete now fails with an error that lists each integration policy that failed. Removing the agent policy from shared integration policies also no longer depends on the Elastic Package Registry, so the delete no longer fails or takes minutes when the registry is unreachable [#300189]({{kib-pull}}300189), [#300384]({{kib-pull}}300384).
 * Fix agent actions and tasks, including bulk upgrades, agent upgrade requests hanging when the product versions API stops responding, the agent status change task, enrollment API key invalidation, and orphan agents [#282829]({{kib-pull}}282829), [#292788]({{kib-pull}}292788), [#292736]({{kib-pull}}292736), [#286324]({{kib-pull}}286324), [#287252]({{kib-pull}}287252), [#283071]({{kib-pull}}283071).
 * Fix {{fleet}} not deactivating inactive agents that have a stale `unenrolled_at` value, which left them active with their API keys unrevoked [#300148]({{kib-pull}}300148).
 * Fix {{fleet}} agent API handlers so they respect spaces, deployment of policies in non-default spaces, and the **Expired** status of enrollment tokens [#284936]({{kib-pull}}284936), [#293010]({{kib-pull}}293010), [#284280]({{kib-pull}}284280).
@@ -404,6 +408,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix lifecycle settings in Index Management appearing as effective for lookup-mode indices and data streams [#292309]({{kib-pull}}292309).
 * Fix transform actions failing with a generic `500` error when the {{es}} request timed out or failed at the transport level [#287592]({{kib-pull}}287592).
 * Fix deleting snapshots failing on long-running deletions of up to 30 minutes, and a snapshot that no longer exists blocking the deletion of others in the same request [#290071]({{kib-pull}}290071).
+* Fix creating and fetching data views with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving the data view [#299790]({{kib-pull}}299790).
 
 **Developer tools**:
 * Fix Console not explaining that timed-out {{es}} requests might still be running [#289481]({{kib-pull}}289481).
@@ -447,6 +452,8 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the cursor jumping when you edit an {{infer}} endpoint ID [#280894]({{kib-pull}}280894).
 * Fix the connector **View logs** page showing `(null)` filter labels [#281155]({{kib-pull}}281155).
 * Fix the region count text in the **Manage region preferences** modal not expanding or collapsing the zone when you select it, and the modal shrinking when you dismiss the model availability notice [#280253]({{kib-pull}}280253), [#280242]({{kib-pull}}280242).
+* Fix the model list on the **Elastic Inference Service** page showing outdated models after you save region preferences, until you refresh the browser [#300999]({{kib-pull}}300999).
+% #300999 carries the nonstandard label release_note:bug, so the generator does not pick it up. Consider changing it to release_note:fix.
 
 **{{esql}} editor**:
 * Fix `MV_CONTAINS`, invalid casts when filtering, autocomplete for nested function expressions, and PromQL variables, columns, and `TS_INFO` and `METRICS_INFO` columns in {{esql}} [#288972]({{kib-pull}}288972), [#287416]({{kib-pull}}287416), [#284277]({{kib-pull}}284277), [#281437]({{kib-pull}}281437), [#280538]({{kib-pull}}280538), [#280524]({{kib-pull}}280524).
@@ -477,6 +484,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix token usage tracking for chat completions that are retried [#282747]({{kib-pull}}282747).
 * Fix legacy AI connector configurations failing the restricted default LLM check when the call uses the {{infer}} endpoint that the default connector relies on. Agent Builder now also uses feature-specific settings that an administrator configured before it uses the default connector [#293855]({{kib-pull}}293855).
 * Fix LLM model resolution failing when you don't have the Actions privilege and an {{infer}} endpoint is configured in model settings [#290533]({{kib-pull}}290533), [#290457]({{kib-pull}}290457).
+* Fix the anomaly detection jobs tool failing with `Insufficient privileges to access feature` for every user, including superusers, when an agent runs it in an `ai.agent` workflow step or in Agent Builder chat [#301983]({{kib-pull}}301983).
 * Fix chat completion calls that use a non-default model succeeding when `genAiSettings:defaultAIConnectorOnly` is on. They now fail with a 400 error [#288107]({{kib-pull}}288107).
 * Fix special tokens in prompts causing AI features to fail or crash, and fix empty text content blocks for Claude models [#283177]({{kib-pull}}283177).
 * Fix streams that never close from blocking the {{kib}} event loop [#286849]({{kib-pull}}286849).
@@ -504,6 +512,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 **Workflows**:
 * Fix YAML comments and formatting being stripped when an agent edits a workflow [#288075]({{kib-pull}}288075).
 * Fix the `generate_workflow` tool timing out when it edits large workflows, and fix edits to steps nested in `if` or `foreach` steps failing [#299949]({{kib-pull}}299949).
+* Fix the `generate_workflow` tool writing `http` steps that fail at run time because they pass objects, such as query parameters, with `{{ }}`, which always renders a string. The tool now uses `${{ }}` for objects, arrays, numbers, and booleans [#301589]({{kib-pull}}301589).
 * Fix the **Workflows** editor flagging valid Liquid map lookups with a variable key, such as `{{ inputs.payload.rules[ep.rule_id].name }}`, as invalid [#289418]({{kib-pull}}289418).
 * Fix false variable validation errors in the YAML editor, and `foreach` collection types that Workflows can't prove [#295421]({{kib-pull}}295421), [#283360]({{kib-pull}}283360).
 * Fix the actions menu and editing shortcuts showing in read-only mode of the workflow editor, and the graph view controls and settings [#289510]({{kib-pull}}289510), [#289079]({{kib-pull}}289079).
@@ -525,6 +534,9 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix a workflow that waits for input or approval staying stuck when {{kib}} can't pass your response on for processing. {{kib}} now retries and, if it still fails, takes your response back so you can answer again [#300207]({{kib-pull}}300207).
 * Fix the resume API accepting a step that belongs to a different execution than the one in the request. The API now returns a `409` error [#299264]({{kib-pull}}299264).
 * Fix execution log writes blocking the next step [#293892]({{kib-pull}}293892).
+* Fix event-triggered workflows looping forever when they call a child workflow that emits the same event [#300361]({{kib-pull}}300361).
+* Fix workflow agent tools changing data without asking for approval. In chat, `execute_workflow` and `resume_workflow_execution` now ask first. In `ai.agent` steps and other runs with no one to answer, they refuse steps that change data unless the step pre-approves them with `approvals.auto_approved_apis`, and `workflow_execute_step` no longer gets stuck waiting for an approval that no one can give [#299856]({{kib-pull}}299856).
+% Consider whether #299856 needs a breaking change entry. `ai.agent` steps that used `execute_workflow` or `resume_workflow_execution` with steps that change data used to run, and now they are refused unless pre-approved. The PR is labeled release_note:fix only.
 * Fix `on-failure` handling on human-in-the-loop and `workflow.execute` steps [#291974]({{kib-pull}}291974).
 * Fix version conflicts on execution and step document updates by retrying [#283735]({{kib-pull}}283735).
 * Fix execution indices turning yellow on single-node clusters [#290445]({{kib-pull}}290445).
@@ -545,12 +557,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix legacy workflow inputs missing from tool schemas [#285149]({{kib-pull}}285149).
 * Fix executing a workflow requiring the `read` privilege [#284822]({{kib-pull}}284822).
 
-% !!DEFERRED!! The following entries are not in build candidate 9.6.0-8ac1386b (Kibana commit 1e39c53eb9ac). Re-check them against the next build candidate.
-% * Fix the metric background trendline for {{esql}} queries that use `EVAL` to alias or overwrite a time-bucket column [#299104]({{kib-pull}}299104).
-% * Fix creating and fetching data views with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving the data view [#299790]({{kib-pull}}299790).
-% * Fix the {{es}} output on a Fleet Server agent policy being replaced when the Fleet Server host has SSL settings [#301068]({{kib-pull}}301068).
-% * Add an `alert_url` field, a link to the alert details page, to each alert in the payload of Universal Alerting action policy workflows [#300017]({{kib-pull}}300017).
-% Not on the 9.6 branch yet (backport missing). The release note in the PR calls it an addition, so the type may need to change to an enhancement.
+% !!DEFERRED!! The following entry is not in build candidate 9.6.0-6bafad71 (Kibana commit 2bbc632e52c3). Re-check it against the next build candidate.
 % * Show a waiting `waitForInput` step in the workflow execution flyout with a **Provide action** link instead of a banner, and make the execution flyout resizable [#294078]({{kib-pull}}294078).
 % Not on the 9.6 branch (backport:skip, merged to main on Oct 28 with a v9.6.0 label). Check the label before you keep it.
 
@@ -631,6 +638,20 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % Consider adding these two PRs. Their authors labeled them release_note:skip, but the PR description contains user-facing text.
 % * Stop the default `Permissions-Policy` header from blocking the Maps starting location, the Canvas `location()` function, and fullscreen for Vidyard embeds [#299876]({{kib-pull}}299876).
 % * Return an error when an Agent Builder MCP server tool call has arguments with more than 10,000 array elements [#300541]({{kib-pull}}300541).
+
+% Removed from 9.6.0: Security solution entries (AlertZero, Entity Analytics, Security Investigations, Security Solution navigation and skills). They belong in the Security solution notes.
+% * Report a Hunt Watch proposal that the gate could not create instead of completing silently [#302151]({{kib-pull}}302151).
+% * Group Alert Triage false positives into open proposals [#300606]({{kib-pull}}300606).
+% * Keep Context after Workflows in the Security navigation when AlertZero is on [#301972]({{kib-pull}}301972).
+% * Reorder the Security solutions side navigation items for AlertZero [#300830]({{kib-pull}}300830).
+% * Enable the endpoint response actions skill in Agent Builder by default [#299402]({{kib-pull}}299402).
+% * Update the Entity Analytics skill description and content [#301628]({{kib-pull}}301628).
+% * Allow closing a case when it has reached the user action limit [#301378]({{kib-pull}}301378).
+
+% Removed from 9.6.0: other entries that the notes leave out.
+% * Fix the APM waterfall silently re-rooting on truncated traces [#284971]({{kib-pull}}284971). Observability solution.
+% * Fix the approximation badge rendering above the **Group by** button instead of in line with the toolbar controls in Discover [#300717]({{kib-pull}}300717). Same-release polish of the approximation badge that 9.6.0 adds in #291464.
+% * Let the rule-authoring skill find and edit existing Universal Alerting rules without experimental flags [#301256]({{kib-pull}}301256). The PR carries both release_note:fix and release_note:skip.
 
 % Folded into the single Kibana Universal Alerting entry for 9.6.0. Add these back only if you want separate entries.
 % * Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
