@@ -16,6 +16,7 @@ import {
   getConfigPathFromCommandLine,
 } from './failure_details';
 import { isScoutFailure } from './failure_identity';
+import { extractErrorMessage } from './failure_text';
 import type { JUnitTestType, TestFailure } from './get_failures';
 import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
@@ -64,21 +65,6 @@ function getCodeBlocksFromText(text: string): string[] {
     blocks.push(match[1].trim());
   }
   return blocks;
-}
-
-/**
- * JUnit failure text is a single blob combining the error message and the stack
- * trace. Extract just the message, i.e. everything before the first stack-frame
- * line, falling back to the full blob when the heuristic yields nothing.
- */
-export function extractErrorMessage(failureText: string): string {
-  const lines = failureText.split('\n');
-  const firstStackFrame = lines.findIndex((line) => /^\s+at /.test(line));
-  if (firstStackFrame === -1) {
-    return failureText.trim();
-  }
-  const message = lines.slice(0, firstStackFrame).join('\n').trim();
-  return message || failureText.trim();
 }
 
 interface ErrorMessageForComment {

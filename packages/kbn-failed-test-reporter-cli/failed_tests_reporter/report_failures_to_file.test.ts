@@ -180,4 +180,53 @@ describe('reportFailuresToFile', () => {
       'Run aborted after this failure:'
     );
   });
+
+  describe('same-error failures', () => {
+    const readHtmlOf = (name: string) => {
+      const dir = Path.join(tmpDir, 'target', 'test_failures');
+      return Fs.readdirSync(dir)
+        .filter((file) => file.endsWith('.html'))
+        .map((file) => Fs.readFileSync(Path.join(dir, file), 'utf8').replaceAll('<wbr />', ''))
+        .find((html) => html.includes(`<h1>${name}</h1>`));
+    };
+
+    const failures = () => {
+      const first = makeFailure('first', { location: 'x-pack/first.ts' });
+      return [
+        first,
+        makeFailure('second', {
+          location: 'x-pack/second.ts',
+          sameErrorAs: first,
+          githubIssue: 'https://gh/issues/42',
+        }),
+        makeFailure('third', { location: 'x-pack/third.ts', sameErrorAs: first }),
+      ];
+    };
+
+    it('lists the other failures with their files and issues on the report of the first one', async () => {
+      await report(failures());
+
+      const html = readHtmlOf('first');
+      expect(html).toContain('Same error in 2 other tests');
+      expect(html).toContain('<code>second</code> in <code>x-pack/second.ts</code> <a');
+      expect(html).toContain('>#42</a>');
+      expect(html).toContain('<li><code>third</code> in <code>x-pack/third.ts</code></li>');
+    });
+
+    it('records the first failure as a reference in the json artifact', async () => {
+      await report(failures());
+
+      const dir = Path.join(tmpDir, 'target', 'test_failures');
+      const artifacts = Fs.readdirSync(dir)
+        .filter((file) => file.endsWith('.json'))
+        .map((file) => JSON.parse(Fs.readFileSync(Path.join(dir, file), 'utf8')));
+      const third = artifacts.find(({ name }) => name === 'third');
+
+      expect(third.sameErrorAs).toEqual({
+        classname: third.classname,
+        name: 'first',
+        location: 'x-pack/first.ts',
+      });
+    });
+  });
 });

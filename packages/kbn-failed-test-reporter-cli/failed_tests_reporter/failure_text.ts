@@ -23,6 +23,21 @@ export const toRepoRelativePaths = (text: string): string =>
 
 const STACK_FRAME_RE = /^\s*at\s/;
 
+/**
+ * JUnit failure text is a single blob combining the error message and the stack
+ * trace. Extract just the message, i.e. everything before the first stack-frame
+ * line, falling back to the full blob when the heuristic yields nothing.
+ */
+export const extractErrorMessage = (failureText: string): string => {
+  const lines = failureText.split('\n');
+  const firstStackFrame = lines.findIndex((line) => /^\s+at /.test(line));
+  if (firstStackFrame === -1) {
+    return failureText.trim();
+  }
+  const message = lines.slice(0, firstStackFrame).join('\n').trim();
+  return message || failureText.trim();
+};
+
 // Frames in the Node runtime, Mocha, or the WebDriver client never point at the code under test.
 const INTERNAL_STACK_FRAME_RE =
   /\((?:node:)?internal[/\\]|[(/\\]node_modules[/\\](?:mocha|selenium-webdriver|@wdio)[/\\]/;
