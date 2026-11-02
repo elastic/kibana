@@ -27,6 +27,7 @@ const SOURCE_INDEX = 'test-alerting-v2-dispatch-default-email-source';
 const ACTION_POLICY_ID = 'dispatch-default-email-policy';
 const ACTION_POLICY_TRIGGER = 'action_policy';
 const RULE_NAME = 'Scout default email rule';
+const ROUTING_TAG = 'notify-dispatch-default-email';
 const HOSTS = ['host-default-email-a', 'host-default-email-b'];
 interface DispatchedAlert {
   alert_id: string;
@@ -48,12 +49,15 @@ apiTest.describe(
   () => {
     let connectorId: string;
     let workflowId: string;
+    let ruleId: string | undefined;
 
     apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActionsEvents.cleanUp();
-      await apiServices.alertingV2.ruleEvents.cleanUp();
-      await apiServices.alertingV2.rules.cleanUp();
-      await apiServices.alertingV2.actionPolicies.cleanUp();
+      // Remove only what an interrupted run of this suite left behind.
+      await apiServices.alertingV2.rules.deleteByQuery({
+        filter: `metadata.name: "${RULE_NAME}"`,
+        force: true,
+      });
+      await apiServices.alertingV2.actionPolicies.delete(ACTION_POLICY_ID);
 
       await apiServices.alertingV2.sourceIndex.create({
         index: SOURCE_INDEX,
@@ -78,10 +82,12 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActionsEvents.cleanUp();
-      await apiServices.alertingV2.ruleEvents.cleanUp();
-      await apiServices.alertingV2.rules.cleanUp();
-      await apiServices.alertingV2.actionPolicies.cleanUp();
+      if (ruleId) {
+        await apiServices.alertingV2.rules.delete(ruleId);
+        await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId });
+        await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId });
+      }
+      await apiServices.alertingV2.actionPolicies.delete(ACTION_POLICY_ID);
       await apiServices.alertingV2.workflows.bulkDelete([workflowId]);
       await apiServices.alerting.connectors.delete(connectorId);
       await apiServices.alertingV2.sourceIndex.delete({ index: SOURCE_INDEX });
@@ -92,7 +98,8 @@ apiTest.describe(
       async ({ apiClient, apiServices, samlAuth }) => {
         // The policy stores an API key minted from the request credential, so it is
         // created with an interactive user session, like the UI does. The workflow's email
-        // step runs as that user, who needs read access to connectors.
+        // step runs as that user, who needs read access to connectors. Its routing tag
+        // matches only this suite's rule, so no other rule's alerts join the email.
         const { cookieHeader } = await samlAuth.asInteractiveUser(
           ALERTING_V2_ACTION_POLICY_CONNECTOR_DISPATCH_ROLE
         );
@@ -104,6 +111,7 @@ apiTest.describe(
               name: 'Dispatch default email policy',
               description: 'Sends every alert of a dispatch in one default email',
               destinations: [{ type: 'workflow', id: workflowId }],
+              matcher: { tags: [ROUTING_TAG] },
               grouping: { mode: 'all' },
             }),
           }
@@ -122,15 +130,16 @@ apiTest.describe(
 
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
-            metadata: { name: RULE_NAME },
+            metadata: { name: RULE_NAME, routing_tags: [ROUTING_TAG] },
             query: {
               base: `FROM ${SOURCE_INDEX} | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
             },
           })
         );
+        ruleId = rule.id;
 
         await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(HOSTS.length, {
-          ruleId: rule.id,
+          ruleId,
           actionTypes: ['fire'],
         });
 
