@@ -45,11 +45,7 @@ jest.mock('@kbn/code-editor', () => {
       }, [editorDidMount, value]);
 
       return (
-        <pre
-          data-language-id={languageId}
-          data-theme={options?.theme}
-          data-test-subj="codeEditorMock"
-        >
+        <pre data-language-id={languageId} data-test-subj="codeEditorMock">
           {value}
         </pre>
       );
@@ -112,9 +108,6 @@ describe('ComposeDiscoverTabs', () => {
         expect.objectContaining({ dataset: expect.objectContaining({ languageId: 'esql' }) }),
       ])
     );
-    for (const editor of screen.getAllByTestId('codeEditorMock')) {
-      expect(editor).toHaveAttribute('data-theme', 'esql');
-    }
   });
 
   it('disables the alert tab when the base query is empty', () => {

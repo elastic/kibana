@@ -8,9 +8,9 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { monaco } from '@kbn/code-editor';
+import { applyKbnCodeEditorChromeOverrides, monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import type { ChangeHistoryCompareMode } from '../../telemetry';
@@ -28,7 +28,7 @@ import {
   CHANGE_HISTORY_UNIFIED_DIFF_EDITOR_OPTIONS,
   CHANGE_HISTORY_UNIFIED_DIFF_MODIFIED_EDITOR_OPTIONS,
 } from './monaco_options';
-import { useDefineChangeHistoryMonacoTheme } from './monaco_theme';
+import { changeHistoryEditorChromeOverrides, useChangeHistoryMonacoTheme } from './monaco_theme';
 
 const getDiffEditorOptions = (
   compareMode: ChangeHistoryCompareMode,
@@ -197,7 +197,8 @@ export const ChangeHistoryMonacoDiff = ({
   const editorOptionsRef = useRef(editorOptions);
   editorOptionsRef.current = editorOptions;
 
-  const monacoTheme = useDefineChangeHistoryMonacoTheme();
+  const euiThemeContext = useEuiTheme();
+  const monacoTheme = useChangeHistoryMonacoTheme();
   const monacoThemeRef = useRef(monacoTheme);
   monacoThemeRef.current = monacoTheme;
 
@@ -360,6 +361,23 @@ export const ChangeHistoryMonacoDiff = ({
       setIsEditorMounted(false);
     };
   }, [baseline, language, monacoTheme, target, updateDiffState, isCompareMode]);
+
+  // Per-instance chrome (widget surfaces, gutter, diff colours). Keyed on the inputs that re-create
+  // the editor above, plus the EUI theme so a light/dark switch re-applies without re-creating it.
+  useEffect(() => {
+    const node = editorRef.current?.getDomNode() ?? diffEditorRef.current?.getContainerDomNode();
+    if (!node) {
+      return;
+    }
+
+    const chrome = applyKbnCodeEditorChromeOverrides(
+      [node],
+      changeHistoryEditorChromeOverrides,
+      euiThemeContext
+    );
+
+    return () => chrome.dispose();
+  }, [baseline, language, target, isCompareMode, euiThemeContext]);
 
   useEffect(() => {
     const diffEditor = diffEditorRef.current;

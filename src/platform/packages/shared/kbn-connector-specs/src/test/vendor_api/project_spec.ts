@@ -15,6 +15,7 @@ import {
   getAtTokens,
   isJsonObject,
   localRefToPointer,
+  resolvePathItem,
   setAtTokens,
   toPointer,
   toTokens,
@@ -37,7 +38,16 @@ const STRIPPED_KEYWORDS = new Set([
 ]);
 
 // Values that are data, not spec objects, so nothing in them is stripped.
-const LITERAL_KEYWORDS = new Set(['enum', 'const', 'default']);
+const LITERAL_KEYWORDS = new Set([
+  'enum',
+  'const',
+  'default',
+  // Pagination extensions, which describe the contract and are read to propose descriptors.
+  'x-speakeasy-pagination',
+  'x-ms-pageable',
+  // Path parameters whose values span segments, which the mock matches.
+  'x-ms-skip-url-encoding',
+]);
 
 // Objects whose keys are names (properties, status codes, media types, ...), not keywords.
 const NAME_MAPS = new Set([
@@ -66,7 +76,10 @@ const NAME_MAPS = new Set([
 
 const PATH_ITEM_KEYS = new Set(['parameters', 'servers', '$ref']);
 
-/** Removes documentation and `x-` extensions from spec objects, keeping names and literal values. */
+/**
+ * Removes documentation and `x-` extensions other than pagination ones from spec objects,
+ * keeping names and literal values.
+ */
 export const normalizeSpecNode = (value: unknown, isNameMap = false): unknown => {
   if (Array.isArray(value)) {
     return value.map((item) => normalizeSpecNode(item));
@@ -90,22 +103,16 @@ export const normalizeSpecNode = (value: unknown, isNameMap = false): unknown =>
   return result;
 };
 
-// A Path Item `$ref` to another path item in the document, whose fields the entry's own override.
-const resolvePathItem = (document: OpenApiDocument, item: unknown): unknown => {
-  if (!isJsonObject(item) || typeof item.$ref !== 'string') {
-    return item;
-  }
-  const { $ref: ref, ...own } = item;
-  const pointer = localRefToPointer(ref);
-  const referenced = pointer === undefined ? undefined : getAtTokens(document, toTokens(pointer));
-  return isJsonObject(referenced) ? { ...referenced, ...own } : item;
-};
+// AutoRest's `x-ms-paths` holds operations whose keys add fixed query parameters, such as Azure
+// Blob Storage's `/?comp=list`; the emulator routes them like `paths`.
+const PATH_MAPS = ['paths', 'x-ms-paths'] as const;
 
 const pickPaths = (
   document: OpenApiDocument,
-  operations: readonly ProjectedOperation[]
+  operations: readonly ProjectedOperation[],
+  pathMap: (typeof PATH_MAPS)[number]
 ): JsonObject => {
-  const { paths } = document;
+  const paths = document[pathMap];
   const picked: JsonObject = {};
   for (const { method, path } of operations) {
     const item = resolvePathItem(document, isJsonObject(paths) ? paths[path] : undefined);
@@ -132,12 +139,14 @@ const toKeptTokens = (tokens: string[]): string[] =>
  * Trims an OpenAPI 3.x document (Swagger 2.0 is converted first) to the given operations, with
  * their path-level parameters and servers, the security schemes they use and every component
  * they reference, directly or through other components. Documentation, examples, `x-`
- * extensions and `info` other than the title are left out, so the result only changes when the
- * contract does.
+ * extensions other than pagination ones and `info` other than the title are left out, so the
+ * result only changes when the contract does. `refs` keeps more components, e.g. those that an
+ * overlay applied to the result references.
  */
 export const projectSpec = (
   source: OpenApiDocument,
-  operations: readonly ProjectedOperation[]
+  operations: readonly ProjectedOperation[],
+  refs: readonly string[] = []
 ): OpenApiDocument => {
   const document = source.swagger === '2.0' ? convertSwagger2(source) : source;
   const { openapi, jsonSchemaDialect, info, servers, security } = document;
@@ -147,8 +156,13 @@ export const projectSpec = (
     info: { title: isJsonObject(info) ? info.title : undefined },
     ...(servers === undefined ? {} : { servers }),
     ...(security === undefined ? {} : { security }),
-    paths: pickPaths(document, operations),
+    paths: pickPaths(document, operations, 'paths'),
   }) as JsonObject;
+  // Added after normalizing, which drops `x-` keys; left out when empty, as in most specs.
+  const msPaths = pickPaths(document, operations, 'x-ms-paths');
+  if (Object.keys(msPaths).length > 0) {
+    projected['x-ms-paths'] = normalizeSpecNode(msPaths, true);
+  }
 
   const kept = new Set<string>();
   const queue: unknown[] = [projected];
@@ -165,7 +179,11 @@ export const projectSpec = (
   };
 
   const schemeNames = new Set(securitySchemeNames(security));
-  for (const item of Object.values(projected.paths as JsonObject)) {
+  const pathItems = PATH_MAPS.flatMap((pathMap) => {
+    const items = projected[pathMap];
+    return isJsonObject(items) ? Object.values(items) : [];
+  });
+  for (const item of pathItems) {
     for (const operation of Object.values(item as JsonObject)) {
       if (isJsonObject(operation)) {
         securitySchemeNames(operation.security).forEach((name) => schemeNames.add(name));
@@ -174,13 +192,15 @@ export const projectSpec = (
   }
   [...schemeNames].sort().forEach((name) => keep(['components', 'securitySchemes', name]));
 
+  const keepRef = (ref: string) => {
+    const pointer = localRefToPointer(ref);
+    if (pointer !== undefined) {
+      keep(toKeptTokens(toTokens(pointer)));
+    }
+  };
+  refs.forEach(keepRef);
   while (queue.length > 0) {
-    forEachRef(queue.shift(), (ref) => {
-      const pointer = localRefToPointer(ref);
-      if (pointer !== undefined) {
-        keep(toKeptTokens(toTokens(pointer)));
-      }
-    });
+    forEachRef(queue.shift(), keepRef);
   }
   return projected;
 };

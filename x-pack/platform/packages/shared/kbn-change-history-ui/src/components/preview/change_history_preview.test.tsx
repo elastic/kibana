@@ -8,13 +8,19 @@
 import '@testing-library/jest-dom';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
-import { monaco } from '@kbn/code-editor';
+import {
+  applyKbnCodeEditorChromeOverrides,
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+  monaco,
+} from '@kbn/code-editor';
 import type { ChangeHistoryConfigValue } from '../../provider/change_history_config_context';
 import { ChangeHistoryConfigContext } from '../../provider/change_history_config_context';
 import type { ChangeHistoryDetail, ChangeHistoryListItem } from '../../types';
 import { TestProvider } from '../../test_utils/test_providers';
 import type { ChangeHistoryPreviewEditorContext } from './change_history_preview';
 import { ChangeHistoryPreview } from './change_history_preview';
+import { changeHistoryEditorChromeOverrides } from './monaco_theme';
 
 const detail: ChangeHistoryDetail = {
   id: 'change-1',
@@ -59,16 +65,19 @@ let mockLineChanges: Array<{
   },
 ];
 
+const mockEditorDomNode = document.createElement('div');
+
 jest.mock('@kbn/code-editor', () => {
   const actual = jest.requireActual('@kbn/code-editor');
 
   return {
     ...actual,
+    initializeRegisteredLanguagesTheme: jest.fn(),
+    applyKbnCodeEditorChromeOverrides: jest.fn(() => ({ dispose: jest.fn() })),
     monaco: {
       ...actual.monaco,
       editor: {
         ...actual.monaco.editor,
-        defineTheme: jest.fn(),
         createModel: jest.fn((value: string, language: string) => ({
           value,
           language,
@@ -77,6 +86,7 @@ jest.mock('@kbn/code-editor', () => {
         create: jest.fn(() => ({
           dispose: jest.fn(),
           layout: jest.fn(),
+          getDomNode: jest.fn(() => mockEditorDomNode),
           getModel: jest.fn(() => mockYamlModel),
           updateOptions: jest.fn(),
           createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
@@ -85,6 +95,7 @@ jest.mock('@kbn/code-editor', () => {
           setModel: jest.fn(),
           dispose: jest.fn(),
           layout: jest.fn(),
+          getContainerDomNode: jest.fn(() => mockEditorDomNode),
           updateOptions: mockDiffUpdateOptions,
           getLineChanges: jest.fn(() => mockLineChanges),
           onDidUpdateDiff: jest.fn((listener: () => void) => {
@@ -430,19 +441,19 @@ describe('ChangeHistoryPreview', () => {
     expect(monaco.editor.createModel).toHaveBeenCalledWith('{\n  "a": 2\n}', 'json');
   });
 
-  it('registers and uses the EUI theme by default', () => {
+  it('registers the global theme and applies change history chrome to the editor', () => {
     jest.useFakeTimers();
     renderPreview({ target: 'name: current\n' });
 
-    expect(monaco.editor.defineTheme).toHaveBeenCalledWith(
-      'change-history-eui',
-      expect.objectContaining({
-        colors: expect.objectContaining({ 'editor.background': '#00000000' }),
-      })
-    );
+    expect(initializeRegisteredLanguagesTheme).toHaveBeenCalled();
     expect(mockCreateEditor).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ theme: 'change-history-eui' })
+      expect.objectContaining({ theme: CODE_EDITOR_DEFAULT_THEME_ID })
+    );
+    expect(applyKbnCodeEditorChromeOverrides).toHaveBeenCalledWith(
+      [mockEditorDomNode],
+      changeHistoryEditorChromeOverrides,
+      expect.objectContaining({ euiTheme: expect.anything() })
     );
   });
 

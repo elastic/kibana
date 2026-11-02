@@ -20,14 +20,11 @@ export type {
 } from '@kbn/es-ui-shared-plugin/public';
 
 export {
-  AuthorizationProvider,
   NotAuthorizedSection,
   SectionError,
   SectionLoading,
   sendRequest,
-  useAuthorizationContext,
   useRequest,
-  WithPrivileges,
   XJson,
   JsonEditor,
   attemptToURIDecode,

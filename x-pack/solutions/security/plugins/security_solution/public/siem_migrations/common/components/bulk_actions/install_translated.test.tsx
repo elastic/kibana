@@ -35,6 +35,7 @@ describe('InstallTranslatedButton', () => {
   } as BulkActionsItem;
 
   const defaultProps = {
+    isAuthorized: true,
     disableInstallTranslatedItemsButton: false,
     installTranslatedItems: mockInstallTranslatedItems,
     installSelectedItem: mockInstallSelectedItem,
