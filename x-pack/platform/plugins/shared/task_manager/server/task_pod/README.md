@@ -36,6 +36,44 @@ maintenance_windows) publish their real contracts to a `TasksKibanaBridge`
 standalone implementation. **A pod must run in its own process**: in Kibana's process the bridges
 are already filled.
 
+## Turning it on
+
+```yaml
+xpack.task_manager.pods:
+  - url: http://localhost:4100
+    task_types: ['alerting_v2:*']     # globs; first matching pod wins
+```
+
+With no `pods`, nothing changes: every task runs in-process. Tasks with `runAs` (service accounts)
+always run in-process.
+
+### Pools
+
+One image per family can run as several pools. A pod serves only the task types in
+`POD_TASK_TYPES` (comma-separated globs; default: all it has) and refuses runs beyond
+`POD_MAX_CONCURRENCY` with a 503 that Kibana retries. Route each pool with its own `pods` entry:
+
+```yaml
+xpack.task_manager.pods:
+  - url: http://rule-executors:4100
+    task_types: ['alerting_v2:rule_executor']
+  - url: http://housekeeping:4101
+    task_types: ['alerting_v2:*']
+```
+
+Serving fewer types does **not** make a pod smaller: the cost is the shared infrastructure (ES
+client, OpenTelemetry, saved objects, DI), which every pool of the family loads. Pools are for
+isolation and independent scaling.
+
+### Failures
+
+- The pod gets the task's deadline and aborts the run then; Kibana stops waiting shortly after. A
+  run isn't limited by undici's 5 minute header timeout.
+- A pod that is unreachable, over capacity (503), shutting down, built for another Kibana version
+  (409) or missing the task type (404) is retried in 5 seconds rather than failed.
+- On SIGTERM a pod stops taking runs and exits once the in-flight ones finish.
+
+
 ## Families
 
 A family is a checked-in manifest next to its owning plugin, e.g.
