@@ -1599,7 +1599,7 @@
     "mysql2": "3.24.3",
     "node-diff3": "3.2.1",
     "node-fetch": "2.7.0",
-    "node-forge": "1.4.0",
+    "node-forge": "1.4.2",
     "nodemailer": "10.0.16",
     "normalize-path": "3.0.0",
     "object-hash": "3.0.0",
