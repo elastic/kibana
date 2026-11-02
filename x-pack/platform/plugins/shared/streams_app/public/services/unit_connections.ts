@@ -220,8 +220,9 @@ const componentSignals = (
  * Narrows a pipeline's signals to those its sources send and its destinations
  * accept. The distributor compiles one collector pipeline per declared signal
  * and rejects one with no receiver or exporter, which a line leaving a widened
- * pipeline would otherwise cause. Delegating pipelines and unknown components
- * are left as they are, and a pipeline never ends up with no signal.
+ * pipeline would otherwise cause. Routing pipelines and unknown components are
+ * left as they are, so a dropped rule line can come back to any destination the
+ * pipeline supports, and a pipeline never ends up with no signal.
  */
 const fitSignals = (
   unit: Unit,
@@ -229,7 +230,7 @@ const fitSignals = (
   config: PipelineConfig
 ): UnitPipeline['supported_telemetry'] => {
   const routes = readRoutes(config);
-  if (routes.some(isDelegatingRoute)) {
+  if (routes.length > 0) {
     return [...telemetry];
   }
   const sent = componentSignals(unit.unit.sources, readEntryIds(config, PIPELINE_ENTRY.sources));
@@ -957,11 +958,7 @@ const withRuleTargets = (
   );
 };
 
-/**
- * Signals a rule carries: its own `telemetry`, or the pipeline's. The rule's own
- * list is read as is, since the pipeline narrows away signals of a rule left
- * unconnected.
- */
+/** Signals a rule carries: its own `telemetry`, or the pipeline's `supported_telemetry`. */
 const ruleSignals = (pipeline: UnitPipeline, ruleIndex: number): readonly UnitSignal[] =>
   readRoutes(pipeline.config)[ruleIndex]?.telemetry ?? pipeline.supported_telemetry;
 
@@ -986,9 +983,8 @@ const routeFitsTarget = (
 
 /**
  * Writes new targets for one rule, or returns `unit` unchanged when they do not
- * fit. The pipeline regains the rule's signals before they are narrowed to its
- * targets again. A routed child pipeline keeps its last destination, since
- * dropping the pipeline would leave its parent route pointing nowhere.
+ * fit. A routed child pipeline keeps its last destination, since dropping the
+ * pipeline would leave its parent route pointing nowhere.
  */
 const writeRuleTargets = (
   unit: Unit,
@@ -1001,12 +997,7 @@ const writeRuleTargets = (
   if (!config || (!pipelineForwards(config) && isRoutedPipeline(unit, pipelineId))) {
     return unit;
   }
-  return writePipeline(
-    unit,
-    pipelineIndex,
-    config,
-    unionSignals(pipeline.supported_telemetry, ruleSignals(pipeline, ruleIndex))
-  );
+  return writePipeline(unit, pipelineIndex, config);
 };
 
 export const canConnectRouteToTarget = (
