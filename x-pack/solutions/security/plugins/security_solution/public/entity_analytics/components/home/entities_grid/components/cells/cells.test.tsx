@@ -49,17 +49,16 @@ describe('RiskScoreChangeCell', () => {
     ['a drop that rounds to zero', -0.004],
   ])('renders a neutral 0.00 without an arrow for %s', (_, value) => {
     const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
-    expect(container.textContent).toBe('0.00');
-    expect(container.querySelector('[data-euiicon-type]')).not.toBeInTheDocument();
+    expect(container.textContent).toBe('0.00 =');
+    expect(container.textContent).not.toMatch(/[↑↓]/);
   });
 
   it.each([
-    ['a rise as an up arrow, said as an increase', 12.6, 'Increased by 12.60', 'sortUp'],
-    ['a drop as a down arrow, said as a decrease', -7.2, 'Decreased by 7.20', 'sortDown'],
-  ])('renders %s', (_, value, text, icon) => {
+    ['a rise as an up arrow, said as an increase', 12.6, 'Increased by +12.60 ↑'],
+    ['a drop as a down arrow, said as a decrease', -7.2, 'Decreased by -7.20 ↓'],
+  ])('renders %s', (_, value, text) => {
     const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
     expect(container.textContent).toBe(text);
-    expect(container.querySelector(`[data-euiicon-type="${icon}"]`)).toBeInTheDocument();
   });
 });
 

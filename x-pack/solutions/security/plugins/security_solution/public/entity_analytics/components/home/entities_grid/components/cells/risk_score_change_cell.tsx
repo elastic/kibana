@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiIcon, EuiScreenReaderOnly, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiText, EuiTextColor } from '@elastic/eui';
 import { alignEndCss } from './styles';
 
 const INCREASED_BY = i18n.translate(
@@ -26,7 +26,7 @@ export const RiskScoreChangeCell = memo(({ value }: { value: unknown }) => {
   if (delta === 0) {
     return (
       <div css={alignEndCss}>
-        <EuiTextColor color="subdued">{'0.00'}</EuiTextColor>
+        <EuiTextColor color="subdued">{'0.00 ='}</EuiTextColor>
       </div>
     );
   }
@@ -35,11 +35,11 @@ export const RiskScoreChangeCell = memo(({ value }: { value: unknown }) => {
   return (
     <EuiText size="s" css={alignEndCss}>
       <EuiTextColor color={worse ? 'danger' : 'success'}>
-        <EuiIcon type={worse ? 'sortUp' : 'sortDown'} size="s" aria-hidden={true} />
         <EuiScreenReaderOnly>
           <span>{worse ? INCREASED_BY : DECREASED_BY}</span>
         </EuiScreenReaderOnly>
-        {` ${Math.abs(delta).toFixed(2)}`}
+        {` ${worse ? '+' : '-'}${Math.abs(delta).toFixed(2)} `}
+        <span aria-hidden={true}>{worse ? '↑' : '↓'}</span>
       </EuiTextColor>
     </EuiText>
   );
