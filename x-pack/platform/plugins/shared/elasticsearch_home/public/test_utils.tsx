@@ -28,6 +28,7 @@ export const testConfig: ElasticsearchHomePageProps = {
     agentInitialMessage: '/elasticsearch-onboarding',
     agentSessionTag: 'test-home',
   },
+  addDataLinks: [],
 };
 
 interface HomeTestContextOptions {

@@ -1435,11 +1435,11 @@ describe('detection rule workflows', () => {
       // action is offered: an inconclusive preview is reported in the proposal text.
       it('reports an inconclusive backtest without withholding the action', () => {
         const action = reviewSteps.find(({ name }) => name === 'propose_query')!;
-        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-        const comment = String((compose.with as Record<string, string>).comment);
+        const backtest = reviewSteps.find(({ name }) => name === 'describe_backtest')!;
+        const comment = String((backtest.with as Record<string, string>).text);
 
         expect(String(action.if)).not.toContain('record_preview_outcome');
-        expect(comment).toContain('{% if steps.can_preview_query_change.output.supported %}');
+        expect(comment).toContain('if steps.can_preview_query_change.output.supported');
         expect(comment).toContain('inconclusive');
         // The unbacktested branch must not promise a manual handoff. The query arm
         // carries the edit-rule action whether or not the preview ran, so approving
@@ -1464,8 +1464,8 @@ describe('detection rule workflows', () => {
       ])(
         'explains why a %s rule with a %s change has no backtest',
         async (type, changeType, reason) => {
-          const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-          const comment = String((compose.with as Record<string, string>).comment);
+          const backtest = reviewSteps.find(({ name }) => name === 'describe_backtest')!;
+          const comment = String((backtest.with as Record<string, string>).text);
 
           const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
             inputs: {},
@@ -1809,8 +1809,8 @@ describe('detection rule workflows', () => {
       });
 
       it('marks capped counts as a floor and never claims a reduction from one', async () => {
-        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-        const comment = String((compose.with as Record<string, string>).comment);
+        const backtest = reviewSteps.find(({ name }) => name === 'describe_backtest')!;
+        const comment = String((backtest.with as Record<string, string>).text);
         const report = reviewSteps.find(({ name }) => name === 'report_review_completed')!
           .with as Record<string, string>;
         const outcome = (limits: Record<string, boolean>) => ({
@@ -1892,8 +1892,8 @@ describe('detection rule workflows', () => {
           'no index the Rule Tuning worker can read matches the rule',
         ],
       ])('says why the backtest did not run when %s', async (_scenario, outcome, reason) => {
-        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
-        const comment = String((compose.with as Record<string, string>).comment);
+        const backtest = reviewSteps.find(({ name }) => name === 'describe_backtest')!;
+        const comment = String((backtest.with as Record<string, string>).text);
 
         const rendered = await createWorkflowLiquidEngine().parseAndRender(comment, {
           inputs: {},
@@ -2139,7 +2139,7 @@ describe('detection rule workflows', () => {
               'build_exception_filter',
               'attach_exception',
               'propose_exception',
-              'compose_proposal',
+              'describe_exception_change',
             ])
           );
           // check_exception_entries is the overflow gate: it reads the raw entries
