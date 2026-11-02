@@ -39,7 +39,7 @@ export interface CoreTasksStart {
   analytics: Pick<CoreStart['analytics'], 'optIn' | 'reportEvent' | 'telemetryCounter$'>;
   elasticsearch: Pick<CoreStart['elasticsearch'], 'client' | 'createClient'>;
   featureFlags: CoreStart['featureFlags'];
-  http: Pick<CoreStart['http'], 'basePath'>;
+  http: Pick<CoreStart['http'], 'basePath' | 'getServerInfo'>;
   injection: Pick<CoreStart['injection'], 'getContainer' | 'fork'>;
   savedObjects: Omit<CoreStart['savedObjects'], 'createExporter' | 'createImporter'>;
   security: CoreStart['security'];

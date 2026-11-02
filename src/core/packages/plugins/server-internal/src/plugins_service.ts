@@ -98,7 +98,7 @@ export interface PluginsServiceTasksStartDeps {
   >;
   elasticsearch: Pick<PluginsServiceStartDeps['elasticsearch'], 'client' | 'createClient'>;
   featureFlags: PluginsServiceStartDeps['featureFlags'];
-  http: Pick<PluginsServiceStartDeps['http'], 'basePath'>;
+  http: Pick<PluginsServiceStartDeps['http'], 'basePath' | 'getServerInfo'>;
   injection: Pick<PluginsServiceStartDeps['injection'], 'fork' | 'getContainer'>;
   savedObjects: Omit<PluginsServiceStartDeps['savedObjects'], 'createExporter' | 'createImporter'>;
   security: Pick<PluginsServiceStartDeps['security'], 'authc' | 'audit' | 'serviceAccounts'>;

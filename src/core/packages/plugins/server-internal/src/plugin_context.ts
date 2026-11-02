@@ -515,7 +515,7 @@ export function createPluginTasksStartContext<TPlugin, TPluginDependencies>({
       createClient: deps.elasticsearch.createClient,
     },
     featureFlags: deps.featureFlags,
-    http: { basePath: deps.http.basePath },
+    http: { basePath: deps.http.basePath, getServerInfo: deps.http.getServerInfo },
     injection: {
       fork: () => deps.injection.fork(plugin.opaqueId),
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),

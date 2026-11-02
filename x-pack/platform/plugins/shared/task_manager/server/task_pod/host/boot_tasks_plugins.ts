@@ -152,7 +152,7 @@ export const bootTasksPlugins = async ({
     analytics: analytics.start,
     elasticsearch: elasticsearch.start,
     featureFlags: createFeatureFlagsStart(),
-    http: { basePath: http.basePath },
+    http: { basePath: http.basePath, getServerInfo: http.getServerInfo },
     injection: injectionStart,
     savedObjects: savedObjects.start(
       elasticsearch.internalClient,

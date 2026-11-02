@@ -38,7 +38,7 @@ export const startPod = async ({
     ? (parse(readFileSync(process.env.POD_CONFIG, 'utf8')) as Record<string, unknown>) ?? {}
     : {};
   const { taskDefinitions } = await bootTasksPlugins({ pluginIds, config: nestDottedKeys(config) });
-  startPodServer({ taskDefinitions, port: Number(process.env.PORT ?? defaultPort) });
+  return startPodServer({ taskDefinitions, port: Number(process.env.PORT ?? defaultPort) });
 };
 
 /** Accepts both `xpack.alerting_v2.x: 1` and nested yml, like kibana.yml does. */
