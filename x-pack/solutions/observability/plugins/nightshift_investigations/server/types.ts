@@ -37,6 +37,8 @@ import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
   allowed: boolean;
+  /** Gives back the slot an allowed start took, when the start does not open a new investigation. */
+  release?: () => Promise<void>;
 }
 
 export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;

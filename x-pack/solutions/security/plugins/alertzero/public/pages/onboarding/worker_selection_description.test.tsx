@@ -11,7 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
+import { ONBOARDING_READ_MORE_URL } from './constants';
 import { WorkerSelectionDescription } from './worker_selection_description';
 
 const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
@@ -70,7 +70,7 @@ describe('WorkerSelectionDescription', () => {
   it('renders the Read more link in the same paragraph, opening the docs URL in a new tab', () => {
     renderDescription();
     const link = screen.getByTestId('alertZeroOnboardingReadMoreLink');
-    expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL_PLACEHOLDER);
+    expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL);
     expect(link).toHaveAttribute('target', '_blank');
     expect(link.closest('p')).toContainElement(
       screen.getByTestId('alertZeroOnboardingWatchSettingsLink')

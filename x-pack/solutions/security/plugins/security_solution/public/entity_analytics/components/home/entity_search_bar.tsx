@@ -61,6 +61,7 @@ export const EntitySearchBar: React.FC<Props> = ({ dataView, timeRange, onTimeRa
         options={TIME_RANGE_OPTIONS.map((v) => ({
           id: v,
           label: TIME_RANGE_BUTTON_LABELS[v],
+          'data-test-subj': `eaTimeRange-${v}`,
         }))}
         idSelected={timeRange}
         onChange={(id) => onTimeRangeChange(id as TimeRange)}

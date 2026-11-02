@@ -1,0 +1,33 @@
+{
+  "operations": {
+    "webSearch": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "firstPage": 0,
+            "pageParam": "offset",
+            "sizeParam": "count"
+          },
+          "response": {
+            "itemsPath": "web.results"
+          },
+          "style": "page"
+        },
+        "path": "/v1/web/search",
+        "source": "search"
+      }
+    ]
+  },
+  "sources": {
+    "search": {
+      "fetchedAt": "2026-11-01T17:16:24.915Z",
+      "format": "brave-markdown",
+      "pages": [
+        "api-reference/web/search/"
+      ],
+      "url": "https://api-dashboard.search.brave.com/llms.txt"
+    }
+  }
+}

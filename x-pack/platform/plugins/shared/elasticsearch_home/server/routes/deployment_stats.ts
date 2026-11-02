@@ -15,7 +15,11 @@ import {
   fetchMonitorPrivileges,
 } from '../lib/deployment_stats';
 
-export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) => {
+export const registerDeploymentStatsRoute = (
+  router: IRouter,
+  logger: Logger,
+  { isServerless }: { isServerless: boolean }
+) => {
   router.get(
     {
       path: DEPLOYMENT_STATS_PATH,
@@ -38,18 +42,33 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         );
 
         const [
-          { indicesCount, storeSizeBytes, vectorCount, documentsCount, newIndex },
+          {
+            dataPanelAccess,
+            indicesCount,
+            dataStreamsCount,
+            storeSizeBytes,
+            vectorCount,
+            documentsCount,
+            newIndex,
+          },
           dashboardsCount,
           { total: apiKeysCount, expiring: expiringApiKeysCount },
         ] = await Promise.all([
-          fetchIndexStats(client, logger, { canMonitorAllIndices, canMonitorCluster }),
+          fetchIndexStats(
+            client,
+            logger,
+            { canMonitorAllIndices, canMonitorCluster },
+            { isServerless }
+          ),
           fetchDashboardsCount(savedObjectsClient, logger),
           fetchApiKeysStats(client, logger),
         ]);
 
         return response.ok({
           body: {
+            dataPanelAccess,
             indicesCount,
+            dataStreamsCount,
             storeSizeBytes,
             vectorCount,
             documentsCount,

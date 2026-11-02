@@ -16,6 +16,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { ElasticsearchHomePublicStart } from '@kbn/elasticsearch-home/public';
 import type { App } from './components/stack_app';
 
 export interface SearchHomepageAppInfo {
@@ -50,6 +51,7 @@ export interface SearchHomepagePluginStart {
 export interface SearchHomepageAppPluginStartDependencies {
   console?: ConsolePluginStart;
   share: SharePluginStart;
+  elasticsearchHome: ElasticsearchHomePublicStart;
   usageCollection?: UsageCollectionStart;
   sampleDataIngest?: SampleDataIngestPluginStart;
   cloud?: CloudStart;
