@@ -98,11 +98,10 @@ export const useRiskMoversCount = ({
     }
   );
 
-  const queryMissingIndex = isMissingIndexError(error);
-  const inputsMissingIndex = isMissingIndexError(indexError);
-  const isMissingIndex = queryMissingIndex || inputsMissingIndex;
-  const filteredError = queryMissingIndex ? undefined : error;
-  const filteredIndexError = inputsMissingIndex ? undefined : indexError;
+  // Only this tile's own query says the risk score index is missing: a missing entity index from
+  // the group filter lookup is a real failure, not missing risk history.
+  const isMissingIndex = isMissingIndexError(error);
+  const filteredError = isMissingIndex ? undefined : error;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
@@ -114,7 +113,7 @@ export const useRiskMoversCount = ({
       defaultMessage: 'There was an error loading risk movers data',
     }),
     // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : filteredError ?? filteredIndexError
+    isTimedOut ? undefined : filteredError ?? indexError
   );
 
   return {
@@ -130,6 +129,6 @@ export const useRiskMoversCount = ({
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     isMissingIndex,
     isTimedOut,
-    error: filteredError ?? filteredIndexError,
+    error: filteredError ?? indexError,
   };
 };

@@ -333,3 +333,35 @@ describe('useAlertBasedTiles in a space with no alerts index', () => {
     expect(result.error).toBe(error);
   });
 });
+
+describe.each([
+  ['useRiskMoversCount', useRiskMoversCount],
+  ['useNewlyHighCriticalCount', useNewlyHighCriticalCount],
+] as const)('%s when the entity index is missing', (_name, useCount) => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data: { search: { search: jest.fn() } } },
+    });
+    mockUseQuery.mockReturnValue({ data: undefined, isFetching: false, error: undefined });
+  });
+
+  afterEach(() => {
+    (useTileQueryInputs as jest.Mock).mockImplementation(actualUseTileQueryInputs);
+  });
+
+  it('reports it as an error, not as missing risk score history', () => {
+    const indexError = new Error('no such index [.entities.v2.latest.default]');
+    (useTileQueryInputs as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: indexError,
+      entityFilterClauses: [],
+    });
+
+    const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
+
+    expect(result.isMissingIndex).toBe(false);
+    expect(result.error).toBe(indexError);
+  });
+});

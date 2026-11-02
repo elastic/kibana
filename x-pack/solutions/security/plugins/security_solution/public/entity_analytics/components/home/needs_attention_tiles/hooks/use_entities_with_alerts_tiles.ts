@@ -134,7 +134,6 @@ export const useAlertBasedTiles = ({
   // risk tiles do without a risk score index.
   const isMissingIndex = isMissingIndexError(error);
   const filteredError = isMissingIndex ? undefined : error;
-  const filteredIndexError = isMissingIndexError(indexError) ? undefined : indexError;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
@@ -146,7 +145,7 @@ export const useAlertBasedTiles = ({
     i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
       defaultMessage: 'There was an error loading entity alert data',
     }),
-    isTimedOut ? undefined : filteredError ?? filteredIndexError
+    isTimedOut ? undefined : filteredError ?? indexError
   );
 
   return {
@@ -167,7 +166,7 @@ export const useAlertBasedTiles = ({
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     isMissingIndex,
-    error: filteredError ?? filteredIndexError,
+    error: filteredError ?? indexError,
     isTimedOut,
   };
 };

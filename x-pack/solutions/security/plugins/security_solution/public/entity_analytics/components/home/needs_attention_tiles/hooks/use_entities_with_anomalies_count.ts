@@ -114,7 +114,6 @@ export const useEntitiesWithAnomaliesCount = ({
   );
 
   const filteredError = isMissingIndexError(error) ? undefined : error;
-  const filteredIndexError = isMissingIndexError(indexError) ? undefined : indexError;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
@@ -126,7 +125,7 @@ export const useEntitiesWithAnomaliesCount = ({
       defaultMessage: 'There was an error loading entities with anomalies count',
     }),
     // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : filteredError ?? filteredIndexError
+    isTimedOut ? undefined : filteredError ?? indexError
   );
 
   return {
@@ -148,7 +147,7 @@ export const useEntitiesWithAnomaliesCount = ({
      * fetch failed: then the list is empty too.
      */
     isMissingJobs: isMlUser && isLicensed && !isJobsError && !isJobsLoading && jobIds.length === 0,
-    error: filteredError ?? filteredIndexError,
+    error: filteredError ?? indexError,
     isTimedOut,
   };
 };
