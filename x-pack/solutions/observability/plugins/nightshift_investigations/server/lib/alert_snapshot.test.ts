@@ -168,6 +168,37 @@ describe('fetchInvestigationAlertSnapshots', () => {
     expect(lookup.esClient.esql.query).toHaveBeenCalledTimes(2);
   });
 
+  it('resolves a rule-less v2 episode without looking up a rule', async () => {
+    const lookup = makeLookup({
+      columns: [
+        'episode.id',
+        'first_timestamp',
+        'last_timestamp',
+        'episode.status',
+        'rule.id',
+        'group_hash',
+      ],
+      rows: [
+        [
+          'episode-1',
+          '2026-09-02T10:00:00.000Z',
+          '2026-09-02T10:05:00.000Z',
+          'active',
+          null,
+          'hash',
+        ],
+      ],
+      episodeData: {},
+    });
+
+    const [snapshot] = await run(makeAlertsClient(), lookup, ['episode-1']);
+
+    expect(snapshot).toEqual(
+      expect.objectContaining({ alert_version: 'v2', id: 'episode-1', rule_id: undefined })
+    );
+    expect(lookup.getRule).not.toHaveBeenCalled();
+  });
+
   it('leaves the rule name unset when the user cannot read the rule', async () => {
     const lookup = makeLookup({
       getRule: jest.fn().mockRejectedValue(Boom.forbidden('forbidden')),

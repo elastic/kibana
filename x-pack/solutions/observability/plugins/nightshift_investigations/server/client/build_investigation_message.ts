@@ -138,13 +138,18 @@ function describeCondition(alert: Partial<AlertSnapshot>): string | undefined {
   return undefined;
 }
 
+function describeV2Rule({ rule_id: ruleId, rule_name: ruleName }: V2AlertSnapshot): string {
+  if (!ruleId) return ' (not created by a rule)';
+  return ` of rule ${
+    ruleName ? `"${sanitize(ruleName)}" (${sanitize(ruleId)})` : sanitize(ruleId)
+  }`;
+}
+
 function describeV2Alert(alert: V2AlertSnapshot): string {
   const lines = [
-    `Alerting v2 episode ${sanitize(alert.id)} of rule ${
-      alert.rule_name
-        ? `"${sanitize(alert.rule_name)}" (${sanitize(alert.rule_id)})`
-        : sanitize(alert.rule_id)
-    } is ${sanitize(alert.status)}, first seen at ${sanitize(alert.start)}.`,
+    `Alerting v2 episode ${sanitize(alert.id)}${describeV2Rule(alert)} is ${sanitize(
+      alert.status
+    )}, first seen at ${sanitize(alert.start)}.`,
     `This is a v2 alert, not a classic one: it is not stored in the .alerts-* indices. Its events are in the ${ALERT_EVENTS_DATA_STREAM} data stream (filter on episode.id and type == "alert"), its actions are in ${ALERT_ACTIONS_DATA_STREAM}, and the rule is the v2 rule with the id above.`,
     `Group hash: ${sanitize(alert.group_hash)}`,
   ];
@@ -227,9 +232,9 @@ export interface AlertRecoveredMessageInput {
   alertId: string;
   alertStart?: string | null;
   recoveredAt?: string;
-  ruleId: string;
-  ruleName: string;
-  ruleTypeId: string;
+  ruleId?: string;
+  ruleName?: string;
+  ruleTypeId?: string;
   ruleTags?: string[];
   snapshot?: Partial<AlertSnapshot> & Record<string, unknown>;
 }
@@ -254,11 +259,15 @@ export function buildAlertRecoveredFollowUpMessage({
     (isString(snapshot?.start) ? snapshot.start || undefined : undefined);
   const recoveredClause = recoveredAt ? ` at ${sanitize(recoveredAt)}` : '';
   const startClause = start ? `, first active at ${sanitize(start)}` : '';
+  const identifiers = [
+    `UUID ${sanitize(alertUuid)}`,
+    `instance "${sanitize(alertId)}"`,
+    ruleId ? `rule ${sanitize(ruleId)}` : undefined,
+    ruleTypeId ? `type ${sanitize(ruleTypeId)}` : undefined,
+  ].filter(isString);
   const lines = [
-    `Alert "${sanitize(ruleName)}" (UUID ${sanitize(alertUuid)}, instance "${sanitize(
-      alertId
-    )}", rule ${sanitize(ruleId)}, type ${sanitize(
-      ruleTypeId
+    `Alert "${sanitize(ruleName || alertUuid)}" (${identifiers.join(
+      ', '
     )}) transitioned to recovered${recoveredClause}${startClause}.`,
   ];
   if (isString(snapshot?.reason) && snapshot.reason)

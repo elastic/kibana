@@ -257,7 +257,7 @@ it('removes notification destinations when the Slack action is removed in the UI
   const result = await call({ completions: [] });
   expect(result.completions).toEqual([]);
   const workflow = parse(updateWorkflow.mock.calls[0][1].yaml);
-  expect(workflow.steps[0].with.notificationDestinations).toBeUndefined();
+  expect(workflow.steps[0].steps[0].with.notificationDestinations).toBeUndefined();
 });
 
 it('returns to the Elastic Slack app when the saved connector is explicitly cleared', async () => {
@@ -278,7 +278,7 @@ it('returns to the Elastic Slack app when the saved connector is explicitly clea
     completions: [{ action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' }],
   });
   const workflow = parse(updateWorkflow.mock.calls[0][1].yaml);
-  expect(workflow.steps[0].with.notificationDestinations[0]).toMatchObject({
+  expect(workflow.steps[0].steps[0].with.notificationDestinations[0]).toMatchObject({
     connector_id: 'elastic-apps-slack',
     params: { channel: '#oncall' },
   });

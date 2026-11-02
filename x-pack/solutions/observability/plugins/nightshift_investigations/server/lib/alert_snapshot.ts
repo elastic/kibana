@@ -193,7 +193,7 @@ const fetchV2Snapshots = async (
     ])
   );
   const ruleNames = await fetchRuleNames(getRulesClient, [
-    ...new Set(episodes.map((episode) => episode['rule.id'])),
+    ...new Set(episodes.flatMap((episode) => (episode['rule.id'] ? [episode['rule.id']] : []))),
   ]);
 
   return new Map(
@@ -202,8 +202,8 @@ const fetchV2Snapshots = async (
       const snapshot = v2AlertSnapshotSchema.parse({
         alert_version: 'v2',
         id: episode['episode.id'],
-        rule_id: episode['rule.id'],
-        rule_name: ruleNames.get(episode['rule.id']),
+        rule_id: episode['rule.id'] ?? undefined,
+        rule_name: ruleNames.get(episode['rule.id'] ?? ''),
         group_hash: episode.group_hash,
         status: episode['episode.status'],
         start: episode.first_timestamp,
