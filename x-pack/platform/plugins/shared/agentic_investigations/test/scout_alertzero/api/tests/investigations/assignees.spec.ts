@@ -134,7 +134,7 @@ apiTest.describe(
 
       const before = await listById();
       expect(before).toHaveStatusCode(200);
-      expect(before.body.results[0].metadata).not.toHaveProperty('assignees');
+      expect(before.body.results[0].metadata.assignees).toBeUndefined();
 
       const assigned = await apiClient.put(INVESTIGATION_ASSIGNEES_PATH(investigationId), {
         headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
