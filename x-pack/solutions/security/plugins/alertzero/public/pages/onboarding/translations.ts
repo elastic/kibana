@@ -148,7 +148,7 @@ const ONBOARDING_WORKER_DESCRIPTIONS: Record<string, string> = {
     'xpack.alertzero.onboarding.workerDescription.attackDiscovery',
     {
       defaultMessage:
-        'Groups related alerts into potential attacks, opens an investigation for each, and proposes forensic analysis of the hosts when an attack looks real or can\'t be ruled out.',
+        "Groups related alerts into potential attacks, opens an investigation for each, and proposes forensic analysis of the hosts when an attack looks real or can't be ruled out.",
     }
   ),
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
