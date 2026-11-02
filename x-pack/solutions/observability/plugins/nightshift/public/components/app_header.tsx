@@ -25,6 +25,10 @@ const detectionsLabel = i18n.translate('xpack.nightshift.detectionsLabel', {
   defaultMessage: 'Detections',
 });
 
+const investigateLabel = i18n.translate('xpack.nightshift.header.investigateButtonText', {
+  defaultMessage: 'Investigate',
+});
+
 export const SETTINGS_PAGE_TITLE = i18n.translate('xpack.nightshift.settingsPage.title', {
   defaultMessage: 'Settings',
 });
@@ -78,6 +82,11 @@ const detectionsEbtProps = getEbtProps({
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
 });
 
+const startInvestigationEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_START_INVESTIGATION,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
 const applyEbtProps = (
   ebtProps: typeof settingsEbtProps,
   params?: AppMenuRunActionParams
@@ -103,6 +112,8 @@ export interface NightshiftAppHeaderProps {
   automationsHref?: string;
   onDetectionsClick?: () => void | Promise<void>;
   detectionsHref?: string;
+  /** Renders "Investigate" (opens the start investigation modal) as the primary action when set. */
+  onStartInvestigationClick?: () => void;
   tabs?: AppHeaderTab[];
   back?: AppHeaderBack;
 }
@@ -119,6 +130,7 @@ export function NightshiftAppHeader({
   automationsHref,
   onDetectionsClick,
   detectionsHref,
+  onStartInvestigationClick,
   tabs,
   back,
 }: NightshiftAppHeaderProps): React.ReactElement {
@@ -126,6 +138,18 @@ export function NightshiftAppHeader({
   const isDetectionPage = page === 'detection';
   const menu = useMemo<AppMenuConfig>(
     () => ({
+      ...(onStartInvestigationClick && {
+        primaryActionItem: {
+          id: 'nightshiftStartInvestigation',
+          label: investigateLabel,
+          iconType: 'inspect',
+          testId: 'o11yNightshiftAppStartInvestigationButton',
+          run: (params?: AppMenuRunActionParams) => {
+            applyEbtProps(startInvestigationEbtProps, params);
+            onStartInvestigationClick();
+          },
+        },
+      }),
       items: [
         // Landing: Automations and Detections buttons; Settings in overflow.
         ...(isLandingPage && onAutomationsClick && automationsHref
@@ -238,6 +262,7 @@ export function NightshiftAppHeader({
       onKnowledgeClick,
       onSourcesClick,
       onSettingsClick,
+      onStartInvestigationClick,
       settingsHref,
       sourcesHref,
     ]

@@ -127,6 +127,23 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
+  it('registers the reference-free judges with the evals plugin', () => {
+    const registerEvaluator = jest.fn();
+
+    createPlugin().setup(coreMock.createSetup(), {
+      ...createSetupDeps(),
+      evals: { enabled: true, mode: 'runtime', registerTaskProvider: jest.fn(), registerEvaluator },
+    });
+
+    expect(registerEvaluator.mock.calls.map(([{ name, version }]) => `${name}@${version}`)).toEqual(
+      [
+        'nightshift_rca_reward@1.0.0',
+        'nightshift_investigation_process@1.0.0',
+        'nightshift_conclusion_quality@1.0.0',
+      ]
+    );
+  });
+
   it('registers investigation steps when Cortex, memory, and decision trees are disabled', () => {
     const registerStepDefinition = jest.fn();
     const dependencies = {
