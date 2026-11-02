@@ -134,6 +134,7 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
+import type { ConnectorTypeConversionServices } from './lib/single_file_connectors/create_connector_from_spec';
 
 export interface PluginSetupContract {
   registerType<
@@ -302,6 +303,26 @@ export class ActionsPlugin
   implements
     Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
 {
+  private connectorTypeConversionServices?: ConnectorTypeConversionServices;
+
+  private getConnectorTypeConversionServices(): ConnectorTypeConversionServices {
+    if (!this.connectorTypeConversionServices) {
+      throw new Error('Connector type conversion services are not ready.');
+    }
+    return this.connectorTypeConversionServices;
+  }
+
+  private registerDynamicConnectorType(
+    actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>
+  ): void {
+    ensureSufficientLicense(actionType);
+    const actionTypeRegistry = this.actionTypeRegistry;
+    if (!actionTypeRegistry) {
+      throw new Error('Action type registry is not ready.');
+    }
+    actionTypeRegistry.register(actionType);
+  }
+
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
@@ -535,7 +556,7 @@ export class ActionsPlugin
       inboundEvents,
     });
 
-    return {
+    const setupContract: PluginSetupContract = {
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -620,6 +641,15 @@ export class ActionsPlugin
         this.connectorEventEmitter = emitter;
       },
     };
+    this.connectorTypeConversionServices = {
+      getActionsConfigurationUtilities: setupContract.getActionsConfigurationUtilities,
+      getAxiosInstanceWithAuth: setupContract.getAxiosInstanceWithAuth,
+      getCredential: setupContract.getCredential,
+      getClientLeasePool: setupContract.getClientLeasePool,
+      getRelayClient: setupContract.getRelayClient,
+      getConnectorJwtSigner: setupContract.getConnectorJwtSigner,
+    };
+    return setupContract;
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
@@ -678,6 +708,10 @@ export class ActionsPlugin
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
+        connectorTypeRegistration: {
+          conversionServices: this.getConnectorTypeConversionServices(),
+          registerType: (actionType) => this.registerDynamicConnectorType(actionType),
+        },
         authTypeRegistry: this.authTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
@@ -1113,7 +1147,10 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
-
+    const getConnectorTypeConversionServices = () => this.getConnectorTypeConversionServices();
+    const registerDynamicConnectorType = (
+      actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>
+    ) => this.registerDynamicConnectorType(actionType);
     return async function actionsRouteHandlerContext(context, request) {
       const [coreStart, pluginsStart] = await core.getStartServices();
       const { taskManager, encryptedSavedObjects, eventLog } = pluginsStart;
@@ -1143,6 +1180,10 @@ export class ActionsPlugin
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
+            connectorTypeRegistration: {
+              conversionServices: getConnectorTypeConversionServices(),
+              registerType: registerDynamicConnectorType,
+            },
             authTypeRegistry: authTypeRegistry!,
             kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,

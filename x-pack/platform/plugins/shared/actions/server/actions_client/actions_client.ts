@@ -37,6 +37,9 @@ import { update } from '../application/connector/methods/update';
 import { rotateInboundIngress } from '../application/connector/methods/rotate_inbound_ingress';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
+import { createConnectorType } from '../application/connector/methods/create_type';
+import type { CreateConnectorTypeRequest } from '../../common/routes/connector/apis/create_type';
+import type { ConnectorTypeConversionServices } from '../lib/single_file_connectors/create_connector_from_spec';
 import { execute } from '../application/connector/methods/execute';
 import type {
   GetGlobalExecutionKPIParams,
@@ -55,6 +58,9 @@ import type {
   ConnectorTokenClientContract,
   HookServices,
   ActionType,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
   ConnectorLifecycleListener,
 } from '../types';
 import { invokePostDeleteListeners } from '../lib/invoke_lifecycle_listeners';
@@ -112,6 +118,12 @@ export interface ConstructorOptions {
   kibanaIndices: string[];
   scopedClusterClient: IScopedClusterClient;
   actionTypeRegistry: ActionTypeRegistry;
+  connectorTypeRegistration?: {
+    registerType: (
+      actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>
+    ) => void;
+    conversionServices: ConnectorTypeConversionServices;
+  };
   authTypeRegistry: AuthTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -148,6 +160,7 @@ export interface ActionsClientContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   actionTypeRegistry: ActionTypeRegistry;
+  connectorTypeRegistration?: ConstructorOptions['connectorTypeRegistration'];
   authTypeRegistry: AuthTypeRegistry;
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
@@ -180,6 +193,7 @@ export class ActionsClient {
   constructor({
     logger,
     actionTypeRegistry,
+    connectorTypeRegistration,
     authTypeRegistry,
     kibanaIndices,
     scopedClusterClient,
@@ -208,6 +222,7 @@ export class ActionsClient {
     this.context = {
       logger,
       actionTypeRegistry,
+      connectorTypeRegistration,
       authTypeRegistry,
       encryptedSavedObjectsClient,
       unsecuredSavedObjectsClient,
@@ -233,6 +248,25 @@ export class ActionsClient {
       evictClientPool,
       securityService,
     };
+  }
+
+  /** Registers a connector type in this Kibana process. */
+  public async createConnectorType({
+    request,
+  }: {
+    request: CreateConnectorTypeRequest;
+  }): Promise<{ id: string }> {
+    const registration = this.context.connectorTypeRegistration;
+    if (!registration) {
+      throw new Error('Connector type registration is not available.');
+    }
+
+    return createConnectorType({
+      actionTypeRegistry: this.context.actionTypeRegistry,
+      conversionServices: registration.conversionServices,
+      registerType: registration.registerType,
+      request,
+    });
   }
 
   /**

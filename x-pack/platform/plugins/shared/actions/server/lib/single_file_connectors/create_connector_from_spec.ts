@@ -22,6 +22,16 @@ import type {
 } from '../../types';
 import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
 
+export type ConnectorTypeConversionServices = Pick<
+  ActionsPluginSetupContract,
+  | 'getActionsConfigurationUtilities'
+  | 'getAxiosInstanceWithAuth'
+  | 'getCredential'
+  | 'getClientLeasePool'
+  | 'getRelayClient'
+  | 'getConnectorJwtSigner'
+>;
+
 import { generateParamsSchema } from './generate_params_schema';
 import { generateSecretsSchema } from './generate_secrets_schema';
 import { generateExecutorFunction } from './generate_executor_function';
@@ -56,7 +66,7 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
 
 export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
-  actions: ActionsPluginSetupContract
+  actions: ConnectorTypeConversionServices
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
   const networkSettings = createConnectorNetworkSettings(configUtils);
