@@ -22,7 +22,7 @@ import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './queries/t
 // Ordered list of all grid columns; GridColumnId and the rows-mode lists derive from it.
 const COLUMNS = [
   { id: 'entity.name', displayAsText: 'Entity name', initialWidth: 200 },
-  { id: 'group_size', displayAsText: 'Records', initialWidth: 100 },
+  { id: 'group_size', displayAsText: 'Records', initialWidth: 100, schema: 'numeric' },
   {
     id: 'entity.relationships.resolution.resolved_to',
     displayAsText: 'Resolved to',
@@ -45,8 +45,8 @@ const COLUMNS = [
   { id: 'entity.source', displayAsText: 'Source', initialWidth: 140 },
   { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 140 },
   { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
-  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120 },
-  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100 },
+  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120, schema: 'numeric' },
+  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, schema: 'numeric' },
   { id: 'entity.attributes.watchlists', displayAsText: 'Watchlists', initialWidth: 200 },
   { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 180 },
   { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
