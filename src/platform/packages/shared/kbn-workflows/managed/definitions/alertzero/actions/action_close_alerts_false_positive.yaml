@@ -64,12 +64,11 @@ outputs:
     type: number
   - name: alert_ids
     type: array
-  - name: already_closed_count
-    type: number
 steps:
   # An analyst can close the proposal's alerts before approving it. Those alerts are counted here and
-  # left out of the close below, so the update script does not rewrite their reason, user and time,
-  # and are reported as already_closed_count rather than as closed by this action.
+  # left out of the close below, so closed_count reports only the alerts this action closed. The
+  # update script already leaves a closed alert's reason, user and time alone; skipping them in the
+  # close query only avoids a needless write per closed alert and the version conflicts it can cause.
   - name: count_already_closed
     type: elasticsearch.search
     with:
@@ -160,4 +159,3 @@ steps:
     with:
       closed_count: "${{ inputs.actionInput.alertIds | size | minus: steps.count_already_closed.output.hits.total.value }}"
       alert_ids: "${{ inputs.actionInput.alertIds }}"
-      already_closed_count: "${{ steps.count_already_closed.output.hits.total.value }}"

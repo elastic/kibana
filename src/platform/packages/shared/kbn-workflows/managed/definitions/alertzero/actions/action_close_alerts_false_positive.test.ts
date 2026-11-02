@@ -80,7 +80,7 @@ describe('Close alerts as false positive action', () => {
       query: {
         bool: {
           filter: { terms: { _id: '${{ inputs.actionInput.alertIds }}' } },
-          // An analyst's earlier closure keeps its reason, user and time.
+          // Skips alerts that are already closed: no needless write, fewer version conflicts.
           must_not: { term: { 'kibana.alert.workflow_status': 'closed' } },
         },
       },
@@ -99,9 +99,8 @@ describe('Close alerts as false positive action', () => {
     ).toEqual(['alert-1', 'alert-2']);
   });
 
-  // Both searches must count closed alerts the way close_alerts decides to skip them. If the
-  // closed term drifted from the must_not above, already-closed alerts would be counted wrong
-  // or the read-back would pass while alerts stay open.
+  // Both searches count closed alerts in the same way: count_already_closed for the close query's
+  // skip, verify_close for the completeness guard.
   describe.each(['count_already_closed', 'verify_close'])('%s search', (stepName) => {
     const searchWith = getStep(stepName).with!;
 
@@ -119,16 +118,6 @@ describe('Close alerts as false positive action', () => {
         { term: { 'kibana.alert.workflow_status': 'closed' } },
       ]);
     });
-
-    it('matches the closed term close_alerts skips', () => {
-      const closeQuery = getStep('close_alerts').with!.query as {
-        bool: { must_not: unknown };
-      };
-
-      expect((searchWith.query as AlertsSearchQuery).bool.filter).toContainEqual(
-        closeQuery.bool.must_not
-      );
-    });
   });
 
   // The analyst closed some alerts before approving, or a retried close finished the rest.
@@ -137,18 +126,14 @@ describe('Close alerts as false positive action', () => {
     expect(evaluateIfCondition(2, ['alert-1', 'alert-2'])).toBe(false);
   });
 
+  // The same result covers an alert that no longer exists: a deleted alert never matches the
+  // search, so counting closed ids against the requested ids keeps the guard failing loudly.
   it('fails when a requested alert is still open after the close', () => {
     expect(evaluateIfCondition(1, ['alert-1', 'alert-2'])).toBe(true);
   });
 
   it('fails when none of the requested alerts are closed after the close', () => {
     expect(evaluateIfCondition(0, ['alert-1', 'alert-2'])).toBe(true);
-  });
-
-  // A deleted alert never matches a search, so an open-count read-back would miss it. Counting
-  // closed ids against the requested ids keeps the guard failing loudly.
-  it('fails when a requested alert no longer exists', () => {
-    expect(evaluateIfCondition(1, ['alert-1', 'alert-2'])).toBe(true);
   });
 
   it('renders a message naming the shortfall', () => {
@@ -164,8 +149,8 @@ describe('Close alerts as false positive action', () => {
     expect(rendered).toContain('0 were already closed before it');
   });
 
-  // The approval message and the Investigation read closed_count, so it must exclude alerts an
-  // analyst closed first.
+  // closed_count is an output for later callers (nothing in this repo reads it today), so it
+  // must exclude alerts an analyst closed first.
   it('reports as closed only the alerts this action closed', () => {
     const closedCount = (
       (getStep('emit_result').with as Record<string, string>).closed_count as string
