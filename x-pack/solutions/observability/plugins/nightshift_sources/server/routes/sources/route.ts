@@ -15,11 +15,12 @@ import {
   validateSourceQueryRequestSchema,
   type DeleteSourceResponse,
   type ListSourcesResponse,
-  type RecommendedSourcesResponse,
   type SourceMutationResponse,
   type SourceWithHealth,
   type ValidateSourceQueryResponse,
 } from '@kbn/nightshift-shared';
+import type { RecommendedSourcesResponse } from '../../../common/recommended_sources';
+import { SourcesRecommendationService } from '../../lib/sources_recommendation_service';
 import { createNightshiftSourcesServerRoute } from '../create_server_route';
 
 const sourceIdPathSchema = z.object({
@@ -49,7 +50,7 @@ const listSourcesRoute = createNightshiftSourcesServerRoute({
 });
 
 const listRecommendedSourcesRoute = createNightshiftSourcesServerRoute({
-  endpoint: 'GET /internal/nightshift/sources/_recommended',
+  endpoint: 'GET /internal/nightshift/sources/_recommendations',
   options: {
     access: 'internal',
     summary: 'List recommended Nightshift sources',
@@ -62,7 +63,7 @@ const listRecommendedSourcesRoute = createNightshiftSourcesServerRoute({
   },
   handler: async ({ request, getSourcesClient }): Promise<RecommendedSourcesResponse> => {
     const client = await getSourcesClient({ request });
-    return { recommendations: await client.listRecommended() };
+    return { recommendations: await new SourcesRecommendationService(client).list() };
   },
 });
 

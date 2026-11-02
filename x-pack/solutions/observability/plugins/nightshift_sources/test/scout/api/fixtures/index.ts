@@ -25,6 +25,7 @@ export {
   listSources,
   listedIds,
   readView,
+  recommendedSourceTestIndexName,
   setSourceEnabled,
   testIndexName,
   uniqueSuffix,

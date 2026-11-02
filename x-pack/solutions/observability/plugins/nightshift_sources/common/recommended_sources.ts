@@ -5,26 +5,21 @@
  * 2.0.
  */
 
-export interface RecommendedSource {
+import type { SourceInput } from '@kbn/nightshift-shared';
+
+export type RecommendedSource = Pick<SourceInput, 'title' | 'description' | 'tags' | 'esql'> & {
   id: string;
-  title: string;
-  description: string;
-  tags: string[];
-  esql: string;
-}
+};
 
 export const RECOMMENDED_SOURCES: readonly RecommendedSource[] = [
   {
     id: 'logs',
-    title: 'Logs',
+    title: 'All logs',
     description: 'Application and infrastructure logs across your environment.',
     tags: ['logs'],
     esql: 'FROM logs*',
   },
 ];
-
-export const normalizeSourceEsql = (esql: string): string =>
-  esql.trim().replace(/\s+/g, ' ').toLowerCase();
 
 export interface RecommendedSourcesResponse {
   recommendations: RecommendedSource[];

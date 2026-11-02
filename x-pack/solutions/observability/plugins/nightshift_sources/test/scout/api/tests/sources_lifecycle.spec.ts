@@ -9,11 +9,8 @@ import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
 import type { RoleSessionCredentials } from '@kbn/scout-oblt';
-import {
-  getNightshiftSourceViewName,
-  type NightshiftSource,
-  type RecommendedSourcesResponse,
-} from '@kbn/nightshift-shared';
+import { getNightshiftSourceViewName, type NightshiftSource } from '@kbn/nightshift-shared';
+import type { RecommendedSourcesResponse } from '../../../../common/recommended_sources';
 import {
   NIGHTSHIFT_MANAGER_ROLE,
   apiTest,
@@ -29,6 +26,7 @@ import {
   listSources,
   listedIds,
   readView,
+  recommendedSourceTestIndexName,
   setSourceEnabled,
   testIndexName,
   uniqueSuffix,
@@ -43,28 +41,35 @@ apiTest.describe(
   () => {
     const suffix = uniqueSuffix();
     const index = testIndexName(suffix);
+    const recommendedSourceIndex = recommendedSourceTestIndexName(suffix);
     let manager: RoleSessionCredentials;
 
     apiTest.beforeAll(async ({ esClient, samlAuth }) => {
       manager = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGER_ROLE);
-      await createTestIndex(esClient, index);
+      await Promise.all([
+        createTestIndex(esClient, index),
+        createTestIndex(esClient, recommendedSourceIndex),
+      ]);
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
       try {
         await cleanupSources(apiClient, manager.cookieHeader, `${TITLE_PREFIX}-${suffix}`);
       } finally {
-        await deleteTestIndex(esClient, index);
+        await Promise.all([
+          deleteTestIndex(esClient, index),
+          deleteTestIndex(esClient, recommendedSourceIndex),
+        ]);
       }
     });
 
     apiTest(
-      'lists the Logs recommendation until a matching source exists',
+      'lists the All logs recommendation until a matching source exists',
       async ({ apiClient, apiServices }) => {
         const spaceId = `ns-recommended-${suffix}`;
         await apiServices.spaces.create({ id: spaceId, name: spaceId });
         try {
-          const hasLogsRecommendation = async (): Promise<boolean> => {
+          const hasAllLogsRecommendation = async (): Promise<boolean> => {
             const response = await listRecommendedSources(apiClient, manager.cookieHeader, {
               spaceId,
             });
@@ -73,7 +78,7 @@ apiTest.describe(
             return recommendations.some(({ id }) => id === 'logs');
           };
 
-          expect(await hasLogsRecommendation()).toBe(true);
+          expect(await hasAllLogsRecommendation()).toBe(true);
 
           const created = await createSource(
             apiClient,
@@ -88,11 +93,11 @@ apiTest.describe(
           const sourceId = (created.body.source as NightshiftSource).id;
 
           try {
-            expect(await hasLogsRecommendation()).toBe(false);
+            expect(await hasAllLogsRecommendation()).toBe(false);
           } finally {
             await deleteSourceChecked(apiClient, manager.cookieHeader, sourceId, { spaceId });
           }
-          expect(await hasLogsRecommendation()).toBe(true);
+          expect(await hasAllLogsRecommendation()).toBe(true);
         } finally {
           await apiServices.spaces.delete(spaceId);
         }
