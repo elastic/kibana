@@ -57,9 +57,11 @@ export const useSearchBarExpression = (rowsMode: RowsMode): SearchBarExpression 
   // Pills are not translated, so a search with pills stays on the main entities' own values.
   const conditions = rowsMode === 'resolved' && !globalFilters.length ? translation : undefined;
 
-  const { data: searchOverrides, error } = useResolvedEntityOverrides(useGridContext(), conditions);
+  const { data, error } = useResolvedEntityOverrides(useGridContext(), conditions);
   // A failed overrides query leaves the search on the main entities' own values, like an untranslated one.
   const isJudgedOnGroups = !!conditions && !error;
+  // A failed refetch keeps the lists it loaded before, which no longer apply.
+  const searchOverrides = isJudgedOnGroups ? data : undefined;
 
   const searchExpression = useMemo(
     () =>

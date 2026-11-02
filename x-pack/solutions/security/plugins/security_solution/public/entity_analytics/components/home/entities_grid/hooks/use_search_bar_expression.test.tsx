@@ -106,6 +106,18 @@ describe('useSearchBarExpression', () => {
       expect(result.current.mainEntityOnlySearch).toBe(result.current.searchExpression);
     });
 
+    it('drops the lists it had when a refetch fails', async () => {
+      const { result } = renderSearch();
+      await waitFor(() => expect(result.current.searchOverrides).toBeDefined());
+
+      mockFetchResolvedEntityOverrides.mockRejectedValue(new Error('too many'));
+      await queryClient.invalidateQueries();
+
+      await waitFor(() => expect(result.current.mainEntityOnlySearch).toBeDefined());
+      expect(result.current.searchOverrides).toBeUndefined();
+      expect(result.current.searchExpression).toBe(result.current.mainEntityOnlySearch);
+    });
+
     it('drops the overrides when the search is cleared', async () => {
       const { result, rerender } = renderSearch();
       await waitFor(() => expect(result.current.searchOverrides).toBeDefined());
