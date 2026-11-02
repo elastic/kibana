@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { InternalRulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import {
@@ -40,6 +41,7 @@ import {
 import type { MaintenanceWorkflowTarget } from './managed_workflow_targets';
 import { createResetRunner } from './reset_maintenance';
 import type { MaintenanceAccess } from './maintenance_access';
+import { SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER } from '../workflows/managed_workflow_owner';
 import { createMaintenanceSystemRequest } from './system_request';
 import { toMessage } from './to_message';
 import { logFailures } from './log_failures';
@@ -258,6 +260,27 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
+  /**
+   * The owner's managed workflows client when no user is behind the sweep, so bound workflows
+   * can still be switched off without `manage_security`. A user sweep disables them as the user.
+   */
+  const getOwnerManagedWorkflows = async (
+    access: MaintenanceAccess
+  ): Promise<PluginScopedManagedWorkflowsApi | undefined> => {
+    switch (access) {
+      case 'user':
+        return undefined;
+      case 'system':
+        return server.workflowsExtensions?.initManagedWorkflowsClient(
+          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER
+        );
+      default: {
+        const unhandledAccess: never = access;
+        throw new Error(`Unhandled maintenance access: ${unhandledAccess}`);
+      }
+    }
+  };
+
   const disableBackedRules = async (
     request: KibanaRequest,
     access: MaintenanceAccess,
@@ -377,7 +400,13 @@ export const createSignificantEventsMaintenanceService = ({
   }> => {
     const failures: SignificantEventsMaintenanceFailure[] = [];
     const mgmt = server.workflowsManagement?.management;
-    const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds: [spaceId], request, failures });
+    const newlyDisabled = await sweepWorkflows({
+      mgmt,
+      managedWorkflows: await getOwnerManagedWorkflows(access),
+      spaceIds: [spaceId],
+      request,
+      failures,
+    });
 
     const newlyDisabledRules = (
       await disableBackedRules(requestForSpace(request, spaceId), access, spaceId, failures)

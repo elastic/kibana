@@ -61,6 +61,7 @@ describe('managed_workflow_targets registry', () => {
     expect(buildDisableTargets([asSpaceId('space-a')])).toContainEqual({
       id: `${NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID}-space-a`,
       spaceId: asSpaceId('space-a'),
+      definitionId: NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
     });
   });
 });

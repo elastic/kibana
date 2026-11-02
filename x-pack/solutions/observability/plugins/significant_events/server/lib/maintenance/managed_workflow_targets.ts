@@ -111,12 +111,18 @@ export interface MaintenanceWorkflowTarget {
   spaceId: SpaceId;
 }
 
+/** A workflow pause disables, with the managed definition it was installed from. */
+export interface MaintenanceDisableTarget extends MaintenanceWorkflowTarget {
+  definitionId: (typeof SCHEDULED_MAINTENANCE_WORKFLOW_IDS)[number];
+}
+
 /** Per-space scheduled documents are installed as `${baseId}-${spaceId}`. */
-const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =>
+const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceDisableTarget[] =>
   spaceIds.flatMap((spaceId) =>
     SCHEDULED_MAINTENANCE_WORKFLOW_IDS.map((baseId) => ({
       id: `${baseId}-${spaceId}`,
       spaceId,
+      definitionId: baseId,
     }))
   );
 
@@ -126,7 +132,7 @@ const scheduledTargetsFor = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] =
  * pausing one space must not turn them off. The manual ones are started by routes that are
  * blocked while their space is paused.
  */
-export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarget[] => [
+export const buildDisableTargets = (spaceIds: SpaceId[]): MaintenanceDisableTarget[] => [
   ...scheduledTargetsFor(spaceIds),
 ];
 
@@ -141,5 +147,5 @@ export const buildCancelTargets = (spaceIds: SpaceId[]): MaintenanceWorkflowTarg
     PER_SPACE_BOUND_WORKFLOW_IDS.map((baseId) => ({ id: `${baseId}-${spaceId}`, spaceId }))
   ),
   ...spaceIds.flatMap((spaceId) => GLOBAL_MAINTENANCE_WORKFLOW_IDS.map((id) => ({ id, spaceId }))),
-  ...buildDisableTargets(spaceIds),
+  ...buildDisableTargets(spaceIds).map(({ id, spaceId }) => ({ id, spaceId })),
 ];

@@ -194,6 +194,25 @@ export function makeManagementApi(options?: {
     }
   );
 
+  // The owner's managed client reads and switches off the same workflows as the management API.
+  const disable = jest.fn(
+    async (
+      definitionId: string,
+      { workflowId, spaceId }: { workflowId?: string; spaceId: string }
+    ) => {
+      const id = workflowId ?? definitionId;
+      const workflow = await getWorkflow(id, spaceId);
+      if (!workflow?.enabled) {
+        return false;
+      }
+      if (options?.failUpdateFor === id) {
+        throw new Error(`update failed for ${id}`);
+      }
+      enabled.set(stateKey(id, spaceId), false);
+      return true;
+    }
+  );
+
   return {
     api: {
       getWorkflow,
@@ -201,8 +220,10 @@ export function makeManagementApi(options?: {
       cancelAllActiveWorkflowExecutions,
       getClient: jest.fn(() => ({ getWorkflow })),
     },
+    managedWorkflows: { disable },
     getWorkflow,
     updateWorkflow,
+    disable,
     cancelAllActiveWorkflowExecutions,
   };
 }
@@ -254,6 +275,8 @@ export function makeUiSettingsClient(
 
 export function makeService(params?: {
   management?: ReturnType<typeof makeManagementApi>['api'];
+  /** The owner's managed workflows client, used by sweeps with no user behind them. */
+  managedWorkflows?: ReturnType<typeof makeManagementApi>['managedWorkflows'];
   ruleBackedRuleIds?: string[];
   /** Rule ids whose owning source is disabled in the catalog; the others belong to an enabled one. */
   disabledSourceRuleIds?: string[];
@@ -475,6 +498,9 @@ export function makeService(params?: {
       },
     },
     workflowsManagement: params?.management ? { management: params.management } : undefined,
+    workflowsExtensions: params?.managedWorkflows
+      ? { initManagedWorkflowsClient: jest.fn(async () => params.managedWorkflows) }
+      : undefined,
     spaces: {
       spacesService: {
         createSpacesClient: jest.fn(() => ({

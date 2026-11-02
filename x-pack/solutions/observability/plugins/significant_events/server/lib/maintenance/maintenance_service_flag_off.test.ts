@@ -16,7 +16,6 @@ import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/acto
 import { GLOBAL_MAINTENANCE_WORKFLOW_IDS } from './managed_workflow_targets';
 import {
   REQUEST,
-  SYSTEM_REQUEST,
   makeManagementApi,
   makeService,
   requestInSpace,
@@ -24,8 +23,8 @@ import {
 
 describe('SignificantEventsMaintenanceService', () => {
   describe('pauseOnFlagOff', () => {
-    it('pauses every space through internal clients, records each space’s restore snapshot, and disables rules as the internal user', async () => {
-      const { api, updateWorkflow } = makeManagementApi();
+    it('pauses every space through internal clients, records each space’s restore snapshot, and disables workflows as their owner and rules as the internal user', async () => {
+      const { api, managedWorkflows, updateWorkflow, disable } = makeManagementApi();
       const {
         service,
         soClient,
@@ -35,6 +34,7 @@ describe('SignificantEventsMaintenanceService', () => {
         getInternalSpaceUiSettingsClient,
       } = makeService({
         management: api,
+        managedWorkflows,
         ruleBackedRuleIds: ['rule-1'],
         spaceIds: ['default'],
         internalSpaceIds: ['default', 'space-a'],
@@ -46,12 +46,12 @@ describe('SignificantEventsMaintenanceService', () => {
 
       await service.pauseOnFlagOff();
 
-      expect(updateWorkflow).toHaveBeenCalledWith(
-        `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
-        { enabled: false },
-        'space-a',
-        SYSTEM_REQUEST
-      );
+      // The bound scheduled workflow is switched off as its owner, which needs no `manage_security`.
+      expect(disable).toHaveBeenCalledWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID, {
+        workflowId: `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+        spaceId: 'space-a',
+      });
+      expect(updateWorkflow).not.toHaveBeenCalled();
       expect(getInternalSpaceUiSettingsClient('space-a').set).toHaveBeenCalledWith(
         OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
         false
@@ -59,7 +59,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(v2RulesClient?.bulkDisableRules).not.toHaveBeenCalled();
       expect(internalRuleBackedRules.bulkDisableRules).toHaveBeenCalledWith({ ids: ['rule-1'] });
       // The shared workflows belong to every space and stay enabled.
-      const disabledIds = updateWorkflow.mock.calls.map(([id]) => id);
+      const disabledIds = disable.mock.calls.map(([, { workflowId }]) => workflowId);
       for (const sharedId of GLOBAL_MAINTENANCE_WORKFLOW_IDS) {
         expect(disabledIds).not.toContain(sharedId);
       }
@@ -145,17 +145,18 @@ describe('SignificantEventsMaintenanceService', () => {
 
   describe('reassertPause', () => {
     it('is a no-op when not paused', async () => {
-      const { api, updateWorkflow } = makeManagementApi();
-      const { service } = makeService({ management: api });
+      const { api, managedWorkflows, updateWorkflow, disable } = makeManagementApi();
+      const { service } = makeService({ management: api, managedWorkflows });
 
       await service.reassertPause();
 
       expect(updateWorkflow).not.toHaveBeenCalled();
+      expect(disable).not.toHaveBeenCalled();
     });
 
     it('re-disables workflows after a flag-flip style re-enable while paused', async () => {
-      const { api, updateWorkflow, getWorkflow } = makeManagementApi();
-      const { service } = makeService({ management: api });
+      const { api, managedWorkflows, updateWorkflow, disable, getWorkflow } = makeManagementApi();
+      const { service } = makeService({ management: api, managedWorkflows });
 
       await service.pause({ request: REQUEST });
       updateWorkflow.mockClear();
@@ -169,19 +170,18 @@ describe('SignificantEventsMaintenanceService', () => {
 
       await service.reassertPause();
 
-      expect(updateWorkflow).toHaveBeenCalledWith(
-        expect.any(String),
-        { enabled: false },
-        expect.any(String),
-        SYSTEM_REQUEST
-      );
+      expect(disable).toHaveBeenCalledWith(expect.any(String), {
+        workflowId: expect.any(String),
+        spaceId: expect.any(String),
+      });
+      expect(updateWorkflow).not.toHaveBeenCalled();
       const status = await service.getStatus({ request: REQUEST });
       expect(status.state).toBe('paused');
       expect(status.updatedAt).toBeDefined();
     });
 
     it('re-asserts in every paused space with a credential-less request', async () => {
-      const { api, updateWorkflow, getWorkflow } = makeManagementApi();
+      const { api, managedWorkflows, updateWorkflow, disable, getWorkflow } = makeManagementApi();
       const {
         service,
         soClient,
@@ -190,6 +190,7 @@ describe('SignificantEventsMaintenanceService', () => {
         getInternalSpaceUiSettingsClient,
       } = makeService({
         management: api,
+        managedWorkflows,
         ruleBackedRuleIds: ['rule-1'],
         spaceIds: ['default', 'space-a'],
       });
@@ -220,12 +221,11 @@ describe('SignificantEventsMaintenanceService', () => {
         };
         expect(document.lastSummary?.partialFailures).toEqual([]);
       }
-      expect(updateWorkflow).toHaveBeenCalledWith(
-        `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
-        { enabled: false },
-        'space-a',
-        SYSTEM_REQUEST
-      );
+      expect(disable).toHaveBeenCalledWith(NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID, {
+        workflowId: `${NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID}-space-a`,
+        spaceId: 'space-a',
+      });
+      expect(updateWorkflow).not.toHaveBeenCalled();
       expect(getInternalSpaceUiSettingsClient('space-a').set).toHaveBeenCalledWith(
         OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
         false
@@ -239,8 +239,8 @@ describe('SignificantEventsMaintenanceService', () => {
     });
 
     it('persists sweep failures on lastSummary so status shows a degraded pause', async () => {
-      const { api } = makeManagementApi();
-      const { service, soClient } = makeService({ management: api });
+      const { api, managedWorkflows } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api, managedWorkflows });
 
       await service.pause({ request: REQUEST });
 
