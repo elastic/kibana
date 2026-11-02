@@ -1396,9 +1396,11 @@ paths:
                     - tools
                 description:
                   description: Description of what the agent does.
+                  maxLength: 2000
                   type: string
                 id:
                   description: Unique identifier for the agent.
+                  maxLength: 64
                   type: string
                 labels:
                   description: Optional labels for categorizing and organizing agents.
@@ -1408,6 +1410,7 @@ paths:
                   type: array
                 name:
                   description: Display name for the agent.
+                  maxLength: 256
                   type: string
               required:
                 - id
@@ -1955,6 +1958,7 @@ paths:
                       type: array
                 description:
                   description: Updated description of what the agent does.
+                  maxLength: 2000
                   type: string
                 labels:
                   description: Updated labels for categorizing and organizing agents.
@@ -1964,6 +1968,7 @@ paths:
                   type: array
                 name:
                   description: Updated display name for the agent.
+                  maxLength: 256
                   type: string
       responses:
         '200':
