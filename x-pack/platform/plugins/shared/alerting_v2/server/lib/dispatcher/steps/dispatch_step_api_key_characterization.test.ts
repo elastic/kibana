@@ -100,7 +100,7 @@ describe('DispatchStep API key characterization', () => {
       ['a raw essu_ secret', UIAM_SECRET, `ApiKey ${UIAM_SECRET}`],
       ['an opaque non-base64 value', 'key-a', 'ApiKey key-a'],
     ])(
-      'crafts one unmarked fake request for %s and reuses it for lookup and scheduling (current behavior)',
+      'crafts one unmarked fake request for %s and reuses it for lookup and scheduling',
       async (_label, apiKey, authorization) => {
         await execute(
           [createActionGroup({ id: 'g1', policyId: 'p1', spaceId: 'team-a' })],
@@ -124,10 +124,21 @@ describe('DispatchStep API key characterization', () => {
         expect(wfm.bulkScheduleWorkflow.mock.calls[0][1]).toBe(request);
       }
     );
+
+    it('marks the fake request for an external Cloud API key', async () => {
+      await execute(
+        [createActionGroup({ id: 'g1', policyId: 'p1' })],
+        [createActionPolicy({ id: 'p1', apiKey: UIAM_SECRET, apiKeyUiamExternal: true })]
+      );
+
+      const [[request]] = wfm.getClient.mock.calls;
+      expect(request.headers).toEqual({ authorization: `ApiKey ${UIAM_SECRET}` });
+      expect(isExternalUiamCredential(request)).toBe(true);
+    });
   });
 
   describe('grouping by stored API key and space', () => {
-    it('keys batches on the stored string, so two forms of the same UIAM secret get separate requests (current behavior)', async () => {
+    it('keys batches on the presented secret, so two forms of the same UIAM secret share a request', async () => {
       await execute(
         [
           createActionGroup({ id: 'g1', policyId: 'p-raw' }),
@@ -139,12 +150,9 @@ describe('DispatchStep API key characterization', () => {
         ]
       );
 
-      expect(wfm.getClient).toHaveBeenCalledTimes(2);
-      const [[first], [second]] = wfm.getClient.mock.calls;
-      expect(first).not.toBe(second);
+      expect(wfm.getClient).toHaveBeenCalledTimes(1);
       expect(scheduleCalls()).toEqual([
-        { authorization: `ApiKey ${UIAM_SECRET}`, spaceId: 'default', groupIds: ['g1'] },
-        { authorization: `ApiKey ${UIAM_SECRET}`, spaceId: 'default', groupIds: ['g2'] },
+        { authorization: `ApiKey ${UIAM_SECRET}`, spaceId: 'default', groupIds: ['g1', 'g2'] },
       ]);
     });
 

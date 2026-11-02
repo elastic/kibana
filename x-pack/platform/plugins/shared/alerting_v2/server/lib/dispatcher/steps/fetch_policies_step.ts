@@ -70,6 +70,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
         apiKey: doc.attributes.apiKey,
+        apiKeyUiamExternal: doc.attributes.apiKeyUiamExternal,
       });
     }
 

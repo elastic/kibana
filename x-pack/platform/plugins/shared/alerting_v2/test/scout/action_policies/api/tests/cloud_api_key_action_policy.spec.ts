@@ -18,7 +18,6 @@ import {
 } from '../fixtures';
 
 const ACTION_POLICY_ID = 'cloud-api-key-policy';
-const CLOUD_API_KEY_ERROR_CODE = 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED';
 
 // The organization-level key only exists in the Mock IdP UIAM setup, so this cannot run on MKI.
 apiTest.describe(
@@ -56,96 +55,67 @@ apiTest.describe(
       await apiServices.alertingV2.actionPolicies.cleanUp();
     });
 
-    apiTest('create: rejects a Cloud API key and creates nothing', async ({ apiClient }) => {
+    apiTest('create: accepts a Cloud API key', async ({ apiClient }) => {
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: cloudApiKeyHeaders,
         body: buildCreateActionPolicyData({ name: 'created with a Cloud API key' }),
       });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
+      expect(response).toHaveStatusCode(201);
 
       const list = await apiClient.get(testData.ACTION_POLICY_API_PATH, {
         headers: sessionHeaders,
       });
       expect(list).toHaveStatusCode(200);
-      expect(list.body.total).toBe(0);
+      expect(list.body.total).toBe(1);
     });
 
     apiTest(
-      'upsert: rejects a Cloud API key when the policy does not exist',
+      'upsert: accepts a Cloud API key when the policy does not exist',
       async ({ apiClient }) => {
         const response = await apiClient.put(getActionPolicyUrl(ACTION_POLICY_ID), {
           headers: cloudApiKeyHeaders,
           body: buildCreateActionPolicyData({ name: 'upserted with a Cloud API key' }),
         });
 
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
-
-        const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
-          headers: sessionHeaders,
-        });
-        expect(get).toHaveStatusCode(404);
+        expect(response).toHaveStatusCode(201);
+        expect(response.body.name).toBe('upserted with a Cloud API key');
       }
     );
 
-    apiTest('upsert: rejects a Cloud API key when replacing a policy', async ({ apiClient }) => {
-      const created = await createPolicyWithSession(apiClient);
+    apiTest('upsert: accepts a Cloud API key when replacing a policy', async ({ apiClient }) => {
+      await createPolicyWithSession(apiClient);
 
       const response = await apiClient.put(getActionPolicyUrl(ACTION_POLICY_ID), {
         headers: cloudApiKeyHeaders,
         body: buildCreateActionPolicyData({ name: 'replaced with a Cloud API key' }),
       });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
-
-      const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
-        headers: sessionHeaders,
-      });
-      expect(get.body.name).toBe(created.name);
-      expect(get.body.updated_at).toBe(created.updated_at);
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.name).toBe('replaced with a Cloud API key');
     });
 
-    apiTest(
-      'update: rejects a Cloud API key and leaves the policy unchanged',
-      async ({ apiClient }) => {
-        const created = await createPolicyWithSession(apiClient);
+    apiTest('update: accepts a Cloud API key', async ({ apiClient }) => {
+      await createPolicyWithSession(apiClient);
 
-        const response = await apiClient.patch(getActionPolicyUrl(ACTION_POLICY_ID), {
-          headers: cloudApiKeyHeaders,
-          body: { name: 'updated with a Cloud API key' },
-        });
+      const response = await apiClient.patch(getActionPolicyUrl(ACTION_POLICY_ID), {
+        headers: cloudApiKeyHeaders,
+        body: { name: 'updated with a Cloud API key' },
+      });
 
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.name).toBe('updated with a Cloud API key');
+    });
 
-        const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
-          headers: sessionHeaders,
-        });
-        expect(get.body.name).toBe(created.name);
-        expect(get.body.updated_at).toBe(created.updated_at);
-      }
-    );
+    apiTest('update API key: accepts a Cloud API key', async ({ apiClient }) => {
+      const created = await createPolicyWithSession(apiClient);
 
-    apiTest(
-      'update API key: rejects a Cloud API key and leaves the policy unchanged',
-      async ({ apiClient }) => {
-        const created = await createPolicyWithSession(apiClient);
+      const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(ACTION_POLICY_ID), {
+        headers: cloudApiKeyHeaders,
+      });
 
-        const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(ACTION_POLICY_ID), {
-          headers: cloudApiKeyHeaders,
-        });
-
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.code).toBe(CLOUD_API_KEY_ERROR_CODE);
-
-        const get = await apiClient.get(getActionPolicyUrl(ACTION_POLICY_ID), {
-          headers: sessionHeaders,
-        });
-        expect(get.body.updated_at).toBe(created.updated_at);
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.updated_at).not.toBe(created.updated_at);
+    });
   }
 );

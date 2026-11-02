@@ -264,14 +264,20 @@ export class DispatchStep implements DispatcherStep {
       return;
     }
 
+    // Keyed by the credential presented, so two stored forms of one UIAM key share a request.
     const groupsByApiKey = new Map<string, ActionGroup[]>();
+    const externalApiKeys = new Set<string>();
     const groupsWithoutApiKey: ActionGroup[] = [];
     for (const group of groups) {
-      const apiKey = policies.apiKeyOf(group.policyId);
-      if (!apiKey) {
+      const storedApiKey = policies.apiKeyOf(group.policyId);
+      if (!storedApiKey) {
         this.recordMissingApiKey(group, failures, logger);
         groupsWithoutApiKey.push(group);
         continue;
+      }
+      const apiKey = getUiamApiKeySecret(storedApiKey);
+      if (policies.isApiKeyUiamExternal(group.policyId)) {
+        externalApiKeys.add(apiKey);
       }
       pushMapList(groupsByApiKey, apiKey, group);
     }
@@ -288,7 +294,7 @@ export class DispatchStep implements DispatcherStep {
     const batches: DispatchBatch[] = [...groupsByApiKey].flatMap(([apiKey, keyGroups]) =>
       [...Map.groupBy(keyGroups, ({ spaceId }) => spaceId)].map(([spaceId, batchGroups]) => ({
         groups: batchGroups,
-        request: this.craftFakeRequest(apiKey, spaceId),
+        request: this.craftFakeRequest(apiKey, spaceId, externalApiKeys.has(apiKey)),
         workflowsBySpace: new Map(),
         failedSpaces: new Map(),
       }))
@@ -630,7 +636,11 @@ export class DispatchStep implements DispatcherStep {
    * the workflows its owner may access. The request is scoped to the policy's space so the
    * scheduled workflow runs, and resolves its connectors, in that space.
    */
-  private craftFakeRequest(apiKey: string, spaceId: string): KibanaRequest {
-    return buildApiKeyFakeRequest({ apiKey: getUiamApiKeySecret(apiKey), spaceId });
+  private craftFakeRequest(
+    apiKey: string,
+    spaceId: string,
+    uiamApiKeyExternal: boolean
+  ): KibanaRequest {
+    return buildApiKeyFakeRequest({ apiKey, spaceId, uiamApiKeyExternal });
   }
 }

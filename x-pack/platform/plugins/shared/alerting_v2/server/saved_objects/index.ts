@@ -43,7 +43,8 @@ export const ActionPolicyAttributesIncludedInAAD = ['apiKeyOwner', 'apiKeyCreate
 export type ActionPolicyAttributesNotPartiallyUpdatable =
   | 'apiKey'
   | 'apiKeyOwner'
-  | 'apiKeyCreatedByUser';
+  | 'apiKeyCreatedByUser'
+  | 'apiKeyUiamExternal';
 
 /**
  * The encrypted attribute and its AAD are banned as `never` rather than just omitted, because an

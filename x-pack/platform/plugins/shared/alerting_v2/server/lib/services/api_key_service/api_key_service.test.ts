@@ -43,6 +43,7 @@ const createMockSecurityService = (
 
   return {
     authc: {
+      getPrincipal: jest.fn().mockReturnValue(null),
       getCurrentUser: jest.fn().mockReturnValue(
         username
           ? {
@@ -82,11 +83,15 @@ describe('ApiKeyService', () => {
 
       const result = await service.create('My Policy');
 
-      expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
-        name: 'My Policy',
-        role_descriptors: {},
-        metadata: { managed: true, kibana: { type: 'action_policy' } },
-      });
+      expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+        request,
+        {
+          name: 'My Policy',
+          role_descriptors: {},
+          metadata: { managed: true, kibana: { type: 'action_policy' } },
+        },
+        {}
+      );
 
       expect(result.apiKey).toBe(Buffer.from('es-key-id:es-key-secret').toString('base64'));
       expect(result.owner).toBe('test-user');
@@ -143,7 +148,7 @@ describe('ApiKeyService', () => {
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
       await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to create UIAM API key for action policy: My Policy'
+        'Failed to create a Cloud API key "uiam-My Policy"'
       );
     });
   });
@@ -190,12 +195,13 @@ describe('ApiKeyService', () => {
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
-      await expect(service.create('My Policy')).rejects.toThrow(
-        'UIAM API keys should only be used in serverless environments'
-      );
+      await expect(service.create('My Policy')).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED },
+      });
     });
 
-    it('rejects a raw Cloud API key with a bad request', async () => {
+    it('reuses a raw Cloud API key as is when UIAM is available', async () => {
       const request = httpServerMock.createKibanaRequest({
         headers: { authorization: 'ApiKey essu_raw-cloud-secret' },
       });
@@ -203,9 +209,10 @@ describe('ApiKeyService', () => {
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
-      await expect(service.create('My Policy')).rejects.toMatchObject({
-        output: { statusCode: 400 },
-        data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED },
+      await expect(service.create('My Policy')).resolves.toEqual({
+        apiKey: 'essu_raw-cloud-secret',
+        owner: 'test-user',
+        createdByUser: true,
       });
       expect(security.authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
     });
@@ -216,9 +223,10 @@ describe('ApiKeyService', () => {
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
-      await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to extract API key from authorization header for action policy: My Policy'
-      );
+      await expect(service.create('My Policy')).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'Could not extract an API key from the request authorization header.',
+      });
     });
   });
 

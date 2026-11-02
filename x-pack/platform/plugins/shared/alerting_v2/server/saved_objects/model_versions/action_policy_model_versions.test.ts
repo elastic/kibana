@@ -527,6 +527,35 @@ describe('actionPolicyModelVersions', () => {
     });
   });
 
+  describe('v6 to v7 migration', () => {
+    const migrator = createModelVersionTestMigrator({ type: actionPolicyType });
+
+    it('leaves a pre-v7 policy unchanged, without an apiKeyUiamExternal flag', () => {
+      const document = migrator.migrate({
+        document: createV5PolicyDocument(),
+        fromVersion: 5,
+        toVersion: 6,
+      });
+
+      expect(migrator.migrate({ document, fromVersion: 6, toVersion: 7 }).attributes).toEqual(
+        document.attributes
+      );
+    });
+
+    it('accepts the optional apiKeyUiamExternal flag', () => {
+      const create = actionPolicyModelVersions['7']?.schemas?.create as ObjectType;
+      const v6Attributes = migrator.migrate({
+        document: createV5PolicyDocument(),
+        fromVersion: 5,
+        toVersion: 6,
+      }).attributes as Record<string, unknown>;
+
+      expect(create.validate({ ...v6Attributes, apiKeyUiamExternal: true })).toMatchObject({
+        apiKeyUiamExternal: true,
+      });
+    });
+  });
+
   // Mirrors the rule check: the actor is nested, and `unknowns: 'ignore'` on the
   // attributes schema has to reach it for a v4 node to read a policy whose actor
   // a newer node extended.

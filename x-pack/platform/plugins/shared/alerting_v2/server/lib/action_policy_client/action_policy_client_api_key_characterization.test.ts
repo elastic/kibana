@@ -168,20 +168,17 @@ describe('ActionPolicyClient API key characterization', () => {
         'a conflict',
         SavedObjectsErrorHelpers.createConflictError(ACTION_POLICY_SAVED_OBJECT_TYPE, POLICY_ID),
       ],
-    ])(
-      'queues the new key on %s even when it is user-provided (current behavior)',
-      async (_label, failure) => {
-        const { client, apiKeyService, mockSavedObjectsClient } = setup();
-        apiKeyService.create.mockResolvedValueOnce(USER_KEY);
-        mockSavedObjectsClient.create.mockRejectedValueOnce(failure);
+    ])('does not queue a user-provided new key on %s', async (_label, failure) => {
+      const { client, apiKeyService, mockSavedObjectsClient } = setup();
+      apiKeyService.create.mockResolvedValueOnce(USER_KEY);
+      mockSavedObjectsClient.create.mockRejectedValueOnce(failure);
 
-        await expect(
-          client.createActionPolicy({ data: policyData, options: { id: POLICY_ID } })
-        ).rejects.toBeDefined();
+      await expect(
+        client.createActionPolicy({ data: policyData, options: { id: POLICY_ID } })
+      ).rejects.toBeDefined();
 
-        expect(queuedKeys(apiKeyService)).toEqual([[USER_KEY.apiKey]]);
-      }
-    );
+      expect(queuedKeys(apiKeyService)).toEqual([]);
+    });
 
     it('neither writes nor queues when key creation rejects', async () => {
       const { client, apiKeyService, mockSavedObjectsClient } = setup();
@@ -229,7 +226,7 @@ describe('ActionPolicyClient API key characterization', () => {
       expect(queuedKeys(apiKeyService)).toEqual([]);
     });
 
-    it('queues the new key but not the old one when the write fails, even if user-provided (current behavior)', async () => {
+    it('queues neither the user-provided new key nor the old one when the write fails', async () => {
       const { client, apiKeyService, mockSavedObjectsClient, decryptsTo } = setup();
       decryptsTo({ apiKey: OLD_KEY, apiKeyCreatedByUser: false });
       apiKeyService.create.mockResolvedValueOnce(USER_KEY);
@@ -237,7 +234,7 @@ describe('ActionPolicyClient API key characterization', () => {
 
       await expect(update(client)).rejects.toThrow('storage error');
 
-      expect(queuedKeys(apiKeyService)).toEqual([[USER_KEY.apiKey]]);
+      expect(queuedKeys(apiKeyService)).toEqual([]);
     });
 
     it.each([
@@ -263,7 +260,7 @@ describe('ActionPolicyClient API key characterization', () => {
   });
 
   describe('upsertActionPolicy', () => {
-    it('queues the user-provided new key when the create branch conflicts (current behavior)', async () => {
+    it('does not queue the user-provided new key when the create branch conflicts', async () => {
       const { client, apiKeyService, mockSavedObjectsClient } = setup();
       mockSavedObjectsClient.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -280,10 +277,10 @@ describe('ActionPolicyClient API key characterization', () => {
         client.upsertActionPolicy({ id: POLICY_ID, data: policyData })
       ).rejects.toThrow();
 
-      expect(queuedKeys(apiKeyService)).toEqual([[USER_KEY.apiKey]]);
+      expect(queuedKeys(apiKeyService)).toEqual([]);
     });
 
-    it('queues the user-provided new key when the replace write fails (current behavior)', async () => {
+    it('does not queue the user-provided new key when the replace write fails', async () => {
       const { client, apiKeyService, mockSavedObjectsClient, decryptsTo } = setup();
       decryptsTo({ apiKey: OLD_KEY, apiKeyCreatedByUser: false });
       apiKeyService.create.mockResolvedValueOnce(USER_KEY);
@@ -293,7 +290,7 @@ describe('ActionPolicyClient API key characterization', () => {
         'storage error'
       );
 
-      expect(queuedKeys(apiKeyService)).toEqual([[USER_KEY.apiKey]]);
+      expect(queuedKeys(apiKeyService)).toEqual([]);
     });
 
     it('queues only the old Kibana-owned key after a successful replace', async () => {
@@ -333,7 +330,7 @@ describe('ActionPolicyClient API key characterization', () => {
       );
     });
 
-    it('queues the user-provided new key when the write fails (current behavior)', async () => {
+    it('does not queue the user-provided new key when the write fails', async () => {
       const { client, apiKeyService, mockSavedObjectsClient, decryptsTo } = setup();
       decryptsTo({ apiKey: OLD_KEY, apiKeyCreatedByUser: false });
       apiKeyService.create.mockResolvedValueOnce(USER_KEY);
@@ -343,10 +340,10 @@ describe('ActionPolicyClient API key characterization', () => {
         'storage error'
       );
 
-      expect(queuedKeys(apiKeyService)).toEqual([[USER_KEY.apiKey]]);
+      expect(queuedKeys(apiKeyService)).toEqual([]);
     });
 
-    it('reports a Cloud API key rejection as INTERNAL_SERVER_ERROR in the bulk response (current behavior)', async () => {
+    it('reports a Cloud API key rejection with its own code in the bulk response', async () => {
       const { client, apiKeyService, mockSavedObjectsClient, decryptsTo } = setup();
       decryptsTo({ apiKey: OLD_KEY, apiKeyCreatedByUser: false });
       apiKeyService.create.mockRejectedValue(
@@ -361,7 +358,7 @@ describe('ActionPolicyClient API key characterization', () => {
           {
             id: POLICY_ID,
             error: {
-              code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
+              code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
               message: 'cloud key not supported',
             },
           },

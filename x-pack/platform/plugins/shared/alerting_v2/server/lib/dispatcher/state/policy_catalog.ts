@@ -50,4 +50,8 @@ export class PolicyCatalog {
   public apiKeyOf(id: ActionPolicyId): string | undefined {
     return this.byId.get(id)?.apiKey;
   }
+
+  public isApiKeyUiamExternal(id: ActionPolicyId): boolean {
+    return this.byId.get(id)?.apiKeyUiamExternal === true;
+  }
 }

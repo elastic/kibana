@@ -151,7 +151,10 @@ const toActionPolicyBulkError = (
 const bulkErrorFromThrown = (id: string, e: unknown): ActionPolicyBulkError => {
   const statusCode = Boom.isBoom(e) ? e.output.statusCode : 500;
   const message = e instanceof Error ? e.message : String(e);
-  return toActionPolicyBulkError(id, { statusCode, message });
+  const code = Boom.isBoom(e) ? e.data?.code : undefined;
+  return typeof code === 'string'
+    ? { id, error: { code, message } }
+    : toActionPolicyBulkError(id, { statusCode, message });
 };
 
 @injectable()
@@ -330,7 +333,11 @@ export class ActionPolicyClient {
         id: params.options?.id,
       }));
     } catch (e) {
-      this.markApiKeysForInvalidation(attributes.apiKey, false, params.options?.id);
+      this.markApiKeysForInvalidation(
+        apiKeyAttrs.apiKey,
+        apiKeyAttrs.createdByUser,
+        params.options?.id
+      );
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
         throw Boom.conflict(getActionPolicyAlreadyExistsMessage(conflictId), {
@@ -426,7 +433,11 @@ export class ActionPolicyClient {
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, params.options.id);
+      this.markApiKeysForInvalidation(
+        apiKeyAttrs.apiKey,
+        apiKeyAttrs.createdByUser,
+        params.options.id
+      );
       throw e;
     }
 
@@ -585,7 +596,7 @@ export class ActionPolicyClient {
         version,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, apiKeyAttrs.createdByUser, id);
       throw e;
     }
 
@@ -1053,7 +1064,7 @@ export class ActionPolicyClient {
         version: existingVersion,
       });
     } catch (e) {
-      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, false, id);
+      this.markApiKeysForInvalidation(apiKeyAttrs.apiKey, apiKeyAttrs.createdByUser, id);
       throw e;
     }
 

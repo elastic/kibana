@@ -55,6 +55,7 @@ export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
   apiKey: auth.apiKey,
   apiKeyOwner: auth.owner,
   apiKeyCreatedByUser: auth.createdByUser,
+  apiKeyUiamExternal: auth.uiamExternal,
 });
 
 /**

@@ -15,6 +15,7 @@ import {
   actionPolicySavedObjectAttributesSchemaV4,
   actionPolicySavedObjectAttributesSchemaV5,
   actionPolicySavedObjectAttributesSchemaV6,
+  actionPolicySavedObjectAttributesSchemaV7,
 } from '../schemas/action_policy_saved_object_attributes';
 import type { ActionPolicySavedObjectAttributesV1 } from '../schemas/action_policy_saved_object_attributes';
 import { toActor } from './to_actor';
@@ -306,6 +307,22 @@ export const actionPolicyModelVersions: SavedObjectsModelVersionMap = {
         { unknowns: 'ignore' }
       ),
       create: actionPolicySavedObjectAttributesSchemaV6,
+    },
+  },
+  '7': {
+    /**
+     * v7 adds the optional `apiKeyUiamExternal` flag. Nothing is backfilled: an absent flag means
+     * the key is not external, which holds for every policy written before Cloud API keys were
+     * accepted. The flag is neither encrypted nor part of the decryption AAD, so a plain model
+     * version is correct and a policy written before v7 still decrypts.
+     */
+    changes: [],
+    schemas: {
+      forwardCompatibility: actionPolicySavedObjectAttributesSchemaV7.extends(
+        {},
+        { unknowns: 'ignore' }
+      ),
+      create: actionPolicySavedObjectAttributesSchemaV7,
     },
   },
 };

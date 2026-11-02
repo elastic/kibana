@@ -27,6 +27,7 @@ interface SetupOptions {
   authenticationType?: string;
   uiam?: boolean;
   authorization?: string;
+  apiKeyInternal?: boolean;
 }
 
 const setup = ({
@@ -34,16 +35,22 @@ const setup = ({
   authenticationType = 'token',
   uiam = false,
   authorization,
+  apiKeyInternal,
 }: SetupOptions = {}) => {
   const grantAsInternalUser = jest.fn().mockResolvedValue(ES_GRANT);
   const uiamGrant = jest.fn().mockResolvedValue(UIAM_GRANT);
   const security = {
     authc: {
-      getCurrentUser: jest
-        .fn()
-        .mockReturnValue(
-          username === null ? null : { username, authentication_type: authenticationType }
-        ),
+      getPrincipal: jest.fn().mockReturnValue(null),
+      getCurrentUser: jest.fn().mockReturnValue(
+        username === null
+          ? null
+          : {
+              username,
+              authentication_type: authenticationType,
+              ...(apiKeyInternal !== undefined ? { api_key: { internal: apiKeyInternal } } : {}),
+            }
+      ),
       apiKeys: {
         grantAsInternalUser,
         uiam: uiam ? { grant: uiamGrant } : null,
@@ -66,6 +73,10 @@ const setup = ({
     logger,
   };
 };
+
+const CLOUD_API_KEY_MESSAGE =
+  `Cannot use a Cloud API key to create or update action policy "${POLICY_NAME}". ` +
+  'Authenticate with a user session or a project-scoped Elasticsearch API key instead.';
 
 const captureError = async (promise: Promise<unknown>): Promise<Error> => {
   try {
@@ -105,11 +116,15 @@ describe('ApiKeyService characterization', () => {
           createdByUser: false,
         });
         expect(grantAsInternalUser).toHaveBeenCalledTimes(1);
-        expect(grantAsInternalUser).toHaveBeenCalledWith(request, {
-          name: POLICY_NAME,
-          role_descriptors: {},
-          metadata: { managed: true, kibana: { type: 'action_policy' } },
-        });
+        expect(grantAsInternalUser).toHaveBeenCalledWith(
+          request,
+          {
+            name: POLICY_NAME,
+            role_descriptors: {},
+            metadata: { managed: true, kibana: { type: 'action_policy' } },
+          },
+          {}
+        );
       }
     );
 
@@ -146,7 +161,7 @@ describe('ApiKeyService characterization', () => {
 
       const error = await captureError(service.create(POLICY_NAME));
 
-      expectPlainError(error, `Failed to create UIAM API key for action policy: ${POLICY_NAME}`);
+      expectPlainError(error, `Failed to create a Cloud API key "uiam-${POLICY_NAME}"`);
       expect(grantAsInternalUser).not.toHaveBeenCalled();
     });
 
@@ -176,26 +191,22 @@ describe('ApiKeyService characterization', () => {
       await expect(service.create(POLICY_NAME)).rejects.toBe(failure);
     });
 
-    it('returns apiKey null when the UIAM grant result lacks an api_key (current behavior)', async () => {
+    it('throws a plain Error when the UIAM grant result lacks an api_key', async () => {
       const { service, uiamGrant } = setup({ uiam: true });
       uiamGrant.mockResolvedValueOnce({ id: 'uiam-key-id', name: 'n', api_key: '' });
 
-      await expect(service.create(POLICY_NAME)).resolves.toEqual({
-        apiKey: null,
-        owner: 'test-user',
-        createdByUser: false,
-      });
+      const error = await captureError(service.create(POLICY_NAME));
+
+      expectPlainError(error, `Failed to create UIAM API key for action policy: ${POLICY_NAME}`);
     });
 
-    it('returns apiKey null when the ES grant result lacks an id (current behavior)', async () => {
+    it('throws a plain Error when the ES grant result lacks an id', async () => {
       const { service, grantAsInternalUser } = setup();
       grantAsInternalUser.mockResolvedValueOnce({ id: '', name: 'n', api_key: 'es-key-secret' });
 
-      await expect(service.create(POLICY_NAME)).resolves.toEqual({
-        apiKey: null,
-        owner: 'test-user',
-        createdByUser: false,
-      });
+      const error = await captureError(service.create(POLICY_NAME));
+
+      expectPlainError(error, `Failed to create ES API key for action policy: ${POLICY_NAME}`);
     });
   });
 
@@ -255,37 +266,24 @@ describe('ApiKeyService characterization', () => {
       expect(uiamGrant).not.toHaveBeenCalled();
     });
 
-    it('throws a plain Error for a base64(id:essu_) envelope when UIAM is absent', async () => {
-      const { service, grantAsInternalUser } = setup({
-        authenticationType: 'api_key',
-        authorization: `ApiKey ${toEnvelope('uiam-id', 'essu_user-secret')}`,
-      });
-
-      const error = await captureError(service.create(POLICY_NAME));
-
-      expectPlainError(error, 'UIAM API keys should only be used in serverless environments');
-      expect(grantAsInternalUser).not.toHaveBeenCalled();
-    });
-
-    it.each([false, true])(
-      'rejects a raw essu_ Cloud API key with Boom 400 (uiam present: %s)',
-      async (uiam) => {
+    it.each([
+      ['a base64(id:essu_) envelope', `ApiKey ${toEnvelope('uiam-id', 'essu_user-secret')}`],
+      ['a raw essu_ Cloud API key', 'ApiKey essu_raw-cloud-secret'],
+    ])(
+      'rejects %s with the Cloud API key Boom 400 when UIAM is absent',
+      async (_label, authorization) => {
         const { service, grantAsInternalUser, uiamGrant } = setup({
           authenticationType: 'api_key',
-          uiam,
-          authorization: 'ApiKey essu_raw-cloud-secret',
+          authorization,
         });
 
         const error = await captureError(service.create(POLICY_NAME));
 
-        const message =
-          `Cannot use a Cloud API key to create or update action policy "${POLICY_NAME}". ` +
-          'Authenticate with a user session or a project-scoped Elasticsearch API key instead.';
         expect(Boom.isBoom(error)).toBe(true);
-        expect(error.message).toBe(message);
+        expect(error.message).toBe(CLOUD_API_KEY_MESSAGE);
         expect(Boom.isBoom(error) && error.output).toEqual({
           statusCode: 400,
-          payload: { statusCode: 400, error: 'Bad Request', message },
+          payload: { statusCode: 400, error: 'Bad Request', message: CLOUD_API_KEY_MESSAGE },
           headers: {},
         });
         expect(Boom.isBoom(error) && error.data).toEqual({
@@ -296,47 +294,49 @@ describe('ApiKeyService characterization', () => {
       }
     );
 
-    it('rejects a Bearer essu_ credential with the same Boom 400 since the scheme is not checked (current behavior)', async () => {
-      const { service } = setup({
-        authenticationType: 'api_key',
-        uiam: true,
-        authorization: 'Bearer essu_token',
-      });
+    it.each([
+      [true, {}],
+      [false, { uiamExternal: true }],
+    ])(
+      'reuses a raw essu_ Cloud API key as is when UIAM is present (internal: %s)',
+      async (apiKeyInternal, expectedExternal) => {
+        const { service, grantAsInternalUser, uiamGrant } = setup({
+          authenticationType: 'api_key',
+          uiam: true,
+          authorization: 'ApiKey essu_raw-cloud-secret',
+          apiKeyInternal,
+        });
 
-      const error = await captureError(service.create(POLICY_NAME));
+        await expect(service.create(POLICY_NAME)).resolves.toEqual({
+          apiKey: 'essu_raw-cloud-secret',
+          owner: 'test-user',
+          createdByUser: true,
+          ...expectedExternal,
+        });
+        expect(grantAsInternalUser).not.toHaveBeenCalled();
+        expect(uiamGrant).not.toHaveBeenCalled();
+      }
+    );
 
-      expect(Boom.isBoom(error) && error.output.statusCode).toBe(400);
-      expect(Boom.isBoom(error) && error.data).toEqual({
-        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
-      });
-    });
+    it.each([
+      ['a Bearer essu_ credential', 'Bearer essu_token'],
+      ['a Basic credential', `Basic ${toEnvelope('basic-user', 'basic-password')}`],
+      ['no authorization header', undefined],
+    ])(
+      'rejects %s with a Boom 400, since only the ApiKey scheme is read',
+      async (_label, authorization) => {
+        const { service } = setup({ authenticationType: 'api_key', uiam: true, authorization });
 
-    it('reuses a non-ApiKey scheme credential as long as it decodes to id:secret (current behavior)', async () => {
-      const envelope = toEnvelope('basic-user', 'basic-password');
-      const { service } = setup({
-        authenticationType: 'api_key',
-        authorization: `Basic ${envelope}`,
-      });
+        const error = await captureError(service.create(POLICY_NAME));
 
-      await expect(service.create(POLICY_NAME)).resolves.toEqual({
-        apiKey: envelope,
-        owner: 'test-user',
-        createdByUser: true,
-      });
-    });
+        expect(Boom.isBoom(error) && error.output.statusCode).toBe(400);
+        expect(error.message).toBe(
+          'Could not extract an API key from the request authorization header.'
+        );
+      }
+    );
 
-    it('throws a plain Error when there is no authorization header', async () => {
-      const { service } = setup({ authenticationType: 'api_key' });
-
-      const error = await captureError(service.create(POLICY_NAME));
-
-      expectPlainError(
-        error,
-        `Failed to extract API key from authorization header for action policy: ${POLICY_NAME}`
-      );
-    });
-
-    it('throws a plain Error when the credential does not decode to id:secret', async () => {
+    it('rejects a credential that does not decode to id:secret with a Boom 400', async () => {
       const { service } = setup({
         authenticationType: 'api_key',
         authorization: `ApiKey ${Buffer.from('no-colon-here').toString('base64')}`,
@@ -344,20 +344,20 @@ describe('ApiKeyService characterization', () => {
 
       const error = await captureError(service.create(POLICY_NAME));
 
-      expectPlainError(
-        error,
-        `Failed to parse API key credentials from authorization header for action policy: ${POLICY_NAME}`
+      expect(Boom.isBoom(error) && error.output.statusCode).toBe(400);
+      expect(error.message).toBe(
+        'Could not extract an API key from the request authorization header.'
       );
     });
 
-    it('truncates a secret containing ":" to its first segment when re-encoding (current behavior)', async () => {
+    it('keeps a secret containing ":" whole when re-encoding', async () => {
       const { service } = setup({
         authenticationType: 'api_key',
         authorization: `ApiKey ${toEnvelope('id-1', 'sec:ret')}`,
       });
 
       await expect(service.create(POLICY_NAME)).resolves.toEqual({
-        apiKey: toEnvelope('id-1', 'sec'),
+        apiKey: toEnvelope('id-1', 'sec:ret'),
         owner: 'test-user',
         createdByUser: true,
       });
@@ -374,7 +374,7 @@ describe('ApiKeyService characterization', () => {
       })),
     });
 
-    it('writes one exact pending-invalidation doc per input form in a single bulkCreate (current behavior)', async () => {
+    it('writes one exact pending-invalidation doc per input form in a single bulkCreate, skipping raw essu_ keys', async () => {
       const { service, invalidationSavedObjectsClient } = setup();
       const apiKeys = [
         toEnvelope('es-id', 'es-secret'),
@@ -384,7 +384,7 @@ describe('ApiKeyService characterization', () => {
         '',
       ];
       invalidationSavedObjectsClient.bulkCreate.mockResolvedValueOnce(
-        successResponse(apiKeys.length)
+        successResponse(apiKeys.length - 1)
       );
 
       await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([
@@ -405,14 +405,7 @@ describe('ApiKeyService characterization', () => {
           type: API_KEY_PENDING_INVALIDATION_TYPE,
           attributes: { apiKeyId: 'uiam-id', createdAt: NOW, uiamApiKey: 'essu_uiam-secret' },
         },
-        // A raw essu_ key is base64-decoded like an envelope: garbage id, no uiamApiKey (current behavior).
-        {
-          type: API_KEY_PENDING_INVALIDATION_TYPE,
-          attributes: {
-            apiKeyId: 'z\ufffd.\ufffd\ufffd\ufffd\ufffd\ufffdh\ufffd\u07ecy\ufffd\ufffd',
-            createdAt: NOW,
-          },
-        },
+        // A raw essu_ key has no id and is never Kibana-owned, so it is not queued.
         {
           type: API_KEY_PENDING_INVALIDATION_TYPE,
           attributes: { apiKeyId: '\ufffd\ufffdZ\ufffd\ufffd', createdAt: NOW },
@@ -424,7 +417,7 @@ describe('ApiKeyService characterization', () => {
       ]);
     });
 
-    it('drops the third and later ":" segments of the secret, so a split essu_ value is still detected (current behavior)', async () => {
+    it('keeps the third and later ":" segments of the secret', async () => {
       const { service, invalidationSavedObjectsClient } = setup();
       invalidationSavedObjectsClient.bulkCreate.mockResolvedValueOnce(successResponse(1));
 
@@ -433,7 +426,7 @@ describe('ApiKeyService characterization', () => {
       expect(invalidationSavedObjectsClient.bulkCreate).toHaveBeenCalledWith([
         {
           type: API_KEY_PENDING_INVALIDATION_TYPE,
-          attributes: { apiKeyId: 'uiam-id', createdAt: NOW, uiamApiKey: 'essu_a' },
+          attributes: { apiKeyId: 'uiam-id', createdAt: NOW, uiamApiKey: 'essu_a:b' },
         },
       ]);
     });

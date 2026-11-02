@@ -128,6 +128,8 @@ export interface ActionPolicy {
   destinations: ActionPolicyDestination[];
   /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
   apiKey?: string;
+  /** Whether `apiKey` is a user-created (external) Cloud API key */
+  apiKeyUiamExternal?: boolean;
 }
 
 export interface MatchedPair {

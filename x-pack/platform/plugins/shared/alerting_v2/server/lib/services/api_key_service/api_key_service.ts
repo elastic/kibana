@@ -13,7 +13,17 @@ import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { isUiamCredential } from '@kbn/core-security-server';
-import { decodeStoredApiKey, getApiKeyFromRequest } from '@kbn/response-ops-scoped-api-keys';
+import type {
+  ApiKeyInvalidationTarget,
+  ScopedCredentials,
+} from '@kbn/response-ops-scoped-api-keys';
+import {
+  decodeStoredApiKey,
+  encodeApiKey,
+  getApiKeyFromRequest,
+  getApiKeyInvalidationTargets,
+  resolveScopedApiKeys,
+} from '@kbn/response-ops-scoped-api-keys';
 import { inject, injectable } from 'inversify';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import { getActionPolicyCloudApiKeyNotSupportedMessage } from '../../errors/action_policy_error_messages';
@@ -24,6 +34,8 @@ export interface ApiKeyAttributes {
   apiKey: string;
   owner: string;
   createdByUser: boolean;
+  /** Set when `apiKey` is a user-created (external) Cloud API key. */
+  uiamExternal?: true;
 }
 
 /**
@@ -38,8 +50,29 @@ export interface ApiKeyServiceContract {
   markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]>;
 }
 
-const encodeApiKey = (id?: string, key?: string): string | null => {
-  return id && key ? Buffer.from(`${id}:${key}`).toString('base64') : null;
+const POLICY_API_KEY = 'policy';
+
+/** Maps the single resolved key onto the stored `base64(id:secret)`, or the raw Cloud API key. */
+const toStoredApiKey = ({ es, uiam }: ScopedCredentials): string | undefined => {
+  if (uiam) {
+    if (!uiam.secret) return undefined;
+    return uiam.id ? encodeApiKey(uiam.id, uiam.secret) : uiam.secret;
+  }
+  return es?.id && es.secret ? encodeApiKey(es.id, es.secret) : undefined;
+};
+
+/** A raw Cloud API key has no id, so it never yields a target; nothing Kibana owns to invalidate. */
+const toInvalidationTarget = (apiKey: string): ApiKeyInvalidationTarget | undefined => {
+  if (isUiamCredential(apiKey)) {
+    return undefined;
+  }
+  const { id, secret } = decodeStoredApiKey(apiKey);
+  const [target] = getApiKeyInvalidationTargets(
+    secret && isUiamCredential(secret)
+      ? { createdByUser: false, uiamApiKeyId: id, uiamApiKey: secret }
+      : { createdByUser: false, esApiKeyId: id }
+  );
+  return target;
 };
 
 @injectable()
@@ -61,25 +94,56 @@ export class ApiKeyService implements ApiKeyServiceContract {
       );
     }
 
-    const isApiKeyAuth = this.isAuthenticationTypeAPIKey();
-
-    if (isApiKeyAuth) {
-      return this.getAuthenticationAPIKeyAttributes(name, username);
+    const uiamEnabled = !!this.securityService.authc.apiKeys.uiam;
+    let result;
+    try {
+      result = await resolveScopedApiKeys(
+        this.request,
+        { security: this.securityService, logger: this.logger },
+        {
+          names: new Map([[POLICY_API_KEY, { es: name, uiam: `uiam-${name}` }]]),
+          storage: 'single',
+          uiamEnabled,
+          uiamRequired: true,
+          metadata: { managed: true, kibana: { type: 'action_policy' } },
+        }
+      );
+    } catch (e) {
+      throw this.isCloudApiKeyRejection(e)
+        ? Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
+            code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
+          })
+        : e;
     }
 
-    return this.grantAPIKeyAttributes(name, username);
+    const credentials = result.enabled ? result.credentials.get(POLICY_API_KEY) : undefined;
+    const apiKey = credentials ? toStoredApiKey(credentials) : undefined;
+    if (!credentials || !apiKey) {
+      throw new Error(
+        `Failed to create ${uiamEnabled ? 'UIAM' : 'ES'} API key for action policy: ${name}`
+      );
+    }
+
+    return {
+      apiKey,
+      owner: username,
+      createdByUser: credentials.createdByUser,
+      ...(credentials.uiamExternal ? { uiamExternal: true as const } : {}),
+    };
   }
 
   public async markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]> {
-    if (apiKeys.length === 0) {
-      return [];
+    const targets = apiKeys.map(toInvalidationTarget);
+    const queued = targets.filter((target): target is ApiKeyInvalidationTarget => !!target);
+    if (queued.length === 0) {
+      return apiKeys.map((): ApiKeyInvalidationResult => ({ success: true }));
     }
-    const decodedApiKeys = apiKeys.map((key) => this.decodeApiKey(key));
-    const apiKeysToInvalidate = decodedApiKeys.map(({ apiKeyId, apiKeyValue }) => ({
+
+    const apiKeysToInvalidate = queued.map(({ apiKeyId, uiamApiKey }) => ({
       attributes: {
         apiKeyId,
         createdAt: new Date().toISOString(),
-        ...(apiKeyValue && isUiamCredential(apiKeyValue) ? { uiamApiKey: apiKeyValue } : {}),
+        ...(uiamApiKey ? { uiamApiKey } : {}),
       },
       type: API_KEY_PENDING_INVALIDATION_TYPE,
     }));
@@ -90,7 +154,7 @@ export class ApiKeyService implements ApiKeyServiceContract {
     } catch (e) {
       const message = (e as Error).message;
       this.logger.error(
-        `Failed to bulk mark list of API keys [${decodedApiKeys
+        `Failed to bulk mark list of API keys [${queued
           .map(({ apiKeyId }) => `"${apiKeyId}"`)
           .join(', ')}] for invalidation: ${message}`,
         {
@@ -100,8 +164,12 @@ export class ApiKeyService implements ApiKeyServiceContract {
       return apiKeys.map((): ApiKeyInvalidationResult => ({ success: false, message }));
     }
 
-    return decodedApiKeys.map(({ apiKeyId }, index): ApiKeyInvalidationResult => {
-      const created = response.saved_objects[index];
+    let index = 0;
+    return targets.map((target): ApiKeyInvalidationResult => {
+      if (!target) {
+        return { success: true };
+      }
+      const created = response.saved_objects[index++];
       if (created && !isSavedObjectErrorResult(created)) {
         return { success: true };
       }
@@ -109,92 +177,13 @@ export class ApiKeyService implements ApiKeyServiceContract {
       const message = created
         ? created.error.message
         : 'Saved object was not returned by bulkCreate';
-      this.logger.error(`Failed to mark API key "${apiKeyId}" for invalidation: ${message}`);
+      this.logger.error(`Failed to mark API key "${target.apiKeyId}" for invalidation: ${message}`);
       return { success: false, message };
     });
   }
 
-  private decodeApiKey(key: string): { apiKeyId: string; apiKeyValue?: string } {
-    const { id, secret } = decodeStoredApiKey(key);
-    return { apiKeyId: id, apiKeyValue: secret };
-  }
-
-  private isAuthenticationTypeAPIKey(): boolean {
-    const user = this.securityService.authc.getCurrentUser(this.request);
-    return user?.authentication_type === 'api_key';
-  }
-
-  private getAuthenticationAPIKeyAttributes(name: string, username: string): ApiKeyAttributes {
-    const credentials = getApiKeyFromRequest(this.request);
-    if (!credentials) {
-      throw new Error(
-        `Failed to extract API key from authorization header for action policy: ${name}`
-      );
-    }
-
-    const { id: apiKeyId, api_key: apiKeyValue } = credentials;
-
-    // A raw `essu_` Cloud API key carries no key id.
-    if (apiKeyId === undefined) {
-      throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
-        code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
-      });
-    }
-
-    if (!apiKeyId || !apiKeyValue) {
-      throw new Error(
-        `Failed to parse API key credentials from authorization header for action policy: ${name}`
-      );
-    }
-
-    if (isUiamCredential(apiKeyValue) && !this.shouldGrantUiam()) {
-      throw new Error('UIAM API keys should only be used in serverless environments');
-    }
-
-    const encoded = encodeApiKey(apiKeyId, apiKeyValue)!;
-
-    return {
-      apiKey: encoded,
-      owner: username,
-      createdByUser: true,
-    };
-  }
-
-  private async grantAPIKeyAttributes(name: string, username: string): Promise<ApiKeyAttributes> {
-    if (this.shouldGrantUiam()) {
-      const uiamResult = await this.securityService.authc.apiKeys.uiam?.grant(this.request, {
-        name: `uiam-${name}`,
-      });
-
-      if (!uiamResult) {
-        throw new Error(`Failed to create UIAM API key for action policy: ${name}`);
-      }
-
-      return {
-        apiKey: encodeApiKey(uiamResult.id, uiamResult.api_key)!,
-        owner: username,
-        createdByUser: false,
-      };
-    }
-
-    const esResult = await this.securityService.authc.apiKeys.grantAsInternalUser(this.request, {
-      name,
-      role_descriptors: {},
-      metadata: { managed: true, kibana: { type: 'action_policy' } },
-    });
-
-    if (!esResult) {
-      throw new Error(`Failed to create ES API key for action policy: ${name}`);
-    }
-
-    return {
-      apiKey: encodeApiKey(esResult.id, esResult.api_key)!,
-      owner: username,
-      createdByUser: false,
-    };
-  }
-
-  private shouldGrantUiam(): boolean {
-    return !!this.securityService.authc.apiKeys.uiam;
+  private isCloudApiKeyRejection(e: unknown): boolean {
+    const secret = getApiKeyFromRequest(this.request)?.api_key;
+    return Boom.isBoom(e) && e.output.statusCode === 400 && !!secret && isUiamCredential(secret);
   }
 }
