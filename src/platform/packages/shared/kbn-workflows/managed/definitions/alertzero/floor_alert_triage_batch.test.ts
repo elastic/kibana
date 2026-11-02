@@ -94,6 +94,40 @@ describe('Alert Triage batch workflow', () => {
       const names = batchSteps.map(({ name }) => name);
       expect(names.indexOf('load_alerts')).toBeLessThan(names.indexOf('classify_alerts'));
     });
+
+    it('does not retry a size error, and marks the alerts failed only for it', () => {
+      const { 'on-failure': onFailure } = stepByName('load_alerts') as YamlStep & {
+        'on-failure': { retry: { condition: string } };
+      };
+      expect(onFailure.retry.condition).toBe("${{ error.type != 'StepSizeLimitExceeded' }}");
+      expect(stepByName('release_claims_load_failed')).toEqual(
+        expect.objectContaining({
+          if: "${{ steps.load_alerts.error.type == 'StepSizeLimitExceeded' }}",
+        })
+      );
+    });
+
+    // `error` is empty inside fallback steps, so the error is read from steps.load_alerts instead.
+    it('continues past a load error and fails the run in a guard that reads the step error', () => {
+      const { 'on-failure': onFailure } = stepByName('load_alerts') as YamlStep & {
+        'on-failure': { continue?: boolean; fallback?: unknown };
+      };
+      expect(onFailure).toEqual(expect.objectContaining({ continue: true }));
+      expect(onFailure.fallback).toBeUndefined();
+
+      const guard = stepByName('guard_load_succeeded');
+      expect(guard).toEqual(
+        expect.objectContaining({ condition: '${{ steps.load_alerts.error != blank }}' })
+      );
+      expect(guard.steps?.map(({ name }) => name)).toEqual([
+        'release_claims_load_failed',
+        'abort_load_failed',
+      ]);
+      expect(stepByName('abort_load_failed').type).toBe('workflow.fail');
+
+      const names = batchSteps.map(({ name }) => name);
+      expect(names.indexOf('guard_load_succeeded')).toBe(names.indexOf('load_alerts') + 1);
+    });
   });
 
   describe('concurrency', () => {
@@ -180,6 +214,7 @@ describe('Alert Triage batch workflow', () => {
     it.each([
       'release_claims_no_alerts',
       'release_claims_analysis_disabled',
+      'release_claims_load_failed',
       'release_claims_classify_failed',
       'release_unverdicted_claims_call',
     ])('%s marks the alerts failed and removes the claim, so no sweep retries them', (name) => {
