@@ -445,6 +445,17 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
     expect(gridCalls[gridCalls.length - 1][0].readAccess.alerts).toBe(true);
   });
+
+  it('lets the flat grid report its loads, with no tile filter or entity filters on', () => {
+    mockPrivileges();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+    expect(gridCalls[gridCalls.length - 1][0].loadTelemetry).toEqual({
+      hasTileFilter: false,
+      hasEntityFilters: false,
+    });
+  });
 });
 
 describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => {

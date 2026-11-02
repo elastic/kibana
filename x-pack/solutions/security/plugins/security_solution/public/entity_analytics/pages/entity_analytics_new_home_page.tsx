@@ -889,6 +889,13 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   // Strings, so a tile refetch with the same entities doesn't reset the pages below.
   const { searchExpression: gridSearchExpression, entityExpression: gridEntityExpression } =
     useMemo(() => toEsql(activeFilters), [activeFilters]);
+  const hasTileFilter = Boolean(activeTile);
+  const hasGridEntityFilters = Object.values(entityFilters).some((values) => values.length > 0);
+  // Only the flat grid reports its loads; the grids of Group by don't.
+  const gridLoadTelemetry = useMemo(
+    () => ({ hasTileFilter, hasEntityFilters: hasGridEntityFilters }),
+    [hasTileFilter, hasGridEntityFilters]
+  );
   // Group by reads the grid's rows with DSL, so it takes the overrides the grid's filters read.
   const { data: entityFilterOverrides } = useEntityFilterOverrides({
     rowsMode,
@@ -1426,6 +1433,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 sortDirection={sortDirection}
                 onSortChange={setSort}
                 onFullScreenChange={setIsGridFullScreen}
+                loadTelemetry={gridLoadTelemetry}
               />
             )}
           </DataViewContext.Provider>

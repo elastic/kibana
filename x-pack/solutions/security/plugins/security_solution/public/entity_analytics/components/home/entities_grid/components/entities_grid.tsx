@@ -41,6 +41,7 @@ import { DataViewContext } from '../../entities_table';
 import { getReadableColumns, isGridColumnId } from '../grid_columns';
 import type { ReadAccess } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
+import { useGridLoadTelemetry } from '../hooks/use_grid_load_telemetry';
 import { RISK_SCORE_NORM_FIELD } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 
@@ -114,6 +115,8 @@ export interface EntitiesGridProps {
   /** Without them the grid has no toolbar, as inside a group. */
   toolbarControls?: React.ReactNode;
   onFullScreenChange?: (isFullScreen: boolean) => void;
+  /** Only the page's own grid reports its loads; the grids inside groups don't pass it. */
+  loadTelemetry?: { hasTileFilter: boolean; hasEntityFilters: boolean };
 }
 
 export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
@@ -131,6 +134,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   readAccess,
   toolbarControls,
   onFullScreenChange,
+  loadTelemetry,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { dataView } = useContext(DataViewContext);
@@ -187,6 +191,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     updatedAt,
     isFetching,
     isAtLoadLimit,
+    loadState,
     prefetch,
     onRowsInViewChange,
   } = useEntityGridData(
@@ -203,6 +208,29 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     },
     { enrichRowsInView: true }
   );
+
+  // A new sort, rows mode, filter, search or range is a new load; columns and scrolling aren't.
+  useGridLoadTelemetry({
+    skip: !loadTelemetry,
+    runKey: JSON.stringify([
+      rowsMode,
+      readableSortField,
+      readableSortDirection,
+      searchExpression,
+      entityExpression,
+      timeRange,
+    ]),
+    loadState,
+    isFetching,
+    meta: {
+      rowsMode,
+      sortField: readableSortField,
+      timeRange,
+      hasTileFilter: !!loadTelemetry?.hasTileFilter,
+      hasEntityFilters: !!loadTelemetry?.hasEntityFilters,
+      isAtLoadLimit,
+    },
+  });
 
   const onAddColumn = useCallback(
     (columnId: string) =>
