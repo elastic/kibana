@@ -15,7 +15,7 @@ import type { SecurityDatasetExample } from './evaluate_dataset';
  */
 export const GENERATE_INSIGHT_TOOL_ID = 'automatic_troubleshooting.generate_insight';
 
-export const TROUBLESHOOTING_TOOL_USAGE_EVALUATOR_NAME = 'Troubleshooting Tool Usage';
+const TROUBLESHOOTING_TOOL_USAGE_EVALUATOR_NAME = 'Troubleshooting Tool Usage';
 
 type ToolCallStep = ReturnType<typeof getToolCallSteps>[number];
 
