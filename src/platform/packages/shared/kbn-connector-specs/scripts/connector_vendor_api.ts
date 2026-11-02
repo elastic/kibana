@@ -12,7 +12,7 @@ import path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { findConnector } from '../src/test/vendor_api/find_connector';
+import { findConnector, findVendorApiDirectory } from '../src/test/vendor_api/find_connector';
 import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
 import { SOURCE_NAME_PATTERN } from '../src/test/vendor_api/manifest';
 import { createSpecCache } from '../src/test/vendor_api/spec_cache';
@@ -57,7 +57,7 @@ run(
         throw createFlagError('--inspect checks nothing; leave out --check');
       }
       const inspectedId = flagsReader.string('connector');
-      const directory = inspectedId ? (await findConnector(inspectedId)).directory : undefined;
+      const directory = inspectedId ? await findVendorApiDirectory(inspectedId) : undefined;
       const { output, manifestUpdated, problems } = await inspectVendorApi({
         sources,
         directory,
