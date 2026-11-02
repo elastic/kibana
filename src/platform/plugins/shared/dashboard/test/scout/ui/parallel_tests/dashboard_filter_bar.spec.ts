@@ -94,13 +94,19 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
   });
 
   spaceTest(
-    'shows default data view fields on an empty dashboard',
+    'shows the filter bar without a data view on an empty dashboard',
     async ({ page, pageObjects }) => {
       await pageObjects.dashboard.openDashboardWithIdInEditMode(emptyDashboardId);
-      await expect(page.testSubj.locator('addFilter')).toBeVisible();
+      await page.testSubj.click('addFilter');
 
-      // An empty dashboard falls back to the default data view
-      expect(await getFieldSuggestions(page)).toContain('bytes');
+      // No panels means no data view is passed to the filter editor, so none is selected and
+      // fields can't be chosen (the default data view is not used as a fallback)
+      expect(
+        await page.components.comboBox('filterIndexPatternsSelect').getSelectedOptions()
+      ).toEqual([]);
+      await expect(page.testSubj.locator('filterFieldSuggestionList')).toHaveClass(
+        /euiComboBox-isDisabled/
+      );
     }
   );
 
