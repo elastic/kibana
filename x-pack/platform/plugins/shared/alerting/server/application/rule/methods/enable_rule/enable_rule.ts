@@ -21,6 +21,7 @@ import {
   createNewAPIKeySet,
   scheduleTask,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -138,7 +139,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
-    await bulkMigrateLegacyActions({ context, rules: [alert] });
+    const migratedIds = await bulkMigrateLegacyActions({ context, rules: [alert] });
 
     const username = await context.getUserName();
     const profileUid = await context.getProfileUid();
@@ -221,6 +222,9 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
 
       throw e;
     }
+
+    // Legacy actions are deleted only once the rule carrying them is saved, so a conflict can be retried
+    await deleteLegacyActionsForRules(context, migratedIds);
 
     // A rule with only a UIAM key, such as one created by a UIAM service account, gets a new key
     // set above, so the UIAM key it held is no longer used. The key may also be a stale one that
