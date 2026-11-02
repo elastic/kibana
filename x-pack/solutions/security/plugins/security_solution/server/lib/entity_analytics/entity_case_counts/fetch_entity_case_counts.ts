@@ -6,7 +6,6 @@
  */
 
 import { chunk } from 'lodash';
-import { nodeBuilder } from '@kbn/es-query';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { isBoom } from '@hapi/boom';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
