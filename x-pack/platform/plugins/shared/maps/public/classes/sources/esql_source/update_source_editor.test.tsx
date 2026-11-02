@@ -151,6 +151,20 @@ describe('UpdateSourceEditor', () => {
       expect(await screen.findByRole('slider', { name: 'Resolution' })).toBeInTheDocument();
     });
 
+    test('should render resolution when query uses ?_geohash_precision', async () => {
+      const sourceDescriptor = ESQLSource.createDescriptor({
+        esql: 'from logs | stats count = count(*) by ST_GEOHASH(location, ?_geohash_precision)',
+      });
+      render(
+        <UpdateSourceEditor
+          onChange={jest.fn()}
+          sourceDescriptor={sourceDescriptor}
+          getDataViewFields={mockGetDataViewFields}
+        />
+      );
+      expect(await screen.findByRole('slider', { name: 'Resolution' })).toBeInTheDocument();
+    });
+
     test('should render resolution when query uses ?_geotile_precision', async () => {
       const sourceDescriptor = ESQLSource.createDescriptor({
         esql: GEOTILE_ESQL,

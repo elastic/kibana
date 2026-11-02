@@ -21,6 +21,7 @@ import {
   getProjectRoutingFromEsqlQuery,
   getStartEndParams,
   hasAggregatingCommand,
+  hasGeohashPrecisionParam,
   hasGeohexPrecisionParam,
   hasGeotilePrecisionParam,
   hasStartEndParams,
@@ -57,6 +58,7 @@ import type { IField } from '../../fields/field';
 import { getData, getHttp, getIndexPatternService, getUiSettings } from '../../../kibana_services';
 import {
   getGeoGridPrecision,
+  getGeoHashPrecision,
   getGeoHexPrecision,
 } from '../es_geo_grid_source/get_geo_grid_precision';
 import { convertToGeoJson } from './convert_to_geojson';
@@ -70,7 +72,7 @@ const DEFAULT_GEO_PRECISION_RESOLUTION = GRID_RESOLUTION.MOST_FINE;
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
   'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
-> & { geotilePrecision?: number; geohexPrecision?: number };
+> & { geotilePrecision?: number; geohexPrecision?: number; geohashPrecision?: number };
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -276,6 +278,7 @@ export class ESQLSource
       ...getGeoPrecisionParams(this._descriptor.esql, {
         geotile: this.getGeotilePrecision(requestMeta.zoom),
         geohex: this.getGeohexPrecision(requestMeta.zoom),
+        geohash: this.getGeohashPrecision(requestMeta.zoom),
       }),
     ];
     if (namedParams.length) {
@@ -410,6 +413,14 @@ export class ESQLSource
     return getGeoHexPrecision(zoom, this._getResolution());
   }
 
+  /**
+   * Geohash precision bound to `?_geohash_precision`, calculated from the map zoom and
+   * the source's grid resolution so geohash cells have a similar size to geotile cells.
+   */
+  getGeohashPrecision(zoom: number): number {
+    return getGeoHashPrecision(zoom, this._getResolution());
+  }
+
   private _getResolution() {
     return this._descriptor.resolution ?? DEFAULT_GEO_PRECISION_RESOLUTION;
   }
@@ -421,6 +432,9 @@ export class ESQLSource
         : {}),
       ...(dataFilters && hasGeohexPrecisionParam(this._descriptor.esql)
         ? { geohexPrecision: this.getGeohexPrecision(dataFilters.zoom) }
+        : {}),
+      ...(dataFilters && hasGeohashPrecisionParam(this._descriptor.esql)
+        ? { geohashPrecision: this.getGeohashPrecision(dataFilters.zoom) }
         : {}),
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,

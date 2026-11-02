@@ -40,7 +40,7 @@ interface Props {
 }
 
 /**
- * Resolution used to calculate the value of the `?_geotile_precision` and `?_geohex_precision` ES|QL parameters from the map zoom.
+ * Resolution used to calculate the value of the `?_geotile_precision`, `?_geohex_precision` and `?_geohash_precision` ES|QL parameters from the map zoom.
  */
 export function GeoPrecisionResolutionEditor({ resolution, onChange }: Props) {
   return (
@@ -50,7 +50,7 @@ export function GeoPrecisionResolutionEditor({ resolution, onChange }: Props) {
       })}
       helpText={i18n.translate('xpack.maps.esqlSource.geoPrecisionResolution.helpText', {
         defaultMessage:
-          'Sets the value of the ?_geotile_precision and ?_geohex_precision parameters from the map zoom level.',
+          'Sets the value of the ?_geotile_precision, ?_geohex_precision and ?_geohash_precision parameters from the map zoom level.',
       })}
       display="columnCompressed"
     >

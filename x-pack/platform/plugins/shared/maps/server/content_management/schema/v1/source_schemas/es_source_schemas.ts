@@ -117,7 +117,7 @@ export const ESQLSourceSchema = z
       ])
       .optional()
       .meta({
-        description: `Grid resolution used to calculate the values of the '?_geotile_precision' and '?_geohex_precision' ES|QL parameters from the map zoom level. Ignored when the ES|QL statement uses neither parameter. Defaults to '${GRID_RESOLUTION.MOST_FINE}'.`,
+        description: `Grid resolution used to calculate the values of the '?_geotile_precision', '?_geohex_precision' and '?_geohash_precision' ES|QL parameters from the map zoom level. Ignored when the ES|QL statement uses none of them. Defaults to '${GRID_RESOLUTION.MOST_FINE}'.`,
       }),
     type: z.literal(SOURCE_TYPES.ESQL),
   })

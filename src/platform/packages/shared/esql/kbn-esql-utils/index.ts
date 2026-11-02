@@ -39,6 +39,7 @@ export {
   hasStartEndParams,
   hasGeotilePrecisionParam,
   hasGeohexPrecisionParam,
+  hasGeohashPrecisionParam,
   getGeoPrecisionParams,
   type GeoPrecisions,
   getNamedParams,

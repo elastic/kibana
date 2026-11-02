@@ -19,6 +19,7 @@ import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-t
 import { lastValueFrom } from 'rxjs';
 import {
   type ESQLControlVariable,
+  GEOHASH_PRECISION_PARAM,
   GEOHEX_PRECISION_PARAM,
   GEOTILE_PRECISION_PARAM,
 } from '@kbn/esql-types';
@@ -47,13 +48,15 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
 };
 
 /** Columns are resolved with `LIMIT 0`, so any valid precision works. */
-const SCHEMA_ONLY_GEO_PRECISIONS: GeoPrecisions = { geotile: 0, geohex: 0 };
+const SCHEMA_ONLY_GEO_PRECISIONS: GeoPrecisions = { geotile: 0, geohex: 0, geohash: 1 };
 
 export interface GeoPrecisions {
   /** Value for `?_geotile_precision` */
   geotile?: number;
   /** Value for `?_geohex_precision` */
   geohex?: number;
+  /** Value for `?_geohash_precision` */
+  geohash?: number;
 }
 
 const hasNamedParam = (query: string, name: string) => new RegExp(`\\?${name}\\b`, 'i').test(query);
@@ -61,11 +64,15 @@ const hasNamedParam = (query: string, name: string) => new RegExp(`\\?${name}\\b
 export const hasGeotilePrecisionParam = (query: string) =>
   hasNamedParam(query, GEOTILE_PRECISION_PARAM);
 
+export const hasGeohashPrecisionParam = (query: string) =>
+  hasNamedParam(query, GEOHASH_PRECISION_PARAM);
+
 export const hasGeohexPrecisionParam = (query: string) =>
   hasNamedParam(query, GEOHEX_PRECISION_PARAM);
 
 /**
- * Returns the `?_geotile_precision` and `?_geohex_precision` named params the query uses.
+ * Returns the `?_geotile_precision`, `?_geohex_precision` and `?_geohash_precision` named params
+ * the query uses.
  * The caller provides the precisions, e.g. derived from the map zoom.
  */
 export const getGeoPrecisionParams = (query: string, precisions: GeoPrecisions = {}) => {
@@ -75,6 +82,9 @@ export const getGeoPrecisionParams = (query: string, precisions: GeoPrecisions =
   }
   if (precisions.geohex !== undefined && hasGeohexPrecisionParam(query)) {
     namedParams.push({ [GEOHEX_PRECISION_PARAM]: precisions.geohex });
+  }
+  if (precisions.geohash !== undefined && hasGeohashPrecisionParam(query)) {
+    namedParams.push({ [GEOHASH_PRECISION_PARAM]: precisions.geohash });
   }
   return namedParams;
 };
@@ -135,7 +145,7 @@ export async function getESQLQueryColumnsRaw({
   filter?: unknown;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
-  /** Values for the `?_geotile_precision` and `?_geohex_precision` params. */
+  /** Values for the `?_geotile_precision`, `?_geohex_precision` and `?_geohash_precision` params. */
   geoPrecisions?: GeoPrecisions;
   includeColumnMetadata?: boolean;
 }): Promise<ESQLColumn[]> {

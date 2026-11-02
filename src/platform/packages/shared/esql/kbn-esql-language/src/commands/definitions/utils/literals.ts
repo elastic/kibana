@@ -9,6 +9,7 @@
 import {
   ControlTriggerSource,
   ESQLVariableType,
+  GEOHASH_PRECISION_PARAM,
   GEOHEX_PRECISION_PARAM,
   GEOTILE_PRECISION_PARAM,
   type ESQLControlVariable,
@@ -25,15 +26,18 @@ import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 export const GEOTILE_PRECISION_SYSTEM_PARAM = `?${GEOTILE_PRECISION_PARAM}`;
 export const GEOHEX_PRECISION_SYSTEM_PARAM = `?${GEOHEX_PRECISION_PARAM}`;
+export const GEOHASH_PRECISION_SYSTEM_PARAM = `?${GEOHASH_PRECISION_PARAM}`;
 export const GEO_PRECISION_SYSTEM_PARAMS = [
   GEOTILE_PRECISION_SYSTEM_PARAM,
   GEOHEX_PRECISION_SYSTEM_PARAM,
+  GEOHASH_PRECISION_SYSTEM_PARAM,
 ];
 
 /** Functions whose `precision` argument can be bound to a geo precision system param. */
 const GEO_PRECISION_PARAM_BY_FUNCTION: Record<string, string> = {
   st_geotile: GEOTILE_PRECISION_SYSTEM_PARAM,
   st_geohex: GEOHEX_PRECISION_SYSTEM_PARAM,
+  st_geohash: GEOHASH_PRECISION_SYSTEM_PARAM,
 };
 
 /**
@@ -53,6 +57,10 @@ export const GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS: Record<string, string> = {
   [GEOHEX_PRECISION_SYSTEM_PARAM]: i18n.translate(
     'esqlLanguage.esql.autocomplete.geohexPrecisionSystemParam',
     { defaultMessage: 'The geohex (H3) resolution for the current map zoom level' }
+  ),
+  [GEOHASH_PRECISION_SYSTEM_PARAM]: i18n.translate(
+    'esqlLanguage.esql.autocomplete.geohashPrecisionSystemParam',
+    { defaultMessage: 'The geohash precision for the current map zoom level' }
   ),
 };
 

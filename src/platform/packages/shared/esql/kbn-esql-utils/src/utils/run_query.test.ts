@@ -94,12 +94,16 @@ describe('run query helpers', () => {
     it('should return the geo precision params only when given and used', () => {
       const geotileQuery = 'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision)';
       const geohexQuery = 'FROM foo | STATS BY ST_GEOHEX(location, ?_geohex_precision)';
-      const precisions = { geotile: 7, geohex: 4 };
+      const geohashQuery = 'FROM foo | STATS BY ST_GEOHASH(location, ?_geohash_precision)';
+      const precisions = { geotile: 7, geohex: 4, geohash: 5 };
       expect(getNamedParams(geotileQuery, undefined, [], precisions)).toEqual([
         { _geotile_precision: 7 },
       ]);
       expect(getNamedParams(geohexQuery, undefined, [], precisions)).toEqual([
         { _geohex_precision: 4 },
+      ]);
+      expect(getNamedParams(geohashQuery, undefined, [], precisions)).toEqual([
+        { _geohash_precision: 5 },
       ]);
       expect(getNamedParams(geotileQuery, undefined, [], { geohex: 4 })).toEqual([]);
       expect(getNamedParams(geotileQuery)).toEqual([]);
@@ -266,14 +270,18 @@ describe('run query helpers', () => {
 
       await getESQLQueryColumnsRaw({
         esqlQuery:
-          'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision), ST_GEOHEX(location, ?_geohex_precision)',
+          'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision), ST_GEOHEX(location, ?_geohex_precision), ST_GEOHASH(location, ?_geohash_precision)',
         search,
       });
 
       expect(search).toHaveBeenCalledWith(
         expect.objectContaining({
           params: expect.objectContaining({
-            params: [{ _geotile_precision: 0 }, { _geohex_precision: 0 }],
+            params: [
+              { _geotile_precision: 0 },
+              { _geohex_precision: 0 },
+              { _geohash_precision: 1 },
+            ],
           }),
         }),
         expect.anything()

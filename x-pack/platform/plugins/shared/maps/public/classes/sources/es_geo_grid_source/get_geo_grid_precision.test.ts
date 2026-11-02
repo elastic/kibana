@@ -6,7 +6,11 @@
  */
 
 import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
-import { getGeoGridPrecision, getGeoHexPrecision } from './get_geo_grid_precision';
+import {
+  getGeoGridPrecision,
+  getGeoHashPrecision,
+  getGeoHexPrecision,
+} from './get_geo_grid_precision';
 
 describe('getGeoGridPrecision', () => {
   test.each([
@@ -40,5 +44,21 @@ describe('getGeoHexPrecision', () => {
   test('should not exceed the max H3 resolution', () => {
     expect(getGeoHexPrecision(28, GRID_RESOLUTION.SUPER_FINE)).toBe(15);
     expect(getGeoHexPrecision(0, GRID_RESOLUTION.COARSE)).toBe(0);
+  });
+});
+
+describe('getGeoHashPrecision', () => {
+  test.each([
+    [GRID_RESOLUTION.COARSE, 3], // geotile level 7, closest to geohash 3 (level 8)
+    [GRID_RESOLUTION.FINE, 3], // geotile level 8
+    [GRID_RESOLUTION.MOST_FINE, 4], // geotile level 9, equally close to 3 and 4, finer wins
+    [GRID_RESOLUTION.SUPER_FINE, 5], // geotile level 13
+  ])('resolution %s at zoom 4.5 should be geohash precision %s', (resolution, expected) => {
+    expect(getGeoHashPrecision(4.5, resolution)).toBe(expected);
+  });
+
+  test('should stay within the geohash precision range', () => {
+    expect(getGeoHashPrecision(0, GRID_RESOLUTION.COARSE)).toBe(1);
+    expect(getGeoHashPrecision(28, GRID_RESOLUTION.SUPER_FINE)).toBe(12);
   });
 });

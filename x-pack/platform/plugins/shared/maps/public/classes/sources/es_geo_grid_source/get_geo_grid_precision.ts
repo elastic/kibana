@@ -89,3 +89,27 @@ const GEOTILE_LEVEL_TO_H3_RESOLUTION = [
 export function getGeoHexPrecision(zoom: number, resolution: GRID_RESOLUTION): number {
   return GEOTILE_LEVEL_TO_H3_RESOLUTION[getGeoGridPrecision(zoom, resolution, RENDER_AS.HEX)];
 }
+
+/**
+ * Geotile level with the same cell width at the equator as a geohash cell, indexed by
+ * geohash precision - 1 (precision 1-12).
+ */
+const GEOHASH_PRECISION_TO_GEOTILE_LEVEL = [3, 5, 8, 10, 13, 15, 18, 20, 23, 25, 28, 30];
+
+/**
+ * Geohash precision (1-12) for the given map zoom and resolution.
+ * Unlike geotile and geohex, Elasticsearch has no vector tile rule for geohash grids.
+ * The geo grid geotile level for the zoom and resolution is converted to the geohash precision
+ * whose cell width is closest to the width of a cell at that level (finer one when equally close).
+ */
+export function getGeoHashPrecision(zoom: number, resolution: GRID_RESOLUTION): number {
+  const level = getGeoGridPrecision(zoom, resolution, RENDER_AS.GRID);
+  let precision = 1;
+  GEOHASH_PRECISION_TO_GEOTILE_LEVEL.forEach((geohashLevel, index) => {
+    const best = GEOHASH_PRECISION_TO_GEOTILE_LEVEL[precision - 1];
+    if (Math.abs(geohashLevel - level) <= Math.abs(best - level)) {
+      precision = index + 1;
+    }
+  });
+  return precision;
+}

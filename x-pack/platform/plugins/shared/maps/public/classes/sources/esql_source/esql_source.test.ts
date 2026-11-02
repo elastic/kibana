@@ -38,6 +38,7 @@ jest.mock('@kbn/esql-utils', () => ({
   hasAggregatingCommand: (query: string) => /\|\s*stats\b/i.test(query),
   getGeoPrecisionParams: (...args: any[]) => mockGetGeoPrecisionParams(...args),
   hasGeohexPrecisionParam: (query: string) => query.includes('?_geohex_precision'),
+  hasGeohashPrecisionParam: (query: string) => query.includes('?_geohash_precision'),
   hasGeotilePrecisionParam: (query: string) => query.includes('?_geotile_precision'),
   getIndexPatternFromESQLQuery: () => 'logstash-*',
   getProjectRoutingFromEsqlQuery: () => undefined,
@@ -233,7 +234,11 @@ describe('getGeoJsonWithMeta', () => {
       makeInspectorAdapters() as any
     );
 
-    expect(mockGetGeoPrecisionParams).toHaveBeenCalledWith(ESQL, { geotile: 9, geohex: 4 });
+    expect(mockGetGeoPrecisionParams).toHaveBeenCalledWith(ESQL, {
+      geotile: 9,
+      geohex: 4,
+      geohash: 4,
+    });
     expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 9 }]);
   });
 });
@@ -313,6 +318,33 @@ describe('getGeohexPrecision', () => {
     expect(geohexMeta).not.toHaveProperty('geotilePrecision');
     expect(createSource('FROM logs').getSyncMeta({ zoom: 4.5 } as any)).not.toHaveProperty(
       'geohexPrecision'
+    );
+  });
+});
+
+describe('getGeohashPrecision', () => {
+  const GEOHASH_ESQL = 'FROM logs | STATS BY ST_GEOHASH(geo.coordinates, ?_geohash_precision)';
+  const createSource = (esql: string, resolution?: GRID_RESOLUTION) =>
+    new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
+
+  test('should default to most fine resolution', () => {
+    expect(createSource(GEOHASH_ESQL).getGeohashPrecision(4.5)).toBe(4);
+  });
+
+  test.each([
+    [GRID_RESOLUTION.COARSE, 3],
+    [GRID_RESOLUTION.FINE, 3],
+    [GRID_RESOLUTION.MOST_FINE, 4],
+    [GRID_RESOLUTION.SUPER_FINE, 5],
+  ])('should use source resolution %s', (resolution, expected) => {
+    const source = createSource(GEOHASH_ESQL, resolution);
+    expect(source.getGeohashPrecision(4.5)).toBe(expected);
+    expect(source.getSyncMeta({ zoom: 4.5 } as any).geohashPrecision).toBe(expected);
+  });
+
+  test('should only include geohashPrecision in the sync meta when the query uses the param', () => {
+    expect(createSource('FROM logs').getSyncMeta({ zoom: 4.5 } as any)).not.toHaveProperty(
+      'geohashPrecision'
     );
   });
 });

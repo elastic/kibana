@@ -445,6 +445,15 @@ describe('functions arg suggestions', () => {
       expect(labels).not.toContain('?_geotile_precision');
     });
 
+    it('ST_GEOHASH precision: suggests the ?_geohash_precision system param only', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | STATS BY ST_GEOHASH(geoPointField, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toContain('?_geohash_precision');
+      expect(labels).not.toContain('?_geohex_precision');
+    });
+
     it('does not suggest ?_geotile_precision for other functions', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = ROUND(doubleField, /)');

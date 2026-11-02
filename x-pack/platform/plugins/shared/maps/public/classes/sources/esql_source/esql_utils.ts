@@ -10,6 +10,7 @@ import type { DataView } from '@kbn/data-plugin/common';
 import {
   getESQLAdHocDataview,
   getESQLQueryColumnsRaw,
+  hasGeohashPrecisionParam,
   hasGeohexPrecisionParam,
   hasGeotilePrecisionParam,
 } from '@kbn/esql-utils';
@@ -18,11 +19,15 @@ import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getHttp, getIndexPatternService } from '../../../kibana_services';
 
 /**
- * True when the ES|QL statement uses a geo precision system param, `?_geotile_precision` or
- * `?_geohex_precision`, which Maps fills from the map zoom and the source's grid resolution.
+ * True when the ES|QL statement uses a geo precision system param, `?_geotile_precision`,
+ * `?_geohex_precision` or `?_geohash_precision`, which Maps fills from the map zoom and the source's grid resolution.
  */
 export function hasGeoPrecisionParam(esql: string) {
-  return hasGeotilePrecisionParam(esql) || hasGeohexPrecisionParam(esql);
+  return (
+    hasGeotilePrecisionParam(esql) ||
+    hasGeohexPrecisionParam(esql) ||
+    hasGeohashPrecisionParam(esql)
+  );
 }
 
 // ESQL_GEO_POINT_TYPE !== ES_GEO_FIELD_TYPE.GEO_POINT
