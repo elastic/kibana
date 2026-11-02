@@ -23,6 +23,7 @@ const createActionTypeRegistryMock = () => {
     hasSubFeature: jest.fn(),
     isDeprecated: jest.fn(),
     getSpec: jest.fn(),
+    isSpecActionType: jest.fn().mockReturnValue(false),
   };
   return mocked;
 };

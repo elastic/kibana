@@ -57,11 +57,12 @@ describe('useUpdateRuleSettings', () => {
   });
 
   it('should call onSuccess if api succeeds', async () => {
+    const onClose = jest.fn();
     const { result } = renderHook(
       () =>
         useUpdateRuleSettings({
           onSave: () => {},
-          onClose: () => {},
+          onClose,
           setUpdatingRulesSettings: () => {},
         }),
       {
@@ -78,17 +79,46 @@ describe('useUpdateRuleSettings', () => {
     await waitFor(() =>
       expect(mockAddSuccess).toHaveBeenCalledWith('Rules settings updated successfully.')
     );
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onError if api fails', async () => {
+  it('should not call onClose until the api resolves', async () => {
+    let resolveUpdate: () => void = () => {};
+    updateFlappingSettings.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveUpdate = resolve;
+      })
+    );
+    const onClose = jest.fn();
+    const { result } = renderHook(
+      () => useUpdateRuleSettings({ onClose, setUpdatingRulesSettings: () => {} }),
+      { wrapper }
+    );
+
+    act(() => {
+      result.current.mutate({
+        flapping: { enabled: true, lookBackWindow: 3, statusChangeThreshold: 3 },
+      });
+    });
+    await waitFor(() => expect(updateFlappingSettings).toHaveBeenCalled());
+    expect(onClose).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveUpdate();
+    });
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  });
+
+  it('should call onError and keep the page open if api fails', async () => {
     updateQueryDelaySettings.mockRejectedValue('');
     updateFlappingSettings.mockRejectedValue('');
 
+    const onClose = jest.fn();
     const { result } = renderHook(
       () =>
         useUpdateRuleSettings({
           onSave: () => {},
-          onClose: () => {},
+          onClose,
           setUpdatingRulesSettings: () => {},
         }),
       {
@@ -106,5 +136,6 @@ describe('useUpdateRuleSettings', () => {
     await waitFor(() =>
       expect(mockAddDanger).toHaveBeenCalledWith('Failed to update rules settings.')
     );
+    expect(onClose).not.toHaveBeenCalled();
   });
 });

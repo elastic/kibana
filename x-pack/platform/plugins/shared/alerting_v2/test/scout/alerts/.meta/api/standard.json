@@ -1,5 +1,5 @@
 {
-  "sha1": "4e33b03fb3b207f613c9a5a46ce4b3f51f8a8075",
+  "sha1": "c96bfe5c3dae8e9352a1caa06a6de18e6267d24f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2549,6 +2549,32 @@
       }
     },
     {
+      "id": "fe0dc58aa8ace83-bdae7937f58824c",
+      "title": "Episodes query when the latest events of an episode share a timestamp the list query returns one row for the episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/episodes_query_timestamp_ties.spec.ts",
+        "line": 75,
+        "column": 13
+      }
+    },
+    {
+      "id": "fe0dc58aa8ace83-4aea202557cff8e",
+      "title": "Episodes query when the latest events of an episode share a timestamp the single episode query returns one row for the episode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/episodes_query_timestamp_ties.spec.ts",
+        "line": 80,
+        "column": 26
+      }
+    },
+    {
       "id": "9eed9c99ffddd93-aaee8a03285479c",
       "title": "List execution history — tolerates missing rule ids resolves names for surviving rules and falls back to id for deleted ones",
       "expectedStatus": "passed",
@@ -3109,7 +3135,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
         "line": 151,
-        "column": 18
+        "column": 83
       }
     },
     {

@@ -188,7 +188,14 @@ export const resolveSandboxCredentials = ({
   return credentials;
 };
 
-/** Redacts injected secret values (and their common encodings) from command output. */
+/**
+ * Redacts injected secret values from command output. Matching is exact: a value is replaced only
+ * where it appears verbatim, so re-encoded (base64, URL-encoded, JSON-escaped) or split-up copies
+ * survive. Encodings are covered only insofar as a caller passes the decoded value in as its own
+ * secret, as `deriveAuthorizationSecretValues` does for Basic credentials. Values shorter than
+ * `MIN_REDACTABLE_SECRET_LENGTH` (6) are skipped, to avoid redacting common substrings. Redaction
+ * is defense in depth; `credproxy` keeping real secrets out of the sandbox is the primary control.
+ */
 export const redactSecrets = (text: string, secretValues: readonly string[]): string =>
   createOutputRedactor(secretValues).redact(text);
 

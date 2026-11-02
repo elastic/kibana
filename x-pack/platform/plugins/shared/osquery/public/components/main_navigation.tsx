@@ -11,14 +11,15 @@ import { matchPath, useHistory, useLocation } from 'react-router-dom';
 import {
   AppHeader,
   AppHeaderLoading,
-  AppHeaderView,
   type AppHeaderBack,
+  type AppHeaderMenu,
   type AppHeaderTab,
 } from '@kbn/app-header';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
 import { PAGE_ROUTING_PATHS } from '../common/page_paths';
-import { useOsqueryAppMenu } from './use_osquery_app_menu';
 import { useOsqueryPageHeaderTitle } from './osquery_page_header_context';
+import { useAddIntegrationsMenuItem } from '../common/hooks/use_add_integrations_menu_item';
+import { useHistoryBack } from '../common/hooks/use_history_back';
 import { getHistoryFilters } from '../actions/history_filter_storage';
 
 enum Section {
@@ -34,9 +35,19 @@ const matchExact = <Params extends { [K in keyof Params]?: string }>(
 
 export const MainNavigation = () => {
   const history = useHistory();
-  const permissions = useKibana().services.application.capabilities.osquery;
+  const { application, docLinks } = useKibana().services;
+  const permissions = application.capabilities.osquery;
   const location = useLocation();
   const subpageTitle = useOsqueryPageHeaderTitle();
+
+  const isResultsRoute = useMemo(
+    () =>
+      [PAGE_ROUTING_PATHS.history_details, PAGE_ROUTING_PATHS.history_scheduled_details].some(
+        (path) => matchExact(location.pathname, path)
+      ),
+    [location.pathname]
+  );
+
   const section = useMemo(() => {
     const firstSegment = location.pathname.split('/')[1] ?? 'overview';
 
@@ -76,28 +87,33 @@ export const MainNavigation = () => {
     permissions.writeLiveQueries ||
     (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks));
 
-  const listMenuExtras = useMemo(
-    () =>
-      isListView
-        ? {
-            primaryActionItem: {
-              id: 'runQuery',
-              iconType: 'play' as const,
-              label: i18n.translate('xpack.osquery.history.newLiveQueryButtonLabel', {
-                defaultMessage: 'Run query',
-              }),
-              href: newQueryNavProps.href,
-              testId: 'osqueryRunQueryButton',
-              disableButton: !canRunQuery,
-              run: () => {
-                history.push('/new');
-              },
-            },
-          }
-        : undefined,
-    [canRunQuery, history, isListView, newQueryNavProps.href]
-  );
-  const menu = useOsqueryAppMenu(listMenuExtras);
+  const addIntegrationsMenuItem = useAddIntegrationsMenuItem();
+
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    const items = addIntegrationsMenuItem ? [addIntegrationsMenuItem] : [];
+
+    // Subpages (Run query, pack and saved query create/edit) have no actions of their own.
+    if (!isListView) {
+      return items.length ? { items } : undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'runQuery',
+        iconType: 'play' as const,
+        label: i18n.translate('xpack.osquery.history.newLiveQueryButtonLabel', {
+          defaultMessage: 'Run query',
+        }),
+        href: newQueryNavProps.href,
+        testId: 'osqueryRunQueryButton',
+        disableButton: !canRunQuery,
+        run: () => {
+          history.push('/new');
+        },
+      },
+      items,
+    };
+  }, [addIntegrationsMenuItem, canRunQuery, history, isListView, newQueryNavProps.href]);
   const loadingMenu = useMemo(() => ({ buttonCount: 1, hasPrimary: false }), []);
 
   const tabs = useMemo<AppHeaderTab[]>(
@@ -132,12 +148,10 @@ export const MainNavigation = () => {
     ]
   );
 
+  const historyBack = useHistoryBack();
+
   const subpageHeader = useMemo(() => {
     const { pathname } = location;
-    const historyBack: AppHeaderBack = {
-      href: historyNavProps.href,
-      label: historyBackLabel,
-    };
     const packsBack: AppHeaderBack = {
       href: packsNavProps.href,
       label: packsBackLabel,
@@ -192,16 +206,9 @@ export const MainNavigation = () => {
       };
     }
 
-    if (matchExact(pathname, PAGE_ROUTING_PATHS.history_scheduled_details)) {
-      return {
-        title: i18n.translate('xpack.osquery.liveQueryActionResults.results', {
-          defaultMessage: 'Query results',
-        }),
-        back: historyBack,
-      };
-    }
-
-    if (matchExact(pathname, PAGE_ROUTING_PATHS.history_details)) {
+    // Results routes normally render their own header (see below); this fallback only shows
+    // alongside `MissingPrivileges` when the user can't read live queries.
+    if (isResultsRoute) {
       return {
         title: i18n.translate('xpack.osquery.liveQueryActionResults.results', {
           defaultMessage: 'Query results',
@@ -212,8 +219,8 @@ export const MainNavigation = () => {
 
     return null;
   }, [
-    historyBackLabel,
-    historyNavProps.href,
+    historyBack,
+    isResultsRoute,
     location,
     packsBackLabel,
     packsNavProps.href,
@@ -222,12 +229,14 @@ export const MainNavigation = () => {
     subpageTitle,
   ]);
 
-  if (!isListView && !subpageHeader) {
-    if (!menu.items?.length) {
-      return null;
-    }
+  // `history_details` and `history_scheduled_details` render their own page-level `AppHeader`
+  // (they own the result data/actions); rendering one here too would double the header.
+  if (isResultsRoute && permissions.readLiveQueries) {
+    return null;
+  }
 
-    return <AppHeaderView menu={menu} />;
+  if (!isListView && !subpageHeader) {
+    return null;
   }
 
   if (subpageHeader && subpageHeader.title === undefined) {
@@ -240,6 +249,7 @@ export const MainNavigation = () => {
       back={subpageHeader?.back}
       tabs={subpageHeader ? undefined : tabs}
       menu={menu}
+      docLink={docLinks.links.osquery.guide}
     />
   );
 };

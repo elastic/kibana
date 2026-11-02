@@ -12,6 +12,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 interface TileSeriesQueryOptions<T> {
   /** Identifies the tile in the query cache. */
@@ -21,8 +22,6 @@ interface TileSeriesQueryOptions<T> {
   enabled: boolean;
   /** Reads the response; throwing leaves the line out. */
   parse: (raw: ESQLSearchResponse) => T;
-  /** Run only against the local cluster, like the tile's count. */
-  localOnly?: boolean;
 }
 
 /** Runs a tile's series query and returns what `parse` reads from it. */
@@ -31,7 +30,6 @@ export const useTileSeriesQuery = <T>({
   query,
   enabled,
   parse,
-  localOnly = false,
 }: TileSeriesQueryOptions<T>): { series: T | undefined; isFetching: boolean; isError: boolean } => {
   const { data } = useKibana().services;
 
@@ -51,7 +49,7 @@ export const useTileSeriesQuery = <T>({
             {
               abortSignal: tileSignal,
               strategy: 'esql_async',
-              ...(localOnly ? { projectRouting: '_alias:_origin' } : {}),
+              projectRouting: TILE_PROJECT_ROUTING,
             }
           )
         )
@@ -95,6 +93,13 @@ interface TileTrendOptions {
   dots: number[] | undefined;
   /** The live count, which replaces the newest dot so the line ends on the number shown. */
   liveCount: number;
+  /**
+   * The count the tile's delta compares with: the count over the range that ended one range ago.
+   * Each dot is a rolling count over a full range, and the oldest dot ends one step later than this
+   * baseline, so it goes first. The line then runs from the baseline to the live count, and
+   * last - first equals the delta. Without a delta there is no baseline and the line keeps its dots.
+   */
+  deltaBaseline?: number;
   skip?: boolean;
   isFetching: boolean;
   isError: boolean;
@@ -105,13 +110,14 @@ interface TileTrendOptions {
 }
 
 /**
- * Turns a series into what the tile shows: the dots ending on the live count, or none while it
- * loads (also for a stale range). After an error, or when it cannot run, there is no line and no
- * spinner.
+ * Turns a series into what the tile shows: the dots ending on the live count, led by the delta's
+ * baseline when it has one, or none while it loads (also for a stale range). After an error, or
+ * when it cannot run, there is no line and no spinner.
  */
 export const getTileTrend = ({
   dots,
   liveCount,
+  deltaBaseline,
   skip,
   isFetching,
   isError,
@@ -120,7 +126,9 @@ export const getTileTrend = ({
 }: TileTrendOptions): { trend: number[] | undefined; isTrendLoading: boolean } => {
   const hasSeries = dots !== undefined && !isFetching && !isHidden;
   return {
-    trend: hasSeries ? [...dots.slice(0, -1), liveCount] : undefined,
+    trend: hasSeries
+      ? [...(deltaBaseline === undefined ? [] : [deltaBaseline]), ...dots.slice(0, -1), liveCount]
+      : undefined,
     isTrendLoading: !skip && !hasSeries && !isError && !isUnavailable && !isHidden,
   };
 };

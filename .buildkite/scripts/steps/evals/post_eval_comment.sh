@@ -20,7 +20,6 @@ set -euo pipefail
 
 # Bootstrap is required so that workspace packages (e.g. @kbn/setup-node-env)
 # are available when calling `node scripts/evals compare`.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
 GITHUB_PR_NUMBER="${GITHUB_PR_NUMBER:-${EVAL_PR_NUMBER:-${BUILDKITE_PULL_REQUEST:-}}}"

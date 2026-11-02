@@ -6,15 +6,18 @@
  */
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import React from 'react';
 
-import { PageTitle } from './page_title';
+import * as i18n from './translations';
 import { AttackDiscoveryUpsellingSection } from '../../sections/attack_discovery';
+import type { UpsellingPageProps } from '../../service/types';
 
-interface Props {
+interface Props extends UpsellingPageProps {
   actions?: React.ReactNode;
   availabilityMessage: string;
+  docLink?: string;
   upgradeMessage: string;
 }
 
@@ -24,15 +27,15 @@ interface Props {
  */
 const AttacksUpsellingPageComponent: React.FC<Props> = ({
   actions,
+  appHeader: Header = AppHeader,
   availabilityMessage,
+  docLink,
   upgradeMessage,
 }) => {
-  const pageTitle = useMemo(() => <PageTitle />, []);
-
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
-        <EuiPageHeader bottomBorder pageTitle={pageTitle} />
+        <Header title={i18n.ATTACKS_PAGE_TITLE} docLink={docLink} spacing="largeBleed" />
         <EuiSpacer size="xxl" />
         <AttackDiscoveryUpsellingSection
           actions={actions}

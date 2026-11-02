@@ -38,14 +38,15 @@ const i18nStrings = {
 };
 
 export interface RowActions {
-  onInvestigateInTimeline: (row: Row) => void;
+  /** Absent when the user lacks Timeline read privileges, which hides the item. */
+  onInvestigateInTimeline?: (row: Row) => void;
   onOpenEntityGraph: (row: Row) => void;
   /** Absent when the agent chat is unavailable, which hides the item. */
   onAddToChat?: (row: Row) => void;
 }
 
 interface RowActionsCellProps {
-  onInvestigateInTimeline: () => void;
+  onInvestigateInTimeline?: () => void;
   onOpenEntityGraph: () => void;
   onAddToChat?: () => void;
 }
@@ -59,6 +60,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
   const moreActionsButton = (
     <EuiToolTip content={i18nStrings.moreActions} disableScreenReaderOutput>
       <EuiButtonIcon
+        data-test-subj="eaGridRowActionsButton"
         iconType="boxesVertical"
         aria-label={i18nStrings.moreActions}
         color="text"
@@ -70,20 +72,24 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={i18nStrings.investigateInTimeline} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="timeline"
-            aria-label={i18nStrings.investigateInTimeline}
-            color="text"
-            size="xs"
-            onClick={onInvestigateInTimeline}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+      {onInvestigateInTimeline && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={i18nStrings.investigateInTimeline} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj="eaGridRowInvestigateInTimeline"
+              iconType="timeline"
+              aria-label={i18nStrings.investigateInTimeline}
+              color="text"
+              size="xs"
+              onClick={onInvestigateInTimeline}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18nStrings.openEntityGraph} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="eaGridRowOpenEntityGraph"
             iconType="cluster"
             aria-label={i18nStrings.openEntityGraph}
             color="text"
@@ -108,6 +114,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
                 items={[
                   <EuiContextMenuItem
                     key="addToChat"
+                    data-test-subj="eaGridRowAddToChat"
                     icon="addToChat"
                     onClick={() => {
                       setIsMoreActionsOpen(false);

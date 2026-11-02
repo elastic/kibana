@@ -294,6 +294,35 @@ export const AUTONOMY_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Autonomy' }
 );
 
+export const HUNT_INDEX_COVERAGE_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.title',
+  { defaultMessage: "Hunt Watch cannot read part of this space's default data view" }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceStateful',
+  {
+    defaultMessage:
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+  }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_STATEFUL_REMOTE = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceStatefulRemote',
+  {
+    defaultMessage:
+      'Cross-cluster patterns need an Elasticsearch version whose alertzero_threat_hunt role includes remote indices.',
+  }
+);
+
+export const HUNT_INDEX_COVERAGE_GUIDANCE_SERVERLESS = i18n.translate(
+  'xpack.alertzero.watches.settings.huntIndexCoverage.guidanceServerless',
+  {
+    defaultMessage:
+      "The worker's built-in role reads the standard Elastic Agent and Beats patterns only, in this project and in linked Security projects. Linked projects of other types are not searched. Remove other patterns from securitySolution:defaultIndex or route their data into a covered data stream.",
+  }
+);
+
 export const WORKER_SETTINGS_UNAVAILABLE = i18n.translate(
   'xpack.alertzero.watches.settings.worker.unavailable',
   { defaultMessage: 'Settings could not be read; reload and try again' }

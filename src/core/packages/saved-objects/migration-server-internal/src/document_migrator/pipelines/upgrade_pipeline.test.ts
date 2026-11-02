@@ -15,7 +15,7 @@ import { TransformType } from '../types';
 import { DocumentUpgradePipeline } from './upgrade_pipeline';
 
 // snake case is way better for migration function names in this very specific scenario.
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 
 describe('DocumentMigratorPipeline', () => {
   const defaultKibanaVersion = '8.8.0';
@@ -59,6 +59,46 @@ describe('DocumentMigratorPipeline', () => {
     const defaultImpl: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
     return jest.fn().mockImplementation(impl ?? defaultImpl);
   };
+
+  describe.each([undefined, false, true])(
+    'type changes with allowSkipClone=%s',
+    (allowSkipClone) => {
+      it.each(['in place', 'returned document'])(
+        'rejects a type change in the %s',
+        (changeMode) => {
+          const document = createDoc({
+            type: 'foo',
+            typeMigrationVersion: '8.7.0',
+          });
+          const changeType = createTransformFn((doc) => {
+            if (changeMode === 'in place') {
+              doc.type = 'bar';
+              return { transformedDoc: doc, additionalDocs: [] };
+            }
+            return { transformedDoc: { ...doc, type: 'bar' }, additionalDocs: [] };
+          });
+          const typeTransforms = getTypeTransforms([
+            {
+              transformType: TransformType.Migrate,
+              version: '8.8.0',
+              transform: changeType,
+            },
+          ]);
+          const pipeline = new DocumentUpgradePipeline({
+            document,
+            kibanaVersion: defaultKibanaVersion,
+            allowSkipClone,
+            migrations: { foo: typeTransforms },
+            convertNamespaceTypes: false,
+          });
+
+          expect(() => pipeline.run()).toThrow(
+            `Changing a document's type during a migration is not supported.`
+          );
+        }
+      );
+    }
+  );
 
   describe('upward conversions', () => {
     it('calls a single `Migrate` conversion function', () => {

@@ -38,12 +38,19 @@ describe('DefaultCell', () => {
 });
 
 describe('RiskScoreChangeCell', () => {
-  it.each([
-    ['no value', undefined],
-    ['zero', 0],
-  ])('renders a dash for %s', (_, value) => {
-    const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
+  it('renders a dash for no value', () => {
+    const { container } = renderInProviders(<RiskScoreChangeCell value={undefined} />);
     expect(container.textContent).toBe('—');
+  });
+
+  it.each([
+    ['zero', 0],
+    ['a rise that rounds to zero', 0.4],
+    ['a drop that rounds to zero', -0.4],
+  ])('renders a neutral 0 without an arrow for %s', (_, value) => {
+    const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
+    expect(container.textContent).toBe('0');
+    expect(container.querySelector('[data-euiicon-type]')).not.toBeInTheDocument();
   });
 
   it.each([
@@ -155,13 +162,13 @@ describe('cells with a click handler', () => {
 });
 
 describe('RowActionsCell', () => {
-  const renderActions = ({ canAddToChat = true } = {}) => {
+  const renderActions = ({ canAddToChat = true, canInvestigateInTimeline = true } = {}) => {
     const onInvestigateInTimeline = jest.fn();
     const onOpenEntityGraph = jest.fn();
     const onAddToChat = jest.fn();
     renderInProviders(
       <RowActionsCell
-        onInvestigateInTimeline={onInvestigateInTimeline}
+        onInvestigateInTimeline={canInvestigateInTimeline ? onInvestigateInTimeline : undefined}
         onOpenEntityGraph={onOpenEntityGraph}
         onAddToChat={canAddToChat ? onAddToChat : undefined}
       />
@@ -200,6 +207,13 @@ describe('RowActionsCell', () => {
   it('hides the more actions menu without the agent chat', () => {
     renderActions({ canAddToChat: false });
     expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();
+  });
+
+  it('hides "Investigate in timeline" without Timeline read privileges', () => {
+    renderActions({ canInvestigateInTimeline: false });
+    expect(
+      screen.queryByRole('button', { name: 'Investigate in timeline' })
+    ).not.toBeInTheDocument();
   });
 });
 

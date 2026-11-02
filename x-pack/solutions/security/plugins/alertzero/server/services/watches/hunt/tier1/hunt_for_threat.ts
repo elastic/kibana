@@ -12,7 +12,9 @@ import type {
   HuntIncompleteness,
   HuntIoc,
 } from '@kbn/alertzero-common';
+import { isIndexExclusion } from '../../../../../common/remote_cluster';
 import { assertHuntWindow } from '../common/assert_hunt_window';
+import { originOfIndices } from '../common/host_origin';
 import { summarizeHit } from '../common/summarize_hit';
 import {
   ALERT_TECHNIQUE_ID_FIELDS,
@@ -86,6 +88,13 @@ const buildTechniqueShould = (techniques: string[]): Array<Record<string, unknow
  * buckets: it is the search's own hit count.
  */
 const PER_INDEX_MAX_BUCKETS = 500;
+
+/**
+ * Per-host `_index` bucket cap. Only "any local index" and the remote cluster aliases are
+ * read from these, so a few buckets per host answer it; a cut list that saw no local index
+ * leaves the host's origin unknown rather than calling it remote-only.
+ */
+const HOST_INDEX_MAX_BUCKETS = 20;
 
 /**
  * Fields the wire hit, the entity chips and the Tier 2 digest read, independent
@@ -181,7 +190,17 @@ export const emptyHuntForThreatResult = (
 
 interface HuntAggregations {
   per_index?: { buckets: Array<{ key: string; doc_count: number }> };
-  affected_hosts?: { buckets: Array<{ key: string; doc_count: number }> };
+  affected_hosts?: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      doc_count_error_upper_bound?: number;
+      by_index?: {
+        buckets: Array<{ key: string; doc_count: number }>;
+        sum_other_doc_count?: number;
+      };
+    }>;
+  };
   affected_users?: {
     buckets: Array<{
       key: string;
@@ -295,7 +314,7 @@ export const huntForThreat = async (
 
   // An empty index list would search every index rather than none, and a list of
   // exclusions alone resolves to none: neither is a universe to hunt.
-  if (!scope.search_patterns.some((pattern) => !pattern.startsWith('-'))) {
+  if (!scope.search_patterns.some((pattern) => !isIndexExclusion(pattern))) {
     return emptyHuntForThreatResult(
       'scope_blocked',
       iocs,
@@ -352,7 +371,13 @@ export const huntForThreat = async (
         terms: { field: '_index', size: PER_INDEX_MAX_BUCKETS },
       },
       affected_hosts: {
-        terms: { field: 'host.name', size: maxAssets },
+        terms: { field: 'host.name', size: maxAssets, show_term_doc_count_error: true },
+        aggs: {
+          // Under CCS, `_index` terms keys come back as `<cluster>:<index>` with either
+          // `ccs_minimize_roundtrips` setting (checked on 9.7.0-SNAPSHOT), which tells a remote
+          // host apart from a local one.
+          by_index: { terms: { field: '_index', size: HOST_INDEX_MAX_BUCKETS } },
+        },
       },
       affected_users: {
         terms: { field: 'user.name', size: maxAssets },
@@ -387,10 +412,17 @@ export const huntForThreat = async (
   );
   const hits = attributeHits(docs, iocs, techniques);
 
-  const hosts: AffectedAsset[] = (aggs?.affected_hosts?.buckets ?? []).map((b) => ({
-    name: b.key,
-    hit_count: b.doc_count,
-  }));
+  const hosts: AffectedAsset[] = (aggs?.affected_hosts?.buckets ?? []).map((b) => {
+    const origin = b.by_index
+      ? originOfIndices(b.by_index.buckets.map((indexBucket) => indexBucket.key))
+      : undefined;
+    // Remote-only needs the host's whole breakdown: no `_index` bucket cut off, and no shard
+    // that left the host out of its top terms (a shard where it is rare can be a local one).
+    const complete =
+      (b.by_index?.sum_other_doc_count ?? 0) === 0 && b.doc_count_error_upper_bound === 0;
+    const known = origin && (origin.local || complete);
+    return { name: b.key, hit_count: b.doc_count, ...(known ? origin : {}) };
+  });
   const userBuckets = aggs?.affected_users?.buckets ?? [];
   const users: AffectedAsset[] = [];
   const services: AffectedAsset[] = [];
