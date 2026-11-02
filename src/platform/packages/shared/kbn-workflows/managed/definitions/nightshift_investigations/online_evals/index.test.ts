@@ -49,6 +49,7 @@ describe('nightshift online evals workflow', () => {
             { name: 'nightshift_investigation_process' },
             { name: 'nightshift_conclusion_quality' },
           ],
+          entry_point: '${{ inputs.entry_point }}',
         }),
       })
     );

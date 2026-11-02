@@ -39,10 +39,6 @@ triggers:
             - follow_up
             - alert_recovery
           description: What kind of round it is, from classifyRound.
-        recovery_verdict:
-          type: string
-          maxLength: 100
-          description: Alert recoveries only, the recovery round's verdict on the root cause.
         investigation_started_at:
           type: string
           maxLength: 100
