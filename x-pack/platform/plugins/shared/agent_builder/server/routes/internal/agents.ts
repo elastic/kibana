@@ -203,35 +203,26 @@ export function registerInternalAgentRoutes({
       const agent = await registry.get(request.params.id);
       const inferenceFeatureId = agent.configuration.inference_feature_id;
 
-      if (inferenceFeatureId !== undefined) {
-        // A run hands the feature to the inference plugin as is, so this mirrors its resolution.
-        // ANY inference request error (400) — missing endpoint, unregistered feature, non-chat
-        // feature — means the feature has no usable model: it is reported as no connector, with
-        // the source still being the agent feature, since the run will not fall back either.
-        // Every other error propagates.
-        const connector = await inference
-          .resolveFeatureConnector(inferenceFeatureId, request)
-          .catch((error) => {
-            if (isUnresolvableFeatureError(error)) {
-              return undefined;
-            }
-            throw error;
-          });
-        return response.ok<GetAgentModelResponse>({
-          body: {
-            inference_feature_id: inferenceFeatureId,
-            ...toAgentModelConnector(connector),
-            source: 'agent_feature',
-          },
-        });
-      }
+      // A feature-bound agent mirrors the run, which hands the feature to the inference plugin as
+      // is: ANY inference request error (400) — missing endpoint, unregistered feature, non-chat
+      // feature — means the feature has no usable model and is reported as no connector, since
+      // the run will not fall back either. Every other error propagates.
+      const connector =
+        inferenceFeatureId !== undefined
+          ? await inference.resolveFeatureConnector(inferenceFeatureId, request).catch((error) => {
+              if (isUnresolvableFeatureError(error)) {
+                return undefined;
+              }
+              throw error;
+            })
+          : await resolveAgentBuilderDefaultEndpoint({ request, searchInferenceEndpoints });
 
-      const connector = await resolveAgentBuilderDefaultEndpoint({
-        request,
-        searchInferenceEndpoints,
-      });
       return response.ok<GetAgentModelResponse>({
-        body: { ...toAgentModelConnector(connector), source: 'default' },
+        body: {
+          ...(inferenceFeatureId !== undefined ? { inference_feature_id: inferenceFeatureId } : {}),
+          ...toAgentModelConnector(connector),
+          source: inferenceFeatureId !== undefined ? 'agent_feature' : 'default',
+        },
       });
     })
   );
