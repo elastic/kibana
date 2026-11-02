@@ -151,7 +151,7 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'Fixed schema',
   }),
   mappedFieldsLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappedFieldsLabel', {
-    defaultMessage: 'Mapped fields',
+    defaultMessage: 'Defined fields',
   }),
   mappedFieldsCount: (count: number) =>
     i18n.translate('xpack.dataFederation.createDatasetWizard.mappedFieldsCount', {
