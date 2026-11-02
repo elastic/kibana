@@ -114,17 +114,17 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             index,
           });
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
-          ruleStates[ruleConfig.id] = clearRuleFailure(
-            await runRelatedUserAliasResolution({
-              state: ruleState,
-              esClient,
-              logger,
-              resolutionClient,
-              signal,
-              telemetry,
-              index,
-            })
-          );
+          const aliasState = await runRelatedUserAliasResolution({
+            state: ruleState,
+            esClient,
+            logger,
+            resolutionClient,
+            signal,
+            telemetry,
+            index,
+          });
+          // An aborted run returns the state it was given, which says nothing about success.
+          ruleStates[ruleConfig.id] = signal.aborted ? aliasState : clearRuleFailure(aliasState);
         } else {
           logger.warn(
             `Skipping resolution rule '${ruleConfig.id}': no matcher spec and unrecognized kind '${ruleConfig.kind}'`

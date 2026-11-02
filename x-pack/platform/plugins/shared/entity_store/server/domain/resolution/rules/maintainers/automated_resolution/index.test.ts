@@ -425,7 +425,7 @@ describe('automatedResolutionMaintainerConfig', () => {
             lastError: 'boom',
             lastFailedAt: '2026-10-01T00:00:00.000Z',
             consecutiveFailures: 3,
-            nextAttemptAt: '2026-10-01T01:00:00.000Z',
+            nextAttemptAt: new Date(Date.now() - 1_000).toISOString(),
           },
         },
       },
@@ -437,6 +437,34 @@ describe('automatedResolutionMaintainerConfig', () => {
       lastProcessedTimestamp: null,
       lastRun: null,
     });
+  });
+
+  it('keeps the failure streak when the related_user run is aborted', async () => {
+    const enabled = DEFAULT_EFFECTIVE_RULES.map((rule) =>
+      rule.id === ALIAS_RESOLUTION_RULE ? { ...rule, enabled: true } : rule
+    );
+    const controller = new AbortController();
+    (runRelatedUserAliasResolution as jest.Mock).mockImplementationOnce(async ({ state }) => {
+      controller.abort();
+      return state;
+    });
+    const failed = {
+      lastProcessedTimestamp: null,
+      lastRun: null,
+      lastError: 'boom',
+      lastFailedAt: '2026-10-01T00:00:00.000Z',
+      consecutiveFailures: 3,
+      nextAttemptAt: new Date(Date.now() - 1_000).toISOString(),
+    };
+
+    const result = await runConfig(
+      createEsClient(),
+      { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: { [ALIAS_RESOLUTION_RULE]: failed } },
+      enabled,
+      controller.signal
+    );
+
+    expect(result.rules[ALIAS_RESOLUTION_RULE]).toEqual(failed);
   });
 
   describe('custom rules', () => {
