@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { ApprovalContent } from './approval_content';
 import type { DeclineParams, AlwaysAllowOption, ApprovalProposal } from './types';
 
@@ -35,6 +36,8 @@ export interface ApprovalModalProps {
   isSubmitting?: 'applying' | 'declining';
   /** Who's approving, for the "Applying"/"Declining" caption before the server confirms a decider. */
   currentActorName?: string;
+  /** See `ApprovalContentProps.basePath`. */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -61,6 +64,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
     onDismiss,
     isSubmitting,
     currentActorName,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const { euiTheme } = useEuiTheme();
@@ -83,6 +87,7 @@ export const ApprovalModal = memo<ApprovalModalProps>(
           data-test-subj={dataTestSubj}
           onApprove={onConfirm}
           onDismiss={onDismiss}
+          basePath={basePath}
         />
       </EuiModal>
     );

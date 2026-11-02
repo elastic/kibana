@@ -82,7 +82,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'ApprovalChatCard' });
   const {
-    services: { application },
+    services: { application, http },
   } = useKibana<CoreStart>();
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
 
@@ -172,6 +172,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         onApprove={isPending || isReplaced ? handleApprove : undefined}
         secondaryActions={secondaryActions}
         onDismiss={isPending && !isReplaced ? handleDismiss : undefined}
+        basePath={http.basePath}
         data-test-subj={`proposalCard-${proposalId}`}
       />
       {isReplaced && (
