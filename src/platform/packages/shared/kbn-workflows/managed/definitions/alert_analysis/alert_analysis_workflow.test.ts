@@ -452,21 +452,23 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       /\{% if variables\.alert_conversation_count[\s\S]*?\{%- endif %\}/
     )?.[0];
     expect(linkBlock).toBeDefined();
+    // An alert of a batch that returned no verdict for it gets the same link on its error note.
+    const errorNoteStep = findStepByName(workflow.steps, 'add_no_data_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    expect(errorNoteStep.with.body.note.note).toContain(linkBlock);
 
     // Variables merge in execution order, so replay the two batches through the real steps.
-    let variables: Record<string, unknown> = { conversation_ids: [], batch_conversations: [] };
+    let variables: Record<string, unknown> = { batch_conversations: [] };
     [
       { conversation: 'conversation-1', alertIds: ['alert-1', 'alert-2'] },
       { conversation: 'conversation-2', alertIds: ['alert-3'] },
     ].forEach(({ conversation, alertIds }) => {
+      variables = { ...variables, batch_result_conversation_id: conversation };
+      const foreach = { item: alertIds.map((_id) => ({ _id })) };
       variables = {
         ...variables,
-        batch_result_conversation_id: conversation,
-        batch_alert_ids: alertIds,
-      };
-      variables = {
-        ...variables,
-        ...(renderValueRecursively(engine, buildStep.with, { variables }) as object),
+        ...(renderValueRecursively(engine, buildStep.with, { variables, foreach }) as object),
       };
       variables = {
         ...variables,
@@ -496,34 +498,36 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
   it('collects one conversation id per batch and exposes them as a workflow output', () => {
     const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
-      with: { conversation_ids: unknown[] };
+      with: { batch_conversations: unknown[] };
     };
-    expect(initStep.with.conversation_ids).toEqual([]);
+    expect(initStep.with.batch_conversations).toEqual([]);
 
     // Gated on a non-empty id, so a batch without a conversation adds nothing.
     const gate = findStepByName(workflow.steps, 'collect_batch_conversation_id') as {
       condition: string;
     };
     expect(gate.condition).toBe("${{ variables.batch_result_conversation_id != '' }}");
-    const pushStep = findStepByName(workflow.steps, 'push_batch_conversation_id') as {
-      with: Record<string, string>;
-    };
-    const pushed = evaluateExpression(
-      createWorkflowLiquidEngine(),
-      pushStep.with.conversation_ids,
-      {
-        variables: {
-          conversation_ids: ['conversation-1'],
-          batch_result_conversation_id: 'conversation-2',
-        },
-      }
-    );
-    expect(pushed).toEqual(['conversation-1', 'conversation-2']);
+    // Outside the verdict check, so a batch that returned no verdicts still records its
+    // conversation.
+    const verdictCheck = findStepByName(workflow.steps, 'check_batch_output_exists') as Step;
+    expect(findStepByName([verdictCheck], 'collect_batch_conversation_id')).toBeUndefined();
 
     const emitStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
       with: Record<string, string>;
     };
-    expect(emitStep.with.conversation_ids).toBe('${{ variables.conversation_ids }}');
+    const output = evaluateExpression(
+      createWorkflowLiquidEngine(),
+      emitStep.with.conversation_ids,
+      {
+        variables: {
+          batch_conversations: [
+            { conversation_id: 'conversation-1', alert_ids: ['alert-1'] },
+            { conversation_id: 'conversation-2', alert_ids: ['alert-2'] },
+          ],
+        },
+      }
+    );
+    expect(output).toEqual(['conversation-1', 'conversation-2']);
   });
 
   it('lets one failed batch fall through instead of aborting the whole execution', () => {

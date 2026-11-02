@@ -474,8 +474,6 @@ steps:
       impacted_entities: []
       # Alert ids with no agent verdict (apply_verdicts no-match branch).
       missing_alert_ids: []
-      # One Agent Builder conversation id per batch that created one (standalone agent path).
-      conversation_ids: []
       # One { conversation_id, alert_ids } entry per batch that created a conversation. The notes
       # are written after every batch has run, so each alert looks up its own batch here.
       batch_conversations: []
@@ -1738,6 +1736,24 @@ steps:
             with:
               batch_result_verdict_count: "${{ variables.batch_result_verdicts | size }}"
 
+          # Once per batch, before the verdict check: a batch that returned no verdicts still
+          # created a conversation, and its alerts' error notes link to it.
+          - name: collect_batch_conversation_id
+            type: if
+            condition: "${{ variables.batch_result_conversation_id != '' }}"
+            steps:
+              - name: build_batch_conversation_entry
+                type: data.set
+                with:
+                  batch_conversation_entry:
+                    conversation_id: "{{ variables.batch_result_conversation_id }}"
+                    alert_ids: "${{ foreach.item | map: '_id' }}"
+
+              - name: push_batch_conversation_id
+                type: data.set
+                with:
+                  batch_conversations: "${{ variables.batch_conversations | push: variables.batch_conversation_entry }}"
+
           # -------------------------------------------------------------------
           # Collect this batch's verdicts
           # -------------------------------------------------------------------
@@ -1794,24 +1810,6 @@ steps:
                   # call so the Worker can name it in Comment 2 without a second lookup.
                   resolved_connector_id: >-
                     {% if variables.resolved_connector_id == '' %}{{ variables.batch_result_connector_id }}{% else %}{{ variables.resolved_connector_id }}{% endif %}
-
-              # Once per batch, so the run-level output lists every conversation the run created.
-              - name: collect_batch_conversation_id
-                type: if
-                condition: "${{ variables.batch_result_conversation_id != '' }}"
-                steps:
-                  - name: build_batch_conversation_entry
-                    type: data.set
-                    with:
-                      batch_conversation_entry:
-                        conversation_id: "{{ variables.batch_result_conversation_id }}"
-                        alert_ids: "${{ variables.batch_alert_ids }}"
-
-                  - name: push_batch_conversation_id
-                    type: data.set
-                    with:
-                      conversation_ids: "${{ variables.conversation_ids | push: variables.batch_result_conversation_id }}"
-                      batch_conversations: "${{ variables.batch_conversations | push: variables.batch_conversation_entry }}"
 
               # -------------------------------------------------------------------
               # Accumulate the verdicts a caller receives via workflow.output
@@ -2020,6 +2018,9 @@ steps:
                         Error: the batch this alert was analyzed in returned no verdict for it.
                         {% if variables.investigation_conversation_id != '' %}
                         - Investigation: [{{ variables.investigation_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.investigation_conversation_id }})
+                        {%- endif %}
+                        {% if variables.alert_conversation_count > 0 -%}
+                        - Conversation: [{{ variables.alert_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.alert_conversation_id }})
                         {%- endif %}
                   headers:
                     kbn-xsrf: string
@@ -2371,4 +2372,4 @@ steps:
       # Alert ids the agent omitted; empty when every analyzed alert got a verdict.
       missing_alert_ids: "${{ variables.missing_alert_ids }}"
       # Conversations the batches created. Empty on the prompt path and when Create conversation is off.
-      conversation_ids: "${{ variables.conversation_ids }}"
+      conversation_ids: "${{ variables.batch_conversations | map: 'conversation_id' }}"
