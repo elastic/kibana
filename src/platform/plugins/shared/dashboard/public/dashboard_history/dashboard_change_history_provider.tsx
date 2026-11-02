@@ -12,7 +12,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import type { ChangeHistoryProviderProps } from '@kbn/change-history-ui';
-import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
+import {
+  ChangeHistoryModal,
+  ChangeHistoryProvider,
+  useChangeHistoryModal,
+} from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -24,6 +28,15 @@ import { DashboardChangeHistoryView } from './dashboard_change_history_view';
 export interface DashboardChangeHistoryProviderProps {
   children: React.ReactNode;
 }
+
+/** clears the comparison when the modal closes, since the provider stays mounted */
+const ResetOnClose = ({ onClose }: { onClose: () => void }): null => {
+  const { isOpen } = useChangeHistoryModal();
+  useEffect(() => {
+    if (!isOpen) onClose();
+  }, [isOpen, onClose]);
+  return null;
+};
 
 export const DashboardChangeHistoryProvider = ({
   children,
@@ -83,7 +96,6 @@ export const DashboardChangeHistoryProvider = ({
           data-test-subj="changeHistoryItemChanges"
           size={'xs'}
           flush={'both'}
-          onKeyDown={(event: React.KeyboardEvent) => event.stopPropagation()} // keep the row's key handler from preventing the native button click
           onClick={() => {
             ignoreEventPropogation.current = true; // if clicking the nChanges button, ignore propogation up to `onSelectChange`
             setIsComparingToPrevious(true);
@@ -108,6 +120,11 @@ export const DashboardChangeHistoryProvider = ({
     [isComparingToPrevious, dashboardApi]
   );
 
+  const resetComparison = useCallback(() => {
+    ignoreEventPropogation.current = false;
+    setIsComparingToPrevious(false);
+  }, []);
+
   return (
     <ChangeHistoryProvider
       objectId={dashboardId}
@@ -128,6 +145,7 @@ export const DashboardChangeHistoryProvider = ({
       analytics={analytics}
     >
       {children}
+      <ResetOnClose onClose={resetComparison} />
       <ChangeHistoryModal />
     </ChangeHistoryProvider>
   );

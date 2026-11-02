@@ -110,6 +110,23 @@ describe('ChangeHistoryItem', () => {
     expect(screen.queryByTestId('changeHistoryItemChangesSummary')).not.toBeInTheDocument();
   });
 
+  it('selects the item from a click on the row or the keyboard-focusable timestamp button', () => {
+    const onClick = jest.fn();
+    renderItem(undefined, { onClick });
+
+    fireEvent.click(screen.getByTestId('changeHistoryItem-evt-1'));
+    expect(onClick).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(screen.getByRole('button', { name: /./ }), { key: 'Enter' });
+    expect(onClick).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not nest the changes content inside an element with the button role', () => {
+    renderItem();
+
+    expect(screen.getByTestId('changeHistoryItemChanges').closest('[role="button"]')).toBeNull();
+  });
+
   it('marks the item as selected for styling', () => {
     renderItem(undefined, { selected: true });
 

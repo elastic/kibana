@@ -196,15 +196,12 @@ describe('DashboardChangeHistoryProvider', () => {
       await expectDashboardPreview('v2');
     });
 
-    it('does not let the row key handler swallow the keyboard activation of the button', async () => {
+    it('does not nest the changes button inside an element with the button role', async () => {
       await renderOpenModal();
 
-      const wasNotPrevented = fireEvent.keyDown(
-        within(row('v2')).getByTestId('changeHistoryItemChanges'),
-        { key: 'Enter' }
-      );
+      const changes = within(row('v2')).getByTestId('changeHistoryItemChanges');
 
-      expect(wasNotPrevented).toBe(true);
+      expect(changes.closest('[role="button"]')).toBeNull();
     });
 
     it('does not render version 1 changes as a link, since there is nothing to compare to', async () => {
@@ -223,6 +220,20 @@ describe('DashboardChangeHistoryProvider', () => {
       fireEvent.click(row('v1'));
 
       await expectDashboardPreview('v1');
+    });
+  });
+
+  describe('closing and reopening the modal', () => {
+    it('shows the rendered preview for the auto-selected latest row after closing from the comparison', async () => {
+      await renderOpenModal();
+      fireEvent.click(within(row('v3')).getByTestId('changeHistoryItemChanges'));
+      await waitFor(() => expect(screen.getByTestId('jsonComparison')).toBeInTheDocument());
+
+      fireEvent.keyDown(screen.getByTestId('changeHistoryModal'), { key: 'Escape' });
+      await waitFor(() => expect(screen.queryByTestId('jsonComparison')).not.toBeInTheDocument());
+      fireEvent.click(screen.getByTestId('changeHistoryTrigger'));
+
+      await expectDashboardPreview('v3');
     });
   });
 

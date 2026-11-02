@@ -9,6 +9,8 @@
 
 import { diffLines } from 'diff';
 import equal from 'fast-deep-equal';
+import * as jsondiffpatch from 'jsondiffpatch';
+import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
 import { omit } from 'lodash';
 
 import type { ObjectChange } from '@kbn/change-history';
@@ -34,14 +36,23 @@ export const INITIAL_HISTORY_SEQUENCE = 1;
 
 const toDiffText = (value: object): string => JSON.stringify(value, null, 2);
 
+// The diff runs synchronously on the save path, so it is bounded to avoid blocking the event loop.
+const DIFF_TIMEOUT_MS = 500;
+
 /**
  * Number of contiguous changed line blocks between two snapshots rendered as pretty-printed JSON,
- * which is how the history preview's diff navigator counts changes.
+ * which is how the history preview's diff navigator counts changes. If the line diff is too
+ * expensive to compute, falls back to the number of JSON patch operations between the snapshots.
  */
 export const countChangedLineBlocks = (previous: object, current: object): number => {
+  const changes = diffLines(toDiffText(previous), toDiffText(current), {
+    timeout: DIFF_TIMEOUT_MS,
+  });
+  if (!changes) return jsonpatchFormatter.format(jsondiffpatch.diff(previous, current)).length;
+
   let blocks = 0;
   let inChangedBlock = false;
-  for (const { added, removed } of diffLines(toDiffText(previous), toDiffText(current))) {
+  for (const { added, removed } of changes) {
     const isChanged = Boolean(added || removed);
     if (isChanged && !inChangedBlock) blocks++;
     inChangedBlock = isChanged;
