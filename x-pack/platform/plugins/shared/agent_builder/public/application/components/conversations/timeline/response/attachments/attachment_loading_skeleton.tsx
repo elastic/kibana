@@ -20,6 +20,8 @@ import { INLINE_HEADER_HEIGHT, COMPACT_WIDTH_THRESHOLD } from './attachment_head
 
 /** Width of a typical header split button, so the skeleton matches the loaded header. */
 const SPLIT_BUTTON_SKELETON_WIDTH = '137px';
+/** Width of the icon-only split button the loaded header renders in compact mode. */
+const COMPACT_SPLIT_BUTTON_SKELETON_WIDTH = '72px';
 
 /**
  * Loading skeleton for an attachment card, shown during streaming before the
@@ -32,6 +34,7 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
   const [measureElement, setMeasureElement] = useState<HTMLDivElement | null>(null);
   const { width: headerWidth } = useResizeObserver(measureElement);
   const isCompact = headerWidth > 0 && headerWidth <= COMPACT_WIDTH_THRESHOLD;
+  const buttonWidth = isCompact ? COMPACT_SPLIT_BUTTON_SKELETON_WIDTH : SPLIT_BUTTON_SKELETON_WIDTH;
 
   const headerStyles = css`
     display: flex;
@@ -48,9 +51,8 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
           <EuiFlexGroup
             responsive={false}
             justifyContent="spaceBetween"
-            direction={isCompact ? 'column' : 'row'}
-            alignItems={isCompact ? 'flexStart' : 'center'}
-            gutterSize={isCompact ? 's' : 'm'}
+            alignItems="center"
+            gutterSize="m"
             style={{ width: '100%' }}
           >
             <EuiFlexItem grow={false}>
@@ -71,12 +73,9 @@ export const AttachmentLoadingSkeleton: React.FC = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem
-              grow={false}
-              style={isCompact ? { alignSelf: 'flex-end' } : { flexShrink: 0 }}
-            >
+            <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
               <EuiSkeletonRectangle
-                width={SPLIT_BUTTON_SKELETON_WIDTH}
+                width={buttonWidth}
                 height={euiTheme.size.xl}
                 borderRadius="m"
               />
