@@ -655,7 +655,7 @@ groups:
           serverless: unavailable
         note: |
           :applies_to: {stack: preview 9.6+, serverless: preview}
-          The `ai:anonymizationSettings` setting is no longer available on the **Advanced Settings** page. Configure anonymization on the **Anonymization** page under **AI** in {{stack-manage-app}}. {{product.kibana}} still applies a default anonymization configuration, which you can review and change on that page.
+          The `ai:anonymizationSettings` setting is no longer available on the **Advanced Settings** page. Configure anonymization on the **Anonymization** page under **AI** in {{stack-manage-app}}. Masking is off by default; on that page you can turn it on and choose which patterns apply.
 
       - setting: "agentBuilder:apiDiscovery"
         id: agent-builder-api-discovery

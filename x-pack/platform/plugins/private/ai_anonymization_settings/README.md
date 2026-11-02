@@ -28,9 +28,10 @@ this page.
 
 ## Default configuration
 
-The value the `ai:anonymizationSettings` setting ships with. Masking is off, `onFailure` is `block`,
-and the built-in email, IPv4, IPv6 and host-name rules are on. The account rule and the NER rule are
-off. `ui_settings_docs.test.ts` in `@kbn/ai-anonymization-server` checks that this block matches the
+The value the `ai:anonymizationSettings` setting ships with. Masking is off (`maskingEnabled:
+false`), so nothing is anonymized until a user turns it on. The enabled state of each rule only
+says which rules take effect once masking is on: the built-in email, IPv4, IPv6 and host-name rules
+are enabled, the account rule and the NER rule are not. `onFailure` is `block`. `ui_settings_docs.test.ts` in `@kbn/ai-anonymization-server` checks that this block matches the
 code, so update it whenever a built-in pattern changes: paste the registered `value` from
 `getAnonymizationUiSettings()` in `@kbn/ai-anonymization-server` (it is already a pretty-printed JSON string).
 
