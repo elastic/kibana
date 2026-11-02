@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/core-http-server-utils'
   - '@kbn/core-security-server'
+  - '@kbn/response-ops-scoped-api-keys'
 tags:
   - plugin
   - prod

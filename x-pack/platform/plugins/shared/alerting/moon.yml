@@ -95,6 +95,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/core-saved-objects-common'
   - '@kbn/workflows-extensions'
+  - '@kbn/response-ops-scoped-api-keys'
 tags:
   - plugin
   - prod

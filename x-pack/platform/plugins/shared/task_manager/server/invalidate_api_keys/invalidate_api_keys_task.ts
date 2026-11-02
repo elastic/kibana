@@ -7,31 +7,23 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
-import type {
-  InvalidateAPIKeyResult,
-  InvalidateAPIKeysParams,
-  InvalidateUiamAPIKeyParams,
-} from '@kbn/security-plugin-types-server';
-import type { KibanaRequest } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type {
+  ApiKeyInvalidationFn,
+  UiamApiKeyInvalidationFn,
+} from '@kbn/response-ops-scoped-api-keys';
+import { runInvalidate } from '@kbn/response-ops-scoped-api-keys';
 import type { TaskScheduling } from '../task_scheduling';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
 import type { TaskManagerStartContract } from '..';
 import type { TaskManagerPluginsStart } from '../plugin';
-import { runInvalidate } from './lib';
+import { getSOIdsUsedByRunningTasks } from './get_so_ids_used_by_running_tasks';
+
+export type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn };
 
 export const TASK_ID = 'invalidate_api_keys';
 const TASK_TYPE = `task_manager:${TASK_ID}`;
-
-export type ApiKeyInvalidationFn = (
-  params: InvalidateAPIKeysParams
-) => Promise<InvalidateAPIKeyResult | null> | undefined;
-
-export type UiamApiKeyInvalidationFn = (
-  request: KibanaRequest,
-  params: InvalidateUiamAPIKeyParams
-) => Promise<InvalidateAPIKeyResult | null>;
 
 export async function scheduleInvalidateApiKeyTask(
   logger: Logger,
@@ -127,6 +119,7 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
 
           const result = await runInvalidate({
             encryptedSavedObjectsClient: getEncryptedSavedObjectsClient(),
+            getSOIdsUsedByRunningTasks,
             invalidateApiKeyFn,
             invalidateUiamApiKeyFn: invalidateUiamApiKeyFn?.(),
             logger,

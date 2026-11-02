@@ -13,13 +13,13 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import { getUiamApiKeySecret } from '@kbn/response-ops-scoped-api-keys';
 import { truncate } from 'lodash';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import {
   createApiKey,
   getApiKeyFromRequest,
-  getUiamApiKeySecret,
   hasApiKey,
   shouldCloneApiKeyFromRequest,
 } from '../lib/api_key_utils';

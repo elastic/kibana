@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  createTaskRunError,
-  getUiamApiKeyId,
-  getUiamApiKeySecret,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getUiamApiKeyId, getUiamApiKeySecret } from '@kbn/response-ops-scoped-api-keys';
 import { type FakeRawRequest, type Headers, type KibanaRequest } from '@kbn/core-http-server';
 import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';

@@ -9,8 +9,8 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isMissingApiKey, isRevokedApiKey } from '@kbn/core-security-server';
 import type { ApiKeyIdAndSOId, UiamApiKeyAndSOId } from './get_api_key_ids_to_invalidate';
 import { invalidateAPIKeys, invalidateUiamAPIKeys } from './invalidate_api_keys';
-import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
-import { UIAM_LOGS_INVALIDATE_TAGS } from '../../constants';
+import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from './types';
+import { UIAM_LOGS_INVALIDATE_TAGS } from './constants';
 
 const MAX_MISSING_KEY_RETRIES = 5;
 

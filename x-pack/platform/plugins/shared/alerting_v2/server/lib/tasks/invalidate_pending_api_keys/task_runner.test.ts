@@ -17,11 +17,11 @@ import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
 import { ApiKeyInvalidationTaskRunner } from './task_runner';
 
-jest.mock('@kbn/task-manager-plugin/server', () => ({
+jest.mock('@kbn/response-ops-scoped-api-keys', () => ({
   runInvalidate: jest.fn().mockResolvedValue({ totalInvalidated: 3, missingApiKeyRetries: {} }),
 }));
 
-const { runInvalidate } = jest.requireMock('@kbn/task-manager-plugin/server');
+const { runInvalidate } = jest.requireMock('@kbn/response-ops-scoped-api-keys');
 
 const config = {
   get: jest.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),

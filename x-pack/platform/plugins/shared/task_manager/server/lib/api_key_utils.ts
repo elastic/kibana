@@ -8,6 +8,7 @@
 import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { isUiamCredential } from '@kbn/core-security-server';
+import { decodeStoredApiKey } from '@kbn/response-ops-scoped-api-keys';
 import { truncate } from 'lodash';
 import type { TaskInstance, TaskUserScope } from '../task';
 import type { GrantApiKeysOpts } from '../api_key_strategy/api_key_strategy';
@@ -40,60 +41,6 @@ const getCredentialsFromRequest = (request: KibanaRequest) => {
   }
   const [scheme] = authorizationHeaderValue.split(/\s+/);
   return authorizationHeaderValue.substring(scheme.length + 1);
-};
-
-/**
- * Splits the `base64(<id>:<secret>)` envelope that Elasticsearch API keys — and
- * UIAM-provisioned keys — are persisted in. This is the only place that decoding lives.
- *
- * For a value that is not in that shape (e.g. a raw `essu_…` secret) `secret` is absent and
- * `id` is meaningless, so every caller has to validate what it gets back before using it.
- */
-export const decodeStoredApiKey = (storedApiKey: string): { id: string; secret?: string } => {
-  const [id, secret] = Buffer.from(storedApiKey, 'base64').toString().split(':');
-
-  return { id, secret };
-};
-
-/**
- * Normalizes a stored task `uiamApiKey` into the credential UIAM expects on the wire.
- *
- * Two writers persist this attribute in different shapes:
- * - the grant path (`EsAndUiamApiKeyStrategy.grantApiKeys`) stores the raw `essu_…` secret;
- * - the UIAM provisioning (convert) path stores `base64(<id>:<secret>)`, mirroring how ES API
- *   keys are encoded.
- *
- * Only the raw secret authenticates. Presenting the base64 envelope makes Elasticsearch parse it
- * as a native `id:api_key` pair and look the id up in its own key store, which fails with a
- * generic authentication error without the cloud realm — and therefore UIAM — ever being reached.
- * A value in neither shape is returned untouched, so behavior for it is unchanged.
- */
-export const getUiamApiKeySecret = (storedUiamApiKey: string): string => {
-  if (isUiamCredential(storedUiamApiKey)) {
-    return storedUiamApiKey;
-  }
-
-  const { secret } = decodeStoredApiKey(storedUiamApiKey);
-
-  return secret && isUiamCredential(secret) ? secret : storedUiamApiKey;
-};
-
-/**
- * Extracts the UIAM key id from a stored `uiamApiKey`, the counterpart to
- * {@link getUiamApiKeySecret}.
- *
- * Only the `base64(<id>:<secret>)` shape carries an id. User-created Cloud keys are stored as
- * the raw `essu_…` secret and have no id, so `undefined` for them is the correct answer rather
- * than a gap: nothing in Kibana owns — or may invalidate — those keys.
- */
-export const getUiamApiKeyId = (storedUiamApiKey?: string | null): string | undefined => {
-  if (!storedUiamApiKey || isUiamCredential(storedUiamApiKey)) {
-    return undefined;
-  }
-
-  const { id, secret } = decodeStoredApiKey(storedUiamApiKey);
-
-  return id && secret && isUiamCredential(secret) ? id : undefined;
 };
 
 export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {

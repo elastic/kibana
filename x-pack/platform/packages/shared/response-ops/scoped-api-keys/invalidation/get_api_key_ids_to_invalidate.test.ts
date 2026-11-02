@@ -459,8 +459,6 @@ describe('getApiKeyIdsToInvalidate', () => {
 
   describe('keys replaced during a task run', () => {
     const taskStartedAt = '2026-10-05T00:00:00.000Z';
-    const futureRetryAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
-    const pastRetryAt = new Date(Date.now() - 60 * 1000).toISOString();
 
     const pendingSO = (id: string, apiKeyId: string, taskId?: string) => ({
       id,
@@ -474,12 +472,10 @@ describe('getApiKeyIdsToInvalidate', () => {
       references: [],
     });
 
-    const runningTaskSO = (
-      id: string,
-      attributes: { status: string; startedAt: string | null; retryAt: string | null }
-    ) => ({ id, type: 'task', attributes, references: [] });
-
-    const getResult = (savedObjects: Array<ReturnType<typeof pendingSO>>) =>
+    const getResult = (
+      savedObjects: Array<ReturnType<typeof pendingSO>>,
+      getSOIdsUsedByRunningTasks?: jest.Mock
+    ) =>
       getApiKeyIdsToInvalidate({
         apiKeySOsPendingInvalidation: {
           saved_objects: savedObjects,
@@ -487,6 +483,7 @@ describe('getApiKeyIdsToInvalidate', () => {
           per_page: 10,
           page: 1,
         },
+        getSOIdsUsedByRunningTasks,
         savedObjectsClient: internalSavedObjectsRepository,
         savedObjectType: 'api_key_to_invalidate',
         savedObjectTypesToQuery: [],
@@ -496,22 +493,27 @@ describe('getApiKeyIdsToInvalidate', () => {
       jest.clearAllMocks();
     });
 
+    test('passes the runs that replaced a key to getSOIdsUsedByRunningTasks', async () => {
+      const getSOIdsUsedByRunningTasks = jest.fn().mockResolvedValue(new Set());
+
+      await getResult(
+        [pendingSO('1', 'key-1', 'task-1'), pendingSO('2', 'key-2')],
+        getSOIdsUsedByRunningTasks
+      );
+
+      expect(getSOIdsUsedByRunningTasks).toHaveBeenCalledTimes(1);
+      expect(getSOIdsUsedByRunningTasks).toHaveBeenCalledWith(
+        new Map([['1', { taskId: 'task-1', taskStartedAt }]]),
+        internalSavedObjectsRepository
+      );
+    });
+
     test('excludes the key while the same run is still in progress', async () => {
-      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-        saved_objects: [
-          runningTaskSO('task-1', {
-            status: 'running',
-            startedAt: taskStartedAt,
-            retryAt: futureRetryAt,
-          }),
-        ],
-      });
+      const result = await getResult(
+        [pendingSO('1', 'key-1', 'task-1'), pendingSO('2', 'key-2')],
+        jest.fn().mockResolvedValue(new Set(['1']))
+      );
 
-      const result = await getResult([pendingSO('1', 'key-1', 'task-1'), pendingSO('2', 'key-2')]);
-
-      expect(internalSavedObjectsRepository.bulkGet).toHaveBeenCalledWith([
-        { type: 'task', id: 'task-1' },
-      ]);
       expect(result).toEqual({
         apiKeyIdsToInvalidate: [{ id: '2', apiKeyId: 'key-2' }],
         apiKeyIdsToExclude: [{ id: '1', apiKeyId: 'key-1' }],
@@ -519,17 +521,10 @@ describe('getApiKeyIdsToInvalidate', () => {
     });
 
     test('excludes other pending entries for the same key while the run is in progress', async () => {
-      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-        saved_objects: [
-          runningTaskSO('task-1', {
-            status: 'running',
-            startedAt: taskStartedAt,
-            retryAt: futureRetryAt,
-          }),
-        ],
-      });
-
-      const result = await getResult([pendingSO('1', 'key-1', 'task-1'), pendingSO('2', 'key-1')]);
+      const result = await getResult(
+        [pendingSO('1', 'key-1', 'task-1'), pendingSO('2', 'key-1')],
+        jest.fn().mockResolvedValue(new Set(['1']))
+      );
 
       expect(result).toEqual({
         apiKeyIdsToInvalidate: [],
@@ -540,16 +535,11 @@ describe('getApiKeyIdsToInvalidate', () => {
       });
     });
 
-    test.each([
-      ['a new run has started', { status: 'running', startedAt: '2026-10-05T01:00:00.000Z' }],
-      ['the task is idle', { status: 'idle', startedAt: null }],
-      ['retryAt has passed', { status: 'running', startedAt: taskStartedAt, retryAt: pastRetryAt }],
-    ])('invalidates the key when %s', async (_, taskAttributes) => {
-      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-        saved_objects: [runningTaskSO('task-1', { retryAt: futureRetryAt, ...taskAttributes })],
-      });
-
-      const result = await getResult([pendingSO('1', 'key-1', 'task-1')]);
+    test('invalidates the key when no run is still using it', async () => {
+      const result = await getResult(
+        [pendingSO('1', 'key-1', 'task-1')],
+        jest.fn().mockResolvedValue(new Set())
+      );
 
       expect(result).toEqual({
         apiKeyIdsToInvalidate: [{ id: '1', apiKeyId: 'key-1' }],
@@ -557,31 +547,14 @@ describe('getApiKeyIdsToInvalidate', () => {
       });
     });
 
-    test('invalidates the key when the task no longer exists', async () => {
-      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
-        saved_objects: [
-          {
-            id: 'task-1',
-            type: 'task',
-            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
-            attributes: undefined,
-            references: [],
-          },
-        ],
-      });
-
+    test('invalidates the key without looking up runs when getSOIdsUsedByRunningTasks is not provided', async () => {
       const result = await getResult([pendingSO('1', 'key-1', 'task-1')]);
-
-      expect(result).toEqual({
-        apiKeyIdsToInvalidate: [{ id: '1', apiKeyId: 'key-1' }],
-        apiKeyIdsToExclude: [],
-      });
-    });
-
-    test('does not look up tasks when no key was replaced during a run', async () => {
-      await getResult([pendingSO('1', 'key-1')]);
 
       expect(internalSavedObjectsRepository.bulkGet).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        apiKeyIdsToInvalidate: [{ id: '1', apiKeyId: 'key-1' }],
+        apiKeyIdsToExclude: [],
+      });
     });
   });
 

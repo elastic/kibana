@@ -65,6 +65,7 @@
     "@kbn/core-security-common",
     "@kbn/core-security-server",
     "@kbn/core-test-helpers-model-versions",
+    "@kbn/response-ops-scoped-api-keys",
   ],
   "exclude": [
     "target/**/*",

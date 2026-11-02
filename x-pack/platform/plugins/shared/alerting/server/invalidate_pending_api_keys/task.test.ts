@@ -9,15 +9,15 @@ import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { runInvalidate } from '@kbn/task-manager-plugin/server';
+import { runInvalidate } from '@kbn/response-ops-scoped-api-keys';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart } from '../plugin';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { taskRunner } from './task';
 
-jest.mock('@kbn/task-manager-plugin/server', () => ({
-  ...jest.requireActual('@kbn/task-manager-plugin/server'),
+jest.mock('@kbn/response-ops-scoped-api-keys', () => ({
+  ...jest.requireActual('@kbn/response-ops-scoped-api-keys'),
   runInvalidate: jest.fn(),
 }));
 

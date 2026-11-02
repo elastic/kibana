@@ -15,11 +15,11 @@ import type { PluginConfig } from '../../../config';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { ApiKeyInvalidationTaskRunner } from './task_runner';
 
-jest.mock('@kbn/task-manager-plugin/server', () => ({
+jest.mock('@kbn/response-ops-scoped-api-keys', () => ({
   runInvalidate: jest.fn().mockResolvedValue({ totalInvalidated: 0, missingApiKeyRetries: {} }),
 }));
 
-const { runInvalidate } = jest.requireMock('@kbn/task-manager-plugin/server');
+const { runInvalidate } = jest.requireMock('@kbn/response-ops-scoped-api-keys');
 
 const config = {
   get: jest.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),
