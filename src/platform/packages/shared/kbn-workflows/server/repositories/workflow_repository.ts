@@ -36,7 +36,8 @@ export const WORKFLOW_STATUSES_CHUNK_SIZE = 1000;
 
 /**
  * Whether a workflow exists in the space it was asked for, as far as one read could tell.
- * `unknown` means the read failed, and says nothing about the workflow.
+ * A soft-deleted workflow is `missing`. `unknown` means the read failed, and says nothing about
+ * the workflow.
  */
 export type WorkflowStatus =
   | { status: 'present'; name?: string }
@@ -327,11 +328,12 @@ export class WorkflowRepository {
 
   /**
    * Reads whether each workflow exists in the space it was asked for, keyed by
-   * `${spaceId}:${workflowId}`, with an entry for every ref. Global workflows are not looked up,
-   * since they cannot be bound to a service account.
+   * `${spaceId}:${workflowId}`, with an entry for every ref. Global workflows cannot be bound to a
+   * service account, so a ref whose ID points at a global workflow is `missing`.
    *
-   * - `present`: the workflow is in that space. The name is left out for a soft-deleted workflow.
-   * - `missing`: the read found no document with that ID, or found it in another space.
+   * - `present`: the workflow is in that space and not soft-deleted.
+   * - `missing`: the read found no document with that ID, found it in another space, or found it
+   *   soft-deleted.
    * - `unknown`: the document or its chunk could not be read, or the index does not exist. A
    *   missing index can mean the index is being restored, so it is not taken as proof that the
    *   workflows are gone.
@@ -413,12 +415,13 @@ export class WorkflowRepository {
       } else {
         const { spaceId: storedSpaceId, deleted_at: deletedAt, name } = source;
         statuses.set(doc._id, (spaceId) => {
-          if (spaceId !== storedSpaceId) {
+          // A soft-deleted workflow never runs. A bulk overwrite can revive it, but that write
+          // goes through `withWorkflowBindingChange`, which checks `manage_security` and binds
+          // again, so the old binding is not needed.
+          if (spaceId !== storedSpaceId || deletedAt) {
             return { status: 'missing' };
           }
-          return !deletedAt && typeof name === 'string'
-            ? { status: 'present', name }
-            : { status: 'present' };
+          return typeof name === 'string' ? { status: 'present', name } : { status: 'present' };
         });
       }
     }

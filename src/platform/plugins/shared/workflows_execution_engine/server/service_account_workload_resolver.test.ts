@@ -21,7 +21,7 @@ describe('resolveWorkflowWorkloads', () => {
           ['default:a/b c', { status: 'present', name: 'Odd id' }],
           ['default:gone', { status: 'missing' }],
           ['default:unreadable', { status: 'unknown' }],
-          ['default:soft-deleted', { status: 'present' }],
+          ['default:nameless', { status: 'present' }],
         ])
       ),
     };
@@ -35,7 +35,7 @@ describe('resolveWorkflowWorkloads', () => {
           { workloadId: 'w-1', spaceId: 'marketing' },
           { workloadId: 'a/b c', spaceId: 'default' },
           { workloadId: 'unreadable', spaceId: 'default' },
-          { workloadId: 'soft-deleted', spaceId: 'default' },
+          { workloadId: 'nameless', spaceId: 'default' },
           { workloadId: 'not-in-the-map', spaceId: 'default' },
         ],
         { signal }
@@ -56,7 +56,7 @@ describe('resolveWorkflowWorkloads', () => {
         { workflowId: 'w-1', spaceId: 'marketing' },
         { workflowId: 'a/b c', spaceId: 'default' },
         { workflowId: 'unreadable', spaceId: 'default' },
-        { workflowId: 'soft-deleted', spaceId: 'default' },
+        { workflowId: 'nameless', spaceId: 'default' },
         { workflowId: 'not-in-the-map', spaceId: 'default' },
       ],
       { signal }

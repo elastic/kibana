@@ -16,9 +16,10 @@ import type { WorkflowRepository } from '@kbn/workflows';
 
 /**
  * Resolves workflows bound to service accounts: whether each still exists, and for a live one its
- * name and the path of its page. The management page shows the name and the link. The stale
- * binding cleanup deletes the binding of a workflow reported `missing`. Reads with internal access,
- * so it also names workflows the person looking cannot open.
+ * name and the path of its page. A soft-deleted workflow is `missing`. The management page shows
+ * the name and the link. The stale binding cleanup deletes the binding of a workflow reported
+ * `missing`. Reads with internal access, so it also names workflows the person looking cannot
+ * open.
  */
 export const resolveWorkflowWorkloads = async (
   repository: Pick<WorkflowRepository, 'getWorkflowStatuses'>,

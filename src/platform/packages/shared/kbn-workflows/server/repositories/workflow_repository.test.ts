@@ -9,7 +9,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WORKFLOW_STATUSES_CHUNK_SIZE, WorkflowRepository } from './workflow_repository';
-import { WORKFLOW_INDEX_NAME } from '../constants';
+import { GLOBAL_WORKFLOW_SPACE_ID, WORKFLOW_INDEX_NAME } from '../constants';
 
 describe('stored workflow ACLs', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -725,6 +725,7 @@ describe('WorkflowRepository.getWorkflowStatuses', () => {
         { id: 'w-4', spaceId: 'default', name: 'Deleted', deleted_at: '2026-10-01T00:00:00Z' },
         { id: 'w-5', spaceId: 'default', name: undefined },
         { id: 'w-6', spaceId: undefined, name: 'No space' },
+        { id: 'w-7', spaceId: GLOBAL_WORKFLOW_SPACE_ID, name: 'Global' },
         { id: 'missing', found: false },
       ]) as never
     );
@@ -739,6 +740,7 @@ describe('WorkflowRepository.getWorkflowStatuses', () => {
         { workflowId: 'w-4', spaceId: 'default' },
         { workflowId: 'w-5', spaceId: 'default' },
         { workflowId: 'w-6', spaceId: 'default' },
+        { workflowId: 'w-7', spaceId: 'default' },
         { workflowId: 'missing', spaceId: 'default' },
       ],
       { signal }
@@ -750,9 +752,10 @@ describe('WorkflowRepository.getWorkflowStatuses', () => {
         ['marketing:w-2', { status: 'present', name: 'Weekly digest' }],
         ['default:w-2', { status: 'missing' }],
         ['default:w-3', { status: 'missing' }],
-        ['default:w-4', { status: 'present' }],
+        ['default:w-4', { status: 'missing' }],
         ['default:w-5', { status: 'present' }],
         ['default:w-6', { status: 'unknown' }],
+        ['default:w-7', { status: 'missing' }],
         ['default:missing', { status: 'missing' }],
       ])
     );
@@ -760,7 +763,7 @@ describe('WorkflowRepository.getWorkflowStatuses', () => {
     expect(esClient.mget).toHaveBeenCalledWith(
       {
         index: WORKFLOW_INDEX_NAME,
-        ids: ['w-1', 'w-2', 'w-3', 'w-4', 'w-5', 'w-6', 'missing'],
+        ids: ['w-1', 'w-2', 'w-3', 'w-4', 'w-5', 'w-6', 'w-7', 'missing'],
         _source_includes: ['name', 'spaceId', 'deleted_at'],
       },
       { signal }
