@@ -60,7 +60,6 @@ import {
   ensureManagedOrphanUnchanged,
   ensureManagedWorkflowUpgradePreservesBinding,
   ensureWorkflowServiceAccountMutationAuthorized,
-  isBoundWorkflowDisableOnly,
   withWorkflowBindingChange,
 } from './workflow_service_account_binding';
 import {
@@ -322,16 +321,6 @@ export class WorkflowCrudService {
       return write();
     }
     if (!accountId && !previous?.definition?.settings?.run_as) return write();
-    // A system actor, with no user behind its request, may switch a bound workflow off, such as a
-    // pause that no user started. Enabling or changing one still needs `manage_security`.
-    if (
-      previous &&
-      options?.request?.isFakeRequest &&
-      !this.deps.getCoreStart().security.authc.getCurrentUser(options.request) &&
-      isBoundWorkflowDisableOnly(document, previous)
-    ) {
-      return write();
-    }
     if (!bindings) throw new Error('Service account bindings are unavailable.');
     return withWorkflowBindingChange({
       getSpaceId: this.deps.getSpaceId,
@@ -1408,13 +1397,16 @@ export class WorkflowCrudService {
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
   }
 
-  /** Disables a managed orphan without a request; the write may only turn `enabled` off. */
-  async disableManagedOrphan(
+  /**
+   * Disables a managed workflow without a request, even when it is bound to a service account.
+   * The write may only turn `enabled` off.
+   */
+  async disableManagedWorkflowWithoutRequest(
     id: string,
     spaceId: string,
     orphan: ManagedWorkflowOrphan
-  ): Promise<void> {
-    await this.runOccWrite(id, async () => {
+  ): Promise<WorkflowProperties> {
+    const { document } = await this.runOccWrite(id, async () => {
       const writer = this.getReadModifyWriteOccWriter(
         spaceId,
         undefined,
@@ -1422,12 +1414,13 @@ export class WorkflowCrudService {
         undefined,
         orphan
       );
-      await writer.readModifyWrite({
+      return writer.readModifyWrite({
         id,
         mutate: (existing) => applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing),
       });
     });
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
+    return document;
   }
 
   /**

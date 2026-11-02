@@ -407,6 +407,53 @@ export class ManagedWorkflowsService {
     });
   }
 
+  /**
+   * Switches an installed managed workflow off without a request, even when it is bound to a
+   * service account. Resolves to whether this call turned it off.
+   */
+  public async disableManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): Promise<boolean> {
+    const { definition, workflowDocumentId, spaceId } = this.resolveOwnedManagedWorkflow(
+      id,
+      options,
+      registeredPluginId
+    );
+    const existing = await this.deps.crudService.getWorkflowDocumentSource(
+      workflowDocumentId,
+      spaceId
+    );
+    if (!existing || !existing.managed || !existing.enabled) {
+      return false;
+    }
+
+    const document = await this.deps.crudService.disableManagedWorkflowWithoutRequest(
+      workflowDocumentId,
+      spaceId,
+      {
+        managedBy: registeredPluginId,
+        definitionId: id,
+      }
+    );
+    await this.deps.crudService.logWorkflowChangesAfterWrite({
+      workflows: [{ id: workflowDocumentId, document }],
+      action: WorkflowChangeHistoryAction.workflowUpdate,
+      spaceId,
+      timestamp: new Date(),
+    });
+    this.deps.audit?.logWorkflowUpdated(undefined, {
+      id: workflowDocumentId,
+      managed: true,
+      originalWorkflowId: definition.id,
+      ownerPlugin: definition.pluginId,
+      spaceId,
+      reason: 'disable',
+    });
+    return true;
+  }
+
   public async getManagedWorkflowStatus(
     id: ManagedWorkflowId,
     options: GetManagedWorkflowStatusOptions,
@@ -737,7 +784,7 @@ export class ManagedWorkflowsService {
     orphan: ManagedWorkflowOrphan
   ): Promise<void> {
     try {
-      await this.deps.crudService.disableManagedOrphan(workflowId, spaceId, orphan);
+      await this.deps.crudService.disableManagedWorkflowWithoutRequest(workflowId, spaceId, orphan);
     } catch (error) {
       this.logger.error(
         `Managed workflows: failed to disable orphaned workflow '${workflowId}' in space '${spaceId}'`,
@@ -849,6 +896,23 @@ export class ManagedWorkflowsService {
     return {
       ...this.applyManagedEnabledState(managedWorkflowData, enabled ?? workflowData.enabled),
       ...(createdAt ? { created_at: createdAt } : {}),
+    };
+  }
+
+  private resolveOwnedManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): { definition: ManagedWorkflowDefinition; workflowDocumentId: string; spaceId: string } {
+    const definition = getManagedWorkflowDefinition(id);
+    if (!definition) {
+      throw new Error(`Unknown managed workflow id: ${id}`);
+    }
+    this.assertPluginRegistration(definition, registeredPluginId);
+    return {
+      definition,
+      workflowDocumentId: this.resolveWorkflowDocumentId(id, options),
+      spaceId: this.getRequiredSpaceId(options),
     };
   }
 

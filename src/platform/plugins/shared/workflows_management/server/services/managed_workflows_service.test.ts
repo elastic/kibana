@@ -241,7 +241,9 @@ const createCrudServiceMock = () => {
       })
     ),
     deleteManagedOrphan: jest.fn().mockResolvedValue(true),
-    disableManagedOrphan: jest.fn().mockResolvedValue(undefined),
+    disableManagedWorkflowWithoutRequest: jest.fn(async () =>
+      createWorkflowSource({ enabled: false })
+    ),
     logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
@@ -1344,6 +1346,49 @@ describe('ManagedWorkflowsService', () => {
     });
   });
 
+  describe('disableManagedWorkflow', () => {
+    it('switches an enabled managed workflow off as its registered owner, and skips one already off', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { audit, crudService, service } = createService();
+      const managed = {
+        managed: true,
+        managedBy: 'storedOtherOwner',
+        originManagedWorkflowId: 'storedOtherDefinition',
+      };
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({ ...managed, enabled: true })
+      );
+
+      await expect(
+        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId)
+      ).resolves.toBe(true);
+
+      expect(crudService.disableManagedWorkflowWithoutRequest).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        {
+          managedBy: PLUGIN_ID,
+          definitionId: WORKFLOW_ID,
+        }
+      );
+      expect(audit.logWorkflowUpdated).toHaveBeenCalledWith(
+        undefined,
+        expect.objectContaining({ id: WORKFLOW_ID, reason: 'disable' })
+      );
+
+      crudService.disableManagedWorkflowWithoutRequest.mockClear();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({ ...managed, enabled: false })
+      );
+
+      await expect(
+        service.disableManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId)
+      ).resolves.toBe(false);
+      expect(crudService.disableManagedWorkflowWithoutRequest).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getManagedWorkflowStatus', () => {
     it('returns intact when the installed managed workflow matches the registry', async () => {
       const definition = createDefinition();
@@ -2275,8 +2320,8 @@ describe('ManagedWorkflowsService', () => {
         expect.stringContaining('system-removed-definition'),
         expect.objectContaining({ error: expect.any(Error) })
       );
-      expect(crudService.disableManagedOrphan).toHaveBeenCalledTimes(1);
-      expect(crudService.disableManagedOrphan).toHaveBeenCalledWith(
+      expect(crudService.disableManagedWorkflowWithoutRequest).toHaveBeenCalledTimes(1);
+      expect(crudService.disableManagedWorkflowWithoutRequest).toHaveBeenCalledWith(
         'system-removed-definition',
         SPACE_ID,
         { managedBy: PLUGIN_ID, definitionId: 'system-removed' }
@@ -2300,7 +2345,7 @@ describe('ManagedWorkflowsService', () => {
       await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
 
       expect(audit.logWorkflowDeleted).not.toHaveBeenCalled();
-      expect(crudService.disableManagedOrphan).toHaveBeenCalledWith(
+      expect(crudService.disableManagedWorkflowWithoutRequest).toHaveBeenCalledWith(
         'system-gone-orphan',
         SPACE_ID,
         { managedBy: PLUGIN_ID, definitionId: 'system-removed' }
@@ -2332,7 +2377,9 @@ describe('ManagedWorkflowsService', () => {
         }
         return true;
       });
-      crudService.disableManagedOrphan.mockRejectedValueOnce(new Error('disable failed'));
+      crudService.disableManagedWorkflowWithoutRequest.mockRejectedValueOnce(
+        new Error('disable failed')
+      );
 
       await service.cleanupUnregisteredOrphans([PLUGIN_ID]);
 
