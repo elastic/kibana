@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiIconTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -192,6 +193,19 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     >
                       {wrapTitleWithDeprecated({ title: item.title, deprecated: isDeprecated })}
                     </EuiFlexItem>
+                    {(onboardingInstanceCounts.get(item.name) ?? 0) > 0 && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          iconType="layers"
+                          color="hollow"
+                          data-test-subj={`installedIntegrationsTable.collectionBadge.${item.name}`}
+                        >
+                          {i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionBadge', {
+                            defaultMessage: 'Collection',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
                     {(isDeprecated || isUpcomingDeprecated || hasDeprecatedPolicyTemplates) && (
                       <EuiFlexItem grow={false}>
                         <EuiIconTip

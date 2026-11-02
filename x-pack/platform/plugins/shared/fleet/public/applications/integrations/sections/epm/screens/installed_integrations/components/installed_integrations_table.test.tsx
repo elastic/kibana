@@ -257,6 +257,20 @@ describe('InstalledIntegrationsTable', () => {
       ).toHaveTextContent('3');
     });
 
+    it('shows the Collection badge only for a package with instances', () => {
+      renderComponent([basePackage], { onboardingInstanceCounts: new Map([['test-package', 1]]) });
+      expect(
+        screen.getByTestId('installedIntegrationsTable.collectionBadge.test-package')
+      ).toHaveTextContent('Collection');
+    });
+
+    it('shows no Collection badge without instances', () => {
+      renderComponent([basePackage]);
+      expect(
+        screen.queryByTestId('installedIntegrationsTable.collectionBadge.test-package')
+      ).not.toBeInTheDocument();
+    });
+
     it('opens the instances of the package on click', async () => {
       const addViewOnboardingInstances = jest.fn();
       (useViewOnboardingInstances as jest.Mock).mockReturnValue({ addViewOnboardingInstances });
