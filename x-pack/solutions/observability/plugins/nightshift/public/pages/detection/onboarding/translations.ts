@@ -84,3 +84,21 @@ export const ADD_SOURCE_LABEL = i18n.translate(
   'xpack.nightshift.detectionOnboarding.addSourceLabel',
   { defaultMessage: 'Add a source' }
 );
+
+export const HISTORY_LOOKUP_ERROR_TITLE = i18n.translate(
+  'xpack.nightshift.detectionOnboarding.historyLookupErrorTitle',
+  { defaultMessage: 'Could not check for earlier detection results' }
+);
+
+export const HISTORY_LOOKUP_ERROR_DESCRIPTION = i18n.translate(
+  'xpack.nightshift.detectionOnboarding.historyLookupErrorDescription',
+  {
+    defaultMessage:
+      'Detection is stopped because this space has no sources. The workspace remains available while the history check is unavailable.',
+  }
+);
+
+export const HISTORY_LOOKUP_RETRY_LABEL = i18n.translate(
+  'xpack.nightshift.detectionOnboarding.historyLookupRetryLabel',
+  { defaultMessage: 'Try again' }
+);

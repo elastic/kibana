@@ -11,6 +11,7 @@ import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { RecommendedSourcesCreationState } from './recommended_sources/recommended_sources_table';
 import { SourcesView } from './sources_view';
 
 const createSource = (id: string): NightshiftSource => ({
@@ -85,8 +86,52 @@ jest.mock('../data/maintenance/use_significant_events_maintenance', () => ({
 jest.mock('../components/search_bar', () => ({ SignificantEventsSearchBar: () => null }));
 jest.mock('./onboarding/generate_split_button', () => ({ GenerateSplitButton: () => null }));
 jest.mock('./find_significant_events_button', () => ({ FindSignificantEventsButton: () => null }));
+let mockRecommendedSourcesTableMountCount = 0;
 jest.mock('./recommended_sources/recommended_sources_table', () => ({
-  RecommendedSourcesTable: () => <div data-test-subj="recommendedSourcesTableStub" />,
+  INITIAL_RECOMMENDED_SOURCES_CREATION_STATE: {
+    isCreating: false,
+    hasCreatedSources: false,
+    hasFailedDrafts: false,
+  },
+  RecommendedSourcesTable: ({
+    onCreationStateChange,
+  }: {
+    onCreationStateChange: (state: RecommendedSourcesCreationState) => void;
+  }) => {
+    const [draftMarker] = React.useState(() => {
+      mockRecommendedSourcesTableMountCount++;
+      return 'retained draft';
+    });
+    return (
+      <div data-test-subj="recommendedSourcesTableStub">
+        {draftMarker}
+        <button
+          data-test-subj="simulatePartialSourceCreation"
+          onClick={() =>
+            onCreationStateChange({
+              isCreating: false,
+              hasCreatedSources: true,
+              hasFailedDrafts: true,
+            })
+          }
+        >
+          Simulate partial source creation
+        </button>
+        <button
+          data-test-subj="simulateFailedSourceCreation"
+          onClick={() =>
+            onCreationStateChange({
+              isCreating: false,
+              hasCreatedSources: false,
+              hasFailedDrafts: true,
+            })
+          }
+        >
+          Simulate failed source creation
+        </button>
+      </div>
+    );
+  },
 }));
 jest.mock('./sources_table', () => ({
   SourcesTable: ({
@@ -145,6 +190,7 @@ describe('SourcesView routes', () => {
     mockIsSourcesLoading = false;
     mockIsSourcesFetching = false;
     mockIsSourcesError = false;
+    mockRecommendedSourcesTableMountCount = 0;
     mockToasts.addWarning.mockClear();
   });
 
@@ -225,6 +271,51 @@ describe('SourcesView routes', () => {
     expect(screen.getByText('Create your first source')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
       'Recommended sources'
+    );
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
+  });
+
+  it('keeps failed drafts after partial creation adds a source', () => {
+    mockSources = [];
+    renderSources('/sources');
+
+    mockSources = [createSource('source-1')];
+    fireEvent.click(screen.getByTestId('simulatePartialSourceCreation'));
+
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeVisible();
+    expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
+      'Sources not added'
+    );
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Source source-1' })).toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+  });
+
+  it('keeps failed drafts when the source refresh after partial creation fails', () => {
+    mockSources = [];
+    renderSources('/sources');
+
+    mockIsSourcesError = true;
+    fireEvent.click(screen.getByTestId('simulatePartialSourceCreation'));
+
+    expect(screen.getByTestId('significantEventsAppSourcesLoadErrorPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
+      'Sources not added'
+    );
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
+  });
+
+  it('keeps all failed drafts when the source refresh also fails', () => {
+    mockSources = [];
+    renderSources('/sources');
+
+    mockIsSourcesError = true;
+    fireEvent.click(screen.getByTestId('simulateFailedSourceCreation'));
+
+    expect(screen.getByTestId('significantEventsAppSourcesLoadErrorPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
+      'Sources not added'
     );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
   });

@@ -12,10 +12,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { RecommendedSourcesTable } from './recommended_sources_table';
+import {
+  INITIAL_RECOMMENDED_SOURCES_CREATION_STATE,
+  RecommendedSourcesTable,
+  type RecommendedSourcesCreationState,
+} from './recommended_sources_table';
 
 const mockFetch = jest.fn();
 const mockToasts = { addSuccess: jest.fn(), addError: jest.fn() };
+const mockOnCreationStateChange = jest.fn();
 let mockRecommendations: RecommendedSource[];
 
 jest.mock('../../hooks/use_kibana', () => ({
@@ -72,6 +77,24 @@ const makeSource = (id: string): NightshiftSource => ({
   esql_updated_at: '2026-10-30T00:00:00.000Z',
 });
 
+const TableHarness = ({ entry }: { entry: 'detections_page' | 'sources_page' }) => {
+  const [creationState, setCreationState] = React.useState<RecommendedSourcesCreationState>(
+    INITIAL_RECOMMENDED_SOURCES_CREATION_STATE
+  );
+  const onCreationStateChange = (state: RecommendedSourcesCreationState) => {
+    mockOnCreationStateChange(state);
+    setCreationState(state);
+  };
+
+  return (
+    <RecommendedSourcesTable
+      entry={entry}
+      isDetectionEnabled={entry === 'detections_page' && creationState.hasCreatedSources}
+      onCreationStateChange={onCreationStateChange}
+    />
+  );
+};
+
 const renderTable = (entry: 'detections_page' | 'sources_page' = 'detections_page') =>
   render(
     <QueryClientProvider
@@ -79,7 +102,7 @@ const renderTable = (entry: 'detections_page' | 'sources_page' = 'detections_pag
     >
       <I18nProvider>
         <EuiProvider>
-          <RecommendedSourcesTable entry={entry} />
+          <TableHarness entry={entry} />
         </EuiProvider>
       </I18nProvider>
     </QueryClientProvider>
@@ -118,6 +141,11 @@ describe('RecommendedSourcesTable', () => {
       'Logs',
       'Metrics',
     ]);
+    expect(mockOnCreationStateChange).toHaveBeenLastCalledWith({
+      isCreating: false,
+      hasCreatedSources: true,
+      hasFailedDrafts: false,
+    });
   });
 
   it('uses source-specific action and success copy on the Sources page', async () => {
@@ -145,21 +173,71 @@ describe('RecommendedSourcesTable', () => {
   it('removes created drafts and keeps a failed draft selected', async () => {
     mockFetch
       .mockResolvedValueOnce({ source: makeSource('logs') })
-      .mockRejectedValueOnce(new Error('Metrics failed'));
+      .mockRejectedValueOnce(new Error('Metrics failed'))
+      .mockRejectedValueOnce(new Error('Metrics still failed'));
     renderTable();
     await waitFor(() =>
       expect(screen.getByTestId('checkboxSelectRow-recommended-metrics')).toBeChecked()
     );
 
+    mockRecommendations = [];
     fireEvent.click(screen.getByTestId('nightshiftRecommendedSourcesEnableButton'));
 
     await waitFor(() =>
       expect(screen.queryByTestId('checkboxSelectRow-recommended-logs')).not.toBeInTheDocument()
     );
     expect(screen.getByTestId('checkboxSelectRow-recommended-metrics')).toBeChecked();
+    expect(screen.getByTestId('nightshiftRecommendedSourcesEnableButton')).toHaveTextContent(
+      'Add selected sources'
+    );
+    expect(mockOnCreationStateChange).toHaveBeenNthCalledWith(1, {
+      isCreating: true,
+      hasCreatedSources: false,
+      hasFailedDrafts: false,
+    });
+    expect(mockOnCreationStateChange).toHaveBeenLastCalledWith({
+      isCreating: false,
+      hasCreatedSources: true,
+      hasFailedDrafts: true,
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftRecommendedSourcesEnableButton'));
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
+    expect(screen.getByTestId('checkboxSelectRow-recommended-metrics')).toBeChecked();
+    expect(mockOnCreationStateChange).toHaveBeenLastCalledWith({
+      isCreating: false,
+      hasCreatedSources: true,
+      hasFailedDrafts: true,
+    });
     expect(mockToasts.addError).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Metrics failed' }),
       { title: 'Could not create source "Metrics"' }
     );
+  });
+
+  it('retains an unsubmitted failed draft after another failed draft succeeds', async () => {
+    mockFetch
+      .mockRejectedValueOnce(new Error('Logs failed'))
+      .mockRejectedValueOnce(new Error('Metrics failed'))
+      .mockResolvedValueOnce({ source: makeSource('logs') });
+    renderTable();
+    await waitFor(() =>
+      expect(screen.getByTestId('checkboxSelectRow-recommended-metrics')).toBeChecked()
+    );
+
+    fireEvent.click(screen.getByTestId('nightshiftRecommendedSourcesEnableButton'));
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(2));
+
+    fireEvent.click(screen.getByTestId('checkboxSelectRow-recommended-metrics'));
+    fireEvent.click(screen.getByTestId('nightshiftRecommendedSourcesEnableButton'));
+
+    await waitFor(() => expect(mockFetch).toHaveBeenCalledTimes(3));
+    expect(screen.queryByTestId('checkboxSelectRow-recommended-logs')).not.toBeInTheDocument();
+    expect(screen.getByTestId('checkboxSelectRow-recommended-metrics')).not.toBeChecked();
+    expect(mockOnCreationStateChange).toHaveBeenLastCalledWith({
+      isCreating: false,
+      hasCreatedSources: true,
+      hasFailedDrafts: true,
+    });
   });
 });

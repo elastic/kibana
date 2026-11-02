@@ -25,6 +25,11 @@ export const RECOMMENDED_SOURCES_TITLE = i18n.translate(
   { defaultMessage: 'Recommended sources' }
 );
 
+export const SOURCES_NOT_ADDED_TITLE = i18n.translate(
+  'xpack.nightshift.recommendedSources.sourcesNotAddedTitle',
+  { defaultMessage: 'Sources not added' }
+);
+
 export const TITLE_COLUMN_HEADER = i18n.translate(
   'xpack.nightshift.recommendedSources.titleColumnHeader',
   { defaultMessage: 'Title' }

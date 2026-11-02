@@ -53,6 +53,18 @@ const SourceFlyout = React.lazy(() =>
 type RecommendedSourcesEntry = 'detections_page' | 'sources_page';
 type SourceDraftOrigin = 'recommended' | 'custom';
 
+export interface RecommendedSourcesCreationState {
+  isCreating: boolean;
+  hasCreatedSources: boolean;
+  hasFailedDrafts: boolean;
+}
+
+export const INITIAL_RECOMMENDED_SOURCES_CREATION_STATE: RecommendedSourcesCreationState = {
+  isCreating: false,
+  hasCreatedSources: false,
+  hasFailedDrafts: false,
+};
+
 interface SourceDraft {
   draftId: string;
   title: string;
@@ -81,17 +93,32 @@ const toRecommendedDraft = ({
   origin: 'recommended',
 });
 
-export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEntry }) => {
+export const RecommendedSourcesTable = ({
+  entry,
+  isDetectionEnabled = false,
+  onCreationStateChange,
+}: {
+  entry: RecommendedSourcesEntry;
+  isDetectionEnabled?: boolean;
+  onCreationStateChange?: (state: RecommendedSourcesCreationState) => void;
+}) => {
   const isSourcesPage = entry === 'sources_page';
+  const isAddingSources = isSourcesPage || isDetectionEnabled;
   const recommendations = useRecommendedSources();
   const createSources = useCreateSources({
-    successContext: isSourcesPage ? 'sources' : 'detection',
+    successContext: isAddingSources ? 'sources' : 'detection',
   });
   const [drafts, setDrafts] = useState<SourceDraft[]>([]);
   const [selectedDraftIds, setSelectedDraftIds] = useState<string[]>([]);
   const [flyout, setFlyout] = useState<FlyoutState>();
   const seenRecommendedDraftIds = useRef(new Set<string>());
   const nextCustomDraftId = useRef(1);
+  const creationProgress = useRef({
+    hasCreatedSources: false,
+    hasFailedDrafts: false,
+  });
+  const failedDraftIds = useRef(new Set<string>());
+  const submittingDraftIds = useRef(new Set<string>());
 
   useEffect(() => {
     if (!recommendations.data) {
@@ -111,12 +138,21 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
         ...recommendedDrafts.map(
           (recommendedDraft) => currentById.get(recommendedDraft.draftId) ?? recommendedDraft
         ),
-        ...current.filter(({ origin }) => origin === 'custom'),
+        ...current.filter(
+          ({ draftId, origin }) =>
+            origin === 'custom' ||
+            ((failedDraftIds.current.has(draftId) || submittingDraftIds.current.has(draftId)) &&
+              !recommendedDraftIds.has(draftId))
+        ),
       ];
     });
     setSelectedDraftIds((current) => {
       const retained = current.filter(
-        (draftId) => !draftId.startsWith('recommended-') || recommendedDraftIds.has(draftId)
+        (draftId) =>
+          !draftId.startsWith('recommended-') ||
+          recommendedDraftIds.has(draftId) ||
+          failedDraftIds.current.has(draftId) ||
+          submittingDraftIds.current.has(draftId)
       );
       return [
         ...retained,
@@ -173,33 +209,51 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
 
   const createSelectedSources = async () => {
     const submittedDraftIds = new Set(selectedDrafts.map(({ draftId }) => draftId));
-    const { failed } = await createSources.mutateAsync(
-      selectedDrafts.map(({ draftId, title, description, tags, esql }) => ({
-        draftId,
-        title,
-        description: description.trim() === '' ? undefined : description,
-        tags,
-        esql,
-        enabled: true,
-      }))
-    );
-    const failedDraftIds = new Set(failed.map(({ draftId }) => draftId));
+    submittedDraftIds.forEach((draftId) => submittingDraftIds.current.add(draftId));
+    onCreationStateChange?.({ isCreating: true, ...creationProgress.current });
+    try {
+      const { created, failed } = await createSources.mutateAsync(
+        selectedDrafts.map(({ draftId, title, description, tags, esql }) => ({
+          draftId,
+          title,
+          description: description.trim() === '' ? undefined : description,
+          tags,
+          esql,
+          enabled: true,
+        }))
+      );
+      const failedSubmissionDraftIds = new Set(failed.map(({ draftId }) => draftId));
 
-    setDrafts((current) =>
-      current.filter(
-        ({ draftId }) => !submittedDraftIds.has(draftId) || failedDraftIds.has(draftId)
-      )
-    );
-    setSelectedDraftIds((current) =>
-      current.filter((draftId) => !submittedDraftIds.has(draftId) || failedDraftIds.has(draftId))
-    );
+      submittedDraftIds.forEach((draftId) => submittingDraftIds.current.delete(draftId));
+      submittedDraftIds.forEach((draftId) => failedDraftIds.current.delete(draftId));
+      failed.forEach(({ draftId }) => failedDraftIds.current.add(draftId));
+      creationProgress.current = {
+        hasCreatedSources: creationProgress.current.hasCreatedSources || created.length > 0,
+        hasFailedDrafts: failedDraftIds.current.size > 0,
+      };
+      setDrafts((current) =>
+        current.filter(
+          ({ draftId }) => !submittedDraftIds.has(draftId) || failedSubmissionDraftIds.has(draftId)
+        )
+      );
+      setSelectedDraftIds((current) =>
+        current.filter(
+          (draftId) => !submittedDraftIds.has(draftId) || failedSubmissionDraftIds.has(draftId)
+        )
+      );
+      onCreationStateChange?.({ isCreating: false, ...creationProgress.current });
+    } catch (error) {
+      submittedDraftIds.forEach((draftId) => submittingDraftIds.current.delete(draftId));
+      onCreationStateChange?.({ isCreating: false, ...creationProgress.current });
+      throw error;
+    }
   };
 
   return (
     <>
       <EuiPanel hasBorder data-test-subj="nightshiftRecommendedSourcesTable">
         <EuiText size="s">
-          <p>{isSourcesPage ? SOURCES_INTRODUCTION : INTRODUCTION}</p>
+          <p>{isAddingSources ? SOURCES_INTRODUCTION : INTRODUCTION}</p>
         </EuiText>
         <EuiSpacer size="m" />
 
@@ -231,7 +285,7 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
 
             {drafts.length > 0 ? (
               <EuiInMemoryTable
-                tableCaption={isSourcesPage ? SOURCES_TABLE_CAPTION : TABLE_CAPTION}
+                tableCaption={isAddingSources ? SOURCES_TABLE_CAPTION : TABLE_CAPTION}
                 itemId="draftId"
                 items={drafts}
                 columns={columns}
@@ -266,13 +320,13 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              iconType={isSourcesPage ? 'plus' : 'check'}
+              iconType={isAddingSources ? 'plus' : 'check'}
               isDisabled={selectedDrafts.length === 0 || createSources.isLoading}
               isLoading={createSources.isLoading}
               onClick={() => void createSelectedSources()}
               data-test-subj="nightshiftRecommendedSourcesEnableButton"
               {...getEbtProps({
-                action: isSourcesPage
+                action: isAddingSources
                   ? NIGHTSHIFT_EBT_ACTIONS.ADD_RECOMMENDED_SOURCES
                   : NIGHTSHIFT_EBT_ACTIONS.ENABLE_DETECTION,
                 element: NIGHTSHIFT_EBT_ELEMENTS.RECOMMENDED_SOURCES_TABLE,
@@ -284,7 +338,7 @@ export const RecommendedSourcesTable = ({ entry }: { entry: RecommendedSourcesEn
                 }),
               })}
             >
-              {isSourcesPage ? ADD_SELECTED_SOURCES_LABEL : ENABLE_DETECTION_LABEL}
+              {isAddingSources ? ADD_SELECTED_SOURCES_LABEL : ENABLE_DETECTION_LABEL}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

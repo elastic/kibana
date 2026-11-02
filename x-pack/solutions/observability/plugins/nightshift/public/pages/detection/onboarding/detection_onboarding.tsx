@@ -8,12 +8,24 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { RecommendedSourcesTable } from '../../../sources/recommended_sources/recommended_sources_table';
+import {
+  RecommendedSourcesTable,
+  type RecommendedSourcesCreationState,
+} from '../../../sources/recommended_sources/recommended_sources_table';
+import { SOURCES_NOT_ADDED_TITLE } from '../../../sources/recommended_sources/translations';
 import { DetectionExplainer } from './detection_explainer';
 import { DetectionOnboardingLocked } from './detection_onboarding_locked';
 import { HOW_DETECTION_WORKS_TITLE, SELECT_SOURCES_TITLE } from './translations';
 
-export const DetectionOnboarding = ({ canManage }: { canManage: boolean }) => {
+export const DetectionOnboarding = ({
+  canManage,
+  isDetectionEnabled,
+  onCreationStateChange,
+}: {
+  canManage: boolean;
+  isDetectionEnabled: boolean;
+  onCreationStateChange: (state: RecommendedSourcesCreationState) => void;
+}) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -29,7 +41,7 @@ export const DetectionOnboarding = ({ canManage }: { canManage: boolean }) => {
       `}
       data-test-subj="nightshiftDetectionOnboarding"
     >
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} hidden={isDetectionEnabled}>
         <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiTitle size="s">
@@ -47,11 +59,15 @@ export const DetectionOnboarding = ({ canManage }: { canManage: boolean }) => {
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
-                <h2>{SELECT_SOURCES_TITLE}</h2>
+                <h2>{isDetectionEnabled ? SOURCES_NOT_ADDED_TITLE : SELECT_SOURCES_TITLE}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RecommendedSourcesTable entry="detections_page" />
+              <RecommendedSourcesTable
+                entry="detections_page"
+                isDetectionEnabled={isDetectionEnabled}
+                onCreationStateChange={onCreationStateChange}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (

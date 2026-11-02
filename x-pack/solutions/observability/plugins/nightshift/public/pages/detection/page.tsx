@@ -22,6 +22,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, {
   lazy,
   Suspense,
@@ -52,6 +53,15 @@ import { EntitiesPanel } from './entities/entities_panel';
 import { PAGE_QUERY_PARAM } from './constants';
 import { RunLimitsBanner } from './run_limits_banner';
 import { useEntitySelection } from './use_entity_selection';
+import {
+  INITIAL_RECOMMENDED_SOURCES_CREATION_STATE,
+  type RecommendedSourcesCreationState,
+} from '../../sources/recommended_sources/recommended_sources_table';
+import {
+  HISTORY_LOOKUP_ERROR_DESCRIPTION,
+  HISTORY_LOOKUP_ERROR_TITLE,
+  HISTORY_LOOKUP_RETRY_LABEL,
+} from './onboarding/translations';
 import {
   RANGE_FROM_QUERY_PARAM,
   RANGE_TO_QUERY_PARAM,
@@ -102,14 +112,30 @@ export const DetectionPage = ({
   const sources = useFetchSources({ select: (sourceList) => sourceList.length });
   const historyOverview = useDetectionOverview(NO_SOURCES_HISTORY_RANGE, {
     enabled: sources.data === 0,
+    showErrorToast: false,
+    refetchOnWindowFocus: false,
   });
+  const [sourceCreationState, setSourceCreationState] = useState<RecommendedSourcesCreationState>(
+    INITIAL_RECOMMENDED_SOURCES_CREATION_STATE
+  );
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const hasNoSources = sources.data === 0;
+  const hasSuccessfulHistoryLookup = historyOverview.data !== undefined && !historyOverview.isError;
   const hasHistory =
     (historyOverview.data?.detections ?? 0) + (historyOverview.data?.significant_events ?? 0) > 0;
+  const hasHistoryLookupFailed = hasNoSources && historyOverview.isError;
+  const shouldRetainSourceCreation =
+    sourceCreationState.isCreating || sourceCreationState.hasFailedDrafts;
   const isOnboardingStateLoading =
-    sources.isLoading || (sources.data === 0 && historyOverview.isLoading);
-  const showOnboarding = sources.data === 0 && !hasHistory;
-  const showNoSourcesCallout = sources.data === 0 && hasHistory;
+    sources.isLoading ||
+    (hasNoSources && (historyOverview.isLoading || historyOverview.isFetching));
+  const showInitialOnboarding =
+    hasNoSources &&
+    hasSuccessfulHistoryLookup &&
+    !hasHistory &&
+    !sourceCreationState.hasCreatedSources;
+  const showSourceCreation = showInitialOnboarding || shouldRetainSourceCreation;
+  const showNoSourcesCallout = hasNoSources && hasHistory;
   const selection = useEntitySelection();
   const [isOverviewCompact, setIsOverviewCompact] = useState(false);
   const fullOverviewSlotRef = useRef<HTMLDivElement>(null);
@@ -218,134 +244,168 @@ export const DetectionPage = ({
           >
             <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionOnboardingLoading" />
           </EuiFlexGroup>
-        ) : showOnboarding ? (
-          <div
-            css={css`
-              flex: 1 1 auto;
-              min-height: 0;
-              overflow: auto;
-            `}
-          >
-            <DetectionOnboarding canManage={canManage} />
-          </div>
         ) : (
           <>
-            {showNoSourcesCallout && (
-              <>
-                <NoSourcesCallout />
-                <EuiSpacer size="m" />
-              </>
-            )}
-            <div
-              ref={fullOverviewSlotRef}
-              css={overviewSlotStyles(!isOverviewCompact)}
-              data-test-subj="nightshiftDetectionOverviewFullSlot"
-              data-collapsed={isOverviewCompact ? 'true' : undefined}
-            >
-              <div>
-                <DetectionOverview {...overviewProps} />
-                <EuiSpacer size="m" />
-              </div>
-            </div>
-            <EuiFlexGroup
-              gutterSize="l"
-              alignItems="stretch"
-              css={css`
-                flex: 1 1 auto;
-                min-height: 0;
-              `}
-            >
-              <EuiFlexItem
-                grow={false}
+            {showSourceCreation && (
+              <div
                 css={css`
-                  width: ${euiTheme.base * 16}px;
+                  flex: ${sourceCreationState.hasCreatedSources ? '0 1 auto' : '1 1 auto'};
+                  max-block-size: ${sourceCreationState.hasCreatedSources ? '40vh' : 'none'};
                   min-height: 0;
+                  overflow: auto;
+                  margin-block-end: ${sourceCreationState.hasCreatedSources ? euiTheme.size.m : 0};
                 `}
               >
+                <DetectionOnboarding
+                  canManage={canManage}
+                  isDetectionEnabled={sourceCreationState.hasCreatedSources}
+                  onCreationStateChange={setSourceCreationState}
+                />
+              </div>
+            )}
+            {!showInitialOnboarding && (
+              <>
+                {hasHistoryLookupFailed && (
+                  <>
+                    <KbnDangerCallout
+                      announceOnMount
+                      size="s"
+                      title={HISTORY_LOOKUP_ERROR_TITLE}
+                      text={HISTORY_LOOKUP_ERROR_DESCRIPTION}
+                      data-test-subj="nightshiftDetectionHistoryLookupError"
+                      actionProps={{
+                        primary: {
+                          children: HISTORY_LOOKUP_RETRY_LABEL,
+                          iconType: 'refresh',
+                          onClick: () => void historyOverview.refetch(),
+                          'data-test-subj': 'nightshiftDetectionHistoryLookupRetryButton',
+                        },
+                      }}
+                    />
+                    <EuiSpacer size="m" />
+                  </>
+                )}
+                {showNoSourcesCallout && (
+                  <>
+                    <NoSourcesCallout />
+                    <EuiSpacer size="m" />
+                  </>
+                )}
                 <div
-                  css={overviewSlotStyles(isOverviewCompact, true)}
-                  data-test-subj="nightshiftDetectionOverviewCompactSlot"
-                  data-collapsed={!isOverviewCompact ? 'true' : undefined}
+                  ref={fullOverviewSlotRef}
+                  css={overviewSlotStyles(!isOverviewCompact)}
+                  data-test-subj="nightshiftDetectionOverviewFullSlot"
+                  data-collapsed={isOverviewCompact ? 'true' : undefined}
                 >
                   <div>
-                    <DetectionOverview {...overviewProps} compact />
+                    <DetectionOverview {...overviewProps} />
+                    <EuiSpacer size="m" />
                   </div>
                 </div>
-                <EntitiesPanel
-                  timeRange={timeRange}
-                  selection={selection}
-                  knowledgeHref={headerProps.knowledgeHref}
-                  onKnowledgeClick={headerProps.onKnowledgeClick}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem
-                css={css`
-                  display: flex;
-                  flex-direction: column;
-                  min-width: 0;
-                  min-height: 0;
-                `}
-              >
-                <EuiTabs size="s">
-                  {getVisibleDetectionTabs(isDeveloperMode).map((id) => (
-                    <EuiTab
-                      key={id}
-                      isSelected={tab === id}
-                      {...reactRouterNavigate(history, `/detections/${id}${tabSearch}`)}
-                      data-test-subj={`nightshiftDetectionTab-${id}`}
-                      {...getEbtProps({
-                        action: NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTION_TAB,
-                        element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_WORKSPACE_TABS,
-                        detail: id,
-                      })}
-                    >
-                      {DETECTION_TAB_LABELS[id]}
-                    </EuiTab>
-                  ))}
-                </EuiTabs>
-                <EuiSpacer size="m" />
-                <div
+                <EuiFlexGroup
+                  gutterSize="l"
+                  alignItems="stretch"
                   css={css`
                     flex: 1 1 auto;
                     min-height: 0;
-                    overflow: auto;
                   `}
-                  data-test-subj="nightshiftDetectionTabBody"
-                  onScroll={handleTabBodyScroll}
                 >
-                  <Suspense
-                    fallback={
-                      <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionTabLoading" />
-                    }
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      width: ${euiTheme.base * 16}px;
+                      min-height: 0;
+                    `}
                   >
-                    {tab === 'events' && (
-                      <EventsTab
-                        timeRange={timeRange}
-                        onTimeRangeChange={setTimeRange}
-                        entities={selection.entities}
-                        unassigned={selection.unassigned}
-                      />
-                    )}
-                    {tab === 'rules' && (
-                      <RulesTab
-                        timeRange={timeRange}
-                        onTimeRangeChange={setTimeRange}
-                        entities={selection.entities}
-                        unassigned={selection.unassigned}
-                      />
-                    )}
-                    {tab === 'signals' && isDeveloperMode && (
-                      <SignalsTab
-                        timeRange={timeRange}
-                        onTimeRangeChange={setTimeRange}
-                        entities={selection.entities}
-                        unassigned={selection.unassigned}
-                      />
-                    )}
-                  </Suspense>
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                    <div
+                      css={overviewSlotStyles(isOverviewCompact, true)}
+                      data-test-subj="nightshiftDetectionOverviewCompactSlot"
+                      data-collapsed={!isOverviewCompact ? 'true' : undefined}
+                    >
+                      <div>
+                        <DetectionOverview {...overviewProps} compact />
+                      </div>
+                    </div>
+                    <EntitiesPanel
+                      timeRange={timeRange}
+                      selection={selection}
+                      knowledgeHref={headerProps.knowledgeHref}
+                      onKnowledgeClick={headerProps.onKnowledgeClick}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    css={css`
+                      display: flex;
+                      flex-direction: column;
+                      min-width: 0;
+                      min-height: 0;
+                    `}
+                  >
+                    <EuiTabs size="s">
+                      {getVisibleDetectionTabs(isDeveloperMode).map((id) => (
+                        <EuiTab
+                          key={id}
+                          isSelected={tab === id}
+                          {...reactRouterNavigate(history, `/detections/${id}${tabSearch}`)}
+                          data-test-subj={`nightshiftDetectionTab-${id}`}
+                          {...getEbtProps({
+                            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTION_TAB,
+                            element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_WORKSPACE_TABS,
+                            detail: id,
+                          })}
+                        >
+                          {DETECTION_TAB_LABELS[id]}
+                        </EuiTab>
+                      ))}
+                    </EuiTabs>
+                    <EuiSpacer size="m" />
+                    <div
+                      css={css`
+                        flex: 1 1 auto;
+                        min-height: 0;
+                        overflow: auto;
+                      `}
+                      data-test-subj="nightshiftDetectionTabBody"
+                      onScroll={handleTabBodyScroll}
+                    >
+                      <Suspense
+                        fallback={
+                          <EuiLoadingSpinner
+                            size="xl"
+                            data-test-subj="nightshiftDetectionTabLoading"
+                          />
+                        }
+                      >
+                        {tab === 'events' && (
+                          <EventsTab
+                            timeRange={timeRange}
+                            onTimeRangeChange={setTimeRange}
+                            entities={selection.entities}
+                            unassigned={selection.unassigned}
+                          />
+                        )}
+                        {tab === 'rules' && (
+                          <RulesTab
+                            timeRange={timeRange}
+                            onTimeRangeChange={setTimeRange}
+                            entities={selection.entities}
+                            unassigned={selection.unassigned}
+                          />
+                        )}
+                        {tab === 'signals' && isDeveloperMode && (
+                          <SignalsTab
+                            timeRange={timeRange}
+                            onTimeRangeChange={setTimeRange}
+                            entities={selection.entities}
+                            unassigned={selection.unassigned}
+                          />
+                        )}
+                      </Suspense>
+                    </div>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            )}
           </>
         )}
       </EuiPageTemplate.Section>

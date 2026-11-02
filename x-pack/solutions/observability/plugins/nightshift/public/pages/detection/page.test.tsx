@@ -16,6 +16,7 @@ import { useDetectionEntities } from '../../data/detection_entities/use_detectio
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
 import { useFetchSources } from '../../data/sources/use_fetch_sources';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
+import type { RecommendedSourcesCreationState } from '../../sources/recommended_sources/recommended_sources_table';
 import type { DetectionTabId } from './detection_tabs';
 import { DetectionPage } from './page';
 
@@ -37,8 +38,43 @@ jest.mock('./signals/signals_tab', () => ({
   SignalsTab: () => <div data-test-subj="signalsTabStub" />,
 }));
 jest.mock('./run_limits_banner', () => ({ RunLimitsBanner: () => null }));
+let mockRecommendedSourcesTableMountCount = 0;
 jest.mock('../../sources/recommended_sources/recommended_sources_table', () => ({
-  RecommendedSourcesTable: () => <div data-test-subj="recommendedSourcesTableStub" />,
+  INITIAL_RECOMMENDED_SOURCES_CREATION_STATE: {
+    isCreating: false,
+    hasCreatedSources: false,
+    hasFailedDrafts: false,
+  },
+  RecommendedSourcesTable: ({
+    isDetectionEnabled,
+    onCreationStateChange,
+  }: {
+    isDetectionEnabled: boolean;
+    onCreationStateChange: (state: RecommendedSourcesCreationState) => void;
+  }) => {
+    const [draftMarker] = React.useState(() => {
+      mockRecommendedSourcesTableMountCount++;
+      return 'retained draft';
+    });
+    return (
+      <div data-test-subj="recommendedSourcesTableStub">
+        {isDetectionEnabled ? 'detection enabled' : 'detection disabled'}
+        {draftMarker}
+        <button
+          data-test-subj="simulatePartialSourceCreation"
+          onClick={() =>
+            onCreationStateChange({
+              isCreating: false,
+              hasCreatedSources: true,
+              hasFailedDrafts: true,
+            })
+          }
+        >
+          Simulate partial source creation
+        </button>
+      </div>
+    );
+  },
 }));
 let mockCanManage = true;
 jest.mock('../../hooks/use_kibana', () => ({
@@ -61,19 +97,31 @@ const refetch = jest.fn();
 let mockSourcesCount = 1;
 let mockHistoryDetections = 0;
 let mockHistorySignificantEvents = 0;
+let mockHistoryError = false;
+let mockHistoryHasCachedData = false;
+let mockHistoryIsFetching = false;
 
 const renderPage = (initialPath = '/detections/events', tab: DetectionTabId = 'events') => {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
-  render(
+  const page = (
+    <Router history={history}>
+      <DetectionPage headerProps={{}} tab={tab} />
+    </Router>
+  );
+  const view = render(
     <I18nProvider>
-      <EuiProvider>
-        <Router history={history}>
-          <DetectionPage headerProps={{}} tab={tab} />
-        </Router>
-      </EuiProvider>
+      <EuiProvider>{page}</EuiProvider>
     </I18nProvider>
   );
-  return history;
+  return {
+    history,
+    rerenderPage: () =>
+      view.rerender(
+        <I18nProvider>
+          <EuiProvider>{page}</EuiProvider>
+        </I18nProvider>
+      ),
+  };
 };
 
 describe('DetectionPage', () => {
@@ -83,6 +131,10 @@ describe('DetectionPage', () => {
     mockSourcesCount = 1;
     mockHistoryDetections = 0;
     mockHistorySignificantEvents = 0;
+    mockHistoryError = false;
+    mockHistoryHasCachedData = false;
+    mockHistoryIsFetching = false;
+    mockRecommendedSourcesTableMountCount = 0;
     mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: false });
     mockUseFetchSources.mockImplementation(() => ({
       data: mockSourcesCount,
@@ -100,27 +152,33 @@ describe('DetectionPage', () => {
       isLoading: false,
       isError: false,
     });
-    mockUseDetectionOverview.mockImplementation(({ from }: { from: string }) => ({
-      data:
-        from === 'now-10y'
-          ? {
-              entities: 0,
-              knowledge_indicators: 0,
-              active_rules: 0,
-              detections: mockHistoryDetections,
-              significant_events: mockHistorySignificantEvents,
-            }
-          : {
-              entities: 6,
-              knowledge_indicators: 113,
-              active_rules: 80,
-              detections: 40,
-              significant_events: 23,
-            },
-      isLoading: false,
-      isError: false,
-      refetch,
-    }));
+    mockUseDetectionOverview.mockImplementation(({ from }: { from: string }) => {
+      const isHistoryLookup = from === 'now-10y';
+      return {
+        data:
+          isHistoryLookup && mockHistoryError && !mockHistoryHasCachedData
+            ? undefined
+            : isHistoryLookup
+            ? {
+                entities: 0,
+                knowledge_indicators: 0,
+                active_rules: 0,
+                detections: mockHistoryDetections,
+                significant_events: mockHistorySignificantEvents,
+              }
+            : {
+                entities: 6,
+                knowledge_indicators: 113,
+                active_rules: 80,
+                detections: 40,
+                significant_events: 23,
+              },
+        isLoading: false,
+        isFetching: isHistoryLookup && mockHistoryIsFetching,
+        isError: isHistoryLookup && mockHistoryError,
+        refetch,
+      };
+    });
   });
 
   it('shows onboarding when the space has no sources or history', () => {
@@ -139,6 +197,65 @@ describe('DetectionPage', () => {
 
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftDetectionNoSourcesCallout')).toBeInTheDocument();
+  });
+
+  it('keeps the workspace and provides a retry when the history lookup fails', async () => {
+    mockSourcesCount = 0;
+    mockHistoryError = true;
+    renderPage();
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionOnboarding')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionHistoryLookupError')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionHistoryLookupRetryButton'));
+    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(mockUseDetectionOverview).toHaveBeenCalledWith(
+      { from: 'now-10y', to: 'now' },
+      { enabled: true, showErrorToast: false, refetchOnWindowFocus: false }
+    );
+  });
+
+  it('waits for a fresh history result instead of using cached zero history', () => {
+    mockSourcesCount = 0;
+    mockHistoryHasCachedData = true;
+    mockHistoryIsFetching = true;
+    renderPage();
+
+    expect(screen.getByTestId('nightshiftDetectionOnboardingLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionOnboarding')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('eventsTabStub')).not.toBeInTheDocument();
+  });
+
+  it('does not use cached zero history when a history refetch fails', async () => {
+    mockSourcesCount = 0;
+    mockHistoryError = true;
+    mockHistoryHasCachedData = true;
+    renderPage();
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionOnboarding')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionHistoryLookupError')).toHaveTextContent(
+      'Detection is stopped because this space has no sources'
+    );
+  });
+
+  it('keeps failed drafts and shows the workspace after partial creation adds a source', async () => {
+    mockSourcesCount = 0;
+    renderPage();
+
+    mockSourcesCount = 1;
+    fireEvent.click(screen.getByTestId('simulatePartialSourceCreation'));
+
+    expect(screen.getByTestId('nightshiftDetectionOnboarding')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sources not added' })).toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent(
+      'detection enabled'
+    );
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionTab-events')).toBeInTheDocument();
   });
 
   it('shows the normal detection workspace when the space has a source', async () => {
@@ -261,7 +378,7 @@ describe('DetectionPage', () => {
   });
 
   it('keeps entities and every tab filter when switching tabs, but not the page or flyout', async () => {
-    const history = renderPage(
+    const { history } = renderPage(
       '/detections/events?entity=checkout&entity=expired&unassigned=true&severity=critical&search=errors&rulesSearch=agent&page=3&eventId=event-1'
     );
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
