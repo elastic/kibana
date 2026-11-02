@@ -10,6 +10,7 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
+import chalk from 'chalk';
 import execa from 'execa';
 import { ES_SERVERLESS_DEFAULT_IMAGE, SERVERLESS_NODES, getUiamContainers } from '@kbn/es';
 import type { DoctorCheckGroup, Fix } from '../types';
@@ -106,12 +107,15 @@ export const dockerChecks: DoctorCheckGroup = {
 
         const recommended = `${RECOMMENDED_CPUS} CPUs and ${RECOMMENDED_MEMORY_GB} GB RAM`;
         const fix = resizeDockerDesktopFix(NCPU, MemTotal);
-        return warn(`${details}, multi-project serverless tests need ${recommended}`, {
-          fix,
-          hint: fix
-            ? 'restarts Docker Desktop and stops its containers'
-            : `Give Docker ${recommended} if this machine allows it (Docker Desktop settings → Resources)`,
-        });
+        return warn(
+          `${details}, multi-project serverless tests need ${chalk.yellow(recommended)}`,
+          {
+            fix,
+            hint: fix
+              ? 'restarts Docker Desktop and stops its containers'
+              : `Give Docker ${recommended} if this machine allows it (Docker Desktop settings → Resources)`,
+          }
+        );
       },
     },
     {
