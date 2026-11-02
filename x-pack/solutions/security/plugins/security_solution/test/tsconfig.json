@@ -15,6 +15,7 @@
     "@kbn/cases-components",
     "@kbn/cases-plugin",
     "@kbn/core-spaces-common",
+    "@kbn/elastic-assistant-common",
     "@kbn/entity-store",
     "@kbn/es",
     "@kbn/fleet-plugin",

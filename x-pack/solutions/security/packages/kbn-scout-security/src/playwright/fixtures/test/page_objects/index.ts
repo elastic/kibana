@@ -11,6 +11,7 @@ import { AddExceptionFlyoutPage } from './add_exception_flyout';
 import { AIValueReportPage } from './ai_value_report';
 import { AlertsTablePage } from './alerts_table';
 import { AgentBuilderPage } from './agent_builder';
+import { AiAssistantPage } from './ai_assistant';
 import { AlertDetailsRightPanelPage } from './alert_details_right_panel';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management';
 import { EntityAnalyticsHomePage } from './entity_analytics_home_page';
@@ -49,6 +50,8 @@ export interface SecurityPageObjects extends PageObjects {
   aiValueReportPage: AIValueReportPage;
   alertsTablePage: AlertsTablePage;
   agentBuilderPage: AgentBuilderPage;
+  /** Classic Security AI Assistant flyout (requires the classic chat experience in the space). */
+  aiAssistantPage: AiAssistantPage;
   alertDetailsRightPanelPage: AlertDetailsRightPanelPage;
   entityAnalyticsManagementPage: EntityAnalyticsManagementPage;
   /** New Entity Analytics home page — Needs attention tiles and entities grid (behind the useNewEntityAnalyticsPage flag). */
@@ -107,6 +110,7 @@ export function extendPageObjects(
     aiValueReportPage: createLazyPageObject(AIValueReportPage, page),
     alertsTablePage: createLazyPageObject(AlertsTablePage, page),
     agentBuilderPage: createLazyPageObject(AgentBuilderPage, page),
+    aiAssistantPage: createLazyPageObject(AiAssistantPage, page),
     alertDetailsRightPanelPage: createLazyPageObject(AlertDetailsRightPanelPage, page),
     entityAnalyticsManagementPage: createLazyPageObject(EntityAnalyticsManagementPage, page),
     entityAnalyticsHomePage: createLazyPageObject(EntityAnalyticsHomePage, page),

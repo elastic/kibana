@@ -103,6 +103,7 @@ Existing namespaces and their source scope:
 | Namespace | Source scope | `api/`? |
 |-----------|-------------|---------|
 | `agent_builder` | `public/agent_builder/` | no |
+| `assistant` | `public/assistant/` | no |
 | `entity_analytics` | `public/entity_analytics/` | yes |
 | `exceptions` | `public/exceptions/` | no |
 | `flyout` | `public/flyout/` (and `public/flyout_v2/`, a v2 rewrite of the same feature area in a separate top-level dir; tests should land in this namespace) | no |
