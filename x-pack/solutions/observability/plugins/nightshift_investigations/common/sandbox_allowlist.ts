@@ -81,9 +81,13 @@ export const normalizeSandboxAllowlistHost = (raw: string): SandboxAllowlistHost
     }
   }
 
-  let scheme = '';
+  let scheme = '*';
   const schemeLower = tokens[idx].toLowerCase();
-  if (schemeLower === 'http' || schemeLower === 'https') {
+  if (
+    schemeLower === 'http' ||
+    schemeLower === 'https' ||
+    (schemeLower === '*' && idx + 1 < tokens.length)
+  ) {
     scheme = schemeLower;
     idx++;
     if (idx >= tokens.length) {
@@ -167,7 +171,7 @@ export const normalizeSandboxAllowlistHost = (raw: string): SandboxAllowlistHost
   const hostWithPort = port ? `${normalizedHost}:${port}` : normalizedHost;
   if (
     action === 'allow' &&
-    scheme === '' &&
+    scheme === '*' &&
     port === '' &&
     methods.length === 0 &&
     pathPrefix === ''
@@ -175,11 +179,7 @@ export const normalizeSandboxAllowlistHost = (raw: string): SandboxAllowlistHost
     return { host: normalizedHost };
   }
 
-  const parts: string[] = [action];
-  if (scheme) {
-    parts.push(scheme);
-  }
-  parts.push(hostWithPort);
+  const parts: string[] = [action, scheme, hostWithPort];
   if (methods.length > 0) {
     parts.push(methods.join(','));
   } else if (pathPrefix) {

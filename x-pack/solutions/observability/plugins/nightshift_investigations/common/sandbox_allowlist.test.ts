@@ -20,12 +20,15 @@ describe('normalizeSandboxAllowlistHost', () => {
     ['localhost', 'localhost'],
     ['10.0.0.1', '10.0.0.1'],
     ['*.datadoghq.com', '*.datadoghq.com'],
-    ['api.github.com:443', 'allow api.github.com:443'],
-    ['pypi.org GET,HEAD /simple/', 'allow pypi.org GET,HEAD /simple/'],
-    ['deny api.github.com POST /gists # block gists', 'deny api.github.com POST /gists'],
+    ['api.github.com:443', 'allow * api.github.com:443'],
+    ['pypi.org GET,HEAD /simple/', 'allow * pypi.org GET,HEAD /simple/'],
+    ['allow * pypi.org GET,HEAD /simple/', 'allow * pypi.org GET,HEAD /simple/'],
+    ['deny api.github.com POST /gists # block gists', 'deny * api.github.com POST /gists'],
+    ['deny * api.github.com POST /gists', 'deny * api.github.com POST /gists'],
     ['allow https api.github.com:443 post,get /', 'allow https api.github.com:443 GET,POST'],
   ])('normalizes %p to %p', (raw, expected) => {
     expect(normalizeSandboxAllowlistHost(raw)).toEqual({ host: expected });
+    expect(normalizeSandboxAllowlistHost(expected)).toEqual({ host: expected });
   });
 
   it.each([
@@ -62,7 +65,7 @@ describe('validateSandboxAllowlist', () => {
         'deny api.github.com POST /gists',
       ])
     ).toEqual({
-      hosts: ['api.github.com', '*.datadoghq.com', 'deny api.github.com POST /gists'],
+      hosts: ['api.github.com', '*.datadoghq.com', 'deny * api.github.com POST /gists'],
       errors: [],
     });
   });

@@ -73,7 +73,9 @@ describe('SandboxAllowlistClient', () => {
 
     it('fails closed on a stored list the write validation would reject', async () => {
       const { client, request } = setup({ stored: ['api.github.com', '*'] });
-      await expect(client.getHostsForCommand(request)).resolves.toEqual([]);
+      await expect(client.getHostsForCommand(request)).rejects.toThrow(
+        SandboxAllowlistValidationError
+      );
     });
   });
 });
@@ -86,8 +88,8 @@ describe('sandboxAllowlistUiSetting schema', () => {
       schema.validate([
         'api.github.com',
         '*.datadoghq.com',
-        'allow pypi.org GET,HEAD /simple/',
-        'deny api.github.com POST /gists',
+        'allow * pypi.org GET,HEAD /simple/',
+        'deny * api.github.com POST /gists',
         'xn--bcher-kva.example',
       ])
     ).not.toThrow();

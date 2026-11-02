@@ -75,10 +75,13 @@ export const createSandboxAllowlistClient = ({
     },
 
     getHostsForCommand: async (request) => {
-      // Re-validate on read so an overridden or legacy value can never widen the proxy's scope
-      // (an empty string or "*" would mean "any host" to the proxy).
+      // Re-validate on read so a corrupted or overridden setting fails closed instead of
+      // silently dropping the space's firewall policy.
       const { hosts, errors } = validateSandboxAllowlist(await readHosts(request));
-      return errors.length > 0 ? [] : hosts;
+      if (errors.length > 0) {
+        throw new SandboxAllowlistValidationError(errors.join('; '));
+      }
+      return hosts;
     },
   };
 };

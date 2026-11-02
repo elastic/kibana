@@ -102,8 +102,8 @@ describe('SandboxAllowlistSection', () => {
           'api.github.com',
           'uploads.github.com',
           '*.datadoghq.com',
-          'allow pypi.org GET,HEAD /simple/',
-          'deny api.github.com POST /gists',
+          'allow * pypi.org GET,HEAD /simple/',
+          'deny * api.github.com POST /gists',
           'xn--bcher-kva.example',
         ],
       })
