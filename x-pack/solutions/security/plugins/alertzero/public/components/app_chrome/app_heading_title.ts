@@ -16,6 +16,9 @@ export const AppHeadingTitleContext = createContext<(title: string | undefined) 
 /**
  * Shows `title` as the app heading while the calling page is mounted, and restores the route's
  * title when it unmounts. A layout effect, so the route's title never paints first.
+ *
+ * Call it from one mounted page at a time. The cleanup clears the title without checking who set
+ * it, so with two callers, the first to unmount would clear the other's title.
  */
 export const useAppHeadingTitle = (title: string): void => {
   const setTitle = useContext(AppHeadingTitleContext);
