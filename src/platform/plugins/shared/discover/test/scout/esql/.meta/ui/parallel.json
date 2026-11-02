@@ -1,5 +1,5 @@
 {
-  "sha1": "db47dc791ae058cea4fb37666ced0abb0cde9db4",
+  "sha1": "4f46c0d78ee39d0ebb5e556a3a5919ac11c58e54",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -265,34 +265,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_by_reference_panel_edit.spec.ts",
-        "line": 41,
+        "line": 30,
         "column": 7
-      }
-    },
-    {
-      "id": "e7cbb386f3174f3-7bdf08033cc4f71",
-      "title": "Discover ES|QL controls - by-reference panel editing should not duplicate a control when saving a copy into another dashboard",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_by_reference_panel_edit.spec.ts",
-        "line": 70,
-        "column": 15
-      }
-    },
-    {
-      "id": "e7cbb386f3174f3-22355d83ed50453",
-      "title": "Discover ES|QL controls - by-reference panel editing should not duplicate a control when saving from Discover into a dashboard",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_by_reference_panel_edit.spec.ts",
-        "line": 112,
-        "column": 29
       }
     },
     {
@@ -356,7 +330,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 7
       }
     },
@@ -369,8 +343,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
-        "line": 81,
+        "line": 82,
         "column": 9
+      }
+    },
+    {
+      "id": "c9f80285597a240-8d488bda8e96102",
+      "title": "Discover ES|QL controls - saving to a dashboard should not duplicate a control when saving a copy into another dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
+        "line": 125,
+        "column": 27
+      }
+    },
+    {
+      "id": "c9f80285597a240-9aad4b273070499",
+      "title": "Discover ES|QL controls - saving to a dashboard should not duplicate a control when saving from Discover into a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
+        "line": 167,
+        "column": 29
       }
     },
     {
