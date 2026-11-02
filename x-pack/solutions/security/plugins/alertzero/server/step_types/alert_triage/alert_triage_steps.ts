@@ -184,7 +184,6 @@ export const getTriageLoadAlertsStepDefinition = ({
               message: `space_id must be the workflow's space "${spaceId}".`,
             });
           }
-          // EXPERIMENT: shared platform loader instead of the detection-engine search route.
           const { alerts, missingIds } = await management.loadAlertDocuments({
             request: contextManager.getFakeRequest(),
             alerts: { ids: input.alert_ids, index: `.alerts-security.alerts-${spaceId}` },
