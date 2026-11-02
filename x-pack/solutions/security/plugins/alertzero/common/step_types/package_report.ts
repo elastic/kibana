@@ -9,7 +9,8 @@ import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest'
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { MAX_HUNT_TECHNIQUE_IDS } from '../hunt_technique_limit';
 import { convergedProposalSchema, mintSuppressionSchema } from './resolve_proposals';
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
@@ -37,95 +38,129 @@ export const MAX_SUMMARY_BULLETS_CHARS = 5000;
 
 const boundedId = z.string().trim().min(1).max(256);
 
-export const packageReportInputSchema = z.object({
-  spaceId: boundedId.describe(
-    'Space the Investigation lives in (S1; must match the workflow space).'
-  ),
-  reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
-  investigationConversationId: boundedId.describe(
-    'Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId}).'
-  ),
-  runId: boundedId.describe('Current-run id; packaging reads only attachments scoped to this run.'),
-  /**
-   * The hunt child's own verdict, threaded through so packaging can tell a run that found
-   * nothing from one that could not finish. Without it, both look identical here: neither
-   * leaves a current-run SSE attachment behind, because the coordinator only emits one for a
-   * confirmed hit.
-   */
-  huntStatus: z
-    .enum(['success', 'partial', 'failed'])
-    .describe(
-      "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish, `failed` when the coordinator call failed or was skipped."
+export const packageReportInputSchema = lazySchema(() =>
+  z.object({
+    spaceId: boundedId.describe(
+      'Space the Investigation lives in (S1; must match the workflow space).'
     ),
-  hasConfirmedHit: z
-    .boolean()
-    .describe(
-      "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
+    reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
+    investigationConversationId: boundedId.describe(
+      'Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId}).'
     ),
-  /**
-   * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
-   * output). Compared against the current-run SSE attachments packaging actually finds: the
-   * hunt's `attach_sse` foreach swallows a per-item attach failure with `continue`, so without
-   * this count a shortfall is invisible and packaging would read a partial finding set as
-   * complete.
-   *
-   * Optional, not required: this workflow is a plain `yaml` definition, so its own content
-   * hash propagates to every space on the next reconciliation regardless of version, but the
-   * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
-   * whose hash covers only the function source, not the imported YAML it renders -- an
-   * already-installed Worker only picks up the call site that supplies this field once its own
-   * `version` bumps. Making it required here would fail every such Worker's packaging call in
-   * the gap between the two. Omitting it instead skips the shortfall check below, which is the
-   * same as not having this fix yet -- never a hard failure.
-   */
-  expectedSseCount: z
-    .number()
-    .int()
-    .min(0)
-    .optional()
-    .describe(
-      'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged. Omit to skip the shortfall check (e.g. an already-installed Worker that does not supply it yet).'
+    runId: boundedId.describe(
+      'Current-run id; packaging reads only attachments scoped to this run.'
     ),
-  /**
-   * The coordinator result a clean run cannot carry on an attachment: the coordinator attaches
-   * an SSE only for a confirmed hit, so on a clean run `tier2_targets`, `actionable_indices`
-   * and the executed Tier 2 behaviors exist only on `hunt.yaml`'s coordinator step output.
-   * Optional for the same staleness reason as `expectedSseCount`: omitting them degrades the
-   * coverage KI's `data_sources` / `validated_esql`, never fails packaging.
-   */
-  reportIntentTargets: z
-    .array(z.string().max(512))
-    .max(200)
-    .optional()
-    .describe(
-      "The coordinator's `report_intent_targets`: the datasets the report itself points at, without Tier 1 hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
-    ),
-  behaviors: z
-    .array(
-      z.object({
-        technique_id: z.string().max(64),
-        technique_name: z.string().max(256).optional(),
-        title: z.string().max(512).optional(),
-        evidence_quote: z.string().max(2000).optional(),
-        confidence: z.number(),
-        severity: z.string().max(32).optional(),
-        validated_esql: z.string().max(32_000),
-        execution: z
-          .object({
-            executed: z.boolean(),
-            row_count: z.number(),
-            hit: z.boolean(),
-            inconclusive_reason: z.string().max(64).optional(),
-          })
-          .optional(),
-      })
-    )
-    .max(20)
-    .optional()
-    .describe(
-      "The coordinator's `tier2.behaviors`. Clean-run coverage KIs carry the executed query as `validated_esql` with `esql_status: executed_no_rows`."
-    ),
-});
+    /**
+     * The hunt child's own verdict, threaded through so packaging can tell a run that found
+     * nothing from one that could not finish. Without it, both look identical here: neither
+     * leaves a current-run SSE attachment behind, because the coordinator only emits one for a
+     * confirmed hit.
+     */
+    huntStatus: z
+      .enum(['success', 'partial', 'retired_incomplete', 'failed'])
+      .describe(
+        "Hunt child's result status: `success` when the run covered what it was asked to, `partial` when a tier could not finish and a later sweep will hunt the report again, `retired_incomplete` when the hunt stamped the report after a gap no rerun can close (the absence of a hit is a settled result, but not a clean verdict), `failed` when the coordinator call failed or was skipped."
+      ),
+    hasConfirmedHit: z
+      .boolean()
+      .describe(
+        "Whether the hunt cleared the confirmed-hit bar (the coordinator's top-level `has_confirmed_hit`: a required-or-baseline index hit from Tier 1, or a Tier 2 behavior that executed and hit). False covers both an environment that is clean and one where nothing was searchable."
+      ),
+    /**
+     * Number of SSE attachments the hunt child prepared for this run (`hunt.yaml`'s `sse_count`
+     * output). Compared against the current-run SSE attachments packaging actually finds: the
+     * hunt's `attach_sse` foreach swallows a per-item attach failure with `continue`, so without
+     * this count a shortfall is invisible and packaging would read a partial finding set as
+     * complete.
+     *
+     * Optional, not required: this workflow is a plain `yaml` definition, so its own content
+     * hash propagates to every space on the next reconciliation regardless of version, but the
+     * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
+     * whose hash covers only the function source, not the imported YAML it renders -- an
+     * already-installed Worker only picks up the call site that supplies this field once its own
+     * `version` bumps. Making it required here would fail every such Worker's packaging call in
+     * the gap between the two. Omitting it instead skips the shortfall check below, which is the
+     * same as not having this fix yet -- never a hard failure.
+     */
+    expectedSseCount: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). A packaging read that finds fewer than this is a partial attach, reported as `run_incomplete` rather than packaged. Omit to skip the shortfall check (e.g. an already-installed Worker that does not supply it yet).'
+      ),
+    /**
+     * The coordinator result a clean run cannot carry on an attachment: the coordinator attaches
+     * an SSE only for a confirmed hit, so on a clean run `tier2_targets`, `actionable_indices`
+     * and the executed Tier 2 behaviors exist only on `hunt.yaml`'s coordinator step output.
+     * Optional for the same staleness reason as `expectedSseCount`: omitting them degrades the
+     * coverage KI's `data_sources` / `validated_esql`, never fails packaging.
+     */
+    reportIntentTargets: z
+      .array(z.string().max(512))
+      .max(200)
+      .optional()
+      .describe(
+        "The coordinator's `report_intent_targets`: the datasets the report itself points at, without Tier 1 hit indices or the process-bearing streams. Coverage KIs without hit events name these as `data_sources`."
+      ),
+    behaviors: z
+      .array(
+        z.object({
+          technique_id: z.string().max(64),
+          technique_name: z.string().max(256).optional(),
+          title: z.string().max(512).optional(),
+          evidence_quote: z.string().max(2000).optional(),
+          confidence: z.number(),
+          severity: z.string().max(32).optional(),
+          validated_esql: z.string().max(32_000),
+          execution: z
+            .object({
+              executed: z.boolean(),
+              row_count: z.number(),
+              hit: z.boolean(),
+              inconclusive_reason: z.string().max(64).optional(),
+            })
+            .optional(),
+        })
+      )
+      .max(20)
+      .optional()
+      .describe(
+        "The coordinator's `tier2.behaviors`. Clean-run coverage KIs carry the executed query as `validated_esql` with `esql_status: executed_no_rows`."
+      ),
+    /**
+     * The deterministic gaps behind a `retired_incomplete` run (`hunt.yaml`'s `coverage_gaps`
+     * output), so packaging can name what was never searched. Optional for the same staleness
+     * reason as `expectedSseCount`: a Worker that does not forward it packages a retired run
+     * with count-less prose instead of failing.
+     *
+     * Only the array is bounded. `detail` and `technique_id` are unbounded upstream (a technique id
+     * may be model or report text), and a string cap here would fail step input validation on one
+     * long value, strand the Investigation open and reproduce the bug this input exists to fix.
+     * This is workflow step input, not HTTP request input, so the unbounded-string rule for route
+     * schemas does not apply; packaging truncates the strings at render time.
+     */
+    coverageGaps: z
+      .array(
+        z.object({
+          reason: z.string(),
+          detail: z.string(),
+          technique_id: z.string().optional(),
+        })
+      )
+      .max(MAX_HUNT_TECHNIQUE_IDS)
+      .optional()
+      .describe(
+        "The hunt's `coverage_gaps`: what a `retired_incomplete` run could not search, and why. Named in the coverage KI and the Investigation summary. Omit when none are known."
+      ),
+  })
+);
+
+/** One gap in a run's coverage, as passed into packaging for a `retired_incomplete` run. */
+export type PackageReportCoverageGap = NonNullable<
+  z.infer<typeof packageReportInputSchema>['coverageGaps']
+>[number];
 
 /** One Tier 2 behavior as passed into packaging, for runs that left no SSE. */
 export type PackageReportBehavior = NonNullable<
@@ -269,8 +304,10 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
         'fillable respond and investigate catalog actions, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
         'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
         'A completed hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a ' +
-        'dismissal off huntStatus and hasConfirmedHit. A hunt that did not complete returns run_incomplete ' +
-        'instead, because its report may still be hunted again into this same Investigation. ' +
+        'dismissal off huntStatus and hasConfirmedHit. A hunt that ended retired_incomplete (a gap no rerun can close) packages the same way, ' +
+        'with the unsearched techniques named in the coverage KI and the Investigation summary. ' +
+        'A hunt that did not complete and will be retried returns run_incomplete instead, because its ' +
+        'report may still be hunted again into this same Investigation. ' +
         'Does not close the Investigation; dismiss is a boolean the child applies.',
     }),
     examples: [

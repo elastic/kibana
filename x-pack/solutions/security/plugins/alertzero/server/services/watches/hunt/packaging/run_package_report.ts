@@ -27,6 +27,7 @@ import {
   buildCleanInvestigationSummary,
   buildInvestigationSummary,
 } from './build_investigation_summary';
+import { dedupeCoverageGaps, describeGaps, gapCountPhrase } from './dedupe_coverage_gaps';
 import { deriveCleanCoverageSubjects } from './derive_clean_coverage_subjects';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
 import type { EsReportContextClient } from './load_report_hunt_context';
@@ -39,6 +40,9 @@ import type {
   CoverageWriteResult,
   UnresolvedMintPayload,
 } from './types';
+
+/** Keeps the Investigation's summary short; the report-scoped KI carries the full list. */
+const MAX_CLOSURE_GAP_CHARS = 500;
 
 export class PackageReportIdentityError extends Error {
   constructor(message: string) {
@@ -111,11 +115,52 @@ const resolveDismissHold = async (
 };
 
 /**
+ * The closing line for a run that cleared no hit. A retired run never says "nothing matched":
+ * part of the report was not searched, so the claim would be false. With no gap list (a Worker that
+ * does not forward one) it drops the count rather than falling back to the clean wording.
+ */
+const buildNoHitClosureSummary = ({
+  reportId,
+  dismissHold,
+  retired,
+  gapPhrase,
+  gapDescription,
+}: {
+  reportId: string;
+  dismissHold: DismissHold;
+  retired: boolean;
+  gapPhrase?: string;
+  /** What was not searched, bounded; this closure summary is the Investigation's own summary. */
+  gapDescription?: string;
+}): string => {
+  const found = `Hunt for report ${reportId} found no confirmed hits`;
+  if (dismissHold !== 'none') {
+    const held =
+      dismissHold === 'open_proposal'
+        ? 'it still has a pending or executing Proposal from an earlier run.'
+        : 'could not verify whether it has an open Proposal.';
+    return `${found}${
+      retired ? ', but part of the report could not be searched' : ''
+    }. Leaving the Investigation open: ${held}`;
+  }
+  if (!retired) {
+    return `${found}. Closing: nothing in this environment matched the report at the confirming-index bar.`;
+  }
+  const unsearched = gapPhrase
+    ? `${gapPhrase} left part of the report unsearched`
+    : 'part of the report could not be searched';
+  const named = gapDescription ? ` Not searched: ${gapDescription}.` : '';
+  return `${found}, but ${unsearched}.${named} Closing: the report is retired without a full search.`;
+};
+
+/**
  * Orchestrates packaging for one Investigation run. Throws
  * {@link PackageReportIdentityError} when the conversation id does not match the report
  * binding; returns typed `run_incomplete` when the run claimed a hit whose current-run SSE
  * state cannot be read, when fewer current-run SSEs were found than the hunt prepared (a
- * partial `attach_sse` foreach), and when a hunt that did not complete left nothing to package.
+ * partial `attach_sse` foreach), and when a hunt that did not complete and will be retried left
+ * nothing to package. A no-hit hunt that settled packages as a dismissal: `success` as a clean
+ * one, `retired_incomplete` as one that names what was never searched.
  */
 export const runPackageReport = async ({
   spaceId,
@@ -181,12 +226,17 @@ export const runPackageReport = async ({
     // (a rerun colliding on the attachment id, or a failed attach), which stays
     // `run_incomplete` so the Worker reports the sweep as partial.
     //
-    // Only a hunt that completed may close, though. The hunt-once gate keys on
-    // `evidence.last_hunted_at`, which the hunt writes only for a run it considers
-    // recorded, so a retryable-incomplete or failed run leaves its report eligible and a
-    // later sweep hunts it again. Closing here would have that sweep write its findings --
-    // a real hit included -- into an Investigation this run had already closed.
-    if (!hasConfirmedHit && huntStatus === 'success') {
+    // Only a settled hunt may close, though. The hunt-once gate keys on `evidence.last_hunted_at`,
+    // which the hunt writes only for a run it considers recorded. Three cases:
+    //  - `success`: settled and clean; nothing matched at the confirming-index bar.
+    //  - `retired_incomplete`: settled but not clean. The gate is stamped because a rerun cannot
+    //    close the gap, so no later sweep comes back to this report; the dismissal says part of it
+    //    was never searched rather than claiming nothing matched.
+    //  - `partial` / `failed`: not settled. The report stays eligible and a later sweep hunts it
+    //    again, so closing here would have that sweep write its findings -- a real hit included --
+    //    into an Investigation this run had already closed.
+    const retired = huntStatus === 'retired_incomplete';
+    if (!hasConfirmedHit && (huntStatus === 'success' || retired)) {
       // No SSE exists here, so the coordinator result the hunt child passed along is the only
       // source for the executed Tier 2 queries and the dataset hint. The report supplies the
       // threat story; a failed or missing load degrades to what the inputs alone can say
@@ -203,6 +253,8 @@ export const runPackageReport = async ({
         deps.hasOpenProposal,
         investigationConversationId
       );
+      const unsearched = retired ? dedupeCoverageGaps(coordinator.coverageGaps) : undefined;
+      const hasGaps = unsearched !== undefined && unsearched.gaps.length > 0;
       const subjects = deriveCleanCoverageSubjects({
         spaceId,
         reportId,
@@ -213,8 +265,11 @@ export const runPackageReport = async ({
           inputs: coordinator,
           reportContext,
           dismissHold,
+          retired,
+          unsearched,
         }),
         investigationConversationId,
+        unsearched,
       });
       const coverage = await deps.writeCoverageKis(subjects);
       return {
@@ -227,14 +282,13 @@ export const runPackageReport = async ({
         omittedProposalCount: 0,
         dismiss: dismissHold === 'none',
         dismissHold,
-        closureSummary:
-          dismissHold === 'none'
-            ? `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`
-            : `Hunt for report ${reportId} found no confirmed hits. Leaving the Investigation open: ${
-                dismissHold === 'open_proposal'
-                  ? 'it still has a pending or executing Proposal from an earlier run.'
-                  : 'could not verify whether it has an open Proposal.'
-              }`,
+        closureSummary: buildNoHitClosureSummary({
+          reportId,
+          dismissHold,
+          retired,
+          gapPhrase: hasGaps ? gapCountPhrase(unsearched) : undefined,
+          gapDescription: hasGaps ? describeGaps(unsearched, MAX_CLOSURE_GAP_CHARS) : undefined,
+        }),
         expectedProposalCount: 0,
         mintSuppression: 'none',
       };
@@ -243,7 +297,9 @@ export const runPackageReport = async ({
       status: 'run_incomplete',
       reason: hasConfirmedHit
         ? `No current-run SSE attachment for runId=${runId}`
-        : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}`,
+        : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}${
+            huntStatus === 'partial' ? '; the report stays eligible for a later sweep' : ''
+          }`,
     };
   }
 
