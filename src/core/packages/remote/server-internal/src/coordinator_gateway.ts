@@ -8,20 +8,30 @@
  */
 
 import { RpcTarget } from 'capnweb';
-import { expose } from '@kbn/core-remote-common';
+import { expose, type RpcCallMeasurement } from '@kbn/core-remote-common';
 
 /** Exposes coordinator capabilities to the executor over the remote session. */
 export class CoordinatorGateway extends RpcTarget {
+  readonly setupCalls = { ping: 0, getCapability: 0 };
   #capabilities: Map<string, RpcTarget>;
 
-  constructor(coordinator: Map<string, object>) {
+  constructor(
+    coordinator: Map<string, object>,
+    observe?: (call: RpcCallMeasurement) => void
+  ) {
     super();
     this.#capabilities = new Map(
-      [...coordinator.entries()].map(([id, instance]) => [id, expose(instance)])
+      [...coordinator.entries()].map(([id, instance]) => [id, expose(instance, observe)])
     );
   }
 
+  ping(): number {
+    this.setupCalls.ping++;
+    return Date.now();
+  }
+
   getCapability(tokenId: string): RpcTarget {
+    this.setupCalls.getCapability++;
     const capability = this.#capabilities.get(tokenId);
     if (!capability) {
       throw new Error(`No coordinator capability bound for "${tokenId}"`);

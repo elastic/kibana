@@ -697,7 +697,7 @@ export class Server {
     const remoteConfig = await firstValueFrom(
       this.configService.atPath<CoreConfigType>(coreConfig.path)
     );
-    await this.remote.start(remoteConfig.remote?.backend ?? 'worker_thread');
+    await this.remote.start(remoteConfig.remote?.backend ?? 'worker_thread', remoteConfig.remote?.faas);
 
     await this.http.start();
 

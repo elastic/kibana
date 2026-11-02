@@ -83,12 +83,10 @@ import {
 import { WorkflowsMeteringService } from './metering/metering_service';
 import {
   type WorkflowExecutorApi,
-  WorkflowExecutorToken,
   WorkflowLogToken,
-  WorkflowStepCatalogToken,
-  WorkflowStepKind,
   WorkflowStorageToken,
 } from './remote/tokens';
+import { workflowRemoteRegistration } from './remote/registration';
 import { WorkflowLog } from './remote/workflow_log';
 import { WorkflowStorage } from './remote/workflow_storage';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
@@ -276,12 +274,7 @@ export class WorkflowsExecutionEnginePlugin
 
     this.coreSetup = core;
     if (config.remoteExecution.enabled) {
-      core.remote.register({
-        id: 'workflows',
-        root: WorkflowExecutorToken,
-        contributions: [WorkflowStepKind],
-        dependencies: [WorkflowStepCatalogToken],
-      });
+      core.remote.register(workflowRemoteRegistration);
     }
     core.security.serviceAccounts.registerWorkloadType({
       type: WORKFLOW_SERVICE_ACCOUNT_TYPE,

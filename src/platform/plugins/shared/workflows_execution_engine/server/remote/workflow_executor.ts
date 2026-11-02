@@ -83,7 +83,21 @@ export class WorkflowExecutor implements WorkflowExecutorApi {
     return Date.now() - start;
   }
 
-  async run(request: {
+  async run(request: { scopeId: string; workflowRunId: string; spaceId: string }): Promise<{
+    status: string;
+    metrics: { executionStartEpochMs: number; executionMs: number; cpu: NodeJS.CpuUsage; memory: NodeJS.MemoryUsage };
+  }> {
+    const start = performance.now();
+    const cpu = process.cpuUsage();
+    const result = await this.executeRun(request);
+    return { ...result, metrics: {
+      executionStartEpochMs: performance.timeOrigin + start,
+      executionMs: performance.now() - start,
+      cpu: process.cpuUsage(cpu), memory: process.memoryUsage(),
+    } };
+  }
+
+  private async executeRun(request: {
     scopeId: string;
     workflowRunId: string;
     spaceId: string;

@@ -28,7 +28,11 @@ export async function ready(): Promise<void> {
   }
   const spec = data.data;
   const bridge = createBridge();
-  const coordinator = openPortSession<CoordinatorApi>(data.__connectionPort, bridge.rpc);
+  const measured = Boolean(process.env.KBN_REMOTE_MEASUREMENT_PATH);
+  const coordinator = openPortSession<CoordinatorApi>(data.__connectionPort, bridge.rpc, measured ? {
+    traffic: { sentBytes: 0, receivedBytes: 0, sentMessages: 0, receivedMessages: 0 },
+    addedRttMs: 0,
+  } : undefined);
   const values = new Map<string, unknown>();
   for (const tokenId of spec.coordinatorTokenIds) {
     values.set(tokenId, coordinator.getCapability(tokenId));
@@ -48,6 +52,9 @@ function createBridge(): {
   } = { loaded: [] };
 
   class Bridge extends RpcTarget {
+    ping(): number {
+      return Date.now();
+    }
     loadedModules(): string[] {
       return state.loaded;
     }

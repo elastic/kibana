@@ -10,7 +10,7 @@
 import type { ServiceToken } from '@kbn/core-di';
 
 /** Backend selected by Core configuration. Callers register a graph, not a placement. */
-export type RemoteBackend = 'worker_thread' | 'in_process';
+export type RemoteBackend = 'worker_thread' | 'in_process' | 'lambda_rie';
 
 export interface ScopeLookup {
   get<T>(scopeId: string): T;

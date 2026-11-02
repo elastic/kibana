@@ -64,7 +64,8 @@ function injectableCapability(value: unknown): unknown {
 export function buildExecutor(
   spec: RemoteWorkerSpec,
   coordinator: ReadonlyMap<string, unknown>,
-  loaded: string[]
+  loaded: string[],
+  resolveExport: typeof loadExport = loadExport
 ): object {
   const container = new Container();
   for (const id of spec.coordinatorTokenIds) {
@@ -76,7 +77,7 @@ export function buildExecutor(
   }
 
   for (const provider of spec.executorProviders) {
-    const Ctor = loadExport(
+    const Ctor = resolveExport(
       provider.modulePath,
       provider.exportName,
       loaded
@@ -86,7 +87,7 @@ export function buildExecutor(
 
   const factories = new Map<string, () => StepInstance>();
   for (const contribution of spec.contributions) {
-    const Ctor = loadExport(
+    const Ctor = resolveExport(
       contribution.modulePath,
       contribution.exportName,
       loaded
@@ -102,7 +103,7 @@ export function buildExecutor(
   }
 
   if (spec.catalog) {
-    const Catalog = loadExport(
+    const Catalog = resolveExport(
       spec.catalog.modulePath,
       spec.catalog.exportName,
       loaded
@@ -112,7 +113,7 @@ export function buildExecutor(
       .toConstantValue(new Catalog(factories as never));
   }
 
-  const Root = loadExport(
+  const Root = resolveExport(
     spec.root.modulePath,
     spec.root.exportName,
     loaded

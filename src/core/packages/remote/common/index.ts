@@ -8,6 +8,7 @@
  */
 
 export { expose, wrapRpcResult } from './src/expose';
+export type { RpcCallMeasurement } from './src/expose';
 export { recordRemoteHeap } from './src/remote_measurement';
 export { recordSeam } from './src/seam_log';
 export { openPortSession } from './src/message_port_session';

@@ -11,6 +11,16 @@ import { RpcTarget } from 'capnweb';
 import { recordSeam } from './seam_log';
 import { isRemotableInstance } from './remotable';
 
+export interface RpcCallMeasurement {
+  readonly name: string;
+  readonly startedEpochMs: number;
+  durationMs?: number;
+  endedEpochMs?: number;
+  failed?: boolean;
+}
+
+type CallObserver = (call: RpcCallMeasurement) => void;
+
 function isThenable(value: unknown): value is PromiseLike<unknown> {
   return (
     typeof value === 'object' &&
@@ -20,12 +30,12 @@ function isThenable(value: unknown): value is PromiseLike<unknown> {
 }
 
 /** Wraps remotable return values so Cap'n Web can stub them. Plain data is returned unchanged. */
-export function wrapRpcResult(result: unknown): unknown {
+export function wrapRpcResult(result: unknown, observe?: CallObserver): unknown {
   if (isThenable(result)) {
-    return Promise.resolve(result).then((value) => wrapRpcResult(value));
+    return Promise.resolve(result).then((value) => wrapRpcResult(value, observe));
   }
   if (isRemotableInstance(result)) {
-    return expose(result);
+    return expose(result, observe);
   }
   return result;
 }
@@ -35,7 +45,7 @@ export function wrapRpcResult(result: unknown): unknown {
  * Methods are copied onto the adapter prototype and invoked with the author instance as `this`,
  * so private fields stay on that instance.
  */
-export function expose(target: object): RpcTarget {
+export function expose(target: object, observe?: CallObserver): RpcTarget {
   class Adapter extends RpcTarget {}
   const proto = Adapter.prototype as unknown as Record<string, unknown>;
   let cursor: object | null = Object.getPrototypeOf(target) as object | null;
@@ -50,17 +60,40 @@ export function expose(target: object): RpcTarget {
       proto[name] = function (...args: unknown[]) {
         const label = `${target.constructor?.name ?? 'remote'}.${name}`;
         recordSeam(`${label}.request`, args);
-        const result = method.apply(target, args);
+        const start = performance.now();
+        const call: RpcCallMeasurement = { name: label, startedEpochMs: Date.now() };
+        observe?.(call);
+        const finish = (failed: boolean): void => {
+          call.durationMs = performance.now() - start;
+          call.endedEpochMs = Date.now();
+          call.failed = failed;
+        };
+        let result: unknown;
+        try {
+          result = method.apply(target, args);
+        } catch (error) {
+          finish(true);
+          throw error;
+        }
         if (isThenable(result)) {
           return wrapRpcResult(
-            Promise.resolve(result).then((value) => {
-              recordSeam(`${label}.response`, value);
-              return value;
-            })
+            Promise.resolve(result).then(
+              (value) => {
+                finish(false);
+                recordSeam(`${label}.response`, value);
+                return value;
+              },
+              (error) => {
+                finish(true);
+                throw error;
+              }
+            ),
+            observe
           );
         }
+        finish(false);
         recordSeam(`${label}.response`, result);
-        return wrapRpcResult(result);
+        return wrapRpcResult(result, observe);
       };
     }
     cursor = Object.getPrototypeOf(cursor) as object | null;

@@ -8,12 +8,13 @@
  */
 
 import { randomUUID } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { appendFileSync, existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { MessageChannel, type MessagePort } from 'node:worker_threads';
 import {
   openPortSession,
+  type RpcCallMeasurement,
   remoteTokenId,
   type RemoteModule,
   type RemoteWorkerSpec,
@@ -28,6 +29,8 @@ import type {
   ScopeLookup,
 } from '@kbn/core-remote-server';
 import { createManagedWorker, type ManagedWorker } from '@kbn/core-threads-server-internal';
+import { buildRemoteSpec } from './build_remote_spec';
+import { FaasBackend, type FaasOptions } from './faas_backend';
 import { buildExecutor } from './build_executor';
 import { CoordinatorGateway } from './coordinator_gateway';
 
@@ -48,6 +51,7 @@ export class RemoteService implements RemoteSetup {
   private readonly workers: ManagedWorker[] = [];
   private readonly ports: MessagePort[] = [];
   private started = false;
+  private readonly functions: FaasBackend[] = [];
   private readonly lookup: ScopeLookup = {
     get: <T>(scopeId: string): T => {
       if (!this.scopes.has(scopeId)) {
@@ -103,7 +107,7 @@ export class RemoteService implements RemoteSetup {
     return pending as Promise<RemoteSession<T>>;
   }
 
-  public async start(backend: RemoteBackend): Promise<void> {
+  public async start(backend: RemoteBackend, faas?: FaasOptions): Promise<void> {
     if (this.started) return;
     this.started = true;
     if (this.registrations.size === 0) {
@@ -112,10 +116,16 @@ export class RemoteService implements RemoteSetup {
     }
     this.logger.info(`Starting remote execution with backend "${backend}"`);
     for (const registration of this.registrations.values()) {
-      const spec = this.buildSpec(registration);
+      const spec = buildRemoteSpec(this.modules, registration);
       const coordinator = this.materializeCoordinator(spec);
       if (backend === 'in_process') {
         this.startInProcess(registration.id, spec, coordinator);
+      } else if (backend === 'lambda_rie') {
+        if (!faas) throw new Error('lambda_rie requires explicit artifact configuration');
+        const runner = new FaasBackend(spec, coordinator, faas);
+        this.functions.push(runner);
+        await runner.ready();
+        this.openSession(registration.id, runner);
       } else {
         await this.startWorker(registration.id, spec, coordinator);
       }
@@ -123,103 +133,13 @@ export class RemoteService implements RemoteSetup {
   }
 
   public async stop(): Promise<void> {
+    await Promise.all(this.functions.map((runner) => runner.stop()));
     for (const port of this.ports) {
       port.close();
     }
     this.ports.length = 0;
     await Promise.all(this.workers.map((worker) => worker.stop()));
     this.workers.length = 0;
-  }
-
-  private buildSpec(registration: RemoteRegistration): RemoteWorkerSpec {
-    const kindIds = new Set(registration.contributions.map((kind) => remoteTokenId(kind)));
-    const rootId = remoteTokenId(registration.root);
-    const dependencyIds = new Set(
-      (registration.dependencies ?? []).map((token) => remoteTokenId(token))
-    );
-    let root: RemoteWorkerSpec['root'] | undefined;
-    let catalog: RemoteWorkerSpec['catalog'];
-    const executorProviders: RemoteWorkerSpec['executorProviders'][number][] = [];
-    const contributions: RemoteWorkerSpec['contributions'][number][] = [];
-    const coordinatorTokenIds: string[] = [];
-
-    const relevant = this.modules.filter((remoteModule) => {
-      const selectedProvider = (remoteModule.providers ?? []).some((provider) => {
-        const id = remoteTokenId(provider.token);
-        return id === rootId || dependencyIds.has(id);
-      });
-      const selectedContribution = (remoteModule.contributions ?? []).some((contribution) =>
-        kindIds.has(remoteTokenId(contribution.kind))
-      );
-      return selectedProvider || selectedContribution;
-    });
-
-    for (const remoteModule of relevant) {
-      for (const provider of remoteModule.providers ?? []) {
-        const id = remoteTokenId(provider.token);
-        if (provider.role === 'root') {
-          if (id !== rootId) continue;
-          if (root) {
-            throw new Error(`Remote graph "${registration.id}" has more than one root provider`);
-          }
-          root = { tokenId: id, modulePath: provider.modulePath, exportName: provider.exportName };
-          continue;
-        }
-        if (provider.placement === 'coordinator') {
-          if (!coordinatorTokenIds.includes(id)) coordinatorTokenIds.push(id);
-          continue;
-        }
-        if (provider.role === 'catalog') {
-          if (!dependencyIds.has(id)) continue;
-          if (catalog) {
-            throw new Error(
-              `Remote graph "${registration.id}" has more than one catalogue provider`
-            );
-          }
-          catalog = {
-            tokenId: id,
-            modulePath: provider.modulePath,
-            exportName: provider.exportName,
-          };
-          continue;
-        }
-        executorProviders.push({
-          tokenId: id,
-          modulePath: provider.modulePath,
-          exportName: provider.exportName,
-        });
-      }
-      for (const contribution of remoteModule.contributions ?? []) {
-        if (!kindIds.has(remoteTokenId(contribution.kind))) continue;
-        contributions.push({
-          stepType: contribution.stepType,
-          modulePath: contribution.modulePath,
-          exportName: contribution.exportName,
-        });
-      }
-    }
-
-    for (const id of dependencyIds) {
-      const provided =
-        catalog?.tokenId === id ||
-        coordinatorTokenIds.includes(id) ||
-        executorProviders.some((provider) => provider.tokenId === id);
-      if (!provided) {
-        throw new Error(`Remote graph "${registration.id}" is missing dependency "${id}"`);
-      }
-    }
-
-    if (!root) {
-      throw new Error(`Remote graph "${registration.id}" has no executor provider for its root`);
-    }
-    return {
-      id: registration.id,
-      root,
-      catalog,
-      executorProviders,
-      contributions,
-      coordinatorTokenIds,
-    };
   }
 
   private materializeCoordinator(spec: RemoteWorkerSpec): Map<string, object> {
@@ -271,9 +191,16 @@ export class RemoteService implements RemoteSetup {
   ): Promise<void> {
     const { port1, port2 } = new MessageChannel();
     this.ports.push(port1);
-    const gateway = new CoordinatorGateway(coordinator);
+    const measurementPath = process.env.KBN_REMOTE_MEASUREMENT_PATH;
+    const traffic = { sentBytes: 0, receivedBytes: 0, sentMessages: 0, receivedMessages: 0 };
+    const rpcCalls: RpcCallMeasurement[] = [];
+    const gateway = new CoordinatorGateway(coordinator, measurementPath ? (call) => {
+      rpcCalls.push(call);
+    } : undefined);
     // Session is established before the worker runs so capability lookups during ready can land.
-    const stub = openPortSession(port1, gateway);
+    const stub = openPortSession<Record<string, (...args: object[]) => Promise<object>>>(port1, gateway, measurementPath ? {
+      traffic, addedRttMs: Number(process.env.KBN_REMOTE_RTT_MS ?? 0),
+    } : undefined);
     const worker = createManagedWorker({
       name: `remote:${id}`,
       entry: ENTRY,
@@ -295,7 +222,46 @@ export class RemoteService implements RemoteSetup {
     this.workers.push(worker);
     worker.start();
     await worker.ready();
-    this.openSession(id, stub);
+    if (measurementPath) {
+      appendFileSync(measurementPath, `${JSON.stringify({ phase: 'worker-session-setup', traffic, rpcCalls, setupCalls: gateway.setupCalls })}\n`);
+      const measuredStub = new Proxy(stub, {
+        get(target, name) {
+          if (name !== 'run') return Reflect.get(target, name);
+          return async (request: { workflowRunId: string }) => {
+            const invocationId = randomUUID();
+            const startedEpochMs = Date.now();
+            let effectiveRttMs: number | undefined;
+            const before = { ...traffic };
+            const firstCall = rpcCalls.length;
+            const start = performance.now();
+            let result: object | undefined;
+            let failure: string | undefined;
+            try {
+              const pingStart = performance.now();
+              await target.ping();
+              effectiveRttMs = performance.now() - pingStart;
+              result = await target.run(request);
+              return result;
+            }
+            catch (error) { failure = String(error); throw error; }
+            finally {
+              appendFileSync(measurementPath, `${JSON.stringify({
+                backend: 'existing-worker', invocationId, startedEpochMs, effectiveRttMs, workflowRunId: request.workflowRunId,
+                at: new Date().toISOString(), hostTotalMs: performance.now() - start,
+                addedRttMs: Number(process.env.KBN_REMOTE_RTT_MS ?? 0),
+                traffic: Object.fromEntries(Object.entries(traffic).map(([key, value]) => [key, value - before[key as keyof typeof before]])),
+                rpcCalls: rpcCalls.slice(firstCall), result, failure,
+                sessionSetup: { pingRpcs: 1 },
+                transport: 'measurement-mode CapnWeb JSON strings on MessagePort; not structured-clone wire bytes',
+              })}\n`);
+            }
+          };
+        },
+      });
+      this.openSession(id, measuredStub);
+    } else {
+      this.openSession(id, stub);
+    }
     this.logger.info(`Remote graph "${id}" ready on worker thread ${worker.status().threadId}`);
   }
 }
