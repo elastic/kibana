@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IBasePath, IRouter, Logger } from '@kbn/core/server';
 
 export interface RouteDependencies {
   router: IRouter;
   log: Logger;
+  basePath: IBasePath;
 }

@@ -9,53 +9,88 @@
 
 import type {
   Plugin,
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
   HttpSetup,
+  HttpFetchOptions,
+  HttpFetchQuery,
+  HttpHeadersInit,
 } from '@kbn/core/public';
-import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
+import { buildPath } from '@kbn/core-http-browser';
+import { ES_PROXY_API_VERSION, ES_PROXY_ROUTE_PATH } from '../common';
 
-type HttpMethod = 'GET' | 'PUT' | 'POST' | 'DELETE' | 'PATCH';
+export type HttpMethod = 'GET' | 'HEAD' | 'PUT' | 'POST' | 'DELETE';
 
-const request =
-  (http: HttpSetup) =>
-  <T>({ method, path, body }: { method: HttpMethod; path: string; body?: string }) =>
-    http.fetch<T>(`/api/es_proxy/${path}`, { method, body });
+export interface EsProxyRequestParams {
+  method: HttpMethod;
+  /**
+   * Unencoded Elasticsearch path, e.g. `my-index/_search`; each `/`-separated segment is URI-encoded.
+   * Pass an array of segments when a segment itself contains `/`, e.g. `['my-index', '_doc', 'a/b']`.
+   */
+  path: string | readonly string[];
+  /** Objects are sent as JSON. Send ndjson as a string with `Content-Type: application/x-ndjson`. */
+  body?: string | object;
+  query?: HttpFetchQuery;
+  headers?: HttpHeadersInit;
+  signal?: AbortSignal;
+}
 
 export interface EsProxyPluginSetup {
-  request: <T>({
-    method,
-    path,
-    body,
-  }: {
-    method: HttpMethod;
-    path: string;
-    body: string;
-  }) => Promise<T>;
+  /** Sends a request and resolves with the parsed response body. */
+  request: <T>(params: EsProxyRequestParams) => Promise<T>;
+  /**
+   * Sends a request and resolves with the unread `Response`, for streamed or binary output such as
+   * server-sent events or `_query?format=arrow`.
+   */
+  stream: (params: EsProxyRequestParams) => Promise<Readonly<Response>>;
 }
 
 export type EsProxyPluginStart = EsProxyPluginSetup;
 
-export class EsProxyPlugin implements Plugin<EsProxyPluginSetup, EsProxyPluginStart, {}, {}> {
-  constructor(initializerContext: PluginInitializerContext) {}
+const toFetchArgs = ({
+  method,
+  path,
+  body,
+  query,
+  headers,
+  signal,
+}: EsProxyRequestParams): [string, HttpFetchOptions] => [
+  buildPath(ES_PROXY_ROUTE_PATH, {
+    path: typeof path === 'string' ? path.replace(/^\/+/, '') : path,
+  }),
+  {
+    method,
+    query,
+    headers,
+    signal,
+    version: ES_PROXY_API_VERSION,
+    body: typeof body === 'object' ? JSON.stringify(body) : body,
+  },
+];
 
-  public setup({ http }: CoreSetup) {
-    return {
-      request: request(http),
-    };
+const createContract = (http: HttpSetup): EsProxyPluginSetup => ({
+  request: <T>(params: EsProxyRequestParams) => http.fetch<T>(...toFetchArgs(params)),
+  stream: async (params) => {
+    const [path, options] = toFetchArgs(params);
+    const { response } = await http.fetch(path, {
+      ...options,
+      asResponse: true,
+      rawResponse: true,
+    });
+    if (!response) {
+      throw new Error(`No response received for ${params.method} ${path}`);
+    }
+    return response;
+  },
+});
+
+export class EsProxyPlugin implements Plugin<EsProxyPluginSetup, EsProxyPluginStart, {}, {}> {
+  public setup({ http }: CoreSetup): EsProxyPluginSetup {
+    return createContract(http);
   }
 
-  public start({ http }: CoreStart) {
-    // Example usage of the es_proxy request function
-    request(http)<InfoResponse>({ method: 'GET', path: '' }).then((response) => {
-      console.log('Get cluster info:');
-      console.log(response);
-    });
-
-    return {
-      request: request(http),
-    };
+  public start({ http }: CoreStart): EsProxyPluginStart {
+    return createContract(http);
   }
 
   public stop() {}

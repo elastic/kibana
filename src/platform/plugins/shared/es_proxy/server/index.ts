@@ -6,12 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { EsProxyPlugin } from './plugin';
 
-// export { config } from './config';
-// export type { CloudConnectConfig } from './config';
-
-export function plugin(initializerContext: PluginInitializerContext) {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { EsProxyPlugin } = await import('./plugin');
   return new EsProxyPlugin(initializerContext);
-}
+};

@@ -6,3 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+export const ES_PROXY_BASE_PATH = '/internal/es_proxy';
+export const ES_PROXY_ROUTE_PATH = `${ES_PROXY_BASE_PATH}/{path*}`;
+export const ES_PROXY_API_VERSION = '1';

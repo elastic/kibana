@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*"
   ],
   "exclude": [
@@ -14,14 +15,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/i18n",
-    "@kbn/management-plugin",
-    "@kbn/i18n-react",
     "@kbn/config-schema",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/features-plugin",
-    "@kbn/encrypted-saved-objects-plugin",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/scout"
   ]
 }

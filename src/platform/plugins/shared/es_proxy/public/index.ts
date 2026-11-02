@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import { EsProxyPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new EsProxyPlugin(initializerContext);
-}
+export const plugin = () => new EsProxyPlugin();
 
-// export type { CloudConnectedPluginSetup, CloudConnectedPluginStart } from './plugin';
+export type {
+  EsProxyPluginSetup,
+  EsProxyPluginStart,
+  EsProxyRequestParams,
+  HttpMethod,
+} from './plugin';

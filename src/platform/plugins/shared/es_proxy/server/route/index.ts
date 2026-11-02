@@ -8,86 +8,65 @@
  */
 
 import { schema } from '@kbn/config-schema';
-// import { createHandler } from './create_handler';
-import type { RequestHandler } from '@kbn/core/server';
-import type { AuthzDisabled, RouteConfigOptions } from '@kbn/core/server';
+import type { RouteSecurity } from '@kbn/core/server';
+import { ES_PROXY_API_VERSION, ES_PROXY_ROUTE_PATH } from '../../common';
 import type { RouteDependencies } from '../types';
+import { createProxyHandler, ES_REQUEST_TIMEOUT_MS } from './proxy_handler';
 
-export const validate = {
-  query: schema.maybe(schema.any()),
-  body: schema.maybe(schema.any()),
-  params: schema.object({
-    path: schema.maybe(schema.string()),
-  }),
-};
+const MAX_PATH_LENGTH = 4096;
+// Must outlast the Elasticsearch request so a timeout is answered with a 504 instead of a closed socket.
+const IDLE_SOCKET_TIMEOUT_MS = ES_REQUEST_TIMEOUT_MS + 10_000;
 
-const path = '/api/es_proxy/{path*}';
-const security: { authz: AuthzDisabled } = {
+const security: RouteSecurity = {
   authz: {
     enabled: false,
-    reason: 'Relies on es client for authorization',
+    reason:
+      'Requests run as the current user through the scoped Elasticsearch client, so Elasticsearch ' +
+      'enforces index and cluster privileges. Any authenticated Kibana user can reach any ' +
+      'Elasticsearch API their Elasticsearch role allows.',
   },
 };
-const bodyOptions: RouteConfigOptions<'post'>['body'] = {
-  output: 'stream',
-  parse: false,
-};
 
-const options = {
-  body: bodyOptions,
-};
+const summary = 'Proxy a request to Elasticsearch';
+const description =
+  'Forwards the request method, path, query string and body to Elasticsearch as the current user ' +
+  'and streams the response back. GET and HEAD requests cannot carry a body; use POST for ' +
+  'search-style APIs such as `_search`, `_count` and `_msearch`.';
 
-const defaultRouteConfig = {
-  path,
-  options,
-  security,
-  validate,
-};
+const params = schema.object({
+  path: schema.maybe(schema.string({ maxLength: MAX_PATH_LENGTH })),
+});
 
-const handler: (method: string) => RequestHandler<{ path: string }> =
-  (method: string) => async (ctx, request, response) => {
-    try {
-      const resp = await (
-        await ctx.core
-      ).elasticsearch.client.asCurrentUser.transport.request<{ body?: string; statusCode: number }>(
-        {
-          method,
-          path: request.params.path || '',
-          querystring: request.url.searchParams.toString(),
-          body: request.body || undefined,
-        },
-        // todo look into asStream option
-        // @ts-expect-error
-        { meta: true, headers: request.headers }
-      );
+const bodyOptions = { output: 'stream', parse: false } as const;
 
-      return response.custom({
-        statusCode: resp.statusCode,
-        body: resp.body,
-      });
-    } catch (error) {
-      // this needs refinement, console might be changing the result
-      return response.customError({
-        statusCode: error.statusCode || 500,
-        body: error.message,
-      });
-    }
-  };
+/**
+ * Registers the Elasticsearch proxy route for every supported method. HEAD is served by the GET route.
+ */
+export const registerProxyRoute = (deps: RouteDependencies): void => {
+  const { router } = deps;
+  const handler = createProxyHandler(deps);
+  const config = {
+    path: ES_PROXY_ROUTE_PATH,
+    access: 'internal',
+    security,
+    summary,
+    description,
+  } as const;
 
-export const registerProxyRoute = (deps: RouteDependencies) => {
-  // see /src/platform/plugins/shared/console/server/lib/proxy_request.ts
-  // need to add HEAD
-  deps.router.post(defaultRouteConfig, handler('POST'));
-  deps.router.delete(defaultRouteConfig, handler('DELETE'));
-  deps.router.patch(defaultRouteConfig, handler('PATCH'));
-  deps.router.put(defaultRouteConfig, handler('PUT'));
-  // todo get body working
-  deps.router.get(
-    {
-      path,
-      security,
-      validate,
-    },
-    handler('GET')
-  );
+  router.versioned
+    .get({ ...config, options: { timeout: { idleSocket: IDLE_SOCKET_TIMEOUT_MS } } })
+    .addVersion({ version: ES_PROXY_API_VERSION, validate: { request: { params } } }, handler);
+
+  for (const method of ['post', 'put', 'delete'] as const) {
+    router.versioned[method]({
+      ...config,
+      options: { body: bodyOptions, timeout: { idleSocket: IDLE_SOCKET_TIMEOUT_MS } },
+    }).addVersion(
+      {
+        version: ES_PROXY_API_VERSION,
+        validate: { request: { params, body: schema.maybe(schema.stream()) } },
+      },
+      handler
+    );
+  }
 };

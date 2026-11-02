@@ -19,7 +19,7 @@ export class EsProxyPlugin implements Plugin<void, void, {}, {}> {
 
   public setup({ http }: CoreSetup) {
     const router = http.createRouter();
-    registerProxyRoute({ router, log: this.log });
+    registerProxyRoute({ router, log: this.log, basePath: http.basePath });
   }
 
   public start() {}

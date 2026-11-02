@@ -13,9 +13,6 @@
     "server": true,
     "requiredPlugins": [],
     "optionalPlugins": [],
-    "requiredBundles": [],
-    "extraPublicDirs": [
-      "common"
-    ]
+    "requiredBundles": []
   }
 }
