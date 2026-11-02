@@ -60,7 +60,9 @@ triggers:
         context:
           type: object
           additionalProperties: true
-          description: Optional structured context from the start API.
+          description: >
+            Optional structured context from the start API. `entry_point` records how the run
+            started, for example start_api or automation.
         connector_id:
           type: string
           maxLength: 500
