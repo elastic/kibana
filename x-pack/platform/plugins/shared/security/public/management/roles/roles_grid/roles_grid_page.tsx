@@ -24,7 +24,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import _ from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
 
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
@@ -142,7 +142,11 @@ export const RolesGridPage: FC<Props> = ({
 
   const [tableState, setTableState] = useState<RolesTableState>(DEFAULT_TABLE_STATE);
 
+  const latestRequest = useRef<symbol>();
+
   const loadRoles = async (tableStateArgs: RolesTableState) => {
+    const requestId = Symbol();
+    latestRequest.current = requestId;
     const queryText = tableStateArgs.query.text;
 
     const requestBody = {
@@ -154,8 +158,14 @@ export const RolesGridPage: FC<Props> = ({
     try {
       setIsLoading(true);
       const rolesFromApi = await rolesAPIClient.queryRoles(requestBody);
-      setRolesResponse(rolesFromApi);
+      if (requestId === latestRequest.current) {
+        setPermissionDenied(false);
+        setRolesResponse(rolesFromApi);
+      }
     } catch (e) {
+      if (requestId !== latestRequest.current) {
+        return;
+      }
       if (_.get(e, 'body.statusCode') === 403) {
         setPermissionDenied(true);
       } else {
@@ -167,18 +177,24 @@ export const RolesGridPage: FC<Props> = ({
         );
       }
     } finally {
-      setIsLoading(false);
-      setHasCompletedLoad(true);
+      if (requestId === latestRequest.current) {
+        setIsLoading(false);
+        setHasCompletedLoad(true);
+      }
     }
   };
 
   useEffect(() => {
     loadRoles(DEFAULT_TABLE_STATE);
+    return () => {
+      latestRequest.current = undefined;
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onIncludeReservedRolesChange = (checked: boolean) => {
     const newTableStateArgs = {
       ...tableState,
+      from: 0,
       filters: {
         showReservedRoles: checked,
       },
@@ -278,6 +294,7 @@ export const RolesGridPage: FC<Props> = ({
       const newState = {
         ...tableState,
         query: args.query,
+        from: 0,
       };
       setTableState(newState);
       loadRoles(newState);

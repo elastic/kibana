@@ -56,7 +56,7 @@ describe('hasRoleChanged', () => {
   it('reports no changes when the form fills in blank values', () => {
     const withBlanks = clone(role);
     withBlanks.elasticsearch.indices[0].query = '';
-    withBlanks.elasticsearch.indices[0].field_security = { grant: [], except: [] };
+    withBlanks.elasticsearch.indices[0].field_security = { except: [] };
     withBlanks.kibana[0].base = [];
 
     expect(hasRoleChanged(role, withBlanks)).toBe(false);
@@ -91,4 +91,25 @@ describe('hasRoleChanged', () => {
     removed.kibana = [];
     expect(hasRoleChanged(role, removed)).toBe(true);
   });
+});
+
+describe('field security equality', () => {
+  it.each(['indices', 'remote_indices'] as const)(
+    'preserves an explicitly empty grant in %s',
+    (indexType) => {
+      const unrestricted = clone(role);
+      unrestricted.elasticsearch[indexType] = [
+        { names: ['foo'], privileges: ['read'], clusters: ['remote'] },
+      ];
+      const restricted = clone(unrestricted);
+      const entries = restricted.elasticsearch[indexType];
+      if (!entries) {
+        throw new Error('Expected index privileges');
+      }
+      entries[0].field_security = { grant: [], except: [] };
+      expect(hasRoleChanged(unrestricted, restricted)).toBe(true);
+      expect(hasRoleChanged(restricted, unrestricted)).toBe(true);
+      expect(hasRoleChanged(restricted, clone(restricted))).toBe(false);
+    }
+  );
 });
