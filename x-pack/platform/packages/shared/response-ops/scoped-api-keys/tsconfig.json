@@ -22,6 +22,10 @@
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/security-plugin-types-server",
     "@kbn/core-spaces-common",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/logging",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-security-common",
+    "@kbn/core-security-server-mocks"
   ]
 }

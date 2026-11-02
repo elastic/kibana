@@ -14,7 +14,7 @@ describe('getApiKeyFromRequest', () => {
 
     const request = httpServerMock.createKibanaRequest({
       headers: {
-        authorization: `ApiKey: ${mockApiKey}`,
+        authorization: `ApiKey ${mockApiKey}`,
       },
     });
 
@@ -26,6 +26,22 @@ describe('getApiKeyFromRequest', () => {
     const request = httpServerMock.createKibanaRequest();
     const result = getApiKeyFromRequest(request);
     expect(result).toBeNull();
+  });
+
+  test.each(['Basic', 'Bearer'])('should return null for the %s scheme', (scheme) => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: `${scheme} ${Buffer.from('user:pass').toString('base64')}` },
+    });
+
+    expect(getApiKeyFromRequest(request)).toBeNull();
+  });
+
+  test('should keep a secret that contains a colon', () => {
+    const request = httpServerMock.createKibanaRequest({
+      headers: { authorization: `ApiKey ${Buffer.from('id:se:cret').toString('base64')}` },
+    });
+
+    expect(getApiKeyFromRequest(request)).toEqual({ id: 'id', api_key: 'se:cret' });
   });
 
   test('should return a raw user-created UIAM API key without an id', () => {

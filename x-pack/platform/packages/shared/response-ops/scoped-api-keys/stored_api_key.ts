@@ -15,9 +15,13 @@ import { isUiamCredential } from '@kbn/core-security-server';
  * `id` is meaningless, so every caller has to validate what it gets back before using it.
  */
 export const decodeStoredApiKey = (storedApiKey: string): { id: string; secret?: string } => {
-  const [id, secret] = Buffer.from(storedApiKey, 'base64').toString().split(':');
+  const decoded = Buffer.from(storedApiKey, 'base64').toString();
+  const separatorIndex = decoded.indexOf(':');
+  if (separatorIndex === -1) {
+    return { id: decoded };
+  }
 
-  return { id, secret };
+  return { id: decoded.slice(0, separatorIndex), secret: decoded.slice(separatorIndex + 1) };
 };
 
 /**

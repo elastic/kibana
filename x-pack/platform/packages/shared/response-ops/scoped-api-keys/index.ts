@@ -8,6 +8,18 @@
 export { decodeStoredApiKey, getUiamApiKeyId, getUiamApiKeySecret } from './stored_api_key';
 export { getApiKeyFromRequest } from './request_api_key';
 export type { RequestApiKeyCredentials } from './request_api_key';
+export { resolveScopedApiKeys, reuseRequestApiKey } from './resolve_scoped_api_keys';
+export { encodeApiKey } from './scoped_credentials';
+export type {
+  ResolveScopedApiKeysOpts,
+  ResolveScopedApiKeysResult,
+  ScopedApiKeyNames,
+  ScopedApiKeysDeps,
+  ScopedApiKeysMode,
+  ScopedCredentials,
+  ScopedEsApiKey,
+  ScopedUiamApiKey,
+} from './scoped_credentials';
 export { buildApiKeyFakeRequest } from './fake_request';
 export type { BuildApiKeyFakeRequestOpts } from './fake_request';
 export { getApiKeyInvalidationTargets } from './invalidation/get_api_key_invalidation_targets';

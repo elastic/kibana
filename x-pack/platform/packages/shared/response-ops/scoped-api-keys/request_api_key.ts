@@ -21,10 +21,13 @@ const getCredentialsFromRequest = (request: KibanaRequest) => {
     return null;
   }
   const [scheme] = authorizationHeaderValue.split(/\s+/);
+  if (scheme.toLowerCase() !== 'apikey') {
+    return null;
+  }
   return authorizationHeaderValue.substring(scheme.length + 1);
 };
 
-/** Extracts the API key credentials the request is authenticated with, or `null` when there are none. */
+/** Extracts the `ApiKey` credentials the request is authenticated with, or `null` when there are none. */
 export const getApiKeyFromRequest = (request: KibanaRequest): RequestApiKeyCredentials | null => {
   const credentials = getCredentialsFromRequest(request);
   if (credentials) {

@@ -129,7 +129,7 @@ describe('bulkMarkApiKeysForInvalidation characterization', () => {
     ]);
   });
 
-  test('ignores segments after the second colon (current behavior)', async () => {
+  test('keeps segments after the second colon in the secret', async () => {
     await run([encode('uiam-id:essu_secret:extra')]);
 
     expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0]).toEqual([
@@ -139,7 +139,7 @@ describe('bulkMarkApiKeysForInvalidation characterization', () => {
           attributes: {
             apiKeyId: 'uiam-id',
             createdAt: mockedDateString,
-            uiamApiKey: 'essu_secret',
+            uiamApiKey: 'essu_secret:extra',
           },
         },
       ],
