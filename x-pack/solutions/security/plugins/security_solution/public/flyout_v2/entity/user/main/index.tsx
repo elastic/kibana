@@ -338,6 +338,7 @@ export const User: FC<UserProps> = memo(function User({
             entityType: EntityType.user,
             entityName: userName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onOpenUser,
             title: userName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,

@@ -12,6 +12,11 @@ import type { TelemetryTarget } from '../../telemetry_targets';
 import type { SandboxCallContext } from './tool_utils';
 import { authorizeConnector } from './connector_authorization';
 import { writeConnectorManifest } from './connector_manifest';
+import {
+  CONNECTOR_DOCS_ROOT,
+  CONNECTOR_MANIFEST_PATH,
+  ELASTIC_MANIFEST_PATH,
+} from './connector_docs';
 import { writeElasticManifest } from './elastic_manifest';
 
 /**
@@ -30,7 +35,7 @@ export const createSandboxWorkspaceManager = ({
   logger,
 }: {
   getDeps: () => { actions?: ActionsPluginStart };
-  /** When set, `/workspace/elastic.md` is (re-)seeded alongside the connector manifest. */
+  /** When set, `/workspace/.connector-docs/elastic.md` is (re-)seeded alongside the connector manifest. */
   telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
   telemetryTargets?: TelemetryTarget[];
@@ -61,12 +66,20 @@ export const createSandboxWorkspaceManager = ({
       const allowedTargets = configuredTargets.filter(
         ({ connectorId }) => connectorId && callContext.allowedConnectorIds.includes(connectorId)
       );
-      // Custom agents can use several connectors; only infer guidance for an unambiguous source.
+      // Agents without a bound target (the assistant, custom agents) can use several telemetry
+      // connectors; infer guidance for an unambiguous source, else fall back to the legacy
+      // `telemetry_connector_id`, the same default an investigation without a named target uses.
+      // With several named targets and no legacy default, `elastic.md` stays unseeded and the
+      // agent picks one from `connectors.md`.
       const inferredTarget =
         new Set(allowedTargets.map(({ connectorId }) => connectorId)).size === 1
           ? allowedTargets[0]
           : undefined;
-      return boundTarget ?? inferredTarget;
+      const defaultTarget =
+        telemetryConnectorId && callContext.allowedConnectorIds.includes(telemetryConnectorId)
+          ? { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices }
+          : undefined;
+      return boundTarget ?? inferredTarget ?? defaultTarget;
     })();
     callTargets.set(callContext, pending);
     return pending;
@@ -107,10 +120,7 @@ export const createSandboxWorkspaceManager = ({
         // `isReset` is an edge-triggered signal and another sandbox RPC (for example the
         // before-agent allocation step) may consume it before tools run. Verify the actual
         // workspace invariant before trusting the connector cache.
-        const manifests = await session.statFiles([
-          '/workspace/elastic.md',
-          '/workspace/connectors.md',
-        ]);
+        const manifests = await session.statFiles([ELASTIC_MANIFEST_PATH, CONNECTOR_MANIFEST_PATH]);
         const workspaceReady =
           manifests.length === 2 &&
           manifests.every(({ exists, is_dir: isDirectory }) => exists && !isDirectory);
@@ -122,9 +132,10 @@ export const createSandboxWorkspaceManager = ({
       if (!canUseTelemetry) {
         lastWorkspaceKeys.delete(session);
         // Clear previously seeded hints on revocation; a failed clear must block file access.
+        await session.mkdirs([CONNECTOR_DOCS_ROOT]);
         const [result] = await session.writeFiles([
           {
-            path: '/workspace/elastic.md',
+            path: ELASTIC_MANIFEST_PATH,
             content: Buffer.from('No telemetry connector is available.\n'),
           },
         ]);

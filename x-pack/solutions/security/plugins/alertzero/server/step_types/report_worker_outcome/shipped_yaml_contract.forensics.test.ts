@@ -41,6 +41,7 @@ describe('shipped Endpoint Analysis Worker YAML and the reportWorkerOutcome sche
               resolve_finding_presence: { output: { iocs: true, timeline: true } },
               resolve_host: { output: { host_name: 'host-1' } },
               resolve_prior_assessment: { output: { count: 0 } },
+              resolve_proposal_counts: { output: { new_count: 2 } },
               resolve_proposal_dispatch: { output: { failed: 0 } },
               resolve_proposals: { output: { proposals_lost: false } },
               resolve_request: { output: { has_request: true } },

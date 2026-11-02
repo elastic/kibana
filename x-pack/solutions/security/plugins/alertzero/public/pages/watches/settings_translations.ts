@@ -390,7 +390,7 @@ export const TRIGGER_AMOUNT_ARIA_LABEL = i18n.translate(
 );
 
 export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.trigger.every', {
-  defaultMessage: 'Every',
+  defaultMessage: 'Runs every',
 });
 
 export const TRIGGER_HELP_TEXT = i18n.translate(

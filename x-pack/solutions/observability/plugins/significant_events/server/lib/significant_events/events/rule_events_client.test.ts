@@ -808,8 +808,9 @@ describe('RuleEventsClient', () => {
     it('reads a user deactivate of the episode the series is on', async () => {
       const { client } = setup([{ at: '2026-10-28T10:00:00.000Z', reason: 'known noise' }]);
 
-      const deactivations = await client.findOperatorDeactivations({ heads });
+      const { deactivations, failed } = await client.findOperatorDeactivations({ heads });
 
+      expect(failed).toBe(false);
       expect(deactivations.get('series-1')).toEqual({
         groupHash: 'series-1',
         episodeId: 'episode-1',
@@ -848,13 +849,13 @@ describe('RuleEventsClient', () => {
     it('does not read a deactivation of an older episode once the series is on a new one', async () => {
       const { client } = setup([{ at: '2026-10-28T10:00:00.000Z', episodeId: 'episode-0' }]);
 
-      expect((await client.findOperatorDeactivations({ heads })).size).toBe(0);
+      expect((await client.findOperatorDeactivations({ heads })).deactivations.size).toBe(0);
     });
 
     it('does not read an engine deactivate as an operator deactivation', async () => {
       const { client } = setup([{ at: '2026-10-28T10:00:00.000Z', actor: 'internal' }]);
 
-      expect((await client.findOperatorDeactivations({ heads })).size).toBe(0);
+      expect((await client.findOperatorDeactivations({ heads })).deactivations.size).toBe(0);
     });
 
     it('lets a later activate cancel the deactivation, and a later deactivate restore it', async () => {
@@ -867,22 +868,28 @@ describe('RuleEventsClient', () => {
         { at: '2026-10-28T10:00:00.000Z', type: 'activate' },
       ]);
 
-      expect((await cancelled.client.findOperatorDeactivations({ heads })).size).toBe(0);
+      expect((await cancelled.client.findOperatorDeactivations({ heads })).deactivations.size).toBe(
+        0
+      );
       expect(
-        (await restored.client.findOperatorDeactivations({ heads })).get('series-1')?.reason
+        (await restored.client.findOperatorDeactivations({ heads })).deactivations.get('series-1')
+          ?.reason
       ).toBe('second');
     });
 
-    it('reads a failed read as not deactivated, with a tagged error, instead of throwing', async () => {
+    it('reports a failed read as failed, with a tagged error, instead of throwing', async () => {
       const { client, logger } = setup(new Error('index_not_found_exception'));
 
-      expect((await client.findOperatorDeactivations({ heads })).size).toBe(0);
+      expect(await client.findOperatorDeactivations({ heads })).toEqual({
+        deactivations: new Map(),
+        failed: true,
+      });
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('deactivation_check_failed')
       );
     });
 
-    it('does not hold a deactivation that carries the standard no-reason note', async () => {
+    it('reads the standard no-reason note as a deactivation without a reason', async () => {
       const { client } = setup([
         {
           at: '2026-10-28T10:00:00.000Z',
@@ -890,7 +897,8 @@ describe('RuleEventsClient', () => {
         },
       ]);
 
-      expect((await client.findOperatorDeactivations({ heads })).size).toBe(0);
+      const { deactivations } = await client.findOperatorDeactivations({ heads });
+      expect(deactivations.get('series-1')?.reason).toBe('');
     });
   });
 
@@ -933,8 +941,12 @@ describe('RuleEventsClient', () => {
       );
 
       expect(await client.findEventDeactivations('event-1')).toEqual([
-        { episode_id: 'episode-1', reason: 'Known noise' },
-        { episode_id: 'episode-2', reason: '' },
+        {
+          '@timestamp': '2026-10-28T12:48:35.184Z',
+          episode_id: 'episode-1',
+          reason: 'Known noise',
+        },
+        { '@timestamp': '2026-10-28T15:00:00.000Z', episode_id: 'episode-2', reason: '' },
       ]);
     });
 

@@ -248,6 +248,33 @@ const results = await evals.evaluate?.({
 - Invalid input, an unknown evaluator, a trace that is not ready, or missing privileges to read the trace throws `EvaluationExecutionError`. A failing evaluator does not throw; it is returned as an `error` result next to the others.
 - A caller with read access to only some of the matching indices gets no privilege error, because Elasticsearch narrows wildcard searches to the indices it can read. Its trace can then look not ready instead (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)).
 
+A caller that already holds the round can pass it as `evidence` instead of `subject`. Nothing is polled or read from traces, so this works whether or not content capture is on, and as soon as the round is complete.
+
+```ts
+const results = await evals.evaluate?.({
+  request,
+  evidence: {
+    round: {
+      input: { message: userQuery },
+      steps: toolCalls.map(({ id, toolId, params, result }) => ({
+        tool_call_id: id,
+        tool_id: toolId,
+        arguments: params,
+        result,
+      })),
+      response: { message: finalResponse },
+    },
+    reference_data: { expected: groundTruth },
+  },
+  evaluators: [{ name: 'correctness', connector_id: judgeConnectorId }],
+});
+```
+
+- The round uses the same normalized shape evaluators read from a trace (see [Reading normalized trace evidence](#reading-normalized-trace-evidence)), with up to 200 tool calls. Every evaluator receives it, including the built-in and user-defined judges.
+- `reference_data` (optional) carries everything else the selected evaluators read: ground truth, or other inputs such as a transcript or a decision tree. An evaluator that declares a `referenceDataSchema` receives only what its schema accepts, and a mismatch is refused before any evaluator runs. Content isn't length-capped, so a judge is responsible for keeping its prompt within its model's context window.
+- Evaluators that read the trace itself, such as `latency`, `input_tokens`, `output_tokens` and `tool_calls`, return an `error` result for evidence, without failing the others.
+- Passing both `subject` and `evidence` throws `EvaluationExecutionError`.
+
 ## Dataset tags and maturity
 
 Datasets carry two optional keyword fields for organization.
