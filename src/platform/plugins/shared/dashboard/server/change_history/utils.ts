@@ -37,7 +37,9 @@ export const INITIAL_HISTORY_SEQUENCE = 1;
 const toDiffText = (value: object): string => JSON.stringify(value, null, 2);
 
 // The diff runs synchronously on the save path, so it is bounded to avoid blocking the event loop.
-const DIFF_TIMEOUT_MS = 500;
+// Maximum edit length (added + removed lines) the line diff computes before giving up, which keeps
+// the worst-case cost small and the fallback independent of machine speed.
+const MAX_DIFF_EDIT_LENGTH = 1000;
 
 /**
  * Number of contiguous changed line blocks between two snapshots rendered as pretty-printed JSON,
@@ -46,7 +48,7 @@ const DIFF_TIMEOUT_MS = 500;
  */
 export const countChangedLineBlocks = (previous: object, current: object): number => {
   const changes = diffLines(toDiffText(previous), toDiffText(current), {
-    timeout: DIFF_TIMEOUT_MS,
+    maxEditLength: MAX_DIFF_EDIT_LENGTH,
   });
   if (!changes) return jsonpatchFormatter.format(jsondiffpatch.diff(previous, current)).length;
 
