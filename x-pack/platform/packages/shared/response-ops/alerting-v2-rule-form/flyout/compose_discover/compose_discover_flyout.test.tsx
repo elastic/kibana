@@ -24,6 +24,7 @@ import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import type { FormValues, RuleQuery, RuleRecovery } from '../../form/types';
 import { createTestQueryClient } from '../../test_utils';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
+import { registerRuleBuilder, RULE_BUILDER_REGISTRY } from './rule_builder';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
 import type { ComposeDiscoverForm } from './compose_discover_form';
 import type { QueryTab } from './types';
@@ -1325,6 +1326,25 @@ describe('ComposeDiscoverFlyout', () => {
       const committed = readCommittedQuery?.();
       expect(committed?.base).toBe('');
       expect(committed?.breach.segment).toBe('');
+    });
+
+    it('does not seed a non-threshold builder from a Discover query the threshold parser accepts', () => {
+      registerRuleBuilder({
+        type: 'custom-builder',
+        stepTitle: 'Custom',
+        createDefaultState: () => ({ marker: 'custom-default' }),
+        renderStep: () => null,
+      });
+
+      renderFlyout({
+        builderType: 'custom-builder',
+        initialQuery: 'FROM logs-*',
+      });
+
+      const committed = readCommittedQuery?.();
+      expect(committed?.base).toBe('');
+      expect(committed?.breach.segment).toBe('');
+      delete RULE_BUILDER_REGISTRY['custom-builder'];
     });
 
     it('still seeds the form query for ES|QL mode (no builderType) with any valid query', () => {
