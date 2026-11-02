@@ -55,7 +55,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a guided anomaly detection job creation flow to Agent Builder chat [#286656]({{kib-pull}}286656).
 
 **Alerting and cases**:
-* Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows, so to turn it off, for example because you don't have a Workflows license, set `alerting:v2:enabled` to `false` [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
+* Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
 * Add an `alert_url` field, a link to the alert details page, to each alert in the payload of Universal Alerting action policy workflows [#300017]({{kib-pull}}300017).
 % The PR and its backport carry release_note:fix, but the release note in the PR says it adds a field. Listed as an enhancement.
 * Add support for recurring maintenance windows and scheduled reports on the last day of the month [#288008]({{kib-pull}}288008).
@@ -165,7 +165,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Limit the cluster privileges that integration packages can request for agent API keys to `monitor` [#286084]({{kib-pull}}286084).
 * Support package spec version 3.7 [#298093]({{kib-pull}}298093).
 * Add the `allow_outdated_version` flag to the package registry install endpoints, so you can install a pinned package version that is older than the latest [#280316]({{kib-pull}}280316).
-* Add error categories to {{fleet}} connection errors to the Elastic Package Registry, with a type (`timeout`, `dns`, `connection`, `http`, or `unknown`) and a reason in server logs and API error responses [#279533]({{kib-pull}}279533).
+* Categorize {{fleet}} connection errors to the Elastic Package Registry, with a type (`timeout`, `dns`, `connection`, `http`, or `unknown`) and a reason in server logs and API error responses [#279533]({{kib-pull}}279533).
 * Validate the `agents` KQL string of every {{fleet}} bulk agent action API against the agent field mappings, and limit it to 500,000 characters and each agent ID to 512 characters [#299837]({{kib-pull}}299837).
 % Consider whether #299837 needs a breaking change entry: bulk routes that skipped KQL validation before now return a validation error for fields outside the agent mappings. The PR is not labeled breaking and its API contracts check calls the schema diff a false positive, so it stays an enhancement.
 
@@ -238,6 +238,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Redesign the {{esql}} editor. The time picker moves to the right, the visor stays visible at the top in Discover, the sources dropdown no longer appears in KQL mode in the visor, and a stop button appears while AI generates a query [#267922]({{kib-pull}}267922).
 * Add {{esql}} views to the data source browser in the {{esql}} editor, with a filter that shows only views [#292608]({{kib-pull}}292608).
 * Expand the {{esql}} editor to fit a long query when you paste one or when AI inserts one [#279712]({{kib-pull}}279712).
+* [{{esql}} Data Federation](elasticsearch://reference/query-languages/esql/esql-data-federation.md) (technical preview) is now [enabled by default](elasticsearch://reference/query-languages/esql/esql-data-federation.md#enable-the-feature) in {{es}} and {{kib}}. The management UI adds a wizard for creating datasets, federated identity authentication for Amazon S3 data sources on {{ech}}, and data source privileges in the role editor.
 
 **{{kib}} platform**:
 * Disallow code generation from strings in Node.js by default, which hardens {{kib}} against code injection. Code that builds functions from strings at run time, such as `eval`, now fails unless an administrator sets the `KBN_DISALLOW_CODE_GEN_FROM_STRINGS` environment variable to `false` [#278233]({{kib-pull}}278233).
@@ -260,7 +261,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Show data retention and the geographies and regions where {{infer}} traffic can be restricted in the model flyout [#295238]({{kib-pull}}295238), [#293331]({{kib-pull}}293331).
 * Add a **Restricted regions** badge to the Elastic {{infer-cap}} Service page header [#290635]({{kib-pull}}290635).
 * Simplify the deprecation and end-of-life notices on model cards, badges, and feature settings, with consistent `YYYY-MM-DD` dates [#298474]({{kib-pull}}298474).
-* Add support for non-streaming interaction with inference endpoints, and a space-aware `genAISettings:inferenceStreaming` setting that defaults to `true` [#297712]({{kib-pull}}297712).
+* Add support for non-streaming interaction with inference endpoints, and a space-aware `genAiSettings:inferenceStreaming` setting that defaults to `true` [#297712]({{kib-pull}}297712).
 * Install the Elastic product documentation when the server starts, and add the product documentation tool to the default Elastic agent tools, when the Elastic {{infer-cap}} Service is available [#275476]({{kib-pull}}275476).
 * Add reasoning effort controls (**Low**, **Medium**, and **High**) to the **Add endpoint** modal of the Elastic {{infer-cap}} Service for chat completion endpoints [#270869]({{kib-pull}}270869).
 * Support `list` fields when you create an {{infer}} endpoint [#290352]({{kib-pull}}290352).
@@ -403,7 +404,8 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix {{fleet}} agent API handlers so they respect spaces, deployment of policies in non-default spaces, and the **Expired** status of enrollment tokens [#284936]({{kib-pull}}284936), [#293010]({{kib-pull}}293010), [#284280]({{kib-pull}}284280).
 * Fix the {{fleet}} agent CSV export failing with a `parsing_exception` error when `xpack.reporting.csv.scroll.strategy: scroll` is configured [#286119]({{kib-pull}}286119).
 * Fix the offline agent CPU and memory metrics tooltip, the Linux aarch64 install command indentation, long policy names in the **Assign to new policy** combobox, the order of policies in the **Assign new agent policy** modal, and the YAML field code editor border [#286386]({{kib-pull}}286386), [#286353]({{kib-pull}}286353), [#286381]({{kib-pull}}286381), [#296067]({{kib-pull}}296067), [#286360]({{kib-pull}}286360).
-* Fix the managed OTLP API key being created without the `apm/event:write` privilege, which made the managed OTLP service reject it, and default OpenTelemetry metrics data streams to the `time_series` index mode [#281261]({{kib-pull}}281261), [#281295]({{kib-pull}}281295).
+* Fix the managed OTLP API key being created without the `apm/event:write` privilege, which made the managed OTLP service reject it [#281261]({{kib-pull}}281261).
+* Default the OpenTelemetry metrics data streams of integration packages to the `time_series` index mode [#281295]({{kib-pull}}281295).
 * Fix `expiration` not being passed in `POST /enrollment_api_keys` to the security APIs [#281324]({{kib-pull}}281324).
 * Fix integration upgrades failing with a `400` error from a proxy in front of {{es}} when the data stream namespace contains non-ASCII characters [#301496]({{kib-pull}}301496).
 * Fix the Certificate Authority set in the Advanced YAML of an output with a proxy not being used for the {{fleet}} Server connection to {{es}} when the {{fleet}} Server host has {{es}} SSL settings [#301626]({{kib-pull}}301626).
@@ -556,7 +558,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % Consider moving #299558 to breaking changes: values that contain KQL syntax, such as `*`, or an empty or missing variable, now behave differently in workflow conditions. The PR describes it as a behavior change and a security fix, but its labels are release_note:fix only.
 * Fix `data.map` reusing the rendering context [#290833]({{kib-pull}}290833).
 * Fix `{{ now }}` not being formatted in generated {{es}} documents [#291211]({{kib-pull}}291211).
-* Fix the output of `elasticsearch.index.exist` [#289580]({{kib-pull}}289580).
+* Fix the `elasticsearch.indices.exists` workflow step crashing the workflow or returning an output you can't use in conditions [#289580]({{kib-pull}}289580).
 * Fix Base64 decoding of binary data, and upload the decoded data through `kibana.request` multipart form data [#288952]({{kib-pull}}288952).
 * Fix HTTP connector paths dropping inline query parameters [#282162]({{kib-pull}}282162).
 * Fix custom steps failing with HTTP `404` when {{kib}} uses a server base path [#283101]({{kib-pull}}283101).
@@ -576,7 +578,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Hide models outside your region preferences on the Feature settings page [#298958]({{kib-pull}}298958).
 % Not on the 9.6 branch (no backport). The PR carries release_note:bug.
 
-% Removed from 9.6.0: Data Federation is not announced yet. Add these back when the feature is announced.
+% The {{esql}} Data Federation bullet in the {{esql}} editor section summarizes these entries. Add PR links there if you want them.
 % * Support federated data sources in the alerting v2 threshold rule builder [#279142]({{kib-pull}}279142).
 % * Detect and update out-of-date CloudFormation templates for federated identity [#291272]({{kib-pull}}291272).
 % * Move {{esql}} Data Federation to technical preview [#296656]({{kib-pull}}296656).
