@@ -13,13 +13,10 @@ const PAGE_URL = 'security/entity_analytics_home_page';
 export class EntityAnalyticsHomePage {
   public readonly root: Locator;
   public readonly grid: Locator;
-  /** The number of entities the grid holds, as its toolbar shows it. */
-  public readonly gridTotal: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.root = this.page.testSubj.locator('entityAnalyticsNewHomePage');
     this.grid = this.page.testSubj.locator('entityAnalyticsEntitiesGrid');
-    this.gridTotal = this.page.testSubj.locator('entityAnalyticsEntitiesTotal');
   }
 
   async goto(): Promise<void> {
@@ -31,13 +28,10 @@ export class EntityAnalyticsHomePage {
     return this.page.testSubj.locator(`eaFaceliftSignalCard-${id}`);
   }
 
-  /** A tile's number. */
-  tileValue(id: string): Locator {
-    return this.tile(id).getByTestId('eaFaceliftSignalCardValue');
-  }
-
   gridRow(entityName: string): Locator {
-    return this.grid.getByRole('row').filter({ hasText: entityName });
+    return this.grid
+      .getByRole('row')
+      .filter({ has: this.page.getByText(entityName, { exact: true }) });
   }
 
   /** Clicks a tile and waits for it to report the new filter state. */
