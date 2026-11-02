@@ -232,6 +232,12 @@ describe('formatFailure', () => {
       expect(output).not.toContain('BREAKING CHANGES DETECTED');
     });
 
+    it('says stable and tech_preview changes block merge', () => {
+      const output = formatFailure([stableEntry('/api/gating')]);
+
+      expectOutputContains(output, 'Stable and Technical Preview changes block merge.');
+    });
+
     it('lists approved changes after the gating ones without counting them', () => {
       const output = formatFailure([allowlistedEntry, stableEntry('/api/gating')]);
 

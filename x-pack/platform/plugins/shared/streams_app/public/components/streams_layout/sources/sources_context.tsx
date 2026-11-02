@@ -13,19 +13,15 @@ import { useKibana } from '../../../hooks/use_kibana';
 import type { SourceApiKeyGenerationDeps } from './source_api_keys';
 import { createSourceEnvironmentLoader, type SourceEnvironmentLoader } from './source_environment';
 import type { SourceApiKeyPrivileges } from './source_api_keys';
-import type { SourceSignal } from './source_models';
+import type { SourceCreationFormData } from './source_form';
 import type { RevealedApiKey, SourceType, SourceViewModel } from './types';
-import {
-  getSourceViewModels,
-  type SourceNameValidationError,
-  type SourcesActorRef,
-} from './state_machines/sources_state_machine';
+import { getSourceViewModels, type SourcesActorRef } from './state_machines/sources_state_machine';
 import {
   sourcesTableStateMachine,
   type SourcesTablePagination,
   type SourcesTableSortingColumn,
 } from './state_machines/sources_table_state_machine';
-import { createUnitRepository } from '../../../services/unit_repository';
+import { createUnitRepository, type Unit } from '../../../services/unit_repository';
 
 export interface SourcesController {
   sources: SourceViewModel[];
@@ -34,21 +30,13 @@ export interface SourcesController {
   selectedSources: SourceViewModel[];
   isCreateModalOpen: boolean;
   isRefreshingUnit: boolean;
-  sourceType: SourceType;
+  /** The unit new sources are validated against. */
+  unitDefinition: Unit;
   availableSourceTypes: SourceType[];
-  sourceName: string;
-  sourceNameError?: SourceNameValidationError;
-  sourceSignals: SourceSignal[];
-  sourceSignalsError?: 'required';
-  canCreateSource: boolean;
   isUnitSaving: boolean;
   createdSource?: SourceViewModel;
   refreshUnit: () => void;
-  createSource: () => void;
-  setCreateSourceType: (sourceType: SourceType) => void;
-  setCreateSourceName: (sourceName: string) => void;
-  setCreateSourceSignals: (signals: SourceSignal[]) => void;
-  validateCreateSourceName: () => void;
+  createSource: (formData: SourceCreationFormData) => void;
   deleteSource: (sourceId: string) => void;
   deleteSources: (sourceIds: string[]) => void;
   generateApiKey: (sourceId: string) => void;
@@ -81,8 +69,6 @@ export interface SourcesTableController extends SourcesController {
   setPagination: (pagination: SourcesTablePagination) => void;
   setVisibleColumnIds: (columnIds: string[]) => void;
 }
-
-const EMPTY_SOURCE_SIGNALS: SourceSignal[] = [];
 
 const IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED = 'observability.managedOtlpPrwEndpointEnabled';
 
@@ -240,13 +226,11 @@ export const useSources = ({
   const revealedApiKey = useSelector(sourcesActorRef, (state) => state.context.revealedApiKey);
   const apiKeyPrivileges = useSelector(sourcesActorRef, (state) => state.context.apiKeyPrivileges);
   const apiKeyError = useSelector(sourcesActorRef, (state) => state.context.apiKeyError?.message);
-  const creationContext = useSelector(sourcesActorRef, (state) => state.context.creationContext);
-  const sourceType = creationContext?.formData.sourceType ?? 'async_bulk';
-  const sourceName = creationContext?.formData.sourceName ?? '';
-  const sourceNameError = creationContext?.formErrors.sourceName;
-  const sourceSignals = creationContext?.formData.signals ?? EMPTY_SOURCE_SIGNALS;
-  const sourceSignalsError = creationContext?.formErrors.signals;
-  const createdSource = creationContext?.createdSource;
+  const createdSource = useSelector(
+    sourcesActorRef,
+    (state) => state.context.creationContext?.createdSource
+  );
+  const unitDefinition = useSelector(sourcesActorRef, (state) => state.context.unitDefinition);
   const availableSourceTypes = useSelector(
     sourcesActorRef,
     (state) => state.context.availableSourceTypes
@@ -276,15 +260,6 @@ export const useSources = ({
     sourcesActorRef,
     (state) => !state.matches({ configuring: 'idle' })
   );
-  const canCreateSource = useSelector(sourcesActorRef, (state) => {
-    const creation = state.context.creationContext;
-    return Boolean(
-      creation?.formData.sourceName.trim() &&
-        !creation.formErrors.sourceName &&
-        !creation.formErrors.signals &&
-        state.context.availableSourceTypes.includes(creation.formData.sourceType)
-    );
-  });
   const isUnitSaving = useSelector(sourcesActorRef, (state) =>
     state.matches({ unitSave: 'saving' })
   );
@@ -298,29 +273,7 @@ export const useSources = ({
   const sourceViews = useSelector(sourcesActorRef, (state) => getSourceViewModels(state.context));
 
   const createSource = useCallback(
-    () => sourcesActorRef.send({ type: 'source.create' }),
-    [sourcesActorRef]
-  );
-
-  const setCreateSourceType = useCallback(
-    (nextSourceType: SourceType) =>
-      sourcesActorRef.send({ type: 'sourceType.select', sourceType: nextSourceType }),
-    [sourcesActorRef]
-  );
-
-  const setCreateSourceName = useCallback(
-    (nextSourceName: string) =>
-      sourcesActorRef.send({ type: 'sourceName.change', sourceName: nextSourceName }),
-    [sourcesActorRef]
-  );
-
-  const validateCreateSourceName = useCallback(
-    () => sourcesActorRef.send({ type: 'sourceName.blur' }),
-    [sourcesActorRef]
-  );
-
-  const setCreateSourceSignals = useCallback(
-    (signals: SourceSignal[]) => sourcesActorRef.send({ type: 'signals.change', signals }),
+    (formData: SourceCreationFormData) => sourcesActorRef.send({ type: 'source.create', formData }),
     [sourcesActorRef]
   );
 
@@ -362,23 +315,14 @@ export const useSources = ({
       selectedSources: sourceViews.filter(({ id }) => selectedSourceIds.includes(id)),
       isCreateModalOpen,
       isRefreshingUnit,
-      sourceType,
+      unitDefinition,
       availableSourceTypes,
-      sourceName,
-      sourceNameError,
-      sourceSignals,
-      sourceSignalsError,
-      canCreateSource: canCreateSource && !isUnitSaving,
       isUnitSaving,
       createdSource,
       refreshUnit: () => {
         tableState?.refreshUnit();
       },
       createSource,
-      setCreateSourceType,
-      setCreateSourceName,
-      setCreateSourceSignals,
-      validateCreateSourceName,
       deleteSource,
       deleteSources,
       generateApiKey,
@@ -406,7 +350,6 @@ export const useSources = ({
     }),
     [
       availableSourceTypes,
-      canCreateSource,
       isUnitSaving,
       createSource,
       createdSource,
@@ -428,18 +371,10 @@ export const useSources = ({
       query,
       selectedSourceId,
       selectedSourceIds,
-      setCreateSourceName,
-      setCreateSourceSignals,
-      setCreateSourceType,
-      sourceName,
-      sourceNameError,
-      sourceSignals,
-      sourceSignalsError,
-      sourceType,
       sourceViews,
       sourcesActorRef,
       tableState,
-      validateCreateSourceName,
+      unitDefinition,
     ]
   );
 };

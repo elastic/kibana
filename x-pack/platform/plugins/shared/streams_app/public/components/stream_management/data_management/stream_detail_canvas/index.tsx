@@ -29,7 +29,9 @@ import {
   type OnNodesDelete,
   type OnReconnect,
 } from '@xyflow/react';
+import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import {
   buildUnitCanvasGraph,
   configuredDestinationNodeId,
@@ -100,9 +102,13 @@ import { SourceDetailsFlyout } from '../../../streams_layout/sources/source_deta
 import { useDestinations } from '../../../streams_layout/destinations/destinations_context';
 import { CreateDestinationModal } from '../../../streams_layout/destinations/create_destination_modal';
 import { UnitDestinationFlyout } from '../../../streams_layout/destinations/unit_destination_flyout';
-import type { DestinationViewModel } from '../../../streams_layout/destinations/types';
+import type {
+  DestinationViewModel,
+  ElasticsearchDestinationViewModel,
+} from '../../../streams_layout/destinations/types';
 import { DESTINATION_SIGNAL_LABELS } from '../../../streams_layout/destinations/destination_type_config';
 import {
+  getDestinationIndices,
   getUnitDestinations,
   withUnitDestinations,
 } from '../../../streams_layout/destinations/destination_models';
@@ -120,6 +126,7 @@ import { RoutingFlyout } from '../../../stream_routing_flyout';
 import { ProcessingFlyout } from '../../../stream_processing_flyout';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
+const NO_DESTINATION_INDICES: ResolvedDestinationIndex[] = [];
 const canvasColumnStyles = css`
   display: flex;
   flex: 1 1 auto;
@@ -153,6 +160,7 @@ export function StreamsCanvas() {
       },
     },
   } = useKibana();
+  const { timeState, timeState$ } = useTimefilter();
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
@@ -166,6 +174,8 @@ export function StreamsCanvas() {
       core={core}
       urlStateStorageContainer={urlStateStorageContainer}
       apiKeyGenerationDeps={apiKeyGenerationDeps}
+      timeState={timeState}
+      timeState$={timeState$}
       loadSourceEnvironment={loadSourceEnvironment}
       loadUnitDefinition={unitDefinitionRepository.load}
       persistUnitDefinition={unitDefinitionRepository.persist}
@@ -262,7 +272,7 @@ function StreamsCanvasInner() {
       buildConfiguredDestinationNode(
         destination,
         connectedDestinationIds.has(destination.id),
-        resolvedIndicesByDestination[destination.id]?.map((index) => index.name) ?? []
+        resolvedIndicesByDestination.get(destination.id)?.map((index) => index.name) ?? []
       )
     );
     const graphNodes = [
@@ -785,10 +795,15 @@ function StreamsCanvasInner() {
             <UnitDestinationFlyout
               destination={flyoutDestination}
               indices={
-                resolvedIndicesByDestination[flyoutDestination.id]?.map((index) => index.name) ?? []
+                resolvedIndicesByDestination.get(flyoutDestination.id) ?? NO_DESTINATION_INDICES
               }
               indicesStatus={resolvedIndicesStatus}
               indicesError={resolvedIndicesError}
+              destinationDetailRef={destinationsController.destinationDetailRefs.get(
+                flyoutDestination.id
+              )}
+              onShowDestinationDetail={destinationsController.showDestinationDetail}
+              onHideDestinationDetail={destinationsController.hideDestinationDetail}
               onClose={closeFlyout}
               isDeleteDisabled={isSaving}
               onIndexClick={openIndexFlyout}
@@ -890,6 +905,22 @@ const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
   };
 };
 
+const getDestinationSubtitle = (destination: ElasticsearchDestinationViewModel): string => {
+  const indices = getDestinationIndices(destination);
+  if (destination.mode === 'auto' || indices.length === 0) {
+    return i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
+      defaultMessage: 'Auto',
+    });
+  }
+  if (indices.length === 1) {
+    return indices[0];
+  }
+  return i18n.translate('xpack.streams.canvas.configuredDestinationNode.fixedIndicesLabel', {
+    defaultMessage: '{count} fixed indices',
+    values: { count: indices.length },
+  });
+};
+
 export const buildConfiguredDestinationNode = (
   destination: DestinationViewModel,
   hasConnectedSource: boolean,
@@ -918,8 +949,11 @@ export const buildConfiguredDestinationNode = (
       data: {
         destinationId: destination.id,
         signals: destination.signals,
+        bucket: destination.bucket,
         title: destination.name,
-        subtitle: !hasConnectedSource ? noSourceLabel : destination.bucket,
+        subtitle: !hasConnectedSource
+          ? noSourceLabel
+          : destination.description || destination.bucket,
       },
     };
   }
@@ -950,17 +984,13 @@ export const buildConfiguredDestinationNode = (
     data: {
       destinationId: destination.id,
       signals: destination.signals,
-      streamName: destination.index,
+      streamName: getDestinationIndices(destination).join(' ') || undefined,
       indexCount: targetedIndexNames.length,
       targetedIndexNames,
       title: destination.name,
       subtitle: !hasConnectedSource
         ? noSourceLabel
-        : destination.mode === 'auto'
-        ? i18n.translate('xpack.streams.canvas.configuredDestinationNode.autoLabel', {
-            defaultMessage: 'Auto',
-          })
-        : destination.index,
+        : destination.description || getDestinationSubtitle(destination),
     },
   };
 };
