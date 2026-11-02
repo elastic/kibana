@@ -37,6 +37,18 @@ export {
   streamsUnitUpsertRequestSchema,
 } from './src/models/unit';
 export type { StreamsUnit } from './src/models/unit';
+export {
+  AUTO_WRITE_PATTERN_BY_SIGNAL,
+  UNIT_DESTINATION_SIGNALS,
+  getSignalTargetsWritePatterns,
+  getUnitDestinationSignalTargets,
+  getUnitDestinationWritePatterns,
+  readUnitDestinationConfigValue,
+  readUnitDestinationSignals,
+  type UnitDestination,
+  type UnitDestinationSignal,
+  type UnitDestinationSignalTargets,
+} from './src/helpers/unit_destination_targets';
 export type {
   CatalogueArrayField,
   CatalogueBooleanField,

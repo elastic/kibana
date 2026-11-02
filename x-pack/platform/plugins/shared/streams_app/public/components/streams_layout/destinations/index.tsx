@@ -14,6 +14,7 @@ import { DeleteDestinationConfirmation } from './delete_destination_confirmation
 import { getDestinationSortableValue, DestinationsGrid } from './destinations_grid';
 import { DestinationsToolbar } from './destinations_toolbar';
 import { useDestinationsTable } from './destinations_context';
+import { getDestinationIndices } from './destination_models';
 import { getDestinationTypeLabel } from './destination_type_config';
 import type { DestinationViewModel } from './types';
 
@@ -24,6 +25,9 @@ export const DestinationsTab = () => {
     resolvedIndicesByDestination,
     resolvedIndicesStatus,
     resolvedIndicesError,
+    destinationDetailRefs,
+    showDestinationDetail,
+    hideDestinationDetail,
     query,
     isCreateModalOpen,
     isRefreshingUnit,
@@ -69,8 +73,9 @@ export const DestinationsTab = () => {
           [
             destination.name,
             destination.id,
+            destination.description,
             ...(destination.type === 'elasticsearch'
-              ? [destination.index, destination.mode]
+              ? [...getDestinationIndices(destination), destination.mode]
               : [destination.bucket]),
             destination.signals.join(' '),
             getDestinationTypeLabel(destination.type),
@@ -92,12 +97,12 @@ export const DestinationsTab = () => {
       const aValue = getDestinationSortableValue(
         a,
         sort.id,
-        resolvedIndicesByDestination[a.id]?.length ?? 0
+        resolvedIndicesByDestination.get(a.id)?.length ?? 0
       );
       const bValue = getDestinationSortableValue(
         b,
         sort.id,
-        resolvedIndicesByDestination[b.id]?.length ?? 0
+        resolvedIndicesByDestination.get(b.id)?.length ?? 0
       );
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
@@ -144,6 +149,9 @@ export const DestinationsTab = () => {
             resolvedIndicesByDestination={resolvedIndicesByDestination}
             resolvedIndicesStatus={resolvedIndicesStatus}
             resolvedIndicesError={resolvedIndicesError}
+            destinationDetailRefs={destinationDetailRefs}
+            onShowDestinationDetail={showDestinationDetail}
+            onHideDestinationDetail={hideDestinationDetail}
             hasActiveFilters={query.trim().length > 0 || selectedTypes.length > 0}
             visibleColumns={visibleColumnIds}
             pagination={pagination}

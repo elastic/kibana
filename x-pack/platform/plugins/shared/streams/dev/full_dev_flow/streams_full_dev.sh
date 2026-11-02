@@ -759,7 +759,8 @@ index_failure_docs() {
   detect_es
   [[ -n "$ES" ]] || die "Elasticsearch is not reachable"
   for i in $(seq "$start" $((start + count - 1))); do
-    es_curl -X POST "$ES/$ds/_doc?refresh=true" \
+    # A red cluster otherwise blocks each write for a minute waiting on the primary.
+    es_curl --max-time 15 -X POST "$ES/$ds/_doc?refresh=true&timeout=10s" \
       -H 'Content-Type: application/json' \
       -d "$(jq -n --arg env "$env" --arg n "$i" \
         '{

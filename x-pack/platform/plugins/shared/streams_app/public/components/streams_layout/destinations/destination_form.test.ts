@@ -6,7 +6,11 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { canSubmitDestinationForm, getDestinationCreationFormErrors } from './destination_form';
+import {
+  canSubmitDestinationForm,
+  getDestinationCreationFormErrors,
+  getVisibleDestinationFormErrors,
+} from './destination_form';
 import { EMPTY_ELASTICSEARCH_DESTINATION_FORM, EMPTY_S3_DESTINATION_FORM } from './types';
 
 const unitDefinition: StreamsUnit.GetResponse = {
@@ -24,6 +28,7 @@ describe('destination form', () => {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       destinationName: 'Application logs',
+      description: '',
       elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
     };
 
@@ -38,6 +43,7 @@ describe('destination form', () => {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       destinationName: 'Application logs',
+      description: '',
       elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, auto: false },
     };
 
@@ -52,6 +58,7 @@ describe('destination form', () => {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       destinationName: 'Templated logs',
+      description: '',
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
@@ -70,6 +77,7 @@ describe('destination form', () => {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       destinationName: 'Metrics as logs',
+      description: '',
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
@@ -88,6 +96,7 @@ describe('destination form', () => {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       destinationName: 'Application',
+      description: '',
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
@@ -108,6 +117,7 @@ describe('destination form', () => {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       destinationName: 'Application logs',
+      description: '',
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
@@ -142,6 +152,7 @@ describe('destination form', () => {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       destinationName: 'Application',
+      description: '',
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
         auto: false,
@@ -164,22 +175,67 @@ describe('destination form', () => {
     ).toBeUndefined();
   });
 
-  it('allows auto write targets that keep a signal prefix', () => {
+  it('allows custom auto write patterns for the selected signals', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
       destinationName: 'Billing',
+      description: '',
       elasticsearch: {
         ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        useCustomWritePatterns: true,
+        customSignals: ['logs' as const, 'metrics' as const],
         logsIndex: 'logs-billing-*',
         metricsIndex: 'metrics-billing-*',
-        tracesIndex: 'traces-billing-*',
       },
     };
 
     expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
       destinationName: undefined,
     });
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
+  });
+
+  it('requires a signal and a pattern for every selected signal in custom auto mode', () => {
+    const formData = {
+      storageKind: 'local_elasticsearch' as const,
+      s3: { ...EMPTY_S3_DESTINATION_FORM },
+      destinationName: 'Billing',
+      description: '',
+      elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, useCustomWritePatterns: true },
+    };
+
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition }).customSignals).toBe(
+      'required'
+    );
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+
+    const withSignal = {
+      ...formData,
+      elasticsearch: { ...formData.elasticsearch, customSignals: ['traces' as const] },
+    };
+    expect(getDestinationCreationFormErrors({ formData: withSignal, unitDefinition })).toEqual({
+      destinationName: undefined,
+      tracesIndex: 'required',
+    });
+    expect(canSubmitDestinationForm({ formData: withSignal, unitDefinition })).toBe(false);
+  });
+
+  it('ignores patterns of unselected signals in custom auto mode', () => {
+    const formData = {
+      storageKind: 'local_elasticsearch' as const,
+      s3: { ...EMPTY_S3_DESTINATION_FORM },
+      destinationName: 'Billing',
+      description: '',
+      elasticsearch: {
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        useCustomWritePatterns: true,
+        customSignals: ['logs' as const],
+        logsIndex: 'logs-billing-*',
+        metricsIndex: 'not-a-pattern',
+      },
+    };
+
     expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
   });
 
@@ -190,8 +246,11 @@ describe('destination form', () => {
         storageKind: 'local_elasticsearch' as const,
         s3: { ...EMPTY_S3_DESTINATION_FORM },
         destinationName: 'Billing',
+        description: '',
         elasticsearch: {
           ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+          useCustomWritePatterns: true,
+          customSignals: ['logs' as const],
           logsIndex,
         },
       };
@@ -208,6 +267,7 @@ describe('S3', () => {
   const s3Form = (overrides: Partial<typeof EMPTY_S3_DESTINATION_FORM>) => ({
     storageKind: 'external_storage' as const,
     destinationName: 'S3 archive',
+    description: '',
     elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
     s3: {
       ...EMPTY_S3_DESTINATION_FORM,
@@ -299,5 +359,30 @@ describe('S3', () => {
       getDestinationCreationFormErrors({ formData: s3Form({}), unitDefinition: unit })
         .destinationName
     ).toBe('duplicate');
+  });
+});
+
+describe('getVisibleDestinationFormErrors', () => {
+  const errors = {
+    destinationName: 'required',
+    staticIndexes: 'required',
+    logsIndex: 'uppercase',
+    region: 'required',
+  } as const;
+
+  it('only shows the errors of touched fields', () => {
+    expect(
+      getVisibleDestinationFormErrors({
+        errors,
+        touchedFields: { elasticsearch: { logsIndex: true } },
+        isSubmitted: false,
+      })
+    ).toEqual({ staticIndexes: 'required', logsIndex: 'uppercase' });
+  });
+
+  it('shows every error once the form was submitted', () => {
+    expect(
+      getVisibleDestinationFormErrors({ errors, touchedFields: {}, isSubmitted: true })
+    ).toEqual(errors);
   });
 });
