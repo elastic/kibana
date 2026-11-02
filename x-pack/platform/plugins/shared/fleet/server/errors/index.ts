@@ -20,7 +20,12 @@ export {
   fleetErrorToResponseOptions,
 } from './handlers';
 
-export { isESClientError, rethrowIfInstanceOrWrap, getErrorMessage } from './utils';
+export {
+  isESClientError,
+  isElasticsearchReadOnlyBlockError,
+  rethrowIfInstanceOrWrap,
+  getErrorMessage,
+} from './utils';
 export {
   FleetError as FleetError,
   FleetVersionConflictError,
