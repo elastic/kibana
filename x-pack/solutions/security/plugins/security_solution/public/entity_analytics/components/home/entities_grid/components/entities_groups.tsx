@@ -18,6 +18,17 @@ import { CHILD_ROWS_COLUMNS } from '../grid_columns';
 import type { ReadAccess } from '../grid_columns';
 import { RISK_SCORE_NORM_FIELD } from '../common';
 import { joinAnd } from '../queries/esql';
+import {
+  buildGroupValueBucketsExpression,
+  buildGroupValueBucketsQuery,
+  splitGroupValueFilters,
+} from '../queries/group_value_filters';
+import {
+  applyResolvedEntityFilterOverridesToQuery,
+  isFilteringByGroupValue,
+} from '../queries/resolved_entities';
+import { useResolvedValueGroups } from '../hooks/use_resolved_value_groups';
+import { useEntityFilterOverrides } from '../hooks/use_entity_grid_data';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 import type { CellHandlers } from './entities_cell_renderer';
 import type { RowActions } from './cells/row_actions_cell';
@@ -75,19 +86,30 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
   groupSelectorComponent,
   ...level
 }) => {
-  const { state, selectedGroup, isQueryReady } = level;
+  const { state, selectedGroup, isQueryReady, rowsMode, searchExpression, entityExpression } =
+    level;
+  const resolvedValueGroups = useResolvedValueGroups({
+    selectedGroup,
+    rowsMode,
+    searchExpression,
+    entityExpression,
+    pageIndex: state.pageIndex,
+    pageSize: state.pageSize,
+    isQueryReady,
+  });
   const { groupData, grouping, isFetching } = useEntityGrouping({
     state,
     selectedGroup,
     groupFilters: [],
     tableId: GROUPED_VIEW_TABLE_ID,
     groupingId: GROUPED_VIEW_GROUPING_ID,
-    isQueryReady,
+    // Resolved rows grouped by the group's values read their own buckets.
+    isQueryReady: isQueryReady !== false && !resolvedValueGroups.isEnabled,
   });
 
   return (
     <GroupWrapper
-      data={groupData}
+      data={resolvedValueGroups.isEnabled ? resolvedValueGroups.groupData : groupData}
       grouping={grouping}
       renderChildComponent={(currentGroupFilters) => (
         <GroupContent {...level} currentGroupFilters={currentGroupFilters} groupingLevel={1} />
@@ -96,7 +118,7 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
       pageSize={state.pageSize}
       onChangeGroupsPage={state.onChangePage}
       onChangeGroupsItemsPerPage={state.onChangeItemsPerPage}
-      isFetching={isFetching}
+      isFetching={resolvedValueGroups.isEnabled ? resolvedValueGroups.isFetching : isFetching}
       selectedGroup={selectedGroup}
       groupingLevel={0}
       groupSelectorComponent={groupSelectorComponent}
@@ -159,13 +181,55 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
   parentGroupFilters,
   ...level
 }) => {
-  const { state, selectedGroup, isQueryReady } = level;
+  const { state, selectedGroup, isQueryReady, rowsMode } = level;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  const { groupValueBuckets, otherFilters } = useMemo(
+    () => splitGroupValueFilters(parseGroupFilters(parentGroupFilters), rowsMode),
+    [parentGroupFilters, rowsMode]
+  );
+  const { searchExpression, entityExpression } = useLeafExpressions(level, parentGroupFilters);
+  const resolvedValueGroups = useResolvedValueGroups({
+    selectedGroup,
+    rowsMode,
+    searchExpression,
+    entityExpression,
+    pageIndex,
+    pageSize,
+    isQueryReady,
+  });
+
+  // Other fields' buckets read DSL: a parent bucket on a group-valued field keeps the resolved
+  // entities whose group's value is in it, with the overrides of that bucket alone.
+  const parentGroupValueExpression = buildGroupValueBucketsExpression(groupValueBuckets);
+  const { data: parentOverrides } = useEntityFilterOverrides({
+    rowsMode,
+    entityExpression: resolvedValueGroups.isEnabled ? undefined : parentGroupValueExpression,
+  });
+  const isParentOverridesReady =
+    resolvedValueGroups.isEnabled ||
+    !isFilteringByGroupValue({ rowsMode, entityExpression: parentGroupValueExpression }) ||
+    parentOverrides != null;
   const groupFilters: Filter[] = useMemo(
-    () => parseGroupFilters(parentGroupFilters),
-    [parentGroupFilters]
+    () =>
+      groupValueBuckets.length
+        ? [
+            ...otherFilters,
+            {
+              meta: {},
+              query: {
+                bool: {
+                  filter: applyResolvedEntityFilterOverridesToQuery(
+                    buildGroupValueBucketsQuery(groupValueBuckets),
+                    parentOverrides
+                  ),
+                },
+              },
+            },
+          ]
+        : otherFilters,
+    [groupValueBuckets, otherFilters, parentOverrides]
   );
 
   const { groupData, grouping, isFetching } = useEntityGrouping({
@@ -174,12 +238,13 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
     groupFilters,
     tableId: GROUPED_VIEW_TABLE_ID,
     groupingId: GROUPED_VIEW_GROUPING_ID,
-    isQueryReady,
+    isQueryReady:
+      isQueryReady !== false && !resolvedValueGroups.isEnabled && isParentOverridesReady,
   });
 
   return (
     <GroupWrapper
-      data={groupData}
+      data={resolvedValueGroups.isEnabled ? resolvedValueGroups.groupData : groupData}
       grouping={grouping}
       renderChildComponent={(currentGroupFilters) => (
         <GroupContent
@@ -193,13 +258,41 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
       pageSize={pageSize}
       onChangeGroupsPage={setPageIndex}
       onChangeGroupsItemsPerPage={setPageSize}
-      isFetching={isFetching}
+      isFetching={resolvedValueGroups.isEnabled ? resolvedValueGroups.isFetching : isFetching}
       selectedGroup={selectedGroup}
       groupingLevel={groupingLevel}
       testSubjects={TEST_SUBJECTS}
     />
   );
 };
+
+/**
+ * The page's filters with the groups' filters, as the rows in a group read them. On resolved
+ * rows, buckets of group-valued fields match the group's values through the entity filters,
+ * which read the overrides; other buckets match the entity docs through the search.
+ */
+const useLeafExpressions = (
+  {
+    rowsMode,
+    searchExpression,
+    entityExpression,
+  }: Pick<GroupViewProps, 'rowsMode' | 'searchExpression' | 'entityExpression'>,
+  groupFiltersJson: ParentGroupFilters
+): Pick<GroupViewProps, 'searchExpression' | 'entityExpression'> =>
+  useMemo(() => {
+    const { groupValueBuckets, otherFilters } = splitGroupValueFilters(
+      parseGroupFilters(groupFiltersJson),
+      rowsMode
+    );
+    const { esqlExpression } = convertFiltersToESQLExpression(otherFilters);
+    return {
+      searchExpression: joinAnd(searchExpression, esqlExpression),
+      entityExpression: joinAnd(
+        entityExpression,
+        buildGroupValueBucketsExpression(groupValueBuckets)
+      ),
+    };
+  }, [rowsMode, searchExpression, entityExpression, groupFiltersJson]);
 
 interface LeafGridProps extends GroupViewProps {
   currentGroupFilters: Filter[];
@@ -226,19 +319,23 @@ const LeafGrid: React.FC<LeafGridProps> = ({
     setSortDirection(dir);
   }, []);
 
-  const leafSearchExpression = useMemo(() => {
-    const groupFilters = processGroupFilters(
-      getMergedFilters(currentGroupFilters, parentGroupFilters)
-    );
-    const { esqlExpression: groupExpr } = convertFiltersToESQLExpression(groupFilters);
-    return joinAnd(searchExpression, groupExpr);
-  }, [searchExpression, currentGroupFilters, parentGroupFilters]);
+  const leafGroupFilters = useMemo(
+    () =>
+      JSON.stringify(
+        processGroupFilters(getMergedFilters(currentGroupFilters, parentGroupFilters))
+      ),
+    [currentGroupFilters, parentGroupFilters]
+  );
+  const leafExpressions = useLeafExpressions(
+    { rowsMode, searchExpression, entityExpression },
+    leafGroupFilters
+  );
 
   return (
     <EntitiesGrid
       columns={CHILD_ROWS_COLUMNS}
-      searchExpression={leafSearchExpression}
-      entityExpression={entityExpression}
+      searchExpression={leafExpressions.searchExpression}
+      entityExpression={leafExpressions.entityExpression}
       timeRange={timeRange}
       watchlistNames={watchlistNames}
       rowsMode={rowsMode}
