@@ -7,11 +7,13 @@
 
 import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 
 const setupPlugin = (coreSetup = coreMock.createSetup()) => {
   const registerAttachmentType = jest.fn<void, [AttachmentTypeDefinition]>();
+  const registerTool = jest.fn();
   const registerSkill = jest.fn();
   const registerSmlType = jest.fn<void, [SmlTypeDefinition]>();
 
@@ -22,6 +24,7 @@ const setupPlugin = (coreSetup = coreMock.createSetup()) => {
     {
       agentBuilder: {
         attachments: { registerType: registerAttachmentType },
+        tools: { register: registerTool },
         skills: { register: registerSkill },
       },
       agentBuilderSml: {
@@ -30,14 +33,19 @@ const setupPlugin = (coreSetup = coreMock.createSetup()) => {
     } as never
   );
 
-  return { registerAttachmentType, registerSkill, registerSmlType };
+  return { registerAttachmentType, registerTool, registerSkill, registerSmlType };
 };
 
 describe('AgentBuilderDashboardsPlugin', () => {
-  it('registers the dashboard attachment type, skill, and SML type', () => {
-    const { registerAttachmentType, registerSkill, registerSmlType } = setupPlugin();
+  it('registers the dashboard attachment type, generate tool, skill, and SML type', () => {
+    const { registerAttachmentType, registerTool, registerSkill, registerSmlType } = setupPlugin();
 
     expect(registerAttachmentType).toHaveBeenCalledTimes(1);
+    expect(registerTool).toHaveBeenCalledTimes(1);
+    expect(registerTool).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'platform.dashboard.generate_dashboard' })
+    );
+    expect(isAllowedBuiltinTool(registerTool.mock.calls[0][0].id)).toBe(true);
     expect(registerSkill).toHaveBeenCalledTimes(1);
     expect(registerSkill).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));
     expect(registerSmlType).toHaveBeenCalledTimes(1);
