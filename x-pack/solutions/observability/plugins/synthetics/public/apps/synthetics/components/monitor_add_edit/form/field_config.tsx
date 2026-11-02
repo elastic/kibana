@@ -109,6 +109,7 @@ import {
   FLOATS_ONLY,
 } from './validation';
 import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
+import { ParameterValuesEditor } from '../fields/parameter_values';
 
 export const API_PRIVATE_LOCATIONS_ONLY = i18n.translate(
   'xpack.synthetics.monitorConfig.locations.apiPrivateOnlyErrorMessage',
@@ -1523,19 +1524,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage: 'Parameters',
     }),
     controlled: true,
-    component: JSONEditor,
-    props: (): JSONCodeEditorProps => ({
-      id: 'syntheticsMonitorConfigParams',
-      height: '100px',
-      ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.paramsAria.label', {
-        defaultMessage: 'Monitor params code editor',
-      }),
+    component: ParameterValuesEditor,
+    props: () => ({
       readOnly,
     }),
     helpText: (
       <FormattedMessage
         id="xpack.synthetics.monitorConfig.params.helpText"
-        defaultMessage="Use JSON to define parameters that can be referenced in your script with {paramsValue}"
+        defaultMessage="Add key-value parameters that can be referenced in your script with {paramsValue}"
         values={{
           paramsValue: <EuiCode>{'params.value'}</EuiCode>,
         }}
