@@ -1,6 +1,12 @@
 # TS-INFO
 
-The `TS_INFO` processing command retrieves information about individual time series available in time series data streams, along with the dimension values that identify each series. It returns one row per metric and time series combination, including `metric_name`, `data_stream`, `unit`, `metric_type`, `field_type`, `dimension_fields`, and a JSON-encoded `dimensions` column.
+The `TS_INFO` processing command retrieves information about individual time series available in time series data streams, along with the dimension values that identify each series.
+
+`TS_INFO` is a more fine-grained variant of `METRICS_INFO`. Where `METRICS_INFO` returns one row per distinct metric, `TS_INFO` returns one row per metric and time series combination. This lets you discover the exact dimension values that identify each series. Like `METRICS_INFO`, any `WHERE` filters that precede `TS_INFO` narrow the set of time series considered.
+
+`TS_INFO` produces one row for every metric and time series combination that matches the preceding filters. It includes all columns from `METRICS_INFO`, plus a `dimensions` column containing a JSON-encoded representation of the dimension key/value pairs that identify the time series.
+
+The output contains these `keyword` columns: `metric_name`, `data_stream`, `unit`, `metric_type`, `field_type`, `dimension_fields`, and `dimensions`.
 
 ## Syntax
 
@@ -12,7 +18,7 @@ The `TS_INFO` processing command retrieves information about individual time ser
 
 ## Examples
 
-List every metric and time series pair in the targeted data stream, sorted by metric name and dimension values:
+List all metric and time series combinations in the targeted data stream.
 
 ```esql
 TS k8s
@@ -20,7 +26,7 @@ TS k8s
 | SORT metric_name, dimensions
 ```
 
-Discover time series matching a `cluster` filter:
+Discover time series matching a `cluster` filter.
 
 ```esql
 TS k8s
@@ -29,7 +35,7 @@ TS k8s
 | SORT metric_name, dimensions
 ```
 
-Select only metric names and dimension values:
+Select only the metric name and dimensions columns.
 
 ```esql
 TS k8s
@@ -39,7 +45,7 @@ TS k8s
 | SORT metric_name, dimensions
 ```
 
-Filter metadata rows by metric type:
+Filter metadata rows to show only gauge metrics.
 
 ```esql
 TS k8s
@@ -48,7 +54,7 @@ TS k8s
 | SORT metric_name, dimensions
 ```
 
-Count distinct time series per metric:
+Count distinct time series per metric.
 
 ```esql
 TS k8s
@@ -63,7 +69,7 @@ series_count:long | metric_name:keyword
 9 | network.total_bytes_in
 9 | network.total_cost
 
-Count distinct metrics per time series:
+Count distinct metrics per time series.
 
 ```esql
 TS k8s
@@ -87,4 +93,4 @@ metric_count:long | dimensions:keyword
 
 - `TS_INFO` can only be used after a `TS` source command. Using it after `FROM` or other source commands produces an error.
 - `TS_INFO` must appear before pipeline-breaking commands such as `STATS`, `SORT`, or `LIMIT`.
-- The output replaces the original table: downstream commands operate on the metadata rows, not the raw time series documents.
+- The output replaces the original table. Downstream commands operate on the metadata rows, not the raw time series documents.
