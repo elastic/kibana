@@ -16,6 +16,7 @@ import {
   NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '.';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
+import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -63,8 +64,13 @@ describe('Nightshift investigation agent type', () => {
       workflow_ids: ['system-nightshift-sandbox-materialize-workspace-bound-default'],
       post_execution_workflow_ids: ['system-nightshift-agent-optimize-bound-default'],
     });
-    expect(base.tools?.[0]?.tool_ids).toEqual([...SANDBOX_TOOL_IDS, TIME_CONVERTER_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      ...SANDBOX_TOOL_IDS,
+      TIME_CONVERTER_TOOL_ID,
+      SLACK_READ_TOOL_ID,
+    ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
+    expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeConnectorSubAction);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/.connector-docs/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
@@ -137,7 +143,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toEqual([
       'system-nightshift-agent-optimize-bound-default',
     ]);
-    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);
   });
 
   it('allow-lists the telemetry connector when one is configured', async () => {
@@ -165,12 +171,12 @@ describe('Nightshift investigation agent type', () => {
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
   });
 
-  it('offers only nightshift_time_converter_tool when the sandbox is not configured', async () => {
+  it('offers only the time converter and the Slack read tool when the sandbox is not configured', async () => {
     const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: false })
     );
 
-    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);
   });
 
   it('instructs the agent to answer in its final message and not to record findings', async () => {
