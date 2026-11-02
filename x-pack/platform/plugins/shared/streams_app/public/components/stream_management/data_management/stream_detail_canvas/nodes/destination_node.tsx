@@ -97,7 +97,19 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
               )}
             </div>
             {data.subtitle && (
-              <EuiText size="s" color="subdued">
+              <EuiText
+                size="s"
+                color="subdued"
+                title={data.subtitle}
+                data-test-subj="streamsCanvasDestinationSubtitle"
+                css={css`
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                `}
+              >
                 {data.subtitle}
               </EuiText>
             )}
