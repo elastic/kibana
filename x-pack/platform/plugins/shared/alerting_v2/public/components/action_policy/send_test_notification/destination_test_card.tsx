@@ -8,7 +8,7 @@
 import { EuiCheckableCard, EuiText } from '@elastic/eui';
 import type { ActionPolicyTestDestination } from '@kbn/alerting-v2-schemas';
 import React from 'react';
-import { DestinationLabel, TRUNCATE_CSS, useDestinationWorkflow } from './destination_label';
+import { DestinationLabel, useDestinationWorkflow } from './destination_label';
 
 interface Props {
   destination: ActionPolicyTestDestination;
@@ -34,7 +34,7 @@ export const DestinationTestCard = ({ destination, checked, disabled, onChange }
       label={<DestinationLabel destination={destination} workflow={workflow} />}
     >
       {description && (
-        <EuiText size="xs" color="subdued" css={TRUNCATE_CSS}>
+        <EuiText size="xs" color="subdued" className="eui-textTruncate">
           {description}
         </EuiText>
       )}

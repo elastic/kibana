@@ -16,15 +16,9 @@ import {
 } from '../details_flyout/workflow_connector_icons';
 import * as labels from './translations';
 
-export const TRUNCATE_CSS = {
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-} as const;
-
 /** The workflow of a destination, fetched only when the user can read it. */
 export const useDestinationWorkflow = ({ id, name }: ActionPolicyTestDestination) =>
-  useFetchWorkflow(id, name !== undefined).data;
+  useFetchWorkflow(id, name !== undefined, { staleTime: Infinity }).data;
 
 interface Props {
   destination: ActionPolicyTestDestination;
@@ -39,7 +33,7 @@ export const DestinationLabel = ({ destination, workflow }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} component="span">
       <EuiFlexItem grow={false} component="span" css={{ minWidth: 0 }}>
-        <EuiText size="s" component="span" css={TRUNCATE_CSS}>
+        <EuiText size="s" component="span" className="eui-textTruncate">
           <strong>{name ?? id}</strong>
         </EuiText>
       </EuiFlexItem>

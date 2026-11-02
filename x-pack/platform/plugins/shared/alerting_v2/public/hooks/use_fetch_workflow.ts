@@ -12,7 +12,11 @@ import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { workflowKeys } from './query_key_factory';
 
-export const useFetchWorkflow = (id: string | undefined, isEnabled = true) => {
+export const useFetchWorkflow = (
+  id: string | undefined,
+  isEnabled = true,
+  { staleTime }: { staleTime?: number } = {}
+) => {
   const workflowsApi = useService(WorkflowApi);
   const { toasts } = useService(CoreStart('notifications'));
 
@@ -20,6 +24,7 @@ export const useFetchWorkflow = (id: string | undefined, isEnabled = true) => {
     queryKey: workflowKeys.detail(id!),
     queryFn: () => workflowsApi.getWorkflow(id!),
     enabled: !!id && isEnabled,
+    staleTime,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
       toasts.addError(error, {

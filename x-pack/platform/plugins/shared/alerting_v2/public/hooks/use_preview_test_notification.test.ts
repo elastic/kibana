@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useService } from '@kbn/core-di-browser';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ActionPoliciesApi } from '../services/action_policies_api';
+import { createHookTestProviders } from '../test_utils/test_providers';
 import { usePreviewTestNotification } from './use_preview_test_notification';
 
 jest.mock('@kbn/core-di-browser');
@@ -17,12 +16,6 @@ jest.mock('@kbn/core-di-browser');
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 
 const createPreview = (seed: number) => ({ seed, groups: [{ seed }], destinations: [] });
-
-const wrap = (queryClient: QueryClient) => {
-  const wrapper = ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-  return wrapper;
-};
 
 describe('usePreviewTestNotification', () => {
   const api = { previewTestNotification: jest.fn() };
@@ -44,13 +37,8 @@ describe('usePreviewTestNotification', () => {
         resolveSecondPreview = resolve;
       })
     );
-    const queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-      logger: { log: () => {}, warn: () => {}, error: () => {} },
-    });
-
     const { result } = renderHook(() => usePreviewTestNotification('policy-1'), {
-      wrapper: wrap(queryClient),
+      wrapper: createHookTestProviders(),
     });
 
     await waitFor(() => expect(result.current.data?.seed).toBe(1));

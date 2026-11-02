@@ -13,9 +13,8 @@ import type {
   ActionPolicyTestPreviewResponse,
   ActionPolicyTestSendResponse,
 } from '@kbn/alerting-v2-schemas';
-import { I18nProvider } from '@kbn/i18n-react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
+import { createTestQueryClient, TestProviders } from '../../../test_utils/test_providers';
 import { SendTestNotificationFlyout } from './send_test_notification_flyout';
 
 jest.mock('@kbn/core-di-browser', () => ({
@@ -95,13 +94,11 @@ const createPreview = (): ActionPolicyTestPreviewResponse => ({
 });
 
 const renderFlyout = (onClose = jest.fn()) => {
-  const queryClient = new QueryClient();
+  const queryClient = createTestQueryClient();
   const createFlyout = () => (
-    <QueryClientProvider client={queryClient}>
-      <I18nProvider>
-        <SendTestNotificationFlyout policy={policy} onClose={onClose} />
-      </I18nProvider>
-    </QueryClientProvider>
+    <TestProviders queryClient={queryClient}>
+      <SendTestNotificationFlyout policy={policy} onClose={onClose} />
+    </TestProviders>
   );
   const view = render(createFlyout());
   const rerender = () => view.rerender(createFlyout());
@@ -123,9 +120,9 @@ describe('SendTestNotificationFlyout', () => {
       renderFlyout();
 
       expect(screen.getByTestId('sendTestNotificationSendButton')).toBeEnabled();
-      expect(screen.getByTestId('sendTestNotificationDestination-wf-1')).toBeInTheDocument();
-      expect(screen.getByTestId('sendTestNotificationDestination-wf-2')).toBeInTheDocument();
-      expect(screen.getByTestId('sendTestNotificationDestination-wf-3')).toBeInTheDocument();
+      expect(getCheckbox('wf-1')).toBeInTheDocument();
+      expect(getCheckbox('wf-2')).toBeInTheDocument();
+      expect(getCheckbox('wf-3')).toBeInTheDocument();
       expect(screen.queryByTestId('sendTestNotificationResults')).not.toBeInTheDocument();
       expect(screen.queryByTestId('sendTestNotificationBackButton')).not.toBeInTheDocument();
     });
