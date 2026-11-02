@@ -215,18 +215,17 @@ steps:
   # takes the ones closest to leaving it. `_source` is not read. Only `_id` reaches the
   # review, and indicator content can be 64 kB.
   #
-  # When the search fails, the sweep starts no review and `emit_search_failure` ends the
-  # run as failed. `on-failure: continue` lets `report_worker_run_completed` run first.
+  # The index does not exist until a hunt report writes the first gap, so a missing index
+  # is an empty queue (see `resolve_search_unreadable`). Any other search error means the
+  # sweep can't read the gaps. It starts no review and `emit_search_failure` ends the run
+  # as failed. `on-failure: continue` lets `report_worker_run_completed` run first.
+  # The search does not set `ignore_unavailable`: it would also hide a closed index.
   - name: search_pending_indicators
     type: elasticsearch.search
     on-failure:
       continue: true
     with:
       index: "ai-index-idx-{{ inputs.ai_index_id | default: consts.ai_index_id }}"
-      # The index does not exist until a hunt report writes the first gap. These two
-      # options make a missing index return no hits instead of an error.
-      ignore_unavailable: true
-      allow_no_indices: true
       # A plain number. The step rejects a template in a number field. Set to the
       # maximum allowed batch_size input so the search always returns enough candidates.
       # consts.batch_size and the batch_size input maximum (50) must not exceed this.
@@ -251,6 +250,15 @@ steps:
           must_not:
             - ids:
                 values: "${{ steps.resolve_active_indicators.output.indicator_ids | default: consts.no_rows }}"
+
+  # True when the search failed and the index is not simply missing. A missing index has
+  # the error type `index_not_found_exception` at the start of the message. `false ==`
+  # comes first on purpose: the template reads right to left, so this means "the message
+  # does not contain `index_not_found_exception`".
+  - name: resolve_search_unreadable
+    type: data.set
+    with:
+      unreadable: "${{ steps.search_pending_indicators.error != null and false == steps.search_pending_indicators.error.message contains 'index_not_found_exception' }}"
 
   # Step 7 of 8: cap results to the smaller of free slots and batch size. Two slices in
   # sequence take the minimum: the first limits by the space ceiling, the second by the
@@ -291,12 +299,12 @@ steps:
       items_in_flight: |-
         {%- assign started = steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size -%}
         {{ steps.collect_active_indicators.output.count | default: 0 | plus: started }}
-      source_read_failed: "${{ steps.search_pending_indicators.error != null }}"
+      source_read_failed: "${{ steps.resolve_search_unreadable.output.unreadable }}"
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"
       degraded_reason: |-
         {%- assign pending = steps.search_pending_indicators.output.hits.total.value | default: 0 -%}
         {%- assign started = steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size -%}
-        {%- if steps.search_pending_indicators.error != null or steps.list_active_reviews.error != null -%}
+        {%- if steps.resolve_search_unreadable.output.unreadable == true or steps.list_active_reviews.error != null -%}
         dependency_unavailable
         {%- elsif pending > 0 and started == 0 -%}
         capacity
@@ -308,7 +316,7 @@ steps:
       run_outcome: |-
         {%- assign pending = steps.search_pending_indicators.output.hits.total.value | default: 0 -%}
         {%- assign started = steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size -%}
-        {%- if steps.search_pending_indicators.error != null -%}
+        {%- if steps.resolve_search_unreadable.output.unreadable == true -%}
         failed_source_unavailable
         {%- elsif pending == 0 -%}
         empty_nothing_pending
@@ -320,14 +328,15 @@ steps:
         produced
         {%- endif -%}
 
-  # Runs only when the search failed: ends the run as failed and keeps the same outputs as
-  # `emit_result`. `status` must be a literal, so failure and success are two steps.
+  # Runs only when the search failed and the gaps are unreadable (not a missing index):
+  # ends the run as failed and keeps the same outputs as `emit_result`. `status` must be
+  # a literal, so failure and success are two steps.
   # A failed `list_active_reviews` does not fail the run, because the review's own
   # concurrency key already stops a second review for the same gap.
   - name: emit_search_failure
     type: workflow.output
     status: failed
-    if: "${{ steps.search_pending_indicators.error != null }}"
+    if: "${{ steps.resolve_search_unreadable.output.unreadable == true }}"
     with:
       message: >-
         Can't read coverage gaps from
@@ -350,7 +359,8 @@ steps:
       # Reviews this sweep tried to start.
       started: "${{ steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size }}"
       in_flight: "${{ steps.collect_active_indicators.output.count }}"
-      # A failed search never reaches this step, so `search_failed` is false here and
-      # zero pending means an empty queue. A failed lookup is reported as a flag only.
-      search_failed: "${{ steps.search_pending_indicators.error != null }}"
+      # An unreadable search never reaches this step, so `search_failed` is false here.
+      # Zero pending means an empty queue, including a missing gaps index. A failed lookup
+      # is reported as a flag only.
+      search_failed: "${{ steps.resolve_search_unreadable.output.unreadable }}"
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"

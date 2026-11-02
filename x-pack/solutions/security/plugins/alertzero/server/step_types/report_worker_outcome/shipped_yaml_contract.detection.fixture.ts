@@ -131,6 +131,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           collect_active_indicators: { output: { count: 2 } },
           list_active_reviews: { output: { results: [] } },
           resolve_dispatch_batch: { output: { indicators: [{ _id: 'ki-1' }] } },
+          resolve_search_unreadable: { output: { unreadable: false } },
           search_pending_indicators: { output: { hits: { total: { value: 6 } } } },
         },
       },
@@ -139,12 +140,23 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         steps: {
           collect_active_indicators: { output: { count: 100 } },
           resolve_dispatch_batch: { output: { indicators: [] } },
+          resolve_search_unreadable: { output: { unreadable: false } },
           search_pending_indicators: { output: { hits: { total: { value: 6 } } } },
         },
       },
       {
         consts: { no_rows: [] },
-        steps: { search_pending_indicators: { error: { message: 'search failed' } } },
+        steps: {
+          resolve_search_unreadable: { output: { unreadable: true } },
+          search_pending_indicators: { error: { message: 'search failed' } },
+        },
+      },
+      {
+        consts: { no_rows: [] },
+        steps: {
+          resolve_search_unreadable: { output: { unreadable: false } },
+          search_pending_indicators: { error: { message: 'index_not_found_exception' } },
+        },
       },
       { steps: { check_context_engine: { error: { message: 'HTTP 404: Not Found' } } } },
     ],

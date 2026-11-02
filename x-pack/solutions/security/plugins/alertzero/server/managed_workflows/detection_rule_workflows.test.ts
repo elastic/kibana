@@ -2457,11 +2457,36 @@ describe('detection rule workflows', () => {
 
       // The first gap write creates the index, so a project with no hunt report yet has
       // none. A missing index is an empty queue. Any other read failure fails the run.
-      it('reads a missing indicator index as an empty queue', () => {
+      // `ignore_unavailable` would also hide a closed index, so the search does not set it.
+      it('does not hide an unavailable index from the search', () => {
         const search = withOf('search_pending_indicators');
 
-        expect(search.ignore_unavailable).toBe(true);
-        expect(search.allow_no_indices).toBe(true);
+        expect(search).not.toHaveProperty('ignore_unavailable');
+        expect(search).not.toHaveProperty('allow_no_indices');
+      });
+
+      // Only a missing index is not unreadable. The error message starts with the error type.
+      it.each([
+        [false, undefined],
+        [false, 'index_not_found_exception: no such index'],
+        [true, 'index_closed_exception: closed'],
+        [true, 'security_exception: no privilege'],
+        [true, 'search_phase_execution_exception'],
+      ])('sets unreadable to %s when the search error is %s', (unreadable, message) => {
+        const search = message ? { error: { message } } : { output: { hits: { hits: [] } } };
+        const flag = withOf('resolve_search_unreadable').unreadable;
+
+        expect(resolveExpression(flag, { steps: { search_pending_indicators: search } })).toBe(
+          unreadable
+        );
+      });
+
+      it('resolves the unreadable flag right after the search', () => {
+        const names = sweepSteps.map(({ name }) => name);
+
+        expect(
+          names.indexOf('resolve_search_unreadable') - names.indexOf('search_pending_indicators')
+        ).toBe(1);
       });
 
       // The dependency checks run before anything else, so a failed check starts no review,
@@ -2537,15 +2562,16 @@ describe('detection rule workflows', () => {
       });
 
       // The search continues on failure so the outcome is still reported, then the run
-      // ends as failed. A completed run with zero pending then always means an empty queue.
-      it('fails the run after reporting the outcome when the search fails', () => {
+      // ends as failed unless the index is missing. A completed run with zero pending then
+      // always means an empty queue.
+      it('fails the run after reporting the outcome when the gaps are unreadable', () => {
         const names = sweepSteps.map(({ name }) => name);
         const failure = step('emit_search_failure');
         const outputs = (sweep.outputs as Array<{ name: string }>).map(({ name }) => name);
 
         expect(failure.type).toBe('workflow.output');
         expect(failure.status).toBe('failed');
-        expect(failure.if).toBe('${{ steps.search_pending_indicators.error != null }}');
+        expect(failure.if).toBe('${{ steps.resolve_search_unreadable.output.unreadable == true }}');
         expect(names.indexOf('report_worker_run_completed')).toBeLessThan(
           names.indexOf('emit_search_failure')
         );
@@ -2691,7 +2717,7 @@ describe('detection rule workflows', () => {
         expect(String(emit.started)).toContain('steps.resolve_dispatch_batch.output.indicators');
         expect(String(emit.in_flight)).toContain('steps.collect_active_indicators.output.count');
         expect(String(emit.search_failed)).toContain(
-          'steps.search_pending_indicators.error != null'
+          'steps.resolve_search_unreadable.output.unreadable'
         );
         expect(String(emit.lookup_failed)).toContain('steps.list_active_reviews.error != null');
       });
