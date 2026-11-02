@@ -9,7 +9,10 @@ import { EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { useSectionFormValidation } from '../hooks/use_section_form_validation';
+import {
+  IndicatorSectionValidityProvider,
+  useSectionFormValidation,
+} from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
 
 interface Props {
@@ -22,7 +25,8 @@ interface Props {
 /**
  * Owns the form subscriptions that change on every keystroke (section validity, isValidating) so the
  * form root never re-renders on field changes. The section elements are created once by the root and
- * passed in, so React skips re-rendering them when only this component updates.
+ * passed in, so React skips re-rendering them when only this component updates. The indicator section
+ * validity is shared with the data preview chart through `IndicatorSectionValidityProvider`.
  */
 export function SloEditFormSteps({
   isEditMode,
@@ -45,30 +49,32 @@ export function SloEditFormSteps({
   );
 
   return (
-    <EuiSteps
-      steps={[
-        {
-          title: i18n.translate('xpack.slo.sloEdit.definition.title', {
-            defaultMessage: 'Define SLI',
-          }),
-          children: indicatorSection,
-          status: isIndicatorSectionValid ? 'complete' : 'incomplete',
-        },
-        {
-          title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
-            defaultMessage: 'Set objectives',
-          }),
-          children: showObjectiveSection ? objectiveSection : null,
-          status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
-        },
-        {
-          title: i18n.translate('xpack.slo.sloEdit.description.title', {
-            defaultMessage: 'Describe SLO',
-          }),
-          children: showDescriptionSection ? descriptionSection : null,
-          status: showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
-        },
-      ]}
-    />
+    <IndicatorSectionValidityProvider value={isIndicatorSectionValid}>
+      <EuiSteps
+        steps={[
+          {
+            title: i18n.translate('xpack.slo.sloEdit.definition.title', {
+              defaultMessage: 'Define SLI',
+            }),
+            children: indicatorSection,
+            status: isIndicatorSectionValid ? 'complete' : 'incomplete',
+          },
+          {
+            title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
+              defaultMessage: 'Set objectives',
+            }),
+            children: showObjectiveSection ? objectiveSection : null,
+            status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
+          },
+          {
+            title: i18n.translate('xpack.slo.sloEdit.description.title', {
+              defaultMessage: 'Describe SLO',
+            }),
+            children: showDescriptionSection ? descriptionSection : null,
+            status: showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
+          },
+        ]}
+      />
+    </IndicatorSectionValidityProvider>
   );
 }
