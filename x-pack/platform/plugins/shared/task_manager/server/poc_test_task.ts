@@ -91,6 +91,9 @@ export function registerPocTestRoutes({
             schema.literal(POC_NOOP_TASK_TYPE),
           ]),
           durationMs: schema.number({ defaultValue: 30_000, min: 0, max: 300_000 }),
+          // When true, exercises the claim-nudge path (schedule + runSoon with
+          // requestImmediateClaim) for the sub-poll-interval pickup check.
+          nudge: schema.boolean({ defaultValue: false }),
         }),
       },
       options: { access: 'internal' },
@@ -102,15 +105,24 @@ export function registerPocTestRoutes({
       },
     },
     async (_ctx, req, res) => {
-      const { taskType, durationMs } = req.body;
+      const { taskType, durationMs, nudge } = req.body;
       const contract = await getStartContract();
       const task = await contract.schedule({
         taskType,
         params: { durationMs },
         state: {},
         scope: ['poc'],
+        // With nudge, schedule slightly in the future so the version-checked
+        // runSoon below cannot race a regular poll cycle's claim.
+        ...(nudge ? { runAt: new Date(Date.now() + 15_000) } : {}),
       });
-      logger.info(`[poc] scheduled ${taskType} task ${task.id} (durationMs=${durationMs})`);
+      if (nudge) {
+        // Only runSoon sends a claim nudge; plain schedule never does.
+        await contract.runSoon(task.id, { requestImmediateClaim: true });
+      }
+      logger.info(
+        `[poc] scheduled ${taskType} task ${task.id} (durationMs=${durationMs}, nudge=${nudge}) at ${new Date().toISOString()}`
+      );
       return res.ok({
         body: { id: task.id, taskType: task.taskType, scheduledAt: task.scheduledAt },
       });
