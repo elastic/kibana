@@ -32,15 +32,17 @@ const findSloDefinitionsParamsSchema = lazySchema(() =>
   })
 );
 
-const sloDefinitionResponseSchema = sloDefinitionSchema
-  .extend({
-    health: sloHealthSchema.optional(),
-  })
-  .meta({
-    id: 'SLODefinitionResponse',
-    description: 'The SLO definition, with its health when requested',
-    additionalProperties: true,
-  });
+const sloDefinitionResponseSchema = lazySchema(() =>
+  sloDefinitionSchema
+    .extend({
+      health: sloHealthSchema.optional(),
+    })
+    .meta({
+      id: 'SLODefinitionResponse',
+      description: 'The SLO definition, with its health when requested',
+      additionalProperties: true,
+    })
+);
 
 const findSloDefinitionsResponseSchema = lazySchema(() =>
   z

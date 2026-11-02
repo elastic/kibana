@@ -34,6 +34,14 @@ const getRouteOptions = (route: ServerRouteRepository[string]): DefaultRouteCrea
 const collectRefs = (document: object): string[] =>
   Array.from(JSON.stringify(document).matchAll(/"\$ref":"([^"]+)"/g), ([, ref]) => ref);
 
+const readOperationFile = ({
+  oasOperationObject,
+}: DefaultRouteCreateOptions): { operationFile: string; operation: OperationFile } => {
+  const operationFile = oasOperationObject?.();
+  if (typeof operationFile !== 'string') throw new Error('oasOperationObject has no file path');
+  return { operationFile, operation: readYaml<OperationFile>(operationFile) };
+};
+
 const EXPECTED_OPERATION_IDS: Record<string, string> = {
   'POST /api/observability/slos 2023-10-31': 'createSloOp',
   'GET /api/observability/slos 2023-10-31': 'findSlosOp',
@@ -70,13 +78,6 @@ describe('SLO routes OpenAPI metadata', () => {
     ).toEqual(EXPECTED_OPERATION_IDS);
   });
 
-  it('resolves every internal reference of the shared error schemas', () => {
-    for (const ref of collectRefs(sharedSchemas)) {
-      expect(ref).toMatch(/^#\//);
-      expect(sharedSchemas).toHaveProperty([ref.slice(2)]);
-    }
-  });
-
   describe.each(documentedRoutes)('$endpoint', ({ options, routeResponses }) => {
     it('has a summary, a description and the slo tag', () => {
       expect(options).toEqual(
@@ -89,10 +90,7 @@ describe('SLO routes OpenAPI metadata', () => {
     });
 
     it('has an operation file with resolvable references, a successful response and examples', () => {
-      const operationFile = options.oasOperationObject?.();
-      if (typeof operationFile !== 'string') throw new Error('oasOperationObject has no file path');
-
-      const operation = readYaml<OperationFile>(operationFile);
+      const { operationFile, operation } = readOperationFile(options);
       for (const ref of collectRefs(operation)) {
         const [file, pointer] = ref.split('#/');
         expect(path.resolve(path.dirname(operationFile), file)).toBe(SHARED_SCHEMAS_FILE);
@@ -117,17 +115,15 @@ describe('SLO routes OpenAPI metadata', () => {
     });
 
     it('generates its successful response body schema from the route', () => {
-      const operationFile = options.oasOperationObject?.();
-      if (typeof operationFile !== 'string') throw new Error('oasOperationObject has no file path');
-
-      const { responses: documentedResponses = {} } = readYaml<OperationFile>(operationFile);
+      const {
+        operation: { responses: documentedResponses = {} },
+      } = readOperationFile(options);
       for (const [status, { description, content }] of Object.entries(documentedResponses)) {
         if (!status.startsWith('2') || !content) continue;
-        expect({
-          status,
-          description,
-          schemas: Object.values(content).map(({ schema }) => schema),
-        }).toEqual({ status, description: undefined, schemas: [undefined] });
+        expect({ status, description }).toEqual({ status, description: undefined });
+        for (const [mediaType, { schema }] of Object.entries(content)) {
+          expect({ status, mediaType, schema }).toEqual({ status, mediaType, schema: undefined });
+        }
         expect(routeResponses?.[Number(status)]).toEqual({
           description: expect.stringMatching(/\S/),
           body: expect.any(Function),

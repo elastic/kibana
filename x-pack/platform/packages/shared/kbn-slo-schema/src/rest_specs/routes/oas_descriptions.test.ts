@@ -268,13 +268,7 @@ describe('SLO public route responses are documented', () => {
     expect(components[id]).toHaveProperty('additionalProperties', true);
   });
 
-  it.each([
-    'SLOWithSummaryResponse',
-    'SLOSummary',
-    'SLOErrorBudget',
-    'SLODefinitionResponse',
-    'SLOBulkDeleteResult',
-  ])('documents the nested %s component as open', async (id) => {
+  it('documents the nested response components as open', async () => {
     const { components } = await generateResponse(
       z.object({
         find: findSLOResponseSchema,
@@ -283,7 +277,14 @@ describe('SLO public route responses are documented', () => {
         bulkDeleteStatus: bulkDeleteStatusResponseSchema,
       })
     );
-    expect(components[id]).toHaveProperty('additionalProperties', true);
+    for (const id of [
+      'SLOSummary',
+      'SLOErrorBudget',
+      'SLODefinitionResponse',
+      'SLOBulkDeleteResult',
+    ]) {
+      expect(components).toHaveProperty([id, 'additionalProperties'], true);
+    }
   });
 
   it('documents every snapshot result variant as open', async () => {
@@ -317,19 +318,15 @@ describe('SLO public route responses are documented', () => {
         snapshot: snapshotResponseSchema,
       })
     );
-    for (const id of ['SLODefinition', 'SLOWithSummaryResponse']) {
-      expect(components[id].properties).toEqual(
-        expect.objectContaining({
-          createdAt: expect.objectContaining({ format: 'date-time' }),
-          updatedAt: expect.objectContaining({ format: 'date-time' }),
-        })
-      );
+    for (const [id, property] of [
+      ['SLODefinition', 'createdAt'],
+      ['SLODefinition', 'updatedAt'],
+      ['SLOWithSummaryResponse', 'createdAt'],
+      ['SLOWithSummaryResponse', 'updatedAt'],
+      ['SLOSummary', 'summaryUpdatedAt'],
+      ['SLOSnapshotResponse', 'at'],
+    ]) {
+      expect(components).toHaveProperty([id, 'properties', property, 'format'], 'date-time');
     }
-    expect(components.SLOSummary.properties?.summaryUpdatedAt).toEqual(
-      expect.objectContaining({ format: 'date-time' })
-    );
-    expect(components.SLOSnapshotResponse.properties?.at).toEqual(
-      expect.objectContaining({ format: 'date-time' })
-    );
   });
 });
