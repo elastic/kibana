@@ -30,6 +30,20 @@ describe('builtinWorkflowInputDefinitions', () => {
     expect(schema.properties?.rules?.type).toBe('object');
   });
 
+  it('requires name and grouping_fields on every alertingV2NotificationGroup rule value', () => {
+    const ruleValue =
+      builtinWorkflowInputDefinitions.alertingV2NotificationGroup.properties?.rules
+        ?.additionalProperties;
+    if (ruleValue == null || typeof ruleValue === 'boolean') {
+      throw new Error('expected rules.additionalProperties to be a value schema');
+    }
+    expect(ruleValue.required).toEqual(['name', 'grouping_fields']);
+    expect(ruleValue.properties?.grouping_fields).toMatchObject({
+      type: 'array',
+      items: { type: 'string' },
+    });
+  });
+
   it('registers securityAlertAnalysisCallerAlerts as a bounded alert-document array', () => {
     const schema = builtinWorkflowInputDefinitions.securityAlertAnalysisCallerAlerts;
     expect(schema.type).toBe('array');

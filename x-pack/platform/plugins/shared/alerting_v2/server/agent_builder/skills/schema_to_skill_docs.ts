@@ -1185,6 +1185,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '- Top-level fields: `{{ inputs.payload.<field> }}`',
     '- Alert iteration: `{% for alert in inputs.payload.alerts %}{{ alert.<field> }}{% endfor %}`',
     '- Rule metadata: `{{ inputs.payload.rules[alert.rule_id].name }}`',
+    '- Rule grouping fields: `{{ inputs.payload.rules[alert.rule_id].grouping_fields | join: ", " }}` (empty when the rule has no grouping; values are under `alert.data`)',
     '- Alert details link: `{{ alert.alert_url }}` (absolute URL; include it in every notification)',
     '',
     '### Test notifications (`execution.isTestRun`)',

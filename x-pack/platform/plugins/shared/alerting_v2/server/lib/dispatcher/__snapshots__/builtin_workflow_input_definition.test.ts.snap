@@ -101,6 +101,13 @@ Object {
       "additionalProperties": Object {
         "additionalProperties": false,
         "properties": Object {
+          "grouping_fields": Object {
+            "description": "Fields the rule groups its alerts by (the rule \`grouping.fields\`). Empty when the rule has no grouping. Values for an alert are under \`alert.data\`.",
+            "items": Object {
+              "type": "string",
+            },
+            "type": "array",
+          },
           "name": Object {
             "description": "Display name of the rule",
             "type": "string",
@@ -108,10 +115,11 @@ Object {
         },
         "required": Array [
           "name",
+          "grouping_fields",
         ],
         "type": "object",
       },
-      "description": "Rule metadata keyed by rule id. Each value contains rule metadata (e.g. \`{ name }\`) for a rule referenced by the alerts. Access via \`rules[alert.rule_id].name\`.",
+      "description": "Rule metadata keyed by rule id. Each value contains \`{ name, grouping_fields }\` for a rule referenced by the alerts. Access via \`rules[alert.rule_id].name\`.",
       "type": "object",
     },
   },

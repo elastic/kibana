@@ -98,6 +98,7 @@ export interface Rule {
   spaceId: string;
   name: string;
   routingTags: string[];
+  groupingFields: string[];
 }
 
 export interface PolicyMatcherAttributes {
@@ -145,7 +146,10 @@ export interface ActionGroup {
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
-export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'>;
+export interface ActionPolicyWorkflowPayloadRule {
+  name: string;
+  grouping_fields: string[];
+}
 
 export type ActionPolicyWorkflowPayloadAlert = Alert;
 

@@ -64,9 +64,21 @@ const shareGroupingValues = (alerts: Alert[], policy: ActionPolicy, suffix: stri
 };
 
 /**
+ * Rule grouping fields name columns under `alert.data`, so a `per_field` policy's `data.*` fields
+ * map to placeholder rule grouping fields without the `data.` prefix.
+ */
+const toRuleGroupingFields = (policy: ActionPolicy): string[] =>
+  policy.grouping.mode === 'per_field'
+    ? policy.grouping.fields
+        .filter((field) => field.startsWith(DATA_FIELD_PREFIX))
+        .map((field) => field.slice(DATA_FIELD_PREFIX.length))
+    : [];
+
+/**
  * Builds placeholder rules and alerts for a policy, from its configuration alone. The rules carry
- * the policy routing tags, so the alerts pass the dispatcher routing-tag check. Deterministic for
- * a seed, apart from `last_event_timestamp`, which is `now`.
+ * the policy routing tags, so the alerts pass the dispatcher routing-tag check, and the `data.*`
+ * fields of a `per_field` policy as grouping fields. Deterministic for a seed, apart from
+ * `last_event_timestamp`, which is `now`.
  */
 export const createSyntheticScenario = ({
   policy,
@@ -79,12 +91,14 @@ export const createSyntheticScenario = ({
   const alertCount = policy.grouping.mode === 'per_alert' ? 1 : DEFAULT_AGGREGATED_ALERT_COUNT;
   const ruleCount = Math.min(alertCount, MAX_PLACEHOLDER_RULES);
   const routingTags = [...(policy.matcher?.tags ?? [])];
+  const groupingFields = toRuleGroupingFields(policy);
 
   const rules: Rule[] = Array.from({ length: ruleCount }, (_, index) => ({
     id: `${TEST_ID_PREFIX}rule-${index + 1}-${randomHex(random)}`,
     spaceId,
     name: `Test rule ${index + 1}`,
     routingTags,
+    groupingFields,
   }));
 
   const severity = SEVERITY_LEVELS[Math.floor(random() * SEVERITY_LEVELS.length)];
