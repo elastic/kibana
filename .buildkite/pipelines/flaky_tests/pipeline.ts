@@ -63,7 +63,7 @@ const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-st
 /**
  * Cypress group steps use `n2-4-virt` for `defend_workflows` suites. Command steps inherit the same
  * defaults unless `agentQueue` / `diskSizeGb` are set on the config entry. `diskSizeGb: undefined`
- * uses the agent image default; set a number to override it.
+ * uses `DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb`; set a number to override it.
  */
 function defaultCypressFlakyAgentOptions(pathHint: string): {
   agentQueue: string;

@@ -27,7 +27,7 @@ import { PrebootService } from '@kbn/core-preboot-server-internal';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
-import { MetricsService } from '@kbn/core-metrics-server-internal';
+import { EventLoopWatchdogService, MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
@@ -72,6 +72,7 @@ import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { UserStorageService } from '@kbn/core-user-storage-server-internal';
+import { setLazyConfigSchemaDisabled } from '@kbn/config-schema';
 import { setLazySchemaDisabled } from '@kbn/zod';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
@@ -98,6 +99,7 @@ export class Server {
   private readonly environment: EnvironmentService;
   private readonly node: NodeService;
   private readonly metrics: MetricsService;
+  private readonly eventLoopWatchdog: EventLoopWatchdogService;
   private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
@@ -128,6 +130,8 @@ export class Server {
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
   private nodeRoles?: NodeRoles;
+  private nodeRoleNames?: readonly string[];
+  private readonly serviceVersion: string;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -138,12 +142,12 @@ export class Server {
   ) {
     const constructorStartUptime = performance.now();
 
-    const serviceVersion =
+    this.serviceVersion =
       env.packageInfo.buildFlavor === 'serverless'
         ? env.packageInfo.buildShaShort
         : env.packageInfo.version;
     this.loggingSystem.setGlobalContext({
-      service: { version: serviceVersion, type: 'kibana', state: 'initializing' },
+      service: { version: this.serviceVersion, type: 'kibana', state: 'initializing' },
     });
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
@@ -164,6 +168,7 @@ export class Server {
     this.environment = new EnvironmentService(core);
     this.node = new NodeService(core);
     this.metrics = new MetricsService(core);
+    this.eventLoopWatchdog = new EventLoopWatchdogService(core);
     this.status = new StatusService(core);
     this.coreApp = new CoreAppsService(core);
     this.httpRateLimiter = new HttpRateLimiterService();
@@ -229,10 +234,11 @@ export class Server {
     });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
     this.nodeRoles = nodePreboot.roles;
+    this.nodeRoleNames = nodePreboot.roleNames;
 
-    // Apply the `disableLazyZodSchemas` static override for `@kbn/zod` before plugin
-    // discovery so that `lazySchema` calls evaluated at plugin-module-load time observe it.
-    await this.#applyLazyZodSchemaOverride();
+    // Apply the `disableLazyZodSchemas` / `disableLazyConfigSchemas` static overrides before plugin
+    // discovery so that schemas evaluated at plugin-module-load time observe them.
+    await this.#applyLazySchemaOverrides();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
@@ -435,6 +441,15 @@ export class Server {
       metrics: metricsSetup,
       coreUsageData: coreUsageDataSetup,
       loggingSystem: this.loggingSystem,
+    });
+
+    if (!this.nodeRoleNames) {
+      throw new Error('Node roles are only known after preboot');
+    }
+    await this.eventLoopWatchdog.setup({
+      status: statusSetup,
+      nodeRoles: this.nodeRoleNames,
+      serviceVersion: this.serviceVersion,
     });
 
     const customBrandingSetup = this.customBranding.setup();
@@ -647,6 +662,7 @@ export class Server {
     });
 
     const featureFlagsStart = this.featureFlags.start();
+    this.eventLoopWatchdog.start({ featureFlags: featureFlagsStart });
     const pubsubStart = this.pubsub.start();
 
     const pricingStart = this.pricing.start();
@@ -706,6 +722,7 @@ export class Server {
     await this.uiSettings.stop();
     await this.rendering.stop();
     await this.metrics.stop();
+    await this.eventLoopWatchdog.stop();
     await this.status.stop();
     await this.logging.stop();
     await this.customBranding.stop();
@@ -741,14 +758,17 @@ export class Server {
     }
   }
 
-  async #applyLazyZodSchemaOverride() {
+  async #applyLazySchemaOverrides() {
     const featureFlagsCfg = await firstValueFrom(
       this.configService.atPath<{ overrides?: Record<string, unknown> }>('feature_flags')
     );
-    const override = featureFlagsCfg.overrides?.disableLazyZodSchemas;
+    const { disableLazyZodSchemas, disableLazyConfigSchemas } = featureFlagsCfg.overrides ?? {};
 
-    if (typeof override === 'boolean') {
-      setLazySchemaDisabled(override);
+    if (typeof disableLazyZodSchemas === 'boolean') {
+      setLazySchemaDisabled(disableLazyZodSchemas);
+    }
+    if (typeof disableLazyConfigSchemas === 'boolean') {
+      setLazyConfigSchemaDisabled(disableLazyConfigSchemas);
     }
   }
 

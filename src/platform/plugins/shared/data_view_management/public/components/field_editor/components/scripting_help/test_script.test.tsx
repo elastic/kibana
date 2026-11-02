@@ -71,7 +71,8 @@ describe('TestScript', () => {
     renderTestScript(executeScript);
 
     expect(await screen.findByText("There's an error in your script")).toBeVisible();
-    const preview = screen.getByTestId('scriptedFieldPreview');
+    // The callout's `announceOnMount` live region can render a second copy of the children
+    const [preview] = screen.getAllByTestId('scriptedFieldPreview');
     expect(preview).toHaveTextContent('search_phase_execution_exception');
     expect(preview).toHaveTextContent('compile error');
   });

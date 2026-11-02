@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 
@@ -37,6 +37,14 @@ export interface InferenceFeatureConfig {
    * endpoints hidden.
    */
   allowTemplateRequiredModels?: boolean;
+  /**
+   * When true, the feature is not shown on the Feature settings page, so admins
+   * can't change its models there. Its models resolve the same way as for visible
+   * features: its `recommendedEndpoints` (or the nearest parent's) with their
+   * parameters, and the global default model and the feature specific models
+   * toggle still apply. Set `ignoreGlobalDefault` to skip the global default model.
+   */
+  isHidden?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;
@@ -109,6 +117,7 @@ export interface SearchInferenceEndpointsPluginStartDependencies {
 
 export interface SearchInferenceEndpointsPluginSetupDependencies {
   features: FeaturesPluginSetup;
+  inference: InferenceServerSetup;
 }
 
 export * from '../common/types';

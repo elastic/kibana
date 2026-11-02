@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';

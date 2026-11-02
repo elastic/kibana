@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
-import { InvestigationStatusBadge } from '../investigation/investigation_status_badge';
+import { InvestigationStatusBadge } from '../components/entities/investigation/investigation_status_badge';
 import { toInvestigationStatus } from '../common/investigation_progress_status';
 import {
   getStatusColor,
