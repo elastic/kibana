@@ -34,7 +34,7 @@ import {
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
 import { EventOriginActorToken } from '../lib/event_origin/token';
-import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
+import { RulesClientEventOriginToken, RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
@@ -135,6 +135,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(InternalRulesClient).toSelf().inSingletonScope();
   bind(EventOriginActorToken).toConstantValue('user');
   bind(RulesClientOptionsToken).toConstantValue({});
+  // Fold the request-scope actor and the caller's client options into the single
+  // value the rules client injects as its event origin.
+  bind(RulesClientEventOriginToken)
+    .toResolvedValue(
+      (actor, options) => ({ actor, options }),
+      [EventOriginActorToken, RulesClientOptionsToken]
+    )
+    .inRequestScope();
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toResolvedValue(

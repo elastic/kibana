@@ -182,8 +182,7 @@ describe('RulesClient', () => {
       ruleEventPublisher,
       loggerService,
       artifactTypeRegistry,
-      'user',
-      rulesClientOptions
+      { actor: 'user', options: rulesClientOptions }
     );
   }
 

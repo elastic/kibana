@@ -36,7 +36,6 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { toEventOrigin } from '../event_origin/event_origin';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
@@ -59,7 +58,6 @@ import {
   getRuleExecutorTaskId,
 } from '../rule_executor/schedule';
 import type { AlertingPublisherContext } from '../events/domain_events';
-import { EventOriginActorToken } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -79,10 +77,10 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
-import type { CreateRulesClientOptions } from './types';
+import type { RulesClientEventOrigin } from './types';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import { RulesClientOptionsToken } from './tokens';
+import { RulesClientEventOriginToken } from './tokens';
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
@@ -239,10 +237,12 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginActorToken) actor: EventOriginActor,
-    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
+    @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin
   ) {
-    this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };
+    this.eventContext = {
+      request,
+      origin: toEventOrigin(eventOrigin.actor, request, eventOrigin.options),
+    };
     this.config = pluginConfigAccessor.get<PluginConfig>();
     this.logger = loggerService.forSubsystem('rulesClient');
   }
