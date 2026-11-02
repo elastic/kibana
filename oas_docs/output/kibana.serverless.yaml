@@ -40991,7 +40991,7 @@ paths:
               - desc
               - asc
             type: string
-        - description: 'A KQL query string to filter results. Filtering is restricted to the following fields: `name`, `namespace`, `package.name`.'
+        - description: 'A KQL query string to filter results. Filtering is restricted to the following fields: `name`, `namespace`, `package.name`, `onboarding_deployment_id`.'
           in: query
           name: kuery
           required: false
@@ -56389,7 +56389,7 @@ paths:
               - desc
               - asc
             type: string
-        - description: 'A KQL query string to filter results. Filtering is restricted to the following fields: `name`, `namespace`, `package.name`.'
+        - description: 'A KQL query string to filter results. Filtering is restricted to the following fields: `name`, `namespace`, `package.name`, `onboarding_deployment_id`.'
           in: query
           name: kuery
           required: false
