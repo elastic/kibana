@@ -87,7 +87,7 @@ node scripts/evals start --suite agent-builder --concurrency 8
 
 > **Rate limits and transient failures:** Concurrent LLM calls are roughly workers × concurrency. Connectors such as EIS and OpenRouter enforce requests-per-minute limits, so a high `--concurrency` can cause 429 (rate limit) errors. If they occur, reduce `--concurrency`.
 >
-> The eval HTTP handler already retries a transient failure twice per request (exponential backoff with jitter, never sooner than a `Retry-After` the server sent): a 429, 503 or 504 response, and a request that never produced an HTTP response at all (a transport failure such as `fetch failed`). Set `KBN_EVALS_HTTP_RETRIES` to change that budget for every kbn-evals suite — `0` disables retries, a higher number retries more.
+> The eval HTTP handler already retries a transient failure twice per request (exponential backoff with jitter, never sooner than a `Retry-After` the server sent): a 429, 503 or 504 response on any route, and a connection that failed or closed before any HTTP response (a transport failure such as `fetch failed`). A transport failure is only re-sent for `GET`/`HEAD` and `/internal/inference/*` requests; other `POST`s (workflow runs, writes) may already have taken effect, so they fail on the first attempt. Aborted requests are never retried. Set `KBN_EVALS_HTTP_RETRIES` to change that budget for every kbn-evals suite — `0` disables retries, a higher number retries more.
 
 #### Advanced options
 
