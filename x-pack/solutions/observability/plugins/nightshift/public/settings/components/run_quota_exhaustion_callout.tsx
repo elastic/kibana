@@ -48,7 +48,8 @@ export const RunQuotaExhaustionCallout = ({
         size="s"
         data-test-subj="nightshiftRunLimitsBanner"
         title={i18n.translate('xpack.nightshift.settings.runLimits.exhaustionTitle', {
-          defaultMessage: 'Automations reached a daily run limit for this deployment.',
+          defaultMessage: 'Automations reached a daily run limit of {limit} for this deployment',
+          values: { limit: limits[exhaustedGroups[0]] },
         })}
         text={i18n.translate('xpack.nightshift.settings.runLimits.exhaustionDescription', {
           defaultMessage:

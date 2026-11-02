@@ -31,6 +31,7 @@ const setup = ({
   runAs = AGENT_ACCOUNT,
   enabled = true,
   installError,
+  automations,
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
@@ -39,7 +40,17 @@ const setup = ({
   runAs?: string;
   enabled?: boolean;
   installError?: Error;
+  /** Automation saved objects in the space; omit to run without automations. */
+  automations?: Array<{ id: string; attributes: Record<string, unknown> }>;
 } = {}) => {
+  const automationsSoClient = {
+    createPointInTimeFinder: jest.fn(() => ({
+      async *find() {
+        yield { saved_objects: automations ?? [] };
+      },
+      close: jest.fn(),
+    })),
+  };
   const esClient = {
     security: {
       hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: canManageSecurity }),
@@ -64,14 +75,17 @@ const setup = ({
   const workflowsExtensions = {
     getClient: jest.fn().mockResolvedValue({ managedWorkflows }),
   } as unknown as WorkflowsExtensionsServerPluginStart;
-  const getWorkflow = jest.fn(async () => ({
+  const getWorkflow = jest.fn(async (_id: string) => ({
     enabled: state.enabled,
     valid: true,
     definition: { settings: { run_as: state.runAs } },
   }));
-  const updateWorkflow = jest.fn(async (_id: string, { enabled: next }: { enabled: boolean }) => {
-    state.enabled = next;
-  });
+  const updateWorkflow = jest.fn(
+    async (_id: string, patch: { enabled?: boolean; yaml?: string }) => {
+      if (patch.enabled !== undefined) state.enabled = patch.enabled;
+      return {};
+    }
+  );
   const workflowsManagement = {
     management: { getWorkflow, updateWorkflow },
   } as unknown as WorkflowsServerPluginSetup;
@@ -98,6 +112,7 @@ const setup = ({
     workflowsManagement,
     getInstalledWorkflowState,
     spaces,
+    getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
     isServerless,
     logger: loggingSystemMock.createLogger(),
   });
@@ -284,5 +299,101 @@ describe('createInvestigatorServiceAccountService', () => {
 
     await expect(service.disable(request, SPACE_ID)).rejects.toThrow(/manage_security/);
     expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
+  describe('automations', () => {
+    const automation = (id: string) => ({
+      id,
+      attributes: {
+        name: id,
+        automationType: 'custom',
+        isEnabled: true,
+        workflowId: `wf-${id}`,
+        trigger: { rows: [{ kind: 'alert' }] },
+        execution: {},
+        completions: [],
+        runtime: {},
+      },
+    });
+
+    it('binds existing automations to the automations account on setup', async () => {
+      const { service, getWorkflow, updateWorkflow } = setup({
+        automations: [automation('a-1'), automation('a-2')],
+      });
+      getWorkflow.mockImplementation(async (id: string) =>
+        id === 'wf-a-2'
+          ? {
+              enabled: true,
+              valid: true,
+              definition: { settings: { run_as: AUTOMATIONS_ACCOUNT } },
+            }
+          : { enabled: true, valid: true, definition: { settings: { run_as: AGENT_ACCOUNT } } }
+      );
+
+      await service.enable(request, SPACE_ID, IDS);
+
+      // a-2 is already bound; only a-1 is rewritten.
+      expect(updateWorkflow).toHaveBeenCalledTimes(1);
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        'wf-a-1',
+        { yaml: expect.stringContaining(`run_as: ${AUTOMATIONS_ACCOUNT}`) },
+        SPACE_ID,
+        request
+      );
+    });
+
+    it('keeps setting the space up when an automation cannot be bound, and reports it', async () => {
+      const { service, updateWorkflow } = setup({
+        automations: [automation('a-1'), automation('a-2')],
+      });
+      updateWorkflow.mockImplementation(async (workflowId: string) => {
+        if (workflowId === 'wf-a-1') throw new Error('invalid');
+        return {};
+      });
+
+      await expect(service.enable(request, SPACE_ID, IDS)).resolves.toMatchObject({
+        bound: true,
+        unboundAutomations: [{ id: 'a-1', name: 'a-1', error: 'invalid' }],
+      });
+    });
+
+    it('reports no unbound automations when every one of them binds', async () => {
+      const { service } = setup({ automations: [automation('a-1')] });
+
+      await expect(service.enable(request, SPACE_ID, IDS)).resolves.not.toHaveProperty(
+        'unboundAutomations'
+      );
+    });
+
+    it('runs automations as the automations account', async () => {
+      const { service } = setup();
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).resolves.toBe(
+        AUTOMATIONS_ACCOUNT
+      );
+    });
+
+    it('leaves automations unbound while service accounts are off', async () => {
+      const { service, esClient } = setup({ serviceAccountsEnabled: false });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).resolves.toBeUndefined();
+      expect(esClient.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('refuses automations in a space that is not set up', async () => {
+      const { service } = setup({ runAs: '' });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+    });
+
+    it('refuses callers without manage_security', async () => {
+      const { service } = setup({ canManageSecurity: false });
+
+      await expect(service.resolveAutomationRunAs(request, SPACE_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+    });
   });
 });

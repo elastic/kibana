@@ -113,6 +113,11 @@ triggers:
           description: >
             The investigation (Agent Builder conversation) to run in. The start API always sets
             it; a run without it starts a new investigation whose id is the workflow execution ID.
+        timeout_seconds:
+          type: number
+          description: >
+            Upper bound the caller asked for. The space's entry point caps its investigation step
+            with it and hands the inputs on unchanged, so this run accepts it and ignores it.
       required:
         - message
       additionalProperties: false
