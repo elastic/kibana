@@ -16,7 +16,7 @@ export const NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW_ID =
 export const NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW = {
   id: NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  version: 2,
   billable: false,
   yaml: FAILURE_SWEEP_YAML,
   management: { lifecycle: 'static', versionStrategy: 'auto', enablement: 'restorable' },

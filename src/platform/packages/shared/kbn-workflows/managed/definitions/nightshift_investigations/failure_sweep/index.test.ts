@@ -23,8 +23,8 @@ describe('managed investigation failure sweep', () => {
     const definition = parse(NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW.yaml);
     expect(WorkflowSchema.parse(definition)).toMatchObject({
       enabled: false,
-      settings: { timeout: '50s', concurrency: { strategy: 'drop', max: 1 } },
-      triggers: expect.arrayContaining([{ type: 'scheduled', with: { every: '1m' } }]),
+      settings: { timeout: '4m', concurrency: { strategy: 'drop', max: 1 } },
+      triggers: expect.arrayContaining([{ type: 'scheduled', with: { every: '5m' } }]),
     });
   });
 });

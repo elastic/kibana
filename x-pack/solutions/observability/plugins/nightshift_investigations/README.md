@@ -288,7 +288,9 @@ Workflows scheduling authorization and retains that scheduler identity. Installa
 logged without failing investigation creation; a subsequent enable/start attempts setup again.
 Existing spaces acquire the sweep on their next onboarding enable or investigation creation.
 
-The sweep runs every minute with a 50-second workflow timeout and drops overlapping runs. It reads
+The sweep runs every five minutes with a four-minute workflow timeout and drops overlapping runs.
+This budget covers execution reads, context persistence, and notifications; the sweep never invokes
+an agent or waits for an investigation to finish. It reads
 permission-filtered, non-test `failed` and `timed_out` executions of the investigation workflow and
 its managed copies, then revalidates each source execution and investigation binding. It never
 classifies running, waiting, or queued work as terminal. Recovery still owns that decision.
@@ -297,7 +299,8 @@ A history pass starts at the sweep copy's creation time and has a fixed upper co
 bound. Each run scans at most 100 records by ID and saves its cursor in normal workflow output;
 the next completed sweep resumes that pass. Finishing a pass resets the cursor so retained failures,
 late recovery writes, and temporary reporting errors are revisited. During a large history pass,
-an additional page of at most 100 recent failures gets priority. Reporting latency is normally the
+an additional page of at most 100 failures from the last ten minutes gets priority, overlapping
+consecutive runs to tolerate scheduling and persistence delays. Reporting latency is normally the
 schedule interval, but depends on scheduling and backlog volume. Workflows history retention bounds
 catch-up. Failures completed before installation are not backfilled.
 

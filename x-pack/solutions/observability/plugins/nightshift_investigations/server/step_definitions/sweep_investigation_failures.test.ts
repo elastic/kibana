@@ -13,10 +13,8 @@ import {
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { reportUnsuccessfulInvestigation } from '../lib/report_unsuccessful_investigation';
-import {
-  FAILURE_SWEEP_BATCH_SIZE,
-  sweepInvestigationFailuresStepDefinition,
-} from './sweep_investigation_failures';
+import { FAILURE_SWEEP_BATCH_SIZE } from '../lib/investigation_failure_sweep';
+import { sweepInvestigationFailuresStepDefinition } from './sweep_investigation_failures';
 
 jest.mock('../lib/report_unsuccessful_investigation', () => ({
   reportUnsuccessfulInvestigation: jest.fn(),
@@ -166,6 +164,44 @@ describe('nightshift.sweepInvestigationFailures', () => {
       sortField: 'finishedAt',
       sortOrder: 'desc',
     });
+  });
+
+  it('keeps the history cursor when reporting a recent failure exhausts the sweep budget', async () => {
+    const { management, run, controller } = setup();
+    const checkpoint = { through: '2026-10-29T10:00:00.000Z', after_id: 'previous-history-run' };
+    management.getWorkflowExecutions.mockResolvedValue({ results: [{ id: 'previous-sweep' }] });
+    management.getWorkflowExecution.mockResolvedValue({
+      context: { output: { checked: 100, errors: 0, checkpoint } },
+    });
+    management.searchExecutionsView
+      .mockResolvedValueOnce({ results: [candidate('unprocessed-history-run')] })
+      .mockResolvedValueOnce({ results: [candidate('recent-run')] });
+    report.mockImplementationOnce(async () => {
+      controller.abort();
+    });
+
+    expect(await run()).toEqual({ output: { checked: 1, errors: 0, checkpoint } });
+    expect(report).toHaveBeenCalledTimes(1);
+    expect(report.mock.calls[0][1].executionId).toBe('recent-run');
+  });
+
+  it('overlaps recent-failure windows across five-minute scheduled runs', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-02T12:00:00.000Z') });
+    try {
+      const { management, run } = setup();
+      management.searchExecutionsView.mockResolvedValue({
+        results: Array.from({ length: FAILURE_SWEEP_BATCH_SIZE }, (_, index) =>
+          candidate(`run-${index}`)
+        ),
+      });
+      await run();
+      expect(management.searchExecutionsView.mock.calls[1][0]).toMatchObject({
+        finishedAfter: '2026-11-02T11:50:00.000Z',
+        finishedBefore: '2026-11-02T12:00:00.000Z',
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('does not report production investigations from a test execution of the sweep', async () => {
