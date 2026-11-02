@@ -54,7 +54,7 @@ const getTopologyRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const sourceIds = await filterReadableSourceIds(
-      await requestedOrAllSourceIds(params.query?.sourceIds, sourcesClient),
+      await requestedOrAllSourceIds(params?.query?.sourceIds, sourcesClient),
       sourcesClient
     );
     const topologySnapshotClient = await getTopologySnapshotClient();
