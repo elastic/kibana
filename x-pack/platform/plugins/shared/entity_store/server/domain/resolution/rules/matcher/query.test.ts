@@ -12,6 +12,7 @@ import {
   buildCandidateValuesQuery,
   buildMatchGroupsQuery,
   buildMatcherValidationQuery,
+  buildNewerEntityQuery,
   buildWatermarkQuery,
 } from './query';
 
@@ -296,6 +297,22 @@ describe('ES|QL matcher query builder', () => {
       expect(query).toContain(inClause);
       expect(query.indexOf(inClause)).toBeLessThan(query.indexOf('| STATS'));
       expect(query).toContain('| LIMIT 2');
+      await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
+    });
+  });
+
+  describe('buildNewerEntityQuery', () => {
+    it('looks for any newer entity, resolved or not', async () => {
+      const query = buildNewerEntityQuery({
+        index: INDEX,
+        spec: EMAIL,
+        watermark: '2026-08-01T00:00:00.000Z',
+      });
+      expect(query).toContain(
+        'entity.lifecycle.first_seen > TO_DATETIME("2026-08-01T00:00:00.000Z")'
+      );
+      expect(query).not.toContain('resolved_to IS NULL');
+      expect(query).toContain('| LIMIT 1');
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
   });

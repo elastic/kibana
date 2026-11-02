@@ -285,6 +285,31 @@ export const buildMatchGroupsQuery = ({
 };
 
 /**
+ * Any entity this rule would consider that is newer than the watermark, resolved
+ * or not. The group query counts a newer resolved entity as a new member, so the
+ * early exit must too.
+ */
+export const buildNewerEntityQuery = ({
+  index,
+  spec,
+  watermark,
+}: BuildWatermarkQueryParams): string => {
+  const { entityFilters, matchValueEval, matchValueFilters } = queryPartsFor(spec);
+  const newerThan = watermarkFilter(watermark);
+  const filters = newerThan ? [...entityFilters, newerThan] : entityFilters;
+
+  return [
+    NULLIFY_UNMAPPED_FIELDS_SETTING,
+    `FROM ${quote(index)}`,
+    `| WHERE ${filters.join('\n    AND ')}`,
+    `| EVAL ${MATCH_GROUP_COLUMNS.matchValue} = ${matchValueEval}`,
+    `| WHERE ${matchValueFilters.join('\n    AND ')}`,
+    `| KEEP ${MATCH_GROUP_COLUMNS.matchValue}`,
+    `| LIMIT 1`,
+  ].join('\n');
+};
+
+/**
  * Max `first_seen` among unresolved entities this rule would consider. Used as
  * the next watermark; omitted groups (n < 2) still advance it so unique values
  * are not re-scanned.
