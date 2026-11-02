@@ -93,7 +93,9 @@ export class WorkerCoordinatorBridge {
       context,
       es: {
         node: process.env.TM_POC_ES_NODE ?? 'http://localhost:9200',
-        username: process.env.TM_POC_ES_USER ?? 'elastic',
+        // kibana_system: the only stock user with allow_restricted_indices on
+        // the Kibana system indices (superuser cannot write them).
+        username: process.env.TM_POC_ES_USER ?? 'kibana_system',
         password: process.env.TM_POC_ES_PASS ?? 'changeme',
         apiKey: process.env.TM_POC_ES_API_KEY,
       },

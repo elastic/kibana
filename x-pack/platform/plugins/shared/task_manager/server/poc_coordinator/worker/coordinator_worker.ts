@@ -105,6 +105,12 @@ const createEsClient = (): ElasticsearchClient => {
   const { node, username, password, apiKey } = data.es;
   const client = new Client({
     node,
+    // Finding: .kibana_task_manager is a restricted system index. Even the
+    // elastic superuser cannot write it (superuser grants
+    // allow_restricted_indices: false); the coordinator must authenticate as
+    // kibana_system (allow_restricted_indices: true on Kibana system indices).
+    // The product-origin header suppresses system-index deprecation warnings.
+    headers: { 'x-elastic-product-origin': 'kibana' },
     ...(apiKey
       ? { auth: { apiKey } }
       : username && password
