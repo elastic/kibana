@@ -1306,5 +1306,180 @@ export default function (providerContext: FtrProviderContext) {
           .expect(404);
       });
     });
+
+    describe('package policy ownership', () => {
+      const PACKAGE = { name: 'filetest', title: 'For File Tests', version: '0.1.0' };
+      let agentPolicyId: string;
+      let packagePolicyIds: string[];
+      const deploymentIds: string[] = [];
+
+      const createPackagePolicy = async (name: string) => {
+        const { body } = await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name,
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [],
+            package: PACKAGE,
+          })
+          .expect(200);
+        return body.item.id as string;
+      };
+
+      const getOnboardingDeploymentId = async (packagePolicyId: string) => {
+        const { body } = await supertest
+          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .expect(200);
+        return body.item.onboarding_deployment_id ?? null;
+      };
+
+      // Like the onboarding flow: the deployment is created first, and records its package
+      // policies once they are deployed.
+      const createDeployment = async (policyIdsByInstance: Record<string, string>) => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['cloudtrail'],
+            agentPolicyIds: [agentPolicyId],
+          })
+          .expect(200);
+        deploymentIds.push(body.item.id);
+        await supertest
+          .put(`${BASE_URL}/${body.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ policyIdsByInstance })
+          .expect(200);
+        return body.item.id as string;
+      };
+
+      before(async () => {
+        const { body } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: `ownership-test-policy-${Date.now()}`, namespace: 'default' })
+          .expect(200);
+        agentPolicyId = body.item.id;
+      });
+
+      beforeEach(async () => {
+        packagePolicyIds = [
+          await createPackagePolicy(`ownership-test-1-${Date.now()}`),
+          await createPackagePolicy(`ownership-test-2-${Date.now()}`),
+        ];
+      });
+
+      afterEach(async () => {
+        while (deploymentIds.length) {
+          await supertest
+            .delete(`${BASE_URL}/${deploymentIds.pop()}`)
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        }
+        await supertest
+          .post('/api/fleet/package_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ packagePolicyIds, force: true })
+          .catch(() => {});
+      });
+
+      after(async () => {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .catch(() => {});
+      });
+
+      it('stamps the package policies a new deployment owns', async () => {
+        const deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[1])).to.equal(null);
+      });
+
+      it('stamps added policies and clears the stamp of removed ones on update', async () => {
+        const deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+
+        await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ policyIdsByInstance: { cloudtrail: packagePolicyIds[1] } })
+          .expect(200);
+
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(null);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[1])).to.equal(deploymentId);
+      });
+
+      it('does not take over a package policy owned by another deployment', async () => {
+        const firstDeploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+        await createDeployment({ cloudtrail: packagePolicyIds[0] });
+
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(firstDeploymentId);
+      });
+
+      it('keeps the stamp when the deployment is deleted', async () => {
+        const deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+
+        await supertest.delete(`${BASE_URL}/${deploymentId}`).set('kbn-xsrf', 'xxxx').expect(200);
+
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+      });
+
+      it('keeps the stamp across package policy updates that do not mention it', async () => {
+        const deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+
+        // Partial update
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ description: 'updated description' })
+          .expect(200);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+
+        // Full update
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `ownership-test-renamed-${Date.now()}`,
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [],
+            package: PACKAGE,
+          })
+          .expect(200);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+      });
+
+      it('does not accept the stamp in package policy requests', async () => {
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `ownership-test-stamped-${Date.now()}`,
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [],
+            package: PACKAGE,
+            onboarding_deployment_id: 'some-deployment',
+          })
+          .expect(400);
+
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ onboarding_deployment_id: 'some-deployment' })
+          .expect(400);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(null);
+      });
+    });
   });
 }

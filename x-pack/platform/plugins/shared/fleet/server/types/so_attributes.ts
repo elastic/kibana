@@ -189,6 +189,7 @@ export interface PackagePolicySOAttributes {
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
   package_agent_version_condition?: string;
   condition?: string | null;
+  onboarding_deployment_id?: string | null;
 }
 
 export interface OutputSoBaseAttributes {

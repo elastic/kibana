@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, isSavedObjectErrorResult } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
 
 import {
@@ -18,7 +22,14 @@ import type {
   CreateCloudOnboardingDeploymentInput,
   UpdateCloudOnboardingDeploymentInput,
 } from '../../common/types/models/cloud_onboarding_deployment';
-import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
+import type {
+  CloudOnboardingDeploymentSOAttributes,
+  PackagePolicySOAttributes,
+} from '../types/so_attributes';
+
+import { appContextService } from './app_context';
+import { auditLoggingService } from './audit_logging';
+import { getPackagePolicySavedObjectType } from './package_policy';
 
 const CLOUD_ONBOARDING_DEPLOYMENT_LIMIT = 100;
 // Distinct package names to count: far more than any provider's onboarding covers.
@@ -38,6 +49,16 @@ export interface ListCloudOnboardingDeploymentsOptions {
   page?: number;
   perPage?: number;
 }
+
+/**
+ * The package policies a deployment manages: one per package for managed integrations, plus the
+ * policy of each service instance.
+ */
+const getOwnedPackagePolicyIds = ({
+  packagePolicyIds,
+  policyIdsByInstance,
+}: Pick<CloudOnboardingDeploymentSOAttributes, 'packagePolicyIds' | 'policyIdsByInstance'>) =>
+  new Set([...(packagePolicyIds ?? []), ...Object.values(policyIdsByInstance ?? {})]);
 
 const MAX_UPDATE_ATTEMPTS = 5;
 const UPDATE_RETRY_BASE_DELAY_MS = 25;
@@ -69,6 +90,13 @@ class CloudOnboardingDeploymentService {
     const so = await soClient.create<CloudOnboardingDeploymentSOAttributes>(
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       attributes
+    );
+
+    await this.syncPackagePolicyOwnership(
+      soClient,
+      so.id,
+      new Set(),
+      getOwnedPackagePolicyIds(attributes)
     );
 
     return toDeployment(so);
@@ -218,24 +246,115 @@ class CloudOnboardingDeploymentService {
       if (description === null || description === '') delete attributes.description;
       if (namespace === null || namespace === '') delete attributes.namespace;
 
+      let so: SavedObject<CloudOnboardingDeploymentSOAttributes>;
       try {
-        const so = await soClient.create<CloudOnboardingDeploymentSOAttributes>(
+        so = await soClient.create<CloudOnboardingDeploymentSOAttributes>(
           CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
           attributes,
           { id, overwrite: true, references: existing.references, version: existing.version }
         );
-        return toDeployment(so);
       } catch (error) {
         if (!SavedObjectsErrorHelpers.isConflictError(error) || attempt >= MAX_UPDATE_ATTEMPTS) {
           throw error;
         }
         await sleepWithJitter(attempt);
+        continue;
       }
+
+      await this.syncPackagePolicyOwnership(
+        soClient,
+        id,
+        getOwnedPackagePolicyIds(existing.attributes),
+        getOwnedPackagePolicyIds(attributes)
+      );
+      return toDeployment(so);
     }
   }
 
+  // Deleting a deployment leaves its package policies stamped; deleting those policies along with
+  // the deployment is tracked in https://github.com/elastic/ingest-dev/issues/10251.
   public async delete(soClient: SavedObjectsClientContract, id: string): Promise<void> {
     await soClient.delete(CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE, id);
+  }
+
+  /**
+   * Stamps the package policies the deployment owns with its id, and clears the stamp from those it
+   * no longer owns. Every owned policy is checked, not only newly added ones, so a stamp that failed
+   * on an earlier write is retried. A policy stamped by another deployment is left untouched.
+   * Failures are logged and do not fail the deployment write: an unstamped policy stays visible and
+   * editable in Fleet.
+   */
+  private async syncPackagePolicyOwnership(
+    soClient: SavedObjectsClientContract,
+    deploymentId: string,
+    previousIds: Set<string>,
+    nextIds: Set<string>
+  ): Promise<void> {
+    const removedIds = [...previousIds].filter((policyId) => !nextIds.has(policyId));
+    const policyIds = [...nextIds, ...removedIds];
+    if (!policyIds.length) {
+      return;
+    }
+
+    const logger = appContextService.getLogger();
+    try {
+      const savedObjectType = await getPackagePolicySavedObjectType();
+      const { saved_objects: policies } = await soClient.bulkGet<PackagePolicySOAttributes>(
+        policyIds.map((policyId) => ({ type: savedObjectType, id: policyId }))
+      );
+
+      const updates: Array<SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>> = [];
+      for (const policy of policies) {
+        // Missing policies were deleted out-of-band; previous revisions are never stamped.
+        if (isSavedObjectErrorResult(policy) || policy.attributes.latest_revision === false) {
+          continue;
+        }
+        const current = policy.attributes.onboarding_deployment_id;
+        if (!nextIds.has(policy.id)) {
+          if (current === deploymentId) {
+            updates.push({
+              type: savedObjectType,
+              id: policy.id,
+              attributes: { onboarding_deployment_id: null },
+            });
+          }
+        } else if (current && current !== deploymentId) {
+          logger.warn(
+            `Package policy ${policy.id} is managed by cloud onboarding deployment ${current}, not stamping it with ${deploymentId}`
+          );
+        } else if (!current) {
+          updates.push({
+            type: savedObjectType,
+            id: policy.id,
+            attributes: { onboarding_deployment_id: deploymentId },
+          });
+        }
+      }
+      if (!updates.length) {
+        return;
+      }
+
+      const { saved_objects: results } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
+        updates
+      );
+      for (const result of results) {
+        if (isSavedObjectErrorResult(result)) {
+          logger.warn(
+            `Failed to update the onboarding deployment of package policy ${result.id}: ${result.error.message}`
+          );
+        } else {
+          auditLoggingService.writeCustomSoAuditLog({
+            action: 'update',
+            id: result.id,
+            savedObjectType,
+          });
+        }
+      }
+    } catch (error) {
+      logger.warn(
+        `Failed to sync package policies of cloud onboarding deployment ${deploymentId}: ${error.message}`
+      );
+    }
   }
 }
 
