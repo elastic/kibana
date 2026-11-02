@@ -61,6 +61,9 @@ import { handleInvestigationFailureStepDefinition } from './step_definitions/han
 import { renderSlackMessageStepDefinition } from './step_definitions/render_slack_message';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
+import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
+import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
+import { referenceFreeJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -88,6 +91,7 @@ import {
 } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
+import { getInvestigatorConnectorIds } from './agents/assistant/inherited_connectors';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
@@ -141,6 +145,7 @@ export class NightshiftInvestigationsPlugin
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private agenticInvestigations?: NightshiftInvestigationsStartDeps['agenticInvestigations'];
   private proposals?: NightshiftInvestigationsStartDeps['proposals'];
+  private evals?: NightshiftInvestigationsStartDeps['evals'];
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
@@ -194,6 +199,9 @@ export class NightshiftInvestigationsPlugin
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
     });
+    for (const judge of referenceFreeJudges) {
+      plugins.evals?.registerEvaluator(judge);
+    }
 
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     this.memoryEnabled = this.ctx.config.get().memory.enabled;
@@ -277,20 +285,27 @@ export class NightshiftInvestigationsPlugin
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
+        // Both agent types allow every configured telemetry connector; the investigator narrows
+        // the list per conversation in the sandbox workspace manager.
+        telemetryConfig: config.sandbox,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
-        logger: this.logger.get('custom_context'),
+        logger: this.logger.get('agent_types'),
       };
       registerInvestigationAgentType(plugins.agentBuilder, {
         ...nightshiftAgentOptions,
-        telemetryConfig: config.sandbox,
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
       if (plugins.sandbox?.isAvailable) {
-        registerAssistantAgentType(plugins.agentBuilder, nightshiftAgentOptions);
+        registerAssistantAgentType(plugins.agentBuilder, {
+          ...nightshiftAgentOptions,
+          // Types register in setup but resolve after start, so read the start contract lazily.
+          getInheritedConnectorIds: ({ request }) =>
+            getInvestigatorConnectorIds({ agentBuilder: this.agentBuilder, request }),
+        });
         this.assistantEnabled = true;
       }
 
@@ -398,6 +413,13 @@ export class NightshiftInvestigationsPlugin
         );
         plugins.workflowsExtensions.registerStepDefinition(
           followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          classifyOnlineEvalsRoundStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            isEvalsAvailable: () => this.evals !== undefined,
+            isPaused: createIsOnlineEvalsPaused(core.getStartServices),
+          })
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
@@ -617,6 +639,7 @@ export class NightshiftInvestigationsPlugin
     this.agentBuilder = plugins.agentBuilder;
     this.agenticInvestigations = plugins.agenticInvestigations;
     this.proposals = plugins.proposals;
+    this.evals = plugins.evals;
     this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;
@@ -787,6 +810,7 @@ export class NightshiftInvestigationsPlugin
         return client ? client.getInstalledWorkflowState(workflowId, spaceId) : null;
       },
       spaces: this.spaces,
+      getAutomationsSoClient: this.getAutomationsSoClient,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
     });
