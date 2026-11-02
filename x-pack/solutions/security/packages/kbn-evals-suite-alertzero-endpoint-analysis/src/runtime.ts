@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { randomUUID } from 'crypto';
-import type { Client } from '@elastic/elasticsearch';
+import { createHash, randomUUID } from 'crypto';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import { ExecutionStatus, isTerminalStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 import {
@@ -513,6 +513,80 @@ const CONSTITUENT_ALERTS_INDEX = '.alerts-security.alerts-default';
 const AD_ALERT_IDS_KEY = 'kibana.alert.attack_discovery.alert_ids';
 export const SEEDED_COMMAND = 'powershell.exe -EncodedCommand SQBFAFgA';
 
+const keyword = { type: 'keyword' } as const;
+const wildcard = { type: 'wildcard' } as const;
+type Properties = Record<string, estypes.MappingProperty>;
+const BASE_ENDPOINT_MAPPINGS: Properties = {
+  '@timestamp': { type: 'date' },
+  event: {
+    properties: {
+      id: keyword,
+      kind: keyword,
+      category: keyword,
+      type: keyword,
+      action: keyword,
+    },
+  },
+  host: { properties: { name: keyword, id: keyword, os: { properties: { type: keyword } } } },
+  agent: { properties: { id: keyword, type: keyword } },
+  user: { properties: { name: keyword } },
+};
+const processFields: Properties = {
+  name: keyword,
+  executable: keyword,
+  entity_id: keyword,
+  pid: { type: 'long' },
+};
+
+/**
+ * Field types follow elastic/endpoint-package (data_stream/<type>/fields/fields.yml). A
+ * Windows host running Defend writes all four streams, and the Forensics skill queries all
+ * four in one ES|QL statement, so a fixture with only a process stream (or one whose mapping
+ * lacks the fields the skill KEEPs) fails in ways production never does.
+ */
+export type EndpointStream = 'process' | 'network' | 'file' | 'registry';
+export const ENDPOINT_STREAM_MAPPINGS: Record<EndpointStream, Properties> = {
+  process: {
+    ...BASE_ENDPOINT_MAPPINGS,
+    process: {
+      properties: {
+        ...processFields,
+        command_line: wildcard,
+        hash: { properties: { sha256: keyword } },
+        parent: {
+          properties: {
+            name: keyword,
+            executable: keyword,
+            entity_id: keyword,
+            command_line: wildcard,
+          },
+        },
+      },
+    },
+  },
+  network: {
+    ...BASE_ENDPOINT_MAPPINGS,
+    process: { properties: { ...processFields, command_line: wildcard } },
+    destination: { properties: { ip: { type: 'ip' }, port: { type: 'long' }, domain: keyword } },
+  },
+  file: {
+    ...BASE_ENDPOINT_MAPPINGS,
+    process: { properties: { ...processFields, command_line: wildcard } },
+    file: { properties: { path: keyword, name: keyword } },
+  },
+  registry: {
+    ...BASE_ENDPOINT_MAPPINGS,
+    process: { properties: processFields },
+    registry: { properties: { path: keyword, value: keyword } },
+  },
+};
+const ENDPOINT_STREAMS = Object.keys(ENDPOINT_STREAM_MAPPINGS) as EndpointStream[];
+// Above the built-in `logs` template (priority 100), which otherwise wins for
+// `logs-*-*` names and maps every string dynamically.
+const EVAL_TEMPLATE_PRIORITY = 500;
+
+const fakeSha256 = (seed: string) => createHash('sha256').update(seed).digest('hex');
+
 export const seedAlertZeroEndpoint = async (
   es: Client,
   fetch: HttpHandler,
@@ -531,7 +605,9 @@ export const seedAlertZeroEndpoint = async (
   const id = randomUUID();
   const host = `AZ-EVAL-${id.slice(0, 8)}`;
   const endpointId = `alertzero-eval-${id}`;
-  const index = `logs-endpoint.events.process-alertzero-eval-${id}`;
+  const streamName = (stream: EndpointStream) =>
+    `logs-endpoint.events.${stream}-alertzero-eval-${id}`;
+  const index = streamName('process');
   const aiIndexId = EVAL_AI_INDEX_ID;
   const aiIndexDest = EVAL_AI_INDEX_DEST;
   const kiId = `alertzero-ki-${id}`;
@@ -556,10 +632,14 @@ export const seedAlertZeroEndpoint = async (
         kiSeeded &&
         es.delete({ index: aiIndexDest, id: kiId, refresh: 'wait_for' }, { ignore: [404] }),
       async () =>
-        Promise.all([
-          deleteDataStreamQuietly(es, index),
-          ignore404(() => es.indices.deleteIndexTemplate({ name: `${index}-tpl` })),
-        ]),
+        Promise.all(
+          ENDPOINT_STREAMS.map(async (stream) => {
+            await deleteDataStreamQuietly(es, streamName(stream));
+            await ignore404(() =>
+              es.indices.deleteIndexTemplate({ name: `${streamName(stream)}-tpl` })
+            );
+          })
+        ),
       async () =>
         es.delete(
           {
@@ -604,53 +684,60 @@ export const seedAlertZeroEndpoint = async (
     conversationId = conversation.id;
     // `logs-*` names can only be data streams (the logs index template matches): install an
     // index template carrying the mappings, create the data stream, then append with
-    // op_type create so every write lands on a fresh backing index.
-    await es.indices.putIndexTemplate({
-      name: `${index}-tpl`,
-      index_patterns: [index],
-      data_stream: {},
-      template: {
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            event: {
-              properties: {
-                id: { type: 'keyword' },
-                category: { type: 'keyword' },
-                type: { type: 'keyword' },
-              },
-            },
-            host: { properties: { name: { type: 'keyword' } } },
-            process: {
-              properties: {
-                name: { type: 'keyword' },
-                command_line: { type: 'keyword' },
-                entity_id: { type: 'keyword' },
-                parent: {
-                  properties: { name: { type: 'keyword' }, entity_id: { type: 'keyword' } },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-    await es.indices.createDataStream({ name: index });
+    // op_type create so every write lands on a fresh backing index. All four Defend streams
+    // are created; only the process stream carries events.
+    for (const stream of ENDPOINT_STREAMS) {
+      const name = streamName(stream);
+      await es.indices.putIndexTemplate({
+        name: `${name}-tpl`,
+        index_patterns: [name],
+        data_stream: {},
+        priority: EVAL_TEMPLATE_PRIORITY,
+        template: { mappings: { properties: ENDPOINT_STREAM_MAPPINGS[stream] } },
+      });
+      await es.indices.createDataStream({ name });
+    }
     const now = Date.now();
     // Malicious: encoded PowerShell spawned by a document process. Benign: an ordinary
     // document print flow (Word -> the 32-bit print spooler helper `splwow64.exe`, not a
     // LOLBAS binary) — same host, same shape, nothing an analysis may act on.
+    const winword = 'C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE';
+    const explorer = { name: 'explorer.exe', executable: 'C:\\Windows\\explorer.exe' };
     const events = conclusive
       ? [
-          { name: 'WINWORD.EXE', command_line: 'WINWORD.EXE invoice.docm', parent: 'explorer.exe' },
-          { name: 'powershell.exe', command_line: SEEDED_COMMAND, parent: 'WINWORD.EXE' },
+          {
+            name: 'WINWORD.EXE',
+            executable: winword,
+            command_line: `"${winword}" invoice.docm`,
+            parent: { ...explorer, command_line: 'C:\\Windows\\Explorer.EXE' },
+          },
+          {
+            name: 'powershell.exe',
+            executable: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
+            command_line: SEEDED_COMMAND,
+            parent: {
+              name: 'WINWORD.EXE',
+              executable: winword,
+              command_line: `"${winword}" invoice.docm`,
+            },
+          },
         ]
       : [
-          { name: 'WINWORD.EXE', command_line: 'WINWORD.EXE invoice.docx', parent: 'explorer.exe' },
+          {
+            name: 'WINWORD.EXE',
+            executable: winword,
+            command_line: `"${winword}" invoice.docx`,
+            parent: { ...explorer, command_line: 'C:\\Windows\\Explorer.EXE' },
+          },
           {
             name: 'splwow64.exe',
+            executable: 'C:\\Windows\\splwow64.exe',
             command_line: 'C:\\Windows\\splwow64.exe 12288',
-            parent: 'WINWORD.EXE',
+            parent: {
+              name: 'WINWORD.EXE',
+              executable: winword,
+              command_line: `"${winword}" invoice.docx`,
+            },
           },
         ];
     const eventIds = events.map((_, i) => `${id}-${i}`);
@@ -661,14 +748,24 @@ export const seedAlertZeroEndpoint = async (
         op_type: 'create',
         document: {
           '@timestamp': new Date(now - (2 - i) * 60_000).toISOString(),
-          event: { id: eventIds[i], category: ['process'], type: ['start'], kind: 'event' },
+          event: {
+            id: eventIds[i],
+            category: ['process'],
+            type: ['start'],
+            kind: 'event',
+            action: 'start',
+          },
           host: { name: host, id: host, os: { type: 'windows' } },
           agent: { id: endpointId, type: 'endpoint' },
+          user: { name: 'jdoe' },
           process: {
             name: event.name,
+            executable: event.executable,
             command_line: event.command_line,
             entity_id: eventIds[i],
-            parent: { name: event.parent, entity_id: i ? eventIds[0] : 'root' },
+            pid: 4100 + i,
+            hash: { sha256: fakeSha256(event.executable) },
+            parent: { ...event.parent, entity_id: i ? eventIds[0] : 'root' },
           },
         },
         refresh: 'wait_for',

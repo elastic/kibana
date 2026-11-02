@@ -81,7 +81,12 @@ interface IndexedDocument {
   index: string;
   id?: string;
   document: Record<string, unknown> & {
-    process?: { command_line?: string };
+    process?: {
+      command_line?: string;
+      executable?: string;
+      hash?: { sha256?: string };
+      parent?: { command_line?: string };
+    };
     attributes?: { attack_discovery_alert_id?: string };
   };
 }
@@ -510,8 +515,15 @@ describe('seedAlertZeroEndpoint', () => {
       expect.objectContaining({
         index_patterns: [fixture.index],
         data_stream: {},
+        // Must outrank the built-in `logs` template (100), or the mappings never apply.
+        priority: expect.any(Number),
       })
     );
+    for (const [params] of es.indices.putIndexTemplate.mock.calls as unknown as Array<
+      [{ priority: number }]
+    >) {
+      expect(params.priority).toBeGreaterThan(100);
+    }
     expect(es.indices.createDataStream).toHaveBeenCalledWith({ name: fixture.index });
     expect(es.indices.create).not.toHaveBeenCalledWith(
       expect.objectContaining({ index: fixture.index })
@@ -522,6 +534,60 @@ describe('seedAlertZeroEndpoint', () => {
       const { index, op_type: opType } = params[0] as { index: string; op_type?: string };
       if (index === fixture.index) expect(opType).toBe('create');
     }
+  });
+
+  it('creates all four Defend streams with the endpoint-package fields the Forensics skill reads', async () => {
+    const es = createEs();
+    const fixture = await seedAlertZeroEndpoint(es, createFetch());
+    const suffix = fixture.index.replace('logs-endpoint.events.process-', '');
+    const created = (es.indices.createDataStream.mock.calls as unknown as Array<[{ name: string }]>)
+      .map(([{ name }]) => name)
+      .sort();
+    expect(created).toEqual(
+      ['file', 'network', 'process', 'registry'].map((s) => `logs-endpoint.events.${s}-${suffix}`)
+    );
+
+    const mappingFor = (stream: string) =>
+      (
+        es.indices.putIndexTemplate.mock.calls as unknown as Array<
+          [{ index_patterns: string[]; template: { mappings: { properties: object } } }]
+        >
+      ).find(([p]) => p.index_patterns[0] === `logs-endpoint.events.${stream}-${suffix}`)?.[0]
+        .template.mappings.properties;
+    expect(mappingFor('process')).toMatchObject({
+      process: {
+        properties: {
+          command_line: { type: 'wildcard' },
+          executable: { type: 'keyword' },
+          hash: { properties: { sha256: { type: 'keyword' } } },
+          parent: { properties: { command_line: { type: 'wildcard' } } },
+        },
+      },
+    });
+    expect(mappingFor('network')).toMatchObject({
+      destination: { properties: { ip: { type: 'ip' }, domain: { type: 'keyword' } } },
+    });
+    expect(mappingFor('file')).toMatchObject({
+      file: { properties: { path: { type: 'keyword' } } },
+    });
+    expect(mappingFor('registry')).toMatchObject({
+      registry: { properties: { path: { type: 'keyword' }, value: { type: 'keyword' } } },
+    });
+
+    const processDocs = indexed(es).filter(({ index }) => index === fixture.index);
+    expect(processDocs).toHaveLength(fixture.eventIds.length);
+    for (const { document } of processDocs) {
+      expect(document.process?.executable).toEqual(expect.any(String));
+      expect(document.process?.hash?.sha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(document.process?.parent?.command_line).toEqual(expect.any(String));
+    }
+
+    await fixture.cleanup();
+    const deleted = (es.indices.deleteDataStream.mock.calls as unknown as Array<[{ name: string }]>)
+      .map(([{ name }]) => name)
+      .sort();
+    expect(deleted).toEqual(created);
+    expect(es.indices.deleteIndexTemplate).toHaveBeenCalledTimes(4);
   });
 
   it('seeds into the shared security-investigations AI index, registering it only when missing', async () => {
