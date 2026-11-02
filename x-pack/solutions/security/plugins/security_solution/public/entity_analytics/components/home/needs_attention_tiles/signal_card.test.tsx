@@ -285,6 +285,17 @@ describe('SignalCard', () => {
     expect(tile).toHaveAttribute('aria-disabled', 'true');
   });
 
+  it('stays clickable at 0 while selected, so its filter can be cleared', () => {
+    const onToggle = jest.fn();
+    renderCard({ value: 0, hasCount: true }, { onToggle, selected: true });
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
+
+    expect(tile).toHaveAttribute('aria-pressed', 'true');
+    expect(tile).not.toHaveAttribute('aria-disabled');
+    fireEvent.click(tile);
+    expect(onToggle).toHaveBeenCalledTimes(1);
+  });
+
   it('shows a dash, not 0, when there is no count (failed, skipped, timed out or no access)', () => {
     const onToggle = jest.fn();
     renderCard({ value: 0, hasCount: false }, { onToggle });
