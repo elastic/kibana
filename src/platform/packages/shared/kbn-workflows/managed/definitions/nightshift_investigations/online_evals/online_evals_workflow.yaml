@@ -59,6 +59,18 @@ triggers:
           type: string
           maxLength: 256
           description: The connector every judge calls.
+        entry_point:
+          type: string
+          enum:
+            - start_api
+            - automation
+            - slack
+            - alert_recovery
+          description: How the scored investigation run started.
+        alert_rule_type:
+          type: string
+          maxLength: 256
+          description: Alert runs only, the rule type of the investigated alert.
       required:
         - investigation_id
         - round_id
@@ -87,3 +99,5 @@ steps:
       # `${{ }}` passes a missing optional input as undefined; `{{ }}` would pass an empty string.
       investigation_ended_at: '${{ inputs.investigation_ended_at }}'
       investigation_execution_id: '${{ inputs.investigation_execution_id }}'
+      entry_point: '${{ inputs.entry_point }}'
+      alert_rule_type: '${{ inputs.alert_rule_type }}'
