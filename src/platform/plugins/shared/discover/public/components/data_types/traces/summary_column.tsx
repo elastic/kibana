@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { getShouldShowFieldHandler } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler, SERVICE_NAME_FIELD } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   AllSummaryColumnProps,
@@ -18,12 +18,33 @@ import { LazySummaryColumn } from '@kbn/discover-contextual-components';
 import type { CellRenderersExtensionParams } from '../../../context_awareness';
 import type { ContextAwarenessToolkit } from '../../../context_awareness';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import {
+  createEntitySummaryBinding,
+  createServiceSummaryDefinition,
+  useEntitySummaryResourceBadge,
+  type EntitySummaryFieldBinding,
+} from '../entity_summary';
 
 export type SummaryColumnGetterDeps = CellRenderersExtensionParams;
 
-const SummaryColumn = (props: Omit<AllSummaryColumnProps, 'core' | 'share'>) => {
+type SummaryColumnWrapperProps = Omit<
+  AllSummaryColumnProps,
+  'core' | 'share' | 'renderResourceBadge'
+> & {
+  bindings: EntitySummaryFieldBinding[];
+};
+
+const SummaryColumn = ({ bindings, ...props }: SummaryColumnWrapperProps) => {
   const { share, core } = useDiscoverServices();
-  return <LazySummaryColumn {...props} share={share} core={core} />;
+  const renderResourceBadge = useEntitySummaryResourceBadge({ bindings });
+  return (
+    <LazySummaryColumn
+      {...props}
+      share={share}
+      core={core}
+      renderResourceBadge={renderResourceBadge}
+    />
+  );
 };
 
 export const getTracesSummaryColumn = (
@@ -33,6 +54,16 @@ export const getTracesSummaryColumn = (
   const { dataView, density, rowHeight } = params;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
+  // Render the service chip as the service-summary popover (same as the Service name column cell),
+  // instead of the generic filter/copy cell-actions badge.
+  const bindings: EntitySummaryFieldBinding[] = [
+    createEntitySummaryBinding({
+      fields: [SERVICE_NAME_FIELD],
+      definition: createServiceSummaryDefinition(),
+      toolkit,
+    }),
+  ];
+
   return (props: Omit<SummaryColumnProps, 'core' | 'share'>) => (
     <SummaryColumn
       {...props}
@@ -41,6 +72,7 @@ export const getTracesSummaryColumn = (
       onFilter={toolkit.actions.addFilter}
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
+      bindings={bindings}
     />
   );
 };
