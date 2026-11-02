@@ -73,7 +73,7 @@ describe('resolveTier2Targets', () => {
 
   beforeEach(() => {
     matchDatasetsWithModelMock.mockReset();
-    matchDatasetsWithModelMock.mockResolvedValue(undefined);
+    matchDatasetsWithModelMock.mockResolvedValue({ status: 'empty' });
   });
 
   it('unions the report match, the Tier 1 hit indices, and the actionable indices, recording each source in a fixed order', async () => {
@@ -130,6 +130,7 @@ describe('resolveTier2Targets', () => {
   describe('the model fallback', () => {
     const report = { text: 'Okta session theft' };
     const modelMatch = {
+      status: 'matched' as const,
       matches: [oktaDataset],
       confidence: 0.9,
       scored: [{ dataset: 'okta.system', confidence: 0.9 }],
@@ -157,6 +158,7 @@ describe('resolveTier2Targets', () => {
         tier2_target_sources: ['model', 'actionable'],
         report_intent_targets: ['logs-okta.system-*'],
         degraded: true,
+        dataset_match: { status: 'matched' },
       });
     });
 
@@ -198,9 +200,10 @@ describe('resolveTier2Targets', () => {
 
       expect(matchDatasetsWithModelMock).not.toHaveBeenCalled();
       expect(result.tier2_targets).toEqual([]);
+      expect(result).not.toHaveProperty('dataset_match');
     });
 
-    it('contributes nothing when the model matched nothing', async () => {
+    it('contributes nothing, and reads empty, when the model matched nothing', async () => {
       const result = await resolveTier2Targets({
         scope: emptyScope,
         tier1: hits(),
@@ -215,7 +218,46 @@ describe('resolveTier2Targets', () => {
         tier2_target_sources: [],
         report_intent_targets: [],
         degraded: false,
+        dataset_match: { status: 'empty' },
       });
+    });
+
+    it('contributes nothing, and reads failed with the message, when the model call failed', async () => {
+      matchDatasetsWithModelMock.mockResolvedValueOnce({
+        status: 'failed',
+        message: 'connector down',
+      });
+
+      const result = await resolveTier2Targets({
+        scope: emptyScope,
+        tier1: hits(),
+        report,
+        model,
+        logger,
+      });
+
+      expect(result).toEqual({
+        tier2_targets: [],
+        tier2_target_sources: [],
+        report_intent_targets: [],
+        degraded: false,
+        dataset_match: { status: 'failed', message: 'connector down' },
+      });
+    });
+
+    it('keeps other sources and reports failed when the model call failed', async () => {
+      matchDatasetsWithModelMock.mockResolvedValueOnce({ status: 'failed' });
+
+      const result = await resolveTier2Targets({
+        scope: { ...emptyScope, actionable_indices: ['logs-endpoint.events.process-default*'] },
+        tier1: hits(),
+        report,
+        model,
+        logger,
+      });
+
+      expect(result.tier2_target_sources).toEqual(['actionable']);
+      expect(result.dataset_match).toEqual({ status: 'failed' });
     });
   });
 

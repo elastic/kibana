@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function getEslintrcForGeneratedCode() {
-  return {
-    rules: {
-      '@typescript-eslint/naming-convention': 0,
-    },
-  };
+/** Thrown when more alerts are requested than `loadAlertDocuments` loads in one call. */
+export class TooManyAlertDocumentsError extends Error {
+  constructor(public readonly limit: number, public readonly requestedCount: number) {
+    super(`Cannot load more than ${limit} alerts at once (received ${requestedCount}).`);
+    this.name = 'TooManyAlertDocumentsError';
+  }
 }

@@ -305,6 +305,24 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toContain('Balanced');
   });
 
+  it('says the dataset-match call failed, not that a model is missing, when the skip carries a detail', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        status: 'tier1_only',
+        tier2_skipped_reason: 'no_inference',
+        tier2_skip_detail: 'connector down',
+        unavailable_model_tiers: ['efficient'],
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain(
+      'the model call that chooses where to hunt failed (connector down)'
+    );
+    expect(narrative).not.toContain('no model to choose where to hunt');
+    expect(narrative).not.toContain('no GenAI connector');
+  });
+
   it('explains every Tier 2 skip reason in plain words under the Tier 2 heading', () => {
     const skipped = (reason: HuntCoordinatorCoreResult['tier2_skipped_reason']) =>
       buildHuntNarrative(result({ status: 'tier1_only', tier2_skipped_reason: reason }), ctx);

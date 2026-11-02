@@ -1686,10 +1686,15 @@ describe('Slack', () => {
   describe('relay auth', () => {
     const relayTrigger = jest.fn();
     const relayListBindings = jest.fn();
+    const relayReadMessages = jest.fn();
     const relayContext = {
       ...mockContext,
       secrets: { authType: 'relay', tenantKey: 'team-A' },
-      relay: { trigger: relayTrigger, listBindings: relayListBindings },
+      relay: {
+        trigger: relayTrigger,
+        listBindings: relayListBindings,
+        readMessages: relayReadMessages,
+      },
     } as unknown as ActionContext;
 
     it('sendMessage posts through the relay and never touches the Slack client', async () => {
@@ -1804,6 +1809,28 @@ describe('Slack', () => {
       expect(result).toMatchObject({ found: true, id: 'C123', source: 'relay-bindings' });
     });
 
+    it('getConversationHistory reads through the relay and never touches the Slack client', async () => {
+      relayReadMessages.mockResolvedValue({
+        channel: { id: 'C123', name: 'alerts' },
+        messages: [{ ts: '1700000000.000100', author: { id: 'U1', isBot: false }, text: 'hi' }],
+        truncated: false,
+      });
+
+      const result = await Slack.actions.getConversationHistory.handler(relayContext, {
+        channel: 'C123',
+        oldest: '1699990000',
+      });
+
+      expect(relayReadMessages).toHaveBeenCalledWith({
+        tenantKey: 'team-A',
+        channelId: 'C123',
+        oldest: '1699990000',
+        limit: 100,
+      });
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ ok: true, channel: 'C123', channelName: 'alerts' });
+    });
+
     it('the test handler checks the relay instead of auth.test', async () => {
       relayListBindings.mockResolvedValue({ bindings: [] });
 
@@ -1817,7 +1844,7 @@ describe('Slack', () => {
       await expect(
         Slack.actions.searchMessages.handler(relayContext, { query: 'anything' })
       ).rejects.toThrow(
-        'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, updateMessage, listChannels, resolveChannelId.'
+        'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, updateMessage, listChannels, resolveChannelId, getConversationHistory.'
       );
 
       expect(mockClient.post).not.toHaveBeenCalled();

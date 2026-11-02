@@ -481,6 +481,16 @@ steps:
         Write every text field of the proposal in ASD-STE100 Simplified Technical English:
         sentences of 20 words or less, active voice, one topic for each sentence, no em
         dashes. Write fp_pattern and reasoning as markdown.
+
+        Format reasoning as a markdown ordered list: start each step with its
+        number and a period on a new line ("1. ", "2. ", "3. "), and separate the
+        steps with newline characters, never with spaces. Put nothing before the
+        first step. Each step is one or two sentences about the rule and the
+        alerts. Write every text field in the analyst's words: never name the
+        tools, skills, attachments or steps you used to get the information (no
+        "get_alerts_by_ids", no "the rule attachment states", no "the retrieved
+        alerts show"); say what you found, for example "The 12 alerts all come
+        from host backup-01" or "The rule query matches every scheduled task".
       schema:
         # Omit the root type so Agent Builder wraps this union under a property;
         # the LangChain-to-inference adapter drops root-level oneOf constraints.
@@ -1522,11 +1532,14 @@ steps:
   # `status` cannot work, because a dismissal and an approved action-less
   # proposal both report `no_action`.
   #
-  # NOTE: the gate reports `decision: approved` only once it has settled that
-  # way, which is either an approval with no action or an action that succeeded.
-  # An approval whose action failed through every retry settles as expired and
-  # reports no decision, so it counts as neither approved nor dismissed and the
-  # alerts stay untagged for the next sweep.
+  # NOTE: the gate reports `decision: approved` with `status: no_action`,
+  # `succeeded`, or `failed`. `failed` comes only from an action that marks its
+  # failure non-retryable, and none of the actions here do that today. Then
+  # `approved` is true and `applied` is false: the alerts stay untagged, but the
+  # investigation closes as approved. Any other action failure is re-offered,
+  # and an approval whose action failed through every retry settles as expired
+  # and reports no decision, so it counts as neither approved nor dismissed and
+  # the alerts stay untagged for the next sweep.
   - name: record_proposal_action_decision
     type: data.set
     with:
