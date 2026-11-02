@@ -12,7 +12,7 @@ import execa from 'execa';
 import type { DoctorCheck, DoctorCheckGroup, Fix } from '../types';
 import { fail, pass, warn } from '../types';
 import { defaultConfig } from '../../../servers/configs/config_sets/default/stateful/base.config';
-import { tryExec } from '../utils';
+import { getScoutServerPids, tryExec } from '../utils';
 
 const canListen = (port: number, host: string) =>
   new Promise<boolean>((resolve) => {
@@ -32,16 +32,6 @@ const getPortOwner = async (port: number) => {
   const fields = new Map(output?.split('\n').map((line) => [line[0], line.slice(1)]));
   const pid = fields.get('p');
   return pid ? { pid, command: fields.get('c') } : undefined;
-};
-
-const getScoutServerPids = async () => {
-  const output = await tryExec('ps', ['-ax', '-o', 'pid=,command=']);
-  return (output ?? '').split('\n').flatMap((line) => {
-    const [pid, command, ...args] = line.trim().split(/\s+/);
-    return /(^|\/)node$/.test(command) && args.join(' ').includes('scripts/scout start-server')
-      ? [pid]
-      : [];
-  });
 };
 
 // ES and Kibana outlive start-server on SIGTERM, so stop its whole process group when it leads one

@@ -15,7 +15,7 @@ import execa from 'execa';
 import { ES_SERVERLESS_DEFAULT_IMAGE, SERVERLESS_NODES, getUiamContainers } from '@kbn/es';
 import type { DoctorCheckGroup, Fix } from '../types';
 import { fail, pass, warn } from '../types';
-import { formatAge, formatBytes, tildify, tryExec } from '../utils';
+import { formatAge, formatBytes, getScoutServerPids, tildify, tryExec } from '../utils';
 
 const RECOMMENDED_CPUS = 12;
 const RECOMMENDED_MEMORY_GB = 15;
@@ -153,6 +153,14 @@ export const dockerChecks: DoctorCheckGroup = {
           .split('\n')
           .filter((name) => names.includes(name));
 
+        const scoutServerPids = running.length ? await getScoutServerPids() : [];
+        if (scoutServerPids.length) {
+          return pass(
+            `Serverless containers belong to the running Scout servers (PID ${scoutServerPids.join(
+              ', '
+            )})`
+          );
+        }
         return running.length
           ? warn(`Serverless containers are still running: ${running.join(', ')}`, {
               fix: { command: `docker kill ${running.join(' ')}`, destructive: true },

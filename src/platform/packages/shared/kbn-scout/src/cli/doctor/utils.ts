@@ -53,3 +53,14 @@ export const braces = (items: string[]): string =>
 export const removePaths = async (paths: string[]) => {
   await Promise.all(paths.map((path) => Fs.promises.rm(path, { recursive: true, force: true })));
 };
+
+/** PIDs of running `node scripts/scout start-server` processes */
+export const getScoutServerPids = async () => {
+  const output = await tryExec('ps', ['-ax', '-o', 'pid=,command=']);
+  return (output ?? '').split('\n').flatMap((line) => {
+    const [pid, command, ...args] = line.trim().split(/\s+/);
+    return /(^|\/)node$/.test(command) && args.join(' ').includes('scripts/scout start-server')
+      ? [pid]
+      : [];
+  });
+};
