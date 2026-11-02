@@ -176,7 +176,9 @@ export class ResourceManager implements ResourceManagerContract {
     state.status = 'pending';
 
     state.initializationPromise = this.retryService
-      .retry(() => state.initializer!.initialize())
+      .retry(() => state.initializer!.initialize(), {
+        logger: this.logger.withLabels({ resource: key }),
+      })
       .then(() => {
         state.status = 'ready';
         this.logger.debug({

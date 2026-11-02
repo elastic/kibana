@@ -10,11 +10,17 @@ import type { errors as EsErrors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 
 import type { BackoffFactory } from '@kbn/response-ops-retry-service';
-import { RetryService } from '@kbn/response-ops-retry-service';
+import { RetryService, createLoggerRetryReporter } from '@kbn/response-ops-retry-service';
+
+const SERVICE_NAME = 'CasesAnalytics';
 
 export class CasesAnalyticsRetryService extends RetryService {
-  constructor(logger: Logger, backOffFactory: BackoffFactory, maxAttempts: number = 10) {
-    super(logger, backOffFactory, 'CasesAnalytics', maxAttempts);
+  constructor(
+    private readonly logger: Logger,
+    backOffFactory: BackoffFactory,
+    maxAttempts: number = 10
+  ) {
+    super(createLoggerRetryReporter(logger, SERVICE_NAME), backOffFactory, maxAttempts);
   }
 
   protected isRetryableError(error: EsErrors.ElasticsearchClientError) {
@@ -22,7 +28,7 @@ export class CasesAnalyticsRetryService extends RetryService {
       return true;
     }
 
-    this.logger.debug(`[${this.serviceName}][isRetryableError] Error is not retryable`, {
+    this.logger.debug(`[${SERVICE_NAME}][isRetryableError] Error is not retryable`, {
       tags: ['cai:retry-error'],
     });
 

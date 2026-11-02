@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { Logger as KibanaLogger } from '@kbn/logging';
-import { Logger as LoggerToken } from '@kbn/core-di';
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { errors } from '@elastic/elasticsearch';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 
+import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { EsTransientRetryService } from './es_transient_retry_service';
 
 const backOffFactory = fullJitterBackoffFactory({
@@ -18,12 +17,16 @@ const backOffFactory = fullJitterBackoffFactory({
   maxBackoffTime: 1000,
 });
 
-function getEsErrorStatusCode(error: unknown): number | undefined {
-  return error instanceof errors.ResponseError ? error.meta.statusCode : undefined;
+export interface RetryOptions {
+  /**
+   * The caller's subsystem logger. Retry warnings are written through it so they
+   * carry the caller's `log.logger` and bound labels.
+   */
+  logger: LoggerServiceContract;
 }
 
 export interface IRetryService {
-  retry<T>(callback: () => Promise<T>): Promise<T>;
+  retry<T>(callback: () => Promise<T>, options: RetryOptions): Promise<T>;
 }
 
 /**
@@ -33,32 +36,19 @@ export interface IRetryService {
  */
 @injectable()
 export class AlertingRetryService implements IRetryService {
-  constructor(@inject(LoggerToken) private readonly logger: KibanaLogger) {}
-
-  public async retry<T>(callback: () => Promise<T>): Promise<T> {
-    const retryService = new EsTransientRetryService(this.logger, backOffFactory, 'alerting_v2', 3);
+  public async retry<T>(callback: () => Promise<T>, { logger }: RetryOptions): Promise<T> {
+    const retryService = new EsTransientRetryService(logger, backOffFactory);
 
     return retryService.retryWithBackoff(async () => {
       try {
         return await callback();
       } catch (e) {
-        // Preserve Elasticsearch client errors as-is (they already expose statusCode / meta).
-        if (e instanceof errors.ResponseError) {
+        // Preserve Elasticsearch client errors and Error instances as-is.
+        if (e instanceof errors.ResponseError || e instanceof Error) {
           throw e;
         }
 
-        if (e instanceof Error) {
-          throw e;
-        }
-
-        const statusCode = getEsErrorStatusCode(e);
-        const statusSuffix = statusCode != null ? ` (statusCode=${statusCode})` : '';
-        const err = new Error(`Elasticsearch error${statusSuffix}: ${String(e)}`);
-        if (statusCode != null) {
-          // Add for downstream logging that checks `error.statusCode` (e.g. RetryService warnings)
-          (err as unknown as { statusCode?: number }).statusCode = statusCode;
-        }
-        throw err;
+        throw new Error(`Elasticsearch error: ${String(e)}`);
       }
     });
   }

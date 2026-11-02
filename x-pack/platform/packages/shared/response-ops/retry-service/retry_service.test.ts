@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/core/server';
+import { createLoggerRetryReporter } from './logger_retry_reporter';
 import { RetryService } from './retry_service';
 import type { BackoffFactory } from './types';
 
@@ -25,6 +26,7 @@ describe('RetryService', () => {
   };
 
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+  const reporter = createLoggerRetryReporter(mockLogger, 'foobar');
 
   let service: RetryService;
 
@@ -32,12 +34,12 @@ describe('RetryService', () => {
     jest.clearAllMocks();
 
     nextBackOff.mockReturnValue(1);
-    service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar');
+    service = new RetryServiceTestClass(reporter, backOffFactory);
   });
 
   it('should not retry after trying more than the max attempts', async () => {
     const maxAttempts = 3;
-    service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar', maxAttempts);
+    service = new RetryServiceTestClass(reporter, backOffFactory, maxAttempts);
 
     cb.mockRejectedValue(new Error('My transient error'));
 
@@ -53,7 +55,7 @@ describe('RetryService', () => {
     'should retry and succeed retryable status code: %s',
     async (statusCode) => {
       const maxAttempts = 3;
-      service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar', maxAttempts);
+      service = new RetryServiceTestClass(reporter, backOffFactory, maxAttempts);
 
       const error = new Error('My transient error');
       cb.mockRejectedValueOnce(error)
@@ -69,7 +71,7 @@ describe('RetryService', () => {
   );
 
   it('should succeed if cb does not throw', async () => {
-    service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar');
+    service = new RetryServiceTestClass(reporter, backOffFactory);
 
     cb.mockResolvedValue({ status: 'ok' });
 
@@ -82,7 +84,7 @@ describe('RetryService', () => {
 
   describe('Logging', () => {
     it('should log a warning when retrying', async () => {
-      service = new RetryServiceTestClass(mockLogger, backOffFactory, 'foobar', 2);
+      service = new RetryServiceTestClass(reporter, backOffFactory, 2);
 
       cb.mockRejectedValue(new Error('My transient error'));
 

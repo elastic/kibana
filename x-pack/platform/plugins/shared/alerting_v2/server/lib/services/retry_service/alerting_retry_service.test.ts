@@ -7,18 +7,27 @@
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { createLoggerService } from '../logger_service/logger_service.mock';
 import { AlertingRetryService } from './alerting_retry_service';
 import { EsConcurrentModificationError } from './es_concurrent_modification_error';
 import { EsUnacknowledgedError } from './es_unacknowledged_error';
 
 describe('AlertingRetryService', () => {
-  const logger = loggingSystemMock.createLogger();
+  const service = new AlertingRetryService();
 
   async function flushTimers(ms: number = 2_000) {
     // baseDelay is 250ms and maxBackoffTime is 1000ms in AlertingRetryService, so 2000ms
     // is enough to cover a retry delay even with jitter.
     await jest.advanceTimersByTimeAsync(ms);
+  }
+
+  function createLogger() {
+    const { loggerService, mockLogger } = createLoggerService();
+    return {
+      logger: loggerService.forSubsystem('resources').withLabels({ resource: 'rule-events' }),
+      mockLogger,
+    };
   }
 
   beforeAll(() => {
@@ -33,21 +42,21 @@ describe('AlertingRetryService', () => {
     jest.clearAllMocks();
   });
 
-  it('delegates to EsTransientRetryService and returns the callback result', async () => {
-    const service = new AlertingRetryService(logger);
+  it('returns the callback result', async () => {
+    const { logger } = createLogger();
 
-    await expect(service.retry(async () => 'ok')).resolves.toBe('ok');
+    await expect(service.retry(async () => 'ok', { logger })).resolves.toBe('ok');
   });
 
   it('retries transient ES errors (e.g. 503) and eventually succeeds', async () => {
-    const service = new AlertingRetryService(logger);
+    const { logger } = createLogger();
 
     const callback = jest
       .fn<Promise<string>, []>()
       .mockRejectedValueOnce(new errors.ResponseError({ statusCode: 503 } as DiagnosticResult))
       .mockResolvedValueOnce('ok');
 
-    const promise = service.retry(callback);
+    const promise = service.retry(callback, { logger });
     const assertion = expect(promise).resolves.toBe('ok');
     await flushTimers();
     await assertion;
@@ -56,7 +65,7 @@ describe('AlertingRetryService', () => {
   });
 
   it('retries ES connection errors and eventually succeeds', async () => {
-    const service = new AlertingRetryService(logger);
+    const { logger } = createLogger();
 
     const callback = jest
       .fn<Promise<string>, []>()
@@ -64,7 +73,7 @@ describe('AlertingRetryService', () => {
       .mockRejectedValueOnce(new errors.TimeoutError('timeout', {} as DiagnosticResult))
       .mockResolvedValueOnce('ok');
 
-    const promise = service.retry(callback);
+    const promise = service.retry(callback, { logger });
     const assertion = expect(promise).resolves.toBe('ok');
     await flushTimers(4_000);
     await assertion;
@@ -73,14 +82,14 @@ describe('AlertingRetryService', () => {
   });
 
   it('retries unacknowledged cluster-state mutations and eventually succeeds', async () => {
-    const service = new AlertingRetryService(logger);
+    const { logger } = createLogger();
 
     const callback = jest
       .fn<Promise<string>, []>()
       .mockRejectedValueOnce(new EsUnacknowledgedError('put pipeline'))
       .mockResolvedValueOnce('ok');
 
-    const promise = service.retry(callback);
+    const promise = service.retry(callback, { logger });
     const assertion = expect(promise).resolves.toBe('ok');
     await flushTimers();
     await assertion;
@@ -89,14 +98,14 @@ describe('AlertingRetryService', () => {
   });
 
   it('retries concurrent resource modifications and eventually succeeds', async () => {
-    const service = new AlertingRetryService(logger);
+    const { logger } = createLogger();
 
     const callback = jest
       .fn<Promise<string>, []>()
       .mockRejectedValueOnce(new EsConcurrentModificationError('data stream deleted'))
       .mockResolvedValueOnce('ok');
 
-    const promise = service.retry(callback);
+    const promise = service.retry(callback, { logger });
     const assertion = expect(promise).resolves.toBe('ok');
     await flushTimers();
     await assertion;
@@ -104,53 +113,102 @@ describe('AlertingRetryService', () => {
     expect(callback).toHaveBeenCalledTimes(2);
   });
 
+  it('gives up after three retries and rethrows the last error', async () => {
+    const { logger } = createLogger();
+
+    const err = new errors.ResponseError({ statusCode: 503 } as DiagnosticResult);
+    const callback = jest.fn<Promise<never>, []>().mockRejectedValue(err);
+
+    const promise = service.retry(callback, { logger });
+    const assertion = expect(promise).rejects.toBe(err);
+    await flushTimers(6_000);
+    await assertion;
+
+    expect(callback).toHaveBeenCalledTimes(4);
+  });
+
+  it('logs each retry through the caller logger with a code and the error', async () => {
+    const { logger, mockLogger } = createLogger();
+
+    const err = new errors.TimeoutError('Request timed out', {} as DiagnosticResult);
+    const callback = jest
+      .fn<Promise<string>, []>()
+      .mockRejectedValueOnce(err)
+      .mockResolvedValueOnce('ok');
+
+    const promise = service.retry(callback, { logger });
+    const assertion = expect(promise).resolves.toBe('ok');
+    await flushTimers();
+    await assertion;
+
+    expect(mockLogger.get).toHaveBeenCalledWith('resources');
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Transient Elasticsearch error, retrying (attempt 1 of 3)',
+      {
+        labels: { resource: 'rule-events', code: ALERTING_LOG_CODES.RETRY_ATTEMPT_FAILED },
+        error: expect.objectContaining({ message: 'Request timed out', type: 'TimeoutError' }),
+      }
+    );
+  });
+
   it('does not retry non-transient ES errors (e.g. 500)', async () => {
-    const service = new AlertingRetryService(logger);
+    const { logger, mockLogger } = createLogger();
 
     const err = new errors.ResponseError({ statusCode: 500 } as DiagnosticResult);
     const callback = jest.fn<Promise<never>, []>().mockRejectedValueOnce(err);
 
-    const promise = service.retry(callback);
+    const promise = service.retry(callback, { logger });
     const assertion = expect(promise).rejects.toBe(err);
     await flushTimers();
     await assertion;
 
     expect(callback).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
   it('re-throws Elasticsearch ResponseError as-is', async () => {
-    const service = new AlertingRetryService(logger);
+    const { logger } = createLogger();
 
     const esError = new errors.ResponseError({ statusCode: 503 } as DiagnosticResult);
 
-    const promise = service.retry(async () => {
-      throw esError;
-    });
+    const promise = service.retry(
+      async () => {
+        throw esError;
+      },
+      { logger }
+    );
     const assertion = expect(promise).rejects.toBe(esError);
-    await flushTimers();
+    await flushTimers(6_000);
     await assertion;
   });
 
   it('re-throws Error instances as-is', async () => {
-    const service = new AlertingRetryService(logger);
+    const { logger } = createLogger();
 
     const err = new Error('boom');
 
-    const promise = service.retry(async () => {
-      throw err;
-    });
+    const promise = service.retry(
+      async () => {
+        throw err;
+      },
+      { logger }
+    );
     const assertion = expect(promise).rejects.toBe(err);
     await flushTimers();
     await assertion;
   });
 
   it('wraps non-Error throws into an Error', async () => {
-    const service = new AlertingRetryService(logger);
+    const { logger } = createLogger();
 
-    const promise = service.retry(async () => {
-      // eslint-disable-next-line no-throw-literal
-      throw 'boom';
-    });
+    const promise = service.retry(
+      async () => {
+        // eslint-disable-next-line no-throw-literal
+        throw 'boom';
+      },
+      { logger }
+    );
     const assertion = expect(promise).rejects.toMatchObject({
       message: expect.stringContaining('Elasticsearch error'),
     });
