@@ -42,7 +42,9 @@ export const loadConfig = async ({
   const httpConfig = configService.atPathSync<HttpConfigType>('server');
 
   return {
-    dev: new DevConfig(devConfig),
+    dev: new DevConfig({
+      basePathProxyTarget: devConfig.basePathProxyTarget ?? httpConfig.port + 1,
+    }),
     plugins: new PluginsConfig(pluginsConfig, env),
     http: new HttpConfig(httpConfig),
   };

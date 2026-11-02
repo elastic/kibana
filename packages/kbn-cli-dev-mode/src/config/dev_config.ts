@@ -12,9 +12,7 @@ import { schema } from '@kbn/config-schema';
 
 export const devConfigSchema = schema.object(
   {
-    basePathProxyTarget: schema.number({
-      defaultValue: 5603,
-    }),
+    basePathProxyTarget: schema.maybe(schema.number()),
   },
   { unknowns: 'ignore' }
 );
@@ -24,7 +22,7 @@ export type DevConfigType = TypeOf<typeof devConfigSchema>;
 export class DevConfig {
   public basePathProxyTargetPort: number;
 
-  constructor(rawConfig: DevConfigType) {
+  constructor(rawConfig: Required<DevConfigType>) {
     this.basePathProxyTargetPort = rawConfig.basePathProxyTarget;
   }
 }
