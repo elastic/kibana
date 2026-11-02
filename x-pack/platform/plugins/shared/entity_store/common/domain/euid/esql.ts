@@ -23,6 +23,7 @@ import {
 } from '../definitions/entity_schema';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
+  esqlIdentityValue,
   esqlIsNotNullOrEmpty,
   esqlIsNullOrEmpty,
   esqlPresentColumnName,
@@ -87,7 +88,7 @@ export function getEuidEsqlFilterBasedOnDocument(
     if (value === undefined) {
       return undefined;
     }
-    return `(${identityField.singleField} == "${escapeEsqlString(value)}")`;
+    return `(${esqlIdentityValue(identityField.singleField)} == "${escapeEsqlString(value)}")`;
   }
 
   const fieldEvaluations = identityField.fieldEvaluations ?? [];
@@ -116,7 +117,7 @@ export function getEuidEsqlFilterBasedOnDocument(
 
   const onExpressions = Object.entries(fieldsToBeFilteredOn.values)
     .filter(([field]) => !evaluatedDestinations.has(field))
-    .map(([field, value]) => `(${field} == "${escapeEsqlString(value)}")`);
+    .map(([field, value]) => `(${esqlIdentityValue(field)} == "${escapeEsqlString(value)}")`);
 
   const toBeFilteredOut = getFieldsToBeFilteredOut(
     effectiveEuidRanking,
@@ -174,7 +175,7 @@ export function buildRankingCaseEsql(
     }
     if (comp.length === 1 && isEuidField(firstAttr)) {
       // Single ranking, single field: bare _present_or_null ref (no COALESCE needed)
-      return presentOrNullAliases.get(firstAttr.field) ?? `TO_STRING(${firstAttr.field})`;
+      return presentOrNullAliases.get(firstAttr.field) ?? esqlIdentityValue(firstAttr.field);
     }
   }
 
@@ -188,14 +189,14 @@ export function buildRankingCaseEsql(
 
     if (composedField.length === 1) {
       const f = composedField[0] as { field: string };
-      return presentOrNullAliases.get(f.field) ?? `TO_STRING(${f.field})`;
+      return presentOrNullAliases.get(f.field) ?? esqlIdentityValue(f.field);
     }
 
     // Composed arm: CONCAT over _present_or_null refs — NULL when any component is absent.
     const parts = composedField
       .map((attr) =>
         isEuidField(attr)
-          ? presentOrNullAliases.get(attr.field) ?? `TO_STRING(${attr.field})`
+          ? presentOrNullAliases.get(attr.field) ?? esqlIdentityValue(attr.field)
           : `"${escapeEsqlString(attr.sep)}"`
       )
       .join(', ');
@@ -357,9 +358,12 @@ function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpe
   return disjuncts.length === 1 ? disjuncts[0] : `(${disjuncts.join(' OR ')})`;
 }
 
-/** `field` is present and non-empty, referencing the raw field (no TO_STRING cast). */
+/** Raw field reference (no TO_STRING cast), so the presence gate can be pushed down to Lucene. */
+const rawFieldOptions: CastFieldOptions = { castFields: false };
+
+/** `field` has a non-empty value, referencing the raw field. */
 function esqlRawFieldNonEmpty(field: string): string {
-  return `(\`${field}\` IS NOT NULL AND \`${field}\` != "")`;
+  return `(${esqlIsNotNullOrEmpty(`\`${field}\``, rawFieldOptions)})`;
 }
 
 /** Fields composing the host-scoped user EUID, per the `entity.namespace == 'local'` ranking branch. */
@@ -382,7 +386,12 @@ export function getHostScopedUserEuidEsql(): {
   const [userField, hostField] = HOST_SCOPED_USER_FIELDS;
 
   return {
-    evalAssignment: `CONCAT("user:", TO_STRING(\`${userField}\`), "@", TO_STRING(\`${hostField}\`), "@${USER_ENTITY_NAMESPACE.Local}")`,
+    evalAssignment: `CONCAT("user:", ${esqlIdentityValue(
+      `\`${userField}\``,
+      rawFieldOptions
+    )}, "@", ${esqlIdentityValue(`\`${hostField}\``, rawFieldOptions)}, "@${
+      USER_ENTITY_NAMESPACE.Local
+    }")`,
     presenceGate: HOST_SCOPED_USER_FIELDS.map(esqlRawFieldNonEmpty).join(' AND '),
   };
 }
@@ -460,7 +469,7 @@ export function getEuidEsqlEvaluation(
   if (isSingleFieldIdentity(identityField)) {
     const expression = appendTypeIdIfNeeded(
       entityType,
-      castField(identityField.singleField),
+      esqlIdentityValue(identityField.singleField),
       mustPrependTypeId
     );
     return `${outputColumn} = ${expression}`;
@@ -482,10 +491,12 @@ export function getEuidEsqlEvaluation(
   for (const f of presentFields) {
     assignments.push(`${esqlPresentColumnName(f)} = ${esqlIsNotNullOrEmpty(f)}`);
   }
-  // Nullable aliases: field value when present, NULL otherwise.
+  // Nullable aliases: the field's identity value when present, NULL otherwise.
   for (const f of presentFields) {
     assignments.push(
-      `${esqlPresentOrNullColumnName(f)} = CASE(${esqlPresentColumnName(f)}, TO_STRING(${f}))`
+      `${esqlPresentOrNullColumnName(f)} = CASE(${esqlPresentColumnName(f)}, ${esqlIdentityValue(
+        f
+      )})`
     );
   }
 

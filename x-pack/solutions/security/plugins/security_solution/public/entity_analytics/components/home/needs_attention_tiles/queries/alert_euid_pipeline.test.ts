@@ -63,7 +63,9 @@ describe('buildAlertEuidPipeline', () => {
       const userGuard = guard.slice(0, guard.indexOf('host_euid = CASE('));
       expect(userGuard).toContain('event.outcome != "failure"');
       expect(derived.indexOf('user_euid = CASE(')).toBeGreaterThan(derived.indexOf('user_euid ='));
-      expect(derived.indexOf('user_euid = CASE(')).toBeLessThan(derived.indexOf('MV_DEDUPE'));
+      expect(derived.indexOf('user_euid = CASE(')).toBeLessThan(
+        derived.indexOf('= MV_DEDUPE(MV_APPEND(')
+      );
     });
 
     it('filters before the EUID evals', () => {

@@ -27,8 +27,8 @@ import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
  *    canonical example — eliminating 18 per-row scalar guards in the ES|QL planner.
  *
  * 2. `isNotEmpty` AND pattern `{and: [{field: X, exists: true}, {field: X, neq: ''}]}`
- *    into `castField(X) IS NOT NULL AND castField(X) != ""`, which the planner can push
- *    down more efficiently.
+ *    into `esqlIsNotNullOrEmpty(X)`, which reduces a multi-valued field to its identity value
+ *    first (a plain `!= ""` is null on a multi-valued field).
  *
  * All other condition shapes are rendered by our own leaf emitter so every field reference
  * is wrapped with the appropriate cast from the singleton field type registry — this prevents

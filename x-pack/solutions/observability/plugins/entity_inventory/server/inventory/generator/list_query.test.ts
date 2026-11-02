@@ -239,15 +239,15 @@ describe('generateListQueries', () => {
 TS metrics-kubernetes.state_deployment-*
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (metricset.name == "state_deployment")
-    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != "" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != "")
+    AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
-| EVAL kubernetes_namespace_present = TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != "",
- kubernetes_deployment_name_present = TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != "",
- kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, TO_STRING(kubernetes.namespace)),
- kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, TO_STRING(kubernetes.deployment.name)),
+| EVAL kubernetes_namespace_present = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL,
+ kubernetes_deployment_name_present = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL,
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace)))),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))),
  entity.id = CONCAT("k8s.deployment:", CONCAT(kubernetes_namespace_present_or_null, "/", kubernetes_deployment_name_present_or_null))
 | KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`paused\`, \`last_seen\`
 | SORT \`last_seen\` DESC NULLS LAST
