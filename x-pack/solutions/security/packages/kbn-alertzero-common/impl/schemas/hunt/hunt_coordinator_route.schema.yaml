@@ -509,7 +509,7 @@ components:
             `tier1.incomplete` / `tier2.incomplete`, which the caller
             already has; this is the part of `completeness` that would
             otherwise reach the caller only as an enum, or on the
-            Tier-1-only paths, not even that. Absent or empty means the
+            paths where only IOC Hunt ran, not even that. Absent or empty means the
             coordinator itself found nothing to report here.
           items:
             $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteness'
@@ -553,7 +553,7 @@ components:
             environment hits or a Behavior Hunt executed required-index
             hit) and the request named a `report_id`: one entry per
             technique this run corroborated, meaning its ES|QL
-            executed and returned required-index rows or a IOC Hunt
+            executed and returned required-index rows or an IOC Hunt
             hit was attributed to it. A technique that was only
             proposed gets no entry of its own; when no technique was
             corroborated, a single report-scoped entry carries all of

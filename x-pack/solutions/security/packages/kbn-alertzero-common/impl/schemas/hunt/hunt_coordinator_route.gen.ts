@@ -313,13 +313,13 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'The distinct reasons of the coverage gaps that kept this run `incomplete_retryable`, from the coordinator and both tiers, judged in the same context as `completeness`. A reason that is final for this run (a technique it gave up on, a gate nothing could pass) is left out. Empty when the run is not retryable; absent on paths that record nothing.'
       ),
     /**
-     * The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here.
+     * The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here.
      */
     incomplete: z
       .array(HuntIncompleteness)
       .optional()
       .describe(
-        "The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here."
+        "The coordinator's own coverage gaps — input this run had to truncate, and a Behavior Hunt that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the paths where only IOC Hunt ran, not even that. Absent or empty means the coordinator itself found nothing to report here."
       ),
     /**
      * Report IOCs excluded by adjudication, not searched by this run.
@@ -359,7 +359,7 @@ export const HuntCoordinatorResult = lazySchema(() =>
         'The full hunt results narrative the hunt child writes to the Investigation: what was hunted, where and when, what each tier found, and why a tier did not run. Deterministic markdown derived from the structured fields, self-sufficient because the SSE attachment may not render everywhere.'
       ),
     /**
-     * Populated when `has_confirmed_hit` is true (IOC Hunt environment hits or a Behavior Hunt executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or a IOC Hunt hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
+     * Populated when `has_confirmed_hit` is true (IOC Hunt environment hits or a Behavior Hunt executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or an IOC Hunt hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.
      */
     sse: z
       .array(
@@ -370,7 +370,7 @@ export const HuntCoordinatorResult = lazySchema(() =>
       )
       .optional()
       .describe(
-        'Populated when `has_confirmed_hit` is true (IOC Hunt environment hits or a Behavior Hunt executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or a IOC Hunt hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
+        'Populated when `has_confirmed_hit` is true (IOC Hunt environment hits or a Behavior Hunt executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or an IOC Hunt hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
       ),
     /**
      * Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation.

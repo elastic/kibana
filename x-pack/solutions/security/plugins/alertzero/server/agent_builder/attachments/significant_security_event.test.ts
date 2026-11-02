@@ -216,7 +216,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
         },
       });
 
-      expect(value).toContain('Confirmed by: tier2');
+      expect(value).toContain('Confirmed by: Behavior Hunt');
       expect(value).toContain('hit — executed, hit (3 row(s) in required indices)');
       expect(value).toContain('clean — executed, no rows in required indices (clean)');
       expect(value).toContain(
@@ -370,7 +370,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       for (const section of [
         'Timeline:',
         'Hunt result:',
-        'Confirmed by: tier1, tier2',
+        'Confirmed by: IOC Hunt, Behavior Hunt',
         'Security knowledge indicators',
         'Entities:',
         'Alerts:',

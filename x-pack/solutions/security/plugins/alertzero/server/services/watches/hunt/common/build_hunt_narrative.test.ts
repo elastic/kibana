@@ -213,7 +213,7 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
-  it('names a IOC Hunt only hit and says Behavior Hunt found nothing to execute', () => {
+  it('names an IOC Hunt only hit and says Behavior Hunt found nothing to execute', () => {
     const narrative = buildHuntNarrative(
       result({ tier1: hitTier1(), tier2: tier2([]), has_confirmed_hit: true }),
       ctx

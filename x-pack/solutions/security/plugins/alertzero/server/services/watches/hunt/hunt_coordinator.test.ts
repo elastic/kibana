@@ -2070,7 +2070,7 @@ describe('huntCoordinator', () => {
       );
     });
 
-    it('carries a IOC Hunt hit in a beats index into the targets with a wildcard suffix', async () => {
+    it('carries an IOC Hunt hit in a beats index into the targets with a wildcard suffix', async () => {
       mockScope.mockResolvedValueOnce({ ...okScope, report_matches: [] });
       mockT1.mockResolvedValueOnce(tier1HitIn('winlogbeat-8.15.0-2026.09.30'));
 
@@ -2497,7 +2497,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(false);
     });
 
-    it('leaves a IOC Hunt hit with no mapped terms alone — the tiers did search', async () => {
+    it('leaves an IOC Hunt hit with no mapped terms alone — the tiers did search', async () => {
       mockT1.mockResolvedValueOnce(tier1Result({ status: 'environment_hits_found' }));
       mockT2.mockResolvedValueOnce(tier2Result());
 
@@ -3081,7 +3081,7 @@ describe('huntCoordinator', () => {
       ],
     };
 
-    it('passes excluded_iocs to huntBehavior and sets excluded_report_iocs on a IOC Hunt+2 result', async () => {
+    it('passes excluded_iocs to huntBehavior and sets excluded_report_iocs on an IOC Hunt and Behavior Hunt result', async () => {
       const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
       const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
       const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');

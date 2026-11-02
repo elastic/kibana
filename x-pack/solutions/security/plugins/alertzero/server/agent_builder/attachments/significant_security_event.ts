@@ -29,6 +29,8 @@ export const SIGNIFICANT_SECURITY_EVENT_ATTACHMENT_ID =
  * Sized so the sum of all sections, plus one over-budget item each and the fixed header,
  * stays inside `maxContentLength`. Real payloads carry short items and never reach it.
  */
+const HIT_SOURCE_LABELS = { tier1: 'IOC Hunt', tier2: 'Behavior Hunt' } as const;
+
 const SECTION_CHAR_BUDGET = 8_000;
 
 /**
@@ -115,7 +117,9 @@ const formatSignificantSecurityEventForAgent = (
       // Tier 1 status of `environment_hits_found` can accompany a finding Tier 1 never
       // corroborated; without this line the model attributes the hit to the wrong tier.
       `Confirmed by: ${
-        hitSources.length > 0 ? hitSources.join(', ') : 'nothing (no confirmed hit)'
+        hitSources.length > 0
+          ? hitSources.map((source) => HIT_SOURCE_LABELS[source]).join(', ')
+          : 'nothing (no confirmed hit)'
       }`,
       `IOC Hunt: ${tier1.status} — ${tier1.counts.total_hits} total hits${
         tier1.counts.returned_hits < tier1.counts.total_hits

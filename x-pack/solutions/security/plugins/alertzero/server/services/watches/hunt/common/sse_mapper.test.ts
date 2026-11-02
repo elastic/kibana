@@ -703,7 +703,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     );
   });
 
-  it('does not let a IOC Hunt hit attributed to another technique corroborate this one', async () => {
+  it('does not let an IOC Hunt hit attributed to another technique corroborate this one', async () => {
     const result = await run(
       {
         ...HIT_TIER1_RESULT,
@@ -739,7 +739,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     expect(entries[0].attachment_id).toEqual(idFor());
   });
 
-  it('publishes a technique entry for a technique a IOC Hunt hit was attributed to', async () => {
+  it('publishes a technique entry for a technique an IOC Hunt hit was attributed to', async () => {
     const result = await run(
       {
         ...HIT_TIER1_RESULT,
