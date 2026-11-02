@@ -1128,7 +1128,7 @@ exports[`pull_request fragments pull_request/security_solution/ai_assistant 1`] 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_ai_assistant.sh",
       "depends_on": [
@@ -1156,7 +1156,7 @@ exports[`pull_request fragments pull_request/security_solution/ai_assistant 1`] 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_ai_assistant.sh",
       "depends_on": [
@@ -1190,7 +1190,7 @@ exports[`pull_request fragments pull_request/security_solution/ai4dsoc 1`] = `
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_ai4dsoc.sh",
       "depends_on": [
@@ -1225,7 +1225,7 @@ exports[`pull_request fragments pull_request/security_solution/asset_inventory 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/asset_inventory.sh",
       "depends_on": [
@@ -1252,7 +1252,7 @@ exports[`pull_request fragments pull_request/security_solution/asset_inventory 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/asset_inventory.sh",
       "depends_on": [
@@ -1287,7 +1287,7 @@ exports[`pull_request fragments pull_request/security_solution/cloud_security_po
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/cloud_security_posture.sh",
       "depends_on": [
@@ -1314,7 +1314,7 @@ exports[`pull_request fragments pull_request/security_solution/cloud_security_po
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/cloud_security_posture_serverless.sh",
       "depends_on": [
@@ -1383,7 +1383,7 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
         "enableNestedVirtualization": true,
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/defend_workflows_burn.sh",
       "depends_on": [
@@ -1403,7 +1403,7 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
         "enableNestedVirtualization": true,
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/defend_workflows_serverless_burn.sh",
       "depends_on": [
@@ -1423,7 +1423,7 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_burn.sh",
       "depends_on": [
@@ -1442,7 +1442,7 @@ exports[`pull_request fragments pull_request/security_solution/cypress_burn 1`] 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/osquery_cypress_burn.sh",
       "depends_on": [
@@ -1468,7 +1468,7 @@ exports[`pull_request fragments pull_request/security_solution/defend_workflows 
         "enableNestedVirtualization": true,
         "machineType": "n2-highmem-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/defend_workflows.sh",
       "depends_on": [
@@ -1496,7 +1496,7 @@ exports[`pull_request fragments pull_request/security_solution/defend_workflows 
         "enableNestedVirtualization": true,
         "machineType": "n2-highmem-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/defend_workflows_serverless.sh",
       "depends_on": [
@@ -1531,7 +1531,7 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_detection_engine.sh",
       "depends_on": [
@@ -1559,7 +1559,7 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_detection_engine_exceptions.sh",
       "depends_on": [
@@ -1587,7 +1587,7 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_detection_engine.sh",
       "depends_on": [
@@ -1614,7 +1614,7 @@ exports[`pull_request fragments pull_request/security_solution/detection_engine 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_detection_engine_exceptions.sh",
       "depends_on": [
@@ -1648,7 +1648,7 @@ exports[`pull_request fragments pull_request/security_solution/entity_analytics 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh",
       "depends_on": [
@@ -1676,7 +1676,7 @@ exports[`pull_request fragments pull_request/security_solution/entity_analytics 
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_entity_analytics.sh",
       "depends_on": [
@@ -1710,7 +1710,7 @@ exports[`pull_request fragments pull_request/security_solution/explore 1`] = `
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_explore.sh",
       "depends_on": [
@@ -1737,7 +1737,7 @@ exports[`pull_request fragments pull_request/security_solution/explore 1`] = `
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_explore.sh",
       "depends_on": [
@@ -1817,7 +1817,7 @@ exports[`pull_request fragments pull_request/security_solution/investigations 1`
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_investigations.sh",
       "depends_on": [
@@ -1844,7 +1844,7 @@ exports[`pull_request fragments pull_request/security_solution/investigations 1`
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_investigations.sh",
       "depends_on": [
@@ -1879,7 +1879,7 @@ exports[`pull_request fragments pull_request/security_solution/osquery_cypress 1
       "agents": {
         "machineType": "n2-highmem-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/osquery_cypress.sh",
       "depends_on": [
@@ -1906,7 +1906,7 @@ exports[`pull_request fragments pull_request/security_solution/osquery_cypress 1
       "agents": {
         "machineType": "n2-highmem-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_osquery.sh",
       "depends_on": [
@@ -1941,7 +1941,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management.sh",
       "depends_on": [
@@ -1969,7 +1969,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh",
       "depends_on": [
@@ -1997,7 +1997,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh",
       "depends_on": [
@@ -2025,7 +2025,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh",
       "depends_on": [
@@ -2053,7 +2053,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh",
       "depends_on": [
@@ -2081,7 +2081,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management.sh",
       "depends_on": [
@@ -2108,7 +2108,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh",
       "depends_on": [
@@ -2135,7 +2135,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh",
       "depends_on": [
@@ -2162,7 +2162,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh",
       "depends_on": [
@@ -2189,7 +2189,7 @@ exports[`pull_request fragments pull_request/security_solution/rule_management 1
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
-        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh",
       "depends_on": [
