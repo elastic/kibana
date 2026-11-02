@@ -8,6 +8,7 @@
 import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
 import type {
   PackageReportBehavior,
+  PackageReportCoverageGap,
   PackageReportMintPayload,
 } from '../../../../../common/step_types/package_report';
 import type { CapabilitiesSource } from '../../../fleet/resolve_host_enrollment';
@@ -49,6 +50,8 @@ export interface ProcessSelector {
   /** Full executable path (`process.executable`) when the source document carried one. */
   processExecutable?: string;
   observedAt?: string;
+  /** When the process exited; absent if it is live or unknown. */
+  exitedAt?: string;
   /**
    * ATT&CK technique this specific process was matched against (from the source event's
    * `matched.technique_id`), when the event that produced this selector carried one. Lets the
@@ -124,6 +127,8 @@ export interface CoordinatorInputs {
   /** The coordinator's report-intent datasets: where a rule for this report would query. */
   reportIntentTargets?: string[];
   behaviors?: PackageReportBehavior[];
+  /** What a `retired_incomplete` run could not search; absent on an older Worker. */
+  coverageGaps?: PackageReportCoverageGap[];
 }
 
 /** What one current-run SSE contributes to a coverage subject. */

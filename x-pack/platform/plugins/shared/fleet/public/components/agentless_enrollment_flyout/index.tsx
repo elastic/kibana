@@ -40,7 +40,7 @@ import { AgentlessStepConfirmData } from './step_confirm_data';
 import { AgentlessStepConfigureConnector } from './step_configure_connector';
 import { AgentlessStepViewDashboards } from './step_view_dashboards';
 import type { AgentlessEnrollmentFlyoutProps } from './types';
-import { resolveIntegrationTitle } from './utils';
+import { getAgentlessEnrollmentState, resolveIntegrationTitle } from './utils';
 
 // re-export the flyout contract types so external consumers can import them from this module
 export type {
@@ -108,7 +108,9 @@ export const AgentlessEnrollmentFlyout = ({
   useEffect(() => {
     if (agentOnline) return;
     if (agentData) {
-      if (agentData.status === 'online') {
+      // Judged by the integration's units, like the step content: an agent failing only outside
+      // the integration runs it, and an online one that does not run it yet is still pending.
+      if (getAgentlessEnrollmentState(agentData, packagePolicy) === 'success') {
         setAgentOnline(true);
         setConfirmEnrollmentStatus('complete');
         setConfirmDataStatus('loading');
@@ -123,7 +125,7 @@ export const AgentlessEnrollmentFlyout = ({
       setConfirmEnrollmentStatus('loading');
       setConfirmDataStatus('disabled');
     }
-  }, [agentOnline, agentData]);
+  }, [agentOnline, agentData, packagePolicy]);
 
   // An online agent with a failed component is not a successful deployment.
   const hasFailedComponents =

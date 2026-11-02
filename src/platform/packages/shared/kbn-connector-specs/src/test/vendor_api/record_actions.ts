@@ -8,12 +8,12 @@
  */
 
 import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-emulate';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionDefinition, ConnectorSpec } from '../../connector_spec';
 import type { ContractContext, ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';
-import type { QueryOperation, VendorApiFixtures } from './fixtures';
+import type { ActionFixture, QueryOperation, VendorApiFixtures } from './fixtures';
 import { toResponseFixtures } from './fixtures';
-import type { RejectedInput } from './generate_action_inputs';
+import type { GeneratedInputs, RejectedInput } from './generate_action_inputs';
 import { generateActionInputs } from './generate_action_inputs';
 import type { ManifestOperation } from './manifest';
 import { matchesPathTemplate } from './manifest';
@@ -131,6 +131,25 @@ const authTypeIdsOf = ({ auth }: ConnectorSpec): string[] =>
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+// A list of overrides generates the inputs once per entry; inputs that come out the same run once.
+const generateFixtureInputs = async (
+  definition: ActionDefinition,
+  input: ActionFixture['input']
+): Promise<GeneratedInputs> => {
+  const overrides = Array.isArray(input) ? input : [input];
+  const generated = await Promise.all(
+    overrides.map((override) => generateActionInputs(definition, override))
+  );
+  const unique = new Map<string, unknown>();
+  for (const candidate of generated.flatMap(({ inputs }) => inputs)) {
+    unique.set(JSON.stringify(candidate), candidate);
+  }
+  return {
+    inputs: [...unique.values()],
+    rejected: generated.flatMap(({ rejected }) => rejected),
+  };
+};
+
 /**
  * Runs every action of a connector against the contract mock, with inputs generated from its
  * schema, under each of its auth types, and records the vendor operations the runs call.
@@ -166,7 +185,7 @@ export const recordActions = async ({
 
   for (const action of Object.keys(connector.actions).sort()) {
     const fixture = fixtures[action] ?? {};
-    const { inputs, rejected } = await generateActionInputs(
+    const { inputs, rejected } = await generateFixtureInputs(
       connector.actions[action],
       fixture.input
     );

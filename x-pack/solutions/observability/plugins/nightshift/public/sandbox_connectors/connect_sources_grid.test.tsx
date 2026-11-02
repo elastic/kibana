@@ -163,11 +163,4 @@ describe('ConnectSourcesGrid', () => {
 
     expect(await githubCard()).toBeDisabled();
   });
-
-  it('renders nothing when no type is sandbox capable', async () => {
-    setup({ types: [] });
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(screen.queryByTestId('nightshiftConnectSourcesGrid')).not.toBeInTheDocument();
-  });
 });

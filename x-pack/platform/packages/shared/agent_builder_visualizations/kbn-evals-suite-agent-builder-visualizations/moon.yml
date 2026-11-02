@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/custom-content-common'
   - '@kbn/esql-language'
+  - '@kbn/esql-utils'
   - '@kbn/evals'
   - '@kbn/inference-common'
   - '@kbn/inference-prompt-utils'

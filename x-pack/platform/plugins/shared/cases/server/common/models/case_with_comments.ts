@@ -407,20 +407,9 @@ export class CaseCommentModel {
         },
       };
     };
-    const alertsAttachedToCase = await this.params.services.attachmentService.getter.getAllAlertIds(
-      {
-        caseId: this.caseInfo.id,
-      }
-    );
-
-    const eventsAttachedToCase = await this.params.services.attachmentService.getter.getAllEventIds(
-      {
-        caseId: this.caseInfo.id,
-        owner: this.caseInfo.attributes.owner,
-      }
-    );
-
-    // Attacks are a Security-only type, so only pay for the lookup when the request carries one.
+    const { getter } = this.params.services.attachmentService;
+    const hasAlerts = attachments.some((attachment) => isAlertAttachmentType(attachment.type));
+    const hasEvents = attachments.some((attachment) => isEventAttachmentType(attachment.type));
     const requestedAttackIds = [
       ...new Set(
         attachments.flatMap((attachment) =>
@@ -430,13 +419,23 @@ export class CaseCommentModel {
         )
       ),
     ];
-    const attacksAttachedToCase =
+
+    // Only look up the id types the request carries.
+    const [alertsAttachedToCase, eventsAttachedToCase, attacksAttachedToCase] = await Promise.all([
+      hasAlerts ? getter.getAllAlertIds({ caseId: this.caseInfo.id }) : new Set<string>(),
+      hasEvents
+        ? getter.getAllEventIds({
+            caseId: this.caseInfo.id,
+            owner: this.caseInfo.attributes.owner,
+          })
+        : new Set<string>(),
       requestedAttackIds.length > 0
-        ? await this.params.services.attachmentService.getter.getAttachedAttackIds({
+        ? getter.getAttachedAttackIds({
             caseId: this.caseInfo.id,
             attackIds: requestedAttackIds,
           })
-        : new Set<string>();
+        : new Set<string>(),
+    ]);
 
     attachments.forEach((attachment) => {
       if (isAlertAttachmentType(attachment.type)) {
@@ -775,7 +774,8 @@ export class CaseCommentModel {
         });
 
       await Promise.all([
-        // Alert sync uses the original request so alerts already on the case still get synced.
+        // Partial duplicates sync every requested alert id, including ids already on the case.
+        // Full duplicates were not created, so `withoutErrors` drops them.
         commentableCase.handleAlertComments(withoutErrors(attachments)),
         commentableCase.handleAttackComments(withoutErrors(attachments)),
         this.bulkCreateCommentUserAction(withoutErrors(attachmentWithoutDuplicateAlerts)),
