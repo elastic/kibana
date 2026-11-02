@@ -23,8 +23,7 @@ interface Props {
 /**
  * Owns the form subscriptions that change on every keystroke (section validity, isValidating) so the
  * form root never re-renders on field changes. The section elements are created once by the root and
- * passed in, so React skips re-rendering them when only this component updates. The indicator section
- * validity is shared with the data preview chart through `IndicatorSectionValidityProvider`.
+ * passed in, so React skips re-rendering them when only this component updates.
  */
 export function SloEditFormSteps({
   isEditMode,

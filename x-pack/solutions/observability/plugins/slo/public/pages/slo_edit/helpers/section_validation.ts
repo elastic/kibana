@@ -180,7 +180,11 @@ export const isIndicatorSectionComplete = (
   getValues: GetValues,
   isInvalid: IsInvalid
 ): boolean => {
-  const { validated, required = [], isComplete } = INDICATOR_SECTION_RULES[indicatorType];
+  const rules: IndicatorSectionRules | undefined = INDICATOR_SECTION_RULES[indicatorType];
+  if (!rules) {
+    return false;
+  }
+  const { validated, required = [], isComplete } = rules;
   return (
     validated.every((field) => !isInvalid(field)) &&
     required.every((field) => Boolean(getValues(field))) &&

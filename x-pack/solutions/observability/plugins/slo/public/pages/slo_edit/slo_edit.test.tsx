@@ -471,8 +471,9 @@ describe('SLO Edit Page', () => {
     });
 
     it('hides the SLI preview placeholder when the indicator section is complete', async () => {
-      const { queryByText } = render(<SloEditPage />);
+      const { findByText, queryByText } = render(<SloEditPage />);
 
+      expect(await findByText('SLI preview')).toBeInTheDocument();
       await waitFor(() => expect(queryByText(PREVIEW_PLACEHOLDER)).not.toBeInTheDocument());
     });
 

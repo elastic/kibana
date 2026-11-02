@@ -14,7 +14,14 @@ import {
   isObjectiveSectionComplete,
 } from '../helpers/section_validation';
 
-export function useSectionFormValidation() {
+interface SectionFormValidation {
+  isValidating: boolean;
+  isIndicatorSectionValid: boolean;
+  isObjectiveSectionValid: boolean;
+  isDescriptionSectionValid: boolean;
+}
+
+export function useSectionFormValidation(): SectionFormValidation {
   const { control, getFieldState, getValues } = useFormContext<CreateSLOForm>();
   const [indicatorType] = useWatch({
     control,
