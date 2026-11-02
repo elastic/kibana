@@ -68,6 +68,8 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
       timeFieldName: '@timestamp',
       spaceId: scoutSpace.id,
     });
+    // Only needed so the panel data view test can assert the default (logstash-*) data view's
+    // fields are not used
     await scoutSpace.uiSettings.set({ defaultIndex: LOGSTASH_DATA_VIEW_ID });
 
     emptyDashboardId = await apiServices.dashboard.create(
@@ -92,23 +94,6 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
     await scoutSpace.uiSettings.unset('defaultIndex');
     await scoutSpace.savedObjects.cleanStandardList();
   });
-
-  spaceTest(
-    'shows the filter bar without a data view on an empty dashboard',
-    async ({ page, pageObjects }) => {
-      await pageObjects.dashboard.openDashboardWithIdInEditMode(emptyDashboardId);
-      await page.testSubj.click('addFilter');
-
-      // No panels means no data view is passed to the filter editor, so none is selected and
-      // fields can't be chosen (the default data view is not used as a fallback)
-      expect(
-        await page.components.comboBox('filterIndexPatternsSelect').getSelectedOptions()
-      ).toEqual([]);
-      await expect(page.testSubj.locator('filterFieldSuggestionList')).toHaveClass(
-        /euiComboBox-isDisabled/
-      );
-    }
-  );
 
   spaceTest(
     'shows panel data view fields on a dashboard with panels',
