@@ -63,7 +63,10 @@ import type {
 
 const DEFAULT_PAGE_SIZE = 100;
 
-/** Max completed steps fetched per page when resolving predecessor `output.reasoning`. */
+/** Step payloads live on the IO stream, never on the step document. */
+const STEP_PAYLOAD_SOURCE_EXCLUDES = ['input', 'output'];
+
+/** Max completed steps fetched when resolving predecessor reasoning from output documents. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
 
 const PROCESSED_WAIT_FOR_INPUT_SHOULD: estypes.QueryDslQueryContainer[] = [
@@ -93,8 +96,8 @@ interface WaitForInputListOptions {
 
 /**
  * Result of the cross-workflow `waitForInput` listings. `reasoningByStepId`
- * contains any `output.reasoning` object found on the step that immediately
- * preceded each wait step.
+ * contains any `reasoning` object from the output document of the step that
+ * immediately preceded each wait step.
  *
  * `deletedWorkflowIds` lists the parent workflow ids in `results` that no
  * longer resolve to an alive workflow (soft-deleted, or hard-deleted and
@@ -364,7 +367,9 @@ export class WorkflowExecutionQueryService {
       workflowExecutionId: params.executionId,
       additionalQuery: { term: { id: params.id } },
       spaceId,
+      sourceExcludes: STEP_PAYLOAD_SOURCE_EXCLUDES,
     });
+    await this.attachStepPayloads(searchResult.results, { input: true, output: true });
     return searchResult.results;
   }
 
@@ -372,8 +377,7 @@ export class WorkflowExecutionQueryService {
     params: SearchStepExecutionsParams,
     spaceId: string
   ): Promise<StepExecutionListResult> {
-    const sourceExcludes = ['input', 'output'];
-
+    const payloads = payloadSourceRequest(params);
     // An explicitly empty array means "no runs", so the clause is built whenever the caller
     // supplied one at all — an empty `terms` matches nothing, which is what was asked for.
     const workflowRunFilter = params.workflowExecutionIds && {
@@ -388,21 +392,17 @@ export class WorkflowExecutionQueryService {
       stepType: params.stepType,
       additionalQuery: workflowRunFilter || undefined,
       spaceId,
-      sourceExcludes: sourceExcludes.length > 0 ? sourceExcludes : undefined,
-      sourceIncludes: params.sourceIncludes,
+      sourceExcludes: STEP_PAYLOAD_SOURCE_EXCLUDES,
+      sourceIncludes: payloads.sourceIncludes,
       page: params.page,
       size: params.size,
       startedAfter: params.startedAfter,
       startedBefore: params.startedBefore,
     });
-    if (params.includeInput || params.includeOutput) {
-      await hydrateExecutionIo({
-        executionsIoDataClient: this.deps.executionsIoDataClient,
-        stepExecutions: result.results,
-        includeInput: params.includeInput,
-        includeOutput: params.includeOutput,
-      });
-    }
+    await this.attachStepPayloads(result.results, {
+      input: payloads.includeInput,
+      output: payloads.includeOutput,
+    });
     return result;
   }
 
@@ -460,6 +460,7 @@ export class WorkflowExecutionQueryService {
         from,
         size: perPage,
         track_total_hits: true,
+        _source: { excludes: STEP_PAYLOAD_SOURCE_EXCLUDES },
       });
     } catch (error) {
       if (isIndexNotFoundError(error)) {
@@ -491,6 +492,8 @@ export class WorkflowExecutionQueryService {
         deletedWorkflowIds: new Set(),
       };
     }
+
+    await this.attachStepPayloads(allResults, { input: true, output: false });
 
     const distinctWorkflowIds = Array.from(
       new Set(
@@ -578,6 +581,7 @@ export class WorkflowExecutionQueryService {
         from,
         size: perPage,
         track_total_hits: true,
+        _source: { excludes: STEP_PAYLOAD_SOURCE_EXCLUDES },
       });
     } catch (error) {
       if (isIndexNotFoundError(error)) {
@@ -609,6 +613,8 @@ export class WorkflowExecutionQueryService {
         deletedWorkflowIds: new Set(),
       };
     }
+
+    await this.attachStepPayloads(allResults, { input: true, output: true });
 
     const distinctWorkflowIds = Array.from(
       new Set(
@@ -699,8 +705,8 @@ export class WorkflowExecutionQueryService {
   }
 
   /**
-   * Best-effort lookup of `output.reasoning` from the completed step that
-   * finished immediately before each wait step started.
+   * Best-effort lookup of reasoning from the output document of the completed
+   * step that finished immediately before each wait step started.
    */
   private async resolvePredecessorReasoning(
     steps: EsWorkflowStepExecution[],
@@ -746,9 +752,8 @@ export class WorkflowExecutionQueryService {
           { workflowRunId: { order: 'asc' } },
           { finishedAt: { order: 'desc', missing: '_last' } },
         ],
-        // Fetch only the reasoning sub-object, not the full (potentially
-        // large) step `output` blob — most predecessors carry no reasoning.
-        _source: { includes: ['workflowRunId', 'finishedAt', 'output.reasoning'] },
+        // Metadata only. Reasoning is read from the predecessor's output document.
+        _source: { includes: ['id', 'workflowRunId', 'finishedAt', 'outputId'] },
         size: PREDECESSOR_REASONING_MAX_HITS,
         track_total_hits: false,
       });
@@ -762,13 +767,33 @@ export class WorkflowExecutionQueryService {
     }
 
     const hits = response?.hits?.hits ?? [];
-    const completedByRun = new Map<string, Array<{ finishedAt?: string; output?: unknown }>>();
+    const completedByRun = new Map<string, Array<{ finishedAt?: string; outputId?: string }>>();
+    const outputIds = new Set<string>();
     for (const hit of hits) {
       const source = hit._source;
       if (source?.workflowRunId) {
         const forRun = completedByRun.get(source.workflowRunId) ?? [];
-        forRun.push({ finishedAt: source.finishedAt, output: source.output });
+        forRun.push({ finishedAt: source.finishedAt, outputId: source.outputId });
         completedByRun.set(source.workflowRunId, forRun);
+        if (source.outputId) {
+          outputIds.add(source.outputId);
+        }
+      }
+    }
+
+    const reasoningByOutputId = new Map<string, Record<string, unknown>>();
+    if (outputIds.size > 0) {
+      try {
+        const { items } = await this.deps.executionsIoDataClient.getByIds([...outputIds]);
+        for (const item of items) {
+          const reasoning = extractReasoning(item.document.value);
+          if (reasoning) {
+            reasoningByOutputId.set(item.document.id, reasoning);
+          }
+        }
+      } catch (error) {
+        this.deps.logger.warn(`Failed to resolve predecessor reasoning: ${error}`);
+        return reasoningByStepId;
       }
     }
 
@@ -783,7 +808,9 @@ export class WorkflowExecutionQueryService {
           (candidate) =>
             typeof candidate.finishedAt === 'string' && candidate.finishedAt <= startedAt
         );
-        const reasoning = extractReasoning(predecessor?.output);
+        const reasoning = predecessor?.outputId
+          ? reasoningByOutputId.get(predecessor.outputId)
+          : undefined;
         if (reasoning) {
           reasoningByStepId.set(id, reasoning);
         }
@@ -907,6 +934,7 @@ export class WorkflowExecutionQueryService {
       },
       size: 1,
       track_total_hits: false,
+      _source: { excludes: STEP_PAYLOAD_SOURCE_EXCLUDES },
     })) as estypes.SearchResponse<EsWorkflowStepExecution>;
 
     if (response.hits.hits.length === 0) {
@@ -918,12 +946,7 @@ export class WorkflowExecutionQueryService {
       return null;
     }
 
-    await hydrateExecutionIo({
-      executionsIoDataClient: this.deps.executionsIoDataClient,
-      stepExecutions: [stepExecution],
-      includeInput: true,
-      includeOutput: true,
-    });
+    await this.attachStepPayloads([stepExecution], { input: true, output: true });
     return stepExecution;
   }
 
@@ -1035,6 +1058,23 @@ export class WorkflowExecutionQueryService {
       throw error;
     }
   }
+
+  /** Drops any payload copied from the step document, then fills the requested sides from IO. */
+  private async attachStepPayloads(
+    steps: EsWorkflowStepExecution[],
+    { input, output }: { input: boolean; output: boolean }
+  ): Promise<void> {
+    omitEmbeddedStepPayloads(steps);
+    if (!input && !output) {
+      return;
+    }
+    await hydrateExecutionIo({
+      executionsIoDataClient: this.deps.executionsIoDataClient,
+      stepExecutions: steps,
+      includeInput: input,
+      includeOutput: output,
+    });
+  }
 }
 
 /**
@@ -1073,6 +1113,51 @@ function buildHistoryFilterClauses({
     });
   }
   return filterMust;
+}
+
+function isStepPayloadSourcePath(path: string): boolean {
+  return (
+    path === 'input' || path === 'output' || path.startsWith('input.') || path.startsWith('output.')
+  );
+}
+
+/**
+ * `sourceIncludes` wins over the include flags. Payload paths in that list are not sent to the
+ * step index; the matching side is loaded as a whole document through the IO client.
+ */
+function payloadSourceRequest(params: {
+  sourceIncludes?: string[];
+  includeInput?: boolean;
+  includeOutput?: boolean;
+}): { sourceIncludes?: string[]; includeInput: boolean; includeOutput: boolean } {
+  if (!params.sourceIncludes?.length) {
+    return {
+      includeInput: Boolean(params.includeInput),
+      includeOutput: Boolean(params.includeOutput),
+    };
+  }
+
+  const includeInput = params.sourceIncludes.some(
+    (path) => path === 'input' || path.startsWith('input.')
+  );
+  const includeOutput = params.sourceIncludes.some(
+    (path) => path === 'output' || path.startsWith('output.')
+  );
+  const sourceIncludes = params.sourceIncludes.filter((path) => !isStepPayloadSourcePath(path));
+  if (includeInput && !sourceIncludes.includes('inputId')) {
+    sourceIncludes.push('inputId');
+  }
+  if (includeOutput && !sourceIncludes.includes('outputId')) {
+    sourceIncludes.push('outputId');
+  }
+  return { sourceIncludes, includeInput, includeOutput };
+}
+
+function omitEmbeddedStepPayloads(steps: EsWorkflowStepExecution[]): void {
+  for (const step of steps) {
+    delete step.input;
+    delete step.output;
+  }
 }
 
 /**

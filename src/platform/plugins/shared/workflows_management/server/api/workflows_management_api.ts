@@ -213,7 +213,8 @@ export interface SearchStepExecutionsParams {
   includeOutput?: boolean;
   /**
    * When set, only these `_source` paths are returned, and `includeInput`/`includeOutput` are
-   * ignored. For reading a few fields off runs whose `output` can be megabytes.
+   * ignored. `input`, `output`, and paths under them are not read from the step document; the
+   * whole payload is loaded through the executions IO client.
    */
   sourceIncludes?: string[];
   page?: number;
