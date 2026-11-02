@@ -141,6 +141,8 @@ export interface SearchWorkflowExecutionsParams {
   executionTypes?: ExecutionType[];
   executedBy?: string[];
   concurrencyGroupKey?: string;
+  /** Exact-match filter on stored execution labels; every entry must match. */
+  labels?: Readonly<Record<string, string>>;
   omitStepRuns?: boolean;
   finishedAfter?: string;
   finishedBefore?: string;

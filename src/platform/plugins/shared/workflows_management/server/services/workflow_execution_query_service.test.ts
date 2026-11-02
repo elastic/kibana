@@ -166,6 +166,23 @@ describe('WorkflowExecutionQueryService', () => {
       });
     });
 
+    it('adds an exact-match term filter per label', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        {
+          workflowId: 'wf-1',
+          labels: { 'hunt.kind': 'manual_session', 'hunt.definition_id': 'lsass' },
+        },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must).toContainEqual({ term: { 'labels.hunt.kind': 'manual_session' } });
+      expect(must).toContainEqual({ term: { 'labels.hunt.definition_id': 'lsass' } });
+    });
+
     it('adds collapse while preserving other filters', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 

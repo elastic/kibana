@@ -20,15 +20,18 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import {
+  assertExecutionLabelsOwnedBy,
   ExecutionStatus,
   isTerminalStatus,
   isWorkflowStepTriggered,
+  normalizeExecutionLabels,
   toWorkflowExecutionEngineModel,
   WorkflowRepository,
 } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   EsWorkflowExecution,
+  ExecutionLabels,
   WorkflowExecutionEngineModel,
   WorkflowSettings,
 } from '@kbn/workflows';
@@ -53,6 +56,7 @@ import {
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
+import { getExecutionRetention } from './lib/execution_retention';
 import { getAuthenticatedUser } from './lib/get_user';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
@@ -68,6 +72,10 @@ import {
   resolveInterruptedWorkflowRunTask,
 } from './lib/task_recovery';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
+import {
+  updateExecutionLabels,
+  type UpdateExecutionLabelsParams,
+} from './lib/update_execution_labels';
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import {
   getExecutionForTaskRunEvent,
@@ -96,10 +104,12 @@ import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigge
 import { initializeTriggerEventsClient } from './trigger_events/event_logs';
 import { searchTriggerEventLog as querySearchTriggerEventLog } from './trigger_events/event_logs/trigger_event_log_query';
 import type {
+  BulkScheduleWorkflow,
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  ExecutionLabelOptions,
   InternalResumeWorkflowExecution,
   ResumeWorkflowExecution,
   ScheduleWorkflow,
@@ -183,6 +193,7 @@ export class WorkflowsExecutionEnginePlugin
 
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
+  private readonly labelNamespaces = new Map<string, string>();
 
   private dataClientBundle!: DataClientBundle;
 
@@ -254,7 +265,7 @@ export class WorkflowsExecutionEnginePlugin
   public setup(
     core: CoreSetup<WorkflowsExecutionEnginePluginStartDeps, WorkflowsExecutionEnginePluginStart>,
     plugins: WorkflowsExecutionEnginePluginSetupDeps
-  ) {
+  ): WorkflowsExecutionEnginePluginSetup {
     this.logger.debug('Workflows execution engine setup');
 
     // Register telemetry event schemas
@@ -1213,7 +1224,43 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
 
-    return {};
+    return {
+      registerExecutionLabelNamespace: (namespace, ownerId) => {
+        const registeredOwner = this.labelNamespaces.get(namespace);
+        if (registeredOwner !== undefined && registeredOwner !== ownerId) {
+          throw new Error(
+            `Execution label namespace "${namespace}" is already registered to "${registeredOwner}"`
+          );
+        }
+        this.labelNamespaces.set(namespace, ownerId);
+      },
+    };
+  }
+
+  /** Validates in-process label options and returns the labels to store, if any. */
+  private resolveLabelOptions(labelOptions: ExecutionLabelOptions | undefined): {
+    executionId?: string;
+    labels?: ExecutionLabels;
+  } {
+    if (!labelOptions) {
+      return {};
+    }
+    const { executionId, labels, labelOwnerId } = labelOptions;
+    if (labels === undefined) {
+      if (executionId !== undefined) {
+        throw new Error('A deterministic execution id requires identity labels');
+      }
+      return {};
+    }
+    if (!labelOwnerId) {
+      throw new Error('Execution labels require a label owner id');
+    }
+    const normalized = normalizeExecutionLabels(labels);
+    assertExecutionLabelsOwnedBy(normalized, labelOwnerId, this.labelNamespaces);
+    if (executionId !== undefined && Object.keys(normalized).length === 0) {
+      throw new Error('A deterministic execution id requires identity labels');
+    }
+    return { executionId, labels: normalized };
   }
 
   public start(coreStart: CoreStart, plugins: WorkflowsExecutionEnginePluginStartDeps) {
@@ -1298,6 +1345,8 @@ export class WorkflowsExecutionEnginePlugin
       defaultTriggeredBy: string;
       authenticatedUser: string | undefined;
       now: Date;
+      executionId?: string;
+      labels?: ExecutionLabels;
     }): Promise<WorkflowExecutionForInputRendering> => {
       if (!args.inheritedIdentity) {
         await ensureServiceAccountBinding(args.workflow, args.spaceId);
@@ -1338,10 +1387,16 @@ export class WorkflowsExecutionEnginePlugin
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
       originalRequest: KibanaRequest,
-      options: { refresh: boolean | 'wait_for'; authenticatedUser?: string } = { refresh: false }
+      options: {
+        refresh: boolean | 'wait_for';
+        authenticatedUser?: string;
+        executionId?: string;
+        labels?: ExecutionLabels;
+      } = { refresh: false }
     ): Promise<{
       workflowExecution: WorkflowExecutionForInputRendering;
       repository: WorkflowExecutionRepository;
+      reusedExisting: boolean;
     }> => {
       const request = getWorkflowOriginalRequest(originalRequest);
       const spaceId = (context.spaceId as string | undefined) || 'default';
@@ -1381,6 +1436,8 @@ export class WorkflowsExecutionEnginePlugin
         defaultTriggeredBy,
         authenticatedUser,
         now: new Date(),
+        executionId: options.executionId,
+        labels: options.labels,
       });
 
       await maybeDrainConcurrencyQueueBeforeEnqueue({
@@ -1393,20 +1450,31 @@ export class WorkflowsExecutionEnginePlugin
 
       // Bound executions must be searchable before the final admission check so
       // force deletion cannot miss an admitted run. Other runs retain the concurrency-only refresh.
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: workflowExecution.effectiveIdentity
-          ? options.refresh || 'wait_for'
-          : workflowExecution.concurrencyGroupKey
-          ? options.refresh
-          : false,
-      });
-
-      await ensureBoundExecutionAdmitted(
+      const { reusedExisting } = await workflowExecutionRepository.createWorkflowExecution(
         workflowExecution,
-        workflowRepository,
-        workflowExecutionRepository
+        {
+          refresh: workflowExecution.effectiveIdentity
+            ? options.refresh || 'wait_for'
+            : workflowExecution.concurrencyGroupKey
+            ? options.refresh
+            : false,
+        }
       );
-      return { workflowExecution, repository: workflowExecutionRepository };
+      // A reused deterministic execution was already admitted and scheduled by its first create.
+      const reusedDeterministic = reusedExisting && options.executionId !== undefined;
+
+      if (!reusedDeterministic) {
+        await ensureBoundExecutionAdmitted(
+          workflowExecution,
+          workflowRepository,
+          workflowExecutionRepository
+        );
+      }
+      return {
+        workflowExecution,
+        repository: workflowExecutionRepository,
+        reusedExisting: reusedDeterministic,
+      };
     };
 
     // Helper function to create a task instance
@@ -1439,8 +1507,14 @@ export class WorkflowsExecutionEnginePlugin
       logger: this.logger,
     };
 
-    const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
+    const executeWorkflow: ExecuteWorkflow = async (
+      workflow,
+      context,
+      originalRequest,
+      labelOptions
+    ) => {
       const request = getWorkflowOriginalRequest(originalRequest);
+      const { executionId, labels } = this.resolveLabelOptions(labelOptions);
       await checkLicense(plugins.licensing);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
@@ -1469,13 +1543,17 @@ export class WorkflowsExecutionEnginePlugin
         }
       }
 
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecution, reusedExisting } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'manual',
         originalRequest,
-        { refresh: true }
+        { refresh: true, executionId, labels }
       );
+
+      if (reusedExisting) {
+        return { workflowExecutionId: workflowExecution.id, reusedExisting: true };
+      }
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
         return {
@@ -1565,14 +1643,24 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
+      const { executionId, labels } = this.resolveLabelOptions(options);
 
-      const { workflowExecution } = await createAndPersistWorkflowExecution(
+      const { workflowExecution, reusedExisting } = await createAndPersistWorkflowExecution(
         workflow,
         context,
         'alert',
         request,
-        { refresh: 'wait_for', authenticatedUser: options?.authenticatedUser }
+        {
+          refresh: 'wait_for',
+          authenticatedUser: options?.authenticatedUser,
+          executionId,
+          labels,
+        }
       );
+
+      if (reusedExisting) {
+        return { workflowExecutionId: workflowExecution.id as string, reusedExisting: true };
+      }
 
       if (workflowExecution.status === ExecutionStatus.FAILED) {
         return {
@@ -1617,7 +1705,7 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     const bulkScheduleWorkflow = async (
-      items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
+      items: Parameters<BulkScheduleWorkflow>[0],
       originalRequest: KibanaRequest
     ): Promise<BulkScheduleWorkflowResult> => {
       if (items.length === 0) {
@@ -1684,6 +1772,10 @@ export class WorkflowsExecutionEnginePlugin
               );
             }
           }
+          const { labels } = this.resolveLabelOptions({
+            labels: item.labels,
+            labelOwnerId: item.labelOwnerId,
+          });
           const workflowExecution = await buildExecutionDocument({
             workflow: item.workflow,
             spaceId,
@@ -1691,6 +1783,7 @@ export class WorkflowsExecutionEnginePlugin
             defaultTriggeredBy: 'alert',
             authenticatedUser,
             now,
+            labels,
           });
           prepared.push({ idx, workflowExecution });
         } catch (err) {
@@ -2064,6 +2157,12 @@ export class WorkflowsExecutionEnginePlugin
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,
       triggerEvents,
+      updateExecutionLabels: (params: UpdateExecutionLabelsParams) =>
+        updateExecutionLabels(
+          { repository: workflowExecutionRepository, namespaces: this.labelNamespaces },
+          params
+        ),
+      executionRetention: getExecutionRetention(this.config.storage),
       serviceAccountBindings: coreStart.security.serviceAccounts,
       __internalStorage: {
         workflowExecutionsDataClient: this.dataClientBundle.createWorkflowDataClient(),

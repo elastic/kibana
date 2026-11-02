@@ -30,7 +30,7 @@ jest.mock('./lib/get_user', () => ({
 }));
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
-const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+const mockCreateWorkflowExecution = jest.fn().mockResolvedValue({ reusedExisting: false });
 const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
 const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
@@ -120,7 +120,7 @@ describe('bulkScheduleWorkflow', () => {
     mockGetWorkflowExecutionStates.mockResolvedValue(new Map());
     mockGetWorkflowsSubscribedToTrigger.mockResolvedValue([]);
     mockIsWorkflowEnabled.mockResolvedValue(true);
-    mockCreateWorkflowExecution.mockResolvedValue(undefined);
+    mockCreateWorkflowExecution.mockResolvedValue({ reusedExisting: false });
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
@@ -239,6 +239,7 @@ describe('bulkScheduleWorkflow', () => {
         expect(options.refresh).toBe(method === 'executeWorkflow' ? true : 'wait_for');
         persisted();
         await gate.promise;
+        return { reusedExisting: false };
       });
       const result = pluginStart[method](workflow, { spaceId: 'default' }, request);
       const rejected = expect(result).rejects.toThrow('Workflow is disabled');
@@ -258,6 +259,7 @@ describe('bulkScheduleWorkflow', () => {
     mockCreateWorkflowExecution.mockImplementationOnce(async (_execution, options) => {
       expect(options.refresh).toBe(true);
       searchable = true;
+      return { reusedExisting: false };
     });
     mockIsWorkflowEnabledRealtime.mockImplementationOnce(async () => {
       expect(searchable).toBe(true);

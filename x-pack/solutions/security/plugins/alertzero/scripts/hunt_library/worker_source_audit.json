@@ -1,0 +1,74 @@
+{
+  "role": "alertzero_threat_hunt",
+  "elasticsearchVersion": "9.7.0-SNAPSHOT",
+  "serverlessRoleSource": "src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml",
+  "rows": [
+    {
+      "id": "aws_iam_cross_account_assume_role_creation",
+      "patterns": [
+        "logs-aws.cloudtrail-*"
+      ],
+      "serverlessUncovered": [],
+      "statefulUncovered": []
+    },
+    {
+      "id": "linux_gtfobins_external_connections",
+      "patterns": [
+        "logs-endpoint.events.network-*"
+      ],
+      "serverlessUncovered": [],
+      "statefulUncovered": []
+    },
+    {
+      "id": "linux_uncommon_exec_suspicious_directory",
+      "patterns": [
+        "logs-endpoint.events.process-*"
+      ],
+      "serverlessUncovered": [],
+      "statefulUncovered": []
+    },
+    {
+      "id": "okta_failed_oauth_public_client_scope",
+      "patterns": [
+        "logs-okta.system*"
+      ],
+      "serverlessUncovered": [],
+      "statefulUncovered": []
+    },
+    {
+      "id": "okta_password_spraying_repeat_source",
+      "patterns": [
+        "logs-okta*"
+      ],
+      "serverlessUncovered": [],
+      "statefulUncovered": []
+    },
+    {
+      "id": "rare_createremotethread_source_process",
+      "patterns": [
+        "logs-windows.sysmon_operational-*"
+      ],
+      "serverlessUncovered": [],
+      "statefulUncovered": []
+    },
+    {
+      "id": "rare_lsass_process_access",
+      "patterns": [
+        "logs-endpoint.events.api*"
+      ],
+      "serverlessUncovered": [],
+      "statefulUncovered": []
+    },
+    {
+      "id": "rare_rundll32_command_line",
+      "patterns": [
+        "logs-endpoint.events.process-*",
+        "logs-windows.sysmon_operational-*",
+        "logs-system.security-*"
+      ],
+      "serverlessUncovered": [],
+      "statefulUncovered": []
+    }
+  ],
+  "ok": true
+}

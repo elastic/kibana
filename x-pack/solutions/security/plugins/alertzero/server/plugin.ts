@@ -48,6 +48,8 @@ import type {
   AlertZeroStartDependencies,
   ThreatIntelSupplyWorkflowInstaller,
 } from './types';
+import { HUNT_LABEL_NAMESPACE, HUNT_LABEL_OWNER_ID } from './hunt_library/execution_labels';
+import { runHuntLibraryPreflight, type HuntLibraryPreflight } from './hunt_library/preflight';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
@@ -97,6 +99,8 @@ export class AlertZeroPlugin
     >
 {
   private readonly logger: Logger;
+  /** Settles once start has checked retention and the fingerprint key; Phase 3 gates the worker on it. */
+  private huntLibraryPreflight?: Promise<HuntLibraryPreflight | undefined>;
   private readonly config: AlertZeroConfig;
   private readonly isServerless: boolean;
   private serverlessTierAvailable = false;
@@ -196,6 +200,10 @@ export class AlertZeroPlugin
     registerAlertZeroTelemetryEvents(coreSetup.analytics);
 
     this.workflowsManagementApi = workflowsManagement.management;
+    this.workflowsManagementApi.registerExecutionLabelNamespace(
+      HUNT_LABEL_NAMESPACE,
+      HUNT_LABEL_OWNER_ID
+    );
 
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
@@ -379,6 +387,21 @@ export class AlertZeroPlugin
         this.fingerprintWritesAllowed = false;
       }
     );
+
+    // Never blocks start: a failed check only logs and keeps the Library Hunt worker disabled.
+    const workflowsManagementApi = this.workflowsManagementApi;
+    if (workflowsManagementApi) {
+      this.huntLibraryPreflight = runHuntLibraryPreflight({
+        config: this.config.huntLibrary,
+        getExecutionRetention: () => workflowsManagementApi.getExecutionRetention(),
+        logger: this.logger,
+      }).catch((error) => {
+        this.logger.error(
+          `Hunt Library preflight failed: ${error instanceof Error ? error.message : String(error)}`
+        );
+        return undefined;
+      });
+    }
 
     this.serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
 
@@ -583,6 +606,11 @@ export class AlertZeroPlugin
 
   private getSpaceId(request: KibanaRequest): string {
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
+  }
+
+  /** Settles with the start-time Hunt Library checks, or undefined when they could not run. */
+  getHuntLibraryPreflight(): Promise<HuntLibraryPreflight | undefined> {
+    return this.huntLibraryPreflight ?? Promise.resolve(undefined);
   }
 
   stop() {

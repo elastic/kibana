@@ -181,6 +181,8 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
   /** Caller-supplied execution metadata, separate from workflow inputs */
   metadata?: Record<string, unknown>;
+  /** Bounded, namespaced, indexed labels. See `execution_labels.ts`. Stored as flattened. */
+  labels?: Readonly<Record<string, string>>;
   /**
    * Event-chain hop depth when scheduled by the event-driven trigger handler.
    * Root copy survives partial `context` updates (same pattern as telemetry extraction).
@@ -328,6 +330,8 @@ export interface WorkflowExecutionDto {
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
+  /** Bounded, namespaced caller labels. See `execution_labels.ts`. */
+  labels?: Readonly<Record<string, string>>;
   /** Aggregated LLM token usage across all `ai.*` steps in this execution. */
   usage?: WorkflowTokenUsage;
   /** Per-step LLM token usage broken down by step and connector. See {@link WorkflowStepTokenUsage}. */

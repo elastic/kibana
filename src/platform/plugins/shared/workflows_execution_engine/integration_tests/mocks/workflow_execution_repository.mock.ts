@@ -72,14 +72,14 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   public createWorkflowExecution(
     workflowExecution: Partial<EsWorkflowExecution>,
     _options: { refresh?: boolean | 'wait_for' } = {}
-  ): Promise<void> {
+  ): Promise<{ reusedExisting: boolean }> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for creation');
     }
 
     this.revisions.set(workflowExecution.id, (this.revisions.get(workflowExecution.id) ?? -1) + 1);
     this.workflowExecutions.set(workflowExecution.id, workflowExecution as EsWorkflowExecution);
-    return Promise.resolve();
+    return Promise.resolve({ reusedExisting: false });
   }
 
   public async discardUnstartedExecution(id: string, spaceId: string): Promise<void> {

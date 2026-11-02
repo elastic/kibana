@@ -56,7 +56,13 @@ import type {
   WorkflowPartialDetailDto,
   WorkflowSortField,
 } from '@kbn/workflows/types/v1';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type {
+  ExecutionLabelOptions,
+  ExecutionRetention,
+  UpdateExecutionLabelsParams,
+  WorkflowsExecutionEnginePluginSetup,
+  WorkflowsExecutionEnginePluginStart,
+} from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
   ExecutionLogsParams,
@@ -291,6 +297,8 @@ export interface ExecuteWorkflowBaseParams {
   completionTimeoutSec?: number;
   triggeredBy?: string;
   metadata?: Record<string, unknown>;
+  /** In-process only: indexed labels and an optional deterministic execution id. */
+  labelOptions?: ExecutionLabelOptions;
 }
 
 export interface ExecuteSavedWorkflowParams extends ExecuteWorkflowBaseParams {
@@ -319,6 +327,8 @@ export type ExecuteWorkflowParams = ExecuteSavedWorkflowParams | ExecuteInlineWo
 
 export interface ExecuteWorkflowResult {
   workflowExecutionId: string;
+  /** True when a deterministic execution id already existed; nothing new was started. */
+  reusedExisting?: boolean;
   execution?: WorkflowExecutionDto;
   timedOut?: boolean;
 }
@@ -335,6 +345,8 @@ export class WorkflowsManagementApi {
   private smlLogger: Logger | null = null;
   private readonly pendingSmlUpdates = new Map<string, Promise<void>>();
   private audit: WorkflowManagementAuditLog | null = null;
+
+  private executionLabelNamespaceRegistrar?: WorkflowsExecutionEnginePluginSetup['registerExecutionLabelNamespace'];
 
   constructor(
     private readonly workflowsService: WorkflowsService,
@@ -758,6 +770,28 @@ export class WorkflowsManagementApi {
     metadata?: Record<string, unknown>,
     isUserInteractive?: boolean
   ): Promise<string> {
+    const { workflowExecutionId } = await this.runWorkflowWithLabels(
+      workflow,
+      spaceId,
+      inputs,
+      request,
+      triggeredBy,
+      metadata,
+      isUserInteractive
+    );
+    return workflowExecutionId;
+  }
+
+  private async runWorkflowWithLabels(
+    workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
+    inputs: Record<string, any>,
+    request: KibanaRequest,
+    triggeredBy?: string,
+    metadata?: Record<string, unknown>,
+    isUserInteractive?: boolean,
+    labelOptions?: ExecutionLabelOptions
+  ): Promise<{ workflowExecutionId: string; reusedExisting?: boolean }> {
     if (!workflow.isEphemeral) {
       await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
     }
@@ -780,12 +814,36 @@ export class WorkflowsManagementApi {
       context.isUserInteractive = true;
     }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
-      workflow,
-      context,
-      request
-    );
-    return executeResponse.workflowExecutionId;
+    const { workflowExecutionId, reusedExisting } = labelOptions
+      ? await workflowsExecutionEngine.executeWorkflow(workflow, context, request, labelOptions)
+      : await workflowsExecutionEngine.executeWorkflow(workflow, context, request);
+    return { workflowExecutionId, ...(reusedExisting ? { reusedExisting } : {}) };
+  }
+
+  /** Registers an execution label namespace to its owning plugin; call during plugin setup. */
+  public registerExecutionLabelNamespace(namespace: string, ownerId: string): void {
+    if (!this.executionLabelNamespaceRegistrar) {
+      throw new Error('Execution label namespaces can only be registered during plugin setup');
+    }
+    this.executionLabelNamespaceRegistrar(namespace, ownerId);
+  }
+
+  public setExecutionLabelNamespaceRegistrar(
+    registrar: WorkflowsExecutionEnginePluginSetup['registerExecutionLabelNamespace']
+  ): void {
+    this.executionLabelNamespaceRegistrar = registrar;
+  }
+
+  /** How long executions are kept; `retentionMs` is null when nothing expires them. */
+  public async getExecutionRetention(): Promise<ExecutionRetention> {
+    const { executionRetention } = await this.getWorkflowsExecutionEngine();
+    return executionRetention;
+  }
+
+  /** Merges owner-checked labels onto an existing execution with optimistic concurrency. */
+  public async updateExecutionLabels(params: UpdateExecutionLabelsParams) {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return workflowsExecutionEngine.updateExecutionLabels(params);
   }
 
   /**
@@ -855,19 +913,22 @@ export class WorkflowsManagementApi {
       completionTimeoutSec = DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC,
       triggeredBy,
       metadata,
+      labelOptions,
     } = params;
 
     const workflow = isExecuteInlineWorkflowParams(params)
       ? await this.createEphemeralWorkflowExecutionModel(params)
       : await this.getSavedWorkflowExecutionModel(params.workflowId, spaceId, request);
 
-    const workflowExecutionId = await this.runWorkflow(
+    const { workflowExecutionId, reusedExisting } = await this.runWorkflowWithLabels(
       workflow,
       spaceId,
       inputs,
       request,
       triggeredBy,
-      metadata
+      metadata,
+      undefined,
+      labelOptions
     );
 
     const { execution, timedOut } = await this.waitForWorkflowExecution({
@@ -879,6 +940,7 @@ export class WorkflowsManagementApi {
 
     return {
       workflowExecutionId,
+      ...(reusedExisting ? { reusedExisting } : {}),
       ...(execution ? { execution } : {}),
       ...(timedOut ? { timedOut } : {}),
     };

@@ -127,6 +127,22 @@ describe('buildWorkflowExecutionDocument', () => {
     ).toMatchObject({ isTestRun: true, isEphemeral: false });
   });
 
+  it('uses a caller-supplied deterministic execution id and stores labels', () => {
+    const doc = buildWorkflowExecutionDocument({
+      ...baseParams,
+      executionId: 'deterministic-id',
+      labels: { 'hunt.kind': 'manual_session' },
+    });
+    expect(doc.id).toBe('deterministic-id');
+    expect(doc.labels).toEqual({ 'hunt.kind': 'manual_session' });
+  });
+
+  it('generates an id and omits labels when none are supplied', () => {
+    const doc = buildWorkflowExecutionDocument({ ...baseParams, labels: {} });
+    expect(doc.id).toEqual(expect.any(String));
+    expect(doc).not.toHaveProperty('labels');
+  });
+
   it('sets version when workflow has version', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,

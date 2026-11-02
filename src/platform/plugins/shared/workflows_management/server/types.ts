@@ -33,7 +33,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsApiRequestHandlerContext } from '@kbn/workflows/server/types';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type {
+  WorkflowsExecutionEnginePluginSetup,
+  WorkflowsExecutionEnginePluginStart,
+} from '@kbn/workflows-execution-engine/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -55,6 +58,7 @@ export interface WorkflowsServerPluginSetupDeps {
   spaces: SpacesPluginSetup;
   serverless?: ServerlessServerSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginSetup;
   /**
    * Optional Inbox plugin. When present, Workflows registers itself as the
    * `workflows` source so paused `waitForInput` steps surface in the

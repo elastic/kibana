@@ -1666,6 +1666,65 @@ steps:
       );
     });
 
+    describe('execution labels', () => {
+      const labelOptions = {
+        executionId: 'det-1',
+        labels: { 'hunt.kind': 'manual_session' },
+        labelOwnerId: 'alertzero',
+      };
+
+      beforeEach(() => {
+        mockWorkflowsService.getWorkflow.mockResolvedValue({
+          id: 'workflow-123',
+          name: 'Test Workflow',
+          enabled: true,
+          valid: true,
+          yaml: 'name: Test Workflow',
+          definition: workflowDefinition,
+        } as any);
+      });
+
+      it('passes in-process label options to the engine as the fourth argument', async () => {
+        await runWithTimers(
+          api.executeWorkflow({
+            workflowId: 'workflow-123',
+            spaceId: 'default',
+            request: mockRequest,
+            waitForCompletion: false,
+            labelOptions,
+          })
+        );
+
+        expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.any(Object),
+          mockRequest,
+          labelOptions
+        );
+      });
+
+      it('reports a reused deterministic execution', async () => {
+        mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValueOnce({
+          workflowExecutionId: 'det-1',
+          reusedExisting: true,
+        });
+
+        const result = await runWithTimers(
+          api.executeWorkflow({
+            workflowId: 'workflow-123',
+            spaceId: 'default',
+            request: mockRequest,
+            waitForCompletion: false,
+            labelOptions,
+          })
+        );
+
+        expect(result).toEqual(
+          expect.objectContaining({ workflowExecutionId: 'det-1', reusedExisting: true })
+        );
+      });
+    });
+
     it('runs a workflow whose only inherit is conditional (server-side caller, not gated)', async () => {
       // Regression (Libra P2): shape of the proposals `system-create-proposal` workflow —
       // an `inherit` step in if/else inside a while loop. A standalone run may complete
@@ -3439,5 +3498,46 @@ steps:
         error: expect.any(Error),
       });
     });
+  });
+});
+
+describe('WorkflowsManagementApi execution labels', () => {
+  const makeApi = () =>
+    new WorkflowsManagementApi(
+      {
+        getWorkflowsExecutionEngine: jest.fn().mockResolvedValue({
+          updateExecutionLabels: jest.fn().mockResolvedValue({ 'hunt.outcome': 'clean' }),
+        }),
+      } as any,
+      true,
+      loggingSystemMock.createLogger()
+    );
+
+  it('refuses namespace registration until the plugin wires the registrar', () => {
+    expect(() => makeApi().registerExecutionLabelNamespace('hunt', 'alertzero')).toThrow(
+      'only be registered during plugin setup'
+    );
+  });
+
+  it('forwards namespace registration to the engine registrar', () => {
+    const registrar = jest.fn();
+    const labelApi = makeApi();
+    labelApi.setExecutionLabelNamespaceRegistrar(registrar);
+
+    labelApi.registerExecutionLabelNamespace('hunt', 'alertzero');
+
+    expect(registrar).toHaveBeenCalledWith('hunt', 'alertzero');
+  });
+
+  it('forwards label merges to the engine', async () => {
+    await expect(
+      makeApi().updateExecutionLabels({
+        executionId: 'e1',
+        spaceId: 'default',
+        workflowId: 'wf',
+        labelOwnerId: 'alertzero',
+        labels: { 'hunt.outcome': 'clean' },
+      })
+    ).resolves.toEqual({ 'hunt.outcome': 'clean' });
   });
 });
