@@ -9,6 +9,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition, NotebookAttributes } from '../../common/types';
+import { isPinnedTimeCell } from '../model/cell_factory';
 import { NotebookStore } from '../model/notebook_store';
 import { createRunQuery } from '../model/run_query';
 import { NotebookScheduler } from '../model/scheduler';
@@ -20,9 +21,6 @@ import { InputCell } from './input_cell';
 import { MarkdownCell } from './markdown_cell';
 import { NotebookContext, useNotebook, type NotebookContextValue } from './notebook_context';
 import { NotebookHeader } from './notebook_header';
-
-const isPinned = (cell: CellDefinition): boolean =>
-  cell.type === 'input' && cell.input.kind === 'time' && cell.input.pinned === true;
 
 const CellView = ({ cell }: { cell: CellDefinition }) => {
   switch (cell.type) {
@@ -46,7 +44,7 @@ const CellList = () => {
     <EuiFlexGroup direction="column" gutterSize="xs">
       {cellOrder.map((id, index) => {
         const cell = cells[id];
-        if (!cell || isPinned(cell)) return null;
+        if (!cell || isPinnedTimeCell(cell)) return null;
         return (
           <Fragment key={id}>
             <AddCellBar index={index} />

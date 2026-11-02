@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -19,7 +19,9 @@ import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import useObservable from 'react-use/lib/useObservable';
 import type { InputCellDefinition } from '../../common/types';
+import { findPinnedTimeCell } from '../model/cell_factory';
 import { useNotebook } from './notebook_context';
+import { NotebookSettingsFlyout } from './notebook_settings_flyout';
 
 const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
   const { store } = useNotebook();
@@ -53,10 +55,8 @@ export const NotebookHeader = ({
   const title = useStateFromPublishingSubject(store.title$);
   const cells = useStateFromPublishingSubject(store.cells$);
   const isDirty = useObservable(store.isDirty$, false);
-  const pinnedTime = Object.values(cells).find(
-    (cell): cell is InputCellDefinition =>
-      cell.type === 'input' && cell.input.kind === 'time' && cell.input.pinned === true
-  );
+  const pinnedTime = findPinnedTimeCell(cells);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
@@ -105,6 +105,17 @@ export const NotebookHeader = ({
         >
           {i18n.translate('xpack.notebook.header.runAll', { defaultMessage: 'Run all' })}
         </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          iconType="gear"
+          onClick={() => setIsSettingsOpen(true)}
+          data-test-subj="notebookSettings"
+        >
+          {i18n.translate('xpack.notebook.header.settings', { defaultMessage: 'Settings' })}
+        </EuiButtonEmpty>
+        {isSettingsOpen && <NotebookSettingsFlyout onClose={() => setIsSettingsOpen(false)} />}
       </EuiFlexItem>
       {onSave && (
         <EuiFlexItem grow={false}>

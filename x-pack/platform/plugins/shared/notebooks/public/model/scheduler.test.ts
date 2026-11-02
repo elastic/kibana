@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@kbn/datemath';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type {
   CellDefinition,
@@ -439,6 +440,36 @@ describe('NotebookScheduler', () => {
       expect(env.output('q')).toBe(qOutput);
       expect(env.output('c')).toBe(qOutput);
       expect(env.fake.callsFor(query)).toHaveLength(1);
+    });
+
+    it('breaks ?_tstart consumers when the global time picker is disabled, and reruns them on enable', async () => {
+      const query = 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend';
+      const env = track(
+        setup([pinnedTime('time'), esql('q', query), chart('c', 'q'), esql('other', 'FROM x')])
+      );
+      await env.open();
+
+      env.store.setGlobalTimePicker(false);
+      await env.scheduler.whenIdle();
+
+      expect(env.runtime('q')).toMatchObject({
+        status: 'error',
+        error: expect.stringContaining('?_tstart'),
+      });
+      expect(env.runtime('c').status).toBe('blocked');
+      expect(env.runtime('other').status).toBe('done');
+
+      env.store.setGlobalTimePicker(true);
+      await env.scheduler.whenIdle();
+
+      expect(env.runtime('q').status).toBe('done');
+      expect(env.runtime('c').status).toBe('done');
+      expect(env.fake.callsFor(query)).toHaveLength(2);
+      expect(env.fake.callsFor(query)[1].params).toEqual({
+        _tstart: dateMath.parse('now-7d/d', { forceNow: NOW })?.toISOString(),
+        _tend: '2026-10-29T12:00:00.000Z',
+      });
+      expect(env.fake.callsFor('FROM x')).toHaveLength(1);
     });
   });
 

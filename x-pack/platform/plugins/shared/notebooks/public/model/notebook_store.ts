@@ -8,6 +8,7 @@
 import objectHash from 'object-hash';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map, type Observable } from 'rxjs';
 import type { CellDefinition, InputDefinition, NotebookAttributes } from '../../common/types';
+import { createPinnedTimeCell, findPinnedTimeCell } from './cell_factory';
 import type { CellRuntime, InputValue } from './types';
 
 const IDLE: CellRuntime = { status: 'idle' };
@@ -125,6 +126,13 @@ export class NotebookStore {
     if (from < 0 || to < 0 || to >= order.length) return;
     [order[from], order[to]] = [order[to], order[from]];
     this.cellOrder$.next(order);
+  }
+
+  /** Adds or removes the pinned time cell that backs the header time picker. */
+  setGlobalTimePicker(enabled: boolean): void {
+    const pinned = findPinnedTimeCell(this.cells$.getValue());
+    if (enabled && !pinned) this.addCell(createPinnedTimeCell(this.cells$.getValue()), 0);
+    if (!enabled && pinned) this.removeCell(pinned.id);
   }
 
   setInputValue(id: string, value: InputValue): void {

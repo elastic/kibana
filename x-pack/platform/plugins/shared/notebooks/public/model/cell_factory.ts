@@ -6,7 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { CellDefinition, CellType, InputKind, NotebookAttributes } from '../../common/types';
+import type {
+  CellDefinition,
+  CellType,
+  InputCellDefinition,
+  InputKind,
+  NotebookAttributes,
+} from '../../common/types';
 
 export type NewCellKind = Exclude<CellType, 'input'> | `input:${InputKind}`;
 
@@ -85,13 +91,25 @@ export const duplicateCell = (
   name: getUniqueName(cell.name.replace(/_\d+$/, ''), cells),
 });
 
-/** A new notebook starts with one pinned time input, `now-7d/d` → `now`. */
+export const isPinnedTimeCell = (cell: CellDefinition): cell is InputCellDefinition =>
+  cell.type === 'input' && cell.input.kind === 'time' && cell.input.pinned === true;
+
+export const findPinnedTimeCell = (
+  cells: Record<string, CellDefinition>
+): InputCellDefinition | undefined => Object.values(cells).find(isPinnedTimeCell);
+
+/** The global time picker's backing cell, exposing `?_tstart`/`?_tend` over `now-7d/d` → `now`. */
+export const createPinnedTimeCell = (cells: Record<string, CellDefinition>): CellDefinition => ({
+  id: uuidv4(),
+  name: Object.values(cells).some(({ name }) => name === 'time')
+    ? getUniqueName('time', cells)
+    : 'time',
+  type: 'input',
+  input: { kind: 'time', defaultValue: { from: 'now-7d/d', to: 'now' }, pinned: true },
+});
+
+/** A new notebook starts with the global time picker enabled. */
 export const createEmptyNotebook = (title: string): NotebookAttributes => {
-  const time: CellDefinition = {
-    id: uuidv4(),
-    name: 'time',
-    type: 'input',
-    input: { kind: 'time', defaultValue: { from: 'now-7d/d', to: 'now' }, pinned: true },
-  };
+  const time = createPinnedTimeCell({});
   return { title, cellOrder: [time.id], cells: { [time.id]: time } };
 };
