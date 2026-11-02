@@ -28,7 +28,10 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { useActiveFaceliftVersion } from '../../../../entity_analytics/components/home/facelift/active_version';
+import {
+  isFaceliftV9OrLater,
+  useActiveFaceliftVersion,
+} from '../../../../entity_analytics/components/home/facelift/active_version';
 import { getEntityId } from '../../../../entity_analytics/components/entity_resolution/helpers';
 import { useResolutionGroup } from '../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group';
 import { EntitySourceValue, TruncatedBadgeList, toEntitySourceArray } from './entity_source_value';
@@ -51,7 +54,7 @@ const useResolvedEntityIds = (
   entityId: string | undefined
 ): { primaryId: string; otherIds: string[] } | undefined => {
   const [faceliftVersion] = useActiveFaceliftVersion();
-  const isV9 = faceliftVersion === 'v9';
+  const isV9 = isFaceliftV9OrLater(faceliftVersion);
   const { data: group } = useResolutionGroup(entityId ?? '', {
     enabled: isV9 && Boolean(entityId),
   });

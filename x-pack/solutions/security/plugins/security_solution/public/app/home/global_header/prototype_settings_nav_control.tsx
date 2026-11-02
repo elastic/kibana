@@ -36,6 +36,15 @@ import {
   useSimplifiedMetrics as useSimplifiedMetricsV8,
 } from '../../../entity_analytics/components/home/facelift/v8/active_metrics_version';
 import { useSimplifiedMetrics as useSimplifiedMetricsV9 } from '../../../entity_analytics/components/home/facelift/v9/active_metrics_version';
+import {
+  EMPTY_STATE_OPTIONS,
+  ERROR_STATE_OPTIONS,
+  LOADING_STATE_OPTIONS,
+  usePrototypeStates,
+  type PrototypeStateGroup,
+  type PrototypeStates,
+  type StateOption,
+} from '../../../entity_analytics/components/home/facelift/v9_1/prototype_states';
 
 const ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.globalHeader.prototypeSettingsAriaLabel',
@@ -57,17 +66,71 @@ const SIMPLIFIED_METRICS_ITEM = i18n.translate(
   { defaultMessage: 'Simplified metrics' }
 );
 
+const EMPTY_STATES_ITEM = i18n.translate(
+  'xpack.securitySolution.globalHeader.prototypeSettingsEmptyStates',
+  { defaultMessage: 'Empty states' }
+);
+
+const LOADING_STATES_ITEM = i18n.translate(
+  'xpack.securitySolution.globalHeader.prototypeSettingsLoadingStates',
+  { defaultMessage: 'Loading states' }
+);
+
+const ERROR_STATES_ITEM = i18n.translate(
+  'xpack.securitySolution.globalHeader.prototypeSettingsErrorStates',
+  { defaultMessage: 'Error states' }
+);
+
+const PROPOSED_DESIGN_ITEM = i18n.translate(
+  'xpack.securitySolution.globalHeader.prototypeSettingsProposedDesign',
+  { defaultMessage: 'Proposed design' }
+);
+
 const ROOT_PANEL_ID = 0;
 const PROTOTYPE_PANEL_ID = 1;
 const METRICS_PANEL_ID = 2;
+const EMPTY_STATES_PANEL_ID = 3;
+const LOADING_STATES_PANEL_ID = 4;
+const ERROR_STATES_PANEL_ID = 5;
+
+const UI_STATES_MENUS: Array<{
+  group: PrototypeStateGroup;
+  panelId: number;
+  name: string;
+  testId: string;
+  options: Array<StateOption<string>>;
+}> = [
+  {
+    group: 'empty',
+    panelId: EMPTY_STATES_PANEL_ID,
+    name: EMPTY_STATES_ITEM,
+    testId: 'EmptyStates',
+    options: EMPTY_STATE_OPTIONS,
+  },
+  {
+    group: 'loading',
+    panelId: LOADING_STATES_PANEL_ID,
+    name: LOADING_STATES_ITEM,
+    testId: 'LoadingStates',
+    options: LOADING_STATE_OPTIONS,
+  },
+  {
+    group: 'error',
+    panelId: ERROR_STATES_PANEL_ID,
+    name: ERROR_STATES_ITEM,
+    testId: 'ErrorStates',
+    options: ERROR_STATE_OPTIONS,
+  },
+];
 
 const showsMetricsVersion = (version: FaceliftVersion): boolean =>
   version === 'v6' || version === 'v7' || version === 'v8';
 
 /**
  * Empty chrome-header button (palette) whose context menu holds Prototype version,
- * Metrics version, and the Simplified metrics switch — each only when the
- * current prototype makes that control valid.
+ * Metrics version, the Simplified metrics switch, and (v.9.1) the Empty / Loading /
+ * Error states submenus — each only when the current prototype makes that control
+ * valid.
  */
 export const PrototypeSettingsNavControl: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -77,12 +140,14 @@ export const PrototypeSettingsNavControl: React.FC = () => {
   const [metricsVersionV8, setMetricsVersionV8] = useActiveMetricsVersionV8();
   const [simplifiedV8, setSimplifiedV8] = useSimplifiedMetricsV8();
   const [simplifiedV9, setSimplifiedV9] = useSimplifiedMetricsV9();
+  const [uiStates, updateUiStates] = usePrototypeStates();
 
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePopover = useCallback(() => setIsOpen((open) => !open), []);
 
   const showMetrics = showsMetricsVersion(faceliftVersion);
   const showSwitcher = faceliftVersion === 'v8' || faceliftVersion === 'v9';
+  const showUiStates = faceliftVersion === 'v9_1';
   const simplified = faceliftVersion === 'v9' ? simplifiedV9 : simplifiedV8;
   const setSimplified = faceliftVersion === 'v9' ? setSimplifiedV9 : setSimplifiedV8;
 
@@ -157,6 +222,16 @@ export const PrototypeSettingsNavControl: React.FC = () => {
       });
     }
 
+    if (showUiStates) {
+      UI_STATES_MENUS.forEach((menu) => {
+        rootItems.push({
+          name: menu.name,
+          panel: menu.panelId,
+          'data-test-subj': `eaPrototypeSettings${menu.testId}`,
+        });
+      });
+    }
+
     const nextPanels: EuiContextMenuPanelDescriptor[] = [
       {
         id: ROOT_PANEL_ID,
@@ -191,6 +266,56 @@ export const PrototypeSettingsNavControl: React.FC = () => {
       });
     }
 
+    if (showUiStates) {
+      UI_STATES_MENUS.forEach((menu) => {
+        const proposed = uiStates.variants[menu.group] === 'proposed';
+        const toggleVariant = () =>
+          updateUiStates({
+            variants: { ...uiStates.variants, [menu.group]: proposed ? 'today' : 'proposed' },
+          });
+
+        nextPanels.push({
+          id: menu.panelId,
+          title: menu.name,
+          items: [
+            {
+              name: (
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem>{PROPOSED_DESIGN_ITEM}</EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiSwitch
+                      compressed
+                      label={PROPOSED_DESIGN_ITEM}
+                      showLabel={false}
+                      checked={proposed}
+                      onChange={(event) => {
+                        event.stopPropagation();
+                        toggleVariant();
+                      }}
+                      data-test-subj={`eaPrototypeSettings${menu.testId}ProposedSwitch`}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              onClick: (event) => {
+                event.preventDefault();
+                toggleVariant();
+              },
+              'data-test-subj': `eaPrototypeSettings${menu.testId}Proposed`,
+            },
+            { isSeparator: true, key: `${menu.testId}Separator` },
+            ...menu.options.map((option) => ({
+              name: option.label,
+              icon: option.key === uiStates[menu.group] ? 'check' : 'empty',
+              onClick: () =>
+                updateUiStates({ [menu.group]: option.key } as Partial<PrototypeStates>),
+              'data-test-subj': `eaPrototypeSettings${menu.testId}Option-${option.key}`,
+            })),
+          ],
+        });
+      });
+    }
+
     return nextPanels;
   }, [
     faceliftVersion,
@@ -201,7 +326,10 @@ export const PrototypeSettingsNavControl: React.FC = () => {
     setSimplified,
     showMetrics,
     showSwitcher,
+    showUiStates,
     simplified,
+    uiStates,
+    updateUiStates,
   ]);
 
   return (

@@ -101,7 +101,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
     faceliftVersion === 'v6' ||
     faceliftVersion === 'v7' ||
     faceliftVersion === 'v8' ||
-    faceliftVersion === 'v9';
+    faceliftVersion === 'v9' ||
+    faceliftVersion === 'v9_1';
   const riskScoreLabel = isFaceliftAliasesOnly
     ? RESOLVED_ENTITY_RISK_SCORE_LABEL
     : GROUP_RISK_SCORE_LABEL;
