@@ -120,7 +120,7 @@ export const resolveInheritedWorkflowIdentity = (
 
 /** Rejects changed delegation before persistence; credential acquisition checks again at run/resume. */
 export const ensureInheritedBindingCurrent = async (
-  core: CoreStart,
+  core: Pick<CoreStart, 'security'>,
   identity: NonNullable<EsWorkflowExecution['effectiveIdentity']>,
   spaceId: string
 ): Promise<void> => {

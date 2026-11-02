@@ -24,7 +24,7 @@ import type { IClusterClient, KibanaRequest, SecurityServiceStart } from '@kbn/c
  */
 export async function getAuthenticatedUser(
   request: KibanaRequest,
-  security: SecurityServiceStart,
+  security: Pick<SecurityServiceStart, 'authc'>,
   clusterClient: IClusterClient
 ): Promise<string | undefined> {
   // Try getCurrentUser first (works for regular authenticated requests)

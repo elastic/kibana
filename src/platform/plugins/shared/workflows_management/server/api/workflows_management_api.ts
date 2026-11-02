@@ -75,6 +75,7 @@ import {
 } from './external_resume/external_resume_service';
 import { withHitlClaim } from './hitl_claim_release';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
+import { getWorkflowsByIdsForRequests } from './lib/get_workflows_by_ids_for_requests';
 import type { LoadAlertDocumentsRequest, LoadedAlertDocuments } from './lib/load_alert_documents';
 import { loadAlertDocuments } from './lib/load_alert_documents';
 import type { StepExecutionListResult } from './lib/search_step_executions';
@@ -504,30 +505,12 @@ export class WorkflowsManagementApi {
   public async getWorkflowsByIdsForRequests(
     lookups: Array<{ ids: string[]; spaceId: string; request: KibanaRequest }>
   ): Promise<Array<PromiseSettledResult<WorkflowDetailDto[]>>> {
-    const idsBySpace = new Map<string, Set<string>>();
-    for (const { ids, spaceId } of lookups) {
-      const uniqueIds = idsBySpace.get(spaceId) ?? new Set<string>();
-      ids.forEach((id) => uniqueIds.add(id));
-      idsBySpace.set(spaceId, uniqueIds);
-    }
-    const access = await this.workflowsService.getAccessControl();
-    const documentsBySpace = new Map(
-      [...idsBySpace].map(([spaceId, ids]) => [
-        spaceId,
-        this.workflowsService.getWorkflowsByIds([...ids], spaceId),
-      ])
-    );
-    return Promise.allSettled(
-      lookups.map(async ({ ids, spaceId, request }) => {
-        const documents = await documentsBySpace.get(spaceId);
-        const requestedIds = new Set(ids);
-        const results = await Promise.all(
-          (documents ?? [])
-            .filter(({ id }) => requestedIds.has(id))
-            .map((workflow) => access.toDto(workflow, request))
-        );
-        return results.filter((workflow) => workflow.permissions.read);
-      })
+    return getWorkflowsByIdsForRequests(
+      {
+        getWorkflowsByIds: (ids, spaceId) => this.workflowsService.getWorkflowsByIds(ids, spaceId),
+        getAccessControl: () => this.workflowsService.getAccessControl(),
+      },
+      lookups
     );
   }
 

@@ -9,7 +9,7 @@
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
-export const checkLicense = async (licensing: LicensingPluginStart) => {
+export const checkLicense = async (licensing: Pick<LicensingPluginStart, 'getLicense'>) => {
   const license = await licensing.getLicense();
 
   if (!license.isAvailable || !license.isActive) {

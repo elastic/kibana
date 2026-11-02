@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/server';
 const LOCALHOST_FALLBACK = 'http://localhost:5601';
 
 export function getKibanaUrl(
-  coreStart?: CoreStart,
+  coreStart?: Pick<CoreStart, 'http'>,
   cloudSetup?: CloudSetup,
   use_server_info: boolean = false,
   use_localhost: boolean = false
@@ -36,7 +36,7 @@ export function getKibanaUrl(
   );
 }
 
-function getServerInfoUrl(coreStart?: CoreStart): string | undefined {
+function getServerInfoUrl(coreStart?: Pick<CoreStart, 'http'>): string | undefined {
   const http = coreStart?.http;
   if (!http) {
     return undefined;

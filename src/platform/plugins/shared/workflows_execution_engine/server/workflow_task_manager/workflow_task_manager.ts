@@ -8,15 +8,18 @@
  */
 
 import { v4 } from 'uuid';
-import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type {
+  ConcreteTaskInstance,
+  RunSoonOptions,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import {
-  type ConcreteTaskInstance,
-  type RunSoonOptions,
   TaskAlreadyRunningError,
-  type TaskManagerStartContract,
   TaskPriority,
   TaskStatus,
-} from '@kbn/task-manager-plugin/server';
+} from '@kbn/task-manager-plugin/server/task_helpers';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';

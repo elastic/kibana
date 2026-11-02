@@ -22,8 +22,8 @@ export type WorkflowExecutionForInputRendering = Partial<EsWorkflowExecution> &
 
 export function buildInputDefaultRenderContext(
   workflowExecution: WorkflowExecutionForInputRendering,
-  coreStart?: CoreStart,
-  dependencies?: ContextDependencies
+  coreStart?: Pick<CoreStart, 'http'>,
+  dependencies?: Pick<ContextDependencies, 'cloudSetup'>
 ): WorkflowContext {
   const startedAt = workflowExecution.startedAt ?? workflowExecution.createdAt;
   const kibanaUrl = getKibanaUrl(coreStart, dependencies?.cloudSetup);
@@ -81,8 +81,8 @@ export function buildInputDefaultRenderContext(
 
 export function buildWorkflowContext(
   workflowExecution: EsWorkflowExecution,
-  coreStart?: CoreStart,
-  dependencies?: ContextDependencies
+  coreStart?: Pick<CoreStart, 'http'>,
+  dependencies?: Pick<ContextDependencies, 'cloudSetup'>
 ): WorkflowContext {
   const normalizedInputsSchema = getInputsFromDefinition(workflowExecution.workflowDefinition);
   const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);
@@ -97,8 +97,8 @@ export function buildWorkflowContext(
 /** Liquid render context with `event.inputs` aliased. Do not persist this object. */
 export function buildWorkflowRenderContext(
   workflowExecution: EsWorkflowExecution,
-  coreStart?: CoreStart,
-  dependencies?: ContextDependencies
+  coreStart?: Pick<CoreStart, 'http'>,
+  dependencies?: Pick<ContextDependencies, 'cloudSetup'>
 ): WorkflowContext {
   const context = buildWorkflowContext(workflowExecution, coreStart, dependencies);
   const rawEvent = context.event as Record<string, unknown> | undefined;

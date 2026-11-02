@@ -39,6 +39,7 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
 import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import { getWorkflowsByIds } from './get_workflows_by_ids';
 import type { WorkflowCrudDeps } from './types';
 import {
   assertWorkflowOperation,
@@ -582,29 +583,7 @@ export class WorkflowCrudService {
     spaceId: string,
     options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowDetailDto[]> {
-    if (ids.length === 0) {
-      return [];
-    }
-
-    const { must, must_not } = buildWorkflowFilters({
-      ids,
-      space: { id: spaceId, includeGlobal: options?.includeGlobal ?? true },
-      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
-    });
-
-    const response = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not } },
-      size: ids.length,
-      track_total_hits: false,
-      allow_partial_search_results: false,
-    });
-    if (response.timed_out || response._shards.failed > 0) {
-      throw new Error('Could not determine workflow access from an incomplete search.');
-    }
-
-    return response.hits.hits.map((hit) =>
-      transformStorageDocumentToWorkflowDto(hit._id, hit._source)
-    );
+    return getWorkflowsByIds(this.deps.workflowStorage, ids, spaceId, options);
   }
 
   async getWorkflowsSourceByIds(

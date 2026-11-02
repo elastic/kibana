@@ -8,8 +8,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/task_helpers';
 import type { ConcurrencySettings, EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
