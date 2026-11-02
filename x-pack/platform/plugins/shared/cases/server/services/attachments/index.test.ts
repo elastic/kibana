@@ -30,6 +30,7 @@ import {
   LEGACY_ALERT_TYPE,
   LENS_ATTACHMENT_TYPE,
   LENS_SO_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
@@ -917,6 +918,34 @@ describe('AttachmentService', () => {
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Invalid attributes: expected attributes.rule.name for alert attachments"`
         );
+      });
+
+      it('does not require metadata.rule.name for a unified alert', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue({
+          id: '1',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          attributes: {},
+          references: [],
+        });
+
+        await expect(
+          service.update({
+            savedObjectId: '1',
+            savedObjectType: CASE_ATTACHMENT_SAVED_OBJECT,
+            updatedAttributes: {
+              type: SECURITY_ALERT_ATTACHMENT_TYPE,
+              attachmentId: 'alert-1',
+              metadata: { index: '.alerts-security.alerts-default' },
+              owner: SECURITY_SOLUTION_OWNER,
+              created_at: '2024-01-01T00:00:00.000Z',
+              created_by: { username: 'u', full_name: null, email: null },
+              pushed_at: null,
+              pushed_by: null,
+              updated_at: null,
+              updated_by: null,
+            },
+          })
+        ).resolves.not.toThrow();
       });
 
       it('strips excess fields from the request', async () => {
