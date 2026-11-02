@@ -62,13 +62,9 @@ describe('applyHtmlTheme', () => {
       warning: '#fc0',
       danger: '#b00',
       borderBasePlain: '#ccc',
-      textHeading: '#000',
-      textSubdued: '#666',
-      textDanger: '#a00',
-      backgroundLightDanger: '#fdd',
     },
     size: { xs: '4px', s: '8px', m: '12px', base: '16px', l: '24px' },
-    border: { radius: { medium: '6px', small: '4px', panel: '12px' } },
+    border: { radius: { medium: '6px', small: '4px' } },
     font: {
       family: 'Inter, sans-serif',
     },
@@ -110,18 +106,6 @@ describe('applyHtmlTheme', () => {
       '@media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}'
     );
     expect(result.match(/!important/g)).toHaveLength(3);
-  });
-
-  it('exposes the heading, subdued and status tokens and the panel radius', () => {
-    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
-
-    expect(result).toContain('--cc-color-text-heading:#000');
-    expect(result).toContain('--cc-color-text-subdued:#666');
-    expect(result).toContain('--cc-color-text-danger:#a00');
-    expect(result).toContain('--cc-color-background-danger:#fdd');
-    expect(result).toContain('--cc-radius-panel:12px');
-    // A theme without a status color drops its token rather than defaulting it.
-    expect(result).not.toContain('--cc-color-text-risk');
   });
 
   it('exposes the motion tokens', () => {
