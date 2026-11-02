@@ -63,6 +63,7 @@ import { triggerInvestigationStepDefinition } from './step_definitions/trigger_i
 import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
 import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
+import { referenceFreeJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -93,6 +94,7 @@ import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
+import { getInvestigatorConnectorIds } from './agents/assistant/inherited_connectors';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createTimeConverterTool } from './tools/time_converter/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
@@ -204,6 +206,9 @@ export class NightshiftInvestigationsPlugin
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
     });
+    for (const judge of referenceFreeJudges) {
+      plugins.evals?.registerEvaluator(judge);
+    }
 
     this.cortexEnabled = this.ctx.config.get().cortex.enabled;
     this.memoryEnabled = this.ctx.config.get().memory.enabled;
@@ -287,13 +292,15 @@ export class NightshiftInvestigationsPlugin
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
+        // Both agent types allow every configured telemetry connector; the investigator narrows
+        // the list per conversation in the sandbox workspace manager.
+        telemetryConfig: config.sandbox,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
-        logger: this.logger.get('custom_context'),
+        logger: this.logger.get('agent_types'),
       };
       registerInvestigationAgentType(plugins.agentBuilder, {
         ...nightshiftAgentOptions,
-        telemetryConfig: config.sandbox,
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (plugins.agenticInvestigations && config.findings_recorder.enabled) {
@@ -357,7 +364,12 @@ export class NightshiftInvestigationsPlugin
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
       if (plugins.sandbox?.isAvailable) {
-        registerAssistantAgentType(plugins.agentBuilder, nightshiftAgentOptions);
+        registerAssistantAgentType(plugins.agentBuilder, {
+          ...nightshiftAgentOptions,
+          // Types register in setup but resolve after start, so read the start contract lazily.
+          getInheritedConnectorIds: ({ request }) =>
+            getInvestigatorConnectorIds({ agentBuilder: this.agentBuilder, request }),
+        });
         this.assistantEnabled = true;
       }
 
@@ -862,6 +874,7 @@ export class NightshiftInvestigationsPlugin
         return client ? client.getInstalledWorkflowState(workflowId, spaceId) : null;
       },
       spaces: this.spaces,
+      getAutomationsSoClient: this.getAutomationsSoClient,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
     });

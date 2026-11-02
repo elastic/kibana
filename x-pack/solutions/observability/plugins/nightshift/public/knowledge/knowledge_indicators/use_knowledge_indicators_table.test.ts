@@ -8,7 +8,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { AggregatedFeature, Feature } from '@kbn/significant-events-schema';
 import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import type { PromoteResult } from '../../data/rules/use_queries_api';
 import { BULK_EXCLUDE_PARTIAL_TOAST_TITLE } from './translations';
@@ -124,14 +124,16 @@ jest.mock('@kbn/react-query', () => ({
 
 function makeFeature(
   overrides: Partial<Feature> & { id: string; source_id: string } & Record<string, unknown>
-): Feature {
+): AggregatedFeature {
   return {
     type: 'entity',
     title: overrides.title ?? overrides.id,
     subtype: undefined,
     excluded: undefined,
+    sources: [overrides.source_id],
+    instances: [{ source_id: overrides.source_id, uuid: overrides.id, confidence: 0 }],
     ...overrides,
-  } as unknown as Feature;
+  } as unknown as AggregatedFeature;
 }
 
 function makeFeatureKI(

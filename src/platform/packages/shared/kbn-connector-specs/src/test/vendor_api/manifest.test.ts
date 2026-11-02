@@ -88,6 +88,35 @@ describe('serializeManifest', () => {
   });
 });
 
+describe('Markdown reference sources', () => {
+  const withSource = (source: Record<string, unknown>) =>
+    JSON.stringify({
+      ...manifest,
+      sources: { docs: { fetchedAt: '2026-10-07T00:00:00Z', ...source } },
+    });
+
+  it('accepts a Markdown reference with the pages to fetch', () => {
+    const json = withSource({
+      format: 'databricks-markdown',
+      url: 'https://docs.databricks.com/api/llms.txt',
+      pages: ['workspace/jobs/'],
+    });
+
+    expect(parseManifest(json).sources.docs.pages).toEqual(['workspace/jobs/']);
+  });
+
+  it('rejects pages on other sources, and an empty list of pages', () => {
+    expect(() =>
+      parseManifest(withSource({ format: 'openapi', url: 'https://x.com/a.json', pages: ['a/'] }))
+    ).toThrow('only applies to Markdown references');
+    expect(() =>
+      parseManifest(
+        withSource({ format: 'brave-markdown', url: 'https://x.com/llms.txt', pages: [] })
+      )
+    ).toThrow();
+  });
+});
+
 describe('fixtures', () => {
   it('converts response overrides to mock fixtures', () => {
     const fixtures = vendorApiFixturesSchema.parse({

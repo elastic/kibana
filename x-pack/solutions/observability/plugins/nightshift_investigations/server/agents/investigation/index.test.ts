@@ -152,6 +152,19 @@ describe('Nightshift investigation agent type', () => {
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
   });
 
+  it('adds inherited connectors to the telemetry allow-list when a resolver is given', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        telemetryConnectorId: 'elasticsearch-telemetry',
+        getInheritedConnectorIds: async () => ['github', 'elasticsearch-telemetry'],
+      })
+    );
+
+    expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
+  });
+
   it('offers only nightshift_time_converter_tool when the sandbox is not configured', async () => {
     const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: false })

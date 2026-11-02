@@ -19,20 +19,13 @@ import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
-import {
-  ANTI_LEAKAGE_EVALUATOR,
-  CAUSE_COMPLETENESS_EVALUATOR,
-  DECISION_TREE_HELPFULNESS_EVALUATOR,
-  GOAL_PASS_EVALUATOR,
-  TRUTHFULNESS_EVALUATOR,
-  createInvestigationJudges,
-} from './judges';
+import { createInvestigationJudges } from './judges';
+import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
 import { assertOrcaSource, hasOrcaTelemetryQuery } from './orca_dataset';
 import {
-  EXECUTION_SUCCESS_EVALUATOR,
   assertExecutionSuccessRate,
   executionSuccessEvaluator,
   getExecutionFailure,
@@ -87,7 +80,8 @@ export const registerInvestigationEvaluation = ({
           evaluationConnector,
           log,
         });
-        const evaluators = [...judges, executionSuccessEvaluator];
+        const evaluators = [...judges, executionSuccessEvaluator, ...efficiencyEvaluators];
+        const evaluatorsByName = new Map(evaluators.map((each) => [each.name, each]));
         // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
         evaluate.setTimeout(
@@ -262,27 +256,25 @@ export const registerInvestigationEvaluation = ({
             expect(persistedOutput?.query).toBe(output.query);
             // Every evaluator scored this run, each in its own evaluation trace.
             expect(new Set(exampleScores.map((each) => each.evaluator.name))).toEqual(
-              new Set([
-                GOAL_PASS_EVALUATOR,
-                CAUSE_COMPLETENESS_EVALUATOR,
-                ANTI_LEAKAGE_EVALUATOR,
-                TRUTHFULNESS_EVALUATOR,
-                DECISION_TREE_HELPFULNESS_EVALUATOR,
-                EXECUTION_SUCCESS_EVALUATOR,
-              ])
+              new Set(evaluatorsByName.keys())
             );
             for (const exampleScore of exampleScores) {
-              expect(exampleScore.evaluator.kind).toBe(
-                exampleScore.evaluator.name === EXECUTION_SUCCESS_EVALUATOR ? 'code' : 'llm'
-              );
-              expect(exampleScore.evaluator.direction).toBe('maximize');
-              expect(exampleScore.evaluator.trace_id).not.toBe(output.traceId);
+              const {
+                name: evaluatorName,
+                kind,
+                direction,
+                trace_id: evaluatorTraceId,
+              } = exampleScore.evaluator;
+              const registered = evaluatorsByName.get(evaluatorName);
+              expect(kind).toBe(registered?.kind.toLowerCase());
+              expect(direction).toBe(registered?.direction);
+              expect(evaluatorTraceId).not.toBe(output.traceId);
               const { score: judgeScore } = exampleScore.evaluator;
-              // Judges emit a normalized [0, 1] score, or null when a dimension does not apply.
-              if (judgeScore !== null && judgeScore !== undefined) {
-                expect(judgeScore).toBeGreaterThanOrEqual(0);
-                expect(judgeScore).toBeLessThanOrEqual(1);
-              }
+              if (judgeScore === null || judgeScore === undefined) continue;
+              // Quality judges emit a normalized [0, 1] score, or null when a dimension does not
+              // apply; efficiency and recall measures are raw non-negative counts or durations.
+              expect(judgeScore).toBeGreaterThanOrEqual(0);
+              if (registered?.direction === 'maximize') expect(judgeScore).toBeLessThanOrEqual(1);
             }
 
             log.info(
@@ -319,10 +311,8 @@ export const registerInvestigationEvaluation = ({
           .filter((traceId): traceId is string => Boolean(traceId));
         expect(experiment.evaluationRuns).toHaveLength(runs.length * scoresPerRun);
         expect(
-          experiment.evaluationRuns.every((evaluationRun) =>
-            evaluationRun.name === EXECUTION_SUCCESS_EVALUATOR
-              ? evaluationRun.kind === 'CODE'
-              : evaluationRun.kind === 'LLM'
+          experiment.evaluationRuns.every(
+            (evaluationRun) => evaluationRun.kind === evaluatorsByName.get(evaluationRun.name)?.kind
           )
         ).toBe(true);
         expect(evaluatorTraces).toHaveLength(runs.length * scoresPerRun);
