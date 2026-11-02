@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { RowsMode } from '../common';
 import { QUERY_SPECS, isGridColumnId } from '../grid_columns';
@@ -43,13 +43,37 @@ interface LoadRun {
   isReported: boolean;
 }
 
+type LoadOutcome = 'ok' | 'failed' | 'abandoned';
+
 const elapsedSince = (start: number) => Math.round(performance.now() - start);
+
+const toEvent = (run: LoadRun, outcome: LoadOutcome, duration: number, meta: GridLoadMeta) => ({
+  eventName: GRID_LOADED_EVENT_NAME,
+  duration,
+  // A phase that never settled (blocked by a failure, or left behind) ends with the load.
+  key1: 'time_to_rows',
+  value1: run.rows ?? duration,
+  key2: 'time_to_count',
+  value2: run.count ?? duration,
+  meta: {
+    outcome,
+    rows_mode: meta.rowsMode,
+    sort_column: meta.sortField,
+    sort_type: getSortType(meta.sortField),
+    has_tile_filter: meta.hasTileFilter,
+    has_entity_filters: meta.hasEntityFilters,
+    is_at_load_limit: meta.isAtLoadLimit,
+    time_range: meta.timeRange,
+  },
+});
 
 /**
  * Reports one `performance_metric` event per grid load, and again for each new sort, rows mode,
  * filter, search or range (`runKey`), once the rows, the count and the computed columns of the
  * first rows in view have settled: how long the grid took, how long its rows and its count took,
  * and whether a query failed. A failed load is reported once nothing is fetching any more.
+ * A load left before it settled (a new `runKey`, or the grid unmounted) is reported as
+ * `abandoned` with its time so far: the slowest loads are the ones people give up on.
  * Successes are reported too: they are the baseline a slow space stands out against.
  */
 export const useGridLoadTelemetry = ({
@@ -67,12 +91,29 @@ export const useGridLoadTelemetry = ({
 }): void => {
   const { analytics } = useKibana().services;
   const run = useRef<LoadRun>();
+  // The meta the current run started with, for a run reported only once it is left behind.
+  const runMeta = useRef(meta);
+
+  const reportAbandoned = useCallback(() => {
+    const current = run.current;
+    if (!current || current.isReported) return;
+    current.isReported = true;
+    analytics?.reportEvent(
+      PERFORMANCE_METRIC_EVENT_TYPE,
+      toEvent(current, 'abandoned', elapsedSince(current.start), runMeta.current)
+    );
+  }, [analytics]);
+
+  // Leaving the page, or switching to Group by, abandons a load that hasn't settled.
+  useEffect(() => reportAbandoned, [reportAbandoned]);
 
   useEffect(() => {
     if (skip) return;
     if (run.current?.key !== runKey) {
+      reportAbandoned();
       run.current = { key: runKey, start: performance.now(), isReported: false };
     }
+    runMeta.current = meta;
     const current = run.current;
     if (current.isReported) return;
 
@@ -93,27 +134,12 @@ export const useGridLoadTelemetry = ({
     if (!isSettled && !hasFailed) return;
 
     current.isReported = true;
-    // A query that waited on a failed one never settles: it ends with the load.
     const duration = isSettled
       ? Math.max(current.count ?? 0, current.enrichment ?? 0)
       : elapsedSince(current.start);
-    analytics?.reportEvent(PERFORMANCE_METRIC_EVENT_TYPE, {
-      eventName: GRID_LOADED_EVENT_NAME,
-      duration,
-      key1: 'time_to_rows',
-      value1: current.rows ?? duration,
-      key2: 'time_to_count',
-      value2: current.count ?? duration,
-      meta: {
-        outcome: hasError ? 'failed' : 'ok',
-        rows_mode: meta.rowsMode,
-        sort_column: meta.sortField,
-        sort_type: getSortType(meta.sortField),
-        has_tile_filter: meta.hasTileFilter,
-        has_entity_filters: meta.hasEntityFilters,
-        is_at_load_limit: meta.isAtLoadLimit,
-        time_range: meta.timeRange,
-      },
-    });
+    analytics?.reportEvent(
+      PERFORMANCE_METRIC_EVENT_TYPE,
+      toEvent(current, hasError ? 'failed' : 'ok', duration, meta)
+    );
   });
 };

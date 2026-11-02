@@ -187,3 +187,66 @@ describe('useGridLoadTelemetry', () => {
     expect(getSortType(sortField)).toBe(sortType);
   });
 });
+
+describe('useGridLoadTelemetry, loads left before they settle', () => {
+  let now = 0;
+  const outcomes = () => reportEvent.mock.calls.map(([, event]) => event.meta.outcome);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    now = 0;
+    jest.spyOn(performance, 'now').mockImplementation(() => now);
+    (useKibana as jest.Mock).mockReturnValue({ services: { analytics: { reportEvent } } });
+  });
+
+  it('reports a load as abandoned, with its time so far, when a new sort or filter replaces it', () => {
+    const { rerender } = renderHook((p: Props) => useGridLoadTelemetry(p), {
+      initialProps: props(loading),
+    });
+    now = 1000;
+    rerender(props({ ...loading, isRowsPending: false }));
+    now = 4000;
+    rerender(props(loading, { runKey: 'resolved:name:7d' }));
+
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+    expect(reportEvent.mock.calls[0][1]).toMatchObject({
+      duration: 4000,
+      value1: 1000,
+      value2: 4000,
+      meta: { outcome: 'abandoned', sort_column: 'entity.risk.calculated_score_norm' },
+    });
+
+    // The new load still reports on its own.
+    now = 5000;
+    rerender(props(settled, { runKey: 'resolved:name:7d' }));
+    expect(outcomes()).toEqual(['abandoned', 'ok']);
+  });
+
+  it('reports a load as abandoned when the grid goes away before it settles', () => {
+    const { unmount } = renderHook((p: Props) => useGridLoadTelemetry(p), {
+      initialProps: props(loading),
+    });
+    now = 2500;
+    unmount();
+    expect(outcomes()).toEqual(['abandoned']);
+    expect(reportEvent.mock.calls[0][1].duration).toBe(2500);
+  });
+
+  it('sends nothing more when a load that settled is left', () => {
+    const { rerender, unmount } = renderHook((p: Props) => useGridLoadTelemetry(p), {
+      initialProps: props(settled),
+    });
+    rerender(props(loading, { runKey: 'resolved:name:7d' }));
+    rerender(props(settled, { runKey: 'resolved:name:7d' }));
+    unmount();
+    expect(outcomes()).toEqual(['ok', 'ok']);
+  });
+
+  it('reports nothing for a grid that does not report its loads', () => {
+    const { unmount } = renderHook((p: Props) => useGridLoadTelemetry(p), {
+      initialProps: props(loading, { skip: true }),
+    });
+    unmount();
+    expect(reportEvent).not.toHaveBeenCalled();
+  });
+});
