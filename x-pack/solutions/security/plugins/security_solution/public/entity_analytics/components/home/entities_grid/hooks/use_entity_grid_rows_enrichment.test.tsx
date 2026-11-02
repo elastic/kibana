@@ -10,6 +10,7 @@ import type { PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import type { QueryArgs, Row } from '../common';
 import type { PageEnricher, RunContext } from '../queries/types';
 import type { GridContext, UseEntityGridDataOptions } from './use_entity_grid_context';
@@ -191,6 +192,27 @@ describe('useEntityGridRowsEnrichment', () => {
   beforeEach(() => {
     mockEnrich.mockReset();
     mockEnrich.mockResolvedValue(new Map());
+    jest.mocked(useErrorToast).mockClear();
+  });
+
+  it('toasts an enricher failure', async () => {
+    const error = new Error('boom');
+    mockEnrich.mockRejectedValue(error);
+    const { result } = renderEnrichment(false);
+
+    await waitFor(() => expect(mockEnrich).toHaveBeenCalled());
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    expect(useErrorToast).toHaveBeenCalledWith(expect.any(String), error);
+  });
+
+  it('does not toast a missing alerts index', async () => {
+    mockEnrich.mockRejectedValue(new Error('no such index [.alerts-security.alerts-default]'));
+    const { result } = renderEnrichment(false);
+
+    await waitFor(() => expect(mockEnrich).toHaveBeenCalled());
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    const toasted = (useErrorToast as jest.Mock).mock.calls.map(([, error]) => error);
+    expect(toasted.filter(Boolean)).toEqual([]);
   });
 
   it('enriches every loaded row, a chunk at a time', async () => {
