@@ -35,13 +35,30 @@ const toHeaderRecord = (value: unknown): Record<string, string> => {
   );
 };
 
+const assertHttpUrl = (value: string): string => {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch (error) {
+    throw new Error(
+      `Declarative request URL is not valid: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error(`Declarative requests do not support the "${url.protocol}" protocol.`);
+  }
+  return url.toString();
+};
+
 const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string => {
   if (request.url !== undefined) {
     const renderedUrl = renderTemplateValue(request.url, context);
     if (typeof renderedUrl !== 'string' || renderedUrl.length === 0) {
       throw new Error('Declarative request url must render to a string.');
     }
-    return renderedUrl;
+    return assertHttpUrl(renderedUrl);
   }
 
   const renderedBaseUrl = renderTemplateValue(request.baseUrl, context);
@@ -49,7 +66,9 @@ const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string
   if (typeof renderedBaseUrl !== 'string' || typeof renderedPath !== 'string') {
     throw new Error('Declarative requests require a rendered URL or base URL and path.');
   }
-  return `${renderedBaseUrl.replace(/\/+$/, '')}/${renderedPath.replace(/^\/+/, '')}`;
+  return assertHttpUrl(
+    `${renderedBaseUrl.replace(/\/+$/, '')}/${renderedPath.replace(/^\/+/, '')}`
+  );
 };
 
 const toResult = (data: unknown): Record<string, unknown> => {

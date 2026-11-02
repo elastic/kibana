@@ -46,11 +46,7 @@ describe('materializeDeclarativeConnectorSpec', () => {
     expect(actionType.source).toBe(ACTION_TYPE_SOURCES.spec);
 
     expect(() =>
-      validateConfig(
-        actionType,
-        { baseUrl: 'https://api.abuseipdb.com' },
-        validatorServices
-      )
+      validateConfig(actionType, { baseUrl: 'https://api.abuseipdb.com' }, validatorServices)
     ).not.toThrow();
     expect(() =>
       validateParams(
@@ -60,10 +56,42 @@ describe('materializeDeclarativeConnectorSpec', () => {
       )
     ).not.toThrow();
     expect(() =>
-      validateSecrets(
+      validateSecrets(actionType, { authType: 'api_key_header', Key: 'secret' }, validatorServices)
+    ).not.toThrow();
+  });
+
+  it('rejects a config URL that is not in allowed hosts', () => {
+    const configUtils = actionsConfigMock.create();
+    configUtils.ensureUriAllowed.mockImplementation((uri: string) => {
+      throw new Error(
+        `target url "${uri}" is not added to the Kibana config xpack.actions.allowedHosts`
+      );
+    });
+    const actionType = createConnectorTypeFromSpec(materialized, {
+      getActionsConfigurationUtilities: () => configUtils,
+      getAxiosInstanceWithAuth: jest.fn(),
+      getCredential: jest.fn(),
+      getClientLeasePool: jest.fn(),
+    } as unknown as ActionsPluginSetupContract);
+
+    expect(() =>
+      validateConfig(
         actionType,
-        { authType: 'api_key_header', Key: 'secret' },
-        validatorServices
+        { baseUrl: 'https://evil.example' },
+        { configurationUtilities: configUtils }
+      )
+    ).toThrow(/allowedHosts/);
+  });
+
+  it('accepts a config URL when allowed hosts does not throw', () => {
+    const configUtils = actionsConfigMock.create();
+    const actionType = createConnectorTypeFromSpec(materialized, createSetupMock());
+
+    expect(() =>
+      validateConfig(
+        actionType,
+        { baseUrl: 'https://api.abuseipdb.com' },
+        { configurationUtilities: configUtils }
       )
     ).not.toThrow();
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderTemplateValue } from './render_template';
+import { renderTemplateValue, TemplateRenderError } from './render_template';
 
 const context = {
   input: {
@@ -33,10 +33,7 @@ describe('renderTemplateValue', () => {
 
   it('drops undefined object entries', () => {
     expect(
-      renderTemplateValue(
-        { keep: '{{ input.keep }}', drop: '{{ input.missing }}' },
-        context
-      )
+      renderTemplateValue({ keep: '{{ input.keep }}', drop: '{{ input.missing }}' }, context)
     ).toEqual({ keep: 'yes' });
   });
 
@@ -47,5 +44,27 @@ describe('renderTemplateValue', () => {
         context
       )
     ).toEqual({ outer: { inner: 'https://api.example', city: 'Austin' } });
+  });
+
+  it('throws TemplateRenderError for an unsafe path segment', () => {
+    expect(() => renderTemplateValue('{{ input.__proto__.x }}', context)).toThrow(
+      TemplateRenderError
+    );
+  });
+
+  it('throws when an embedded template value is missing', () => {
+    expect(() => renderTemplateValue('ip {{ input.missing }}', context)).toThrow(
+      TemplateRenderError
+    );
+  });
+
+  it('drops an exact template that does not resolve', () => {
+    expect(renderTemplateValue({ drop: '{{ input.missing }}', keep: 'yes' }, context)).toEqual({
+      keep: 'yes',
+    });
+  });
+
+  it('throws when the template root is not input or config', () => {
+    expect(() => renderTemplateValue('{{ foo.bar }}', context)).toThrow(TemplateRenderError);
   });
 });

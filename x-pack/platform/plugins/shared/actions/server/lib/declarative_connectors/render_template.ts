@@ -10,15 +10,35 @@ export interface TemplateContext {
   config: Record<string, unknown>;
 }
 
+export const UNSAFE_PATH_SEGMENTS: ReadonlySet<string> = new Set([
+  '__proto__',
+  'prototype',
+  'constructor',
+]);
+
+/** Thrown when a template path is unsafe, unknown, or missing an embedded value. */
+export class TemplateRenderError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'TemplateRenderError';
+  }
+}
+
 const EXACT_TEMPLATE = /^\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}$/;
 const EMBEDDED_TEMPLATE = /\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g;
 
-const readPath = (root: unknown, path: string): unknown => {
-  if (!path) {
-    return root;
+const resolveTemplatePath = (path: string, context: TemplateContext): unknown => {
+  const [root, ...segments] = path.split('.');
+  if (root !== 'input' && root !== 'config') {
+    throw new TemplateRenderError(
+      `Declarative templates may only read from input or config. Received "${path}".`
+    );
   }
-  let current = root;
-  for (const segment of path.split('.')) {
+  let current: unknown = context[root];
+  for (const segment of segments) {
+    if (UNSAFE_PATH_SEGMENTS.has(segment)) {
+      throw new TemplateRenderError(`Unsafe declarative template path segment "${segment}".`);
+    }
     if (current === null || typeof current !== 'object') {
       return undefined;
     }
@@ -27,22 +47,18 @@ const readPath = (root: unknown, path: string): unknown => {
   return current;
 };
 
-const resolveTemplatePath = (path: string, context: TemplateContext): unknown => {
-  const [root, ...segments] = path.split('.');
-  if (root !== 'input' && root !== 'config') {
-    return undefined;
-  }
-  return readPath(context[root], segments.join('.'));
-};
-
 const renderString = (value: string, context: TemplateContext): unknown => {
   const exactMatch = value.match(EXACT_TEMPLATE);
   if (exactMatch) {
     return resolveTemplatePath(exactMatch[1], context);
   }
-  return value.replace(EMBEDDED_TEMPLATE, (_match, path: string) =>
-    String(resolveTemplatePath(path, context))
-  );
+  return value.replace(EMBEDDED_TEMPLATE, (_match, path: string) => {
+    const resolved = resolveTemplatePath(path, context);
+    if (resolved === undefined) {
+      throw new TemplateRenderError(`Declarative template "${path}" did not resolve to a value.`);
+    }
+    return String(resolved);
+  });
 };
 
 /** Renders `{{ input.x }}` and `{{ config.x }}` templates. Exact templates keep the raw value. */

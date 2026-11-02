@@ -84,4 +84,80 @@ describe('parseDeclarativeConnectorSpec', () => {
     expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
     expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/url or baseUrl/);
   });
+
+  it.each(['ears', 'oauth_authorization_code', 'relay', 'not_a_type'])(
+    'rejects unsupported auth type %s',
+    (authTypeId) => {
+      const raw = minimalSpec(`      method: GET
+      url: https://example.com`).replace('    - none', `    - ${authTypeId}`);
+
+      expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+      expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(new RegExp(authTypeId));
+    }
+  );
+
+  it.each(['basic', 'bearer', 'none'])('accepts shared auth type %s', (authTypeId) => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com`).replace('    - none', `    - ${authTypeId}`);
+    const parsed = parseDeclarativeConnectorSpec(raw);
+
+    expect(parsed.auth.types[0]).toEqual({ type: authTypeId, defaults: {} });
+  });
+
+  it('rejects okta because auth.prefix is not supported', () => {
+    expect(() => parseDeclarativeConnectorSpec(loadFixture('okta-1.0.0.yaml'))).toThrow(
+      /auth\.prefix is not supported/
+    );
+  });
+
+  it('normalizes legacy auth without a prefix', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com`).replace(
+      `auth:
+  types:
+    - none`,
+      `auth:
+  type: api_key_header
+  header: Key`
+    );
+    const parsed = parseDeclarativeConnectorSpec(raw);
+
+    expect(parsed.auth.types).toEqual([
+      { type: 'api_key_header', defaults: { headerField: 'Key' } },
+    ]);
+  });
+
+  it('rejects generativeAIForSearchPlayground', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com`).replace('    - alerting', '    - generativeAIForSearchPlayground');
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/generativeAIForSearchPlayground/);
+  });
+
+  it('rejects a secrets template and names the action', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com
+      headers:
+        Authorization: "Bearer {{ secrets.apiKey }}"`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/Action "ping"/);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/secrets\.apiKey/);
+  });
+
+  it('rejects an unsafe template path segment', () => {
+    const raw = minimalSpec(`      method: GET
+      url: "https://example.com/{{ input.__proto__.x }}"`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/__proto__/);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/Action "ping"/);
+  });
+
+  it('rejects a template root other than input or config', () => {
+    const raw = minimalSpec(`      method: GET
+      url: "https://example.com/{{ foo.bar }}"`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/foo\.bar/);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/Action "ping"/);
+  });
 });

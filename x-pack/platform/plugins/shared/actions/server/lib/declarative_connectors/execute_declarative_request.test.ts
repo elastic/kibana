@@ -9,6 +9,7 @@ import { createRecordingAxiosClient } from '@kbn/connector-specs/src/lib/recordi
 import { loadFixture } from './__fixtures__/load_fixture';
 import { executeDeclarativeRequest } from './execute_declarative_request';
 import { parseDeclarativeConnectorSpec } from './parse_declarative_connector_spec';
+import { TemplateRenderError } from './render_template';
 
 describe('executeDeclarativeRequest', () => {
   const connector = parseDeclarativeConnectorSpec(loadFixture('abuseipdb-1.1.0.yaml'));
@@ -98,5 +99,44 @@ describe('executeDeclarativeRequest', () => {
         config,
       })
     ).resolves.toEqual({ data: 'ok' });
+  });
+
+  it('does not send a request when rendering or the URL fails', async () => {
+    const { client, requests } = createRecordingAxiosClient({});
+
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', url: 'https://example.com/{{ input.missing }}' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(TemplateRenderError);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', url: '{{ input.__proto__.x }}' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(TemplateRenderError);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', baseUrl: 'ftp://x', path: '/check' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/ftp:/);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', baseUrl: 'not a url', path: '/check' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/not valid/);
+
+    expect(requests).toHaveLength(0);
   });
 });

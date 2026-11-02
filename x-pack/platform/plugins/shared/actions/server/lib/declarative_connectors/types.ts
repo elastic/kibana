@@ -41,6 +41,8 @@ export interface DeclarativeJsonSchema {
   xUi?: DeclarativeFieldUi;
 }
 
+export type DeclarativeTemplateRoot = 'input' | 'config';
+
 export type DeclarativeHttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 export interface DeclarativeRetry {

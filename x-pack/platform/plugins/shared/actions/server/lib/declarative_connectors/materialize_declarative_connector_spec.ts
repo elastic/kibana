@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ActionContext, ConnectorSpec, ConnectorTestHandlerResult } from '@kbn/connector-specs';
+import type {
+  ActionContext,
+  ConnectorSpec,
+  ConnectorTestHandlerResult,
+} from '@kbn/connector-specs';
 import type { z } from '@kbn/zod/v4';
 import { declarativeJsonSchemaToZod } from './json_schema_to_zod';
 import { executeDeclarativeRequest } from './execute_declarative_request';

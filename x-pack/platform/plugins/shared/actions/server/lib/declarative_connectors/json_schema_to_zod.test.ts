@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getMeta } from '@kbn/connector-specs';
+import type { z } from '@kbn/zod/v4';
 import { loadFixture } from './__fixtures__/load_fixture';
 import { declarativeJsonSchemaToZod } from './json_schema_to_zod';
 import { parseDeclarativeConnectorSpec } from './parse_declarative_connector_spec';
@@ -38,5 +40,28 @@ describe('declarativeJsonSchemaToZod', () => {
     const schema = declarativeJsonSchemaToZod(connector.config);
 
     expect(schema.parse({})).toEqual({ baseUrl: 'http://127.0.0.1:8090' });
+  });
+
+  it('copies xUi onto config field meta, including allowed hosts', () => {
+    const schema = declarativeJsonSchemaToZod(connector.config) as z.ZodObject;
+
+    expect(getMeta(schema.shape.baseUrl)).toEqual(
+      expect.objectContaining({
+        label: 'Base URL',
+        placeholder: 'https://api.abuseipdb.com',
+        helpText:
+          'Use the local mock URL for the PoC or https://api.abuseipdb.com for live testing.',
+        validate: { allowedHosts: true },
+      })
+    );
+  });
+
+  it('rejects a non-IPv4 ipAddress and accepts a valid one', () => {
+    const schema = declarativeJsonSchemaToZod(connector.actions.checkIp.input);
+
+    expect(() => schema.parse({ ipAddress: 'not-an-ip' })).toThrow();
+    expect(schema.parse({ ipAddress: '1.2.3.4' })).toEqual(
+      expect.objectContaining({ ipAddress: '1.2.3.4' })
+    );
   });
 });
