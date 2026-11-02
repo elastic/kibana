@@ -152,6 +152,20 @@ describe('code scores', () => {
     ).toBe(1);
   });
 
+  it.each([
+    ['IOC Hunt matched 121 documents', 'environment_hits_found'],
+    ['Tier 1 matched 121 documents', 'environment_hits_found'],
+    ['IOC Hunt had nothing to search', 'no_searchable_terms'],
+    ['Tier 1 had nothing to search', 'no_searchable_terms'],
+  ] as const)('reads %s from the headline as %s', (headline, status) => {
+    expect(
+      scoreTier1Status(
+        buildExpected({ tier1Status: status }),
+        buildArtifacts({ hunt: { headline: `confirmed hit: ${headline}; Behavior Hunt skipped` } })
+      ).score
+    ).toBe(1);
+  });
+
   it('scores 0 when pending Proposals are below the expected minimum', () => {
     expect(
       scoreProposalPresence(buildExpected({ pendingProposals: { min: 1 } }), buildArtifacts()).score
