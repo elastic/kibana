@@ -166,7 +166,7 @@ describe('SignificantEventsMaintenanceService', () => {
       };
       expect(
         clearWrite.disabledWorkflows.some(({ id }) =>
-          id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
+          id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID)
         )
       ).toBe(false);
 
@@ -181,7 +181,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(
         updateWorkflow.mock.calls.some(
           ([id, update]) =>
-            id.startsWith(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) &&
+            id.startsWith(NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID) &&
             update.enabled === true
         )
       ).toBe(false);
