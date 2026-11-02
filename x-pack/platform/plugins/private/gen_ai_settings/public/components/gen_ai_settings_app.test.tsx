@@ -110,6 +110,9 @@ describe('GenAiSettingsApp', () => {
 
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+    coreStart.settings.metadata.getAll.mockImplementation(async () =>
+      coreStart.settings.client.getAll()
+    );
     coreStart.http.fetch.mockResolvedValue({
       page: 1,
       perPage: 20,

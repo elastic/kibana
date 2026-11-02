@@ -269,6 +269,10 @@ export function Settings() {
                 ) : null}
                 {item.settings.map((settingKey) => {
                   const field = fields[settingKey];
+                  if (!field) {
+                    return null;
+                  }
+
                   return (
                     <FieldRowProvider
                       {...{

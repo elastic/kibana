@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo, useState } from 'react';
-import type { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { IUiSettingsClient, UiSettingsMetadataState, UiSettingsType } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {
@@ -15,20 +16,23 @@ import type {
   UiSettingMetadata,
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
-import { normalizeSettings } from '@kbn/management-settings-utilities';
+import { mergeSettingDefinitions, normalizeSettings } from '@kbn/management-settings-utilities';
 
 function getSettingsFields({
   settingsKeys,
   uiSettings,
+  definitions,
 }: {
   settingsKeys: string[];
   uiSettings?: IUiSettingsClient;
+  definitions: UiSettingsMetadataState;
 }) {
   if (!uiSettings) {
     return {};
   }
-  const uiSettingsDefinition = uiSettings.getAll();
-  const normalizedSettings = normalizeSettings(uiSettingsDefinition);
+  const normalizedSettings = normalizeSettings(
+    mergeSettingDefinitions(definitions, uiSettings.getAll())
+  );
   const fields: Record<string, FieldDefinition> = {};
 
   settingsKeys.forEach((key) => {
@@ -48,7 +52,7 @@ function getSettingsFields({
 
 export function useEditableSettings(settingsKeys: string[]) {
   const {
-    services: { settings },
+    services: { settings, notifications },
   } = useKibana();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -56,13 +60,43 @@ export function useEditableSettings(settingsKeys: string[]) {
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}
   );
+  const [definitions, setDefinitions] = useState<UiSettingsMetadataState>({});
+
+  useEffect(() => {
+    if (!settings) {
+      return;
+    }
+
+    let isCurrent = true;
+    settings.metadata.getAll('namespace').then(
+      (result) => {
+        if (isCurrent) {
+          setDefinitions(result);
+        }
+      },
+      (error: Error) => {
+        if (isCurrent) {
+          notifications?.toasts.addDanger({
+            title: i18n.translate('xpack.observabilityShared.editableSettings.loadError', {
+              defaultMessage: 'Unable to load settings',
+            }),
+            text: error.message,
+          });
+        }
+      }
+    );
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [settings, notifications]);
 
   const fields = useMemo(
     () => {
-      return getSettingsFields({ settingsKeys, uiSettings: settings?.client });
+      return getSettingsFields({ settingsKeys, uiSettings: settings?.client, definitions });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [settings, settingsKeys, forceReloadSettings]
+    [settings, settingsKeys, forceReloadSettings, definitions]
   );
 
   const handleFieldChange: OnFieldChangeFn = (id, change) => {

@@ -14,8 +14,8 @@ import type {
   UnsavedFieldChange,
 } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
-import type { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
-import { normalizeSettings } from '@kbn/management-settings-utilities';
+import type { IUiSettingsClient, UiSettingsMetadataState, UiSettingsType } from '@kbn/core/public';
+import { mergeSettingDefinitions, normalizeSettings } from '@kbn/management-settings-utilities';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
@@ -87,16 +87,19 @@ function combineErrors(errors: Error[]): Error {
 function getSettingsFields({
   settingsKeys,
   uiSettings,
+  definitions,
 }: {
   settingsKeys: string[];
   uiSettings?: IUiSettingsClient;
+  definitions: UiSettingsMetadataState;
 }) {
   if (!uiSettings) {
     return {};
   }
 
-  const uiSettingsDefinition = uiSettings.getAll();
-  const normalizedSettings = normalizeSettings(uiSettingsDefinition);
+  const normalizedSettings = normalizeSettings(
+    mergeSettingDefinitions(definitions, uiSettings.getAll())
+  );
 
   return settingsKeys.reduce<Record<string, FieldDefinition>>((acc, key) => {
     const setting: UiSettingMetadata = normalizedSettings[key];
@@ -129,9 +132,22 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
   const fieldsQuery = useQuery({
     queryKey: ['settingsFields', settingsKeys],
     queryFn: async () => {
-      return getSettingsFields({ settingsKeys, uiSettings: settings?.client });
+      const definitions = await queryClient.fetchQuery({
+        queryKey: ['settingsDefinitions'],
+        queryFn: () => settings.metadata.getAll('namespace'),
+        staleTime: Infinity,
+      });
+      return getSettingsFields({ settingsKeys, uiSettings: settings?.client, definitions });
     },
     refetchOnWindowFocus: true,
+    onError(error: Error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.genAiSettings.load.error', {
+          defaultMessage: 'Unable to load settings',
+        }),
+        text: error.message,
+      });
+    },
   });
 
   // Subscribe to UI settings changes to update in real-time when values change

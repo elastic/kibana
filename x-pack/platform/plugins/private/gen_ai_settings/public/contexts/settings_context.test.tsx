@@ -18,16 +18,35 @@ import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/publi
 import { Subject } from 'rxjs';
 
 describe('settings_context', () => {
-  const setupSettingsContext = () => {
+  const definitions = {
+    'genAiSettings:defaultAIConnector': {
+      name: 'Default AI connector',
+      description: 'The connector to use by default',
+      readonlyMode: 'ui',
+      value: 'NO_DEFAULT_CONNECTOR',
+    },
+    'genAiSettings:defaultAIConnectorOnly': {
+      name: 'Disallow all other connectors',
+      description: 'Only allow the default connector',
+      readonlyMode: 'ui',
+      value: false,
+    },
+  };
+
+  const setupSettingsContext = ({
+    getDefinitions = jest.fn().mockResolvedValue(definitions),
+  }: { getDefinitions?: jest.Mock } = {}) => {
     const queryClient = new QueryClient({
       logger: {
         log: () => {},
         warn: () => {},
         error: () => {},
       },
+      defaultOptions: { queries: { retry: false } },
     });
     const updateSubject = new Subject<{ key: string }>();
     const set = jest.fn().mockResolvedValue(undefined);
+    const addDanger = jest.fn();
 
     const rendered = renderHook(() => useSettingsContext(), {
       wrapper: ({ children }) => (
@@ -35,11 +54,12 @@ describe('settings_context', () => {
           services={{
             notifications: {
               toasts: {
-                addDanger: jest.fn(),
+                addDanger,
                 addSuccess: jest.fn(),
               },
             },
             settings: {
+              metadata: { getAll: getDefinitions },
               client: {
                 getUpdate$: () => updateSubject,
                 getUpdateErrors$: () => new Subject(),
@@ -69,8 +89,36 @@ describe('settings_context', () => {
       ),
     });
 
-    return { result: rendered.result, set, queryClient, updateSubject };
+    return { result: rendered.result, set, queryClient, updateSubject, addDanger };
   };
+
+  it('should take display metadata from the setting definitions and values from the client', async () => {
+    const { result } = setupSettingsContext();
+
+    await waitFor(() => {
+      expect(result.current.fields['genAiSettings:defaultAIConnector']).toEqual(
+        expect.objectContaining({
+          name: 'Default AI connector',
+          description: 'The connector to use by default',
+          savedValue: 'pmeClaudeV37SonnetUsEast1',
+        })
+      );
+    });
+  });
+
+  it('should show a danger toast when the setting definitions fail to load', async () => {
+    const { result, addDanger } = setupSettingsContext({
+      getDefinitions: jest.fn().mockRejectedValue(new Error('Internal Server Error')),
+    });
+
+    await waitFor(() => {
+      expect(addDanger).toHaveBeenCalledWith({
+        title: 'Unable to load settings',
+        text: 'Internal Server Error',
+      });
+    });
+    expect(result.current.fields).toEqual({});
+  });
 
   it('should provide the correct initial state', async () => {
     const { result } = setupSettingsContext();
@@ -331,6 +379,7 @@ describe('settings_context', () => {
                   },
                 },
                 settings: {
+                  metadata: { getAll: jest.fn().mockResolvedValue(definitions) },
                   client: {
                     getUpdate$: () => new Subject(),
                     getUpdateErrors$: () => new Subject(),
@@ -403,6 +452,7 @@ describe('settings_context', () => {
                   },
                 },
                 settings: {
+                  metadata: { getAll: jest.fn().mockResolvedValue({}) },
                   client: {
                     getUpdateErrors$: () => new Subject(),
                     isOverridden: () => false,
@@ -435,6 +485,7 @@ describe('settings_context', () => {
                 },
               },
               settings: {
+                metadata: { getAll: jest.fn().mockResolvedValue({}) },
                 client: {
                   getUpdate$: () => new Subject(),
                   getUpdateErrors$: () => new Subject(),
@@ -473,6 +524,7 @@ describe('settings_context', () => {
                 },
               },
               settings: {
+                metadata: { getAll: jest.fn().mockResolvedValue({}) },
                 client: {
                   getUpdate$: () => new Subject(),
                   getUpdateErrors$: () => new Subject(),
