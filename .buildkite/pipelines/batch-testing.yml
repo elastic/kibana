@@ -46,23 +46,6 @@ steps:
           FTR_TEST_CHANNELS: '${TEST_CHANNELS}'
           LIMIT_CONFIG_TYPE: functional
           ALLOW_ZERO_JEST_OR_FTR_CONFIGS: true
-        plugins:
-          - sparse-checkout#v1.6.0:
-              no_cone: true
-              paths:
-                - '/.buildkite/'
-                - '/.nvmrc'
-                - '/package.json'
-                - '/tsconfig.base.json'
-                - '/versions.json'
-                - '/kibana.jsonc'
-                - '**/kibana.jsonc'
-                - '**/tsconfig.json'
-                - '**/*.test.js'
-                - '**/*.test.mjs'
-                - '**/*.test.ts'
-                - '**/*.test.tsx'
-              cleanup_sparse_state: true
         retry:
           automatic:
             - exit_status: '*'

@@ -253,15 +253,24 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     detectionEnginePrivileges: { error: alertsPrivilegesError, result: alertsPrivilegesResult },
     timelinePrivileges: { read: canReadTimeline },
   } = useUserPrivileges();
-  const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
-    useAlertsPrivileges();
+  // `hasAlertsRead` needs both the Security > Alerts feature privilege and read on the alerts
+  // index; `hasIndexRead` is null until the index privileges are known.
+  const {
+    hasIndexRead: hasAlertsIndexRead,
+    hasAlertsRead,
+    loading: isAlertsPrivilegesLoading,
+  } = useAlertsPrivileges();
   const { cases } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+
+  // Index read without `hasAlertsRead` can only mean the Alerts feature privilege is missing. When
+  // the index privilege is missing too, the callout already lists the index.
+  const alertsFeatureMissing = hasAlertsIndexRead === true && hasAlertsRead === false;
 
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
     isError: alertsPrivilegesError != null,
-    canRead: hasAlertsIndexRead ?? undefined,
+    canRead: hasAlertsIndexRead == null ? undefined : hasAlertsRead,
   });
   const risk = getReadAccess({
     isLoading: riskEngineReadPrivileges.isLoading,
@@ -309,6 +318,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           entityEnginePrivileges={entityEnginePrivilegesQuery.data}
           anomalyPrivileges={anomalyPrivilegesQuery.data}
           alertsIndexPrivileges={alertsPrivilegesResult?.index}
+          alertsFeatureMissing={alertsFeatureMissing}
           id="entity-analytics-home"
         />
       </div>
@@ -569,6 +579,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     severeAlertsEntityIds,
     watchlistedCount,
     watchlistedEntityIds,
+    hasCount: alertBasedHasCount,
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
     isTimedOut: alertBasedTimedOut,
@@ -582,6 +593,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   const {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
+    hasCount: anomaliesHasCount,
     isLoading: anomaliesLoading,
     isMissingJobs: anomaliesMissingJobs,
     isCountPending: anomaliesPending,
@@ -596,6 +608,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   const {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
+    hasCount: newEntityHasCount,
     isLoading: newEntityLoading,
     isCountPending: newEntityPending,
     isTimedOut: newEntityTimedOut,
@@ -609,6 +622,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   const {
     count: riskMoversCount,
     entityIds: riskMoversEntityIds,
+    hasCount: riskMoversHasCount,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
     isCountPending: riskMoversPending,
@@ -623,6 +637,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   const {
     count: newlyHCCount,
     entityIds: newlyHCEntityIds,
+    hasCount: newlyHCHasCount,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
     isCountPending: newlyHCPending,
@@ -949,6 +964,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        hasCount: alertBasedHasCount,
         entityIds: severeAlertsEntityIds,
         isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
@@ -984,6 +1000,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        hasCount: anomaliesHasCount,
         entityIds: anomaliesEntityIds,
         // Without ML jobs the tile shows 0, which isn't a real count.
         isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
@@ -1025,6 +1042,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
+        hasCount: riskMoversHasCount,
         entityIds: riskMoversEntityIds,
         isUnavailable: Boolean(riskMoversError),
         noDataMessage: !canReadRisk
@@ -1064,6 +1082,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
+        hasCount: newlyHCHasCount,
         entityIds: newlyHCEntityIds,
         isUnavailable: Boolean(newlyHCError),
         noDataMessage: !canReadRisk
@@ -1105,6 +1124,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        hasCount: alertBasedHasCount,
         entityIds: watchlistedEntityIds,
         isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
@@ -1136,6 +1156,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        hasCount: newEntityHasCount,
         entityIds: newEntityEntityIds,
         isUnavailable: Boolean(newEntityError),
         noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
@@ -1210,6 +1231,11 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       newEntityLoading,
       newEntityTimedOut,
       riskMoversMissingIndex,
+      alertBasedHasCount,
+      anomaliesHasCount,
+      riskMoversHasCount,
+      newlyHCHasCount,
+      newEntityHasCount,
       timeRange,
     ]
   );

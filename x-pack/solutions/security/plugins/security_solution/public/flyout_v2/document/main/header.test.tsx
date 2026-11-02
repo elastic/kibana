@@ -15,6 +15,7 @@ import {
   DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID,
 } from '../../shared/components/test_ids';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { FLYOUT_V2_DOCUMENT_PAGINATION_TEST_ID } from './components/test_ids';
 import { createPaginationStore } from '../pagination/store';
 import { PaginationStoreProvider } from '../pagination/context';
@@ -105,6 +106,10 @@ jest.mock('../../shared/components/share_url_icon_button', () => ({
   }) => (url ? <button type="button" data-test-subj={dataTestSubj} /> : null),
 }));
 
+jest.mock('../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: jest.fn(),
+}));
+
 jest.mock('../../../flyout/document_details/right/hooks/use_get_flyout_link', () => ({
   useGetFlyoutLink: jest.fn(),
 }));
@@ -171,10 +176,12 @@ const renderHeaderWithStore = (
   );
 
 const mockUseGetFlyoutLink = useGetFlyoutLink as jest.Mock;
+const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 
 describe('<DocumentHeader />', () => {
   beforeEach(() => {
     mockUseGetFlyoutLink.mockReturnValue(null);
+    mockUseIsInSecurityApp.mockReturnValue(true);
   });
 
   it('should pass the hit to the severity component', () => {
@@ -268,6 +275,14 @@ describe('<DocumentHeader />', () => {
 
   it('should not render the share button for alerts when link is null (e.g. preview index)', () => {
     mockUseGetFlyoutLink.mockReturnValue(null);
+    const { queryByTestId } = renderHeader({ hit: alertHit });
+
+    expect(queryByTestId(DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should not render the share button for alerts outside the Security Solution app (e.g. Discover)', () => {
+    mockUseGetFlyoutLink.mockReturnValue('https://example.com/alerts/redirect/test-id');
+    mockUseIsInSecurityApp.mockReturnValue(false);
     const { queryByTestId } = renderHeader({ hit: alertHit });
 
     expect(queryByTestId(DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID)).not.toBeInTheDocument();

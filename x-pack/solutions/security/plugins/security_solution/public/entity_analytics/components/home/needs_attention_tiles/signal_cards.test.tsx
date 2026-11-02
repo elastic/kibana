@@ -36,6 +36,7 @@ const cards: SignalCardData[] = CARD_IDS.map((id, index) => ({
   description: `Description ${id}`,
   filterLabel: id,
   value: index + 1,
+  hasCount: true,
   delta: 2,
   trend: [1, 2, 3],
 }));
