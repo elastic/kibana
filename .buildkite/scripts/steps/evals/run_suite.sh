@@ -680,18 +680,19 @@ if [[ -n "${EVAL_SPEC_FILES:-}" ]]; then
   EVAL_RUN_ARGS+=(${EVAL_SPEC_FILE_LIST[@]+"${EVAL_SPEC_FILE_LIST[@]}"})
 fi
 
+# stdin is detached so the CLI never prompts for a profile on agents that attach a terminal.
 run_eval_suite() {
   if [[ -n "${EVAL_PROJECT:-}" ]]; then
     KBN_EVALS_RUN_LOG="$(mktemp -t kbn-evals-run.XXXXXX.log)"
     export KBN_EVALS_RUN_LOG
     set +e
-    node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}" 2>&1 | tee "$KBN_EVALS_RUN_LOG"
+    node scripts/evals run --suite "$EVAL_SUITE_ID" --project "$EVAL_PROJECT" "${EVAL_RUN_ARGS[@]}" </dev/null 2>&1 | tee "$KBN_EVALS_RUN_LOG"
     local eval_exit="${PIPESTATUS[0]}"
     set -e
     return "${eval_exit}"
   fi
 
-  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}"
+  node scripts/evals run --suite "$EVAL_SUITE_ID" "${EVAL_RUN_ARGS[@]}" </dev/null
 }
 
 run_eval_suite
