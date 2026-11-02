@@ -1,5 +1,5 @@
 {
-  "sha1": "17f1a837cc8c04f1ec0cc0e0dcc5e6ab1bd803a1",
+  "sha1": "16fd5daef9f4f8b97555b6033ad4df5b1b083e35",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -659,8 +659,8 @@
       }
     },
     {
-      "id": "f10b583306dc58a-69dccf9a88e32b3",
-      "title": "Agent Builder — concurrent conversation writes API keeps both rounds when two clients converse with the same conversation at once",
+      "id": "f10b583306dc58a-0c64009e4dee94f",
+      "title": "Agent Builder — concurrent conversation writes API refuses a second converse while a run is active on the same conversation",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -670,8 +670,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_concurrency_api.spec.ts",
-        "line": 35,
-        "column": 38
+        "line": 58,
+        "column": 18
+      }
+    },
+    {
+      "id": "f10b583306dc58a-80645fc13469537",
+      "title": "Agent Builder — concurrent conversation writes API reports active_execution on GET while a run is active and omits it after",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_concurrency_api.spec.ts",
+        "line": 102,
+        "column": 10
       }
     },
     {
@@ -1248,6 +1264,246 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/conversations_search_api.spec.ts",
         "line": 258,
         "column": 63
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-a6f2ff576885357",
+      "title": "Investigation conversation telemetry metadata stores and reads back target c0 alongside the creating run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-adebb03875b4853",
+      "title": "Investigation conversation telemetry metadata stores and reads back target orca alongside the creating run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-5755bc064661155",
+      "title": "Investigation conversation telemetry metadata stores and reads back target none alongside the creating run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-f112cc5543c2b46",
+      "title": "Investigation conversation telemetry metadata stores and reads back target aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa alongside the creating run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-16e680a0be99be2",
+      "title": "Investigation conversation telemetry metadata stores and reads back target orca- alongside the creating run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-6ceb0d5862bf118",
+      "title": "Investigation conversation telemetry metadata stores and reads back target orca_ alongside the creating run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-078f70af21fd502",
+      "title": "Investigation conversation telemetry metadata leaves the target absent when creating a legacy investigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-1a335563497b361",
+      "title": "Investigation conversation telemetry metadata rejects changing target c0 to orca through metadata PATCH",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 113,
+        "column": 33
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-4fdba0102020d9f",
+      "title": "Investigation conversation telemetry metadata rejects changing target orca to c0 through metadata PATCH",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 113,
+        "column": 33
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-44405aaf1fd6842",
+      "title": "Investigation conversation telemetry metadata rejects changing target orca to none through metadata PATCH",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 113,
+        "column": 33
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-4a3931bc9955dfe",
+      "title": "Investigation conversation telemetry metadata rejects changing target undefined to orca through metadata PATCH",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 113,
+        "column": 33
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-59bb09e9cb803fc",
+      "title": "Investigation conversation telemetry metadata allows unchanged targets and unrelated metadata updates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 152,
+        "column": 23
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-7ed816da93edaca",
+      "title": "Investigation conversation telemetry metadata rejects invalid target \"UPPERCASE\" through template validation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 215,
+        "column": 31
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-dcc5470d44857bd",
+      "title": "Investigation conversation telemetry metadata rejects invalid target \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" through template validation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 215,
+        "column": 31
+      }
+    },
+    {
+      "id": "bbfc0a2e2874cca-ff9f2341ea697f8",
+      "title": "Investigation conversation telemetry metadata rejects invalid target \"\" through template validation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/conversations/api/tests/investigation_telemetry_metadata_api.spec.ts",
+        "line": 215,
+        "column": 31
       }
     }
   ]
