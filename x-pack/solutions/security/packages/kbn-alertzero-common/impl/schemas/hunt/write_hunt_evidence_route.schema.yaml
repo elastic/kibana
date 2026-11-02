@@ -102,6 +102,9 @@ paths:
                 properties:
                   acknowledged:
                     type: boolean
+                  settledByCap:
+                    type: boolean
+                    description: True when the report's coverage ledger could not hold every technique, so a retryable run was settled and stamped as hunted instead of left eligible for a later sweep.
               examples:
                 WriteHuntEvidenceResponse200Example:
                   summary: Evidence written.

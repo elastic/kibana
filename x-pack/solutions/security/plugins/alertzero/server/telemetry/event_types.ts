@@ -722,7 +722,7 @@ export const ALERTZERO_HUNT_REPORT_COMPLETED_EVENT: EventTypeOpts<AlertZeroHuntR
     schema: {
       ...ENVELOPE_SCHEMA,
       closed_clean: flagField(
-        'Whether a clean run (no confirmed hit) closed the Investigation as benign'
+        'Whether a run with no confirmed hit closed the Investigation: as benign, or as `other` for a `retired_incomplete` run, which is true too although part of the report was never searched'
       ),
       coverage_kis_skipped: countField('Coverage knowledge items packaging did not write'),
       coverage_kis_written: countField(

@@ -463,7 +463,7 @@ describe('writeHuntEvidence', () => {
   it('warns when the cap settled a run that wanted to continue', async () => {
     const esClient = makeEsClient([{ space_id: 'default', coverage_pending: false }]);
 
-    await write(esClient, {
+    const result = await write(esClient, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -474,11 +474,12 @@ describe('writeHuntEvidence', () => {
     });
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('report-1'));
+    expect(result).toEqual({ settledByCap: true });
   });
 
   it('does not warn when the run is still pending, or when it never wanted to continue', async () => {
     const pending = makeEsClient([{ space_id: 'default', coverage_pending: true }]);
-    await write(pending, {
+    const stillPending = await write(pending, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-1',
@@ -489,7 +490,7 @@ describe('writeHuntEvidence', () => {
     });
 
     const done = makeEsClient([{ space_id: 'default', coverage_pending: false }]);
-    await write(done, {
+    const finished = await write(done, {
       spaceId: 'default',
       reportId: 'report-1',
       runId: 'run-2',
@@ -500,5 +501,7 @@ describe('writeHuntEvidence', () => {
     });
 
     expect(logger.warn).not.toHaveBeenCalled();
+    expect(stillPending).toEqual({ settledByCap: false });
+    expect(finished).toEqual({ settledByCap: false });
   });
 });
