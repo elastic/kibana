@@ -43,7 +43,6 @@ export type MachineType =
   | 'n2-standard-8'
   | 'n2-standard-16'
   | 'n2d-custom-16-32768'
-  | 'n2d-standard-2'
   | 'n2d-standard-8'
   | 'n4-highcpu-32'
   | 'n4-standard-16'

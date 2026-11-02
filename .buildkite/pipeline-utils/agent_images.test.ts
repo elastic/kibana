@@ -141,7 +141,7 @@ describe('agent_images', () => {
       );
     });
 
-    it('limits the spot and virt queues to the asia-south2 and northamerica-northeast2 zones', () => {
+    it('limits the spot queues to the asia-south2 and northamerica-northeast2 zones', () => {
       const spotZones = [
         'asia-south2-a',
         'asia-south2-b',
@@ -153,7 +153,6 @@ describe('agent_images', () => {
 
       expect(expandAgentQueue('n2-4-spot')).toEqual(expect.objectContaining({ spotZones }));
       expect(expandAgentQueue('n2-8-spot')).toEqual(expect.objectContaining({ spotZones }));
-      expect(expandAgentQueue('n2-4-virt')).toEqual(expect.objectContaining({ spotZones }));
     });
 
     it('returns virt config for virt queue', () => {
