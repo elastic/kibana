@@ -59,7 +59,7 @@ import { createMockInMemoryConnector } from '../application/connector/mocks';
 import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import { securityServiceMock } from '@kbn/core/server/mocks';
-import { encodeApiKey } from '../inbound/event_identity/encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-scoped-api-keys';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');

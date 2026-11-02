@@ -8,7 +8,7 @@
 import { httpServerMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
-import { encodeApiKey } from './encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-scoped-api-keys';
 import { mintConnectorEventIdentity } from './mint_editor_api_keys';
 import {
   CONNECTOR_EVENT_IDENTITY_API_KEY_METADATA,
@@ -50,11 +50,11 @@ describe('mintConnectorEventIdentity', () => {
       connectorId,
     });
 
-    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
-      name,
-      role_descriptors: {},
-      metadata: CONNECTOR_EVENT_IDENTITY_API_KEY_METADATA,
-    });
+    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+      request,
+      { name, role_descriptors: {}, metadata: CONNECTOR_EVENT_IDENTITY_API_KEY_METADATA },
+      {}
+    );
     expect(identity).toEqual({
       apiKey: encodeApiKey('es-id', 'es-secret'),
     });
@@ -121,9 +121,9 @@ describe('mintConnectorEventIdentity', () => {
       })
     ).rejects.toThrow('es down');
 
-    expect(securityService.authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(uiamRequest, {
-      id: 'uiam-id',
-    });
+    const [rollbackRequest, params] = securityService.authc.apiKeys.uiam!.invalidate.mock.calls[0];
+    expect(rollbackRequest.headers.authorization).toBe('ApiKey essu_granted');
+    expect(params).toEqual({ id: 'uiam-id' });
   });
 
   test('throws when API keys are disabled', async () => {
@@ -260,7 +260,7 @@ describe('mintConnectorEventIdentity', () => {
           logger,
           connectorId,
         })
-      ).rejects.toThrow(`Failed to create UIAM API key for connector event identity "${name}"`);
+      ).rejects.toThrow(`Failed to create a Cloud API key "uiam-${name}"`);
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
 

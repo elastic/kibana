@@ -26,7 +26,7 @@ import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityServiceMock } from '@kbn/core/server/mocks';
-import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-scoped-api-keys';
 import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 

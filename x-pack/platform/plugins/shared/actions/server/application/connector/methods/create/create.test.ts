@@ -35,7 +35,7 @@ import {
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
 import { securityServiceMock } from '@kbn/core/server/mocks';
-import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-scoped-api-keys';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 jest.mock('@kbn/connector-specs', () => {

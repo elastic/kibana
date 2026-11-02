@@ -8,7 +8,7 @@
 import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
-import { encodeApiKey } from './encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-scoped-api-keys';
 import { invalidateConnectorEventIdentity } from './invalidate_connector_event_identity';
 
 describe('invalidateConnectorEventIdentity', () => {
@@ -27,7 +27,7 @@ describe('invalidateConnectorEventIdentity', () => {
     });
 
     await invalidateConnectorEventIdentity({
-      identity: { apiKey: encodeApiKey('es-id', 'es-secret')! },
+      identity: { apiKey: encodeApiKey('es-id', 'es-secret') },
       securityService,
       logger,
       connectorId: 'connector-1',
@@ -48,7 +48,7 @@ describe('invalidateConnectorEventIdentity', () => {
     });
 
     await invalidateConnectorEventIdentity({
-      identity: { uiamApiKey: encodeApiKey('uiam-id', 'essu_granted')! },
+      identity: { uiamApiKey: encodeApiKey('uiam-id', 'essu_granted') },
       securityService,
       logger,
       connectorId: 'connector-1',
@@ -72,7 +72,7 @@ describe('invalidateConnectorEventIdentity', () => {
 
     await expect(
       invalidateConnectorEventIdentity({
-        identity: { apiKey: encodeApiKey('es-id', 'es-secret')! },
+        identity: { apiKey: encodeApiKey('es-id', 'es-secret') },
         securityService,
         logger,
         connectorId: 'connector-1',
@@ -80,8 +80,23 @@ describe('invalidateConnectorEventIdentity', () => {
     ).resolves.toBeUndefined();
 
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to invalidate ES API key'),
+      expect.stringContaining('Failed to synchronously invalidate ES API key'),
       expect.any(Object)
     );
+  });
+
+  test('keeps colons in the stored UIAM secret', async () => {
+    const securityService = securityServiceMock.createStart();
+
+    await invalidateConnectorEventIdentity({
+      identity: { uiamApiKey: encodeApiKey('uiam-id', 'essu_granted:extra') },
+      securityService,
+      logger,
+      connectorId: 'connector-1',
+    });
+
+    const [request, params] = securityService.authc.apiKeys.uiam!.invalidate.mock.calls[0];
+    expect(request.headers.authorization).toBe('ApiKey essu_granted:extra');
+    expect(params).toEqual({ id: 'uiam-id' });
   });
 });

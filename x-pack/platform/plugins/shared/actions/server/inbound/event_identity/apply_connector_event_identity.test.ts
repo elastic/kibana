@@ -16,7 +16,7 @@ import {
   loadPreviousConnectorEventIdentity,
   mintInboundEventIdentityAttributes,
 } from './apply_connector_event_identity';
-import { encodeApiKey } from './encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-scoped-api-keys';
 import { connectorEventIdentityApiKeyName } from './types';
 
 const request = httpServerMock.createKibanaRequest();

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getUiamApiKeySecret } from '@kbn/response-ops-scoped-api-keys';
+import type { ScopedCredentials } from '@kbn/response-ops-scoped-api-keys';
+import { encodeApiKey, getUiamApiKeySecret } from '@kbn/response-ops-scoped-api-keys';
 
 import type { RawAction } from '../../types';
 import { createEventIdentityApiKeysDisabledError } from './errors';
@@ -20,22 +21,12 @@ export const authorizationCredentialFromIdentity = (
   return identity.apiKey;
 };
 
-export const encodeApiKey = (id?: string, key?: string): string | undefined => {
-  if (!id || !key) {
-    return undefined;
-  }
-  return Buffer.from(`${id}:${key}`).toString('base64');
-};
-
-export const identityFromGrantResults = ({
-  esResult,
-  uiamResult,
-}: {
-  esResult?: { id: string; api_key: string };
-  uiamResult?: { id: string; api_key: string };
-}): ConnectorEventIdentity => {
-  const apiKey = encodeApiKey(esResult?.id, esResult?.api_key);
-  const uiamApiKey = encodeApiKey(uiamResult?.id, uiamResult?.api_key);
+export const identityFromCredentials = ({
+  es,
+  uiam,
+}: ScopedCredentials): ConnectorEventIdentity => {
+  const apiKey = es?.id && es.secret ? encodeApiKey(es.id, es.secret) : undefined;
+  const uiamApiKey = uiam?.id && uiam.secret ? encodeApiKey(uiam.id, uiam.secret) : undefined;
 
   if (!apiKey && !uiamApiKey) {
     throw createEventIdentityApiKeysDisabledError();
