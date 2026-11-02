@@ -13,8 +13,9 @@ import type { TfUnionMeta, TfVariantMeta } from '@kbn/zod';
 // Kibana's Zod schemas with the `@kbn/zod` `tf*` helpers), into a small Terraform-oriented model.
 //
 // Conventions that need no annotation: a union of primitives is its primitive; a union of objects with no `x-tf-union`
-// is a JSON leaf, and so is a property whose merged variants cannot be combined; `allOf[union, object]` distributes
-// the object into every branch of the union. Mapping mistakes the document can reveal (an override or a JSON-leaf path
+// is a JSON leaf, and so is a property whose merged variants cannot be combined (a CI check requires each such leaf to
+// be accepted explicitly, see `unmapped_unions.ts`); `allOf[union, object]` distributes the object into every branch
+// of the union. Mapping mistakes the document can reveal (an override or a JSON-leaf path
 // that matches nothing, an unsupported `allOf`) throw instead of producing a quietly different tree.
 
 export const ROOT_COMPONENT = 'Kibana_HTTP_APIs_kbn-dashboard-data';
@@ -44,6 +45,8 @@ export interface OasSchema {
   jsonName?: string;
   /** Compiler-internal: the discriminator to drop from this branch once its own union is merged. */
   dropProperty?: string;
+  /** Compiler-internal: a JSON leaf no annotation asked for (merged variants define this property differently). */
+  implicitLeaf?: true;
 }
 
 export interface OasDocument {
@@ -85,6 +88,12 @@ const refName = (raw: OasSchema): string | undefined => raw.$ref?.split('/').pop
 
 export class Compiler {
   readonly schemas: Record<string, OasSchema>;
+  /**
+   * Locations of the JSON leaves no annotation asked for: unions of objects with no `x-tf-union`, and properties that
+   * merged variants define differently. A location is the nearest component, then the property path inside it
+   * (`.prop`, `[]` for array items, `|key` for an inline branch).
+   */
+  readonly implicitJsonLeaves = new Set<string>();
 
   constructor(doc: OasDocument) {
     this.schemas = doc.components.schemas;
@@ -183,7 +192,8 @@ export class Compiler {
       return na;
     }
     if (mode === 'all') throw new Error(`allOf parts disagree on property ${name}`);
-    return { 'x-tf-json-leaf': true };
+    // `compile` records it at its location.
+    return { 'x-tf-json-leaf': true, implicitLeaf: true };
   }
 
   isPrimitive(s: OasSchema): boolean {
@@ -274,14 +284,22 @@ export class Compiler {
     return collect(p);
   }
 
-  compile(raw: OasSchema, override?: Partial<TfUnionMeta>, stack: string[] = []): TNode {
+  compile(
+    raw: OasSchema,
+    override?: Partial<TfUnionMeta>,
+    stack: string[] = [],
+    location = ''
+  ): TNode {
     const name = refName(raw);
     if (name && stack.includes(name)) return { k: 'json' };
     const nextStack = name ? [...stack, name] : stack;
+    const at = name ?? location;
     const s = this.normalize(raw);
     const leaf = s['x-tf-json-leaf'];
-    if (leaf)
+    if (leaf) {
+      if (s.implicitLeaf) this.implicitJsonLeaves.add(at);
       return { k: 'json', attribute: typeof leaf === 'object' ? leaf.attribute : undefined };
+    }
 
     const branches = this.unionBranches(s);
     const unionMeta = s['x-tf-union'];
@@ -292,7 +310,11 @@ export class Compiler {
     }
     if (branches) {
       if (branches.every((b) => this.isPrimitive(b))) return { k: 'prim', type: this.primType(s) };
-      if (!unionMeta) return { k: 'json' }; // convention: unmapped union of objects -> JSON leaf
+      if (!unionMeta) {
+        // Convention: unmapped union of objects -> JSON leaf.
+        this.implicitJsonLeaves.add(at);
+        return { k: 'json' };
+      }
       const m: TfUnionMeta = { ...unionMeta, ...override };
       if (m.merge) {
         const parts = this.applyJsonLeaves(
@@ -306,13 +328,16 @@ export class Compiler {
           const { [dropProperty]: _dropped, ...kept } = merged.properties ?? {};
           merged.properties = kept;
         }
-        return this.compile(merged, undefined, nextStack);
+        return this.compile(merged, undefined, nextStack, at);
       }
-      return this.compileKeyed(branches, m, nextStack);
+      return this.compileKeyed(branches, m, nextStack, at);
     }
     if (s.type === 'array') {
       if (!s.items) return { k: 'json' };
-      return { k: 'list', items: this.compile(s.items, s['x-tf-union-override'], nextStack) };
+      return {
+        k: 'list',
+        items: this.compile(s.items, s['x-tf-union-override'], nextStack, `${at}[]`),
+      };
     }
     if (s.properties) {
       const props: Prop[] = [];
@@ -323,7 +348,8 @@ export class Compiler {
         const node = this.compile(
           pr,
           p.type === 'array' ? undefined : p['x-tf-union-override'],
-          nextStack
+          nextStack,
+          `${at}.${propName}`
         );
         const isPropLeaf = node.k === 'json' && !node.attribute;
         props.push({
@@ -340,11 +366,20 @@ export class Compiler {
     return { k: 'prim', type: this.primType(s) };
   }
 
-  compileKeyed(branches: OasSchema[], m: TfUnionMeta, stack: string[]): KeyedNode {
+  /** The component a union branch comes from (also through `allOf` distribution), else its place in the union. */
+  branchLocation(branch: OasSchema, fallback: string): string {
+    const name = refName(branch);
+    if (name) return name;
+    const [first] = branch.allOf ?? [];
+    return first ? this.branchLocation(first, fallback) : fallback;
+  }
+
+  compileKeyed(branches: OasSchema[], m: TfUnionMeta, stack: string[], location = ''): KeyedNode {
     const disc = m.structural ? undefined : m.discriminator;
     const discOutside = m.discriminator_placement === 'outside';
-    const byKey = new Map<string, { raws: OasSchema[]; values: string[] }>();
+    const byKey = new Map<string, { raws: OasSchema[]; values: string[]; location: string }>();
     let outsideRaw: OasSchema | undefined;
+    let outsideLocation = location;
     for (const b of branches) {
       const nb = this.normalize(b);
       const v = nb['x-tf-variant'] ?? {};
@@ -356,6 +391,7 @@ export class Compiler {
         (m.key_template ?? '{value}').replace('{value}', values[0]);
       if (!key || key.includes('undefined'))
         throw new Error(`no variant key for branch ${nb.title}`);
+      const branchAt = this.branchLocation(b, `${location}|${key}`);
       const { [disc ?? '']: _d, ...restProps } = nb.properties ?? {};
       let content: OasSchema;
       if (m.content) {
@@ -369,6 +405,7 @@ export class Compiler {
           properties: outsideProps,
           required: nb.required ?? [],
         };
+        if (!outsideRaw) outsideLocation = branchAt;
         outsideRaw = outsideRaw ? this.mergeObjects(outsideRaw, outside, 'any') : outside;
       } else if (this.unionBranches(nb) && !nb.properties) {
         // The branch is itself a (merged) union: drop the discriminator after merging.
@@ -377,19 +414,31 @@ export class Compiler {
         content = { ...nb, properties: v.keep_discriminator ? nb.properties : restProps };
       }
       const [withLeaves] = this.applyJsonLeaves([content], v.json_leaves, nb.title ?? key);
-      const entry = byKey.get(key) ?? { raws: [], values: [] };
+      const entry = byKey.get(key) ?? {
+        raws: [],
+        values: [],
+        location: m.content ? `${branchAt}.${m.content}` : branchAt,
+      };
       entry.raws.push(withLeaves);
       entry.values.push(...values);
       byKey.set(key, entry);
     }
-    const variants: Variant[] = [...byKey.entries()].map(([key, { raws, values }]) => {
-      const raw =
-        raws.length > 1
-          ? raws.map((r) => this.normalize(r)).reduce((a, b) => this.mergeObjects(a, b, 'any'))
-          : raws[0];
-      return { key, values: [...new Set(values)], content: this.compile(raw, undefined, stack) };
-    });
-    const outsideNode = outsideRaw ? this.compile(outsideRaw, undefined, stack) : undefined;
+    const variants: Variant[] = [...byKey.entries()].map(
+      ([key, { raws, values, location: variantAt }]) => {
+        const raw =
+          raws.length > 1
+            ? raws.map((r) => this.normalize(r)).reduce((a, b) => this.mergeObjects(a, b, 'any'))
+            : raws[0];
+        return {
+          key,
+          values: [...new Set(values)],
+          content: this.compile(raw, undefined, stack, variantAt),
+        };
+      }
+    );
+    const outsideNode = outsideRaw
+      ? this.compile(outsideRaw, undefined, stack, outsideLocation)
+      : undefined;
     return {
       k: 'keyed',
       m,
@@ -415,14 +464,22 @@ export const compileDashboardRoot = (doc: OasDocument): { compiler: Compiler; ro
   );
   if (!panelUnionRaw) throw new Error('The dashboard root has no panel union in panels[]');
   // The panel-or-section union is split here rather than compiled.
-  const root = compiler.compile({ ...rootSchema, properties: otherProperties });
+  const root = compiler.compile(
+    { ...rootSchema, properties: otherProperties },
+    undefined,
+    [ROOT_COMPONENT],
+    ROOT_COMPONENT
+  );
   if (root.k !== 'object') throw new Error('The dashboard root is not an object');
   root.props.push(
     {
       apiName: 'panels',
       tfName: 'panels',
       required: false,
-      node: { k: 'list', items: compiler.compile(panelUnionRaw) },
+      node: {
+        k: 'list',
+        items: compiler.compile(panelUnionRaw, undefined, [], `${ROOT_COMPONENT}.panels[]`),
+      },
     },
     {
       apiName: 'sections',

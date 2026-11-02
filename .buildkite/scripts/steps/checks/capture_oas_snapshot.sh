@@ -45,6 +45,9 @@ retry 5 15 run_check
 .buildkite/scripts/steps/openapi_bundling/security_solution_openapi_bundling.sh
 .buildkite/scripts/steps/openapi_bundling/final_merge.sh
 
+echo --- Check unmapped unions in the Dashboards API Terraform mapping
+node scripts/check_dashboard_terraform_mapping
+
 node ./scripts/validate_oas_docs.js --assert-no-error-increase --skip-printing-issues --update-baseline
 
 if is_pr && ! is_auto_commit_disabled; then
