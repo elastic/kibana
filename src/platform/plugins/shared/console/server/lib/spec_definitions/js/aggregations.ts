@@ -9,7 +9,7 @@
 
 import type { SpecDefinitionsService } from '../../../services';
 
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @kbn/compat/typescript-naming-convention */
 const significantTermsArgs = {
   __template: {
     field: '',

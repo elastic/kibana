@@ -35,93 +35,6 @@ export const typescriptRules: DummyRuleMap = {
   '@typescript-eslint/adjacent-overload-signatures': 'error',
   // '@typescript-eslint/array-type': 'error',
   '@typescript-eslint/consistent-type-assertions': 'error',
-  // '@typescript-eslint/member-ordering': [
-  //   'error',
-  //   {
-  //     'default': ['public-static-field', 'static-field', 'instance-field']
-  //   }
-  // ],
-  // '@typescript-eslint/naming-convention': [
-  //   'error',
-  //   {
-  //     'selector': 'default',
-  //     'format': ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'classMethod',
-  //     'filter': {
-  //       'regex': '^UNSAFE_',
-  //       'match': true
-  //     },
-  //     'prefix': ['UNSAFE_'],
-  //     'format': ['camelCase']
-  //   },
-  //   {
-  //     'selector': 'variable',
-  //     'format': [
-  //       'camelCase',
-  //       'UPPER_CASE', // e.g. const SOMETHING = ...
-  //       'PascalCase' // e.g. React.FunctionComponent =
-  //     ],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'variable',
-  //     'modifiers': ['destructured'],
-  //     'format': [
-  //       'camelCase',
-  //       'snake_case', // e.g. properties from ES response objects
-  //       'UPPER_CASE', // e.g. const SOMETHING = ...
-  //       'PascalCase' // e.g. React.FunctionComponent =
-  //     ],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'parameter',
-  //     'format': ['camelCase', 'PascalCase', 'snake_case'],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'function',
-  //     'format': [
-  //       'camelCase',
-  //       'PascalCase' // React.FunctionComponent =
-  //     ],
-  //     'leadingUnderscore': 'allowSingleOrDouble',
-  //     'trailingUnderscore': 'allowSingleOrDouble'
-  //   },
-  //   {
-  //     'selector': 'typeLike',
-  //     'format': ['PascalCase', 'UPPER_CASE'],
-  //     'leadingUnderscore': 'allow',
-  //     'trailingUnderscore': 'allow'
-  //   },
-  //   {
-  //     'selector': 'enum',
-  //     'format': ['PascalCase', 'UPPER_CASE', 'camelCase']
-  //   },
-  //   // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
-  //   // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
-  //   {
-  //     'selector': [
-  //       'classProperty',
-  //       'objectLiteralProperty',
-  //       'typeProperty',
-  //       'classMethod',
-  //       'objectLiteralMethod',
-  //       'typeMethod',
-  //       'accessor',
-  //       'enumMember'
-  //     ],
-  //     'format': null,
-  //     'modifiers': ['requiresQuotes']
-  //   }
-  // ],
   '@typescript-eslint/no-empty-interface': 'error',
   // '@typescript-eslint/no-empty-object-type': 'off',
   '@typescript-eslint/no-extra-non-null-assertion': 'error',
@@ -161,6 +74,88 @@ export const typescriptOverrides: OxlintOverride[] = [
       '@typescript-eslint/triple-slash-reference': [
         'error',
         { path: 'never', types: 'never', lib: 'never' },
+      ],
+      '@kbn/compat/typescript-member-ordering': [
+        'error',
+        { default: ['public-static-field', 'static-field', 'instance-field'] },
+      ],
+      '@kbn/compat/typescript-naming-convention': [
+        'error',
+        {
+          selector: 'default',
+          format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'classMethod',
+          filter: { regex: '^UNSAFE_', match: true },
+          prefix: ['UNSAFE_'],
+          format: ['camelCase'],
+        },
+        {
+          selector: 'variable',
+          format: [
+            'camelCase',
+            'UPPER_CASE', // e.g. const SOMETHING = ...
+            'PascalCase', // e.g. React.FunctionComponent =
+          ],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'variable',
+          modifiers: ['destructured'],
+          format: [
+            'camelCase',
+            'snake_case', // e.g. properties from ES response objects
+            'UPPER_CASE', // e.g. const SOMETHING = ...
+            'PascalCase', // e.g. React.FunctionComponent =
+          ],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'parameter',
+          format: ['camelCase', 'PascalCase', 'snake_case'],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'function',
+          format: [
+            'camelCase',
+            'PascalCase', // React.FunctionComponent =
+          ],
+          leadingUnderscore: 'allowSingleOrDouble',
+          trailingUnderscore: 'allowSingleOrDouble',
+        },
+        {
+          selector: 'typeLike',
+          format: ['PascalCase', 'UPPER_CASE'],
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+        {
+          selector: 'enum',
+          format: ['PascalCase', 'UPPER_CASE', 'camelCase'],
+        },
+        // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
+        // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
+        {
+          selector: [
+            'classProperty',
+            'objectLiteralProperty',
+            'typeProperty',
+            'classMethod',
+            'objectLiteralMethod',
+            'typeMethod',
+            'accessor',
+            'enumMember',
+          ],
+          format: null,
+          modifiers: ['requiresQuotes'],
+        },
       ],
       eqeqeq: ['error', 'always', { null: 'ignore' }],
       'max-classes-per-file': ['error', 1],

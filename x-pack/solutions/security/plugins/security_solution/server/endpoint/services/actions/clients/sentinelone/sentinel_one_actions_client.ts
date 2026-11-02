@@ -644,7 +644,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           limit: 1,
           sortBy: 'createdAt',
           sortOrder: 'asc',
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+          // eslint-disable-next-line @kbn/compat/typescript-naming-convention
           createdAt__gte: timestamp,
           agentIds: agentId,
         };
