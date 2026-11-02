@@ -1646,6 +1646,12 @@
                   false
                 ]
               },
+              "override": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
               "target_field": ""
             },
             "reroute": {
@@ -3805,6 +3811,12 @@
               "tag": "",
               "field": "",
               "ignore_missing": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "override": {
                 "__one_of": [
                   true,
                   false
