@@ -224,6 +224,68 @@ actions:
     });
   });
 
+  describe('Markdown references', () => {
+    const INDEX_URL = 'https://docs.example.com/llms.txt';
+    const documents: Record<string, string> = {
+      [INDEX_URL]: '- [Search](api/search.md)',
+      'https://docs.example.com/api/search.md': [
+        '# Search',
+        '',
+        '`GET` `/v1/search`',
+        '',
+        '**Base URL:** `https://api.example.com`',
+      ].join('\n'),
+    };
+    const fetchText = async (url: string) => documents[url];
+
+    it("reads a connector's Markdown source from its index and pages", async () => {
+      await fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        JSON.stringify({
+          sources: {
+            search: {
+              format: 'brave-markdown',
+              url: INDEX_URL,
+              pages: ['api/'],
+              fetchedAt: '2026-10-08T00:00:00.000Z',
+            },
+          },
+          operations: {},
+        })
+      );
+
+      const { output, problems } = await inspect({ sources: {}, directory, fetchText });
+
+      expect(problems).toEqual([]);
+      expect(output).toContain('GET     /v1/search');
+    });
+
+    it('adds a new Markdown source to the manifest with its format and pages', async () => {
+      const { manifestUpdated } = await inspect({
+        sources: { search: INDEX_URL },
+        formats: { search: 'brave-markdown' },
+        pages: { search: ['api/'] },
+        directory,
+        fetchText,
+      });
+
+      expect(manifestUpdated).toBe(true);
+      expect((await readManifest(directory)).sources.search).toEqual({
+        format: 'brave-markdown',
+        url: INDEX_URL,
+        pages: ['api/'],
+        fetchedAt: '2026-10-08T09:00:00.000Z',
+      });
+    });
+
+    it('refuses --pages without a Markdown format, and for a source that does not exist', async () => {
+      await expect(inspect({ pages: { v1: ['api/'] } })).rejects.toThrow('--pages only applies');
+      await expect(inspect({ formats: { nope: 'brave-markdown' } })).rejects.toThrow(
+        'no source "nope"'
+      );
+    });
+  });
+
   it("adds new sources to a connector's manifest, with when they were fetched", async () => {
     const { manifestUpdated, problems } = await inspect({
       directory,

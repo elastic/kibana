@@ -86,6 +86,8 @@ run(
       const directory = inspectedId ? await findVendorApiDirectory(inspectedId) : undefined;
       const { output, manifestUpdated, problems } = await inspectVendorApi({
         sources,
+        formats,
+        pages,
         directory,
         operations: flagsReader.arrayOfStrings('operation') ?? [],
         grep: flagsReader.string('grep'),

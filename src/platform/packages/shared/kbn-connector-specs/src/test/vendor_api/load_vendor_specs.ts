@@ -115,11 +115,12 @@ export const loadVendorSpecs = async ({
   const overlay = overlayText ? (parseSpecText(overlayText) as OverlayDocument) : undefined;
 
   const raw: Record<string, OpenApiDocument> = {};
-  for (const [name, { url }] of Object.entries(manifest.sources)) {
+  for (const [name, source] of Object.entries(manifest.sources)) {
+    const { url } = source;
     const snapshot = latest ? undefined : await read(snapshotFile(name));
     if (snapshot === undefined) {
       log.info(`Fetching ${name} from ${url}`);
-      raw[name] = (await loadVendorSpec(url, fetchText)).document;
+      raw[name] = (await loadVendorSpec(url, fetchText, source)).document;
     } else {
       raw[name] = JSON.parse(snapshot);
     }

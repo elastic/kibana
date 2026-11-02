@@ -14,8 +14,8 @@ import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
 import { describeOperation, findOperation, listOperations } from './inspect_spec';
 import { isJsonObject } from './json_pointer';
 import { loadVendorSpec } from './load_vendor_spec';
-import type { ManifestSource, VendorApiManifest } from './manifest';
-import { parseManifest, serializeManifest } from './manifest';
+import type { ManifestSource, MarkdownSourceFormat, VendorApiManifest } from './manifest';
+import { isMarkdownFormat, parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import type { VendorApiLog } from './load_vendor_specs';
 import { applyOverlayToSources, readOptional } from './load_vendor_specs';
@@ -26,6 +26,10 @@ export const LIST_LIMIT = 200;
 export interface InspectVendorApiOptions {
   /** Specs to inspect by source name; without them, the sources in the connector's manifest. */
   readonly sources: Readonly<Record<string, string>>;
+  /** Sources that are Markdown references, by name, with the template their pages follow. */
+  readonly formats?: Readonly<Record<string, MarkdownSourceFormat>>;
+  /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
+  readonly pages?: Readonly<Record<string, readonly string[]>>;
   /**
    * A connector's `vendor_api` folder. Its overlay is applied, its manifest sources are used
    * without `sources`, and `sources` it doesn't have yet are added to its manifest.
@@ -66,6 +70,8 @@ const titleOf = ({ info }: OpenApiDocument): string => {
  */
 export const inspectVendorApi = async ({
   sources: sourceFlags,
+  formats: formatFlags = {},
+  pages: pageFlags = {},
   directory,
   operations,
   grep,
@@ -90,15 +96,28 @@ export const inspectVendorApi = async ({
   if (Object.keys(urls).length === 0) {
     throw new Error('pass the specs to inspect with --source, or a --connector with a manifest');
   }
+  for (const name of [...Object.keys(formatFlags), ...Object.keys(pageFlags)]) {
+    if (!(name in urls)) {
+      throw new Error(`--format and --pages name a source, but there is no source "${name}"`);
+    }
+  }
 
   const problems: string[] = [];
   const loaded: Record<string, OpenApiDocument> = {};
   const added: Record<string, ManifestSource> = {};
   for (const [name, url] of Object.entries(urls)) {
-    log.info(`Loading ${name} from ${url}`);
-    const { format, apiVersion, document } = await loadVendorSpec(url, fetchText);
-    loaded[name] = document;
     const known = manifest?.sources[name];
+    const declaredFormat = formatFlags[name] ?? known?.format;
+    const pages = pageFlags[name] ?? known?.pages;
+    if (!isMarkdownFormat(declaredFormat) && pages !== undefined) {
+      throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
+    }
+    log.info(`Loading ${name} from ${url}`);
+    const { format, apiVersion, document } = await loadVendorSpec(url, fetchText, {
+      format: declaredFormat,
+      pages,
+    });
+    loaded[name] = document;
     if (known && known.url !== url) {
       problems.push(
         `${name} is ${known.url} in ${MANIFEST}; to move it, record with --source ${name}=${url}`
@@ -107,6 +126,7 @@ export const inspectVendorApi = async ({
       added[name] = {
         format,
         url,
+        ...(pages === undefined ? {} : { pages: [...pages] }),
         ...(apiVersion === undefined ? {} : { apiVersion }),
         fetchedAt: (fetchedAt?.(url) ?? now()).toISOString(),
       };

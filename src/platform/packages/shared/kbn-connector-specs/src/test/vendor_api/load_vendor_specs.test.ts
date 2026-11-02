@@ -103,6 +103,41 @@ describe('loadVendorSpecs', () => {
     expect(specs.v1.info).toEqual({ title: 'Latest', version: '1', 'x-corrected': true });
   });
 
+  it('fetches a Markdown reference with latest from its index and pages', async () => {
+    const markdownManifest: VendorApiManifest = {
+      sources: {
+        v1: {
+          format: 'brave-markdown',
+          url: 'https://docs.example.com/llms.txt',
+          pages: ['api/'],
+          fetchedAt: '2026-10-07T00:00:00.000Z',
+        },
+      },
+      operations: {},
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), serializeManifest(markdownManifest));
+    await fs.rm(path.join(directory, 'overlay.yaml'));
+    const documents: Record<string, string> = {
+      'https://docs.example.com/llms.txt': '- [Search](api/search.md)',
+      'https://docs.example.com/api/search.md': [
+        '# Search',
+        '',
+        '`GET` `/v1/search`',
+        '',
+        '**Base URL:** `https://api.example.com`',
+      ].join('\n'),
+    };
+
+    const { specs } = await loadVendorSpecs({
+      directory,
+      latest: true,
+      fetchText: async (url) => documents[url],
+      log,
+    });
+
+    expect(Object.keys(specs.v1.paths ?? {})).toEqual(['/v1/search']);
+  });
+
   it('fails without a manifest', async () => {
     await fs.rm(path.join(directory, 'manifest.json'));
 

@@ -620,7 +620,7 @@ node scripts/connector_vendor_api --connector brave-search --source search=https
 node scripts/connector_vendor_api --connector databricks --source docs=https://docs.databricks.com/api/llms.txt --format docs=databricks-markdown --pages docs=jobs/v2/ --pages docs=clusters/v2/ --pages docs=warehouses/v1/ --pages docs=alerts/v1/
 ```
 
-The pages are converted to OpenAPI with `convertMarkdownReference`, and recorded, projected and snapshotted like any other source. A prefix that selects no page fails the run, as the vendor may have moved the group.
+The pages are converted to OpenAPI with `convertMarkdownReference`, and recorded, projected and snapshotted like any other source. A prefix that selects no page fails the run, as the vendor may have moved the group. `--inspect` takes `--format` and `--pages` too, and adds them to the manifest with the source.
 
 The folder holds:
 
