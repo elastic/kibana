@@ -307,9 +307,11 @@ describe('getFieldEvaluationsEsql', () => {
     (entityType) => {
       const result = getFieldEvaluationsEsql(getBuiltInEntityDefinition(entityType));
 
-      expect(result).toContain('_src_entity_source0 = MV_FIRST(TO_STRING(event.module))');
-      expect(result).toContain('_src_entity_source1 = MV_FIRST(TO_STRING(event.dataset))');
-      expect(result).toContain('_src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset))');
+      expect(result).toContain(`_src_entity_source0 = ${esqlIdentityValue('event.module')}`);
+      expect(result).toContain(`_src_entity_source1 = ${esqlIdentityValue('event.dataset')}`);
+      expect(result).toContain(
+        `_src_entity_source2 = ${esqlIdentityValue('data_stream.dataset')}`
+      );
       // Multi-source picker uses COALESCE of single-arm CaseEagerEvaluators
       expect(result).toContain('_src_entity_source = COALESCE(');
       // entity.source has no whenClauses -> 2-arm CASE (already CaseEagerEvaluator)
@@ -678,7 +680,7 @@ describe('buildOneFieldEvaluationEsql', () => {
     const result = normalize(buildOneFieldEvaluationEsql(evaluation));
 
     expect(result).toBe(
-      '_src_entity_source = MV_FIRST(TO_STRING(event.module)),\n' +
+      `_src_entity_source = ${esqlIdentityValue('event.module')},\n` +
         'entity.source = CASE(_src_entity_source IS NULL OR _src_entity_source == "", NULL, _src_entity_source)'
     );
   });
@@ -696,9 +698,9 @@ describe('buildOneFieldEvaluationEsql', () => {
 
     const result = normalize(buildOneFieldEvaluationEsql(evaluation));
 
-    expect(result).toContain('_src_entity_namespace0 = MV_FIRST(TO_STRING(event.module))');
+    expect(result).toContain(`_src_entity_namespace0 = ${esqlIdentityValue('event.module')}`);
     expect(result).toContain(
-      '_src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), "."))'
+      `_src_entity_namespace1 = MV_FIRST(SPLIT(${esqlIdentityValue('data_stream.dataset')}, "."))`
     );
     expect(result).toContain(
       '_src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL'

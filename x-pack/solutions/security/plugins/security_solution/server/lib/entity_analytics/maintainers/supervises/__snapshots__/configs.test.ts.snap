@@ -118,8 +118,8 @@ exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots workday: t
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-workday.user-__namespace__
 | WHERE (workday.user.Manager_Email IS NOT NULL OR workday.user.Manager_ID IS NOT NULL)
-| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
- _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+| EVAL _src_entity_namespace0 = CASE(MV_MIN(TO_STRING(event.module)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(event.module))), 1, 1)), MV_MIN(TO_STRING(event.module))),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(CASE(MV_MIN(TO_STRING(data_stream.dataset)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(data_stream.dataset))), 1, 1)), MV_MIN(TO_STRING(data_stream.dataset))), \\".\\")),
  _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
  _eval_entity_namespace_arm0 = (CASE(MV_MIN(TO_STRING(user.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(user.name))), 1, 1)), MV_MIN(TO_STRING(user.name))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))) IS NOT NULL AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
  _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),
@@ -164,8 +164,8 @@ exports[`SUPERVISES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots workday: t
 "FROM logs-workday.user-__namespace__
 | WHERE (workday.user.Manager_Email IS NOT NULL OR workday.user.Manager_ID IS NOT NULL)
     AND event.ingested >= NOW() - 30 day
-| EVAL _src_entity_namespace0 = MV_FIRST(TO_STRING(event.module)),
- _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(TO_STRING(data_stream.dataset)), \\".\\")),
+| EVAL _src_entity_namespace0 = CASE(MV_MIN(TO_STRING(event.module)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(event.module))), 1, 1)), MV_MIN(TO_STRING(event.module))),
+ _src_entity_namespace1 = MV_FIRST(SPLIT(CASE(MV_MIN(TO_STRING(data_stream.dataset)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(data_stream.dataset))), 1, 1)), MV_MIN(TO_STRING(data_stream.dataset))), \\".\\")),
  _src_entity_namespace = COALESCE(CASE(_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\", _src_entity_namespace0), CASE(_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\", _src_entity_namespace1)),
  _eval_entity_namespace_arm0 = (CASE(MV_MIN(TO_STRING(user.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(user.name))), 1, 1)), MV_MIN(TO_STRING(user.name))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))) IS NOT NULL AND NOT (TO_STRING(user.name) IN (\\"root\\", \\"bin\\", \\"daemon\\", \\"sys\\", \\"nobody\\", \\"jenkins\\", \\"ansible\\", \\"deploy\\", \\"terraform\\", \\"gitlab-runner\\", \\"postgres\\", \\"mysql\\", \\"redis\\", \\"elasticsearch\\", \\"kafka\\", \\"admin\\", \\"operator\\", \\"service\\"))),
  _eval_entity_namespace_arm1 = (MV_CONTAINS(TO_STRING(event.kind), \\"asset\\") AND MV_CONTAINS(TO_STRING(event.module), \\"asset_discovery\\")),

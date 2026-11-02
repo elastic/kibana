@@ -6,7 +6,6 @@
  */
 
 import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condition_to_esql';
-import { castField } from '../../esql/cast';
 import type { CastFieldOptions } from '../../esql/cast';
 import type {
   EntityDefinitionWithoutId,
@@ -145,9 +144,9 @@ export function getEuidEsqlFilterBasedOnDocument(
 
 function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
   if ('field' in source) {
-    return `MV_FIRST(${castField(source.field)})`;
+    return esqlIdentityValue(source.field);
   }
-  return `MV_FIRST(SPLIT(MV_FIRST(${castField(source.firstChunkOfField)}), "${escapeEsqlString(
+  return `MV_FIRST(SPLIT(${esqlIdentityValue(source.firstChunkOfField)}, "${escapeEsqlString(
     source.splitBy
   )}"))`;
 }
