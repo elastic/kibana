@@ -17,10 +17,11 @@ import { QueryBar } from '../query_bar';
 interface CustomToolBarProps {
   rowsCount?: number;
   onOpenIndexInDiscover?: EditLookupIndexContentContext['onOpenIndexInDiscover'];
+  fieldsSelector?: React.ReactNode;
 }
 
 export const getGridToolbar =
-  ({ rowsCount, onOpenIndexInDiscover }: CustomToolBarProps) =>
+  ({ rowsCount, onOpenIndexInDiscover, fieldsSelector }: CustomToolBarProps) =>
   ({ gridProps: { additionalControls } }: UnifiedDataTableRenderCustomToolbarProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -43,6 +44,7 @@ export const getGridToolbar =
               </strong>
             </EuiText>
           </EuiFlexItem>
+          {fieldsSelector && <EuiFlexItem grow={false}>{fieldsSelector}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             {additionalControls && <EuiFlexItem grow={false}>{additionalControls}</EuiFlexItem>}
           </EuiFlexItem>

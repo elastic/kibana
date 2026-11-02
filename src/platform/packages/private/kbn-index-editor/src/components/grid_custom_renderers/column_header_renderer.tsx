@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import type { HTMLAttributes } from 'react';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { IndexUpdateService } from '../../services/index_update_service';
@@ -25,13 +25,16 @@ import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_serv
 import { AddColumnPopover, COLUMN_INDEX_PROP } from './add_column_popover';
 import { isPlaceholderColumn } from '../../utils';
 
+// Provides the index of the column currently being edited so each column header can derive its own
+// edit state reactively, without the grid rebuilding its per-column configuration on every edit.
+export const EditingColumnIndexContext = React.createContext<number | null>(null);
+
 export const getColumnHeaderRenderer = (
   columnName: string,
   columnType: string | undefined,
   columnIndex: number,
   isSavedColumn: boolean,
   isUnsupportedESQLType: boolean,
-  isColumnInEditMode: boolean,
   setEditingColumnIndex: (columnIndex: number | null) => void,
   indexUpdateService: IndexUpdateService,
   telemetryService: IndexEditorTelemetryService
@@ -40,7 +43,6 @@ export const getColumnHeaderRenderer = (
     ...column,
     display: (
       <ColumnHeader
-        isColumnInEditMode={isColumnInEditMode}
         setEditingColumnIndex={setEditingColumnIndex}
         isSavedColumn={isSavedColumn}
         initialColumnName={columnName}
@@ -95,7 +97,6 @@ export const getColumnHeaderRenderer = (
 };
 
 interface ColumnHeaderProps {
-  isColumnInEditMode: boolean;
   setEditingColumnIndex: (columnIndex: number | null) => void;
   isSavedColumn: boolean;
   isUnsupportedESQLType: boolean;
@@ -107,7 +108,6 @@ interface ColumnHeaderProps {
 }
 
 const ColumnHeader = ({
-  isColumnInEditMode,
   setEditingColumnIndex,
   isSavedColumn,
   isUnsupportedESQLType,
@@ -119,6 +119,7 @@ const ColumnHeader = ({
 }: ColumnHeaderProps) => {
   const { euiTheme } = useEuiTheme();
   const [renderKey, setRenderKey] = useState(0);
+  const isColumnInEditMode = useContext(EditingColumnIndexContext) === columnIndex;
 
   const handleClosePopover = () => {
     setEditingColumnIndex(null);
