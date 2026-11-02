@@ -60,7 +60,7 @@ export const useNewEntitySeries = ({
     [index, timeRange, entityFilterClauses]
   );
 
-  const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack, count });
+  const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'newEntitySeries',
     query,

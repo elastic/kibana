@@ -67,7 +67,7 @@ export const useEntitiesWithAnomaliesSeries = ({
     [index, jobIds, timeRange, entityFilterClauses]
   );
 
-  const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack, count });
+  const { canRun, isHidden } = getSeriesGate({ isReady, reachesBack });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'entitiesWithAnomaliesSeries',
     query,

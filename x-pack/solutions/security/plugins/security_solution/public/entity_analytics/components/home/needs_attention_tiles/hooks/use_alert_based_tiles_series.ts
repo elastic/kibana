@@ -74,8 +74,8 @@ export const useAlertBasedTilesSeries = ({
     [index, spaceId, timeRange, entityFilterClauses]
   );
 
-  const severeGate = getSeriesGate({ isReady, reachesBack, count: severeAlertsCount });
-  const watchlistedGate = getSeriesGate({ isReady, reachesBack, count: watchlistedCount });
+  const severeGate = getSeriesGate({ isReady, reachesBack });
+  const watchlistedGate = getSeriesGate({ isReady, reachesBack });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'alertBasedTilesSeries',
     query,

@@ -128,6 +128,18 @@ describe('SignalCard', () => {
     expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('-2,270↓');
   });
 
+  it('shows the drop and the sparkline for a count that fell to 0, and still does not filter', () => {
+    const onToggle = jest.fn();
+    renderCard({ value: 0, delta: -4, trend: [4, 3, 1, 0] }, { onToggle });
+
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('-4↓');
+    expect(mockSeriesData).toHaveLength(4);
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
+    fireEvent.click(tile);
+    expect(onToggle).not.toHaveBeenCalled();
+    expect(tile).toHaveAttribute('aria-disabled', 'true');
+  });
+
   it('shows a grey "0 =" badge when nothing changed', () => {
     renderCard({ delta: 0 });
     expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('0=');
@@ -175,11 +187,16 @@ describe('SignalCard', () => {
     expect(screen.queryByTestId('eaFaceliftSignalCardDeltaLabel')).not.toBeInTheDocument();
   });
 
-  it('does not say it at a zero count, or while the delta loads, or next to a delta', () => {
+  it('says it at a zero count that came back too, but not without a count', () => {
     const { unmount } = renderCard({ value: 0, isDeltaUnavailable: true });
-    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaUnavailable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaUnavailable')).toBeInTheDocument();
     unmount();
 
+    renderCard({ value: 0, hasCount: false, isDeltaUnavailable: true });
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaUnavailable')).not.toBeInTheDocument();
+  });
+
+  it('does not say it while the delta loads, or next to a delta', () => {
     const loading = renderCard({ isDeltaLoading: true, isDeltaUnavailable: true });
     expect(screen.queryByTestId('eaFaceliftSignalCardDeltaUnavailable')).not.toBeInTheDocument();
     loading.unmount();
@@ -202,10 +219,14 @@ describe('SignalCard', () => {
     }
   );
 
-  it('does not say the comparison failed at a zero count, or while the delta loads', () => {
+  it('says the comparison failed at a zero count that came back, but not without a count or while the delta loads', () => {
     const { unmount } = renderCard({ value: 0, deltaFailure: 'delta' });
-    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaFailed')).not.toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaFailed')).toBeInTheDocument();
     unmount();
+
+    const noCount = renderCard({ value: 0, hasCount: false, deltaFailure: 'delta' });
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaFailed')).not.toBeInTheDocument();
+    noCount.unmount();
 
     renderCard({ isDeltaLoading: true, deltaFailure: 'delta' });
     expect(screen.queryByTestId('eaFaceliftSignalCardDeltaFailed')).not.toBeInTheDocument();
@@ -256,13 +277,21 @@ describe('SignalCard', () => {
       );
     });
 
-    it('stays the title alone while the delta loads or at a zero count', () => {
+    it('stays the title alone while the delta loads or when there is no count', () => {
       const loading = renderCard({ isDeltaLoading: true, delta: 5 });
       expect(tile()).toHaveAttribute('aria-label', 'New entity');
       loading.unmount();
 
-      renderCard({ value: 0, delta: 5 });
+      renderCard({ value: 0, hasCount: false, delta: 5 });
       expect(tile()).toHaveAttribute('aria-label', 'New entity');
+    });
+
+    it('says the drop at a zero count that came back', () => {
+      renderCard({ value: 0, delta: -4 });
+      expect(tile()).toHaveAttribute(
+        'aria-label',
+        'New entity. Down 4 compared with the previous period'
+      );
     });
   });
 

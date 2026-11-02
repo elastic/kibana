@@ -745,6 +745,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     skip: skipAlertTiles,
     severeAlertsCount,
     watchlistedCount,
+    hasCount: alertBasedHasCount,
   });
   const {
     delta: anomaliesDelta,
@@ -758,6 +759,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     isReady: !anomaliesPending,
     skip: skipAnomaliesTile,
     count: anomaliesCount,
+    hasCount: anomaliesHasCount,
   });
   const {
     delta: newEntityDelta,
@@ -766,7 +768,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     isHistoryMissing: newEntityHistoryMissing,
     reachesBack: newEntityReachesBack,
     failure: newEntityDeltaFailure,
-  } = useNewEntityDelta({ ...deltaOptions, isReady: !newEntityPending, count: newEntityCount });
+  } = useNewEntityDelta({
+    ...deltaOptions,
+    isReady: !newEntityPending,
+    count: newEntityCount,
+    hasCount: newEntityHasCount,
+  });
   const {
     delta: riskMoversDelta,
     previous: riskMoversPrevious,
@@ -779,6 +786,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     skip: skipRiskTiles,
     isReady: !riskMoversPending,
     count: riskMoversCount,
+    hasCount: riskMoversHasCount,
   });
   const {
     delta: newlyHCDelta,
@@ -792,6 +800,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     skip: skipRiskTiles,
     isReady: !newlyHCPending,
     count: newlyHCCount,
+    hasCount: newlyHCHasCount,
   });
 
   // The sparklines follow the deltas: each starts once its own counts and deltas have settled, and

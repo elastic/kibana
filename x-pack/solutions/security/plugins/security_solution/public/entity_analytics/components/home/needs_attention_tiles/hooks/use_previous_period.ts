@@ -152,22 +152,23 @@ export const usePreviousPeriod = <T>({
 };
 
 /**
- * Whether a delta can still arrive, for the spinner: not for a skipped tile, a zero count (the pill
- * is hidden then), a query that can never run, a failed query, a history that is too short (the
- * tile says so instead) or a delta that is already known.
+ * Whether a delta can still arrive, for the skeleton: not for a skipped tile, a count that is not
+ * known (it failed, timed out or was skipped), a query that can never run, a failed query, a history
+ * that is too short (the tile says so instead) or a delta that is already known. A count of 0 is
+ * known: the tile still compares it with the previous period.
  */
 export const isDeltaStillComing = ({
   skip,
-  count,
+  hasCount,
   isUnavailable,
   isError,
   isHistoryMissing,
   hasDelta,
 }: {
   skip?: boolean;
-  count: number;
+  hasCount: boolean;
   isUnavailable: boolean;
   isError: boolean;
   isHistoryMissing: boolean;
   hasDelta: boolean;
-}): boolean => !skip && count > 0 && !isUnavailable && !isError && !isHistoryMissing && !hasDelta;
+}): boolean => !skip && hasCount && !isUnavailable && !isError && !isHistoryMissing && !hasDelta;

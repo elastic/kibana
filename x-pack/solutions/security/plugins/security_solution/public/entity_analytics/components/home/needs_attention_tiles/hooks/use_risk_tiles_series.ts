@@ -75,16 +75,8 @@ export const useRiskTilesSeries = ({
     [spaceId, index, timeRange, entityFilterClauses]
   );
 
-  const moversGate = getSeriesGate({
-    isReady,
-    reachesBack: riskMoversReachesBack,
-    count: riskMoversCount,
-  });
-  const newlyHighGate = getSeriesGate({
-    isReady,
-    reachesBack: newlyHighCriticalReachesBack,
-    count: newlyHighCriticalCount,
-  });
+  const moversGate = getSeriesGate({ isReady, reachesBack: riskMoversReachesBack });
+  const newlyHighGate = getSeriesGate({ isReady, reachesBack: newlyHighCriticalReachesBack });
   const { series, isFetching, isError } = useTileSeriesQuery({
     tileKey: 'riskTilesSeries',
     query,

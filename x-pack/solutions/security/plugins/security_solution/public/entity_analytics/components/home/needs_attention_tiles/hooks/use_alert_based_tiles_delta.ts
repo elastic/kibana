@@ -25,12 +25,13 @@ interface AlertBasedTilesDeltaOptions {
   /** The live counts, which the previous period is compared with. */
   severeAlertsCount: number;
   watchlistedCount: number;
+  /** True when the count came back: a failed, timed-out or skipped count has no change to show. */
+  hasCount: boolean;
 }
 
 /**
  * The deltas of the Entities with alerts and Watchlisted tiles, from one shared previous-period
- * query. It runs only once the page's counts have loaded and at least one of the two counts is above
- * 0, after a check that the alerts reach back twice the range. While a delta can still arrive
+ * query. It runs only once the page's counts have loaded and came back, after a check that the alerts reach back twice the range. While a delta can still arrive
  * `isDeltaLoading` is true; after a failure or a short history it is false (a short history sets
  * `isHistoryMissing` instead).
  */
@@ -42,6 +43,7 @@ export const useAlertBasedTilesDelta = ({
   isReady,
   severeAlertsCount,
   watchlistedCount,
+  hasCount,
 }: AlertBasedTilesDeltaOptions): {
   severeAlertsDelta: number | undefined;
   watchlistedDelta: number | undefined;
@@ -71,12 +73,11 @@ export const useAlertBasedTilesDelta = ({
     [index, spaceId, timeRange, entityFilterClauses]
   );
 
-  const highestCount = Math.max(severeAlertsCount, watchlistedCount);
   const { previous, reachesBack, isHistoryMissing, isError, failure } = usePreviousPeriod({
     tileKey: 'alertBasedTiles',
     guardQuery,
     previousQuery,
-    enabled: !skip && isReady && highestCount > 0 && !isIndexLoading && Boolean(index),
+    enabled: !skip && isReady && hasCount && !isIndexLoading && Boolean(index),
     parse: parseAlertBasedTilesResponse,
   });
 
@@ -90,7 +91,7 @@ export const useAlertBasedTilesDelta = ({
     failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
-      count: highestCount,
+      hasCount,
       // Once the index has loaded, a missing one means the query can never run.
       isUnavailable: !skip && !isIndexLoading && !index,
       isError,

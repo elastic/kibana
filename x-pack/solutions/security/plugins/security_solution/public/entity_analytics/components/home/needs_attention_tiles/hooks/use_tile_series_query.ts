@@ -72,20 +72,19 @@ export const useTileSeriesQuery = <T>({
 
 /**
  * Whether a tile's series may run: the same rule as its delta. It needs the page's counts and the
- * delta to have settled, a history that reaches back twice the range, and a count above 0. Once
- * those have settled and it may not run, the tile has no line (`isHidden`) and no spinner.
+ * delta to have settled and a history that reaches back twice the range, which a tile whose count
+ * did not come back never gets (its delta does not run). Once those have settled and it may not run,
+ * the tile has no line (`isHidden`) and no spinner.
  */
 export const getSeriesGate = ({
   isReady,
   reachesBack,
-  count,
 }: {
   isReady: boolean;
   /** From the tile's delta hook; undefined until its history check settles, or after it failed. */
   reachesBack: boolean | undefined;
-  count: number;
 }): { canRun: boolean; isHidden: boolean } => {
-  const canRun = isReady && reachesBack === true && count > 0;
+  const canRun = isReady && reachesBack === true;
   return { canRun, isHidden: isReady && !canRun };
 };
 

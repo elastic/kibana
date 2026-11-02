@@ -25,6 +25,8 @@ interface RiskTileDeltaOptions {
   isReady: boolean;
   /** The live count, which the previous period is compared with. */
   count: number;
+  /** True when the count came back: a failed, timed-out or skipped count has no change to show. */
+  hasCount: boolean;
 }
 
 interface RiskTileDefinition {
@@ -48,6 +50,7 @@ const useRiskTileDelta = (
     entityFilters = EMPTY_ENTITY_FILTERS,
     isReady,
     count,
+    hasCount,
   }: RiskTileDeltaOptions
 ): {
   delta: number | undefined;
@@ -78,7 +81,7 @@ const useRiskTileDelta = (
     guardKey: RISK_HISTORY_GUARD_KEY,
     guardQuery,
     previousQuery,
-    enabled: !skip && isReady && count > 0 && !isIndexLoading && Boolean(index),
+    enabled: !skip && isReady && hasCount && !isIndexLoading && Boolean(index),
     parse: (raw) => readFirstNumber(raw, 'value'),
   });
 
@@ -90,7 +93,7 @@ const useRiskTileDelta = (
     failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
-      count,
+      hasCount,
       // Once the index has loaded, a missing one means the query can never run.
       isUnavailable: !skip && !isIndexLoading && !index,
       isError,

@@ -136,8 +136,8 @@ const getTrendReversedBadgeColors = (
 ): TrendBadgeColors => {
   if (delta === 0) {
     return {
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      textColor: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundLightText,
+      textColor: euiTheme.colors.textParagraph,
       icon: TREND_NONE,
     };
   }
@@ -534,7 +534,10 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
   const isZero = card.value === 0;
   // A tile without a count has nothing to filter the table by.
   const countIssue = isLoading ? undefined : card.countIssue;
-  const interactive = !isZero && !isLoading && !countIssue;
+  // A count that came back, also 0, is compared with the previous period; only a count above 0
+  // filters the table.
+  const hasCount = !isLoading && !countIssue && card.hasCount;
+  const interactive = hasCount && !isZero;
   // A selected tile stays clickable at 0, so the filter it applies can still be cleared.
   const canToggle = (interactive || selected) && !isLoading;
   // Hover only: mouse clicks must not leave focus chrome that looks like hover after deselect.
@@ -555,13 +558,13 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
 
   const { delta, trend } = card;
   // Each part that is still loading has a skeleton or no line, and the tile gets one progress bar.
-  const isDeltaLoading = interactive && Boolean(card.isDeltaLoading);
-  const isTrendLoading = interactive && Boolean(card.isTrendLoading);
+  const isDeltaLoading = hasCount && Boolean(card.isDeltaLoading);
+  const isTrendLoading = hasCount && Boolean(card.isTrendLoading);
   const showProgress = isLoading || isDeltaLoading || isTrendLoading;
-  const shownDelta = interactive && !card.isDeltaLoading && delta !== undefined ? delta : undefined;
+  const shownDelta = hasCount && !card.isDeltaLoading && delta !== undefined ? delta : undefined;
   // No line next to "Not enough history to compare": the short history would make it misleading.
   const shownTrend =
-    interactive &&
+    hasCount &&
     !showProgress &&
     card.isDeltaUnavailable !== true &&
     trend !== undefined &&
@@ -569,12 +572,12 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
       ? trend
       : undefined;
   const showNoHistory =
-    interactive &&
+    hasCount &&
     card.isDeltaUnavailable === true &&
     !card.isDeltaLoading &&
     shownDelta === undefined;
   const failedComparison =
-    interactive && !card.isDeltaLoading && shownDelta === undefined && !showNoHistory
+    hasCount && !card.isDeltaLoading && shownDelta === undefined && !showNoHistory
       ? card.deltaFailure
       : undefined;
 

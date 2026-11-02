@@ -778,6 +778,24 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
     });
   });
 
+  it("runs a tile's delta for a count of 0 that came back, but not for a count that did not", () => {
+    mockTiles();
+    hooks.useNewEntityCount.mockReturnValue({
+      ...hooks.useNewEntityCount(),
+      count: 0,
+      hasCount: true,
+    });
+    hooks.useRiskMoversCount.mockReturnValue({
+      ...hooks.useRiskMoversCount(),
+      count: 0,
+      hasCount: false,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(lastOptions(DELTA_HOOKS.newEntity).hasCount).toBe(true);
+    expect(lastOptions(DELTA_HOOKS.riskMovers).hasCount).toBe(false);
+  });
+
   it('passes whether each count has a result to its tile, so a missing count is not shown as 0', () => {
     mockTiles();
     hooks.useRiskMoversCount.mockReturnValue({

@@ -270,12 +270,14 @@ describe('series hooks', () => {
       expect(isEnabled()).toBe(false);
     });
 
-    it.each([
-      ['the history is too short', { count: 4, reachesBack: false }],
-      ['the count is 0', { count: 0, reachesBack: true }],
-    ])('leaves the lines out, with no spinner and no query, when %s', (_reason, tile) => {
-      expect(runAll(hook, tile)).toEqual(NO_LINES(hook));
+    it('leaves the lines out, with no spinner and no query, when the history is too short', () => {
+      expect(runAll(hook, { count: 4, reachesBack: false })).toEqual(NO_LINES(hook));
       expect(isEnabled()).toBe(false);
+    });
+
+    it('runs for a count of 0 too, so a drop to 0 keeps its line', () => {
+      runAll(hook, { count: 0, reachesBack: true });
+      expect(isEnabled()).toBe(true);
     });
 
     it('waits for the history check before it decides, with the spinner on', () => {
@@ -338,24 +340,24 @@ describe('series hooks', () => {
   });
 
   describe.each(TWO_TILE_HOOKS)('$name: two tiles in one query', (hook) => {
-    it('hides only the tile whose count is 0, and runs while the other has a count', () => {
+    it('draws a line for a tile whose count is 0 too, ending on 0', () => {
       mockUseQuery.mockReturnValue(queryResult({ data: hook.toQueryData(dotsOfTiles(hook)) }));
       const [first, second] = settledTiles(hook);
 
       const firstZero = run(hook, { tiles: [{ ...first, count: 0 }, second] });
       expect(isEnabled()).toBe(true);
-      expect(firstZero.trends[0]).toBeUndefined();
+      expect(firstZero.trends[0]?.[DOT_COUNT - 1]).toBe(0);
       expect(firstZero.trends[1]?.[DOT_COUNT - 1]).toBe(second.count);
 
       const secondZero = run(hook, { tiles: [first, { ...second, count: 0 }] });
       expect(isEnabled()).toBe(true);
       expect(secondZero.trends[0]?.[DOT_COUNT - 1]).toBe(first.count);
-      expect(secondZero.trends[1]).toBeUndefined();
+      expect(secondZero.trends[1]?.[DOT_COUNT - 1]).toBe(0);
     });
 
-    it('does not run when both counts are 0', () => {
-      expect(runAll(hook, { count: 0, reachesBack: true })).toEqual(NO_LINES(hook));
-      expect(isEnabled()).toBe(false);
+    it('runs when both counts are 0', () => {
+      runAll(hook, { count: 0, reachesBack: true });
+      expect(isEnabled()).toBe(true);
     });
   });
 

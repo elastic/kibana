@@ -25,11 +25,13 @@ interface AnomaliesDeltaOptions {
   isReady: boolean;
   /** The live count, which the previous period is compared with. */
   count: number;
+  /** True when the count came back: a failed, timed-out or skipped count has no change to show. */
+  hasCount: boolean;
 }
 
 /**
  * The delta of the Entities with anomalies tile. Like the count it needs the installed security
- * ML jobs. It runs only once the page's counts have loaded and its own count is above 0, after a
+ * ML jobs. It runs only once the page's counts have loaded and its own count came back, after a
  * check that the anomaly records reach back twice the range.
  */
 export const useEntitiesWithAnomaliesDelta = ({
@@ -39,6 +41,7 @@ export const useEntitiesWithAnomaliesDelta = ({
   entityFilters = EMPTY_ENTITY_FILTERS,
   isReady,
   count,
+  hasCount,
 }: AnomaliesDeltaOptions): {
   delta: number | undefined;
   /** The count over the previous period, which the sparkline starts from. */
@@ -80,7 +83,7 @@ export const useEntitiesWithAnomaliesDelta = ({
     tileKey: 'entitiesWithAnomalies',
     guardQuery,
     previousQuery,
-    enabled: !skip && isReady && count > 0 && !isLoadingInputs && hasInputs,
+    enabled: !skip && isReady && hasCount && !isLoadingInputs && hasInputs,
     parse: (raw) => readFirstNumber(raw, 'value'),
   });
 
@@ -92,7 +95,7 @@ export const useEntitiesWithAnomaliesDelta = ({
     failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
-      count,
+      hasCount,
       // Once the inputs have loaded, no installed job or no index means the query can never run.
       isUnavailable: !skip && !isLoadingInputs && !hasInputs,
       isError,
