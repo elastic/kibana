@@ -259,6 +259,11 @@ export const WORKER_SETTINGS_SAVE_ERROR = i18n.translate(
   { defaultMessage: 'Could not save this Worker. Other saved changes were kept.' }
 );
 
+export const WORKER_DOCS_LINK_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.docsLinkLabel',
+  { defaultMessage: 'Learn more' }
+);
+
 export const WATCH_SETTINGS_INVALID = i18n.translate(
   'xpack.alertzero.watches.settings.invalidDrafts',
   { defaultMessage: 'Fix invalid settings before saving.' }
