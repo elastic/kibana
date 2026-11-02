@@ -1,0 +1,4 @@
+=== BASELINE KILL TEST (Run B, worker OFF) ===
+[2026-11-02T13:05:40.476+01:00][WARN ][plugins.taskManager] [poc-kill-test] task 34543b3f-d43b-4184-906f-42bbadbbcf8f BLOCKING the main-thread event loop for 60000ms starting 2026-11-02T12:05:40.476Z
+[2026-11-02T13:06:40.476+01:00][WARN ][plugins.taskManager] [poc-kill-test] task 34543b3f-d43b-4184-906f-42bbadbbcf8f finished blocking at 2026-11-02T12:06:40.476Z
+mid-block ES query: 0 claim stamps after block start (vs 10+ in worker mode)

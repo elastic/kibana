@@ -1,0 +1,7 @@
+=== NUDGE TEST (Run A2) ===
+[2026-11-02T12:49:11.966+01:00][INFO ][plugins.taskManager] [poc] scheduled pocNoop task 0d96cda0-2713-4f8c-9660-391bdd6804d7 (durationMs=0, nudge=true) at 2026-11-02T11:49:11.966Z
+[2026-11-02T12:49:14.376+01:00][INFO ][plugins.taskManager] [poc-noop] task 0d96cda0-2713-4f8c-9660-391bdd6804d7 executed at 2026-11-02T11:49:14.376Z (runAt was 2026-11-02T11:49:11.945Z)
+[2026-11-02T12:49:38.417+01:00][INFO ][plugins.taskManager] [poc] scheduled pocNoop task c667366c-de0f-42cd-b277-b053ba03f08e (durationMs=0, nudge=true) at 2026-11-02T11:49:38.417Z
+[2026-11-02T12:49:38.447+01:00][INFO ][plugins.taskManager] [poc-noop] task c667366c-de0f-42cd-b277-b053ba03f08e executed at 2026-11-02T11:49:38.447Z (runAt was 2026-11-02T11:49:38.400Z)
+--- worker ---
+[2026-11-02T11:49:38.428Z][DEBUG][task-coordinator-worker:1] Task poller received a claim nudge, running a claim cycle immediately

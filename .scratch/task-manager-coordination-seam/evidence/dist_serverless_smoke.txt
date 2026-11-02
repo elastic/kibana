@@ -1,0 +1,18 @@
+=== DIST SMOKE (darwin dist, --serverless=es, config-file auth, NO env vars) ===
+--- self-activation + config-derived ES connection (redacted) ---
+[2026-11-02T17:34:55.488+01:00][WARN ][plugins.taskManager] PoC test task scaffolding enabled (TM_POC_TEST_TASK=true)
+[2026-11-02T17:34:58.016+01:00][INFO ][plugins.taskManager] PoC worker coordinator enabled: main-thread Kibana discovery heartbeat disabled (worker owns it)
+[2026-11-02T17:34:58.016+01:00][INFO ][plugins.taskManager] PoC worker coordinator enabled: main-thread claim-nudge watcher disabled (worker owns it)
+[2026-11-02T17:34:58.018+01:00][INFO ][plugins.taskManager] PoC worker coordinator enabled: polling/claiming moves to a worker thread; in-process poller disabled
+[2026-11-02T17:34:58.631+01:00][INFO ][plugins.taskManager.pocWorkerCoordinatorBridge] PoC coordinator worker ES connection: node=http://localhost:9200, auth=serviceAccountToken([REDACTED]), ca=0 file(s), rejectUnauthorized=true, sources=[config:/Users/jloleysens/repos/work/kibana/config/serverless.yml, config:/tmp/poc-smoke.yml]
+--- worker boot in dist (compiled coordinator_worker.js) ---
+{"@timestamp":"2026-11-02T16:34:58.863Z","log.level":"INFO","log.logger":"task-coordinator-worker:1","message":"Coordinator worker booted (threadId=1, pid=7842); waiting for start"}
+{"@timestamp":"2026-11-02T16:34:58.866Z","log.level":"INFO","log.logger":"task-coordinator-worker:1","message":"TaskCoordinator starting for node \"27e3ca2a-9e05-4c94-9083-dd9afb6bb97e\" (claiming as \"kibana:27e3ca2a-9e05-4c94-9083-dd9afb6bb97e\") with 224 task types"}
+--- nudge end-to-end on dist ---
+{"@timestamp":"2026-11-02T16:35:37.495Z","log.level":"DEBUG","log.logger":"task-coordinator-worker:1","message":"Task poller received a claim nudge, running a claim cycle immediately"}
+[2026-11-02T17:35:37.521+01:00][INFO ][plugins.taskManager] [poc-noop] task ebbc6930-fff6-45f0-b4f4-80cf1361a879 executed at 2026-11-02T16:35:37.521Z (runAt was 2026-11-02T16:35:37.461Z)
+--- kill test on dist: worker stdout lines DURING 60s block (fs.writeSync(1)) ---
+[2026-11-02T17:35:52.538+01:00][WARN ][plugins.taskManager] [poc-kill-test] task 9cffea1e-483a-443a-95a9-56a5c6b95def BLOCKING the main-thread event loop for 60000ms starting 2026-11-02T16:35:52.538Z
+[2026-11-02T17:36:52.538+01:00][WARN ][plugins.taskManager] [poc-kill-test] task 9cffea1e-483a-443a-95a9-56a5c6b95def finished blocking at 2026-11-02T16:36:52.538Z
+{"@timestamp":"2026-11-02T16:35:55.518Z","log.level":"INFO","log.logger":"task-coordinator-worker:1","message":"[cycle 29] coordinator claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0"}
+{"@timestamp":"2026-11-02T16:36:01.523Z","log.level":"INFO","log.logger":"task-coordinator-worker:1","message":"[cycle 31] coordinator claimed: 7; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0"}

@@ -1,0 +1,15 @@
+=== KILL TEST (Run A, worker coordinator ON) ===
+--- main-thread log: block boundaries + 60.0s silence ---
+[2026-11-02T12:45:15.393+01:00][WARN ][plugins.taskManager] [poc-kill-test] task 678e7018-db80-47fb-a49f-5236044dfff4 BLOCKING the main-thread event loop for 60000ms starting 2026-11-02T11:45:15.393Z
+[2026-11-02T12:46:15.393+01:00][WARN ][plugins.taskManager] [poc-kill-test] task 678e7018-db80-47fb-a49f-5236044dfff4 finished blocking at 2026-11-02T11:46:15.393Z
+
+--- worker fs-sync log: claim cycles during block window 11:45:15Z..11:46:15Z ---
+[2026-11-02T11:45:00.395Z][INFO][task-coordinator-worker:1] [cycle 545] coordinator claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0
+[2026-11-02T11:45:06.394Z][INFO][task-coordinator-worker:1] [cycle 547] coordinator claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0
+[2026-11-02T11:45:09.398Z][INFO][task-coordinator-worker:1] [cycle 548] coordinator claimed: 2; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0
+[2026-11-02T11:45:15.389Z][INFO][task-coordinator-worker:1] [cycle 550] coordinator claimed: 2; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0
+[2026-11-02T11:45:36.397Z][INFO][task-coordinator-worker:1] [cycle 557] coordinator claimed: 7; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0
+[2026-11-02T11:45:51.408Z][INFO][task-coordinator-worker:1] [cycle 562] coordinator claimed: 2; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0
+[2026-11-02T11:46:09.406Z][INFO][task-coordinator-worker:1] [cycle 568] coordinator claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0
+[2026-11-02T11:46:15.419Z][INFO][task-coordinator-worker:1] [cycle 570] coordinator claimed: 1; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0
+[2026-11-02T11:46:37.936Z][INFO][task-coordinator-worker:1] [cycle 585] coordinator claimed: 7; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0

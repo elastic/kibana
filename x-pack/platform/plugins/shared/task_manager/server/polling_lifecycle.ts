@@ -47,6 +47,8 @@ import {
   asTaskPollingCycleEvent,
   asTaskManagerStatEvent,
   asTaskManagerBackpressureEvent,
+  asTaskClaimEvent,
+  startTaskTimer,
 } from './task_events';
 import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
@@ -79,6 +81,9 @@ import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import type { TaskExecutionControlService, TaskExecutionControlState } from './execution_control';
+import { WorkerCoordinatorBridge, serializeTaskDefinitions } from './poc_worker_bridge';
+import { TASK_MANAGER_CLAIM_NUDGE_INDEX } from './constants';
+import type { CapacitySnapshot, ClaimedTaskBatch } from './poc_coordinator/types';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -103,6 +108,8 @@ export interface TaskPollingLifecycleOpts {
   enrichFakeRequest?: FakeRequestEnricher;
   /** Requests extra claim cycles; ignored during Elasticsearch backpressure and its recovery. */
   claimNudgeService?: TaskManagerClaimNudgeService;
+  /** PoC seam: run coordination (polling/claiming/discovery/nudge) in a worker thread. */
+  pocWorkerCoordinator?: { enabled: boolean; isServerless: boolean };
 }
 
 export type TaskLifecycleEvent =
@@ -127,7 +134,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
-  private poller: TaskPoller<string, TimedFillPoolResult>;
+  private poller?: TaskPoller<string, TimedFillPoolResult>;
+  // PoC seam: when the worker coordinator is enabled, claiming happens in a
+  // worker thread and these replace the in-process poller.
+  private workerBridge?: WorkerCoordinatorBridge;
+  private workerCycleEvents$?: Subject<Result<TimedFillPoolResult, PollingError<string>>>;
   private started = false;
   private stopped = false;
   private readonly executionControlService: TaskExecutionControlService;
@@ -175,6 +186,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     eventLogger,
     enrichFakeRequest,
     claimNudgeService,
+    pocWorkerCoordinator,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -318,30 +330,65 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       .pipe(pairwise())
       .subscribe(([previous, current]) => this.handleExecutionControlTransition(previous, current));
 
-    this.poller = createTaskPoller<string, TimedFillPoolResult>({
-      logger,
-      initialPollInterval: pollInterval,
-      pollInterval$: this.pollIntervalConfiguration$,
-      claimNudge$: claimNudgeService?.claimNudge$,
-      backpressure$: claimNudgeSuppressed$,
-      getCapacity: () => {
-        const capacity = this.pool.availableCapacity();
-        if (!capacity) {
-          const usedCapacityPercentage = this.pool.usedCapacityPercentage;
+    if (pocWorkerCoordinator?.enabled) {
+      // PoC seam: coordination (polling, claiming, discovery, claim-nudge
+      // watching) runs in a worker thread. The executor side keeps the pool,
+      // hydrates claimed refs and re-emits lifecycle events for monitoring.
+      this.logger.info(
+        'PoC worker coordinator enabled: polling/claiming moves to a worker thread; in-process poller disabled'
+      );
+      this.workerCycleEvents$ = new Subject<Result<TimedFillPoolResult, PollingError<string>>>();
+      this.workerBridge = new WorkerCoordinatorBridge({
+        logger,
+        config,
+        context: {
+          taskManagerId: taskStore.taskManagerId,
+          podName: taskPartitioner.getPodName(),
+          taskIndex: taskStore.index,
+          claimNudgeIndex: TASK_MANAGER_CLAIM_NUDGE_INDEX,
+          isServerless: pocWorkerCoordinator.isServerless,
+          definitions: serializeTaskDefinitions(definitions),
+          startingCapacity,
+          excludedTaskTypes: config.unsafe.exclude_task_types,
+        },
+        getCapacitySnapshot: () => this.buildCapacitySnapshot(),
+        getExecutionReport: () => ({
+          tmUtilization: this.currentTmUtilization$.getValue(),
+          takenAt: Date.now(),
+        }),
+      });
+      this.workerBridge.claimedBatches$.subscribe((batch) => {
+        void this.runClaimedBatch(batch);
+      });
+      this.subscribeToPoller(this.workerCycleEvents$);
+    } else {
+      this.poller = createTaskPoller<string, TimedFillPoolResult>({
+        logger,
+        initialPollInterval: pollInterval,
+        pollInterval$: this.pollIntervalConfiguration$,
+        claimNudge$: claimNudgeService?.claimNudge$,
+        backpressure$: claimNudgeSuppressed$,
+        getCapacity: () => {
+          const capacity = this.pool.availableCapacity();
+          if (!capacity) {
+            const usedCapacityPercentage = this.pool.usedCapacityPercentage;
 
-          // if there isn't capacity, emit a load event so that we can expose how often
-          // high load causes the poller to skip work (work isn't called when there is no capacity)
-          this.emitEvent(asTaskManagerStatEvent('load', asOk(usedCapacityPercentage)));
+            // if there isn't capacity, emit a load event so that we can expose how often
+            // high load causes the poller to skip work (work isn't called when there is no capacity)
+            this.emitEvent(asTaskManagerStatEvent('load', asOk(usedCapacityPercentage)));
 
-          // Emit event indicating task manager utilization
-          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(usedCapacityPercentage)));
-        }
-        return capacity;
-      },
-      work: this.pollForWork,
-    });
+            // Emit event indicating task manager utilization
+            this.emitEvent(
+              asTaskManagerStatEvent('workerUtilization', asOk(usedCapacityPercentage))
+            );
+          }
+          return capacity;
+        },
+        work: this.pollForWork,
+      });
 
-    this.subscribeToPoller(this.poller.events$);
+      this.subscribeToPoller(this.poller.events$);
+    }
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
       if (areESAndSOAvailable && !this.started) {
@@ -400,7 +447,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       );
     } finally {
       if (!this.stopped) {
-        this.poller.start();
+        this.poller?.start();
+        this.workerBridge?.start();
       }
     }
   }
@@ -413,7 +461,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.stopped = true;
     this.executionControlSubscription?.unsubscribe();
     this.backpressureSubscription?.unsubscribe();
-    this.poller.stop();
+    this.poller?.stop();
+    void this.workerBridge?.stop();
   }
 
   public getCurrentTasksInPool(): string[] {
@@ -464,41 +513,152 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       // wrap each task in a Task Runner
       this.createTaskRunnerForTask,
       // place tasks in the Task Pool
-      async (tasks: TaskRunner[]) => {
-        const { paused, pausedTaskTypes } = this.executionControlService.getState();
-        // If a global pause landed after tasks were claimed in this cycle, don't
-        // start any of them; they idle out via retryAt and are reclaimed once resumed.
-        if (paused) {
-          this.logger.debug(
-            'Task Manager execution was paused mid-cycle; not running the tasks claimed in this cycle.'
-          );
-          return TaskPoolRunResult.NoTaskWereRan;
-        }
-        // Likewise, if specific task types were paused mid-cycle, don't start the
-        // tasks of those types that were already claimed in this cycle.
-        const pausedTypes = new Set(pausedTaskTypes);
-        const tasksToRun = [];
-        const removeTaskPromises = [];
-        for (const task of tasks) {
-          if (pausedTypes.has(task.taskType)) {
-            this.logger.debug(
-              `Not running claimed task ${task} because task type "${task.taskType}" was paused mid-cycle.`
-            );
-          } else if (task.isAdHocTaskAndOutOfAttempts) {
-            this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
-            removeTaskPromises.push(task.removeTask());
+      this.runTaskRunners
+    );
+  };
+
+  private runTaskRunners = async (tasks: TaskRunner[]): Promise<TaskPoolRunResult> => {
+    const { paused, pausedTaskTypes } = this.executionControlService.getState();
+    // If a global pause landed after tasks were claimed in this cycle, don't
+    // start any of them; they idle out via retryAt and are reclaimed once resumed.
+    if (paused) {
+      this.logger.debug(
+        'Task Manager execution was paused mid-cycle; not running the tasks claimed in this cycle.'
+      );
+      return TaskPoolRunResult.NoTaskWereRan;
+    }
+    // Likewise, if specific task types were paused mid-cycle, don't start the
+    // tasks of those types that were already claimed in this cycle.
+    const pausedTypes = new Set(pausedTaskTypes);
+    const tasksToRun = [];
+    const removeTaskPromises = [];
+    for (const task of tasks) {
+      if (pausedTypes.has(task.taskType)) {
+        this.logger.debug(
+          `Not running claimed task ${task} because task type "${task.taskType}" was paused mid-cycle.`
+        );
+      } else if (task.isAdHocTaskAndOutOfAttempts) {
+        this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
+        removeTaskPromises.push(task.removeTask());
+      } else {
+        tasksToRun.push(task);
+      }
+    }
+    // Wait for all the promises at once to speed up the polling cycle
+    const [result] = await Promise.all([this.pool.run(tasksToRun), ...removeTaskPromises]);
+    // Emit the load after fetching tasks, giving us a good metric for evaluating how
+    // busy Task manager tends to be in this Kibana instance
+    this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.usedCapacityPercentage)));
+    return result;
+  };
+
+  /** PoC seam, channel 1: advisory capacity snapshot for the worker coordinator. */
+  private buildCapacitySnapshot(): CapacitySnapshot {
+    const availableCapacityByType: Record<string, number> = {};
+    for (const def of this.definitions.getAllDefinitions()) {
+      if (def.maxConcurrency != null) {
+        availableCapacityByType[def.type] = this.pool.availableCapacity(def.type);
+      }
+    }
+    const state = this.executionControlService.isInitialized()
+      ? this.executionControlService.getState()
+      : { paused: true, pausedTaskTypes: [] };
+    return {
+      availableCapacity: this.pool.availableCapacity(),
+      availableCapacityByType,
+      usedCapacityPercentage: this.pool.usedCapacityPercentage,
+      paused: state.paused,
+      pausedTaskTypes: state.pausedTaskTypes,
+      takenAt: Date.now(),
+    };
+  }
+
+  /**
+   * PoC seam, channel 2 handler: hydrate claimed task refs with the full
+   * TaskStore (params/state/decrypted API keys stay executor-side), re-check
+   * versions, then run through the pool. Mirrors the tail of strategy_mget
+   * (hydration) plus the tail of pollForWork (run), and feeds the equivalent
+   * polling-cycle events into the monitoring stream.
+   */
+  private runClaimedBatch = async (batch: ClaimedTaskBatch): Promise<void> => {
+    const stopTaskTimer = startTaskTimer();
+    try {
+      if (batch.timing) {
+        this.emitEvent(
+          asTaskManagerStatEvent('claimDuration', asOk(batch.timing.stop - batch.timing.start))
+        );
+      }
+
+      const refs = batch.tasks;
+      const fullTasks: ConcreteTaskInstance[] = [];
+      let conflicts = batch.stats.tasksConflicted;
+      let bulkGetErrors = 0;
+
+      if (refs.length > 0) {
+        const versionById = new Map(refs.map((ref) => [ref.id, ref.version]));
+        const bulkGetResult = await this.store.bulkGet(refs.map((ref) => ref.id));
+        for (const result of bulkGetResult) {
+          if (isOk(result)) {
+            if (result.value.version !== versionById.get(result.value.id)) {
+              this.logger.warn(
+                `Task ${result.value.id} was modified between worker claim and executor hydration, skipping until the next claim cycle.`
+              );
+              conflicts++;
+            } else {
+              fullTasks.push(result.value);
+            }
           } else {
-            tasksToRun.push(task);
+            const { id, type, error } = result.error;
+            this.logger.error(
+              `Error hydrating claimed task ${id}:${type}: ${error.message ?? error}`
+            );
+            bulkGetErrors++;
           }
         }
-        // Wait for all the promises at once to speed up the polling cycle
-        const [result] = await Promise.all([this.pool.run(tasksToRun), ...removeTaskPromises]);
-        // Emit the load after fetching tasks, giving us a good metric for evaluating how
-        // busy Task manager tends to be in this Kibana instance
-        this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.usedCapacityPercentage)));
-        return result;
       }
-    );
+
+      for (const doc of fullTasks) {
+        this.emitEvent(asTaskClaimEvent(doc.id, asOk(doc), batch.timing));
+      }
+
+      const runResult =
+        fullTasks.length > 0
+          ? await this.runTaskRunners(fullTasks.map(this.createTaskRunnerForTask))
+          : TaskPoolRunResult.NoTaskWereRan;
+
+      const stats = {
+        ...batch.stats,
+        tasksConflicted: conflicts,
+        tasksErrors: batch.stats.tasksErrors + bulkGetErrors,
+      };
+      let fillResult: FillPoolResult;
+      if (fullTasks.length === 0) {
+        fillResult = FillPoolResult.NoTasksClaimed;
+      } else if (runResult === TaskPoolRunResult.RanOutOfCapacity) {
+        fillResult = FillPoolResult.RanOutOfCapacity;
+      } else if (runResult === TaskPoolRunResult.RunningAtCapacity) {
+        fillResult = FillPoolResult.RunningAtCapacity;
+      } else if (runResult === TaskPoolRunResult.NoTaskWereRan) {
+        fillResult = FillPoolResult.NoTasksClaimed;
+      } else {
+        fillResult = FillPoolResult.PoolFilled;
+      }
+
+      this.workerCycleEvents$?.next(
+        asOk({ result: fillResult, stats, timing: batch.timing ?? stopTaskTimer() })
+      );
+    } catch (error) {
+      this.workerCycleEvents$?.next(
+        asErr(
+          new PollingError<string>(
+            `Failed to process claimed batch from the worker coordinator: ${error.message}`,
+            PollingErrorType.WorkError,
+            none,
+            error instanceof Error ? error : undefined
+          )
+        )
+      );
+    }
   };
 
   private subscribeToPoller(

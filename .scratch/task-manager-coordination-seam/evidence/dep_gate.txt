@@ -1,0 +1,8 @@
+=== DEP GATE ===
+Loaded 587 modules for the coordinator graph.
+Module-graph audit: no task_pool / task_running / TaskStore / CoreStart modules.
+  [coordinator] Coordinator poll interval changing to 3000ms (avg utilization 10.0%)
+  [coordinator] Stopping the task poller
+Instantiation: TaskCoordinator constructed from { esClient, logger, config, serializer } + plain-data context only.
+
+DEPENDENCY GATE: PASSED
