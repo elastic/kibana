@@ -18,7 +18,7 @@ import {
 import { RESOLVE_PROPOSAL_WORKFLOW } from './resolve_proposal';
 import RESOLVE_PROPOSAL_YAML from './resolve_proposal.yaml';
 import { parseDuration } from '../../../common/utils';
-import { ACTION_WORKFLOW_TAG } from '../../action_workflow';
+import { ACTION_NON_RETRYABLE_ERROR_TYPE, ACTION_WORKFLOW_TAG } from '../../action_workflow';
 
 const workflow = parseWorkflow(RESOLVE_PROPOSAL_YAML);
 
@@ -280,6 +280,7 @@ describe('resolve-proposal workflow', () => {
         expect(adoptStep?.type).toBe('data.set');
         expect(adoptStep?.with?.action_failed).toBe(`\${{ steps.${execute}.error != blank }}`);
         expect(adoptStep?.with?.action_error_message).toBe(`{{ steps.${execute}.error.message }}`);
+        expect(adoptStep?.with?.action_error_type).toBe(`{{ steps.${execute}.error.type }}`);
       });
     });
 
@@ -295,6 +296,25 @@ describe('resolve-proposal workflow', () => {
       );
       expect(step('output_action_failed')?.with).toEqual(
         expect.objectContaining({ resolution: 'action_failed', status: 'failed' })
+      );
+    });
+
+    it('settles a non-retryable failure as failed instead of reporting it for a re-offer', () => {
+      const failureSteps = step('handle_action_failure')?.steps ?? [];
+      const branch = step('handle_non_retryable_failure');
+
+      expect(branch?.condition).toBe(
+        `\${{ variables.action_error_type == "${ACTION_NON_RETRYABLE_ERROR_TYPE}" }}`
+      );
+      // Recorded first, so the proposal is never left `executing`; checked
+      // before the re-offer report, which would otherwise end the run first.
+      expect(failureSteps.map(({ name }) => name)).toEqual([
+        'record_action_failure',
+        'handle_non_retryable_failure',
+        'output_action_failed',
+      ]);
+      expect(step('output_non_retryable_failed')?.with).toEqual(
+        expect.objectContaining({ resolution: 'settled', status: 'failed', decision: 'approved' })
       );
     });
 
