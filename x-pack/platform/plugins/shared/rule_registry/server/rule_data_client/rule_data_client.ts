@@ -39,6 +39,29 @@ export interface RuleDataClientConstructorOptions {
 
 export type WaitResult = Either<Error, ElasticsearchClient>;
 
+// Status codes returned by the _bulk API for per-item failures that are
+// expected/benign for alert writes and should not be logged as errors.
+// A 409 (version conflict) is a normal outcome of alert de-duplication when
+// the same alert is written concurrently; the persistence rule-type wrapper
+// already treats 409 as non-fatal (see errorAggregator([409])).
+const IGNORED_BULK_ITEM_STATUS_CODES = [409];
+
+/**
+ * Returns true if the bulk response contains at least one per-item failure
+ * whose status code is not in the ignore-list. A top-level `errors: true` flag
+ * is set by Elasticsearch when *any* item has a status >= 400, including benign
+ * outcomes such as 409 version conflicts, so this is used to avoid logging an
+ * error for responses whose only failures are ignorable.
+ */
+const hasNonIgnorableBulkErrors = (response: estypes.BulkResponse): boolean =>
+  (response.items ?? []).some((item) =>
+    Object.values(item).some(
+      (operation) =>
+        operation?.error != null &&
+        !IGNORED_BULK_ITEM_STATUS_CODES.includes(operation.status)
+    )
+  );
+
 export class RuleDataClient implements IRuleDataClient {
   private _isWriteEnabled: boolean = false;
   private _isWriterCacheEnabled: boolean = true;
@@ -234,6 +257,20 @@ export class RuleDataClient implements IRuleDataClient {
             });
 
             if (!response.body.errors) {
+              return response;
+            }
+
+            // The top-level `errors` flag is set by Elasticsearch when *any*
+            // item has a status >= 400, including benign outcomes such as 409
+            // version conflicts from alert de-duplication. Only treat the
+            // response as an error (and log the whole body) when it contains at
+            // least one non-ignorable per-item failure; otherwise the entire
+            // bulk response - hundreds of successful `201` items included -
+            // would be logged as a single noisy, misleading ERROR line.
+            if (!hasNonIgnorableBulkErrors(response.body)) {
+              this.options.logger.debug(
+                `Bulk write to ${alias} completed with only ignorable per-item errors (e.g. version conflicts).`
+              );
               return response;
             }
 
