@@ -11,14 +11,14 @@ import fs from 'fs/promises';
 import path from 'path';
 import { stringify } from 'yaml';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
-import { applyOverlay } from '@kbn/connector-emulate';
 import { describeOperation, findOperation, listOperations } from './inspect_spec';
 import { isJsonObject } from './json_pointer';
 import { loadVendorSpec } from './load_vendor_spec';
 import type { ManifestSource, VendorApiManifest } from './manifest';
 import { parseManifest, serializeManifest } from './manifest';
 import { parseSpecText } from './parse_spec_text';
-import { readOptional } from './load_vendor_specs';
+import type { VendorApiLog } from './load_vendor_specs';
+import { applyOverlayToSources, readOptional } from './load_vendor_specs';
 
 /** Operations listed per source before the list is cut short. */
 export const LIST_LIMIT = 200;
@@ -40,7 +40,7 @@ export interface InspectVendorApiOptions {
   /** When the document `fetchText` returned for a URL was fetched, if not just now. */
   readonly fetchedAt?: (url: string) => Date | undefined;
   readonly now: () => Date;
-  readonly log: { readonly info: (message: string) => void };
+  readonly log: VendorApiLog;
 }
 
 export interface InspectVendorApiResult {
@@ -51,6 +51,7 @@ export interface InspectVendorApiResult {
 }
 
 const MANIFEST = 'manifest.json';
+const SILENT_LOG: VendorApiLog = { info: () => {}, warning: () => {} };
 
 const titleOf = ({ info }: OpenApiDocument): string => {
   const { title, version } = isJsonObject(info) ? info : {};
@@ -91,12 +92,12 @@ export const inspectVendorApi = async ({
   }
 
   const problems: string[] = [];
-  const documents: Record<string, OpenApiDocument> = {};
+  const loaded: Record<string, OpenApiDocument> = {};
   const added: Record<string, ManifestSource> = {};
   for (const [name, url] of Object.entries(urls)) {
     log.info(`Loading ${name} from ${url}`);
     const { format, apiVersion, document } = await loadVendorSpec(url, fetchText);
-    documents[name] = overlay ? applyOverlay(document, overlay).document : document;
+    loaded[name] = document;
     const known = manifest?.sources[name];
     if (known && known.url !== url) {
       problems.push(
@@ -111,6 +112,10 @@ export const inspectVendorApi = async ({
       };
     }
   }
+  // An overlay action may target a source that --source left out, so it only counts as stale when
+  // every source is loaded.
+  const loadsEverySource = Object.keys(manifest?.sources ?? {}).every((name) => name in loaded);
+  const documents = applyOverlayToSources(loaded, overlay, loadsEverySource ? log : SILENT_LOG);
   const manifestUpdated = directory !== undefined && Object.keys(added).length > 0;
   if (directory && manifestUpdated) {
     await fs.mkdir(directory, { recursive: true });

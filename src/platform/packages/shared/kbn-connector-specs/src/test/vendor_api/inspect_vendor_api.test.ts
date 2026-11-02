@@ -69,7 +69,7 @@ const inspect = (options: Partial<InspectVendorApiOptions>) =>
       throw new Error(`unexpected fetch of ${url}`);
     },
     now: () => new Date('2026-10-08T09:00:00.000Z'),
-    log: { info: () => {} },
+    log: { info: () => {}, warning: () => {} },
     ...options,
   });
 
@@ -173,6 +173,55 @@ actions:
       parameters: [{ name: 'limit', schema: { type: 'integer', maximum: 100 } }],
     });
     expect(manifestUpdated).toBe(false);
+  });
+
+  describe('with an overlay action that matches nothing', () => {
+    const warnings: string[] = [];
+    const log = { info: () => {}, warning: (message: string) => warnings.push(message) };
+
+    beforeEach(async () => {
+      warnings.length = 0;
+      await fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        JSON.stringify({
+          sources: {
+            v1: { format: 'openapi', url: SPEC_URL, fetchedAt: '2026-10-08T00:00:00.000Z' },
+            legacy: { format: 'swagger', url: SWAGGER_URL, fetchedAt: '2026-10-08T00:00:00.000Z' },
+          },
+          operations: {},
+        })
+      );
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `overlay: 1.0.0
+info: { title: Corrections, version: 1.0.0 }
+actions:
+  - target: $.paths['/items'].get
+    update: { summary: Lists every item }
+`
+      );
+    });
+
+    it('warns when every source was loaded', async () => {
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `overlay: 1.0.0
+info: { title: Corrections, version: 1.0.0 }
+actions:
+  - target: $.paths['/gone'].get
+    update: { summary: Gone }
+`
+      );
+      await inspect({ sources: {}, directory, log });
+      expect(warnings).toEqual([
+        'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
+      ]);
+    });
+
+    it('stays quiet when --source left out the source it targets', async () => {
+      await inspect({ sources: { legacy: SWAGGER_URL }, directory, log });
+      expect(warnings).toEqual([]);
+    });
   });
 
   it("adds new sources to a connector's manifest, with when they were fetched", async () => {
