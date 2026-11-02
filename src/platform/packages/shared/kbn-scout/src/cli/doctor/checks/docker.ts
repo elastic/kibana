@@ -108,7 +108,7 @@ export const dockerChecks: DoctorCheckGroup = {
         const recommended = `${RECOMMENDED_CPUS} CPUs and ${RECOMMENDED_MEMORY_GB} GB RAM`;
         const fix = resizeDockerDesktopFix(NCPU, MemTotal);
         return warn(
-          `${details}, multi-project serverless tests need ${chalk.yellow(recommended)}`,
+          `${details}, ${chalk.yellow(`multi-project serverless tests need ${recommended}`)}`,
           {
             fix,
             hint: fix
