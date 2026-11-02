@@ -79,21 +79,6 @@ export const spotZones = {
     'southamerica-east1-b',
     'southamerica-east1-c',
   ],
-  // Zones aligned with the preemptible N2D CPU quota, which is separate from the standard quota.
-  n2dPreemptible: [
-    'asia-south2-a',
-    'asia-south2-b',
-    'asia-south2-c',
-    'europe-west2-a',
-    'europe-west2-b',
-    'europe-west2-c',
-    'northamerica-northeast2-a',
-    'northamerica-northeast2-b',
-    'northamerica-northeast2-c',
-    'southamerica-east1-a',
-    'southamerica-east1-b',
-    'southamerica-east1-c',
-  ],
 } as const satisfies Record<string, readonly Zone[]>;
 
 // Exit statuses are integers or '*', the forms Buildkite's schema allows.
