@@ -77,10 +77,6 @@ const assertTemplateMatchesSchema = (value: unknown, schema: unknown): Record<st
 /**
  * When the connector requires an EIS template, call chat completion directly.
  * Returns undefined so the caller keeps the agent path.
- *
- * `featureId` and `connectorId` are mutually exclusive: on a feature, the connector is
- * resolved through the inference plugin and the completion is sent with the feature id so
- * the feature's own settings apply.
  */
 const completeWithPromptTemplate = async ({
   inference,

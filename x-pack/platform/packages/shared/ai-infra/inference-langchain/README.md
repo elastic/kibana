@@ -33,9 +33,6 @@ created to snapshot the connector exposed by `getConnector()`, and every call th
 const chatModel = await inferenceStart.getChatModel({
   request,
   featureId: 'my_feature_id',
-  chatModelOptions: {
-    temperature: 0.2,
-  },
 });
 
 // the connector the feature resolved to is available for metadata

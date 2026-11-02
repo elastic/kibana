@@ -928,10 +928,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }
 
   /**
-   * The connector a run is known to use before it starts, for up-front validation: the requested
-   * connector, or the Agent Builder default endpoint when nothing else applies. A feature-sourced
-   * run (`inferenceFeatureId`, or the agent's own `inference_feature_id`) resolves nothing here:
-   * the inference plugin resolves the feature when the run calls the model.
+   * The connector a run is known to use before it starts, for up-front validation.
+   * A feature-sourced run resolves nothing here, the inference plugin handles it.
    */
   private async resolveExecutionConnector({
     agentId,

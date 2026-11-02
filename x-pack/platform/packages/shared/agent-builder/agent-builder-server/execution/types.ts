@@ -39,11 +39,7 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
-  /**
-   * Id of the inference feature the run uses when no `connectorId` is set; overrides the agent's
-   * `inference_feature_id`. Set by the `ai.agent` workflow step and by sub-agent dispatch; no
-   * route accepts it.
-   */
+  /** Id of the inference feature the run uses - can't be used with connectorId */
   inferenceFeatureId?: string;
   /** The input for this execution. */
   nextInput: ConverseInput;
