@@ -16,6 +16,7 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { EntitiesGrid } from '../components/home/entities_grid/components/entities_grid';
+import { EMPTY_ENTITY_FILTERS } from '../components/home/entities_grid/common';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import { useSearchBarExpression } from '../components/home/entities_grid/hooks/use_search_bar_expression';
 import type { SignalCardData } from '../components/home/needs_attention_tiles/data';
@@ -63,6 +64,7 @@ jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({ addWarning: mockAddWarning }),
 }));
 let mockRowsMode: 'resolved' | 'individual' = 'individual';
+let mockUrlStateOverrides: Record<string, unknown> = {};
 jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state', () => ({
   useEntityAnalyticsUrlState: () => ({
     timeRange: '7d',
@@ -81,6 +83,7 @@ jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state
     setActiveTile: jest.fn(),
     expandedIds: [],
     toggleExpandedId: jest.fn(),
+    ...mockUrlStateOverrides,
   }),
 }));
 jest.mock('../components/home/entities_grid/hooks/use_search_bar_expression', () => ({
@@ -423,11 +426,17 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
 describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrivileges();
     (useEntityStoreStatus as jest.Mock).mockReturnValue({
       data: { status: 'running' },
       isLoading: false,
     });
     mockTiles();
+  });
+
+  afterEach(() => {
+    mockUrlStateOverrides = {};
+    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
   });
 
   it('skips the alert tiles and says why when Alerts is None but the alerts index is readable', () => {
@@ -464,6 +473,113 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
     expect(getCard('entitiesWithAlerts')?.noDataMessage).toBeUndefined();
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
     expect(gridCalls[gridCalls.length - 1][0].readAccess.alerts).toBe(true);
+  });
+
+  it('lets the flat grid report its loads, with no tile filter or entity filters on', () => {
+    mockPrivileges();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+    expect(gridCalls[gridCalls.length - 1][0].loadTelemetry).toEqual({
+      runKey: expect.any(String),
+      isFilterPending: false,
+      hasTileFilter: false,
+      hasEntityFilters: false,
+    });
+  });
+
+  it('keys a grid load on the search as typed, and holds it while its overrides resolve', () => {
+    mockPrivileges();
+    const loadTelemetry = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0].loadTelemetry;
+    };
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'entity.name == "a"',
+      rawSearchExpression: 'entity.name == "a"',
+      isSearchOverridesPending: true,
+    });
+    const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    const { runKey, isFilterPending } = loadTelemetry();
+    expect(isFilterPending).toBe(true);
+
+    // The overrides arrive and patch the expression: the same load, now free to settle.
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: '(entity.name == "a" AND NOT entity.id IN ("x")) OR entity.id IN ("y")',
+      rawSearchExpression: 'entity.name == "a"',
+      isSearchOverridesPending: false,
+    });
+    rerender(<EntityAnalyticsNewHomePage />);
+    expect(loadTelemetry()).toMatchObject({ runKey, isFilterPending: false });
+
+    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
+  });
+
+  describe('the key of a grid load', () => {
+    const lastLoadTelemetry = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0].loadTelemetry;
+    };
+    const runKeyWith = (overrides: Record<string, unknown>): string => {
+      jest.clearAllMocks();
+      mockUrlStateOverrides = overrides;
+      mockTiles();
+      const { unmount } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      const { runKey } = lastLoadTelemetry();
+      unmount();
+      return runKey;
+    };
+
+    it('is stable for the same request', () => {
+      expect(runKeyWith({})).toBe(runKeyWith({}));
+    });
+
+    it.each([
+      ['rows mode', { rowsMode: 'resolved' }],
+      ['sort field', { sortField: 'entity.name' }],
+      ['sort direction', { sortDirection: 'asc' }],
+      ['entity filters', { entityFilters: { ...EMPTY_ENTITY_FILTERS, entityTypes: ['host'] } }],
+      ['tile', { activeTile: 'newEntity' }],
+      ['time range', { timeRange: '30d' }],
+    ])('changes with the %s, so the new load is reported', (_name, overrides) => {
+      expect(runKeyWith(overrides)).not.toBe(runKeyWith({}));
+    });
+
+    it('changes with the search as typed', () => {
+      const keyOfSearch = (rawSearchExpression?: string): string => {
+        (useSearchBarExpression as jest.Mock).mockReturnValue({
+          rawSearchExpression,
+          isSearchOverridesPending: false,
+        });
+        return runKeyWith({});
+      };
+      const keyWithoutSearch = keyOfSearch(undefined);
+      expect(keyOfSearch('entity.name == "a"')).not.toBe(keyWithoutSearch);
+    });
+  });
+
+  it('holds the load while the active tile is loading, and releases it once it settles', () => {
+    mockUrlStateOverrides = { activeTile: 'newEntity' };
+    const loadingTile = {
+      count: 3,
+      entityIds: [],
+      hasCount: true,
+      isLoading: true,
+      isMissingIndex: false,
+      isCountPending: false,
+    };
+    hooks.useNewEntityCount.mockReturnValue(loadingTile);
+    const loadTelemetry = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0].loadTelemetry;
+    };
+    const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    const { runKey } = loadTelemetry();
+    expect(loadTelemetry()).toMatchObject({ isFilterPending: true, hasTileFilter: true });
+
+    hooks.useNewEntityCount.mockReturnValue({ ...loadingTile, isLoading: false });
+    rerender(<EntityAnalyticsNewHomePage />);
+    expect(loadTelemetry()).toMatchObject({ runKey, isFilterPending: false });
   });
 });
 

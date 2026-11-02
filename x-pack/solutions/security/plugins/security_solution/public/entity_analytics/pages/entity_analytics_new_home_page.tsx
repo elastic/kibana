@@ -550,8 +550,13 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const { searchExpression, searchOverrides, isSearchOverridesPending, mainEntityOnlySearch } =
-    useSearchBarExpression(rowsMode);
+  const {
+    searchExpression,
+    searchOverrides,
+    isSearchOverridesPending,
+    mainEntityOnlySearch,
+    rawSearchExpression,
+  } = useSearchBarExpression(rowsMode);
   useEffect(() => {
     if (!mainEntityOnlySearch) return;
 
@@ -1301,6 +1306,40 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     [signalCards, tileSearchExpression, shownTileEntityIds, isTilesSearchPending]
   );
 
+  // Only the flat grid reports its loads; the grids of Group by don't. A load is what the user asked
+  // for: its key leaves out the search overrides and the tile's entity ids that the page resolves
+  // for it, and the load waits for them, so it is timed whole and reported once.
+  const isActiveTileLoading = Boolean(
+    activeTile && shownSignalCards.find(({ id }) => id === activeTile)?.isLoading
+  );
+  const gridLoadTelemetry = useMemo(
+    () => ({
+      runKey: JSON.stringify([
+        rowsMode,
+        sortField,
+        sortDirection,
+        rawSearchExpression,
+        entityFilters,
+        activeTile,
+        timeRange,
+      ]),
+      isFilterPending: isSearchOverridesPending || isActiveTileLoading,
+      hasTileFilter: Boolean(activeTile),
+      hasEntityFilters: Object.values(entityFilters).some((values) => values.length > 0),
+    }),
+    [
+      rowsMode,
+      sortField,
+      sortDirection,
+      rawSearchExpression,
+      entityFilters,
+      activeTile,
+      timeRange,
+      isSearchOverridesPending,
+      isActiveTileLoading,
+    ]
+  );
+
   const onGroupChange = useCallback(
     (key: string) => {
       if (key === 'none') return setGroupsSelected(['none']);
@@ -1488,6 +1527,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 sortDirection={sortDirection}
                 onSortChange={setSort}
                 onFullScreenChange={setIsGridFullScreen}
+                loadTelemetry={gridLoadTelemetry}
               />
             )}
           </DataViewContext.Provider>
