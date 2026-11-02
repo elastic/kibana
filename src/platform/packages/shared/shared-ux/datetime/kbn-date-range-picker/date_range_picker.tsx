@@ -186,7 +186,7 @@ export interface DateRangePickerProps {
    * Increment this value whenever the host refreshed its data without changing `value`
    * (e.g. a manual "Refresh"), so relative bounds (e.g. `now-15m`) are re-resolved against the
    * current time and the displayed absolute dates advance with the data. Unlike `refreshEpoch`,
-   * this does not reset the auto-refresh countdown.
+   * this does not reset the auto-refresh countdown. `undefined` on first render is ignored.
    */
   resolveEpoch?: number;
   /**

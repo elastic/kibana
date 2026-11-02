@@ -59,8 +59,12 @@ test.describe(
         );
       });
 
-      await test.step('advance the clock and click Refresh', async () => {
-        await page.clock.fastForward(`0${FAST_FORWARD_MINUTES}:00`);
+      await test.step('advance the clock — tooltip stays stale until Refresh', async () => {
+        await page.clock.fastForward('05:00');
+        expect(parseResolvedEnd(await readResolvedDateRange(page))).toBe(resolvedEndBeforeRefresh);
+      });
+
+      await test.step('click Refresh', async () => {
         await clickSearchBarRefresh(page);
       });
 

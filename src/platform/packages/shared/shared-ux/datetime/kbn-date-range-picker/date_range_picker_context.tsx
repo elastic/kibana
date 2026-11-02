@@ -241,10 +241,11 @@ export function DateRangePickerProvider({
       }),
     [onRefresh]
   );
+  // Keep `undefined` distinct from `0` so the first real epoch signal still re-resolves.
   const timeRange = useResolvedTimeRange(
     text,
     transformOptions,
-    `${refreshEpoch ?? 0}:${resolveEpoch ?? 0}:${autoRefreshCount}`
+    `${refreshEpoch}:${resolveEpoch}:${autoRefreshCount}`
   );
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, transformOptions),

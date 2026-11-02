@@ -36,8 +36,9 @@ const resolve = (
  *
  * Relative bounds (e.g. `now-15m`) resolve against the clock, so a range parsed from unchanged
  * text goes stale over time. `resolveKey` lets the caller force a re-resolution (e.g. after a
- * refresh) without `useMemo`, which cannot depend on a value its factory does not read. The last
- * resolution is kept in state and replaced during render when any input changed.
+ * refresh). Because `textToTimeRange` is impure (reads the clock), the last resolution is kept
+ * in state and replaced during render when any input changes — React's adjust-state-while-
+ * rendering pattern — rather than caching an impure result in `useMemo`.
  */
 export function useResolvedTimeRange(
   text: string,
