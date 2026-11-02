@@ -461,9 +461,32 @@ describe('UnifiedDataTable', () => {
 
   describe('edit field button', () => {
     it(
-      'should render the edit field button if onFieldEdited is provided',
+      'delegates editing without opening an internal editor or creating a draft',
       async () => {
-        await renderDataTable({ columns: ['message'], onFieldEdited: jest.fn() });
+        const onEditField = jest.fn();
+        await renderDataTable({
+          columns: ['message'],
+          onEditField,
+          shouldKeepAdHocDataViewImmutable: true,
+        });
+
+        await userEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-message'));
+        await userEvent.click(screen.getByTestId('gridEditFieldButton'));
+
+        expect(onEditField).toHaveBeenCalledWith('message');
+        expect(servicesMock.dataViewFieldEditor.openEditor).not.toHaveBeenCalled();
+        expect(servicesMock.data.dataViews.create).not.toHaveBeenCalled();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'keeps the default editor and save callback when editing is not delegated',
+      async () => {
+        const onFieldEdited = jest.fn();
+        const openEditor = jest.mocked(servicesMock.dataViewFieldEditor.openEditor);
+        openEditor.mockResolvedValueOnce(jest.fn());
+        await renderDataTable({ columns: ['message'], onFieldEdited });
 
         expect(
           screen.queryByTestId('dataGridHeaderCellActionGroup-message')
@@ -473,6 +496,15 @@ describe('UnifiedDataTable', () => {
 
         expect(screen.getByTestId('dataGridHeaderCellActionGroup-message')).toBeVisible();
         expect(screen.getByTestId('gridEditFieldButton')).toBeVisible();
+        await userEvent.click(screen.getByTestId('gridEditFieldButton'));
+        await waitFor(() => expect(openEditor).toHaveBeenCalledTimes(1));
+
+        const [options] = openEditor.mock.calls[0];
+        await options.onSave?.([]);
+
+        expect(onFieldEdited).toHaveBeenCalledWith({
+          editedDataView: options.ctx.dataView,
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );

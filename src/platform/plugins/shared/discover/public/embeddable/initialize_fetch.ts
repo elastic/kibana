@@ -156,6 +156,7 @@ export function initializeFetch({
   setDataLoading,
   setSearchError,
   setApproximationApplied,
+  remapParentFilters,
   esqlSource$,
 }: {
   api: SavedSearchPartialFetchApi;
@@ -166,6 +167,8 @@ export function initializeFetch({
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setSearchError: (error: Error | undefined) => void;
   setApproximationApplied: (value: boolean | undefined) => void;
+  /** Translates parent filters that still reference the panel view by a previous ID. */
+  remapParentFilters?: (filters: FetchContext['filters']) => FetchContext['filters'];
   esqlSource$?: BehaviorSubject<EsqlSource | undefined>;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
@@ -184,8 +187,11 @@ export function initializeFetch({
           abortController = undefined;
         }
       }),
-      switchMap(async ([fetchContext, savedSearch, dataViews]) => {
+      switchMap(async ([parentFetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
+        const fetchContext = remapParentFilters
+          ? { ...parentFetchContext, filters: remapParentFilters(parentFetchContext.filters) }
+          : parentFetchContext;
 
         setSearchError(undefined);
         if (!dataView || !savedSearch.searchSource) {

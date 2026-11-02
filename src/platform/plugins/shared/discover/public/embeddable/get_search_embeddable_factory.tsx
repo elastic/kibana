@@ -367,6 +367,7 @@ export const getSearchEmbeddableFactory = ({
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setSearchError: (error: Error | undefined) => searchError$.next(error),
         setApproximationApplied: searchEmbeddable.internalApi.setApproximationApplied,
+        remapParentFilters: searchEmbeddable.internalApi.remapParentFilters,
         esqlSource$: searchEmbeddable.esqlSource$,
       });
       cancelRequests = _cancelRequests;
