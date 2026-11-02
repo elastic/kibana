@@ -228,6 +228,7 @@ describe('ProposedActionButton', () => {
 
     it.each<[string, Partial<ApprovalProposal>, RegExp]>([
       ['approved', {}, /^Approved by\s/],
+      ['approved, with no action to run,', { status: 'no_action' }, /^Approved by\s/],
       ['declined', { decision: 'dismissed' }, /^Declined by\s/],
       ['failed', { status: 'failed' }, /^Executed by\s/],
       ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, /^Applied by\s/],
