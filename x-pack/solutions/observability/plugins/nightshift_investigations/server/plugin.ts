@@ -86,10 +86,7 @@ import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
-import {
-  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-  registerInvestigationAgentType,
-} from './agents/investigation';
+import { registerInvestigationAgentType } from './agents/investigation';
 import { registerFindingsRecorder } from './findings_recorder';
 import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
@@ -284,6 +281,7 @@ export class NightshiftInvestigationsPlugin
         },
         logger: this.logger,
       });
+      const config = this.ctx.config.get();
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
