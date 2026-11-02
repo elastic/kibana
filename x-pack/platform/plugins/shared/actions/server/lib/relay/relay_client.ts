@@ -23,6 +23,9 @@ import type {
   RelayInstallResponse,
   RelayServiceAccountInstallRequest,
   RelayListBindingsOptions,
+  RelayReadMessage,
+  RelayReadMessagesInput,
+  RelayReadResponse,
   RelayTriggerInput,
   RelayTriggerResponse,
 } from './types';
@@ -72,6 +75,24 @@ interface RelayTriggerResponseBody {
   channel?: string;
   origin?: { external_conversation_id?: string };
 }
+
+/** Raw shape of the channel read response body. */
+interface RelayReadResponseBody {
+  channel?: { id?: string; name?: string };
+  messages?: Array<{
+    ts: string;
+    thread_ts?: string;
+    reply_count?: number;
+    author?: { id?: string; name?: string; is_bot?: boolean };
+    text?: string;
+  }>;
+  truncated?: boolean;
+}
+
+const parseRetryAfterSeconds = (value: unknown): number | undefined => {
+  const seconds = Number(Array.isArray(value) ? value[0] : value);
+  return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
+};
 
 export class RelayClient implements RelayClientContract {
   private readonly axios = axios.create();
@@ -235,6 +256,50 @@ export class RelayClient implements RelayClientContract {
     };
   }
 
+  /** Read a window of a bound public channel. */
+  async readMessages({
+    tenantKey,
+    channelId,
+    oldest,
+    latest,
+    limit,
+  }: RelayReadMessagesInput): Promise<RelayReadResponse> {
+    const path = `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/channels/${encodeURIComponent(
+      channelId
+    )}/messages`;
+    const query = new URLSearchParams();
+    if (oldest) query.set('oldest', oldest);
+    if (latest) query.set('latest', latest);
+    if (limit !== undefined) query.set('limit', String(limit));
+    const search = query.toString();
+
+    const response = await this.get(search ? `${path}?${search}` : path);
+    const body = response.data as RelayReadResponseBody | undefined;
+    if (!Array.isArray(body?.messages) || typeof body?.channel?.id !== 'string') {
+      throw new RelayRequestError(
+        path,
+        response.status,
+        'Relay invalid response format missing expected `channel` or `messages`'
+      );
+    }
+
+    const messages: RelayReadMessage[] = body.messages.map(
+      ({ ts, thread_ts: threadTs, reply_count: replyCount, author, text }) => ({
+        ts,
+        ...(threadTs ? { threadTs } : {}),
+        ...(replyCount !== undefined ? { replyCount } : {}),
+        author: { id: author?.id, name: author?.name, isBot: author?.is_bot === true },
+        text: text ?? '',
+      })
+    );
+
+    return {
+      channel: { id: body.channel.id, name: body.channel.name ?? body.channel.id },
+      messages,
+      truncated: body.truncated === true,
+    };
+  }
+
   isRelayOrigin(url: string): boolean {
     try {
       return new URL(url).origin === this.baseUrl.origin;
@@ -288,7 +353,8 @@ export class RelayClient implements RelayClientContract {
       path,
       response.status,
       relayMessage,
-      typeof reason === 'string' ? reason : undefined
+      typeof reason === 'string' ? reason : undefined,
+      parseRetryAfterSeconds(response.headers?.['retry-after'])
     );
   }
 

@@ -28,6 +28,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/react-hooks",
     "@kbn/shared-ux-column-presets",
+    "@kbn/shared-ux-link-redirect-app",
     "@kbn/ui-callout",
     "@kbn/app-header",
     "@kbn/server-route-repository",

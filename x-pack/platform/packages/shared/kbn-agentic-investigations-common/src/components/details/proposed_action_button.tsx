@@ -27,6 +27,7 @@ import {
   type ApprovalProposal,
   type DeclineParams,
 } from '@kbn/proposals-ui';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
 import { useIsTextTruncated } from '../use_is_text_truncated';
@@ -54,6 +55,11 @@ export interface ProposedActionButtonProps {
   /** Marks a to-do proposal that was marked as applied as not applied, from the modal. */
   onReopen?: () => Promise<void>;
   isReopening?: boolean;
+  /**
+   * See `ApprovalModalProps.basePath`. Supplied by the caller: flyout slots render outside a
+   * `KibanaContextProvider`, so this package cannot read `core.http` itself.
+   */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -126,10 +132,8 @@ const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
 /**
  * A row in the flyout's "Proposed actions" list — a `<li>` meant for a `ProposedActionsList`.
  *
- * Always clickable: it opens the same {@link ApprovalModal} the conversation card's
- * recommended-action menu item opens (see `onClickRecommendedAction` in `BaseActions`), so a
- * proposal reads and decides identically whether it was reached from the queue or from inside its
- * own flyout. For a decided proposal that modal is read-only — the badge reports the outcome and
+ * Always clickable: it opens the {@link ApprovalModal}, the one place a proposal is read and
+ * decided. For a decided proposal that modal is read-only — the badge reports the outcome and
  * who/when decided it, and there is nothing left to submit — so hover feedback is the same for
  * every row rather than suggesting a decided one is inert.
  *
@@ -147,6 +151,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     currentActorName,
     onReopen,
     isReopening,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -243,6 +248,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             currentActorName={currentActorName}
             onReopen={onReopen}
             isReopening={isReopening}
+            basePath={basePath}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}
