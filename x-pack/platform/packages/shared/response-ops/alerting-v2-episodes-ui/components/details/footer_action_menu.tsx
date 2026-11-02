@@ -17,7 +17,7 @@ import type { EpisodeAction } from '../../actions/types';
 import * as i18n from './translations';
 
 /**
- * Episode workflow actions, grouped together right below "View details". Every other
+ * Episode workflow actions, grouped together right below the navigation group. Every other
  * action (edit tags, open in Discover) is grouped after them.
  */
 const WORKFLOW_ACTION_IDS: ReadonlySet<string> = new Set([
@@ -58,8 +58,12 @@ export const EpisodeFooterActionMenu = ({
   viewDetailsHref,
   onSuccess,
 }: EpisodeFooterActionMenuProps) => {
-  const [workflowActions, otherActions] = partition(
+  const [navigationActions, nonNavigationActions] = partition(
     actions,
+    (action) => action.isNavigationAction === true
+  );
+  const [workflowActions, otherActions] = partition(
+    nonNavigationActions,
     (action) => WORKFLOW_ACTION_IDS.has(action.id) || action.isWorkflowAction === true
   );
 
@@ -102,7 +106,7 @@ export const EpisodeFooterActionMenu = ({
     };
   };
 
-  const viewDetailsGroup: EuiContextMenuPanelItemDescriptor[] = viewDetailsHref
+  const viewDetailsItems: EuiContextMenuPanelItemDescriptor[] = viewDetailsHref
     ? [
         {
           name: i18n.FLYOUT_VIEW_DETAILS,
@@ -112,9 +116,10 @@ export const EpisodeFooterActionMenu = ({
         },
       ]
     : [];
+  const navigationGroup = [...viewDetailsItems, ...navigationActions.map(toMenuItem)];
 
   const nonEmptyGroups = [
-    viewDetailsGroup,
+    navigationGroup,
     workflowActions.map(toMenuItem),
     otherActions.map(toMenuItem),
   ].filter((group) => group.length > 0);

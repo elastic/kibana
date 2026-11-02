@@ -40,6 +40,7 @@ import {
 } from '../constants';
 import type { ObservabilityAlertingCases } from '../types';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
+import { createViewInAppAction } from '../actions/view_in_app';
 import {
   getObservabilityRulesTabVisibility,
   hasObservabilityAlertingCapabilities,
@@ -47,9 +48,11 @@ import {
 
 const createObservabilityEpisodeActions = (
   cases: ObservabilityAlertingCases | undefined,
-  { rendering }: EpisodeActionsDeps
+  getAlertFormatter: TriggersAndActionsUIPublicPluginStart['getAlertFormatter'],
+  { rendering, http, notifications }: EpisodeActionsDeps
 ): EpisodeAction[] => [
   createInvestigateEpisodeAction(),
+  createViewInAppAction({ http, notifications, getAlertFormatter }),
   ...(cases
     ? [
         createAddToCaseAction({
@@ -65,7 +68,10 @@ const createObservabilityEpisodeActions = (
 interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
-  triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
+  triggersActionsUi: Pick<
+    TriggersAndActionsUIPublicPluginStart,
+    'getClassicRulesPage' | 'getAlertFormatter'
+  >;
   cases?: ObservabilityAlertingCases;
   ObservabilityPageTemplate: ObservabilitySharedPluginStart['navigation']['PageTemplate'];
   history: ScopedHistory;
@@ -200,9 +206,10 @@ export const ObservabilityAlertingApp = ({
     v2RulesTabNewBadge
   );
 
+  const { getAlertFormatter } = triggersActionsUi;
   const createActions = useCallback(
-    (deps: EpisodeActionsDeps) => createObservabilityEpisodeActions(cases, deps),
-    [cases]
+    (deps: EpisodeActionsDeps) => createObservabilityEpisodeActions(cases, getAlertFormatter, deps),
+    [cases, getAlertFormatter]
   );
 
   const privilegeCheck: PrivilegeCheck = useCallback(
