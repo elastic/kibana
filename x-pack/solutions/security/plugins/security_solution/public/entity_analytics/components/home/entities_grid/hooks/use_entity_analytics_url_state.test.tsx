@@ -39,6 +39,7 @@ describe('useEntityAnalyticsUrlState', () => {
         rowsMode: 'resolved',
         sortField: 'entity.risk.calculated_score_norm',
         sortDirection: 'desc',
+        groupsSelected: ['none'],
         expandedIds: [],
         activeTile: null,
         entityFilters: {
@@ -132,6 +133,48 @@ describe('useEntityAnalyticsUrlState', () => {
       eaSortField: 'entity.risk.calculated_score_norm',
       eaSortDir: 'desc',
     });
+  });
+
+  it('reads and writes the fields the grid is grouped by', () => {
+    const { result, params } = renderUrlState(
+      '?eaRowsMode=individual&eaGroupBy=entity.type,host.os'
+    );
+
+    expect(result.current.groupsSelected).toEqual(['entity.type', 'host.os']);
+
+    act(() => result.current.setGroupsSelected(['entity.type']));
+    expect(params().eaGroupBy).toBe('entity.type');
+
+    act(() => result.current.setGroupsSelected(['none']));
+    expect(params().eaGroupBy).toBeUndefined();
+    expect(result.current.groupsSelected).toEqual(['none']);
+  });
+
+  it('keeps only the group levels the grid supports', () => {
+    const { result } = renderUrlState('?eaGroupBy=a,b,c,d,e');
+
+    expect(result.current.groupsSelected).toEqual(['a', 'b', 'c']);
+  });
+
+  it('drops Resolution from the grouping of resolved rows', () => {
+    const { result, params } = renderUrlState(
+      '?eaRowsMode=individual&eaGroupBy=entity.relationships.resolution.resolved_to,entity.type'
+    );
+    expect(result.current.groupsSelected).toEqual([
+      'entity.relationships.resolution.resolved_to',
+      'entity.type',
+    ]);
+
+    act(() => result.current.setRowsMode('resolved'));
+
+    expect(params().eaGroupBy).toBe('entity.type');
+    expect(result.current.groupsSelected).toEqual(['entity.type']);
+  });
+
+  it('reads a Resolution-only grouping of resolved rows as no grouping', () => {
+    const { result } = renderUrlState('?eaGroupBy=entity.relationships.resolution.resolved_to');
+
+    expect(result.current.groupsSelected).toEqual(['none']);
   });
 
   it('writes entity filters and drops empty ones', () => {

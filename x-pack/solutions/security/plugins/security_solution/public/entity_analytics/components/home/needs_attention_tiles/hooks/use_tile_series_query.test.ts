@@ -104,7 +104,7 @@ describe('useTileSeriesQuery', () => {
     );
   });
 
-  it('searches with the ES|QL strategy and parses the response', async () => {
+  it('searches with the ES|QL strategy, in the local project only, and parses the response', async () => {
     mockSearch.mockReturnValue(of({ rawResponse: { columns: [{ name: 'a' }], values: [[1, 2]] } }));
     renderHook(() =>
       useTileSeriesQuery({ tileKey: 'tile', query: 'FROM x', enabled: true, parse })
@@ -112,24 +112,8 @@ describe('useTileSeriesQuery', () => {
     expect(await lastCall()[1]({ signal: undefined })).toBe(2);
     expect(mockSearch).toHaveBeenCalledWith(
       { params: { query: 'FROM x' } },
-      expect.objectContaining({ strategy: 'esql_async' })
+      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
     );
-    expect(mockSearch.mock.calls[0][1].projectRouting).toBeUndefined();
-  });
-
-  it('can run on the local cluster only, like the count', async () => {
-    mockSearch.mockReturnValue(of({ rawResponse: { columns: [], values: [] } }));
-    renderHook(() =>
-      useTileSeriesQuery({
-        tileKey: 'tile',
-        query: 'FROM x',
-        enabled: true,
-        parse,
-        localOnly: true,
-      })
-    );
-    await lastCall()[1]({ signal: undefined });
-    expect(mockSearch.mock.calls[0][1].projectRouting).toBe('_alias:_origin');
   });
 
   it('fails when the parser throws, so the line is left out', async () => {
@@ -153,6 +137,15 @@ describe('getTileTrend', () => {
 
   it('ends the dots on the live count', () => {
     expect(getTileTrend(base)).toEqual({ trend: [1, 2, 9], isTrendLoading: false });
+  });
+
+  it('starts the line on the delta baseline when there is one', () => {
+    expect(getTileTrend({ ...base, deltaBaseline: 7 })).toEqual({
+      trend: [7, 1, 2, 9],
+      isTrendLoading: false,
+    });
+    // 0 is a real baseline. A truthy check would drop it and start the line on the first dot.
+    expect(getTileTrend({ ...base, deltaBaseline: 0 }).trend).toEqual([0, 1, 2, 9]);
   });
 
   it('shows a spinner and no line while loading, also for a stale range', () => {

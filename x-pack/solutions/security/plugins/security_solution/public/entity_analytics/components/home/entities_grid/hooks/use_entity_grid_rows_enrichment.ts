@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { isAbortError } from '../../../../../common/utils/exceptions';
 import type { QueryArgs, Row } from '../common';
-import { getEntityId, getEntityIds } from '../common';
+import { ENTITY_GRID_QUERY_KEY, getEntityId, getEntityIds } from '../common';
 import { getPageEnrichers } from '../grid_columns';
 import { createEsqlRunner } from '../queries/esql';
 import type { EnrichedFields, PageEnricher, RunContext } from '../queries/types';
@@ -90,7 +90,7 @@ const getEnrichKey = (
   chunk: readonly Row[]
 ) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'enrich',
     {
@@ -238,5 +238,8 @@ export const useEntityGridRowsEnrichment = (
     isFetching: enrichQueries.some((q) => q.isFetching),
     dataUpdatedAt: Math.max(0, ...enrichQueries.map((q) => q.dataUpdatedAt)),
     error: enrichQueries.find((q) => q.error)?.error,
+    // For the load telemetry: whether the rows asked for so far have their computed columns.
+    hasEnrichedRows: enrichQueries.some(({ data, error }) => data != null || error != null),
+    hasFailedColumns: enrichQueries.some(({ data }) => !!data?.errors.length),
   };
 };

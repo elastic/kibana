@@ -111,7 +111,7 @@ apiTest.describe('Bulk get rules API', { tag: testData.API_ENGINE_TAG }, () => {
   );
 
   apiTest(
-    'bulk-get: should return 404 when one or more requested ids are missing',
+    'bulk-get: returns the found rules and a not-found error for each missing id',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'present-rule' } })
@@ -122,21 +122,39 @@ apiTest.describe('Bulk get rules API', { tag: testData.API_ENGINE_TAG }, () => {
         body: { ids: [rule.id, 'does-not-exist'] },
       });
 
-      expect(response).toHaveStatusCode(404);
-      expect(response.body.code).toBe('NOT_FOUND');
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items.map((item: { id: string }) => item.id)).toStrictEqual([rule.id]);
+
+      expect(response.body.errors).toHaveLength(1);
+      const [error] = response.body.errors;
+      expect(error.id).toBe('does-not-exist');
+      expect(error.error.code).toBe('RULE_NOT_FOUND');
+      expect(error.error.details.rule_id).toBe('does-not-exist');
     }
   );
 
   apiTest(
-    'bulk-get: should return 404 when all requested ids are missing',
+    'bulk-get: returns no items and a not-found error per id when all ids are missing',
     async ({ apiClient }) => {
       const response = await apiClient.post(getBulkRulesUrl(), {
         headers: readerHeaders,
         body: { ids: ['missing-1', 'missing-2'] },
       });
 
-      expect(response).toHaveStatusCode(404);
-      expect(response.body.code).toBe('NOT_FOUND');
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.items).toHaveLength(0);
+      expect(response.body.errors.map((error: { id: string }) => error.id)).toStrictEqual([
+        'missing-1',
+        'missing-2',
+      ]);
+      expect(
+        response.body.errors.map((error: { error: { code: string } }) => error.error.code)
+      ).toStrictEqual(['RULE_NOT_FOUND', 'RULE_NOT_FOUND']);
+      expect(
+        response.body.errors.map(
+          (error: { error: { details: { rule_id: string } } }) => error.error.details.rule_id
+        )
+      ).toStrictEqual(['missing-1', 'missing-2']);
     }
   );
 

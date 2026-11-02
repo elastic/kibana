@@ -23,6 +23,7 @@ import {
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 interface AlertBasedTilesResult {
   severeAlertsCount: number;
@@ -114,7 +115,11 @@ export const useAlertBasedTiles = ({
         lastValueFrom(
           data.search.search(
             { params: { query } },
-            { abortSignal: tileSignal, strategy: 'esql_async' }
+            {
+              abortSignal: tileSignal,
+              strategy: 'esql_async',
+              projectRouting: TILE_PROJECT_ROUTING,
+            }
           )
         )
       );
@@ -148,6 +153,9 @@ export const useAlertBasedTiles = ({
 
   return {
     severeAlertsCount: shownResult?.severeAlertsCount ?? 0,
+    // True only when the count query returned a result. A skipped, failed, timed-out or no-access
+    // count is not a genuine 0, so the tile must not show `count` (0) for it.
+    hasCount: shownResult !== undefined && !error && !indexError,
     severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
       : shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,

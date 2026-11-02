@@ -27,6 +27,8 @@ interface NewEntitySeriesOptions {
   reachesBack: boolean | undefined;
   /** The live count, which replaces the newest dot so the line ends on the number shown. */
   count: number;
+  /** From the tile's delta hook (its `previous`): the delta's baseline, which starts the line. */
+  deltaBaseline: number | undefined;
 }
 
 /**
@@ -44,6 +46,7 @@ export const useNewEntitySeries = ({
   isReady,
   reachesBack,
   count,
+  deltaBaseline,
 }: NewEntitySeriesOptions): { trend: number[] | undefined; isTrendLoading: boolean } => {
   const {
     data: resolvedIndex,
@@ -63,12 +66,12 @@ export const useNewEntitySeries = ({
     query,
     enabled: !skip && canRun && !isIndexLoading,
     parse: (raw) => readSeriesDots(raw, timeRange, newEntitySeriesColumn),
-    localOnly: true,
   });
 
   return getTileTrend({
     dots: series,
     liveCount: count,
+    deltaBaseline,
     skip,
     isFetching,
     isError,

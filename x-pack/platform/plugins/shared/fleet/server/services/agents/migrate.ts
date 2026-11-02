@@ -22,6 +22,7 @@ import type { AgentActionEvent } from '../action_sender';
 import { sendActionTelemetryEvents } from '../action_sender';
 
 import { createAgentAction } from './actions';
+import { throwIfAgentlessAgentPolicy } from './hosted_agent';
 import type { GetAgentsOptions } from './crud';
 import { getAgents, getAgentsByKuery, openPointInTime } from './crud';
 
@@ -56,6 +57,7 @@ export async function migrateSingleAgent(
   if (agentPolicy?.is_protected) {
     throw new FleetUnauthorizedError(`Agent is protected and cannot be migrated`);
   }
+  throwIfAgentlessAgentPolicy(agentPolicy, `Cannot migrate managed agent ${agentId}`);
   if (agent.components?.some((c) => c.type === 'fleet-server')) {
     throw new FleetUnauthorizedError(`Fleet server agents cannot be migrated`);
   }

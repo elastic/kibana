@@ -136,10 +136,10 @@ function buildEuiGridColumn({
   onResize,
   sortedColumns,
   disableCellActions = false,
-  disableColumnActions = false,
   dataGridRef,
   hideFilteringOnComputedColumns,
   documentsDisplayMode,
+  isInteractive,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -167,10 +167,10 @@ function buildEuiGridColumn({
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   disableCellActions?: boolean;
-  disableColumnActions?: boolean;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
+  isInteractive: boolean;
 }) {
   const dataViewField = getDataViewFieldFromDataSource({
     dataView,
@@ -275,7 +275,7 @@ function buildEuiGridColumn({
         />
       ) : undefined,
     displayAsText: columnDisplayName,
-    actions: disableColumnActions
+    actions: !isInteractive
       ? false
       : {
           showHide:
@@ -320,8 +320,8 @@ function buildEuiGridColumn({
       <DataTableSourceColumnHeaderMemoized
         columnDisplayName={columnDisplayName}
         headerRowHeight={headerRowHeight}
-        // JSON mode do not display a tooltip, Summary mode sets undefined so the default one is displayed.
-        tooltipContent={documentsDisplayMode === 'json' ? null : undefined}
+        // JSON mode and non-interactive modes (e.g. print) do not display a tooltip, Summary mode sets undefined so the default one is displayed.
+        tooltipContent={documentsDisplayMode === 'json' || !isInteractive ? null : undefined}
       />
     );
     if (documentsDisplayMode === 'json') {
@@ -396,7 +396,6 @@ export function getEuiGridColumns({
   isSortEnabled,
   isResizable = true,
   disableCellActions = false,
-  disableColumnActions = false,
   isPlainRecord,
   services,
   hasEditDataViewPermission,
@@ -413,6 +412,7 @@ export function getEuiGridColumns({
   dataGridRef,
   hideFilteringOnComputedColumns,
   documentsDisplayMode,
+  isInteractive = true,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -425,7 +425,6 @@ export function getEuiGridColumns({
   isResizable?: boolean;
   isPlainRecord?: boolean;
   disableCellActions?: boolean;
-  disableColumnActions?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -445,6 +444,7 @@ export function getEuiGridColumns({
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
+  isInteractive?: boolean;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -459,8 +459,8 @@ export function getEuiGridColumns({
       columnWidth: getColWidth(column),
       dataView,
       isSummaryOnlyColumn,
-      isSortEnabled,
-      isResizable,
+      isSortEnabled: isSortEnabled && isInteractive,
+      isResizable: isResizable && isInteractive,
       isPlainRecord,
       toastNotifications: services.toastNotifications,
       uiActions: services.uiActions,
@@ -477,11 +477,11 @@ export function getEuiGridColumns({
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
       sortedColumns,
-      disableCellActions,
-      disableColumnActions,
+      disableCellActions: disableCellActions || !isInteractive,
       dataGridRef,
       hideFilteringOnComputedColumns,
       documentsDisplayMode,
+      isInteractive,
     })
   );
 }

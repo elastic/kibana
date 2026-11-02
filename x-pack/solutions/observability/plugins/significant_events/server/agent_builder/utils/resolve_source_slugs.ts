@@ -72,7 +72,7 @@ export function findSource(catalog: SourceCatalog, slugOrId: string): Nightshift
  * Resolves slugs (or source ids) to sources in the caller's order. Duplicates
  * repeat the same source. Throws {@link UnknownSourceSlugError} if any is missing.
  */
-export function resolveSourcesBySlug(
+export function resolveSourcesBySlugOrId(
   catalog: SourceCatalog,
   slugs: readonly string[]
 ): NightshiftSource[] {
@@ -90,6 +90,18 @@ export function resolveSourcesBySlug(
     throw new UnknownSourceSlugError(missing);
   }
   return sources;
+}
+
+/**
+ * The source a slug or id names. Throws {@link UnknownSourceSlugError} if the space has none.
+ */
+export async function resolveSource(
+  sourcesClient: SourcesClient,
+  slugOrId: string
+): Promise<NightshiftSource> {
+  const catalog = await loadSourceCatalog(sourcesClient);
+  const [source] = resolveSourcesBySlugOrId(catalog, [slugOrId]);
+  return source;
 }
 
 /**

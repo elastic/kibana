@@ -137,6 +137,7 @@ xpack.securitySolution.enableExperimental:
     trialCompanionEnabled,
     disable:linuxRansomwareProtection,
     disable:registryCredentialHardening,
+    disable:endpointAiDataCollection,
 
     # Alerts and Attacks alignment feature is disabled in EASE
     disable:enableAlertsAndAttacksAlignment,

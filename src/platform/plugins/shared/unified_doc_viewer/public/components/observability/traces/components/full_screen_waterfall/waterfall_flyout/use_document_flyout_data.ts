@@ -18,6 +18,8 @@ export interface UseDocumentFlyoutDataParams {
   docId: string;
   traceId: string;
   docIndex?: string;
+  /** Absolute window to search the document in; defaults to the global time filter. */
+  timeRange?: { from: string; to: string };
 }
 
 /**
@@ -47,12 +49,14 @@ export function useDocumentFlyoutData({
   docId,
   traceId,
   docIndex,
+  timeRange,
 }: UseDocumentFlyoutDataParams): DocumentFlyoutData {
   const isSpanType = type === 'span';
 
   const spanData = useSpanFlyoutData({
     spanId: isSpanType ? docId : '',
     traceId,
+    timeRange,
   });
 
   const logData = useLogFlyoutData({

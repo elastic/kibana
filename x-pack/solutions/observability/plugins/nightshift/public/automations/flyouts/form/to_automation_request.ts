@@ -11,6 +11,7 @@ import type {
   CreateAutomationBody,
   UpdateAutomationBody,
 } from '../../hooks/use_automations';
+import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 import {
   SLACK_TRIGGER_EVENTS,
   toPresetSchedule,
@@ -39,6 +40,7 @@ const toTriggerRow = (
       event: SLACK_TRIGGER_EVENTS[trigger.kind],
       ...(trigger.channels.length ? { channels: trigger.channels } : {}),
       ...(trigger.users.length ? { users: trigger.users } : {}),
+      ...(trigger.bots.length ? { bots: trigger.bots } : {}),
       ...(messageFilter ? { messageFilter } : {}),
     };
   }
@@ -69,7 +71,10 @@ export const toAutomationRequestBody = (
       : values.slackAction.target === 'thread'
       ? [{ action: 'post_to_slack', targetMode: 'thread' }]
       : [{ action: 'post_to_slack', targetMode: values.slackAction.target, destination }],
-    runtime: { dailyDispatchLimit: Number(values.dailyDispatchLimit) },
+    runtime:
+      values.dailyDispatchLimit === UNLIMITED_DAILY_LIMIT
+        ? {}
+        : { dailyDispatchLimit: Number(values.dailyDispatchLimit) },
   };
 };
 
@@ -144,7 +149,10 @@ export const toAutomationUpdateBody = (
     completions: toUpdatedCompletions(values, automation),
     runtime: {
       ...automation.runtime,
-      dailyDispatchLimit: Number(values.dailyDispatchLimit),
+      dailyDispatchLimit:
+        values.dailyDispatchLimit === UNLIMITED_DAILY_LIMIT
+          ? null
+          : Number(values.dailyDispatchLimit),
     },
   };
 };
