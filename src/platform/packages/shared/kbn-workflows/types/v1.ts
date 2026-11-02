@@ -487,6 +487,7 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   id: string;
   name: string;
   description?: string;
+  tags?: string[];
   enabled: boolean;
   managed?: boolean;
   managedBy?: string | null;
