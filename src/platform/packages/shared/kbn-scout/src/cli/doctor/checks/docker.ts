@@ -104,9 +104,9 @@ export const dockerChecks: DoctorCheckGroup = {
           return pass(details);
         }
 
-        const recommended = `${RECOMMENDED_CPUS} CPUs and ${RECOMMENDED_MEMORY_GB} GB memory`;
+        const recommended = `${RECOMMENDED_CPUS} CPUs and ${RECOMMENDED_MEMORY_GB} GB RAM`;
         const fix = resizeDockerDesktopFix(NCPU, MemTotal);
-        return warn(`${details}, serverless ES needs ${recommended}`, {
+        return warn(`${details}, multi-project serverless tests need ${recommended}`, {
           fix,
           hint: fix
             ? 'restarts Docker Desktop and stops its containers'
