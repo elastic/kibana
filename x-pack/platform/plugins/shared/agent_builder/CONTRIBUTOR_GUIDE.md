@@ -336,6 +336,33 @@ agentBuilder.agents.register({
 
 `inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
 
+#### What running on a feature means
+
+The agent's runs are handed to the inference plugin as that feature: Agent Builder does not pick a
+connector itself. The model settings page is the single owner of the feature's model settings, and
+the feature's model *and* its reasoning configuration apply to the agent. A few consequences:
+
+- **The feature owns reasoning.** A `reasoning_level` passed by the caller (e.g. on the chat API) is
+  ignored, with a warning in the logs, when the run's model comes from a feature. It only applies to
+  runs on an explicit connector.
+- **No fallback.** When the feature has no model configured (no model selected on the model settings
+  page, no recommended endpoint, and the default AI connector does not resolve for it), the run fails
+  with the inference plugin's error. It does not fall back to the Agent Builder default model.
+- **An explicit connector wins.** A connector selected by the caller (the Chat UI connector selector,
+  `connector_id` on the API, `connector-id` / `inference-id` on the `ai.agent` workflow step) is used
+  instead of the agent's feature.
+- **Sub-agents inherit the model source.** A sub-agent without its own `inference_feature_id` runs on
+  the same feature as its parent, with the feature's reasoning. The exception is a sub-agent
+  dispatched with `low` effort when a dedicated fast model is configured for the `agent_builder_fast`
+  feature: it runs on that fast model instead.
+
+The `ai.agent` workflow step can also point a run at a feature with `connector-id-by-feature`, which
+follows the same rules (the step's `reasoning-level` is ignored on that path).
+
+The Agent Builder default (`agent_builder`) and fast (`agent_builder_fast`) features are not routed
+through this path: when no connector and no feature is selected, Agent Builder resolves their
+first endpoint itself, and the caller's reasoning level applies.
+
 ## Registering attachment types
 
 Attachments are used to provide additional context when conversing with an agent.
