@@ -476,6 +476,9 @@ steps:
       missing_alert_ids: []
       # One Agent Builder conversation id per batch that created one (standalone agent path).
       conversation_ids: []
+      # One { conversation_id, alert_ids } entry per batch that created a conversation. The notes
+      # are written after every batch has run, so each alert looks up its own batch here.
+      batch_conversations: []
 
   # ---------------------------------------------------------------------------
   # Read this space's configuration at run time
@@ -1797,10 +1800,18 @@ steps:
                 type: if
                 condition: "${{ variables.batch_result_conversation_id != '' }}"
                 steps:
+                  - name: build_batch_conversation_entry
+                    type: data.set
+                    with:
+                      batch_conversation_entry:
+                        conversation_id: "{{ variables.batch_result_conversation_id }}"
+                        alert_ids: "${{ variables.batch_alert_ids }}"
+
                   - name: push_batch_conversation_id
                     type: data.set
                     with:
                       conversation_ids: "${{ variables.conversation_ids | push: variables.batch_result_conversation_id }}"
+                      batch_conversations: "${{ variables.batch_conversations | push: variables.batch_conversation_entry }}"
 
               # -------------------------------------------------------------------
               # Accumulate the verdicts a caller receives via workflow.output
@@ -1972,6 +1983,10 @@ steps:
               # does not reliably shadow the value the previous iteration set. A count is always a
               # concrete number, so an alert with no verdict can never inherit its predecessor's.
               alert_verdict_count: "${{ variables.all_verdicts | where: 'id', foreach.item._id | size }}"
+              # The conversation of the batch this alert was classified in. Counted for the same
+              # reason as the verdict: the id of the previous alert must not leak into this one.
+              alert_conversation_count: "${{ variables.batch_conversations | where_exp: 'b', 'b.alert_ids contains foreach.item._id' | size }}"
+              alert_conversation_id: "{{ variables.batch_conversations | where_exp: 'b', 'b.alert_ids contains foreach.item._id' | map: 'conversation_id' | first }}"
 
           - name: check_alert_verdict_exists
             type: if
@@ -2057,8 +2072,8 @@ steps:
                             - Tag prefix: {{ variables.tag_prefix }}
                             - Connector: {{ variables.resolved_connector_id | default: variables.connector_id }}
                             - Analyzed in a batch of up to {{ consts.batch_size }} alerts
-                            {% if variables.batch_result_conversation_id != '' -%}
-                            - Conversation: [{{ variables.batch_result_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.batch_result_conversation_id }})
+                            {% if variables.alert_conversation_count > 0 -%}
+                            - Conversation: [{{ variables.alert_conversation_id }}](/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.alert_conversation_id }})
                             {%- endif %}
                             {% if variables.auto_close_enabled -%}
                             - Auto-close confidence range: {{ variables.auto_close_confidence_score_min_threshold }} to {{ variables.auto_close_confidence_score_max_threshold }}

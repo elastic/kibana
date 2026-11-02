@@ -426,10 +426,72 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       with: { body: { note: { note: string } } };
     };
     const { note } = verdictNoteStep.with.body.note;
-    expect(note).toContain("variables.batch_result_conversation_id != ''");
+    expect(note).toContain('variables.alert_conversation_count > 0');
     expect(note).toContain(
-      '/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.batch_result_conversation_id }}'
+      '/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.alert_conversation_id }}'
     );
+  });
+
+  it('links each alert to the conversation of its own batch, not the last batch', () => {
+    // The notes are written by apply_verdicts after every batch has run, so a link read from
+    // batch_result_conversation_id would hold the last batch's id for every alert.
+    const engine = createWorkflowLiquidEngine();
+    const buildStep = findStepByName(workflow.steps, 'build_batch_conversation_entry') as {
+      with: Record<string, unknown>;
+    };
+    const pushStep = findStepByName(workflow.steps, 'push_batch_conversation_id') as {
+      with: Record<string, unknown>;
+    };
+    const selectStep = findStepByName(workflow.steps, 'select_alert_verdict') as {
+      with: Record<string, unknown>;
+    };
+    const noteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    const linkBlock = noteStep.with.body.note.note.match(
+      /\{% if variables\.alert_conversation_count[\s\S]*?\{%- endif %\}/
+    )?.[0];
+    expect(linkBlock).toBeDefined();
+
+    // Variables merge in execution order, so replay the two batches through the real steps.
+    let variables: Record<string, unknown> = { conversation_ids: [], batch_conversations: [] };
+    [
+      { conversation: 'conversation-1', alertIds: ['alert-1', 'alert-2'] },
+      { conversation: 'conversation-2', alertIds: ['alert-3'] },
+    ].forEach(({ conversation, alertIds }) => {
+      variables = {
+        ...variables,
+        batch_result_conversation_id: conversation,
+        batch_alert_ids: alertIds,
+      };
+      variables = {
+        ...variables,
+        ...(renderValueRecursively(engine, buildStep.with, { variables }) as object),
+      };
+      variables = {
+        ...variables,
+        ...(renderValueRecursively(engine, pushStep.with, { variables }) as object),
+      };
+    });
+
+    const renderLink = (alertId: string): string => {
+      const context = {
+        variables,
+        foreach: { item: { _id: alertId } },
+        workflow: { spaceId: 'default' },
+      };
+      const selected = renderValueRecursively(engine, selectStep.with, context) as object;
+      return engine.parseAndRenderSync(linkBlock as string, {
+        ...context,
+        variables: { ...variables, ...selected },
+      });
+    };
+
+    expect(renderLink('alert-1')).toContain('/app/agent_builder/conversations/conversation-1)');
+    expect(renderLink('alert-2')).toContain('/app/agent_builder/conversations/conversation-1)');
+    expect(renderLink('alert-3')).toContain('/app/agent_builder/conversations/conversation-2)');
+    // An alert that no conversation covers gets no link and no leftover id.
+    expect(renderLink('alert-without-batch')).not.toContain('Conversation');
   });
 
   it('collects one conversation id per batch and exposes them as a workflow output', () => {
