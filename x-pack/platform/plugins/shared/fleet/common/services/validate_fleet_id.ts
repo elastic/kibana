@@ -27,3 +27,41 @@ export const validateFleetSavedObjectId = (value: string | undefined): void => {
     );
   }
 };
+
+/**
+ * Returns true if the id contains a path-traversal segment (`..`) or a NUL
+ * character. Unlike {@link isUnsafeId}, a bare `/` is allowed because package
+ * policy input and stream ids legitimately embed the input type (e.g.
+ * `cloudbeat/cis_k8s-...`). Only whole `/`- or `\`-separated segments equal to
+ * `..` escape a parent directory, so substrings such as `foo..bar` are safe.
+ */
+export const isPathTraversalId = (value: string): boolean => {
+  if (value.includes('\0')) return true;
+  return value.split(/[/\\]/).some((segment) => segment === '..');
+};
+
+const PATH_TRAVERSAL_ID_ERROR =
+  'id is not valid: must not contain path traversal sequences ("..") or null characters';
+
+/**
+ * Throws a FleetError if the id contains a path-traversal segment. Use for
+ * package policy input and stream ids, which may legitimately contain `/` and
+ * so cannot use {@link validateFleetSavedObjectId}. Only call on create/update
+ * paths so pre-existing stored ids continue to function.
+ */
+export const validateNoPathTraversalId = (value: string | undefined): void => {
+  if (value === undefined) return;
+  if (isPathTraversalId(value)) {
+    throw new FleetError(PATH_TRAVERSAL_ID_ERROR);
+  }
+};
+
+/**
+ * `@kbn/config-schema` `validate`-style predicate: returns an error message
+ * when the id contains a path-traversal segment, otherwise `undefined`.
+ */
+export const validateNoPathTraversalIdSchema = (value: string): string | undefined => {
+  if (isPathTraversalId(value)) {
+    return PATH_TRAVERSAL_ID_ERROR;
+  }
+};

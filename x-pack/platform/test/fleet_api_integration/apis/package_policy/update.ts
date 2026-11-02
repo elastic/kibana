@@ -288,6 +288,35 @@ export default function (providerContext: FtrProviderContext) {
         });
     });
 
+    it('should return a 400 when updating with a path-traversal input id', async function () {
+      const { body } = await supertest
+        .put(`/api/fleet/package_policies/${packagePolicyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'filetest-1',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            {
+              id: '../../../../../../tmp/evil',
+              type: 'logfile',
+              policy_template: 'template_a',
+              enabled: true,
+              streams: [],
+            },
+          ],
+          package: {
+            name: 'filetest',
+            title: 'For File Tests',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.contain('path traversal');
+    });
+
     it('should work with multiple policy ids', async function () {
       const response = await supertest
         .put(`/api/fleet/package_policies/${packagePolicyId}`)

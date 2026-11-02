@@ -279,4 +279,58 @@ describe('getInputsWithIds', () => {
     expect(inputs[0].id).toBe('logfile-policy123');
     expect(inputs[0].streams[0].id).toBe('logfile-test-dataset-policy123');
   });
+
+  describe('path traversal validation', () => {
+    const policyWithInputId = (inputId: string, streamId?: string) =>
+      ({
+        name: 'test-policy',
+        namespace: 'default',
+        policy_ids: ['policy1'],
+        package: { name: 'test-package', title: 'Test Package', version: '1.0.0' },
+        enabled: true,
+        inputs: [
+          {
+            id: inputId,
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                ...(streamId ? { id: streamId } : {}),
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'test-dataset' },
+              },
+            ],
+          },
+        ],
+      } as any);
+
+    it('throws when a client-supplied input id contains a traversal sequence', () => {
+      expect(() =>
+        getInputsWithIds(policyWithInputId('../../../../tmp/report-proof'), 'policy123')
+      ).toThrow('path traversal');
+    });
+
+    it('throws when a client-supplied stream id contains a traversal sequence', () => {
+      expect(() =>
+        getInputsWithIds(policyWithInputId('safe-input-id', 'a/../../etc'), 'policy123')
+      ).toThrow('path traversal');
+    });
+
+    it('does not throw for a client-supplied input id containing a legitimate slash', () => {
+      expect(() =>
+        getInputsWithIds(policyWithInputId('cloudbeat/cis_k8s-kspm-policy123'), 'policy123')
+      ).not.toThrow();
+    });
+
+    it('skips validation when validateIds is false (stored-data callers)', () => {
+      const inputs = getInputsWithIds(
+        policyWithInputId('../../../../tmp/report-proof'),
+        'policy123',
+        false,
+        undefined,
+        false
+      );
+      expect(inputs[0].id).toBe('../../../../tmp/report-proof');
+    });
+  });
 });
