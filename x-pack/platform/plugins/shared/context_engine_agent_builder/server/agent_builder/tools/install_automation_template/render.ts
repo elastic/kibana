@@ -78,6 +78,16 @@ export const assertSafeIdentifier = (label: string, value: string): void => {
   }
 };
 
+/**
+ * The templates add the backticks themselves, so any backtick in a name is dropped rather than
+ * rejected: a model often pre-quotes a name that has spaces (`Currency Code`).
+ */
+export const toSafeIdentifier = (label: string, value: string): string => {
+  const unquoted = value.replaceAll('`', '');
+  assertSafeIdentifier(label, unquoted);
+  return unquoted;
+};
+
 /** The orchestration splices this between FROM and the next pipe. A bare WHERE is not valid there. */
 const corpusFilterLine = (filter: string): string => {
   const trimmed = filter.trim();
@@ -101,16 +111,16 @@ const replaceTokens = (template: string, tokens: Record<string, string>): string
 export const renderDocumentOrchestrationTemplate = (
   values: DocumentOrchestrationTemplateValues
 ): string => {
-  assertSafeIdentifier('sourceIndex', values.sourceIndex);
-  assertSafeIdentifier('titleField', values.titleField);
-  assertSafeIdentifier('bodyField', values.bodyField);
+  const sourceIndex = toSafeIdentifier('sourceIndex', values.sourceIndex);
+  const titleField = toSafeIdentifier('titleField', values.titleField);
+  const bodyField = toSafeIdentifier('bodyField', values.bodyField);
 
   return replaceTokens(CONTEXT_ENGINE_DOCUMENT_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
     __AUTOMATION_NAME__: yamlString(values.automationName),
-    __SOURCE_INDEX__: yamlString(values.sourceIndex),
-    __TITLE_FIELD__: yamlString(values.titleField),
-    __BODY_FIELD__: yamlString(values.bodyField),
+    __SOURCE_INDEX__: yamlString(sourceIndex),
+    __TITLE_FIELD__: yamlString(titleField),
+    __BODY_FIELD__: yamlString(bodyField),
     __CORPUS_FILTER__: yamlString(corpusFilterLine(values.corpusFilter)),
     __MAX_DOCUMENTS__: String(values.maxDocuments),
     __BODY_MAX_CHARS__: String(values.bodyMaxChars),
@@ -118,22 +128,20 @@ export const renderDocumentOrchestrationTemplate = (
 };
 
 export const renderUnitProfileTemplate = (values: UnitProfileTemplateValues): string => {
-  assertSafeIdentifier('unitIndex', values.unitIndex);
-  assertSafeIdentifier('unitKey', values.unitKey);
-  assertSafeIdentifier('activityField', values.activityField);
-  assertSafeIdentifier('breakdownField', values.breakdownField);
-  for (const field of values.metricFields) {
-    assertSafeIdentifier('metricFields', field);
-  }
+  const unitIndex = toSafeIdentifier('unitIndex', values.unitIndex);
+  const unitKey = toSafeIdentifier('unitKey', values.unitKey);
+  const activityField = toSafeIdentifier('activityField', values.activityField);
+  const breakdownField = toSafeIdentifier('breakdownField', values.breakdownField);
+  const metricFields = values.metricFields.map((field) => toSafeIdentifier('metricFields', field));
 
   return replaceTokens(CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
     __AUTOMATION_NAME__: yamlString(values.automationName),
-    __UNIT_INDEX__: yamlString(values.unitIndex),
-    __UNIT_KEY__: yamlString(values.unitKey),
-    __ACTIVITY_FIELD__: yamlString(values.activityField),
-    __BREAKDOWN_FIELD__: yamlString(values.breakdownField),
-    __METRIC_FIELDS__: JSON.stringify(values.metricFields),
+    __UNIT_INDEX__: yamlString(unitIndex),
+    __UNIT_KEY__: yamlString(unitKey),
+    __ACTIVITY_FIELD__: yamlString(activityField),
+    __BREAKDOWN_FIELD__: yamlString(breakdownField),
+    __METRIC_FIELDS__: JSON.stringify(metricFields),
     __CORPUS_FILTER__: yamlString(corpusFilterLine(values.corpusFilter)),
     __MAX_UNITS__: String(values.maxUnits),
   });
@@ -145,27 +153,23 @@ export const renderIndexMetadataTemplate = (values: IndexMetadataTemplateValues)
   }
 
   const seen = new Set<string>();
-  for (const { index, categoryField } of values.sources) {
-    assertSafeIdentifier('sourceIndex', index);
-    assertSafeIdentifier('categoryField', categoryField);
+  const sources = values.sources.map((source) => {
+    const index = toSafeIdentifier('sourceIndex', source.index);
+    const categoryField = toSafeIdentifier('categoryField', source.categoryField);
     if (seen.has(index)) {
       throw new Error(
         `Index "${index}" is listed twice. Each source writes the KI "<name>/${index}", so a second entry would overwrite the first.`
       );
     }
     seen.add(index);
-  }
+    return { index, category_field: categoryField };
+  });
 
   return replaceTokens(CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
     __AUTOMATION_NAME__: yamlString(values.automationName),
     // JSON is valid YAML flow syntax, so the list renders on the const's own line.
-    __SOURCES__: JSON.stringify(
-      values.sources.map(({ index, categoryField }) => ({
-        index,
-        category_field: categoryField,
-      }))
-    ),
+    __SOURCES__: JSON.stringify(sources),
   });
 };
 

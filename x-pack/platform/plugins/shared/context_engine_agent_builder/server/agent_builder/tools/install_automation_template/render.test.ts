@@ -232,7 +232,7 @@ describe('automation template rendering', () => {
       expect(() =>
         renderIndexMetadataTemplate({
           ...twoSources,
-          sources: [twoSources.sources[0], { index: 'flights', categoryField: 'tier`' }],
+          sources: [twoSources.sources[0], { index: 'flights', categoryField: 'tier\n' }],
         })
       ).toThrow(/categoryField/);
       expect(() =>
@@ -241,6 +241,40 @@ describe('automation template rendering', () => {
           sources: [{ index: 'flights{{ x }}', categoryField: 'tier' }],
         })
       ).toThrow(/sourceIndex/);
+    });
+
+    it('drops backticks from a pre-quoted name', () => {
+      const { consts } = parse(
+        renderIndexMetadataTemplate({
+          ...twoSources,
+          sources: [{ index: 'sales', categoryField: '`Currency Code`' }],
+        })
+      );
+
+      expect(consts.sources).toEqual([{ index: 'sales', category_field: 'Currency Code' }]);
+    });
+
+    it('drops every backtick, so none can break out of the quoting', () => {
+      const { consts } = parse(
+        renderIndexMetadataTemplate({
+          ...twoSources,
+          sources: [{ index: 'flights', categoryField: '`a` | DROP `b`' }],
+        })
+      );
+
+      expect(consts.sources).toEqual([{ index: 'flights', category_field: 'a | DROP b' }]);
+    });
+
+    it('treats a pre-quoted index as the same index when checking for duplicates', () => {
+      expect(() =>
+        renderIndexMetadataTemplate({
+          ...twoSources,
+          sources: [
+            { index: 'loyalty-docs', categoryField: 'tier' },
+            { index: '`loyalty-docs`', categoryField: 'status' },
+          ],
+        })
+      ).toThrow(/listed twice/);
     });
 
     it('rejects the same index twice, whose KIs would overwrite each other', () => {
@@ -318,10 +352,10 @@ describe('automation template rendering', () => {
       expect(unitEscaped).toBe('a\\"b\\\\c\\nd\\re');
     });
 
-    it('rejects a metric field that would break out of its backticks', () => {
-      expect(() =>
-        renderUnitProfileTemplate({ ...unitValues, metricFields: ['Points` | DROP x'] })
-      ).toThrow(/metricFields/);
+    it('drops the backtick from a metric field that would break out of its backticks', () => {
+      const yaml = renderUnitProfileTemplate({ ...unitValues, metricFields: ['Points` | DROP x'] });
+
+      expect(parse(yaml).consts.metric_fields).toEqual(['Points | DROP x']);
     });
   });
 
@@ -559,10 +593,37 @@ describe('automation template rendering', () => {
     }
   );
 
-  it('rejects an identifier that would break out of its backticks', () => {
-    expect(() =>
-      renderUnitProfileTemplate({ ...unitValues, unitKey: 'Province` | DROP x | EVAL y="' })
-    ).toThrow(/unitKey .* backtick/);
+  it('drops backticks from pre-quoted unit profile fields', () => {
+    const { consts } = parse(
+      renderUnitProfileTemplate({
+        ...unitValues,
+        unitKey: '`Province`',
+        activityField: '`Enrollment Date`',
+        metricFields: ['`Points Accumulated`'],
+      })
+    );
+
+    expect(consts.unit_key).toBe('Province');
+    expect(consts.activity_field).toBe('Enrollment Date');
+    expect(consts.metric_fields).toEqual(['Points Accumulated']);
+  });
+
+  it('drops the backtick from an identifier that would break out of its backticks', () => {
+    const yaml = renderUnitProfileTemplate({
+      ...unitValues,
+      unitKey: 'Province` | DROP x | EVAL y="',
+    });
+
+    expect(parse(yaml).consts.unit_key).toBe('Province | DROP x | EVAL y="');
+  });
+
+  it('still rejects a line break or a Liquid brace pair in an identifier', () => {
+    expect(() => renderUnitProfileTemplate({ ...unitValues, unitKey: 'Province\nx' })).toThrow(
+      /unitKey/
+    );
+    expect(() => renderUnitProfileTemplate({ ...unitValues, unitKey: '{{ x }}' })).toThrow(
+      /unitKey/
+    );
   });
 
   describe('targeted_ki_writer template', () => {
