@@ -8,6 +8,6 @@
 export {
   createSandboxAllowlistClient,
   type SandboxAllowlistClient,
+  type SandboxAllowlistClientDeps,
 } from './sandbox_allowlist_client';
 export { SandboxAllowlistDisabledError, SandboxAllowlistValidationError } from './errors';
-export { sandboxAllowlistUiSetting } from './ui_setting';

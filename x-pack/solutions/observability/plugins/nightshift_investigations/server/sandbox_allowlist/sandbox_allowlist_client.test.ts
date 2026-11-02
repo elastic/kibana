@@ -5,59 +5,118 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   httpServerMock,
+  savedObjectsClientMock,
   savedObjectsServiceMock,
-  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST } from '@kbn/management-settings-ids';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import {
+  NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
+  NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+  nightshiftSandboxAllowlistSavedObjectType,
+} from '../saved_objects';
 import { createSandboxAllowlistClient } from './sandbox_allowlist_client';
-import { SandboxAllowlistValidationError } from './errors';
-import { sandboxAllowlistUiSetting } from './ui_setting';
+import { SandboxAllowlistDisabledError, SandboxAllowlistValidationError } from './errors';
 
-const setup = ({ stored = [] }: { stored?: string[] } = {}) => {
+const setup = ({
+  stored,
+  withSavedObjects = true,
+}: {
+  stored?: unknown;
+  withSavedObjects?: boolean;
+} = {}) => {
   const savedObjects = savedObjectsServiceMock.createStartContract();
-  const uiSettings = uiSettingsServiceMock.createStartContract();
-  const uiSettingsClient = uiSettingsServiceMock.createClient();
-  uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
-  uiSettingsClient.get.mockResolvedValue(stored);
+  const soClient = savedObjectsClientMock.create();
+  soClient.asScopedToNamespace.mockReturnValue(soClient);
+  savedObjects.getScopedClient.mockReturnValue(soClient);
 
-  const client = createSandboxAllowlistClient({ getDeps: () => ({ savedObjects, uiSettings }) });
-  return { client, savedObjects, uiSettingsClient, request: httpServerMock.createKibanaRequest() };
+  if (stored !== undefined) {
+    soClient.get.mockResolvedValue({
+      id: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
+      type: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+      references: [],
+      version: 'v1',
+      attributes: { hosts: stored },
+    });
+  } else {
+    soClient.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError(
+        NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+        NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID
+      )
+    );
+  }
+  soClient.create.mockImplementation(async (type, attributes) => ({
+    id: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
+    type,
+    references: [],
+    version: 'v1',
+    attributes,
+  }));
+
+  const spaces = {
+    spacesService: { getSpaceId: jest.fn(() => 'space-a') },
+  } as unknown as SpacesPluginStart;
+
+  const client = createSandboxAllowlistClient({
+    getDeps: () => ({
+      savedObjects: withSavedObjects ? savedObjects : undefined,
+      spaces,
+    }),
+  });
+  return {
+    client,
+    savedObjects,
+    soClient,
+    request: httpServerMock.createKibanaRequest(),
+  };
 };
 
-describe('SandboxAllowlistClient', () => {
-  it('reads the advanced setting without the security extension', async () => {
-    const { client, savedObjects, uiSettingsClient, request } = setup({
-      stored: ['api.github.com'],
-    });
+describe('createSandboxAllowlistClient', () => {
+  it('returns an empty allowlist when none is stored yet and scopes to the current space', async () => {
+    const { client, request, savedObjects, soClient } = setup();
 
-    await expect(client.get(request)).resolves.toEqual({ hosts: ['api.github.com'] });
-    expect(uiSettingsClient.get).toHaveBeenCalledWith(OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST);
+    await expect(client.get(request)).resolves.toEqual({ hosts: [] });
     expect(savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
+      excludedExtensions: expect.any(Array),
+      includedHiddenTypes: [NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE],
     });
+    expect(soClient.asScopedToNamespace).toHaveBeenCalledWith('space-a');
   });
 
-  it('stores normalized hosts', async () => {
-    const { client, uiSettingsClient, request } = setup();
+  it('normalizes and de-duplicates hosts on replace', async () => {
+    const { client, request, soClient } = setup();
 
-    const result = await client.replace(request, { hosts: ['API.GitHub.com.', 'bücher.example'] });
+    const result = await client.replace(request, {
+      hosts: ['API.GitHub.com.', 'api.github.com', '  uploads.github.com  '],
+    });
 
-    expect(result).toEqual({ hosts: ['api.github.com', 'xn--bcher-kva.example'] });
-    expect(uiSettingsClient.set).toHaveBeenCalledWith(OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST, [
-      'api.github.com',
-      'xn--bcher-kva.example',
-    ]);
+    expect(result).toEqual({ hosts: ['api.github.com', 'uploads.github.com'] });
+    expect(soClient.create).toHaveBeenCalledWith(
+      NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+      { hosts: ['api.github.com', 'uploads.github.com'] },
+      { id: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID, overwrite: true }
+    );
   });
 
-  it('rejects wildcards and other invalid entries without writing', async () => {
-    const { client, uiSettingsClient, request } = setup();
+  it('throws SandboxAllowlistValidationError without writing when any entry is invalid', async () => {
+    const { client, request, soClient } = setup();
+
     await expect(
-      client.replace(request, { hosts: ['*.github.com', 'https://x.example'] })
-    ).rejects.toBeInstanceOf(SandboxAllowlistValidationError);
-    expect(uiSettingsClient.set).not.toHaveBeenCalled();
+      client.replace(request, { hosts: ['api.github.com', '*.com'] })
+    ).rejects.toThrow(SandboxAllowlistValidationError);
+    expect(soClient.create).not.toHaveBeenCalled();
+  });
+
+  it('throws SandboxAllowlistDisabledError when savedObjects is unavailable', async () => {
+    const { client, request } = setup({ withSavedObjects: false });
+
+    await expect(client.get(request)).rejects.toThrow(SandboxAllowlistDisabledError);
+    await expect(client.replace(request, { hosts: [] })).rejects.toThrow(
+      SandboxAllowlistDisabledError
+    );
   });
 
   describe('getHostsForCommand', () => {
@@ -80,31 +139,35 @@ describe('SandboxAllowlistClient', () => {
   });
 });
 
-describe('sandboxAllowlistUiSetting schema', () => {
-  const { schema } = sandboxAllowlistUiSetting[OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST];
+describe('nightshiftSandboxAllowlistSavedObjectType schema', () => {
+  const schema = nightshiftSandboxAllowlistSavedObjectType.modelVersions![1].schemas.create;
 
   it('accepts a normalized list of hosts and DSL rules', () => {
     expect(() =>
-      schema.validate([
-        'api.github.com',
-        '*.datadoghq.com',
-        'allow * pypi.org GET,HEAD /simple/',
-        'deny * api.github.com POST /gists',
-        'xn--bcher-kva.example',
-      ])
+      schema.validate({
+        hosts: [
+          'api.github.com',
+          '*.datadoghq.com',
+          'allow * pypi.org GET,HEAD /simple/',
+          'deny * api.github.com POST /gists',
+          'xn--bcher-kva.example',
+        ],
+      })
     ).not.toThrow();
   });
 
   it.each([[['*']], [['*.com']], [['API.github.com']], [['a.example', 'a.example']]])(
-    'rejects %p written through the generic settings API',
+    'rejects invalid or unnormalized hosts %p',
     (hosts) => {
-      expect(() => schema.validate(hosts)).toThrow();
+      expect(() => schema.validate({ hosts })).toThrow();
     }
   );
 
-  it('rejects more than 32 hosts', () => {
+  it('rejects more than 32 rules', () => {
     expect(() =>
-      schema.validate(Array.from({ length: 33 }, (_, index) => `h${index}.example`))
+      schema.validate({
+        hosts: Array.from({ length: 33 }, (_, index) => `h${index}.example`),
+      })
     ).toThrow();
   });
 });

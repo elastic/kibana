@@ -5,78 +5,113 @@
  * 2.0.
  */
 
-import type { CoreStart, IUiSettingsClient, KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST } from '@kbn/management-settings-ids';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   validateSandboxAllowlist,
   type GetSandboxAllowlistResponse,
   type PutSandboxAllowlistRequest,
   type PutSandboxAllowlistResponse,
 } from '../../common/sandbox_allowlist';
-import { SandboxAllowlistValidationError } from './errors';
+import {
+  NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
+  NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+  type NightshiftSandboxAllowlistAttributes,
+} from '../saved_objects';
+import { SandboxAllowlistDisabledError, SandboxAllowlistValidationError } from './errors';
 
-/** The `nightshift.enabled` flag is checked by the routes, from the request handler context. */
 export interface SandboxAllowlistClient {
+  /** Reads the space's sandbox egress allowlist. */
   get: (request: KibanaRequest) => Promise<GetSandboxAllowlistResponse>;
+  /** Validates, normalizes and stores the space's sandbox egress allowlist. */
   replace: (
     request: KibanaRequest,
     params: PutSandboxAllowlistRequest
   ) => Promise<PutSandboxAllowlistResponse>;
   /**
-   * The hosts that may receive real credential values for a sandbox command in the request's
-   * space. Server-side only: never exposed to the sandbox or the agent.
+   * Normalized egress firewall rules for the request's space, for passing to `sandbox-api`.
+   * Throws {@link SandboxAllowlistValidationError} if the stored object fails validation.
    */
   getHostsForCommand: (request: KibanaRequest) => Promise<string[]>;
 }
 
 export interface SandboxAllowlistClientDeps {
   savedObjects?: CoreStart['savedObjects'];
-  uiSettings?: CoreStart['uiSettings'];
+  spaces?: SpacesPluginStart;
 }
 
 /**
- * Creates the client for the per-space sandbox credential host allowlist, stored in the
- * `observability:nightshiftSandboxAllowlist` advanced setting.
+ * Client for the per-space sandbox egress firewall allowlist, backed by a hidden space-scoped
+ * Saved Object (`nightshift-sandbox-allowlist`) so it can only be modified through the
+ * Nightshift `manage`-privileged route (and not through generic `uiSettings` / Saved Objects APIs).
  */
 export const createSandboxAllowlistClient = ({
   getDeps,
 }: {
   getDeps: () => SandboxAllowlistClientDeps;
 }): SandboxAllowlistClient => {
-  // Writes are authorized by the Nightshift manage privilege on the route, and command-time reads
-  // happen on behalf of whoever runs the sandbox tool, so the security extension is skipped. The
-  // spaces extension still scopes the settings to the request's space.
-  const getUiSettingsClient = (request: KibanaRequest): IUiSettingsClient => {
-    const { savedObjects, uiSettings } = getDeps();
-    if (!savedObjects || !uiSettings) {
-      throw new Error('uiSettings is not available — plugin start() has not been called');
+  const getSpaceId = (request: KibanaRequest): string =>
+    getDeps().spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+  const getSavedObjectsClient = (request: KibanaRequest) => {
+    const { savedObjects } = getDeps();
+    if (!savedObjects) {
+      throw new SandboxAllowlistDisabledError();
     }
-    return uiSettings.asScopedToClient(
-      savedObjects.getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] })
-    );
+    return savedObjects
+      .getScopedClient(request, {
+        excludedExtensions: [SECURITY_EXTENSION_ID],
+        includedHiddenTypes: [NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE],
+      })
+      .asScopedToNamespace(getSpaceId(request));
   };
 
-  const readHosts = async (request: KibanaRequest): Promise<string[]> =>
-    (await getUiSettingsClient(request).get<string[]>(
-      OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST
-    )) ?? [];
+  const readHosts = async (request: KibanaRequest): Promise<string[]> => {
+    try {
+      const existing = await getSavedObjectsClient(
+        request
+      ).get<NightshiftSandboxAllowlistAttributes>(
+        NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+        NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID
+      );
+      const raw = existing.attributes.hosts;
+      return Array.isArray(raw)
+        ? raw.filter((item): item is string => typeof item === 'string')
+        : [];
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return [];
+      }
+      throw err;
+    }
+  };
 
   return {
-    get: async (request) => ({ hosts: await readHosts(request) }),
+    get: async (request) => {
+      const { hosts } = validateSandboxAllowlist(await readHosts(request));
+      return { hosts };
+    },
 
-    replace: async (request, params) => {
-      const { hosts, errors } = validateSandboxAllowlist(params.hosts);
+    replace: async (request, { hosts: rawHosts }) => {
+      const client = getSavedObjectsClient(request);
+      const { hosts, errors } = validateSandboxAllowlist(rawHosts);
       if (errors.length > 0) {
         throw new SandboxAllowlistValidationError(errors.join('; '));
       }
-      await getUiSettingsClient(request).set(OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST, hosts);
+      await client.create<NightshiftSandboxAllowlistAttributes>(
+        NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+        { hosts },
+        { id: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID, overwrite: true }
+      );
       return { hosts };
     },
 
     getHostsForCommand: async (request) => {
-      // Re-validate on read so a corrupted or overridden setting fails closed instead of
-      // silently dropping the space's firewall policy.
+      // Re-validate on read so a corrupted stored value fails closed instead of silently
+      // dropping the space's firewall policy.
       const { hosts, errors } = validateSandboxAllowlist(await readHosts(request));
       if (errors.length > 0) {
         throw new SandboxAllowlistValidationError(errors.join('; '));

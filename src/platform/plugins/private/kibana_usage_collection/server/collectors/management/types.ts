@@ -215,7 +215,6 @@ export interface UsageStats {
   'observability:streamsEnableCanvas': boolean;
   'observability:nightshiftContinuousOnboardingEnabled': boolean;
   'observability:nightshiftContinuousOnboardingIntervalHours': number;
-  'observability:nightshiftSandboxAllowlist': string;
   'observability:streamsSigEventsScheduledDiscoveryEnabled': boolean;
   'observability:streamsSigEventsScheduledDiscoveryDetectionIntervalMinutes': number;
   'observability:streamsSigEventsScheduledDiscoveryDetectionBucketIntervalMinutes': number;

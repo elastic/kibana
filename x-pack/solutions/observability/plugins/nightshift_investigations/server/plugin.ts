@@ -104,6 +104,7 @@ import {
 import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
 import {
   nightshiftCustomContextSavedObjectType,
+  nightshiftSandboxAllowlistSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
@@ -115,7 +116,7 @@ import {
   createListSandboxConnectorTypes,
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
-import { createSandboxAllowlistClient, sandboxAllowlistUiSetting } from './sandbox_allowlist';
+import { createSandboxAllowlistClient } from './sandbox_allowlist';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -220,10 +221,10 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
-    core.uiSettings.register(sandboxAllowlistUiSetting);
+    core.savedObjects.registerType(nightshiftSandboxAllowlistSavedObjectType);
 
     const sandboxAllowlistClient = createSandboxAllowlistClient({
-      getDeps: () => ({ savedObjects: this.savedObjects, uiSettings: this.uiSettings }),
+      getDeps: () => ({ savedObjects: this.savedObjects, spaces: this.spaces }),
     });
 
     const customContextClient = createCustomContextClient({
