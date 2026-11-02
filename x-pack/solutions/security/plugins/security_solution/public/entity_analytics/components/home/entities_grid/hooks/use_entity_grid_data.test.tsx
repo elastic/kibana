@@ -265,6 +265,26 @@ describe('useEntityGridData', () => {
       expect(mockRunQuery).not.toHaveBeenCalled();
     });
 
+    it('keeps loading, and does not query, while the search overrides are pending', async () => {
+      const { result, rerender } = renderHook(
+        ({ options }: { options: UseEntityGridDataOptions }) => useEntityGridData(options),
+        {
+          initialProps: { options: { ...OPTIONS, isSearchOverridesPending: true } },
+          wrapper: ({ children }: PropsWithChildren) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          ),
+        }
+      );
+
+      expect(result.current.isFetching).toBe(true);
+      expect(mockFetchSortPage).not.toHaveBeenCalled();
+      expect(mockRunQuery).not.toHaveBeenCalled();
+
+      rerender({ options: { ...OPTIONS, isSearchOverridesPending: false } });
+
+      await waitFor(() => expect(mockFetchSortPage).toHaveBeenCalled());
+    });
+
     it('does not query until the space resolves', async () => {
       mockContext({ spaceId: null });
 

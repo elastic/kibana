@@ -275,6 +275,7 @@ export const useEntityGridData = (
     updatedAt: Math.max(rowsQuery.dataUpdatedAt, enrichment.dataUpdatedAt) || null,
     isAtLoadLimit: !!rowsQuery.data?.isAtLoadLimit,
     isFetching:
+      !!options.isSearchOverridesPending ||
       resolvedEntityFilterOverrides.isFetching ||
       rowsQuery.isFetching ||
       countQuery.isFetching ||
