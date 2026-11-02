@@ -11,9 +11,5 @@ import { EsProxyPlugin } from './plugin';
 
 export const plugin = () => new EsProxyPlugin();
 
-export type {
-  EsProxyPluginSetup,
-  EsProxyPluginStart,
-  EsProxyRequestParams,
-  HttpMethod,
-} from './plugin';
+export type { EsProxyPluginSetup, EsProxyPluginStart } from './plugin';
+export type { EsProxyRequestParams, HttpMethod } from '../common/types';
