@@ -316,6 +316,7 @@ describe('isPageWithAppHeaderPath', () => {
     ['the exception list details page', '/exceptions/details/list-1'],
     ['a cloud security posture page', '/cloud_security_posture/findings'],
     ['the cloud security posture base path', '/cloud_security_posture'],
+    ['the Manage landing page', '/manage'],
     ['a rules tab with a trailing slash', '/rules/management/'],
     ['a rule details tab with a trailing slash', '/rules/id/rule-id/overview/'],
     ['a rule details path with an encoded rule id', '/rules/id/rule%20id/overview'],
@@ -333,6 +334,7 @@ describe('isPageWithAppHeaderPath', () => {
     ['the dashboards page', '/dashboards'],
     ['an empty path', ''],
     ['the root path', '/'],
+    ['a page under Manage', '/manage/sub-page'],
     ['the rules page without a tab', '/rules'],
     ['a rule details tab with an extra segment', '/rules/id/rule-id/overview/extra'],
     [
