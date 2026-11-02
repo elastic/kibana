@@ -20,13 +20,23 @@
  *     fetched or the stream is stopped.
  */
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import produce from 'immer-v9';
 import type { ConversationStreamService } from '../../../services/events';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
 import { useResumeRoundMutation } from './use_resume_round_mutation';
 import type { ResumeRoundVars } from './use_resume_round_mutation';
+import { useAttachExecutionMutation } from './use_attach_execution_mutation';
+import type { AttachExecutionVars } from './use_attach_execution_mutation';
 import type { ActiveStream, StreamRecord } from './types';
 import type { OptimisticAttachments } from '../../utils/build_optimistic_attachments';
 
@@ -36,6 +46,7 @@ export interface StreamingContextValue {
   byConversationId: Record<string, StreamRecord>;
   mutateSendMessage: (vars: SendMessageVars) => void;
   mutateResumeRound: (vars: ResumeRoundVars) => void;
+  mutateAttach: (vars: AttachExecutionVars) => void;
   cancelStream: (conversationId: string) => void;
   /** Closes this UI's connections locally; the runs keep going on the server. */
   detachAllStreams: () => void;
@@ -54,6 +65,9 @@ export const StreamingProvider = ({
 }) => {
   const [activeStreams, setActiveStreams] = useState<Map<string, ActiveStream>>(() => new Map());
   const [byConversationId, setByConversationId] = useState<Record<string, StreamRecord>>({});
+
+  // Executions attached to, or stopped, from this mount
+  const attemptedExecutionIds = useRef<Set<string>>(new Set());
 
   const setActiveStream = useCallback((conversationId: string, value: ActiveStream) => {
     setActiveStreams((prev) => new Map(prev).set(conversationId, value));
@@ -115,6 +129,12 @@ export const StreamingProvider = ({
     markStreamStarted,
   });
 
+  const attachMutation = useAttachExecutionMutation({
+    conversationStreamService,
+    clearActiveStream,
+    markStreamStarted,
+  });
+
   // Pull stable references out of the mutation result objects. The result object itself is
   // a NEW reference each render (React Query rebuilds it), so anything that depends on the
   // whole object would re-evaluate every render. The individual fields below are stable.
@@ -124,6 +144,9 @@ export const StreamingProvider = ({
   const resumeMutate = resumeMutation.mutate;
   const resumeCancel = resumeMutation.cancel;
   const resumeDetachAll = resumeMutation.detachAll;
+  const attachMutate = attachMutation.mutate;
+  const attachCancel = attachMutation.cancel;
+  const attachDetachAll = attachMutation.detachAll;
 
   const cancelStream = useCallback(
     (conversationId: string) => {
@@ -131,10 +154,15 @@ export const StreamingProvider = ({
         const current = prev.get(conversationId);
         return current ? new Map(prev).set(conversationId, { ...current, cancelling: true }) : prev;
       });
-      sendCancel(conversationId);
-      resumeCancel(conversationId);
+      // The pointer can outlive a Stop by a few seconds; never re-attach to a run stopped here.
+      for (const cancel of [sendCancel, resumeCancel, attachCancel]) {
+        const stoppedExecutionId = cancel(conversationId);
+        if (stoppedExecutionId) {
+          attemptedExecutionIds.current.add(stoppedExecutionId);
+        }
+      }
     },
-    [sendCancel, resumeCancel]
+    [sendCancel, resumeCancel, attachCancel]
   );
 
   // Each mutation hook owns its own `Map<conversationId, StreamHandle>` ref; ask each to close
@@ -142,7 +170,12 @@ export const StreamingProvider = ({
   const detachAllStreams = useCallback(() => {
     sendDetachAll();
     resumeDetachAll();
-  }, [sendDetachAll, resumeDetachAll]);
+    attachDetachAll();
+  }, [sendDetachAll, resumeDetachAll, attachDetachAll]);
+
+  // Leaving the UI closes its connections; the runs continue on the server and are re-attached
+  // on return through the conversation's `active_execution` pointer.
+  useEffect(() => () => detachAllStreams(), [detachAllStreams]);
 
   // Wrappers around `mutate` that set the per-id `activeStreams` entry SYNCHRONOUSLY before
   // queueing the mutation, so the conversation reads as streaming (Stop, the scroll anchor) in
@@ -166,6 +199,19 @@ export const StreamingProvider = ({
     },
     [setActiveStream, resumeMutate]
   );
+  const mutateAttach = useCallback(
+    (vars: AttachExecutionVars) => {
+      if (attemptedExecutionIds.current.has(vars.executionId)) {
+        return;
+      }
+      attemptedExecutionIds.current.add(vars.executionId);
+      setActiveStream(vars.conversationId, {
+        type: 'attach',
+      });
+      attachMutate(vars);
+    },
+    [setActiveStream, attachMutate]
+  );
 
   const value = useMemo<StreamingContextValue>(
     () => ({
@@ -174,6 +220,7 @@ export const StreamingProvider = ({
       byConversationId,
       mutateSendMessage,
       mutateResumeRound,
+      mutateAttach,
       cancelStream,
       detachAllStreams,
     }),
@@ -183,6 +230,7 @@ export const StreamingProvider = ({
       byConversationId,
       mutateSendMessage,
       mutateResumeRound,
+      mutateAttach,
       cancelStream,
       detachAllStreams,
     ]

@@ -106,6 +106,7 @@ describe('useConversation polling', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
+      mutateAttach: jest.fn(),
       detachAllStreams: jest.fn(),
     });
     mockUseStreamRecord.mockReturnValue({});
@@ -205,6 +206,7 @@ describe('useConversation polling', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
+      mutateAttach: jest.fn(),
       detachAllStreams: jest.fn(),
     });
   };
@@ -287,6 +289,7 @@ describe('useConversationReadOnly', () => {
       mutateSendMessage: jest.fn(),
       mutateResumeRound: jest.fn(),
       cancelStream: jest.fn(),
+      mutateAttach: jest.fn(),
       detachAllStreams: jest.fn(),
     });
 

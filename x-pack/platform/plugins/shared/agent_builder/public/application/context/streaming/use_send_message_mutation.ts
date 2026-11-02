@@ -271,11 +271,13 @@ export const useSendMessageMutation = ({
   });
 
   const cancel = useCallback(
-    (conversationId: string) => {
+    (conversationId: string): string | undefined => {
       const handle = controllersRef.current.get(conversationId);
-      if (handle) {
-        requestAbort(handle, chatService);
+      if (!handle) {
+        return undefined;
       }
+      requestAbort(handle, chatService);
+      return handle.executionId;
     },
     [chatService]
   );
