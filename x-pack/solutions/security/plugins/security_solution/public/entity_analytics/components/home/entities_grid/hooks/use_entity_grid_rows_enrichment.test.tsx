@@ -219,4 +219,32 @@ describe('useEntityGridRowsEnrichment', () => {
     act(() => result.current.onRowsInViewChange(0, 10));
     expect(mockEnrich).toHaveBeenCalledTimes(2);
   });
+
+  it('says when the first chunk asked for has its columns, whatever scrolling asks for later', async () => {
+    let resolveSecond: (values: Map<string, unknown>) => void = () => {};
+    mockEnrich
+      .mockResolvedValueOnce(new Map())
+      .mockImplementationOnce(() => new Promise((resolve) => (resolveSecond = resolve)));
+    const { result } = renderEnrichment(true);
+    expect(result.current.hasEnrichedRows).toBe(false);
+
+    act(() => result.current.onRowsInViewChange(0, 10));
+    await waitFor(() => expect(result.current.hasEnrichedRows).toBe(true));
+
+    // A scrolled-to chunk still loading leaves the first chunk's state as it was.
+    act(() => result.current.onRowsInViewChange(110, 120));
+    await waitFor(() => expect(result.current.isEnriching).toBe(true));
+    expect(result.current.hasEnrichedRows).toBe(true);
+    expect(result.current.hasFailedColumns).toBe(false);
+    act(() => resolveSecond(new Map()));
+  });
+
+  it('says when a computed column failed', async () => {
+    mockEnrich.mockRejectedValue(new Error('boom'));
+    const { result } = renderEnrichment(true);
+
+    act(() => result.current.onRowsInViewChange(0, 10));
+    await waitFor(() => expect(result.current.hasFailedColumns).toBe(true));
+    expect(result.current.hasEnrichedRows).toBe(true);
+  });
 });
