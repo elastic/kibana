@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
-import { createTraceBasedEvaluator } from './factory';
+import { createTraceBasedEvaluator, traceIdFilter } from './factory';
 
 export function createLatencyEvaluator({
   traceEsClient,
@@ -23,9 +23,11 @@ export function createLatencyEvaluator({
     config: {
       name: 'Latency',
       direction: 'minimize',
-      buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}"
-| STATS total_duration_ns = MAX(duration)
+      // One trace's duration is its longest span; a multi-round run adds its traces' durations.
+      buildQuery: (_traceId, traceIds) => `FROM traces-*
+| WHERE ${traceIdFilter(traceIds)}
+| STATS trace_duration_ns = MAX(duration) BY trace.id
+| STATS total_duration_ns = SUM(trace_duration_ns)
 | EVAL latency_seconds = TO_DOUBLE(total_duration_ns) / 1000000000
 | KEEP latency_seconds`,
       extractResult: (response) => {
@@ -63,8 +65,8 @@ export function createSpanLatencyEvaluator({
     config: {
       name: 'Latency',
       direction: 'minimize',
-      buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}" AND ${spanFilter}
+      buildQuery: (_traceId, traceIds) => `FROM traces-*
+| WHERE ${traceIdFilter(traceIds)} AND ${spanFilter}
 | STATS total_duration_ns = SUM(duration)
 | EVAL latency_seconds = TO_DOUBLE(total_duration_ns) / 1000000000
 | KEEP latency_seconds`,
