@@ -274,4 +274,38 @@ describe('projectSpec', () => {
   it('leaves out x-ms-paths when no operation is under it', () => {
     expect(projectSpec(document, operations)).not.toHaveProperty(['x-ms-paths']);
   });
+
+  it('keeps the routing extensions of converted Smithy models', () => {
+    const bucket = { default: 'bucket', 'x-path-parameter': true };
+    const s3 = {
+      openapi: '3.0.3',
+      info: { title: 'S3', version: '1' },
+      servers: [
+        { url: 'https://{Bucket}.s3.amazonaws.com', variables: { Bucket: bucket } },
+        { url: 'https://s3.amazonaws.com' },
+      ],
+      paths: {},
+      'x-ms-paths': {
+        '/?x-id=ListBuckets': {
+          get: {
+            'x-optional-fixed-query': ['x-id'],
+            responses: { '200': ok({ type: 'object' }) },
+          },
+        },
+      },
+    };
+
+    const projected = projectSpec(s3, [{ method: 'get', path: '/?x-id=ListBuckets' }]);
+
+    expect(projected.servers).toEqual(s3.servers);
+    expect(projected['x-ms-paths']).toEqual({
+      '/?x-id=ListBuckets': {
+        get: {
+          'x-optional-fixed-query': ['x-id'],
+          responses: { '200': okProjected({ type: 'object' }) },
+        },
+      },
+    });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
 });
