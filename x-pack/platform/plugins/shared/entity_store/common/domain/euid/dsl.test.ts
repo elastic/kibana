@@ -737,10 +737,11 @@ describe('getEuidDslFilterBasedOnEntityRecord', () => {
 
     it('aws IAM record: does not guard user.entity.id, which the record does not store', () => {
       const roleArn = 'arn:aws:iam::123456789012:role/Admin';
+      // A multi-valued field resolves to its lowest value, so the role ARN sorts first here.
       const result = getEuidDslFilterBasedOnEntityRecord(getBuiltInEntityDefinition('user'), {
         entity: { id: `user:${roleArn}@aws`, namespace: 'aws' },
         cloud: { provider: 'aws' },
-        user: { id: [roleArn, 'AROAEXAMPLE:session-1'], name: 'Admin' },
+        user: { id: [roleArn, 'session-1'], name: 'Admin' },
       });
 
       expect(result?.bool?.filter).toEqual(

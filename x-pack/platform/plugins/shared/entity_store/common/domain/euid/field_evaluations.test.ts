@@ -41,20 +41,29 @@ describe('getFieldValue', () => {
     expect(getFieldValue({ event: { module: '' } }, 'event.module')).toBeUndefined();
   });
 
-  it('should return first element as string when value is array', () => {
+  it('should return the lowest non-empty element as string when value is array', () => {
     expect(getFieldValue({ foo: ['a', 'b'] }, 'foo')).toBe('a');
+    expect(getFieldValue({ foo: ['b', 'a'] }, 'foo')).toBe('a');
+    expect(getFieldValue({ foo: ['', 'b'] }, 'foo')).toBe('b');
+    expect(getFieldValue({ foo: [null, 'b'] }, 'foo')).toBe('b');
     expect(getFieldValue({ event: { module: ['okta'] } }, 'event.module')).toBe('okta');
   });
 
-  it('should return undefined for empty array or array with null/undefined first element', () => {
+  it('should return undefined for empty array or array with only null/undefined/empty elements', () => {
     expect(getFieldValue({ foo: [] }, 'foo')).toBeUndefined();
     expect(getFieldValue({ foo: [null] }, 'foo')).toBeUndefined();
     expect(getFieldValue({ foo: [undefined] }, 'foo')).toBeUndefined();
+    expect(getFieldValue({ foo: [''] }, 'foo')).toBeUndefined();
   });
 
-  it('should return undefined when value is an object', () => {
-    expect(getFieldValue({ foo: {} }, 'foo')).toBeUndefined();
-    expect(getFieldValue({ foo: { bar: 1 } }, 'foo')).toBeUndefined();
+  it('should skip nested objects inside an array', () => {
+    expect(getFieldValue({ foo: [{ bar: 1 }] }, 'foo')).toBeUndefined();
+    expect(getFieldValue({ foo: [{ bar: 1 }, 'b'] }, 'foo')).toBe('b');
+  });
+
+  it('should throw when value is an object', () => {
+    expect(() => getFieldValue({ foo: {} }, 'foo')).toThrow('Field foo is an object');
+    expect(() => getFieldValue({ foo: { bar: 1 } }, 'foo')).toThrow('Field foo is an object');
   });
 
   it('should convert number and boolean to string', () => {
@@ -131,15 +140,20 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
-  it('should use first element of event.module list for matching and fallback', () => {
+  it('should use the lowest element of event.module list for matching and fallback', () => {
     expect(applyFieldEvaluations({ event: { module: ['okta'] } }, userEvaluations)).toEqual({
       'entity.namespace': 'okta',
     });
     expect(
       applyFieldEvaluations({ event: { module: ['other', 'okta'] } }, userEvaluations)
     ).toEqual({
-      'entity.namespace': 'other',
+      'entity.namespace': 'okta',
     });
+    expect(applyFieldEvaluations({ event: { module: ['other', 'abc'] } }, userEvaluations)).toEqual(
+      {
+        'entity.namespace': 'abc',
+      }
+    );
     expect(
       applyFieldEvaluations(
         { event: { module: ['entityanalytics_entra_id', 'azure'] } },
@@ -150,9 +164,9 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
-  it('should use first element as fallback when event.module is a list and no clause matches', () => {
+  it('should use the lowest element as fallback when event.module is a list and no clause matches', () => {
     expect(
-      applyFieldEvaluations({ event: { module: ['custom_a', 'custom_b'] } }, userEvaluations)
+      applyFieldEvaluations({ event: { module: ['custom_b', 'custom_a'] } }, userEvaluations)
     ).toEqual({
       'entity.namespace': 'custom_a',
     });
