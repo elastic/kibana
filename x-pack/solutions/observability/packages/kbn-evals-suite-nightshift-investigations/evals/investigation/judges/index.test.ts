@@ -284,6 +284,20 @@ describe('ORCA scores', () => {
     expect(result).toMatchObject({ score: 1, label: 'hallucinated' });
   });
 
+  it('does not score a hallucination when only named_flags holds the true flag', async () => {
+    const { deps } = judgeReturning({
+      named_flags: ['productCatalogFailure'],
+      named_causes: ['The productCatalogFailure flag'],
+      reasoning: 'The report words the flag its own way.',
+    });
+    const result = await evaluator(deps, ORCA_HALLUCINATION_EVALUATOR).evaluate({
+      ...example,
+      metadata: { case_id: 'checkout', plausible_flags: ['productCatalogFailure'] },
+      output: output(),
+    });
+    expect(result).toMatchObject({ score: 0, label: 'pass' });
+  });
+
   it('keeps accuracy and hallucination n/a for a no-incident control with an empty flag set', async () => {
     const { deps, prompt } = judgeReturning({
       named_flags: ['cartFailure'],

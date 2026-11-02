@@ -69,7 +69,7 @@ const workflow = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml) as {
 describe('Nightshift investigation workflow', () => {
   it('records the investigation through the agent tools rather than persist steps', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.id).toBe('system-nightshift-investigation');
-    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(5);
+    expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.version).toBe(6);
     expect(investigation.name).toBe('Nightshift Investigation');
     expect(investigation.steps.map((step) => step.name)).toEqual([
       'resolve_model',
@@ -308,6 +308,18 @@ describe('Nightshift investigation workflow', () => {
   it('knows nothing about Slack', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
   });
+});
+
+it('accepts the telemetry cutoff the start API forwards and still rejects unknown inputs', () => {
+  const validator = buildFieldsZodValidator(
+    getInputsFromDefinition(WorkflowSchema.parse(investigation))
+  );
+  const inputs = { message: 'Why did checkout fail?' };
+
+  expect(
+    validator.safeParse({ ...inputs, telemetry_not_after: '2026-04-19T16:27:00.000Z' }).success
+  ).toBe(true);
+  expect(validator.safeParse({ ...inputs, not_declared: 'x' }).success).toBe(false);
 });
 
 it('accepts a telemetry target independently of the model and keeps the single investigator', () => {

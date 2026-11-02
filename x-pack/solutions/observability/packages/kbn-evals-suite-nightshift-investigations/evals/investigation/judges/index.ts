@@ -627,13 +627,11 @@ interface OrcaFlagsExtraction {
  */
 const createOrcaFlagsExtractor = (deps: JudgeDeps) => {
   const extractions = new WeakMap<InvestigationTaskReport, Promise<OrcaFlagsExtraction>>();
-  return async (
+  return (
     flags: string[],
     expected: InvestigationExample['output'],
-    report: InvestigationTaskReport,
-    field: 'named_flags' | 'named_causes',
-    missingList: string
-  ): Promise<{ named: string[]; reasoning: string }> => {
+    report: InvestigationTaskReport
+  ): Promise<OrcaFlagsExtraction> => {
     const extraction =
       extractions.get(report) ??
       invokeJudge<OrcaFlagsExtraction>(deps, ORCA_FLAGS_JUDGE, OrcaFlagsJudgePrompt, {
@@ -642,10 +640,7 @@ const createOrcaFlagsExtractor = (deps: JudgeDeps) => {
         answer: composeAnswerText(report),
       });
     extractions.set(report, extraction);
-    const result = await extraction;
-    const named = stringList(result[field]);
-    if (!named) throw new Error(missingList);
-    return { named, reasoning: result.reasoning };
+    return extraction;
   };
 };
 
@@ -675,13 +670,9 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
             explanation: 'The report names none of the plausible flags.',
           };
         }
-        const { named, reasoning } = await extractFlags(
-          flags,
-          expected,
-          report,
-          'named_flags',
-          'ORCA accuracy judge returned no flag list'
-        );
+        const { named_flags: namedFlags, reasoning } = await extractFlags(flags, expected, report);
+        const named = stringList(namedFlags);
+        if (!named) throw new Error('ORCA accuracy judge returned no flag list');
         const score = scoreOrcaRcaAccuracy({ plausibleFlags: flags, namedFlags: named });
         return {
           score,
@@ -716,19 +707,22 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
         if (!reportHasFindings(report)) {
           return { score: 0, label: 'pass', explanation: 'The report names no cause.' };
         }
-        const { named, reasoning } = await extractFlags(
-          flags,
-          expected,
-          report,
-          'named_causes',
-          'ORCA hallucination judge returned no cause list'
-        );
-        const score = scoreOrcaHallucination({ plausibleFlags: flags, namedCauses: named });
+        const extraction = await extractFlags(flags, expected, report);
+        const namedCauses = stringList(extraction.named_causes);
+        const namedFlags = stringList(extraction.named_flags);
+        if (!namedCauses || !namedFlags) {
+          throw new Error('ORCA hallucination judge returned no cause list');
+        }
+        const score = scoreOrcaHallucination({
+          plausibleFlags: flags,
+          // `named_causes` keeps the report's wording, so a flag may match only in `named_flags`.
+          namedCauses: [...namedCauses, ...namedFlags],
+        });
         return {
           score,
           label: score === 1 ? 'hallucinated' : 'pass',
-          explanation: reasoning,
-          metadata: { plausible_flags: flags, named_causes: named },
+          explanation: extraction.reasoning,
+          metadata: { plausible_flags: flags, named_causes: namedCauses },
         };
       },
     },

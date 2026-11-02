@@ -422,6 +422,11 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
+            telemetryConnectorIds: new Set(
+              getTelemetryTargets(config.sandbox).flatMap(({ connectorId }) =>
+                connectorId ? [connectorId] : []
+              )
+            ),
             readTelemetryNotAfter: async (request, conversationId) => {
               const agentBuilderStart = this.agentBuilder;
               if (!agentBuilderStart) return undefined;

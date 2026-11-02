@@ -41,6 +41,7 @@ METADATA_PATH = re.compile(
     r"|^(/[^/]+)?/_field_caps$"
     r"|^(/[^/]+)?/_mapping(/.*)?$"
 )
+ESQL_STRING = re.compile(r'"""[\\s\\S]*?"""|"(?:[^"\\\\]|\\\\.)*"')
 # Each of these selects documents without going through the top-level query.
 UNBOUNDED_CLAUSES = ("knn", "retriever", "runtime_mappings")
 
@@ -54,38 +55,25 @@ def split_path(path):
     return unquote(pathname).rstrip("/") or "/", query_string
 
 
-def end_of_from(query):
-    match = re.search(r"\\bFROM\\b", query, re.IGNORECASE)
-    if not match:
-        return None
-    index = match.end()
-    length = len(query)
-    while index < length:
-        if query.startswith('"""', index):
-            close = query.find('"""', index + 3)
-            if close < 0:
-                return None
-            index = close + 3
-            continue
-        char = query[index]
-        if char in ('"', "'"):
-            close = query.find(char, index + 1)
-            if close < 0:
-                return None
-            index = close + 1
-            continue
-        if char == "|":
-            return index
-        index += 1
-    return length
+def blank_strings(query):
+    return ESQL_STRING.sub(lambda match: " " * len(match.group(0)), query)
 
 
 def bound_esql(query):
     if not isinstance(query, str):
         raise Refused("an ES|QL read needs a query string")
-    end = end_of_from(query)
-    if end is None:
-        raise Refused("an ES|QL read must start from a FROM command")
+    code = blank_strings(query)
+    if '"' in code:
+        raise Refused("the ES|QL query has an unterminated string")
+    if "//" in code or "/*" in code:
+        raise Refused("the cutoff cannot be added to an ES|QL query with comments; remove them")
+    if not re.match(r"\\s*FROM\\b", code, re.IGNORECASE):
+        raise Refused("an ES|QL read must start with a FROM command")
+    end = code.find("|")
+    if end < 0:
+        end = len(query)
+    if "(" in code[:end]:
+        raise Refused("the cutoff cannot be added to an ES|QL subquery")
     predicate = '| WHERE @timestamp <= "%s"' % NOT_AFTER
     tail = query[end:]
     if tail.startswith("|"):

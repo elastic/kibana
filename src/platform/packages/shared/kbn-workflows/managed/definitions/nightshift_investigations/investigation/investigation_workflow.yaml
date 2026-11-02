@@ -78,6 +78,10 @@ triggers:
           type: string
           maxLength: 64
           description: Named sandbox telemetry target; none disables telemetry for this investigation.
+        telemetry_not_after:
+          type: string
+          maxLength: 40
+          description: Latest inclusive @timestamp this investigation's sandbox telemetry queries may return.
         notificationDestinations:
           type: array
           maxItems: 5

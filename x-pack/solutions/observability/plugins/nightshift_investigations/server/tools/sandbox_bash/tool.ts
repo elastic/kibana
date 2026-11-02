@@ -100,12 +100,15 @@ export const createSandboxBashTool = ({
   getSandboxStart,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
+  telemetryConnectorIds,
   readTelemetryNotAfter,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  /** Connectors the telemetry cutoff applies to. Any other connector is not Elasticsearch telemetry. */
+  telemetryConnectorIds?: ReadonlySet<string>;
   /**
    * Latest inclusive `@timestamp` this conversation's telemetry queries may return. Unset for
    * investigations that do not bound telemetry. A thrown read does not run the command: the
@@ -211,7 +214,12 @@ export const createSandboxBashTool = ({
       };
 
       let commandToRun = command;
-      if (readTelemetryNotAfter && mergedEnv.CONNECTOR_CONFIG_URL) {
+      if (
+        readTelemetryNotAfter &&
+        connector_id &&
+        telemetryConnectorIds?.has(connector_id) &&
+        mergedEnv.CONNECTOR_CONFIG_URL
+      ) {
         let notAfter: string | undefined;
         try {
           notAfter = await readTelemetryNotAfter(context.request, rawConversationId);

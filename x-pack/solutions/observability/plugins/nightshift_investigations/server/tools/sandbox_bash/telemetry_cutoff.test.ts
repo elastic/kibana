@@ -175,6 +175,27 @@ describe('telemetry cutoff proxy', () => {
       expect(query.indexOf('@timestamp <= ')).toBeLessThan(query.indexOf('@timestamp > '));
     }));
 
+  it.each([
+    ['FROM logs-* | WHERE url.original == "http://a/b" | LIMIT 1', 'FROM logs-*'],
+    ['FROM "logs-*" | WHERE message == "a | b"', 'FROM "logs-*"'],
+    ['FROM logs-* | WHERE message RLIKE """a|b // c"""', 'FROM logs-*'],
+    ['from logs-* | WHERE message == "say \\"hi\\" | now"', 'from logs-*'],
+    ['FROM logs-* | WHERE message == "say \\" // hi"', 'FROM logs-*'],
+  ])('adds the bound right after FROM in %s', (query, source) =>
+    withUpstream(async (upstream) => {
+      await enforceTelemetryCutoff({
+        upstreamUrl: upstream.url,
+        path: '/_query',
+        body: JSON.stringify({ query }),
+      });
+      const forwarded: string = JSON.parse(upstream.seen[0]).query;
+      expect(forwarded.startsWith(source)).toBe(true);
+      expect(forwarded.slice(source.length).trimStart().startsWith('| WHERE @timestamp <= ')).toBe(
+        true
+      );
+    })
+  );
+
   it.each(['2026-04-19T16:00:00', '2026-04-19', 'now-1h'])(
     'bounds a query whose lower bound is %s',
     (lowerBound) =>
@@ -288,6 +309,12 @@ describe('telemetry cutoff proxy', () => {
     ['a body that is not an object', '/logs-*/_search', '[]'],
     ['a query that is not an object', '/logs-*/_search', '{"query":"x"}'],
     ['an ES|QL query without FROM', '/_query', '{"query":"ROW a = 1"}'],
+    ['a FROM after the first command', '/_query', '{"query":"ROW a = 1, from = 2 | LIMIT 1"}'],
+    ['an ES|QL line comment', '/_query', '{"query":"FROM logs-* // telemetry"}'],
+    ['an ES|QL block comment', '/_query', '{"query":"FROM logs-* /* | a */ | LIMIT 1"}'],
+    ['a comment before FROM', '/_query', '{"query":"// FROM a | b\\nFROM logs-*"}'],
+    ['an ES|QL subquery', '/_query', '{"query":"FROM a, (FROM b | LIMIT 1) | LIMIT 1"}'],
+    ['an unterminated ES|QL string', '/_query', '{"query":"FROM \\"logs-* | LIMIT 1"}'],
     ['an ES|QL body without a query', '/_query', '{}'],
   ])('refuses %s without reading upstream', (_name, path, body) =>
     withUpstream(async (upstream) => {

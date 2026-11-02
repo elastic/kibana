@@ -48,6 +48,7 @@ const setup = ({
     getSandboxStart: () => sandboxStart,
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
+    telemetryConnectorIds: new Set(['nightshift-evals-telemetry']),
     readTelemetryNotAfter,
     logger,
   });
@@ -335,6 +336,21 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     await run({ connector_id: 'github', command: 'curl "$CONNECTOR_CONFIG_APIURL"' });
 
     expect(runCommand.mock.calls[0][0].command).toBe('curl "$CONNECTOR_CONFIG_APIURL"');
+  });
+
+  it('does not proxy another connector that has a URL', async () => {
+    const readTelemetryNotAfter = jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z');
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials: telemetryCredentials,
+      readTelemetryNotAfter,
+    });
+
+    await run({ connector_id: 'generic-http', command: 'curl "$CONNECTOR_CONFIG_URL/api/items"' });
+
+    const { command, env } = runCommand.mock.calls[0][0];
+    expect(command).toBe('curl "$CONNECTOR_CONFIG_URL/api/items"');
+    expect(env.CONNECTOR_CONFIG_URL).toBe('https://telemetry.example');
+    expect(readTelemetryNotAfter).not.toHaveBeenCalled();
   });
 
   it('runs the command through the cutoff proxy and keeps the cluster URL out of the command', async () => {
