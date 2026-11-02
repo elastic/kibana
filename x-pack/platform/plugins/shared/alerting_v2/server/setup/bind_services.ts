@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { once } from 'lodash';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { OnStart, Logger, PluginSetup, PluginStart } from '@kbn/core-di';
 import {
@@ -59,7 +58,8 @@ import {
   EsServiceScopedSpaceRoutingToken,
 } from '../lib/services/es_service/tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
-import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
+import { EventLoggerToken, EventLogServiceToken } from '../lib/services/event_log_service/tokens';
+import { ACTION_POLICY_EVENT_PROVIDER } from '../lib/dispatcher/steps/constants';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { SettingsService } from '../lib/services/settings_service/settings_service';
 import {
@@ -197,6 +197,12 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
+  bind(EventLoggerToken)
+    .toResolvedValue(
+      (eventLog) => eventLog.getLogger({ event: { provider: ACTION_POLICY_EVENT_PROVIDER } }),
+      [PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')]
+    )
+    .inSingletonScope();
   bind(WorkflowService).toSelf().inSingletonScope();
   bind(WorkflowServiceToken).toService(WorkflowService);
   bind(LicenseService).toSelf().inSingletonScope();
@@ -235,10 +241,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   // promise resolves on the plugin's `OnStart` hook, at which point the injection
   // service is guaranteed to be bound, so task runs wait until the plugin starts.
   const injectionPromise = new Promise<CoreDiServiceStart>((resolve) => {
-    bind(OnStart).toConstantValue(
-      once((container) => {
-        resolve(container.get(CoreStart('injection')));
-      })
+    bind(OnStart).toResolvedValue(
+      (injection) => () => resolve(injection),
+      [CoreStart('injection')]
     );
   });
 
