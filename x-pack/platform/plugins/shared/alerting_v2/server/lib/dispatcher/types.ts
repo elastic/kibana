@@ -146,10 +146,9 @@ export interface ActionGroup {
   rules: Record<RuleId, ActionPolicyWorkflowPayloadRule>;
 }
 
-export interface ActionPolicyWorkflowPayloadRule {
-  name: string;
-  grouping_fields: string[];
-}
+export type ActionPolicyWorkflowPayloadRule = Pick<Rule, 'name'> & {
+  grouping_fields: Rule['groupingFields'];
+};
 
 export type ActionPolicyWorkflowPayloadAlert = Alert;
 

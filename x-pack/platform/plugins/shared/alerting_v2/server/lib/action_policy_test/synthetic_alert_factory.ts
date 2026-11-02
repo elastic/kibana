@@ -23,6 +23,10 @@ const MAX_PLACEHOLDER_RULES = 3;
 
 const DATA_FIELD_PREFIX = 'data.';
 
+/** Path of a `data.*` policy grouping field under `alert.data`, or `''` for any other field. */
+const toDataPath = (field: string): string =>
+  field.startsWith(DATA_FIELD_PREFIX) ? field.slice(DATA_FIELD_PREFIX.length) : '';
+
 export interface SyntheticScenarioParams {
   policy: ActionPolicy;
   kibanaBaseUrl: string;
@@ -52,9 +56,7 @@ const shareGroupingValues = (alerts: Alert[], policy: ActionPolicy, suffix: stri
 
   const [firstAlert] = alerts;
   for (const field of policy.grouping.fields) {
-    const dataPath = field.startsWith(DATA_FIELD_PREFIX)
-      ? field.slice(DATA_FIELD_PREFIX.length)
-      : '';
+    const dataPath = toDataPath(field);
     const value =
       get(firstAlert, field) ?? (dataPath ? `${TEST_ID_PREFIX}${dataPath}-${suffix}` : undefined);
     if (value !== undefined) {
@@ -69,9 +71,7 @@ const shareGroupingValues = (alerts: Alert[], policy: ActionPolicy, suffix: stri
  */
 const toRuleGroupingFields = (policy: ActionPolicy): string[] =>
   policy.grouping.mode === 'per_field'
-    ? policy.grouping.fields
-        .filter((field) => field.startsWith(DATA_FIELD_PREFIX))
-        .map((field) => field.slice(DATA_FIELD_PREFIX.length))
+    ? policy.grouping.fields.map(toDataPath).filter((dataPath) => dataPath !== '')
     : [];
 
 /**
