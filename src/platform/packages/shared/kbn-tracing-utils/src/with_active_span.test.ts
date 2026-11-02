@@ -13,7 +13,7 @@ import { of, throwError } from 'rxjs';
 import type { WithActiveSpan } from './with_active_span';
 import { withActiveSpan } from './with_active_span';
 import { last } from 'lodash';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import { core, tracing } from '@elastic/opentelemetry-node/sdk';
 import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
 
 const createMockSpan = () => {
@@ -64,6 +64,19 @@ describe('withActiveSpan', () => {
   it('returns the callback result unchanged when no tracer is provided', () => {
     const result = withActiveSpan('no-tracer', () => 123);
     expect(result).toBe(123);
+  });
+
+  it('skips the span when tracing is suppressed with the OpenTelemetry SDK helper', () => {
+    const span = createMockSpan();
+    const tracer = createMockTracer(span);
+    const result = withActiveSpan(
+      'name',
+      { tracer },
+      core.suppressTracing(context.active()),
+      () => 'value'
+    );
+    expect(result).toBe('value');
+    expect(tracer.startActiveSpan).not.toHaveBeenCalled();
   });
 
   it('handles synchronous results – sets OK status and ends span', () => {
