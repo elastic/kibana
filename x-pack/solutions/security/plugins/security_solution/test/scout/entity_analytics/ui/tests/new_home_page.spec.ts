@@ -26,12 +26,20 @@ const NEW_HOME_PAGE_FLAG = 'securitySolution.useNewEntityAnalyticsPage';
 const NEW_RISKY_HOST = 'scout-new-risky-host';
 // No risk score, so not on the tile.
 const OTHER_HOST = 'scout-other-host';
+// Narrows the grid to this suite's hosts, so other entities on a shared deployment can't push them
+// out of the rendered rows.
+const SEEDED_HOSTS_QUERY = `entity.name: "${NEW_RISKY_HOST}" or entity.name: "${OTHER_HOST}"`;
 
 test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic] }, () => {
+  // Another suite may already run the host engine: then this suite only removes its own entities.
+  let installedHostEngine = false;
+
   test.beforeAll(async ({ apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': { [NEW_HOME_PAGE_FLAG]: true },
     });
+    const { engines } = await apiServices.entityAnalytics.getEntityStoreStatus();
+    installedHostEngine = !engines.some(({ type }) => type === 'host');
     await apiServices.entityAnalytics.installEntityStoreV2(['host']);
     await apiServices.entityAnalytics.indexEntityStoreEntry(
       `host:${NEW_RISKY_HOST}`,
@@ -44,10 +52,20 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsT1Analyst();
     await pageObjects.entityAnalyticsHomePage.goto();
+    await pageObjects.queryBar.setQuery(SEEDED_HOSTS_QUERY);
+    await pageObjects.queryBar.submitQuery();
   });
 
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.entityAnalytics.uninstallEntityStoreV2(['host']);
+  test.afterAll(async ({ apiServices, esClient }) => {
+    if (installedHostEngine) {
+      await apiServices.entityAnalytics.uninstallEntityStoreV2(['host']);
+    } else {
+      await esClient.deleteByQuery({
+        index: 'entities-latest-default',
+        query: { terms: { 'entity.id': [`host:${NEW_RISKY_HOST}`, `host:${OTHER_HOST}`] } },
+        refresh: true,
+      });
+    }
     await apiServices.core.settings({
       'feature_flags.overrides': { [NEW_HOME_PAGE_FLAG]: null },
     });
