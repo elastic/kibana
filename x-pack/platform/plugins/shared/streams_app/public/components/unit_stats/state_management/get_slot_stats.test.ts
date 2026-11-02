@@ -88,14 +88,14 @@ describe('getSlotStats', () => {
       });
     });
 
-    it('keeps a stale value as it is', () => {
+    it('keeps a stale value as it is, and reports it as stale', () => {
       const stale: StatsEntry<ProcessorStatsView> = {
         status: 'stale',
         stats: { instances: [instance(3700, 0.008)] },
       };
 
       expect(getSlotStats(SLOT, [stale])).toEqual({
-        status: 'ready',
+        status: 'stale',
         eventsRate: 3700,
         durationAverage: 0.008,
       });

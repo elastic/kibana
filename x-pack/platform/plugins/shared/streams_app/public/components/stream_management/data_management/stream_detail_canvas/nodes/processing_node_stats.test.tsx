@@ -14,6 +14,7 @@ import { ProcessingNodeStats } from './processing_node_stats';
 
 const mockUseSlotStats = jest.fn();
 const mockUnit: { current: Unit } = { current: undefined as unknown as Unit };
+const mockStagedUnit: { current: Unit } = { current: undefined as unknown as Unit };
 
 jest.mock('../../../../unit_stats/state_management/use_stats_manager', () => ({
   useSlotStats: (args: unknown) => mockUseSlotStats(args),
@@ -21,6 +22,7 @@ jest.mock('../../../../unit_stats/state_management/use_stats_manager', () => ({
 
 jest.mock('../state_management', () => ({
   useCanvasPersistedUnit: () => mockUnit.current,
+  useCanvasUnitDefinition: () => mockStagedUnit.current,
 }));
 
 const UNIT: Unit = {
@@ -55,6 +57,7 @@ const isShown = (testId: string) => screen.queryByTestId(testId) !== null;
 beforeEach(() => {
   mockUseSlotStats.mockReset();
   mockUnit.current = UNIT;
+  mockStagedUnit.current = UNIT;
 });
 
 describe('ProcessingNodeStats', () => {
@@ -76,6 +79,54 @@ describe('ProcessingNodeStats', () => {
       expect(mockUseSlotStats).toHaveBeenCalledWith({ ref: ROUTE_SLOT, processorIds: ['tag-a'] });
     });
 
+    it('passes no processors for a route that unsaved edits moved to another position', () => {
+      // Another route was removed ahead of this one, so it sits at position 0 and the saved unit
+      // has a different route there.
+      mockUnit.current = {
+        ...UNIT,
+        unit: {
+          ...UNIT.unit,
+          pipelines: [
+            {
+              id: 'main',
+              supported_telemetry: ['logs'],
+              config: [
+                {
+                  name: 'routes',
+                  value: [
+                    { when: 'prod', processors: ['tag-prod'], destinations: ['out-prod'] },
+                    { when: 'dev', processors: ['tag-dev'], destinations: ['out-dev'] },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+      mockStagedUnit.current = {
+        ...mockUnit.current,
+        unit: {
+          ...mockUnit.current.unit,
+          pipelines: [
+            {
+              id: 'main',
+              supported_telemetry: ['logs'],
+              config: [
+                {
+                  name: 'routes',
+                  value: [{ when: 'dev', processors: ['tag-dev'], destinations: ['out-dev'] }],
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      renderRow(ROUTE_SLOT, UNKNOWN);
+
+      expect(mockUseSlotStats).toHaveBeenCalledWith({ ref: ROUTE_SLOT, processorIds: [] });
+    });
+
     it('passes no processors for a slot that is not in the saved unit', () => {
       renderRow({ kind: 'pipeline', pipelineId: 'missing' }, UNKNOWN);
 
@@ -92,6 +143,20 @@ describe('ProcessingNodeStats', () => {
 
       expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
       expect(text('streamsCanvasProcessingNodeDuration')).toBe('8ms');
+    });
+
+    it('shows the last numbers with a stale mark when a refresh has failed', () => {
+      renderRow(ROUTE_SLOT, { status: 'stale', eventsRate: 3700, durationAverage: 0.008 });
+
+      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasProcessingNodeDuration')).toBe('8ms');
+      expect(isShown('streamsCanvasProcessingNodeStale')).toBe(true);
+    });
+
+    it('shows no stale mark for numbers that are current', () => {
+      renderRow(ROUTE_SLOT, { status: 'ready', eventsRate: 3700, durationAverage: 0.008 });
+
+      expect(isShown('streamsCanvasProcessingNodeStale')).toBe(false);
     });
 
     it('shows a dash for a number that is missing, and never a zero', () => {

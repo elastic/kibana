@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { formatEventsRate } from '../../../../../services/unit_stats_client/format_stats';
 import { useDestinationStats } from '../../../../unit_stats/state_management/use_stats_manager';
 import { getDestinationFlowStatus } from './destination_stats_status';
+import { StaleStatsIcon } from './stale_stats_icon';
 
 interface DestinationNodeStatsProps {
   destinationId: string;
@@ -62,6 +63,9 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
             defaultMessage: 'Data not flowing in',
           })}
         </EuiHealth>
+      )}
+      {entry?.status === 'stale' && status !== 'unknown' && (
+        <StaleStatsIcon dataTestSubj="streamsCanvasDestinationStale" />
       )}
       {typeof indexCount === 'number' && indexCount > 0 && (
         <EuiText

@@ -16,9 +16,10 @@ import type { StatsEntry } from './types';
 export interface SlotStats {
   /**
    * `unknown` when there is nothing to show yet: no processors, a result still to arrive, or a
-   * failure. Once every processor has a result it is `ready`, and a missing value is `null`.
+   * failure. Once every processor has a result it is `ready`, and a missing value is `null`. It is
+   * `stale` when the numbers are shown but a processor's last refresh failed.
    */
-  status: 'unknown' | 'ready';
+  status: 'unknown' | 'ready' | 'stale';
   /** Records per second that reach the slot. Nothing is known about what leaves it. */
   eventsRate: number | null;
   /** Seconds that a record spends in the slot, on average. */
@@ -52,7 +53,7 @@ export const getSlotStats = (
   const durations = instances.map((instance) => instance?.durationAverage ?? null);
 
   return {
-    status: 'ready',
+    status: entries.some((entry) => entry?.status === 'stale') ? 'stale' : 'ready',
     eventsRate: instances[0]?.eventsRate ?? null,
     durationAverage: durations.every(isNumber)
       ? durations.reduce((total, duration) => total + duration, 0)

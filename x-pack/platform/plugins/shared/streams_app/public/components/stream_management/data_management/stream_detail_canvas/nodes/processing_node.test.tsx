@@ -38,6 +38,7 @@ const mockUnit: Unit = {
 
 jest.mock('../state_management', () => ({
   useCanvasPersistedUnit: () => mockUnit,
+  useCanvasUnitDefinition: () => mockUnit,
 }));
 
 const PIPELINE_NODE_DATA: ProcessingNodeData = {
@@ -45,6 +46,7 @@ const PIPELINE_NODE_DATA: ProcessingNodeData = {
   title: 'Parse and enrich',
   processorCount: 2,
   editable: true,
+  output: 'connect',
 };
 
 const ROUTE_NODE_DATA: ProcessingNodeData = {
@@ -52,6 +54,7 @@ const ROUTE_NODE_DATA: ProcessingNodeData = {
   title: 'Tag nginx',
   processorCount: 1,
   editable: true,
+  output: 'reconnect',
 };
 
 const renderNode = (data: ProcessingNodeData) =>

@@ -7,14 +7,16 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { getSlotProcessorIds, type ProcessingNodeRef } from '../../../../../services/unit_graph';
+import { isSlotSaved } from '../../../../../services/unit_processing';
 import {
   formatDuration,
   formatEventsRate,
 } from '../../../../../services/unit_stats_client/format_stats';
 import { useSlotStats } from '../../../../unit_stats/state_management/use_stats_manager';
-import { useCanvasPersistedUnit } from '../state_management';
+import { useCanvasPersistedUnit, useCanvasUnitDefinition } from '../state_management';
+import { StaleStatsIcon } from './stale_stats_icon';
 
 interface ProcessingNodeStatsProps {
   slot: ProcessingNodeRef;
@@ -23,14 +25,19 @@ interface ProcessingNodeStatsProps {
 /**
  * The stats of a processing node, on two lines: the records per second that reach the slot, and
  * the time a record spends in it. It is its own component, so a stats update re-renders only
- * this part. It reads the saved unit, because the stats describe what is deployed. Until the
- * first result arrives it keeps its space and shows nothing, so a load or a failure never looks
- * like a measured zero.
+ * this part. It reads the saved unit, because the stats describe what is deployed. A route that
+ * unsaved edits moved to another position shows nothing until the unit is saved, because the
+ * saved unit has another route there. Until the first result arrives it keeps its space and shows
+ * nothing, so a load or a failure never looks like a measured zero.
  */
 export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
   const { euiTheme } = useEuiTheme();
-  const unit = useCanvasPersistedUnit();
-  const processorIds = useMemo(() => getSlotProcessorIds(unit, slot), [unit, slot]);
+  const savedUnit = useCanvasPersistedUnit();
+  const stagedUnit = useCanvasUnitDefinition();
+  const processorIds = useMemo(
+    () => (isSlotSaved(savedUnit, stagedUnit, slot) ? getSlotProcessorIds(savedUnit, slot) : []),
+    [savedUnit, stagedUnit, slot]
+  );
   const stats = useSlotStats({ ref: slot, processorIds });
 
   return (
@@ -43,11 +50,20 @@ export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
         min-height: ${euiTheme.size.xxl};
       `}
     >
-      {stats.status === 'ready' && (
+      {stats.status !== 'unknown' && (
         <>
-          <EuiText size="xs" data-test-subj="streamsCanvasProcessingNodeRate">
-            {formatEventsRate(stats.eventsRate)}
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" data-test-subj="streamsCanvasProcessingNodeRate">
+                {formatEventsRate(stats.eventsRate)}
+              </EuiText>
+            </EuiFlexItem>
+            {stats.status === 'stale' && (
+              <EuiFlexItem grow={false}>
+                <StaleStatsIcon dataTestSubj="streamsCanvasProcessingNodeStale" />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
           <EuiText size="xs" color="subdued" data-test-subj="streamsCanvasProcessingNodeDuration">
             {formatDuration(stats.durationAverage)}
           </EuiText>

@@ -56,11 +56,18 @@ describe('DestinationNodeStats', () => {
       expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
     });
 
-    it('keeps showing Live while a refresh has failed, and the value is stale', () => {
+    it('keeps showing Live while a refresh has failed, and marks the value as stale', () => {
       renderFooter({ status: 'stale', stats: statsWithRate(3700) });
 
       expect(text('streamsCanvasDestinationLive')).toBe('Live');
       expect(text('streamsCanvasDestinationRate')).toBe('3.7k eps');
+      expect(isShown('streamsCanvasDestinationStale')).toBe(true);
+    });
+
+    it('shows no stale mark for a value that is current', () => {
+      renderFooter({ status: 'ready', stats: statsWithRate(3700) });
+
+      expect(isShown('streamsCanvasDestinationStale')).toBe(false);
     });
   });
 
