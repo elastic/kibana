@@ -223,6 +223,7 @@ export const configSchema = schema.object({
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
+  multiTenancy: schema.maybe(schema.object({ tenantsFile: schema.string() })),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -566,6 +567,11 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly dnsCacheTtl: Duration;
 
+  /**
+   * Routes request-scoped clients to the project named by the `x-elastic-project-id` header.
+   */
+  public readonly multiTenancy?: ElasticsearchConfigType['multiTenancy'];
+
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -596,6 +602,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
     this.dnsCacheTtl = rawConfig.dnsCacheTtl;
     this.publicBaseUrl = rawConfig.publicBaseUrl;
+    this.multiTenancy = rawConfig.multiTenancy;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

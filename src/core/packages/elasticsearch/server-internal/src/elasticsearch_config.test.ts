@@ -48,6 +48,7 @@ test.skip('set correct defaults', () => {
       "maxIdleSockets": 256,
       "maxResponseSize": undefined,
       "maxSockets": 800,
+      "multiTenancy": undefined,
       "password": undefined,
       "publicBaseUrl": undefined,
       "requestHeadersWhitelist": Array [
@@ -95,6 +96,7 @@ test('set correct defaults (serverless)', () => {
       "maxIdleSockets": 256,
       "maxResponseSize": undefined,
       "maxSockets": 800,
+      "multiTenancy": undefined,
       "password": undefined,
       "publicBaseUrl": undefined,
       "requestHeadersWhitelist": Array [

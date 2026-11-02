@@ -23,6 +23,7 @@ import type {
   UnauthorizedErrorHandler,
   ElasticsearchClientConfig,
   ElasticsearchCapabilities,
+  ScopeableRequest,
 } from '@kbn/core-elasticsearch-server';
 import {
   ClusterClient,
@@ -50,6 +51,14 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
+import { readTenantsFile, type TenantConfig } from './multi_tenancy/tenants_file';
+
+const PROJECT_ID_HEADER = 'x-elastic-project-id';
+
+const getProjectId = (request: ScopeableRequest): string | undefined => {
+  const value = request.headers?.[PROJECT_ID_HEADER];
+  return Array.isArray(value) ? value[0] : value;
+};
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -78,6 +87,8 @@ export class ElasticsearchService
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
   private security?: InternalSecurityServiceSetup;
+  private tenants?: Map<string, TenantConfig>;
+  private readonly tenantClients = new Map<string, ClusterClient>();
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -128,6 +139,20 @@ export class ElasticsearchService
     this.executionContextClient = deps.executionContext;
     this.security = deps.security;
     this.client = this.createClusterClient('data', config);
+
+    if (config.multiTenancy) {
+      const tenants = new Map(
+        Object.entries(await readTenantsFile(config.multiTenancy.tenantsFile))
+      );
+      deps.http.registerOnPreAuth((request, response, toolkit) => {
+        const projectId = getProjectId(request);
+        if (projectId === undefined || tenants.has(projectId)) {
+          return toolkit.next();
+        }
+        return response.badRequest({ body: `Unknown project [${projectId}]` });
+      });
+      this.tenants = tenants;
+    }
 
     // Both polls run until the service stops.
     const pollLifetime = new AbortController();
@@ -251,7 +276,8 @@ export class ElasticsearchService
     return {
       client: {
         asInternalUser: this.client!.asInternalUser,
-        asScoped: this.client!.asScoped.bind(this.client!),
+        asScoped: (request, opts) =>
+          (this.getTenantClient(request, config) ?? this.client!).asScoped(request, opts),
       },
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
@@ -265,6 +291,7 @@ export class ElasticsearchService
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
     this.stop$.next();
+    await Promise.all([...this.tenantClients.values()].map((client) => client.close()));
     if (this.client) {
       await this.client.close();
     }
@@ -289,6 +316,25 @@ export class ElasticsearchService
       kibanaVersion: this.kibanaVersion,
       onRequestHandlerFactory: this.onRequestHandlerFactory,
     });
+  }
+
+  private getTenantClient(request: ScopeableRequest, config: ElasticsearchClientConfig) {
+    const projectId = getProjectId(request);
+    if (!this.tenants || projectId === undefined) {
+      return undefined;
+    }
+
+    const tenant = this.tenants.get(projectId);
+    if (!tenant) {
+      throw new Error(`Unknown project [${projectId}]`);
+    }
+
+    let client = this.tenantClients.get(projectId);
+    if (!client) {
+      client = this.createClusterClient(`tenant-${projectId}`, config, tenant);
+      this.tenantClients.set(projectId, client);
+    }
+    return client;
   }
 
   private getAgentManager({ dnsCacheTtl }: ElasticsearchClientConfig): AgentManager {
