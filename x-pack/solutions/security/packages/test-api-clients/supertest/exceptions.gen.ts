@@ -35,6 +35,7 @@ import type { DeleteExceptionListRequestQueryInput } from '@kbn/securitysolution
 import type { DeleteExceptionListItemRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/delete_exception_list_item/delete_exception_list_item.gen';
 import type { DuplicateExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/duplicate_exception_list/duplicate_exception_list.gen';
 import type { ExportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/export_exception_list/export_exception_list.gen';
+import type { ExportExceptionListsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/export_exception_lists/export_exception_lists.gen';
 import type { FindExceptionListItemsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_list_items/find_exception_list_items.gen';
 import type { FindExceptionListsRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/find_exception_lists/find_exception_lists.gen';
 import type { ImportExceptionListRequestQueryInput } from '@kbn/securitysolution-exceptions-common/api/import_exceptions/import_exceptions.gen';
@@ -186,6 +187,17 @@ an exception list that no longer exists.
       .query(props.query);
   },
   /**
+   * Returns a streaming NDJSON file with list records, item records, and a summary footer.
+   */
+  exportExceptionLists(props: ExportExceptionListsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/exception_lists/_bulk_export', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
    * Get a list of all exception list items in the specified list.
    */
   findExceptionListItems(props: FindExceptionListItemsProps, kibanaSpace: string = 'default') {
@@ -318,6 +330,9 @@ export interface DuplicateExceptionListProps {
 }
 export interface ExportExceptionListProps {
   query: ExportExceptionListRequestQueryInput;
+}
+export interface ExportExceptionListsProps {
+  query: ExportExceptionListsRequestQueryInput;
 }
 export interface FindExceptionListItemsProps {
   query: FindExceptionListItemsRequestQueryInput;
