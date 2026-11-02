@@ -89,6 +89,12 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
+import { isPocWorkerCoordinatorEnabled } from './poc_worker_bridge';
+import {
+  isPocTestTaskEnabled,
+  registerPocTestTaskDefinitions,
+  registerPocTestRoutes,
+} from './poc_test_task';
 
 export interface TaskManagerSetupContract {
   /**
@@ -352,6 +358,17 @@ export class TaskManagerPlugin
 
     this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
+    // PoC seam: dev-only kill-test scaffolding, gated behind TM_POC_TEST_TASK.
+    if (isPocTestTaskEnabled()) {
+      this.logger.warn('PoC test task scaffolding enabled (TM_POC_TEST_TASK=true)');
+      registerPocTestTaskDefinitions(this.definitions, this.logger);
+      registerPocTestRoutes({
+        router,
+        logger: this.logger,
+        getStartContract: () => core.getStartServices().then(([, , contract]) => contract),
+      });
+    }
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
@@ -402,8 +419,14 @@ export class TaskManagerPlugin
       onNodesCounted: (numOfNodes: number) => this.numOfKibanaInstances$.next(numOfNodes),
     });
 
-    if (this.shouldRunBackgroundTasks) {
+    if (this.shouldRunBackgroundTasks && !isPocWorkerCoordinatorEnabled()) {
       this.kibanaDiscoveryService.start().catch(() => {});
+    } else if (this.shouldRunBackgroundTasks) {
+      // PoC seam: the worker-thread coordinator runs its own discovery
+      // heartbeat; starting the main-thread one too would hide a dead worker.
+      this.logger.info(
+        'PoC worker coordinator enabled: main-thread Kibana discovery heartbeat disabled (worker owns it)'
+      );
     }
 
     // Runs on every node (including UI-only nodes) so the pause/resume API and
@@ -467,7 +490,15 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
-      this.claimNudgeService?.start();
+      if (!isPocWorkerCoordinatorEnabled()) {
+        this.claimNudgeService?.start();
+      } else {
+        // PoC seam: the worker-thread coordinator watches for nudges itself;
+        // the main-thread service stays notify-only (runSoon still works).
+        this.logger.info(
+          'PoC worker coordinator enabled: main-thread claim-nudge watcher disabled (worker owns it)'
+        );
+      }
 
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,

@@ -15,7 +15,9 @@ import { Subject, Subscription, of } from 'rxjs';
 import type { Option } from 'fp-ts/Option';
 import { none } from 'fp-ts/Option';
 import type { Logger } from '@kbn/core/server';
-import { TaskErrorSource } from '../task_running';
+// Imported from common (its true source) rather than task_running so the
+// poller stays importable from coordination-only contexts (PoC seam).
+import { TaskErrorSource } from '../../common';
 import type { Result } from '../lib/result_type';
 import { asOk, asErr } from '../lib/result_type';
 import { createThrottledClaimNudge } from '../claim_nudge/create_throttled_claim_nudge';
