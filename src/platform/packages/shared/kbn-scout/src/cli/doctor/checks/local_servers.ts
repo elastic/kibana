@@ -10,7 +10,7 @@
 import Net from 'net';
 import execa from 'execa';
 import type { DoctorCheck, DoctorCheckGroup, Fix } from '../types';
-import { fail, pass, warn } from '../types';
+import { fail, pass } from '../types';
 import { defaultConfig } from '../../../servers/configs/config_sets/default/stateful/base.config';
 import { getScoutServerPids, tryExec } from '../utils';
 
@@ -71,7 +71,7 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
     const scoutServerPids = await getScoutServerPids();
     const usedBy = owner ? ` by ${owner.command} (PID ${owner.pid})` : '';
     if (scoutServerPids.length) {
-      return warn(
+      return fail(
         `${name} port ${port} is used${usedBy}, Scout servers are already running (PID ${scoutServerPids.join(
           ', '
         )})`,
