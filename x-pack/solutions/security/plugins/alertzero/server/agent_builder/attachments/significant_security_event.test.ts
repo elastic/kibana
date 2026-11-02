@@ -262,7 +262,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain('Per index (truncated by the producer: not the complete set):');
       expect(value).toContain('Resolved IOCs (truncated by the producer: not the complete set):');
       expect(value).toContain(
-        'Tier 2: behaviors_proposed (truncated by the producer: not the complete set)'
+        'Behavior Hunt: behaviors_proposed (truncated by the producer: not the complete set)'
       );
     });
   });
