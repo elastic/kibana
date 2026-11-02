@@ -284,7 +284,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           </EuiFlexGroup>
         )}
         <EuiPopoverFooter>
-          <EuiPanel color="transparent" paddingSize="m">
+          <EuiPanel color="transparent" paddingSize="m" hasBorder={false}>
             <EuiText size="s">
               <p>
                 {i18n.translate('unifiedFieldList.fieldTypeFilter.learnMoreText', {

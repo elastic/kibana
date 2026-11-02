@@ -45,14 +45,3 @@ export const extendPageObjects = (
     dataDrift: createLazyPageObject(DataDrift, page),
   };
 };
-
-export {
-  DataDrift,
-  DataVisualizerDataView,
-  DataVisualizerSelector,
-  DataVisualizerTable,
-  FileDataVisualizer,
-  IndexDataVisualizer,
-  JobSourceSelection,
-  MlNavigation,
-};

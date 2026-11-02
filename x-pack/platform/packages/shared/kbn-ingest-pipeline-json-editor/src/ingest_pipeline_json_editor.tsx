@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, monaco } from '@kbn/code-editor';
 import type { IngestPipelineJsonEditorProps, StepDecoration } from './types';
 import { useStepDecorations } from './hooks/use_step_decorations';
 import { useGutterSimulationMarkers } from './hooks/use_gutter_simulation_markers';
@@ -92,8 +92,8 @@ export const IngestPipelineJsonEditor = ({
   );
 
   useEffect(() => {
-    const previousOptions = monaco.languages.json.jsonDefaults.diagnosticsOptions;
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+    const previousOptions = jsonDefaults.diagnosticsOptions;
+    jsonDefaults.setDiagnosticsOptions({
       ...previousOptions,
       validate: true,
       enableSchemaRequest: false,
@@ -101,7 +101,7 @@ export const IngestPipelineJsonEditor = ({
     });
 
     return () => {
-      monaco.languages.json.jsonDefaults.setDiagnosticsOptions(previousOptions);
+      jsonDefaults.setDiagnosticsOptions(previousOptions);
     };
   }, [schemas]);
 

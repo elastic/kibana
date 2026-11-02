@@ -19,7 +19,7 @@ export const CONVERSATION_QUEUE_LABELS: Record<RecommendedAction, string> = Obje
     defaultMessage: 'Configure',
   }),
   closed: i18n.translate('xpack.alertzero.conversationQueue.bucket.closed', {
-    defaultMessage: 'Closed',
+    defaultMessage: 'Closed Actions',
   }),
 });
 

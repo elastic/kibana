@@ -9,14 +9,11 @@
 
 import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { EuiFlyoutProps } from '@elastic/eui';
 
 /** Static configuration shared with template zones. */
 export interface FlyoutTemplateConfig {
   /** Root `data-test-subj`, used to derive zone-level test subjects. */
   dataTestSubj?: string;
-  /** Flyout horizontal padding size; the header reads it to bleed dividers to the edges. */
-  paddingSize?: EuiFlyoutProps['paddingSize'];
 }
 
 const FlyoutTemplateConfigContext = createContext<FlyoutTemplateConfig>({});

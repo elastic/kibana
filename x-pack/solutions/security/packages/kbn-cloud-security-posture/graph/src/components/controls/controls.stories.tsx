@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { css } from '@emotion/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { action } from '@storybook/addon-actions';
 import { Controls as ControlsComponent, type ControlsProps } from './controls';
+import { LayersPanel } from './layers_panel';
+import { DEFAULT_GRAPH_DISPLAY_OPTIONS } from '../graph/graph_display_options_context';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 export default {
@@ -54,4 +56,31 @@ export const Controls: StoryObj<ControlsProps> = {
     nodeIdsToCenterOn: ['node1', 'node2'],
     fitViewOptions: { duration: 200 },
   },
+};
+
+const LayersPanelDemo = () => {
+  const [displayOptions, setDisplayOptions] = useState(DEFAULT_GRAPH_DISPLAY_OPTIONS);
+  return (
+    <div
+      css={css`
+        display: inline-block;
+        border: 1px solid #d3dae6;
+        border-radius: 6px;
+        overflow: hidden;
+      `}
+    >
+      <LayersPanel
+        displayOptions={displayOptions}
+        onChange={(opts) => {
+          action('onChange')(opts);
+          setDisplayOptions(opts);
+        }}
+      />
+    </div>
+  );
+};
+
+/** Standalone Layers panel — shows all toggleable fields and keeps state locally. */
+export const Layers: StoryObj = {
+  render: () => <LayersPanelDemo />,
 };

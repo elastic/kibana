@@ -19,7 +19,6 @@ import React from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
 import type { PipelineStepBranch } from './types';
-import { useKibana } from '../../../../hooks/use_kibana';
 import {
   useInteractiveModeSelector,
   useStreamEnrichmentEvents,
@@ -31,20 +30,6 @@ const createProcessorText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.createProcessorButtonText',
   {
     defaultMessage: 'Create processor',
-  }
-);
-
-const createConditionText = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createConditionButtonText',
-  {
-    defaultMessage: 'Create condition',
-  }
-);
-
-const unsupportedConditionMessage = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createConditionUnsupportedMessage',
-  {
-    defaultMessage: 'Conditions are not supported in ingest pipelines yet.',
   }
 );
 
@@ -70,9 +55,6 @@ interface AddStepProps {
 }
 
 export const CreateStepButton: React.FC<AddStepProps> = ({ parentId, branch, mode }) => {
-  const {
-    core: { notifications },
-  } = useKibana();
   const { addProcessor } = useStreamEnrichmentEvents();
 
   const canAddStep = useInteractiveModeSelector((state) =>
@@ -88,18 +70,6 @@ export const CreateStepButton: React.FC<AddStepProps> = ({ parentId, branch, mod
   });
 
   const items = [
-    <EuiContextMenuItem
-      data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition"
-      data-stream-type={streamType}
-      key="addCondition"
-      icon="timeline"
-      onClick={() => {
-        togglePopover(false);
-        notifications.toasts.addWarning(unsupportedConditionMessage);
-      }}
-    >
-      {createConditionText}
-    </EuiContextMenuItem>,
     <EuiContextMenuItem
       data-test-subj="streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor"
       data-stream-type={streamType}

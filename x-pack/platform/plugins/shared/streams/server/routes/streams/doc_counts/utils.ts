@@ -5,18 +5,81 @@
  * 2.0.
  */
 
-import deepMerge from 'deepmerge';
 import { bytePartition } from '@kbn/std';
 import { isEmpty } from 'lodash';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { lazySchema, z } from '@kbn/zod/v4';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { MAX_STATS_STREAM_NAMES } from '../../../../common/constants';
 
 interface MeteringStatsResponse {
-  indices: Array<{
+  indices?: Array<{
     name: string;
     num_docs: number;
     size_in_bytes: number;
   }>;
+}
+
+// The list endpoints only read these fields. The full response is about 7x larger.
+export const DATA_STREAM_INDEX_NAMES_FILTER_PATH = [
+  'data_streams.name',
+  'data_streams.indices.index_name',
+  'data_streams.failure_store.indices.index_name',
+];
+
+const statsStreamNamesSchema = () =>
+  z.array(z.string().min(1).max(MAX_STREAM_NAME_LENGTH)).min(1).max(MAX_STATS_STREAM_NAMES);
+
+/** Request body of the POST variants of the bulk stats endpoints. */
+export const statsStreamNamesBodySchema = lazySchema(() =>
+  z.object({ streams: statsStreamNamesSchema() })
+);
+
+/** Like {@link statsStreamNamesBodySchema}, plus the time range of the time-bound stats. */
+export const statsStreamNamesTimeRangeBodySchema = lazySchema(() =>
+  z.object({ streams: statsStreamNamesSchema(), start: z.number(), end: z.number() })
+);
+
+const getNamedDataStreams = async (
+  esClient: ElasticsearchClient,
+  names: string[]
+): Promise<IndicesGetDataStreamResponse['data_streams']> => {
+  // filter_path drops `data_streams` entirely when nothing matches.
+  const { data_streams: dataStreams = [] } = await esClient.indices.getDataStream(
+    { name: names, filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
+    // Elasticsearch accepts `ignore_unavailable` here, but the client types omit it.
+    // Without it, a single missing name fails the whole request with a 404.
+    { querystring: { ignore_unavailable: true } }
+  );
+  return dataStreams;
+};
+
+/**
+ * Fetches data streams with only their names and backing index names, for the given
+ * stream names or all of them. Missing names are skipped.
+ */
+export async function getDataStreamsWithIndexNames({
+  esClient,
+  streamName,
+  streamNames = streamName ? [streamName] : undefined,
+}: {
+  esClient: ElasticsearchClient;
+  streamName?: string;
+  streamNames?: readonly string[];
+}): Promise<IndicesGetDataStreamResponse['data_streams']> {
+  if (!streamNames) {
+    const { data_streams: dataStreams = [] } = await esClient.indices.getDataStream({
+      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
+    });
+    return dataStreams;
+  }
+
+  const chunks = await processAsyncInChunks({
+    items: [...new Set(streamNames)],
+    processChunk: (names) => getNamedDataStreams(esClient, names),
+  });
+  return chunks.flat();
 }
 
 /**
@@ -101,23 +164,18 @@ export async function getDataStreamsMeteringStats({
       }),
   });
 
-  if (!chunkResults.length) {
-    return {};
+  // Mutate one record so the cost stays linear in the number of entries. Projects can have
+  // thousands of backing indices, and this runs on the request path.
+  const statsByName: Record<string, { size?: string; sizeBytes: number; totalDocs: number }> = {};
+
+  for (const { indices } of chunkResults) {
+    if (!indices) {
+      continue;
+    }
+    for (const { name, size_in_bytes: sizeBytes, num_docs: totalDocs } of indices) {
+      statsByName[name] = { sizeBytes, totalDocs };
+    }
   }
 
-  const { indices } = chunkResults.reduce((result, chunkResult) => deepMerge(result, chunkResult));
-
-  return indices.reduce(
-    (
-      acc: Record<string, { sizeBytes: number; totalDocs: number }>,
-      index: { name: string; size_in_bytes: number; num_docs: number }
-    ) => ({
-      ...acc,
-      [index.name]: {
-        sizeBytes: index.size_in_bytes,
-        totalDocs: index.num_docs,
-      },
-    }),
-    {} as Record<string, { size?: string; sizeBytes: number; totalDocs: number }>
-  );
+  return statsByName;
 }

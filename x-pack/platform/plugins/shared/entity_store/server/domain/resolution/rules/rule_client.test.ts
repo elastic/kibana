@@ -115,4 +115,26 @@ describe('ResolutionRulesClient', () => {
 
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
   });
+
+  it('returns undefined for a custom rule that no longer exists', async () => {
+    const client = createClient({
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+    });
+
+    await expect(client.getCustomRule('gone')).resolves.toBeUndefined();
+  });
+
+  // The maintainer prunes a rule's state only on `undefined`, so a forbidden
+  // read must never look like a deleted rule.
+  it('throws when reading a custom rule is forbidden', async () => {
+    const client = createClient({
+      get: jest
+        .fn()
+        .mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('denied'))),
+    });
+
+    const error = await client.getCustomRule('rule-1').catch((err) => err);
+
+    expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+  });
 });

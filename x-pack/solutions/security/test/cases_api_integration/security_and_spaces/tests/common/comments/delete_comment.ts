@@ -20,8 +20,9 @@ import {
 import {
   getPostCaseRequest,
   postCaseReq,
-  postCommentAlertReq,
   postCommentUserReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -108,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })) as Error;
 
         expect(error.message).to.be(
-          `This comment ${patchedCase.comments![0].id} does not exist in fake-id.`
+          `This attachment ${patchedCase.comments![0].id} does not exist in case fake-id.`
         );
       });
 
@@ -298,7 +299,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentUserReq, postCommentUserReq, postCommentAlertReq],
+          params: [postUnifiedCommentReq, postUnifiedCommentReq, postUnifiedAlertReq],
           expectedHttpCode: 200,
         });
 

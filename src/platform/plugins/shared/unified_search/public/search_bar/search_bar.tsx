@@ -34,13 +34,13 @@ import type {
   SavedQueryTimeFilter,
 } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import type { SavedQueryMeta } from '../saved_query_form';
@@ -67,7 +67,10 @@ export interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
-  indexPatterns?: DataView[];
+  /**
+   * What to filter on: a `DataView`, or for an ES|QL source the value of `source.toFilterableSource()`.
+   */
+  indexPatterns?: FilterableSource[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   dataViewPickerOverride?: React.ReactNode;
@@ -86,6 +89,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * the `unifiedSearch.newDateRangePickerEnabled` feature flag is also enabled.
    */
   enableDateRangePicker?: boolean;
+  /**
+   * When false, hide the date picker's previous / next / zoom time-window buttons.
+   * Defaults to true.
+   */
+  showTimeWindowButtons?: boolean;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
   filtersForSuggestions?: Filter[];
@@ -178,6 +186,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
+  visorInitialState?: QueryBarTopRowProps['visorInitialState'];
+  onVisorInitialStateChange?: QueryBarTopRowProps['onVisorInitialStateChange'];
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
@@ -185,6 +195,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Enable data source browser suggestion in ES|QL editor.
    */
   enableResourceBrowser?: boolean;
+  /**
+   * Show the action to create an ES|QL view from the editor query.
+   * Hidden unless a host opts in.
+   */
+  enableCreateView?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -514,13 +529,16 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       return;
     }
 
-    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER;
+    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | QuerySource.QUICK_SEARCH_KQL;
     switch (trigger) {
       case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
         source = QuerySource.SEARCH_BUTTON;
         break;
       case QuerySubmitTrigger.TIME_FILTER:
         source = QuerySource.TIME_FILTER;
+        break;
+      case QuerySubmitTrigger.QUICK_SEARCH:
+        source = QuerySource.QUICK_SEARCH_KQL;
         break;
       default:
         return;
@@ -599,20 +617,24 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           defaultMessage='"{name}" is running now. Feel free to close the tab. <link>Check its progress here.</link>'
           values={{
             name,
-            link: (chunks: React.ReactNode) => (
-              <EuiLink
-                data-test-subj="backgroundSearchToastLink"
-                onClick={() => {
-                  this.services.notifications.toasts.remove(toast);
-                  this.services.data.search.showSearchSessionsFlyout({
-                    appId: this.services.appName,
-                    trackingProps: { openedFrom: 'toast' },
-                  });
-                }}
-              >
-                {chunks}
-              </EuiLink>
-            ),
+            link: (chunks: React.ReactNode) => {
+              const { searchSessionsManagement } = this.services;
+              if (!searchSessionsManagement) return chunks;
+              return (
+                <EuiLink
+                  data-test-subj="backgroundSearchToastLink"
+                  onClick={() => {
+                    this.services.notifications.toasts.remove(toast);
+                    searchSessionsManagement.openFlyout({
+                      appId: this.services.appName,
+                      trackingProps: { openedFrom: 'toast' },
+                    });
+                  }}
+                >
+                  {chunks}
+                </EuiLink>
+              );
+            },
           }}
         />,
         this.services
@@ -846,12 +868,16 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}
           esqlEditorInitialState={this.props.esqlEditorInitialState}
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
+          visorInitialState={this.props.visorInitialState}
+          onVisorInitialStateChange={this.props.onVisorInitialStateChange}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableDateRangePicker={this.props.enableDateRangePicker}
+          showTimeWindowButtons={this.props.showTimeWindowButtons}
           enableResourceBrowser={this.props.enableResourceBrowser}
+          enableCreateView={this.props.enableCreateView}
         />
       </div>
     );

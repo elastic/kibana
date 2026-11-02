@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { existsQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { SPAN_ID, TRACE_ID } from '../../../common/es_fields/apm';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
 import {
@@ -45,7 +45,7 @@ export async function getUnprocessedOtelErrors({
     query: unprocessedOtelExceptionQuery([
       ...rangeQuery(start, end),
       ...termQuery(TRACE_ID, traceId),
-      ...termQuery(SPAN_ID, docId),
+      ...(docId ? termQuery(SPAN_ID, docId) : existsQuery(SPAN_ID)),
     ]),
     fields: [...requiredOtelFields, ...optionalOtelFields],
   });

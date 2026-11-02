@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { FetcherConfigSchema } from '../schema';
+import { KibanaFetcherConfigSchema } from '../schema';
 
 const MAX_RECURSION_DEPTH = 10;
 
@@ -18,7 +18,7 @@ export function insertFetcherToSchemaRecursively(schema: z.ZodType, depth: numbe
   }
   if (schema instanceof z.ZodObject) {
     return schema.extend({
-      fetcher: FetcherConfigSchema,
+      fetcher: KibanaFetcherConfigSchema,
     });
   }
   if (schema instanceof z.ZodUnion) {

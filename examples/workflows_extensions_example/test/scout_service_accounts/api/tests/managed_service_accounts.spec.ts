@@ -16,9 +16,13 @@ apiTest.describe(
   { tag: ['@local-serverless-search', '@local-stateful-classic'] },
   () => {
     const { getContext, setup, teardown, cleanupWorkflows } = createServiceAccountSuite();
+
     apiTest.beforeAll(setup);
+
     apiTest.afterEach(async ({ apiClient }) => cleanupWorkflows(apiClient));
+
     apiTest.afterAll(teardown);
+
     apiTest(
       'managed workflow installs, executes and rebinds with its service account',
       async ({ apiClient }) => {

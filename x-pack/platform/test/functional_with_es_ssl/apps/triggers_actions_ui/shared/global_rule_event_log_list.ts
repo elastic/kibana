@@ -95,11 +95,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should load from the shareable lazy loader', async () => {
       await PageObjects.common.navigateToApp('triggersActionsUiExample/global_rule_event_log_list');
-      const exists = await testSubjects.exists('ruleEventLogListTable');
-      const spacesSwitchExists = await testSubjects.exists('showAllSpacesSwitch');
-
-      expect(exists).to.be(true);
-      expect(spacesSwitchExists).to.be(true);
+      await testSubjects.existOrFail('ruleEventLogListTable');
+      await testSubjects.existOrFail('showAllSpacesSwitch');
     });
 
     it('should filter out rule types based on filteredRuleTypes prop and respect spaces', async () => {

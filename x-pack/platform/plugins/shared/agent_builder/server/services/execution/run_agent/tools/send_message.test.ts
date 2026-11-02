@@ -6,7 +6,11 @@
  */
 
 import { ReplaySubject } from 'rxjs';
-import { ChatEventType, SELF_AGENT_ID } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  SELF_AGENT_ID,
+  createConversationBusyError,
+} from '@kbn/agent-builder-common';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '../../../../mocks';
@@ -171,6 +175,7 @@ describe('createSendMessageTool', () => {
 
     expect(sendToSubAgent).toHaveBeenCalledWith(
       expect.objectContaining({
+        agentId: 'test-agent',
         parentExecutionId: 'parent-exec',
         conversationId: 'child-convo',
         prompt: 'follow up',
@@ -288,7 +293,7 @@ describe('createSendMessageTool', () => {
       await callHandler(tool, { to: 'researcher', prompt: 'hi' }, context);
 
       expect(sendToSubAgent).toHaveBeenCalledWith(
-        expect.objectContaining({ conversationId: 'child-convo' })
+        expect.objectContaining({ agentId: 'agent-b', conversationId: 'child-convo' })
       );
     });
 
@@ -318,9 +323,41 @@ describe('createSendMessageTool', () => {
       await callHandler(tool, { to: 'me', prompt: 'hi' }, context);
 
       expect(sendToSubAgent).toHaveBeenCalledWith(
-        expect.objectContaining({ conversationId: 'child-self' })
+        expect.objectContaining({ agentId: 'test-agent', conversationId: 'child-self' })
       );
     });
+  });
+
+  it('lets a sub-agent that declares its own inference feature run on it', async () => {
+    const events$ = roundCompleteEvents({ response: { message: 'ok' } });
+    const sendToSubAgent = jest.fn().mockResolvedValue({
+      executionId: 'sub-exec',
+      events$: events$.asObservable(),
+    });
+    const subagentTracker = new SubagentTracker({
+      solver: { conversation_id: 'child-convo', agent_id: 'solution-agent' },
+    });
+    const tool = createSendMessageTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent,
+        getExecution: jest.fn(),
+      },
+      subagentTracker,
+      allowedIds: new Set(['solution-agent']),
+      inferenceFeatureIdBySubagent: new Map([['solution-agent', 'my_feature']]),
+    });
+
+    const { context, modelProvider } = createMockContext();
+    await callHandler(tool, { to: 'solver', prompt: 'hi' }, context);
+
+    expect(modelProvider.selectModel).not.toHaveBeenCalled();
+    expect(sendToSubAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ agentId: 'solution-agent', connectorId: undefined })
+    );
   });
 
   it('returns an error result when sendToSubAgent throws', async () => {
@@ -348,5 +385,38 @@ describe('createSendMessageTool', () => {
     expect(result.results[0].type).toBe(ToolResultType.error);
     expect(result.results[0].data.message).toContain('send_message failed');
     expect(result.results[0].data.message).toContain('inference offline');
+  });
+
+  it('returns a wait message when the sub-agent is busy', async () => {
+    const sendToSubAgent = jest
+      .fn()
+      .mockRejectedValue(
+        createConversationBusyError({ conversationId: 'child-convo', activeExecutionId: 'e1' })
+      );
+    const subagentTracker = new SubagentTracker({
+      researcher: { conversation_id: 'child-convo', agent_id: 'test-agent' },
+    });
+
+    const tool = createSendMessageTool({
+      agentId: 'test-agent',
+      executionId: 'parent-exec',
+      subAgentExecutor: {
+        executeSubAgent: jest.fn(),
+        createSubAgent: jest.fn(),
+        sendToSubAgent,
+        getExecution: jest.fn(),
+      },
+      subagentTracker,
+      allowedIds: new Set(['test-agent']),
+    });
+
+    const { context } = createMockContext();
+    const result = await callHandler(tool, { to: 'researcher', prompt: 'hi' }, context);
+
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].type).toBe(ToolResultType.error);
+    expect(result.results[0].data.message).toBe(
+      'Sub-agent "researcher" is still answering your previous message. Wait for its reply before sending another message.'
+    );
   });
 });

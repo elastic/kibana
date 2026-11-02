@@ -20,6 +20,10 @@ export const LINKED_INVESTIGATIONS_LABELS = Object.freeze({
   statusClosed: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusClosed', {
     defaultMessage: 'Closed',
   }),
+  actionRequired: i18n.translate(
+    'xpack.alertzero.detailsFlyout.linkedInvestigations.actionRequired',
+    { defaultMessage: 'Action required' }
+  ),
   empty: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.empty', {
     defaultMessage: 'No linked investigations',
   }),
@@ -53,6 +57,9 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     proposedActions: i18n.translate('xpack.alertzero.detailsFlyout.sections.proposedActions', {
       defaultMessage: 'Proposed actions',
     }),
+    impact: i18n.translate('xpack.alertzero.detailsFlyout.sections.impact', {
+      defaultMessage: 'Impact',
+    }),
   },
   overview: {
     showMore: i18n.translate('xpack.alertzero.detailsFlyout.overview.showMore', {
@@ -82,6 +89,13 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
   proposedAction: {
     needsReviewBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.needsReview', {
       defaultMessage: 'Needs review',
+    }),
+    noTypeCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.noType', {
+      defaultMessage: 'No action type',
+    }),
+    /** An expired proposal that saved no reason: true whether it timed out or ended early. */
+    expiredCaption: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.expiredCaption', {
+      defaultMessage: 'Can no longer be applied',
     }),
     reversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.reversible', {
       defaultMessage: 'Reversible',

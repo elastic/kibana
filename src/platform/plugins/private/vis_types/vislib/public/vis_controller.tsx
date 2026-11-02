@@ -85,9 +85,11 @@ export const createVislibVisController = (
       const { uiState, event: fireEvent, hasCompatibleActions } = handlers;
 
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
-      this.vislibVis.on('brush', fireEvent);
-      this.vislibVis.on('click', fireEvent);
-
+      const isInteractive = handlers.isInteractive();
+      if (isInteractive) {
+        this.vislibVis.on('brush', fireEvent);
+        this.vislibVis.on('click', fireEvent);
+      }
       const [startServices] = await core.getStartServices();
       this.vislibVis.on('renderComplete', () => {
         // refreshing the legend after the chart is rendered.
@@ -104,6 +106,7 @@ export const createVislibVisController = (
             visParams,
             fireEvent,
             hasCompatibleActions,
+            handlers.isInteractive(),
             uiState as PersistedState
           );
         }
@@ -111,10 +114,12 @@ export const createVislibVisController = (
         renderComplete?.();
       });
 
-      this.removeListeners = () => {
-        this.vislibVis.off('brush', fireEvent);
-        this.vislibVis.off('click', fireEvent);
-      };
+      this.removeListeners = isInteractive
+        ? () => {
+            this.vislibVis.off('brush', fireEvent);
+            this.vislibVis.off('click', fireEvent);
+          }
+        : undefined;
 
       this.vislibVis.initVisConfig(esResponse, uiState);
 
@@ -131,10 +136,10 @@ export const createVislibVisController = (
           visParams,
           fireEvent,
           hasCompatibleActions,
+          handlers.isInteractive(),
           uiState as PersistedState
         );
       }
-
       this.vislibVis.render(esResponse, uiState);
     }
 
@@ -144,6 +149,7 @@ export const createVislibVisController = (
       visParams: BasicVislibParams,
       fireEvent: IInterpreterRenderHandlers['event'],
       hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'],
+      isInteractive: boolean,
       uiState?: PersistedState
     ) {
       const { legendPosition } = visParams;
@@ -157,6 +163,7 @@ export const createVislibVisController = (
           hasCompatibleActions={hasCompatibleActions}
           addLegend={this.showLegend(visParams)}
           position={legendPosition}
+          isInteractive={isInteractive}
         />,
         startServices
       )(this.legendEl);

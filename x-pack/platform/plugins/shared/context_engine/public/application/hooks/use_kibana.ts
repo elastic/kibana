@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  useKibana as useKibanaFromReact,
+  type KibanaReactContextValue,
+} from '@kbn/kibana-react-plugin/public';
 import type {
   AgentBuilderIntegration,
   ChatOpener,
@@ -17,6 +20,7 @@ export interface ContextEngineServices extends ContextEngineAppServices {
   data: ContextEngineStartDependencies['data'];
   share: ContextEngineStartDependencies['share'];
   triggersActionsUi: ContextEngineStartDependencies['triggersActionsUi'];
+  cloud?: ContextEngineStartDependencies['cloud'];
   console?: ContextEngineStartDependencies['console'];
   spaces?: ContextEngineStartDependencies['spaces'];
   /**
@@ -33,6 +37,5 @@ export interface ContextEngineServices extends ContextEngineAppServices {
   getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
 }
 
-const useTypedKibana = () => useKibana<ContextEngineServices>();
-
-export { useTypedKibana as useKibana };
+export const useKibana = (): KibanaReactContextValue<ContextEngineServices> =>
+  useKibanaFromReact<ContextEngineServices>();

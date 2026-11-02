@@ -3,21 +3,27 @@
 exports[`maybeAddCloudLinks when cloud enabled and it fails to fetch the user, it sets the links 2`] = `
 Array [
   Object {
+    "dataTestSubj": "userMenuLink__profile",
     "href": "profile-url",
     "iconType": "user",
+    "isExternal": true,
     "label": "Profile",
     "order": 100,
     "setAsProfile": true,
   },
   Object {
+    "dataTestSubj": "userMenuLink__billing",
     "href": "billing-url",
-    "iconType": "chartGauge",
-    "label": "Billing",
+    "iconType": "money",
+    "isExternal": true,
+    "label": "Billing and subscription",
     "order": 200,
   },
   Object {
+    "dataTestSubj": "userMenuLink__organization",
     "href": "organization-url",
-    "iconType": "gear",
+    "iconType": "users",
+    "isExternal": true,
     "label": "Organization",
     "order": 300,
   },
@@ -36,21 +42,27 @@ Array [
 exports[`maybeAddCloudLinks when cloud enabled and the user is an Elastic Cloud user, it sets the links 2`] = `
 Array [
   Object {
+    "dataTestSubj": "userMenuLink__profile",
     "href": "profile-url",
     "iconType": "user",
+    "isExternal": true,
     "label": "Profile",
     "order": 100,
     "setAsProfile": true,
   },
   Object {
+    "dataTestSubj": "userMenuLink__billing",
     "href": "billing-url",
-    "iconType": "chartGauge",
-    "label": "Billing",
+    "iconType": "money",
+    "isExternal": true,
+    "label": "Billing and subscription",
     "order": 200,
   },
   Object {
+    "dataTestSubj": "userMenuLink__organization",
     "href": "organization-url",
-    "iconType": "gear",
+    "iconType": "users",
+    "isExternal": true,
     "label": "Organization",
     "order": 300,
   },

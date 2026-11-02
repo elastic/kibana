@@ -45,14 +45,7 @@ export const markResultAsCleaned = (result: ToolResult): ToolResult => {
   return result;
 };
 
-export interface ToolCallResultTransformerOptions {
-  forceFilestoreSubstitution?: boolean;
-}
-
-export type ToolCallResultTransformer = (
-  toolCall: ToolCallWithResult,
-  options?: ToolCallResultTransformerOptions
-) => Promise<ToolResult[]>;
+export type ToolCallResultTransformer = (toolCall: ToolCallWithResult) => Promise<ToolResult[]>;
 
 export interface ToolSummarizationDeps {
   toolManager: ToolManager;

@@ -92,9 +92,6 @@ describe('autonomy level card copy', () => {
     expect(factValueToText(factValueOf(TRIAGE_WORKER_ID, 'manual', 'Closures')!)).toBe(
       'You answer each Proposal — accept to close, or reject and re-tag'
     );
-    expect(factValueToText(factValueOf(TRIAGE_WORKER_ID, 'assisted', 'Closures')!)).toBe(
-      'Worker closes false positives on its own — You reopen any you disagree with'
-    );
     expect(factValueToText(factValueOf(TRIAGE_WORKER_ID, 'supervised', 'Closures')!)).toBe(
       'Worker closes false positives on its own — You reopen any you disagree with'
     );

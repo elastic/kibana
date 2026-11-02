@@ -6,11 +6,9 @@
  */
 
 import { recurse } from 'cypress-recurse';
-import {
-  SECURITY_SOLUTION_NAVBAR_THREAT_INTELLIGENCE_ITEM,
-  UPDATE_STATUS,
-} from '../../screens/threat_intelligence/common';
-import { BLOCKLIST_URL } from '../../urls/navigation';
+import { UPDATE_STATUS } from '../../screens/threat_intelligence/common';
+import { BLOCKLIST_URL, INDICATORS_URL } from '../../urls/navigation';
+import { visitWithTimeRange } from '../navigation';
 import {
   BARCHART_POPOVER_BUTTON,
   BARCHART_WRAPPER,
@@ -38,10 +36,17 @@ export const navigateToBlocklist = () => {
 };
 
 /**
- * Navigate to Threat Intelligence screen via the Security Solution navbar
+ * Visit the indicators view with a time range wide enough to cover the archived indicators, and
+ * wait for the table to render.
+ *
+ * Always come back here this way rather than through the Security navbar. The indicators archives
+ * are old enough to fall outside the default time range, so a navbar click lands on an empty view
+ * and the table never renders. Any full page load away from here (a case, the blocklist) drops the
+ * time range, so it has to be re-established on the way back.
  */
-export const navigateToThreatIntelligence = () => {
-  cy.get(SECURITY_SOLUTION_NAVBAR_THREAT_INTELLIGENCE_ITEM).click();
+export const visitIndicatorsWithTimeRange = () => {
+  visitWithTimeRange(INDICATORS_URL);
+  waitForViewToBeLoaded();
 };
 
 /**

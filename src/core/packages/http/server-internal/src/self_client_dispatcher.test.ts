@@ -8,18 +8,25 @@
  */
 
 jest.mock('undici', () => ({
-  Agent: jest.fn().mockImplementation(() => ({ close: jest.fn().mockResolvedValue(undefined) })),
+  Agent: jest.fn().mockImplementation(() => ({
+    close: jest.fn().mockResolvedValue(undefined),
+    compose: jest.fn().mockImplementation(() => ({ dispatch: jest.fn() })),
+  })),
+  getGlobalDispatcher: jest.fn(() => ({
+    compose: jest.fn().mockImplementation(() => ({ dispatch: jest.fn() })),
+  })),
 }));
 
 import { rootCertificates } from 'node:tls';
-import { Agent } from 'undici';
+import { Agent, getGlobalDispatcher } from 'undici';
 import type { IBasePath } from '@kbn/core-http-server';
 import type { HttpConfig } from './http_config';
-import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
+import { SelfHttpDispatcherProvider, withHeadersTimeout } from './self_client_dispatcher';
 
 type VerificationMode = HttpConfig['selfHttp']['ssl']['verificationMode'];
 
 const AgentMock = Agent as unknown as jest.Mock;
+const getGlobalDispatcherMock = getGlobalDispatcher as jest.Mock;
 
 const PUBLIC_BASE_URL = 'https://kibana.example.com';
 const HTTPS_URL = new URL('https://kibana.example.com/api/status');
@@ -59,6 +66,7 @@ const connectOptionsOf = (callIndex: number) => AgentMock.mock.calls[callIndex][
 describe('SelfHttpDispatcherProvider', () => {
   beforeEach(() => {
     AgentMock.mockClear();
+    getGlobalDispatcherMock.mockClear();
   });
 
   it('returns no dispatcher for plain HTTP targets regardless of verification mode', () => {
@@ -67,7 +75,7 @@ describe('SelfHttpDispatcherProvider', () => {
       certificateAuthorities: ['public CA'],
     });
 
-    expect(provider.get(new URL('http://kibana.example.com/api/status'))).toBeUndefined();
+    expect(provider.get(new URL('http://kibana.example.com/api/status'), 'public')).toBeUndefined();
     expect(AgentMock).not.toHaveBeenCalled();
   });
 
@@ -78,7 +86,7 @@ describe('SelfHttpDispatcherProvider', () => {
         certificateAuthorities: ['public CA'],
       });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
       expect(AgentMock).toHaveBeenCalledTimes(1);
       expect(connectOptionsOf(0)).toEqual({
         ca: [...rootCertificates, 'public CA'],
@@ -94,7 +102,7 @@ describe('SelfHttpDispatcherProvider', () => {
         certificateAuthorities: ['public CA'],
       });
 
-      provider.get(HTTPS_URL);
+      provider.get(HTTPS_URL, 'public');
 
       const connect = connectOptionsOf(0);
       expect(connect.ca).toEqual([...rootCertificates, 'public CA']);
@@ -109,7 +117,7 @@ describe('SelfHttpDispatcherProvider', () => {
         certificateAuthorities: ['public CA'],
       });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
       expect(connectOptionsOf(0).rejectUnauthorized).toBe(false);
     });
   });
@@ -118,14 +126,41 @@ describe('SelfHttpDispatcherProvider', () => {
     it('defers to the global dispatcher in full mode', () => {
       const { provider } = createProvider({ verificationMode: 'full' });
 
-      expect(provider.get(HTTPS_URL)).toBeUndefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeUndefined();
       expect(AgentMock).not.toHaveBeenCalled();
+    });
+
+    it('composes a per-request headers timeout over the global dispatcher in full mode', () => {
+      const { provider } = createProvider({ verificationMode: 'full' });
+
+      const dispatcher = provider.get(HTTPS_URL, 'public', 60_000);
+
+      expect(dispatcher).toBeDefined();
+      expect(AgentMock).not.toHaveBeenCalled();
+      const globalDispatcher = getGlobalDispatcherMock.mock.results[0].value;
+      expect(globalDispatcher.compose).toHaveBeenCalledTimes(1);
+      expect(dispatcher).toBe(globalDispatcher.compose.mock.results[0].value);
+    });
+
+    it('composes a per-request headers timeout over the global dispatcher for plain HTTP', () => {
+      const { provider } = createProvider();
+
+      const dispatcher = provider.get(
+        new URL('http://kibana.example.com/api/status'),
+        'public',
+        60_000
+      );
+
+      expect(dispatcher).toBeDefined();
+      expect(AgentMock).not.toHaveBeenCalled();
+      const globalDispatcher = getGlobalDispatcherMock.mock.results[0].value;
+      expect(dispatcher).toBe(globalDispatcher.compose.mock.results[0].value);
     });
 
     it('builds an agent that keeps the default trust store in certificate mode', () => {
       const { provider } = createProvider({ verificationMode: 'certificate' });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
       expect(AgentMock).toHaveBeenCalledTimes(1);
 
       const connect = connectOptionsOf(0);
@@ -138,27 +173,42 @@ describe('SelfHttpDispatcherProvider', () => {
     it('builds an agent rather than deferring to the global dispatcher in none mode', () => {
       const { provider } = createProvider({ verificationMode: 'none' });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
       expect(AgentMock).toHaveBeenCalledTimes(1);
       expect(connectOptionsOf(0)).toEqual({ rejectUnauthorized: false });
     });
   });
 
   describe('local target', () => {
-    it("trusts the listener's own certificate in full mode", () => {
+    it('treats full as a leaf pin so the loopback hostname is not required to match the SAN', () => {
+      const leaf = '-----BEGIN CERTIFICATE-----\nLEAF\n-----END CERTIFICATE-----';
       const { provider } = createProvider({
         verificationMode: 'full',
+        target: 'local',
+        serverCertificate: `${leaf}\n-----BEGIN CERTIFICATE-----\nINTERMEDIATE\n-----END CERTIFICATE-----`,
+      });
+
+      provider.get(HTTPS_URL, 'local');
+
+      const connect = connectOptionsOf(0);
+      expect(connect.ca).toEqual([leaf]);
+      expect(connect.allowPartialTrustChain).toBe(true);
+      expect(connect.rejectUnauthorized).toBe(true);
+      expect(connect.checkServerIdentity('localhost', {})).toBeUndefined();
+    });
+
+    it('keeps public roots when certificate mode is selected explicitly', () => {
+      const { provider } = createProvider({
+        verificationMode: 'certificate',
         target: 'local',
         serverCertificate: 'local server certificate',
       });
 
-      provider.get(HTTPS_URL);
+      provider.get(HTTPS_URL, 'local');
 
-      expect(connectOptionsOf(0)).toEqual({
-        ca: [...rootCertificates, 'local server certificate'],
-        allowPartialTrustChain: true,
-        rejectUnauthorized: true,
-      });
+      const connect = connectOptionsOf(0);
+      expect(connect.ca).toEqual([...rootCertificates, 'local server certificate']);
+      expect(connect.checkServerIdentity('localhost', {})).toBeUndefined();
     });
 
     it('skips verification in none mode', () => {
@@ -168,7 +218,7 @@ describe('SelfHttpDispatcherProvider', () => {
         serverCertificate: 'local server certificate',
       });
 
-      provider.get(HTTPS_URL);
+      provider.get(HTTPS_URL, 'local');
 
       expect(connectOptionsOf(0).rejectUnauthorized).toBe(false);
     });
@@ -181,8 +231,26 @@ describe('SelfHttpDispatcherProvider', () => {
         certificateAuthorities: ['public CA'],
       });
 
-      expect(provider.get(HTTPS_URL)).toBe(provider.get(HTTPS_URL));
+      expect(provider.get(HTTPS_URL, 'public')).toBe(provider.get(HTTPS_URL, 'public'));
       expect(AgentMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('composes per-request headers timeouts over the shared cached agent', () => {
+      const { provider } = createProvider({
+        verificationMode: 'certificate',
+        certificateAuthorities: ['public CA'],
+      });
+
+      const first = provider.get(HTTPS_URL, 'public', 60_000);
+      const second = provider.get(HTTPS_URL, 'public', 120_000);
+
+      // One shared agent (and connection pool); each call gets its own composed dispatcher.
+      expect(AgentMock).toHaveBeenCalledTimes(1);
+      const agent = AgentMock.mock.results[0].value;
+      expect(agent.compose).toHaveBeenCalledTimes(2);
+      expect(first).toBe(agent.compose.mock.results[0].value);
+      expect(second).toBe(agent.compose.mock.results[1].value);
+      expect(first).not.toBe(second);
     });
 
     it('closes the agent and defers to the global dispatcher when a reload restores full mode', () => {
@@ -200,12 +268,12 @@ describe('SelfHttpDispatcherProvider', () => {
         target: 'auto',
       });
 
-      expect(provider.get(HTTPS_URL)).toBeDefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeDefined();
 
       verificationMode = 'full';
       certificateAuthorities = undefined;
 
-      expect(provider.get(HTTPS_URL)).toBeUndefined();
+      expect(provider.get(HTTPS_URL, 'public')).toBeUndefined();
       expect(AgentMock).toHaveBeenCalledTimes(1);
       expect(AgentMock.mock.results[0].value.close).toHaveBeenCalled();
     });
@@ -224,14 +292,52 @@ describe('SelfHttpDispatcherProvider', () => {
         target: 'auto',
       });
 
-      const first = provider.get(HTTPS_URL);
+      const first = provider.get(HTTPS_URL, 'public');
       verificationMode = 'none';
-      const second = provider.get(HTTPS_URL);
+      const second = provider.get(HTTPS_URL, 'public');
 
       expect(second).not.toBe(first);
       expect(AgentMock).toHaveBeenCalledTimes(2);
       expect(AgentMock.mock.results[0].value.close).toHaveBeenCalled();
       expect(connectOptionsOf(1).rejectUnauthorized).toBe(false);
     });
+
+    it('caches local and public agents independently', () => {
+      const { provider } = createProvider({
+        verificationMode: 'none',
+        certificateAuthorities: ['public CA'],
+        serverCertificate: 'local server certificate',
+      });
+
+      const local = provider.get(HTTPS_URL, 'local');
+      const pub = provider.get(HTTPS_URL, 'public');
+
+      expect(local).toBeDefined();
+      expect(pub).toBeDefined();
+      expect(local).not.toBe(pub);
+      expect(AgentMock).toHaveBeenCalledTimes(2);
+    });
+  });
+});
+
+describe('withHeadersTimeout', () => {
+  it('injects the headers timeout into the dispatch options', () => {
+    const dispatch = jest.fn().mockReturnValue(true);
+    const handler = jest.fn();
+
+    withHeadersTimeout(60_000)(dispatch)(
+      { method: 'GET', origin: 'https://kibana.example.com', path: '/' },
+      handler as never
+    );
+
+    expect(dispatch).toHaveBeenCalledWith(
+      {
+        method: 'GET',
+        origin: 'https://kibana.example.com',
+        path: '/',
+        headersTimeout: 60_000,
+      },
+      handler
+    );
   });
 });

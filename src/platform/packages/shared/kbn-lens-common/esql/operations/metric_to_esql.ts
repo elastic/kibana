@@ -17,7 +17,7 @@ const typeToESQLFn: Record<string, string> = {
   average: 'AVG',
   sum: 'SUM',
   median: 'MEDIAN',
-  standard_deviation: 'MEDIAN_ABSOLUTE_DEVIATION',
+  standard_deviation: 'STD_DEV',
 };
 
 /**

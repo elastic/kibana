@@ -18,9 +18,10 @@ export const SOURCES_PATH = 'internal/nightshift/sources';
 
 /**
  * Test data indices are created under this prefix so roles can be scoped to them. It avoids
- * `logs-*` on purpose: that template only allows data streams.
+ * `logs-*` on purpose because that template only allows data streams.
  */
 export const TEST_INDEX_PREFIX = 'nightshift-sources-test-';
+export const RECOMMENDED_SOURCE_TEST_INDEX_PREFIX = 'logsnightshift-sources-recommendation-test-';
 
 const VIEW_NAME_PATTERN = `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}*`;
 
@@ -32,7 +33,7 @@ const VIEW_READ_PRIVILEGES = {
   privileges: ['read', 'read_view_metadata'],
 };
 const TEST_DATA_READ_PRIVILEGES = {
-  names: [`${TEST_INDEX_PREFIX}*`],
+  names: [`${TEST_INDEX_PREFIX}*`, `${RECOMMENDED_SOURCE_TEST_INDEX_PREFIX}*`],
   privileges: ['read', 'view_index_metadata'],
 };
 
@@ -52,7 +53,7 @@ export const NIGHTSHIFT_READ_ONLY_ROLE: KibanaRole = {
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['read'] }, spaces: ['*'] }],
 };
 
-/** Kibana read access but no Elasticsearch privileges: GET health must degrade to `unknown`. */
+/** Kibana read access and no explicit Elasticsearch privileges. View read comes from the implicit grant, so GET health is `ok`. */
 export const NIGHTSHIFT_READ_ONLY_NO_ES_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['read'] }, spaces: ['*'] }],

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunction, isEqual } from 'lodash';
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import { isFunction, isEqual, omit } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerShareableState } from '@kbn/unified-doc-viewer';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -36,6 +38,7 @@ import {
   ExpandedDocLinkability,
   getExpandedDocLinkability,
   getExpandedDocRef,
+  matchesExpandedDocRef,
 } from '../../../utils/expanded_doc';
 import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
@@ -65,6 +68,7 @@ import type {
   TabState,
   UpdateESQLQueryActionPayload,
 } from '../types';
+import { appendAdHocDataViews } from './data_views';
 import { addLog } from '../../../../../utils/add_log';
 import { FetchStatus } from '../../../../types';
 
@@ -87,7 +91,11 @@ const mergeAppState = (
   { tabId, appState }: AppStatePayload
 ) => {
   const currentAppState = selectTab(currentState, tabId).appState;
-  const mergedAppState = { ...currentAppState, ...appState };
+  const nextAppState = { ...currentAppState, ...appState };
+  // The shareable doc viewer state is only restorable alongside an expanded document reference.
+  const mergedAppState: DiscoverAppState = nextAppState.expandedDoc
+    ? nextAppState
+    : omit(nextAppState, 'docViewerState');
   return { mergedAppState, hasStateChanges: !isEqualState(currentAppState, mergedAppState) };
 };
 
@@ -152,7 +160,52 @@ export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload
       return;
     }
 
-    dispatch(updateAppState({ tabId, appState: { expandedDoc: nextExpandedDocRef } }));
+    // Compare identities rather than references, since a shared link may omit the routing.
+    const isSameDocument = Boolean(
+      expandedDoc &&
+        appState.expandedDoc &&
+        matchesExpandedDocRef(expandedDoc, appState.expandedDoc)
+    );
+
+    dispatch(
+      updateAppState({
+        tabId,
+        appState: {
+          expandedDoc: nextExpandedDocRef,
+          // The shareable doc viewer state belongs to the document it was captured for.
+          ...(isSameDocument ? {} : { docViewerState: undefined }),
+        },
+      })
+    );
+  };
+
+type DocViewerShareableStatePayload = TabActionPayload<{
+  docViewerState: DocViewerShareableState | undefined;
+}>;
+
+/**
+ * Synchronizes the shareable doc viewer state to the URL, only while a linkable document is expanded.
+ * Replaces URL history rather than pushing, so frequent in-flyout changes (tab or nested navigation)
+ * do not flood the browser back stack.
+ */
+export const setDocViewerShareableState: InternalStateThunkActionCreator<
+  [DocViewerShareableStatePayload],
+  Promise<void>
+> = (payload) =>
+  async function setDocViewerShareableStateThunkFn(dispatch, getState) {
+    const { tabId, docViewerState } = payload;
+    const { appState } = selectTab(getState(), tabId);
+
+    // The state is only restorable alongside a shared document reference.
+    const nextDocViewerState = appState.expandedDoc ? docViewerState : undefined;
+
+    if (isEqual(appState.docViewerState, nextDocViewerState)) {
+      return;
+    }
+
+    await dispatch(
+      updateAppStateAndReplaceUrl({ tabId, appState: { docViewerState: nextDocViewerState } })
+    );
   };
 
 /**
@@ -441,9 +494,14 @@ export const pushCurrentTabStateToUrl: InternalStateThunkActionCreator<
  * Clean ups the ES|QL query and moves to the dataview mode
  */
 export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
-> = ({ tabId, dataView }) =>
-  function transitionFromESQLToDataViewThunkFn(dispatch, _, { services }) {
+  [TabActionPayload<{ dataView: DataView }>],
+  Promise<void>
+> = ({ tabId, dataView: fallbackDataView }) =>
+  async function transitionFromESQLToDataViewThunkFn(
+    dispatch,
+    getState,
+    { services, runtimeStateManager }
+  ) {
     // Mark all profile app state default fields to reset when transitioning to data view mode
     dispatch(
       internalStateSlice.actions.setProfileAppStateDefaultFieldsToReset({
@@ -451,6 +509,32 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
         fieldsToReset: 'all',
       })
     );
+
+    // If currently in ES|QL mode, find or create a proper (non-ESQL_TYPE) DataView for the
+    // FROM index pattern so Classic mode shows the right index — not the default DataView.
+    // The EsqlSource carries the index pattern as .title; no need to re-parse the query string.
+    let dataView = fallbackDataView;
+    const { currentDataSource$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentSource = currentDataSource$.getValue();
+    if (currentSource?.kind === 'esql') {
+      try {
+        const savedDataViews = await services.dataViews.getIdsWithTitle();
+        const match = savedDataViews.find((dv) => dv.title === currentSource.title);
+        if (match?.id) {
+          dataView = await services.dataViews.get(match.id);
+        } else {
+          const adHocDataView = await services.dataViews.create({
+            title: currentSource.title,
+            timeFieldName: currentSource.timeFieldName,
+          });
+          await services.dataViews.refreshFields(adHocDataView);
+          dispatch(appendAdHocDataViews(adHocDataView));
+          dataView = adHocDataView;
+        }
+      } catch {
+        // fall through to fallbackDataView
+      }
+    }
 
     const sort = getDefaultSort(
       dataView,
@@ -622,13 +706,13 @@ export const fetchData: InternalStateThunkActionCreator<
   };
 
 /**
- * Pause auto refresh interval if the data view is not time-based or is a rollup
+ * Pause auto refresh interval if the data source is not time-based or is a rollup
  */
 export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
-> = ({ tabId, dataView }) =>
+  [TabActionPayload<{ dataSource: DataSource }>]
+> = ({ tabId, dataSource }) =>
   function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
+    if (!dataSource.isTimeBased() || dataSource.isRollup()) {
       const currentState = getState();
       const globalState = selectTab(currentState, tabId).globalState;
       if (globalState?.refreshInterval && !globalState.refreshInterval.pause) {

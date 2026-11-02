@@ -16,16 +16,24 @@ import {
   getBaseScoreESQL,
   type EuidCompositeAggregation,
 } from '../../calculate_esql_risk_scores';
+import {
+  getStampedEuidCompositeQuery,
+  getStampedEuidRangeFilter,
+  getUnstampedAlertsCountQuery,
+} from '../../stamping_queries';
+import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import type { RiskScoreModifierEntity, ScoredEntityPage, StepResult } from './pipeline_types';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
+import type { EsqlPageProfileSummary } from '../instrumentation/esql_page_profile';
+import { summarizeEsqlPage } from '../instrumentation/esql_page_profile';
+import type { PageStepTimings } from '../instrumentation/page_timing_types';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import type { EntityStoreRefresh } from '../../persist_risk_scores_to_entity_store';
 import { createMissingEntities as runCreateMissingEntities } from './create_missing_entities';
-
-const BASE_SCORING_REQUEST_TIMEOUT = '5m';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -42,6 +50,8 @@ interface ScoreBaseEntitiesParams {
   abortSignal?: AbortSignal;
   /** Explicit creation opt-in; also makes lookup failures fatal so they cannot be treated as misses. */
   createMissingEntities: boolean;
+  /** Stage-owned collector shared across scoring and persistence, including failed pages. */
+  pageTimings: PageStepTimings;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
@@ -49,6 +59,8 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   idBasedRiskScoringEnabled: boolean;
   createMissingEntities: boolean;
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** Entity store `refresh` for the per-page writes. Omit to wait, as single-entity runs do. */
+  entityStoreRefresh?: EntityStoreRefresh;
   /** When true, populate `scores` in the summary. Omit for full-population runs. */
   collectScores?: boolean;
 }
@@ -83,11 +95,14 @@ interface EuidPageResult {
 /**
  * Streams base risk scores for one entity type, one page per yield.
  *
- * Each page: a composite aggregation over the alerts index (paginating by EUID
- * via a Painless runtime mapping) discovers the next page's upper-bound EUID,
- * then a single ES|QL query scores every alert in the half-open EUID range
- * `(previousUpper, currentUpper]`. The Phase-0 lookup index is unused here —
- * Phase 2 (resolution scoring) is its only reader.
+ * Each page: a composite aggregation over the alerts index (paginating by EUID)
+ * discovers the next page's upper-bound EUID, then a single ES|QL query scores
+ * every alert in the half-open EUID range `(previousUpper, currentUpper]`. The
+ * Phase-0 lookup index is unused here — Phase 2 (resolution scoring) is its only reader.
+ *
+ * When every in-scope alert carries a stamped EUID for this type, pages come from the stamped field
+ * and each scoring query reads only its page's alerts. Otherwise a Painless runtime mapping derives
+ * the EUIDs of the alerts without one, which runs over every alert on every page.
  *
  * Modifier entities are fetched only for IDs that produced scores.
  */
@@ -105,9 +120,18 @@ export const calculateBaseEntityScores = async function* ({
   calculationRunId,
   abortSignal,
   createMissingEntities,
+  pageTimings,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
+
+  const stamped = await allAlertsStamped({ esClient, entityType, alertFilters, alertsIndex });
+  pageTimings.setStamped(stamped);
+  logger.debug(
+    stamped
+      ? 'base scoring pages by stamped entity IDs'
+      : 'base scoring pages by derived entity IDs: some alerts have no stamped entity ID'
+  );
 
   do {
     if (abortSignal?.aborted) {
@@ -115,20 +139,25 @@ export const calculateBaseEntityScores = async function* ({
       return;
     }
 
-    const pageResult = await fetchNextEuidPage({
-      esClient,
-      entityType,
-      alertFilters,
-      alertsIndex,
-      pageSize,
-      afterKey,
-    });
+    pageTimings.startPage();
+    const pageResult = await pageTimings.time(['discovery'], () =>
+      fetchNextEuidPage({
+        esClient,
+        entityType,
+        alertFilters,
+        alertsIndex,
+        pageSize,
+        afterKey,
+        stamped,
+      })
+    );
     if (!pageResult) {
+      pageTimings.dropPage();
       return;
     }
 
     afterKey = pageResult.afterKey;
-    const scores = await scorePageFromAlerts({
+    const { scores, profileSummary } = await scorePageFromAlerts({
       esClient,
       entityType,
       bounds: { lower: previousPageUpperBound, upper: pageResult.upperBound },
@@ -136,27 +165,38 @@ export const calculateBaseEntityScores = async function* ({
       pageSize,
       alertsIndex,
       alertFilters,
+      stamped,
+      profile: pageTimings.shouldProfile(),
+      pageTimings,
     });
     previousPageUpperBound = pageResult.upperBound;
+    if (profileSummary) {
+      pageTimings.recordProfile(profileSummary);
+    }
 
     if (scores.length > 0) {
-      const entities = await fetchEntitiesByIds({
-        crudClient,
-        entityIds: scores.map((score) => score.entity_id),
-        logger,
-        errorContext:
-          'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
-        strict: createMissingEntities,
-      });
+      const entities = await pageTimings.time(['entity', 'fetch'], () =>
+        fetchEntitiesByIds({
+          onError: () => pageTimings.count('entityFetchFailures', 1),
+          crudClient,
+          entityIds: scores.map((score) => score.entity_id),
+          logger,
+          errorContext:
+            'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
+          strict: createMissingEntities,
+        })
+      );
 
-      yield applyBaseScoreModifiers({
-        scores,
-        entities,
-        now,
-        entityType,
-        calculationRunId,
-        watchlistConfigs,
-      });
+      yield pageTimings.timeSync(['modifiers'], () =>
+        applyBaseScoreModifiers({
+          scores,
+          entities,
+          now,
+          entityType,
+          calculationRunId,
+          watchlistConfigs,
+        })
+      );
     }
   } while (afterKey !== undefined);
 };
@@ -166,7 +206,9 @@ export const scoreBaseEntities = async ({
   idBasedRiskScoringEnabled,
   createMissingEntities: createMissingEntitiesEnabled,
   refresh,
+  entityStoreRefresh,
   collectScores,
+  pageTimings,
   ...params
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   let pagesProcessed = 0;
@@ -184,34 +226,43 @@ export const scoreBaseEntities = async ({
   for await (const page of calculateBaseEntityScores({
     ...params,
     createMissingEntities: createMissingEntitiesEnabled,
+    pageTimings,
   })) {
     pagesProcessed += 1;
+    pageTimings.count('pagesProcessed', 1);
     scoresCalculated += page.scores.length;
+    pageTimings.count('scoresCalculated', page.scores.length);
     // Scores without a canonical entity would create orphaned risk documents. Create eligible
     // entities from a representative alert when enabled; otherwise drop their scores.
     const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
     const missingScores = page.scores.filter((score) => !page.entities.has(score.id_value));
     scoresMissingFromStore += missingScores.length;
+    pageTimings.count('scoresMissingFromStore', missingScores.length);
 
     let riskIndexScores = inStoreScores;
     let entityStoreScores = inStoreScores;
 
     if (missingScores.length > 0) {
       if (createMissingEntitiesEnabled) {
-        const createResult = await runCreateMissingEntities({
-          esClient: params.esClient,
-          crudClient: params.crudClient,
-          entityType: params.entityType,
-          alertsIndex: params.alertsIndex,
-          alertFilters: params.alertFilters,
-          logger: params.logger,
-          missingScores,
-          abortSignal: params.abortSignal,
-        });
+        const createResult = await pageTimings.time(['entity', 'create'], () =>
+          runCreateMissingEntities({
+            esClient: params.esClient,
+            crudClient: params.crudClient,
+            entityType: params.entityType,
+            alertsIndex: params.alertsIndex,
+            alertFilters: params.alertFilters,
+            logger: params.logger,
+            missingScores,
+            abortSignal: params.abortSignal,
+          })
+        );
 
         entitiesCreated += createResult.created.length;
+        pageTimings.count('entitiesCreated', createResult.created.length);
         entityCreationsSkipped += createResult.skipped.length;
+        pageTimings.count('entityCreationsSkipped', createResult.skipped.length);
         entityCreationsFailed += createResult.failed.length;
+        pageTimings.count('entityCreationsFailed', createResult.failed.length);
 
         const createdSet = new Set(createResult.created);
         const alreadyExistsSet = new Set(createResult.alreadyExists);
@@ -235,6 +286,7 @@ export const scoreBaseEntities = async ({
     }
 
     scoresDroppedNotInStore += page.scores.length - riskIndexScores.length;
+    pageTimings.count('scoresDroppedNotInStore', page.scores.length - riskIndexScores.length);
 
     scoresWrittenRiskIndex += await persistScoresToRiskIndex({
       writer,
@@ -242,14 +294,20 @@ export const scoreBaseEntities = async ({
       scores: riskIndexScores,
       logger: params.logger,
       refresh,
+      pageTimings,
     });
-    const { docsWritten, errorsCount } = await persistScoresToEntityStore({
-      crudClient: params.crudClient,
-      logger: params.logger,
-      entityType: params.entityType,
-      scores: entityStoreScores,
-      enabled: idBasedRiskScoringEnabled,
-    });
+    const { docsWritten, errorsCount } = await pageTimings.time(['store', 'write'], () =>
+      persistScoresToEntityStore({
+        crudClient: params.crudClient,
+        logger: params.logger,
+        entityType: params.entityType,
+        scores: entityStoreScores,
+        enabled: idBasedRiskScoringEnabled,
+        refresh: entityStoreRefresh,
+      })
+    );
+    pageTimings.count('storeDocumentsWritten', docsWritten);
+    pageTimings.count('storeWriteFailures', errorsCount);
     scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
 
@@ -275,6 +333,29 @@ export const scoreBaseEntities = async ({
   };
 };
 
+/**
+ * Whether every in-scope alert that could resolve to an entity of this type carries a stamped
+ * EUID for it, so pages can come from the stamped field. Checked once per run: alerts written
+ * after the check are scored by the next run.
+ */
+const allAlertsStamped = async ({
+  esClient,
+  entityType,
+  alertFilters,
+  alertsIndex,
+}: {
+  esClient: ElasticsearchClient;
+  entityType: EntityType;
+  alertFilters: QueryDslQueryContainer[];
+  alertsIndex: string;
+}): Promise<boolean> => {
+  const { count } = await esClient.count(
+    getUnstampedAlertsCountQuery(entityType, alertFilters, alertsIndex),
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+  );
+  return count === 0;
+};
+
 const fetchNextEuidPage = async ({
   esClient,
   entityType,
@@ -282,6 +363,7 @@ const fetchNextEuidPage = async ({
   alertsIndex,
   pageSize,
   afterKey,
+  stamped,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -289,27 +371,35 @@ const fetchNextEuidPage = async ({
   alertsIndex: string;
   pageSize: number;
   afterKey: Record<string, string> | undefined;
+  stamped: boolean;
 }): Promise<EuidPageResult | null> => {
+  const compositeParams = { index: alertsIndex, pageSize, afterKey };
   const compositeResponse = await esClient.search(
-    getEuidCompositeQuery(entityType, alertFilters, {
-      index: alertsIndex,
-      pageSize,
-      afterKey,
-    }),
-    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
+    stamped
+      ? getStampedEuidCompositeQuery(entityType, alertFilters, compositeParams)
+      : getEuidCompositeQuery(entityType, alertFilters, compositeParams),
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
 
   const compositeAgg = (
     compositeResponse.aggregations as { by_entity_id?: EuidCompositeAggregation } | undefined
   )?.by_entity_id;
   const buckets = compositeAgg?.buckets ?? [];
-  if (buckets.length === 0) {
+
+  // The stamped field also holds other types' EUIDs, which sort after this type's: the first one
+  // ends the type's pages.
+  const typePrefix = `${entityType}:`;
+  const firstOtherType = stamped
+    ? buckets.findIndex((bucket) => !bucket.key.entity_id.startsWith(typePrefix))
+    : -1;
+  const pageBuckets = firstOtherType === -1 ? buckets : buckets.slice(0, firstOtherType);
+  if (pageBuckets.length === 0) {
     return null;
   }
 
   return {
-    upperBound: buckets[buckets.length - 1].key.entity_id,
-    afterKey: compositeAgg?.after_key,
+    upperBound: pageBuckets[pageBuckets.length - 1].key.entity_id,
+    afterKey: firstOtherType === -1 ? compositeAgg?.after_key : undefined,
   };
 };
 
@@ -321,6 +411,9 @@ const scorePageFromAlerts = async ({
   pageSize,
   alertsIndex,
   alertFilters,
+  stamped,
+  profile,
+  pageTimings,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -329,17 +422,41 @@ const scorePageFromAlerts = async ({
   pageSize: number;
   alertsIndex: string;
   alertFilters: QueryDslQueryContainer[];
-}): Promise<ParsedRiskScore[]> => {
+  stamped: boolean;
+  profile: boolean;
+  pageTimings: PageStepTimings;
+}): Promise<{ scores: ParsedRiskScore[]; profileSummary?: EsqlPageProfileSummary }> => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
-  const esqlResponse = await esClient.esql.query(
-    {
-      query,
-      filter: { bool: { filter: alertFilters } },
-    },
-    { requestTimeout: BASE_SCORING_REQUEST_TIMEOUT }
+  const startedAt = Date.now();
+  const esqlResponse = await pageTimings.time(
+    ['esql'],
+    () =>
+      esClient.esql.query(
+        {
+          query,
+          filter: {
+            bool: {
+              filter: stamped
+                ? [...alertFilters, getStampedEuidRangeFilter(entityType, bounds)]
+                : alertFilters,
+            },
+          },
+          ...(profile ? { profile: true } : {}),
+        },
+        { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+      ),
+    (response) => response.took
   );
+  const wallMs = Date.now() - startedAt;
+  pageTimings.count('esqlRows', esqlResponse.values?.length ?? 0);
+  pageTimings.count('partialResponses', Number(esqlResponse.is_partial === true));
 
-  return (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex));
+  return {
+    scores: pageTimings.timeSync(['parse'], () =>
+      (esqlResponse.values ?? []).map(parseEsqlBaseScoreRow(alertsIndex, sampleSize))
+    ),
+    profileSummary: profile ? summarizeEsqlPage(esqlResponse, wallMs) : undefined,
+  };
 };
 
 const applyBaseScoreModifiers = ({

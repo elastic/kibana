@@ -31,7 +31,7 @@ import type {
   SearchTriggerEventLogResult,
 } from './trigger_events/event_logs/trigger_event_log_query';
 import type { EmitEvent } from './trigger_events/trigger_event_handler';
-import type { IWorkflowEventLoggerService } from './workflow_event_logger';
+import type { IWorkflowLogsQueryService } from './workflow_event_logger';
 
 export type {
   DataClient,
@@ -83,7 +83,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   cancelWorkflowExecution: CancelWorkflowExecution;
   cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions;
   resumeWorkflowExecution: ResumeWorkflowExecution;
-  workflowEventLoggerService: IWorkflowEventLoggerService;
+  workflowEventLoggerService: IWorkflowLogsQueryService;
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;
@@ -137,6 +137,12 @@ export type CancelAllActiveWorkflowExecutions = (params: {
   onCancelled?: (executionId: string) => void;
 }) => Promise<void>;
 
+/**
+ * Stores the response of an execution waiting for input and hands it to Task Manager. With a
+ * request, a handoff that keeps failing is reverted and rejected with
+ * `WorkflowResumeNotAppliedError`, as are failures before anything is written, so the caller can
+ * release its claim on the waiting step. Any other rejection may have left the response pending.
+ */
 export type ResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
@@ -151,13 +157,15 @@ export type InternalResumeWorkflowExecution = (
   executionId: string,
   spaceId: string,
   context: Record<string, unknown> | undefined,
-  request?: KibanaRequest
+  request?: KibanaRequest,
+  options?: { isUserInteractive?: boolean }
 ) => Promise<void>;
 
 export type ScheduleWorkflow = (
   workflow: WorkflowExecutionEngineModel,
   context: Record<string, unknown>,
-  request: KibanaRequest
+  request: KibanaRequest,
+  options?: { authenticatedUser?: string }
 ) => Promise<ExecuteWorkflowResponse>;
 
 export type BulkScheduleWorkflow = (

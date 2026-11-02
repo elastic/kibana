@@ -61,15 +61,5 @@ describe('pagination persist', () => {
       setPersistedPageSize('my-list', 100);
       expect(localStorage.getItem('contentList:pageSize:my-list')).toBe('100');
     });
-
-    it('does not throw when localStorage is unavailable', () => {
-      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-        throw new Error('localStorage unavailable');
-      });
-
-      expect(() => setPersistedPageSize('my-list', 50)).not.toThrow();
-
-      jest.restoreAllMocks();
-    });
   });
 });

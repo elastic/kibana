@@ -7,11 +7,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import {
-  GENAI_EBT_CLICK_ACTIONS,
-  GENAI_TAB_IMPRESSION_EVENT_TYPE,
-  type GenAiFields,
-} from '@kbn/apm-ui-shared';
+import type { GenAiFields } from '@kbn/genai-common';
+import { GENAI_EBT_CLICK_ACTIONS, GENAI_TAB_IMPRESSION_EVENT_TYPE } from '@kbn/apm-ui-shared';
 import { getGenAiTabContent } from './get_genai_tab_content';
 
 const genAi: GenAiFields = {

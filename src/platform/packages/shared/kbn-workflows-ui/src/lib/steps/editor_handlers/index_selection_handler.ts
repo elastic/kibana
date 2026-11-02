@@ -30,13 +30,13 @@ const DEFAULT_OPTIONS: Required<IndexSelectionHandlerOptions> = {
   showAllIndices: false,
 };
 
-const indexLabel = i18n.translate('workflows.indexSelection.kindIndex', {
+const indexLabel = i18n.translate('workflowsUi.indexSelection.kindIndex', {
   defaultMessage: 'Index',
 });
-const aliasLabel = i18n.translate('workflows.indexSelection.kindAlias', {
+const aliasLabel = i18n.translate('workflowsUi.indexSelection.kindAlias', {
   defaultMessage: 'Alias',
 });
-const dataStreamLabel = i18n.translate('workflows.indexSelection.kindDataStream', {
+const dataStreamLabel = i18n.translate('workflowsUi.indexSelection.kindDataStream', {
   defaultMessage: 'Data stream',
 });
 
@@ -57,7 +57,7 @@ function getKindFromTags(item: MatchedItem): string {
 function toSelectionOption(item: MatchedItem): SelectionOption<string> {
   return {
     value: item.name,
-    description: i18n.translate('workflows.indexSelection.kind', {
+    description: i18n.translate('workflowsUi.indexSelection.kind', {
       defaultMessage: 'Type: {kind}',
       values: { kind: getKindFromTags(item) },
     }),
@@ -67,7 +67,7 @@ function toSelectionOption(item: MatchedItem): SelectionOption<string> {
 function toPatternSelectionOption(pattern: string, count: number): SelectionOption<string> {
   return {
     value: pattern,
-    description: i18n.translate('workflows.indexSelection.wildcardSuggestion', {
+    description: i18n.translate('workflowsUi.indexSelection.wildcardSuggestion', {
       defaultMessage: 'Includes {count, plural, one {# source} other {# sources}}',
       values: { count },
     }),
@@ -146,7 +146,7 @@ export const getIndexSelectionHandler = (
       if (option) {
         const { description } = option;
         return {
-          message: i18n.translate('workflows.indexSelection.detailsFound', {
+          message: i18n.translate('workflowsUi.indexSelection.detailsFound', {
             defaultMessage: '✓ index pattern `{input}` exists. \n{optionDescription}',
             values: { input, optionDescription: description ? `\n${description}` : '' },
           }),
@@ -156,7 +156,7 @@ export const getIndexSelectionHandler = (
 
       if (!allowWildcard && input.includes('*')) {
         return {
-          message: i18n.translate('workflows.indexSelection.detailsWildcardNotAllowed', {
+          message: i18n.translate('workflowsUi.indexSelection.detailsWildcardNotAllowed', {
             defaultMessage: 'Wildcard patterns are not allowed.',
           }),
           links: [],
@@ -169,14 +169,14 @@ export const getIndexSelectionHandler = (
       });
 
       return {
-        message: i18n.translate('workflows.indexSelection.detailsNotFound', {
+        message: i18n.translate('workflowsUi.indexSelection.detailsNotFound', {
           defaultMessage:
             'No indices, aliases, or data streams currently match `{pattern}`. The workflow can still run, matches are evaluated at execution time.',
           values: { pattern: input },
         }),
         links: [
           {
-            text: i18n.translate('workflows.indexSelection.openIndexManagement', {
+            text: i18n.translate('workflowsUi.indexSelection.openIndexManagement', {
               defaultMessage: 'Open Index Management',
             }),
             path: indexManagementUrl,

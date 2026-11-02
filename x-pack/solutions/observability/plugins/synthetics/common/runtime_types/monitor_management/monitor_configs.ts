@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { SchemaOutput } from '../schema_output';
+import type {
+  KerberosConfigCodec,
+  NtlmConfigCodec,
+  RequestBodyCheckCodec,
+  ResponseCheckJSONCodec,
+} from '../schemas/monitor_configs';
 
 export enum MonitorTypeEnum {
   HTTP = 'http',
@@ -95,26 +100,24 @@ export enum Mode {
   ALL = 'all',
 }
 
-export const MonitorTypeCodec = z.enum(MonitorTypeEnum);
-export const ResponseBodyIndexPolicyCodec = z.enum(ResponseBodyIndexPolicy);
-export const CodeEditorModeCodec = z.enum(CodeEditorMode);
-export const ScheduleUnitCodec = z.enum(ScheduleUnit);
-export const VerificationModeCodec = z.enum(VerificationMode);
-export const TLSVersionCodec = z.enum(TLSVersion);
-export const ScreenshotOptionCodec = z.enum(ScreenshotOption);
-export const SourceTypeCodec = z.enum(SourceType);
-export const FormMonitorTypeCodec = z.enum(FormMonitorType);
-export const ModeCodec = z.enum(Mode);
+// UI-only selector value used by the HTTP monitor form to switch between the
+// mutually exclusive authentication schemes. Not persisted directly; the
+// underlying `kerberos.enabled` / `ntlm.enabled` flags (and basic auth
+// username/password) are the source of truth.
+export enum HttpAuthMethod {
+  NONE = 'none',
+  BASIC = 'basic',
+  KERBEROS = 'kerberos',
+  NTLM = 'ntlm',
+}
 
-export const ResponseCheckJSONCodec = z.looseObject({
-  description: z.string(),
-  expression: z.string(),
-});
+// Mirrors the libbeat Kerberos client `auth_type` option used by Heartbeat.
+export enum KerberosAuthType {
+  PASSWORD = 'password',
+  KEYTAB = 'keytab',
+}
 
-export const RequestBodyCheckCodec = z.looseObject({
-  value: z.string(),
-  type: CodeEditorModeCodec,
-});
-
+export type KerberosConfig = SchemaOutput<typeof KerberosConfigCodec>;
+export type NtlmConfig = SchemaOutput<typeof NtlmConfigCodec>;
 export type ResponseCheckJSON = SchemaOutput<typeof ResponseCheckJSONCodec>;
 export type RequestBodyCheck = SchemaOutput<typeof RequestBodyCheckCodec>;

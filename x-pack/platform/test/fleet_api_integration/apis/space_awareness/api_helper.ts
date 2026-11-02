@@ -793,6 +793,7 @@ export class SpaceTestApiClient {
   async deleteDownloadSource(id: string, spaceId?: string) {
     const res = await this.supertest
       .delete(`${this.getBaseUrl(spaceId)}/api/fleet/agent_download_sources/${id}`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx');
 
     expectStatusCode200(res);
@@ -824,6 +825,7 @@ export class SpaceTestApiClient {
   async deleteFleetServerHosts(id: string, spaceId?: string) {
     const res = await this.supertest
       .delete(`${this.getBaseUrl(spaceId)}/api/fleet/fleet_server_hosts/${id}`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx');
 
     expectStatusCode200(res);
@@ -847,6 +849,7 @@ export class SpaceTestApiClient {
   async deleteOutput(id: string, spaceId?: string) {
     const res = await this.supertest
       .delete(`${this.getBaseUrl(spaceId)}/api/fleet/outputs/${id}`)
+      .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx');
 
     expectStatusCode200(res);

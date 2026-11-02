@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { nodeBuilder } from '@kbn/es-query';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
 import {
@@ -201,5 +202,147 @@ describe('ensureAuthorized', () => {
         'test/create',
       ],
     });
+  });
+});
+
+describe('getFindAuthorizationFilter', () => {
+  const getPrivilege = mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get');
+
+  test('filters to the requested spaces without checking privileges when there is no authorization api', async () => {
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+    });
+
+    await expect(
+      actionsAuthorization.getFindAuthorizationFilter({
+        namespaces: ['space-1'],
+      })
+    ).resolves.toEqual({
+      filter: nodeBuilder.is('kibana.space_ids', 'space-1'),
+    });
+  });
+
+  test('filters to the requested spaces without checking privileges when the security license is disabled', async () => {
+    const { authorization } = mockSecurity();
+    authorization.mode.useRbacForRequest.mockReturnValue(false);
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+    });
+
+    await expect(
+      actionsAuthorization.getFindAuthorizationFilter({ namespaces: ['space-1'] })
+    ).resolves.toEqual({
+      filter: nodeBuilder.is('kibana.space_ids', 'space-1'),
+    });
+    expect(authorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
+  });
+
+  test('checks the get privilege in every requested space', async () => {
+    const { authorization } = mockSecurity();
+    const atSpaces = jest.fn().mockResolvedValue({
+      username: 'some-user',
+      hasAllRequested: true,
+      privileges: {
+        kibana: [
+          { resource: 'space-1', privilege: getPrivilege, authorized: true },
+          { resource: 'default', privilege: getPrivilege, authorized: true },
+        ],
+      },
+    });
+    authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces });
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+    });
+
+    await expect(
+      actionsAuthorization.getFindAuthorizationFilter({
+        namespaces: ['space-1', undefined],
+      })
+    ).resolves.toEqual({
+      filter: nodeBuilder.or([
+        nodeBuilder.is('kibana.space_ids', 'space-1'),
+        nodeBuilder.is('kibana.space_ids', 'default'),
+      ]),
+    });
+
+    expect(atSpaces).toHaveBeenCalledWith(['space-1', 'default'], {
+      kibana: [getPrivilege],
+    });
+  });
+
+  test('throws when at least one requested space lacks the get privilege', async () => {
+    const { authorization } = mockSecurity();
+    const atSpaces = jest.fn().mockResolvedValue({
+      username: 'some-user',
+      hasAllRequested: false,
+      privileges: {
+        kibana: [
+          { resource: 'space-1', privilege: getPrivilege, authorized: false },
+          { resource: 'default', privilege: getPrivilege, authorized: true },
+        ],
+      },
+    });
+    authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces });
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+    });
+
+    await expect(
+      actionsAuthorization.getFindAuthorizationFilter({
+        namespaces: ['space-1', undefined],
+      })
+    ).rejects.toThrow(
+      'Unauthorized to get actions. Validate that you have permissions to access spaces: space-1.'
+    );
+  });
+
+  test('filters to current space when namespaces are omitted', async () => {
+    const { authorization } = mockSecurity();
+    const atSpaces = jest.fn().mockResolvedValue({
+      username: 'some-user',
+      hasAllRequested: true,
+      privileges: {
+        kibana: [
+          { resource: 'space-1', privilege: getPrivilege, authorized: true },
+          { resource: 'default', privilege: 'login', authorized: true },
+        ],
+      },
+    });
+    authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces });
+    const actionsAuthorization = new ActionsAuthorization({
+      request: { ...request, spaceId: 'space-1' } as KibanaRequest,
+      authorization,
+    });
+
+    await expect(actionsAuthorization.getFindAuthorizationFilter({})).resolves.toEqual({
+      filter: nodeBuilder.is('kibana.space_ids', 'space-1'),
+    });
+
+    expect(atSpaces).toHaveBeenCalledWith(['space-1'], {
+      kibana: [getPrivilege],
+    });
+  });
+
+  test('throws when namespaces are omitted and no space is authorized', async () => {
+    const { authorization } = mockSecurity();
+    const atSpaces = jest.fn().mockResolvedValue({
+      username: 'some-user',
+      hasAllRequested: false,
+      privileges: {
+        kibana: [],
+      },
+    });
+    authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces });
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+    });
+
+    await expect(actionsAuthorization.getFindAuthorizationFilter({})).rejects.toThrow(
+      'Unauthorized to get actions.'
+    );
   });
 });

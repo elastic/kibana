@@ -20,7 +20,7 @@ export const useSyncJobs = (
     queryKey: ['fetchSyncJobs', pagination],
     queryFn: async () =>
       http.fetch<Paginate<ConnectorSyncJob>>(
-        `/internal/serverless_search/connectors/${connectorId}/sync_jobs`,
+        `/internal/serverless_search/connectors/${encodeURIComponent(connectorId)}/sync_jobs`,
         {
           query: {
             from: pagination.pageIndex * (pagination.pageSize || 10),

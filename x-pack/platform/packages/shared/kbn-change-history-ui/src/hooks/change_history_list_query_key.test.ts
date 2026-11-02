@@ -11,44 +11,61 @@ import {
   changeHistoryObjectQueryKeyPrefix,
   changeHistoryScopeQueryKeyPrefix,
 } from './change_history_list_query_key';
-import { TEST_CHANGE_HISTORY_SCOPE } from '../test_utils/change_history_test_fixtures';
+import {
+  TEST_CHANGE_HISTORY_SCOPE,
+  TEST_CHANGE_HISTORY_SUPPORTS,
+} from '../test_utils/change_history_test_fixtures';
 
 describe('change history query keys', () => {
   it('includes scope segments before objectId', () => {
-    expect(changeHistoryScopeQueryKeyPrefix(TEST_CHANGE_HISTORY_SCOPE)).toEqual([
-      'change-history',
-      'stack',
-      'documents',
-      'document',
-    ]);
-    expect(changeHistoryObjectQueryKeyPrefix('obj-1', TEST_CHANGE_HISTORY_SCOPE)).toEqual([
-      'change-history',
-      'stack',
-      'documents',
-      'document',
-      'obj-1',
-    ]);
+    expect(
+      changeHistoryScopeQueryKeyPrefix(TEST_CHANGE_HISTORY_SCOPE, TEST_CHANGE_HISTORY_SUPPORTS)
+    ).toEqual(['change-history', 'stack', 'documents', 'document', false]);
+    expect(
+      changeHistoryObjectQueryKeyPrefix(
+        'obj-1',
+        TEST_CHANGE_HISTORY_SCOPE,
+        TEST_CHANGE_HISTORY_SUPPORTS
+      )
+    ).toEqual(['change-history', 'stack', 'documents', 'document', false, 'obj-1']);
     expect(
       changeHistoryListQueryKey({
         objectId: 'obj-1',
         scope: TEST_CHANGE_HISTORY_SCOPE,
         pageSize: 20,
+        supports: TEST_CHANGE_HISTORY_SUPPORTS,
       })
-    ).toEqual(['change-history', 'stack', 'documents', 'document', 'obj-1', 'list', 20]);
+    ).toEqual(['change-history', 'stack', 'documents', 'document', false, 'obj-1', 'list', 20]);
     expect(
       changeHistoryDetailQueryKey({
         objectId: 'obj-1',
         changeId: 'evt-1',
         scope: TEST_CHANGE_HISTORY_SCOPE,
+        supports: TEST_CHANGE_HISTORY_SUPPORTS,
       })
-    ).toEqual(['change-history', 'stack', 'documents', 'document', 'obj-1', 'detail', 'evt-1']);
+    ).toEqual([
+      'change-history',
+      'stack',
+      'documents',
+      'document',
+      false,
+      'obj-1',
+      'detail',
+      'evt-1',
+    ]);
   });
 
   it('isolates the same objectId across scopes', () => {
     const otherScope = { module: 'stack', dataset: 'cases', objectType: 'case' };
 
-    expect(changeHistoryObjectQueryKeyPrefix('same-id', TEST_CHANGE_HISTORY_SCOPE)).not.toEqual(
-      changeHistoryObjectQueryKeyPrefix('same-id', otherScope)
+    expect(
+      changeHistoryObjectQueryKeyPrefix(
+        'same-id',
+        TEST_CHANGE_HISTORY_SCOPE,
+        TEST_CHANGE_HISTORY_SUPPORTS
+      )
+    ).not.toEqual(
+      changeHistoryObjectQueryKeyPrefix('same-id', otherScope, TEST_CHANGE_HISTORY_SUPPORTS)
     );
   });
 });

@@ -9,11 +9,15 @@ applies_to:
 
 # Azure Monitor connector [azure-monitor-action-type]
 
-The Azure Monitor connector connects directly to the Azure Resource Manager (ARM) and Log Analytics REST APIs. It lets a workflow or agent triage an Azure Monitor alert without leaving Elastic: list and inspect fired or resolved alerts, change an alert's state, query the metrics or logs behind it, correlate it with Activity Log events, and mute noisy alert rules during a maintenance window.
+The Azure Monitor connector connects directly to the Azure Resource Manager (ARM) and Log Analytics REST APIs. It lets an agent triage an Azure Monitor alert without leaving Elastic: list and inspect fired or resolved alerts, change an alert's state, query the metrics or logs behind it, correlate it with Activity Log events, and mute noisy alert rules during a maintenance window.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
 
 ## Overview
 
-This is a **custom connector** that authenticates as an Azure AD app registration (service principal) using the OAuth 2.0 Client Credentials grant.
+The Azure Monitor connector authenticates as an Azure AD app registration (service principal) using the OAuth 2.0 Client Credentials grant.
 
 ## Create connectors in {{kib}} [define-azure-monitor-ui]
 

@@ -31,7 +31,7 @@ export const kbnFullScreenBgCss = ({ euiTheme }: UseEuiTheme) => {
     bottom: 0,
     zIndex: Number(euiTheme.levels.navigation) + 1000,
     background: 'inherit',
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    backgroundColor: euiTheme.colors.body,
     overflow: 'auto',
     [euiCanAnimate]: {
       opacity: 0,

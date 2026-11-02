@@ -8,52 +8,46 @@
 // This entire module is deleted when the managed source becomes the default
 // and the legacy blob (mitre_tactics_techniques) is removed.
 
+import type { Logger } from '@kbn/core/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
-import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
+import type { MitreEntitySummaryBuckets, MitreFramework } from '@kbn/security-mitre-attack-common';
+import { DEFAULT_MITRE_FRAMEWORK } from '@kbn/security-mitre-attack-common';
 
-// Managed and legacy results are cached under separate keys so that a flag flip
-// within one process cannot serve the wrong dataset.
-let managedCachePromise: Promise<MitreEntitySummaryBuckets> | null = null;
+// Only the legacy blob is cached: it never changes within a process. Managed
+// reads go to the data client every time because the Saved Objects can change
+// at runtime, and the uncached read is one small find on low-frequency paths.
 let legacyCachePromise: Promise<MitreEntitySummaryBuckets> | null = null;
 
-/** Resets both caches. Exported for test isolation only. */
+/** Resets the legacy blob cache. Exported for test isolation only. */
 export const resetResolveMitreBucketsCache = (): void => {
-  managedCachePromise = null;
   legacyCachePromise = null;
 };
 
 /**
- * Returns MITRE ATT&CK entity summary buckets, sourcing from the managed client
- * when available and adapting the legacy static blob otherwise. Results are
- * module-level cached by source so repeated requests do not re-query. An empty
- * managed result (SO population not yet complete) is never cached.
+ * Returns MITRE entity summary buckets for one framework from the managed data client when
+ * one is given, otherwise from the cached legacy blob (enterprise only). Throws when the managed
+ * collection is empty (population not finished) so callers hit their existing
+ * degraded-mode handling instead of treating every rule's MITRE IDs as invalid.
  */
 export const resolveMitreBuckets = async (
-  mitreDataClient?: MitreAttackDataClient
+  mitreDataClient?: MitreAttackDataClient,
+  framework: MitreFramework = DEFAULT_MITRE_FRAMEWORK
 ): Promise<MitreEntitySummaryBuckets> => {
   if (mitreDataClient) {
-    if (!managedCachePromise) {
-      // Assign the Promise before any await so concurrent callers share the same
-      // in-flight request.
-      managedCachePromise = mitreDataClient.list().then(
-        (collection): MitreEntitySummaryBuckets => {
-          // An empty managed collection means SO population has not completed yet.
-          // Returning it would be indistinguishable from real data to callers —
-          // every MITRE ID on every rule would appear invalid. Clear the cache and
-          // throw so callers' existing degraded-mode error handling engages instead.
-          if (collection.tactics.length === 0 && collection.techniques.length === 0) {
-            managedCachePromise = null;
-            throw new Error('Managed MITRE data is not initialized');
-          }
-          return collection;
-        },
-        (err) => {
-          managedCachePromise = null;
-          throw err;
-        }
-      );
+    const collection = await mitreDataClient.list({ framework });
+    // An empty collection means SO population has not finished. Throw rather than
+    // return it, otherwise every rule's MITRE IDs would look invalid to callers.
+    if (collection.tactics.length === 0 && collection.techniques.length === 0) {
+      throw new Error(`Managed MITRE data is not initialized (framework: ${framework})`);
     }
-    return managedCachePromise;
+    return collection;
+  }
+
+  // The legacy blob is ATT&CK Enterprise only, regardless of what the default framework is.
+  if (framework !== 'enterprise') {
+    throw new Error(
+      `Legacy MITRE data source only provides the enterprise framework (requested: ${framework})`
+    );
   }
 
   // Fallback: serves the bundled legacy blob when xpack.mitreAttack.managedSourceEnabled is off.
@@ -73,4 +67,40 @@ export const resolveMitreBuckets = async (
     });
   }
   return legacyCachePromise;
+};
+
+/**
+ * Resolves buckets for each requested framework independently. Frameworks that fail to
+ * resolve are omitted so one failure does not drop the others.
+ */
+export const resolveMitreBucketsByFramework = async (
+  mitreDataClient: MitreAttackDataClient | undefined,
+  frameworks: readonly MitreFramework[],
+  logger?: Logger
+): Promise<Partial<Record<MitreFramework, MitreEntitySummaryBuckets>>> => {
+  // The legacy source (no data client) serves Enterprise only, so skip other frameworks
+  // up front instead of attempting and failing each one.
+  const availableFrameworks = mitreDataClient
+    ? frameworks
+    : frameworks.filter((framework) => framework === 'enterprise');
+
+  const results = await Promise.allSettled(
+    availableFrameworks.map((framework) => resolveMitreBuckets(mitreDataClient, framework))
+  );
+
+  const bucketsByFramework: Partial<Record<MitreFramework, MitreEntitySummaryBuckets>> = {};
+  results.forEach((result, index) => {
+    const framework = availableFrameworks[index];
+    if (result.status === 'fulfilled') {
+      bucketsByFramework[framework] = result.value;
+      return;
+    }
+    const { reason } = result;
+    logger?.debug(
+      `Failed to resolve MITRE buckets for framework "${framework}": ${
+        reason instanceof Error ? reason.message : String(reason)
+      }`
+    );
+  });
+  return bucketsByFramework;
 };

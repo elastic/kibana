@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
@@ -78,11 +77,26 @@ describe('DetectionRulesClient change tracking', () => {
       errors: [],
       total: 0,
     });
+    rulesClient.bulkUpdateRules.mockImplementation(async (args) => ({
+      successfulIds: args.rules.map((rule) => rule.id),
+      errors: [],
+      total: args.rules.length,
+    }));
+    rulesClient.bulkEnableRules.mockResolvedValue({
+      errors: [],
+      rules: [],
+      total: 0,
+      taskIdsFailedToBeEnabled: [],
+    });
+    rulesClient.bulkDisableRules.mockResolvedValue({
+      errors: [],
+      rules: [],
+      total: 0,
+    });
 
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
-      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient: savedObjectsClientMock.create(),
@@ -161,7 +175,7 @@ describe('DetectionRulesClient change tracking', () => {
           },
         });
 
-        expect(rulesClient.update).toHaveBeenCalledWith(
+        expect(rulesClient.bulkUpdateRules).toHaveBeenCalledWith(
           expect.objectContaining({
             changeTracking: {
               action: SecurityRuleChangeTrackingAction.ruleImport,
@@ -283,10 +297,14 @@ describe('DetectionRulesClient change tracking', () => {
 
   describe('changeTracking.bulkCount', () => {
     it('bulkDeleteRules uses caller-provided bulkCount', async () => {
-      const ruleIds = ['id-1', 'id-2', 'id-3'];
+      const rules = [
+        getRuleMock(getQueryRuleParams({ ruleId: 'id-1' })),
+        getRuleMock(getQueryRuleParams({ ruleId: 'id-2' })),
+        getRuleMock(getQueryRuleParams({ ruleId: 'id-3' })),
+      ];
 
       await detectionRulesClient.bulkDeleteRules({
-        ruleIds,
+        rules,
         changeTracking: { metadata: { bulkCount: 10 } },
       });
 
@@ -297,14 +315,18 @@ describe('DetectionRulesClient change tracking', () => {
       );
     });
 
-    it('bulkDeleteRules defaults bulkCount to ruleIds.length when not provided', async () => {
-      const ruleIds = ['id-1', 'id-2', 'id-3'];
+    it('bulkDeleteRules defaults bulkCount to rules.length when not provided', async () => {
+      const rules = [
+        getRuleMock(getQueryRuleParams({ ruleId: 'id-1' })),
+        getRuleMock(getQueryRuleParams({ ruleId: 'id-2' })),
+        getRuleMock(getQueryRuleParams({ ruleId: 'id-3' })),
+      ];
 
-      await detectionRulesClient.bulkDeleteRules({ ruleIds });
+      await detectionRulesClient.bulkDeleteRules({ rules });
 
       expect(rulesClient.bulkDeleteRules).toHaveBeenCalledWith(
         expect.objectContaining({
-          changeTracking: expect.objectContaining({ metadata: { bulkCount: ruleIds.length } }),
+          changeTracking: expect.objectContaining({ metadata: { bulkCount: rules.length } }),
         })
       );
     });

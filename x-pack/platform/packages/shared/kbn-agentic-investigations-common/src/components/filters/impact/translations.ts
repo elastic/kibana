@@ -11,4 +11,22 @@ export const IMPACT_LABELS = Object.freeze({
   title: i18n.translate('xpack.alertzero.impact.title', {
     defaultMessage: 'Impact',
   }),
+  showMore: (count: number) =>
+    i18n.translate('xpack.alertzero.impact.showMore', {
+      defaultMessage: '+{count}',
+      values: { count },
+    }),
+  showMoreAriaLabel: (count: number) =>
+    i18n.translate('xpack.alertzero.impact.showMoreAriaLabel', {
+      defaultMessage: 'Show {count} more',
+      values: { count },
+    }),
+  reachLimit: (limit: number, count: number) =>
+    i18n.translate('xpack.alertzero.impact.reachLimit', {
+      defaultMessage: 'Only the first {limit} entities can be listed; {count} more are not shown.',
+      values: { limit, count },
+    }),
+  showFewer: i18n.translate('xpack.alertzero.impact.showFewer', {
+    defaultMessage: 'Show fewer',
+  }),
 });

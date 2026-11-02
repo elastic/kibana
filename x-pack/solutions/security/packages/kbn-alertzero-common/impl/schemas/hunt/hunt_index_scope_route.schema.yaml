@@ -9,26 +9,17 @@ paths:
       x-labels: [ess, serverless]
       operationId: HuntIndexScope
       description: >-
-        Index-scope projection over resolveIndexScope, one entry per technology
-        (or the single requested one), for the given space. Not the same as
-        Security Solution threat-intel readiness (`/internal/threat_intel/readiness`)
-        or SIEM Readiness; this only reports which hunt telemetry indices exist.
-      summary: Hunt index scope per technology
+        The hunt scope for the space: the Security Solution default data view the
+        hunt searches, and what resolved inside it. Not the same as Security
+        Solution threat-intel readiness (`/internal/threat_intel/readiness`) or
+        SIEM Readiness; this only reports whether the hunt has anything to search.
+      summary: Hunt index scope
       tags:
         - AlertZero API
-      parameters:
-        - name: technology
-          in: query
-          required: false
-          schema:
-            $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
-          description: Limit the index-scope check to a single technology
       responses:
         '200':
           description: Successful response
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '../components/hunt.schema.yaml#/components/schemas/ResolvedIndexScope'
+                $ref: '../components/hunt.schema.yaml#/components/schemas/HuntScope'

@@ -70,6 +70,7 @@ describe('unsnoozeAlertInstance()', () => {
         ],
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       { version: '123' }
     );

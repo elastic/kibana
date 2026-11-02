@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const ESCALATION_LINK = 'https://github.com/elastic/kibana/issues/new';
+export const README_LINK =
+  'https://github.com/elastic/kibana/blob/main/packages/kbn-api-contracts/README.md';

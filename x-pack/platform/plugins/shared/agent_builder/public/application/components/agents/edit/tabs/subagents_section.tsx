@@ -23,7 +23,6 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgents } from '../../../../hooks/agents/use_agents';
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import type { AgentFormData } from '../agent_form';
 
 interface SubagentsSectionProps {
@@ -35,7 +34,6 @@ interface SubagentsSectionProps {
  * Full-page-editor variant of the sub-agents section.
  */
 export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) => {
-  const experimentalOn = useExperimentalFeatures();
   const { agents } = useAgentBuilderAgents();
 
   const { control, formState } = useFormContext<AgentFormData>();
@@ -72,8 +70,6 @@ export const SubagentsSection: React.FC<SubagentsSectionProps> = ({ agentId }) =
       .map((a) => ({ value: a.id, label: `${a.name} (${a.id})` }));
     return [selfOption, ...others];
   }, [agents, agentId]);
-
-  if (!experimentalOn) return null;
 
   return (
     <>

@@ -1519,6 +1519,14 @@ describe('TableListView', () => {
               color: '',
               managed: false,
             },
+            {
+              id: 'id-tag-amp',
+              name: 'R&D',
+              type: 'tag',
+              description: '',
+              color: '',
+              managed: false,
+            },
           ],
         }),
         {
@@ -1663,6 +1671,35 @@ describe('TableListView', () => {
       expect(searchTerm).toBe(expected);
     });
 
+    test('should keep ampersands in a tag name when updating the URL', async () => {
+      let testBed: TestBed;
+
+      const findItems = jest.fn().mockResolvedValue({ total: hits.length, hits: [...hits] });
+
+      await act(async () => {
+        testBed = await setupTagFiltering({
+          findItems,
+        });
+      });
+
+      const { component, find } = testBed!;
+      component.update();
+
+      await act(async () => {
+        find('tagFilterPopoverButton').simulate('click');
+      });
+      component.update();
+
+      await act(async () => {
+        find('tag-searchbar-option-R&D').simulate('click');
+      });
+      component.update();
+
+      const search = router?.history.location?.search ?? '';
+      expect(search).toBe('?s=tag%3A%28%22R%26D%22%29');
+      expect(queryString.parse(search).s).toBe('tag:("R&D")');
+    });
+
     test('should update the URL when changing a tag from the filter dropdown', async () => {
       let testBed: TestBed;
 
@@ -1694,7 +1731,7 @@ describe('TableListView', () => {
       });
       component.update();
 
-      expect(router?.history.location?.search).toBe('?s=tag:(tag-2)');
+      expect(router?.history.location?.search).toBe('?s=tag%3A%28tag-2%29');
     });
 
     test('should set initial sort column and direction from URL', async () => {

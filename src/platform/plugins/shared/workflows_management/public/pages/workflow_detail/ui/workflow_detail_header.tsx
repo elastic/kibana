@@ -11,7 +11,7 @@ import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux-v7';
+import { useSelector } from 'react-redux-v7';
 import { useLocation, useParams } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
@@ -20,9 +20,7 @@ import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
@@ -35,11 +33,9 @@ import {
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
-import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
+import { getSaveWorkflowTooltipContent } from '../../../shared/ui';
 import { getAddConnectorsMenuItem } from '../../../shared/ui/get_add_connectors_menu_item';
 import {
   getReturnDestinationFromSearch,
@@ -62,12 +58,6 @@ const executionsTabReadManagedExecutionDisabledTooltip = i18n.translate(
       'You need the Workflows "Read workflow executions" and "Read managed workflow executions" privileges to view managed workflow executions.',
   }
 );
-
-const Translations = {
-  runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
-    defaultMessage: 'Run',
-  }),
-};
 
 const useWorkflowDetailHeaderBack = (): AppHeaderBack => {
   const { application } = useKibana().services;
@@ -128,23 +118,20 @@ export const WorkflowDetailHeader = React.memo(
     const { application } = useKibana().services;
     const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
-    const dispatch = useDispatch();
     const [isAccessOpen, setIsAccessOpen] = useState(false);
     const {
       canCreateWorkflow,
       canUpdateWorkflow: hasUpdatePrivilege,
-      canExecuteWorkflow: hasExecutePrivilege,
       canReadWorkflow,
       canReadWorkflowExecution,
       canReadManagedWorkflowExecution,
     } = useWorkflowsCapabilities();
 
-    const { activeTab, setActiveTab } = useWorkflowUrlState();
+    const { activeTab, isViewingExecution, setActiveTab } = useWorkflowUrlState();
     const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);
     const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
-    const canExecuteWorkflow = hasExecutePrivilege && workflow?.permissions?.execute !== false;
     const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
     const isManagedWorkflow = workflow?.managed === true;
     const canReadVisibleWorkflowExecution =
@@ -173,10 +160,6 @@ export const WorkflowDetailHeader = React.memo(
     }, [saveYaml]);
 
     const updateWorkflow = useUpdateWorkflow();
-
-    const openTestModal = useCallback(() => {
-      dispatch(setIsTestModalOpen(true));
-    }, [dispatch]);
 
     const [savedLabel, setSavedLabel] = useState<string>('');
 
@@ -219,27 +202,17 @@ export const WorkflowDetailHeader = React.memo(
     const isSchemaValid =
       isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
 
-    const runWorkflowTooltipContent = useMemo(() => {
-      return getTestRunTooltipContent({
-        isExecutionsTab,
-        isValid: isSyntaxValid,
-        canRunWorkflow: hasExecutePrivilege,
-        hasWorkflowAccess: workflow?.permissions?.execute !== false,
-        isSaving,
-      });
-    }, [isSyntaxValid, hasExecutePrivilege, workflow, isExecutionsTab, isSaving]);
-
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
       return getSaveWorkflowTooltipContent({
-        isExecutionsTab,
+        isExecutionsTab: isViewingExecution,
         canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
         isCreate,
         hasUnsavedChanges,
         isManagedWorkflow,
       });
     }, [
-      isExecutionsTab,
+      isViewingExecution,
       workflowId,
       canCreateWorkflow,
       canUpdateWorkflow,
@@ -295,15 +268,11 @@ export const WorkflowDetailHeader = React.memo(
       ]
     );
 
-    const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-      WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
-    );
-
     const changeHistoryModal = useContext(ChangeHistoryModalContext);
     const openHistoryModal = useCallback(() => {
       changeHistoryModal?.openModal();
     }, [changeHistoryModal]);
-    const showHistoryButton = Boolean(canReadWorkflow && !isExecutionsTab && changeHistoryModal);
+    const showHistoryButton = Boolean(canReadWorkflow && !isViewingExecution && changeHistoryModal);
 
     const historyItem = useMemo<AppMenuItemType | undefined>(() => {
       if (!showHistoryButton) {
@@ -352,7 +321,6 @@ export const WorkflowDetailHeader = React.memo(
       enabledSwitchTooltipContent,
     ]);
 
-    const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
     const addConnectorsMenuItem = useMemo(
       () => getAddConnectorsMenuItem(application),
       [application]
@@ -410,41 +378,8 @@ export const WorkflowDetailHeader = React.memo(
 
     const appMenu = useMemo<AppMenuConfig>(() => {
       const items: AppMenuItemType[] = [];
-      if (workflowId && !isManagedWorkflow) {
-        items.push({
-          id: 'workflowAccess',
-          overflow: true,
-          label: i18n.translate('workflows.access.openButtonLabel', { defaultMessage: 'Access' }),
-          iconType: 'users',
-          run: () => setIsAccessOpen(true),
-          testId: 'workflowAccessButton',
-          disableButton: !canManageAccess,
-          tooltipContent: !canManageAccess
-            ? workflow?.permissions?.manage === false
-              ? i18n.translate('workflows.access.ownerOnlyTooltip', {
-                  defaultMessage: 'Only the workflow owner can manage access.',
-                })
-              : i18n.translate('workflows.access.updatePrivilegeTooltip', {
-                  defaultMessage: 'You need the Workflows Update privilege to manage access.',
-                })
-            : undefined,
-        });
-      }
       if (workflowId) {
         items.push(executionsToggleItem);
-      }
-      if (!isVisualEditorEnabled) {
-        items.push({
-          id: 'runWorkflow',
-          order: 1,
-          label: Translations.runWorkflow,
-          iconType: 'play',
-          run: handleRunClick,
-          disableButton:
-            isExecutionsTab || !canExecuteWorkflow || isLoading || isSaving || !isSyntaxValid,
-          tooltipContent: runWorkflowTooltipContent ?? undefined,
-          testId: 'runWorkflowHeaderButton',
-        });
       }
       if (historyItem) {
         items.push(historyItem);
@@ -456,13 +391,13 @@ export const WorkflowDetailHeader = React.memo(
       return {
         primaryActionItem: {
           id: 'saveWorkflow',
-          label: i18n.translate('keepWorkflows.buttonText', {
+          label: i18n.translate('workflows.saveButtonText', {
             defaultMessage: 'Save',
           }),
           iconType: 'save',
           run: handleSaveWorkflow,
           disableButton:
-            isExecutionsTab ||
+            isViewingExecution ||
             !canSaveWorkflow ||
             isLoading ||
             isSaving ||
@@ -477,15 +412,12 @@ export const WorkflowDetailHeader = React.memo(
         items,
       };
     }, [
-      canManageAccess,
-      workflow?.permissions?.manage,
-      isExecutionsTab,
+      isViewingExecution,
       workflowId,
       executionsToggleItem,
       historyItem,
       addConnectorsMenuItem,
       enabledSwitchConfig,
-      isVisualEditorEnabled,
       handleSaveWorkflow,
       canSaveWorkflow,
       isLoading,
@@ -494,11 +426,29 @@ export const WorkflowDetailHeader = React.memo(
       isYamlSynced,
       hasUnsavedChanges,
       saveWorkflowTooltipContent,
-      handleRunClick,
-      canExecuteWorkflow,
-      isSyntaxValid,
-      runWorkflowTooltipContent,
     ]);
+
+    const share = useMemo(() => {
+      if (!workflowId || isManagedWorkflow) return undefined;
+      return {
+        label: i18n.translate('workflows.access.buttonLabel', { defaultMessage: 'Access control' }),
+        onClick: () => setIsAccessOpen(true),
+        isDisabled: !canManageAccess,
+        tooltip: !canManageAccess
+          ? {
+              content:
+                workflow?.permissions?.manage === false
+                  ? i18n.translate('workflows.access.ownerOnlyTooltip', {
+                      defaultMessage:
+                        'Only the workflow owner and administrators can manage access.',
+                    })
+                  : i18n.translate('workflows.access.updatePrivilegeTooltip', {
+                      defaultMessage: 'You need the Workflows Update privilege to manage access.',
+                    }),
+            }
+          : undefined,
+      };
+    }, [canManageAccess, isManagedWorkflow, workflow?.permissions?.manage, workflowId]);
 
     return (
       <>
@@ -507,6 +457,7 @@ export const WorkflowDetailHeader = React.memo(
             title={name}
             back={back}
             badges={badges}
+            share={share}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
             spacing="compact"
@@ -515,7 +466,6 @@ export const WorkflowDetailHeader = React.memo(
         {isAccessOpen && workflow && (
           <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
         )}
-        {runConfirmationModal}
       </>
     );
   }

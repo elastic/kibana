@@ -30,6 +30,7 @@ export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limite
 export {
   isValidDataset,
   isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   isValidNamespace,
   INVALID_NAMESPACE_CHARACTERS,
   VALID_DATA_STREAM_TYPES,
@@ -41,6 +42,10 @@ export {
   isAgentRequestDiagnosticsSupported,
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from './is_agent_request_diagnostics_supported';
+export {
+  isAgentRestartSupported,
+  MINIMUM_RESTART_AGENT_VERSION,
+} from './is_agent_restart_supported';
 export {
   isAgentMigrationSupported,
   MINIMUM_MIGRATE_AGENT_VERSION,
@@ -137,7 +142,14 @@ export {
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
-export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
+export { getIncompatibleIntegrations } from './agent_version_compatibility';
+export {
+  removeSOAttributes,
+  getSortConfig,
+  checkTargetVersionsValidity,
+  extractAgentIdsWithData,
+  filterIncomingDataWithData,
+} from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
 
@@ -173,6 +185,9 @@ export {
 
 export {
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,

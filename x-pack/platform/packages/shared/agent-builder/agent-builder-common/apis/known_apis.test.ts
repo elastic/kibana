@@ -23,7 +23,6 @@ import {
   findUnknownApis,
   formatUnknownApis,
   isKnownApiSelector,
-  matchesApiSelector,
 } from './known_apis';
 
 describe('elasticsearchApiSelectors', () => {
@@ -78,37 +77,6 @@ describe('isKnownApiSelector', () => {
   it('rejects a typo and an empty identifier', () => {
     expect(isKnownApiSelector({ target: 'elasticsearch', api: 'indices.crate' })).toBe(false);
     expect(isKnownApiSelector({ target: 'elasticsearch', api: '' })).toBe(false);
-  });
-});
-
-describe('matchesApiSelector', () => {
-  it('matches an exact identifier', () => {
-    expect(matchesApiSelector('indices.create', 'indices.create')).toBe(true);
-    expect(matchesApiSelector('indices.create', 'indices.delete')).toBe(false);
-  });
-
-  it('matches every operation under a namespace wildcard', () => {
-    expect(matchesApiSelector('indices.*', 'indices.create')).toBe(true);
-    expect(matchesApiSelector('indices.*', 'indices.delete')).toBe(true);
-  });
-
-  it('does not let a namespace wildcard reach another namespace or a bare identifier', () => {
-    expect(matchesApiSelector('indices.*', 'cases.create')).toBe(false);
-    expect(matchesApiSelector('indices.*', 'bulk')).toBe(false);
-    expect(matchesApiSelector('indices.*', 'indices')).toBe(false);
-  });
-
-  it('does not treat a namespace wildcard as a bare prefix', () => {
-    expect(matchesApiSelector('indices.*', 'indices_v2.create')).toBe(false);
-  });
-
-  it('matches everything under the full wildcard', () => {
-    expect(matchesApiSelector('*', 'indices.create')).toBe(true);
-    expect(matchesApiSelector('*', 'bulk')).toBe(true);
-  });
-
-  it('does not treat a bare namespace as a wildcard', () => {
-    expect(matchesApiSelector('indices', 'indices.create')).toBe(false);
   });
 });
 

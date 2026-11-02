@@ -7,11 +7,43 @@
 
 import { useCallback } from 'react';
 import { useService } from '@kbn/core-di-browser';
+import { i18n } from '@kbn/i18n';
+import { WORKFLOW_VALIDATION_RULES } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import {
   buildInlineWorkflowYaml,
+  getInlineActionStepDefinition,
   type InlineWorkflowActionDraft,
 } from '@kbn/alerting-v2-rule-form';
+
+const getInvalidWorkflowMessage = (draft: InlineWorkflowActionDraft, reasons: string[]): string => {
+  const label = getInlineActionStepDefinition(draft.stepType)?.label ?? draft.stepType;
+  return reasons.length > 0
+    ? i18n.translate('xpack.alertingV2.actionPolicy.inlineWorkflows.invalidWorkflow', {
+        defaultMessage: 'The {label} workflow is invalid: {reasons}',
+        values: { label, reasons: reasons.join('; ') },
+      })
+    : i18n.translate('xpack.alertingV2.actionPolicy.inlineWorkflows.invalidWorkflowNoDetails', {
+        defaultMessage: 'The {label} workflow is invalid.',
+        values: { label },
+      });
+};
+
+// Best effort: the reasons only make the error message more helpful.
+const getValidationErrors = async (workflowApi: WorkflowApi, yaml: string): Promise<string[]> => {
+  try {
+    const { diagnostics } = await workflowApi.validateWorkflow({ yaml });
+    // Variable checks are advisory: they never block saving a workflow.
+    return diagnostics
+      .filter(
+        ({ severity, ruleId }) =>
+          severity === 'error' && WORKFLOW_VALIDATION_RULES[ruleId]?.owner !== 'variable-validation'
+      )
+      .map(({ message }) => message);
+  } catch {
+    return [];
+  }
+};
 
 /**
  * Creates single-step workflows for the provided inline action drafts and
@@ -38,10 +70,16 @@ export const useCreateInlineWorkflows = () => {
       const createdIds: string[] = [];
       try {
         for (const draft of drafts) {
-          const created = await workflowApi.createWorkflow({
-            yaml: buildInlineWorkflowYaml(draft),
-          });
+          const yaml = buildInlineWorkflowYaml(draft);
+          const created = await workflowApi.createWorkflow({ yaml });
           createdIds.push(created.id);
+
+          // An invalid workflow is still saved, so it must be rejected here rather
+          // than referenced as a destination that never runs.
+          if (created.valid === false) {
+            const reasons = await getValidationErrors(workflowApi, yaml);
+            throw new Error(getInvalidWorkflowMessage(draft, reasons));
+          }
         }
         return createdIds;
       } catch (err) {

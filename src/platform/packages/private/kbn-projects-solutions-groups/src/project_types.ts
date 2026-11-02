@@ -20,10 +20,6 @@ export const KIBANA_SECURITY_PROJECT = 'security' as const;
  */
 export const KIBANA_SEARCH_PROJECT = 'es' as const;
 /**
- * Constant for the Kibana Workplace AI serverless project type.
- */
-export const KIBANA_WORKPLACE_AI_PROJECT = 'workplaceai' as const;
-/**
  * Constant for the Kibana Vectordb serverless project type.
  */
 export const KIBANA_VECTORDB_PROJECT = 'vectordb' as const;
@@ -35,7 +31,6 @@ export const KIBANA_PROJECTS = [
   KIBANA_OBSERVABILITY_PROJECT,
   KIBANA_SECURITY_PROJECT,
   KIBANA_SEARCH_PROJECT,
-  KIBANA_WORKPLACE_AI_PROJECT,
   KIBANA_VECTORDB_PROJECT,
 ] as const; // BOOKMARK - List of Kibana project types
 

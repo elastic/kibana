@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/core-base-browser-mocks'
   - '@kbn/core-injected-metadata-browser-mocks'
   - '@kbn/lazy-object'
+  - '@kbn/logging'
+  - '@kbn/logging-mocks'
 tags:
   - shared-browser
   - package
@@ -35,6 +37,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

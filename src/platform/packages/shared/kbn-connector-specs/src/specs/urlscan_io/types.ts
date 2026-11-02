@@ -31,22 +31,33 @@ const uuid = () =>
  */
 const SUBMITTABLE_URL_PATTERN = /^https?:\/\/[^\s]+$/i;
 
+/** urlscan rejects submissions whose url is outside 5 to 2083 characters. */
+const URLSCAN_MAX_URL_LENGTH = 2083;
+
+/**
+ * urlscan documents no search query length limit; the query must fit a task.url clause around
+ * any URL scanUrl accepts.
+ */
+const MAX_SEARCH_QUERY_LENGTH = 8192;
+
 /**
  * Visibility is the single most consequential submission option: `public` puts the URL on the
  * urlscan front page and into everyone's search results.
  */
-const VisibilitySchema = z
-  .enum(['public', 'unlisted', 'private'])
-  .describe(
-    'Who can see the scan. "public" is listed on the urlscan front page and in public search results. "unlisted" is hidden from the public site but visible to vetted researchers, the right choice when the URL may carry PII. "private" is visible only to your account and team. Omit to use the account default.'
-  );
+const VisibilitySchema = lazySchema(() =>
+  z
+    .enum(['public', 'unlisted', 'private'])
+    .describe(
+      'Who can see the scan. "public" is listed on the urlscan front page and in public search results. "unlisted" is hidden from the public site but visible to vetted researchers, the right choice when the URL may carry PII. "private" is visible only to your account and team. Omit to use the account default.'
+    )
+);
 
 export const ScanUrlInputSchema = lazySchema(() =>
   z.object({
     url: z
       .string()
       .min(8)
-      .max(2048)
+      .max(URLSCAN_MAX_URL_LENGTH)
       .regex(SUBMITTABLE_URL_PATTERN, {
         message: 'Must be an http:// or https:// URL.',
       })
@@ -63,7 +74,7 @@ export const ScanUrlInputSchema = lazySchema(() =>
       ),
     referer: z
       .string()
-      .max(2048)
+      .max(URLSCAN_MAX_URL_LENGTH)
       .regex(SUBMITTABLE_URL_PATTERN, { message: 'Must be an http:// or https:// URL.' })
       .optional()
       .describe(
@@ -100,7 +111,7 @@ export const ScanUrlAndWaitInputSchema = lazySchema(() =>
     url: z
       .string()
       .min(8)
-      .max(2048)
+      .max(URLSCAN_MAX_URL_LENGTH)
       .regex(SUBMITTABLE_URL_PATTERN, { message: 'Must be an http:// or https:// URL.' })
       .describe(
         'The URL to scan and then wait for, including its scheme, for example "https://suspicious-login.example/verify".'
@@ -113,7 +124,7 @@ export const ScanUrlAndWaitInputSchema = lazySchema(() =>
       .describe('Up to 10 free-form tags recorded on the scan, for example ["phishing"].'),
     referer: z
       .string()
-      .max(2048)
+      .max(URLSCAN_MAX_URL_LENGTH)
       .regex(SUBMITTABLE_URL_PATTERN, { message: 'Must be an http:// or https:// URL.' })
       .optional()
       .describe('Override the HTTP Referer the scanner sends.'),
@@ -189,7 +200,7 @@ export const SearchScansInputSchema = lazySchema(() =>
     q: z
       .string()
       .min(1)
-      .max(2000)
+      .max(MAX_SEARCH_QUERY_LENGTH)
       .describe(
         'Elasticsearch query-string query over historical scans. Examples: "page.domain:example.com", "ip:8.8.8.8", "hash:<sha256>", "page.asn:AS15169", "task.url:\\"https://example.com/login\\"", "domain:example.com AND date:>now-7d". Field names come from the urlscan search reference: page.domain, task.url, ip, asn, hash, country, filename, page.title, page.tlsIssuer, task.tags. Bound the query by date where you can, since an unbounded query is slow and burns quota.'
       ),

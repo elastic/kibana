@@ -5,16 +5,32 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRulesClientMockParams } from '../../../../test_utils';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
+  bulkMigrateLegacyActions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -52,6 +68,8 @@ beforeEach(() => {
     ownerId: null,
   });
   (auditLogger.log as jest.Mock).mockClear();
+  (bulkMigrateLegacyActions as jest.Mock).mockReset().mockResolvedValue([]);
+  (deleteLegacyActionsForRules as jest.Mock).mockReset();
 });
 
 setGlobalDate();
@@ -199,6 +217,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -278,6 +297,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -369,6 +389,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -423,6 +444,7 @@ describe('disableRule()', () => {
         apiKeyOwner: 'elastic',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -469,6 +491,7 @@ describe('disableRule()', () => {
         scheduledTaskId: '1',
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -526,6 +549,43 @@ describe('disableRule()', () => {
     );
     expect(taskManager.bulkDisable).not.toHaveBeenCalled();
     expect(taskManager.removeIfExists).not.toHaveBeenCalledWith();
+  });
+
+  test('deletes the migrated legacy actions only after the rule is saved', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+
+    await rulesClient.disableRule({ id: '1' });
+
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+    expect(
+      (unsecuredSavedObjectsClient.update as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
+  test('migrates again on the retry after a version conflict, and deletes the legacy actions once the retry saves', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, '1')
+    );
+
+    await rulesClient.disableRule({ id: '1' });
+
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(2);
+    expect(bulkMigrateLegacyActions).toHaveBeenCalledTimes(2);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+    expect(
+      (unsecuredSavedObjectsClient.update as jest.Mock).mock.invocationCallOrder[1]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
+  test('keeps the legacy actions when saving the rule fails, so the retry can migrate them', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+    unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('version conflict'));
+
+    await expect(rulesClient.disableRule({ id: '1' })).rejects.toThrow('version conflict');
+
+    expect(deleteLegacyActionsForRules).not.toHaveBeenCalled();
   });
 
   test('throws when failing to disable task', async () => {
@@ -587,6 +647,7 @@ describe('disableRule()', () => {
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',
@@ -641,6 +702,7 @@ describe('disableRule()', () => {
         scheduledTaskId: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         actions: [
           {
             group: 'default',

@@ -40,6 +40,11 @@ export class NewsfeedPageObject extends FtrService {
     return await this.testSubjects.exists('newsfeedSidebar');
   }
 
+  async waitForNewsfeedPanelOpen() {
+    this.log.debug('waitForNewsfeedPanelOpen');
+    return await this.testSubjects.waitForExists('newsfeedSidebar');
+  }
+
   async getRedButtonSign() {
     return await this.testSubjects.exists('headerActionButtonNotification');
   }
@@ -56,7 +61,8 @@ export class NewsfeedPageObject extends FtrService {
     return objects;
   }
 
-  async openNewsfeedEmptyPanel() {
-    return await this.testSubjects.exists('emptyNewsfeed');
+  async waitForNewsfeedEmptyPanel() {
+    this.log.debug('waitForNewsfeedEmptyPanel');
+    return await this.testSubjects.waitForExists('emptyNewsfeed');
   }
 }

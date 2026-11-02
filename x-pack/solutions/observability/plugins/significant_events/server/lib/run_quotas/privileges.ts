@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
 
 export const canManageRunQuotas = async ({
@@ -23,10 +23,9 @@ export const canManageRunQuotas = async ({
   }
 
   const result = await authz.checkPrivilegesWithRequest(request).globally({
-    kibana: [
-      authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.manage),
-      authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.configure),
-    ],
+    kibana: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES.map((privilege) =>
+      authz.actions.api.get(privilege)
+    ),
   });
   return result.hasAllRequested;
 };

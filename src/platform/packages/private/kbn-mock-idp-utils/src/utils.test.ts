@@ -23,6 +23,7 @@ import {
   MOCK_IDP_LOGOUT_PATH,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ROLE_MAPPING_NAME,
+  MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET,
   MOCK_IDP_UIAM_SIGNING_SECRET,
 } from './constants';
 import { decodeWithChecksum } from './jwt-codecs/encoder-checksum';
@@ -30,6 +31,7 @@ import { removePrefixEssuDev } from './jwt-codecs/encoder-prefix';
 import {
   createMockIdpMetadata,
   createSAMLResponse,
+  createUiamOAuthAccessToken,
   ensureSAMLRoleMapping,
   getSAMLRequestId,
 } from './utils';
@@ -255,9 +257,18 @@ describe('mock-idp-utils', () => {
         // reach cross-project (CPS) linked projects of any type.
         expect(
           payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
-        ).toEqual(['observability', 'elasticsearch', 'security', 'workplaceai', 'vectordb']);
+        ).toEqual(['observability', 'elasticsearch', 'security', 'vectordb']);
+        // Organization membership is what grants organization actions such as creating a
+        // project-scoped service account. It must add no application roles of its own.
+        expect(payload.ras.organization).toEqual([
+          {
+            role_id: 'ess-default-organization',
+            organization_id: serverlessOptions.serverless.organizationId,
+            application_roles: [],
+          },
+        ]);
         for (const grant of payload.ras.project) {
-          expect(grant.role_id).toBe('cloud-role-id');
+          expect(grant.role_id).toBe(`${grant.project_type}-application-only`);
           expect(grant.organization_id).toBe(serverlessOptions.serverless.organizationId);
           expect(grant.application_roles).toEqual(serverlessOptions.roles);
           expect(grant.project_scope).toEqual({ scope: 'all' });
@@ -292,7 +303,7 @@ describe('mock-idp-utils', () => {
         // `observability` grant.
         expect(
           payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
-        ).toEqual(['observability', 'elasticsearch', 'security', 'workplaceai', 'vectordb']);
+        ).toEqual(['observability', 'elasticsearch', 'security', 'vectordb']);
       });
 
       it('should generate refresh token with valid JWT structure', async () => {
@@ -387,6 +398,44 @@ describe('mock-idp-utils', () => {
         expect(decoded).not.toContain(`Name="${MOCK_IDP_ATTRIBUTE_UIAM_ACCESS_TOKEN}"`);
         expect(decoded).not.toContain(`Name="${MOCK_IDP_ATTRIBUTE_UIAM_REFRESH_TOKEN}"`);
       });
+    });
+  });
+
+  describe('createUiamOAuthAccessToken', () => {
+    it('should sign the token with the OAuth key set and name it in the `kid` header', async () => {
+      const wrappedToken = await createUiamOAuthAccessToken({
+        username: 'user1',
+        organizationId: 'org1234567890',
+        projectType: 'security',
+        roles: ['admin'],
+        audience: 'https://localhost:5620',
+      });
+      expect(wrappedToken).toMatch(/^essu_dev_/);
+
+      const [header, payload, signature] = decodeWithChecksum(
+        removePrefixEssuDev(wrappedToken)
+      ).split('.');
+
+      expect(JSON.parse(Buffer.from(header, 'base64url').toString())).toEqual({
+        typ: 'JWT',
+        alg: 'HS256',
+        kid: 'ot',
+      });
+
+      const claims = JSON.parse(Buffer.from(payload, 'base64url').toString());
+      expect(claims.typ).toBe('oauth-access-token');
+      expect(claims.aud).toBe('https://localhost:5620');
+
+      expect(signature).toBe(
+        createHmac('sha256', MOCK_IDP_UIAM_OAUTH_SIGNING_SECRET)
+          .update(`${header}.${payload}`)
+          .digest('base64url')
+      );
+      expect(signature).not.toBe(
+        createHmac('sha256', MOCK_IDP_UIAM_SIGNING_SECRET)
+          .update(`${header}.${payload}`)
+          .digest('base64url')
+      );
     });
   });
 

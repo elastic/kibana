@@ -8,19 +8,15 @@
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { Rule, RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
-import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import type { RuleParams } from '../../../../rule_schema';
 import { getHistoryForRule } from './get_history_for_rule';
 
 describe('getHistoryForRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
-  let userProfileService: ReturnType<typeof userProfileServiceMock.createStart>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    userProfileService = userProfileServiceMock.createStart();
-    userProfileService.bulkGet.mockResolvedValue([]);
   });
 
   const mockRuleChangesHistory = (items: ReturnType<typeof buildItems>) => {
@@ -37,7 +33,6 @@ describe('getHistoryForRule', () => {
 
     await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 2,
@@ -57,7 +52,6 @@ describe('getHistoryForRule', () => {
 
     await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 4,
       perPage: 2,
@@ -77,7 +71,6 @@ describe('getHistoryForRule', () => {
 
     await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 2,
@@ -97,7 +90,6 @@ describe('getHistoryForRule', () => {
 
     const result = await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 2,
@@ -115,7 +107,6 @@ describe('getHistoryForRule', () => {
 
     const result = await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 3,
       perPage: 2,
@@ -130,7 +121,6 @@ describe('getHistoryForRule', () => {
 
     const result = await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 1,
@@ -141,46 +131,39 @@ describe('getHistoryForRule', () => {
     expect(result.items[0].rule.name).toBe('rule-1');
   });
 
-  it('resolves the display name from the user profile when the profile id is known', async () => {
+  it('uses the resolved `full_name` as the display name when present', async () => {
     const items = buildItems(1).map((item) => ({
       ...item,
-      user: { id: 'profile-1', name: 'test-user' },
+      user: {
+        id: 'profile-1',
+        name: 'test-user',
+        full_name: 'Test User',
+        email: 'test@elastic.co',
+      },
     }));
 
     mockRuleChangesHistory(items);
-    userProfileService.bulkGet.mockResolvedValue([
-      {
-        uid: 'profile-1',
-        enabled: true,
-        user: { username: 'test-user', full_name: 'Test User' },
-        data: {},
-      },
-    ]);
 
     const result = await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 1,
     });
 
-    expect(userProfileService.bulkGet).toHaveBeenCalledWith({ uids: new Set(['profile-1']) });
     expect(result.items[0].user).toEqual({ id: 'profile-1', name: 'Test User' });
   });
 
-  it('falls back to the raw username when the user profile cannot be resolved', async () => {
+  it('falls back to the raw username when the user profile was not resolved', async () => {
     const items = buildItems(1).map((item) => ({
       ...item,
       user: { id: 'profile-1', name: 'test-user' },
     }));
 
     mockRuleChangesHistory(items);
-    userProfileService.bulkGet.mockResolvedValue([]);
 
     const result = await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 1,
@@ -196,7 +179,6 @@ describe('getHistoryForRule', () => {
 
     const result = await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 2,
@@ -210,7 +192,6 @@ describe('getHistoryForRule', () => {
 
     const result = await getHistoryForRule({
       rulesClient,
-      userProfileService,
       ruleId: 'rule-1',
       page: 1,
       perPage: 20,

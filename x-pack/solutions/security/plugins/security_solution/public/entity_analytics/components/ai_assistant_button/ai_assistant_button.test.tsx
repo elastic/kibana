@@ -96,6 +96,11 @@ describe('AiAssistantButton', () => {
     render(<AiAssistantButton {...defaultProps} />, { wrapper: TestProviders });
 
     expect(screen.getByTestId('newAgentBuilderAttachment')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('newAgentBuilderAttachment')
+        .querySelector('[data-euiicon-type="addToChat"]')
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('ai-assistant-button')).not.toBeInTheDocument();
   });
 

@@ -95,6 +95,8 @@ const createDashboardClient = ({
         version: 'v1',
       },
     }),
+    create: jest.fn(),
+    update: jest.fn(),
   } as jest.Mocked<DashboardPluginStart['client']>);
 
 const createLogger = (): Logger =>

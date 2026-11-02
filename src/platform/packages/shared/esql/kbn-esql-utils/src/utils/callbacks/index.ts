@@ -8,7 +8,7 @@
  */
 
 export { getESQLSources } from './sources';
-export { getEsqlColumns } from './columns';
+export { getEsqlColumns, getEsqlSourceColumns } from './columns';
 export { getEsqlPolicies } from './policies';
 export { getJoinIndices } from './lookup_indices';
 export { getTimeseriesIndices } from './timeseries_indices';

@@ -12,7 +12,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   DEFAULT_EPISODES_TABLE_CONFIG,
-  EPISODES_TABLE_APP_STATE_KEY,
+  ALERTS_TABLE_APP_STATE_KEY,
   EPISODES_TABLE_CONFIG_STORAGE_KEY,
 } from '../utils/episodes_table_config';
 import { useEpisodesTableConfig } from './use_episodes_table_config';
@@ -76,7 +76,7 @@ describe('useEpisodesTableConfig', () => {
     await act(async () => {
       await urlStateStorage.set(
         '_a',
-        { [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: 1 } },
+        { [ALERTS_TABLE_APP_STATE_KEY]: { rowHeight: 1 } },
         { replace: true }
       );
     });
@@ -103,7 +103,7 @@ describe('useEpisodesTableConfig', () => {
     await act(async () => {
       await urlStateStorage.set(
         '_a',
-        { [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: -1 } },
+        { [ALERTS_TABLE_APP_STATE_KEY]: { rowHeight: -1 } },
         { replace: true }
       );
     });
@@ -120,7 +120,7 @@ describe('useEpisodesTableConfig', () => {
     await act(async () => {
       await urlStateStorage.set(
         '_a',
-        { [EPISODES_TABLE_APP_STATE_KEY]: { rowHeight: 5 } },
+        { [ALERTS_TABLE_APP_STATE_KEY]: { rowHeight: 5 } },
         { replace: false }
       );
     });
