@@ -70736,7 +70736,7 @@ paths:
           required: false
           schema:
             description: A search string to filter history entries by pack name, query text, or query ID.
-            maxLength: 10000
+            maxLength: 65536
             type: string
         - description: Comma-separated list of user IDs to filter live query history.
           in: query
@@ -70745,7 +70745,7 @@ paths:
           schema:
             description: Comma-separated list of user IDs to filter live query history.
             example: elastic,admin
-            maxLength: 10000
+            maxLength: 65536
             type: string
         - description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
           in: query
@@ -72026,7 +72026,7 @@ paths:
           schema:
             description: The kuery to filter the results by.
             example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
-            maxLength: 10000
+            maxLength: 65536
             nullable: true
             type: string
         - description: The page number to return. The default is 1.
@@ -72269,7 +72269,7 @@ paths:
           schema:
             description: The kuery to filter the results by.
             example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
-            maxLength: 10000
+            maxLength: 65536
             nullable: true
             type: string
         - description: The page number to return. The default is 1.
@@ -207070,7 +207070,7 @@ components:
           items:
             maxLength: 1024
             type: string
-          maxItems: 10000
+          maxItems: 100000
           nullable: true
           type: array
         esFilters:
@@ -207094,7 +207094,7 @@ components:
           description: |
             An optional KQL filter appended (with AND) to the base action/schedule filter. The filter is wrapped in parentheses so it cannot override or escape the built-in action_id / schedule_id gate.
           example: 'host.name: "prod-host-1"'
-          maxLength: 10000
+          maxLength: 65536
           nullable: true
           type: string
     Security_Osquery_API_ExportResultRow:
