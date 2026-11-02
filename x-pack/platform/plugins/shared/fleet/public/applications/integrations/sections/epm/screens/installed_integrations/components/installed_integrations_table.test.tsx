@@ -140,6 +140,7 @@ describe('InstalledIntegrationsTable', () => {
       onboardingInstanceCounts?: Map<string, number>;
       rollingbackIntegrations?: InstalledPackageUIPackageListItem[];
       rollbackAvailable?: Record<string, boolean>;
+      onboardingEnabled?: boolean;
     }
   ) => {
     if (overrides?.rollingbackIntegrations !== undefined) {
@@ -158,6 +159,9 @@ describe('InstalledIntegrationsTable', () => {
     }
 
     const renderer = createIntegrationsTestRendererMock();
+    renderer.startServices.featureFlags.useBooleanValue.mockReturnValue(
+      overrides?.onboardingEnabled ?? false
+    );
 
     const result = renderer.render(
       <InstalledIntegrationsTable
@@ -267,6 +271,32 @@ describe('InstalledIntegrationsTable', () => {
       });
 
       expect(addViewOnboardingInstances).toHaveBeenCalledWith('test-package');
+    });
+  });
+
+  describe('attached policies managed by a cloud onboarding instance', () => {
+    const withPolicies = (count: number, onboardingManagedCount: number) =>
+      ({
+        ...basePackage,
+        packagePoliciesInfo: { count, onboardingManagedCount },
+      } as InstalledPackageUIPackageListItem);
+
+    it('leaves them out of the policy count when the onboarding flow is enabled', () => {
+      renderComponent([withPolicies(3, 2)], { onboardingEnabled: true });
+
+      expect(screen.getByText('View 1 policy')).toBeInTheDocument();
+    });
+
+    it('shows no policy link when the onboarding flow manages every policy', () => {
+      renderComponent([withPolicies(2, 2)], { onboardingEnabled: true });
+
+      expect(screen.queryByText(/View \d+ polic/)).not.toBeInTheDocument();
+    });
+
+    it('counts them when the onboarding flow is disabled', () => {
+      renderComponent([withPolicies(3, 2)]);
+
+      expect(screen.getByText('View 3 policies')).toBeInTheDocument();
     });
   });
 });

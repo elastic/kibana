@@ -69,8 +69,14 @@ describe('PackagePoliciesTable', () => {
     hasUpgrade?: boolean;
     keepPoliciesUpToDate?: boolean;
     pendingUpgradeReview?: object;
+    onboardingDeploymentId?: string;
   }) => {
-    const { hasUpgrade = false, keepPoliciesUpToDate = false, pendingUpgradeReview } = overrides;
+    const {
+      hasUpgrade = false,
+      keepPoliciesUpToDate = false,
+      pendingUpgradeReview,
+      onboardingDeploymentId,
+    } = overrides;
 
     jest.mocked(useIsPackagePolicyUpgradable).mockReturnValue({
       isPackagePolicyUpgradable: jest.fn().mockReturnValue(hasUpgrade),
@@ -81,9 +87,14 @@ describe('PackagePoliciesTable', () => {
     });
 
     const renderer = createFleetTestRendererMock();
+    renderer.startServices.application.getUrlForApp.mockImplementation(
+      (appId, { path = '' } = {}) => `/app/${appId}${path}`
+    );
     return renderer.render(
       <PackagePoliciesTable
-        packagePolicies={[basePackagePolicy] as any}
+        packagePolicies={
+          [{ ...basePackagePolicy, onboarding_deployment_id: onboardingDeploymentId }] as any
+        }
         agentPolicy={agentPolicy as any}
         refreshAgentPolicy={jest.fn()}
       />
@@ -123,5 +134,35 @@ describe('PackagePoliciesTable', () => {
     expect(result.queryByText('Upgrade')).not.toBeInTheDocument();
     expect(result.queryByText('Review upgrade')).not.toBeInTheDocument();
     expect(result.queryByText('Resume upgrade')).not.toBeInTheDocument();
+  });
+
+  describe('a policy managed by a cloud onboarding instance', () => {
+    it('shows a badge linking to the onboarding instance', async () => {
+      const result = renderTable({ onboardingDeploymentId: 'deploy-1' });
+      await act(async () => {});
+
+      const badge = result.getByTestId('PackagePoliciesTableManagedByOnboardingBadge');
+      expect(badge).toHaveTextContent('Managed by AWS onboarding');
+      expect(badge.closest('a') ?? badge.querySelector('a')).toHaveAttribute(
+        'href',
+        '/app/onboarding/aws?deploymentId=deploy-1'
+      );
+    });
+
+    it('does not offer the upgrade page, which edits the policy', async () => {
+      const result = renderTable({ hasUpgrade: true, onboardingDeploymentId: 'deploy-1' });
+      await act(async () => {});
+
+      expect(result.queryByText('Upgrade')).not.toBeInTheDocument();
+    });
+
+    it('shows no badge for other policies', async () => {
+      const result = renderTable({});
+      await act(async () => {});
+
+      expect(
+        result.queryByTestId('PackagePoliciesTableManagedByOnboardingBadge')
+      ).not.toBeInTheDocument();
+    });
   });
 });

@@ -1491,6 +1491,35 @@ export default function (providerContext: FtrProviderContext) {
         expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(null);
       });
 
+      it('lets the package policy list leave out the policies an onboarding instance manages', async () => {
+        await createDeployment({ cloudtrail: packagePolicyIds[0] });
+
+        const { body } = await supertest
+          .get('/api/fleet/package_policies')
+          .query({
+            kuery: `fleet-package-policies.package.name:${PACKAGE.name} AND NOT fleet-package-policies.onboarding_deployment_id:*`,
+            perPage: 100,
+          })
+          .expect(200);
+        const ids = body.items.map(({ id }: { id: string }) => id);
+
+        expect(ids).to.contain(packagePolicyIds[1]);
+        expect(ids).not.to.contain(packagePolicyIds[0]);
+      });
+
+      it('counts the policies an onboarding instance manages in the package list', async () => {
+        await createDeployment({ cloudtrail: packagePolicyIds[0] });
+
+        const { body } = await supertest
+          .get('/api/fleet/epm/packages')
+          .query({ withPackagePoliciesCount: true, prerelease: true })
+          .expect(200);
+        const item = body.items.find(({ name }: { name: string }) => name === PACKAGE.name);
+
+        expect(item.packagePoliciesInfo.onboardingManagedCount).to.equal(1);
+        expect(item.packagePoliciesInfo.count).to.be.greaterThan(1);
+      });
+
       describe('changes from outside the onboarding flow', () => {
         const ONBOARDING_ONLY = /can only be changed from the onboarding flow/;
         let deploymentId: string;

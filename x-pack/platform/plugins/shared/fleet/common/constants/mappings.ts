@@ -80,6 +80,7 @@ export const PACKAGE_POLICIES_MAPPINGS = {
     updated_by: { type: 'keyword' },
     created_at: { type: 'date' },
     created_by: { type: 'keyword' },
+    onboarding_deployment_id: { type: 'keyword' },
   },
 } as const;
 

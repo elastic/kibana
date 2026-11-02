@@ -27,6 +27,7 @@ import {
   useUpgradeReviewActions,
 } from '../hooks';
 import { isAgentlessPoliciesUIEnabled, policyHasFleetServer } from '../services';
+import { ONBOARDING_APP_ID, getOnboardingInstancePath } from '../services/aws_onboarding_override';
 
 import { scheduleAutoOpenModal } from '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status';
 import { useAgentlessPolicyUpgrade } from '../applications/integrations/sections/epm/screens/detail/policies/components/use_agentless_policy_upgrade';
@@ -85,6 +86,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
   const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
   const isAgentlessPolicy = packagePolicy.supports_agentless;
+  // A policy managed by a cloud onboarding instance can only be changed from the onboarding flow.
+  const onboardingDeploymentId = packagePolicy.onboarding_deployment_id;
 
   const {
     isAgentlessUpgrade,
@@ -228,18 +231,34 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
           </EuiContextMenuItem>,
         ]
       : []),
-    <EuiContextMenuItem
-      data-test-subj="PackagePolicyActionsEditItem"
-      disabled={!canWriteIntegrationPolicies || (!agentPolicy && !isOrphanedPolicy)}
-      icon="pencil"
-      href={editHref}
-      key="packagePolicyEdit"
-    >
-      <FormattedMessage
-        id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
-        defaultMessage="Edit integration"
-      />
-    </EuiContextMenuItem>,
+    onboardingDeploymentId ? (
+      <EuiContextMenuItem
+        data-test-subj="PackagePolicyActionsManageInOnboardingItem"
+        icon="popout"
+        href={application.getUrlForApp(ONBOARDING_APP_ID, {
+          path: getOnboardingInstancePath(onboardingDeploymentId),
+        })}
+        key="packagePolicyManageInOnboarding"
+      >
+        <FormattedMessage
+          id="xpack.fleet.policyDetails.packagePoliciesTable.manageInOnboardingActionTitle"
+          defaultMessage="Manage in AWS onboarding"
+        />
+      </EuiContextMenuItem>
+    ) : (
+      <EuiContextMenuItem
+        data-test-subj="PackagePolicyActionsEditItem"
+        disabled={!canWriteIntegrationPolicies || (!agentPolicy && !isOrphanedPolicy)}
+        icon="pencil"
+        href={editHref}
+        key="packagePolicyEdit"
+      >
+        <FormattedMessage
+          id="xpack.fleet.policyDetails.packagePoliciesTable.editActionTitle"
+          defaultMessage="Edit integration"
+        />
+      </EuiContextMenuItem>
+    ),
     ...(isAgentlessPolicy
       ? [
           <EuiContextMenuItem
@@ -282,7 +301,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
             />
           </EuiContextMenuItem>,
         ]
-      : packagePolicy.hasUpgrade
+      : // The upgrade page of an agent-based policy edits it; a managed integration upgrades in place.
+      packagePolicy.hasUpgrade && (!onboardingDeploymentId || isAgentlessUpgrade)
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsUpgradeItem"
@@ -376,7 +396,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     );
   }
 
-  if (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless) {
+  if (
+    !onboardingDeploymentId &&
+    (!agentPolicy || !agentPolicyIsManaged || agentPolicy?.supports_agentless)
+  ) {
     const ContextMenuItem = canWriteIntegrationPolicies
       ? DangerEuiContextMenuItem
       : EuiContextMenuItem;

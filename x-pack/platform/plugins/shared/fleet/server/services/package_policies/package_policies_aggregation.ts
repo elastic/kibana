@@ -11,12 +11,26 @@ import { SO_SEARCH_LIMIT } from '../../../common';
 
 import { getPackagePolicySavedObjectType } from '../package_policy';
 
-export async function getPackagePoliciesCountByPackageName(soClient: SavedObjectsClientContract) {
+/**
+ * The number of package policies of each package, by package name, and how many of them a cloud
+ * onboarding instance manages.
+ */
+export async function getPackagePoliciesCountByPackageName(
+  soClient: SavedObjectsClientContract
+): Promise<Record<string, { count: number; onboardingManagedCount: number }>> {
   const savedObjectType = await getPackagePolicySavedObjectType();
 
   const res = await soClient.find<
     any,
-    { count_by_package_name: { buckets: Array<{ key: string; doc_count: number }> } }
+    {
+      count_by_package_name: {
+        buckets: Array<{
+          key: string;
+          doc_count: number;
+          onboarding_managed: { doc_count: number };
+        }>;
+      };
+    }
   >({
     type: savedObjectType,
     perPage: 0,
@@ -37,15 +51,21 @@ export async function getPackagePoliciesCountByPackageName(soClient: SavedObject
           // truncates results when more than 10 distinct package names exist.
           size: SO_SEARCH_LIMIT,
         },
+        aggs: {
+          onboarding_managed: {
+            filter: {
+              exists: { field: `${savedObjectType}.attributes.onboarding_deployment_id` },
+            },
+          },
+        },
       },
     },
   });
 
-  return (
-    res.aggregations?.count_by_package_name.buckets.reduce((acc, bucket) => {
-      acc[bucket.key] = bucket.doc_count;
-
-      return acc;
-    }, {} as { [k: string]: number }) ?? {}
+  return Object.fromEntries(
+    (res.aggregations?.count_by_package_name.buckets ?? []).map((bucket) => [
+      bucket.key,
+      { count: bucket.doc_count, onboardingManagedCount: bucket.onboarding_managed.doc_count },
+    ])
   );
 }

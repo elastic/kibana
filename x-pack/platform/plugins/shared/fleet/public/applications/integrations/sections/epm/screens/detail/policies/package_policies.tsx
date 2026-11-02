@@ -34,9 +34,11 @@ import {
   useIsPackagePolicyUpgradable,
   usePagination,
   useGetPackageInfoByKeyQuery,
+  useStartServices,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
+import { ONBOARDING_ENABLED_FLAG } from '../../../../../../../services/aws_onboarding_override';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
@@ -84,6 +86,12 @@ export const PackagePoliciesPage = ({
   // Kill switch: when off, the agentless deployments table is sourced from the legacy
   // package-policy LIST + bulk agent-policy reads instead of the managed integrations API.
   const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
+  // Policies managed by a cloud onboarding instance are left out: they can only be changed from the
+  // onboarding flow, and are listed as instances instead.
+  const { featureFlags } = useStartServices();
+  const onboardingEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
+  const notOnboardingManagedKuery = (field: string) =>
+    onboardingEnabled ? ` AND NOT ${field}:*` : '';
 
   // The agentless deployments table re-derives each policy's inputs from the package manifest
   // (agentless policies come from the LIST API with simplified object inputs). That requires the
@@ -170,7 +178,7 @@ export const PackagePoliciesPage = ({
       canHaveAgentlessPolicies
         ? `AND NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`
         : ``
-    }`,
+    }${notOnboardingManagedKuery(`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.onboarding_deployment_id`)}`,
   });
   useEffect(() => {
     const mappedPoliciesData = !agentBasedData?.items
@@ -208,7 +216,7 @@ export const PackagePoliciesPage = ({
     {
       page: agentlessPagination.currentPage,
       perPage: agentlessPagination.pageSize,
-      kuery: `package.name: "${name}"`,
+      kuery: `package.name: "${name}"${notOnboardingManagedKuery('onboarding_deployment_id')}`,
     },
     { enabled: canHaveAgentlessPolicies && agentlessUIEnabled }
   );
@@ -224,7 +232,9 @@ export const PackagePoliciesPage = ({
     {
       page: agentlessPagination.currentPage,
       perPage: agentlessPagination.pageSize,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${name}" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true`,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${name}" AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.supports_agentless: true${notOnboardingManagedKuery(
+        `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.onboarding_deployment_id`
+      )}`,
     },
     { enabled: canHaveAgentlessPolicies && !agentlessUIEnabled }
   );

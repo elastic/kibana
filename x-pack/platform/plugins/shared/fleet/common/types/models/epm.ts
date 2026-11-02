@@ -738,7 +738,12 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
-  packagePoliciesInfo?: { count: number };
+  packagePoliciesInfo?: {
+    /** All package policies of the package. */
+    count: number;
+    /** Those of them managed by a cloud onboarding instance, which can only be changed from the onboarding flow. */
+    onboardingManagedCount?: number;
+  };
   /** Set by the integrations catalog: whether the tile opens "Add integration" (vs. Integration Details). */
   addIntegrationFromCatalog?: boolean;
 };

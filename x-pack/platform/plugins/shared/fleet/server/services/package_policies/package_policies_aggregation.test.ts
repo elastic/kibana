@@ -93,8 +93,8 @@ describe('getPackagePoliciesCountByPackageName', () => {
       aggregations: {
         count_by_package_name: {
           buckets: [
-            { key: 'nginx', doc_count: 2 },
-            { key: 'system', doc_count: 1 },
+            { key: 'aws', doc_count: 3, onboarding_managed: { doc_count: 2 } },
+            { key: 'system', doc_count: 1, onboarding_managed: { doc_count: 0 } },
           ],
         },
       },
@@ -102,7 +102,32 @@ describe('getPackagePoliciesCountByPackageName', () => {
 
     const result = await getPackagePoliciesCountByPackageName(soClient);
 
-    expect(result).toEqual({ nginx: 2, system: 1 });
+    expect(result).toEqual({
+      aws: { count: 3, onboardingManagedCount: 2 },
+      system: { count: 1, onboardingManagedCount: 0 },
+    });
+  });
+
+  it('counts the policies managed by a cloud onboarding instance in each package', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 0,
+      total: 0,
+      saved_objects: [],
+      aggregations: { count_by_package_name: { buckets: [] } },
+    });
+
+    await getPackagePoliciesCountByPackageName(soClient);
+
+    const [[callArgs]] = soClient.find.mock.calls;
+    expect((callArgs.aggs as any)?.count_by_package_name?.aggs).toEqual({
+      onboarding_managed: {
+        filter: {
+          exists: { field: `${MOCKED_SO_TYPE}.attributes.onboarding_deployment_id` },
+        },
+      },
+    });
   });
 
   it('returns an empty object when there are no buckets', async () => {

@@ -32,6 +32,9 @@ jest.mock('../hooks', () => {
     useStartServices: jest.fn().mockReturnValue({
       application: {
         navigateToApp: jest.fn(),
+        getUrlForApp: jest.fn(
+          (appId: string, { path = '' }: { path?: string } = {}) => `/app/${appId}${path}`
+        ),
       },
       notifications: {
         toasts: { addSuccess: jest.fn(), addWarning: jest.fn(), addError: jest.fn() },
@@ -274,6 +277,53 @@ describe('PackagePolicyActionsMenu', () => {
     // Flag off: the legacy edit-page upgrade still works, so the link is untouched.
     expect(upgradeButton).toHaveAttribute('href', '/test/upgrade-link');
     jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+  });
+
+  describe('a policy managed by a cloud onboarding instance', () => {
+    const onboardingPackagePolicy = (props: Partial<InMemoryPackagePolicy> = {}) =>
+      createMockPackagePolicy({ onboarding_deployment_id: 'deploy-1', ...props });
+
+    it('links to the onboarding instance instead of editing or deleting the policy', async () => {
+      const { utils } = renderMenu({
+        agentPolicies: createMockAgentPolicies(),
+        packagePolicy: onboardingPackagePolicy(),
+      });
+
+      const manageItem = await utils.findByTestId('PackagePolicyActionsManageInOnboardingItem');
+      expect(manageItem).toHaveAttribute(
+        'href',
+        expect.stringContaining('/aws?deploymentId=deploy-1')
+      );
+      expect(utils.queryByTestId('PackagePolicyActionsEditItem')).toBeNull();
+      expect(utils.queryByText('Delete integration')).toBeNull();
+      // A copy is not managed by the onboarding instance.
+      expect(utils.getByTestId('PackagePolicyActionsCopyItem')).toBeInTheDocument();
+    });
+
+    it('does not link to the upgrade page of an agent-based policy, which edits it', async () => {
+      const { utils } = renderMenu({
+        agentPolicies: createMockAgentPolicies(),
+        packagePolicy: onboardingPackagePolicy({ hasUpgrade: true }),
+      });
+
+      await utils.findByTestId('PackagePolicyActionsManageInOnboardingItem');
+      expect(utils.queryByTestId('PackagePolicyActionsUpgradeItem')).toBeNull();
+    });
+
+    it('keeps the in-place upgrade of a managed integration', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        ...allowedExperimentalValues,
+      });
+      const { utils } = renderMenu({
+        agentPolicies: createMockAgentPolicies({ supports_agentless: true }),
+        packagePolicy: onboardingPackagePolicy({ hasUpgrade: true, supports_agentless: true }),
+      });
+
+      expect(await utils.findByTestId('PackagePolicyActionsUpgradeItem')).not.toHaveAttribute(
+        'href'
+      );
+      jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+    });
   });
 
   it('Should not be able to delete integration from a managed policy', async () => {

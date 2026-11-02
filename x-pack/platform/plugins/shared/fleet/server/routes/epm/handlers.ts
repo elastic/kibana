@@ -179,7 +179,8 @@ export const getListHandler: FleetRequestHandler<
     );
     for (const item of flattenedRes) {
       item.packagePoliciesInfo = {
-        count: countByPackage[item.name] ?? 0,
+        count: countByPackage[item.name]?.count ?? 0,
+        onboardingManagedCount: countByPackage[item.name]?.onboardingManagedCount ?? 0,
       };
     }
   }

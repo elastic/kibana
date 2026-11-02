@@ -385,6 +385,29 @@ describe('edit package policy page', () => {
     });
   });
 
+  it('shows a callout instead of the form for a policy managed by a cloud onboarding instance', async () => {
+    (sendGetOnePackagePolicy as MockFn).mockResolvedValue({
+      data: { item: { ...mockPackagePolicy, onboarding_deployment_id: 'deploy-1' } },
+    });
+    const getUrlForApp = jest.fn(
+      (appId: string, { path = '' }: { path?: string } = {}) => `/app/${appId}${path}`
+    );
+    Object.assign(useStartServices().application, { getUrlForApp });
+    render();
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('editPackagePolicyManagedByOnboardingCallout')
+      ).toBeInTheDocument();
+    });
+    expect(renderResult.getByTestId('editPackagePolicyManageInOnboardingButton')).toHaveAttribute(
+      'href',
+      '/app/onboarding/aws?deploymentId=deploy-1'
+    );
+    expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
+    expect(renderResult.queryByText('Save integration')).not.toBeInTheDocument();
+  });
+
   it('should navigate on submit', async () => {
     render();
 

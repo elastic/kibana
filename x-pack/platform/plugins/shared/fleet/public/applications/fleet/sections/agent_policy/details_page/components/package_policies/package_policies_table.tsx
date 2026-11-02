@@ -35,8 +35,13 @@ import {
   useMultipleAgentPolicies,
   useGetOutputs,
   useDefaultOutput,
+  useStartServices,
 } from '../../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
+import {
+  ONBOARDING_APP_ID,
+  getOnboardingInstancePath,
+} from '../../../../../../../services/aws_onboarding_override';
 
 import {
   OTEL_INPUTS_MINIMUM_VERSION,
@@ -81,6 +86,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     getUpgradeVersion,
   } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
+  const { application } = useStartServices();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
   const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
@@ -173,6 +179,24 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
+            {packagePolicy.onboarding_deployment_id && (
+              // It can only be changed from the onboarding flow, which the badge opens.
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  data-test-subj="PackagePoliciesTableManagedByOnboardingBadge"
+                  color="hollow"
+                  iconType="lock"
+                  href={application.getUrlForApp(ONBOARDING_APP_ID, {
+                    path: getOnboardingInstancePath(packagePolicy.onboarding_deployment_id),
+                  })}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.policyDetails.packagePoliciesTable.managedByOnboardingBadge"
+                    defaultMessage="Managed by AWS onboarding"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
             {enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
@@ -271,11 +295,14 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   </EuiFlexGroup>
                 </EuiLink>
               </EuiFlexItem>
-              <PackagePolicyUpgradeCell
-                packagePolicy={packagePolicy}
-                agentPolicies={[agentPolicy]}
-                from="fleet-policy-list"
-              />
+              {/* Its upgrade page edits the policy, which only the onboarding flow may do. */}
+              {!packagePolicy.onboarding_deployment_id && (
+                <PackagePolicyUpgradeCell
+                  packagePolicy={packagePolicy}
+                  agentPolicies={[agentPolicy]}
+                  from="fleet-policy-list"
+                />
+              )}
             </EuiFlexGroup>
           );
         },
@@ -389,6 +416,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     [
       canReadIntegrationPolicies,
       getHref,
+      application,
       agentPolicy,
       enableOtelIntegrations,
       canUseMultipleAgentPolicies,

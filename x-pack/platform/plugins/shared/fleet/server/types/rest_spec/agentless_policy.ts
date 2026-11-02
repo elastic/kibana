@@ -37,6 +37,7 @@ export const AGENTLESS_POLICY_FILTER_MAPPINGS = {
         name: { type: 'keyword' },
       },
     },
+    onboarding_deployment_id: { type: 'keyword' },
   },
 } as const;
 

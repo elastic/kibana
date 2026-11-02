@@ -12,6 +12,10 @@ export const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 export const ONBOARDING_APP_ID = 'onboarding';
 export const ONBOARDING_AWS_PATH = '/aws';
 
+/** Path in the onboarding app that resumes the given onboarding instance. */
+export const getOnboardingInstancePath = (deploymentId: string) =>
+  `${ONBOARDING_AWS_PATH}?deploymentId=${encodeURIComponent(deploymentId)}`;
+
 export const AWS_TITLE = i18n.translate('xpack.fleet.onboardingOverride.awsTitle', {
   defaultMessage: 'Amazon Web Services',
 });

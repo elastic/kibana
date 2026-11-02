@@ -234,7 +234,7 @@ describe('getListHandler — withPackagePoliciesCount SO client', () => {
     mockGetPackages.mockResolvedValue([
       { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
     ]);
-    mockGetCount.mockResolvedValue({ nginx: 3 });
+    mockGetCount.mockResolvedValue({ nginx: { count: 3, onboardingManagedCount: 1 } });
   });
 
   it('uses the global (all-spaces) SO client for the package policy count', async () => {
@@ -256,7 +256,7 @@ describe('getListHandler — withPackagePoliciesCount SO client', () => {
     );
 
     const body = listResponse.ok.mock.calls[0][0].body;
-    expect(body.items[0].packagePoliciesInfo).toEqual({ count: 3 });
+    expect(body.items[0].packagePoliciesInfo).toEqual({ count: 3, onboardingManagedCount: 1 });
   });
 
   it('skips the count query when withPackagePoliciesCount is false', async () => {
