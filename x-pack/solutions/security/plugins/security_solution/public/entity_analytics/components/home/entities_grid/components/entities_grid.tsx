@@ -75,12 +75,13 @@ const EntityGridActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) =
   const { rows, rowActions } = useEntityGridView();
   const row = rows[rowIndex];
   if (!row || !rowActions) return null;
-  const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat } = rowActions;
+  const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat, onAddToCase } = rowActions;
   return (
     <RowActionsCell
       onInvestigateInTimeline={onInvestigateInTimeline && (() => onInvestigateInTimeline(row))}
       onOpenEntityGraph={() => onOpenEntityGraph(row)}
       onAddToChat={onAddToChat && (() => onAddToChat(row))}
+      onAddToCase={onAddToCase && (() => onAddToCase(row))}
     />
   );
 };
