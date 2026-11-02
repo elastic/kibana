@@ -18,15 +18,15 @@
  *   - serializer: a real SavedObjectsSerializer over a minimal type registry
  *                 ('task' is namespace-agnostic, which is all the claim path
  *                 reads).
- *   - logger:     writes to the worker's stdout (relayed to the parent
- *                 process's stream by Node) AND synchronously to an optional
- *                 side log file, so claim-cycle evidence survives a blocked
- *                 main-thread event loop.
+ *   - logger:     ECS-shaped JSON written synchronously to fd 1 with
+ *                 fs.writeSync, bypassing the worker->parent stdout relay so
+ *                 claim-cycle evidence reaches container stdout even while
+ *                 the main-thread event loop is blocked.
  * and bridges the three channels over parentPort messages.
  */
 
 import { parentPort, workerData, threadId } from 'worker_threads';
-import { appendFileSync, readFileSync, writeSync } from 'fs';
+import { readFileSync, writeSync } from 'fs';
 import { Subject } from 'rxjs';
 import { Client } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -80,13 +80,6 @@ const createLogger = (): CoordinatorLogger => {
       writeSync(1, line);
     } catch {
       // best effort
-    }
-    if (data.logFilePath) {
-      try {
-        appendFileSync(data.logFilePath, line);
-      } catch {
-        // best effort
-      }
     }
   };
   return {

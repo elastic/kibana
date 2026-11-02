@@ -139,6 +139,4 @@ export interface CoordinatorWorkerData {
     caPaths?: string[];
     rejectUnauthorized?: boolean;
   };
-  /** Optional side-channel log file, written with sync fs so logs survive a blocked main thread. */
-  logFilePath?: string;
 }

@@ -20,6 +20,7 @@
  */
 
 import Path from 'path';
+import { existsSync } from 'fs';
 import { Worker } from 'worker_threads';
 import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -116,19 +117,25 @@ export class WorkerCoordinatorBridge {
         caPaths: connection.caPaths,
         rejectUnauthorized: connection.rejectUnauthorized,
       },
-      logFilePath: process.env.TM_POC_WORKER_LOG_FILE,
     };
 
+    // Dist builds ship the compiled worker next to the dev entry; point the
+    // Worker straight at it (pdfmaker pattern). In source/dev the compiled
+    // file does not exist and the entry installs the TS transpiler first.
+    const compiledWorker = Path.resolve(__dirname, 'poc_coordinator/worker/coordinator_worker.js');
+    const workerPath = existsSync(compiledWorker)
+      ? compiledWorker
+      : Path.resolve(__dirname, 'poc_coordinator/worker/coordinator_worker_entry.js');
+
     this.logger.info(
-      `Starting PoC coordinator worker thread (log file: ${workerData.logFilePath ?? 'none'})`
+      `Starting PoC coordinator worker thread (${
+        workerPath === compiledWorker ? 'dist' : 'dev'
+      } mode)`
     );
 
-    this.worker = new Worker(
-      Path.resolve(__dirname, 'poc_coordinator/worker/coordinator_worker_entry.js'),
-      {
-        workerData,
-      }
-    );
+    this.worker = new Worker(workerPath, {
+      workerData,
+    });
 
     this.worker.on('message', (message: CoordinatorToExecutorMessage) => {
       switch (message.kind) {
