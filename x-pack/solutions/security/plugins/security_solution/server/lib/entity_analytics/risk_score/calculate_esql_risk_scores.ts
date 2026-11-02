@@ -39,6 +39,7 @@ import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets 
 import { MAX_INPUTS_COUNT, RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 import { filterFromRange } from './helpers';
 import { applyScoreModifiers } from './apply_score_modifiers';
+import { assertValidEsqlSourceIndex } from './validate_esql_source_index';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 type ESQLResults = Array<
@@ -372,6 +373,10 @@ export const getESQL = (
   pageSize: number,
   index: string = '.alerts-security.alerts-default'
 ) => {
+  // `index` derives from the user-writable dataViewId; reject anything that could break
+  // out of the FROM clause before interpolating it.
+  assertValidEsqlSourceIndex(index);
+
   const identifierField = EntityTypeToIdentifierField[entityType];
 
   const lower = afterKeys.lower ? `${identifierField} > ${afterKeys.lower}` : undefined;
@@ -542,6 +547,10 @@ export const getBaseScoreESQL = (
   pageSize: number,
   index: string
 ): string => {
+  // `index` derives from the user-writable dataViewId; reject anything that could break
+  // out of the FROM clause before interpolating it.
+  assertValidEsqlSourceIndex(index);
+
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
   const fieldEvals = euid.esql.getFieldEvaluations(entityType);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
@@ -741,6 +750,10 @@ const buildResolutionScoreESQL = ({
   alertsIndex: string;
   lookupIndex: string;
 }): string => {
+  // `alertsIndex` derives from the user-writable dataViewId; reject anything that could
+  // break out of the FROM clause before interpolating it. (`lookupIndex` is engine-owned.)
+  assertValidEsqlSourceIndex(alertsIndex);
+
   const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
   const fieldEvals = euid.esql.getFieldEvaluations(entityType);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
