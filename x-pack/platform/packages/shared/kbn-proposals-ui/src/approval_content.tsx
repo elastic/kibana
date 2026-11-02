@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
 import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { ApprovalContentHeader } from './approval_content_header';
 import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
@@ -87,6 +88,12 @@ export interface ApprovalContentProps {
   onReopen?: () => Promise<void>;
   /** Whether this proposal's `onReopen` is in flight, from the host's mutation cache. */
   isReopening?: boolean;
+  /**
+   * `core.http.basePath`, so the comment's in-app links (`/app/security/...`) resolve with the
+   * server base path and the current space. Without it they render as authored, which breaks
+   * under `server.basePath`.
+   */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -125,6 +132,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     onDismiss,
     onReopen,
     isReopening = false,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const generatedTitleId = useGeneratedHtmlId({ prefix: 'ApprovalContent' });
@@ -331,6 +339,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           banner={banner}
           bannerSuffix={bannerSuffix}
           actionError={actionError}
+          basePath={basePath}
           data-test-subj={dataTestSubj}
         />
 
