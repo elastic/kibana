@@ -13,9 +13,19 @@ import dedent from 'dedent';
 import { formatSuggestions } from '../helpers/report';
 
 // `type|pkgId` stands for a plugin package's file of that type.
+// `type|pkgId|declaredTasksDeps` also lists the plugins whose tasks entries it declares.
 const parse = (spec: string) => {
-  const [type, pkgId] = spec.split('|');
-  return pkgId ? { type, pkgInfo: { pkgId }, manifest: { type: 'plugin' } } : { type };
+  const [type, pkgId, declared] = spec.split('|');
+  return pkgId
+    ? {
+        type,
+        pkgInfo: { pkgId },
+        manifest: {
+          type: 'plugin',
+          plugin: { id: pkgId, tasks: { requiredPlugins: declared ? declared.split(',') : [] } },
+        },
+      }
+    : { type };
 };
 
 const make = (from: string, to: string, imp = 'import') => ({
@@ -103,7 +113,8 @@ for (const [name, tester] of [tsTester, babelTester]) {
         make('server package', 'tasks package'),
         make('tasks package|a', 'common package'),
         make('tasks package|a', 'server package|a'),
-        make('tasks package|a', 'tasks package|b'),
+        make('tasks package|a|b', 'tasks package|b'),
+        make('tasks package|a', 'tasks package|a'),
         make('tasks package|a', 'server package|b', 'import type { Foo } from'),
       ],
 
@@ -161,6 +172,16 @@ for (const [name, tester] of [tsTester, babelTester]) {
         {
           ...make('common package', 'tasks package|a'),
           errors: [{ line: 1, messageId: 'TYPE_MISMATCH' }],
+        },
+        {
+          ...make('tasks package|a|c', 'tasks package|b'),
+          errors: [
+            {
+              line: 1,
+              messageId: 'UNDECLARED_TASKS_DEPENDENCY',
+              data: { ownId: 'a', importedId: 'b' },
+            },
+          ],
         },
         {
           ...make('tasks package|a', 'server package|b'),

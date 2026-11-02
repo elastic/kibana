@@ -49,6 +49,7 @@ export const NoBoundaryCrossingRule: CreateOnceRule = {
     },
     messages: {
       CROSS_PLUGIN_TASKS: `A "tasks" file can only import another plugin's "server/tasks" code, but this imports "{{importedType}}" code from "{{pkgId}}". Expose what you need from "{{pkgId}}/server/tasks" instead.`,
+      UNDECLARED_TASKS_DEPENDENCY: `"{{ownId}}" imports the "tasks" entry of "{{importedId}}", which is not in the "tasks" requiredPlugins or optionalPlugins of its kibana.jsonc.`,
       TYPE_MISMATCH: `"{{importedType}}" code can not be imported from "{{ownType}}" code.{{suggestion}}`,
     },
   },
@@ -119,6 +120,32 @@ export const NoBoundaryCrossingRule: CreateOnceRule = {
               pkgId: imported.pkgInfo?.pkgId ?? 'another package',
             },
           });
+          return;
+        }
+
+        // A tasks entry only receives the tasks contracts it declares, so it can only import the
+        // tasks entries of the plugins it lists.
+        if (
+          self.type === 'tasks package' &&
+          imported.type === 'tasks package' &&
+          self.manifest?.type === 'plugin' &&
+          imported.manifest?.type === 'plugin' &&
+          self.manifest.plugin.id !== imported.manifest.plugin.id
+        ) {
+          const declared = [
+            ...(self.manifest.plugin.tasks?.requiredPlugins ?? []),
+            ...(self.manifest.plugin.tasks?.optionalPlugins ?? []),
+          ];
+          if (!declared.includes(imported.manifest.plugin.id)) {
+            context.report({
+              node,
+              messageId: 'UNDECLARED_TASKS_DEPENDENCY',
+              data: {
+                ownId: self.manifest.plugin.id,
+                importedId: imported.manifest.plugin.id,
+              },
+            });
+          }
         }
       };
     });
