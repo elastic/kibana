@@ -8,11 +8,11 @@
 import {
   SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_CREATE_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_STATUS_UPDATE_EVENT_TYPE,
   SIGNIFICANT_EVENTS_AGENT_TOOL_KI_IDENTIFICATION_STARTED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
+  SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
@@ -22,13 +22,13 @@ import {
 import {
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
-  agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
+  eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,
@@ -64,9 +64,9 @@ const agentToolEventStatusUpdateEventType = {
   schema: agentToolEventStatusUpdateSchema,
 };
 
-const agentToolEventInvestigationAttachEventType = {
-  eventType: SIGNIFICANT_EVENTS_AGENT_TOOL_EVENT_INVESTIGATION_ATTACH_EVENT_TYPE,
-  schema: agentToolEventInvestigationAttachSchema,
+const eventStatusChangedEventType = {
+  eventType: SIGNIFICANT_EVENTS_EVENT_STATUS_CHANGED_EVENT_TYPE,
+  schema: eventStatusChangedSchema,
 };
 
 const discoveryTriggeredEventType = {
@@ -94,17 +94,34 @@ const agentToolEventSearchEventType = {
   schema: agentToolEventSearchSchema,
 };
 
+/** Every EBT event type this plugin registers; the service registers exactly this list. */
+const significantEventsEventTypes = [
+  knowledgeIndicatorEventsGeneratedEventType,
+  knowledgeIndicatorFeaturesIdentifiedEventType,
+  agentBuilderKnowledgeIndicatorCreatedEventType,
+  agentToolKiIdentificationStartedEventType,
+  agentToolEventCreateEventType,
+  agentToolEventStatusUpdateEventType,
+  eventStatusChangedEventType,
+  agentToolEventWriteEventType,
+  agentToolEventSearchEventType,
+  discoveryTriggeredEventType,
+  detectionScanEventType,
+  onboardingScheduledEventType,
+] as const;
+
 export {
   agentBuilderKnowledgeIndicatorCreatedEventType,
   agentToolEventCreateEventType,
-  agentToolEventInvestigationAttachEventType,
   agentToolEventSearchEventType,
   agentToolEventStatusUpdateEventType,
   agentToolEventWriteEventType,
   agentToolKiIdentificationStartedEventType,
   detectionScanEventType,
   discoveryTriggeredEventType,
+  eventStatusChangedEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,
+  significantEventsEventTypes,
 };

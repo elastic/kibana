@@ -75,6 +75,7 @@ const createTool = (
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),
     licensing: {},
+    space: 'tool-space',
   });
   return createEventsWriteTool({
     getScopedClients: getScopedClients as unknown as GetScopedClients,
@@ -787,6 +788,74 @@ describe('events_write tool', () => {
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenLastCalledWith(
       expect.objectContaining({ success: false, written: false, error_message: 'busy' })
+    );
+  });
+
+  it('identifies the alert on every telemetry event and carries the workflow execution', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true, severity: 'high' },
+      {
+        index: 1,
+        event_id: 'event-2',
+        written: false,
+        reason: 'bulk_error',
+        error: { type: 'rejected', reason: 'busy', status: 429 },
+      },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+
+    await invokeHandler(
+      createTool(telemetry) as never,
+      {
+        items: [
+          { ...input, workflow_execution_id: 'wf-exec-1' },
+          { ...input, event_id: 'event-2' },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        alert_source: 'elastic.significant_events',
+        fingerprint: 'event-1',
+        event_id: 'event-1',
+        space_id: 'tool-space',
+        workflow_execution_id: 'wf-exec-1',
+        severity: 'high',
+      })
+    );
+    const second = telemetry.trackAgentToolEventsWrite.mock.calls[1][0];
+    expect(second).toMatchObject({
+      alert_source: 'elastic.significant_events',
+      fingerprint: 'event-2',
+      space_id: 'tool-space',
+      success: false,
+    });
+    expect(second).not.toHaveProperty('workflow_execution_id');
+  });
+
+  it('keeps the fingerprint and reports an unknown space when scoping fails', async () => {
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const getScopedClients = jest.fn().mockRejectedValue(new Error('no clients'));
+    const failingTool = createEventsWriteTool({
+      getScopedClients: getScopedClients as unknown as GetScopedClients,
+      server: {} as SignificantEventsServer,
+      logger: loggingSystemMock.createLogger(),
+      telemetry: telemetry as never,
+    });
+
+    await invokeHandler(failingTool as never, { items: [input] }, createMockToolContext());
+
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({
+        alert_source: 'elastic.significant_events',
+        fingerprint: 'event-1',
+        space_id: 'unknown',
+        success: false,
+        error_message: 'no clients',
+      })
     );
   });
 

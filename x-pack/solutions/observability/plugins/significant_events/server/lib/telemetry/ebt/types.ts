@@ -7,6 +7,27 @@
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SIGNIFICANT_EVENT_ENTITY_TYPE } from './constants';
+
+/** Who caused a Significant Event version to be written. */
+type SignificantEventActor = 'agent' | 'human' | 'system';
+
+/**
+ * Identity of the alert an event is about, shared by every alert-level EBT event so a metric can be
+ * split by `alert_source` and the same alert joined across events by `fingerprint`.
+ */
+interface AlertIdentityProps {
+  /**
+   * The `source` on the alert document in `.rule-events`. Significant Events always write
+   * `elastic.significant_events`; the field is named `alert_source` so it does not collide with
+   * `source_id`/`source_ids`, which identify Nightshift query sources.
+   */
+  alert_source: string;
+  /** The alert `fingerprint`: the Significant Event's stable `event_id`. */
+  fingerprint: string;
+  /** The Kibana space the alert lives in. */
+  space_id: string;
+}
 
 interface KnowledgeIndicatorQueriesGeneratedProps {
   count: number;
@@ -48,6 +69,8 @@ interface AgentBuilderKnowledgeIndicatorCreatedProps {
   tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
   source_id: string;
+  /** The created knowledge indicator's id; absent when creation failed. */
+  knowledge_indicator_id?: string;
   error_message?: string;
 }
 
@@ -57,35 +80,49 @@ interface AgentToolKnowledgeIndicatorIdentificationStartedProps {
   error_message?: string;
 }
 
-interface AgentToolEventCreateProps {
+/** The chat agent's `event_create` tool call; `fingerprint` is `unknown` when creation failed. */
+interface AgentToolEventCreateProps extends AlertIdentityProps {
   success: boolean;
   source_ids: string[];
   error_message?: string;
 }
 
-interface AgentToolEventStatusUpdateProps {
+/** The chat agent's `event_status_update` tool call. */
+interface AgentToolEventStatusUpdateProps extends AlertIdentityProps {
   success: boolean;
   /**
    * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
    * nodes that have not been upgraded yet.
    */
   event_uuid?: string;
+  /** Same value as `fingerprint`; kept so existing queries keep working. */
   event_id: string;
   status: SignificantEventStatus;
   error_message?: string;
 }
 
-interface AgentToolEventInvestigationAttachProps {
-  success: boolean;
-  /**
-   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with pre-#1517
-   * events; new events populate `event_id` instead.
-   */
-  event_uuid?: string;
-  /** Stable event_id slug. Optional for rolling-deploy compatibility with pre-#1517 nodes. */
-  event_id?: string;
-  workflow_execution_id: string;
-  error_message?: string;
+/**
+ * One Significant Event version was written and its status is not the one stored before it: the
+ * first version (no `previous_status`) or a transition. Emitted on every write path (agent write,
+ * operator update, rule-deletion cleanup), so it is the single status-change record per event.
+ */
+interface EventStatusChangedProps extends AlertIdentityProps {
+  entity_type: typeof SIGNIFICANT_EVENT_ENTITY_TYPE;
+  /** Status of the latest stored version before this write; absent when this write created the event. */
+  previous_status?: SignificantEventStatus;
+  status: SignificantEventStatus;
+  actor: SignificantEventActor;
+  /** Severity tier stored on the written version. */
+  severity: Severity;
+  /** Confidence stored on the written version (0-1). */
+  confidence: number;
+  /** Correlation fan-in: signals stored on the written version, one per member rule. */
+  signal_count: number;
+  /** Signals whose verdict confirms the event. */
+  confirmed_signal_count: number;
+  source_ids: string[];
+  /** The workflow execution that produced this version, when it was written by a workflow. */
+  workflow_execution_id?: string;
 }
 
 interface DiscoveryTriggeredProps {
@@ -120,6 +157,8 @@ interface DetectionScanProps {
   default_bucket_interval: string;
   /** The Kibana space in which the scan ran. */
   space_id: string;
+  /** The detection workflow execution that requested the scan; absent for a direct call. */
+  workflow_execution_id?: string;
 }
 
 interface KnowledgeIndicatorOnboardingScheduledProps {
@@ -131,8 +170,9 @@ interface KnowledgeIndicatorOnboardingScheduledProps {
   skip_queries: boolean;
 }
 
-interface AgentToolEventWriteProps {
+interface AgentToolEventWriteProps extends AlertIdentityProps {
   success: boolean;
+  /** Same value as `fingerprint`; kept so existing queries keep working. */
   event_id: string;
   /** Absent when no status was decided for the item (it was rejected or skipped earlier). */
   status?: SignificantEventStatus;
@@ -141,6 +181,8 @@ interface AgentToolEventWriteProps {
   error_message?: string;
   /** Tier actually stored. Present only when written is true. */
   severity?: Severity;
+  /** The discovery workflow execution the agent wrote on behalf of, when it passed one. */
+  workflow_execution_id?: string;
 }
 
 interface AgentToolEventSearchProps {
@@ -158,13 +200,15 @@ export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
   type AgentToolEventCreateProps,
-  type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
+  type AlertIdentityProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,
+  type EventStatusChangedProps,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,
+  type SignificantEventActor,
 };

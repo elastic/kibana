@@ -151,6 +151,7 @@ export function createFeatureKnowledgeIndicatorTool({
           tool_id: 'ki_feature_create',
           success: true,
           source_id: source.id,
+          knowledge_indicator_id: id,
         });
 
         return {

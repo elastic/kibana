@@ -24,6 +24,7 @@ import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
+import { alertIdentity, UNKNOWN_TELEMETRY_VALUE } from '../alert_identity_telemetry';
 import { createEventToolHandler } from './handler';
 import { classifyError } from '../../utils/error_utils';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
@@ -113,10 +114,12 @@ export function createEventTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       let sourceIds: string[] = [];
+      let spaceId = UNKNOWN_TELEMETRY_VALUE;
       try {
-        const { getEventSearchClient, licensing, sourcesClient } = await getScopedClients({
+        const { getEventSearchClient, licensing, sourcesClient, space } = await getScopedClients({
           request,
         });
+        spaceId = space;
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
@@ -130,6 +133,7 @@ export function createEventTool({
         });
 
         telemetry.trackAgentToolEventCreate({
+          ...alertIdentity(data.event_id, spaceId),
           success: true,
           source_ids: sourceIds,
         });
@@ -153,6 +157,7 @@ export function createEventTool({
         const rawMessage = error instanceof Error ? error.message : String(error);
         logger.error(`Error running event_create: ${rawMessage}`);
         telemetry.trackAgentToolEventCreate({
+          ...alertIdentity(undefined, spaceId),
           success: false,
           source_ids: sourceIds,
           error_message: rawMessage,

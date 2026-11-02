@@ -160,6 +160,7 @@ export function createQueryKnowledgeIndicatorTool({
           tool_id: 'ki_query_create',
           success: true,
           source_id: source.id,
+          knowledge_indicator_id: id,
         });
 
         return {

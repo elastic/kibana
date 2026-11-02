@@ -7,6 +7,7 @@
 
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
+import type { EventStatusChangeReporter } from './event_status_change_telemetry';
 import { RuleEventsClient } from './rule_events_client';
 
 /**
@@ -19,6 +20,11 @@ export const asRuleEventsClient = (
   writer: {
     getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
     emitTrigger?: TriggerEmitter;
+    telemetry?: EventStatusChangeReporter;
+    /** The space reported on status-change telemetry; defaults to `default`. */
+    space?: string;
   } = {}
 ): RuleEventsClient =>
-  Object.assign(Object.create(RuleEventsClient.prototype), reads, { clients: writer });
+  Object.assign(Object.create(RuleEventsClient.prototype), reads, {
+    clients: { space: 'default', ...writer },
+  });

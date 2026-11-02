@@ -170,6 +170,7 @@ describe('ki_feature_create tool', () => {
         tool_id: 'ki_feature_create',
         success: true,
         source_id: 'logs.test',
+        knowledge_indicator_id: 'feature-1',
       })
     );
   });

@@ -9,8 +9,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { registerAgentBuilderTools } from './register_tools';
 import {
-  SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID,
-  SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID,
   SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID,
   SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID,
@@ -70,8 +68,6 @@ describe('registerAgentBuilderTools', () => {
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_FEATURE_SIMILARITY_SEARCH_TOOL_ID);
     expect(registeredIds).toContain(SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID);
-    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID);
-    expect(registeredIds).toContain(SIGNIFICANT_EVENTS_EVENT_STATUS_UPDATE_TOOL_ID);
     expect(registeredIds).toContain(NIGHTSHIFT_SOURCE_LIST_TOOL_ID);
     expect(registeredIds).toContain(NIGHTSHIFT_SOURCE_GET_TOOL_ID);
     expect(registeredIds).toContain(NIGHTSHIFT_SOURCE_CREATE_TOOL_ID);

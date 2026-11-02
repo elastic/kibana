@@ -23,9 +23,11 @@ export async function updateEventStatusToolHandler({
   status: SignificantEventManualStatus;
   assessmentNote?: string;
 }): Promise<{ event_id: string } & UpdateEventStatusResult> {
+  // The chat agent sets the status an operator asked for; the write is still the agent's.
   const result = await eventSearchClient.updateEventStatus({
     eventId,
     change: StatusChange.byOperator(status),
+    actor: 'agent',
     assessmentNote,
   });
 

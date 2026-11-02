@@ -60,17 +60,19 @@ describe('createSignificantEventsClients', () => {
     expect(clients.emitTrigger).toBe(triggerEmitter);
   });
 
-  it('gives the event client the writer lazily, and the trigger emitter, to write with', async () => {
+  it('gives the event client the writer lazily, the trigger emitter and telemetry to write with', async () => {
     const createAlertEvent = jest.fn().mockResolvedValue(undefined);
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent });
     const triggerEmitter = jest.fn();
+    const telemetry = { trackEventStatusChanged: jest.fn() };
     const clients = createSignificantEventsClients({
       services: { detection: { getClient: jest.fn() } as never },
       dataStreams: { initializeClient: jest.fn() } as never,
       esClient: {} as never,
-      space: 'default',
+      space: 'ops',
       getAlertEventsClient,
       triggerEmitter,
+      telemetry,
     });
 
     const eventClient = await clients.getEventSearchClient();
@@ -87,11 +89,15 @@ describe('createSignificantEventsClients', () => {
         severity: 'medium',
         confidence: 0.8,
       },
+      actor: 'agent',
     });
 
     expect(createAlertEvent).toHaveBeenCalledWith(
       expect.objectContaining({ fingerprint: 'event-1' })
     );
     expect(triggerEmitter).toHaveBeenCalledTimes(1);
+    expect(telemetry.trackEventStatusChanged).toHaveBeenCalledWith(
+      expect.objectContaining({ fingerprint: 'event-1', space_id: 'ops', actor: 'agent' })
+    );
   });
 });

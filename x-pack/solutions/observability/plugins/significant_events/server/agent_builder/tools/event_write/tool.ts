@@ -39,6 +39,7 @@ import {
   MAX_BULK_WRITE_ITEMS,
   trackTelemetryBestEffort,
 } from '../bulk_write';
+import { alertIdentity, UNKNOWN_TELEMETRY_VALUE } from '../alert_identity_telemetry';
 import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/discovery';
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
@@ -419,6 +420,8 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
+      // Known once the scoped clients resolved; an earlier failure reports the unknown space.
+      let spaceId = UNKNOWN_TELEMETRY_VALUE;
       try {
         const {
           getEventSearchClient,
@@ -426,9 +429,11 @@ export function createEventsWriteTool({
           getKnowledgeIndicatorClient,
           licensing,
           sourcesClient,
+          space,
         } = await getScopedClients({
           request,
         });
+        spaceId = space;
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
@@ -465,13 +470,17 @@ export function createEventsWriteTool({
             description: 'events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
+                ...alertIdentity(result.event_id, spaceId),
                 success: result.written || isSkipped,
-                event_id: result.event_id ?? 'unknown',
+                event_id: result.event_id ?? UNKNOWN_TELEMETRY_VALUE,
                 status: result.status,
                 written: result.written,
                 source_ids: input.source_ids,
                 error_message: isBulkError ? result.error.reason : undefined,
                 ...(result.written ? { severity: result.severity } : {}),
+                ...(input.workflow_execution_id !== undefined
+                  ? { workflow_execution_id: input.workflow_execution_id }
+                  : {}),
               }),
           });
         });
@@ -508,11 +517,15 @@ export function createEventsWriteTool({
             description: 'failed events_write telemetry',
             track: () =>
               telemetry.trackAgentToolEventsWrite({
+                ...alertIdentity(input.event_id, spaceId),
                 success: false,
-                event_id: input.event_id ?? 'unknown',
+                event_id: input.event_id ?? UNKNOWN_TELEMETRY_VALUE,
                 written: false,
                 source_ids: 'source_ids' in input ? input.source_ids : [],
                 error_message: message,
+                ...(input.workflow_execution_id !== undefined
+                  ? { workflow_execution_id: input.workflow_execution_id }
+                  : {}),
               }),
           });
         });

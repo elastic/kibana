@@ -60,6 +60,11 @@ import {
   type LifecycleSkipReason,
 } from './lifecycle/lifecycle_controller';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import type { SignificantEventActor } from '../../telemetry/ebt';
+import {
+  reportEventStatusChange,
+  type EventStatusChangeReporter,
+} from './event_status_change_telemetry';
 import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
@@ -405,6 +410,8 @@ export class RuleEventsClient {
       space: string;
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
       emitTrigger?: TriggerEmitter;
+      /** Reports a status-change EBT event per written version that changes status. */
+      telemetry?: EventStatusChangeReporter;
       /** Reads `.alert-actions`, a private Alerting v2 index; falls back to `esClient`. */
       internalEsClient?: ElasticsearchClient;
       logger?: Logger;
@@ -975,17 +982,27 @@ export class RuleEventsClient {
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
-  async createEvent({ event }: { event: SignificantEvent }): Promise<void> {
-    await this.writeVersion({ event });
+  async createEvent({
+    event,
+    actor,
+  }: {
+    event: SignificantEvent;
+    /** Who caused the write, recorded on the status-change telemetry. */
+    actor: SignificantEventActor;
+  }): Promise<void> {
+    await this.writeVersion({ event, actor });
   }
 
   /** Writes the next version only while `prior` is still the head (best effort, not atomic). */
   async updateEvent({
     event,
     prior,
+    actor,
   }: {
     event: SignificantEvent;
     prior: SignificantEvent;
+    /** Who caused the write, recorded on the status-change telemetry. */
+    actor: SignificantEventActor;
   }): Promise<UpdateEventResult> {
     // A head that cannot be read back is not a version to build on.
     const head = await this.findLatestByEventId(event.event_id);
@@ -993,7 +1010,7 @@ export class RuleEventsClient {
       return { updated: false, head };
     }
 
-    await this.writeVersion({ event, prior });
+    await this.writeVersion({ event, prior, actor });
     return { updated: true };
   }
 
@@ -1001,11 +1018,17 @@ export class RuleEventsClient {
   async updateEventStatus({
     eventId,
     change,
+    actor,
     assessmentNote,
     expectedTimestamp,
   }: {
     eventId: string;
     change: StatusChange;
+    /**
+     * Who asked for the change, recorded on the status-change telemetry. Not derived from `change`:
+     * an operator change (`byOperator`) is a human's from the UI but the agent's from a chat tool.
+     */
+    actor: SignificantEventActor;
     assessmentNote?: string;
     /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
     expectedTimestamp?: string;
@@ -1032,7 +1055,7 @@ export class RuleEventsClient {
       return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
     }
 
-    const written = await this.updateEvent({ event: decision.event, prior: latest });
+    const written = await this.updateEvent({ event: decision.event, prior: latest, actor });
     if (!written.updated) {
       return {
         updated: 0,
@@ -1048,11 +1071,13 @@ export class RuleEventsClient {
   private async writeVersion({
     event,
     prior,
+    actor,
   }: {
     event: SignificantEvent;
     prior?: SignificantEvent;
+    actor: SignificantEventActor;
   }): Promise<void> {
-    const { getAlertEventsClient, emitTrigger } = this.clients;
+    const { getAlertEventsClient, emitTrigger, telemetry, logger, space } = this.clients;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
     }
@@ -1065,5 +1090,6 @@ export class RuleEventsClient {
       significantEvent: event,
       priorSignificantEvent: prior,
     });
+    reportEventStatusChange({ telemetry, logger, event, prior, actor, spaceId: space });
   }
 }

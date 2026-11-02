@@ -9,16 +9,41 @@ import type { RootSchema } from '@elastic/ebt/client';
 import type {
   AgentBuilderKnowledgeIndicatorCreatedProps,
   AgentToolEventCreateProps,
-  AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
+  AlertIdentityProps,
   DetectionScanProps,
+  EventStatusChangedProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
   AgentToolEventWriteProps,
   AgentToolEventSearchProps,
 } from './types';
+
+/** Fields every alert-level event carries, so metrics split by source and join by fingerprint. */
+const alertIdentitySchema: RootSchema<AlertIdentityProps> = {
+  alert_source: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The `source` of the alert document in `.rule-events`. Significant Events write `elastic.significant_events`. Named `alert_source` to not collide with `source_id`/`source_ids` (Nightshift query sources).',
+    },
+  },
+  fingerprint: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The alert `fingerprint` in `.rule-events`, which for a Significant Event is its stable `event_id`. Joins every event about the same alert.',
+    },
+  },
+  space_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The Kibana space the alert lives in',
+    },
+  },
+};
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
@@ -278,6 +303,14 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
         description: 'The Nightshift source id the knowledge indicator was created for',
       },
     },
+    knowledge_indicator_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The id of the created knowledge indicator (`feature.id` or `query.id`); absent when creation failed',
+        optional: true,
+      },
+    },
     error_message: {
       type: 'text',
       _meta: {
@@ -311,6 +344,7 @@ const agentToolKnowledgeIndicatorIdentificationStartedSchema: RootSchema<AgentTo
   };
 
 const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
+  ...alertIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -339,6 +373,7 @@ const agentToolEventCreateSchema: RootSchema<AgentToolEventCreateProps> = {
 };
 
 const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdateProps> = {
+  ...alertIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -356,7 +391,8 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   event_id: {
     type: 'keyword',
     _meta: {
-      description: 'The stable event id of the updated significant event',
+      description:
+        'The stable event id of the updated significant event; the same value as `fingerprint`',
     },
   },
   status: {
@@ -369,6 +405,83 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
     type: 'text',
     _meta: {
       description: 'Error message when event status update fails',
+      optional: true,
+    },
+  },
+};
+
+const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
+  ...alertIdentitySchema,
+  entity_type: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The kind of entity whose status changed; always `significant_event` for this event type',
+    },
+  },
+  previous_status: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Status of the latest stored version before this write (active, recovering or inactive); absent when this write created the event',
+      optional: true,
+    },
+  },
+  status: {
+    type: 'keyword',
+    _meta: {
+      description: 'Status stored on the written version (active, recovering or inactive)',
+    },
+  },
+  actor: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Who caused the write: `agent` (discovery or chat agent), `human` (operator update) or `system` (maintenance, e.g. rule deletion)',
+    },
+  },
+  severity: {
+    type: 'keyword',
+    _meta: {
+      description: 'Severity tier stored on the written version',
+    },
+  },
+  confidence: {
+    type: 'float',
+    _meta: {
+      description: 'Confidence stored on the written version, between 0 and 1',
+    },
+  },
+  signal_count: {
+    type: 'long',
+    _meta: {
+      description:
+        'Correlation fan-in: the number of signals stored on the written version, one per member rule',
+    },
+  },
+  confirmed_signal_count: {
+    type: 'long',
+    _meta: {
+      description: 'The number of stored signals whose verdict confirms the event',
+    },
+  },
+  source_ids: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'A Nightshift source id',
+      },
+    },
+    _meta: {
+      description: 'The Nightshift source ids the event covers',
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The workflow execution that produced this version, when written by a workflow; joins the discovery run and workflow engine events',
       optional: true,
     },
   },
@@ -465,6 +578,14 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
       description: 'The Kibana space in which the scan ran',
     },
   },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The detection workflow execution that requested the scan; absent when the route was called directly',
+      optional: true,
+    },
+  },
 };
 
 const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingScheduledProps> = {
@@ -507,46 +628,8 @@ const onboardingScheduledSchema: RootSchema<KnowledgeIndicatorOnboardingSchedule
   },
 };
 
-const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestigationAttachProps> =
-  {
-    success: {
-      type: 'boolean',
-      _meta: {
-        description: 'Whether the investigation attachment succeeded',
-      },
-    },
-    event_uuid: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'Deprecated — superseded by `event_id`. The identifier of the significant event the investigation was attached to',
-        optional: true,
-      },
-    },
-    event_id: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'The stable event id of the significant event the investigation was attached to',
-        optional: true,
-      },
-    },
-    workflow_execution_id: {
-      type: 'keyword',
-      _meta: {
-        description: 'The investigation workflow execution id that was attached',
-      },
-    },
-    error_message: {
-      type: 'text',
-      _meta: {
-        description: 'Error message when investigation attachment fails',
-        optional: true,
-      },
-    },
-  };
-
 const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
+  ...alertIdentitySchema,
   success: {
     type: 'boolean',
     _meta: {
@@ -556,7 +639,8 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
   event_id: {
     type: 'keyword',
     _meta: {
-      description: 'The stable event id associated with the written event',
+      description:
+        'The stable event id associated with the written event; the same value as `fingerprint`',
     },
   },
   status: {
@@ -595,6 +679,14 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
     type: 'keyword',
     _meta: {
       description: 'The severity tier actually stored. Present only when written is true.',
+      optional: true,
+    },
+  },
+  workflow_execution_id: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'The discovery workflow execution the agent wrote on behalf of, when the item carried one',
       optional: true,
     },
   },
@@ -656,13 +748,13 @@ const agentToolEventSearchSchema: RootSchema<AgentToolEventSearchProps> = {
 export {
   agentBuilderKnowledgeIndicatorCreatedSchema,
   agentToolEventCreateSchema,
-  agentToolEventInvestigationAttachSchema,
   agentToolEventSearchSchema,
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
+  eventStatusChangedSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,

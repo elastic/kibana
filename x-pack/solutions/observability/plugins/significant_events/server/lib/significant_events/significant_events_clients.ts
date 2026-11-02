@@ -16,6 +16,7 @@ import {
 } from './detections';
 import type { DetectionClient } from './detections';
 import { RuleEventsClient } from './events/rule_events_client';
+import type { EventStatusChangeReporter } from './events/event_status_change_telemetry';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
 
 export interface SignificantEventsServices {
@@ -44,6 +45,7 @@ export function createSignificantEventsClients({
   logger,
   space,
   triggerEmitter,
+  telemetry,
   getAlertEventsClient,
 }: {
   services: SignificantEventsServices;
@@ -54,6 +56,8 @@ export function createSignificantEventsClients({
   logger?: Logger;
   space: string;
   triggerEmitter?: TriggerEmitter;
+  /** Reports a status-change EBT event for every written version that changes status. */
+  telemetry?: EventStatusChangeReporter;
   getAlertEventsClient: () => Promise<AlertEventsClientApi>;
 }): SignificantEventsClients {
   const eventSearchClient = new RuleEventsClient({
@@ -63,6 +67,7 @@ export function createSignificantEventsClients({
     space,
     getAlertEventsClient,
     emitTrigger: triggerEmitter,
+    telemetry,
   });
 
   return {

@@ -152,6 +152,8 @@ const changePointScanRoute = createServerRoute({
     body: z.object({
       lookback: z.string().max(64),
       bucketInterval: z.string().max(64),
+      /** The detection workflow execution requesting the scan; carried onto its telemetry. */
+      workflowExecutionId: z.string().max(256).optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, getSpaceId, telemetry, logger }) => {
@@ -221,6 +223,9 @@ const changePointScanRoute = createServerRoute({
       default_lookback: defaultConfig.lookback,
       default_bucket_interval: defaultConfig.bucketInterval,
       space_id: spaceId,
+      ...(params.body.workflowExecutionId !== undefined
+        ? { workflow_execution_id: params.body.workflowExecutionId }
+        : {}),
     });
 
     return { alertIndex: sigEventsContext.alertsReader.index, aggregations };

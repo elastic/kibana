@@ -173,6 +173,7 @@ describe('ki_query_create tool', () => {
         tool_id: 'ki_query_create',
         success: true,
         source_id: 'logs.test',
+        knowledge_indicator_id: expect.any(String),
       })
     );
   });

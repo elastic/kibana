@@ -29,11 +29,12 @@ const makeLink = (sourceId: string, ruleId: string): QueryLink =>
     query: { id: `${ruleId}-query`, severity_score: 90 },
   } as QueryLink);
 
-const setup = () => {
+const setup = ({ workflowExecutionId }: { workflowExecutionId?: string } = {}) => {
   const runChangePointScan = jest.fn().mockResolvedValue({ took: 1, by_rule: { buckets: [] } });
   const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
+  const trackSignificantEventsDetectionScan = jest.fn();
   const handlerParams = {
-    params: { body: { lookback: 'now-1440m', bucketInterval: '60m' } },
+    params: { body: { lookback: 'now-1440m', bucketInterval: '60m', workflowExecutionId } },
     request: {},
     getScopedClients: jest.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },
@@ -53,10 +54,10 @@ const setup = () => {
     }),
     server: {},
     getSpaceId: jest.fn().mockResolvedValue('default'),
-    telemetry: { trackSignificantEventsDetectionScan: jest.fn() },
+    telemetry: { trackSignificantEventsDetectionScan },
     logger: { get: jest.fn() },
   } as unknown as ScanHandlerParams;
-  return { handlerParams, runChangePointScan, list };
+  return { handlerParams, runChangePointScan, list, trackSignificantEventsDetectionScan };
 };
 
 describe('change point scan route', () => {
@@ -68,5 +69,28 @@ describe('change point scan route', () => {
     expect(list).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
     const scannedRuleIds = runChangePointScan.mock.calls.flatMap(([, { ruleIds }]) => ruleIds);
     expect(scannedRuleIds).toEqual(['rule-1']);
+  });
+
+  it('carries the workflow execution id onto the scan telemetry', async () => {
+    const { handlerParams, trackSignificantEventsDetectionScan } = setup({
+      workflowExecutionId: 'wf-exec-1',
+    });
+
+    await scanRoute.handler(handlerParams);
+
+    expect(trackSignificantEventsDetectionScan).toHaveBeenCalledWith(
+      expect.objectContaining({ space_id: 'default', workflow_execution_id: 'wf-exec-1' })
+    );
+  });
+
+  it('omits the workflow execution id from the scan telemetry when none was sent', async () => {
+    const { handlerParams, trackSignificantEventsDetectionScan } = setup();
+
+    await scanRoute.handler(handlerParams);
+
+    expect(trackSignificantEventsDetectionScan).toHaveBeenCalledTimes(1);
+    expect(trackSignificantEventsDetectionScan.mock.calls[0][0]).not.toHaveProperty(
+      'workflow_execution_id'
+    );
   });
 });

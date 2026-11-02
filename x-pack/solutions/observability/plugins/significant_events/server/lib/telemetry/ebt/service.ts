@@ -6,20 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import {
-  agentBuilderKnowledgeIndicatorCreatedEventType,
-  agentToolEventCreateEventType,
-  agentToolEventInvestigationAttachEventType,
-  agentToolEventStatusUpdateEventType,
-  agentToolKiIdentificationStartedEventType,
-  detectionScanEventType,
-  discoveryTriggeredEventType,
-  knowledgeIndicatorEventsGeneratedEventType,
-  knowledgeIndicatorFeaturesIdentifiedEventType,
-  onboardingScheduledEventType,
-  agentToolEventWriteEventType,
-  agentToolEventSearchEventType,
-} from './events';
+import { significantEventsEventTypes } from './events';
 import { EbtTelemetryClient } from './client';
 
 export class EbtTelemetryService {
@@ -29,18 +16,9 @@ export class EbtTelemetryService {
 
   public setup(analytics: AnalyticsServiceSetup) {
     this.analytics = analytics;
-    this.analytics.registerEventType(knowledgeIndicatorEventsGeneratedEventType);
-    this.analytics.registerEventType(knowledgeIndicatorFeaturesIdentifiedEventType);
-    this.analytics.registerEventType(agentBuilderKnowledgeIndicatorCreatedEventType);
-    this.analytics.registerEventType(agentToolKiIdentificationStartedEventType);
-    this.analytics.registerEventType(agentToolEventCreateEventType);
-    this.analytics.registerEventType(agentToolEventStatusUpdateEventType);
-    this.analytics.registerEventType(agentToolEventWriteEventType);
-    this.analytics.registerEventType(agentToolEventSearchEventType);
-    this.analytics.registerEventType(agentToolEventInvestigationAttachEventType);
-    this.analytics.registerEventType(discoveryTriggeredEventType);
-    this.analytics.registerEventType(detectionScanEventType);
-    this.analytics.registerEventType(onboardingScheduledEventType);
+    significantEventsEventTypes.forEach((eventType) => {
+      analytics.registerEventType(eventType);
+    });
   }
 
   public getClient() {
