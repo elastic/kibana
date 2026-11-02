@@ -84,7 +84,7 @@ export const prBaseSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/typecheck/check_types.sh',
     label: 'Check Types',
     agents: {
-      ...spotAgent('n4-highcpu-32', spotZones.n4),
+      ...spotAgent('n4-highcpu-32', spotZones.allUS),
       ...hyperdiskBalanced,
     },
     key: 'check_types',
