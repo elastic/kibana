@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, renderHook, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { WorkflowListItemDto } from '@kbn/workflows';
@@ -14,7 +15,6 @@ import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
-import type { RunWorkflowSelectionScope } from './use_run_workflow_selection';
 import {
   useRunDocumentWorkflowPanel,
   RUN_DOCUMENT_WORKFLOW_PANEL_ID,
@@ -165,11 +165,14 @@ const createMockKibana = (
   };
 };
 
+const ROOT_PANEL_ID = 0;
+
 const renderContextMenu = (
   items: DocumentTableContextMenuItem[],
-  panels: EuiContextMenuPanelDescriptor[]
+  panels: EuiContextMenuPanelDescriptor[],
+  initialPanelId = panels[0]?.id ?? 1
 ) => {
-  const panelsToRender = [{ id: 0, items }, ...panels];
+  const panelsToRender = [{ id: ROOT_PANEL_ID, items }, ...panels];
   return render(
     <EuiPopover
       aria-label="Context menu"
@@ -179,7 +182,7 @@ const renderContextMenu = (
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
+      <EuiContextMenu initialPanelId={initialPanelId} panels={panelsToRender} />
     </EuiPopover>
   );
 };
@@ -540,10 +543,8 @@ describe('useRunDocumentWorkflowPanel', () => {
     const pageDocumentIds = [{ _id: 'doc-1', _index: 'logs-a' }];
 
     const renderSelectAllPanel = (
-      props: {
-        isAllSelected?: boolean;
-        selectionScope?: RunWorkflowSelectionScope;
-      } = {}
+      props: Partial<UseRunDocumentWorkflowPanelProps> = {},
+      initialPanelId?: number
     ) => {
       const { result } = renderHook(
         () =>
@@ -558,7 +559,8 @@ describe('useRunDocumentWorkflowPanel', () => {
       );
       return renderContextMenu(
         result.current.runWorkflowMenuItem,
-        result.current.runDocumentWorkflowPanel
+        result.current.runDocumentWorkflowPanel,
+        initialPanelId
       );
     };
 
@@ -581,15 +583,31 @@ describe('useRunDocumentWorkflowPanel', () => {
       });
     });
 
-    it('does not resolve beyond the loaded rows when the caller has no selection scope', () => {
+    it('runs on the loaded rows without a selection scope when they are the whole select-all', () => {
       const searchHandler = mockDocumentIdSearch({ events: [], totalCount: 0 });
 
-      renderSelectAllPanel({ selectionScope: undefined });
+      renderSelectAllPanel({ selectionScope: undefined, totalItems: pageDocumentIds.length });
 
       expect(searchHandler).not.toHaveBeenCalled();
       expect(lastPanelProps().inputs).toEqual({
         event: { triggerType: 'document', documentIds: pageDocumentIds },
       });
+    });
+
+    it('does not resolve the selection until the run panel opens', async () => {
+      const searchHandler = mockDocumentIdSearch({
+        events: [timelineItem('doc-1', 'logs-a')],
+        totalCount: 1,
+      });
+
+      const { getByTestId } = renderSelectAllPanel({}, ROOT_PANEL_ID);
+
+      expect(useTimelineEventsHandlerMock).not.toHaveBeenCalled();
+      expect(searchHandler).not.toHaveBeenCalled();
+
+      await userEvent.click(getByTestId('run-document-workflow-action'));
+
+      await waitFor(() => expect(searchHandler).toHaveBeenCalledTimes(1));
     });
 
     it('runs on every matching document, not just the loaded rows, when all are selected', async () => {
@@ -663,14 +681,28 @@ describe('useRunDocumentWorkflowPanel', () => {
         expect(menuItem.toolTipContent).toBeUndefined();
       });
 
-      // Without a scope the run stays on the loaded rows, so the table total is irrelevant.
-      it('ignores the table total when the select-all cannot be resolved beyond the loaded rows', () => {
+      // Without a scope only the loaded rows can be run on, which would silently drop the rest.
+      it.each([
+        ['covers more than the loaded rows', pageDocumentIds.length + 1],
+        ['has no known total', undefined],
+      ])(
+        'disables the action and explains why when a select-all without a scope %s',
+        (_, totalItems) => {
+          const menuItem = renderMenuItem({ selectionScope: undefined, totalItems });
+
+          expect(menuItem.disabled).toBe(true);
+          expect(menuItem.toolTipContent).toBe(i18n.RUN_WORKFLOW_SELECT_ALL_UNSUPPORTED);
+        }
+      );
+
+      it('keeps the action enabled without a scope when the loaded rows are the whole select-all', () => {
         const menuItem = renderMenuItem({
           selectionScope: undefined,
-          totalItems: MAX_RUN_WORKFLOW_DOCS + 1,
+          totalItems: pageDocumentIds.length,
         });
 
         expect(menuItem.disabled).toBeUndefined();
+        expect(menuItem.toolTipContent).toBeUndefined();
       });
 
       it('ignores the table total when only the loaded rows are selected', () => {

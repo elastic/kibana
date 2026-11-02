@@ -29,6 +29,7 @@ import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_c
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
+import type { RunWorkflowSelectionScope } from '../../../../detections/components/alerts_table/timeline_actions/use_run_workflow_selection';
 import { ALERT_STATUS_ACTION_IDS } from '../../../constants/action_ids';
 
 export type BulkActionMenuItem = AlertTableContextMenuItem;
@@ -46,7 +47,6 @@ export interface BulkActionGroups {
   customItems: BulkActionMenuItem[];
   workflowItems: BulkActionMenuItem[];
 }
-import type { RunWorkflowSelectionScope } from '../../../../detections/components/alerts_table/timeline_actions/use_run_workflow_selection';
 
 export interface BulkActionsProps {
   eventIds: string[];

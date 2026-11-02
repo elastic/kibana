@@ -127,20 +127,37 @@ export interface UseRunDocumentWorkflowPanelProps {
   /**
    * True when the user chose "select all N". A table only hands over its loaded rows, so the
    * rest of the selection has to be resolved from `selectionScope` before the run payload can
-   * be built. Ignored unless `selectionScope` is also supplied.
+   * be built. Without `selectionScope`, the menu item is disabled unless `totalItems` shows the
+   * loaded rows already cover the whole selection.
    */
   isAllSelected?: boolean;
   /**
    * Query context used to resolve a select-all beyond the loaded rows. Callers that cannot
-   * describe their selection as a query omit it, and the run stays scoped to the loaded rows.
+   * describe their selection as a query omit it.
    */
   selectionScope?: RunWorkflowSelectionScope;
   /**
    * Number of hits a select-all covers. Past `MAX_RUN_WORKFLOW_DOCS` the menu item is disabled
-   * with a tooltip explaining why. Only read when a select-all is resolved from `selectionScope`.
+   * with a tooltip explaining why. Only read during a select-all.
    */
   totalItems?: number;
 }
+
+const getRunWorkflowDisabledReason = ({
+  isSelectAllUnresolvable,
+  selectionSize,
+}: {
+  isSelectAllUnresolvable: boolean;
+  selectionSize: number;
+}): string | undefined => {
+  if (isSelectAllUnresolvable) {
+    return i18n.RUN_WORKFLOW_SELECT_ALL_UNSUPPORTED;
+  }
+  if (selectionSize > MAX_RUN_WORKFLOW_DOCS) {
+    return i18n.RUN_WORKFLOW_SELECTION_TOO_LARGE(MAX_RUN_WORKFLOW_DOCS);
+  }
+  return undefined;
+};
 
 /**
  * Resolves a select-all into concrete ids, then renders the run panel against them.
@@ -207,9 +224,13 @@ export const useRunDocumentWorkflowPanel = ({
     [workflowUIEnabled, canExecuteWorkflow, hasDocuments, canRunInCase]
   );
 
-  // Only resolve a select-all when the caller described its selection as a query; otherwise the
-  // loaded rows are all there is to run on.
+  // Only resolve a select-all when the caller described its selection as a query.
   const selectAllScope = isAllSelected ? selectionScope : undefined;
+  // Without a query, a select-all reaching past the loaded rows can't run on what was selected.
+  const isSelectAllUnresolvable =
+    isAllSelected &&
+    selectAllScope === undefined &&
+    (totalItems === undefined || totalItems > documentIds.length);
 
   const panelContent = useMemo(
     () =>
@@ -233,7 +254,7 @@ export const useRunDocumentWorkflowPanel = ({
 
   const selectionSize =
     selectAllScope !== undefined && totalItems !== undefined ? totalItems : documentIds.length;
-  const exceedsLimit = selectionSize > MAX_RUN_WORKFLOW_DOCS;
+  const disabledReason = getRunWorkflowDisabledReason({ isSelectAllUnresolvable, selectionSize });
 
   const runWorkflowMenuItem: DocumentTableContextMenuItem[] = useMemo(
     () => [
@@ -244,13 +265,13 @@ export const useRunDocumentWorkflowPanel = ({
         key: RUN_DOCUMENT_WORKFLOW_ACTION_ID,
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_DOCUMENT_WORKFLOW_PANEL_ID,
-        ...(exceedsLimit && {
+        ...(disabledReason !== undefined && {
           disabled: true,
-          toolTipContent: i18n.RUN_WORKFLOW_SELECTION_TOO_LARGE(MAX_RUN_WORKFLOW_DOCS),
+          toolTipContent: disabledReason,
         }),
       },
     ],
-    [exceedsLimit]
+    [disabledReason]
   );
 
   const runDocumentWorkflowPanel: EuiContextMenuPanelDescriptor[] = useMemo(

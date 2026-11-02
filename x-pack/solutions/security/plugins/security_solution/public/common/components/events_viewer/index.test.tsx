@@ -179,12 +179,31 @@ describe('StatefulEventsViewer', () => {
     expect(useAlertBulkActions).toHaveBeenLastCalledWith(
       expect.objectContaining({
         selectionScope: expect.objectContaining({
+          dataViewId: (useTimelineEvents as jest.Mock).mock.lastCall?.[0].dataViewId,
           indexNames: ['logs-*'],
           from,
           to,
           queryId: `${TableId.test}-run-workflow-selection`,
         }),
       })
+    );
+  });
+
+  // The sessions search collapses hits by entry leader, so resolving a select-all as plain events
+  // would run on raw process events instead of the selected sessions.
+  test('gives the bulk actions no selection scope for a sessions table', () => {
+    render(
+      <TestProviders>
+        <StatefulEventsViewer
+          {...testProps}
+          entityType={EntityType.SESSIONS}
+          indexNames={['logs-*']}
+        />
+      </TestProviders>
+    );
+
+    expect(useAlertBulkActions).toHaveBeenLastCalledWith(
+      expect.objectContaining({ selectionScope: undefined })
     );
   });
 });

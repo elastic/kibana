@@ -26,7 +26,7 @@ import type {
   DeprecatedRowRenderer,
   Direction,
 } from '@kbn/securitysolution-timeline-common';
-import type { EntityType } from '@kbn/timelines-plugin/common';
+import { EntityType } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
@@ -448,18 +448,24 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     itemsPerPage,
   ]);
 
+  // Sessions collapse hits by entry leader on the server, which the selection search doesn't, so
+  // only an events table can describe its select-all as a query.
   const runWorkflowSelectionScope = useMemo(
-    () => ({
-      dataViewId: selectedDataViewId ?? '',
-      indexNames: indexNames ?? selectedPatterns,
-      filterQuery,
-      from: start,
-      to: end,
-      runtimeMappings,
-      queryId: `${tableId}-run-workflow-selection`,
-    }),
+    () =>
+      entityType === EntityType.EVENTS
+        ? {
+            dataViewId,
+            indexNames: indexNames ?? selectedPatterns,
+            filterQuery,
+            from: start,
+            to: end,
+            runtimeMappings,
+            queryId: `${tableId}-run-workflow-selection`,
+          }
+        : undefined,
     [
-      selectedDataViewId,
+      entityType,
+      dataViewId,
       indexNames,
       selectedPatterns,
       filterQuery,
