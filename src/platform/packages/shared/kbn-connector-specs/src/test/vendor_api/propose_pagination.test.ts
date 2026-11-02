@@ -97,6 +97,23 @@ describe('assessPagination', () => {
     });
   });
 
+  it('reads operations under x-ms-paths', () => {
+    expect(
+      assessPagination(
+        {
+          openapi: '3.0.3',
+          paths: {},
+          'x-ms-paths': {
+            '/?comp=list': {
+              get: { 'x-ms-pageable': { nextLinkName: 'NextMarker' }, responses: json({}) },
+            },
+          },
+        },
+        { method: 'get', path: '/?comp=list' }
+      )
+    ).toMatchObject({ listLike: true, reason: 'it has x-ms-pageable' });
+  });
+
   it('proposes body cursors, skipping next-page URLs under links', () => {
     const page = {
       type: 'object',
