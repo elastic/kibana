@@ -30,6 +30,7 @@
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/esql-server-utils",
+    "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/esql-language",
     "@kbn/datemath",

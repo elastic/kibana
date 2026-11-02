@@ -10,14 +10,14 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { LifecycleDetection, SignificantEvent } from '@kbn/significant-events-schema';
 import { DetectionsList, MAX_VISIBLE_DETECTIONS } from './detections_list';
-import { useFetchEventLifecycle } from '../../../hooks/use_fetch_event_lifecycle';
+import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
-jest.mock('../../../hooks/use_fetch_event_lifecycle');
+jest.mock('../../../data/significant_events/use_fetch_event_lifecycle');
 jest.mock('../detection/change_point_visualization', () => ({
   ChangePointSparkline: ({ data }: { data: Array<{ x: number; y: number }> }) => (
     <div data-test-subj="mockDetectionSparkline" data-point-count={data.length} />

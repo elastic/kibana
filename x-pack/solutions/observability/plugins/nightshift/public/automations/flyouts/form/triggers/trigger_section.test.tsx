@@ -21,7 +21,7 @@ const defaultCatalog = {
   isError: false,
 };
 const mockUseRuleCatalog = jest.fn();
-jest.mock('../../../../hooks/use_rule_catalog', () => ({
+jest.mock('../../../../data/rules/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
 }));
 jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
