@@ -10,7 +10,13 @@ import {
   createTriggerFormValues,
   type TriggerFormValues,
 } from './automation_form_values';
-import { canSaveAutomation, getSaveBlocker, isTriggerValid, isValidDailyLimit } from './validation';
+import {
+  canSaveAutomation,
+  getInstructionsError,
+  getSaveBlocker,
+  isTriggerValid,
+  isValidDailyLimit,
+} from './validation';
 
 const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'every' }>> = {}) => ({
   ...(createTriggerFormValues('every') as Extract<TriggerFormValues, { kind: 'every' }>),
@@ -47,9 +53,12 @@ describe('automation validation', () => {
   describe('getSaveBlocker', () => {
     const values = createAutomationFormValues();
 
-    it('requires instructions for a scheduled assessment', () => {
-      const scheduled = { ...values, trigger: createTriggerFormValues('every') };
-      expect(getSaveBlocker(scheduled)).toBe(
+    it('keeps scheduled saves enabled while reporting missing instructions for submit validation', () => {
+      const trigger = createTriggerFormValues('every');
+      const scheduled = { ...values, trigger };
+      expect(canSaveAutomation(scheduled)).toBe(true);
+      expect(getSaveBlocker(scheduled)).toBeUndefined();
+      expect(getInstructionsError('', trigger)).toBe(
         'Add instructions describing what this scheduled automation should investigate.'
       );
       expect(canSaveAutomation({ ...scheduled, instructions: 'Review checkout health.' })).toBe(

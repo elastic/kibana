@@ -42,6 +42,7 @@ export const AutomationFormBody = ({
   values,
   tagSuggestions,
   isNameInvalid,
+  showValidationErrors = false,
   readOnly = false,
   showIdentityFields = true,
   usedToday,
@@ -52,6 +53,7 @@ export const AutomationFormBody = ({
   values: AutomationFormValues;
   tagSuggestions: string[];
   isNameInvalid: boolean;
+  showValidationErrors?: boolean;
   readOnly?: boolean;
   showIdentityFields?: boolean;
   usedToday?: number;
@@ -136,6 +138,7 @@ export const AutomationFormBody = ({
         <AutomationTriggerSection
           trigger={values.trigger}
           instructions={values.instructions}
+          showValidationErrors={showValidationErrors}
           onInstructionsChange={(instructions) => onChange({ instructions })}
           dailyDispatchLimit={values.dailyDispatchLimit}
           onTriggerChange={(trigger) => onChange({ trigger, ...getActionForTrigger(trigger) })}

@@ -77,8 +77,9 @@ export const getInstructionsError = (
 
 export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
   if (!values.trigger) return validationLabels.triggerRequired;
-  const instructionsError = getInstructionsError(values.instructions, values.trigger);
-  if (instructionsError) return instructionsError;
+  if (values.instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+    return validationLabels.instructionsTooLong;
+  }
   if (values.trigger && isSlackTrigger(values.trigger) && !values.trigger.channels.length) {
     return validationLabels.slackChannelsRequired;
   }

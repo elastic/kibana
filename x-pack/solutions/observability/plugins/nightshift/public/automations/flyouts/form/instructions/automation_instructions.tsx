@@ -59,11 +59,13 @@ export const AutomationInstructions = ({
   instructions,
   trigger,
   onInstructionsChange,
+  showValidationErrors = false,
   readOnly = false,
 }: {
   instructions: string;
   trigger: TriggerFormValues;
   onInstructionsChange: (instructions: string) => void;
+  showValidationErrors?: boolean;
   readOnly?: boolean;
 }) => {
   const fieldId = useGeneratedHtmlId({ prefix: 'automationInstructions' });
@@ -71,7 +73,7 @@ export const AutomationInstructions = ({
   const isScheduled = trigger.kind === 'every';
   const label = isScheduled ? labels.instructions : labels.additionalInstructions;
   const error =
-    hasBlurred || instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH
+    showValidationErrors || hasBlurred || instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH
       ? getInstructionsError(instructions, trigger)
       : undefined;
 

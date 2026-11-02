@@ -32,6 +32,7 @@ export const AutomationTriggerSection = ({
   usedToday,
   savedLimit,
   onRaiseLimit,
+  showValidationErrors = false,
   readOnly = false,
 }: {
   trigger?: TriggerFormValues;
@@ -43,6 +44,7 @@ export const AutomationTriggerSection = ({
   usedToday?: number;
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
+  showValidationErrors?: boolean;
   readOnly?: boolean;
 }) => {
   const [stashedTriggers, setStashedTriggers] = useState<
@@ -135,6 +137,7 @@ export const AutomationTriggerSection = ({
               trigger={trigger}
               instructions={instructions}
               onInstructionsChange={onInstructionsChange}
+              showValidationErrors={showValidationErrors}
               readOnly={readOnly}
             />
           </>
