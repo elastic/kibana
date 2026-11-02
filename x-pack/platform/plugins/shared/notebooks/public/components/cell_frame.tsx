@@ -139,6 +139,7 @@ export const CellFrame = ({
             content={getTypeLabel(cell)}
             aria-label={getTypeLabel(cell)}
             color="text"
+            position="left"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
