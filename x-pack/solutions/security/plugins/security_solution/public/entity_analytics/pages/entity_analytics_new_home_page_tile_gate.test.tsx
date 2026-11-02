@@ -38,8 +38,8 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useRiskTilesSeries: jest.fn(),
   useSearchedTileEntityIds: jest.fn(),
   useTilesLoadTelemetry: jest.fn(),
+  useTilesErrorNotice: jest.fn(),
   useTilesTimeoutNotice: jest.fn(),
-  TILE_TIMEOUT_MESSAGE: 'Timed out',
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -400,6 +400,15 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
     expect(screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper')).toBeEmptyDOMElement();
   });
 
+  it('titles the tiles section', () => {
+    mockPrivileges();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('eaFaceliftNeedsAttentionTitle')).toHaveTextContent(
+      'Entities that need your attention'
+    );
+  });
+
   it.each([
     ['alerts', ['alerts'], ['entitiesWithAlerts', 'watchlisted']],
     ['anomalies', ['anomalies'], ['entitiesWithAnomalies']],
@@ -417,7 +426,10 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
         expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(isSkipped);
       });
       cardIds.forEach((id) => {
-        expect(getCard(id)?.noDataMessage).toMatch(/^Requires read access to /);
+        expect(getCard(id)?.countIssue).toEqual({
+          kind: 'locked',
+          text: expect.stringMatching(/^Requires read access to /),
+        });
       });
     }
   );
@@ -447,9 +459,10 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       expect(lastOptions(hook).skip).toBe(true);
     });
     ['entitiesWithAlerts', 'watchlisted'].forEach((id) => {
-      expect(getCard(id as SignalCardData['id'])?.noDataMessage).toBe(
-        'Requires read access to alerts'
-      );
+      expect(getCard(id as SignalCardData['id'])?.countIssue).toEqual({
+        kind: 'locked',
+        text: 'Requires read access to alerts',
+      });
     });
     // The grid drops the Alerts columns (and so their count and click path) for this role.
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
@@ -470,7 +483,7 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
     expect(lastOptions(COUNT_HOOKS.alerts).skip).toBe(false);
-    expect(getCard('entitiesWithAlerts')?.noDataMessage).toBeUndefined();
+    expect(getCard('entitiesWithAlerts')?.countIssue).toBeUndefined();
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
     expect(gridCalls[gridCalls.length - 1][0].readAccess.alerts).toBe(true);
   });
@@ -555,6 +568,81 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       };
       const keyWithoutSearch = keyOfSearch(undefined);
       expect(keyOfSearch('entity.name == "a"')).not.toBe(keyWithoutSearch);
+    });
+  });
+
+  describe('a tile with more entities than the table is filtered by', () => {
+    const manyIds = Array.from({ length: 1423 }, (_, i) => `entity-${i}`);
+    const lastGridProps = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0];
+    };
+    const selectBigTile = () => {
+      mockUrlStateOverrides = { activeTile: 'newEntity' };
+      hooks.useNewEntityCount.mockReturnValue({
+        count: manyIds.length,
+        entityIds: manyIds,
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+    };
+
+    it('tells the grid how many entities the tile has, for the resolved rows', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toEqual({ total: 1423, limit: 1000 });
+    });
+
+    it('warns with the numbers written out, 1,000 of 1,423', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      mockAddWarning.mockClear();
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      // The warning fires when the selection changes, so change it by one entity.
+      hooks.useNewEntityCount.mockReturnValue({
+        count: manyIds.length + 1,
+        entityIds: [...manyIds, 'entity-extra'],
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(mockAddWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Table shows 1,000 of 1,424 entities',
+          text: expect.stringContaining('limited to 1,000 entities'),
+        })
+      );
+    });
+
+    it('says nothing of it for individual records, which are a different count', () => {
+      mockRowsMode = 'individual';
+      selectBigTile();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toBeUndefined();
+    });
+
+    it('says nothing of it while the tile fits the table', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      hooks.useNewEntityCount.mockReturnValue({
+        count: 1000,
+        entityIds: manyIds.slice(0, 1000),
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toBeUndefined();
     });
   });
 
@@ -675,10 +763,14 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
     });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
-    expect(getCard('entitiesWithAlerts')?.noDataMessage).toBe('Requires detection alerts');
-    expect(getCard('watchlisted')?.noDataMessage).toBe('Requires detection alerts');
+    expect(getCard('entitiesWithAlerts')?.countIssue).toEqual(
+      expect.objectContaining({ kind: 'issue', text: 'Requires an alerts index' })
+    );
+    expect(getCard('watchlisted')?.countIssue).toEqual(
+      expect.objectContaining({ kind: 'issue', text: 'Requires an alerts index' })
+    );
     expect(getCard('entitiesWithAlerts')?.isUnavailable).toBe(true);
-    expect(getCard('newEntity')?.noDataMessage).toBeUndefined();
+    expect(getCard('newEntity')?.countIssue).toBeUndefined();
   });
 
   describe('when a count times out', () => {
@@ -695,10 +787,14 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       });
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
-      const messageOf = (id: SignalCardData['id']) => getCard(id)?.noDataMessage;
-      expect(messageOf('entitiesWithAlerts')).toBe('Timed out');
-      expect(messageOf('watchlisted')).toBe('Timed out');
-      expect(messageOf('newEntity')).toBeUndefined();
+      const issueOf = (id: SignalCardData['id']) => getCard(id)?.countIssue;
+      expect(issueOf('entitiesWithAlerts')).toEqual(
+        expect.objectContaining({ kind: 'issue', icon: 'error', text: 'Query timed out' })
+      );
+      expect(issueOf('watchlisted')).toEqual(
+        expect.objectContaining({ kind: 'issue', icon: 'error', text: 'Query timed out' })
+      );
+      expect(issueOf('newEntity')).toBeUndefined();
       expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
       expect(lastOptions('useTilesLoadTelemetry').tiles.alerts.isTimedOut).toBe(true);
     });
@@ -708,6 +804,74 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
     });
+  });
+
+  describe('when a count fails', () => {
+    const lastErrorNotice = () => {
+      const { calls } = hooks.useTilesErrorNotice.mock;
+      return calls[calls.length - 1];
+    };
+
+    it('names every tile that failed in one notice, once the counts have settled', () => {
+      mockTiles();
+      hooks.useAlertBasedTiles.mockReturnValue({
+        ...hooks.useAlertBasedTiles(),
+        hasCount: false,
+        error: new Error('boom'),
+      });
+      hooks.useNewEntityCount.mockReturnValue({
+        ...hooks.useNewEntityCount(),
+        hasCount: false,
+        error: new Error('boom'),
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      const [titles, isSettled] = lastErrorNotice();
+      expect(titles).toEqual(['Severely alerting', 'New & alerting', 'Watchlisted & alerting']);
+      expect(isSettled).toBe(true);
+    });
+
+    it('does not name a tile that timed out, which has its own notice', () => {
+      mockTiles();
+      hooks.useNewEntityCount.mockReturnValue({
+        ...hooks.useNewEntityCount(),
+        hasCount: false,
+        error: new Error('boom'),
+        isTimedOut: true,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastErrorNotice()[0]).toEqual([]);
+      expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
+    });
+
+    it('names nothing, and has not settled, while a count still loads', () => {
+      mockTiles({ alerts: { isCountPending: true } });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastErrorNotice()[0]).toEqual([]);
+    });
+  });
+
+  it("runs a tile's delta for a count of 0 that came back, but not for a count that did not", () => {
+    mockTiles();
+    hooks.useNewEntityCount.mockReturnValue({
+      ...hooks.useNewEntityCount(),
+      count: 0,
+      hasCount: true,
+    });
+    hooks.useRiskMoversCount.mockReturnValue({
+      ...hooks.useRiskMoversCount(),
+      count: 0,
+      hasCount: false,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(lastOptions(DELTA_HOOKS.newEntity).hasCount).toBe(true);
+    expect(lastOptions(DELTA_HOOKS.riskMovers).hasCount).toBe(false);
+    // The sparklines are told the same, so a count that did not come back draws no line.
+    expect(lastOptions(SERIES_HOOKS.newEntity).hasCount).toBe(true);
+    expect(lastOptions(SERIES_HOOKS.riskMovers).riskMoversHasCount).toBe(false);
   });
 
   it('passes whether each count has a result to its tile, so a missing count is not shown as 0', () => {
@@ -732,15 +896,18 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
   });
 
   it('tells the anomalies tile that it needs jobs only when no security ML job is installed', () => {
-    const anomaliesNoDataMessage = () => getCard('entitiesWithAnomalies')?.noDataMessage;
+    const anomaliesIssueText = () => {
+      const issue = getCard('entitiesWithAnomalies')?.countIssue;
+      return issue?.kind === 'issue' ? issue.text : undefined;
+    };
     mockTiles({}, { anomaliesMissingJobs: true });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
-    expect(anomaliesNoDataMessage()).toBe('Requires anomaly detection jobs');
+    expect(anomaliesIssueText()).toBe('Requires anomaly detection jobs');
 
     jest.clearAllMocks();
     mockTiles({}, { anomaliesMissingJobs: false });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
-    expect(anomaliesNoDataMessage()).toBeUndefined();
+    expect(anomaliesIssueText()).toBeUndefined();
   });
 });
 
@@ -754,6 +921,39 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
       isLoading: false,
     });
     mockTiles();
+  });
+
+  it('also drops a failed comparison and a loading sparkline for the searched tiles', () => {
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("host.name: a")',
+      isSearchOverridesPending: false,
+    });
+    hooks.useSearchedTileEntityIds.mockReturnValue({
+      searchedTileEntityIds: {
+        entitiesWithAlerts: ['host:a'],
+        entitiesWithAnomalies: [],
+        riskMovers: [],
+        newlyHighCritical: [],
+        watchlisted: [],
+        newEntity: [],
+      },
+      isPending: false,
+    });
+    // The unfiltered comparison failed and its sparkline is still loading: neither applies to a
+    // tile that now counts only the searched entities.
+    hooks.useAlertBasedTilesDelta.mockReturnValue({
+      ...hooks.useAlertBasedTilesDelta(),
+      failure: 'delta',
+    });
+    hooks.useAlertBasedTilesSeries.mockReturnValue({
+      alertsTrend: undefined,
+      watchlistedTrend: undefined,
+      isTrendLoading: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(getCard('entitiesWithAlerts')?.deltaFailure).toBeUndefined();
+    expect(getCard('entitiesWithAlerts')?.isTrendLoading).toBe(false);
   });
 
   it("shows each tile's searched entities, without its delta and sparkline", () => {
