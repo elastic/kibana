@@ -121,6 +121,7 @@ export const Rootly: ConnectorSpec = {
       {
         type: 'bearer',
         isRecommended: true,
+        supportsSandbox: true,
         defaults: {},
         overrides: {
           meta: {
