@@ -243,11 +243,6 @@ export const PREVIEW_REOPENED = i18n.translate('xpack.alertzero.onboarding.previ
   defaultMessage: 'Reopened',
 });
 
-export const VIDEO_PLACEHOLDER_LABEL = i18n.translate(
-  'xpack.alertzero.onboarding.intro.videoPlaceholderLabel',
-  { defaultMessage: 'Play: AlertZero in 90 seconds (video placeholder)' }
-);
-
 export interface PreviewItem {
   readonly age: string;
   readonly reopened: boolean;
