@@ -7,7 +7,6 @@
 
 import React, { useState, type PropsWithChildren, type ReactNode } from 'react';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
   EuiContextMenuItem,
@@ -20,7 +19,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -31,6 +29,7 @@ import { CELL_NAME_PATTERN } from '../model/references';
 import { duplicateCell, type NewCellKind } from '../model/cell_factory';
 import type { CellRuntime } from '../model/types';
 import { CellStatusBadge } from './cell_status_badge';
+import { RunButton } from './run_button';
 import { useNotebook } from './notebook_context';
 
 const TYPE_ICONS: Record<CellType, string> = {
@@ -64,7 +63,6 @@ const OUTPUTS_LABEL = i18n.translate('xpack.notebook.cell.outputs', {
   defaultMessage: 'Outputs',
 });
 
-const RUN_LABEL = i18n.translate('xpack.notebook.cell.run', { defaultMessage: 'Run' });
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
 });
@@ -164,38 +162,17 @@ export const CellFrame = ({
         </EuiFlexItem>
         <EuiFlexItem />
         {headerActions}
-        {'runMode' in cell && (
+        {onRun && 'runMode' in cell && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('xpack.notebook.cell.autoRunTooltip', {
-                defaultMessage: 'Re-run automatically when upstream cells change',
-              })}
-            >
-              <EuiSwitch
-                compressed
-                label={i18n.translate('xpack.notebook.cell.autoRun', { defaultMessage: 'Auto' })}
-                checked={cell.runMode === 'auto'}
-                onChange={(event) =>
-                  store.updateCell(cell.id, (current) =>
-                    'runMode' in current
-                      ? { ...current, runMode: event.target.checked ? 'auto' : 'manual' }
-                      : current
-                  )
-                }
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-        {onRun && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="play"
-              onClick={onRun}
-              data-test-subj="notebookCellRun"
-            >
-              {RUN_LABEL}
-            </EuiButtonEmpty>
+            <RunButton
+              runMode={cell.runMode}
+              onRun={onRun}
+              onRunModeChange={(runMode) =>
+                store.updateCell(cell.id, (current) =>
+                  'runMode' in current ? { ...current, runMode } : current
+                )
+              }
+            />
           </EuiFlexItem>
         )}
         {runtime && (
