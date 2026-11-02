@@ -36,12 +36,9 @@ import { alertingAuthorizationClientFactoryMock } from './alerting_authorization
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { backfillClientMock } from './backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import {
-  UIAM_LOGS_CREDENTIALS_TAGS,
-  UIAM_LOGS_GRANT_TAGS,
-  UIAM_LOGS_INVALIDATE_TAGS,
-} from './constants';
+import { UIAM_LOGS_CREDENTIALS_TAGS, UIAM_LOGS_GRANT_TAGS } from './constants';
 import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
+import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
@@ -62,6 +59,7 @@ const ES_CLONED = {
   api_key: 'cloned-es-secret',
   encoded: b64('cloned-es-id:cloned-es-secret'),
 };
+const { encoded: _encoded, ...ES_CLONED_RESULT } = ES_CLONED;
 
 const CONFIGS = {
   esOnly: { shouldGrantUiam: false, apiKeyType: ApiKeyType.ES, uiamPresent: false },
@@ -227,10 +225,22 @@ const expectError = (
 };
 
 const uiamGrantFailureLog = (message: string, stackTrace: unknown) => [
-  `Failed to create UIAM API key for alerting rule : test: ${message}`,
+  `Failed to create UIAM API key "uiam-test": ${message}`,
   { tags: UIAM_LOGS_GRANT_TAGS, error: { stack_trace: stackTrace } },
 ];
-const CLOUD_KEY_NULL_MESSAGE = 'Failed to create a Cloud API key for alerting rule : test';
+const CLOUD_KEY_NULL_MESSAGE = 'Failed to create a Cloud API key "uiam-test"';
+const UIAM_NOT_ENABLED_MESSAGE = 'Failed to create UIAM API key "uiam-test": UIAM is not enabled';
+const CLOUD_KEY_NOT_SUPPORTED_MESSAGE =
+  'Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.';
+const NOT_UIAM_COMPATIBLE_LOG = [
+  'Request credential is not UIAM-compatible, skipping UIAM API key grant. Only ES API keys will be used.',
+  { tags: UIAM_LOGS_CREDENTIALS_TAGS },
+];
+const QUEUED_GRANTED_UIAM = [
+  { apiKeys: [b64('granted-uiam-id:essu_granted_secret')] },
+  expect.anything(),
+  expect.anything(),
+];
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -267,28 +277,28 @@ describe('RulesClientFactory API key characterization', () => {
       ['basic', 'uiamGrantEsRun', 'esOnly', true],
       ['uiamBearer', 'uiamGrantEsRun', 'esAndUiam', false],
       ['esApiKey', 'uiamGrantEsRun', 'esOnly', true],
-      ['encodedUiamApiKey', 'uiamGrantEsRun', 'esOnly', true],
+      ['encodedUiamApiKey', 'uiamGrantEsRun', 'esAndUiam', false],
       ['rawUiamApiKey', 'uiamGrantEsRun', 'esAndUiam', false],
       ['uiamServiceAccount', 'uiamGrantEsRun', 'uiamOnly', false],
       ['session', 'uiamGrantUiamRun', 'esOnly', true],
       ['basic', 'uiamGrantUiamRun', 'esOnly', true],
       ['uiamBearer', 'uiamGrantUiamRun', 'esAndUiam', false],
       ['esApiKey', 'uiamGrantUiamRun', 'esOnly', true],
-      ['encodedUiamApiKey', 'uiamGrantUiamRun', 'esOnly', true],
+      ['encodedUiamApiKey', 'uiamGrantUiamRun', 'esAndUiam', false],
       ['rawUiamApiKey', 'uiamGrantUiamRun', 'esAndUiam', false],
       ['uiamServiceAccount', 'uiamGrantUiamRun', 'uiamOnly', false],
     ];
 
     it.each(table)(
-      '%s / %s -> %s (logs invalid UIAM credentials: %s) (current behavior)',
-      async (credential, config, outcome, logsInvalidCredentials) => {
+      '%s / %s -> %s (logs non-UIAM credentials: %s)',
+      async (credential, config, outcome, logsNonUiamCredentials) => {
         const { context, request } = await setup({ config, credential });
         uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
         securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue(ES_GRANTED);
 
         if (outcome === 'uiamNotEnabled') {
           expectError(await captureError(() => context.createAPIKey('test', 'wait_for')), {
-            message: 'Failed to create UIAM API key for alerting rule : test: UIAM is not enabled',
+            message: UIAM_NOT_ENABLED_MESSAGE,
           });
         } else {
           expect(await context.createAPIKey('test', 'wait_for')).toEqual(EXPECTED_RESULTS[outcome]);
@@ -312,20 +322,14 @@ describe('RulesClientFactory API key characterization', () => {
             : []
         );
         expect(uiamApiKeys.invalidate).not.toHaveBeenCalled();
-        expect(logger.error.mock.calls).toEqual(
-          logsInvalidCredentials
-            ? [
-                [
-                  'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials',
-                  { tags: UIAM_LOGS_CREDENTIALS_TAGS },
-                ],
-              ]
-            : []
+        expect(logger.error).not.toHaveBeenCalled();
+        expect(logger.debug.mock.calls).toEqual(
+          logsNonUiamCredentials ? [NOT_UIAM_COMPATIBLE_LOG] : []
         );
       }
     );
 
-    test('grants the UIAM key before the ES key (current behavior)', async () => {
+    test('grants the UIAM key before the ES key', async () => {
       const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
       uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
       securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue(ES_GRANTED);
@@ -338,7 +342,7 @@ describe('RulesClientFactory API key characterization', () => {
       expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        { refresh: undefined }
+        {}
       );
     });
 
@@ -359,7 +363,7 @@ describe('RulesClientFactory API key characterization', () => {
     );
   });
 
-  describe('createAPIKey() failure injection and synchronous UIAM rollback', () => {
+  describe('createAPIKey() failure injection and queued cleanup of minted keys', () => {
     type UiamOutcome = 'granted' | 'null' | 'throws' | 'serviceMissing';
     type EsOutcome = 'granted' | 'null' | 'throws';
     interface Row {
@@ -368,9 +372,9 @@ describe('RulesClientFactory API key characterization', () => {
       uiam: UiamOutcome;
       es: EsOutcome;
       result?: CreateAPIKeyResult;
-      rejects?: 'esError' | 'uiamError' | 'cloudKeyNull';
+      rejects?: 'esError' | 'uiamError' | 'cloudKeyNull' | 'uiamNotEnabled';
       esCalled: boolean;
-      rollsBack: boolean;
+      queues: boolean;
     }
 
     const BOTH: CreateAPIKeyResult = {
@@ -390,7 +394,7 @@ describe('RulesClientFactory API key characterization', () => {
         es: 'granted',
         result: BOTH,
         esCalled: true,
-        rollsBack: false,
+        queues: false,
       },
       {
         credential: 'rawUiamApiKey',
@@ -399,7 +403,7 @@ describe('RulesClientFactory API key characterization', () => {
         es: 'null',
         result: DISABLED,
         esCalled: true,
-        rollsBack: true,
+        queues: true,
       },
       {
         credential: 'rawUiamApiKey',
@@ -408,7 +412,7 @@ describe('RulesClientFactory API key characterization', () => {
         es: 'throws',
         rejects: 'esError',
         esCalled: true,
-        rollsBack: true,
+        queues: true,
       },
     ];
 
@@ -422,7 +426,7 @@ describe('RulesClientFactory API key characterization', () => {
           es: 'granted',
           result: ES_ONLY,
           esCalled: true,
-          rollsBack: false,
+          queues: false,
         },
         {
           credential: 'rawUiamApiKey',
@@ -431,7 +435,7 @@ describe('RulesClientFactory API key characterization', () => {
           es: 'null',
           result: DISABLED,
           esCalled: true,
-          rollsBack: false,
+          queues: false,
         },
         {
           credential: 'rawUiamApiKey',
@@ -440,7 +444,7 @@ describe('RulesClientFactory API key characterization', () => {
           es: 'throws',
           rejects: 'esError',
           esCalled: true,
-          rollsBack: false,
+          queues: false,
         },
       ]),
       ...softRows('uiamGrantUiamRun'),
@@ -452,7 +456,7 @@ describe('RulesClientFactory API key characterization', () => {
           es,
           rejects: 'cloudKeyNull',
           esCalled: false,
-          rollsBack: false,
+          queues: false,
         },
         {
           credential: 'rawUiamApiKey',
@@ -461,16 +465,16 @@ describe('RulesClientFactory API key characterization', () => {
           es,
           rejects: 'uiamError',
           esCalled: false,
-          rollsBack: false,
+          queues: false,
         },
         {
           credential: 'rawUiamApiKey',
           config: 'uiamGrantUiamRun',
           uiam: 'serviceMissing',
           es,
-          rejects: 'cloudKeyNull',
+          rejects: 'uiamNotEnabled',
           esCalled: false,
-          rollsBack: false,
+          queues: false,
         },
       ]),
       ...(['uiamGrantEsRun', 'uiamGrantUiamRun'] as const).flatMap((config): Row[] => [
@@ -481,7 +485,7 @@ describe('RulesClientFactory API key characterization', () => {
           es: 'granted',
           result: UIAM_ONLY,
           esCalled: false,
-          rollsBack: false,
+          queues: false,
         },
         {
           credential: 'uiamServiceAccount',
@@ -490,7 +494,7 @@ describe('RulesClientFactory API key characterization', () => {
           es: 'granted',
           rejects: 'cloudKeyNull',
           esCalled: false,
-          rollsBack: false,
+          queues: false,
         },
         {
           credential: 'uiamServiceAccount',
@@ -499,23 +503,23 @@ describe('RulesClientFactory API key characterization', () => {
           es: 'granted',
           rejects: 'uiamError',
           esCalled: false,
-          rollsBack: false,
+          queues: false,
         },
         {
           credential: 'uiamServiceAccount',
           config,
           uiam: 'serviceMissing',
           es: 'granted',
-          rejects: 'cloudKeyNull',
+          rejects: 'uiamNotEnabled',
           esCalled: false,
-          rollsBack: false,
+          queues: false,
         },
       ]),
     ];
 
     it.each(table)(
-      '$credential / $config: uiam.grant $uiam, grantAsInternalUser $es (current behavior)',
-      async ({ credential, config, uiam, es, result, rejects, esCalled, rollsBack }) => {
+      '$credential / $config: uiam.grant $uiam, grantAsInternalUser $es',
+      async ({ credential, config, uiam, es, result, rejects, esCalled, queues }) => {
         const uiamError = new Error('UIAM grant failed');
         const esError = new Error('ES grant failed');
         const { context, request } = await setup({
@@ -537,23 +541,21 @@ describe('RulesClientFactory API key characterization', () => {
         if (rejects === 'cloudKeyNull') {
           expectError(await captureError(() => outcome), { message: CLOUD_KEY_NULL_MESSAGE });
         }
+        if (rejects === 'uiamNotEnabled') {
+          expectError(await captureError(() => outcome), { message: UIAM_NOT_ENABLED_MESSAGE });
+        }
         if (result) expect(await outcome).toEqual(result);
 
         expect(uiamApiKeys.grant.mock.calls).toEqual(
           uiam === 'serviceMissing' ? [] : [[request, { name: 'uiam-test' }]]
         );
         expect(grantAsInternalUser.mock.calls.length).toBe(esCalled ? 1 : 0);
-        expect(uiamApiKeys.invalidate.mock.calls).toEqual(
-          rollsBack ? [[request, { id: 'granted-uiam-id' }]] : []
+        expect(uiamApiKeys.invalidate).not.toHaveBeenCalled();
+        expect(jest.mocked(bulkMarkApiKeysForInvalidation).mock.calls).toEqual(
+          queues ? [QUEUED_GRANTED_UIAM] : []
         );
-        if (rollsBack) {
-          expect(uiamApiKeys.invalidate.mock.calls[0][0]).toBe(request);
-          expect(grantAsInternalUser.mock.invocationCallOrder[0]).toBeLessThan(
-            uiamApiKeys.invalidate.mock.invocationCallOrder[0]
-          );
-        }
         expect(logger.error.mock.calls).toEqual(
-          uiam === 'granted'
+          uiam === 'granted' || uiam === 'serviceMissing'
             ? []
             : [
                 uiam === 'throws'
@@ -564,59 +566,7 @@ describe('RulesClientFactory API key characterization', () => {
       }
     );
 
-    test('logs the UIAM rollback failure reasons (with two trailing spaces) and still rethrows the ES error (current behavior)', async () => {
-      const esError = new Error('ES grant failed');
-      const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
-      uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
-      uiamApiKeys.invalidate.mockResolvedValue({
-        invalidated_api_keys: [],
-        previously_invalidated_api_keys: [],
-        error_count: 2,
-        error_details: [{ reason: 'reason a' }, { reason: 'reason b' }],
-      });
-      securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValue(esError);
-
-      await expect(context.createAPIKey('test')).rejects.toBe(esError);
-      expect(logger.error.mock.calls).toEqual([
-        [
-          'Failed to invalidate UIAM API key for alerting rule : test: reason a, reason b  ',
-          { tags: UIAM_LOGS_INVALIDATE_TAGS },
-        ],
-      ]);
-    });
-
-    test('a rejected UIAM rollback replaces the ES error (current behavior)', async () => {
-      const invalidateError = new Error('UIAM invalidate failed');
-      const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
-      uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
-      uiamApiKeys.invalidate.mockRejectedValue(invalidateError);
-      securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValue(
-        new Error('ES grant failed')
-      );
-
-      await expect(context.createAPIKey('test')).rejects.toBe(invalidateError);
-    });
-
-    test('a rejected UIAM rollback rejects createAPIKey when the ES grant returned null (current behavior)', async () => {
-      const invalidateError = new Error('UIAM invalidate failed');
-      const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
-      uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
-      uiamApiKeys.invalidate.mockRejectedValue(invalidateError);
-      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue(null);
-
-      await expect(context.createAPIKey('test')).rejects.toBe(invalidateError);
-    });
-
-    test('skips the rollback when the granted UIAM key has no id (current behavior)', async () => {
-      const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
-      uiamApiKeys.grant.mockResolvedValue({ name: 'uiam-test', api_key: 'essu_no_id' });
-      securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue(null);
-
-      expect(await context.createAPIKey('test')).toEqual({ apiKeysEnabled: false });
-      expect(uiamApiKeys.invalidate).not.toHaveBeenCalled();
-    });
-
-    test('a non-Error UIAM rejection is logged with its string value and no stack (current behavior)', async () => {
+    test('a non-Error UIAM rejection is logged with its string value and no stack', async () => {
       const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
       uiamApiKeys.grant.mockRejectedValue('plain string failure');
       securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue(ES_GRANTED);
@@ -645,18 +595,20 @@ describe('RulesClientFactory API key characterization', () => {
       whenExternal: expectation,
       otherwise: expectation,
     });
+    const NO_KEY_ERROR = {
+      error: {
+        message: 'Could not extract an API key from the request authorization header.',
+        boomStatus: 400,
+      },
+    };
     const PARSE_ERROR = {
       error: {
-        message:
-          'Failed to parse API key credentials from authorization header for alerting rule : test',
+        message: 'Failed to parse API key credentials from the request authorization header.',
+        boomStatus: 400,
       },
     };
     const CLOUD_KEY_BOOM = {
-      error: {
-        message:
-          'Cannot use a Cloud API key to create or enable rule "test". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.',
-        boomStatus: 400,
-      },
+      error: { message: CLOUD_KEY_NOT_SUPPORTED_MESSAGE, boomStatus: 400 },
     };
     const rawUiam = (apiKey: string) => ({
       whenExternal: {
@@ -687,46 +639,46 @@ describe('RulesClientFactory API key characterization', () => {
         ...same({ value: { apiKeysEnabled: false } }),
       },
       {
-        label: 'Basic credentials parsed as id:key',
+        label: 'Basic credentials are not an API key',
         header: CREDENTIALS.basic.headers.authorization,
         shouldGrantUiam,
-        readsCurrentUser: true,
-        ...esResult('basic-user', 'basic-pass'),
+        readsCurrentUser: false,
+        ...same({ value: { apiKeysEnabled: false } }),
       },
       {
         label: 'ES API key',
         header: CREDENTIALS.esApiKey.headers.authorization,
         shouldGrantUiam,
-        readsCurrentUser: true,
+        readsCurrentUser: false,
         ...esResult('es-user-key-id', 'es-user-key-secret'),
       },
       {
         label: 'ES API key with extra colon segments',
         header: `ApiKey ${b64('key-id:secret:extra')}`,
         shouldGrantUiam,
-        readsCurrentUser: true,
-        ...esResult('key-id', 'secret'),
+        readsCurrentUser: false,
+        ...esResult('key-id', 'secret:extra'),
       },
       {
         label: 'non-base64 credentials',
         header: 'ApiKey a-broken-api-key',
         shouldGrantUiam,
-        readsCurrentUser: true,
-        ...same(PARSE_ERROR),
+        readsCurrentUser: false,
+        ...same(NO_KEY_ERROR),
       },
       {
         label: 'empty id',
         header: `ApiKey ${b64(':secret')}`,
         shouldGrantUiam,
-        readsCurrentUser: true,
+        readsCurrentUser: false,
         ...same(PARSE_ERROR),
       },
       {
         label: 'empty secret',
         header: `ApiKey ${b64('key-id:')}`,
         shouldGrantUiam,
-        readsCurrentUser: true,
-        ...same(PARSE_ERROR),
+        readsCurrentUser: false,
+        ...same(NO_KEY_ERROR),
       },
       shouldGrantUiam
         ? {
@@ -760,30 +712,28 @@ describe('RulesClientFactory API key characterization', () => {
             label: 'base64(id:essu_) UIAM API key',
             header: CREDENTIALS.encodedUiamApiKey.headers.authorization,
             shouldGrantUiam,
-            readsCurrentUser: true,
-            ...same({
-              error: { message: 'UIAM API keys should only be used in serverless environments' },
-            }),
+            readsCurrentUser: false,
+            ...same(CLOUD_KEY_BOOM),
           },
       {
         label: 'raw essu_ API key',
         header: 'ApiKey essu_raw_user_secret',
         shouldGrantUiam,
-        readsCurrentUser: true,
+        readsCurrentUser: shouldGrantUiam,
         ...(shouldGrantUiam ? rawUiam('essu_raw_user_secret') : same(CLOUD_KEY_BOOM)),
       },
       {
-        label: 'Bearer essu_ token (scheme ignored)',
+        label: 'Bearer essu_ token is not an API key',
         header: 'Bearer essu_access_token',
         shouldGrantUiam,
-        readsCurrentUser: true,
-        ...(shouldGrantUiam ? rawUiam('essu_access_token') : same(CLOUD_KEY_BOOM)),
+        readsCurrentUser: false,
+        ...same({ value: { apiKeysEnabled: false } }),
       },
       {
         label: 'lowercase apikey scheme with raw essu_',
         header: 'apikey essu_lower',
         shouldGrantUiam,
-        readsCurrentUser: true,
+        readsCurrentUser: shouldGrantUiam,
         ...(shouldGrantUiam ? rawUiam('essu_lower') : same(CLOUD_KEY_BOOM)),
       },
     ]);
@@ -797,7 +747,7 @@ describe('RulesClientFactory API key characterization', () => {
     ];
 
     it.each(table)(
-      '$label, shouldGrantUiam=$shouldGrantUiam (current behavior)',
+      '$label, shouldGrantUiam=$shouldGrantUiam',
       async ({ header, shouldGrantUiam, readsCurrentUser, whenExternal, otherwise }) => {
         for (const config of Object.keys(CONFIGS) as ConfigName[]) {
           if (CONFIGS[config].shouldGrantUiam !== shouldGrantUiam) continue;
@@ -840,91 +790,53 @@ describe('RulesClientFactory API key characterization', () => {
       });
     });
 
-    test('reads shouldGrantUiam from the `this` it is invoked on, not from the factory (current behavior)', async () => {
+    test('reads shouldGrantUiam from the factory, whatever `this` it is invoked on', async () => {
       const { context } = await setup({ config: 'esOnly', credential: 'rawUiamApiKey' });
       const { getAuthenticationAPIKey } = context;
 
-      expect(getAuthenticationAPIKey.call({ shouldGrantUiam: true }, 'test')).toEqual({
-        apiKeysEnabled: true,
-        uiamResult: { name: 'uiam-test', api_key: 'essu_raw_user_secret' },
-      });
-      expect(() => getAuthenticationAPIKey('test')).toThrow(TypeError);
+      for (const call of [
+        () => getAuthenticationAPIKey.call({ shouldGrantUiam: true }, 'test'),
+        () => getAuthenticationAPIKey('test'),
+      ]) {
+        expectError(await captureError(call), CLOUD_KEY_BOOM.error);
+      }
     });
   });
 
   describe('cloneAPIKey() matrix', () => {
     type UiamOutcome = 'granted' | 'null' | 'throws' | 'serviceMissing';
     type CloneOutcome = 'cloned' | 'null' | 'throws';
-    const GENERIC_CLONE_UIAM_ERROR = 'Failed to grant UIAM API key for cloned alerting rule';
 
-    describe('requests carrying a raw essu_ credential mint a UIAM key', () => {
+    describe('requests carrying a UIAM credential mint a UIAM key', () => {
       interface Row {
         credential: CredentialName;
         config: ConfigName;
         uiam: UiamOutcome;
-        rejects?: 'generic' | 'cloudKeyNull' | 'uiamError';
+        rejects?: 'uiamNotEnabled' | 'cloudKeyNull' | 'uiamError';
         grantLog?: 'null' | 'throws';
       }
-      const table: Row[] = (['rawUiamApiKey', 'uiamBearer'] as const).flatMap(
+      const table: Row[] = (['rawUiamApiKey', 'encodedUiamApiKey', 'uiamBearer'] as const).flatMap(
         (credential): Row[] => [
-          { credential, config: 'esOnly', uiam: 'granted', rejects: 'generic' },
-          { credential, config: 'uiamTypeWithoutUiam', uiam: 'granted', rejects: 'generic' },
-          { credential, config: 'uiamGrantEsRun', uiam: 'granted' },
-          {
-            credential,
-            config: 'uiamGrantEsRun',
-            uiam: 'null',
-            rejects: 'generic',
-            grantLog: 'null',
-          },
-          {
-            credential,
-            config: 'uiamGrantEsRun',
-            uiam: 'throws',
-            rejects: 'generic',
-            grantLog: 'throws',
-          },
-          {
-            credential,
-            config: 'uiamGrantEsRun',
-            uiam: 'serviceMissing',
-            rejects: 'generic',
-            grantLog: 'null',
-          },
-          { credential, config: 'uiamGrantUiamRun', uiam: 'granted' },
-          {
-            credential,
-            config: 'uiamGrantUiamRun',
-            uiam: 'null',
-            rejects: 'cloudKeyNull',
-            grantLog: 'null',
-          },
-          {
-            credential,
-            config: 'uiamGrantUiamRun',
-            uiam: 'throws',
-            rejects: 'uiamError',
-            grantLog: 'throws',
-          },
-          {
-            credential,
-            config: 'uiamGrantUiamRun',
-            uiam: 'serviceMissing',
-            rejects: 'cloudKeyNull',
-            grantLog: 'null',
-          },
+          { credential, config: 'esOnly', uiam: 'granted', rejects: 'uiamNotEnabled' },
+          { credential, config: 'uiamTypeWithoutUiam', uiam: 'granted', rejects: 'uiamNotEnabled' },
+          ...(['uiamGrantEsRun', 'uiamGrantUiamRun'] as const).flatMap((config): Row[] => [
+            { credential, config, uiam: 'granted' },
+            { credential, config, uiam: 'null', rejects: 'cloudKeyNull', grantLog: 'null' },
+            { credential, config, uiam: 'throws', rejects: 'uiamError', grantLog: 'throws' },
+            { credential, config, uiam: 'serviceMissing', rejects: 'uiamNotEnabled' },
+          ]),
         ]
       );
       table.push({
         credential: 'uiamServiceAccount',
         config: 'uiamGrantEsRun',
         uiam: 'null',
-        rejects: 'generic',
+        rejects: 'cloudKeyNull',
         grantLog: 'null',
       });
 
       it.each(table)(
-        '$credential / $config: uiam.grant $uiam (current behavior)',
+        '$credential / $config: uiam.grant $uiam',
         async ({ credential, config, uiam, rejects, grantLog }) => {
           const uiamError = new Error('UIAM grant failed');
           const { context, request } = await setup({
@@ -937,8 +849,8 @@ describe('RulesClientFactory API key characterization', () => {
           if (uiam === 'throws') uiamApiKeys.grant.mockRejectedValue(uiamError);
 
           const outcome = context.cloneAPIKey('test');
-          if (rejects === 'generic') {
-            expectError(await captureError(() => outcome), { message: GENERIC_CLONE_UIAM_ERROR });
+          if (rejects === 'uiamNotEnabled') {
+            expectError(await captureError(() => outcome), { message: UIAM_NOT_ENABLED_MESSAGE });
           }
           if (rejects === 'cloudKeyNull') {
             expectError(await captureError(() => outcome), { message: CLOUD_KEY_NULL_MESSAGE });
@@ -954,7 +866,7 @@ describe('RulesClientFactory API key characterization', () => {
           );
           expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
           expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
-          expect(securityService.authc.getPrincipal).not.toHaveBeenCalled();
+          expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
           expect(logger.error.mock.calls).toEqual(
             grantLog === undefined
               ? []
@@ -970,7 +882,7 @@ describe('RulesClientFactory API key characterization', () => {
 
     describe('every other request is cloned through Elasticsearch', () => {
       const table: Array<[CredentialName, ConfigName, CloneOutcome]> = (
-        ['session', 'basic', 'esApiKey', 'encodedUiamApiKey'] as const
+        ['session', 'basic', 'esApiKey'] as const
       ).flatMap((credential) =>
         (['esOnly', 'uiamGrantUiamRun'] as const).flatMap((config) =>
           (['cloned', 'null', 'throws'] as const).map(
@@ -979,36 +891,33 @@ describe('RulesClientFactory API key characterization', () => {
         )
       );
 
-      it.each(table)(
-        '%s / %s: cloneAsInternalUser %s (current behavior)',
-        async (credential, config, clone) => {
-          const cloneError = new Error('clone failed');
-          const { context, request } = await setup({ config, credential });
-          const { cloneAsInternalUser } = securityService.authc.apiKeys;
-          if (clone === 'cloned') cloneAsInternalUser.mockResolvedValue(ES_CLONED);
-          if (clone === 'null') cloneAsInternalUser.mockResolvedValue(null);
-          if (clone === 'throws') cloneAsInternalUser.mockRejectedValue(cloneError);
+      it.each(table)('%s / %s: cloneAsInternalUser %s', async (credential, config, clone) => {
+        const cloneError = new Error('clone failed');
+        const { context, request } = await setup({ config, credential });
+        const { cloneAsInternalUser } = securityService.authc.apiKeys;
+        if (clone === 'cloned') cloneAsInternalUser.mockResolvedValue(ES_CLONED);
+        if (clone === 'null') cloneAsInternalUser.mockResolvedValue(null);
+        if (clone === 'throws') cloneAsInternalUser.mockRejectedValue(cloneError);
 
-          const outcome = context.cloneAPIKey('test');
-          if (clone === 'cloned') {
-            expect(await outcome).toEqual({ apiKeysEnabled: true, result: ES_CLONED });
-          }
-          if (clone === 'null') {
-            expectError(await captureError(() => outcome), {
-              message: 'API key clone returned null (security feature may be disabled)',
-            });
-          }
-          if (clone === 'throws') await expect(outcome).rejects.toBe(cloneError);
-
-          expect(cloneAsInternalUser.mock.calls).toEqual([
-            [request, { name: 'test', metadata: METADATA }],
-          ]);
-          expect(uiamApiKeys.grant).not.toHaveBeenCalled();
-          expect(logger.error).not.toHaveBeenCalled();
+        const outcome = context.cloneAPIKey('test');
+        if (clone === 'cloned') {
+          expect(await outcome).toEqual({ apiKeysEnabled: true, result: ES_CLONED_RESULT });
         }
-      );
+        if (clone === 'null') {
+          expectError(await captureError(() => outcome), {
+            message: 'API key clone returned null (security feature may be disabled)',
+          });
+        }
+        if (clone === 'throws') await expect(outcome).rejects.toBe(cloneError);
 
-      test('still calls cloneAsInternalUser when securityPluginStart is missing (current behavior)', async () => {
+        expect(cloneAsInternalUser.mock.calls).toEqual([
+          [request, { name: 'test', metadata: METADATA }],
+        ]);
+        expect(uiamApiKeys.grant).not.toHaveBeenCalled();
+        expect(logger.error).not.toHaveBeenCalled();
+      });
+
+      test('still calls cloneAsInternalUser when securityPluginStart is missing', async () => {
         const { context } = await setup({
           config: 'esOnly',
           credential: 'esApiKey',
@@ -1018,7 +927,7 @@ describe('RulesClientFactory API key characterization', () => {
 
         expect(await context.cloneAPIKey('test')).toEqual({
           apiKeysEnabled: true,
-          result: ES_CLONED,
+          result: ES_CLONED_RESULT,
         });
       });
     });
@@ -1273,7 +1182,7 @@ describe('RulesClientFactory API key characterization', () => {
         config: 'esOnly',
         internal: false,
         expected: {
-          boom: 'Error creating API key for rule - UIAM API keys should only be used in serverless environments',
+          boom: `Error creating API key for rule - ${CLOUD_KEY_NOT_SUPPORTED_MESSAGE}`,
         },
       },
       {
@@ -1302,12 +1211,12 @@ describe('RulesClientFactory API key characterization', () => {
         },
       },
       {
-        title: 'user raw essu_ key outside serverless (message names the -user-created key)',
+        title: 'user raw essu_ key outside serverless',
         credential: 'rawUiamApiKey',
         config: 'esOnly',
         internal: false,
         expected: {
-          boom: `Error creating API key for rule - Cannot use a Cloud API key to create or enable rule "${NAME}-user-created". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.`,
+          boom: `Error creating API key for rule - ${CLOUD_KEY_NOT_SUPPORTED_MESSAGE}`,
         },
       },
       {
@@ -1351,11 +1260,11 @@ describe('RulesClientFactory API key characterization', () => {
         expected: clonedEs,
       },
       {
-        title: 'framework-managed base64(id:essu_) key goes to the ES clone API',
+        title: 'framework-managed base64(id:essu_) key mints a fresh UIAM key',
         credential: 'encodedUiamApiKey',
         config: 'uiamGrantUiamRun',
         apiKeyOwnership: frameworkManaged,
-        expected: clonedEs,
+        expected: grantedUiamOnly,
       },
       {
         title: 'framework-managed raw essu_ key outside serverless',
@@ -1363,7 +1272,7 @@ describe('RulesClientFactory API key characterization', () => {
         config: 'esOnly',
         apiKeyOwnership: frameworkManaged,
         expected: {
-          boom: 'Error creating API key for rule - Failed to grant UIAM API key for cloned alerting rule',
+          boom: `Error creating API key for rule - Failed to create UIAM API key "uiam-${NAME}": UIAM is not enabled`,
         },
       },
       {
@@ -1406,13 +1315,13 @@ describe('RulesClientFactory API key characterization', () => {
         credential: 'uiamServiceAccount',
         config: 'esOnly',
         expected: {
-          boom: `Error creating API key for rule - Failed to create UIAM API key for alerting rule : ${NAME}: UIAM is not enabled`,
+          boom: `Error creating API key for rule - Failed to create UIAM API key "uiam-${NAME}": UIAM is not enabled`,
         },
       },
     ];
 
     it.each(table)(
-      '$title ($credential / $config) (current behavior)',
+      '$title ($credential / $config)',
       async ({ credential, config, internal, apiKeyOwnership, cloneHeader, expected }) => {
         const { headers } = CREDENTIALS[credential];
         const { context } = await setup({

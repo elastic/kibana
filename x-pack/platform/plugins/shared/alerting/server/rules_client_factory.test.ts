@@ -32,6 +32,7 @@ import type { AlertingAuthorization } from './authorization';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -389,7 +390,7 @@ describe('RulesClientFactory', () => {
     expect(createAPIKeyResult).toEqual({ apiKeysEnabled: false });
   });
 
-  test('createAPIKey() invalidates UIAM API key when ES API key creation returns null', async () => {
+  test('createAPIKey() queues the UIAM API key for invalidation when ES API key creation returns null', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -421,9 +422,12 @@ describe('RulesClientFactory', () => {
     expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
       name: 'uiam-test',
     });
-    expect(uiamApiKeys.invalidate).toHaveBeenCalledWith(expect.any(Object), {
-      id: 'uiam-id',
-    });
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [Buffer.from('uiam-id:uiam-key').toString('base64')] },
+      expect.anything(),
+      rulesClientFactoryParams.internalSavedObjectsRepository
+    );
+    expect(uiamApiKeys.invalidate).not.toHaveBeenCalled();
   });
 
   test('createAPIKey() returns { apiKeysEnabled: false } when UIAM grant returns null and ES grant returns null', async () => {
@@ -492,7 +496,7 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: Failed to create a Cloud API key for alerting rule : test',
+      'Failed to create UIAM API key "uiam-test": Failed to create a Cloud API key "uiam-test"',
       expect.objectContaining({ tags: expect.any(Array) })
     );
     expect(uiamApiKeys.grant).toHaveBeenCalledWith(expect.any(Object), {
@@ -535,7 +539,7 @@ describe('RulesClientFactory', () => {
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: UIAM service unavailable',
+      'Failed to create UIAM API key "uiam-test": UIAM service unavailable',
       expect.objectContaining({
         tags: expect.any(Array),
         error: expect.objectContaining({ stack_trace: uiamError.stack }),
@@ -546,7 +550,7 @@ describe('RulesClientFactory', () => {
     });
   });
 
-  test('createAPIKey() logs an error and does not call uiam.grant when shouldGrantUiam is true but request has no authorization header', async () => {
+  test('createAPIKey() logs at debug and does not call uiam.grant when shouldGrantUiam is true but request has no authorization header', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -577,14 +581,15 @@ describe('RulesClientFactory', () => {
       result: { api_key: '123', id: 'abc', name: '' },
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
-    expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials',
+    expect(rulesClientFactoryParams.logger.debug).toHaveBeenCalledWith(
+      'Request credential is not UIAM-compatible, skipping UIAM API key grant. Only ES API keys will be used.',
       expect.objectContaining({ tags: expect.any(Array) })
     );
+    expect(rulesClientFactoryParams.logger.error).not.toHaveBeenCalled();
     expect(uiamApiKeys.grant).not.toHaveBeenCalled();
   });
 
-  test('createAPIKey() logs an error and does not call uiam.grant when shouldGrantUiam is true but request has non-UIAM credentials', async () => {
+  test('createAPIKey() logs at debug and does not call uiam.grant when shouldGrantUiam is true but request has non-UIAM credentials', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -619,10 +624,11 @@ describe('RulesClientFactory', () => {
       result: { api_key: '123', id: 'abc', name: '' },
     });
     expect(createAPIKeyResult).not.toHaveProperty('uiamResult');
-    expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
-      'Failed to create UIAM API key for alerting rule : test: Invalid or missing UIAM credentials',
+    expect(rulesClientFactoryParams.logger.debug).toHaveBeenCalledWith(
+      'Request credential is not UIAM-compatible, skipping UIAM API key grant. Only ES API keys will be used.',
       expect.objectContaining({ tags: expect.any(Array) })
     );
+    expect(rulesClientFactoryParams.logger.error).not.toHaveBeenCalled();
     expect(uiamApiKeys.grant).not.toHaveBeenCalled();
   });
 
@@ -674,7 +680,7 @@ describe('RulesClientFactory', () => {
       securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
       await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create a Cloud API key for alerting rule : test"`
+        `"Failed to create a Cloud API key \\"uiam-test\\""`
       );
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
@@ -781,7 +787,7 @@ describe('RulesClientFactory', () => {
       } as never;
 
       await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create a Cloud API key for alerting rule : test"`
+        `"Failed to create a Cloud API key \\"uiam-test\\""`
       );
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
@@ -790,7 +796,7 @@ describe('RulesClientFactory', () => {
       const constructorCall = await initializeFactory(serviceAccountRequest(), false);
 
       await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create UIAM API key for alerting rule : test: UIAM is not enabled"`
+        `"Failed to create UIAM API key \\"uiam-test\\": UIAM is not enabled"`
       );
       expect(securityService.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
@@ -899,7 +905,7 @@ describe('RulesClientFactory', () => {
     );
   });
 
-  test('createAPIKey() invalidates UIAM API key when ES API key creation throws', async () => {
+  test('createAPIKey() queues the UIAM API key for invalidation when ES API key creation throws', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -935,9 +941,12 @@ describe('RulesClientFactory', () => {
     await expect(constructorCall.createAPIKey('test')).rejects.toThrowErrorMatchingInlineSnapshot(
       `"TLS disabled"`
     );
-    expect(uiamApiKeys.invalidate).toHaveBeenCalledWith(expect.any(Object), {
-      id: 'uiam-id',
-    });
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [Buffer.from('uiam-id:uiam-key').toString('base64')] },
+      expect.anything(),
+      rulesClientFactoryParams.internalSavedObjectsRepository
+    );
+    expect(uiamApiKeys.invalidate).not.toHaveBeenCalled();
   });
 
   test('create() calls getSpaceId to derive spaceId from request', async () => {
@@ -1072,7 +1081,7 @@ describe('RulesClientFactory', () => {
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"UIAM API keys should only be used in serverless environments"`
+      `"Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead."`
     );
   });
 
@@ -1098,7 +1107,7 @@ describe('RulesClientFactory', () => {
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Failed to parse API key credentials from authorization header for alerting rule : test"`
+      `"Could not extract an API key from the request authorization header."`
     );
   });
 
@@ -1188,7 +1197,7 @@ describe('RulesClientFactory', () => {
     expect(() =>
       constructorCall.getAuthenticationAPIKey('test')
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Cannot use a Cloud API key to create or enable rule \\"test\\". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead."`
+      `"Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead."`
     );
 
     // A client error, so it has to surface as a 4xx rather than an opaque 500.
@@ -1333,6 +1342,25 @@ describe('RulesClientFactory', () => {
     expect(constructorCall.cloneApiKeysOnCreate).toBe(false);
   });
 
+  test('a fake request always clones, even with an explicit cloneApiKeysOnCreate: false', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const request = kibanaRequestFactory({
+      headers: { authorization: `ApiKey ${Buffer.from('id:secret').toString('base64')}` },
+      path: '/',
+    });
+    await factory.create(request, savedObjectsService, { cloneApiKeysOnCreate: false });
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
+  });
+
   test('cloneAPIKey calls cloneAsInternalUser and returns the result', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
@@ -1369,7 +1397,6 @@ describe('RulesClientFactory', () => {
         id: 'cloned-id',
         name: 'test-rule-key',
         api_key: 'cloned-secret',
-        encoded: 'encoded-value',
       },
     });
   });
@@ -1434,7 +1461,7 @@ describe('RulesClientFactory', () => {
     securityService.authc.apiKeys.uiam = uiamApiKeys as never;
 
     await expect(constructorCall.cloneAPIKey('test')).rejects.toThrow(
-      'Failed to grant UIAM API key for cloned alerting rule'
+      'Failed to create a Cloud API key "uiam-test"'
     );
     expect(securityService.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
   });
