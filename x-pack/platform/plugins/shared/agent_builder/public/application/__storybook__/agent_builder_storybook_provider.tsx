@@ -103,6 +103,7 @@ const agentBuilderServices = {
   eventsService: { track: noOp },
   isEarsEnabled: false,
   isEarsExperimentalEnabled: false,
+  isServerless: false,
   openSidebarConversation: () => ({}),
 } as unknown as AgentBuilderInternalService;
 
