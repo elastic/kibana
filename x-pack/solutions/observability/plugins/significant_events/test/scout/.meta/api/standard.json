@@ -1,5 +1,5 @@
 {
-  "sha1": "0bad4b96b509cadf8f138b1a3a3f62420fac0e25",
+  "sha1": "9200783fb2cea0b729254f0873475d4b35695c28",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 157,
+        "line": 162,
         "column": 17
       }
     },
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 190,
+        "line": 195,
         "column": 14
       }
     },
@@ -96,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 213,
+        "line": 218,
         "column": 48
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 253,
+        "line": 258,
         "column": 14
       }
     },
@@ -128,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 270,
+        "line": 275,
         "column": 45
       }
     },
@@ -144,7 +144,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 288,
+        "line": 293,
         "column": 39
       }
     },
@@ -160,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 353,
+        "line": 358,
         "column": 54
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 157,
+        "line": 162,
         "column": 17
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 190,
+        "line": 195,
         "column": 14
       }
     },
@@ -240,7 +240,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 213,
+        "line": 218,
         "column": 48
       }
     },
@@ -256,7 +256,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 253,
+        "line": 258,
         "column": 14
       }
     },
@@ -272,7 +272,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 270,
+        "line": 275,
         "column": 45
       }
     },
@@ -288,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 288,
+        "line": 293,
         "column": 39
       }
     },
@@ -304,7 +304,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 353,
+        "line": 358,
         "column": 54
       }
     },
@@ -352,7 +352,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 157,
+        "line": 162,
         "column": 17
       }
     },
@@ -368,7 +368,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 190,
+        "line": 195,
         "column": 14
       }
     },
@@ -384,7 +384,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 213,
+        "line": 218,
         "column": 48
       }
     },
@@ -400,7 +400,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 253,
+        "line": 258,
         "column": 14
       }
     },
@@ -416,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 270,
+        "line": 275,
         "column": 45
       }
     },
@@ -432,7 +432,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 288,
+        "line": 293,
         "column": 39
       }
     },
@@ -448,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 353,
+        "line": 358,
         "column": 54
       }
     },
@@ -544,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 90,
-        "column": 13
+        "line": 83,
+        "column": 48
       }
     },
     {
@@ -560,7 +560,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 105,
+        "line": 99,
         "column": 27
       }
     },
@@ -576,7 +576,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 117,
+        "line": 111,
         "column": 41
       }
     },
@@ -592,7 +592,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 129,
+        "line": 123,
         "column": 7
       }
     },
@@ -608,7 +608,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 148,
+        "line": 142,
         "column": 16
       }
     },
@@ -624,7 +624,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 157,
+        "line": 151,
         "column": 23
       }
     },
@@ -640,7 +640,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
-        "line": 201,
+        "line": 195,
         "column": 17
       }
     },

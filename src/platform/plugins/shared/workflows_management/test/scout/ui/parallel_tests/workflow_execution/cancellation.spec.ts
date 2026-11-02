@@ -81,9 +81,9 @@ test.describe('Workflow execution - Cancellation', { tag: [...tags.stateful.clas
     await modal.waitFor({ state: 'visible' });
     await modal.getByRole('button', { name: 'Cancel all' }).click();
 
-    await expect(
-      page.getByText('Cancellation requested for all active executions of this workflow')
-    ).toBeVisible({ timeout: 15_000 });
+    await pageObjects.toasts.waitForToastWithText(
+      'Cancellation requested for all active executions of this workflow'
+    );
 
     await expect
       .poll(
