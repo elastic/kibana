@@ -195,20 +195,85 @@ describe('code scores', () => {
           outcome: 'partial',
           hunt: { status: 'partial' },
           coordinator: { completeness: 'incomplete_final', completed_successfully: true },
-          reportDoc: { evidence: [{ space_id: 'default' }] },
+          reportDoc: {
+            evidence: [{ space_id: 'default', last_hunted_at: '2026-01-01T12:00:00.000Z' }],
+          },
         })
       ).score
     ).toBe(1);
   });
 
-  it('scores 0 when a retryable hunt, which must leave the report eligible, wrote evidence', () => {
+  it('scores 0 when a retryable hunt with no hit, which must leave the report eligible, stamped it', () => {
     expect(
       scoreEvidenceHonesty(
         buildExpected({ evidenceWritten: 'iff_completed_successfully' }),
         buildArtifacts({
           hunt: { status: 'partial' },
-          coordinator: { completeness: 'incomplete_retryable', completed_successfully: false },
-          reportDoc: { evidence: [{ space_id: 'default' }] },
+          coordinator: {
+            completeness: 'incomplete_retryable',
+            completed_successfully: false,
+            has_confirmed_hit: false,
+          },
+          reportDoc: {
+            evidence: [{ space_id: 'default', last_hunted_at: '2026-01-01T12:00:00.000Z' }],
+          },
+        })
+      ).score
+    ).toBe(0);
+  });
+
+  it('scores 1 when a retryable hunt with no hit left only the coverage ledger, not a stamp', () => {
+    expect(
+      scoreEvidenceHonesty(
+        buildExpected({ evidenceWritten: 'iff_completed_successfully' }),
+        buildArtifacts({
+          hunt: { status: 'partial' },
+          coordinator: {
+            completeness: 'incomplete_retryable',
+            completed_successfully: false,
+            has_confirmed_hit: false,
+          },
+          reportDoc: {
+            evidence: [
+              { space_id: 'default', hunted_technique_ids: ['T1001'], coverage_pending: true },
+            ],
+          },
+        })
+      ).score
+    ).toBe(1);
+  });
+
+  it('scores 1 when a confirmed hit on a retryable hunt was stamped', () => {
+    expect(
+      scoreEvidenceHonesty(
+        buildExpected({ evidenceWritten: 'iff_completed_successfully' }),
+        buildArtifacts({
+          hunt: { status: 'partial' },
+          coordinator: {
+            completeness: 'incomplete_retryable',
+            completed_successfully: false,
+            has_confirmed_hit: true,
+          },
+          reportDoc: {
+            evidence: [{ space_id: 'default', last_hunted_at: '2026-01-01T12:00:00.000Z' }],
+          },
+        })
+      ).score
+    ).toBe(1);
+  });
+
+  it('scores 0 when a confirmed hit on a retryable hunt was not stamped', () => {
+    expect(
+      scoreEvidenceHonesty(
+        buildExpected({ evidenceWritten: 'iff_completed_successfully' }),
+        buildArtifacts({
+          hunt: { status: 'partial' },
+          coordinator: {
+            completeness: 'incomplete_retryable',
+            completed_successfully: false,
+            has_confirmed_hit: true,
+          },
+          reportDoc: { evidence: [] },
         })
       ).score
     ).toBe(0);
@@ -220,7 +285,9 @@ describe('code scores', () => {
         buildExpected({ evidenceWritten: 'iff_completed_successfully' }),
         buildArtifacts({
           hunt: { status: 'failed' },
-          reportDoc: { evidence: [{ space_id: 'default' }] },
+          reportDoc: {
+            evidence: [{ space_id: 'default', last_hunted_at: '2026-01-01T12:00:00.000Z' }],
+          },
         })
       ).score
     ).toBe(0);

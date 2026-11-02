@@ -65,6 +65,39 @@ describe('isEvidenceQuoteGrounded', () => {
   it('rejects an empty or whitespace-only quote', () => {
     expect(isEvidenceQuoteGrounded('   ', text)).toBe(false);
   });
+
+  it('ignores punctuation and typography differences', () => {
+    const report =
+      'The service stops accepting connections while the device keeps running normally, and the actor’s tool – a loader – retries.';
+    expect(
+      isEvidenceQuoteGrounded(
+        'The service stops accepting connections while the device keeps running normally.',
+        report
+      )
+    ).toBe(true);
+    expect(isEvidenceQuoteGrounded("the actor's tool - a loader - retries", report)).toBe(true);
+  });
+
+  it('rejects a quote with one word changed', () => {
+    expect(isEvidenceQuoteGrounded('called sts.AssumeRole into escalated-group', text)).toBe(false);
+  });
+
+  it('accepts a verbatim quote of a report that uses an ellipsis itself', () => {
+    const report =
+      'It adds tool definitions (apex_score, apex_code_review, …) to outgoing requests.';
+    expect(
+      isEvidenceQuoteGrounded(
+        'tool definitions (apex_score, apex_code_review, …) to outgoing requests',
+        report
+      )
+    ).toBe(true);
+  });
+
+  it('rejects a quote word that only matches part of a report word', () => {
+    const report = 'The login was successfully blocked.';
+    expect(isEvidenceQuoteGrounded('The login was successful.', report)).toBe(false);
+    expect(isEvidenceQuoteGrounded('ogin was successfully', report)).toBe(false);
+  });
 });
 
 describe('assertEsqlGroundedInReport', () => {

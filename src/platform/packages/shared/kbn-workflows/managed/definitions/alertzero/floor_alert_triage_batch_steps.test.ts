@@ -115,277 +115,120 @@ describe('floor_alert_triage_batch — compute_fp_candidates', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// compute_fp_entities / build_fp_entity_summary — the title suffix naming the hosts and users
-// behind the candidates, so proposals in the queue can be told apart.
-// ---------------------------------------------------------------------------
+describe('floor_alert_triage_batch — Investigations', () => {
+  const creates = allSteps.filter((step) => step.type === 'ai.conversation.create');
 
-interface EntityVerdict {
-  classification: string;
-  confidence_score: number;
-  host_name: string;
-  user_name: string;
-}
-
-const fpVerdict = (host: string, user: string, overrides: Partial<EntityVerdict> = {}) => ({
-  classification: 'false_positive',
-  confidence_score: 0.9,
-  host_name: host,
-  user_name: user,
-  ...overrides,
-});
-
-const MISSING = '__missing__';
-
-const summarizeEntities = (verdicts: EntityVerdict[], confidenceFloor = 0.85): string => {
-  const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
-    inputs: { confidence_floor: confidenceFloor },
-  }).trim();
-  const entitiesStep = stepByName('compute_fp_entities')?.with as Record<string, string>;
-  const context = {
-    steps: { classify_alerts: { output: { verdicts } } },
-    variables: { fp_threshold_expr: fpThresholdExpr } as Record<string, unknown>,
-  };
-  context.variables.fp_hosts = evalExpr(entitiesStep.fp_hosts, context);
-  context.variables.fp_users = evalExpr(entitiesStep.fp_users, context);
-  const summaryStep = stepByName('build_fp_entity_summary')?.with as Record<string, string>;
-  return renderString(summaryStep.fp_entity_summary, context).trim();
-};
-
-const hostsNamed = (count: number) =>
-  Array.from({ length: count }, (_, i) => fpVerdict(`host-${i + 1}`, MISSING));
-
-describe('floor_alert_triage_batch — fp entity summary', () => {
-  it('names a single host', () => {
-    expect(summarizeEntities([fpVerdict('build-agent-01', MISSING)])).toBe('on build-agent-01');
+  // A conversation exists for a new proposal, a failure, or a batch with alerts in no proposal and
+  // no proposal to hold them. Otherwise those alerts go into the Investigation of the first proposal.
+  it('creates an Investigation only for a new proposal, for a failure or for a batch with no proposal', () => {
+    expect(creates.map((step) => step.name).sort()).toEqual([
+      'create_batch_investigation',
+      'create_classification_empty_investigation',
+      'create_classify_failed_investigation',
+      'create_grouping_failed_investigation',
+      'create_missing_alert_ids_investigation',
+      'create_proposal_investigation',
+    ]);
+    expect(stepByName('create_investigation')).toBeUndefined();
   });
 
-  it('counts each host once however many of its alerts are candidates', () => {
-    expect(
-      summarizeEntities([
-        fpVerdict('build-agent-01', MISSING),
-        fpVerdict('build-agent-01', MISSING),
-        fpVerdict('build-agent-02', MISSING),
-      ])
-    ).toBe('on build-agent-01, build-agent-02');
-  });
-
-  it('lists the first two hosts and counts the rest, up to five hosts', () => {
-    expect(summarizeEntities(hostsNamed(3))).toBe('on host-1, host-2 +1');
-    expect(summarizeEntities(hostsNamed(5))).toBe('on host-1, host-2 +3');
-  });
-
-  it('collapses to a count above five hosts', () => {
-    expect(summarizeEntities(hostsNamed(6))).toBe('on 6 hosts');
-    expect(summarizeEntities(hostsNamed(37))).toBe('on 37 hosts');
-  });
-
-  it('says "for" and names the users when no candidate has a host', () => {
-    expect(summarizeEntities([fpVerdict(MISSING, 'svc-backup'), fpVerdict(MISSING, 'jdoe')])).toBe(
-      'for svc-backup, jdoe'
-    );
-  });
-
-  it('puts the user after the host in parentheses', () => {
-    expect(summarizeEntities([fpVerdict('DC-01', 'svc-backup')])).toBe('on DC-01 (svc-backup)');
-  });
-
-  it('applies the cap to hosts and users independently', () => {
-    const verdicts = [
-      ...hostsNamed(2),
-      ...['u1', 'u2', 'u3'].map((user) => fpVerdict(MISSING, user)),
+  it('opens each failure Investigation, attaches the alerts that need attention, then comments, and leaves it open', () => {
+    const failures = [
+      [
+        'create_classify_failed_investigation',
+        'attach_classify_failed_alerts',
+        'post_comment_classify_failed',
+        'inputs.alert_ids',
+      ],
+      [
+        'create_classification_empty_investigation',
+        'attach_classification_empty_alerts',
+        'post_comment_classification_empty',
+        'inputs.alert_ids',
+      ],
+      [
+        'create_missing_alert_ids_investigation',
+        'attach_missing_alerts',
+        'post_comment_missing_alert_ids',
+        'steps.classify_alerts.output.missing_alert_ids',
+      ],
     ];
-    expect(summarizeEntities(verdicts)).toBe('on host-1, host-2 (u1, u2 +1)');
-  });
-
-  it('is empty when no candidate has a host or user, leaving the title unchanged', () => {
-    expect(summarizeEntities([fpVerdict(MISSING, MISSING)])).toBe('');
-  });
-
-  it('never names an entity whose alert is not a candidate', () => {
-    expect(
-      summarizeEntities([
-        fpVerdict('closing-host', MISSING),
-        fpVerdict('below-floor-host', MISSING, { confidence_score: 0.5 }),
-        fpVerdict('tp-host', MISSING, { classification: 'true_positive' }),
-        fpVerdict('inconclusive-host', MISSING, { classification: 'inconclusive' }),
-      ])
-    ).toBe('on closing-host');
-  });
-
-  it('shortens a very long name so one hostname cannot stretch the title', () => {
-    const summary = summarizeEntities([fpVerdict('h'.repeat(300), MISSING)]);
-    expect(summary.length).toBeLessThan(60);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// post_comment_triage_started — alert IDs and feature routing
-// ---------------------------------------------------------------------------
-
-const triageStartedComment = stepByName('post_comment_triage_started');
-const triageInputTemplate = (triageStartedComment?.with as Record<string, unknown>)
-  ?.message as string;
-
-const makeAlerts = (count: number) =>
-  Array.from({ length: count }, (_, i) => ({ _id: `alert-id-${i + 1}` }));
-
-const renderTriageStarted = (alertCount: number): string =>
-  renderString(triageInputTemplate, {
-    inputs: { rule_name: 'My Rule' },
-    steps: {
-      create_investigation: { output: { conversation_id: 'conv-1' } },
-      load_alerts: { output: { alerts: makeAlerts(alertCount) } },
-    },
-    execution: { url: 'https://kibana.example.com/app/exec/1' },
-  });
-
-describe('floor_alert_triage_batch — post_comment_triage_started', () => {
-  it('includes the alertzero_efficient feature name for model routing', () => {
-    const comment = renderTriageStarted(3);
-    expect(comment).toContain('alertzero_efficient');
-  });
-
-  it('reports the alert count without listing individual IDs, since the chip attachment above already shows them', () => {
-    const comment = renderTriageStarted(3);
-    expect(comment).toContain('3 alerts');
-    expect(comment).not.toContain('alert-id-1');
-  });
-
-  it('says "alert" rather than "alerts" for a single alert', () => {
-    expect(renderTriageStarted(1)).toContain('(1 alert)');
-  });
-
-  it('renders the execution URL as a markdown link rather than a raw URL', () => {
-    const comment = renderTriageStarted(3);
-    expect(comment).toContain('[View execution](https://kibana.example.com/app/exec/1)');
-  });
-
-  it('claims every alert is attached when no chunk failed', () => {
-    const comment = renderString(triageInputTemplate, {
-      inputs: { rule_name: 'My Rule' },
-      steps: {
-        create_investigation: { output: { conversation_id: 'conv-1' } },
-        load_alerts: { output: { alerts: makeAlerts(3) } },
-      },
-      execution: { url: 'https://kibana.example.com/app/exec/1' },
-      variables: { failed_attach_chunk_count: 0, total_attach_chunk_count: 1 },
+    const flat = allSteps.map((step) => step.name);
+    failures.forEach(([create, attach, comment, ids]) => {
+      expect(flat.indexOf(attach)).toBe(flat.indexOf(create) + 1);
+      expect(flat.indexOf(comment)).toBe(flat.indexOf(attach) + 2);
+      expect(stepByName(attach)?.foreach).toContain(ids);
+      expect(stepByName(comment)?.with?.conversation_id).toBe(
+        `{{ steps.${create}.output.conversation_id }}`
+      );
     });
-    expect(comment).toContain('Alerts attached above.');
-    expect(comment).not.toContain('failed to attach');
-  });
-
-  it('warns with the failure count instead of claiming full attachment when a chunk failed', () => {
-    const comment = renderString(triageInputTemplate, {
-      inputs: { rule_name: 'My Rule' },
-      steps: {
-        create_investigation: { output: { conversation_id: 'conv-1' } },
-        load_alerts: { output: { alerts: makeAlerts(45) } },
-      },
-      execution: { url: 'https://kibana.example.com/app/exec/1' },
-      variables: { failed_attach_chunk_count: 1, total_attach_chunk_count: 3 },
-    });
-    expect(comment).toContain('1 of 3 alert chunk(s) failed to attach');
-    expect(comment).not.toContain('Alerts attached above.');
-  });
-});
-
-// ---------------------------------------------------------------------------
-// attach_alerts — chunk-attachment failures are retried, then counted rather
-// than silently swallowed (a failed chunk never shows as evidence)
-// ---------------------------------------------------------------------------
-
-describe('floor_alert_triage_batch — create_investigation severity', () => {
-  it('does not set a severity; Alert Analysis leaves it to the user', () => {
-    const create = stepByName('create_investigation');
-    const metadata = (create?.with as { metadata?: Record<string, unknown> } | undefined)?.metadata;
-    expect(metadata).toBeDefined();
-    expect(metadata).not.toHaveProperty('severity');
-  });
-});
-
-describe('floor_alert_triage_batch — attach_impact', () => {
-  const classifyOutput = (entities: unknown[]) => ({
-    steps: { classify_alerts: { output: { impacted_entities: entities } } },
-  });
-
-  it('records impact through the shared step, not a security-specific attachment', () => {
-    const step = stepByName('attach_impact');
-    expect(step?.type).toBe('investigations.attachImpact');
-    expect(step?.with).toEqual({
-      conversationId: '{{ steps.create_investigation.output.conversation_id }}',
-      entities: '${{ steps.classify_alerts.output.impacted_entities }}',
-    });
-    expect(JSON.stringify(parsed)).not.toContain('security.impact');
-  });
-
-  it('does not fail the run when impact cannot be recorded', () => {
-    expect(stepByName('attach_impact')?.['on-failure']?.continue).toBe(true);
-  });
-
-  it('skips the step when no alert carried a host or user, since the shared step rejects an empty list', () => {
-    const gate = stepByName('attach_impact_gate');
-    expect(gate?.steps?.map((step) => step.name)).toEqual(['attach_impact']);
-    expect(evalExpr(gate!.condition!, classifyOutput([]))).toBe(false);
-    expect(
-      evalExpr(gate!.condition!, classifyOutput([{ id: 'host:a', name: 'a', type: 'host' }]))
-    ).toBe(true);
-  });
-});
-
-describe('floor_alert_triage_batch — attach_alerts', () => {
-  it('retries a failed chunk attach before continuing past it', () => {
-    const chunkStep = stepByName('attach_alert_chunk');
-    expect(chunkStep?.type).toBe('ai.attachment.add');
-    expect(chunkStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(chunkStep?.['on-failure']?.continue).toBe(true);
-  });
-
-  it('initializes the failure counter and total before the loop runs', () => {
-    const init = stepByName('init_attach_chunk_tracking');
-    expect(init?.with?.failed_attach_chunk_count).toBe(0);
-
-    const topLevelNames = parsed.steps.map((step) => step.name);
-    expect(topLevelNames.indexOf('init_attach_chunk_tracking')).toBeLessThan(
-      topLevelNames.indexOf('attach_alerts')
+    expect(flat.indexOf('post_comment_grouping_failed')).toBe(
+      flat.indexOf('create_grouping_failed_investigation') + 1
     );
+    // Only the batch Investigation without a proposal is closed; a failure Investigation stays open.
+    expect(
+      allSteps
+        .filter((step) => step.type === 'ai.conversation.metadata.patch')
+        .map((step) => step.name)
+    ).toEqual(['close_batch_investigation']);
   });
 
-  it('increments the failure counter only when the chunk attach step recorded an error', () => {
-    const recordFailure = stepByName('record_attach_alert_chunk_failure');
-    expect(recordFailure?.type).toBe('data.set');
-    expect(recordFailure?.if).toBe('${{ steps.attach_alert_chunk.error != blank }}');
+  it('does not set a severity; Alert Analysis leaves it to the user', () => {
+    creates.forEach((step) => {
+      const metadata = (step.with as { metadata?: Record<string, unknown> }).metadata;
+      expect(metadata).toBeDefined();
+      expect(metadata).not.toHaveProperty('severity');
+    });
+  });
 
+  it('posts no progress comments while it classifies, because it has no conversation then', () => {
+    const inputs = stepByName('classify_alerts')?.with?.inputs as Record<string, unknown>;
+    expect(inputs).not.toHaveProperty('investigationConversationId');
+    expect(stepByName('post_comment_triage_started')).toBeUndefined();
+    expect(stepByName('post_comment_classification_results')).toBeUndefined();
+    expect(stepByName('post_comment_alert_updates')).toBeUndefined();
+  });
+
+  it('attaches impact to each new Investigation with its own entities, not to the batch', () => {
+    expect(stepByName('attach_impact_gate')).toBeUndefined();
+    const step = stepByName('attach_mint_impact');
+    expect(step?.type).toBe('investigations.attachImpact');
+    expect(step?.['on-failure']?.continue).toBe(true);
+    expect(step?.with).toEqual({
+      conversationId: '{{ steps.create_proposal_investigation.output.conversation_id }}',
+      entities: '${{ steps.process_mints.item.impacted_entities }}',
+    });
+    const gate = stepByName('attach_mint_impact_gate');
     expect(
-      evalExpr(recordFailure!.if!, { steps: { attach_alert_chunk: { error: undefined } } })
+      evalExpr(gate?.condition as string, {
+        steps: { process_mints: { item: { impacted_entities: [] } } },
+      })
     ).toBe(false);
-    expect(
-      evalExpr(recordFailure!.if!, {
-        steps: { attach_alert_chunk: { error: { message: 'boom' } } },
-      })
-    ).toBe(true);
+  });
 
-    expect(
-      evalExpr(recordFailure!.with!.failed_attach_chunk_count as string, {
-        variables: { failed_attach_chunk_count: 2 },
-      })
-    ).toBe(3);
+  it('attaches each new proposal its alerts once, by the tag of its Investigation, retrying on failure', () => {
+    const attach = stepByName('attach_mint_alerts');
+    expect(attach?.type).toBe('ai.attachment.add');
+    expect(attach?.foreach).toBeUndefined();
+    expect(attach?.with?.data).toEqual({
+      tags: [
+        'az:triage_investigation:{{ steps.create_proposal_investigation.output.conversation_id }}',
+      ],
+    });
+    expect(attach?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(attach?.['on-failure']?.continue).toBe(true);
   });
 });
-
-// ---------------------------------------------------------------------------
-// Early abort when Alert Analysis is disabled
-// ---------------------------------------------------------------------------
 
 describe('floor_alert_triage_batch — require_analysis_enabled', () => {
   const topLevelNames = parsed.steps.map((step) => step.name);
 
-  it('runs before create_investigation so a disabled-analysis run opens no Investigation', () => {
+  it('runs before the alerts are loaded and classified, so a disabled-analysis run does nothing', () => {
     expect(topLevelNames.indexOf('fetch_analysis_runtime_config')).toBeLessThan(
-      topLevelNames.indexOf('create_investigation')
+      topLevelNames.indexOf('classify_alerts')
     );
     expect(topLevelNames.indexOf('require_analysis_enabled')).toBeLessThan(
-      topLevelNames.indexOf('create_investigation')
+      topLevelNames.indexOf('classify_alerts')
     );
   });
 
@@ -426,10 +269,12 @@ describe('floor_alert_triage_batch — require_analysis_enabled', () => {
 });
 
 describe('floor_alert_triage_batch — classify_alerts on-failure', () => {
-  it('marks the alerts failed, then fails the run after the warning so close_investigation_no_fp cannot run', () => {
+  it('marks the alerts failed, then fails the run after the warning, so the run reports no summary', () => {
     const classify = stepByName('classify_alerts');
     const abort = stepByName('abort_classify_failed');
     expect(classify?.['on-failure']?.fallback?.map((step) => step.name)).toEqual([
+      'create_classify_failed_investigation',
+      'attach_classify_failed_alerts',
       'post_comment_classify_failed',
       'release_claims_classify_failed',
       'abort_classify_failed',
@@ -516,69 +361,100 @@ describe('floor_alert_triage_batch — guard_classification_nonempty', () => {
   });
 });
 
-describe('floor_alert_triage_batch — post_comment_classification_results', () => {
-  const render = (): string => {
-    const comment = stepByName('post_comment_classification_results');
-    const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
-    return renderString(template, {
+describe('floor_alert_triage_batch — batch summary', () => {
+  const names = parsed.steps.map((step) => step.name);
+  const message = (stepByName('log_batch_summary')?.with as { message: string }).message;
+
+  const render = (
+    overrides: Record<string, unknown> = {},
+    model: { connector_id?: string; agent_id?: string } = {}
+  ): string =>
+    renderString(message, {
+      inputs: { rule_name: 'Noisy rule', rule_id: 'rule-1' },
       steps: {
         classify_alerts: {
           output: {
-            true_positive_count: 0,
-            false_positive_count: 2,
-            inconclusive_count: 0,
-            grouped_counts_summary: '2 alerts with no host field classified as false positive.',
-            generated_summary: 'Both alerts look benign.',
+            true_positive_count: 2,
+            false_positive_count: 5,
+            inconclusive_count: 1,
             connector_id: '',
+            agent_id: '',
+            ...model,
           },
         },
       },
+      variables: {
+        alert_count: 10,
+        verdict_count: 9,
+        fp_candidate_count: 3,
+        group_mints: [],
+        group_joins: [],
+        ...overrides,
+      },
     });
-  };
 
-  it('starts every paragraph flush left, so the chat does not render indented text', () => {
-    const lines = render()
-      .split('\n')
-      .filter((line) => line.trim() !== '');
+  // Without a conversation, the execution is the only record of what a batch did.
+  it('logs what the batch did in a console step, before the run report and the failure that ends the run', () => {
+    expect(stepByName('log_batch_summary')?.type).toBe('console');
+    expect(names.indexOf('log_batch_summary')).toBeLessThan(names.indexOf('abort_review_failed'));
+    expect(names.indexOf('abort_review_failed')).toBeLessThan(
+      names.indexOf('report_worker_run_completed')
+    );
+  });
 
-    expect(lines).toHaveLength(3);
-    lines.forEach((line) => expect(line).toBe(line.trimStart()));
+  it('names the rule and counts every verdict, the alerts without one included', () => {
+    const rendered = render();
+    expect(rendered).toContain('rule "Noisy rule" (rule-1): 10 alerts.');
+    expect(rendered).toContain(
+      'Verdicts: 2 true positive, 3 false positive at or above the floor, 2 false positive below the floor, 1 inconclusive, 1 without a verdict.'
+    );
+  });
+
+  // The attribution comment is gone with the batch conversation, so the summary names the model.
+  it('names the connector and the agent when an agent classified the alerts', () => {
+    const rendered = render({}, { connector_id: 'conn-1', agent_id: 'agent-1' });
+    expect(rendered).toContain('Model: connector `conn-1`, agent `agent-1`.');
+  });
+
+  it('names only the connector when a prompt classified the alerts, and nothing when no call was made', () => {
+    expect(render({}, { connector_id: 'conn-1', agent_id: '' })).toContain(
+      'Model: connector `conn-1`.'
+    );
+    expect(render({}, { connector_id: '', agent_id: '' })).not.toContain('Model:');
+  });
+
+  it('says so when the batch created and joined nothing', () => {
+    expect(render()).toContain('No proposal created and no proposal joined.');
+  });
+
+  it('names each proposal the batch created and each one it joined', () => {
+    const rendered = render({
+      group_mints: [{ proposal_id: 'p-1', kind: 'keyed', alert_ids: ['a', 'b'] }],
+      group_joins: [{ owner_proposal_id: 'p-0', revision: 3, alert_ids: ['c'] }],
+    });
+    expect(rendered).toContain('Created proposal p-1 (keyed) for 2 alerts.');
+    expect(rendered).toContain('Joined proposal p-0 (revision 3) with 1 alert.');
+    expect(rendered).not.toContain('No proposal created');
   });
 });
 
-describe('floor_alert_triage_batch — close_investigation_no_fp', () => {
-  it('nests an analyzed-batch guard so each condition stays a single comparison', () => {
-    const outer = stepByName('close_investigation_no_fp');
-    const inner = stepByName('close_investigation_no_fp_when_analyzed');
-
-    expect(outer?.condition).toBe('${{ variables.fp_candidate_count == 0 }}');
-    expect(inner?.condition).toBe('${{ variables.verdict_count > 0 }}');
-    expect(outer?.steps?.some((s) => s.name === 'close_investigation_no_fp_when_analyzed')).toBe(
-      true
-    );
-    expect(inner?.steps?.some((s) => s.name === 'close_no_fp')).toBe(true);
-  });
-
-  it('does not close the Investigation or claim "Triage complete" for a zero-verdict batch', () => {
-    // fp_candidate_count is also 0 when nothing was classified (missing connector, skipped
-    // sub-workflow), which is exactly the case guard_classification_nonempty_inner already
-    // warned about above. The inner guard must fail for that case so close_no_fp /
-    // post_comment_outcome_no_fp never run.
-    expect(
-      evalExpr('${{ variables.fp_candidate_count == 0 }}', { variables: { fp_candidate_count: 0 } })
-    ).toBe(true);
-    expect(
-      evalExpr('${{ variables.verdict_count > 0 }}', { variables: { verdict_count: 0 } })
-    ).toBe(false);
-  });
-
-  it('still closes and reports "Triage complete" for a real zero-FP analyzed batch', () => {
-    expect(
-      evalExpr('${{ variables.fp_candidate_count == 0 }}', { variables: { fp_candidate_count: 0 } })
-    ).toBe(true);
-    expect(
-      evalExpr('${{ variables.verdict_count > 0 }}', { variables: { verdict_count: 5 } })
-    ).toBe(true);
+// `kibana.SetAlertTags` validates its body: both lists are required, even when one is empty. A call
+// that only adds a tag fails with HTTP 400 at run time, and `continue: true` hides it.
+describe('floor_alert_triage_batch — kibana.SetAlertTags calls', () => {
+  it('send both tag lists, so none is rejected by the route', () => {
+    const calls = allSteps.filter((step) => step.type === 'kibana.SetAlertTags');
+    expect(calls.length).toBeGreaterThan(0);
+    calls.forEach((step) => {
+      const tags = step.with?.tags as Record<string, unknown>;
+      expect({ step: step.name, add: Array.isArray(tags?.tags_to_add) }).toEqual({
+        step: step.name,
+        add: true,
+      });
+      expect({ step: step.name, remove: Array.isArray(tags?.tags_to_remove) }).toEqual({
+        step: step.name,
+        remove: true,
+      });
+    });
   });
 });
 
@@ -619,15 +495,27 @@ const AZ_TAG_STEPS = AZ_TAG_WRITES.map(({ step }) => step);
 describe('floor_alert_triage_batch — az: tags', () => {
   const idsStep = stepByName('compute_az_tag_ids');
 
+  const FLOOR = 0.85;
   const verdicts = [
-    { alert_id: 'tp-1', classification: 'true_positive' },
-    { alert_id: 'fp-1', classification: 'false_positive' },
-    { alert_id: 'fp-2', classification: 'false_positive' },
-    { alert_id: 'inc-1', classification: 'inconclusive' },
+    { alert_id: 'tp-1', classification: 'true_positive', confidence_score: 0.9 },
+    { alert_id: 'fp-1', classification: 'false_positive', confidence_score: 0.9 },
+    { alert_id: 'fp-2', classification: 'false_positive', confidence_score: 0.85 },
+    { alert_id: 'inc-1', classification: 'inconclusive', confidence_score: 0.5 },
   ];
 
   const computeIds = (batch: typeof verdicts): Record<string, unknown> => {
-    const context = { steps: { classify_alerts: { output: { verdicts: batch } } } };
+    const belowFloorStep = stepByName('compute_below_floor_fp_ids');
+    const thresholds = stepByName('build_fp_threshold_expr')?.with as Record<string, string>;
+    const variables: Record<string, unknown> = Object.fromEntries(
+      Object.entries(thresholds).map(([key, template]) => [
+        key,
+        renderString(template, { inputs: { confidence_floor: FLOOR } }).trim(),
+      ])
+    );
+    const context = { steps: { classify_alerts: { output: { verdicts: batch } } }, variables };
+    Object.entries(belowFloorStep?.with ?? {}).forEach(([key, expr]) => {
+      variables[key] = evalExpr(expr as string, context);
+    });
     return Object.fromEntries(
       Object.entries(idsStep?.with ?? {}).map(([key, expr]) => [
         key,
@@ -671,9 +559,33 @@ describe('floor_alert_triage_batch — az: tags', () => {
     });
   });
 
+  // A below-floor false positive is never proposed for closure, so `az:false_positive` would stay
+  // on it forever. It is tagged `az:inconclusive` instead.
+  it('tags a false positive below the confidence floor inconclusive, not false_positive', () => {
+    const ids = computeIds([
+      ...verdicts,
+      { alert_id: 'fp-low', classification: 'false_positive', confidence_score: 0.4 },
+    ]);
+    expect(ids.az_false_positive_ids).toEqual(['fp-1', 'fp-2']);
+    expect(ids.az_inconclusive_ids).toEqual(['inc-1', 'fp-low']);
+  });
+
+  it('marks exactly the confident false positives with az:model_fp, which no other class keeps', () => {
+    const tagsOf = (step: string) =>
+      (callOf(step)?.with as { tags: { tags_to_add: string[]; tags_to_remove: string[] } }).tags;
+    expect(tagsOf('set_az_false_positive_tags').tags_to_add).toEqual([
+      'az:false_positive',
+      'az:model_fp',
+    ]);
+    expect(tagsOf('set_az_true_positive_tags').tags_to_remove).toContain('az:model_fp');
+    expect(tagsOf('set_az_inconclusive_tags').tags_to_remove).toContain('az:model_fp');
+  });
+
   it('chunks each list at the size the closure review re-tags with', () => {
-    const reviewChunkSize = Number(/chunk: (\d+)/.exec(FLOOR_ALERT_TRIAGE_REVIEW_YAML)?.[1]);
-    expect(reviewChunkSize).toBeGreaterThan(0);
+    // The re-tag step of the review (`alertzero.triage.retagProposalAlerts`) chunks at
+    // TAG_CHUNK_SIZE in the alertzero plugin. Not the alert attachments, which are capped at 20 ids a call.
+    const reviewChunkSize = 500;
+    expect(FLOOR_ALERT_TRIAGE_REVIEW_YAML).toContain('alertzero.triage.retagProposalAlerts');
     AZ_TAG_STEPS.forEach((step) => expect(chunkSizeOf(step)).toBe(reviewChunkSize));
   });
 
@@ -715,7 +627,9 @@ describe('floor_alert_triage_batch — az: tags', () => {
   });
 
   it('only writes a class tag for the alerts of that class', () => {
-    const ids = computeIds([{ alert_id: 'fp-1', classification: 'false_positive' }]);
+    const ids = computeIds([
+      { alert_id: 'fp-1', classification: 'false_positive', confidence_score: 0.9 },
+    ]);
     const chunksFor = (variable: string, step: string) =>
       renderChunks(step, variable, ids[variable] as string[]);
     expect(chunksFor('az_false_positive_ids', 'set_az_false_positive_tags')).toEqual([['fp-1']]);
@@ -743,12 +657,12 @@ describe('floor_alert_triage_batch — az: tags', () => {
       const { tags } = callOf(step)?.with as {
         tags: { tags_to_remove: string[]; tags_to_add: string[] };
       };
-      expect(tags.tags_to_add).toEqual([tagToAdd]);
+      expect(tags.tags_to_add).toEqual(expect.arrayContaining([tagToAdd]));
       // The claim tags leave in the same update, so an alert is never left with a verdict and a
       // claim, or with a claim and no verdict.
       const claimTags = ['az:triage_pending', 'az:triage_exec:{{ execution.id }}'];
-      const verdictTags = [...tags.tags_to_remove, ...tags.tags_to_add].filter(
-        (tag) => !claimTags.includes(tag)
+      const verdictTags = [...tags.tags_to_remove, ...tags.tags_to_add].filter((tag) =>
+        all.includes(tag)
       );
       expect(verdictTags.sort()).toEqual([...all].sort());
       expect(tags.tags_to_remove).toEqual(expect.arrayContaining(claimTags));
@@ -782,9 +696,14 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
     renderString(noteTemplate, {
       workflow: { spaceId: 'default' },
       execution: { url: 'https://kibana.example.com/app/exec/1' },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
+      variables: {
+        group_mints: [{ alert_ids: ['a1'] }],
+        group_joins: [],
+        mint_conversation_ids: ['conv-1'],
+      },
       foreach: {
         item: {
+          alert_id: 'a1',
           classification: 'false_positive',
           confidence_score: 0.9,
           rationale: 'Signed SCCM parent process.',
@@ -805,6 +724,51 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
 
   it('omits the contributing factors heading when there are none', () => {
     expect(renderNote([])).not.toContain('Contributing factors');
+  });
+
+  // The note sits on the alert, so its link must lead to the Investigation the alert ended up in.
+  describe('the Investigation the note links to', () => {
+    const noteFor = (alertId: string): string =>
+      renderString(noteTemplate, {
+        workflow: { spaceId: 'default' },
+        execution: { url: 'https://kibana.example.com/app/exec/1' },
+        variables: {
+          group_mints: [{ alert_ids: ['a1', 'a2'] }, { alert_ids: ['b1'] }],
+          mint_conversation_ids: ['conv-mint-0', 'conv-mint-1'],
+          group_joins: [{ alert_ids: ['c1'], conversation_id: 'conv-owner' }],
+          home_conversation_id: 'conv-mint-0',
+        },
+        foreach: {
+          item: {
+            alert_id: alertId,
+            classification: 'false_positive',
+            confidence_score: 0.9,
+            rationale: 'Known.',
+            contributing_factors: [],
+          },
+        },
+      });
+
+    it.each([
+      ['a2', 'conv-mint-0'],
+      ['b1', 'conv-mint-1'],
+      ['c1', 'conv-owner'],
+    ])('links the note of alert %s to %s', (alertId, conversation) => {
+      expect(noteFor(alertId)).toContain(`/conversations/${conversation})`);
+    });
+
+    // A true positive, an inconclusive alert or a false positive below the floor is in no proposal,
+    // so its note links the Investigation that holds the batch's other alerts.
+    it('links an alert that is in no proposal to the batch Investigation', () => {
+      expect(noteFor('tp-1')).toContain('/conversations/conv-mint-0)');
+    });
+
+    it('builds the retry note with the same link', () => {
+      const retryTemplate = (
+        stepByName('retry_verdict_note')?.with?.body as { note: { note: string } }
+      ).note.note;
+      expect(retryTemplate).toBe(noteTemplate);
+    });
   });
 
   it('tells the sub-workflow it is called by the Worker, which suppresses its own note', () => {
@@ -966,17 +930,34 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
         expect(retry?.type).toBe('foreach');
         expect(retry?.foreach).toContain('variables.failed_note_verdicts');
         expect(retryStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-        // A note that still fails fails the run, as it did before the notes ran in parallel.
-        expect(retryStep?.['on-failure']?.continue).toBeUndefined();
+        // A note that still fails is counted, and fails the run after every review was started.
+        expect(retryStep?.['on-failure']?.continue).toBe(true);
       });
 
-      it('runs after the notes and before the review is started', () => {
+      it('counts a note that still fails and fails the run at the end', () => {
         const names = parsed.steps.map((step) => step.name);
+        expect(stepByName('init_failed_verdict_notes')?.with?.failed_note_count).toBe(0);
+        const count = retry?.steps?.find(({ name }) => name === 'count_failed_verdict_note');
+        expect(count?.if).toBe('${{ steps.retry_verdict_note.error != blank }}');
+        expect(
+          evalExpr(count?.with?.failed_note_count as string, {
+            variables: { failed_note_count: 1 },
+          })
+        ).toBe(2);
+        const abort = stepByName('abort_note_failed');
+        expect(abort?.type).toBe('workflow.fail');
+        expect(abort?.if).toBe('${{ variables.failed_note_count > 0 }}');
+        expect(names.indexOf('abort_note_failed')).toBeGreaterThan(
+          names.indexOf('abort_review_failed')
+        );
+      });
+
+      // A run that dies while writing notes must not leave tagged alerts with no proposal.
+      it('runs after the reviews are started, so a failing note cannot strand the alerts', () => {
+        const names = parsed.steps.map((step) => step.name);
+        expect(names.indexOf('add_verdict_notes')).toBeGreaterThan(names.indexOf('start_reviews'));
         expect(names.indexOf('retry_failed_verdict_notes')).toBeGreaterThan(
           names.indexOf('add_verdict_notes')
-        );
-        expect(names.indexOf('gate_fp_close')).toBeGreaterThan(
-          names.indexOf('retry_failed_verdict_notes')
         );
       });
 
@@ -999,29 +980,145 @@ describe('floor_alert_triage_batch — add_verdict_notes', () => {
 // fails after fallback execution"), so `continue: true` is required alongside it,
 // or the run aborts and any step after the patch (e.g. the outcome comment) never runs.
 // ---------------------------------------------------------------------------
-describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure handling', () => {
-  const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
+describe('floor_alert_triage_batch — where the alerts in no proposal go', () => {
+  const route = (mint_count: number, join_count: number) => {
+    const variables = {
+      mint_count,
+      join_count,
+      proposal_count: mint_count + join_count,
+      home_conversation_id: '',
+    };
+    const runs = (name: string) =>
+      evalExpr((stepByName(name) as { condition: string }).condition, { variables });
+    return {
+      inMint: runs('home_from_mint'),
+      inJoin: runs('home_from_join'),
+      // The batch Investigation is created when neither proposal Investigation took them.
+      own: !runs('home_from_mint') && !runs('home_from_join'),
+    };
+  };
 
-  it('finds every conversation-close step this workflow defines', () => {
-    expect(patchSteps.map((step) => step.name).sort()).toEqual(['close_no_fp']);
+  it.each([
+    ['no proposal', 0, 0, { inMint: false, inJoin: false, own: true }],
+    ['one new proposal', 1, 0, { inMint: true, inJoin: false, own: false }],
+    ['one join', 0, 1, { inMint: false, inJoin: true, own: false }],
+    ['two new proposals', 2, 0, { inMint: false, inJoin: false, own: true }],
+    ['a new proposal and a join', 1, 1, { inMint: false, inJoin: false, own: true }],
+  ])('%s', (_label, mints, joins, expected) => {
+    expect(route(mints, joins)).toEqual(expected);
+  });
+});
+
+describe('floor_alert_triage_batch — a failed batch Investigation', () => {
+  it('retries the create and then continues, so the planned reviews still start', () => {
+    expect(stepByName('create_batch_investigation')?.['on-failure']).toEqual({
+      retry: { 'max-attempts': 3, delay: '5s' },
+      continue: true,
+    });
   });
 
-  it.each(['close_no_fp'])(
-    '"%s" survives a patch failure via fallback + continue, so the step after it still runs',
-    (name) => {
-      const step = stepByName(name);
-      expect(step?.['on-failure']?.continue).toBe(true);
-      expect(step?.['on-failure']?.fallback?.length).toBeGreaterThan(0);
-    }
-  );
+  it('only records the alerts in an Investigation that exists', () => {
+    const gate = stepByName('record_other_alerts') as {
+      condition: string;
+      steps: Array<{ name: string }>;
+    };
+    expect(evalExpr(gate.condition, { variables: { home_conversation_id: '' } })).toBe(false);
+    expect(evalExpr(gate.condition, { variables: { home_conversation_id: 'conv-1' } })).toBe(true);
+    expect(gate.steps.map((step) => step.name)).toEqual([
+      'init_other_tag_tracking',
+      'tag_other_alerts',
+      'attach_other_alerts',
+      'count_other_entities',
+      'attach_other_impact_gate',
+      'post_comment_other_alerts',
+      'close_batch_investigation',
+      'report_batch_investigation_closed',
+    ]);
+  });
+
+  it('tags the alerts with the Investigation that holds them, and attaches them only to the batch Investigation', () => {
+    expect(stepByName('tag_other_alerts')?.foreach).toBe(
+      '${{ variables.other_alert_ids | chunk: 500 | json }}'
+    );
+    expect(stepByName('tag_other_alert_chunk')?.with?.tags).toEqual({
+      tags_to_add: ['az:triage_investigation:{{ variables.home_conversation_id }}'],
+      tags_to_remove: [],
+    });
+    const attach = stepByName('attach_other_alerts');
+    expect(attach?.type).toBe('ai.attachment.add');
+    expect(attach?.with?.data).toEqual({
+      tags: ['az:triage_investigation:{{ variables.home_conversation_id }}'],
+    });
+    // A proposal's Investigation already has the attachment from when the proposal was created.
+    expect(
+      evalExpr(attach?.if as string, { variables: { batch_conversation_created: false } })
+    ).toBe(false);
+    expect(
+      evalExpr(attach?.if as string, { variables: { batch_conversation_created: true } })
+    ).toBe(true);
+  });
+
+  it('does not take the new home when the create failed', () => {
+    const set = stepByName('set_home_from_batch_investigation') as { if: string };
+    expect(
+      evalExpr(set.if, { steps: { create_batch_investigation: { error: { message: 'x' } } } })
+    ).toBe(false);
+    expect(evalExpr(set.if, { steps: { create_batch_investigation: { output: {} } } })).toBe(true);
+  });
+});
+
+describe('floor_alert_triage_batch — the entities of the alerts in no proposal', () => {
+  it('records them on the Investigation that holds those alerts, without failing the run', () => {
+    expect(stepByName('attach_other_impact')?.type).toBe('investigations.attachImpact');
+    expect(stepByName('attach_other_impact')?.['on-failure']).toEqual({ continue: true });
+    expect(stepByName('attach_other_impact')?.with).toEqual({
+      conversationId: '{{ variables.home_conversation_id }}',
+      entities: '${{ steps.group_fp_candidates_call.output.other_impacted_entities }}',
+    });
+  });
+
+  it('attaches none when the grouping step returned none or did not run', () => {
+    const count = stepByName('count_other_entities')?.with?.other_entity_count as string;
+    const gate = (stepByName('attach_other_impact_gate') as { condition: string }).condition;
+    const entities = (list?: unknown[]) => ({
+      variables: { no_items: [] },
+      steps: {
+        group_fp_candidates_call: list ? { output: { other_impacted_entities: list } } : {},
+      },
+    });
+    expect(evalExpr(count, entities([{ id: 'h', name: 'h', type: 'host' }]))).toBe(1);
+    expect(evalExpr(count, entities([]))).toBe(0);
+    expect(evalExpr(count, entities())).toBe(0);
+    expect(evalExpr(gate, { variables: { other_entity_count: 0 } })).toBe(false);
+    expect(evalExpr(gate, { variables: { other_entity_count: 2 } })).toBe(true);
+  });
+
+  it('hands the grouping step the alerts in no proposal, and runs it for every classified batch', () => {
+    const call = stepByName('group_fp_candidates_call');
+    expect((call?.with as Record<string, string>).other_alert_ids).toBe(
+      '${{ variables.other_alert_ids }}'
+    );
+    expect(evalExpr(call?.if as string, { variables: { verdict_count: 0 } })).toBe(false);
+    expect(evalExpr(call?.if as string, { variables: { verdict_count: 4 } })).toBe(true);
+  });
+});
+
+describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure handling', () => {
+  // The reviews close theirs and a failure Investigation stays open for follow-up. The batch closes
+  // only the Investigation it made for a batch with no proposal, and a failed close must not fail the run.
+  it('closes only the Investigation of a batch with no proposal, without failing the run', () => {
+    const closes = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
+    expect(closes.map((step) => step.name)).toEqual(['close_batch_investigation']);
+    expect(closes[0]['on-failure']).toEqual({ continue: true });
+  });
 });
 
 // ---------------------------------------------------------------------------
 // Closure review hand-off
 //
-// The closure proposal waits for an analyst, so it lives in its own workflow started with
-// `workflow.executeAsync`. This run must not wait for it, must start it only after the tags and
-// notes exist.
+// Each new closure proposal waits for an analyst, so it lives in its own workflow started with
+// `workflow.executeAsync`, one per proposal and each in its own Investigation. This run must not
+// wait for them, and must start them only after the tags and notes exist.
 // ---------------------------------------------------------------------------
 describe('floor_alert_triage_batch — closure review hand-off', () => {
   const stepIndex = (name: string) => parsed.steps.findIndex((step) => step.name === name);
@@ -1035,17 +1132,21 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(stepByName('start_fp_review')?.type).toBe('workflow.executeAsync');
   });
 
-  it('starts the review after every alert has its az: tag and its note', () => {
-    const gate = stepIndex('gate_fp_close');
-    AZ_TAG_STEPS.forEach((name) => expect(gate).toBeGreaterThan(stepIndex(name)));
-    expect(gate).toBeGreaterThan(stepIndex('add_verdict_notes'));
+  it('starts the reviews after every alert has its az: tag, and before the notes', () => {
+    const start = stepIndex('start_reviews');
+    AZ_TAG_STEPS.forEach((name) => expect(start).toBeGreaterThan(stepIndex(name)));
+    expect(start).toBeLessThan(stepIndex('add_verdict_notes'));
   });
 
-  it('only starts a review when there is something to close', () => {
-    expect(stepByName('gate_fp_close')?.condition).toBe('${{ variables.fp_candidate_count > 0 }}');
-    expect(stepByName('gate_fp_close')?.steps?.map((step) => step.name)).toContain(
-      'start_fp_review'
-    );
+  it('starts one review for each new proposal, and none when there is nothing to close', () => {
+    const loop = stepByName('start_reviews');
+    expect(loop?.type).toBe('foreach');
+    expect(loop?.foreach).toBe('${{ variables.group_mints | json }}');
+    expect(loop?.steps?.map((step) => step.name)).toContain('start_fp_review');
+    // No grouping step runs without candidates, so the list stays empty.
+    expect(
+      evalExpr('${{ variables.group_mints | json }}', { variables: { group_mints: [] } })
+    ).toBe('[]');
   });
 
   it('hands the review everything it needs and resolves the autonomy mapping itself', () => {
@@ -1055,12 +1156,14 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(Object.keys(inputs).sort()).toEqual(
       [
         'autonomy',
+        'comment',
         'conversation_id',
         'confidence_floor',
-        'entity_summary',
         'fp_candidate_ids',
+        'proposal_id',
         'rule_id',
         'rule_name',
+        'title',
       ].sort()
     );
 
@@ -1071,28 +1174,88 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         autonomy: 'supervised',
         confidence_floor: 0.9,
       },
-      steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
-      variables: { fp_candidate_ids: ['a', 'b'], fp_entity_summary: 'on host-1' },
+      steps: {
+        start_reviews: {
+          index: 1,
+          item: {
+            alert_ids: ['a', 'b'],
+            title: 'Close 2 alerts',
+            comment: 'Why.',
+            proposal_id: 'p-1',
+          },
+        },
+      },
+      variables: { mint_conversation_ids: ['conv-0', 'conv-1'] },
     };
     expect(renderString(inputs.rule_id, context)).toBe('rule-1');
+    // Each proposal gets its own Investigation: the one at the proposal's position.
     expect(renderString(inputs.conversation_id, context)).toBe('conv-1');
     expect(renderString(inputs.autonomy, context)).toBe('supervised');
-    expect(renderString(inputs.entity_summary, context)).toBe('on host-1');
+    expect(renderString(inputs.title, context)).toBe('Close 2 alerts');
+    expect(renderString(inputs.proposal_id, context)).toBe('p-1');
     expect(evalExpr(inputs.fp_candidate_ids, context)).toEqual(['a', 'b']);
     expect(evalExpr(inputs.confidence_floor, context)).toBe(0.9);
   });
 
-  it('fails the run, after saying so, when the review cannot be started at all', () => {
-    const fallback = stepByName('start_fp_review')?.['on-failure']?.fallback ?? [];
-    expect(fallback.map((step) => step.name)).toEqual(['post_comment_review_not_started']);
-    expect(stepByName('start_fp_review')?.['on-failure']?.continue).toBeUndefined();
+  // One review that cannot start must not strand the alerts of the proposals after it.
+  it('tries every review, then fails the run once for those that could not start', () => {
+    const start = stepByName('start_fp_review');
+    expect(start?.['on-failure']?.fallback?.map((step) => step.name)).toEqual([
+      'retag_review_not_started',
+      'post_comment_review_not_started',
+    ]);
+    expect(start?.['on-failure']?.continue).toBe(true);
+
+    const abort = stepByName('abort_review_failed');
+    expect(abort?.type).toBe('workflow.fail');
+    expect(abort?.if).toBe('${{ variables.failed_review_count > 0 }}');
+    // Before the run report, which a failed run does not send, as before.
+    expect(stepIndex('abort_review_failed')).toBe(stepIndex('abort_note_failed') - 1);
+    expect(stepIndex('abort_note_failed')).toBe(stepIndex('report_worker_run_completed') - 1);
+    expect(
+      evalExpr(stepByName('count_failed_review')?.with?.failed_review_count as string, {
+        variables: { failed_review_count: 1 },
+      })
+    ).toBe(2);
+  });
+
+  // Nobody revisits an alert left as az:false_positive, so a review that never ran must not leave one.
+  it.each(['retag_review_not_started', 'retag_review_failed'])(
+    '"%s" moves every alert of the proposal from az:false_positive to az:inconclusive and keeps az:model_fp',
+    (name) => {
+      const call = stepByName(name)?.steps?.[0];
+      expect(stepByName(name)?.foreach).toContain(
+        'steps.start_reviews.item.alert_ids | chunk: 500'
+      );
+      expect(call?.with?.tags).toEqual({
+        tags_to_remove: ['az:false_positive'],
+        tags_to_add: ['az:inconclusive'],
+      });
+      expect(call?.['on-failure']?.continue).toBe(true);
+    }
+  );
+
+  it('re-tags the candidates, and fails the run, when the alerts cannot be grouped into proposals', () => {
+    const group = stepByName('group_fp_candidates_call');
+    expect(group?.type).toBe('alertzero.triage.groupFpCandidates');
+    expect(group?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    // `fallback` without `continue` re-throws, which fails the run.
+    expect(group?.['on-failure']?.continue).toBeUndefined();
+    const retag = group?.['on-failure']?.fallback?.find(
+      ({ name }) => name === 'retag_grouping_failed'
+    );
+    expect(retag?.foreach).toContain('variables.fp_candidate_ids | chunk: 500');
+    expect(retag?.steps?.[0].with?.tags).toEqual({
+      tags_to_remove: ['az:false_positive'],
+      tags_to_add: ['az:inconclusive'],
+    });
   });
 
   describe('reading the review status', () => {
     const outcomeTemplate = stepByName('resolve_review_dispatch')?.with?.review_dispatch as string;
-    const resolveDispatch = (status: string): string =>
+    const resolveDispatch = (status: string, error?: unknown): string =>
       renderString(outcomeTemplate, {
-        steps: { start_fp_review: { output: { status } } },
+        steps: { start_fp_review: { output: { status }, error } },
       }).trim();
 
     // The status comes from `workflow.executeAsync` itself. A separate read of the execution
@@ -1121,6 +1284,10 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
       expect(resolveDispatch(status)).toBe(expected);
     });
 
+    it('does not re-tag a dispatch that failed, because its own fallback did', () => {
+      expect(resolveDispatch('', { message: 'could not start' })).toBe('not_started');
+    });
+
     // The Worker matches the review's status by string. Tie each literal to the engine's enum so a
     // rename there fails here instead of silently sending every batch down the "started" branch.
     it('only matches statuses the engine can report', () => {
@@ -1141,9 +1308,18 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         `\${{ variables.review_dispatch == '${dispatch}' }}`
       );
     });
+
+    it('counts the alerts of a started review as in flight', () => {
+      expect(
+        evalExpr(stepByName('count_started_alerts')?.with?.started_alert_count as string, {
+          variables: { started_alert_count: 3 },
+          steps: { start_reviews: { item: { alert_ids: ['a', 'b'] } } },
+        })
+      ).toBe(5);
+    });
   });
 
-  describe('a batch whose review ended without a decision', () => {
+  describe('a proposal whose review ended without a decision', () => {
     const branchStepNames = (branchName: string) =>
       flatten(stepByName(branchName)?.steps ?? []).map((step) => step.name);
 
@@ -1153,7 +1329,7 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
       expect(stepByName('close_investigation_review_limit')).toBeUndefined();
     });
 
-    it('leaves the Investigation open when the review failed', () => {
+    it('leaves the proposal Investigation open when the review failed', () => {
       expect(
         flatten(stepByName('handle_review_failed')?.steps ?? []).some(
           (step) => step.type === 'ai.conversation.metadata.patch'
@@ -1161,25 +1337,30 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
       ).toBe(false);
     });
 
-    it('fails the run for a review that ended without a decision, after commenting', () => {
-      const names = branchStepNames('handle_review_failed');
-      expect(names).toEqual(['post_comment_review_failed', 'abort_review_failed']);
-      expect(stepByName('abort_review_failed')?.type).toBe('workflow.fail');
+    it('re-tags and comments in the proposal Investigation', () => {
+      expect(branchStepNames('handle_review_failed')).toEqual([
+        'retag_review_failed',
+        'retag_review_failed_call',
+        'post_comment_review_failed',
+      ]);
     });
 
     const renderReviewFailed = (autonomy: string, count: number): string => {
       const template = (stepByName('post_comment_review_failed')?.with as { message: string })
         .message;
       return renderString(template, {
-        steps: { start_fp_review: { output: { status: 'failed' } } },
-        variables: { fp_candidate_count: count },
+        steps: {
+          start_fp_review: { output: { status: 'failed' } },
+          start_reviews: { index: 0, item: { alert_ids: Array.from({ length: count }, String) } },
+        },
+        variables: { mint_conversation_ids: ['conv-0'] },
         inputs: { autonomy },
       });
     };
 
     it.each([
-      [1, 'is tagged az:false_positive', 'it is still open'],
-      [3, 'are tagged az:false_positive', 'they are still open'],
+      [1, 'is re-tagged az:inconclusive', 'it is still open'],
+      [3, 'are re-tagged az:inconclusive', 'they are still open'],
     ])(
       'does not claim %i candidate alert(s) are still open when a supervised review failed',
       (count, tagged, stillOpen) => {
@@ -1207,7 +1388,7 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
 
         expect(rendered).toContain('status: failed');
         expect(rendered).toContain(expected);
-        expect(rendered).toContain('tagged az:false_positive');
+        expect(rendered).toContain('re-tagged az:inconclusive');
         expect(rendered).not.toContain('may already be closed');
       }
     );
@@ -1217,7 +1398,8 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     const template = (stepByName('post_comment_review_started')?.with as { message: string })
       .message;
     const rendered = renderString(template, {
-      variables: { fp_candidate_count: 2 },
+      steps: { start_reviews: { index: 0, item: { alert_ids: ['a', 'b'] } } },
+      variables: { mint_conversation_ids: ['conv-0'] },
       inputs: { autonomy: 'manual', confidence_floor: 0.85 },
     });
 
@@ -1227,39 +1409,414 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
   });
 });
 
-describe('floor_alert_triage_batch — classification comment attribution', () => {
-  const renderResults = (output: Record<string, unknown>): string =>
-    renderString(
-      (stepByName('post_comment_classification_results')?.with as { message: string }).message,
-      {
+// ---------------------------------------------------------------------------
+// Grouping: joins, new proposals and their Investigations
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage_batch — grouping', () => {
+  const names = parsed.steps.map((step) => step.name);
+
+  it('groups after the tags and before the notes, so each note can link its own Investigation', () => {
+    expect(names.indexOf('group_fp_candidates_call')).toBeGreaterThan(
+      names.indexOf('tag_pattern_keys')
+    );
+    ['process_mints', 'process_joins'].forEach((name) =>
+      expect(names.indexOf(name)).toBeLessThan(names.indexOf('add_verdict_notes'))
+    );
+  });
+
+  it('groups only when there are false positives, and falls back to empty lists otherwise', () => {
+    const group = stepByName('group_fp_candidates_call');
+    expect(evalExpr(group?.if as string, { variables: { fp_candidate_count: 0 } })).toBe(false);
+    const resolve = stepByName('resolve_grouping')?.with as Record<string, string>;
+    const context = { variables: { no_items: [] }, steps: { group_fp_candidates_call: {} } };
+    expect(evalExpr(resolve.group_mints, context)).toEqual([]);
+    expect(evalExpr(resolve.group_joins, context)).toEqual([]);
+  });
+
+  it('gives each new proposal its own Investigation, alerts, impact, az:proposal and Investigation tags', () => {
+    const loop = stepByName('process_mints');
+    expect(loop?.foreach).toBe('${{ variables.group_mints | json }}');
+    const inner = flatten(loop?.steps ?? []).map((step) => step.name);
+    expect(inner).toEqual(
+      expect.arrayContaining([
+        'create_proposal_investigation',
+        'attach_mint_alerts',
+        'attach_mint_impact',
+        'tag_mint_alert_chunk',
+      ])
+    );
+    expect(stepByName('tag_mint_alert_chunk')?.with?.tags).toEqual({
+      tags_to_add: [
+        'az:proposal:{{ steps.process_mints.item.proposal_id }}',
+        'az:triage_investigation:{{ steps.create_proposal_investigation.output.conversation_id }}',
+      ],
+      tags_to_remove: [],
+    });
+    // The first message reports failed tag writes, so the tags are written before it.
+    expect(inner.indexOf('tag_mint_alerts')).toBeLessThan(
+      inner.indexOf('post_comment_mint_analysis')
+    );
+  });
+
+  it('records the conversation of each proposal at its position, for the notes and the reviews', () => {
+    const wrap = stepByName('wrap_mint_conversation_id')?.with as Record<string, string>;
+    const record = stepByName('record_mint_conversation')?.with as Record<string, string>;
+    const wrapped = evalExpr(wrap.new_conversation_ids, {
+      steps: { create_proposal_investigation: { output: { conversation_id: 'conv-1' } } },
+    });
+    expect(wrapped).toEqual(['conv-1']);
+    expect(
+      evalExpr(record.mint_conversation_ids, {
+        variables: { mint_conversation_ids: ['conv-0'], new_conversation_ids: wrapped },
+      })
+    ).toEqual(['conv-0', 'conv-1']);
+  });
+
+  describe('when the Investigation of a proposal cannot be created', () => {
+    it('retries the create and carries on, so the other proposals still get their review', () => {
+      const create = stepByName('create_proposal_investigation');
+      expect(create?.['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '5s' },
+        continue: true,
+      });
+    });
+
+    it('keeps the position of the failed proposal with an empty conversation id', () => {
+      const record = stepByName('record_mint_without_conversation');
+      expect(record?.if).toBe('${{ steps.create_proposal_investigation.error != blank }}');
+      expect(
+        evalExpr((record?.with as Record<string, string>).mint_conversation_ids, {
+          variables: { mint_conversation_ids: ['conv-0'], no_conversation_ids: [''] },
+        })
+      ).toEqual(['conv-0', '']);
+      expect(stepByName('record_mint_conversation')?.if).toBe(
+        '${{ steps.create_proposal_investigation.error == blank }}'
+      );
+    });
+
+    it('attaches nothing and tags nothing to an Investigation that does not exist', () => {
+      const fill = stepByName('fill_mint_investigation');
+      expect(fill?.condition).toBe('${{ steps.create_proposal_investigation.error == blank }}');
+      expect(flatten(fill?.steps ?? []).map((step) => step.name)).toEqual(
+        expect.arrayContaining([
+          'attach_mint_alerts',
+          'post_comment_mint_analysis',
+          'attach_mint_impact',
+          'tag_mint_alert_chunk',
+        ])
+      );
+    });
+
+    it('starts no review for it and re-tags its alerts, while the others go on', () => {
+      expect(stepByName('start_fp_review')?.if).toBe("${{ variables.mint_conversation_id != '' }}");
+      const template = stepByName('resolve_review_dispatch')?.with?.review_dispatch as string;
+      expect(
+        renderString(template, { variables: { mint_conversation_id: '' }, steps: {} }).trim()
+      ).toBe('no_investigation');
+      expect(
+        renderString(template, {
+          variables: { mint_conversation_id: 'conv-1' },
+          steps: { start_fp_review: { output: { status: 'pending' } } },
+        }).trim()
+      ).toBe('started');
+      expect(stepByName('handle_no_investigation')?.condition).toBe(
+        "${{ variables.review_dispatch == 'no_investigation' }}"
+      );
+      const retag = stepByName('retag_no_investigation');
+      expect(retag?.foreach).toContain('steps.start_reviews.item.alert_ids | chunk: 500');
+      expect(retag?.steps?.[0].with?.tags).toEqual({
+        tags_to_remove: ['az:false_positive'],
+        tags_to_add: ['az:inconclusive'],
+      });
+    });
+
+    it('counts it as a failed review, so the run still reports the failure', () => {
+      expect(
+        evalExpr(stepByName('count_failed_review')?.if as string, {
+          variables: { review_dispatch: 'no_investigation' },
+        })
+      ).toBe(true);
+    });
+  });
+
+  it('adds the joined alerts to the owner by its tags, without attaching them, and links just those alerts there', () => {
+    const loop = stepByName('process_joins');
+    expect(loop?.foreach).toBe('${{ variables.group_joins | json }}');
+    expect(stepByName('attach_joined_alerts')).toBeUndefined();
+    expect(stepByName('attach_joined_impact')?.type).toBe('investigations.attachImpact');
+    expect(stepByName('attach_joined_impact')?.with).toEqual({
+      conversationId: '{{ steps.process_joins.item.conversation_id }}',
+      entities: '${{ steps.process_joins.item.impacted_entities }}',
+    });
+    expect(stepByName('tag_joined_alert_chunk')?.with?.tags).toEqual({
+      tags_to_add: [
+        'az:proposal:{{ steps.process_joins.item.owner_proposal_id }}',
+        'az:triage_investigation:{{ steps.process_joins.item.conversation_id }}',
+      ],
+      tags_to_remove: [],
+    });
+    expect(flatten(loop?.steps ?? []).map((step) => step.name)).toContain(
+      'post_comment_joined_owner'
+    );
+    expect(stepByName('post_comment_joined_batch')).toBeUndefined();
+    const message = (stepByName('post_comment_joined_owner')?.with as { message: string }).message;
+    expect(
+      renderString(message, {
+        workflow: { spaceId: 'team' },
+        inputs: { rule_name: 'Rule A' },
         steps: {
-          classify_alerts: {
-            output: {
-              true_positive_count: 1,
-              false_positive_count: 2,
-              inconclusive_count: 0,
-              grouped_counts_summary: '',
-              generated_summary: 'Looks benign.',
-              ...output,
-            },
+          process_joins: {
+            item: { alert_ids: ['a', 'b'], revision: 2, alerts_page_query: '?filters=x' },
           },
         },
+      })
+    ).toContain('[View the added alerts](/s/team/app/security/alerts?filters=x)');
+  });
+
+  it('counts the alert chunks that fail to tag and says so in the Investigation', () => {
+    [
+      ['tag_mint_alert_chunk', 'record_tag_mint_alert_chunk_failure'],
+      ['tag_joined_alert_chunk', 'record_tag_joined_alert_chunk_failure'],
+      ['tag_other_alert_chunk', 'record_tag_other_alert_chunk_failure'],
+    ].forEach(([tag, record]) => {
+      expect(stepByName(tag)?.['on-failure']?.continue).toBe(true);
+      expect(stepByName(record)?.if).toBe(`\${{ steps.${tag}.error != blank }}`);
+    });
+
+    const message = (stepByName('post_comment_joined_owner')?.with as { message: string }).message;
+    const render = (failed: number) =>
+      renderString(message, {
+        workflow: { spaceId: 'team' },
+        inputs: { rule_name: 'Rule A' },
+        variables: { failed_tag_chunk_count: failed },
+        steps: { process_joins: { item: { alert_ids: ['a'], total_alerts: 3, revision: 2 } } },
+      });
+    expect(render(1)).toContain('Some alerts could not be tagged after retries');
+    expect(render(0)).not.toContain('could not be tagged');
+  });
+
+  it.each([
+    ['post_comment_mint_analysis', 'attach_mint_alerts'],
+    ['post_comment_other_alerts', 'attach_other_alerts'],
+  ])('says in %s when the alerts attachment failed', (comment, attach) => {
+    const message = (stepByName(comment)?.with as { message: string }).message;
+    const render = (steps: Record<string, unknown>, failed = 0) =>
+      renderString(message, {
+        workflow: { spaceId: 'team' },
+        inputs: { rule_name: 'Rule A' },
+        variables: { failed_tag_chunk_count: failed },
+        steps: { process_mints: { item: { alert_ids: ['a'] } }, classify_alerts: {}, ...steps },
+      });
+    const failedAttach = { [attach]: { error: { message: 'x' } } };
+    expect(render(failedAttach, 1)).toContain('The alerts failed to attach after retries');
+    expect(render(failedAttach, 1)).not.toContain('could not be tagged');
+    expect(render({}, 1)).toContain('Some alerts could not be tagged after retries');
+    expect(render({})).not.toContain('⚠️');
+  });
+
+  it('reports whether the batch created a conversation, for a proposal, a failure or its own alerts', () => {
+    const input = stepByName('report_batch_grouped')?.with as Record<string, string>;
+    const count = stepByName('count_grouping')?.with?.mint_count as string;
+    expect(evalExpr(count, { variables: { group_mints: [{}, {}] } })).toBe(2);
+    const created = (mints: number, failures: number, batchConversation = false) =>
+      evalExpr(input.conversation_created, {
+        variables: {
+          mint_count: mints,
+          failure_conversation_count: failures,
+          batch_conversation_created: batchConversation,
+        },
+      });
+    expect(created(2, 0)).toBe(true);
+    expect(created(0, 0)).toBe(false);
+    // A failure that does not end the run (no verdicts, or some alerts without one) opens one too.
+    expect(created(0, 1)).toBe(true);
+    // A batch of true positives only has no proposal, but its alerts get an Investigation.
+    expect(created(0, 0, true)).toBe(true);
+  });
+
+  it('reports the grouping after the alerts in no proposal are routed, which may create the Investigation', () => {
+    const order = parsed.steps.map((step) => step.name);
+    expect(order.indexOf('report_batch_grouped')).toBeGreaterThan(
+      order.indexOf('route_other_alerts')
+    );
+  });
+
+  it('counts the failure Investigations that do not end the run, and only those', () => {
+    expect(stepByName('init_failure_conversations')?.with?.failure_conversation_count).toBe(0);
+    ['count_classification_empty_conversation', 'count_missing_alert_ids_conversation'].forEach(
+      (name) => {
+        const expr = stepByName(name)?.with?.failure_conversation_count as string;
+        expect(evalExpr(expr, { variables: { failure_conversation_count: 1 } })).toBe(2);
       }
     );
-
-  it('names the connector and the agent when an agent classified the alerts', () => {
-    const comment = renderResults({ connector_id: 'connector-1', agent_id: 'elastic-ai-agent' });
-    expect(comment).toContain('Connector: `connector-1`, Agent: `elastic-ai-agent`');
+    // A classify or grouping failure fails the run, which reports nothing.
+    expect(stepByName('count_classify_failed_conversation')).toBeUndefined();
   });
 
-  it('names only the connector when a prompt classified the alerts, because no agent ran', () => {
-    const comment = renderResults({ connector_id: 'connector-1', agent_id: '' });
-    expect(comment).toContain('_(Connector: `connector-1`)_');
-    expect(comment).not.toContain('Agent:');
+  it('sends no Investigation id with the batch classification, since the batch has none', () => {
+    expect(stepByName('report_batch_classified')?.with).not.toHaveProperty('investigation_id');
   });
 
-  it('names neither when no call was made', () => {
-    const comment = renderResults({ connector_id: '', agent_id: '' });
-    expect(comment).not.toContain('Connector:');
+  // A truncated lookup must be visible to whoever reads the telemetry or the execution, not only
+  // in the server log.
+  it('reports whether the batch was grouped, and why not', () => {
+    const input = stepByName('report_batch_grouped')?.with as Record<string, string>;
+    const grouping = (output?: Record<string, unknown>) =>
+      renderString(input.grouping, { steps: { group_fp_candidates_call: { output } } }).trim();
+    expect(grouping({ grouping: 'lookup_incomplete' })).toBe('lookup_incomplete');
+    expect(grouping({ grouping: 'supervised' })).toBe('supervised');
+    expect(grouping(undefined)).toBe('no_candidates');
+  });
+
+  it('says in the batch summary whether the batch was grouped', () => {
+    const message = (stepByName('log_batch_summary')?.with as { message: string }).message;
+    const render = (output?: Record<string, unknown>) =>
+      renderString(message, {
+        inputs: { rule_name: 'R', rule_id: 'r' },
+        steps: {
+          classify_alerts: { output: { connector_id: '', agent_id: '' } },
+          group_fp_candidates_call: { output },
+        },
+        variables: {
+          alert_count: 1,
+          verdict_count: 1,
+          fp_candidate_count: 1,
+          group_mints: [],
+          group_joins: [],
+        },
+      });
+    expect(render({ grouping: 'lookup_incomplete' })).toContain('Grouping: lookup_incomplete.');
+    expect(render(undefined)).toContain('Grouping: no_candidates.');
+  });
+
+  it('reports the grouping outcome of the batch', () => {
+    const input = stepByName('report_batch_grouped')?.with as Record<string, string>;
+    const context = {
+      steps: {
+        group_fp_candidates_call: {
+          output: { alerts_joined: 4, proposals_created: 2, alerts_pooled: 1 },
+        },
+      },
+    };
+    expect(evalExpr(input.alerts_joined, context)).toBe(4);
+    expect(evalExpr(input.proposals_created, context)).toBe(2);
+    expect(evalExpr(input.alerts_pooled, context)).toBe(1);
+    expect(evalExpr(input.alerts_joined, { steps: { group_fp_candidates_call: {} } })).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// tag_pattern_keys — the key tags that grouping, the proposal summary and Decisions read
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage_batch — tag_pattern_keys', () => {
+  const tagStep = stepByName('tag_pattern_keys');
+  const reportStep = stepByName('report_batch_grouped');
+  const names = parsed.steps.map((step) => step.name);
+
+  it('runs after every verdict tag is written and before the notes', () => {
+    expect(names.indexOf('tag_pattern_keys')).toBeGreaterThan(
+      names.indexOf('set_az_inconclusive_tags')
+    );
+    expect(names.indexOf('tag_pattern_keys')).toBeLessThan(names.indexOf('add_verdict_notes'));
+    expect(names.indexOf('report_batch_grouped')).toBeGreaterThan(
+      names.indexOf('tag_pattern_keys')
+    );
+  });
+
+  it('tags the alerts that got a verdict, whatever the verdict, and names the confident false positives', () => {
+    const verdicts = [
+      { alert_id: 'tp-1', classification: 'true_positive' },
+      { alert_id: 'inc-1', classification: 'inconclusive' },
+      { alert_id: 'fp-1', classification: 'false_positive' },
+    ];
+    const context = {
+      steps: { classify_alerts: { output: { verdicts } } },
+      variables: { fp_candidate_ids: ['fp-1'] },
+      workflow: { spaceId: 'team' },
+    };
+    const input = tagStep?.with as Record<string, string>;
+
+    expect(evalExpr(input.alert_ids, context)).toEqual(['tp-1', 'inc-1', 'fp-1']);
+    expect(evalExpr(input.fp_candidate_ids, context)).toEqual(['fp-1']);
+    expect(evalExpr(input.space_id, context)).toBe('team');
+  });
+
+  it('does not run for a batch with no verdict, which the step rejects as an empty list', () => {
+    expect(evalExpr(tagStep?.if as string, { variables: { verdict_count: 0 } })).toBe(false);
+    expect(evalExpr(tagStep?.if as string, { variables: { verdict_count: 3 } })).toBe(true);
+  });
+
+  // The keys are data for tuning, not part of the verdict, so a failure must not fail triage.
+  it('retries, then continues past a failure so the batch still reaches its review', () => {
+    expect(tagStep?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(tagStep?.['on-failure']?.continue).toBe(true);
+  });
+
+  it('reports the key statistics only when the tags were written', () => {
+    const guard = reportStep?.if as string;
+    const run = (verdictCount: number, error?: unknown) =>
+      evalExpr(guard, {
+        variables: { verdict_count: verdictCount },
+        steps: { tag_pattern_keys: { error } },
+      });
+
+    expect(run(3)).toBe(true);
+    expect(run(3, { message: 'failed' })).toBe(false);
+    expect(run(0)).toBe(false);
+  });
+});
+
+describe('floor_alert_triage_batch — compute_other_alerts', () => {
+  const verdicts = [
+    { alert_id: 'candidate', classification: 'false_positive', confidence_score: 0.95 },
+    { alert_id: 'at-floor', classification: 'false_positive', confidence_score: 0.85 },
+    { alert_id: 'below-floor', classification: 'false_positive', confidence_score: 0.5 },
+    { alert_id: 'true-positive', classification: 'true_positive', confidence_score: 0.99 },
+    { alert_id: 'inconclusive', classification: 'inconclusive', confidence_score: 0.3 },
+  ];
+  const buildExprs = (confidenceFloor: number) => {
+    const withBlock = stepByName('build_fp_threshold_expr')?.with as Record<string, string>;
+    return {
+      fp_threshold_expr: renderString(withBlock.fp_threshold_expr, {
+        inputs: { confidence_floor: confidenceFloor },
+      }).trim(),
+      fp_candidate_expr: renderString(withBlock.fp_candidate_expr, {
+        inputs: { confidence_floor: confidenceFloor },
+      }).trim(),
+    };
+  };
+  const compute = (batch: typeof verdicts) => {
+    const context = {
+      steps: { classify_alerts: { output: { verdicts: batch } } },
+      variables: buildExprs(0.85),
+    };
+    const candidates = evalExpr(
+      stepByName('compute_fp_candidates')?.with?.fp_candidate_ids as string,
+      context
+    );
+    const others = evalExpr(stepByName('compute_other_alerts')?.with?.other_alert_ids as string, {
+      ...context,
+      variables: { ...context.variables, fp_candidate_ids: candidates },
+    });
+    return { candidates, others };
+  };
+
+  it('keeps every alert that is not a candidate, and none of the candidates', () => {
+    const { candidates, others } = compute(verdicts);
+
+    expect(candidates).toEqual(['candidate', 'at-floor']);
+    expect(others).toEqual(['below-floor', 'true-positive', 'inconclusive']);
+  });
+
+  it('leaves none when every alert is a candidate', () => {
+    expect(compute(verdicts.slice(0, 2)).others).toEqual([]);
+  });
+
+  it('splits the batch exactly: a candidate and an other alert never overlap or go missing', () => {
+    const { candidates, others } = compute(verdicts);
+
+    expect([...(candidates as string[]), ...(others as string[])].sort()).toEqual(
+      verdicts.map(({ alert_id: id }) => id).sort()
+    );
   });
 });

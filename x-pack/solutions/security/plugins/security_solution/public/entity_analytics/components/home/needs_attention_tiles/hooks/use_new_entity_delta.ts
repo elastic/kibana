@@ -66,7 +66,6 @@ export const useNewEntityDelta = ({
     previousQuery,
     enabled: !skip && isReady && count > 0 && !isIndexLoading && Boolean(index),
     parse: (raw) => readFirstNumber(raw, 'value'),
-    localOnly: true,
   });
 
   return {

@@ -22,10 +22,27 @@ import {
   createWorkflowExecutionError,
   isHooksExecutionError,
   isWorkflowExecutionError,
+  createConversationBusyError,
+  isConversationBusyError,
+  createConversationWriteConflictError,
 } from './errors';
 import { HookLifecycle, HookExecutionMode } from '../hooks/lifecycle';
 
 describe('AgentBuilder errors', () => {
+  describe('createConversationBusyError', () => {
+    it('creates a conversationBusy error with a 409 and the active execution id', () => {
+      const err = createConversationBusyError({ conversationId: 'c1', activeExecutionId: 'e1' });
+
+      expect(err.code).toBe(AgentBuilderErrorCode.conversationBusy);
+      expect(err.meta).toEqual({ conversationId: 'c1', activeExecutionId: 'e1', statusCode: 409 });
+      expect(err.message).toBe('Conversation c1 already has an execution in progress');
+      expect(isConversationBusyError(err)).toBe(true);
+      expect(
+        isConversationBusyError(createConversationWriteConflictError({ conversationId: 'c1' }))
+      ).toBe(false);
+    });
+  });
+
   describe('isAgentBuilderError', () => {
     it('should return true for a AgentBuilderError instance', () => {
       const error = createInternalError('test error');

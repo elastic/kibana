@@ -18,7 +18,9 @@ import { useIntegrations } from '../../../hooks/alert_summary/use_integrations';
 
 jest.mock('../../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
-  SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
+  SiemSearchBar: ({ displayStyle }: { displayStyle?: string }) => (
+    <div data-test-subj={'alert-summary-search-bar'} data-display-style={displayStyle} />
+  ),
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../hooks/alert_summary/use_integrations');
@@ -52,5 +54,19 @@ describe('<SearchBarSection />', () => {
 
     expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(INTEGRATION_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render the search bar in the page rather than in the global filters portal', () => {
+    (useIntegrations as jest.Mock).mockReturnValue({
+      isLoading: false,
+      integrations: [],
+    });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data: { query: { filterManager: jest.fn() } } },
+    });
+
+    const { getByTestId } = render(<SearchBarSection dataView={dataView} packages={packages} />);
+
+    expect(getByTestId(SEARCH_BAR_TEST_ID)).toHaveAttribute('data-display-style', 'inPage');
   });
 });

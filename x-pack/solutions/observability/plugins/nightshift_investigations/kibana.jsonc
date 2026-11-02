@@ -19,6 +19,7 @@
       "agenticInvestigations",
       "contextEngine",
       "encryptedSavedObjects",
+      "evals",
       "inference",
       "proposals",
       "ruleRegistry",
