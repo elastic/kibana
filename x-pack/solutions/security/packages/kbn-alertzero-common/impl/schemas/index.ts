@@ -47,6 +47,8 @@ export {
 export {
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
+  AdditionalContext,
+  AttackDiscoveryWorkerExtras,
 } from './components/floor_watch_settings.gen';
 
 export { ListWatchesResponse } from './watches/list_watches_route.gen';

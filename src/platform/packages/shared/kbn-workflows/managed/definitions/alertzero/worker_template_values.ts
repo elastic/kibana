@@ -125,13 +125,40 @@ export const attackDiscoveryMaxAlerts = (interval: string): number => {
   return Math.min(ATTACK_DISCOVERY_ALERTS_PER_DAY, Math.max(ATTACK_DISCOVERY_MIN_ALERTS, prorated));
 };
 
+export interface AttackDiscoveryWorkerTemplateValues extends ScheduledWorkerTemplateValues {
+  /** Mirrors `AttackDiscoveryWorkerExtras` in `@kbn/alertzero-common`. Absent until an admin sets one. */
+  extras?: { additionalContext?: string };
+}
+
+const ADDITIONAL_CONTEXT_LINE_PLACEHOLDER = '    __WORKER_ADDITIONAL_CONTEXT_LINE__:\n';
+
+/**
+ * Emits `additionalContext` only when it has text. The floor reads it as an undefined const when it
+ * is absent, so the runner and the generation step never receive an empty string. JSON is a valid
+ * YAML double-quoted scalar and keeps newlines and quotes in one line; U+2028/U+2029 are escaped
+ * because JSON leaves them raw and some YAML readers treat them as line breaks. A function
+ * replacement keeps `$` sequences in free-form text (`$$`, `$&`, `$'`) literal.
+ */
+const renderAdditionalContext = (yaml: string, additionalContext: string | undefined): string => {
+  if (additionalContext === undefined || additionalContext.trim() === '') {
+    return yaml.replaceAll(ADDITIONAL_CONTEXT_LINE_PLACEHOLDER, '');
+  }
+  const scalar = JSON.stringify(additionalContext)
+    .replaceAll('\u2028', '\\u2028')
+    .replaceAll('\u2029', '\\u2029');
+  return yaml.replaceAll(ADDITIONAL_CONTEXT_LINE_PLACEHOLDER, () => `    additionalContext: ${scalar}\n`);
+};
+
 export const renderAttackDiscoveryWorkerYaml = (
   yaml: string,
-  values: ScheduledWorkerTemplateValues
+  values: AttackDiscoveryWorkerTemplateValues
 ): string =>
-  renderScheduledWorkerYaml(yaml, values).replaceAll(
-    '__WORKER_MAX_ALERTS__',
-    String(attackDiscoveryMaxAlerts(values.scheduleInterval))
+  renderAdditionalContext(
+    renderScheduledWorkerYaml(yaml, values).replaceAll(
+      '__WORKER_MAX_ALERTS__',
+      String(attackDiscoveryMaxAlerts(values.scheduleInterval))
+    ),
+    values.extras?.additionalContext
   );
 
 export const renderAlertTriageWorkerYaml = (

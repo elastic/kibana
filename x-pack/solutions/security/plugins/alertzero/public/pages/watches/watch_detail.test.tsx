@@ -222,6 +222,7 @@ const floorWorkers: Worker[] = [
       workerId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
       autonomy: 'manual',
       scheduleInterval: '24h',
+      extras: {},
     },
   }),
 ];

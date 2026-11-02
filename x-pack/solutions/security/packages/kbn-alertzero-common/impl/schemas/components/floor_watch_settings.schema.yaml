@@ -80,3 +80,22 @@ components:
           $ref: '#/components/schemas/ExcludeBuildingBlocks'
         excludedRuleTags:
           $ref: '#/components/schemas/ExcludedRuleTags'
+
+    AdditionalContext:
+      type: string
+      minLength: 1
+      maxLength: 4000
+      description: >-
+        Free-text guidance appended to the Attack Discovery generation prompt on every scheduled
+        run, such as environment details or what the analysts care about. Sent to the model as
+        written and not anonymized, so it must not hold sensitive identifiers.
+
+    AttackDiscoveryWorkerExtras:
+      type: object
+      additionalProperties: false
+      description: >-
+        Complete Worker-specific settings for the Attack Discovery Worker, owned by Floor Watch.
+        Sent whole on write; an empty object clears every field.
+      properties:
+        additionalContext:
+          $ref: '#/components/schemas/AdditionalContext'

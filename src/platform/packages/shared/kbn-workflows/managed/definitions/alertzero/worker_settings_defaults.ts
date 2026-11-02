@@ -59,6 +59,8 @@ export const ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS = {
   allowedAutonomyLevels: ['manual', 'supervised'],
   // Matches the Attack Discovery schedule form default.
   scheduleInterval: { defaultValue: '24h' },
+  // Every setting is optional and absent by default: an empty object renders no extra prompt text.
+  extras: { defaultValue: {} },
 } as const satisfies WorkerSettingsDefaults;
 
 export const CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS = {

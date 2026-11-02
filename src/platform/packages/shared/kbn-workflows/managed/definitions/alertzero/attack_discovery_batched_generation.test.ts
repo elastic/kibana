@@ -98,8 +98,9 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
   });
 
   describe('inputs', () => {
-    it('exposes exactly batch_size, connector_id, lookback and max_alerts', () => {
+    it('exposes exactly additional_context, batch_size, connector_id, lookback and max_alerts', () => {
       expect(Object.keys(inputs()).sort()).toEqual([
+        'additional_context',
         'batch_size',
         'connector_id',
         'lookback',
@@ -295,6 +296,34 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(fanOut().steps?.[0].with?.generation_source).toBe(
         ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE
       );
+    });
+
+    // Evaluates the `with` value the way the execution engine does for a `${{ }}`
+    // string: strip the delimiters and evaluate the expression against the context.
+    describe('additional context', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+
+      const forwarded = (inputValues: Record<string, unknown>): unknown => {
+        const template = String(fanOut().steps?.[0].with?.additional_context);
+        const expression = template
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim();
+        return engine.evalValueSync(expression, { inputs: inputValues });
+      };
+
+      it('forwards the input to the run step so it reaches the generation prompt', () => {
+        expect(fanOut().steps?.[0].with?.additional_context).toBe(
+          '${{ inputs.additional_context }}'
+        );
+        expect(forwarded({ additional_context: 'Prioritise the finance subnet.' })).toBe(
+          'Prioritise the finance subnet.'
+        );
+      });
+
+      it('leaves the value undefined, not an empty string, when the input is absent', () => {
+        expect(forwarded({ batch_size: 100 })).toBeUndefined();
+      });
     });
 
     // The offsets and the per-branch slice are a matched pair — an off-by-one

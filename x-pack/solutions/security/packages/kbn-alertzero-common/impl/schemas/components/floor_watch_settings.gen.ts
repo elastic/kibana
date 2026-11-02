@@ -72,3 +72,21 @@ export const AlertTriageWorkerExtras = lazySchema(() =>
     .strict()
 );
 export type AlertTriageWorkerExtras = z.infer<typeof AlertTriageWorkerExtras>;
+
+/**
+ * Free-text guidance appended to the Attack Discovery generation prompt on every scheduled run, such as environment details or what the analysts care about. Sent to the model as written and not anonymized, so it must not hold sensitive identifiers.
+ */
+export const AdditionalContext = lazySchema(() => z.string().min(1).max(4000));
+export type AdditionalContext = z.infer<typeof AdditionalContext>;
+
+/**
+ * Complete Worker-specific settings for the Attack Discovery Worker, owned by Floor Watch. Sent whole on write; an empty object clears every field.
+ */
+export const AttackDiscoveryWorkerExtras = lazySchema(() =>
+  z
+    .object({
+      additionalContext: AdditionalContext.optional(),
+    })
+    .strict()
+);
+export type AttackDiscoveryWorkerExtras = z.infer<typeof AttackDiscoveryWorkerExtras>;

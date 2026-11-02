@@ -339,7 +339,8 @@
       "defaults": {
         "workerId": "system-security-floor-attack-discovery",
         "autonomy": "manual",
-        "scheduleInterval": "24h"
+        "scheduleInterval": "24h",
+        "extras": {}
       },
       "schema": {
         "kind": "object",
@@ -363,6 +364,19 @@
             "maxLength": 6,
             "pattern": "^[1-9][0-9]*[mhd]$"
           },
+          "extras": {
+            "kind": "object",
+            "fields": {
+              "additionalContext": {
+                "kind": "leaf",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              }
+            },
+            "required": [],
+            "additionalProperties": false
+          },
           "serviceAccountId": {
             "kind": "leaf",
             "type": "string",
@@ -372,6 +386,7 @@
         },
         "required": [
           "autonomy",
+          "extras",
           "scheduleInterval",
           "workerId"
         ],
