@@ -11,6 +11,18 @@ import { isUiamCredential } from '@kbn/core-security-server';
 import { getApiKeyFromRequest } from './request_api_key';
 import type { ResolveScopedApiKeysOpts, ScopedApiKeysDeps, ScopedCredentials } from './types';
 
+const CLOUD_API_KEY_NOT_SUPPORTED = 'CLOUD_API_KEY_NOT_SUPPORTED';
+
+export const cloudApiKeyNotSupportedError = () =>
+  Boom.badRequest(
+    'Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.',
+    { code: CLOUD_API_KEY_NOT_SUPPORTED }
+  );
+
+/** Whether a resolve error is the 400 for a Cloud API key used where UIAM is not enabled. */
+export const isCloudApiKeyNotSupportedError = (err: unknown): boolean =>
+  Boom.isBoom(err) && err.data?.code === CLOUD_API_KEY_NOT_SUPPORTED;
+
 /**
  * Returns the caller's own API key as user-created credentials. Throws a 400 when the request
  * does not carry a usable key, or carries a UIAM key while UIAM is not enabled.
@@ -29,9 +41,7 @@ export const reuseRequestApiKey = (
 
   if (isUiamCredential(secret)) {
     if (!uiamEnabled) {
-      throw Boom.badRequest(
-        'Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.'
-      );
+      throw cloudApiKeyNotSupportedError();
     }
     // UIAM's own verdict, reported on the current user. Absent means internal (fail closed).
     const external = security.authc.getCurrentUser(request)?.api_key?.internal === false;

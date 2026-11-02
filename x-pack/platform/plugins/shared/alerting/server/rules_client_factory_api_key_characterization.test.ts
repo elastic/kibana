@@ -812,13 +812,18 @@ describe('RulesClientFactory API key characterization', () => {
         credential: CredentialName;
         config: ConfigName;
         uiam: UiamOutcome;
-        rejects?: 'uiamNotEnabled' | 'cloudKeyNull' | 'uiamError';
+        rejects?: 'uiamNotEnabled' | 'cloudKeyNotSupported' | 'cloudKeyNull' | 'uiamError';
         grantLog?: 'null' | 'throws';
       }
       const table: Row[] = (['rawUiamApiKey', 'encodedUiamApiKey', 'uiamBearer'] as const).flatMap(
         (credential): Row[] => [
-          { credential, config: 'esOnly', uiam: 'granted', rejects: 'uiamNotEnabled' },
-          { credential, config: 'uiamTypeWithoutUiam', uiam: 'granted', rejects: 'uiamNotEnabled' },
+          { credential, config: 'esOnly', uiam: 'granted', rejects: 'cloudKeyNotSupported' },
+          {
+            credential,
+            config: 'uiamTypeWithoutUiam',
+            uiam: 'granted',
+            rejects: 'cloudKeyNotSupported',
+          },
           ...(['uiamGrantEsRun', 'uiamGrantUiamRun'] as const).flatMap((config): Row[] => [
             { credential, config, uiam: 'granted' },
             { credential, config, uiam: 'null', rejects: 'cloudKeyNull', grantLog: 'null' },
@@ -851,6 +856,12 @@ describe('RulesClientFactory API key characterization', () => {
           const outcome = context.cloneAPIKey('test');
           if (rejects === 'uiamNotEnabled') {
             expectError(await captureError(() => outcome), { message: UIAM_NOT_ENABLED_MESSAGE });
+          }
+          if (rejects === 'cloudKeyNotSupported') {
+            expectError(await captureError(() => outcome), {
+              message: CLOUD_KEY_NOT_SUPPORTED_MESSAGE,
+              boomStatus: 400,
+            });
           }
           if (rejects === 'cloudKeyNull') {
             expectError(await captureError(() => outcome), { message: CLOUD_KEY_NULL_MESSAGE });
@@ -1272,7 +1283,7 @@ describe('RulesClientFactory API key characterization', () => {
         config: 'esOnly',
         apiKeyOwnership: frameworkManaged,
         expected: {
-          boom: `Error creating API key for rule - Failed to create UIAM API key "uiam-${NAME}": UIAM is not enabled`,
+          boom: `Error creating API key for rule - ${CLOUD_KEY_NOT_SUPPORTED_MESSAGE}`,
         },
       },
       {

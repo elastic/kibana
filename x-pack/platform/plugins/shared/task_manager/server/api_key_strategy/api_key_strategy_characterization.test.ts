@@ -709,7 +709,7 @@ const GRANT_ROWS: GrantRow[] = [
   ),
   row(
     { strategy: 'es', credential: 'uiam_encoded_api_key', opts: { cloneApiKey: true } },
-    { error: uiamNotEnabled(), calls: [API_KEYS_ENABLED_CALL] }
+    { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
     row(
@@ -747,7 +747,7 @@ const GRANT_ROWS: GrantRow[] = [
   ),
   row(
     { strategy: 'es', credential: 'uiam_raw_api_key', opts: { cloneApiKey: true } },
-    { error: uiamNotEnabled(), calls: [API_KEYS_ENABLED_CALL] }
+    { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
     row(
@@ -795,7 +795,7 @@ const GRANT_ROWS: GrantRow[] = [
     ),
     row(
       { strategy, credential: 'uiam_raw_api_key', opts: { onEsKey: true, cloneApiKey: true } },
-      { error: uiamNotEnabled(), calls: [API_KEYS_ENABLED_CALL] }
+      { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
     ),
     ...(['null', 'throw'] as const).map((kind) =>
       row(
@@ -856,7 +856,7 @@ const GRANT_ROWS: GrantRow[] = [
   // Fake request carrying a UIAM credential (no resolved user): a fresh UIAM key.
   row(
     { strategy: 'es', credential: 'fake_uiam_api_key' },
-    { error: uiamNotEnabled(false), calls: [API_KEYS_ENABLED_CALL] }
+    { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
     ...[{}, { cloneApiKey: true }].map((opts) =>
@@ -871,7 +871,7 @@ const GRANT_ROWS: GrantRow[] = [
     ),
     row(
       { strategy, credential: 'fake_uiam_api_key', opts: { onEsKey: true } },
-      { error: uiamNotEnabled(false), calls: [API_KEYS_ENABLED_CALL] }
+      { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
     ),
   ]),
 

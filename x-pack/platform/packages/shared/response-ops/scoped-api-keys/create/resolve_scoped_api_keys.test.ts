@@ -357,6 +357,25 @@ describe('resolveScopedApiKeys', () => {
       });
       expect(security.authc.apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
     });
+
+    test('rejects a Cloud API key with a 400 when UIAM is disabled', async () => {
+      const { security, request, deps } = setup({
+        authorization: 'ApiKey essu_raw',
+        user: { authentication_type: 'api_key' },
+      });
+
+      const error = await resolveScopedApiKeys(
+        request,
+        deps,
+        opts({ clone: true, uiamEnabled: false })
+      ).catch((err) => err);
+
+      expect(error.output.statusCode).toBe(400);
+      expect(error.message).toBe(
+        'Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.'
+      );
+      expect(security.authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
+    });
   });
 
   describe('UIAM service account', () => {

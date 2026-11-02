@@ -6,7 +6,7 @@
  */
 
 export { resolveScopedApiKeys } from './create/resolve_scoped_api_keys';
-export { reuseRequestApiKey } from './create/reuse_request_api_key';
+export { isCloudApiKeyNotSupportedError, reuseRequestApiKey } from './create/reuse_request_api_key';
 export { getApiKeyFromRequest } from './create/request_api_key';
 export type { RequestApiKeyCredentials } from './create/request_api_key';
 export type {
@@ -31,6 +31,17 @@ export type {
   ApiKeyInvalidationTarget,
   GetApiKeyInvalidationTargetsOpts,
 } from './invalidate/get_api_key_invalidation_targets';
+export { invalidateApiKeysNow } from './invalidate/invalidate_api_keys_now';
+export type {
+  InvalidateApiKeysNowDeps,
+  InvalidateApiKeysNowOpts,
+} from './invalidate/invalidate_api_keys_now';
+export { queueApiKeysForInvalidation } from './invalidate/queue_api_keys_for_invalidation';
+export type {
+  QueueApiKeysForInvalidationDeps,
+  QueuedApiKeyInvalidation,
+  QueueApiKeyResult,
+} from './invalidate/queue_api_keys_for_invalidation';
 export { runInvalidate } from './invalidate/run_invalidate';
 export type { RunInvalidateResult, SavedObjectTypesToQuery } from './invalidate/run_invalidate';
 export type {

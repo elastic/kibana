@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { getApiKeyFromRequest } from './request_api_key';
-import { reuseRequestApiKey } from './reuse_request_api_key';
+import { cloudApiKeyNotSupportedError, reuseRequestApiKey } from './reuse_request_api_key';
 import { cloneEsApiKey, grantEsApiKey, grantUiamApiKey } from './grant';
 import type {
   ResolveScopedApiKeysOpts,
@@ -132,6 +132,9 @@ const clone = async (
 ): Promise<ResolveScopedApiKeysResult> => {
   // The Elasticsearch clone API rejects UIAM credentials, so a UIAM caller gets a fresh UIAM key.
   if (hasUiamCredential(request)) {
+    if (!opts.uiamEnabled) {
+      throw cloudApiKeyNotSupportedError();
+    }
     return grantUiamOnly(request, deps, opts);
   }
 
