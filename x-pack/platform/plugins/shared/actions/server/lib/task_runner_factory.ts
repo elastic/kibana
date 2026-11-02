@@ -16,9 +16,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { type Headers, type FakeRawRequest } from '@kbn/core-http-server';
-import { markExternalUiamCredential } from '@kbn/core-security-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { buildApiKeyFakeRequest } from '@kbn/response-ops-scoped-api-keys';
 import type { Logger } from '@kbn/logging';
 import type {
   ISavedObjectsRepository,
@@ -265,27 +263,7 @@ function getFakeRequest(
   spaceId: SpaceId,
   uiamApiKeyExternal?: boolean
 ) {
-  const requestHeaders: Headers = {};
-  if (apiKey) {
-    requestHeaders.authorization = `ApiKey ${apiKey}`;
-  }
-
-  const fakeRawRequest: FakeRawRequest = {
-    headers: requestHeaders,
-    spaceId,
-  };
-
-  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-
-  // An external (user-created Cloud) UIAM API key must not be presented to Elasticsearch with the
-  // UIAM shared secret - UIAM rejects external keys carrying client authentication. The verdict is
-  // UIAM's own, captured when the rule was created and persisted on the action task params.
-  // Framework-minted UIAM keys (flag absent) keep receiving the shared secret.
-  if (apiKey && uiamApiKeyExternal === true) {
-    markExternalUiamCredential(fakeRequest);
-  }
-
-  return fakeRequest;
+  return buildApiKeyFakeRequest({ apiKey, spaceId, uiamApiKeyExternal });
 }
 
 async function getActionTaskParams(

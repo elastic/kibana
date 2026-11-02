@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FakeRawRequest, Headers, KibanaRequest } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { markExternalUiamCredential } from '@kbn/core-security-server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import { buildApiKeyFakeRequest } from '@kbn/response-ops-scoped-api-keys';
 
 import type { RawAction } from '../../types';
 import {
@@ -21,26 +19,12 @@ import type { ConnectorEventIdentity } from './types';
 export const buildEventScheduleRequest = (
   identity: ConnectorEventIdentity,
   spaceId: string
-): KibanaRequest => {
-  const credential = authorizationCredentialFromIdentity(identity);
-  const requestHeaders: Headers = {};
-  if (credential) {
-    requestHeaders.authorization = `ApiKey ${credential}`;
-  }
-
-  const fakeRawRequest: FakeRawRequest = {
-    headers: requestHeaders,
-    spaceId: brandSpaceId(spaceId),
-  };
-
-  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-
-  if (credential && identity.uiamApiKey && identity.uiamApiKeyExternal === true) {
-    markExternalUiamCredential(fakeRequest);
-  }
-
-  return fakeRequest;
-};
+): KibanaRequest =>
+  buildApiKeyFakeRequest({
+    apiKey: authorizationCredentialFromIdentity(identity),
+    spaceId,
+    uiamApiKeyExternal: identity.uiamApiKey ? identity.uiamApiKeyExternal : undefined,
+  });
 
 export const resolveConnectorEventScheduleRequest = (
   attributes: RawAction,

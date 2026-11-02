@@ -14,12 +14,11 @@ import {
   HTTPAuthorizationHeader,
   isUiamBearerCredential,
   isUiamCredential,
-  markExternalUiamCredential,
 } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { isUnauthorizedError } from '@kbn/es-errors';
 
-import { getUiamApiKeySecret } from '@kbn/response-ops-scoped-api-keys';
+import { buildApiKeyFakeRequest, getUiamApiKeySecret } from '@kbn/response-ops-scoped-api-keys';
 
 const MAX_API_KEY_CREDENTIAL_LENGTH = 8192;
 
@@ -78,15 +77,6 @@ const readInboundAuthorization = (
   }
   const credential = readApiKeyCredential(authorization.credentials);
   return credential ? { kind: 'api_key', credential } : undefined;
-};
-
-const kibanaApiKeyRequest = (credential: string, spaceId: string): KibanaRequest => {
-  const requestHeaders: Headers = { authorization: `ApiKey ${credential}` };
-  const fakeRawRequest: FakeRawRequest = {
-    headers: requestHeaders,
-    spaceId: brandSpaceId(spaceId),
-  };
-  return kibanaRequestFactory(fakeRawRequest);
 };
 
 const readClientAuthentication = (
@@ -242,10 +232,11 @@ export const resolveKibanaInboundRequest = async ({
   // A 401 retries once without the mark, because a Kibana-granted UIAM key needs the secret.
   const attempts = isUiamCredential(inbound.credential) ? [true, false] : [false];
   for (const external of attempts) {
-    const request = kibanaApiKeyRequest(inbound.credential, spaceId);
-    if (external) {
-      markExternalUiamCredential(request);
-    }
+    const request = buildApiKeyFakeRequest({
+      apiKey: inbound.credential,
+      spaceId,
+      uiamApiKeyExternal: external,
+    });
     if (await elasticsearchAccepts(elasticsearchClient, request)) {
       const allowed = await getKibanaRequestAccess(request);
       return allowed ? { request } : undefined;
