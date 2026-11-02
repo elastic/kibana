@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { getESQLAdHocDataview, hasGeotilePrecisionParam } from '@kbn/esql-utils';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
@@ -16,7 +16,8 @@ import { ES_GEO_FIELD_TYPE, GRID_RESOLUTION } from '../../../../common/constants
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getHttp, getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
-import { GeotileResolutionEditor } from './geotile_resolution_editor';
+import { GeoPrecisionResolutionEditor } from './geo_precision_resolution_editor';
+import { hasGeoPrecisionParam } from './esql_utils';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 
 interface Props {
@@ -124,7 +125,7 @@ export function CreateSourceEditor(props: Props) {
               narrowByGlobalSearch,
               narrowByGlobalTime,
               narrowByMapBounds,
-              ...(hasGeotilePrecisionParam(esql) ? { resolution } : {}),
+              ...(hasGeoPrecisionParam(esql) ? { resolution } : {}),
             } as ESQLSourceDescriptor)
           : null;
       props.onSourceConfigChange(sourceConfig);
@@ -222,8 +223,8 @@ export function CreateSourceEditor(props: Props) {
               }}
             />
 
-            {hasGeotilePrecisionParam(esql) && (
-              <GeotileResolutionEditor resolution={resolution} onChange={setResolution} />
+            {hasGeoPrecisionParam(esql) && (
+              <GeoPrecisionResolutionEditor resolution={resolution} onChange={setResolution} />
             )}
           </>
         )}

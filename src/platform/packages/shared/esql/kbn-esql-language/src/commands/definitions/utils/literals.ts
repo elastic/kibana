@@ -9,6 +9,7 @@
 import {
   ControlTriggerSource,
   ESQLVariableType,
+  GEOHEX_PRECISION_PARAM,
   GEOTILE_PRECISION_PARAM,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
@@ -23,22 +24,48 @@ import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 export const GEOTILE_PRECISION_SYSTEM_PARAM = `?${GEOTILE_PRECISION_PARAM}`;
+export const GEOHEX_PRECISION_SYSTEM_PARAM = `?${GEOHEX_PRECISION_PARAM}`;
+export const GEO_PRECISION_SYSTEM_PARAMS = [
+  GEOTILE_PRECISION_SYSTEM_PARAM,
+  GEOHEX_PRECISION_SYSTEM_PARAM,
+];
 
-/** Functions whose `precision` argument can be bound to the geotile precision system param. */
-const GEOTILE_PRECISION_FUNCTIONS = ['st_geotile'];
+/** Functions whose `precision` argument can be bound to a geo precision system param. */
+const GEO_PRECISION_PARAM_BY_FUNCTION: Record<string, string> = {
+  st_geotile: GEOTILE_PRECISION_SYSTEM_PARAM,
+  st_geohex: GEOHEX_PRECISION_SYSTEM_PARAM,
+};
 
-export const supportsGeotilePrecisionParam = (functionName: string, paramName?: string) =>
-  paramName === 'precision' && GEOTILE_PRECISION_FUNCTIONS.includes(functionName.toLowerCase());
+/**
+ * Returns the geo precision system param that can be bound to the given function argument,
+ * or undefined when the argument does not support one.
+ */
+export const getGeoPrecisionSystemParam = (functionName: string, paramName?: string) =>
+  paramName === 'precision'
+    ? GEO_PRECISION_PARAM_BY_FUNCTION[functionName.toLowerCase()]
+    : undefined;
 
-export function getGeotilePrecisionLiterals(options?: DateLiteralsOptions) {
+export const GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS: Record<string, string> = {
+  [GEOTILE_PRECISION_SYSTEM_PARAM]: i18n.translate(
+    'esqlLanguage.esql.autocomplete.geotilePrecisionSystemParam',
+    { defaultMessage: 'The geotile precision for the current map zoom level' }
+  ),
+  [GEOHEX_PRECISION_SYSTEM_PARAM]: i18n.translate(
+    'esqlLanguage.esql.autocomplete.geohexPrecisionSystemParam',
+    { defaultMessage: 'The geohex (H3) resolution for the current map zoom level' }
+  ),
+};
+
+export function getGeoPrecisionLiterals(systemParam: string, options?: DateLiteralsOptions) {
   return buildConstantsDefinitions(
-    [GEOTILE_PRECISION_SYSTEM_PARAM],
-    i18n.translate('esqlLanguage.esql.autocomplete.namedParamGeotilePrecisionDefinition', {
+    [systemParam],
+    i18n.translate('esqlLanguage.esql.autocomplete.namedParamGeoPrecisionDefinition', {
       defaultMessage: 'Bind to map zoom level',
     }),
     options,
-    i18n.translate('esqlLanguage.esql.autocomplete.geotilePrecisionNamedParamDoc', {
-      defaultMessage: `Use the \`?_geotile_precision\` parameter to bind the precision to the zoom level of the map.`,
+    i18n.translate('esqlLanguage.esql.autocomplete.geoPrecisionNamedParamDoc', {
+      defaultMessage: `Use the \`{param}\` parameter to bind the precision to the zoom level of the map.`,
+      values: { param: systemParam },
     }),
     SuggestionCategory.GEO_PRECISION_PARAM
   );

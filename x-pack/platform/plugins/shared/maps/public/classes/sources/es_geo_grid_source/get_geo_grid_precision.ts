@@ -70,3 +70,22 @@ export function getGeoGridPrecision(
     Math.ceil(zoom) + getGeoGridPrecisionResolutionDelta(resolution, renderAs);
   return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
 }
+
+/**
+ * H3 resolution (0-15) for each geotile level (0-29).
+ * Same table Elasticsearch uses to turn the vector tile zoom into a geohex_grid precision
+ * (`GridAggregation.GEOHEX` in the vector-tile plugin).
+ */
+// prettier-ignore
+const GEOTILE_LEVEL_TO_H3_RESOLUTION = [
+  0, 0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 6, 6, 7, 8, 9, 9, 10, 11, 11, 12, 13, 14, 14, 15, 15, 15, 15,
+];
+
+/**
+ * H3 resolution (geohex precision) for the given map zoom and resolution.
+ * Same calculation Elasticsearch performs for hex layers rendered with vector tiles,
+ * where the resolution delta is sent as `grid_precision`.
+ */
+export function getGeoHexPrecision(zoom: number, resolution: GRID_RESOLUTION): number {
+  return GEOTILE_LEVEL_TO_H3_RESOLUTION[getGeoGridPrecision(zoom, resolution, RENDER_AS.HEX)];
+}

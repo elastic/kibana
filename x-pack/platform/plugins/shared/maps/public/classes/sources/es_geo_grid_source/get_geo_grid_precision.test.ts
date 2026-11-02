@@ -6,7 +6,7 @@
  */
 
 import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
-import { getGeoGridPrecision } from './get_geo_grid_precision';
+import { getGeoGridPrecision, getGeoHexPrecision } from './get_geo_grid_precision';
 
 describe('getGeoGridPrecision', () => {
   test.each([
@@ -24,5 +24,21 @@ describe('getGeoGridPrecision', () => {
 
   test('should not exceed the max geotile level', () => {
     expect(getGeoGridPrecision(28, GRID_RESOLUTION.SUPER_FINE, RENDER_AS.GRID)).toBe(29);
+  });
+});
+
+describe('getGeoHexPrecision', () => {
+  test.each([
+    [GRID_RESOLUTION.COARSE, 3], // geotile level 7
+    [GRID_RESOLUTION.FINE, 4], // geotile level 10
+    [GRID_RESOLUTION.MOST_FINE, 4], // geotile level 10
+    [GRID_RESOLUTION.SUPER_FINE, 6], // geotile level 13
+  ])('resolution %s at zoom 4.5 should be H3 resolution %s', (resolution, expected) => {
+    expect(getGeoHexPrecision(4.5, resolution)).toBe(expected);
+  });
+
+  test('should not exceed the max H3 resolution', () => {
+    expect(getGeoHexPrecision(28, GRID_RESOLUTION.SUPER_FINE)).toBe(15);
+    expect(getGeoHexPrecision(0, GRID_RESOLUTION.COARSE)).toBe(0);
   });
 });

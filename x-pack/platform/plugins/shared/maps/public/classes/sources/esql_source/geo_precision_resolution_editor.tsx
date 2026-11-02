@@ -19,7 +19,7 @@ const RESOLUTIONS = [
 
 const TICKS = [
   {
-    label: i18n.translate('xpack.maps.esqlSource.geotileResolution.lowLabel', {
+    label: i18n.translate('xpack.maps.esqlSource.geoPrecisionResolution.lowLabel', {
       defaultMessage: 'low',
     }),
     value: 1,
@@ -27,7 +27,7 @@ const TICKS = [
   { label: <span>&nbsp;</span>, value: 2 },
   { label: <span>&nbsp;</span>, value: 3 },
   {
-    label: i18n.translate('xpack.maps.esqlSource.geotileResolution.highLabel', {
+    label: i18n.translate('xpack.maps.esqlSource.geoPrecisionResolution.highLabel', {
       defaultMessage: 'high',
     }),
     value: 4,
@@ -40,16 +40,17 @@ interface Props {
 }
 
 /**
- * Resolution used to calculate the value of the `?_geotile_precision` ES|QL parameter from the map zoom.
+ * Resolution used to calculate the value of the `?_geotile_precision` and `?_geohex_precision` ES|QL parameters from the map zoom.
  */
-export function GeotileResolutionEditor({ resolution, onChange }: Props) {
+export function GeoPrecisionResolutionEditor({ resolution, onChange }: Props) {
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.maps.esqlSource.geotileResolution.label', {
+      label={i18n.translate('xpack.maps.esqlSource.geoPrecisionResolution.label', {
         defaultMessage: 'Resolution',
       })}
-      helpText={i18n.translate('xpack.maps.esqlSource.geotileResolution.helpText', {
-        defaultMessage: 'Sets the value of ?_geotile_precision from the map zoom level.',
+      helpText={i18n.translate('xpack.maps.esqlSource.geoPrecisionResolution.helpText', {
+        defaultMessage:
+          'Sets the value of the ?_geotile_precision and ?_geohex_precision parameters from the map zoom level.',
       })}
       display="columnCompressed"
     >
@@ -64,7 +65,7 @@ export function GeotileResolutionEditor({ resolution, onChange }: Props) {
         tickInterval={1}
         ticks={TICKS}
         compressed
-        aria-label={i18n.translate('xpack.maps.esqlSource.geotileResolution.ariaLabel', {
+        aria-label={i18n.translate('xpack.maps.esqlSource.geoPrecisionResolution.ariaLabel', {
           defaultMessage: 'Resolution',
         })}
       />

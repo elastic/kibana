@@ -27,6 +27,9 @@ export type { QueryTemplate } from './registry/options/recommended_queries';
 export {
   TIME_SYSTEM_PARAMS,
   GEOTILE_PRECISION_SYSTEM_PARAM,
+  GEOHEX_PRECISION_SYSTEM_PARAM,
+  GEO_PRECISION_SYSTEM_PARAMS,
+  GEO_PRECISION_SYSTEM_PARAM_DESCRIPTIONS,
 } from './definitions/utils/literals';
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';
 export { getIndexSourcesFromQuery, shouldBeQuotedSource } from './definitions/utils/sources';

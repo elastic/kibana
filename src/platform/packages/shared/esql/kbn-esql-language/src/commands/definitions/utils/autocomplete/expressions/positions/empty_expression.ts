@@ -43,7 +43,7 @@ import {
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
 } from '../../../../../registry/complete_items';
-import { getGeotilePrecisionLiterals, supportsGeotilePrecisionParam } from '../../../literals';
+import { getGeoPrecisionLiterals, getGeoPrecisionSystemParam } from '../../../literals';
 import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 import { getTimeSeriesAggregateFieldTypes } from '../../../time_series_aggregate_args';
 
@@ -186,12 +186,14 @@ function buildLiteralSuggestions(
 
   suggestions.push(...constantOnlySuggestions);
 
-  if (
-    functionDefinition &&
-    paramDefinitions.some(({ name }) => supportsGeotilePrecisionParam(functionDefinition.name, name))
-  ) {
+  const geoPrecisionSystemParam = functionDefinition
+    ? paramDefinitions
+        .map(({ name }) => getGeoPrecisionSystemParam(functionDefinition.name, name))
+        .find(Boolean)
+    : undefined;
+  if (geoPrecisionSystemParam) {
     suggestions.push(
-      ...getGeotilePrecisionLiterals({
+      ...getGeoPrecisionLiterals(geoPrecisionSystemParam, {
         addComma: config.shouldAddComma,
         advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
       })

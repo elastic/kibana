@@ -17,10 +17,11 @@ import {
   getESQLQueryColumnsRaw,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
-  getGeotilePrecisionParams,
+  getGeoPrecisionParams,
   getProjectRoutingFromEsqlQuery,
   getStartEndParams,
   hasAggregatingCommand,
+  hasGeohexPrecisionParam,
   hasGeotilePrecisionParam,
   hasStartEndParams,
 } from '@kbn/esql-utils';
@@ -54,19 +55,22 @@ import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_sou
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { getData, getHttp, getIndexPatternService, getUiSettings } from '../../../kibana_services';
-import { getGeoGridPrecision } from '../es_geo_grid_source/get_geo_grid_precision';
+import {
+  getGeoGridPrecision,
+  getGeoHexPrecision,
+} from '../es_geo_grid_source/get_geo_grid_precision';
 import { convertToGeoJson } from './convert_to_geojson';
 import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ESQLField } from '../../fields/esql_field';
 
-const DEFAULT_GEOTILE_PRECISION_RESOLUTION = GRID_RESOLUTION.MOST_FINE;
+const DEFAULT_GEO_PRECISION_RESOLUTION = GRID_RESOLUTION.MOST_FINE;
 
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
   'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
-> & { geotilePrecision?: number };
+> & { geotilePrecision?: number; geohexPrecision?: number };
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -269,10 +273,10 @@ export class ESQLSource
 
     const namedParams = [
       ...getStartEndParams(this._descriptor.esql, timeRange),
-      ...getGeotilePrecisionParams(
-        this._descriptor.esql,
-        this.getGeotilePrecision(requestMeta.zoom)
-      ),
+      ...getGeoPrecisionParams(this._descriptor.esql, {
+        geotile: this.getGeotilePrecision(requestMeta.zoom),
+        geohex: this.getGeohexPrecision(requestMeta.zoom),
+      }),
     ];
     if (namedParams.length) {
       params.params = namedParams;
@@ -395,17 +399,28 @@ export class ESQLSource
    * the source's grid resolution (same calculation as the geo grid source).
    */
   getGeotilePrecision(zoom: number): number {
-    return getGeoGridPrecision(
-      zoom,
-      this._descriptor.resolution ?? DEFAULT_GEOTILE_PRECISION_RESOLUTION,
-      RENDER_AS.GRID
-    );
+    return getGeoGridPrecision(zoom, this._getResolution(), RENDER_AS.GRID);
+  }
+
+  /**
+   * Geohex (H3) resolution bound to `?_geohex_precision`, calculated from the map zoom and
+   * the source's grid resolution (same calculation as hex layers rendered with vector tiles).
+   */
+  getGeohexPrecision(zoom: number): number {
+    return getGeoHexPrecision(zoom, this._getResolution());
+  }
+
+  private _getResolution() {
+    return this._descriptor.resolution ?? DEFAULT_GEO_PRECISION_RESOLUTION;
   }
 
   getSyncMeta(dataFilters?: DataFilters): ESQLSourceSyncMeta {
     return {
       ...(dataFilters && hasGeotilePrecisionParam(this._descriptor.esql)
         ? { geotilePrecision: this.getGeotilePrecision(dataFilters.zoom) }
+        : {}),
+      ...(dataFilters && hasGeohexPrecisionParam(this._descriptor.esql)
+        ? { geohexPrecision: this.getGeohexPrecision(dataFilters.zoom) }
         : {}),
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,

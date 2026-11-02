@@ -17,7 +17,11 @@ import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
-import { type ESQLControlVariable, GEOTILE_PRECISION_PARAM } from '@kbn/esql-types';
+import {
+  type ESQLControlVariable,
+  GEOHEX_PRECISION_PARAM,
+  GEOTILE_PRECISION_PARAM,
+} from '@kbn/esql-types';
 import { getESQLQueryVariables } from './query_parsing_helpers';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
@@ -42,29 +46,48 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
   return [];
 };
 
-const SCHEMA_ONLY_GEOTILE_PRECISION = 0;
+/** Columns are resolved with `LIMIT 0`, so any valid precision works. */
+const SCHEMA_ONLY_GEO_PRECISIONS: GeoPrecisions = { geotile: 0, geohex: 0 };
+
+export interface GeoPrecisions {
+  /** Value for `?_geotile_precision` */
+  geotile?: number;
+  /** Value for `?_geohex_precision` */
+  geohex?: number;
+}
+
+const hasNamedParam = (query: string, name: string) => new RegExp(`\\?${name}\\b`, 'i').test(query);
 
 export const hasGeotilePrecisionParam = (query: string) =>
-  new RegExp(`\\?${GEOTILE_PRECISION_PARAM}\\b`, 'i').test(query);
+  hasNamedParam(query, GEOTILE_PRECISION_PARAM);
+
+export const hasGeohexPrecisionParam = (query: string) =>
+  hasNamedParam(query, GEOHEX_PRECISION_PARAM);
 
 /**
- * Returns the `?_geotile_precision` named param when the query uses it.
- * The caller provides the precision, e.g. derived from the map zoom.
+ * Returns the `?_geotile_precision` and `?_geohex_precision` named params the query uses.
+ * The caller provides the precisions, e.g. derived from the map zoom.
  */
-export const getGeotilePrecisionParams = (query: string, precision?: number) =>
-  precision !== undefined && hasGeotilePrecisionParam(query)
-    ? [{ [GEOTILE_PRECISION_PARAM]: precision }]
-    : [];
+export const getGeoPrecisionParams = (query: string, precisions: GeoPrecisions = {}) => {
+  const namedParams: Array<Record<string, number>> = [];
+  if (precisions.geotile !== undefined && hasGeotilePrecisionParam(query)) {
+    namedParams.push({ [GEOTILE_PRECISION_PARAM]: precisions.geotile });
+  }
+  if (precisions.geohex !== undefined && hasGeohexPrecisionParam(query)) {
+    namedParams.push({ [GEOHEX_PRECISION_PARAM]: precisions.geohex });
+  }
+  return namedParams;
+};
 
 export const getNamedParams = (
   query: string,
   timeRange?: TimeRange,
   variables?: ESQLControlVariable[],
-  geotilePrecision?: number
+  geoPrecisions?: GeoPrecisions
 ) => {
   const namedParams: ESQLSearchParams['params'] = [
     ...getStartEndParams(query, timeRange),
-    ...getGeotilePrecisionParams(query, geotilePrecision),
+    ...getGeoPrecisionParams(query, geoPrecisions),
   ];
   if (variables?.length) {
     const usedVariables = new Set(getESQLQueryVariables(query));
@@ -102,7 +125,7 @@ export async function getESQLQueryColumnsRaw({
   dropNullColumns,
   timeRange,
   variables,
-  geotilePrecision = SCHEMA_ONLY_GEOTILE_PRECISION,
+  geoPrecisions = SCHEMA_ONLY_GEO_PRECISIONS,
   includeColumnMetadata,
 }: {
   esqlQuery: string;
@@ -112,12 +135,12 @@ export async function getESQLQueryColumnsRaw({
   filter?: unknown;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
-  /** Value for `?_geotile_precision`. Columns are resolved with `LIMIT 0`, so any valid level works. */
-  geotilePrecision?: number;
+  /** Values for the `?_geotile_precision` and `?_geohex_precision` params. */
+  geoPrecisions?: GeoPrecisions;
   includeColumnMetadata?: boolean;
 }): Promise<ESQLColumn[]> {
   try {
-    const namedParams = getNamedParams(esqlQuery, timeRange, variables, geotilePrecision);
+    const namedParams = getNamedParams(esqlQuery, timeRange, variables, geoPrecisions);
     const response = await lastValueFrom(
       search(
         {

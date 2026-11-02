@@ -91,11 +91,19 @@ describe('run query helpers', () => {
       expect(params[1]).toHaveProperty('_tend');
     });
 
-    it('should return the geotile precision param only when given and used', () => {
-      const query = 'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision)';
-      expect(getNamedParams(query, undefined, [], 7)).toEqual([{ _geotile_precision: 7 }]);
-      expect(getNamedParams(query)).toEqual([]);
-      expect(getNamedParams('FROM foo', undefined, [], 7)).toEqual([]);
+    it('should return the geo precision params only when given and used', () => {
+      const geotileQuery = 'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision)';
+      const geohexQuery = 'FROM foo | STATS BY ST_GEOHEX(location, ?_geohex_precision)';
+      const precisions = { geotile: 7, geohex: 4 };
+      expect(getNamedParams(geotileQuery, undefined, [], precisions)).toEqual([
+        { _geotile_precision: 7 },
+      ]);
+      expect(getNamedParams(geohexQuery, undefined, [], precisions)).toEqual([
+        { _geohex_precision: 4 },
+      ]);
+      expect(getNamedParams(geotileQuery, undefined, [], { geohex: 4 })).toEqual([]);
+      expect(getNamedParams(geotileQuery)).toEqual([]);
+      expect(getNamedParams('FROM foo', undefined, [], precisions)).toEqual([]);
     });
 
     it('should return only the variables used in the query', () => {
@@ -251,19 +259,22 @@ describe('run query helpers', () => {
       );
     });
 
-    it('getESQLQueryColumnsRaw binds ?_geotile_precision so the column lookup is valid', async () => {
+    it('getESQLQueryColumnsRaw binds the geo precision params so the column lookup is valid', async () => {
       search.mockReturnValue(
         of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
       );
 
       await getESQLQueryColumnsRaw({
-        esqlQuery: 'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision)',
+        esqlQuery:
+          'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision), ST_GEOHEX(location, ?_geohex_precision)',
         search,
       });
 
       expect(search).toHaveBeenCalledWith(
         expect.objectContaining({
-          params: expect.objectContaining({ params: [{ _geotile_precision: 0 }] }),
+          params: expect.objectContaining({
+            params: [{ _geotile_precision: 0 }, { _geohex_precision: 0 }],
+          }),
         }),
         expect.anything()
       );

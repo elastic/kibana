@@ -28,7 +28,7 @@ jest.mock('../../../kibana_services', () => ({
   getIndexPatternService: () => ({}),
 }));
 
-const mockGetGeotilePrecisionParams = jest.fn().mockReturnValue([]);
+const mockGetGeoPrecisionParams = jest.fn().mockReturnValue([]);
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: () => mockGetESQLQueryColumnsRaw(),
@@ -36,7 +36,8 @@ jest.mock('@kbn/esql-utils', () => ({
   getStartEndParams: () => [],
   hasStartEndParams: () => false,
   hasAggregatingCommand: (query: string) => /\|\s*stats\b/i.test(query),
-  getGeotilePrecisionParams: (...args: any[]) => mockGetGeotilePrecisionParams(...args),
+  getGeoPrecisionParams: (...args: any[]) => mockGetGeoPrecisionParams(...args),
+  hasGeohexPrecisionParam: (query: string) => query.includes('?_geohex_precision'),
   hasGeotilePrecisionParam: (query: string) => query.includes('?_geotile_precision'),
   getIndexPatternFromESQLQuery: () => 'logstash-*',
   getProjectRoutingFromEsqlQuery: () => undefined,
@@ -163,7 +164,7 @@ describe('getGeoJsonWithMeta', () => {
   beforeEach(() => {
     mockSearch.mockReset();
     mockGetLimitFromESQLQuery.mockReturnValue(10000);
-    mockGetGeotilePrecisionParams.mockReset().mockReturnValue([]);
+    mockGetGeoPrecisionParams.mockReset().mockReturnValue([]);
   });
 
   test('should return features and resultsCount from ES|QL response', async () => {
@@ -221,7 +222,7 @@ describe('getGeoJsonWithMeta', () => {
   });
 
   test('should bind ?_geotile_precision to a precision derived from the map zoom', async () => {
-    mockGetGeotilePrecisionParams.mockReturnValue([{ _geotile_precision: 9 }]);
+    mockGetGeoPrecisionParams.mockReturnValue([{ _geotile_precision: 9 }]);
     mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(1), requestParams: {} }));
 
     await createSource().getGeoJsonWithMeta(
@@ -232,7 +233,7 @@ describe('getGeoJsonWithMeta', () => {
       makeInspectorAdapters() as any
     );
 
-    expect(mockGetGeotilePrecisionParams).toHaveBeenCalledWith(ESQL, 9);
+    expect(mockGetGeoPrecisionParams).toHaveBeenCalledWith(ESQL, { geotile: 9, geohex: 4 });
     expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 9 }]);
   });
 });
@@ -283,5 +284,35 @@ describe('getGeotilePrecision', () => {
     const source = createSource(resolution);
     expect(source.getGeotilePrecision(4.5)).toBe(expected);
     expect(source.getSyncMeta({ zoom: 4.5 } as any).geotilePrecision).toBe(expected);
+  });
+});
+
+describe('getGeohexPrecision', () => {
+  const GEOHEX_ESQL = 'FROM logs | STATS BY ST_GEOHEX(geo.coordinates, ?_geohex_precision)';
+  const createSource = (esql: string, resolution?: GRID_RESOLUTION) =>
+    new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
+
+  test('should default to most fine resolution', () => {
+    expect(createSource(GEOHEX_ESQL).getGeohexPrecision(4.5)).toBe(4);
+  });
+
+  test.each([
+    [GRID_RESOLUTION.COARSE, 3], // geotile level 7
+    [GRID_RESOLUTION.FINE, 4], // geotile level 10
+    [GRID_RESOLUTION.MOST_FINE, 4], // geotile level 10
+    [GRID_RESOLUTION.SUPER_FINE, 6], // geotile level 13
+  ])('should use source resolution %s', (resolution, expected) => {
+    const source = createSource(GEOHEX_ESQL, resolution);
+    expect(source.getGeohexPrecision(4.5)).toBe(expected);
+    expect(source.getSyncMeta({ zoom: 4.5 } as any).geohexPrecision).toBe(expected);
+  });
+
+  test('should only include the precision of the params used in the sync meta', () => {
+    const geohexMeta = createSource(GEOHEX_ESQL).getSyncMeta({ zoom: 4.5 } as any);
+    expect(geohexMeta).toHaveProperty('geohexPrecision');
+    expect(geohexMeta).not.toHaveProperty('geotilePrecision');
+    expect(createSource('FROM logs').getSyncMeta({ zoom: 4.5 } as any)).not.toHaveProperty(
+      'geohexPrecision'
+    );
   });
 });

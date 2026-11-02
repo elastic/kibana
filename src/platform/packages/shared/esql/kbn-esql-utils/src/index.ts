@@ -87,7 +87,9 @@ export {
   getStartEndParams,
   hasStartEndParams,
   hasGeotilePrecisionParam,
-  getGeotilePrecisionParams,
+  hasGeohexPrecisionParam,
+  getGeoPrecisionParams,
+  type GeoPrecisions,
   getNamedParams,
   getEsqlSearchParams,
 } from './utils/run_query';

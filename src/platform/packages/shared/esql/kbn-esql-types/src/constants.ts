@@ -44,6 +44,12 @@ export const LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE = `${LOOKUP_INDEX_ROUTE}/update_
  */
 export const GEOTILE_PRECISION_PARAM = '_geotile_precision';
 
+/**
+ * System named param, like `?_geotile_precision`, that consumers with a map context (e.g. Maps)
+ * populate with the H3 resolution (0-15) matching the current zoom level.
+ */
+export const GEOHEX_PRECISION_PARAM = '_geohex_precision';
+
 export enum SOURCES_TYPES {
   INDEX = 'Index',
   TIMESERIES = 'Timeseries',
