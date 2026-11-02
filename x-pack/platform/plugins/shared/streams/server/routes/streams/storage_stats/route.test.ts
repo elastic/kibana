@@ -44,24 +44,20 @@ const callHandler = ({
   meteringIndices?: MeteringIndexInput[];
   streams?: string[];
 }) => {
-  getDataStream = jest.fn().mockResolvedValue(
-    getDataStreamResponse ?? {
-      data_streams: dataStreams.map((ds) => ({
-        name: ds.name,
-        indices: ds.indices.map((index_name) => ({ index_name })),
-      })),
-    }
+  getDataStream = jest.fn(
+    async ({ name }: { name?: string[] }) =>
+      getDataStreamResponse ?? {
+        data_streams: dataStreams
+          .filter((ds) => !name || name.includes(ds.name))
+          .map((ds) => ({
+            name: ds.name,
+            indices: ds.indices.map((index_name) => ({ index_name })),
+          })),
+      }
   );
-  const dataStreamNames = new Set(dataStreams.map(({ name }) => name));
   const esClient = {
     indices: {
       getDataStream,
-      resolveIndex: jest.fn(async ({ name }: { name: string }) => ({
-        data_streams: name
-          .split(',')
-          .filter((dataStreamName) => dataStreamNames.has(dataStreamName))
-          .map((dataStreamName) => ({ name: dataStreamName })),
-      })),
       stats: jest.fn().mockResolvedValue({ indices: indicesStats }),
     },
   };
@@ -108,17 +104,17 @@ const hotStats = (size: number): IndicesStatsIndicesStats =>
   } as IndicesStatsIndicesStats);
 
 describe('storage_stats route (stateful)', () => {
-  it('only resolves the requested data streams when posted stream names', async () => {
+  it('only requests the posted data streams and skips missing ones', async () => {
     await callHandler({
       dataStreams: [{ name: 'stream-a', indices: ['.ds-stream-a-000001'] }],
       indicesStats: { '.ds-stream-a-000001': hotStats(1_000) },
       streams: ['stream-a', 'stream-b'],
     });
 
-    expect(getDataStream).toHaveBeenCalledWith({
-      name: ['stream-a'],
-      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
-    });
+    expect(getDataStream).toHaveBeenCalledWith(
+      { name: ['stream-a', 'stream-b'], filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
+      { querystring: { ignore_unavailable: true } }
+    );
   });
 
   it('counts frozen searchable-snapshot data via total_data_set_size_in_bytes', async () => {

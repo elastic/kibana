@@ -9,7 +9,6 @@ import { bytePartition } from '@kbn/std';
 import { isEmpty } from 'lodash';
 import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { isNotFoundError } from '@kbn/es-errors';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { MAX_STATS_STREAM_NAMES } from '../../../../common/constants';
@@ -44,34 +43,16 @@ export const statsStreamNamesTimeRangeBodySchema = lazySchema(() =>
 
 const getNamedDataStreams = async (
   esClient: ElasticsearchClient,
-  names: string[],
-  retries = 3
+  names: string[]
 ): Promise<IndicesGetDataStreamResponse['data_streams']> => {
-  const { data_streams: resolvedDataStreams = [] } = await esClient.indices.resolveIndex({
-    name: names.join(','),
-    expand_wildcards: 'open',
-    ignore_unavailable: true,
-    allow_no_indices: true,
-    filter_path: 'data_streams.name',
-  });
-  const resolvedNames = resolvedDataStreams.map(({ name }) => name);
-  if (resolvedNames.length === 0) {
-    return [];
-  }
-  try {
-    // filter_path drops `data_streams` entirely when nothing matches.
-    const { data_streams: dataStreams = [] } = await esClient.indices.getDataStream({
-      name: resolvedNames,
-      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
-    });
-    return dataStreams;
-  } catch (error) {
-    if (!isNotFoundError(error)) {
-      throw error;
-    }
-    // A stream deleted after resolving fails the whole request; resolving again skips it.
-    return retries > 0 ? getNamedDataStreams(esClient, resolvedNames, retries - 1) : [];
-  }
+  // filter_path drops `data_streams` entirely when nothing matches.
+  const { data_streams: dataStreams = [] } = await esClient.indices.getDataStream(
+    { name: names, filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
+    // Elasticsearch accepts `ignore_unavailable` here, but the client types omit it.
+    // Without it, a single missing name fails the whole request with a 404.
+    { querystring: { ignore_unavailable: true } }
+  );
+  return dataStreams;
 };
 
 /**

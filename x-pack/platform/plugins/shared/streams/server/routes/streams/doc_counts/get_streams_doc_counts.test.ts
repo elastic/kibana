@@ -25,13 +25,9 @@ const dataStreams = [
 
 const makeEsClient = () => {
   const getDataStream = jest.fn().mockResolvedValue({ data_streams: dataStreams });
-  const resolveIndex = jest.fn(async ({ name }: { name: string }) => ({
-    data_streams: name.split(',').map((dataStreamName) => ({ name: dataStreamName })),
-  }));
   const esClient = {
     indices: {
       getDataStream,
-      resolveIndex,
       stats: jest.fn().mockResolvedValue({
         indices: {
           '.ds-logs-a-000001': { primaries: { docs: { count: 3 } } },
@@ -49,7 +45,7 @@ const makeEsClient = () => {
       }),
     },
   } as unknown as ElasticsearchClient;
-  return { esClient, getDataStream, resolveIndex };
+  return { esClient, getDataStream };
 };
 
 const streamsClient = {
@@ -100,10 +96,10 @@ describe.each(cases)('$name', ({ run, expected }) => {
     const { esClient, getDataStream } = makeEsClient();
 
     await expect(run(esClient, 'logs-a')).resolves.toEqual(expected);
-    expect(getDataStream).toHaveBeenCalledWith({
-      name: ['logs-a'],
-      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
-    });
+    expect(getDataStream).toHaveBeenCalledWith(
+      { name: ['logs-a'], filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
+      { querystring: { ignore_unavailable: true } }
+    );
   });
 
   it('returns no counts when the filtered response has no data_streams key', async () => {
@@ -161,10 +157,10 @@ describe('getFailedDocCountsForStreams query scope', () => {
       streamNames: ['logs-a', 'logs-b'],
     });
 
-    expect(getDataStream).toHaveBeenCalledWith({
-      name: ['logs-a', 'logs-b'],
-      filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH,
-    });
+    expect(getDataStream).toHaveBeenCalledWith(
+      { name: ['logs-a', 'logs-b'], filter_path: DATA_STREAM_INDEX_NAMES_FILTER_PATH },
+      { querystring: { ignore_unavailable: true } }
+    );
     expect(getEsqlQuery(esClient)).toMatch(/^FROM \.fs-logs-a-000001,\.fs-logs-b-1 METADATA/);
     expect(result).toEqual([
       { stream: 'logs-a', count: 5 },
