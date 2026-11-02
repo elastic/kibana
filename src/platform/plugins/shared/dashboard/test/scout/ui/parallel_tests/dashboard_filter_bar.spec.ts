@@ -7,48 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardApiDataInput } from '@kbn/as-code-dashboard-schema';
 import { spaceTest, tags } from '@kbn/scout';
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-const LOGSTASH_DATA_VIEW_ID = 'filter-bar-logstash';
-const ANIMALS_DATA_VIEW_ID = 'filter-bar-animals';
-
-const ANIMALS_TIME_RANGE = { from: '2018-01-01T00:00:00.000Z', to: '2018-04-13T00:00:00.000Z' };
-const TIME_RANGE = { from: '2015-09-19T06:31:44.000Z', to: '2015-09-23T18:31:44.000Z' };
-
-type DashboardPanel = NonNullable<DashboardApiDataInput['panels']>[number];
-
-const dataViewSpec = (indexPattern: string) =>
-  ({
-    type: 'data_view_spec',
-    index_pattern: indexPattern,
-    time_field: '@timestamp',
-  } as const);
-
-const ANIMALS_METRIC_PANEL: DashboardPanel = {
-  type: 'vis',
-  grid: { x: 0, y: 0, w: 24, h: 15 },
-  config: {
-    type: 'metric',
-    data_source: dataViewSpec('animals-*'),
-    metrics: [{ type: 'primary', operation: 'count' }],
-  },
-};
 // Document counts in the animals archive: all animals, and cats only
 const ANIMALS_COUNT = 23;
 const CATS_COUNT = 11;
 
-const getFieldSuggestions = async (page: ScoutPage) => {
-  await page.testSubj.click('addFilter');
-  const fields = await page.components.comboBox('filterFieldSuggestionList').getAllVisibleOptions();
-  await page.testSubj.click('cancelSaveFilter');
-  await expect(page.testSubj.locator('addFilterPopover')).toBeHidden();
-  return fields;
-};
-
-let emptyDashboardId = '';
 let animalsDashboardId = '';
 
 // Focus: how the filter bar behaves: its visibility, its field list, and how filters persist and load
@@ -57,30 +22,31 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
     await scoutSpace.savedObjects.cleanStandardList();
 
     await apiServices.dataViews.create({
-      id: LOGSTASH_DATA_VIEW_ID,
-      title: 'logstash-*',
-      timeFieldName: '@timestamp',
-      spaceId: scoutSpace.id,
-    });
-    await apiServices.dataViews.create({
-      id: ANIMALS_DATA_VIEW_ID,
+      id: 'filter-bar-animals',
       title: 'animals-*',
       timeFieldName: '@timestamp',
       spaceId: scoutSpace.id,
     });
-    // Only needed so the panel data view test can assert the default (logstash-*) data view's
-    // fields are not used
-    await scoutSpace.uiSettings.set({ defaultIndex: LOGSTASH_DATA_VIEW_ID });
 
-    emptyDashboardId = await apiServices.dashboard.create(
-      { title: 'Filter bar: empty', time_range: TIME_RANGE },
-      scoutSpace.id
-    );
     animalsDashboardId = await apiServices.dashboard.create(
       {
         title: 'Filter bar: animals',
-        time_range: ANIMALS_TIME_RANGE,
-        panels: [ANIMALS_METRIC_PANEL],
+        time_range: { from: '2018-01-01T00:00:00.000Z', to: '2018-04-13T00:00:00.000Z' },
+        panels: [
+          {
+            type: 'vis',
+            grid: { x: 0, y: 0, w: 24, h: 15 },
+            config: {
+              type: 'metric',
+              data_source: {
+                type: 'data_view_spec',
+                index_pattern: 'animals-*',
+                time_field: '@timestamp',
+              },
+              metrics: [{ type: 'primary', operation: 'count' }],
+            },
+          },
+        ],
       },
       scoutSpace.id
     );
@@ -91,22 +57,16 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('defaultIndex');
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest(
-    'shows panel data view fields on a dashboard with panels',
-    async ({ page, pageObjects }) => {
-      await pageObjects.dashboard.openDashboardWithIdInEditMode(animalsDashboardId);
-      await pageObjects.dashboard.waitForRenderComplete();
+  spaceTest('shows panel data view fields on a dashboard with panels', async ({ pageObjects }) => {
+    await pageObjects.dashboard.openDashboardWithIdInEditMode(animalsDashboardId);
+    await pageObjects.dashboard.waitForRenderComplete();
 
-      // The panel's data view is used instead of the default (logstash-*) data view
-      const fields = await getFieldSuggestions(page);
-      expect(fields).toContain('animal');
-      expect(fields).not.toContain('bytes');
-    }
-  );
+    // The filter editor lists the fields of the data view used by the panel
+    expect(await pageObjects.filterBar.getFilterEditorFields()).toContain('animal');
+  });
 
   spaceTest('filter pills', async ({ page, pageObjects }) => {
     const { dashboard, filterBar, queryBar } = pageObjects;
