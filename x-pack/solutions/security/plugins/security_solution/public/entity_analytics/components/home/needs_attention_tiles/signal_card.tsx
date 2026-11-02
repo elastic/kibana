@@ -465,6 +465,16 @@ const NOT_AVAILABLE = i18n.translate(
   { defaultMessage: 'N/A' }
 );
 
+/** What a screen reader calls the skeletons while the tile loads. */
+const COUNT_SKELETON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.countSkeletonLabel',
+  { defaultMessage: 'Count' }
+);
+const CHANGE_SKELETON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.changeSkeletonLabel',
+  { defaultMessage: 'Change' }
+);
+
 /** Where the count will be while it loads. */
 const CountSkeleton: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -478,7 +488,7 @@ const CountSkeleton: React.FC = () => {
         width={64}
         height={28}
         borderRadius="m"
-        contentAriaLabel="Count"
+        contentAriaLabel={COUNT_SKELETON_LABEL}
         data-test-subj="eaFaceliftSignalCardCountSkeleton"
       />
     </div>
@@ -503,7 +513,7 @@ const DeltaSkeleton: React.FC<{ label: string }> = ({ label }) => {
         width={36}
         height={BADGE_HEIGHT}
         borderRadius="m"
-        contentAriaLabel="Change"
+        contentAriaLabel={CHANGE_SKELETON_LABEL}
       />
       <DeltaLabel text={label} />
     </span>
