@@ -32,6 +32,31 @@ describe('CommandMenuList', () => {
     expect(screen.getByText('Gamma')).toBeInTheDocument();
   });
 
+  describe('enter hint', () => {
+    const getHintCount = (container: HTMLElement) =>
+      container.querySelectorAll('[data-euiicon-type="return"]').length;
+
+    it('is shown on the highlighted row only, and follows the highlight', () => {
+      const ref = createRef<CommandMenuHandle>();
+      const { container } = renderWithProvider(
+        <CommandMenuList ref={ref} options={mockOptions} isLoading={false} onSelect={jest.fn()} />
+      );
+      const getHintedRowText = () =>
+        container.querySelector('[data-euiicon-type="return"]')?.closest('[role="option"]')
+          ?.textContent;
+
+      expect(getHintCount(container)).toBe(1);
+      expect(getHintedRowText()).toContain('Alpha');
+
+      act(() => {
+        ref.current!.handleKeyDown({ key: 'ArrowDown' } as React.KeyboardEvent);
+      });
+
+      expect(getHintCount(container)).toBe(1);
+      expect(getHintedRowText()).toContain('Beta');
+    });
+  });
+
   it('shows empty message when no options', () => {
     renderWithProvider(<CommandMenuList options={[]} isLoading={false} onSelect={jest.fn()} />);
 
