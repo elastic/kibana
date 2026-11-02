@@ -201,6 +201,80 @@ nvm use && ATTACK_DISCOVERY_DATASET_JSONL_PATH=data/eval_dataset_attack_discover
 
 ---
 
+## Audit failure classes (synthetic scenarios)
+
+`evals/attack_discovery/audit_failure_classes.spec.ts` runs authored `bundledAlerts` scenarios that
+reproduce four failure classes seen when auditing Attack Discovery output. It is independent of the
+dataset-backed spec above and is not part of the weekly run.
+
+| Failure class | Scenario |
+|---|---|
+| Invented entity joins | `shared-ci-egress`, `same-display-name-cross-account` |
+| Threshold / meta alerts treated as evidence | `threshold-meta-alerts` |
+| Unconditional containment advice | `same-display-name-cross-account` (unconfirmed) |
+| No negative control | `benign-batch` (36 alerts, nothing to find) |
+| Positive control under noise | `positive-chain-with-noise` (a four-alert chain next to shared-egress noise) |
+
+Each scenario declares its gold as data (`alertGroups`, `forbiddenCoCitation`,
+`expectedDiscoveries`, `requiredGroup`, `confirmed`), so the evaluators stay generic. Alert ids are
+opaque hashes so an id never reveals its group. Alerts are rendered to `pageContent` in the product
+`field,value` format with `transformRawData`; values are not anonymized, so evaluators can compare
+what a model cites with what the alert contains.
+
+### Input variants
+
+Every scenario runs twice, recorded as `metadata.inputVariant` and in the example name
+(`<scenario>.<variant>`):
+
+- `baseline`: only fields in the product default allowlist (`src/audit_failure_classes/default_allowlist.ts`
+  is a copy of it; a test fails if it drifts from the plugin), no additional context.
+- `enriched`: the baseline fields plus `cloud.account.id`, `user.id` (IAM ARN),
+  `source.as.organization.name`, `source.as.number`, `user_agent.original`, and an additional-context
+  block saying the egress NAT is shared and that `user.name` is not unique across accounts.
+  `cloud.provider` is listed as enriched but is already in the default allowlist.
+
+Running the same suite per model gives a model x input-variant grid: filter the results by example
+name suffix (`.baseline` / `.enriched`).
+
+### Evaluators (code only, no LLM)
+
+| Evaluator | Scores |
+|---|---|
+| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; N/A without forbidden pairs |
+| `EntityCoOccurrence` | Grounded / asserted pairs of a `user.*` token with a `source.ip`, `cloud.account.id` or `host.*` token in one discovery; a pair is grounded when one cited alert carries both values; N/A with no asserted pair |
+| `NegativeControl` | 1 only if a `none`-expected scenario produced zero discoveries; otherwise N/A |
+| `PositiveControlRecall` | Fraction of the required group's alert ids that any discovery cites; label `recalled` at >= 0.6 |
+| `ConditionalRemediation` | For unconfirmed scenarios, 0 when the markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend or deactivate without a conditional |
+
+A run with no parsed insights is reported as `task_error` with a null score, never as a pass.
+
+### Heuristic limits
+
+- `ConditionalRemediation` is keyword based. A conditional split across sentences ("Verify first.
+  Then revoke.") is flagged; past or passive forms ("the key was revoked") are never flagged; a
+  negated instruction is not recognised. Use it as a screen and read the flagged text.
+- `EntityCoOccurrence` reads only `{{ field value }}` tokens. Entities in plain prose assert
+  nothing, and every user x linked-entity pair inside a discovery counts even if the sentence does
+  not link them. A value that the variant does not render (for example `cloud.account.id` in
+  `baseline`) can never be grounded, so compare variants rather than reading one in isolation.
+- `NegativeControl` treats any discovery as a failure; it does not judge whether the discovery is
+  reasonable.
+
+### Run
+
+With the Scout stack up (`node scripts/evals scout`), per model:
+
+```bash
+nvm use && ATTACK_DISCOVERY_EVAL_CONCURRENCY=1 node scripts/evals run --suite attack-discovery \
+  --model <model> --judge <judge> \
+  --grep "Attack Discovery audit failure classes" --repetitions 1
+```
+
+`--grep` goes to Playwright, so it keeps the existing dataset spec out of the run. The judge
+connector is required by the CLI but not used by these evaluators.
+
+---
+
 ## Environment variables
 
 | Variable | Purpose | Default |
