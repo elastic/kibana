@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiFieldNumber,
   EuiHorizontalRule,
+  EuiSwitch,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -21,6 +22,7 @@ import { isValidDailyLimit } from '../validation';
 import {
   MAX_DAILY_LIMIT,
   SOFT_DAILY_LIMIT,
+  UNLIMITED_DAILY_LIMIT,
   getDailyUsageTone,
   suggestRaisedLimit,
 } from '../../../utils/daily_usage';
@@ -43,9 +45,12 @@ export const DailyLimitField = ({
   readOnly?: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isUnlimited = value === UNLIMITED_DAILY_LIMIT;
   const limit = Number(value);
   const tone =
-    usedToday === undefined || limit < 1 ? 'healthy' : getDailyUsageTone(usedToday, limit);
+    usedToday === undefined || isUnlimited || limit < 1
+      ? 'healthy'
+      : getDailyUsageTone(usedToday, limit);
   const raisedLimit = suggestRaisedLimit(usedToday ?? 0, limit);
   const raise = readOnly ? onRaiseLimit : (next: number) => onChange(String(next));
   const raiseAction =
@@ -72,7 +77,7 @@ export const DailyLimitField = ({
             data-test-subj="automationDailyLimit"
             css={{ marginInlineStart: euiTheme.size.xs }}
           >
-            {value} {triggerLabels.perDay}
+            {isUnlimited ? triggerLabels.noLimit : `${value} ${triggerLabels.perDay}`}
           </EuiBadge>
         ) : (
           <div css={{ width: 180 }}>
@@ -82,7 +87,8 @@ export const DailyLimitField = ({
               min={1}
               max={MAX_DAILY_LIMIT}
               step={1}
-              value={value}
+              value={isUnlimited ? '' : value}
+              disabled={isUnlimited}
               isInvalid={!isValidDailyLimit(value)}
               append={triggerLabels.perDay}
               onChange={(event) => onChange(event.target.value)}
@@ -91,11 +97,25 @@ export const DailyLimitField = ({
             />
           </div>
         )}
-        {!readOnly && <EuiBadge color="success">{triggerLabels.recommended}</EuiBadge>}
+        {!readOnly && !isUnlimited && (
+          <EuiBadge color="success">{triggerLabels.recommended}</EuiBadge>
+        )}
       </Sentence>
+      {!readOnly && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiSwitch
+            compressed
+            label={triggerLabels.noDailyLimit}
+            checked={isUnlimited}
+            onChange={(event) => onChange(event.target.checked ? UNLIMITED_DAILY_LIMIT : '20')}
+            data-test-subj="automationDailyLimitUnlimited"
+          />
+        </>
+      )}
       <EuiSpacer size={readOnly ? 'xs' : 's'} />
       <EuiText size="s" color="subdued">
-        {helpText}
+        {isUnlimited ? triggerLabels.noDailyLimitHelp : helpText}
       </EuiText>
       {usedToday !== undefined && tone === 'exceeded' && (
         <KbnWarningCallout
@@ -119,7 +139,7 @@ export const DailyLimitField = ({
           data-test-subj="automationDailyLimitApproachingCallout"
         />
       )}
-      {limit > SOFT_DAILY_LIMIT && (
+      {!isUnlimited && limit > SOFT_DAILY_LIMIT && (
         <KbnWarningCallout
           announceOnMount={false}
           size="s"
@@ -134,7 +154,7 @@ export const DailyLimitField = ({
           data-test-subj="automationDailyLimitSoftCapCallout"
         />
       )}
-      {!readOnly && savedLimit !== undefined && savedLimit !== limit && (
+      {!readOnly && !isUnlimited && savedLimit !== undefined && savedLimit !== limit && (
         <KbnInfoCallout
           announceOnMount={false}
           size="s"

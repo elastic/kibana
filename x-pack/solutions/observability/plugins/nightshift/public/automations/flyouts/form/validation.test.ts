@@ -22,6 +22,7 @@ describe('automation validation', () => {
     ['1', true],
     ['50', true],
     ['', false],
+    ['unlimited', true],
     ['0', false],
     ['51', false],
     ['1.5', false],
