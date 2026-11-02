@@ -28,6 +28,10 @@ import { useNotebookServices } from '../services';
 import { useNotebook } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
 
+const REFRESH_TOOLTIP = i18n.translate('xpack.notebook.header.refreshTooltip', {
+  defaultMessage: 'Rerun time-dependent cells',
+});
+
 const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
   const { store, scheduler } = useNotebook();
   const inputValues = useStateFromPublishingSubject(store.inputValues$);
@@ -44,6 +48,8 @@ const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
         store.setInputValue(cell.id, { kind: 'time', range: { from: start, to: end } })
       }
       onRefresh={() => scheduler.refresh()}
+      showUpdateButton="iconOnly"
+      updateButtonProps={{ toolTipProps: { content: REFRESH_TOOLTIP } }}
       data-test-subj="notebookTimePicker"
     />
   );
