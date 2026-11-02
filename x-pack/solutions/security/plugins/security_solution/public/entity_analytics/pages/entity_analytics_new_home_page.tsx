@@ -1038,7 +1038,10 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitTitle',
         {
           defaultMessage: 'Table shows {limit} of {count} entities',
-          values: { limit: MAX_TILE_FILTER_ENTITY_IDS, count: selectedEntityIds.length },
+          values: {
+            limit: MAX_TILE_FILTER_ENTITY_IDS.toLocaleString(),
+            count: selectedEntityIds.length.toLocaleString(),
+          },
         }
       ),
       text: i18n.translate(
@@ -1046,7 +1049,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         {
           defaultMessage:
             'The table is limited to {limit} entities from this tile. Narrow the time range or filters to see a smaller set.',
-          values: { limit: MAX_TILE_FILTER_ENTITY_IDS },
+          values: { limit: MAX_TILE_FILTER_ENTITY_IDS.toLocaleString() },
         }
       ),
     });

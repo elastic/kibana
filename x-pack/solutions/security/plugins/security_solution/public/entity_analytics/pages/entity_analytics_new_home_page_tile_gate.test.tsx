@@ -597,6 +597,30 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       expect(lastGridProps().cappedTile).toEqual({ total: 1423, limit: 1000 });
     });
 
+    it('warns with the numbers written out, 1,000 of 1,423', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      mockAddWarning.mockClear();
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      // The warning fires when the selection changes, so change it by one entity.
+      hooks.useNewEntityCount.mockReturnValue({
+        count: manyIds.length + 1,
+        entityIds: [...manyIds, 'entity-extra'],
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(mockAddWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Table shows 1,000 of 1,424 entities',
+          text: expect.stringContaining('limited to 1,000 entities'),
+        })
+      );
+    });
+
     it('says nothing of it for individual records, which are a different count', () => {
       mockRowsMode = 'individual';
       selectBigTile();
