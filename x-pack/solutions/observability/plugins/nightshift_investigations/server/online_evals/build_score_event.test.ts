@@ -134,6 +134,28 @@ describe('buildOnlineEvalScoreEvent', () => {
     expect(explanation.endsWith('…')).toBe(true);
   });
 
+  it('counts every evaluator of a failed evaluation as failed', () => {
+    const event = buildOnlineEvalScoreEvent({
+      metadata,
+      results: [],
+      failedEvaluators: [{ name: 'rca_quality' }, { name: 'rca_reward', version: '1.0.0' }],
+      includeExplanations: true,
+    });
+
+    expect(event).toEqual(
+      expect.objectContaining({
+        scores: [],
+        evaluator_count: 2,
+        failed_count: 2,
+        skipped_count: 0,
+        errors: [
+          { evaluator_name: 'rca_quality', code: 'evaluation_failed' },
+          { evaluator_name: 'rca_reward', evaluator_version: '1.0.0', code: 'evaluation_failed' },
+        ],
+      })
+    );
+  });
+
   it('omits the judge model when no evaluator resolved one', () => {
     const event = buildOnlineEvalScoreEvent({
       metadata,
