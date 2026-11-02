@@ -20,6 +20,7 @@ import {
   ExecutionTypeValues,
   WorkflowExecutionCollapseFields,
 } from '@kbn/workflows';
+import { isResultWindowTooLargeError } from '../../lib/es_error_helpers';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import {
@@ -231,7 +232,12 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             body: await api.searchExecutionsView({ ...params, request }, spaceId),
           });
         } catch (error) {
-          if (error instanceof Error && 'statusCode' in error && error.statusCode === 400) {
+          if (
+            !isResultWindowTooLargeError(error) &&
+            error instanceof Error &&
+            'statusCode' in error &&
+            error.statusCode === 400
+          ) {
             return response.badRequest({ body: { message: error.message } });
           }
           return handleRouteError(response, error);
