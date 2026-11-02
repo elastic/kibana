@@ -25,9 +25,12 @@ type RunAsExecution = Pick<EsWorkflowExecution, 'workflowId' | 'spaceId'> & Bind
 export type WorkflowTaskRunAs = NonNullable<TaskInstance['runAs']>;
 const executionContexts = new WeakMap<
   KibanaRequest,
-  { originalRequest: KibanaRequest; execution: IdentityExecution }
+  { originalRequest?: KibanaRequest; execution: IdentityExecution }
 >();
 const taskRunAsByRequest = new WeakMap<KibanaRequest, WorkflowTaskRunAs>();
+// Requests Task Manager minted for an execution's binding, keyed to that execution's id. Nobody
+// called these runs, so there is no caller identity to hand to the executions they start.
+const bindingRequests = new WeakMap<KibanaRequest, string>();
 const inheritedIdentitySchema = WorkflowExecuteStepInputSchema.pick({
   'workflow-id': true,
   'allowed-workflow-ids': true,
@@ -148,6 +151,30 @@ export const ensureInheritedBindingCurrent = async (
 export const getWorkflowOriginalRequest = (request: KibanaRequest): KibanaRequest =>
   executionContexts.get(request)?.originalRequest ?? request;
 
+const getWorkflowCaller = (request: KibanaRequest): KibanaRequest | undefined => {
+  if (bindingRequests.has(request)) {
+    return undefined;
+  }
+  const context = executionContexts.get(request);
+  return context ? context.originalRequest : request;
+};
+
+/**
+ * Rejects an unbound execution started by a run Task Manager runs as its binding: that run has no
+ * caller, and handing it the binding would delegate the service account to an unbound workflow.
+ */
+export const ensureWorkflowCallerAvailable = (
+  request: KibanaRequest,
+  execution: Pick<EsWorkflowExecution, 'workflowId'> & BindingExecution
+): void => {
+  if (getExecutionServiceAccountId(execution) || getWorkflowCaller(request)) {
+    return;
+  }
+  throw Boom.forbidden(
+    `Workflow "${execution.workflowId}" has no service account, and the workflow run that started it runs in the background as its own service account, so there is no caller to run it as. Bind "${execution.workflowId}" to a service account.`
+  );
+};
+
 const toTaskRunAs = (
   execution: RunAsExecution,
   serviceAccountId: string
@@ -198,21 +225,45 @@ export const withWorkflowTaskRunAs = async <T>(
   }
 };
 
+/** Runs `execute` with `request`, which Task Manager minted for the binding of `executionId`. */
+export const withWorkflowBindingRequest = async <T>(
+  request: KibanaRequest,
+  executionId: string,
+  runAs: WorkflowTaskRunAs,
+  execute: () => Promise<T>
+): Promise<T> => {
+  bindingRequests.set(request, executionId);
+  try {
+    return await withWorkflowTaskRunAs(request, runAs, execute);
+  } finally {
+    bindingRequests.delete(request);
+  }
+};
+
 export const withWorkflowExecutionIdentity = async <T>(
   core: CoreStart,
   execution: IdentityExecution,
   request: KibanaRequest,
   execute: (request: KibanaRequest) => Promise<T>
 ): Promise<T> => {
-  const originalRequest = getWorkflowOriginalRequest(request);
+  const originalRequest = getWorkflowCaller(request);
   const serviceAccountId = getExecutionServiceAccountId(execution);
   if (!serviceAccountId) {
-    return execute(originalRequest);
+    ensureWorkflowCallerAvailable(request, execution);
+    return execute(originalRequest ?? request);
   }
   if (!core.security.serviceAccounts.isEnabled()) {
     throw Boom.forbidden('Service account execution is disabled.');
   }
-  const taskRunAs = getServiceAccountCallerTaskRunAs(core, originalRequest, execution);
+  if (bindingRequests.get(request) === execution.id) {
+    executionContexts.set(request, { execution });
+    try {
+      return await execute(request);
+    } finally {
+      executionContexts.delete(request);
+    }
+  }
+  const taskRunAs = getServiceAccountCallerTaskRunAs(core, request, execution);
   return core.security.serviceAccounts.withScopedRequestForWorkload(
     { ...toTaskRunAs(execution, serviceAccountId), executionId: execution.id },
     async (scopedRequest) => {

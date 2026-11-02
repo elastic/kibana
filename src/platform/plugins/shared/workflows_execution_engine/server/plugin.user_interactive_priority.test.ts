@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
@@ -131,6 +131,9 @@ describe('user-interactive task priority', () => {
     taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     taskManager.ensureScheduled.mockResolvedValue({ id: 'scheduled-task' } as any);
     taskManager.runSoon.mockResolvedValue({ id: 'scheduled-task', conflict: false } as any);
+    taskManager.get.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'immediate-runner')
+    );
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,

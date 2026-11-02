@@ -33,6 +33,9 @@ export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 
 type ScheduleOptions = NonNullable<Parameters<TaskManagerStartContract['schedule']>[1]>;
 
+// Task Manager's `TaskCredential.type` for a task that runs as a service account workload.
+const SERVICE_ACCOUNT_CREDENTIAL_TYPE = 'service_account';
+
 /** A task of an execution started by a service account runs as the execution's binding. */
 const runAsFields = (
   request: KibanaRequest | undefined,
@@ -311,6 +314,10 @@ export class WorkflowTaskManager {
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
     const priority = getTaskPriority({ isUserInteractive });
+    // An approver's request has no `runAs`, but the parked runner may run as the binding, and
+    // Task Manager rejects updating it with another identity.
+    const runAs =
+      (fakeRequest && getWorkflowTaskRunAs(fakeRequest)) ?? (await this.getStoredRunAs(taskId));
 
     await this.taskManager.ensureScheduled(
       {
@@ -320,11 +327,35 @@ export class WorkflowTaskManager {
         state: {},
         scope: [`workflow:execution:${executionId}`],
         priority,
-        ...runAsFields(fakeRequest),
+        ...runAsFields(fakeRequest, runAs),
       },
-      cloneApiKeyOptions(fakeRequest, regenerateApiKey ? { regenerateApiKey: true } : {})
+      runAs
+        ? undefined
+        : cloneApiKeyOptions(fakeRequest, regenerateApiKey ? { regenerateApiKey: true } : {})
     );
     return { taskId };
+  }
+
+  private async getStoredRunAs(taskId: string): Promise<WorkflowTaskRunAs | undefined> {
+    let task: ConcreteTaskInstance;
+    try {
+      task = await this.taskManager.get(taskId);
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    }
+    const { type, workloadType, workloadId, spaceId, expectedServiceAccountId } =
+      task.credential ?? {};
+    return type === SERVICE_ACCOUNT_CREDENTIAL_TYPE && workloadType && workloadId && spaceId
+      ? {
+          workloadType,
+          workloadId,
+          spaceId,
+          expectedServiceAccountId: expectedServiceAccountId ?? null,
+        }
+      : undefined;
   }
 
   /**

@@ -44,6 +44,8 @@ import {
   resumeWorkflow,
   runWorkflow,
 } from './execution_functions';
+import { completeIdentityFailureCleanup } from './execution_functions/complete_identity_failure_cleanup';
+import { finalizeWorkflowIdentityFailure } from './execution_functions/finalize_workflow_identity_failure';
 import { handlePostExecutionLoop } from './execution_functions/handle_post_execution_loop';
 import { resumeWaitingWorkflowExecution } from './execution_functions/resume_waiting_workflow_execution';
 import { buildWorkflowExecutionDocument } from './lib/build_workflow_execution_document';
@@ -88,11 +90,12 @@ import { StepExecutionRepository } from './repositories/step_execution_repositor
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import {
   ensureInheritedBindingCurrent,
+  ensureWorkflowCallerAvailable,
   getExecutionTaskRunAs,
   getServiceAccountCallerTaskRunAs,
   getWorkflowOriginalRequest,
   resolveInheritedWorkflowIdentity,
-  withWorkflowTaskRunAs,
+  withWorkflowBindingRequest,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
 } from './service_account_execution';
 import { resolveWorkflowWorkloads } from './service_account_workload_resolver';
@@ -278,22 +281,76 @@ export class WorkflowsExecutionEnginePlugin
         let taskRunner: ReturnType<typeof createTaskRunner> | undefined;
         return {
           run: async () => {
-            const { workflowExecutionRepository } = this.createScopedRepositories();
+            const { workflowExecutionRepository, stepExecutionRepository } =
+              this.createScopedRepositories();
             const execution = await workflowExecutionRepository.getWorkflowExecutionById(
               workflowRunId,
               spaceId
             );
             const executionRunAs = execution ? getExecutionTaskRunAs(execution) : undefined;
-            if (!executionRunAs) {
+            if (!execution || !executionRunAs) {
               taskRunner = createTaskRunner(context);
               return taskRunner.run();
             }
-            return runAs.withScopedRequest((request) =>
-              withWorkflowTaskRunAs(request, executionRunAs, async () => {
-                taskRunner = createTaskRunner({ ...context, fakeRequest: request });
-                return taskRunner.run();
-              })
-            );
+            let minted = false;
+            try {
+              return await runAs.withScopedRequest(
+                (request) => {
+                  minted = true;
+                  return withWorkflowBindingRequest(
+                    request,
+                    execution.id,
+                    executionRunAs,
+                    async () => {
+                      taskRunner = createTaskRunner({ ...context, fakeRequest: request });
+                      return taskRunner.run();
+                    }
+                  );
+                },
+                { expectedServiceAccountId: executionRunAs.expectedServiceAccountId }
+              );
+            } catch (error) {
+              if (minted) {
+                throw error;
+              }
+              // Without a request the runner can't start, so fail the execution here rather than
+              // leave it waiting for a task that can't mint either.
+              const [, pluginsStart] = await core.getStartServices();
+              const failedExecution = await finalizeWorkflowIdentityFailure({
+                workflowRunId,
+                spaceId,
+                error: {
+                  type: 'ServiceAccountExecutionError',
+                  message: error instanceof Error ? error.message : String(error),
+                },
+                workflowExecutionRepository,
+                stepExecutionRepository,
+              });
+              const current =
+                failedExecution ??
+                (await workflowExecutionRepository.getWorkflowExecutionById(
+                  workflowRunId,
+                  spaceId
+                ));
+              if (current) {
+                await completeIdentityFailureCleanup(current, {
+                  workflowRunId,
+                  spaceId,
+                  logger: this.logger,
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                  workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                  meteringService: this.meteringService,
+                  cloudSetup: this.setupDependencies?.cloudSetup,
+                });
+              }
+              this.logger.warn(
+                `Failed workflow execution ${workflowRunId}: its service account request could not be minted: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
           },
           cancel: async () => {
             await taskRunner?.cancel?.();
@@ -1439,6 +1496,7 @@ export class WorkflowsExecutionEnginePlugin
         authenticatedUser,
         now: new Date(),
       });
+      ensureWorkflowCallerAvailable(originalRequest, workflowExecution);
 
       await maybeDrainConcurrencyQueueBeforeEnqueue({
         workflowExecution,
@@ -1752,6 +1810,7 @@ export class WorkflowsExecutionEnginePlugin
             authenticatedUser,
             now,
           });
+          ensureWorkflowCallerAvailable(originalRequest, workflowExecution);
           prepared.push({ idx, workflowExecution });
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);

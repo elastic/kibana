@@ -15,9 +15,11 @@ import {
 } from '@kbn/core/server/mocks';
 import { hasWorkflowAccess } from './lib/has_workflow_access';
 import {
+  ensureWorkflowCallerAvailable,
   getServiceAccountCallerTaskRunAs,
   getWorkflowOriginalRequest,
   getWorkflowTaskRunAs,
+  withWorkflowBindingRequest,
   withWorkflowExecutionIdentity,
   withWorkflowTaskRunAs,
 } from './service_account_execution';
@@ -177,6 +179,86 @@ describe('workflow service account execution', () => {
         })
       ).rejects.toThrow('boom');
       expect(getWorkflowTaskRunAs(request)).toBeUndefined();
+    });
+  });
+
+  describe('runs resumed by Task Manager as their binding', () => {
+    const bindingRunAs = {
+      workloadType: 'workflow',
+      workloadId: 'workflow',
+      spaceId: 'space',
+      expectedServiceAccountId: 'account-a',
+    };
+    const createCore = () => {
+      const core = {
+        ...coreMock.createStart(),
+        security: securityServiceMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      return core;
+    };
+
+    it('runs the execution with the minted request instead of minting again', async () => {
+      const core = createCore();
+      const minted = httpServerMock.createKibanaRequest();
+      const run = jest.fn().mockResolvedValue('done');
+
+      await expect(
+        withWorkflowBindingRequest(minted, 'parent-execution', bindingRunAs, () =>
+          withWorkflowExecutionIdentity(core, execution('account-a'), minted, run)
+        )
+      ).resolves.toBe('done');
+      expect(run).toHaveBeenCalledWith(minted);
+      expect(core.security.serviceAccounts.withScopedRequestForWorkload).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unbound execution started from the run, since it has no caller', async () => {
+      const core = createCore();
+      const minted = httpServerMock.createKibanaRequest();
+      const child = jest.fn();
+
+      await withWorkflowBindingRequest(minted, 'parent-execution', bindingRunAs, async () => {
+        expect(() => ensureWorkflowCallerAvailable(minted, { workflowId: 'child' })).toThrow(
+          'Workflow "child" has no service account'
+        );
+        await withWorkflowExecutionIdentity(
+          core,
+          execution('account-a'),
+          minted,
+          async (actual) => {
+            await expect(
+              withWorkflowExecutionIdentity(core, execution(), actual, child)
+            ).rejects.toThrow('there is no caller to run it as');
+          }
+        );
+      });
+      expect(child).not.toHaveBeenCalled();
+      expect(() => ensureWorkflowCallerAvailable(minted, { workflowId: 'child' })).not.toThrow();
+    });
+
+    it('lets the run start bound and inherited executions', async () => {
+      const minted = httpServerMock.createKibanaRequest();
+
+      await withWorkflowBindingRequest(minted, 'parent-execution', bindingRunAs, async () => {
+        expect(() => ensureWorkflowCallerAvailable(minted, execution('account-b'))).not.toThrow();
+        expect(() =>
+          ensureWorkflowCallerAvailable(minted, {
+            workflowId: 'child',
+            effectiveIdentity: {
+              type: 'service_account',
+              id: 'account-a',
+              inheritedFrom: { workloadId: 'workflow' },
+            },
+          })
+        ).not.toThrow();
+      });
+    });
+
+    it('lets a caller-started run start unbound executions as the caller', () => {
+      expect(() =>
+        ensureWorkflowCallerAvailable(httpServerMock.createKibanaRequest(), { workflowId: 'child' })
+      ).not.toThrow();
     });
   });
 

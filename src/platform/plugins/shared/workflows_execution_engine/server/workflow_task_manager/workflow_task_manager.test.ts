@@ -685,6 +685,56 @@ describe('WorkflowTaskManager', () => {
       // Both calls must target the same stable id — never a random uuid
       expect(scheduledIds).toEqual([stableId, stableId]);
     });
+
+    it("keeps a parked runner's binding when an approver's request hands off the resume", async () => {
+      const executionId = 'exec-bound-approval';
+      const runAs = {
+        workloadType: 'workflow',
+        workloadId: 'test-workflow-id',
+        spaceId: 'default',
+        expectedServiceAccountId: 'account-a',
+      };
+      mockTaskManager.get.mockResolvedValue({
+        ...taskManagerMock.createTask(),
+        id: getWorkflowImmediateResumeTaskId(executionId),
+        credential: { type: 'service_account', ...runAs },
+      });
+
+      await workflowTaskManager.scheduleImmediateResume({
+        executionId,
+        spaceId: 'default',
+        fakeRequest,
+        isUserInteractive: true,
+        regenerateApiKey: true,
+      });
+
+      expect(mockTaskManager.get).toHaveBeenCalledWith(
+        getWorkflowImmediateResumeTaskId(executionId)
+      );
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        expect.objectContaining({ id: getWorkflowImmediateResumeTaskId(executionId), runAs }),
+        undefined
+      );
+    });
+
+    it("clones the approver's key when the parked runner has an API key", async () => {
+      const executionId = 'exec-user-approval';
+      mockTaskManager.get.mockResolvedValue({
+        ...taskManagerMock.createTask(),
+        credential: { type: 'api_key' },
+      });
+
+      await workflowTaskManager.scheduleImmediateResume({
+        executionId,
+        spaceId: 'default',
+        fakeRequest,
+        regenerateApiKey: true,
+      });
+
+      const [[task, options]] = mockTaskManager.ensureScheduled.mock.calls;
+      expect(task.runAs).toBeUndefined();
+      expect(options).toEqual({ request: fakeRequest, cloneApiKey: true, regenerateApiKey: true });
+    });
   });
 
   describe('removeTasksForExecution', () => {
