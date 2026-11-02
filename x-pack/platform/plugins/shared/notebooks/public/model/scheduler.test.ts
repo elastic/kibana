@@ -501,6 +501,56 @@ describe('NotebookScheduler', () => {
       await env.scheduler.runCell('q');
       expect(env.fake.calls.map(({ query }) => query)).toEqual(['FROM logs', 'FROM metrics']);
     });
+
+    it('marks an edited query and its charts stale, keeping outputs, until it is run', async () => {
+      const env = track(setup([esql('q', 'FROM logs'), chart('c', 'q')]));
+      await env.open();
+      const qOutput = env.output('q');
+
+      env.scheduler.markEdited('q', true);
+      await env.scheduler.whenIdle();
+
+      expect(env.runtime('q').status).toBe('stale');
+      expect(env.runtime('c').status).toBe('stale');
+      expect(env.output('q')).toBe(qOutput);
+      expect(env.output('c')).toBe(qOutput);
+
+      env.store.updateCell('q', (cell) => ({ ...cell, query: 'FROM metrics' }));
+      await env.scheduler.runCell('q');
+
+      expect(env.fake.calls.map(({ query }) => query)).toEqual(['FROM logs', 'FROM metrics']);
+      expect(env.runtime('q').status).toBe('done');
+      expect(env.runtime('c').status).toBe('done');
+    });
+
+    it('returns an edited query to done without running when the edit is reverted', async () => {
+      const env = track(setup([esql('q', 'FROM logs'), chart('c', 'q')]));
+      await env.open();
+
+      env.scheduler.markEdited('q', true);
+      await env.scheduler.whenIdle();
+      env.scheduler.markEdited('q', false);
+      await env.scheduler.whenIdle();
+
+      expect(env.runtime('q').status).toBe('done');
+      expect(env.runtime('c').status).toBe('done');
+      expect(env.fake.calls).toHaveLength(1);
+    });
+
+    it('keeps an edited query stale on input changes and Run all', async () => {
+      const query = 'FROM logs | WHERE ?os IS NULL OR os == ?os';
+      const env = track(setup([dropdown('os'), esql('q', query)]));
+      await env.open();
+
+      env.scheduler.markEdited('q', true);
+      env.store.setInputValue('os', { kind: 'dropdown', value: 'win 7' });
+      await env.scheduler.whenIdle();
+      expect(env.runtime('q').status).toBe('stale');
+
+      await env.scheduler.runAll();
+      expect(env.runtime('q').status).toBe('stale');
+      expect(env.fake.callsFor(query)).toHaveLength(1);
+    });
   });
 
   describe('manual run mode', () => {

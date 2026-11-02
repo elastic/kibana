@@ -85,6 +85,7 @@ export class NotebookScheduler {
   private subscriptions: Subscription[] = [];
   private readonly tasks = new Map<string, Promise<void>>();
   private readonly controllers = new Map<string, AbortController>();
+  private readonly editedCells = new Set<string>();
 
   constructor(private readonly store: NotebookStore, { runQuery, now }: SchedulerDeps) {
     this.runQuery = runQuery;
@@ -105,7 +106,16 @@ export class NotebookScheduler {
 
   runCell(id: string): Promise<void> {
     if (!this.graph.parents.has(id)) return Promise.resolve();
+    this.editedCells.delete(id);
     return this.propagate([id], new Set([id]));
+  }
+
+  /** Flags an ES|QL cell whose editor holds an unrun query; it and its descendants stay stale until it is run. */
+  markEdited(id: string, isEdited: boolean): void {
+    if (this.editedCells.has(id) === isEdited || !this.graph.parents.has(id)) return;
+    if (isEdited) this.editedCells.add(id);
+    else this.editedCells.delete(id);
+    void this.propagate([id], new Set());
   }
 
   runAll(): Promise<void> {
@@ -143,7 +153,10 @@ export class NotebookScheduler {
 
     Object.keys(previousCells)
       .filter((id) => !cells[id])
-      .forEach((id) => this.cancel(id));
+      .forEach((id) => {
+        this.cancel(id);
+        this.editedCells.delete(id);
+      });
 
     const roots = this.graph.order.filter((id) => {
       const before = previousCells[id];
@@ -237,6 +250,10 @@ export class NotebookScheduler {
   ): Promise<void> {
     if (!query.trim()) {
       this.publish(id, { status: 'idle' });
+      return;
+    }
+    if (this.editedCells.has(id)) {
+      this.setStatus(id, 'stale');
       return;
     }
     const params = buildQueryParams(query, this.parentOutputs(id));

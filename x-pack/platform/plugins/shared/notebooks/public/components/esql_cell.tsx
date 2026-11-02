@@ -6,8 +6,7 @@
  */
 
 import React, { Suspense, useEffect, useState } from 'react';
-import { EuiBadge, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { EsqlCellDefinition } from '../../common/types';
 import { CellFrame } from './cell_frame';
@@ -25,6 +24,10 @@ export const EsqlCell = ({ cell }: { cell: EsqlCellDefinition }) => {
   const [draft, setDraft] = useState(cell.query);
 
   useEffect(() => setDraft(cell.query), [cell.query]);
+  useEffect(
+    () => scheduler.markEdited(cell.id, draft !== cell.query),
+    [scheduler, cell.id, cell.query, draft]
+  );
 
   const run = async (query: string): Promise<void> => {
     store.updateCell(cell.id, (current) =>
@@ -36,22 +39,7 @@ export const EsqlCell = ({ cell }: { cell: EsqlCellDefinition }) => {
   const { output } = runtime;
 
   return (
-    <CellFrame
-      cell={cell}
-      runtime={runtime}
-      onRun={() => run(draft)}
-      headerActions={
-        draft !== cell.query && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" iconType="pencil">
-              {i18n.translate('xpack.notebook.esqlCell.unrunEdits', {
-                defaultMessage: 'Edited, not run',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        )
-      }
-    >
+    <CellFrame cell={cell} runtime={runtime} onRun={() => run(draft)}>
       <Suspense fallback={<EuiLoadingSpinner />}>
         <LazyEsqlEditor
           query={{ esql: draft }}
