@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
 import type {
   BulkScheduleWorkflowResult,
   WorkflowDetailDto,
@@ -19,7 +16,7 @@ import type {
   WorkflowsServerPluginSetup,
   WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
-import { getUiamApiKeySecret } from '@kbn/response-ops-scoped-api-keys';
+import { buildApiKeyFakeRequest, getUiamApiKeySecret } from '@kbn/response-ops-scoped-api-keys';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { inject, injectable } from 'inversify';
 import { isError, uniqBy } from 'lodash';
@@ -634,15 +631,6 @@ export class DispatchStep implements DispatcherStep {
    * scheduled workflow runs, and resolves its connectors, in that space.
    */
   private craftFakeRequest(apiKey: string, spaceId: string): KibanaRequest {
-    const requestHeaders: Headers = {
-      authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
-    };
-
-    const fakeRawRequest: FakeRawRequest = {
-      headers: requestHeaders,
-      spaceId: brandSpaceId(spaceId),
-    };
-
-    return kibanaRequestFactory(fakeRawRequest);
+    return buildApiKeyFakeRequest({ apiKey: getUiamApiKeySecret(apiKey), spaceId });
   }
 }
