@@ -7,7 +7,8 @@
 
 import { PluginStart } from '@kbn/core-di';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';

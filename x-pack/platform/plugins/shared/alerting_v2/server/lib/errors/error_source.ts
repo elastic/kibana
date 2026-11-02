@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_helpers';
 
 /**
  * Who a failure is attributed to. `user` is a failure caused by the rule's own

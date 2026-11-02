@@ -25,11 +25,11 @@ import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsUtils,
-  type KibanaRequest as CoreKibanaRequest,
-  type PluginInitializerContext,
-  type SavedObjectReference,
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import type {
+  KibanaRequest as CoreKibanaRequest,
+  PluginInitializerContext,
+  SavedObjectReference,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';

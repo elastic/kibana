@@ -71,6 +71,8 @@ beforeEach(() => {
 
 afterAll(() => jest.useRealTimers());
 
+import type { PodDispatch } from '../task_pod/pod_dispatch';
+
 describe('TaskManagerRunner', () => {
   const pendingStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.PENDING, opts);
   const readyToRunStageSetup = (opts: TestOpts) => testOpts(TaskRunningStage.READY_TO_RUN, opts);
@@ -427,6 +429,7 @@ describe('TaskManagerRunner', () => {
         };
         const encryptedCredential = 'canary';
         let recordTaskRunSpy: jest.SpyInstance;
+        let fetchSpyForRunAs: jest.SpyInstance;
 
         beforeEach(() => {
           withScopedRequest.mockImplementation(async (_params, fn) => fn({}));
@@ -442,6 +445,26 @@ describe('TaskManagerRunner', () => {
 
         afterEach(() => {
           recordTaskRunSpy.mockRestore();
+        });
+
+        test('runs in-process even when a pod serves the task type', async () => {
+          fetchSpyForRunAs = jest.spyOn(global, 'fetch');
+          const { runner, store } = await readyToRunStageSetup({
+            instance: { credential, encryptedCredential },
+            definitions,
+            podDispatch: {
+              registry: {} as never,
+              kibanaVersion: '9.6.0',
+              getPod: () => ({ url: 'http://pod', callbackUrl: 'http://kb' }),
+            },
+          });
+          store.getVerifiedCredential.mockResolvedValue(asOk(credential));
+
+          await runner.run();
+
+          expect(createTaskRunner).toHaveBeenCalled();
+          expect(fetchSpyForRunAs).not.toHaveBeenCalled();
+          fetchSpyForRunAs.mockRestore();
         });
 
         test('runs the task as its workload instead of with an API key', async () => {
@@ -821,6 +844,67 @@ describe('TaskManagerRunner', () => {
       const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
       expect(createTaskRunnerParams.fakeRequest).toBeDefined();
       expect(createTaskRunnerParams.taskInstance).toEqual(instance);
+    });
+
+    describe('task pods', () => {
+      const instanceWithKey = () => ({
+        ...mockInstance(),
+        apiKey: 'aw4badfg333',
+        userScope: {
+          apiKeyId: 'abcdefg',
+          spaceId: asSpaceId('default'),
+          apiKeyCreatedByUser: false,
+        },
+      });
+      const podDispatch = (matches = true): PodDispatch & { fetch: jest.Mock } => {
+        const registry = { startRun: jest.fn(() => 'tok'), endRun: jest.fn(async () => {}) };
+        return {
+          registry: registry as never,
+          kibanaVersion: '9.6.0',
+          getPod: () => (matches ? { url: 'http://pod', callbackUrl: 'http://kb' } : undefined),
+          fetch: jest.fn(),
+        };
+      };
+      let fetchSpy: jest.SpyInstance;
+      const podReplies = (body: unknown) => {
+        fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
+          ok: true,
+          status: 200,
+          json: async () => body,
+        } as never);
+      };
+      afterEach(() => fetchSpy?.mockRestore());
+
+      test('runs a task routed to a pod there, without its API key inside the task instance', async () => {
+        const createTaskRunner = jest.fn();
+        podReplies({ kind: 'result', result: { state: { fromPod: true } } });
+        const { runner } = await readyToRunStageSetup({
+          instance: instanceWithKey(),
+          podDispatch: podDispatch(),
+          definitions: { bar: { title: 'Bar!', timeout: '2m', createTaskRunner } },
+        });
+        await runner.run();
+
+        expect(createTaskRunner).not.toHaveBeenCalled();
+        const sent = JSON.parse(fetchSpy.mock.calls[0][1].body);
+        expect(sent.apiKey).toEqual(expect.any(String));
+        expect(sent.taskInstance.apiKey).toBeUndefined();
+        expect(sent.kibanaVersion).toBe('9.6.0');
+        expect(new Date(sent.deadline).getTime()).toBeGreaterThan(Date.now());
+      });
+
+      test('runs locally when no pod serves the task type', async () => {
+        const createTaskRunner = jest.fn(() => ({ run: async () => undefined }));
+        const { runner } = await readyToRunStageSetup({
+          instance: instanceWithKey(),
+          podDispatch: podDispatch(false),
+          definitions: { bar: { title: 'Bar!', createTaskRunner } },
+        });
+        fetchSpy = jest.spyOn(global, 'fetch');
+        await runner.run();
+        expect(createTaskRunner).toHaveBeenCalled();
+        expect(fetchSpy).not.toHaveBeenCalled();
+      });
     });
 
     test('calls enrichFakeRequest with the fake request and userProfileId when both are present', async () => {
@@ -4497,6 +4581,7 @@ describe('TaskManagerRunner', () => {
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     enrichFakeRequest?: jest.Mock;
+    podDispatch?: PodDispatch;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -4577,6 +4662,7 @@ describe('TaskManagerRunner', () => {
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
       enrichFakeRequest: opts.enrichFakeRequest,
+      podDispatch: opts.podDispatch,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

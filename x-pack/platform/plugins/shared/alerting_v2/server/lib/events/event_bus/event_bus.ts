@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AsyncResource } from 'node:async_hooks';
 import { EventEmitterAsyncResource } from 'node:events';
 import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -82,6 +83,7 @@ const RESERVED_EVENT_TYPES: ReadonlySet<string> = new Set([
 export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TContext = void>
   implements EventBus<TEvent, TContext>
 {
+  #publisherContext?: AsyncResource;
   readonly #emitter = new EventEmitterAsyncResource({
     captureRejections: true,
     name: ASYNC_RESOURCE_NAME,
@@ -123,10 +125,18 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     // `rest` is `[]` for context-less buses and `[context]` otherwise.
     // Forward only the args we received so a context-less listener is
     // invoked with `(event)` rather than `(event, undefined)`.
-    if (rest.length > 0) {
-      this.#emitter.emit(event.type, event, rest[0]);
-    } else {
-      this.#emitter.emit(event.type, event);
+    // `emit` runs handlers inside the emitter's own async scope, which would drop the publisher's
+    // async context (APM transaction, task pod run context). Capture it here so handlers can
+    // be re-entered into it.
+    this.#publisherContext = new AsyncResource('alerting_v2.event_bus.publish');
+    try {
+      if (rest.length > 0) {
+        this.#emitter.emit(event.type, event, rest[0]);
+      } else {
+        this.#emitter.emit(event.type, event);
+      }
+    } finally {
+      this.#publisherContext = undefined;
     }
     this.logger.debug({
       message: () => 'Published domain event',
@@ -139,13 +149,21 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     handler: (...args: EventBusHandlerArgs<E, TContext>) => Promise<void> | void
   ): Subscription {
     const wrapped: AnyHandler = (event, ...extra) => {
-      setImmediate(async () => {
+      const publisherContext = this.#publisherContext;
+      const invoke = async () => {
         try {
           await (handler as (...args: unknown[]) => Promise<void> | void)(event, ...extra);
         } catch (err) {
           this.#logError(err, ALERTING_LOG_CODES.EVENTS_BUS_HANDLER_FAILED, {
             event_type: event.type,
           });
+        }
+      };
+      setImmediate(() => {
+        if (publisherContext) {
+          publisherContext.runInAsyncScope(invoke);
+        } else {
+          invoke();
         }
       });
     };

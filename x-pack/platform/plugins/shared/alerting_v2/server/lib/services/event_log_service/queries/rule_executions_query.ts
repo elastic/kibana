@@ -6,7 +6,10 @@
  */
 
 import type { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '@kbn/task-manager-plugin/server';
+import {
+  EVENT_LOG_ACTIONS,
+  EVENT_LOG_PROVIDER,
+} from '@kbn/task-manager-plugin/server/task_helpers';
 import { ruleExecutionOutcomeSchema } from '@kbn/alerting-v2-schemas';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../../../rule_executor/constants';
 import { getRuleExecutorTaskId } from '../../../rule_executor/schedule';

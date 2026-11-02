@@ -11,7 +11,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { TaskCost } from '@kbn/task-manager-plugin/server';
+import { TaskCost } from '@kbn/task-manager-plugin/server/task_helpers';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 import { cleanupExpiredNotifications } from './cleanup_expired_notifications';
 

@@ -7,7 +7,7 @@
 
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server/task_helpers';
 import { inject, injectable } from 'inversify';
 
 import type { HaltReason } from './types';

@@ -19,7 +19,7 @@ import type {
   WorkflowsServerPluginSetup,
   WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
-import { getUiamApiKeySecret } from '@kbn/task-manager-plugin/server';
+import { getUiamApiKeySecret } from '@kbn/task-manager-plugin/server/task_helpers';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { inject, injectable } from 'inversify';
 import { isError, uniqBy } from 'lodash';

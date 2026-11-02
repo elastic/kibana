@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, PluginInitializerContext } from '@kbn/core/server';
 import { PluginInitializer } from '@kbn/core-di-server';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import { throwRetryableError } from '@kbn/task-manager-plugin/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_helpers';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
 import type { PluginConfig } from '../../../config';

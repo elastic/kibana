@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export function spaceIdToNamespace(spaces?: SpacesPluginStart, spaceId?: string) {

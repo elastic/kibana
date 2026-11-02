@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common';
 import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';

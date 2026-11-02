@@ -57,6 +57,11 @@
     "@kbn/scout",
     "@kbn/std",
     "@kbn/mock-idp-utils",
+    "@kbn/core-di",
+    "@kbn/core-di-internal",
+    "@kbn/core-di-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/core-saved-objects-api-server-internal",
   ],
   "exclude": ["target/**/*"]
 }

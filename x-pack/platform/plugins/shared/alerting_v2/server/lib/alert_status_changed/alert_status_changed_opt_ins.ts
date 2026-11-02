@@ -36,7 +36,7 @@ export interface AlertStatusChangedOptIn {
 @injectable()
 export class AlertStatusChangedOptIns {
   private readonly optIns: AlertStatusChangedOptIn[] = [];
-  private readonly logger: LoggerServiceContract;
+  protected readonly logger: LoggerServiceContract;
 
   constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
     this.logger = loggerService.forSubsystem('events');

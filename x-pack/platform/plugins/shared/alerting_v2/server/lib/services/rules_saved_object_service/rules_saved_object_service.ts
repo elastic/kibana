@@ -13,7 +13,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { SavedObjectError } from '@kbn/core/types';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';

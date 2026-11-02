@@ -13,7 +13,7 @@ import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
-import { runInvalidate } from '@kbn/task-manager-plugin/server';
+import { runInvalidate } from '@kbn/task-manager-plugin/server/invalidate_api_keys';
 import { inject, injectable } from 'inversify';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {

@@ -22,6 +22,7 @@ import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
+import type { PodDispatch } from './task_pod/pod_dispatch';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
@@ -101,6 +102,7 @@ export interface TaskPollingLifecycleOpts {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  podDispatch?: PodDispatch;
   /** Requests extra claim cycles; ignored during Elasticsearch backpressure and its recovery. */
   claimNudgeService?: TaskManagerClaimNudgeService;
 }
@@ -150,6 +152,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private apiKeyStrategy: ApiKeyStrategy;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
   private enrichFakeRequest?: FakeRequestEnricher;
+  private podDispatch?: PodDispatch;
 
   private eventLogger: TaskEventLogger;
 
@@ -174,6 +177,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    podDispatch,
     claimNudgeService,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
@@ -186,6 +190,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.apiKeyStrategy = apiKeyStrategy;
     this.executionControlService = executionControlService;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.podDispatch = podDispatch;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
@@ -441,6 +446,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
       enrichFakeRequest: this.enrichFakeRequest,
+      podDispatch: this.podDispatch,
     });
   };
 

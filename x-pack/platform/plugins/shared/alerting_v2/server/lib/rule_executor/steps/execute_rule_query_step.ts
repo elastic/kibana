@@ -8,7 +8,7 @@
 import { inject, injectable } from 'inversify';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { appendLimitToQuery } from '@kbn/esql-utils';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_helpers';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';

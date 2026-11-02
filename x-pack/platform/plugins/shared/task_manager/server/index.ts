@@ -142,3 +142,4 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
     },
   },
 };
+export type { PodContractHandlers, PodContractContext } from './task_pod/pod_contract_registry';

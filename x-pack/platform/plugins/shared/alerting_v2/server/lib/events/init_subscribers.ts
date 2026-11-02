@@ -15,7 +15,8 @@ import { RuleTelemetrySubscriber } from './rule_telemetry_subscriber/rule_teleme
 import { ActionPolicyTelemetrySubscriber } from './action_policy_telemetry_subscriber/action_policy_telemetry_subscriber';
 
 /**
- * Activates every event-bus subscriber. Intended to be invoked from the
+ * Activates the event-bus subscribers that react to what Kibana-side requests publish (rule
+ * lifecycle, alert actions). Task-side subscribers are started by `initTaskSubscribers`. Intended to be invoked from the
  * plugin's `OnStart` callback once every start-time dependency
  * (`workflowsExtensions`, core http, etc.) is available, so handlers
  * never run against partially-initialised collaborators.
@@ -25,8 +26,16 @@ export function initSubscribers(container: Container): void {
   container.get(AlertActionWorkflowSubscriber).start();
   container.get(RuleWorkflowSubscriber).start();
   container.get(RuleChangesHistorySubscriber).start();
-  container.get(RuleExecutorWorkflowSubscriber).start();
-  container.get(AlertStatusChangedWorkflowSubscriber).start();
   container.get(RuleTelemetrySubscriber).start();
   container.get(ActionPolicyTelemetrySubscriber).start();
+}
+
+/**
+ * Subscribers that react to events published while a task runs (rule execution results). They
+ * belong to the task runtime, so they start wherever tasks run: Kibana or a task pod.
+ */
+export function initTaskSubscribers(container: Container): void {
+  container.get(RuleExecutorWorkflowSubscriber).start();
+  // Published by the rule executor and, in Kibana, by the alert events client.
+  container.get(AlertStatusChangedWorkflowSubscriber).start();
 }

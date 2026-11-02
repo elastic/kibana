@@ -77,6 +77,8 @@ import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
 import { millisToNanos } from '../lib/millis_to_nanos';
+import type { PodDispatch } from '../task_pod/pod_dispatch';
+import { RemoteTaskRunner } from '../task_pod/remote_task_runner';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -145,6 +147,7 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  podDispatch?: PodDispatch;
 } & Pick<Middleware, 'beforeRun'>;
 
 export enum TaskRunResult {
@@ -206,6 +209,7 @@ export class TaskManagerRunner implements TaskRunner {
   private isCancelled = false;
   private scheduleAtRunStart?: IntervalSchedule | RruleSchedule;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
+  private readonly podDispatch?: PodDispatch;
   private taskRunEventCustomFields?: Record<string, unknown>;
 
   /**
@@ -234,6 +238,7 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    podDispatch,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -255,6 +260,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.podDispatch = podDispatch;
   }
 
   /**
@@ -533,13 +539,45 @@ export class TaskManagerRunner implements TaskRunner {
 
           const abortController = new AbortController();
 
-          this.task = definition.createTaskRunner({
-            taskInstance: sanitizedTaskInstance,
-            ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
-            signal: abortController.signal,
-            executionUuid: this.uuid,
-            setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
-          });
+          // Service-account (`runAs`) tasks carry a closure that cannot cross a process boundary,
+          // so they always run in-process.
+          const pod = runAs ? undefined : this.podDispatch?.getPod(this.taskType);
+          if (pod && this.podDispatch) {
+            const { registry } = this.podDispatch;
+            this.task = new RemoteTaskRunner({
+              pod,
+              request: {
+                taskType: this.taskType,
+                taskInstance: JSON.parse(JSON.stringify(sanitizedTaskInstance)),
+                executionUuid: this.uuid,
+                apiKey: apiKeyForRequest,
+                spaceId: modifiedContext.taskInstance.userScope?.spaceId,
+                userProfileId,
+                userName,
+                uiamApiKeyExternal: modifiedContext.taskInstance.userScope?.uiamApiKeyExternal,
+                traceparent: modifiedContext.taskInstance.traceparent,
+                kibanaVersion: this.podDispatch.kibanaVersion,
+              },
+              timeoutMs: parseIntervalAsMillisecond(this.timeout),
+              signal: abortController.signal,
+              startRun: () =>
+                registry.startRun({
+                  executionUuid: this.uuid,
+                  taskType: this.taskType,
+                  getFakeRequest: () => fakeRequest,
+                }),
+              endRun: (token) => registry.endRun(token),
+              setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+            });
+          } else {
+            this.task = definition.createTaskRunner({
+              taskInstance: sanitizedTaskInstance,
+              ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
+              signal: abortController.signal,
+              executionUuid: this.uuid,
+              setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+            });
+          }
 
           const originalTaskCancel = this.task.cancel;
 

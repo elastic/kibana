@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_helpers';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { isEsqlUserError } from '../errors/esql_user_error';
 import { toQueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';

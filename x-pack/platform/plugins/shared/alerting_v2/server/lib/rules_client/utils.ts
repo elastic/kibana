@@ -30,7 +30,7 @@ import {
   validateComposedEsqlQuery,
   type ImmutableRuleField,
 } from '@kbn/alerting-v2-schemas';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server/task_helpers';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { applyPatch } from '../apply_patch';

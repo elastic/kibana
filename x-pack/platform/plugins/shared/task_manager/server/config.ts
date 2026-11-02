@@ -216,6 +216,17 @@ export const configSchema = schema.object(
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
       exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
     }),
+    /* Task pods: task types matching `task_types` (globs) run in the pod at `url` instead of in-process. */
+    pods: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          url: schema.string(),
+          task_types: schema.arrayOf(schema.string(), { minSize: 1 }),
+        })
+      )
+    ),
+    /* This node's URL as reachable from task pods; defaults to the server's own host and port. */
+    pod_callback_url: schema.maybe(schema.string()),
     /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
     version_conflict_threshold: schema.number({
       defaultValue: DEFAULT_VERSION_CONFLICT_THRESHOLD,

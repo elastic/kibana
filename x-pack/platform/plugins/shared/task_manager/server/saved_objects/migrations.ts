@@ -13,7 +13,7 @@ import type {
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type {
   RuleTaskState,
   MutableRuleTaskState,

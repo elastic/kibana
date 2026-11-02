@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
+import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task_helpers';
 import type { AlertingTaskDefinition } from '../../services/task_run_scope_service/create_task_runner';
 import { ALERT_ACTIONS_CLEANUP_TASK_TIMEOUT, ALERT_ACTIONS_CLEANUP_TASK_TYPE } from './constants';
 import { AlertActionsCleanupTaskRunner } from './task_runner';

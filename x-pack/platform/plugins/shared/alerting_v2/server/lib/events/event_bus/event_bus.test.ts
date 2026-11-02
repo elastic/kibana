@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AsyncLocalStorage } from 'node:async_hooks';
 import type { Logger } from '@kbn/core/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
@@ -378,6 +379,25 @@ describe('AsyncDomainEventBus', () => {
 
       expect(failing).toHaveBeenCalledWith(expect.objectContaining({ type: 'foo' }), context);
       expect(succeeding).toHaveBeenCalledWith(expect.objectContaining({ type: 'foo' }), context);
+    });
+  });
+
+  describe('async context', () => {
+    it("runs handlers in the publisher's async context", async () => {
+      const storage = new AsyncLocalStorage<string>();
+      const seen: Array<string | undefined> = [];
+      bus.subscribe<FooEvent>('foo', async () => {
+        await Promise.resolve();
+        seen.push(storage.getStore());
+      });
+
+      storage.run('run-1', () => bus.publish(fooEvent()));
+      storage.run('run-2', () => bus.publish(fooEvent()));
+      bus.publish(fooEvent());
+
+      await flushAsync();
+
+      expect(seen).toEqual(['run-1', 'run-2', undefined]);
     });
   });
 });

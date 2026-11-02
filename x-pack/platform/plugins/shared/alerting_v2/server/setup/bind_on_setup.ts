@@ -18,24 +18,17 @@ import type {
   AlertingServerStart,
 } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
-import { registerSavedObjects } from '../saved_objects';
-import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
-import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { registerCreateAlertEventStep } from '../lib/workflow_extensions/register_create_alert_event_step';
 import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
 import { registerAlertingV2ManagedWorkflowOwner } from '../lib/workflow_extensions/managed_workflows';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
-import {
-  ACTION_POLICY_EVENT_ACTIONS,
-  ACTION_POLICY_EVENT_PROVIDER,
-} from '../lib/dispatcher/steps/constants';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
 import { registerTelemetryEvents } from '../lib/telemetry/register_ebt_events';
 
 /**
- * Core platform setup-phase registrations (feature privileges, saved objects,
- * capabilities, UI settings, the action policy event log, workflow extensions,
- * and usage collection).
+ * Kibana-side setup-phase registrations (feature privileges, UI settings, telemetry events,
+ * workflow extensions, and usage collection). What tasks need to run (saved objects, the action
+ * policy event log) is in `bind_task_runtime`, which task pods load too.
  *
  * Larger / optional concerns live in their own setup modules: task definitions
  * in `bind_tasks` and Agent Builder in `bind_agent_builder`. `OnSetup` is a
@@ -45,16 +38,6 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
     registerFeaturePrivileges(container.get(PluginSetup('features')));
 
-    registerSavedObjects({
-      savedObjects: container.get(CoreSetup('savedObjects')),
-      encryptedSavedObjects: container.get(
-        PluginSetup<AlertingServerSetupDependencies['encryptedSavedObjects']>(
-          'encryptedSavedObjects'
-        )
-      ),
-      logger: container.get(LoggerServiceToken).forSubsystem('savedObjects'),
-    });
-
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
     registerAlertingAdvancedSettings(uiSettingsSetup);
@@ -62,18 +45,6 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     // Event types must be registered during setup, before the first `reportEvent`.
     const analyticsSetup = container.get(CoreSetup('analytics'));
     registerTelemetryEvents(analyticsSetup);
-
-    const eventLogService = container.get(
-      PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
-    );
-    eventLogService.registerProviderActions(
-      ACTION_POLICY_EVENT_PROVIDER,
-      Object.values(ACTION_POLICY_EVENT_ACTIONS)
-    );
-    const eventLogger = eventLogService.getLogger({
-      event: { provider: ACTION_POLICY_EVENT_PROVIDER },
-    });
-    container.bind(EventLoggerToken).toConstantValue(eventLogger);
 
     const workflowsExtensionsSetup = container.get(
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')

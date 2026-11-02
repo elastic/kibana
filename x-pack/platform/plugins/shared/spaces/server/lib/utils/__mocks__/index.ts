@@ -7,7 +7,7 @@
 
 const mockNamespaceIdToString = jest.fn();
 const mockNamespaceStringToId = jest.fn();
-jest.mock('@kbn/core/server', () => ({
+jest.mock('@kbn/core-saved-objects-utils-server', () => ({
   SavedObjectsUtils: {
     namespaceIdToString: mockNamespaceIdToString,
     namespaceStringToId: mockNamespaceStringToId,

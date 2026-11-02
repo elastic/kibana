@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsFindResponse, SavedObjectsClientContract } from '@kbn/core/server';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-common';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AggregationsStringTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';

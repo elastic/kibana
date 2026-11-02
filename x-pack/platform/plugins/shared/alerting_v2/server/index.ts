@@ -10,16 +10,12 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 import type { PluginConfig } from './config';
 import { configSchema } from './config';
 import { bindAgentBuilder } from './setup/bind_agent_builder';
-import { bindArtifactTypes } from './setup/bind_artifact_types';
 import { bindContract } from './setup/bind_contract';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
-import { bindServices } from './setup/bind_services';
-import { bindEvents } from './setup/bind_events';
-import { bindRuleExecutionServices } from './setup/bind_rule_executor';
-import { bindDispatcherExecutionServices } from './setup/bind_dispatcher_executor';
-import { bindTasks } from './setup/bind_tasks';
+import { bindTaskPodContracts } from './setup/bind_task_pod_contracts';
+import { bindTaskRuntime } from './setup/bind_task_runtime';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
@@ -29,17 +25,13 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 };
 
 const pluginModule = new ContainerModule((options) => {
+  bindTaskRuntime(options);
+  bindTaskPodContracts(options);
   bindOnSetup(options);
-  bindArtifactTypes(options);
   bindAgentBuilder(options);
   bindOnStart(options);
   bindContract(options);
   bindRoutes(options);
-  bindServices(options);
-  bindEvents(options);
-  bindRuleExecutionServices(options);
-  bindDispatcherExecutionServices(options);
-  bindTasks(options);
 });
 
 export { pluginModule as module };

@@ -23,6 +23,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/serverless",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*",
