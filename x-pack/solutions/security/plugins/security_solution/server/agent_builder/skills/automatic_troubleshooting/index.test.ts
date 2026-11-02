@@ -105,7 +105,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
       );
       expect(skill.content).toContain('Skip this step when no specific endpoint is involved.');
       expect(skill.content).toContain(
-        'If automatic_troubleshooting.generate_insight rejects the endpoint IDs, do not call it again'
+        'If automatic_troubleshooting.generate_insight rejects the endpoint IDs, do not call it again with other guessed IDs'
+      );
+      expect(skill.content).toContain(
+        "DON'T call it again with guessed IDs after it rejects the endpoint IDs"
       );
       expect(skill.content).toContain('After any other error, call it at most once more');
       expect(skill.content).not.toMatch(/mandatory/i);

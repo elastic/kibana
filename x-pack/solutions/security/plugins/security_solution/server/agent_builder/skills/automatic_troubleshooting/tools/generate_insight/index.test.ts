@@ -628,7 +628,9 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
         'This tool MUST be called when the findings concern one or more specific endpoints.'
       );
       expect(tool.description).toContain('Do not call it when no specific endpoint is involved');
-      expect(tool.description).toContain('If it rejects the endpoint IDs, do not call it again');
+      expect(tool.description).toContain(
+        'If it rejects the endpoint IDs, do not call it again with guessed IDs'
+      );
       expect(tool.description).toContain('after any other error, retry it at most once');
       expect(tool.description).not.toContain('MUST ALWAYS');
     });
