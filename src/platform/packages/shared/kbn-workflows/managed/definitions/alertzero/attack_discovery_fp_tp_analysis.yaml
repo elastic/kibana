@@ -118,6 +118,9 @@ outputs:
     - verdict
     - summary_markdown
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Attack Discovery worker"
   # Enforced by `require_supported_verdict`. `failed` is absent deliberately: it is
   # an execution state the review derives, not a classification.
   supported_verdicts:
@@ -269,14 +272,23 @@ steps:
       index: entities-latest-{{ workflow.spaceId }}
       size: 50
       # The template caps this string at 200k characters.
+      # entity.sub_type, entity.name, and the asset fields are what entity_role
+      # uses to tell a management host from a workstation.
       _source:
         - entity.id
         - entity.type
+        - entity.sub_type
+        - entity.name
         - host.name
         - host.id
         - user.name
         - user.id
         - asset.criticality
+        - asset.environment
+        - asset.name
+        - asset.model
+        - asset.owner
+        - asset.vendor
       query:
         bool:
           minimum_should_match: 1
@@ -401,6 +413,7 @@ steps:
     create-conversation: true
     timeout: "8m"
     with:
+      author_name: "{{ consts.author_name }}"
       configuration_overrides:
         enable_elastic_capabilities: false
         tools: []
@@ -479,8 +492,8 @@ steps:
         Claims:
         - claims.world: one entry for each world-check result the verdict relies on, with
           `check`, `result` (supports or contradicts), `source` (entity_store or
-          raw_event), and `id` — the `entity.id` of an entity store hit or the `_id` of a
-          raw event hit. Cite only ids that appear in the hits below.
+          raw_event), and `id` — the `entity.id` or the `_id` of an entity store hit, or the
+          `_id` of a raw event hit. Cite only ids that appear in the hits below.
         - claims.alert_link: when alert_linkage supports, the strongest pivot. `field`
           is one of user.name, user.id, host.id, host.name, process.entity_id,
           process.pid, agent.id, or source.ip. Include its `value` and the `_id`s of
@@ -656,11 +669,13 @@ steps:
       verdict: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
       summary_markdown: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}Evidence was truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
 
-  # A world claim may only cite an id from the hits. `capture` records a miss
-  # without depending on `assign` inside `for`. No claims is not a miss: claims
-  # are optional. An already inconclusive verdict is left as the model wrote it.
-  # `downgraded` is the string "true" or "false" because the loop cannot live in
-  # a typed `${{ }}` expression.
+  # A world claim may only cite an id from the hits. An entity-store claim may
+  # cite `entity.id` or the hit `_id`; the prompt renders both. A raw-event claim
+  # must cite that hit's `_id`. `capture` records a miss without depending on
+  # `assign` inside `for`. No claims is not a miss: claims are optional. An
+  # already inconclusive verdict is left as the model wrote it. `downgraded` is
+  # the string "true" or "false" because the loop cannot live in a typed `${{ }}`
+  # expression.
   - name: check_claim_grounding
     type: data.set
     with:
@@ -668,7 +683,8 @@ steps:
         {%- assign world = steps.analyze.output.structured_output.claims.world -%}
         {%- assign event_ids = steps.load_events.output.hits.hits | default: consts.no_rows | map: '_id' -%}
         {%- assign entity_ids = steps.load_entities.output.hits.hits | default: consts.no_rows | map: '_source.entity.id' -%}
-        {%- capture misses -%}{%- for claim in world -%}{%- if claim.source == 'raw_event' -%}{%- unless event_ids contains claim.id -%}x{%- endunless -%}{%- elsif claim.source == 'entity_store' -%}{%- unless entity_ids contains claim.id -%}x{%- endunless -%}{%- else -%}x{%- endif -%}{%- endfor -%}{%- endcapture -%}
+        {%- assign entity_doc_ids = steps.load_entities.output.hits.hits | default: consts.no_rows | map: '_id' -%}
+        {%- capture misses -%}{%- for claim in world -%}{%- if claim.source == 'raw_event' -%}{%- unless event_ids contains claim.id -%}x{%- endunless -%}{%- elsif claim.source == 'entity_store' -%}{%- unless entity_ids contains claim.id or entity_doc_ids contains claim.id -%}x{%- endunless -%}{%- else -%}x{%- endif -%}{%- endfor -%}{%- endcapture -%}
         {%- if misses != blank and steps.block_truncated_clear.output.verdict != 'inconclusive' -%}true{%- else -%}false{%- endif -%}
 
   # Same shape as `block_truncated_clear`: a verdict that cites evidence the

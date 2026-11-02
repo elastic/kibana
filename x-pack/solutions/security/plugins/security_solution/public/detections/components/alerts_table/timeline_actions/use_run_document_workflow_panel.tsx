@@ -34,9 +34,14 @@ const sortManualWorkflow = (a: WorkflowListItemDto, b: WorkflowListItemDto) =>
 
 export type DocumentTableContextMenuItem = EuiContextMenuPanelItemDescriptor;
 
+export interface DocumentSelection {
+  _id: string;
+  _index: string;
+}
+
 export interface DocumentWorkflowsPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  /** The selected documents; the server fetches each one's fields. */
+  documentIds: DocumentSelection[];
   onClose: () => void;
   /** Optional callback invoked when workflow execution is triggered. */
   onExecute?: () => void;
@@ -53,7 +58,7 @@ export interface DocumentWorkflowsPanelProps {
 
 /** A panel that lets users select and execute a workflow against one or more documents. **/
 export const DocumentWorkflowsPanel = ({
-  documents,
+  documentIds,
   onClose,
   onExecute,
   originEventId,
@@ -63,12 +68,12 @@ export const DocumentWorkflowsPanel = ({
     (): CaseAttachmentWorkflowTarget =>
       originEventId !== undefined
         ? { attachmentId: originEventId }
-        : { attachmentIds: documents.map(({ _id }) => _id) },
-    [documents, originEventId]
+        : { attachmentIds: documentIds.map(({ _id }) => _id) },
+    [documentIds, originEventId]
   );
   const fallbackTelemetry = useMemo(
-    () => getRunWorkflowTelemetry({ surface: 'document', isBulk, itemCount: documents.length }),
-    [documents.length, isBulk]
+    () => getRunWorkflowTelemetry({ surface: 'document', isBulk, itemCount: documentIds.length }),
+    [documentIds.length, isBulk]
   );
   const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
     attachmentType: SECURITY_EVENT_ATTACHMENT_TYPE,
@@ -80,10 +85,10 @@ export const DocumentWorkflowsPanel = ({
     () => ({
       event: {
         triggerType: 'document' as const,
-        documents,
+        documentIds,
       },
     }),
-    [documents]
+    [documentIds]
   );
 
   return (
@@ -102,13 +107,12 @@ export const DocumentWorkflowsPanel = ({
 export const RUN_DOCUMENT_WORKFLOW_PANEL_ID = 'RUN_DOCUMENT_WORKFLOW_PANEL_ID';
 export const RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH = 400;
 export interface UseRunDocumentWorkflowPanelProps {
-  /** Full documents including _id, _index, and all source fields */
-  documents: Array<{ _id: string; _index: string } & Record<string, unknown>>;
+  documentIds: DocumentSelection[];
   closePopover: () => void;
   /**
    * Pass `ecsRowData._id` from a row action so a run inside a case uses a `cases.attachment`
-   * origin. Omit for bulk actions. Outside a case the value is ignored. Inside a case, the menu
-   * item is hidden when Cases runs are unavailable or there is no document to target.
+   * origin. Omit for bulk actions. Outside a case the value is ignored. The menu item is hidden
+   * when there is no document to run on, or inside a case when Cases runs are unavailable.
    */
   originEventId?: string;
   /** Reports the run as a bulk run outside a case. Bulk actions set it. */
@@ -124,7 +128,7 @@ export interface UseRunDocumentWorkflowPanelResult {
 
 export const useRunDocumentWorkflowPanel = ({
   closePopover,
-  documents,
+  documentIds,
   originEventId,
   isBulk,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
@@ -132,12 +136,12 @@ export const useRunDocumentWorkflowPanel = ({
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   // Inside a case, only offer the action when the run can be recorded on the case.
   const caseRouting = useCaseAttachmentWorkflowRouting();
-  const hasCaseTarget = originEventId !== undefined || documents.length > 0;
-  const canRunInCase = caseRouting === 'outside' || (caseRouting === 'available' && hasCaseTarget);
+  const hasDocuments = documentIds.length > 0;
+  const canRunInCase = caseRouting !== 'unavailable';
 
   const canRunWorkflow = useMemo(
-    () => workflowUIEnabled && canExecuteWorkflow && canRunInCase,
-    [workflowUIEnabled, canExecuteWorkflow, canRunInCase]
+    () => workflowUIEnabled && canExecuteWorkflow && hasDocuments && canRunInCase,
+    [workflowUIEnabled, canExecuteWorkflow, hasDocuments, canRunInCase]
   );
 
   const runWorkflowMenuItem: DocumentTableContextMenuItem[] = useMemo(
@@ -163,7 +167,7 @@ export const useRunDocumentWorkflowPanel = ({
         width: RUN_DOCUMENT_WORKFLOWS_PANEL_WIDTH,
         content: (
           <DocumentWorkflowsPanel
-            documents={documents}
+            documentIds={documentIds}
             onClose={closePopover}
             originEventId={originEventId}
             isBulk={isBulk}
@@ -171,7 +175,7 @@ export const useRunDocumentWorkflowPanel = ({
         ),
       },
     ],
-    [closePopover, documents, isBulk, originEventId]
+    [closePopover, documentIds, isBulk, originEventId]
   );
 
   return useMemo(

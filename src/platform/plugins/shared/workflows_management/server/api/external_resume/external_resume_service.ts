@@ -275,6 +275,7 @@ async function resumeWorkflowExecutionWithResolvedContext(
 
   const claimed = await workflowsService.claimHitlStepForExternalResume(
     stepExecutionId,
+    executionId,
     resumedBy,
     spaceId
   );

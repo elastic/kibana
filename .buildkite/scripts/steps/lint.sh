@@ -15,7 +15,8 @@ echo "stylelint ✅"
 oxlint_core_dir="$(mktemp -d)"
 if sudo -n true 2>/dev/null; then
   sudo sysctl -q -w "kernel.core_pattern=$oxlint_core_dir/core.%e.%p" || echo "core_pattern is not writable, oxlint crashes won't leave core dumps"
-  ulimit -c unlimited 2>/dev/null || true
+  # `ulimit -c unlimited` left the limit at 0 on CI agents; raising the hard limit needs root
+  sudo prlimit --pid $$ --core=unlimited || echo "core size limit can't be raised, oxlint crashes won't leave core dumps"
 fi
 echo "oxlint core dumps: core_pattern=$(cat /proc/sys/kernel/core_pattern 2>/dev/null), ulimit -c=$(ulimit -c)"
 
