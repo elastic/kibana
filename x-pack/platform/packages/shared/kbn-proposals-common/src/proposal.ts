@@ -439,9 +439,9 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
 
 /**
  * A to-do for a human: something the analyst carries out themselves, so approving it records that
- * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
- * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
- * producer states it explicitly, and a proposal without an action that still asks for permission
+ * they did. Decision surfaces present it as "Mark as applied" (with Decline) rather than Approve,
+ * and as "Applied" once marked. Keyed on the category rather than on the absence of an action, so
+ * a producer states it explicitly, and a proposal without an action that still asks for permission
  * (to run an analysis, say) keeps Approve/Decline.
  */
 export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>

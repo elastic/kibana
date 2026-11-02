@@ -62,7 +62,7 @@ export interface ApprovalContentProps {
    */
   readOnly?: boolean;
   /**
-   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve" ("I've applied" for a
+   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve" ("Mark as applied" for a
    * to-do proposal, see `isTodoProposal`), disabled once the
    * proposal has expired — both derived here rather than supplied by the caller, so every host's
    * Approve button behaves and reads identically. Omit for a host that cannot record an approval,
@@ -73,11 +73,11 @@ export interface ApprovalContentProps {
   secondaryActions?: ApprovalAction[];
   /**
    * Enables the built-in decline flow. When set, a "Decline" trigger appears next to the Approve
-   * button; clicking it swaps the body for `DeclineReasonForm` and the footer for Cancel/Decline,
-   * entirely within this component — so a host never renders `DeclineReasonForm` itself or tracks
-   * its own declining mode. The same flow renders identically whether this is placed inside a
-   * modal or an Agent Builder chat card. Disabled whenever the Approve button is. Not offered
-   * for a to-do proposal (`isTodoProposal`), whose only decision is "I've applied".
+   * / "Mark as applied" button; clicking it swaps the body for `DeclineReasonForm` and the footer
+   * for Cancel/Decline, entirely within this component — so a host never renders
+   * `DeclineReasonForm` itself or tracks its own declining mode. The same flow renders identically
+   * whether this is placed inside a modal or an Agent Builder chat card. Disabled whenever the
+   * primary button is.
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
   /**
@@ -156,8 +156,8 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
-    // A to-do is the analyst's to carry out, so there is nothing to approve or decline: the one
-    // decision left is the human confirming they did it.
+    // A to-do is the analyst's to carry out: primary is "Mark as applied" instead of Approve, and
+    // Decline still lets them dismiss it without carrying it out.
     const isTodo = isTodoProposal(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
@@ -224,11 +224,11 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           ]
         : [
             ...(secondaryActions ?? []),
-            ...(onDismiss && !isTodo
+            ...(onDismiss
               ? [
                   {
                     label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
-                    color: 'text' as const,
+                    color: 'primary' as const,
                     iconType: 'cross' as const,
                     onClick: startDeclining,
                     isDisabled: isReplaced || primaryAction?.isDisabled,
@@ -264,14 +264,14 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    // Only a human's own "I've applied" can be taken back: nothing ran, so nothing is undone.
+    // Only a human's own "Mark as applied" can be taken back: nothing ran, so nothing is undone.
     const canReopen =
       Boolean(onReopen) && isTodo && !isReplaced && approvalPhase === 'marked_applied';
     const reopenAction: ApprovalAction | undefined =
       canReopen && onReopen
         ? {
             label: APPROVAL_MODAL_TRANSLATIONS.markNotApplied,
-            color: 'text',
+            color: 'primary',
             iconType: 'undo',
             isDisabled: readOnly,
             isLoading: isReopening,

@@ -11,11 +11,11 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   approve: i18n.translate('xpack.proposals.approvalModal.approve', {
     defaultMessage: 'Approve',
   }),
-  /** The single decision a to-do proposal offers: the human did what it proposes. */
+  /** The single decision a to-do proposal offers: the human confirms they carried it out. */
   markApplied: i18n.translate('xpack.proposals.approvalModal.markApplied', {
-    defaultMessage: "I've applied",
+    defaultMessage: 'Mark as applied',
   }),
-  /** Takes back a to-do proposal's "I've applied", re-offering it. */
+  /** Takes back a to-do proposal's "Mark as applied", re-offering it. */
   markNotApplied: i18n.translate('xpack.proposals.approvalModal.markNotApplied', {
     defaultMessage: 'Mark as not applied',
   }),
@@ -92,9 +92,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     'xpack.proposals.approvalModal.outcome.markedAppliedTitle',
     { defaultMessage: 'Marked as applied' }
   ),
-  /** The caption's name for the to-do category, which reads oddly sentence-cased as "Todo". */
+  /** The caption's name for the to-do category (not sentence-cased "Todo"). */
   todoCategory: i18n.translate('xpack.proposals.approvalModal.caption.todoCategory', {
-    defaultMessage: 'To do',
+    defaultMessage: 'Apply manually',
   }),
   actionErrorTitle: i18n.translate('xpack.proposals.approvalModal.outcome.actionError', {
     defaultMessage: 'Could not record the decision. Try again.',
