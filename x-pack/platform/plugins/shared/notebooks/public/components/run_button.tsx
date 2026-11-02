@@ -20,16 +20,14 @@ import type { RunMode } from '../../common/types';
 
 const RUN_LABEL = i18n.translate('xpack.notebook.runButton.run', { defaultMessage: 'Run' });
 
-const MODES: Record<RunMode, { icon: string; title: string; description: string }> = {
+const MODES: Record<RunMode, { title: string; description: string }> = {
   auto: {
-    icon: 'bolt',
     title: i18n.translate('xpack.notebook.runButton.auto', { defaultMessage: 'Auto' }),
     description: i18n.translate('xpack.notebook.runButton.autoDescription', {
       defaultMessage: 'Re-run automatically when upstream cells change',
     }),
   },
   manual: {
-    icon: 'play',
     title: i18n.translate('xpack.notebook.runButton.manual', { defaultMessage: 'Manual' }),
     description: i18n.translate('xpack.notebook.runButton.manualDescription', {
       defaultMessage: 'Run only when you click Run; marked stale when upstream cells change',
@@ -49,12 +47,12 @@ export const RunButton = ({
   onRunModeChange: (runMode: RunMode) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { icon, title, description } = MODES[runMode];
+  const { title, description } = MODES[runMode];
 
   return (
     <EuiSplitButton size="s" color={runMode === 'auto' ? 'primary' : 'text'}>
       <EuiSplitButton.ActionPrimary
-        iconType={icon}
+        iconType="play"
         onClick={onRun}
         tooltipProps={{ title, content: description }}
         data-test-subj="notebookCellRun"
@@ -82,7 +80,6 @@ export const RunButton = ({
               items={RUN_MODE_ORDER.map((mode) => (
                 <EuiContextMenuItem
                   key={mode}
-                  icon={MODES[mode].icon}
                   aria-current={mode === runMode}
                   onClick={() => {
                     setIsOpen(false);
