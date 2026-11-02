@@ -865,6 +865,43 @@ describe('StepExecutionRuntime', () => {
     });
   });
 
+  describe('getStepTimeoutMs', () => {
+    const createRuntime = (configuration?: Record<string, unknown>) =>
+      new StepExecutionRuntime({
+        node: { ...fakeNode, configuration } as GraphNodeUnion,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: {
+          renderValueAccordingToContext: jest.fn((value: string) =>
+            value === '{{ inputs.timeout }}' ? '2m' : value
+          ),
+        } as unknown as WorkflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
+
+    it('returns the step timeout in milliseconds', () => {
+      expect(createRuntime({ timeout: '10m' }).getStepTimeoutMs()).toBe(600_000);
+    });
+
+    it('renders a templated step timeout', () => {
+      expect(createRuntime({ timeout: '{{ inputs.timeout }}' }).getStepTimeoutMs()).toBe(120_000);
+    });
+
+    it('returns undefined when the node has no timeout', () => {
+      expect(createRuntime({ name: 'step' }).getStepTimeoutMs()).toBeUndefined();
+      expect(createRuntime().getStepTimeoutMs()).toBeUndefined();
+    });
+  });
+
+  // The ordering here is the whole point: `StepIoService.rehydrateOutputs`
+  // snapshots only the ids that are evicted at entry, so an id that is resident
+  // at that moment is not in its fetch set. If the pin were taken after the
+  // await -- or not at all -- the concurrent eviction cycle could drop that
+  // output during the ES round trip, and it would be neither fetched nor
+  // resident when the caller reads it.
   describe('rehydrateStepOutputs', () => {
     it('rehydrates the requested step execution ids', async () => {
       const rehydrate = jest.spyOn(stepIoService, 'rehydrate').mockImplementation(async () => {});

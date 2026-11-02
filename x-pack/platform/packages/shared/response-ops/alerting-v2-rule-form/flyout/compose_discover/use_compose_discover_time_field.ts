@@ -20,6 +20,8 @@ export interface TimeFieldOption {
 export interface ComposeDiscoverTimeFieldValue {
   timeFieldOptions: TimeFieldOption[];
   isTimeFieldResolved: boolean;
+  /** True while date-field discovery is in flight. Unresolved is not an error yet. */
+  isResolvingTimeField: boolean;
 }
 
 /**

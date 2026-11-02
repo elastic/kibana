@@ -37,7 +37,7 @@ describe('ExitWhileNodeImpl', () => {
     stepExecutionRuntime.finishStep = jest.fn();
     stepExecutionRuntime.getCurrentStepState = jest.fn();
     stepExecutionRuntime.contextManager = {
-      renderValueWithContext: jest.fn().mockImplementation((input) => input),
+      renderConditionWithContext: jest.fn().mockImplementation((input) => input),
       getContext: jest.fn().mockReturnValue({}),
     } as any;
 
@@ -69,7 +69,7 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 1,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderConditionWithContext as jest.Mock).mockReturnValue(
         true
       );
     });
@@ -93,7 +93,7 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
         iteration: 2,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderConditionWithContext as jest.Mock).mockReturnValue(
         false
       );
     });
@@ -153,7 +153,9 @@ describe('ExitWhileNodeImpl', () => {
       it('should not evaluate the condition', () => {
         underTest.run();
 
-        expect(stepExecutionRuntime.contextManager.renderValueWithContext).not.toHaveBeenCalled();
+        expect(
+          stepExecutionRuntime.contextManager.renderConditionWithContext
+        ).not.toHaveBeenCalled();
       });
     });
 
@@ -188,7 +190,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean true condition', () => {
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderConditionWithContext as jest.Mock).mockReturnValue(
         true
       );
 
@@ -198,7 +200,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean false condition', () => {
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderConditionWithContext as jest.Mock).mockReturnValue(
         false
       );
 
@@ -209,7 +211,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle undefined condition as false', () => {
-      (stepExecutionRuntime.contextManager.renderValueWithContext as jest.Mock).mockReturnValue(
+      (stepExecutionRuntime.contextManager.renderConditionWithContext as jest.Mock).mockReturnValue(
         undefined
       );
 

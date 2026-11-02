@@ -23,11 +23,14 @@ spec:
         ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: buildkite/on-merge
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        REPORT_FAILING_SUITES: 'true'
+        FAILING_SUITES_REPO: elastic/appex-qa-ai
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         SCOUT_REPORTER_ENABLED: 'true'
+        SCOUT_TEST_RUN_SCOPE: 'on-merge'
       allow_rebuilds: true
-      branch_configuration: main 9.5 9.4 8.19
+      branch_configuration: main 9.6 9.5 9.4 8.19
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/on_merge.yml

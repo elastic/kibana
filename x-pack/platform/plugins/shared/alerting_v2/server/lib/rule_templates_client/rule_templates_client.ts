@@ -90,8 +90,12 @@ export class RuleTemplatesClient {
       return item ? [item] : [];
     });
 
+    const ruleCounts = await this.tryGetRuleCounts(items.map(({ id }) => id));
+
     return {
-      items,
+      items: ruleCounts
+        ? items.map((item) => ({ ...item, rule_count: ruleCounts[item.id] ?? 0 }))
+        : items,
       total: res.total,
       page,
       per_page: perPage,
@@ -131,6 +135,23 @@ export class RuleTemplatesClient {
       | undefined;
 
     return aggregations?.tags?.buckets.map(({ key }) => key) ?? [];
+  }
+
+  /**
+   * The count is supplementary, so a failure is logged and the templates are listed
+   * without `rule_count` rather than failing the whole listing.
+   */
+  private async tryGetRuleCounts(templateIds: string[]): Promise<Record<string, number> | null> {
+    try {
+      return await this.rulesClient.getRuleCountsByTemplateId(templateIds);
+    } catch (e) {
+      this.logger.warn({
+        message: 'Failed to count the rules created from each rule template',
+        code: ALERTING_LOG_CODES.RULE_TEMPLATE_RULE_COUNT_FAILED,
+        error: e,
+      });
+      return null;
+    }
   }
 
   private async getRuleTemplateSo(id: string) {

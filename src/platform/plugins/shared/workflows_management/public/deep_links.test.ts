@@ -41,7 +41,7 @@ describe('getDeepLinks', () => {
     );
   });
 
-  it('orders Executions before Template Library when both are enabled', () => {
+  it('orders Executions before Template library when both are enabled', () => {
     const deepLinks = getDeepLinks({ executionsViewEnabled: true, libraryEnabled: true });
 
     expect(deepLinks.map((link) => link.id)).toEqual(['list', 'executions', 'library']);

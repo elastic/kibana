@@ -13,7 +13,6 @@ export type {
   ListServiceAccountsParams,
   ListServiceAccountWorkloadsResponse,
   ListServiceAccountsResponse,
-  ServiceAccountBoundWorkload,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from './service_accounts_api_client';

@@ -7,6 +7,7 @@
 
 import type { RuleAction, RuleSystemAction } from '@kbn/alerting-types';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../..';
 
@@ -37,7 +38,7 @@ interface FormatActionToEnqueueOpts {
   ruleConsumer: string;
   ruleId: string;
   ruleTypeId: string;
-  spaceId: string;
+  spaceId: SpaceId;
 }
 
 export const formatActionToEnqueue = (opts: FormatActionToEnqueueOpts) => {

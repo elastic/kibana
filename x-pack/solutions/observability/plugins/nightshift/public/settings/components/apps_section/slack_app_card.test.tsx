@@ -42,14 +42,6 @@ const renderCard = (props: React.ComponentProps<typeof SlackAppCard>) =>
   );
 
 describe('SlackAppCard', () => {
-  it('offers to connect the workspace when the Slack App is available', () => {
-    withConnection({});
-    renderCard({ canEdit: true, description: 'Custom description' });
-
-    expect(screen.getByText('Custom description')).toBeInTheDocument();
-    expect(screen.getByTestId('streamsSlackAppConnectButton')).toBeEnabled();
-  });
-
   it('renders nothing when the Slack App is unavailable', () => {
     withConnection({ available: false });
     renderCard({ canEdit: true });
@@ -63,6 +55,33 @@ describe('SlackAppCard', () => {
 
     expect(screen.getByTestId('streamsSlackAppUnavailable')).toBeInTheDocument();
     expect(screen.queryByTestId('streamsSlackAppConnectButton')).not.toBeInTheDocument();
+  });
+
+  it('shows who connected the workspace and when', () => {
+    withConnection({
+      status: 'connected',
+      workspace: { tenantKey: 'T0123ABC', name: 'Acme' },
+      createdBy: 'alice',
+      createdAt: '2026-10-19T12:00:00.000Z',
+    });
+    renderCard({ canEdit: true });
+
+    expect(screen.getByTestId('streamsSlackAppConnectedBy')).toHaveTextContent(
+      'Set up by alice on Oct 19, 2026'
+    );
+  });
+
+  it('shows only the date when the install had no username', () => {
+    withConnection({
+      status: 'connected',
+      workspace: { tenantKey: 'T0123ABC' },
+      createdAt: '2026-10-19T12:00:00.000Z',
+    });
+    renderCard({ canEdit: true });
+
+    expect(screen.getByTestId('streamsSlackAppConnectedBy')).toHaveTextContent(
+      'Set up on Oct 19, 2026'
+    );
   });
 
   it('shows the note when the status request failed', () => {

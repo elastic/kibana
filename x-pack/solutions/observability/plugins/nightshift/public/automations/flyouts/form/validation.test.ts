@@ -10,14 +10,7 @@ import {
   createTriggerFormValues,
   type TriggerFormValues,
 } from './automation_form_values';
-import {
-  canSaveAutomation,
-  getSaveBlocker,
-  hasDailyLimit,
-  isTriggerValid,
-  isValidCron,
-  isValidDailyLimit,
-} from './validation';
+import { canSaveAutomation, getSaveBlocker, isTriggerValid, isValidDailyLimit } from './validation';
 
 const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'every' }>> = {}) => ({
   ...(createTriggerFormValues('every') as Extract<TriggerFormValues, { kind: 'every' }>),
@@ -25,15 +18,6 @@ const everyTrigger = (overrides: Partial<Extract<TriggerFormValues, { kind: 'eve
 });
 
 describe('automation validation', () => {
-  it.each([
-    ['0 9 * * *', true],
-    ['*/15 9-17 * * 1-5', true],
-    ['0 9 * *', false],
-    ['not a cron', false],
-  ])('validates cron %s', (expression, expected) => {
-    expect(isValidCron(expression)).toBe(expected);
-  });
-
   it.each([
     ['1', true],
     ['50', true],
@@ -45,18 +29,10 @@ describe('automation validation', () => {
     expect(isValidDailyLimit(value)).toBe(expected);
   });
 
-  it('only applies a daily limit to event and interval triggers', () => {
-    expect(hasDailyLimit(undefined)).toBe(false);
-    expect(hasDailyLimit(createTriggerFormValues('alert'))).toBe(true);
-    expect(hasDailyLimit(createTriggerFormValues('every'))).toBe(true);
-    expect(hasDailyLimit(createTriggerFormValues('cron'))).toBe(false);
-  });
-
   it('validates triggers', () => {
     expect(isTriggerValid(undefined)).toBe(false);
     expect(isTriggerValid(createTriggerFormValues('alert'))).toBe(true);
     expect(isTriggerValid(everyTrigger({ unit: 'week', daysOfWeek: [] }))).toBe(false);
-    expect(isTriggerValid({ kind: 'cron', cronExpression: 'bad', timezone: 'UTC' })).toBe(false);
   });
 
   it('requires the hourly window to start before it ends', () => {
@@ -70,13 +46,15 @@ describe('automation validation', () => {
   describe('getSaveBlocker', () => {
     const values = createAutomationFormValues();
 
-    it('blocks an invalid custom cron', () => {
-      expect(
-        getSaveBlocker({
-          ...values,
-          trigger: { kind: 'cron', cronExpression: 'bad', timezone: 'UTC' },
-        })
-      ).toBe('Fix the cron expression to save');
+    it('requires instructions for a scheduled assessment', () => {
+      const scheduled = { ...values, trigger: createTriggerFormValues('every') };
+      expect(getSaveBlocker(scheduled)).toBe(
+        'Add instructions describing what this scheduled automation should investigate.'
+      );
+      expect(canSaveAutomation({ ...scheduled, instructions: 'Review checkout health.' })).toBe(
+        true
+      );
+      expect(canSaveAutomation({ ...scheduled, instructions: 'x'.repeat(10001) })).toBe(false);
     });
 
     it('blocks a Slack action without a destination', () => {

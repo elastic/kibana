@@ -6,6 +6,12 @@
  */
 
 import React from 'react';
+import { RunQuotaReachedBanner } from '../../components/ui/run_quota_reached_callout';
 import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
 
-export const KnowledgeIndicatorsTab = (): React.ReactElement => <KnowledgeIndicatorsTable />;
+export const KnowledgeIndicatorsTab = (): React.ReactElement => (
+  <>
+    <RunQuotaReachedBanner group="ki_extraction" />
+    <KnowledgeIndicatorsTable />
+  </>
+);

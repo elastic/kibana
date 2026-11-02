@@ -59,9 +59,6 @@ describe('setupDependencies', () => {
     logging: {
       console: true,
     },
-    http: {
-      allowedHosts: ['*'],
-    },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
     eviction: {
       maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),

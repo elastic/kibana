@@ -7,10 +7,32 @@
 
 import { isEmpty, isEqual, isPlainObject } from 'lodash';
 
-import { KAFKA_OAUTHBEARER_SASL_MECHANISM, kafkaAuthType } from '../../../common/constants';
+import {
+  KAFKA_OAUTHBEARER_SASL_MECHANISM,
+  kafkaAuthType,
+  kafkaKerberosAuthType,
+} from '../../../common/constants';
 import type { KafkaOutput, ValueOf } from '../../../common/types';
 
 type KafkaAuthTypeValue = ValueOf<typeof kafkaAuthType>;
+
+/**
+ * The authentication methods that keep their settings and their secrets in the output, under a
+ * key with the name of the method (`oauth2` and `secrets.oauth2`, for example).
+ */
+export const KAFKA_AUTH_METHODS = ['oauth2', 'kerberos'] as const;
+export type KafkaAuthMethod = (typeof KAFKA_AUTH_METHODS)[number];
+
+const AUTH_TYPE_OF_METHOD: Record<KafkaAuthMethod, KafkaAuthTypeValue> = {
+  oauth2: kafkaAuthType.OAuth2,
+  kerberos: kafkaAuthType.Kerberos,
+};
+
+/** The method an `auth_type` belongs to, if it is one that keeps its settings in the output. */
+export const getKafkaAuthMethod = (
+  authType: KafkaOutput['auth_type'] | null | undefined
+): KafkaAuthMethod | undefined =>
+  KAFKA_AUTH_METHODS.find((method) => AUTH_TYPE_OF_METHOD[method] === authType);
 
 /**
  * Output fields that only make sense for one `auth_type`. They are cleared when the output uses any
@@ -21,6 +43,7 @@ const KAFKA_AUTH_TYPE_OWNED_FIELDS: Partial<Record<KafkaAuthTypeValue, string[]>
   [kafkaAuthType.None]: ['connection_type'],
   [kafkaAuthType.Userpass]: ['username', 'password'],
   [kafkaAuthType.OAuth2]: ['oauth2'],
+  [kafkaAuthType.Kerberos]: ['kerberos'],
 };
 
 /**
@@ -29,6 +52,7 @@ const KAFKA_AUTH_TYPE_OWNED_FIELDS: Partial<Record<KafkaAuthTypeValue, string[]>
  */
 const KAFKA_AUTH_TYPE_CLEARED_FIELDS: Partial<Record<KafkaAuthTypeValue, string[]>> = {
   [kafkaAuthType.OAuth2]: ['sasl'],
+  [kafkaAuthType.Kerberos]: ['sasl'],
 };
 
 /**
@@ -37,6 +61,7 @@ const KAFKA_AUTH_TYPE_CLEARED_FIELDS: Partial<Record<KafkaAuthTypeValue, string[
  */
 const KAFKA_AUTH_TYPE_OWNED_SECRETS: Partial<Record<KafkaAuthTypeValue, string[]>> = {
   [kafkaAuthType.OAuth2]: ['oauth2'],
+  [kafkaAuthType.Kerberos]: ['kerberos'],
 };
 
 /**
@@ -88,85 +113,105 @@ export function omitKafkaSecretsOfOtherAuthTypes<T extends object>(
   return kept as T;
 }
 
+/** The parts of an output payload or saved output that the helpers read. */
+export interface KafkaAuthOutput {
+  type?: string;
+  auth_type?: string | null;
+  secrets?: unknown;
+  oauth2?: unknown;
+  kerberos?: unknown;
+}
+type SavedKafkaOutput = KafkaAuthOutput;
+
+const secretsOf = (output: { secrets?: unknown }, method: KafkaAuthMethod) =>
+  (output.secrets as Record<string, Record<string, unknown> | null | undefined> | undefined)?.[
+    method
+  ];
+
 /**
  * The saved object update merges objects: a secret that is no longer sent is deleted, but its
  * reference stays in the output unless it is explicitly set to `null`. Returns those `null`s for
- * the OAuth2 secrets that the output has and the update does not keep (`undefined` if none).
+ * the secrets of the method that the output has and the update does not keep (`undefined` if none).
  */
-export function getRemovedKafkaOAuth2Secrets(
+export function getRemovedKafkaAuthSecrets(
+  method: KafkaAuthMethod,
   original: { type?: string; secrets?: unknown },
   updatedSecrets: unknown
 ): Record<string, null> | undefined {
-  const savedOAuth2 = (original.secrets as { oauth2?: Record<string, unknown> } | undefined)
-    ?.oauth2;
-  if (original.type !== 'kafka' || !savedOAuth2) {
+  const saved = secretsOf(original, method);
+  if (original.type !== 'kafka' || !saved) {
     return undefined;
   }
 
-  const keptOAuth2 = (updatedSecrets as { oauth2?: Record<string, unknown> } | undefined)?.oauth2;
-  const removed = Object.keys(savedOAuth2).filter((key) => savedOAuth2[key] && !keptOAuth2?.[key]);
+  const kept = secretsOf({ secrets: updatedSecrets }, method);
+  const removed = Object.keys(saved).filter((key) => saved[key] && !kept?.[key]);
 
   return removed.length ? Object.fromEntries(removed.map((key) => [key, null])) : undefined;
 }
 
-interface SavedKafkaOutput {
-  type?: string;
-  auth_type?: string | null;
-  oauth2?: unknown;
-  secrets?: unknown;
-}
-
-const savedOAuth2Secrets = (output: SavedKafkaOutput): Record<string, unknown> | undefined =>
-  (output.secrets as { oauth2?: Record<string, unknown> } | undefined)?.oauth2;
-
 /**
  * An update that does not name an `auth_type` leaves the authentication of the output as it is. For
- * an output that uses OAuth2, the settings and secrets the update does not send are the saved
+ * an output that uses the method, the settings and secrets the update does not send are the saved
  * ones, so that renaming the output, for example, does not remove them.
  */
-export function withSavedKafkaOAuth2<T extends object>(original: SavedKafkaOutput, update: T): T {
-  const sent = update as { auth_type?: unknown; oauth2?: unknown; secrets?: { oauth2?: unknown } };
-  if (original.type !== 'kafka' || original.auth_type !== kafkaAuthType.OAuth2) {
+export function withSavedKafkaAuth<T extends object>(
+  method: KafkaAuthMethod,
+  original: SavedKafkaOutput,
+  update: T
+): T {
+  const sent = update as { auth_type?: unknown; secrets?: object } & Record<string, unknown>;
+  if (original.type !== 'kafka' || original.auth_type !== AUTH_TYPE_OF_METHOD[method]) {
     return update;
   }
   if (sent.auth_type !== undefined) {
     return update;
   }
 
-  const secrets = savedOAuth2Secrets(original);
+  const secrets = secretsOf(original, method);
 
   return {
     ...update,
-    ...(sent.oauth2 === undefined && original.oauth2 ? { oauth2: original.oauth2 } : {}),
-    ...(!sent.secrets?.oauth2 && secrets ? { secrets: { ...sent.secrets, oauth2: secrets } } : {}),
+    ...(sent[method] === undefined && original[method] ? { [method]: original[method] } : {}),
+    ...(!secretsOf(sent, method) && secrets
+      ? { secrets: { ...sent.secrets, [method]: secrets } }
+      : {}),
   };
 }
 
 /**
- * Whether an update keeps the OAuth2 authentication of an output exactly as it is: the same
- * settings, and the saved secrets sent back as references. Such an update does not need OAuth2 to
- * be allowed, it is an ordinary edit of the output.
+ * Whether an update keeps the authentication of an output exactly as it is: the same settings, and
+ * the saved secrets sent back as references. Such an update does not need the method to be
+ * allowed, it is an ordinary edit of the output.
+ *
+ * An update that names the authentication but leaves out the saved secrets does not keep it: the
+ * secrets would be deleted. (An update that does not name it gets the saved secrets restored first,
+ * see `withSavedKafkaAuth`.)
  */
-export function keepsKafkaOAuth2(
+export function keepsKafkaAuth(
+  method: KafkaAuthMethod,
   original: SavedKafkaOutput,
-  update: { type?: string; auth_type?: string | null; oauth2?: unknown; secrets?: unknown }
+  update: KafkaAuthOutput
 ): boolean {
-  if (original.type !== 'kafka' || original.auth_type !== kafkaAuthType.OAuth2) {
+  const authType = AUTH_TYPE_OF_METHOD[method];
+  if (original.type !== 'kafka' || original.auth_type !== authType) {
     return false;
   }
   if (
     (update.type !== undefined && update.type !== 'kafka') ||
-    (update.auth_type !== undefined && update.auth_type !== kafkaAuthType.OAuth2)
+    (update.auth_type !== undefined && update.auth_type !== authType)
   ) {
     return false;
   }
-  if (!isEqual(update.oauth2 ?? original.oauth2, original.oauth2)) {
+  if (!isEqual(update[method] ?? original[method], original[method])) {
     return false;
   }
 
-  const saved = savedOAuth2Secrets(original) ?? {};
-  const sent =
-    (update.secrets as { oauth2?: Record<string, unknown> } | undefined)?.oauth2 ?? saved;
+  const saved = secretsOf(original, method) ?? {};
+  const sent = secretsOf(update, method);
+  if (!sent) {
+    // nothing to lose when nothing is saved, e.g. an output set up before the settings existed
+    return isEmpty(saved);
+  }
   const isSavedReference = (key: string) =>
     isPlainObject(sent[key]) &&
     (sent[key] as { id?: string }).id === (saved[key] as { id?: string } | undefined)?.id;
@@ -233,16 +278,17 @@ const mergeSettings = (base: object, override: object): Record<string, unknown> 
 /**
  * The saved object update merges objects: a setting that is no longer sent would stay in the
  * output unless it is explicitly set to `null`, e.g. a verification that was skipped before. Returns
- * the new OAuth2 settings with a `null` for each saved setting that is not part of them.
+ * the new settings of the method with a `null` for each saved setting that is not part of them.
  */
-export function withRemovedKafkaOAuth2Settings<T extends object>(
+export function withRemovedKafkaAuthSettings<T extends object>(
+  method: KafkaAuthMethod,
   original: SavedKafkaOutput,
-  oauth2: T
+  settings: T
 ): T {
   const removed =
-    original.type === 'kafka' ? nullsForRemovedSettings(original.oauth2, oauth2) : undefined;
+    original.type === 'kafka' ? nullsForRemovedSettings(original[method], settings) : undefined;
 
-  return removed ? (mergeSettings(removed, oauth2) as T) : oauth2;
+  return removed ? (mergeSettings(removed, settings) as T) : settings;
 }
 
 const withoutNulls = (value: unknown): unknown => {
@@ -268,33 +314,44 @@ const withoutNulls = (value: unknown): unknown => {
 };
 
 /**
- * Removes the OAuth2 settings set to `null` by an update (see `withRemovedKafkaOAuth2Settings`)
- * from the attributes of a saved output, so they are not part of the output.
+ * Removes the settings of the method set to `null` by an update (see
+ * `withRemovedKafkaAuthSettings`) from the attributes of a saved output, so they are not part of
+ * the output.
  */
-export function omitRemovedKafkaOAuth2Settings<T extends object>(attributes: T): T {
-  const oauth2 = (attributes as { oauth2?: unknown }).oauth2;
-  if (!isPlainObject(oauth2)) {
+export function omitRemovedKafkaAuthSettings<T extends object>(
+  method: KafkaAuthMethod,
+  attributes: T
+): T {
+  const settings = (attributes as Record<string, unknown>)[method];
+  if (!isPlainObject(settings)) {
     return attributes;
   }
 
-  return { ...attributes, oauth2: withoutNulls(oauth2) };
+  return { ...attributes, [method]: withoutNulls(settings) };
 }
 
 /**
- * Removes the OAuth2 secrets set to `null` by an update (see `getRemovedKafkaOAuth2Secrets`) from
- * the attributes of a saved output, so they are not part of the output.
+ * Removes the secrets of the method set to `null` by an update (see `getRemovedKafkaAuthSecrets`)
+ * from the attributes of a saved output, so they are not part of the output.
  */
-export function omitRemovedKafkaOAuth2Secrets<T extends object>(attributes: T): T {
-  const secrets = (attributes as { secrets?: { oauth2?: Record<string, unknown> | null } }).secrets;
-  if (!secrets || !('oauth2' in secrets)) {
+export function omitRemovedKafkaAuthSecrets<T extends object>(
+  method: KafkaAuthMethod,
+  attributes: T
+): T {
+  const secrets = (attributes as { secrets?: Record<string, unknown> }).secrets;
+  if (!secrets || !(method in secrets)) {
     return attributes;
   }
 
-  const { oauth2, ...otherSecrets } = secrets;
-  const keptOAuth2 = Object.fromEntries(
-    Object.entries(oauth2 ?? {}).filter(([, secret]) => secret !== null && secret !== undefined)
+  const { [method]: methodSecrets, ...otherSecrets } = secrets;
+  const keptSecrets = Object.fromEntries(
+    Object.entries((methodSecrets as Record<string, unknown> | null) ?? {}).filter(
+      ([, secret]) => secret !== null && secret !== undefined
+    )
   );
-  const newSecrets = isEmpty(keptOAuth2) ? otherSecrets : { ...otherSecrets, oauth2: keptOAuth2 };
+  const newSecrets = isEmpty(keptSecrets)
+    ? otherSecrets
+    : { ...otherSecrets, [method]: keptSecrets };
 
   const { secrets: _secrets, ...otherAttributes } = attributes as T & { secrets?: unknown };
 
@@ -302,27 +359,28 @@ export function omitRemovedKafkaOAuth2Secrets<T extends object>(attributes: T): 
   return (isEmpty(newSecrets) ? otherAttributes : { ...otherAttributes, secrets: newSecrets }) as T;
 }
 
+/** Applies `omitRemovedKafkaAuthSettings` and `omitRemovedKafkaAuthSecrets` for every method. */
+export function omitRemovedKafkaAuthData<T extends object>(attributes: T): T {
+  return KAFKA_AUTH_METHODS.reduce(
+    (result, method) =>
+      omitRemovedKafkaAuthSettings(method, omitRemovedKafkaAuthSecrets(method, result)),
+    attributes
+  );
+}
+
 /**
- * Whether an output payload uses the OAuth2 authentication method: it names it, or it sets OAuth2
- * settings or secrets without naming another method (a partial update). OAuth2 settings sent along
- * with another `auth_type` are leftovers, they are cleared and do not count.
+ * Whether an output payload uses the authentication method: it names it, or it sets settings or
+ * secrets of the method without naming another one (a partial update). Settings sent along with
+ * another `auth_type` are leftovers, they are cleared and do not count.
  */
-export function usesKafkaOAuth2(output: {
-  type?: string;
-  auth_type?: string | null;
-  oauth2?: unknown;
-  secrets?: unknown;
-}): boolean {
+export function usesKafkaAuth(method: KafkaAuthMethod, output: KafkaAuthOutput): boolean {
   if (output.type !== 'kafka') {
     return false;
   }
   if (output.auth_type) {
-    return output.auth_type === kafkaAuthType.OAuth2;
+    return output.auth_type === AUTH_TYPE_OF_METHOD[method];
   }
-  return (
-    !isEmpty(output.oauth2) ||
-    !isEmpty((output.secrets as { oauth2?: unknown } | undefined)?.oauth2)
-  );
+  return !isEmpty(output[method]) || !isEmpty(secretsOf(output, method));
 }
 
 const isNumber = (value: unknown): value is number =>
@@ -354,9 +412,33 @@ const pruneEmpty = (value: unknown): unknown => {
  * method adds the keys it needs here.
  */
 export function buildKafkaAuthData(
-  output: Pick<KafkaOutput, 'auth_type' | 'username' | 'password' | 'sasl' | 'oauth2'>
+  output: Pick<KafkaOutput, 'auth_type' | 'username' | 'password' | 'sasl' | 'oauth2' | 'kerberos'>
 ): Record<string, unknown> {
-  const { username, password, sasl, oauth2 } = output;
+  const { username, password, sasl, oauth2, kerberos } = output;
+
+  if (output.auth_type === kafkaAuthType.Kerberos) {
+    // the `kerberos` settings switch the agent to the GSSAPI mechanism by themselves: a `sasl`
+    // mechanism or top-level credentials next to them are not valid. Only the settings of the
+    // authentication type in use are sent, the password comes with the secrets.
+    const {
+      auth_type: kerberosAuthType,
+      keytab,
+      username: kerberosUsername,
+      ...others
+    } = kerberos ?? {};
+    const isKeytab = kerberosAuthType === kafkaKerberosAuthType.Keytab;
+
+    return kerberos
+      ? {
+          kerberos: {
+            enabled: true,
+            auth_type: kerberosAuthType,
+            ...(isKeytab ? { keytab } : { username: kerberosUsername }),
+            ...others,
+          },
+        }
+      : {};
+  }
 
   if (output.auth_type === kafkaAuthType.OAuth2) {
     const { timeout, expiry_buffer: expiryBuffer, ...otherSettings } = oauth2 ?? {};

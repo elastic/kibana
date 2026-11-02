@@ -47,7 +47,7 @@ export class ExitWhileNodeImpl implements NodeImplementation {
         ...whileAdditionalContext,
       };
 
-      const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
+      const renderedCondition = this.stepExecutionRuntime.contextManager.renderConditionWithContext(
         this.node.condition,
         context
       );

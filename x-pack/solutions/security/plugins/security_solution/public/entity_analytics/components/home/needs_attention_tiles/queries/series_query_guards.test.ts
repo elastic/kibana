@@ -73,28 +73,35 @@ describe('series queries count exactly, with one column per dot', () => {
 });
 
 describe('series queries apply the entity filters where the count does', () => {
-  const lookupJoinTo = (end: string) => (query: string) =>
-    query.slice(query.indexOf('| LOOKUP JOIN'), query.indexOf(end));
+  // After the rows are grouped: the join to the main entity, then the filters.
+  const groupFilterSteps = (query: string) =>
+    query.slice(
+      query.indexOf('| EVAL entity.id = effective_id'),
+      query.indexOf(FILTERS[0]) + FILTERS[0].length
+    );
 
   it.each([
     {
       tile: 'alert based',
       series: buildAlertBasedTilesSeriesQuery(INDEX, NAMESPACE, '7d', FILTERS),
       count: buildAlertBasedTilesQuery(INDEX, NAMESPACE, '7d', FILTERS),
-      shared: lookupJoinTo('| EVAL is_watchlisted'),
+      shared: groupFilterSteps,
     },
     {
       tile: 'anomalies',
       series: buildEntitiesWithAnomaliesSeriesQuery(INDEX, '7d', FILTERS, JOBS),
       count: buildEntitiesWithAnomaliesCountQuery(INDEX, '7d', FILTERS, JOBS),
-      shared: lookupJoinTo('| EVAL effective_id'),
+      shared: groupFilterSteps,
     },
     {
       tile: 'new entity',
       series: buildNewEntitySeriesQuery(INDEX, '7d', FILTERS),
       count: buildNewEntityCountQuery(INDEX, '7d', FILTERS),
       shared: (query: string) =>
-        query.slice(query.indexOf('| WHERE entity.risk'), query.indexOf('| EVAL effective_id')),
+        query.slice(
+          query.indexOf('| WHERE entity.name IS NOT NULL'),
+          query.indexOf('| EVAL group_score')
+        ),
     },
   ])('for the $tile tile', ({ series, count, shared }) => {
     expect(shared(series)).toContain(FILTERS[0]);

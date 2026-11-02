@@ -6,9 +6,6 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
-import type { UserProfile } from '@kbn/core-user-profile-common';
 import type { RuleObjectId } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type {
   RuleChangesHistoryResponse,
@@ -21,20 +18,16 @@ const DEFAULT_PER_PAGE = 20;
 
 export interface GetHistoryForRuleArgs {
   rulesClient: RulesClient;
-  userProfileService: UserProfileServiceStart;
   ruleId: RuleObjectId;
   page?: number;
   perPage?: number;
-  logger?: Logger;
 }
 
 export const getHistoryForRule = async ({
   rulesClient,
-  userProfileService,
   ruleId,
   page = DEFAULT_PAGE,
   perPage = DEFAULT_PER_PAGE,
-  logger,
 }: GetHistoryForRuleArgs): Promise<RuleChangesHistoryResponse> => {
   // Run queries concurrently:
   // - main: the requested page (newest-first, +1 extra for old_values computation)
@@ -57,11 +50,10 @@ export const getHistoryForRule = async ({
   ]);
 
   const fetchedItems = result.items;
-  const userProfilesById = await resolveUserProfiles(userProfileService, fetchedItems, logger);
   const resultItems: RuleHistoryItem[] = [];
 
   for (let i = 0; i < Math.min(perPage, fetchedItems.length); ++i) {
-    resultItems.push(mapRuleHistoryItem(fetchedItems[i], fetchedItems[i + 1], userProfilesById));
+    resultItems.push(mapRuleHistoryItem(fetchedItems[i], fetchedItems[i + 1]));
   }
 
   return {
@@ -71,26 +63,4 @@ export const getHistoryForRule = async ({
     tracking_started_at: oldestResult.items[0]?.['@timestamp'],
     items: resultItems,
   };
-};
-
-const resolveUserProfiles = async (
-  userProfileService: UserProfileServiceStart,
-  items: Array<{ user?: { id?: string } }>,
-  logger?: Logger
-): Promise<Map<string, UserProfile>> => {
-  const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
-
-  if (uids.size === 0) {
-    return new Map();
-  }
-
-  try {
-    const profiles = await userProfileService.bulkGet({ uids });
-
-    return new Map(profiles.map((profile) => [profile.uid, profile]));
-  } catch (error) {
-    logger?.warn(`Failed to resolve user profiles for rule history: ${error.message}`);
-
-    return new Map();
-  }
 };

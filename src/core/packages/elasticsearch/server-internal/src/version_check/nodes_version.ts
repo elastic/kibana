@@ -9,29 +9,27 @@
 
 /**
  * The Elasticsearch version check as a state-action machine. The control state
- * picks the polling interval: STARTUP until the cluster is first compatible,
+ * names the polling interval: STARTUP until the cluster is first compatible,
  * FAILING while the request fails, NORMAL otherwise.
  */
 
 import { ReplaySubject, type Observable } from 'rxjs';
-import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 import {
-  mapNodesVersionCompatibility,
+  compatibilityFromNodesInfo,
   sameCompatibility,
   type NodesInfo,
   type NodesVersionCompatibility,
 } from './nodes_version_compatibility';
 import {
-  nextOnGrid,
+  attempt,
   realClock,
   run,
   type Action,
   type ActionResult,
   type AugmentedState,
   type Clock,
-  type Scheduled,
   type StateActionMachine,
 } from './state_action_machine';
 
@@ -39,8 +37,8 @@ export interface NodesVersionConfig {
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;
   healthCheckInterval: number;
-  healthCheckFailureInterval?: number;
-  healthCheckStartupInterval?: number;
+  healthCheckFailureInterval: number;
+  healthCheckStartupInterval: number;
   healthCheckRetry: number;
 }
 
@@ -48,13 +46,12 @@ export type NodesVersionResult = ActionResult<NodesInfo>;
 
 export type NodesVersionControlState = 'STARTUP' | 'NORMAL' | 'FAILING';
 
-export interface NodesVersionState extends Scheduled {
+export interface NodesVersionState {
   readonly controlState: NodesVersionControlState;
   /** `undefined` until the first compatibility settles. */
   readonly compatibility: NodesVersionCompatibility | undefined;
-  /** Retries left before a request error settles as the compatibility. */
-  readonly attemptsLeft: number;
-  readonly nextActionAt: number;
+  /** Failed requests since the last settled compatibility; each is retried up to `healthCheckRetry`. */
+  readonly failures: number;
 }
 
 export type NodesVersionEvent =
@@ -62,15 +59,11 @@ export type NodesVersionEvent =
   | { readonly type: 'compatibilityChanged'; readonly compatibility: NodesVersionCompatibility }
   | { readonly type: 'compatibilityUnchanged' };
 
-export const initialState = (
-  config: NodesVersionConfig,
-  nextActionAt: number
-): NodesVersionState => ({
+const initialState: NodesVersionState = {
   controlState: 'STARTUP',
   compatibility: undefined,
-  attemptsLeft: config.healthCheckRetry,
-  nextActionAt,
-});
+  failures: 0,
+};
 
 const pollingInterval = (
   config: NodesVersionConfig,
@@ -78,10 +71,9 @@ const pollingInterval = (
 ): number => {
   switch (controlState) {
     case 'STARTUP':
-      // `||`, not `??`: a configured zero falls back, as the failure interval does.
-      return config.healthCheckStartupInterval || config.healthCheckInterval;
+      return config.healthCheckStartupInterval;
     case 'FAILING':
-      return config.healthCheckFailureInterval || config.healthCheckInterval;
+      return config.healthCheckFailureInterval;
     case 'NORMAL':
       return config.healthCheckInterval;
   }
@@ -105,34 +97,30 @@ const nextControlState = (
   compatibility: NodesVersionCompatibility
 ): NodesVersionControlState => {
   if (state.controlState === 'STARTUP' && !compatibility.isCompatible) {
-    // A request error before the cluster was ever compatible is still startup.
+    // Until the cluster is first compatible, neither an error nor an incompatible answer ends startup.
     return 'STARTUP';
   }
   // An incompatible but reachable cluster is NORMAL: only request errors are FAILING.
   return result.ok ? 'NORMAL' : 'FAILING';
 };
 
-export const model = (
+const model = (
   config: NodesVersionConfig,
   state: NodesVersionState,
   result: NodesVersionResult
 ): AugmentedState<NodesVersionState, NodesVersionEvent> => {
-  const schedule = (controlState: NodesVersionControlState): number =>
-    nextOnGrid(state.nextActionAt, result.completedAt, pollingInterval(config, controlState));
-
-  if (!result.ok && state.attemptsLeft > 0) {
+  if (!result.ok && state.failures < config.healthCheckRetry) {
     return {
       state: {
         ...state,
-        attemptsLeft: state.attemptsLeft - 1,
-        nextActionAt: schedule(state.controlState),
+        failures: state.failures + 1,
       },
       event: { type: 'retried' },
     };
   }
 
-  const compatibility = mapNodesVersionCompatibility(
-    result.ok ? result.value : { nodes: {}, nodesInfoRequestError: result.error },
+  const compatibility = compatibilityFromNodesInfo(
+    result,
     config.kibanaVersion,
     config.ignoreVersionMismatch
   );
@@ -143,8 +131,7 @@ export const model = (
     state: {
       controlState,
       compatibility,
-      attemptsLeft: config.healthCheckRetry,
-      nextActionAt: schedule(controlState),
+      failures: 0,
     },
     event: changed
       ? { type: 'compatibilityChanged', compatibility }
@@ -156,9 +143,12 @@ export const nodesVersionMachine = (
   action: Action<NodesInfo>,
   config: NodesVersionConfig
 ): StateActionMachine<NodesVersionState, NodesInfo, NodesVersionEvent> => ({
-  initialState: (start) => initialState(config, start),
+  initialState,
   next: () => action,
-  model: (state, result) => model(config, state, result),
+  model: (state, result) => {
+    const step = model(config, state, result);
+    return { ...step, wait: pollingInterval(config, step.state.controlState) };
+  },
 });
 
 export interface CheckEsNodesVersionOptions {
@@ -173,45 +163,35 @@ export const checkEsNodesVersion = async ({
   kibanaVersion,
   ignoreVersionMismatch,
 }: CheckEsNodesVersionOptions): Promise<NodesVersionCompatibility> => {
-  const machine = nodesVersionMachine(fetchNodesInfo(internalClient), {
-    kibanaVersion,
-    ignoreVersionMismatch,
-    healthCheckInterval: 0,
-    healthCheckRetry: 1,
-  });
-  for await (const { event } of run(machine)) {
-    if (event.type === 'compatibilityChanged') {
-      return event.compatibility;
-    }
-  }
-  throw new Error('The version check stopped without a compatibility');
+  const fetch = fetchNodesInfo(internalClient);
+  const check = async () =>
+    compatibilityFromNodesInfo(
+      await attempt(fetch, realClock.now),
+      kibanaVersion,
+      ignoreVersionMismatch
+    );
+  const first = await check();
+  return first.nodesInfoRequestError ? check() : first;
 };
 
 export interface PollEsNodesVersionOptions extends NodesVersionConfig {
   internalClient: ElasticsearchClient;
-  log: Logger;
   signal: AbortSignal;
 }
 
 /** Polls until `signal` aborts, emitting each changed compatibility and replaying the latest. */
 export const pollEsNodesVersion = (
-  { internalClient, log, signal, ...config }: PollEsNodesVersionOptions,
+  { internalClient, signal, ...config }: PollEsNodesVersionOptions,
   clock: Clock = realClock
 ): Observable<NodesVersionCompatibility> => {
-  log.debug('Checking Elasticsearch version');
   const compatibility$ = new ReplaySubject<NodesVersionCompatibility>(1);
   const machine = nodesVersionMachine(fetchNodesInfo(internalClient), config);
 
   const poll = async (): Promise<void> => {
     for await (const { event } of run(machine, clock, signal)) {
-      if (event.type !== 'compatibilityChanged') {
-        continue;
+      if (event.type === 'compatibilityChanged') {
+        compatibility$.next(event.compatibility);
       }
-      const { compatibility } = event;
-      if (!compatibility.isCompatible && compatibility.message) {
-        log.error(compatibility.message);
-      }
-      compatibility$.next(compatibility);
     }
   };
   poll().then(

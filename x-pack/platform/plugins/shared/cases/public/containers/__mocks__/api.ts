@@ -199,4 +199,6 @@ export const patchObservable = jest.fn();
 export const deleteObservable = jest.fn();
 export const bulkDeleteObservables = jest.fn();
 
+export const bulkDeleteAttachments = jest.fn();
+
 export const searchEvents = jest.fn();

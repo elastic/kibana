@@ -92,7 +92,7 @@ export const installSecurityManagedWorkflowsAndMarkReady = async ({
 
 /**
  * Periodic catch-up for spaces created after boot. Installs only
- * `attribute_alerts_to_reports` per missing space (ingest/enrich are global).
+ * `attribute_alerts_to_reports` per missing space (ingest/enrich live in the default space).
  * Intended to ride the promote_threat_indicators task every 15m.
  */
 export const reconcileThreatIntelAttributeWorkflowsForSpaces = async ({
@@ -118,7 +118,7 @@ export const reconcileThreatIntelAttributeWorkflowsForSpaces = async ({
 };
 
 /**
- * Full TI managed-workflow install (globals + per-space attribute) for every
+ * Full TI managed-workflow install (default-space supply workflows + per-space attribute) for every
  * current space. Used when bootstrap recovers after the boot-time installer
  * skipped TI because `bootstrapReady` had rejected.
  */

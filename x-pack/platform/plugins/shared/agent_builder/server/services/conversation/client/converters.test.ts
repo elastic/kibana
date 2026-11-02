@@ -2044,7 +2044,7 @@ describe('conversation model converters', () => {
       }
     );
 
-    it('refreshes the preserved user_message when a rounds-path input change hits a resumed round', () => {
+    it('keeps the preserved user_message unchanged when a rounds-path input change hits a resumed round', () => {
       const events = multiExecutionTimeline();
 
       const rounds = eventsToRounds(events);
@@ -2073,11 +2073,7 @@ describe('conversation model converters', () => {
         expect.arrayContaining(['mr::execution::1::execution_terminated'])
       );
       const userMessage = updated.events?.find((e) => e.id === 'mr::user_message');
-      expect((userMessage?.data as { attachment_refs?: unknown }).attachment_refs).toEqual([
-        { attachment_id: 'att-1', version: 1 },
-      ]);
-      // Keep the original user message, not the resume message.
-      expect((userMessage?.data as { message: string }).message).toBe('do it');
+      expect(userMessage).toEqual(conversation.events?.find((e) => e.id === 'mr::user_message'));
     });
 
     it('regenerates round-derived events when rounds change', () => {
@@ -2423,8 +2419,27 @@ describe('conversation model converters', () => {
       });
 
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      expect(updated.rounds).toBe(passedThroughRounds);
       expect(updated.rounds[0].response?.message).toBe('stored truth');
+    });
+
+    it('honors caller-supplied rounds when events are also provided (step-only appendEvents)', () => {
+      const base = eventsNativeStored();
+      const callerRounds = [{ ...base.rounds[0], response: { message: 'updated response' } }];
+
+      const updated = updateConversation({
+        conversation: base,
+        update: {
+          id: base.id,
+          events: base.events!,
+          rounds: callerRounds,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.rounds[0].response?.message).toBe('updated response');
     });
 
     it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {
@@ -2630,6 +2645,81 @@ describe('conversation model converters', () => {
         expect(result.template_version).toBeUndefined();
         expect(result.metadata).toBeUndefined();
       });
+    });
+  });
+
+  describe('active_execution', () => {
+    const activeExecution = {
+      execution_id: 'execution-1',
+      started_at: creationDate,
+    };
+
+    const documentWith = (
+      source: Partial<ConversationDocument['_source']>
+    ): ConversationDocument => ({
+      _id: 'conv-active',
+      _seq_no: 1,
+      _primary_term: 1,
+      _source: {
+        agent_id: 'agent_id',
+        title: 'Active conv',
+        user_id: 'user_id',
+        user_name: 'user_name',
+        space: 'space',
+        conversation_rounds: [],
+        created_at: creationDate,
+        updated_at: updateDate,
+        ...source,
+      },
+    });
+
+    it('active_execution round-trips through fromEs and toEs', () => {
+      const conversation = fromEs(
+        documentWith({ active_execution: activeExecution }),
+        requestingUser
+      );
+
+      expect(conversation.active_execution).toEqual(activeExecution);
+      expect(toEs(conversation, 'space').active_execution).toEqual(activeExecution);
+    });
+
+    it('leaves active_execution undefined when absent', () => {
+      const conversation = fromEs(documentWith({}), requestingUser);
+
+      expect(conversation.active_execution).toBeUndefined();
+      expect(toEs(conversation, 'space').active_execution).toBeUndefined();
+    });
+
+    it('is not exposed on list rows', () => {
+      expect(
+        fromEsWithoutRounds(documentWith({ active_execution: activeExecution }), requestingUser)
+      ).not.toHaveProperty('active_execution');
+    });
+
+    it('is kept on responses', () => {
+      const response = toConversationResponseFromDocument({
+        document: documentWith({ active_execution: activeExecution }),
+        user: requestingUser,
+        resolveTemplate: () => undefined,
+      });
+
+      expect(response.active_execution).toEqual(activeExecution);
+    });
+
+    it('createRequestToEs writes active_execution when present', () => {
+      const result = createRequestToEs({
+        conversation: {
+          agent_id: 'agent_id',
+          title: 'Active conv',
+          rounds: [],
+          active_execution: activeExecution,
+        },
+        space: 'space',
+        currentUser: { id: 'user_id', username: 'user_name' },
+        creationDate: new Date(creationDate),
+      });
+
+      expect(result.active_execution).toEqual(activeExecution);
     });
   });
 });

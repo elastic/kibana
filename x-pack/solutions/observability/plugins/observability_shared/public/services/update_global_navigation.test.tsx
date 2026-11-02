@@ -389,20 +389,20 @@ describe('updateGlobalNavigation', () => {
         });
       });
 
-      it('excludes the alerts deep link from globalSearch when showV1AlertsInGlobalSearch is false', () => {
+      it('hides the alerts deep link from every nav location when showV1Alerts is false', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
           logs: { show: true },
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
-        const deepLinks = [
+        const deepLinks: AppDeepLink[] = [
           {
             id: 'alerts',
             title: 'Alerts',
             order: 8001,
             path: '/alerts',
-            visibleIn: [],
+            visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
           },
         ];
         const callback = jest.fn();
@@ -415,7 +415,7 @@ describe('updateGlobalNavigation', () => {
           deepLinks,
           updater$,
           pricing,
-          showV1AlertsInGlobalSearch: false,
+          showV1Alerts: false,
         });
 
         expect(callback).toHaveBeenCalledWith({
@@ -425,7 +425,7 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['classicSideNav', 'projectSideNav'],
+              visibleIn: [],
             },
           ],
           status: AppStatus.accessible,

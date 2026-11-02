@@ -14,6 +14,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { withSpan } from '@kbn/apm-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
 import type { ClientCreateRequest } from '@kbn/data-streams/src/types/es_api';
 import type { Logger } from '@kbn/logging';
@@ -39,7 +40,7 @@ import type {
   GetChangeHistoryByFieldsResult,
   ObjectChange,
 } from './types';
-import { sha256, sanitizeFields } from './utils';
+import { sha256, sanitizeFields, enrichWithProfiles } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
 
@@ -48,9 +49,17 @@ type ChangeHistoryDataStreamClient = DataStreamClient<
   ChangeHistoryDocument
 >;
 
+export interface ChangeHistoryClientInitializeOptions {
+  /** When supplied, `getHistory` and `getEvent` resolve `user.full_name` and `user.email` at read time; lookup failures are swallowed. */
+  userProfileService?: UserProfileServiceStart;
+}
+
 export interface IChangeHistoryClient {
   isInitialized(): boolean;
-  initialize(elasticsearchClient: ElasticsearchClient): Promise<void>;
+  initialize(
+    elasticsearchClient: ElasticsearchClient,
+    opts?: ChangeHistoryClientInitializeOptions
+  ): Promise<void>;
   log(change: ObjectChange, opts: LogChangeHistoryOptions): Promise<void>;
   logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): Promise<void>;
   getHistory(
@@ -79,6 +88,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
   private kibanaVersion: string;
   private logger: Logger;
   private client?: ChangeHistoryDataStreamClient;
+  private userProfileService?: UserProfileServiceStart;
 
   constructor({
     module,
@@ -118,15 +128,20 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
   /**
    * Initialize the change tracking service.
    * @param elasticsearchClient The privileged elasticsearch client `core.elasticsearch.client.asInternalUser`.
+   * @param opts Optional integration hooks; see {@link ChangeHistoryClientInitializeOptions}.
    * @returns A promise that resolves when the change tracking service is initialized.
    * @throws An error if the data stream is not initialized properly.
    */
-  async initialize(elasticsearchClient: ElasticsearchClient) {
+  async initialize(
+    elasticsearchClient: ElasticsearchClient,
+    opts?: ChangeHistoryClientInitializeOptions
+  ) {
     if (!FLAGS.FEATURE_ENABLED) {
       const error = new Error(`Change history is disabled. Skipping initialization.`);
       this.logger.error(error);
       throw error;
     }
+    this.userProfileService = opts?.userProfileService;
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
       {
         name: DATA_STREAM_NAME,
@@ -309,9 +324,11 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           from: opts?.from,
         })
     );
+    const items = history.hits.hits.map((h) => h._source).filter((i) => !!i);
+    await this.enrichUsers(items, opts?.spanLabels);
     return {
       total: Number((history.hits.total as SearchTotalHits)?.value) || 0,
-      items: history.hits.hits.map((h) => h._source).filter((i) => !!i),
+      items,
     };
   }
 
@@ -354,7 +371,11 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
           size: 1,
         })
     );
-    return response.hits.hits[0]?._source;
+    const document = response.hits.hits[0]?._source;
+    if (document) {
+      await this.enrichUsers([document], opts?.spanLabels);
+    }
+    return document;
   }
 
   /**
@@ -405,6 +426,20 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         ...this.parseHistoryByFieldAggregation(response.aggregations, field),
       })),
     };
+  }
+
+  private async enrichUsers(
+    items: ChangeHistoryDocument[],
+    spanLabels?: GetChangeHistoryOptions['spanLabels']
+  ): Promise<void> {
+    const { userProfileService } = this;
+    if (!userProfileService) {
+      return;
+    }
+    await withSpan(
+      { name: 'change_history.resolve_user_profiles', type: 'app', labels: spanLabels },
+      () => enrichWithProfiles(items, userProfileService, this.logger)
+    );
   }
 
   private getInitializedClient(): ChangeHistoryDataStreamClient {

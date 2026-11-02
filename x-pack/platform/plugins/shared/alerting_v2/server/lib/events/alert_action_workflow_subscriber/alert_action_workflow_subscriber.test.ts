@@ -71,7 +71,7 @@ describe('AlertActionWorkflowSubscriber', () => {
 
       await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
@@ -95,7 +95,7 @@ describe('AlertActionWorkflowSubscriber', () => {
       await expect(
         handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
           request,
-          origin: 'user',
+          origin: { actor: 'user', channel: 'api' },
         })
       ).resolves.toBeUndefined();
 

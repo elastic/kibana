@@ -96,7 +96,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const spy = jest.spyOn(plugin, 'initializeCspResources').mockResolvedValue(undefined);
 
       await plugin.start(coreMock.createStart(), mockPlugins);
       await mockPlugins.fleet.fleetSetupCompleted();
@@ -113,7 +113,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const spy = jest.spyOn(plugin, 'initializeCspResources').mockResolvedValue(undefined);
 
       await plugin.start(coreMock.createStart(), mockPlugins);
       await mockPlugins.fleet.fleetSetupCompleted();
@@ -141,7 +141,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const spy = jest.spyOn(plugin, 'initializeCspResources').mockResolvedValue(undefined);
       const loggerWarnSpy = jest.spyOn(context.logger.get(), 'warn');
 
       await plugin.start(coreMock.createStart(), mockPlugins);
@@ -175,7 +175,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockResolvedValue(undefined);
+      const spy = jest.spyOn(plugin, 'initializeCspResources').mockResolvedValue(undefined);
       const loggerErrorSpy = jest.spyOn(context.logger.get(), 'error');
 
       await plugin.start(coreMock.createStart(), mockPlugins);
@@ -225,7 +225,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+      const spy = jest.spyOn(plugin, 'initializeCspResources').mockImplementation();
 
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);
@@ -293,7 +293,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const context = coreMock.createPluginInitializerContext<unknown>();
       plugin = new CspPlugin(context);
-      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+      const spy = jest.spyOn(plugin, 'initializeCspResources').mockImplementation();
 
       // Act
       await plugin.start(coreMock.createStart(), mockPlugins);

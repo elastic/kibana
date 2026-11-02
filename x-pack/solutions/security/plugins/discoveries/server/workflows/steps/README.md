@@ -316,7 +316,7 @@ The `_generate` endpoint is the REST equivalent for async mode, and it remains a
 
 | Direction | Key Fields |
 |-----------|------------|
-| **Input** | `connector_id` (optional), `alert_retrieval_mode` (enum: `custom_only`\|`custom_query`\|`esql`\|`provided`, default `custom_query`), `mode` (enum: `async`\|`sync`, default `sync`), `alerts` (string[], optional pre-retrieved), `size` (default 100), `start`/`end`, `filter`, `esql_query`, `alert_retrieval_workflow_ids`, `validation_workflow_id`, `additional_context` |
+| **Input** | `connector_id` (optional), `alert_retrieval_mode` (enum: `custom_only`\|`custom_query`\|`esql`\|`provided`, default `custom_query`), `mode` (enum: `async`\|`sync`, default `sync`), `alerts` (string[], optional pre-retrieved), `size` (default 100), `start`/`end`, `filter`, `esql_query`, `alert_retrieval_workflow_ids`, `validation_workflow_id`, `additional_context`, `ground_truth_gate_enabled` (default `true`; `false` skips the generation-phase gate) |
 | **Output** | `attack_discoveries` (nullable array), `execution_uuid`, `status` (enum: `pending`\|`completed`), `alerts_context_count`, `discovery_count` |
 
 ---
