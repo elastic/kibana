@@ -7,6 +7,7 @@
 
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
+import { ModelRefusalError } from '@kbn/langchain/server';
 import {
   attackDiscoveryRefineTemplateRequest,
   createAttackDiscoveryTemplateCompletion,
@@ -19,6 +20,20 @@ const inferenceClient = { chatComplete } as unknown as InferenceClient;
 describe('createAttackDiscoveryTemplateCompletion', () => {
   beforeEach(() => {
     chatComplete.mockClear();
+  });
+
+  it('throws a ModelRefusalError when the response carries a content filter refusal', async () => {
+    chatComplete.mockResolvedValueOnce({
+      content: '',
+      refusal:
+        'The response was stopped by the provider content filter (finish_reason: content_filter).',
+    });
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+    });
+
+    await expect(complete({ alerts: ['a'], phase: 'generate' })).rejects.toThrow(ModelRefusalError);
   });
 
   it('clamps alerts and the partial JSON to the gateway schema', async () => {

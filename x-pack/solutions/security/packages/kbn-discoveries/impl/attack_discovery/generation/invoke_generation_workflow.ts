@@ -23,6 +23,7 @@ import {
 import { getDurationNanoseconds } from '../../lib/persistence';
 
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
+import { isContentFilterError } from '../../lib/errors/is_content_filter_error';
 import { isContextLengthExceededError } from '../../lib/errors/is_context_length_exceeded_error';
 
 import type {
@@ -227,6 +228,14 @@ const extractGenerationWorkflowResult = ({
 }): ExtractedGenerationWorkflowResult => {
   if (execution.status === 'failed') {
     const errorMessage = execution.error?.message ?? 'Unknown error';
+
+    if (isContentFilterError(errorMessage)) {
+      throw new AttackDiscoveryError({
+        errorCategory: 'content_filter',
+        message: `Generation workflow failed: ${errorMessage}`,
+        workflowId: execution.workflowId,
+      });
+    }
 
     if (isContextLengthExceededError(errorMessage)) {
       throw new AttackDiscoveryError({
