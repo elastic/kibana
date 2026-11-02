@@ -62,11 +62,15 @@ describe('buildListQuery', () => {
         expect(lines[0]).toBe('SET unmapped_fields="nullify";');
         expect(lines[1]).toBe(`${engine} ${plan.indexPattern}`);
         expect(lines[2]).toBe('| WHERE `@timestamp` >= ?from AND `@timestamp` < ?to');
-        expect(lines.slice(3, 5)).toEqual(
+        const predicates =
           plan.filter !== undefined
             ? [`    AND (${plan.filter})`, `    AND ${identity.presenceFilter}`]
-            : [`    AND ${identity.presenceFilter}`, expect.stringMatching(/^\| STATS /)]
-        );
+            : [`    AND ${identity.presenceFilter}`];
+        expect(lines.slice(3, 4 + predicates.length)).toEqual([
+          ...predicates,
+          `| EVAL ${identity.normalization}`,
+        ]);
+        expect(lines[4 + predicates.length]).toMatch(/^\| STATS /);
 
         plan.attributes.forEach(({ name, field }) => {
           const quotedField = quoteIdentifier(field);
@@ -240,6 +244,7 @@ TS metrics-kubernetes.state_deployment-*
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (metricset.name == "state_deployment")
     AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
+| EVAL \`kubernetes.namespace\` = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))), \`kubernetes.deployment.name\` = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)

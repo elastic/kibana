@@ -76,7 +76,10 @@ describe('buildCountQuery', () => {
     expect(esql).not.toMatch(/^TS /m);
     expect(esql).toMatch(/\| STATS `count` = COUNT\(\*\)$/);
     expect(esql).not.toContain('COUNT_DISTINCT');
-    expect(esql).not.toContain('| EVAL');
+    expect(esql.match(/\| EVAL /g)).toHaveLength(1);
+    expect(esql).toContain(
+      `\n| EVAL ${resolveIdentityPlan(k8sNodeFixture).normalization}\n| STATS BY \`kubernetes.node.name\`\n`
+    );
   });
 
   it('counts k8s.deployment across both plans, filtering only the state plan', () => {
@@ -93,7 +96,11 @@ describe('buildCountQuery', () => {
         ' AND (metricset.name == "state_deployment")))\n'
     );
     expect(esql.split('metricset.name').length - 1).toBe(1);
-    expect(esql).toContain('| STATS BY `kubernetes.namespace`, `kubernetes.deployment.name`\n');
+    expect(esql).toContain(
+      `\n| EVAL ${
+        resolveIdentityPlan(k8sDeploymentFixture).normalization
+      }\n| STATS BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`\n`
+    );
     expect(esql).toContain(
       `\n| EVAL ${
         resolveIdentityPlan(k8sDeploymentFixture).idEvaluation
@@ -111,13 +118,18 @@ describe('buildCountQuery', () => {
     expect(Parser.parse(esql).root.commands.map(({ name }) => name)).toEqual([
       'from',
       'where',
+      'eval',
       'stats',
       'eval',
       'stats',
       'stats',
     ]);
     expect(esql).toContain(`\n| EVAL ${resolveIdentityPlan(hostLikeFixture).idEvaluation}\n`);
-    expect(esql).toContain('\n| STATS BY `host.id`, `host.name`\n| EVAL ');
+    expect(esql).toContain(
+      `\n| EVAL ${
+        resolveIdentityPlan(hostLikeFixture).normalization
+      }\n| STATS BY \`host.id\`, \`host.name\`\n| EVAL `
+    );
     expect(esql).toMatch(/\n\| STATS BY `entity\.id`\n\| STATS `count` = COUNT\(\*\)$/);
     expect(esql).not.toContain('COUNT_DISTINCT');
   });

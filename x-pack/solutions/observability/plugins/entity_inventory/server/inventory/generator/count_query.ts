@@ -62,7 +62,7 @@ export const buildCountQuery = ({
   if (plans.length === 0) {
     throw new Error('the count query needs at least one plan');
   }
-  const { groupingFields, presenceFilter, idEvaluation } = identity;
+  const { groupingFields, normalization, presenceFilter, idEvaluation } = identity;
   const patterns = [...new Set(plans.map(({ indexPattern }) => indexPattern))];
   // Bare: Elasticsearch rejects a quoted name in `METADATA` ("Unresolved metadata pattern").
   const metadata = plans.length > 1 ? ' METADATA _index' : '';
@@ -89,6 +89,7 @@ export const buildCountQuery = ({
     'SET unmapped_fields="nullify";',
     `FROM ${patterns.join(', ')}${metadata}`,
     `| WHERE ${predicates.join('\n    AND ')}`,
+    `| EVAL ${normalization}`,
     `| STATS BY ${groupingFields.map(quoteIdentifier).join(', ')}`,
     ...tail,
   ].join('\n');

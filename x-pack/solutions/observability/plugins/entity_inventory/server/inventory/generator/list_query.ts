@@ -58,7 +58,7 @@ export const buildListQuery = ({
 }: ListQueryInput): GeneratedQuery => {
   assertValidLimit(limit);
   const { engine, indexPattern, filter } = plan;
-  const { groupingFields, presenceFilter, idEvaluation } = identity;
+  const { groupingFields, normalization, presenceFilter, idEvaluation } = identity;
 
   const predicates = [
     `${TIMESTAMP} >= ?from AND ${TIMESTAMP} < ?to`,
@@ -74,6 +74,7 @@ export const buildListQuery = ({
     'SET unmapped_fields="nullify";',
     `${engine} ${indexPattern}`,
     `| WHERE ${predicates.join(`${CONTINUATION}AND `)}`,
+    `| EVAL ${normalization}`,
     `| STATS ${aggregations.join(`,${CONTINUATION}`)}${CONTINUATION}BY ${groupingFields
       .map(quoteIdentifier)
       .join(', ')}`,

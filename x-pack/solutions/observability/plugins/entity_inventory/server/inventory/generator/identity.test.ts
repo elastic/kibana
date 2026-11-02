@@ -115,13 +115,23 @@ describe('resolveIdentityPlan', () => {
   it.each(INVENTORY_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
     'the identity output of %s parses in a query',
     (_type, definition) => {
-      const { groupingFields, presenceFilter, idEvaluation } = resolveIdentityPlan(definition);
-      const esql = `FROM x | WHERE ${presenceFilter} | STATS c = COUNT(*) BY ${groupingFields.join(
+      const { groupingFields, normalization, presenceFilter, idEvaluation } =
+        resolveIdentityPlan(definition);
+      const esql = `FROM x | WHERE ${presenceFilter} | EVAL ${normalization} | STATS c = COUNT(*) BY ${groupingFields.join(
         ', '
       )} | EVAL ${idEvaluation}`;
       expect(() => assertParses(esql)).not.toThrow();
     }
   );
+
+  it('reduces each grouping field to its identity value under its own name', () => {
+    const { groupingFields, normalization } = resolveIdentityPlan(k8sNodeFixture);
+
+    expect(normalization.split(/,\s(?=`)/)).toHaveLength(groupingFields.length);
+    groupingFields.forEach((field) => {
+      expect(normalization).toContain(`\`${field}\` = CASE(MV_MIN(TO_STRING(${field})) == ""`);
+    });
+  });
 
   it('throws InventoryDefinitionError for a definition without dynamic', () => {
     const { dynamic, ...withoutDynamic } = k8sNodeFixture;

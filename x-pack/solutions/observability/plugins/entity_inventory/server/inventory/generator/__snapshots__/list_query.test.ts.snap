@@ -6,6 +6,7 @@ Object {
 FROM metrics-system.*
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))) IS NOT NULL OR CASE(MV_MIN(TO_STRING(host.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.name))), 1, 1)), MV_MIN(TO_STRING(host.name))) IS NOT NULL)
+| EVAL \`host.id\` = CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))), \`host.name\` = CASE(MV_MIN(TO_STRING(host.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.name))), 1, 1)), MV_MIN(TO_STRING(host.name)))
 | STATS \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`host.id\`, \`host.name\`
@@ -34,6 +35,7 @@ Object {
 TS metrics-system.*
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))) IS NOT NULL OR CASE(MV_MIN(TO_STRING(host.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.name))), 1, 1)), MV_MIN(TO_STRING(host.name))) IS NOT NULL)
+| EVAL \`host.id\` = CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))), \`host.name\` = CASE(MV_MIN(TO_STRING(host.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.name))), 1, 1)), MV_MIN(TO_STRING(host.name)))
 | STATS \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`host.id\`, \`host.name\`
@@ -62,6 +64,7 @@ Object {
 FROM metrics-kubeletstatsreceiver.otel-default
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
+| EVAL \`kubernetes.namespace\` = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))), \`kubernetes.deployment.name\` = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
@@ -91,6 +94,7 @@ FROM metrics-kubernetes.state_deployment-*
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (metricset.name == \\"state_deployment\\")
     AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
+| EVAL \`kubernetes.namespace\` = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))), \`kubernetes.deployment.name\` = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
@@ -120,6 +124,7 @@ Object {
 TS metrics-kubeletstatsreceiver.otel-default
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
+| EVAL \`kubernetes.namespace\` = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))), \`kubernetes.deployment.name\` = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
@@ -149,6 +154,7 @@ TS metrics-kubernetes.state_deployment-*
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (metricset.name == \\"state_deployment\\")
     AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
+| EVAL \`kubernetes.namespace\` = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))), \`kubernetes.deployment.name\` = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
@@ -178,6 +184,7 @@ Object {
 FROM metrics-kubeletstatsreceiver.otel-default
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND ((CASE(MV_MIN(TO_STRING(kubernetes.node.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.node.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.node.name))) IS NOT NULL))
+| EVAL \`kubernetes.node.name\` = CASE(MV_MIN(TO_STRING(kubernetes.node.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.node.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.node.name)))
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
     \`os.type\` = LAST(\`host.os.type\`, \`@timestamp\`) WHERE \`host.os.type\` IS NOT NULL,
@@ -204,6 +211,7 @@ Object {
 TS metrics-kubeletstatsreceiver.otel-default
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND ((CASE(MV_MIN(TO_STRING(kubernetes.node.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.node.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.node.name))) IS NOT NULL))
+| EVAL \`kubernetes.node.name\` = CASE(MV_MIN(TO_STRING(kubernetes.node.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.node.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.node.name)))
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
     \`os.type\` = LAST(\`host.os.type\`, \`@timestamp\`) WHERE \`host.os.type\` IS NOT NULL,

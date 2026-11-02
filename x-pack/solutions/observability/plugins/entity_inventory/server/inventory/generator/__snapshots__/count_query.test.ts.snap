@@ -5,6 +5,7 @@ exports[`buildCountQuery counts a ranked identity by evaluating the id and count
 FROM metrics-system.*
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))) IS NOT NULL OR CASE(MV_MIN(TO_STRING(host.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.name))), 1, 1)), MV_MIN(TO_STRING(host.name))) IS NOT NULL)
+| EVAL \`host.id\` = CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))), \`host.name\` = CASE(MV_MIN(TO_STRING(host.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.name))), 1, 1)), MV_MIN(TO_STRING(host.name)))
 | STATS BY \`host.id\`, \`host.name\`
 | EVAL host_id_present = CASE(MV_MIN(TO_STRING(host.id)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.id))), 1, 1)), MV_MIN(TO_STRING(host.id))) IS NOT NULL,
  host_name_present = CASE(MV_MIN(TO_STRING(host.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(host.name))), 1, 1)), MV_MIN(TO_STRING(host.name))) IS NOT NULL,
@@ -21,6 +22,7 @@ FROM metrics-kubeletstatsreceiver.otel-default, metrics-kubernetes.state_deploym
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
     AND ((\`_index\` LIKE \\"metrics-kubeletstatsreceiver.otel-default\\" OR \`_index\` LIKE \\".ds-metrics-kubeletstatsreceiver.otel-default-????.??.??-*\\") OR ((\`_index\` LIKE \\"metrics-kubernetes.state_deployment-*\\" OR \`_index\` LIKE \\".ds-metrics-kubernetes.state_deployment-*-????.??.??-*\\") AND (metricset.name == \\"state_deployment\\")))
+| EVAL \`kubernetes.namespace\` = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))), \`kubernetes.deployment.name\` = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))
 | STATS BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
 | EVAL kubernetes_namespace_present = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL,
  kubernetes_deployment_name_present = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL,
@@ -36,6 +38,7 @@ exports[`buildCountQuery counts k8s.node from its single plan without any _index
 FROM metrics-kubeletstatsreceiver.otel-default
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND ((CASE(MV_MIN(TO_STRING(kubernetes.node.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.node.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.node.name))) IS NOT NULL))
+| EVAL \`kubernetes.node.name\` = CASE(MV_MIN(TO_STRING(kubernetes.node.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.node.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.node.name)))
 | STATS BY \`kubernetes.node.name\`
 | STATS \`count\` = COUNT(*)"
 `;
@@ -46,6 +49,7 @@ FROM metrics-kubernetes.* METADATA _index
 | WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
     AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
     AND (((\`_index\` LIKE \\"metrics-kubernetes.*\\" OR \`_index\` LIKE \\".ds-metrics-kubernetes.*-????.??.??-*\\") AND (metricset.name == \\"state_deployment\\")) OR ((\`_index\` LIKE \\"metrics-kubernetes.*\\" OR \`_index\` LIKE \\".ds-metrics-kubernetes.*-????.??.??-*\\") AND (metricset.name == \\"state_replicaset\\")))
+| EVAL \`kubernetes.namespace\` = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))), \`kubernetes.deployment.name\` = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))
 | STATS BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
 | EVAL kubernetes_namespace_present = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL,
  kubernetes_deployment_name_present = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == \\"\\", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL,
