@@ -51,6 +51,9 @@ import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maint
 import {
   consumeRunQuota,
   createRunQuotaInternalRepository,
+  dayKey,
+  releaseRunQuota,
+  resolveDailyWindow,
   runQuotaLedgerSavedObjectType,
   runQuotaSettingsSavedObjectType,
 } from './lib/run_quotas';
@@ -134,6 +137,7 @@ import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
+import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -188,10 +192,17 @@ export class SignificantEventsPlugin
       if (!this.server?.core) {
         throw new Error('Significant Events start services are unavailable');
       }
-      return consumeRunQuota({
-        internalRepository: createRunQuotaInternalRepository(this.server),
+      const internalRepository = createRunQuotaInternalRepository(this.server);
+      const date = dayKey(resolveDailyWindow());
+      const { allowed } = await consumeRunQuota({
+        internalRepository,
         group: 'investigation',
+        date,
       });
+      return {
+        allowed,
+        release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
+      };
     });
 
     core.dataStreams.registerDataStream(detectionsDataStream);
@@ -560,6 +571,17 @@ export class SignificantEventsPlugin
             await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
           }
         },
+        syncContinuousOnboarding: (event) =>
+          syncContinuousOnboarding({
+            event,
+            workflowService: continuousOnboardingWorkflowService,
+            maintenanceService: this.maintenanceService,
+            getStartServices: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              return { coreStart, pluginsStart };
+            },
+            logger: this.logger,
+          }),
       })
     );
 
