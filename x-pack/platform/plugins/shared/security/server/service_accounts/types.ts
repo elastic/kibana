@@ -96,21 +96,25 @@ export interface ServiceAccountsBackend {
   reauthenticateFakeRequest(request: KibanaRequest): Promise<{ authorization: string } | null>;
 
   /**
-   * Replaces the credential of a service-account-bound fake request when it would expire within
-   * `validForMs`. Only meant to be called by Core's HTTP self client credential refresher, before a
-   * self call hands the credential to a route handler that cannot refresh it. Same credential-only
-   * result and ownership rules as {@link reauthenticateFakeRequest}. Has three outcomes:
+   * Refreshes the credential of a service-account-bound fake request to try to cover `validForMs`.
+   * A token minted within the reuse window is kept. An older one is replaced when it expires before
+   * `validForMs`, or when its lifetime is unknown. Only meant to be called by Core's HTTP self
+   * client refresher, before a self call hands the credential to a route handler that cannot
+   * refresh it. Same credential-only result and ownership rules as
+   * {@link reauthenticateFakeRequest}. Has three outcomes:
    *
-   * - The auth headers to send, when the current credential covers the call or was replaced.
+   * - The auth headers to send, when the current credential is reused or was replaced. This does
+   *   not guarantee that the credential lasts for the whole call.
    * - `null` when the request is not this backend's, its `authorization` header no longer carries
    *   the token issued for it, or a replacement failed for now (a backoff, an upstream 5xx).
-   * - A {@link ServiceAccountCredentialRefusedError} when the credential does not cover the call
-   *   and the request will never get a replacement: its binding is gone or was replaced, its
-   *   account was revoked, or its lease expired.
+   * - A {@link ServiceAccountCredentialRefusedError} when a replacement is needed and the request
+   *   will never get one: its binding is gone or was replaced, its account was revoked, or its
+   *   lease expired.
    *
    * A refusal is only noticed when a replacement is needed. While the current credential covers the
    * call nothing re-checks the binding, so a workload keeps running for up to one token lifetime
-   * after it was unbound. A credential whose lifetime the backend did not report is never refused.
+   * after it was unbound. A credential of unknown lifetime is replaced, and so re-checked, on any
+   * self call made more than the reuse window after it was minted.
    */
   refreshFakeRequestBeforeUse(
     request: KibanaRequest,

@@ -586,7 +586,7 @@ describe('ServiceAccountFakeRequests', () => {
     });
   });
 
-  describe('#ensureTokenValidFor', () => {
+  describe('#refreshTokenBeforeUse', () => {
     const TOKEN_LIFETIME_MS = 5 * 60 * 1000;
 
     /** Makes the next mint answer only after `delayMs`. */
@@ -612,7 +612,7 @@ describe('ServiceAccountFakeRequests', () => {
 
     it('throws for a request that is not bound to a service account', async () => {
       await expect(
-        fakeRequests.ensureTokenValidFor(httpServerMock.createFakeKibanaRequest({}), 60_000)
+        fakeRequests.refreshTokenBeforeUse(httpServerMock.createFakeKibanaRequest({}), 60_000)
       ).rejects.toThrowError('The provided request is not bound to a service account.');
     });
 
@@ -622,7 +622,9 @@ describe('ServiceAccountFakeRequests', () => {
 
       jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 60_000);
 
-      await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe('essu_token_1');
+      await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
+        'essu_token_1'
+      );
       expect(mintToken).not.toHaveBeenCalled();
     });
 
@@ -632,7 +634,9 @@ describe('ServiceAccountFakeRequests', () => {
 
       jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 59_999);
 
-      await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe('essu_token_2');
+      await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
+        'essu_token_2'
+      );
       expect(mintToken).toHaveBeenCalledTimes(1);
       expect(request.headers.authorization).toBe('Bearer essu_token_2');
     });
@@ -644,7 +648,7 @@ describe('ServiceAccountFakeRequests', () => {
       // Three minutes left cannot cover a four minute call, but a new five minute token can.
       jest.advanceTimersByTime(2 * 60_000);
 
-      await expect(fakeRequests.ensureTokenValidFor(request, 4 * 60_000)).resolves.toBe(
+      await expect(fakeRequests.refreshTokenBeforeUse(request, 4 * 60_000)).resolves.toBe(
         'essu_token_2'
       );
       expect(mintToken).toHaveBeenCalledTimes(1);
@@ -655,15 +659,15 @@ describe('ServiceAccountFakeRequests', () => {
       mintToken.mockClear();
 
       jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
-      await expect(fakeRequests.ensureTokenValidFor(request, 2 * TOKEN_LIFETIME_MS)).resolves.toBe(
-        'essu_token_1'
-      );
+      await expect(
+        fakeRequests.refreshTokenBeforeUse(request, 2 * TOKEN_LIFETIME_MS)
+      ).resolves.toBe('essu_token_1');
       expect(mintToken).not.toHaveBeenCalled();
 
       jest.advanceTimersByTime(1);
-      await expect(fakeRequests.ensureTokenValidFor(request, 2 * TOKEN_LIFETIME_MS)).resolves.toBe(
-        'essu_token_2'
-      );
+      await expect(
+        fakeRequests.refreshTokenBeforeUse(request, 2 * TOKEN_LIFETIME_MS)
+      ).resolves.toBe('essu_token_2');
       expect(mintToken).toHaveBeenCalledTimes(1);
     });
 
@@ -674,7 +678,9 @@ describe('ServiceAccountFakeRequests', () => {
 
       jest.advanceTimersByTime(400);
 
-      await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe('essu_token_1');
+      await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
+        'essu_token_1'
+      );
       expect(mintToken).not.toHaveBeenCalled();
     });
 
@@ -688,7 +694,7 @@ describe('ServiceAccountFakeRequests', () => {
       // 230s are really left, though 260s would be if the lifetime ran from when the mint answered.
       jest.advanceTimersByTime(40_000);
 
-      await expect(fakeRequests.ensureTokenValidFor(request, 240_000)).resolves.toBe(
+      await expect(fakeRequests.refreshTokenBeforeUse(request, 240_000)).resolves.toBe(
         'essu_token_1'
       );
       expect(mintToken).toHaveBeenCalledTimes(1);
@@ -698,7 +704,7 @@ describe('ServiceAccountFakeRequests', () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
       jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 10_000);
       delayNextMint('essu_slow', 30_000);
-      const pending = fakeRequests.ensureTokenValidFor(request, 60_000);
+      const pending = fakeRequests.refreshTokenBeforeUse(request, 60_000);
       await jest.advanceTimersByTimeAsync(30_000);
       await expect(pending).resolves.toBe('essu_slow');
       mintToken.mockClear();
@@ -706,34 +712,50 @@ describe('ServiceAccountFakeRequests', () => {
       // 60s are really left, though 90s would be if the lifetime ran from when the mint answered.
       jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 30_000 - 60_000);
 
-      await expect(fakeRequests.ensureTokenValidFor(request, 61_000)).resolves.toBe('essu_token_2');
+      await expect(fakeRequests.refreshTokenBeforeUse(request, 61_000)).resolves.toBe(
+        'essu_token_2'
+      );
       expect(mintToken).toHaveBeenCalledTimes(1);
     });
 
-    it('returns a token of unknown lifetime as it is, and never refuses it', async () => {
-      tokenExpiresInMs = undefined;
-      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
-      mintToken.mockClear();
-
-      jest.advanceTimersByTime(REQUEST_LIFETIME_MS + 1);
-
-      await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe('essu_token_1');
-      expect(mintToken).not.toHaveBeenCalled();
-    });
-
-    it.each([0, -1, Number.NaN])(
-      'treats a reported lifetime of %p as unknown',
+    it.each([undefined, 0, -1, Number.NaN])(
+      'uses age-based refresh when the reported lifetime is %p',
       async (expiresInMs) => {
         tokenExpiresInMs = expiresInMs;
         const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
         mintToken.mockClear();
 
-        await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe(
+        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS);
+        await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
           'essu_token_1'
         );
         expect(mintToken).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(1);
+        await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
+          'essu_token_2'
+        );
+        expect(mintToken).toHaveBeenCalledTimes(1);
+        expect(request.headers.authorization).toBe('Bearer essu_token_2');
       }
     );
+
+    it('shares an unknown-lifetime refresh between concurrent callers', async () => {
+      tokenExpiresInMs = undefined;
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+      mintToken.mockClear();
+      delayNextMint('essu_shared', 1_000);
+      jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS + 1);
+
+      const pending = Promise.all([
+        fakeRequests.refreshTokenBeforeUse(request, 60_000),
+        fakeRequests.refreshTokenBeforeUse(request, 300_000),
+      ]);
+      await jest.advanceTimersByTimeAsync(1_000);
+
+      await expect(pending).resolves.toEqual(['essu_shared', 'essu_shared']);
+      expect(mintToken).toHaveBeenCalledTimes(1);
+    });
 
     it('keeps the lifetime of a token minted through an interceptor', async () => {
       const request = await fakeRequests.create({
@@ -745,7 +767,9 @@ describe('ServiceAccountFakeRequests', () => {
 
       jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 30_000);
 
-      await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe('essu_token_2');
+      await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
+        'essu_token_2'
+      );
       expect(mintToken).toHaveBeenCalledTimes(1);
     });
 
@@ -762,13 +786,45 @@ describe('ServiceAccountFakeRequests', () => {
 
       jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 30_000);
 
-      await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe(
+      await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
         'essu_substituted'
       );
-      expect(mintToken).not.toHaveBeenCalled();
+      expect(mintToken).toHaveBeenCalledTimes(1);
     });
 
     describe('refusals', () => {
+      it('sanitizes a refusal when a token of unknown lifetime needs refreshing', async () => {
+        tokenExpiresInMs = undefined;
+        const { state, mintInterceptor } = refusingInterceptor();
+        const request = await fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor });
+        state.refuse = true;
+        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS + 1);
+
+        const error = await fakeRequests
+          .refreshTokenBeforeUse(request, 60_000)
+          .catch((e: Error) => e);
+
+        expect(error).toBeInstanceOf(ServiceAccountCredentialRefusedError);
+        expect(error).toMatchObject({
+          code: 'SERVICE_ACCOUNT_CREDENTIAL_REFUSED',
+          message:
+            'The service account credential of this request needs refreshing, but a replacement was refused.',
+        });
+        expect(error).not.toHaveProperty('cause');
+      });
+
+      it('refuses an unknown-lifetime refresh after the lease expires', async () => {
+        tokenExpiresInMs = undefined;
+        const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
+        mintToken.mockClear();
+        jest.advanceTimersByTime(REQUEST_LIFETIME_MS + 1);
+
+        await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).rejects.toBeInstanceOf(
+          ServiceAccountCredentialRefusedError
+        );
+        expect(mintToken).not.toHaveBeenCalled();
+      });
+
       it('refuses a call the token cannot cover once a replacement is refused for good', async () => {
         const { state, mintInterceptor } = refusingInterceptor();
         const request = await fakeRequests.create({
@@ -781,7 +837,7 @@ describe('ServiceAccountFakeRequests', () => {
         jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 30_000);
 
         const error = await fakeRequests
-          .ensureTokenValidFor(request, 60_000)
+          .refreshTokenBeforeUse(request, 60_000)
           .catch((e: Error) => e);
         expect(error).toBeInstanceOf(ServiceAccountCredentialRefusedError);
         expect(error).toMatchObject({ code: 'SERVICE_ACCOUNT_CREDENTIAL_REFUSED' });
@@ -798,7 +854,7 @@ describe('ServiceAccountFakeRequests', () => {
         jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 30_000);
 
         const error = (await fakeRequests
-          .ensureTokenValidFor(request, 60_000)
+          .refreshTokenBeforeUse(request, 60_000)
           .catch((e: Error) => e)) as Error;
 
         expect(error.message).not.toContain('secret-binding-detail');
@@ -817,7 +873,7 @@ describe('ServiceAccountFakeRequests', () => {
         // The Elasticsearch client's 401 path latches the refusal.
         await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrow();
 
-        await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe(
+        await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
           'essu_token_1'
         );
       });
@@ -829,7 +885,7 @@ describe('ServiceAccountFakeRequests', () => {
 
         jest.advanceTimersByTime(2_000);
 
-        await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).resolves.toBe(
+        await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).resolves.toBe(
           'essu_token_1'
         );
         expect(mintToken).not.toHaveBeenCalled();
@@ -841,7 +897,7 @@ describe('ServiceAccountFakeRequests', () => {
 
         jest.advanceTimersByTime(REQUEST_LIFETIME_MS + 1);
 
-        await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).rejects.toBeInstanceOf(
+        await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).rejects.toBeInstanceOf(
           ServiceAccountCredentialRefusedError
         );
         expect(mintToken).not.toHaveBeenCalled();
@@ -856,10 +912,10 @@ describe('ServiceAccountFakeRequests', () => {
         mintToken.mockRejectedValueOnce(error);
         jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 30_000);
 
-        await expect(fakeRequests.ensureTokenValidFor(request, 60_000)).rejects.toBe(error);
+        await expect(fakeRequests.refreshTokenBeforeUse(request, 60_000)).rejects.toBe(error);
         // Within the backoff, the refusal to retry yet is not a refusal for good either.
         const backoff = await fakeRequests
-          .ensureTokenValidFor(request, 60_000)
+          .refreshTokenBeforeUse(request, 60_000)
           .catch((e: Error) => e);
         expect(backoff).not.toBeInstanceOf(ServiceAccountCredentialRefusedError);
         expect(backoff).toMatchObject({
@@ -873,7 +929,7 @@ describe('ServiceAccountFakeRequests', () => {
         delayNextMint('essu_late', 1_000);
         jest.advanceTimersByTime(TOKEN_LIFETIME_MS - 30_000);
 
-        const pending = fakeRequests.ensureTokenValidFor(request, 60_000).catch((e: Error) => e);
+        const pending = fakeRequests.refreshTokenBeforeUse(request, 60_000).catch((e: Error) => e);
         fakeRequests.release(request);
         await jest.advanceTimersByTimeAsync(1_000);
 

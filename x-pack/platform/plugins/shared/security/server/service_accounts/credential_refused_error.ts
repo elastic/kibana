@@ -17,7 +17,7 @@ export class ServiceAccountCredentialRefusedError extends Error {
 
   constructor() {
     super(
-      'The service account credential of this request expires too soon for the call, and a replacement was refused.'
+      'The service account credential of this request needs refreshing, but a replacement was refused.'
     );
     this.name = 'ServiceAccountCredentialRefusedError';
   }

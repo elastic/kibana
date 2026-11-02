@@ -361,43 +361,34 @@ export class ServiceAccountFakeRequests {
   }
 
   /**
-   * Returns a token that stays valid for at least `validForMs`, minting a replacement (through
-   * {@link ensureFreshToken}) when the current one expires sooner. This is the only way to cover a
-   * caller that hands the credential to something that cannot refresh it, such as the route
-   * handler of a Kibana self HTTP call.
+   * Refreshes a token before it is handed to a caller that cannot renew it, aiming to cover
+   * `validForMs` without promising validity beyond the token's own lifetime.
    *
-   * No token covers more than its own lifetime, and none is replaced within
-   * {@link SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS} of being minted, so `validForMs` is capped at the
-   * lifetime minus that window. A caller asking for more than a token can give is answered with a
-   * token at most that old.
+   * A token minted within {@link SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS} is reused. An older token
+   * is reused only when its reported expiry covers the call, and is replaced when its expiry is
+   * unknown.
    *
-   * A token that covers the call is returned without any other check, even when the request can no
-   * longer mint: an issued token keeps its upstream expiry. So is a token whose backend did not
-   * report its lifetime. Otherwise, throws {@link ServiceAccountCredentialRefusedError} when the
-   * request will never get a replacement, and whatever {@link ensureFreshToken} throws when a
-   * replacement failed for now.
+   * A token that is reused is returned without any other check, even when the request can no
+   * longer mint: an issued token keeps its upstream expiry. Otherwise, throws
+   * {@link ServiceAccountCredentialRefusedError} when the request will never get a replacement,
+   * and whatever {@link ensureFreshToken} throws when a replacement failed for now.
    */
-  async ensureTokenValidFor(request: KibanaRequest, validForMs: number): Promise<string> {
+  async refreshTokenBeforeUse(request: KibanaRequest, validForMs: number): Promise<string> {
     const entry = this.registry.get(request);
     if (!entry) {
       throw new Error('The provided request is not bound to a service account.');
     }
 
-    if (entry.expiresAt === undefined) {
-      return entry.token;
-    }
-
-    const tokenLifetimeMs = entry.expiresAt - entry.mintedAt;
-    const requiredValidityMs = Math.min(
-      validForMs,
-      tokenLifetimeMs - SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS
-    );
-    if (entry.expiresAt - Date.now() >= requiredValidityMs) {
+    const now = Date.now();
+    if (
+      now - entry.mintedAt <= SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS ||
+      (entry.expiresAt !== undefined && entry.expiresAt - now >= validForMs)
+    ) {
       return entry.token;
     }
 
     try {
-      // The current token was just found too short-lived, so any age is too old.
+      // The reuse window has elapsed, and the token's lifetime is insufficient or unknown.
       return await this.ensureFreshToken(request, 0);
     } catch (err) {
       if (this.registry.get(request) === entry && entry.nonRetryableError) {

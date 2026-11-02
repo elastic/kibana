@@ -1480,7 +1480,7 @@ describe('UiamServiceAccounts', () => {
       });
 
       it.each([undefined, null, 300, '300', 'not-a-duration', 'P'.padEnd(65, '1')])(
-        'never replaces a token whose lifetime UIAM reports as %p',
+        'uses age-based refresh when UIAM reports the lifetime as %p',
         async (expiresIn) => {
           mockUiam.exchangeServiceAccountToken.mockResolvedValue({
             token: 'essu_token_unknown',
@@ -1491,14 +1491,52 @@ describe('UiamServiceAccounts', () => {
           });
           mockUiam.exchangeServiceAccountToken.mockClear();
 
-          jest.advanceTimersByTime(5 * 60_000);
-
           await expect(
             serviceAccounts.refreshFakeRequestBeforeUse(request, 60_000)
           ).resolves.toEqual({ authorization: 'Bearer essu_token_unknown' });
           expect(mockUiam.exchangeServiceAccountToken).not.toHaveBeenCalled();
+
+          mockUiam.exchangeServiceAccountToken.mockResolvedValueOnce({
+            token: 'essu_replacement',
+            expires_in: 'PT5M',
+          });
+          jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS + 1);
+
+          await expect(
+            serviceAccounts.refreshFakeRequestBeforeUse(request, 60_000)
+          ).resolves.toEqual({ authorization: 'Bearer essu_replacement' });
+          expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
+
+          // A later valid expiry restores selective reuse instead of minting every ten seconds.
+          jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS + 1);
+          await expect(
+            serviceAccounts.refreshFakeRequestBeforeUse(request, 60_000)
+          ).resolves.toEqual({ authorization: 'Bearer essu_replacement' });
+          expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
         }
       );
+
+      it('keeps an unknown-lifetime token after a transient refresh failure and backs off', async () => {
+        mockUiam.exchangeServiceAccountToken.mockResolvedValueOnce({ token: 'essu_unknown' });
+        const request = await serviceAccounts.createFakeRequest({
+          serviceAccountId: 'service-account-id',
+        });
+        mockUiam.exchangeServiceAccountToken.mockClear();
+        mockUiam.exchangeServiceAccountToken.mockRejectedValue(
+          Boom.serverUnavailable('UIAM is down')
+        );
+        jest.advanceTimersByTime(SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS + 1);
+
+        await expect(
+          serviceAccounts.refreshFakeRequestBeforeUse(request, 60_000)
+        ).resolves.toBeNull();
+        await expect(
+          serviceAccounts.refreshFakeRequestBeforeUse(request, 60_000)
+        ).resolves.toBeNull();
+
+        expect(request.headers.authorization).toBe('Bearer essu_unknown');
+        expect(mockUiam.exchangeServiceAccountToken).toHaveBeenCalledTimes(1);
+      });
 
       it('returns null when a replacement cannot be minted for now', async () => {
         const request = await serviceAccounts.createFakeRequest({

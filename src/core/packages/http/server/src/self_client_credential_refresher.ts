@@ -88,8 +88,8 @@ export interface HttpSelfCredentialRefresherToolkit {
     params: HttpSelfCredentialRefresherReplaceParams
   ) => HttpSelfCredentialRefresherReplaceResult;
   /**
-   * The call is not sent and fails with this error, because the credential cannot cover it and
-   * never will. Reserved for a definitive refusal: a refresher that is unsure lets the call go.
+   * The call is not sent and fails with this error because credential replacement was definitively
+   * refused. A temporary refresh failure should leave the call unhandled instead.
    */
   reject: (
     params: HttpSelfCredentialRefresherRejectParams
@@ -99,6 +99,7 @@ export interface HttpSelfCredentialRefresherToolkit {
 /**
  * A function consulted before every Kibana self HTTP call, giving the owner of a short-lived
  * credential a chance to replace it before the target route handler starts using it.
+ * Refreshing is best effort: even a replacement may expire before the call's timeout.
  *
  * The self client can only recover a 401 raised by the authentication lifecycle. Once the target
  * route handler runs, it holds the credential it was called with, and nothing can replace it for

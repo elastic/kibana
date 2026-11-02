@@ -774,7 +774,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     try {
-      const token = await this.fakeRequests.ensureTokenValidFor(request, validForMs);
+      const token = await this.fakeRequests.refreshTokenBeforeUse(request, validForMs);
       return { authorization: `Bearer ${token}` };
     } catch (err) {
       if (err instanceof ServiceAccountCredentialRefusedError) {

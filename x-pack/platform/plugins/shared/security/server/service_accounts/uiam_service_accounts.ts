@@ -112,7 +112,7 @@ const toDirectoryEntry = (
  * `docker.elastic.co/cloud-ci/uiam:git-a67a2f75a615`, whose exchange response carries `token`
  * plus an `expires_in` ISO-8601 duration (currently `PT5M`). The duration is advisory and read
  * leniently, so a change to its type or format can never fail an exchange: a token whose lifetime
- * is unknown is still usable, it is only never replaced ahead of a self call.
+ * is unknown falls back to age-based refresh ahead of a self call.
  */
 const exchangeTokenResponseSchema = lazySchema(() =>
   z.object({
@@ -532,7 +532,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
 
     try {
-      const token = await this.fakeRequests.ensureTokenValidFor(request, validForMs);
+      const token = await this.fakeRequests.refreshTokenBeforeUse(request, validForMs);
       return { authorization: `Bearer ${token}` };
     } catch (err) {
       if (err instanceof ServiceAccountCredentialRefusedError) {
