@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
 import { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
 
@@ -132,6 +133,25 @@ describe('ProposedActionButton', () => {
     expect(
       screen.getAllByText('Isolate cfo-mbp-14 — host isolation').length
     ).toBeGreaterThanOrEqual(2);
+  });
+
+  it('hands the base path to the modal, so in-app links in the comment survive server.basePath', () => {
+    const basePath = {
+      serverBasePath: '/kbn',
+      prepend: (path: string) => `/kbn${path}`,
+    } as unknown as IBasePath;
+    renderButton({
+      basePath,
+      proposal: {
+        ...mockProposal,
+        comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)',
+      },
+    });
+    fireEvent.click(screen.getByTestId('proposedAction'));
+
+    expect(
+      within(screen.getByRole('dialog')).getByRole('link', { name: /Noisy rule/ })
+    ).toHaveAttribute('href', '/kbn/app/security/rules/id/abc');
   });
 
   it('commits the approval by calling onConfirm from the modal', () => {

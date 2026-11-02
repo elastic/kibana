@@ -481,6 +481,16 @@ steps:
         Write every text field of the proposal in ASD-STE100 Simplified Technical English:
         sentences of 20 words or less, active voice, one topic for each sentence, no em
         dashes. Write fp_pattern and reasoning as markdown.
+
+        Format reasoning as a markdown ordered list: start each step with its
+        number and a period on a new line ("1. ", "2. ", "3. "), and separate the
+        steps with newline characters, never with spaces. Put nothing before the
+        first step. Each step is one or two sentences about the rule and the
+        alerts. Write every text field in the analyst's words: never name the
+        tools, skills, attachments or steps you used to get the information (no
+        "get_alerts_by_ids", no "the rule attachment states", no "the retrieved
+        alerts show"); say what you found, for example "The 12 alerts all come
+        from host backup-01" or "The rule query matches every scheduled task".
       schema:
         # Omit the root type so Agent Builder wraps this union under a property;
         # the LangChain-to-inference adapter drops root-level oneOf constraints.

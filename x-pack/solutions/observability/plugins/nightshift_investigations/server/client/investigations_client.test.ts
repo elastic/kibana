@@ -1507,13 +1507,48 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     });
 
-    it('releases the automation budget when the start loses the claim and continues the holder', async () => {
-      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
-      withConversations(makeConversation({ id: 'inv-holder' }));
+    describe('global quota release', () => {
+      const release = jest.fn().mockResolvedValue(undefined);
 
-      await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-holder' });
+      beforeEach(() => {
+        release.mockClear();
+        investigationQuotaCallback.mockResolvedValue({ allowed: true, release });
+      });
 
-      expect(await usage()).toBe(0);
+      it('releases both slots when the start loses the claim and continues the holder', async () => {
+        subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
+        withConversations(makeConversation({ id: 'inv-holder' }));
+
+        await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-holder' });
+
+        expect(release).toHaveBeenCalledTimes(1);
+        expect(await usage()).toBe(0);
+      });
+
+      it('releases the automation slot and fails the start when the quota check is unavailable', async () => {
+        investigationQuotaCallback.mockRejectedValue(new Error('Storage unavailable'));
+
+        await expect(startWithBudget(1)).rejects.toBeInstanceOf(InvestigationUnavailableError);
+
+        expect(await usage()).toBe(0);
+      });
+
+      it('keeps both slots when the claim attempt fails', async () => {
+        subjectsClient.claimSubjects.mockRejectedValue(new Error('claim conflict'));
+
+        await expect(startWithBudget(1)).rejects.toThrow('claim conflict');
+
+        expect(release).not.toHaveBeenCalled();
+        expect(await usage()).toBe(1);
+      });
+
+      it('keeps the global slot when the start fails after claiming', async () => {
+        mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
+
+        await expect(startWithBudget(1)).rejects.toThrow('failed');
+
+        expect(release).not.toHaveBeenCalled();
+      });
     });
 
     it.each([
