@@ -20,10 +20,12 @@ export {
   RULE_BUILDER_REGISTRY,
   registerRuleBuilder,
   getRuleBuilderCreateOptions,
+  useBuilderState,
 } from './flyout/compose_discover/rule_builder';
 export type {
   RuleBuilderDefinition,
   RuleBuilderCreateOption,
+  BuilderStateUpdateOptions,
 } from './flyout/compose_discover/rule_builder';
 export type { BuilderState } from './flyout/compose_discover/rule_builder';
 

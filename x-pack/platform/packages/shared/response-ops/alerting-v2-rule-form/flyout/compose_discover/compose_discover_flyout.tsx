@@ -450,7 +450,9 @@ export function ComposeDiscoverFlyout({
   }, [uiState.childOpen]);
 
   const [initialParsedState] = useState<BuilderState | null>(() => {
-    if (!builderType || initialBuilderState !== undefined || !inlineResult.query) return null;
+    if (builderType !== 'threshold' || initialBuilderState !== undefined || !inlineResult.query) {
+      return null;
+    }
     return parseDiscoverQueryForBuilder(inlineResult.query);
   });
 
