@@ -12,15 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { TakeActionButton } from './components/take_action_button';
 import { useEaseDetailsContext } from './context';
-import { useBasicDataFromDetailsData } from '../document_details/shared/hooks/use_basic_data_from_details_data';
-import { useAssistant } from '../../flyout_v2/document/main/hooks/use_assistant';
-import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
-import { NewAgentBuilderAttachment } from '../../agent_builder/components/new_agent_builder_attachment';
-import { useAgentBuilderAttachment } from '../../agent_builder/hooks/use_agent_builder_attachment';
-import { getRawData } from '../../assistant/helpers';
-import { stringifyEssentialAlertData } from '../../agent_builder/helpers';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { ALERT_ATTACHMENT_PROMPT } from '../../agent_builder/components/prompts';
+import { useBasicDataFromDetailsData } from '../../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
+import { useAssistant } from '../../../../flyout_v2/document/main/hooks/use_assistant';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
+import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { getRawData } from '../../../../assistant/helpers';
+import { stringifyEssentialAlertData } from '../../../../agent_builder/helpers';
+import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import { ALERT_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
 
 export const ASK_AI_ASSISTANT = i18n.translate(
   'xpack.securitySolution.flyout.right.footer.askAIAssistant',

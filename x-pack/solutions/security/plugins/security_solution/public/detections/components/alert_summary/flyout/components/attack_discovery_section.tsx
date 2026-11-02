@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AttackDiscoveryWidget } from './attack_discovery_widget';
-import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
+import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '../test_ids';
 import { useEaseDetailsContext } from '../context';
 
 const ATTACK_DISCOVERY = i18n.translate(
