@@ -49,6 +49,7 @@ import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
+import { TargetingWarningCallout } from './targeting_warning_callout';
 import { overflowCss } from '../utils';
 import { PackVersionField } from './pack_version_field';
 import { PackResultTypeField } from './pack_result_type_field';
@@ -555,6 +556,20 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     [agentPoliciesById]
   );
 
+  // Must mirror the `policy_ids` built in the submit handler (combo-box selection
+  // plus shard keys). Passing only `policyIds` would flag a shard-targeted policy
+  // as collateral damage, contradicting the server's own post-save check.
+  const targetPolicyIds = useMemo(
+    () => [
+      ...(policyIds ?? []),
+      ...filter(
+        map(shards, (shard, key) => key),
+        (key) => !isEmpty(key)
+      ),
+    ],
+    [policyIds, shards]
+  );
+
   const availableOptions = useMemo(() => {
     const currentShardsFieldValues = map(shards, (shard, key) => key);
     const currentPolicyIdsFieldValues = map(policyIds, (policy) => policy);
@@ -676,6 +691,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                     <PolicyAssignmentList isReadOnly={isReadOnly} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
+                {/* The callout supplies its own leading spacer when it renders. */}
+                <TargetingWarningCallout
+                  targetPolicyIds={targetPolicyIds}
+                  agentPoliciesById={agentPoliciesById}
+                />
                 <EuiSpacer size="m" />
 
                 <EuiFlexGroup>
@@ -699,6 +719,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       },
     ],
     [
+      agentPoliciesById,
       availableOptions,
       changePackType,
       defaultValue?.saved_object_id,
@@ -715,6 +736,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       shardsToggleState,
       showMigrationAdvisory,
       showScheduleErrors,
+      targetPolicyIds,
     ]
   );
 
