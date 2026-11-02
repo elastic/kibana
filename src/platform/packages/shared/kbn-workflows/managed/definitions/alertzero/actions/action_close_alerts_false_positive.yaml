@@ -157,5 +157,9 @@ steps:
     type: workflow.output
     status: completed
     with:
-      closed_count: "${{ inputs.actionInput.alertIds | size | minus: steps.count_already_closed.output.hits.total.value }}"
+      # What the close step updated. It skips alerts that are already closed, so an analyst's earlier
+      # closure is not credited here. shortcut: after a retry that follows a partial close this
+      # undercounts, because the retry skips the alerts the first attempt closed; the completeness
+      # check reads the end state, so it is not affected.
+      closed_count: "${{ steps.close_alerts.output.updated }}"
       alert_ids: "${{ inputs.actionInput.alertIds }}"

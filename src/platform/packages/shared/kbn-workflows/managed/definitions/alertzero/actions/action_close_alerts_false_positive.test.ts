@@ -149,16 +149,22 @@ describe('Close alerts as false positive action', () => {
     expect(rendered).toContain('0 were already closed before it');
   });
 
-  // closed_count is an output for later callers (nothing in this repo reads it today), so it
-  // must exclude alerts an analyst closed first.
-  it('reports as closed only the alerts this action closed', () => {
+  // closed_count is an output for later callers (nothing in this repo reads it today). It is what
+  // the close step updated, not requested minus the first count: an analyst can close an alert
+  // between the count and the close, and the close skips it, so it must not be credited here.
+  it('reports as closed only what the close step updated', () => {
     const closedCount = (
       (getStep('emit_result').with as Record<string, string>).closed_count as string
     ).trim();
 
     expect(
       evaluateExpression(closedCount, {
-        steps: { count_already_closed: { output: { hits: { total: { value: 2 } } } } },
+        // 4 requested, 1 already closed at the first count, and a second one closed by an analyst
+        // before the close ran: the close updated the other 2.
+        steps: {
+          count_already_closed: { output: { hits: { total: { value: 1 } } } },
+          close_alerts: { output: { updated: 2 } },
+        },
         inputs: { actionInput: { alertIds: ['alert-1', 'alert-2', 'alert-3', 'alert-4'] } },
       })
     ).toBe(2);
