@@ -1,0 +1,17 @@
+=== HARDENING / FALLBACK EVIDENCE (dev + dist) ===
+--- A: worker-boot fatal -> fallback (dev) ---
+[2026-11-02T20:24:09.629+01:00][ERROR][plugins.taskManager.pocWorkerCoordinatorBridge] PoC worker coordinator is unusable: worker reported a fatal error: simulated worker boot failure (TM_POC_SIMULATE_FAILURE=worker-boot)
+[2026-11-02T20:24:09.630+01:00][ERROR][plugins.taskManager] PoC worker coordinator disabled (worker reported a fatal error: simulated worker boot failure (TM_POC_SIMULATE_FAILURE=worker-boot)); falling back to stock in-process polling
+[2026-11-02T20:24:09.630+01:00][INFO ][plugins.taskManager] Starting the task poller
+[2026-11-02T20:24:23.680+01:00][INFO ][plugins.taskManager] [poc-noop] task 934fe4aa-343d-4647-9bba-940328f89427 executed at 2026-11-02T19:24:23.680Z (runAt was 2026-11-02T19:24:21.116Z)
+--- B: bridge-start throw -> fallback (dev) ---
+[2026-11-02T20:24:53.857+01:00][ERROR][plugins.taskManager.pocWorkerCoordinatorBridge] PoC worker coordinator is unusable: failed to start the coordinator worker: simulated bridge start failure (TM_POC_SIMULATE_FAILURE=bridge-start)
+[2026-11-02T20:24:53.857+01:00][ERROR][plugins.taskManager] PoC worker coordinator disabled (failed to start the coordinator worker: simulated bridge start failure (TM_POC_SIMULATE_FAILURE=bridge-start)); falling back to stock in-process polling
+--- C: resolver failure -> defaults, worker continues (dev) ---
+[2026-11-02T20:25:25.743+01:00][INFO ][plugins.taskManager.pocWorkerCoordinatorBridge] PoC coordinator worker ES connection: node=http://localhost:9200, auth=basic(kibana_system/[REDACTED]), ca=0 file(s), rejectUnauthorized=true, sources=[resolver-error:simulated resolver failure (TM_POC_SIMULATE_FAILURE=resolver), default:node, default:basic-auth]
+--- D: dead ES endpoint -> 5 claim failures -> fallback (dev) ---
+{"@timestamp":"2026-11-02T19:26:05.059Z","log.level":"WARN","log.logger":"task-coordinator-worker:1","message":"Failed to watch Task Manager claim nudge checkpoints for index .kibana_task_manager_claim_nudge, falling back to regular polling and retrying in ~967ms: connection failed (http://localhost:9999/)"}
+[2026-11-02T20:27:21.390+01:00][ERROR][plugins.taskManager.pocWorkerCoordinatorBridge] PoC worker coordinator is unusable: 5 consecutive claim cycle failures (e.g. unusable ES connection)
+--- dist: happy path + worker-boot sabotage -> fallback, Kibana READY ---
+[2026-11-02T20:30:55.366+01:00][INFO ][plugins.taskManager.pocWorkerCoordinatorBridge] Starting PoC coordinator worker thread (dist mode)
+[2026-11-02T20:31:17.998+01:00][ERROR][plugins.taskManager] PoC worker coordinator disabled (worker reported a fatal error: simulated worker boot failure (TM_POC_SIMULATE_FAILURE=worker-boot)); falling back to stock in-process polling
