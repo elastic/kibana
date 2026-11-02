@@ -757,7 +757,25 @@ export const huntBehavior = async (
     size,
     row_limit: rowLimitFromParams,
     allowed_indices: allowedIndices = [],
+    already_searched_technique_ids: alreadySearchedIds = [],
+    pending_technique_ids: pendingIds = [],
   } = params;
+  const alreadySearched = new Set(alreadySearchedIds);
+  // A technique an earlier run left for this one that nothing in this run accounts for: the model
+  // did not name it this time (or named it below the threshold), so it was never searched. Reported
+  // as a gap so the report does not read as complete because extraction varied. The coordinator
+  // gives up on it after this one run: only an extracted technique is ever searched, so a technique
+  // the model never names again would otherwise be re-reported every sweep.
+  const pendingGaps = (accountedFor: ReadonlySet<string>): HuntIncompleteness[] =>
+    [...new Set(pendingIds)]
+      .filter((techniqueId) => !alreadySearched.has(techniqueId) && !accountedFor.has(techniqueId))
+      .map((technique_id) => ({
+        reason: 'generation_budget' as const,
+        technique_id,
+        detail:
+          `${technique_id} was left unsearched by an earlier run and this run's extraction did ` +
+          `not return it, so it was not searched and gets no further run.`,
+      }));
 
   const rowLimit = size ?? rowLimitFromParams;
   const canExecute =
@@ -830,23 +848,33 @@ export const huntBehavior = async (
     .filter((c) => c.llm_confidence >= llmThreshold);
 
   if (candidates.length === 0) {
+    const leftPending = pendingGaps(new Set());
     return {
       status: 'no_behaviors_found',
       report_id: reportId,
       behaviors: [],
       indexed_behaviors: [],
       has_hit: false,
+      ...(leftPending.length > 0 && { incomplete: leftPending }),
       message:
         'No behavioral candidates passed the LLM-confidence threshold. ' +
         'The report may be IOC-only or describe known/already-covered techniques.',
       next_step:
-        'Lower `llm_confidence_threshold` or fall back to IOC matching if the report is IOC-only.',
+        'Lower `llm_confidence_threshold` or fall back to IOC matching if the report is IOC-only.' +
+        (leftPending.length > 0
+          ? ` ${leftPending.length} technique${
+              leftPending.length === 1 ? '' : 's'
+            } an earlier run left unsearched ${
+              leftPending.length === 1 ? 'was' : 'were'
+            } not returned either, so they were not searched and the report is settled.`
+          : ''),
     };
   }
 
   const validated: ValidatedBehavior[] = [];
   const droppedIds: string[] = [];
   const ungroundedQuoteIds: string[] = [];
+  const skippedAsSearched = new Set<string>();
 
   for (const candidate of candidates) {
     const technique = techniqueById.get(candidate.technique_id);
@@ -854,6 +882,16 @@ export const huntBehavior = async (
     const entry = technique ?? subtechnique;
     if (!entry) {
       droppedIds.push(candidate.technique_id);
+      continue;
+    }
+    // A revoked id resolves to its live successor; carry the live id forward so
+    // the hunt query and the indexed projection never cite a retired technique.
+    const techniqueId = entry.id;
+    // An earlier run already searched this technique. Dropped here, before the quote check and any
+    // generation, so it takes no slot of the budget and is not reported as a gap: it was covered,
+    // not missed, and a quote that does not ground this time must not undo that.
+    if (alreadySearched.has(techniqueId)) {
+      skippedAsSearched.add(techniqueId);
       continue;
     }
     // The extraction contract promises a verbatim quote, but only the technique id is
@@ -864,9 +902,6 @@ export const huntBehavior = async (
       ungroundedQuoteIds.push(candidate.technique_id);
       continue;
     }
-    // A revoked id resolves to its live successor; carry the live id forward so
-    // the hunt query and the indexed projection never cite a retired technique.
-    const techniqueId = entry.id;
     // One behavior per live technique id. The LLM can emit the same id twice
     // (or a revoked id alongside its successor); generation, execution, and the
     // indexed `reportId:techniqueId` projection are all keyed by that id, so a
@@ -909,6 +944,13 @@ export const huntBehavior = async (
     });
   }
 
+  if (skippedAsSearched.size > 0) {
+    logger.info(
+      `[hunt:extract] skipped ${skippedAsSearched.size} technique(s) an earlier run on this ` +
+        `report already searched: ${[...skippedAsSearched].join(', ')}.`
+    );
+  }
+
   if (ungroundedQuoteIds.length > 0) {
     logger.warn(
       `[hunt:extract] dropped ${ungroundedQuoteIds.length} candidate(s) whose evidence_quote ` +
@@ -937,6 +979,13 @@ export const huntBehavior = async (
   const gap = (technique_id: string, reason: HuntIncompleteReason, detail: string): void => {
     incomplete.push({ reason, technique_id, detail });
   };
+  const leftPending = pendingGaps(
+    new Set([
+      ...validated.map(({ technique_id: techniqueId }) => techniqueId),
+      ...incomplete.map(({ technique_id: techniqueId }) => techniqueId ?? ''),
+    ])
+  );
+  incomplete.push(...leftPending);
 
   if (validated.length > 0 && !esClient) {
     logger.debug(
@@ -1227,7 +1276,15 @@ export const huntBehavior = async (
     has_hit: hasHit,
     ...(incomplete.length > 0 && { incomplete }),
     next_step:
-      validated.length === 0
+      validated.length === 0 && skippedAsSearched.size > 0 && incomplete.length === 0
+        ? 'Every extracted technique was already searched by an earlier run on this report, so ' +
+          'there was nothing new to hunt.'
+        : validated.length === 0 &&
+          leftPending.length > 0 &&
+          incomplete.length === leftPending.length
+        ? 'Nothing new was extracted to hunt, and the techniques an earlier run left unsearched ' +
+          `were not returned either, so they were not searched and the report is settled.${partialSuffix}`
+        : validated.length === 0
         ? 'No extracted candidate survived validation: each was either absent from the ' +
           'canonical ATT&CK catalog or offered a quote the report does not contain. ' +
           'Consider lowering the LLM threshold or falling back to IOC matching for this ' +

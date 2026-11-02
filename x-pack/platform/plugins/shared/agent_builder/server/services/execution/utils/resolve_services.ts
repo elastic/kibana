@@ -28,12 +28,17 @@ export interface ResolvedServices {
 const getAgentConfiguration = async ({
   agentRegistry,
   agentId,
+  runAs,
 }: {
   agentRegistry: AgentRegistry;
   agentId: string;
+  runAs?: string;
 }): Promise<AgentConfiguration> => {
   try {
-    const { configuration } = await agentRegistry.get(agentId);
+    const { configuration } =
+      runAs !== undefined
+        ? await agentRegistry.get(agentId, { runAs })
+        : await agentRegistry.get(agentId);
     return configuration;
   } catch (error) {
     throw isAgentNotFoundError(error)
@@ -75,6 +80,7 @@ const selectModelSource = ({
  *
  * @param connectorId - Connector requested by the caller. When set, inference features are ignored.
  * @param inferenceFeatureId - Inference feature the execution was given; overrides the agent's.
+ * @param runAs - Service account the execution runs as; see `GetAgentOptions.runAs`.
  * @returns The model provider and the model source the run uses.
  * @throws {AgentBuilderError} with code `agentNotFound` when the agent does not exist or the
  * caller cannot access it.
@@ -84,6 +90,7 @@ export const resolveServices = async ({
   connectorId,
   inferenceFeatureId,
   telemetryMetadata,
+  runAs,
   request,
   logger,
   inference,
@@ -97,6 +104,7 @@ export const resolveServices = async ({
   connectorId?: string;
   inferenceFeatureId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  runAs?: string;
   request: KibanaRequest;
   logger: Logger;
   inference: InferenceServerStart;
@@ -111,6 +119,7 @@ export const resolveServices = async ({
   const { inference_feature_id: agentInferenceFeatureId } = await getAgentConfiguration({
     agentRegistry,
     agentId,
+    runAs,
   });
 
   const defaultModel = selectModelSource({

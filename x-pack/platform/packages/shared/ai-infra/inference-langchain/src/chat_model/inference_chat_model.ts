@@ -114,16 +114,7 @@ type MessagesParams = Pick<ChatCompleteOptions, 'messages' | 'system'>;
 
 type ConnectorInvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
 
-/**
- * `temperature` stays a caller option on the feature path, exactly as on the connector path.
- * `FeatureChatCompleteOptions` still types it as `never` until https://github.com/elastic/kibana/pull/301824
- * lands; once it does, this collapses to `Omit<FeatureChatCompleteOptions, 'messages' | 'system' | 'stream'>`.
- */
-type FeatureInvocationParams = Omit<
-  FeatureChatCompleteOptions,
-  'messages' | 'system' | 'stream' | 'temperature'
-> &
-  Pick<ChatCompleteOptions, 'temperature'>;
+type FeatureInvocationParams = Omit<FeatureChatCompleteOptions, 'messages' | 'system' | 'stream'>;
 
 type InvocationParams = ConnectorInvocationParams | FeatureInvocationParams;
 
@@ -299,10 +290,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     return this.caller.call(async () => {
       try {
         if (isFeatureRequest(request)) {
-          // see `FeatureInvocationParams`: only `temperature` differs from `FeatureChatCompleteOptions`
-          return await this.chatComplete(
-            request as FeatureChatCompleteOptions & { stream?: TStream }
-          );
+          return await this.chatComplete(request);
         }
         return await this.chatComplete(request);
       } catch (e) {

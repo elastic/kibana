@@ -14,7 +14,8 @@ const THREAT_INDEX_PATTERNS = ['filebeat-*'];
 const VALID_INDEX_FIELD = 'myhash.mysha256';
 const VALID_INDICATOR_FIELD = 'threat.indicator.file.hash.sha256';
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/299380
+spaceTest.describe.skip(
   'Indicator match rule creation: indicator mapping',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {

@@ -365,7 +365,6 @@ describe('InferencePlugin.start resolveFeatureConnector', () => {
     const resolver = createFeatureEndpointResolverMock().mockResolvedValue({
       connectorId: 'top',
       reasoning: { effort: 'low' },
-      temperature: 0.2,
     });
     const { start, coreStart, actions } = startPlugin(resolver);
 
