@@ -13,11 +13,7 @@ import { APP_ID } from '../../../../common/constants';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
 import { ENTITY_CASE_COUNTS_INTERNAL_URL } from '../../../../common/entity_analytics/entity_analytics/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
-import {
-  CASE_ATTACHMENT_TYPE,
-  canReadSecurityCases,
-  fetchEntityCaseCounts,
-} from './fetch_entity_case_counts';
+import { fetchEntityCaseCounts, isCasesForbiddenError } from './fetch_entity_case_counts';
 import { fetchGroupMemberIds } from './fetch_group_member_ids';
 
 export const registerEntityCaseCountsRoute = ({
@@ -53,18 +49,9 @@ export const registerEntityCaseCountsRoute = ({
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const [coreStart, { security, cases }] = await getStartServices();
+          const [, { cases }] = await getStartServices();
           if (!cases) throw new Error('The cases plugin is not available');
-          if (!(await canReadSecurityCases(security, request))) {
-            return response.forbidden({
-              body: { message: 'User is not authorized to read Security cases.' },
-            });
-          }
-
           const spaceId = (await context.securitySolution).getSpaceId();
-          const repository = coreStart.savedObjects.createInternalRepository([
-            CASE_ATTACHMENT_TYPE,
-          ]);
           const { entity_ids: entityIds, include_members: includeMembers } = request.body;
           const memberIds = includeMembers
             ? await fetchGroupMemberIds(
@@ -76,14 +63,17 @@ export const registerEntityCaseCountsRoute = ({
               )
             : {};
           const counts = await fetchEntityCaseCounts(
-            repository,
             await cases.getCasesClientWithRequest(request),
-            spaceId,
             entityIds,
             memberIds
           );
           return response.ok({ body: Object.fromEntries(counts) });
         } catch (err) {
+          if (isCasesForbiddenError(err)) {
+            return response.forbidden({
+              body: { message: 'User is not authorized to read Security cases.' },
+            });
+          }
           logger.error(`Failed to count cases of entities: ${err}`);
           const error = transformError(err);
           return siemResponse.error({ statusCode: error.statusCode, body: error.message });
