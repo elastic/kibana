@@ -40,7 +40,7 @@ export function getGeotilePrecisionLiterals(options?: DateLiteralsOptions) {
     i18n.translate('esqlLanguage.esql.autocomplete.geotilePrecisionNamedParamDoc', {
       defaultMessage: `Use the \`?_geotile_precision\` parameter to bind the precision to the zoom level of the map.`,
     }),
-    SuggestionCategory.TIME_PARAM
+    SuggestionCategory.GEO_PRECISION_PARAM
   );
 }
 
