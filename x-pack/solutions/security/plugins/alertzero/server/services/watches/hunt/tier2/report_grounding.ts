@@ -38,17 +38,29 @@ const stripFraming = (value: string): string =>
     .replace(/^(?:\.\.\.|…)\s*|\s*(?:\.\.\.|…)$/g, '')
     .trim();
 
+/** Keep only letters and digits, so a quote that differs from the report only in punctuation or typography still matches. */
+const toWords = (value: string): string =>
+  value
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, ' ')
+    .trim();
+
 /**
- * True when `quote` appears in `text`. An internal ellipsis is treated as a gap in a
- * sequence: every segment must appear, in order, so a genuinely truncated verbatim
- * quote still verifies while a fabrication stitched from unrelated fragments does not.
+ * True when the words of `quote` appear in `text`, ignoring punctuation. An ellipsis is
+ * treated as a gap in a sequence: every segment must appear, in order, so a genuinely
+ * truncated verbatim quote still verifies while a fabrication stitched from unrelated
+ * fragments does not.
  */
 export const isEvidenceQuoteGrounded = (quote: string, text: string): boolean => {
-  const haystack = normalize(text);
-  const segments = stripFraming(quote)
-    .split(/\s*(?:\.\.\.|…)\s*/)
-    .map(normalize)
-    .filter((segment) => segment.length > 0);
+  // Padding every side with a space makes matches whole words: `successful` must not
+  // match inside `successfully`.
+  const haystack = ` ${toWords(text)} `;
+  const segments = quote
+    .split(/\.\.\.|…/)
+    .map(toWords)
+    .filter((segment) => segment.length > 0)
+    .map((segment) => ` ${segment} `);
   if (segments.length === 0) {
     return false;
   }
@@ -65,7 +77,8 @@ export const isEvidenceQuoteGrounded = (quote: string, text: string): boolean =>
     if (at === -1) {
       return false;
     }
-    searchFrom = at + segment.length;
+    // Resume on the closing space so the next segment can share it.
+    searchFrom = at + segment.length - 1;
   }
   return true;
 };

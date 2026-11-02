@@ -147,6 +147,8 @@ These are **separate** from the legacy `flyout` param and the pre-existing `atta
   keeps the root and sets the child slot.
 - `buildOnClose(fallback)` — returns the `onClose` handler. Writes `[fallback]` (or clears the param when `null`) unless
   a newer open is still on screen.
+- `readRootDescriptor()` — the current session-start root descriptor (or `null`), read from the same storage the
+  writer writes to. Use it to compute the `buildOnClose` fallback of child opens.
 
 Two invariants worth understanding before you touch this file:
 
@@ -156,6 +158,13 @@ Two invariants worth understanding before you touch this file:
   per param key, plus an `openGenerationStacks` mirror of the URL array, so `buildOnClose` can ask precisely: "is
   anything newer than me still open?" and swallow stale eviction callbacks correctly. Don't replace this with a simpler
   check.
+- **A root close ends its session.** When a session ends (Back, or closing the root), core closes the child flyout
+  without calling its `onClose`, so only the root's `onClose` fires. The root's close therefore clears the whole chain
+  and marks its child as closed, so a late child `onClose` can't write its `[root]` fallback back. Only a
+  `'start'` root ends its session this way.
+- **A child of an unstored flyout is stored alone.** An `'inherit'` open without a stored `'start'` root (its parent,
+  e.g. Discover's doc viewer, is not part of the chain) writes `[descriptor]` marked `asChild: true`, replacing any
+  previous such child the way the parent's child slot does. `readRootDescriptor()` returns `null` for it.
 
 ### Restore (`use_flyout_v2_restore.ts`)
 
@@ -176,6 +185,38 @@ Two invariants worth understanding before you touch this file:
 right `useFlyoutApi()` method. **When you add a descriptor kind, you must add a case here** (and the child variant, or
 fall through to the `default` for tools). Tool restorers rebuild header callbacks (e.g. `buildShowEntityCallback`)
 because tools open as `'start'` and don't persist their parent.
+
+### Discover doc viewer (`use_flyout_v2_doc_viewer_state.ts`)
+
+In Discover, the chain is not written to `flyoutV2`. Discover deep-links the expanded document and its doc viewer
+state (`_a.docViewerState`), so the alert/event, attack and IOC Overview tabs store the chain as their own doc view
+state instead:
+
+- Flyouts of `DOC_VIEWER_FLYOUT_HISTORY_KEY` (only used outside the Security app) never touch the URL:
+  `useFlyoutV2UrlWriter` reads and writes the chain kept in `docViewerFlyoutChain`
+  (`flyout_v2_doc_viewer_chain.ts`). The store is module-scoped because flyouts render in their own React roots, and
+  because it outlives the Overview tab: flyouts can open and close while another doc viewer tab is selected.
+- While an Overview tab is mounted, `useFlyoutV2DocViewerState` attaches a reporter to the store that forwards the
+  chain to the doc view's `onInitialStateChange`. It is detached on unmount, so a tab that is no longer mounted never
+  calls into the host (its setter would overwrite the other tabs' state).
+- `flyoutV2DocViewerStateSchema` (`flyout_v2_doc_viewer_state_schema.ts`) is exposed as the `shareableStateSchema` of
+  the three overview tab features, so Discover puts the chain in the URL and validates it on read.
+- `FlyoutV2DocViewerStateSync` (`one_discover/flyout_v2_doc_viewer_state_sync.tsx`) is the single component the three
+  tabs render inside their flyout providers; it is a no-op inside the Security app.
+- The store belongs to one doc viewer session: the doc viewer instance (`useDocViewerFlyoutId()` from
+  `@kbn/unified-doc-viewer-plugin/public`) and the document it displays (`useDocViewerFlyoutChainSessionKey`). The
+  Overview tab and the header/footer notes buttons (`one_discover/use_open_notes_flyout.tsx`) claim it, which empties
+  it when the session changes.
+- On the first mount in a session the hook seeds the store from `initialState` and reopens the chain (a root marked
+  `asChild` reopens as the doc viewer's child). Descriptors targeting the displayed document reuse its record
+  (document, attack or IOC); others fall back to their document flyout. Once the session has a live chain (the tab
+  mounted before, e.g. a doc viewer tab switch, or a flyout opened from the header or footer before it first mounted)
+  the live chain wins: it is handed back to the host if it differs from `initialState` and nothing is reopened. Only
+  opens make a chain live, since a close can come from a flyout of a previous session.
+- While another doc viewer tab is selected, `_a.docViewerState` lags behind the chain until the Overview tab mounts
+  again.
+- Code computing a child's close fallback must use `FlyoutUrlWriter.readRootDescriptor()` instead of reading the URL,
+  so it sees the chain wherever it is stored.
 
 ## Providers (`shared/components/flyout_provider.tsx`)
 

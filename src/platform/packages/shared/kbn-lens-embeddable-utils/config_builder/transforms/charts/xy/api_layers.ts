@@ -345,25 +345,6 @@ function convertReferenceLineLayerToAPI(
 
 export function buildAPIReferenceLinesLayer(
   visualization: XYReferenceLineLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'>,
-  adHocDataViews: Record<string, unknown>,
-  resolveAxisId: ResolveAxisId,
-  references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
-): ReferenceLineLayerTypeNoESQL;
-/**
- * @deprecated ES|QL reference lines are not yet supported
- */
-export function buildAPIReferenceLinesLayer(
-  visualization: XYReferenceLineLayerConfig,
-  layer: TextBasedLayer,
-  adHocDataViews: Record<string, unknown>,
-  resolveAxisId: ResolveAxisId,
-  references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
-): ReferenceLineLayerTypeESQL;
-export function buildAPIReferenceLinesLayer(
-  visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
   adHocDataViews: Record<string, unknown>,
   resolveAxisId: ResolveAxisId,

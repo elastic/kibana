@@ -185,24 +185,85 @@ describe('recordActions', () => {
     ]);
   });
 
+  it('matches queries against the path of requests that match no operation', async () => {
+    const mcp: ConnectorSpec = {
+      ...connector,
+      actions: {
+        callTool: action(z.object({}), async ({ client }) =>
+          client.post(`${V1}/mcp/tools`, {}).catch(() => undefined)
+        ),
+      },
+    };
+    const readScope = (fixtures = {}) =>
+      recordActions({ connector: mcp, specs, fixtures }).then(({ findings }) =>
+        findings.filter(({ kind }) => kind === 'read-scope' || kind === 'unused-query')
+      );
+
+    expect(await readScope()).toEqual([
+      { kind: 'read-scope', action: 'callTool', request: `POST ${V1}/mcp/tools` },
+    ]);
+    expect(
+      await readScope({ callTool: { queries: [{ method: 'POST', path: '/v1/mcp/{name}' }] } })
+    ).toEqual([]);
+  });
+
   it('runs actions with a config sampled from the connector schema, unless one is given', async () => {
     const configured: ConnectorSpec = {
       ...connector,
-      schema: z.object({ region: z.enum(['us', 'eu']), debug: z.boolean().optional() }),
+      schema: z.object({
+        region: z.enum(['us', 'eu']),
+        debug: z.boolean().optional(),
+        apiUrl: z.string().default(V1),
+      }),
       actions: {
         getItem: action(z.object({}), async ({ client, config }) => {
           if (config?.region === undefined || 'debug' in config) {
             throw new Error(`Unexpected config ${JSON.stringify(config)}`);
           }
-          return (await client.get(`${V1}/items/${config.region}`)).data;
+          return (await client.get(`${config.apiUrl}/items/${config.region}`)).data;
         }),
       },
     };
 
     expect((await recordActions({ connector: configured, specs })).findings).toEqual([]);
     expect(
-      (await recordActions({ connector: configured, specs, config: { debug: true } })).findings
-    ).toEqual([expect.objectContaining({ kind: 'handler-error' })]);
+      (await recordActions({ connector: configured, specs, config: { region: 'eu', debug: true } }))
+        .findings
+    ).toEqual([expect.objectContaining({ kind: 'no-auth-type', action: 'getItem' })]);
+    await expect(
+      recordActions({ connector: configured, specs, config: { debug: true } })
+    ).rejects.toThrow(/^The connector config is invalid: .*region/s);
+  });
+
+  it('merges fixture config into the config of the action', async () => {
+    const configured: ConnectorSpec = {
+      ...connector,
+      schema: z.object({ serverUrl: z.url().optional() }),
+      actions: {
+        getItem: action(z.object({}), async ({ client, config }) => {
+          if (config?.serverUrl === undefined) {
+            throw new Error('The server URL is required');
+          }
+          return (await client.get(`${config.serverUrl}/v1/items/1`)).data;
+        }),
+      },
+    };
+
+    expect((await recordActions({ connector: configured, specs })).operations.getItem).toEqual([]);
+    const { operations, findings } = await recordActions({
+      connector: configured,
+      specs,
+      fixtures: { getItem: { config: { serverUrl: 'https://api.example.com' } } },
+    });
+    expect(findings).toEqual([]);
+    expect(operations.getItem).toHaveLength(1);
+    await expect(
+      recordActions({
+        connector: configured,
+        specs,
+        fixtures: { getItem: { config: { serverUrl: 'not a url' } } },
+      })
+    ).rejects.toThrow(/^The config of getItem is invalid: /);
   });
 
   it('serves response overrides and reports those the spec contradicts', async () => {
@@ -230,5 +291,92 @@ describe('recordActions', () => {
     expect(findings).toContainEqual(
       expect.objectContaining({ kind: 'rejected-response', action: 'listItems' })
     );
+  });
+
+  describe('with several auth types', () => {
+    const needsBasic = 'Only available with basic authentication';
+    const v1 = specs.v1;
+    const multiAuthSpecs = {
+      v1: {
+        ...v1,
+        security: [{ bearer: [] }, { basic: [] }],
+        components: {
+          securitySchemes: {
+            ...v1.components.securitySchemes,
+            basic: { type: 'http', scheme: 'basic' },
+          },
+        },
+      },
+    };
+    const multiAuth: ConnectorSpec = {
+      ...connector,
+      auth: { types: ['bearer', 'basic'] },
+      actions: {
+        basicOnly: action(z.object({}), async ({ client, secrets }) => {
+          if (secrets?.authType !== 'basic') {
+            throw new Error(needsBasic);
+          }
+          return (await client.get(`${V1}/items`)).data;
+        }),
+        never: action(z.object({}), async () => {
+          throw new Error('Never available');
+        }),
+      },
+    };
+
+    it('records the union of the operations each auth type reaches', async () => {
+      const { operations, findings } = await recordActions({
+        connector: multiAuth,
+        specs: multiAuthSpecs,
+      });
+
+      expect(operations.basicOnly).toEqual([{ source: 'v1', method: 'get', path: '/items' }]);
+      expect(findings).not.toContainEqual(expect.objectContaining({ action: 'basicOnly' }));
+    });
+
+    it('reports an action that sends no request under any auth type', async () => {
+      const { findings } = await recordActions({ connector: multiAuth, specs: multiAuthSpecs });
+
+      expect(findings).toContainEqual({
+        kind: 'no-auth-type',
+        action: 'never',
+        errors: { bearer: 'Never available', basic: 'Never available' },
+      });
+    });
+
+    it('records only the given auth type when one is passed', async () => {
+      const { operations, findings } = await recordActions({
+        connector: multiAuth,
+        specs: multiAuthSpecs,
+        authType: 'bearer',
+      });
+
+      expect(operations.basicOnly).toEqual([]);
+      expect(findings).toContainEqual({
+        kind: 'no-auth-type',
+        action: 'basicOnly',
+        errors: { bearer: needsBasic },
+      });
+    });
+
+    it('reports auth types the contract context rejects, and fails when none is left', async () => {
+      const { findings } = await recordActions({
+        connector: multiAuth,
+        specs: multiAuthSpecs,
+        secrets: { username: '' },
+      });
+
+      expect(findings).toContainEqual(
+        expect.objectContaining({ kind: 'auth-type-error', authType: 'basic' })
+      );
+      await expect(
+        recordActions({
+          connector: multiAuth,
+          specs: multiAuthSpecs,
+          authType: 'basic',
+          secrets: { username: '' },
+        })
+      ).rejects.toThrow(/Auth type basic/);
+    });
   });
 });
