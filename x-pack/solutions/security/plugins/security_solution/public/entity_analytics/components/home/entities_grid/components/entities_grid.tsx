@@ -108,6 +108,7 @@ export interface EntitiesGridProps {
   onSortChange: (field: string, direction: SortDir) => void;
   searchExpression?: string;
   entityExpression?: string;
+  isSearchOverridesPending?: boolean;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
   /** Columns of a source the user can't read are left out, so their queries never run. */
@@ -129,6 +130,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   onSortChange,
   searchExpression,
   entityExpression,
+  isSearchOverridesPending,
   cellHandlers,
   rowActions,
   readAccess,
@@ -201,6 +203,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       pageSize: MAX_LOADED_ROWS,
       searchExpression,
       entityExpression,
+      isSearchOverridesPending,
       timeRange,
       rowsMode,
       keepFields,

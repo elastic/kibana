@@ -11,9 +11,13 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Subject } from 'rxjs';
 import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
-import { EventsService } from '../../../services/events/events_service';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import { ConversationStreamService } from '../../../services/events/conversation_stream_service';
-import { propagateEvents } from '../../../services/chat/propagate_events';
+import {
+  EXECUTION_STREAMING_EVENT_TYPE,
+  type ExecutionStreamingEvent,
+  type TimelineDisplayEvent,
+} from '../../../services/events/sse_to_events';
 import { createExecutionStartedEvent } from '../../components/conversations/timeline/items/execution_started.factory';
 import { createExecutionTerminatedEvent } from '../../components/conversations/timeline/items/execution_terminated_event.factory';
 import { queryKeys } from '../../query_keys';
@@ -43,15 +47,14 @@ const vars = {
 const terminated = createExecutionTerminatedEvent({ execution_id: 'round-1::execution::1' });
 
 const setup = () => {
-  const eventsService = new EventsService();
-  const conversationStreamService = new ConversationStreamService(eventsService);
+  const conversationStreamService = new ConversationStreamService();
   const bindings = {
     conversationStreamService,
     clearActiveStream: jest.fn(),
     markStreamStarted: jest.fn(),
   };
   const source = new Subject<ChatEvent>();
-  mockResume.mockReturnValue(source.pipe(propagateEvents({ eventsService, conversationId })));
+  mockResume.mockReturnValue(source);
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -69,9 +72,38 @@ const setup = () => {
   return { bindings, source, result, conversationStreamService, observer };
 };
 
+const chunk = (text: string): ChatEvent =>
+  ({ type: ChatEventType.messageChunk, data: { message_id: 'm', text_chunk: text } } as ChatEvent);
+
+const messageOf = (events: TimelineDisplayEvent[]): string | undefined =>
+  events.find(
+    (event): event is ExecutionStreamingEvent => event.type === EXECUTION_STREAMING_EVENT_TYPE
+  )?.data.message;
+
 describe('useResumeRoundMutation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('adds each streamed chunk to the live events exactly once, before the run ends', async () => {
+    const { source, result, conversationStreamService } = setup();
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockResume).toHaveBeenCalled());
+    act(() => {
+      source.next(
+        createExecutionStartedEvent({
+          id: 'round-1::execution::1::execution_started',
+          execution_id: 'round-1::execution::1',
+          trigger_event_id: 'round-1::prompt_response::1',
+        }) as ChatEvent
+      );
+      source.next(chunk('Hi'));
+    });
+    expect(messageOf(conversationStreamService.getSnapshot(conversationId))).toBe('Hi');
+
+    act(() => source.next(chunk(' there')));
+    expect(messageOf(conversationStreamService.getSnapshot(conversationId))).toBe('Hi there');
   });
 
   it('releases the execution events once the refetch contains the saved execution, keeping the answer', async () => {

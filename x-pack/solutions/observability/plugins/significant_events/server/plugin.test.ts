@@ -7,7 +7,12 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
+import {
+  consumeRunQuota,
+  createRunQuotaInternalRepository,
+  dayKey,
+  releaseRunQuota,
+} from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
 import type { SignificantEventsPluginSetupDependencies } from './types';
@@ -16,12 +21,17 @@ import { SignificantEventsPlugin } from './plugin';
 jest.mock('./lib/run_quotas', () => ({
   consumeRunQuota: jest.fn(),
   createRunQuotaInternalRepository: jest.fn(),
+  releaseRunQuota: jest.fn(),
+  dayKey: jest.fn(),
+  resolveDailyWindow: jest.fn(),
 }));
 
 jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
 
 const consumeRunQuotaMock = jest.mocked(consumeRunQuota);
+const releaseRunQuotaMock = jest.mocked(releaseRunQuota);
 const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
+const dayKeyMock = jest.mocked(dayKey);
 
 const createPlugin = () => new SignificantEventsPlugin(coreMock.createPluginInitializerContext());
 
@@ -120,6 +130,7 @@ describe('SignificantEventsPlugin setup', () => {
     const registerInvestigationQuota = jest.fn();
     const internalRepository = {} as ReturnType<typeof createRunQuotaInternalRepository>;
     createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
+    dayKeyMock.mockReturnValueOnce('2026-10-29').mockReturnValueOnce('2026-10-30');
     const plugin = createPlugin();
     plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
     const server = plugin.server;
@@ -129,12 +140,22 @@ describe('SignificantEventsPlugin setup', () => {
     server.core = coreMock.createStart();
     const [callback] = registerInvestigationQuota.mock.calls[0];
 
-    await expect(callback()).resolves.toEqual({ allowed: true });
+    const result = await callback();
 
+    expect(result).toEqual({ allowed: true, release: expect.any(Function) });
     expect(createRunQuotaInternalRepositoryMock).toHaveBeenCalledWith(server);
     expect(consumeRunQuotaMock).toHaveBeenCalledWith({
       internalRepository,
       group: 'investigation',
+      date: '2026-10-29',
+    });
+
+    await result.release();
+
+    expect(releaseRunQuotaMock).toHaveBeenCalledWith({
+      internalRepository,
+      group: 'investigation',
+      date: '2026-10-29',
     });
   });
 });
