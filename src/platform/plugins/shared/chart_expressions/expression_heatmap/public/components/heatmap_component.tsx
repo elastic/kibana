@@ -461,7 +461,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       }
     }
 
-    if (yAxisColumn?.meta.type === 'number_range') {
+    if (yAxisColumn?.meta.type === 'number_range' && args.gridConfig.ySortPredicate) {
       chartData = sortRowsByRangeLowerBound(
         chartData,
         yAxisColumn.id,

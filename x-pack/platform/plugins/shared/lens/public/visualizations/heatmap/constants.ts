@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { IconChartHeatmap } from '@kbn/chart-icons';
+import type { DataType } from '@kbn/lens-common';
 
 export const LENS_HEATMAP_RENDERER = 'lens_heatmap_renderer';
 
@@ -38,3 +39,5 @@ export const FUNCTION_NAME = 'heatmap';
 export const LEGEND_FUNCTION = 'heatmap_legend';
 
 export const HEATMAP_GRID_FUNCTION = 'heatmap_grid';
+
+export const NUMERIC_DATA_TYPES: DataType[] = ['number', 'number_range'];

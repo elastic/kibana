@@ -41,6 +41,7 @@ import {
   HEATMAP_GRID_FUNCTION,
   LEGEND_FUNCTION,
   LENS_HEATMAP_ID,
+  NUMERIC_DATA_TYPES,
 } from './constants';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
@@ -285,7 +286,11 @@ export const getHeatmapVisualization = ({
       update.yAccessor = columnId;
       const datasource = frame.datasourceLayers[layerId];
       const operation = datasource?.getOperationForColumnId(columnId);
-      if (operation?.dataType === 'number' && !prevState.gridConfig.ySortPredicate) {
+      if (
+        operation &&
+        NUMERIC_DATA_TYPES.includes(operation.dataType) &&
+        !prevState.gridConfig.ySortPredicate
+      ) {
         update.gridConfig = {
           ...prevState.gridConfig,
           ySortPredicate: 'desc',

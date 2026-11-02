@@ -12,7 +12,12 @@ import { IconChartHeatmap } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { Visualization } from '@kbn/lens-common';
 import type { HeatmapVisualizationState } from './types';
-import { CHART_SHAPES, HEATMAP_GRID_FUNCTION, LEGEND_FUNCTION } from './constants';
+import {
+  CHART_SHAPES,
+  HEATMAP_GRID_FUNCTION,
+  LEGEND_FUNCTION,
+  NUMERIC_DATA_TYPES,
+} from './constants';
 
 export const getSuggestions: Visualization<HeatmapVisualizationState>['getSuggestions'] = ({
   table,
@@ -119,7 +124,7 @@ export const getSuggestions: Visualization<HeatmapVisualizationState>['getSugges
   newState.yAccessor = groups.find((g) => g.columnId !== newState.xAccessor)?.columnId;
 
   const yColumn = groups.find((g) => g.columnId === newState.yAccessor);
-  if (yColumn && yColumn.operation.dataType === 'number') {
+  if (yColumn && NUMERIC_DATA_TYPES.includes(yColumn.operation.dataType)) {
     newState.gridConfig = {
       ...newState.gridConfig,
       ySortPredicate: 'desc',

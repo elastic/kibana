@@ -910,7 +910,11 @@ describe('heatmap suggestions', () => {
       expect(suggestion).toMatchObject({
         hide: false,
         score: 0.9,
-        state: { xAccessor: 'date-column', yAccessor: 'range-column' },
+        state: {
+          xAccessor: 'date-column',
+          yAccessor: 'range-column',
+          gridConfig: { ySortPredicate: 'desc' },
+        },
       });
     });
   });
