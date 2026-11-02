@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.17';
+export const PROTOTYPE_VERSION = '1.18';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,12 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-02',
+    summary: 'Scrollable prototype variation popover with pinned settings tabs.',
+    details:
+      'Cap popover height and scroll Settings/About body so Prototype settings and About the prototype tabs stay visible as dimensions grow. Bump to v1.18.',
+  },
   {
     date: '2026-11-02',
     summary:
@@ -434,15 +440,7 @@ const formatChangelogDate = (isoDate: string): string => {
 };
 
 const AboutPrototypePanel = () => (
-  <EuiFlexGroup
-    direction="column"
-    gutterSize="m"
-    css={css`
-      flex: 1 1 auto;
-      height: 100%;
-      min-height: 0;
-    `}
-  >
+  <EuiFlexGroup direction="column" gutterSize="m">
     <EuiFlexItem grow={false}>
       <EuiText size="s">
         <p>
@@ -458,44 +456,29 @@ const AboutPrototypePanel = () => (
     <EuiFlexItem grow={false}>
       <EuiHorizontalRule margin="none" />
     </EuiFlexItem>
-    <EuiFlexItem
-      grow={true}
-      css={css`
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-      `}
-    >
+    <EuiFlexItem grow={false}>
       <EuiText size="s">
         <strong>Change log</strong>
       </EuiText>
       <EuiSpacer size="s" />
-      <div
-        css={css`
-          flex: 1 1 auto;
-          min-height: 0;
-          overflow-y: auto;
-        `}
-      >
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {PROTOTYPE_CHANGELOG.map((entry) => (
-            <EuiFlexItem key={`${entry.date}-${entry.summary}`} grow={false}>
-              <EuiText size="xs">
-                <p css={css`margin-bottom: 0;`}>
-                  <strong>{formatChangelogDate(entry.date)}</strong>
-                  {' — '}
-                  {entry.summary}
-                </p>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {PROTOTYPE_CHANGELOG.map((entry) => (
+          <EuiFlexItem key={`${entry.date}-${entry.summary}`} grow={false}>
+            <EuiText size="xs">
+              <p css={css`margin-bottom: 0;`}>
+                <strong>{formatChangelogDate(entry.date)}</strong>
+                {' — '}
+                {entry.summary}
+              </p>
+            </EuiText>
+            {entry.details ? (
+              <EuiText size="xs" color="subdued">
+                <p css={css`margin-bottom: 0; margin-top: 2px;`}>{entry.details}</p>
               </EuiText>
-              {entry.details ? (
-                <EuiText size="xs" color="subdued">
-                  <p css={css`margin-bottom: 0; margin-top: 2px;`}>{entry.details}</p>
-                </EuiText>
-              ) : null}
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </div>
+            ) : null}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -556,6 +539,10 @@ export const VariationSwitcher = () => {
         <div
           css={css`
             min-width: 280px;
+            max-width: min(420px, calc(100vw - ${euiTheme.size.l} * 2));
+            display: flex;
+            flex-direction: column;
+            max-height: min(75vh, calc(100vh - ${euiTheme.size.l} * 3));
           `}
         >
           <EuiFlexGroup
@@ -563,6 +550,9 @@ export const VariationSwitcher = () => {
             justifyContent="spaceBetween"
             gutterSize="s"
             responsive={false}
+            css={css`
+              flex-shrink: 0;
+            `}
           >
             <EuiFlexItem grow={true}>
               <EuiTabs size="s" bottomBorder={false}>
@@ -590,24 +580,18 @@ export const VariationSwitcher = () => {
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiHorizontalRule margin="s" />
-          <EuiSpacer size="s" />
-          {/* Settings drives width/height; About overlays so it cannot widen the panel. */}
+          <EuiHorizontalRule margin="s" css={css`flex-shrink: 0;`} />
           <div
             css={css`
-              position: relative;
+              flex: 1 1 auto;
+              min-height: 0;
+              overflow-x: hidden;
+              overflow-y: auto;
+              -webkit-overflow-scrolling: touch;
             `}
+            data-test-subj="entityCentricLabPrototypePanelScroll"
           >
-            <div
-              hidden={selectedTab !== 'settings'}
-              css={css`
-                &[hidden] {
-                  display: block !important;
-                  visibility: hidden;
-                  pointer-events: none;
-                }
-              `}
-            >
+            {selectedTab === 'settings' ? (
               <EuiFlexGroup direction="column" gutterSize="m">
                 {dimensions.map((dim) => (
                   <EuiFlexItem key={dim.id} grow={false}>
@@ -625,25 +609,9 @@ export const VariationSwitcher = () => {
                   <ResetPrototypeStateButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </div>
-            <div
-              hidden={selectedTab !== 'about'}
-              css={css`
-                position: absolute;
-                inset: 0;
-                display: flex;
-                flex-direction: column;
-                min-height: 0;
-                overflow: hidden;
-                &[hidden] {
-                  display: flex !important;
-                  visibility: hidden;
-                  pointer-events: none;
-                }
-              `}
-            >
+            ) : (
               <AboutPrototypePanel />
-            </div>
+            )}
           </div>
         </div>
       </EuiPopover>
