@@ -395,6 +395,12 @@ export class UserProfileService {
     request: KibanaRequest,
     recordFailure: (telemetry: GetCurrentTelemetry) => void
   ): Promise<ResolvedCurrentUserProfileId> {
+    // Temporary E2E experiment: neither current-profile API may recover a profile ID.
+    const profileResolutionDisabled = true;
+    if (profileResolutionDisabled) {
+      return { telemetry: {}, notApplicable: true };
+    }
+
     if (!this.license?.isEnabled()) {
       this.logger.debug(
         'Skipping user profile retrieval: security features are disabled in Elasticsearch.'
