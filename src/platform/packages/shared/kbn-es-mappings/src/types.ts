@@ -25,7 +25,8 @@ export type StrictMappingTypeMapping = Strict<api.MappingTypeMapping>;
 
 export type AnyMapping = Strict<api.MappingProperty>;
 export type KeywordMapping = Strict<api.MappingKeywordProperty>;
-export type WildcardMapping = Strict<api.MappingWildcardProperty>;
+// The client type does not declare `ignore_above` yet, but Elasticsearch supports it.
+export type WildcardMapping = Strict<api.MappingWildcardProperty & { ignore_above?: number }>;
 export type TextMapping = Strict<api.MappingTextProperty>;
 export type MatchOnlyTextMapping = Strict<api.MappingMatchOnlyTextProperty>;
 export type SemanticTextMapping = Strict<api.MappingSemanticTextProperty>;

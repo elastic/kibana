@@ -42,6 +42,12 @@ describe('mappings', () => {
         "type": "wildcard",
       }
     `);
+    expect(mappings.wildcard({ ignore_above: 1024 })).toMatchInlineSnapshot(`
+      Object {
+        "ignore_above": 1024,
+        "type": "wildcard",
+      }
+    `);
     expect(mappings.text()).toMatchInlineSnapshot(`
       Object {
         "fields": Object {
