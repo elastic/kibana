@@ -76,7 +76,7 @@ const validateSourceQueryRoute = createNightshiftSourcesServerRoute({
     access: 'internal',
     summary: 'Validate a Nightshift source query',
     description:
-      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A query create would reject comes back with `valid: false` and the reason.',
+      'Runs the checks create runs on the ES|QL query, as the calling user, without storing anything. A query that fails validation comes back with `valid: false` and the reason. A query the user cannot read is a 403, as on create.',
   },
   security: {
     authz: {
