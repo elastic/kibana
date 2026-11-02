@@ -28,46 +28,42 @@ const expectManagementHost = async (page: ScoutPage, pathRe: RegExp) => {
 const templateId = `scout-v1-template-sm-${Date.now()}`;
 const templateName = `Scout v1 template ${templateId}`;
 
-test.describe(
-  'Create rule from template',
-  { tag: tags.stateful.classic },
-  () => {
-    test.beforeAll(async ({ kbnClient }) => {
-      await kbnClient.savedObjects.create({
+test.describe('Create rule from template', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ kbnClient }) => {
+    await kbnClient.savedObjects.create({
+      type: RULE_TEMPLATE_SO_TYPE,
+      id: templateId,
+      overwrite: true,
+      attributes: makeV1EsQueryRuleTemplateAttributes(templateName),
+    });
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    try {
+      await kbnClient.savedObjects.delete({
         type: RULE_TEMPLATE_SO_TYPE,
         id: templateId,
-        overwrite: true,
-        attributes: makeV1EsQueryRuleTemplateAttributes(templateName),
       });
-    });
+    } catch {
+      // beforeAll may have failed before the template was created
+    }
+  });
 
-    test.afterAll(async ({ kbnClient }) => {
-      try {
-        await kbnClient.savedObjects.delete({
-          type: RULE_TEMPLATE_SO_TYPE,
-          id: templateId,
-        });
-      } catch {
-        // beforeAll may have failed before the template was created
-      }
-    });
+  test('stays on the host mount when selecting a template', async ({
+    browserAuth,
+    kbnUrl,
+    page,
+    pageObjects,
+  }) => {
+    const rules = pageObjects.classicRulesPage;
 
-    test('stays on the host mount when selecting a template', async ({
-      browserAuth,
-      kbnUrl,
-      page,
-      pageObjects,
-    }) => {
-      const rules = pageObjects.classicRulesPage;
+    await browserAuth.loginAsAdmin();
+    await rules.goto(kbnUrl);
+    await expect(rules.createButton).toBeVisible({ timeout: 30_000 });
+    await rules.openCreateRuleTypeModal();
+    await rules.selectTemplate(templateId, templateName);
 
-      await browserAuth.loginAsAdmin();
-      await rules.goto(kbnUrl);
-      await expect(rules.createButton).toBeVisible({ timeout: 30_000 });
-      await rules.openCreateRuleTypeModal();
-      await rules.selectTemplate(templateId, templateName);
-
-      await expectManagementHost(page, CLASSIC_RULES_CREATE_URL_RE);
-      expect(page.url()).toContain(`/create/template/${templateId}`);
-    });
-  }
-);
+    await expectManagementHost(page, CLASSIC_RULES_CREATE_URL_RE);
+    expect(page.url()).toContain(`/create/template/${templateId}`);
+  });
+});
