@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
@@ -181,7 +181,7 @@ export const AgentsList: React.FC = () => {
   const { manageAgents } = useUiPrivileges();
   const { addSuccessToast, addErrorToast } = useToasts();
   const {
-    services: { settings },
+    services: { analytics, settings },
   } = useKibana();
   const dateFormat = settings?.client.get<string>('dateFormat');
   const { defaultAgentId: spaceDefaultAgentId } = useSpaceDefaultAgent();
@@ -431,7 +431,14 @@ export const AgentsList: React.FC = () => {
           description: actionLabels.deleteDescription,
           'data-test-subj': (agent) => `agentBuilderAgentsListDelete-${agent.id}`,
           showOnHover: true,
-          onClick: (agent) => deleteAgent({ agent }),
+          onClick: (agent) => {
+            analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+              ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              ebt_action: AGENT_BUILDER_UI_EBT.action.agentList.AGENT_DELETE,
+              element_kind: 'button',
+            });
+            deleteAgent({ agent });
+          },
           available: canEditAgent,
         },
       ],
@@ -448,6 +455,7 @@ export const AgentsList: React.FC = () => {
       agentActions,
     ];
   }, [
+    analytics,
     createAgentBuilderUrl,
     deleteAgent,
     manageAgents,
