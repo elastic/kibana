@@ -117,7 +117,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   dataPlugin.search.dslPaginated = jest.fn().mockResolvedValue({
     rawResponse: { hits: { total: 2, hits: [] } },
-    pagination: { hasNextPage: false, nextPage: jest.fn() },
+    pagination: { hasNextPage: jest.fn().mockReturnValue(false), nextPage: jest.fn() },
   });
 
   dataPlugin.search.searchSource.createEmpty = jest.fn(() => createSearchSourceWithDeps());

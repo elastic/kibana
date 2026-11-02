@@ -83,7 +83,7 @@ export function sendLoadingMoreFinishedMsg(
   }: {
     moreRecords: DataTableRecord[];
     interceptedWarnings: SearchResponseWarning[] | undefined;
-    pagination?: IDslPagination;
+    pagination?: IDslPagination<true>;
   }
 ) {
   const currentValue = documents$.getValue();

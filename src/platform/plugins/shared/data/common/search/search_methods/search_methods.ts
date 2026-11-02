@@ -22,6 +22,7 @@ import type {
   IDslSearchOptions,
   IDslSearchResult,
   IDslPaginatedSearchParams,
+  IDslUntrackedPaginatedSearchParams,
   IDslPaginatedSearchOptions,
   IDslPaginatedSearchResult,
   IDslPagination,
@@ -152,18 +153,27 @@ export class SearchMethodsService implements ISearchMethods {
   }
 
   /**
-   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
+   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers.
+   * Total hits are counted by default; pass `trackTotalHits: false` to skip counting, in which
+   * case `hasNextPage` must be given the total by the caller.
    */
-  async dslPaginated(
+  dslPaginated(
     params: IDslPaginatedSearchParams,
     options?: IDslPaginatedSearchOptions
-  ): Promise<IDslPaginatedSearchResult> {
+  ): Promise<IDslPaginatedSearchResult>;
+  dslPaginated(
+    params: IDslUntrackedPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
+  ): Promise<IDslPaginatedSearchResult<true>>;
+  async dslPaginated(
+    params: IDslPaginatedSearchParams | IDslUntrackedPaginatedSearchParams,
+    options?: IDslPaginatedSearchOptions
+  ): Promise<IDslPaginatedSearchResult<boolean>> {
     // Apply the context once so every page reuses the merged query
     const contextParams = params.kibanaQueryContext
       ? await this.applyDslKibanaQueryContext(params)
       : params;
-    // trackTotalHits is required for pagination to determine if there are more pages
-    const paginatedParams = { ...contextParams, trackTotalHits: true as const };
+    const paginatedParams = { ...contextParams, trackTotalHits: params.trackTotalHits ?? true };
     const request = this.buildDslRequest(paginatedParams, options);
     const response = await this.executeDslSearch(
       request,
@@ -392,21 +402,25 @@ export class SearchMethodsService implements ISearchMethods {
     originalParams: IDslSearchParams,
     options?: IDslSearchOptions,
     previouslyLoadedCount = 0
-  ): IDslPagination {
+  ): IDslPagination<boolean> {
     const self = this;
     const lastHit = rawResponse.hits?.hits?.at?.(-1);
     // Total hits is for the whole query, so it is compared against everything loaded so far
     const currentCount = previouslyLoadedCount + (rawResponse.hits?.hits?.length ?? 0);
-    const totalValue =
+    const responseTotal: number | undefined =
       typeof rawResponse.hits?.total === 'number'
         ? rawResponse.hits.total
-        : rawResponse.hits?.total?.value ?? 0;
-    const hasNextPage = Boolean(lastHit?.sort) && totalValue > currentCount;
+        : rawResponse.hits?.total?.value;
+
+    // Without a total from the caller or the response there is no way to know, so assume none
+    const hasNextPage = (totalHits: number | undefined = responseTotal): boolean =>
+      Boolean(lastHit?.sort) && totalHits !== undefined && totalHits > currentCount;
 
     return {
       hasNextPage,
-      nextPage: async (pageOptions): Promise<IDslPaginatedSearchResult | null> => {
-        if (!hasNextPage || !lastHit?.sort) {
+      nextPage: async (pageOptions): Promise<IDslPaginatedSearchResult<boolean> | null> => {
+        // When the response has no total the caller owns the decision to page, using `hasNextPage`
+        if (!lastHit?.sort || (responseTotal !== undefined && !hasNextPage())) {
           return null;
         }
 

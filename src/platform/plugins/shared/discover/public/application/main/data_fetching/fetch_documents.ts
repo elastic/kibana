@@ -55,6 +55,8 @@ export const fetchDocuments = async (
     {
       index: dataView,
       ...searchRequest.body,
+      // The total comes from the separate hit count request, so this one doesn't have to count it
+      trackTotalHits: false,
     },
     {
       abortSignal: abortController.signal,

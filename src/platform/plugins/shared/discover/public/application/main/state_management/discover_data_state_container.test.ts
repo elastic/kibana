@@ -243,10 +243,10 @@ describe('test getDataStateContainer', () => {
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 2),
       pagination: {
-        hasNextPage: true,
+        hasNextPage: () => true,
         nextPage: jest.fn().mockResolvedValue({
           rawResponse: { hits: { hits: esHitsMockWithSort.slice(2) } },
-          pagination: { hasNextPage: false, nextPage: jest.fn() } as IDslPagination,
+          pagination: { hasNextPage: () => false, nextPage: jest.fn() } as IDslPagination<true>,
         }),
       },
     });
@@ -423,7 +423,7 @@ describe('test getDataStateContainer', () => {
     mockFetchDocuments.mockResolvedValue({ records: moreRecords });
 
     const mockPagination: IDslPagination = {
-      hasNextPage: true,
+      hasNextPage: () => true,
       nextPage: jest.fn().mockResolvedValue({
         rawResponse: {
           hits: {
@@ -431,9 +431,9 @@ describe('test getDataStateContainer', () => {
           },
         },
         pagination: {
-          hasNextPage: false,
+          hasNextPage: () => false,
           nextPage: jest.fn(),
-        } as IDslPagination,
+        } as IDslPagination<true>,
       }),
     };
 

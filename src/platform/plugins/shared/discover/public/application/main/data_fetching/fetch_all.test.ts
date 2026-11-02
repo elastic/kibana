@@ -296,13 +296,13 @@ describe('test fetchAll', () => {
       const collectMain = subjectCollector(subjects.main$);
 
       const nextPagination = {
-        hasNextPage: false,
+        hasNextPage: () => false,
         nextPage: jest.fn(),
         getAllPages: jest.fn(),
       };
 
       const mockPagination = {
-        hasNextPage: true,
+        hasNextPage: () => true,
         nextPage: jest.fn().mockResolvedValue({
           rawResponse: {
             hits: {
@@ -353,7 +353,7 @@ describe('test fetchAll', () => {
       const collectMain = subjectCollector(subjects.main$);
 
       const mockPagination = {
-        hasNextPage: true,
+        hasNextPage: () => true,
         nextPage: jest.fn().mockRejectedValue({ msg: 'This query failed' }),
         getAllPages: jest.fn(),
       };

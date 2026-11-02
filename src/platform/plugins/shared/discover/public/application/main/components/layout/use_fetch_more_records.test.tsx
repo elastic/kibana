@@ -87,7 +87,7 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 3),
-      pagination: { hasNextPage: true, nextPage: jest.fn() },
+      pagination: { hasNextPage: () => true, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -131,7 +131,7 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.LOADING_MORE,
       result: records.slice(0, 3),
-      pagination: { hasNextPage: true, nextPage: jest.fn() },
+      pagination: { hasNextPage: () => true, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -181,7 +181,7 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 3),
-      pagination: { hasNextPage: true, nextPage: jest.fn() },
+      pagination: { hasNextPage: () => true, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
@@ -208,7 +208,7 @@ describe('useFetchMoreRecords', () => {
     dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 3),
-      pagination: { hasNextPage: false, nextPage: jest.fn() },
+      pagination: { hasNextPage: () => false, nextPage: jest.fn() },
     });
     dataStateContainer.data$.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,

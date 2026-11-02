@@ -34,7 +34,7 @@ export const useFetchMoreRecords = (): UseFetchMoreRecordsResult => {
   const isMoreDataLoading = documentState.fetchStatus === FetchStatus.LOADING_MORE;
 
   const totalHits = totalHitsState.result || 0;
-  const canFetchMoreRecords = Boolean(documentState.pagination?.hasNextPage);
+  const canFetchMoreRecords = Boolean(documentState.pagination?.hasNextPage(totalHits));
 
   const onFetchMoreRecords = useMemo(
     () =>

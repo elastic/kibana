@@ -271,7 +271,7 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
     const currentDocs = dataSubjects.documents$.getValue();
     const pagination = currentDocs.pagination;
 
-    if (!pagination?.hasNextPage) {
+    if (!pagination?.hasNextPage(dataSubjects.totalHits$.getValue().result ?? 0)) {
       return; // No more pages available
     }
 

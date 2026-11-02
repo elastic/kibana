@@ -87,7 +87,7 @@ export interface DataDocumentsMsg extends DataMsg {
   dataSource?: DataSource;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
-  pagination?: IDslPagination;
+  pagination?: IDslPagination<true>;
   approximationApplied?: boolean;
 }
 

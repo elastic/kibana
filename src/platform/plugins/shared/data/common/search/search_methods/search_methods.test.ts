@@ -336,8 +336,8 @@ describe('SearchMethodsService', () => {
       const second = await first.pagination.nextPage();
       const third = await second?.pagination.nextPage();
 
-      expect(second?.pagination.hasNextPage).toBe(true);
-      expect(third?.pagination.hasNextPage).toBe(false);
+      expect(second?.pagination.hasNextPage()).toBe(true);
+      expect(third?.pagination.hasNextPage()).toBe(false);
     });
 
     describe('search context', () => {
@@ -853,7 +853,7 @@ describe('SearchMethodsService', () => {
         sort: [{ timestamp: 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(true);
+      expect(result.pagination.hasNextPage()).toBe(true);
     });
 
     it('hasNextPage is false when no more results', async () => {
@@ -874,7 +874,52 @@ describe('SearchMethodsService', () => {
         sort: [{ timestamp: 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(false);
+      expect(result.pagination.hasNextPage()).toBe(false);
+    });
+
+    describe('with trackTotalHits: false', () => {
+      const untrackedParams = {
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' as const }],
+        trackTotalHits: false as const,
+      };
+      const twoHitsWithoutTotal = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+        },
+      };
+
+      it('does not ask Elasticsearch to count total hits', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        await service.dslPaginated(untrackedParams);
+
+        expect(mockSearch.mock.calls[0][0].params.body.track_total_hits).toBe(false);
+      });
+
+      it('derives hasNextPage from the total the caller supplies', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        const { pagination } = await service.dslPaginated(untrackedParams);
+
+        expect(pagination.hasNextPage(100)).toBe(true);
+        expect(pagination.hasNextPage(2)).toBe(false);
+      });
+
+      it('compares the supplied total with everything loaded so far on later pages', async () => {
+        mockSearch.mockReturnValue(createMockResponse(twoHitsWithoutTotal));
+
+        const first = await service.dslPaginated(untrackedParams);
+        const second = await first.pagination.nextPage();
+
+        expect(mockSearch.mock.calls[1][0].params.body.track_total_hits).toBe(false);
+        expect(second?.pagination.hasNextPage(4)).toBe(false);
+        expect(second?.pagination.hasNextPage(5)).toBe(true);
+      });
     });
 
     it('hasNextPage is false when no sort values', async () => {
@@ -895,7 +940,7 @@ describe('SearchMethodsService', () => {
         sort: [{ '@timestamp': 'desc' }],
       });
 
-      expect(result.pagination.hasNextPage).toBe(false);
+      expect(result.pagination.hasNextPage()).toBe(false);
     });
 
     it('nextPage() uses search_after from last hit sort', async () => {
