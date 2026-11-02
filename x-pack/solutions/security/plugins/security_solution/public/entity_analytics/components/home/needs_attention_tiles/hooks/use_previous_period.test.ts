@@ -173,21 +173,25 @@ describe('usePreviousPeriod', () => {
     expect(callOf('PrevPeriod')[0]).toEqual(['tilePrevPeriod', 'FROM previous']);
   });
 
-  it('runs each query with the ES|QL strategy, on the local cluster only when asked', async () => {
+  it('runs each query with the ES|QL strategy, in the local project only', async () => {
     mockSearch.mockReturnValue(
       of({ rawResponse: { columns: [{ name: 'value' }], values: [[7]] } })
     );
-    renderHook(() => usePreviousPeriod({ ...options, localOnly: true }));
+    renderHook(() => usePreviousPeriod(options));
     expect(await callOf('PrevPeriod')[1]({ signal: undefined })).toBe(7);
     expect(mockSearch).toHaveBeenCalledWith(
       { params: { query: 'FROM previous' } },
       expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
     );
 
-    mockSearch.mockClear();
-    renderHook(() => usePreviousPeriod(options));
-    await callOf('PrevPeriod')[1]({ signal: undefined });
-    expect(mockSearch.mock.calls[0][1].projectRouting).toBeUndefined();
+    mockSearch.mockReturnValue(
+      of({ rawResponse: { columns: [{ name: 'reaches_back' }], values: [[true]] } })
+    );
+    expect(await callOf('HistoryReachesBack')[1]({ signal: undefined })).toBe(true);
+    expect(mockSearch).toHaveBeenCalledWith(
+      { params: { query: 'FROM guard' } },
+      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+    );
   });
 
   it('fails the previous query when its parser throws, so the delta is left out', async () => {

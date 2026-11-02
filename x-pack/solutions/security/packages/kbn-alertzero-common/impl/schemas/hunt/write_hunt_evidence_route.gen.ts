@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntCompleteness } from '../components/hunt.gen';
+import { HuntCompleteness, HuntIncompleteReason } from '../components/hunt.gen';
 
 export const WriteHuntEvidenceRequestBody = lazySchema(() =>
   z
@@ -61,6 +61,16 @@ export const WriteHuntEvidenceRequestBody = lazySchema(() =>
         .describe(
           "From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run."
         ),
+      /**
+       * From the coordinator's `retryable_reasons`: the reasons of the gaps that kept the run retryable. A retryable run whose reasons all came from the environment (an unavailable index or catalog, a partial search, enrichment not finished) leaves the retry count as it was, even when it searched something new. Omit or send none to count every retryable run.
+       */
+      retryableReasons: z
+        .array(HuntIncompleteReason)
+        .max(100)
+        .optional()
+        .describe(
+          "From the coordinator's `retryable_reasons`: the reasons of the gaps that kept the run retryable. A retryable run whose reasons all came from the environment (an unavailable index or catalog, a partial search, enrichment not finished) leaves the retry count as it was, even when it searched something new. Omit or send none to count every retryable run."
+        ),
     })
     .strict()
 );
@@ -71,13 +81,13 @@ export const WriteHuntEvidenceResponse = lazySchema(() =>
   z.object({
     acknowledged: z.boolean(),
     /**
-     * True when the report's coverage ledger could not hold every technique, so a retryable run was settled and stamped as hunted instead of left eligible for a later sweep.
+     * True when a retryable run was settled and stamped as hunted instead of left eligible for a later sweep, either because the report's coverage ledger could not hold every technique or because the report reached the retry bound.
      */
     settledByCap: z
       .boolean()
       .optional()
       .describe(
-        "True when the report's coverage ledger could not hold every technique, so a retryable run was settled and stamped as hunted instead of left eligible for a later sweep."
+        "True when a retryable run was settled and stamped as hunted instead of left eligible for a later sweep, either because the report's coverage ledger could not hold every technique or because the report reached the retry bound."
       ),
   })
 );

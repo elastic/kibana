@@ -36,7 +36,11 @@ export const GroupSizeCell = memo(
   }) =>
     onGroupSizeClick ? (
       <div css={cellContainerCss}>
-        <EuiLink onClick={() => onGroupSizeClick(row)} css={cellTruncateCss}>
+        <EuiLink
+          data-test-subj="eaGridGroupSizeLink"
+          onClick={() => onGroupSizeClick(row)}
+          css={cellTruncateCss}
+        >
           {String(value ?? '—')}
         </EuiLink>
       </div>
