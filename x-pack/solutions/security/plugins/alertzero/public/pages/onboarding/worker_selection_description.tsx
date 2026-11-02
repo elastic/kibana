@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
+import { ONBOARDING_READ_MORE_URL } from './constants';
 import * as i18n from './translations';
 
 interface Props {
@@ -37,7 +37,7 @@ export const WorkerSelectionDescription: React.FC<Props> = ({ isSaving, onWatchS
       />
       <br />
       <EuiLink
-        href={ONBOARDING_READ_MORE_URL_PLACEHOLDER}
+        href={ONBOARDING_READ_MORE_URL}
         target="_blank"
         external
         data-test-subj="alertZeroOnboardingReadMoreLink"

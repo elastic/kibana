@@ -6,6 +6,7 @@
  */
 
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import type { InvestigationEntryPoint } from '../client/investigations_client';
 import type { OnlineEvalsRoundKind } from '../online_evals/classify_round';
 
 export const NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT = 'nightshift-investigation-eval-score';
@@ -14,7 +15,7 @@ export const NIGHTSHIFT_ONLINE_EVAL_SCORE_EVENT = 'nightshift-investigation-eval
 export type OnlineEvalGradedReport = 'first_round' | 'pre_recovery' | 'current';
 
 /** How the investigation run that was scored started. */
-export type OnlineEvalEntryPoint = 'start_api' | 'automation' | 'slack' | 'alert_recovery';
+export type OnlineEvalEntryPoint = InvestigationEntryPoint;
 
 /**
  * Why an evaluator produced no score. `evidence_unmet` counts as skipped: the round didn't have

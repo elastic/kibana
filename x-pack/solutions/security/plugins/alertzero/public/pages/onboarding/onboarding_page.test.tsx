@@ -25,7 +25,7 @@ import {
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID, SecurityPageName } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
-import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
+import { ONBOARDING_READ_MORE_URL } from './constants';
 import { OnboardingPage } from './onboarding_page';
 
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
@@ -200,13 +200,6 @@ describe('OnboardingPage', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('shows a disabled video placeholder', () => {
-      renderPage({ canWrite: true, skipIntro: false });
-
-      expect(screen.getByTestId('alertZeroOnboardingVideoPlaceholder')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /video placeholder/ })).toBeDisabled();
-    });
-
     it('switches the preview section when a dot is selected', () => {
       renderPage({ canWrite: true, skipIntro: false });
 
@@ -234,7 +227,7 @@ describe('OnboardingPage', () => {
 
       expect(screen.getByTestId('alertZeroOnboardingReadMoreLink')).toHaveAttribute(
         'href',
-        ONBOARDING_READ_MORE_URL_PLACEHOLDER
+        ONBOARDING_READ_MORE_URL
       );
     });
 
@@ -363,7 +356,7 @@ describe('OnboardingPage', () => {
       renderPage({ canWrite: true });
       const link = screen.getByTestId('alertZeroOnboardingReadMoreLink');
       expect(link).toHaveTextContent('Read more about Watches and Workers');
-      expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL_PLACEHOLDER);
+      expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL);
     });
 
     it('links to Watch settings from the intro', () => {

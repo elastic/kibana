@@ -23,6 +23,7 @@ import {
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 export const useNewlyHighCriticalCount = ({
   spaceId,
@@ -71,7 +72,11 @@ export const useNewlyHighCriticalCount = ({
         lastValueFrom(
           data.search.search(
             { params: { query } },
-            { abortSignal: tileSignal, strategy: 'esql_async' }
+            {
+              abortSignal: tileSignal,
+              strategy: 'esql_async',
+              projectRouting: TILE_PROJECT_ROUTING,
+            }
           )
         )
       );

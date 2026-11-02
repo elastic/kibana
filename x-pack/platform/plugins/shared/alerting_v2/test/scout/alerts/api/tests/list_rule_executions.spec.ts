@@ -291,4 +291,52 @@ apiTest.describe('List rule executions API', { tag: testData.API_ENGINE_TAG }, (
 
     expect(response).toHaveStatusCode(400);
   });
+
+  apiTest(
+    'sort: orders executions by started_at ascending and descending',
+    async ({ apiServices, apiClient }) => {
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: `sortable-rule-${nameSuffix}` } })
+      );
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId: rule.id, runs: 2 });
+
+      const ascending = await apiClient.get(
+        listRuleExecutionsUrl({
+          rule_ids: [rule.id],
+          sort_field: 'started_at',
+          sort_order: 'asc',
+          per_page: 100,
+        }),
+        { headers: readerHeaders }
+      );
+
+      expect(ascending).toHaveStatusCode(200);
+      const ascendingTimes = ascending.body.items.map((item: { started_at: string }) =>
+        Date.parse(item.started_at)
+      );
+
+      expect(ascendingTimes.length).toBeGreaterThanOrEqual(2);
+      expect([...ascendingTimes].sort((a: number, b: number) => a - b)).toStrictEqual(
+        ascendingTimes
+      );
+
+      const descending = await apiClient.get(
+        listRuleExecutionsUrl({
+          rule_ids: [rule.id],
+          sort_field: 'started_at',
+          sort_order: 'desc',
+          per_page: 100,
+        }),
+        { headers: readerHeaders }
+      );
+
+      expect(descending).toHaveStatusCode(200);
+      const descendingTimes = descending.body.items.map((item: { started_at: string }) =>
+        Date.parse(item.started_at)
+      );
+      expect([...descendingTimes].sort((a: number, b: number) => b - a)).toStrictEqual(
+        descendingTimes
+      );
+    }
+  );
 });
