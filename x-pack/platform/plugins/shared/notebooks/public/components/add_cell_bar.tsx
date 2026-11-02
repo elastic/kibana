@@ -23,7 +23,7 @@ import { useNotebook } from './notebook_context';
 const CELL_KINDS: ReadonlyArray<{ kind: NewCellKind; icon: string; label: string }> = [
   {
     kind: 'esql',
-    icon: 'code',
+    icon: 'database',
     label: i18n.translate('xpack.notebook.addCell.esql', { defaultMessage: 'ES|QL query' }),
   },
   {

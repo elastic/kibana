@@ -31,7 +31,7 @@ import { CellStatusBadge } from './cell_status_badge';
 import { useNotebook } from './notebook_context';
 
 const TYPE_ICONS: Record<CellType, string> = {
-  esql: 'code',
+  esql: 'database',
   chart: 'visBarVertical',
   markdown: 'text',
   input: 'controls',
