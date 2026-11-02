@@ -14,6 +14,10 @@ import { assessPagination } from './propose_pagination';
 
 const METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
 
+// AutoRest's `x-ms-paths` holds operations whose keys add fixed query parameters, such as Azure
+// Blob Storage's `/?comp=list`. Azure's specs use it, and so do converted Smithy models.
+const PATH_MAPS = ['paths', 'x-ms-paths'] as const;
+
 const DESCRIPTION_LENGTH = 200;
 
 // Objects whose keys are property names, not schema keywords.
@@ -244,10 +248,15 @@ const describeServers = (servers: unknown) =>
       )
     : undefined;
 
+const pathItemEntries = (document: OpenApiDocument): Array<[string, unknown]> =>
+  PATH_MAPS.flatMap((pathMap) => {
+    const pathItems = document[pathMap];
+    return isJsonObject(pathItems) ? Object.entries(pathItems) : [];
+  });
+
 /** Lists every operation in an OpenAPI 3.x document, in document order. */
 export const listOperations = (document: OpenApiDocument): OperationSummary[] => {
-  const paths = isJsonObject(document.paths) ? document.paths : {};
-  return Object.entries(paths).flatMap(([path, value]) => {
+  return pathItemEntries(document).flatMap(([path, value]) => {
     const pathItem = resolveObject(document, value);
     return METHODS.flatMap((method) => {
       const operation = pathItem[method];
@@ -308,7 +317,7 @@ export const describeOperation = (
 ): JsonObject | undefined => {
   const pathItem = resolveObject(
     document,
-    isJsonObject(document.paths) ? document.paths[path] : undefined
+    pathItemEntries(document).find(([key]) => key === path)?.[1]
   );
   const operation = pathItem[method];
   if (!isJsonObject(operation)) {

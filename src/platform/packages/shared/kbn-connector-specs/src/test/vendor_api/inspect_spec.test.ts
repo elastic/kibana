@@ -137,6 +137,45 @@ describe('listOperations', () => {
   });
 });
 
+describe('operations under x-ms-paths', () => {
+  const msPathsDocument: OpenApiDocument = {
+    openapi: '3.0.3',
+    paths: {
+      '/containers': { get: { responses: { '204': { description: 'none' } } } },
+    },
+    'x-ms-paths': {
+      '/?comp=list': {
+        get: {
+          operationId: 'listContainers',
+          'x-ms-pageable': { nextLinkName: 'NextMarker' },
+          responses: { '200': { description: 'ok' } },
+        },
+      },
+    },
+  };
+  const listContainers = { method: 'get', path: '/?comp=list' };
+
+  it('lists them after the operations under paths', () => {
+    expect(listOperations(msPathsDocument)).toEqual([
+      { method: 'get', path: '/containers' },
+      { ...listContainers, operationId: 'listContainers' },
+    ]);
+  });
+
+  it('finds them by operationId and by method and path', () => {
+    expect(findOperation(msPathsDocument, 'listContainers')).toMatchObject(listContainers);
+    expect(findOperation(msPathsDocument, 'GET /?comp=list')).toMatchObject(listContainers);
+  });
+
+  it('describes them, with their pagination', () => {
+    expect(describeOperation(msPathsDocument, listContainers)).toMatchObject({
+      operation: 'GET /?comp=list',
+      operationId: 'listContainers',
+      pagination: { reason: 'it has x-ms-pageable' },
+    });
+  });
+});
+
 describe('findOperation', () => {
   it('finds an operation by operationId', () => {
     expect(findOperation(document, 'createIssue')).toMatchObject({ method: 'post' });
