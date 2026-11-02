@@ -71,7 +71,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     defaultMessage: 'Irreversible',
   }),
   appliedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.appliedTitle', {
-    defaultMessage: 'Applied successfully',
+    defaultMessage: 'Applied',
   }),
   declinedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.declinedTitle', {
     defaultMessage: 'Declined',
@@ -79,11 +79,19 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   applyingBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.applyingTitle', {
     defaultMessage: 'Applying',
   }),
+  /** The detail after an outcome banner's title: who asked or decided, and when if known. */
+  whoAndWhenBannerDescription: (name: string, time?: string) =>
+    time
+      ? i18n.translate('xpack.proposals.approvalModal.outcome.whoAndWhenDescription', {
+          defaultMessage: '{name} on {time}',
+          values: { name, time },
+        })
+      : name,
   decliningBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.decliningTitle', {
     defaultMessage: 'Declining',
   }),
   failedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.failedTitle', {
-    defaultMessage: 'Action failed',
+    defaultMessage: 'Failed',
   }),
   noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
     defaultMessage: 'Approved',
@@ -103,11 +111,11 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     defaultMessage: 'You',
   }),
   unknownActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.unknownActor', {
-    defaultMessage: 'Someone',
+    defaultMessage: 'Unknown user',
   }),
   previousFailureCalloutTitle: i18n.translate(
     'xpack.proposals.approvalModal.previousFailureCallout',
-    { defaultMessage: 'A previous attempt at this action failed' }
+    { defaultMessage: 'Previous attempt to apply this proposal failed' }
   ),
   failedAttemptCalloutTitle: i18n.translate('xpack.proposals.approvalModal.failedAttemptCallout', {
     defaultMessage: 'This attempt failed to execute the action',
@@ -116,7 +124,6 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   // passes and when the workflow settles a proposal as `status: 'expired'` beforehand (e.g. after
   // exhausting its retry attempts), and this wording has to be true for either cause.
   expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
-    defaultMessage:
-      'This proposal expired before a decision was made and can no longer be actioned.',
+    defaultMessage: 'Expired and can no longer be applied',
   }),
 });
