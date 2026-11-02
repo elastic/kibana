@@ -72,6 +72,18 @@ jest.mock('../../sources/recommended_sources/recommended_sources_table', () => (
         >
           Simulate partial source creation
         </button>
+        <button
+          data-test-subj="simulateCompletedSourceCreation"
+          onClick={() =>
+            onCreationStateChange({
+              isCreating: false,
+              hasCreatedSources: true,
+              hasFailedDrafts: false,
+            })
+          }
+        >
+          Simulate completed source creation
+        </button>
       </div>
     );
   },
@@ -95,6 +107,8 @@ const mockUseFetchSources = useFetchSources as jest.Mock;
 const mockUseDeveloperMode = useDeveloperMode as jest.Mock;
 const refetch = jest.fn();
 let mockSourcesCount = 1;
+let mockSourcesError = false;
+let mockSourcesIsFetching = false;
 let mockHistoryDetections = 0;
 let mockHistorySignificantEvents = 0;
 let mockHistoryError = false;
@@ -103,24 +117,19 @@ let mockHistoryIsFetching = false;
 
 const renderPage = (initialPath = '/detections/events', tab: DetectionTabId = 'events') => {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
-  const page = (
-    <Router history={history}>
-      <DetectionPage headerProps={{}} tab={tab} />
-    </Router>
-  );
-  const view = render(
+  const renderDetectionPage = () => (
     <I18nProvider>
-      <EuiProvider>{page}</EuiProvider>
+      <EuiProvider>
+        <Router history={history}>
+          <DetectionPage headerProps={{}} tab={tab} />
+        </Router>
+      </EuiProvider>
     </I18nProvider>
   );
+  const view = render(renderDetectionPage());
   return {
     history,
-    rerenderPage: () =>
-      view.rerender(
-        <I18nProvider>
-          <EuiProvider>{page}</EuiProvider>
-        </I18nProvider>
-      ),
+    rerenderPage: () => view.rerender(renderDetectionPage()),
   };
 };
 
@@ -129,6 +138,8 @@ describe('DetectionPage', () => {
     jest.clearAllMocks();
     mockCanManage = true;
     mockSourcesCount = 1;
+    mockSourcesError = false;
+    mockSourcesIsFetching = false;
     mockHistoryDetections = 0;
     mockHistorySignificantEvents = 0;
     mockHistoryError = false;
@@ -139,7 +150,8 @@ describe('DetectionPage', () => {
     mockUseFetchSources.mockImplementation(() => ({
       data: mockSourcesCount,
       isLoading: false,
-      isError: false,
+      isFetching: mockSourcesIsFetching,
+      isError: mockSourcesError,
     }));
     mockUseDetectionEntities.mockReturnValue({
       data: { entities: [], unassigned: { rules: 0, active_events: 0 }, truncated: false },
@@ -227,6 +239,29 @@ describe('DetectionPage', () => {
     expect(screen.queryByTestId('eventsTabStub')).not.toBeInTheDocument();
   });
 
+  it('keeps onboarding drafts mounted through background history refetches and failures', () => {
+    mockSourcesCount = 0;
+    const { rerenderPage } = renderPage();
+
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+
+    mockHistoryIsFetching = true;
+    rerenderPage();
+
+    expect(screen.queryByTestId('nightshiftDetectionOnboardingLoading')).not.toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+
+    mockHistoryIsFetching = false;
+    mockHistoryError = true;
+    mockHistoryHasCachedData = true;
+    rerenderPage();
+
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+    expect(screen.getByTestId('nightshiftDetectionHistoryLookupError')).toBeInTheDocument();
+  });
+
   it('does not use cached zero history when a history refetch fails', async () => {
     mockSourcesCount = 0;
     mockHistoryError = true;
@@ -242,7 +277,7 @@ describe('DetectionPage', () => {
 
   it('keeps failed drafts and shows the workspace after partial creation adds a source', async () => {
     mockSourcesCount = 0;
-    renderPage();
+    const { rerenderPage } = renderPage();
 
     mockSourcesCount = 1;
     fireEvent.click(screen.getByTestId('simulatePartialSourceCreation'));
@@ -254,8 +289,57 @@ describe('DetectionPage', () => {
     );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
     expect(mockRecommendedSourcesTableMountCount).toBe(1);
+    expect(
+      screen.queryByRole('heading', { name: 'How does detection work?' })
+    ).not.toBeInTheDocument();
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftDetectionTab-events')).toBeInTheDocument();
+
+    mockSourcesCount = 0;
+    mockHistoryIsFetching = true;
+    rerenderPage();
+
+    expect(screen.queryByTestId('nightshiftDetectionOnboardingLoading')).not.toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+
+    mockHistoryIsFetching = false;
+    rerenderPage();
+
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent(
+      'detection disabled'
+    );
+    expect(screen.getByRole('heading', { name: 'How does detection work?' })).toBeInTheDocument();
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+
+    mockSourcesIsFetching = true;
+    rerenderPage();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent(
+      'detection disabled'
+    );
+
+    mockSourcesIsFetching = false;
+    mockSourcesError = true;
+    rerenderPage();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent(
+      'detection disabled'
+    );
+  });
+
+  it('offers onboarding again when newly created sources are later deleted', () => {
+    mockSourcesCount = 0;
+    const { rerenderPage } = renderPage();
+
+    mockSourcesCount = 1;
+    fireEvent.click(screen.getByTestId('simulateCompletedSourceCreation'));
+
+    expect(screen.queryByTestId('recommendedSourcesTableStub')).not.toBeInTheDocument();
+
+    mockSourcesCount = 0;
+    rerenderPage();
+
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
+    expect(mockRecommendedSourcesTableMountCount).toBe(2);
   });
 
   it('shows the normal detection workspace when the space has a source', async () => {

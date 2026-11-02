@@ -73,6 +73,7 @@ export function SourcesView() {
   const [sourceCreationState, setSourceCreationState] = useState<RecommendedSourcesCreationState>(
     INITIAL_RECOMMENDED_SOURCES_CREATION_STATE
   );
+  const [hasShownEmptySourceSetup, setHasShownEmptySourceSetup] = useState(false);
 
   const {
     sources,
@@ -189,11 +190,42 @@ export function SourcesView() {
 
   // With cached sources, a failed refetch keeps the table; the toast already reports it.
   const hasSourcesLoadFailed = isSourcesError && sources.length === 0;
-  const hasNoSources = !isSourcesError && sources.length === 0;
+  const hasNoSources = sources.length === 0 && (!isSourcesError || hasShownEmptySourceSetup);
   const shouldRetainSourceCreation =
     sourceCreationState.isCreating || sourceCreationState.hasFailedDrafts;
-  const showInitialSourceSetup = hasNoSources && !sourceCreationState.hasCreatedSources;
+  const hasCreatedSourcesAwaitingCatalog =
+    sourceCreationState.hasCreatedSources && (isSourcesFetching || isSourcesError);
+  const showInitialSourceSetup = hasNoSources && !hasCreatedSourcesAwaitingCatalog;
   const showSourceCreation = showInitialSourceSetup || shouldRetainSourceCreation;
+  useEffect(() => {
+    if (!isSourcesLoading && !isSourcesError) {
+      setHasShownEmptySourceSetup(sources.length === 0);
+    }
+  }, [isSourcesError, isSourcesLoading, sources.length]);
+  useEffect(() => {
+    if (
+      !sourceCreationState.hasCreatedSources ||
+      isSourcesLoading ||
+      isSourcesFetching ||
+      isSourcesError
+    ) {
+      return;
+    }
+    if (sources.length > 0 && !shouldRetainSourceCreation) {
+      setSourceCreationState(INITIAL_RECOMMENDED_SOURCES_CREATION_STATE);
+      return;
+    }
+    if (sources.length === 0) {
+      setSourceCreationState((current) => ({ ...current, hasCreatedSources: false }));
+    }
+  }, [
+    isSourcesError,
+    isSourcesFetching,
+    isSourcesLoading,
+    shouldRetainSourceCreation,
+    sourceCreationState.hasCreatedSources,
+    sources.length,
+  ]);
 
   return (
     <>
@@ -279,24 +311,26 @@ export function SourcesView() {
               <EuiFlexItem key="sourceCreation">
                 {canManage ? (
                   <EuiFlexGroup direction="column" gutterSize="xl">
-                    <EuiFlexItem grow={false} hidden={!showInitialSourceSetup}>
-                      <EuiEmptyPrompt
-                        data-test-subj="significantEventsAppSourcesEmptyPrompt"
-                        iconType="database"
-                        title={<h2>{EMPTY_STATE_TITLE}</h2>}
-                        body={<p>{EMPTY_STATE_BODY}</p>}
-                        actions={
-                          <EuiButton
-                            data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
-                            fill
-                            iconType="plus"
-                            onClick={openCreateFlyout}
-                          >
-                            {CREATE_SOURCE_BUTTON_LABEL}
-                          </EuiButton>
-                        }
-                      />
-                    </EuiFlexItem>
+                    {showInitialSourceSetup && (
+                      <EuiFlexItem grow={false}>
+                        <EuiEmptyPrompt
+                          data-test-subj="significantEventsAppSourcesEmptyPrompt"
+                          iconType="database"
+                          title={<h2>{EMPTY_STATE_TITLE}</h2>}
+                          body={<p>{EMPTY_STATE_BODY}</p>}
+                          actions={
+                            <EuiButton
+                              data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
+                              fill
+                              iconType="plus"
+                              onClick={openCreateFlyout}
+                            >
+                              {CREATE_SOURCE_BUTTON_LABEL}
+                            </EuiButton>
+                          }
+                        />
+                      </EuiFlexItem>
+                    )}
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="s">
                         <h2 data-test-subj="nightshiftRecommendedSourcesTitle">

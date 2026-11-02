@@ -41,18 +41,20 @@ export const DetectionOnboarding = ({
       `}
       data-test-subj="nightshiftDetectionOnboarding"
     >
-      <EuiFlexItem grow={false} hidden={isDetectionEnabled}>
-        <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>{HOW_DETECTION_WORKS_TITLE}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DetectionExplainer />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {!isDetectionEnabled && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2>{HOW_DETECTION_WORKS_TITLE}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DetectionExplainer />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         {canManage ? (

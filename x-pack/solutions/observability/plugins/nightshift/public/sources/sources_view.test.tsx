@@ -129,6 +129,18 @@ jest.mock('./recommended_sources/recommended_sources_table', () => ({
         >
           Simulate failed source creation
         </button>
+        <button
+          data-test-subj="simulateCompletedSourceCreation"
+          onClick={() =>
+            onCreationStateChange({
+              isCreating: false,
+              hasCreatedSources: true,
+              hasFailedDrafts: false,
+            })
+          }
+        >
+          Simulate completed source creation
+        </button>
       </div>
     );
   },
@@ -277,17 +289,48 @@ describe('SourcesView routes', () => {
 
   it('keeps failed drafts after partial creation adds a source', () => {
     mockSources = [];
-    renderSources('/sources');
+    const { rerenderSources } = renderSources('/sources');
 
     mockSources = [createSource('source-1')];
     fireEvent.click(screen.getByTestId('simulatePartialSourceCreation'));
 
-    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeVisible();
+    expect(screen.queryByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeInTheDocument();
     expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
       'Sources not added'
     );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Source source-1' })).toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+
+    mockSources = [];
+    rerenderSources();
+
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+
+    mockIsSourcesFetching = true;
+    rerenderSources();
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
+
+    mockIsSourcesFetching = false;
+    mockIsSourcesError = true;
+    rerenderSources();
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
+    expect(mockRecommendedSourcesTableMountCount).toBe(1);
+  });
+
+  it('keeps the empty setup mounted when its source refresh fails', () => {
+    mockSources = [];
+    const { rerenderSources } = renderSources('/sources');
+
+    mockIsSourcesError = true;
+    rerenderSources();
+
+    expect(screen.getByTestId('significantEventsAppSourcesLoadErrorPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
     expect(screen.getByTestId('recommendedSourcesTableStub')).toHaveTextContent('retained draft');
     expect(mockRecommendedSourcesTableMountCount).toBe(1);
   });
@@ -304,6 +347,24 @@ describe('SourcesView routes', () => {
       'Sources not added'
     );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
+  });
+
+  it('returns to initial setup when created sources are later deleted', () => {
+    mockSources = [];
+    const { rerenderSources } = renderSources('/sources');
+
+    mockSources = [createSource('source-1')];
+    fireEvent.click(screen.getByTestId('simulateCompletedSourceCreation'));
+
+    expect(screen.queryByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('recommendedSourcesTableStub')).not.toBeInTheDocument();
+
+    mockSources = [];
+    rerenderSources();
+
+    expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
+    expect(mockRecommendedSourcesTableMountCount).toBe(2);
   });
 
   it('keeps all failed drafts when the source refresh also fails', () => {
@@ -360,5 +421,6 @@ describe('SourcesView routes', () => {
     expect(history.location.pathname).toBe('/sources/source-1');
     expect(mockToasts.addWarning).not.toHaveBeenCalled();
     expect(screen.getByTestId('significantEventsAppSourcesLoadErrorPrompt')).toBeInTheDocument();
+    expect(screen.queryByTestId('recommendedSourcesTableStub')).not.toBeInTheDocument();
   });
 });

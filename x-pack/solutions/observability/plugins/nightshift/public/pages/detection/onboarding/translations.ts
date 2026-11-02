@@ -94,7 +94,7 @@ export const HISTORY_LOOKUP_ERROR_DESCRIPTION = i18n.translate(
   'xpack.nightshift.detectionOnboarding.historyLookupErrorDescription',
   {
     defaultMessage:
-      'Detection is stopped because this space has no sources. The workspace remains available while the history check is unavailable.',
+      'Detection is stopped because this space has no sources. The current view remains available while the history check is unavailable.',
   }
 );
 

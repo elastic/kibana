@@ -71,6 +71,7 @@ import { DetectionOnboarding } from './onboarding/detection_onboarding';
 import { NoSourcesCallout } from './onboarding/no_sources_callout';
 
 const NO_SOURCES_HISTORY_RANGE = { from: 'now-10y', to: 'now' } as const;
+type NoSourcesHistoryState = 'unknown' | 'empty' | 'has_history';
 
 const EventsTab = lazy(() =>
   import('./events/events_tab').then(({ EventsTab: Tab }) => ({ default: Tab }))
@@ -120,25 +121,71 @@ export const DetectionPage = ({
   );
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const hasNoSources = sources.data === 0;
-  const hasSuccessfulHistoryLookup = historyOverview.data !== undefined && !historyOverview.isError;
+  const hasConfiguredSources = (sources.data ?? 0) > 0;
+  const isDetectionEnabled =
+    hasConfiguredSources ||
+    (sourceCreationState.hasCreatedSources &&
+      (sources.isLoading || sources.isFetching || sources.isError));
   const hasHistory =
     (historyOverview.data?.detections ?? 0) + (historyOverview.data?.significant_events ?? 0) > 0;
+  const hasFreshSuccessfulHistoryLookup =
+    historyOverview.data !== undefined && !historyOverview.isError && !historyOverview.isFetching;
+  const [resolvedNoSourcesHistoryState, setResolvedNoSourcesHistoryState] =
+    useState<NoSourcesHistoryState>('unknown');
+  const noSourcesHistoryState = hasFreshSuccessfulHistoryLookup
+    ? hasHistory
+      ? 'has_history'
+      : 'empty'
+    : resolvedNoSourcesHistoryState;
   const hasHistoryLookupFailed = hasNoSources && historyOverview.isError;
   const shouldRetainSourceCreation =
     sourceCreationState.isCreating || sourceCreationState.hasFailedDrafts;
   const isOnboardingStateLoading =
-    sources.isLoading ||
-    (hasNoSources && (historyOverview.isLoading || historyOverview.isFetching));
+    !shouldRetainSourceCreation &&
+    (sources.isLoading ||
+      (hasNoSources &&
+        (historyOverview.isLoading ||
+          (historyOverview.isFetching && resolvedNoSourcesHistoryState === 'unknown'))));
   const showInitialOnboarding =
-    hasNoSources &&
-    hasSuccessfulHistoryLookup &&
-    !hasHistory &&
-    !sourceCreationState.hasCreatedSources;
+    hasNoSources && noSourcesHistoryState === 'empty' && !isDetectionEnabled;
   const showSourceCreation = showInitialOnboarding || shouldRetainSourceCreation;
-  const showNoSourcesCallout = hasNoSources && hasHistory;
+  const showNoSourcesCallout = hasNoSources && noSourcesHistoryState === 'has_history';
   const selection = useEntitySelection();
   const [isOverviewCompact, setIsOverviewCompact] = useState(false);
   const fullOverviewSlotRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!hasNoSources) {
+      setResolvedNoSourcesHistoryState('unknown');
+      return;
+    }
+    if (hasFreshSuccessfulHistoryLookup) {
+      setResolvedNoSourcesHistoryState(hasHistory ? 'has_history' : 'empty');
+    }
+  }, [hasFreshSuccessfulHistoryLookup, hasHistory, hasNoSources]);
+  useEffect(() => {
+    if (
+      !sourceCreationState.hasCreatedSources ||
+      sources.isLoading ||
+      sources.isFetching ||
+      sources.isError
+    ) {
+      return;
+    }
+    if ((sources.data ?? 0) > 0 && !shouldRetainSourceCreation) {
+      setSourceCreationState(INITIAL_RECOMMENDED_SOURCES_CREATION_STATE);
+      return;
+    }
+    if (sources.data === 0) {
+      setSourceCreationState((current) => ({ ...current, hasCreatedSources: false }));
+    }
+  }, [
+    shouldRetainSourceCreation,
+    sourceCreationState.hasCreatedSources,
+    sources.data,
+    sources.isError,
+    sources.isFetching,
+    sources.isLoading,
+  ]);
   useEffect(() => setIsOverviewCompact(false), [tab]);
   const handleTabBodyScroll = useCallback(
     (event: UIEvent<HTMLDivElement>) => {
@@ -246,45 +293,45 @@ export const DetectionPage = ({
           </EuiFlexGroup>
         ) : (
           <>
+            {hasHistoryLookupFailed && (
+              <>
+                <KbnDangerCallout
+                  announceOnMount
+                  size="s"
+                  title={HISTORY_LOOKUP_ERROR_TITLE}
+                  text={HISTORY_LOOKUP_ERROR_DESCRIPTION}
+                  data-test-subj="nightshiftDetectionHistoryLookupError"
+                  actionProps={{
+                    primary: {
+                      children: HISTORY_LOOKUP_RETRY_LABEL,
+                      iconType: 'refresh',
+                      onClick: () => void historyOverview.refetch(),
+                      'data-test-subj': 'nightshiftDetectionHistoryLookupRetryButton',
+                    },
+                  }}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             {showSourceCreation && (
               <div
                 css={css`
-                  flex: ${sourceCreationState.hasCreatedSources ? '0 1 auto' : '1 1 auto'};
-                  max-block-size: ${sourceCreationState.hasCreatedSources ? '40vh' : 'none'};
+                  flex: ${isDetectionEnabled ? '0 1 auto' : '1 1 auto'};
+                  max-block-size: ${isDetectionEnabled ? '40vh' : 'none'};
                   min-height: 0;
                   overflow: auto;
-                  margin-block-end: ${sourceCreationState.hasCreatedSources ? euiTheme.size.m : 0};
+                  margin-block-end: ${isDetectionEnabled ? euiTheme.size.m : 0};
                 `}
               >
                 <DetectionOnboarding
                   canManage={canManage}
-                  isDetectionEnabled={sourceCreationState.hasCreatedSources}
+                  isDetectionEnabled={isDetectionEnabled}
                   onCreationStateChange={setSourceCreationState}
                 />
               </div>
             )}
             {!showInitialOnboarding && (
               <>
-                {hasHistoryLookupFailed && (
-                  <>
-                    <KbnDangerCallout
-                      announceOnMount
-                      size="s"
-                      title={HISTORY_LOOKUP_ERROR_TITLE}
-                      text={HISTORY_LOOKUP_ERROR_DESCRIPTION}
-                      data-test-subj="nightshiftDetectionHistoryLookupError"
-                      actionProps={{
-                        primary: {
-                          children: HISTORY_LOOKUP_RETRY_LABEL,
-                          iconType: 'refresh',
-                          onClick: () => void historyOverview.refetch(),
-                          'data-test-subj': 'nightshiftDetectionHistoryLookupRetryButton',
-                        },
-                      }}
-                    />
-                    <EuiSpacer size="m" />
-                  </>
-                )}
                 {showNoSourcesCallout && (
                   <>
                     <NoSourcesCallout />
