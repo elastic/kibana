@@ -1522,11 +1522,14 @@ steps:
   # `status` cannot work, because a dismissal and an approved action-less
   # proposal both report `no_action`.
   #
-  # NOTE: the gate reports `decision: approved` only once it has settled that
-  # way, which is either an approval with no action or an action that succeeded.
-  # An approval whose action failed through every retry settles as expired and
-  # reports no decision, so it counts as neither approved nor dismissed and the
-  # alerts stay untagged for the next sweep.
+  # NOTE: the gate reports `decision: approved` with `status: no_action`,
+  # `succeeded`, or `failed`. `failed` comes only from an action that marks its
+  # failure non-retryable, and none of the actions here do that today. Then
+  # `approved` is true and `applied` is false: the alerts stay untagged, but the
+  # investigation closes as approved. Any other action failure is re-offered,
+  # and an approval whose action failed through every retry settles as expired
+  # and reports no decision, so it counts as neither approved nor dismissed and
+  # the alerts stay untagged for the next sweep.
   - name: record_proposal_action_decision
     type: data.set
     with:
