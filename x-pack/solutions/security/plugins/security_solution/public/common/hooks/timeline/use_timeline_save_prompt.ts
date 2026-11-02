@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import type { AppLeaveHandler } from '@kbn/core-application-browser';
 import { useHistory } from 'react-router-dom';
@@ -68,6 +68,8 @@ export const useTimelineSavePrompt = (
         });
 
         if (confirmRes) {
+          // The user chose to leave anyway, so stop asking until the timeline changes again.
+          dispatch(timelineActions.setChanged({ id: timelineId, changed: false }));
           unblock();
           application.navigateToUrl(
             http.basePath.get() + location.pathname + location.hash + location.search,
@@ -95,6 +97,8 @@ export const useTimelineSavePrompt = (
       unblock();
     };
   }, [
+    dispatch,
+    timelineId,
     history,
     http.basePath,
     application,
@@ -106,6 +110,19 @@ export const useTimelineSavePrompt = (
     changed,
   ]);
 
+  // Core only calls back on cancel of the app leave prompt. If the wrapper unmounts while the
+  // prompt is pending, the user confirmed leaving.
+  const appLeavePromptPendingRef = useRef(false);
+
+  useEffect(
+    () => () => {
+      if (appLeavePromptPendingRef.current) {
+        dispatch(timelineActions.setChanged({ id: timelineId, changed: false }));
+      }
+    },
+    [dispatch, timelineId]
+  );
+
   useEffect(() => {
     onAppLeave((actions, nextAppId) => {
       // Confirm when the user has made any changes to a timeline
@@ -113,12 +130,18 @@ export const useTimelineSavePrompt = (
         !(nextAppId ?? '').includes(APP_ID) &&
         (changed || (timelineStatus === TimelineStatusEnum.draft && updated != null))
       ) {
+        // `nextAppId` is undefined for the browser `beforeunload` prompt, which never unmounts the app.
+        appLeavePromptPendingRef.current = nextAppId != null;
         return actions.confirm(
           UNSAVED_TIMELINE_SAVE_PROMPT,
           UNSAVED_TIMELINE_SAVE_PROMPT_TITLE,
-          showSaveTimelineModal
+          () => {
+            appLeavePromptPendingRef.current = false;
+            showSaveTimelineModal();
+          }
         );
       } else {
+        appLeavePromptPendingRef.current = false;
         return actions.default();
       }
     });
