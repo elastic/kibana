@@ -316,7 +316,7 @@ export type AlertEvent = Partial<{
     }>;
   }>;
   // disabling naming-convention to accommodate external field
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   Memory_protection: Partial<{
     feature: ECSField<string>;
     self_injection: ECSField<boolean>;

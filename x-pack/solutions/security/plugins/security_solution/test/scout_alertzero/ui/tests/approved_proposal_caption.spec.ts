@@ -54,8 +54,6 @@ test.describe('AlertZero approved proposal caption', { tag: tags.stateful.classi
 
     await alertZeroQueue.gotoInvestigationFlyout(investigationId, proposalId);
 
-    await expect(alertZeroQueue.proposedAction(proposalId)).toContainText(
-      /Approved by Ada Lovelace at \d/
-    );
+    await expect(alertZeroQueue.proposedAction(proposalId)).toContainText(/Ada Lovelace • \d/);
   });
 });

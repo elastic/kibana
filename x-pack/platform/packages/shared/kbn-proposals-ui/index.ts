@@ -9,7 +9,6 @@ export { ApprovalModal, type ApprovalModalProps } from './src/approval_modal';
 export { ApprovalContent, type ApprovalContentProps } from './src/approval_content';
 export { ApprovalActorTime, type ApprovalActorTimeProps } from './src/approval_actor_time';
 export {
-  getApprovalActorOutcome,
   getApprovalOutcomeBadge,
   type ApprovalOutcomeBadge,
   type ApprovalOutcomeStatus,

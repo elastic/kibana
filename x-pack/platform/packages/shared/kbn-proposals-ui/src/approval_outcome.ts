@@ -6,7 +6,6 @@
  */
 
 import type { EuiBadgeProps, IconType } from '@elastic/eui';
-import type { ApprovalActorOutcome } from './approval_actor_time';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 /** What a primary action resolves to once its promise settles. */
@@ -42,6 +41,7 @@ export interface ApprovalOutcomeBadge {
   iconType: IconType;
   label: string;
   isLoading: boolean;
+  isDisabled?: boolean;
 }
 
 export interface ApprovalOutcomeBanner {
@@ -74,6 +74,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.applyingBadge,
         isLoading: true,
+        isDisabled: true,
       };
     case 'declining':
       return {
@@ -81,6 +82,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.decliningBadge,
         isLoading: true,
+        isDisabled: true,
       };
     case 'failed':
       return {
@@ -98,7 +100,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
       };
     case 'no_action':
       return {
-        color: 'default',
+        color: 'success',
         iconType: 'check',
         label: APPROVAL_MODAL_TRANSLATIONS.noActionBadge,
         isLoading: false,
@@ -110,28 +112,6 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         label: APPROVAL_MODAL_TRANSLATIONS.markedAppliedBadge,
         isLoading: false,
       };
-    default:
-      return undefined;
-  }
-};
-
-/**
- * The outcome that leads a caption which stands on its own ("Approved by {name} at {time}").
- * `undefined` where no one acted, or the badge label says it better: pending, in-flight
- * declining, and expired.
- */
-export const getApprovalActorOutcome = (phase: ApprovalPhase): ApprovalActorOutcome | undefined => {
-  switch (phase) {
-    case 'applying':
-    case 'applied':
-    case 'no_action':
-      return 'approved';
-    case 'marked_applied':
-      return 'applied';
-    case 'declined':
-      return 'declined';
-    case 'failed':
-      return 'executed';
     default:
       return undefined;
   }
@@ -173,7 +153,7 @@ export const getApprovalOutcomeBanner = (
       };
     case 'no_action':
       return {
-        color: 'primary',
+        color: 'success',
         title: APPROVAL_MODAL_TRANSLATIONS.noActionBannerTitle,
         isLoading: false,
       };
