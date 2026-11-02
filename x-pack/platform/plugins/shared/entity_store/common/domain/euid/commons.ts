@@ -98,8 +98,12 @@ export function getFieldValue(doc: any, field: string): string | undefined {
   );
 }
 
-/** The field's first value, as `includes` reads it until #20578 changes it. */
-function getFirstFieldValue(doc: any, field: string): string | undefined {
+/**
+ * The field's first value. `includes` reads it this way until #20578 changes it, and entity
+ * records are filtered on it: a record collects values from several events, so its first value
+ * is the one its EUID was built from, not the lowest.
+ */
+export function getFirstFieldValue(doc: any, field: string): string | undefined {
   const flattenedValue = doc[field];
   const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
   if (Array.isArray(fieldInObject)) {
@@ -268,7 +272,8 @@ export function getEffectiveEuidRanking(
 
 export function getFieldsToBeFilteredOn(
   doc: any,
-  euidFields: EuidAttribute[][]
+  euidFields: EuidAttribute[][],
+  readValue: (doc: any, field: string) => string | undefined = getFieldValue
 ): { values: FieldValue; rankingPosition: number } {
   for (let i = 0; i < euidFields.length; i++) {
     const composition = euidFields[i];
@@ -276,7 +281,7 @@ export function getFieldsToBeFilteredOn(
     const composedFieldValues = fieldAttrs.reduce(
       (acc, attr) => ({
         ...acc,
-        [attr.field]: getFieldValue(doc, attr.field),
+        [attr.field]: readValue(doc, attr.field),
       }),
       {}
     );
