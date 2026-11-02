@@ -9,10 +9,6 @@ xpack.securitySolutionEss.enabled: false
 ## Disable plugins
 xpack.observabilityAIAssistant.enabled: false
 
-## TEMPORARY (QA only, do not merge): enable service accounts so a CI-built image can be used for the E2E QA round.
-## `xpack.task_manager.grant_uiam_api_keys` is already enabled for QA projects via serverless-gitops.
-xpack.security.serviceAccounts.enabled: true
-
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboards and Discover are shown in the Security section, after Security (1100)
