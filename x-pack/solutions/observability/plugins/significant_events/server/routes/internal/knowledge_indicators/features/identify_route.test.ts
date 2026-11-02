@@ -56,13 +56,6 @@ jest.mock('@kbn/nightshift-ai', () => ({
     mockResolveNightshiftModelForRequest(options),
 }));
 
-jest.mock(
-  '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled',
-  () => ({
-    isSignificantEventsSemanticCodeSearchGroundingEnabled: jest.fn().mockResolvedValue(false),
-  })
-);
-
 const prepareRoute =
   internalIdentifyKIFeaturesRoutes[
     'POST /internal/streams/{sourceId}/features/_identify/inferred/prepare'

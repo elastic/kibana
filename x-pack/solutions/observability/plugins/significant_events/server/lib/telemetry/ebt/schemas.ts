@@ -12,7 +12,6 @@ import type {
   AgentToolEventInvestigationAttachProps,
   AgentToolEventStatusUpdateProps,
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
-  CodeAnalysisGroundingProps,
   DetectionScanProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
@@ -375,41 +374,6 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   },
 };
 
-const codeAnalysisGroundingSchema: RootSchema<CodeAnalysisGroundingProps> = {
-  source_id: {
-    type: 'keyword',
-    _meta: {
-      description: 'The Nightshift source id the code analysis was grounded for',
-    },
-  },
-  status: {
-    type: 'keyword',
-    _meta: {
-      description:
-        'Outcome of code_analysis grounding: feature, no_match, no_candidates, no_strings, or unavailable',
-    },
-  },
-  repository: {
-    type: 'keyword',
-    _meta: {
-      description: 'The repository/index selected to ground the source against',
-      optional: true,
-    },
-  },
-  candidate_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of candidate code repositories considered',
-    },
-  },
-  verified_count: {
-    type: 'long',
-    _meta: {
-      description: 'The number of distinctive log strings verified against the selected code',
-    },
-  },
-};
-
 const discoveryTriggeredSchema = {
   execution_id: {
     type: 'keyword' as const,
@@ -697,7 +661,6 @@ export {
   agentToolEventStatusUpdateSchema,
   agentToolEventWriteSchema,
   agentToolKnowledgeIndicatorIdentificationStartedSchema,
-  codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
