@@ -176,12 +176,11 @@ const printFixCommands = (log: ToolingLog, results: CheckResult[]) => {
 
 const printNextSteps = (log: ToolingLog, archs: DoctorArch[], readyArchs: DoctorArch[]) => {
   log.write('');
-  for (const arch of archs) {
-    if (!readyArchs.includes(arch)) {
-      log.write(chalk.red.bold(` ✖ Not ready for ${arch}, fix the failed checks above`));
-      continue;
-    }
+  if (readyArchs.length < archs.length) {
+    log.write(chalk.red.bold(' ✖ Fix the failed checks before using Scout'));
+  }
 
+  for (const arch of readyArchs) {
     const [domain, ...otherDomains] = testTargets.local
       .filter((target) => target.arch === arch)
       .map((target) => target.domain);
