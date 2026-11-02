@@ -44,6 +44,7 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { SessionEventsService } from './session_memory/session_events';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -396,6 +397,8 @@ export class ContextEnginePlugin
     });
     const signalsService = this.signalsService;
 
+    const sessionEventsService = new SessionEventsService(this.esClient);
+
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
       new ImprovementsService({ esClient, logger: improvementsLogger, space: spaceId });
@@ -461,6 +464,16 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getSessionEventsService: () => sessionEventsService,
+      isMemoryEnabled: async (request) => {
+        const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+        const scopedGlobalUiSettings =
+          coreStart.uiSettings.globalAsScopedToClient(savedObjectsClient);
+        return (
+          (await scopedGlobalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ??
+          false
+        );
+      },
     };
   }
 

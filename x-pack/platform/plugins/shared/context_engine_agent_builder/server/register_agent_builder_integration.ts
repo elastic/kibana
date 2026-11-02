@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { hasContextEngineReadPrivilege } from './agent_builder/has_context_engine_read_privilege';
+import { registerSessionEventsHook } from './agent_builder/session_events/register_session_events_hook';
 import { registerAgentBuilderTools } from './agent_builder/tools';
 import { registerAttachmentTypes } from './attachment_types';
 import { registerContextEngineAgent } from './agent/context_engine_agent';
@@ -23,6 +24,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
   coreSetup,
   agentBuilder,
   workflowsManagement,
+  logger,
 }: {
   coreSetup: CoreSetup<
     ContextEngineAgentBuilderStartDependencies,
@@ -30,6 +32,7 @@ export const registerContextEngineAgentBuilderIntegration = ({
   >;
   agentBuilder: AgentBuilderPluginSetup;
   workflowsManagement: WorkflowsManagementApi;
+  logger: Logger;
 }): void => {
   registerAttachmentTypes(agentBuilder);
   registerContextEngineAgent(agentBuilder);
@@ -71,6 +74,23 @@ export const registerContextEngineAgentBuilderIntegration = ({
     getContextEngineStart: async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.contextEngine;
+    },
+  });
+
+  registerSessionEventsHook({
+    agentBuilder,
+    logger,
+    getCoreStart: async () => {
+      const [coreStart] = await coreSetup.getStartServices();
+      return coreStart;
+    },
+    getContextEngineStart: async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.contextEngine;
+    },
+    getSpaces: async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.spaces;
     },
   });
 };

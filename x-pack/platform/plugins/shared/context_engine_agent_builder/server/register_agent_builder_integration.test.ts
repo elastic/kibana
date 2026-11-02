@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
@@ -73,7 +74,9 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
     let resolver: AiIndexResolver | undefined;
     const register = jest.fn();
+    const registerHooks = jest.fn();
     const agentBuilder = {
+      hooks: { register: registerHooks },
       agents: {
         register,
         registerType: jest.fn(),
@@ -87,6 +90,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       coreSetup,
       agentBuilder,
       workflowsManagement: {} as any,
+      logger: loggingSystemMock.createLogger(),
     });
 
     if (!resolver) {
@@ -95,6 +99,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     return {
       resolver,
       register,
+      registerHooks,
       list,
       getAiIndexDataReadService,
       asScoped,
@@ -111,6 +116,14 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
     const [{ getContextEngineStart }] = registerAgentBuilderTools.mock.calls.at(-1);
 
     await expect(getContextEngineStart()).resolves.toEqual({ getAiIndexDataReadService });
+  });
+
+  it('registers the session events after-execution hook', () => {
+    const { registerHooks } = setup({ aiIndices: [] });
+
+    expect(registerHooks).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'context-engine-session-events' })
+    );
   });
 
   it('reads readable AI Indices as the requesting user through the data read service', async () => {

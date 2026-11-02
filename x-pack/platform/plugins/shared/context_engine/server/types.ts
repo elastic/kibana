@@ -24,6 +24,7 @@ import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
+import type { SessionEventsServiceApi } from './session_memory/session_events';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -39,6 +40,10 @@ export interface GetAiIndexDataReadServiceParams {
 
 export interface ContextEnginePluginStart {
   getAiIndexService: () => AiIndexService;
+  /** Session events (raw round transcripts), written as the internal user. */
+  getSessionEventsService: () => SessionEventsServiceApi;
+  /** Whether the global `contextEngine:memoryEnabled` setting is on for the request's user. */
+  isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** Caller-scoped AI-index reads (query, and later describe/list). */
   getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
   /** The signals store. */
