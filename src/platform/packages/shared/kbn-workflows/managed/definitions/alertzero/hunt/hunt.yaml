@@ -260,6 +260,9 @@ steps:
   # body: an internal failure's message would land in the Investigation, where
   # every later agent round reads it as user input. The execution keeps the body.
   #
+  # The impact line counts `coordinator.impacted_entities`, what this run sent, not
+  # `attach_impact`'s output, which is the Investigation's impact merged across sweeps.
+  #
   # Gated on the coordinator having finished with a result, not on
   # `completed_successfully`: that flag is false for an `incomplete_retryable`
   # run too, which still has findings the analyst must see.
@@ -279,7 +282,9 @@ steps:
           _The coordinator prepared {{ coordinator.sse | size }} significant security event attachment{% if coordinator.sse.size != 1 %}s{% endif %} for this Investigation._
           {%- endif %}
           {% if steps.attach_impact.output != nil %}
-          _Recorded impact: {{ coordinator.impacted_entities | size }} host(s) and user(s)._
+          {%- assign impact_hosts = coordinator.impacted_entities | where: 'type', 'host' | size %}
+          {%- assign impact_users = coordinator.impacted_entities | where: 'type', 'user' | size %}
+          _Recorded impact from this hunt: {{ impact_hosts }} host{% if impact_hosts != 1 %}s{% endif %}, {{ impact_users }} user{% if impact_users != 1 %}s{% endif %}._
           {%- elsif steps.attach_impact.error != nil %}
           {%- assign impact_error = steps.attach_impact.error.message %}
           _Could not record impact{% if impact_error contains 'HTTP 403:' %}: the Worker's identity lacks the Manage investigations privilege.{% elsif impact_error contains 'HTTP 404:' %}: the Worker's identity does not own this Investigation, or it no longer exists.{% elsif impact_error contains 'HTTP 400:' %}: it was rejected as invalid (an Investigation's impact holds at most 100 hosts and users).{% elsif impact_error contains 'HTTP 409:' %}: another writer updated it at the same time.{% else %}. See hunt execution {{ execution.id }}.{% endif %}_

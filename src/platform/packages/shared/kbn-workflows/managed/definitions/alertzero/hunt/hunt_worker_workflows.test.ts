@@ -763,14 +763,57 @@ describe('Hunt Watch worker chain', () => {
         { id: 'user:b', name: 'b', type: 'user' },
       ];
 
-      it('counts the entities this run recorded', () => {
-        const message = render({
+      const host = (name: string) => ({ id: `host:${name}`, name, type: 'host' });
+      const user = (name: string) => ({ id: `user:${name}`, name, type: 'user' });
+      // The attach route answers with the Investigation's merged impact, which also holds earlier
+      // sweeps' entities, so the count has to come from what this run sent.
+      const renderImpactLine = (impactedEntities: unknown[]): string =>
+        render({
           steps: {
-            read_hunt_result: { output: { data: { result: hitOutput(twoEntities) } } },
-            attach_impact: { output: { id: 'impact-1', entities: twoEntities } },
+            read_hunt_result: { output: { data: { result: hitOutput(impactedEntities) } } },
+            attach_impact: {
+              output: { id: 'impact-1', entities: [...impactedEntities, host('earlier-sweep')] },
+            },
           },
         });
-        expect(message).toContain('_Recorded impact: 2 host(s) and user(s)._');
+
+      it.each([
+        ['1 host and 1 user', twoEntities, '_Recorded impact from this hunt: 1 host, 1 user._'],
+        ['1 host and no users', [host('a')], '_Recorded impact from this hunt: 1 host, 0 users._'],
+        [
+          '2 hosts and 1 user',
+          [host('a'), host('b'), user('c')],
+          '_Recorded impact from this hunt: 2 hosts, 1 user._',
+        ],
+        [
+          'no hosts and 2 users',
+          [user('a'), user('b')],
+          '_Recorded impact from this hunt: 0 hosts, 2 users._',
+        ],
+      ])(
+        'counts the hosts and users this run recorded separately: %s',
+        (_label, entities, line) => {
+          const message = renderImpactLine(entities);
+          expect(message).toContain(line);
+          expect(message).not.toContain('host(s)');
+        }
+      );
+
+      // Whitespace control around the `assign` lines is easy to break without changing the line.
+      it('renders the impact line after exactly one blank line and nothing after it', () => {
+        expect(renderImpactLine(twoEntities)).toBe(
+          'Narrative.\n\n_The coordinator prepared 1 significant security event attachment for this Investigation._\n\n_Recorded impact from this hunt: 1 host, 1 user._'
+        );
+      });
+
+      // The coordinator schema only emits host and user, but the line must not fold another type
+      // into either count if that ever widens.
+      it('counts neither host nor user for another entity type', () => {
+        const message = renderImpactLine([
+          host('a'),
+          { id: 'service:s', name: 's', type: 'service' },
+        ]);
+        expect(message).toContain('_Recorded impact from this hunt: 1 host, 0 users._');
       });
 
       // `kibana.request` failures carry the status only as an `HTTP <status>:` message prefix.
