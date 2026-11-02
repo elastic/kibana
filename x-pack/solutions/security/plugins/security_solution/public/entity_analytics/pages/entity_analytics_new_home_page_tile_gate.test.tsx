@@ -440,7 +440,11 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
 
   afterEach(() => {
     mockUrlStateOverrides = {};
-    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
   });
 
   it('skips the alert tiles and says why when Alerts is None but the alerts index is readable', () => {
@@ -502,6 +506,8 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       searchExpression: 'entity.name == "a"',
       rawSearchExpression: 'entity.name == "a"',
       isSearchOverridesPending: true,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
     const { runKey, isFilterPending } = loadTelemetry();
@@ -512,11 +518,17 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       searchExpression: '(entity.name == "a" AND NOT entity.id IN ("x")) OR entity.id IN ("y")',
       rawSearchExpression: 'entity.name == "a"',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     rerender(<EntityAnalyticsNewHomePage />);
     expect(loadTelemetry()).toMatchObject({ runKey, isFilterPending: false });
 
-    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
   });
 
   describe('the key of a grid load', () => {
@@ -554,6 +566,8 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
         (useSearchBarExpression as jest.Mock).mockReturnValue({
           rawSearchExpression,
           isSearchOverridesPending: false,
+          applicableFilters: [],
+          ignoredFields: [],
         });
         return runKeyWith({});
       };

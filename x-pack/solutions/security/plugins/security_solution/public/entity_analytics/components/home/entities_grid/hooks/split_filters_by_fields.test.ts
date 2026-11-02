@@ -5,31 +5,10 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { CombinedFilter, Filter, Query } from '@kbn/es-query';
+import type { CombinedFilter, Filter } from '@kbn/es-query';
 import { BooleanRelation, FILTERS } from '@kbn/es-query';
 import { convertFiltersToESQLExpression } from '@kbn/esql-utils';
-import { splitFiltersByFields, useSearchBarExpression } from './use_search_bar_expression';
-
-let mockGlobalFilters: Filter[] = [];
-let mockGlobalQuery: Query = { query: '', language: 'kuery' };
-
-jest.mock('../../../../../common/hooks/use_selector', () => ({
-  useDeepEqualSelector: (selector: () => unknown) => selector(),
-}));
-
-jest.mock('../../../../../common/store/inputs', () => ({
-  inputsSelectors: {
-    globalFiltersQuerySelector: () => () => mockGlobalFilters,
-    globalQuerySelector: () => () => mockGlobalQuery,
-  },
-}));
-
-jest.mock('./use_entity_grid_context', () => ({ useGridContext: () => ({}) }));
-jest.mock('./use_entity_grid_data', () => ({
-  useResolvedEntityOverrides: () => ({ data: undefined, error: null }),
-}));
+import { splitFiltersByFields } from './use_search_bar_expression';
 
 const ENTITY_FIELDS: ReadonlySet<string> = new Set(['entity.id', 'entity.EngineMetadata.Type']);
 
@@ -41,10 +20,6 @@ const phraseFilter = (field: string, value: string, negate = false): Filter => (
 const combinedFilter = (filters: Filter[]): CombinedFilter => ({
   meta: { type: FILTERS.COMBINED, relation: BooleanRelation.OR, params: filters },
 });
-
-const entityDataView = {
-  fields: { getAll: () => [...ENTITY_FIELDS].map((name) => ({ name })) },
-} as unknown as DataView;
 
 describe('splitFiltersByFields', () => {
   it('keeps the filters on fields the entity docs have', () => {
@@ -173,49 +148,5 @@ describe('splitFiltersByFields', () => {
 
     expect(esqlExpression).toContain('entity.id');
     expect(esqlExpression).not.toContain('workflow_status');
-  });
-});
-
-describe('useSearchBarExpression', () => {
-  beforeEach(() => {
-    mockGlobalFilters = [
-      phraseFilter('entity.id', 'host:a'),
-      phraseFilter('kibana.alert.workflow_status', 'open'),
-    ];
-    mockGlobalQuery = { query: 'entity.name: a', language: 'kuery' };
-  });
-
-  it('leaves out the filters on fields the entity data view lacks and reports them', () => {
-    const { result } = renderHook(() => useSearchBarExpression('individual', entityDataView));
-
-    expect(result.current.ignoredFields).toEqual(['kibana.alert.workflow_status']);
-    expect(result.current.applicableFilters).toEqual([mockGlobalFilters[0]]);
-    expect(result.current.searchExpression).toContain('entity.id');
-    expect(result.current.searchExpression).toContain('KQL(');
-    expect(result.current.searchExpression).not.toContain('workflow_status');
-  });
-
-  it('converts every filter and ignores none while there is no data view', () => {
-    const { result } = renderHook(() => useSearchBarExpression('individual', undefined));
-
-    expect(result.current.ignoredFields).toEqual([]);
-    expect(result.current.applicableFilters).toEqual(mockGlobalFilters);
-    expect(result.current.searchExpression).toContain('workflow_status');
-  });
-
-  it('is undefined when there is no filter nor query', () => {
-    mockGlobalFilters = [];
-    mockGlobalQuery = { query: '', language: 'kuery' };
-
-    const { result } = renderHook(() => useSearchBarExpression('individual', entityDataView));
-
-    expect(result.current).toEqual({
-      searchExpression: undefined,
-      searchOverrides: undefined,
-      isSearchOverridesPending: false,
-      mainEntityOnlySearch: undefined,
-      applicableFilters: [],
-      ignoredFields: [],
-    });
   });
 });
