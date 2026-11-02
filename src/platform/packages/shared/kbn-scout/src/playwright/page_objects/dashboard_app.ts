@@ -12,6 +12,7 @@ import { euiSelectors } from '../eui_components';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
+import { Chrome } from './chrome';
 import { RenderablePage } from './utils/renderable_page';
 import { Toasts } from './toasts';
 
@@ -40,6 +41,7 @@ export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
   private readonly appMenu: AppMenu;
+  private readonly chrome: Chrome;
   // Dashboard shell and mode controls
   private readonly settingsFlyout;
   private readonly settingsButton;
@@ -88,6 +90,7 @@ export class DashboardApp {
     this.renderable = new RenderablePage(page);
     this.toasts = new Toasts(page);
     this.appMenu = new AppMenu(page);
+    this.chrome = new Chrome(page);
 
     // Dashboard shell and mode controls
     this.settingsFlyout = this.page.testSubj.locator('dashboardSettingsFlyout');
@@ -1190,6 +1193,21 @@ export class DashboardApp {
     return this.page.testSubj
       .locator('appHeaderTitle')
       .or(this.page.testSubj.locator('breadcrumb last'));
+  }
+
+  // Navigates from the current dashboard to the listing through the UI (no page reload), unlike
+  // `goto()`, which loads the listing URL directly. The new chrome header has no breadcrumbs, so it uses the app header link; headers
+  // with a breadcrumb trail use the listing breadcrumb (test subject differs on serverless).
+  async navigateToListingFromCurrentDashboard() {
+    if (await this.chrome.isProjectChrome()) {
+      await this.page.testSubj.click('appHeaderBack');
+    } else {
+      await this.page.testSubj
+        .locator('breadcrumb dashboardListingBreadcrumb first')
+        .or(this.page.testSubj.locator('breadcrumb breadcrumb-deepLinkId-dashboards'))
+        .click();
+    }
+    await expect(this.page.testSubj.locator('dashboardLandingPage')).toBeVisible();
   }
 
   // ============================================================

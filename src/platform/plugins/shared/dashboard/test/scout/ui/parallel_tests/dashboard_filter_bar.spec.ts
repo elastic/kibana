@@ -134,10 +134,7 @@ spaceTest.describe('Dashboard filter bar', { tag: tags.deploymentAgnostic }, () 
 
     // Goes through the listing page so the global (pinned) filters carry over
     const openSavedDashboardFromListing = async (title: string) => {
-      await page
-        .locator('[data-test-subj~="breadcrumb"]')
-        .filter({ hasText: /^Dashboards$/ })
-        .click();
+      await dashboard.navigateToListingFromCurrentDashboard();
       await dashboard.clickDashboardTitleLink(title);
     };
 
