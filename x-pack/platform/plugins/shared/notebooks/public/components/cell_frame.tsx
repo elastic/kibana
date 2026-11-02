@@ -13,7 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiInlineEditText,
   EuiPanel,
   EuiPopover,
@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { CellDefinition, CellType } from '../../common/types';
 import { CELL_NAME_PATTERN } from '../model/references';
-import { duplicateCell } from '../model/cell_factory';
+import { duplicateCell, type NewCellKind } from '../model/cell_factory';
 import type { CellRuntime } from '../model/types';
 import { CellStatusBadge } from './cell_status_badge';
 import { useNotebook } from './notebook_context';
@@ -35,6 +35,26 @@ const TYPE_ICONS: Record<CellType, string> = {
   chart: 'visBarVertical',
   markdown: 'text',
   input: 'controls',
+};
+
+const TYPE_LABELS: Record<NewCellKind, string> = {
+  esql: i18n.translate('xpack.notebook.cell.type.esql', { defaultMessage: 'ES|QL query' }),
+  chart: i18n.translate('xpack.notebook.cell.type.chart', { defaultMessage: 'Chart' }),
+  markdown: i18n.translate('xpack.notebook.cell.type.markdown', { defaultMessage: 'Markdown' }),
+  'input:time': i18n.translate('xpack.notebook.cell.type.time', {
+    defaultMessage: 'Time input',
+  }),
+  'input:dropdown': i18n.translate('xpack.notebook.cell.type.dropdown', {
+    defaultMessage: 'Dropdown input',
+  }),
+  'input:range': i18n.translate('xpack.notebook.cell.type.range', {
+    defaultMessage: 'Range input',
+  }),
+};
+
+const getTypeLabel = (cell: CellDefinition): string => {
+  const kind: NewCellKind = cell.type === 'input' ? `input:${cell.input.kind}` : cell.type;
+  return TYPE_LABELS[kind];
 };
 
 const RUN_LABEL = i18n.translate('xpack.notebook.cell.run', { defaultMessage: 'Run' });
@@ -114,7 +134,12 @@ export const CellFrame = ({
     <EuiPanel hasBorder paddingSize="s" data-test-subj={`notebookCell-${cell.name}`}>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type={TYPE_ICONS[cell.type]} aria-hidden={true} />
+          <EuiIconTip
+            type={TYPE_ICONS[cell.type]}
+            content={getTypeLabel(cell)}
+            aria-label={getTypeLabel(cell)}
+            color="text"
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
           <EuiInlineEditText
