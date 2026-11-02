@@ -68887,39 +68887,13 @@ paths:
                 purgePolicy:
                   description: Policy that dictates which SLI documents to purge based on age
                   discriminator:
+                    mapping:
+                      fixed_age: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkPurgePolicyFixedAge'
+                      fixed_time: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkPurgePolicyFixedTime'
                     propertyName: purgeType
                   oneOf:
-                    - additionalProperties: false
-                      type: object
-                      properties:
-                        age:
-                          description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
-                          maxLength: 16
-                          type: string
-                        purgeType:
-                          description: Specifies whether documents will be purged based on a specific age or on a timestamp
-                          enum:
-                            - fixed_age
-                          type: string
-                      required:
-                        - purgeType
-                        - age
-                    - additionalProperties: false
-                      type: object
-                      properties:
-                        purgeType:
-                          description: Specifies whether documents will be purged based on a specific age or on a timestamp
-                          enum:
-                            - fixed_time
-                          type: string
-                        timestamp:
-                          description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
-                          format: date-time
-                          maxLength: 128
-                          type: string
-                      required:
-                        - purgeType
-                        - timestamp
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkPurgePolicyFixedAge'
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOBulkPurgePolicyFixedTime'
               required:
                 - list
                 - purgePolicy
@@ -179954,6 +179928,39 @@ components:
           type: array
       required:
         - isDone
+    Kibana_HTTP_APIs_SLOBulkPurgePolicyFixedAge:
+      additionalProperties: false
+      type: object
+      properties:
+        age:
+          description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
+          maxLength: 16
+          type: string
+        purgeType:
+          description: Specifies whether documents will be purged based on a specific age or on a timestamp
+          enum:
+            - fixed_age
+          type: string
+      required:
+        - purgeType
+        - age
+    Kibana_HTTP_APIs_SLOBulkPurgePolicyFixedTime:
+      additionalProperties: false
+      type: object
+      properties:
+        purgeType:
+          description: Specifies whether documents will be purged based on a specific age or on a timestamp
+          enum:
+            - fixed_time
+          type: string
+        timestamp:
+          description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
+          format: date-time
+          maxLength: 128
+          type: string
+      required:
+        - purgeType
+        - timestamp
     Kibana_HTTP_APIs_SLOBulkPurgeRollupResponse:
       additionalProperties: true
       description: The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
@@ -181320,38 +181327,45 @@ components:
     Kibana_HTTP_APIs_SLOTimeWindow:
       description: Defines properties for the SLO time window
       discriminator:
+        mapping:
+          calendarAligned: '#/components/schemas/Kibana_HTTP_APIs_SLOTimeWindowCalendarAligned'
+          rolling: '#/components/schemas/Kibana_HTTP_APIs_SLOTimeWindowRolling'
         propertyName: type
       oneOf:
-        - additionalProperties: false
-          type: object
-          properties:
-            duration:
-              description: 'the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d'
-              maxLength: 16
-              type: string
-            type:
-              description: Indicates weither the time window is a rolling or a calendar aligned time window.
-              enum:
-                - rolling
-              type: string
-          required:
-            - duration
-            - type
-        - additionalProperties: false
-          type: object
-          properties:
-            duration:
-              description: 'the duration formatted as {duration}{unit}. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)'
-              maxLength: 16
-              type: string
-            type:
-              description: Indicates weither the time window is a rolling or a calendar aligned time window.
-              enum:
-                - calendarAligned
-              type: string
-          required:
-            - duration
-            - type
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOTimeWindowRolling'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_SLOTimeWindowCalendarAligned'
+    Kibana_HTTP_APIs_SLOTimeWindowCalendarAligned:
+      additionalProperties: false
+      type: object
+      properties:
+        duration:
+          description: 'the duration formatted as {duration}{unit}. Accepted values for calendar aligned: 1w (weekly) or 1M (monthly)'
+          maxLength: 16
+          type: string
+        type:
+          description: Indicates weither the time window is a rolling or a calendar aligned time window.
+          enum:
+            - calendarAligned
+          type: string
+      required:
+        - duration
+        - type
+    Kibana_HTTP_APIs_SLOTimeWindowRolling:
+      additionalProperties: false
+      type: object
+      properties:
+        duration:
+          description: 'the duration formatted as {duration}{unit}. Accepted values for rolling: 7d, 30d, 90d'
+          maxLength: 16
+          type: string
+        type:
+          description: Indicates weither the time window is a rolling or a calendar aligned time window.
+          enum:
+            - rolling
+          type: string
+      required:
+        - duration
+        - type
     Kibana_HTTP_APIs_SLOWithSummaryResponse:
       additionalProperties: true
       description: The SLO definition with its computed summary

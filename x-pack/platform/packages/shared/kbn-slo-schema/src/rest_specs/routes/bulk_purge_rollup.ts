@@ -13,21 +13,25 @@ const PURGE_TYPE_DESCRIPTION =
   'Specifies whether documents will be purged based on a specific age or on a timestamp';
 
 const fixedAgePurge = lazySchema(() =>
-  z.object({
-    purgeType: z.literal('fixed_age').describe(PURGE_TYPE_DESCRIPTION),
-    age: durationType.describe(
-      'The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.'
-    ),
-  })
+  z
+    .object({
+      purgeType: z.literal('fixed_age').describe(PURGE_TYPE_DESCRIPTION),
+      age: durationType.describe(
+        'The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.'
+      ),
+    })
+    .meta({ id: 'SLOBulkPurgePolicyFixedAge' })
 );
 
 const fixedTimePurge = lazySchema(() =>
-  z.object({
-    purgeType: z.literal('fixed_time').describe(PURGE_TYPE_DESCRIPTION),
-    timestamp: dateType.describe(
-      'The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.'
-    ),
-  })
+  z
+    .object({
+      purgeType: z.literal('fixed_time').describe(PURGE_TYPE_DESCRIPTION),
+      timestamp: dateType.describe(
+        'The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.'
+      ),
+    })
+    .meta({ id: 'SLOBulkPurgePolicyFixedTime' })
 );
 
 const bulkPurgePolicy = lazySchema(() =>

@@ -206,6 +206,22 @@ describe('SLO public route request bodies are documented', () => {
     );
   });
 
+  it('maps the purge policy discriminator to named variants', async () => {
+    const doc = await generate({ body: bulkPurgeRollupSchema.shape.body }, '/api/route');
+    const requestBody = doc.paths['/api/route']?.[ROUTE_METHOD]
+      ?.requestBody as OpenAPIV3.RequestBodyObject;
+    expect(Object.values(requestBody.content)[0].schema).toHaveProperty(
+      'properties.purgePolicy.discriminator',
+      {
+        propertyName: 'purgeType',
+        mapping: {
+          fixed_age: '#/components/schemas/SLOBulkPurgePolicyFixedAge',
+          fixed_time: '#/components/schemas/SLOBulkPurgePolicyFixedTime',
+        },
+      }
+    );
+  });
+
   it('describes the route-specific meaning of shared date and duration fields', async () => {
     expect(
       await getBodyPropertyDescriptions(bulkPurgeRollupSchema.shape.body, [
