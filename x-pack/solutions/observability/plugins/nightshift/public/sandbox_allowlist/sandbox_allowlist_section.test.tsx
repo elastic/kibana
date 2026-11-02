@@ -37,12 +37,10 @@ const typeHosts = (value: string) =>
   });
 
 describe('parseSandboxAllowlistText', () => {
-  it('splits on newlines and commas and drops blanks', () => {
-    expect(parseSandboxAllowlistText('a.example\n\n b.example , c.example\n')).toEqual([
-      'a.example',
-      'b.example',
-      'c.example',
-    ]);
+  it('splits on newlines, preserves commas inside method lists, and drops blanks', () => {
+    expect(
+      parseSandboxAllowlistText('a.example\r\n\n pypi.org GET,HEAD /simple/\n  b.example  \n')
+    ).toEqual(['a.example', 'pypi.org GET,HEAD /simple/', 'b.example']);
   });
 });
 
@@ -94,7 +92,7 @@ describe('SandboxAllowlistSection', () => {
     renderSection();
 
     typeHosts(
-      'api.github.com\nUploads.GitHub.com.\n*.datadoghq.com\ndeny api.github.com POST /gists\nbücher.example'
+      'api.github.com\nUploads.GitHub.com.\n*.datadoghq.com\npypi.org GET,HEAD /simple/\ndeny api.github.com POST /gists\nbücher.example'
     );
     fireEvent.click(screen.getByTestId('nightshiftSandboxAllowlistSave'));
 
@@ -104,6 +102,7 @@ describe('SandboxAllowlistSection', () => {
           'api.github.com',
           'uploads.github.com',
           '*.datadoghq.com',
+          'allow pypi.org GET,HEAD /simple/',
           'deny api.github.com POST /gists',
           'xn--bcher-kva.example',
         ],

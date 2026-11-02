@@ -68,9 +68,9 @@ const putSandboxAllowlistRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'PUT /internal/nightshift/sandbox_allowlist',
   options: {
     access: 'internal',
-    summary: 'Replace the sandbox credential host allowlist',
+    summary: 'Replace the sandbox egress firewall allowlist',
     description:
-      'Replaces the hosts that may receive real connector and sandbox secret values from sandbox commands in the current space. Entries must be exact hostnames; wildcards are not supported.',
+      'Replaces the outbound hostnames and egress firewall DSL rules permitted for sandbox commands in the current space.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: lazySchema(() =>

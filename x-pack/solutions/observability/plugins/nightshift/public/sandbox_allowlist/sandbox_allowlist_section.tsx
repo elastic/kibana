@@ -27,16 +27,16 @@ import { SettingsSectionRow } from '../settings/components/settings_section';
 import { useFetchSandboxAllowlist } from './use_fetch_sandbox_allowlist';
 import { useSaveSandboxAllowlist } from './use_save_sandbox_allowlist';
 
-/** One host per line; commas are accepted too so a pasted list just works. */
+/** One host or egress firewall rule per line. */
 export const parseSandboxAllowlistText = (text: string): string[] =>
   text
-    .split(/[\n,]/)
+    .split(/\r?\n/)
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
 
 const formatHosts = (hosts: readonly string[]): string => hosts.join('\n');
 
-/** Admin-only editor for the per-space list of hosts that may receive sandbox credentials. */
+/** Admin-only editor for the per-space sandbox egress firewall allowlist. */
 export const SandboxAllowlistSection = () => {
   const { data, isLoading, error } = useFetchSandboxAllowlist();
   const { mutateAsync, isLoading: isSaving } = useSaveSandboxAllowlist();
@@ -64,20 +64,20 @@ export const SandboxAllowlistSection = () => {
   return (
     <SettingsSectionRow
       title={i18n.translate('xpack.nightshift.settings.sandboxAllowlistTitle', {
-        defaultMessage: 'Sandbox credential allowlist',
+        defaultMessage: 'Sandbox egress allowlist',
       })}
       description={
         <>
           <p>
             {i18n.translate('xpack.nightshift.settings.sandboxAllowlistDescription', {
               defaultMessage:
-                'Hosts that sandbox commands may send connector credentials and sandbox secrets to. Requests to any other host receive a placeholder instead of the real value. Commands that need credentials fail while this list is empty.',
+                'Outbound destinations and egress firewall rules permitted for sandbox commands in this space. Active connector hosts are included automatically.',
             })}
           </p>
           <p>
             {i18n.translate('xpack.nightshift.settings.sandboxAllowlistWildcardNote', {
               defaultMessage:
-                'Enter one exact hostname per line, for example api.github.com. Wildcards, schemes, ports and paths are not supported. At most {max} hosts.',
+                'Enter one hostname or rule per line (e.g. api.github.com, *.datadoghq.com, pypi.org GET,HEAD /simple/, or deny api.github.com POST /gists). At most {max} rules.',
               values: { max: MAX_SANDBOX_ALLOWLIST_HOSTS },
             })}
           </p>

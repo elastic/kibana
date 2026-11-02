@@ -11,13 +11,16 @@ export const SANDBOX_ALLOWLIST_API_PATH = '/internal/nightshift/sandbox_allowlis
 export const MAX_SANDBOX_ALLOWLIST_HOSTS = 32;
 /** Longest DNS name, and the credential proxy's `MaxHostLen`. */
 export const MAX_SANDBOX_ALLOWLIST_HOST_LENGTH = 253;
+/** Longest canonical egress firewall rule string (`session.MaxEgressRuleLen` in `credproxy`). */
+export const MAX_SANDBOX_ALLOWLIST_RULE_LENGTH = 512;
 /** Bound on raw input per entry, before normalization (IDN names grow when encoded). */
 export const MAX_SANDBOX_ALLOWLIST_RAW_HOST_LENGTH = 1024;
 
 const MAX_LABEL_LENGTH = 63;
 const LABEL_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
-const NON_HOSTNAME_CHARS_REGEX = /[\s/:?#@*[\]\%]/;
+const NON_HOSTNAME_CHARS_REGEX = /[\s/:?#@*[\]\\%]/;
 const ALLOWED_HTTP_METHODS = new Set(['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']);
+const RESERVED_HOST_KEYWORDS = new Set(['allow', 'deny', 'http', 'https', ...ALLOWED_HTTP_METHODS]);
 
 export type SandboxAllowlistHostResult = { host: string } | { error: string };
 
@@ -121,6 +124,12 @@ export const normalizeSandboxAllowlistHost = (raw: string): SandboxAllowlistHost
     if ('error' in hostRes) {
       return hostRes;
     }
+    if (
+      RESERVED_HOST_KEYWORDS.has(hostRes.host) ||
+      RESERVED_HOST_KEYWORDS.has(hostRes.host.toUpperCase())
+    ) {
+      return { error: 'is not a valid hostname' };
+    }
     normalizedHost = hostRes.host;
   }
 
@@ -179,7 +188,11 @@ export const normalizeSandboxAllowlistHost = (raw: string): SandboxAllowlistHost
   if (pathPrefix) {
     parts.push(pathPrefix);
   }
-  return { host: parts.join(' ') };
+  const canonical = parts.join(' ');
+  if (canonical.length > MAX_SANDBOX_ALLOWLIST_RULE_LENGTH) {
+    return { error: `must be at most ${MAX_SANDBOX_ALLOWLIST_RULE_LENGTH} characters long` };
+  }
+  return { host: canonical };
 };
 
 export interface SandboxAllowlistValidation {
