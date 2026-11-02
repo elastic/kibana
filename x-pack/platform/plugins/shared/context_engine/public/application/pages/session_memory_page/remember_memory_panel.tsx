@@ -36,12 +36,7 @@ export const MEMORY_TYPE_SUGGESTIONS = [
   'fact',
   'statement',
   'summary',
-  'goal',
   'decision',
-  'task',
-  'feedback',
-  'instruction',
-  'observation',
 ] as const;
 
 const labels = {
