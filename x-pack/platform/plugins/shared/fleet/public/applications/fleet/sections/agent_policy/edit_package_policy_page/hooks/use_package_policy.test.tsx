@@ -145,7 +145,19 @@ jest.mock('../../../../../../hooks/use_request', () => ({
   sendGetAgentlessPolicy: jest.fn(),
   sendUpdateAgentlessPolicy: jest.fn(),
   sendUpdatePackagePolicy: jest.fn(),
-  sendGetOnePackagePolicy: (packagePolicyId: string) => {
+  sendGetOnePackagePolicy: function sendGetOnePackagePolicy(packagePolicyId: string): any {
+    // A policy managed by an onboarding deployment, and one it no longer manages.
+    if (packagePolicyId === 'onboarding-managed' || packagePolicyId === 'onboarding-released') {
+      const { item } = sendGetOnePackagePolicy('package-policy-1').data;
+      return {
+        data: {
+          item: {
+            ...item,
+            onboarding_deployment_id: packagePolicyId === 'onboarding-managed' ? 'deploy-1' : null,
+          },
+        },
+      };
+    }
     if (packagePolicyId === 'package-policy-1') {
       return {
         data: {
@@ -341,6 +353,28 @@ describe('usePackagePolicy', () => {
 
     expect(result.current.packagePolicy).toEqual(omit(mockPackagePolicy, 'id'));
   });
+
+  it.each(['onboarding-managed', 'onboarding-released'])(
+    'should not send back the read-only onboarding_deployment_id of a %s policy on save',
+    async (packagePolicyId) => {
+      jest
+        .mocked(sendUpdatePackagePolicy)
+        .mockResolvedValue({ data: { item: { id: 'nginx-1' } }, error: null } as any);
+      const renderer = createFleetTestRendererMock();
+      const { result } = renderer.renderHook(() =>
+        usePackagePolicyWithRelatedData(packagePolicyId, {})
+      );
+      await waitFor(() => expect(result.current.packagePolicy).toBeDefined());
+
+      expect(result.current.packagePolicy).not.toHaveProperty('onboarding_deployment_id');
+      await act(async () => {
+        await result.current.savePackagePolicy();
+      });
+      expect(jest.mocked(sendUpdatePackagePolicy).mock.calls[0][1]).not.toHaveProperty(
+        'onboarding_deployment_id'
+      );
+    }
+  );
 
   it('should load the package policy if this is an upgrade', async () => {
     const renderer = createFleetTestRendererMock();

@@ -120,7 +120,7 @@ export const getCloudOnboardingDeploymentHandler: FleetRequestHandler<
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({
-        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+        body: { message: `Cloud onboarding instance ${request.params.id} not found` },
       });
     }
     throw error;
@@ -229,14 +229,14 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({
-        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+        body: { message: `Cloud onboarding instance ${request.params.id} not found` },
       });
     }
     if (SavedObjectsErrorHelpers.isConflictError(error)) {
       return response.customError({
         statusCode: 409,
         body: {
-          message: `Cloud onboarding deployment ${request.params.id} was modified concurrently, retry the request`,
+          message: `Cloud onboarding instance ${request.params.id} was modified concurrently, retry the request`,
         },
       });
     }
@@ -256,7 +256,7 @@ export const deleteCloudOnboardingDeploymentHandler: FleetRequestHandler<
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return response.notFound({
-        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+        body: { message: `Cloud onboarding instance ${request.params.id} not found` },
       });
     }
     throw error;

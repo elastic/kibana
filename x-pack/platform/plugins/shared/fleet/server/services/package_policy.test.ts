@@ -15203,8 +15203,8 @@ describe('Package policy service', () => {
 
       describe('onboarding_deployment_id', () => {
         const makePolicies = (
-          current: string | undefined,
-          previous: string | undefined
+          current: string | null | undefined,
+          previous: string | null | undefined
         ): Array<SavedObjectsFindResult<PackagePolicySOAttributes>> =>
           [
             { id: 'onboarding-policy', version: '2.3.2', onboarding_deployment_id: current },
@@ -15225,7 +15225,7 @@ describe('Package policy service', () => {
               created_by: 'elastic',
               updated_at: '2024-12-22T21:28:05.380Z',
               updated_by: 'elastic',
-              ...(deploymentId ? { onboarding_deployment_id: deploymentId } : {}),
+              ...(deploymentId !== undefined ? { onboarding_deployment_id: deploymentId } : {}),
             },
             references: [],
             score: 0,
@@ -15236,6 +15236,16 @@ describe('Package policy service', () => {
           await packagePolicyService.rollback(
             mockSoClient,
             makePolicies('deploy-2', 'deploy-1'),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).toHaveProperty('onboarding_deployment_id', 'deploy-2');
+        });
+
+        it('keeps the current value when the previous revision has it cleared', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies('deploy-2', null),
             '2.2.0'
           );
 

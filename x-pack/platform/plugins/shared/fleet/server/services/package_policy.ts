@@ -3663,7 +3663,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               revision: (policy?.attributes.revision ?? 0) + 1, // Bump revision
               latest_revision: true,
               // Ownership may have changed since the snapshot was taken; keep the current value.
-              ...(previousRevision.attributes.onboarding_deployment_id != null && {
+              ...(previousRevision.attributes.onboarding_deployment_id !== undefined && {
                 onboarding_deployment_id: policy.attributes.onboarding_deployment_id ?? null,
               }),
             },

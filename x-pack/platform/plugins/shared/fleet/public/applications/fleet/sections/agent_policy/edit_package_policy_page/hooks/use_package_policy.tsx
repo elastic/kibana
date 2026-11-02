@@ -367,6 +367,8 @@ export function usePackagePolicyWithRelatedData(
             updated_by,
             updated_at,
             secret_references,
+            // Read-only: set by Fleet, rejected in update requests.
+            onboarding_deployment_id: onboardingDeploymentId,
             ...restOfPackagePolicy
           } = basePolicy;
 

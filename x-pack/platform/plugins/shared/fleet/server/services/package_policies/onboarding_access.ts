@@ -32,7 +32,7 @@ export function assertOnboardingAccess(
 
   if (offendingIds.length > 0) {
     throw new PackagePolicyManagedByOnboardingError(
-      `Package policies managed by a cloud onboarding deployment can only be changed from the onboarding flow. Offending IDs: ${offendingIds.join(
+      `Package policies managed by a cloud onboarding instance can only be changed from the onboarding flow. Offending IDs: ${offendingIds.join(
         ', '
       )}.`
     );

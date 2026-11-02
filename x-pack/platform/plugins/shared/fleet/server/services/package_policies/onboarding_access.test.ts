@@ -40,7 +40,7 @@ describe('assertOnboardingAccess', () => {
   ])('rejects changes to managed policies with %s', (_, onboardingDeploymentId) => {
     expect(() => assertOnboardingAccess([managed, unmanaged], onboardingDeploymentId)).toThrow(
       new PackagePolicyManagedByOnboardingError(
-        'Package policies managed by a cloud onboarding deployment can only be changed from the onboarding flow. Offending IDs: pp-managed.'
+        'Package policies managed by a cloud onboarding instance can only be changed from the onboarding flow. Offending IDs: pp-managed.'
       )
     );
   });

@@ -855,7 +855,7 @@ export const PackagePolicySchema = schema.object(
         schema.string({
           meta: {
             description:
-              'ID of the cloud onboarding deployment that manages this package policy. Set by Fleet, read-only.',
+              'ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.',
           },
         })
       )
@@ -975,7 +975,7 @@ export const OnboardingDeploymentIdQuerySchema = schema.maybe(
     maxLength: 256,
     meta: {
       description:
-        'ID of the cloud onboarding deployment that manages the package policies. Required to change package policies managed by a cloud onboarding deployment; only the onboarding flow is expected to set it.',
+        'ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.',
     },
   })
 );

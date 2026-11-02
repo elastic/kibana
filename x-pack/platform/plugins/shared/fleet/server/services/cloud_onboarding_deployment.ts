@@ -16,6 +16,7 @@ import { nodeBuilder } from '@kbn/es-query';
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../../common/constants';
 import type {
   CloudOnboardingDeployment,
@@ -92,12 +93,11 @@ class CloudOnboardingDeploymentService {
       attributes
     );
 
-    await this.syncPackagePolicyOwnership(
-      soClient,
-      so.id,
-      new Set(),
-      getOwnedPackagePolicyIds(attributes)
-    );
+    // A new deployment has nothing stamped yet, so there is only something to do if it owns policies.
+    const ownedIds = getOwnedPackagePolicyIds(attributes);
+    if (ownedIds.size) {
+      await this.syncPackagePolicyOwnership(soClient, so.id, ownedIds);
+    }
 
     return toDeployment(so);
   }
@@ -261,12 +261,7 @@ class CloudOnboardingDeploymentService {
         continue;
       }
 
-      await this.syncPackagePolicyOwnership(
-        soClient,
-        id,
-        getOwnedPackagePolicyIds(existing.attributes),
-        getOwnedPackagePolicyIds(attributes)
-      );
+      await this.syncPackagePolicyOwnership(soClient, id, getOwnedPackagePolicyIds(attributes));
       return toDeployment(so);
     }
   }
@@ -278,57 +273,67 @@ class CloudOnboardingDeploymentService {
   }
 
   /**
-   * Stamps the package policies the deployment owns with its id, and clears the stamp from those it
-   * no longer owns. Every owned policy is checked, not only newly added ones, so a stamp that failed
-   * on an earlier write is retried. A policy stamped by another deployment is left untouched.
-   * Failures are logged and do not fail the deployment write: an unstamped policy stays visible and
-   * editable in Fleet.
+   * Stamps the package policies the deployment owns with its id, and clears the stamp from every
+   * other policy stamped with it. The current state is read on every write, so a stamp or a clear
+   * that failed on an earlier write is retried. A policy stamped by another deployment is left
+   * untouched, and each write carries the version it was decided on, so a concurrent change makes it
+   * fail instead of overwriting that change. Failures are logged and do not fail the deployment
+   * write: an unstamped policy stays visible and editable in Fleet.
    */
   private async syncPackagePolicyOwnership(
     soClient: SavedObjectsClientContract,
     deploymentId: string,
-    previousIds: Set<string>,
-    nextIds: Set<string>
+    ownedIds: Set<string>
   ): Promise<void> {
-    const removedIds = [...previousIds].filter((policyId) => !nextIds.has(policyId));
-    const policyIds = [...nextIds, ...removedIds];
-    if (!policyIds.length) {
-      return;
-    }
-
     const logger = appContextService.getLogger();
     try {
       const savedObjectType = await getPackagePolicySavedObjectType();
-      const { saved_objects: policies } = await soClient.bulkGet<PackagePolicySOAttributes>(
-        policyIds.map((policyId) => ({ type: savedObjectType, id: policyId }))
-      );
+      const { saved_objects: stampedPolicies } = await soClient.find<PackagePolicySOAttributes>({
+        type: savedObjectType,
+        filter: nodeBuilder.is(
+          `${savedObjectType}.attributes.onboarding_deployment_id`,
+          deploymentId
+        ),
+        perPage: SO_SEARCH_LIMIT,
+      });
+      const stampedIds = new Set(stampedPolicies.map(({ id }) => id));
+      const unstampedIds = [...ownedIds].filter((policyId) => !stampedIds.has(policyId));
+      const { saved_objects: unstampedPolicies } = unstampedIds.length
+        ? await soClient.bulkGet<PackagePolicySOAttributes>(
+            unstampedIds.map((policyId) => ({ type: savedObjectType, id: policyId }))
+          )
+        : { saved_objects: [] };
 
       const updates: Array<SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>> = [];
-      for (const policy of policies) {
+      for (const policy of stampedPolicies) {
+        // A previous revision keeps the stamp of the snapshot; it is never restored over a newer one.
+        if (!ownedIds.has(policy.id) && policy.attributes.latest_revision !== false) {
+          updates.push({
+            type: savedObjectType,
+            id: policy.id,
+            version: policy.version,
+            attributes: { onboarding_deployment_id: null },
+          });
+        }
+      }
+      for (const policy of unstampedPolicies) {
         // Missing policies were deleted out-of-band; previous revisions are never stamped.
         if (isSavedObjectErrorResult(policy) || policy.attributes.latest_revision === false) {
           continue;
         }
         const current = policy.attributes.onboarding_deployment_id;
-        if (!nextIds.has(policy.id)) {
-          if (current === deploymentId) {
-            updates.push({
-              type: savedObjectType,
-              id: policy.id,
-              attributes: { onboarding_deployment_id: null },
-            });
-          }
-        } else if (current && current !== deploymentId) {
+        if (current) {
           logger.warn(
-            `Package policy ${policy.id} is managed by cloud onboarding deployment ${current}, not stamping it with ${deploymentId}`
+            `Package policy ${policy.id} is managed by cloud onboarding instance ${current}, not stamping it with ${deploymentId}`
           );
-        } else if (!current) {
-          updates.push({
-            type: savedObjectType,
-            id: policy.id,
-            attributes: { onboarding_deployment_id: deploymentId },
-          });
+          continue;
         }
+        updates.push({
+          type: savedObjectType,
+          id: policy.id,
+          version: policy.version,
+          attributes: { onboarding_deployment_id: deploymentId },
+        });
       }
       if (!updates.length) {
         return;
@@ -340,7 +345,7 @@ class CloudOnboardingDeploymentService {
       for (const result of results) {
         if (isSavedObjectErrorResult(result)) {
           logger.warn(
-            `Failed to update the onboarding deployment of package policy ${result.id}: ${result.error.message}`
+            `Failed to update the onboarding instance of package policy ${result.id}: ${result.error.message}`
           );
         } else {
           auditLoggingService.writeCustomSoAuditLog({
@@ -352,7 +357,7 @@ class CloudOnboardingDeploymentService {
       }
     } catch (error) {
       logger.warn(
-        `Failed to sync package policies of cloud onboarding deployment ${deploymentId}: ${error.message}`
+        `Failed to sync package policies of cloud onboarding instance ${deploymentId}: ${error.message}`
       );
     }
   }
