@@ -16,7 +16,7 @@ export class EntityAnalyticsHomePage {
 
   constructor(private readonly page: ScoutPage) {
     this.root = this.page.testSubj.locator('entityAnalyticsNewHomePage');
-    this.grid = this.page.getByRole('grid', { name: 'Entity analytics grid' });
+    this.grid = this.page.testSubj.locator('entityAnalyticsEntitiesGrid');
   }
 
   async goto(): Promise<void> {
