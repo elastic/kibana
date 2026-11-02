@@ -7,16 +7,15 @@
 
 import type { SourceChangeEvent } from '@kbn/nightshift-sources-plugin/server';
 
+/** Returns the target enabled state, or `undefined` when the setting should remain unchanged. */
 export const getContinuousOnboardingTarget = ({
   eventType,
   total,
-  isPaused,
 }: {
   eventType: SourceChangeEvent['type'];
   total: number;
-  isPaused: boolean;
 }): boolean | undefined => {
-  if (eventType === 'updated' || isPaused) {
+  if (eventType === 'updated') {
     return;
   }
   if (eventType === 'created' && total === 1) {

@@ -12,19 +12,17 @@ describe('getContinuousOnboardingTarget', () => {
   it.each<{
     eventType: SourceChangeEvent['type'];
     total: number;
-    isPaused: boolean;
     expected: boolean | undefined;
   }>([
-    { eventType: 'created', total: 1, isPaused: false, expected: true },
-    { eventType: 'created', total: 2, isPaused: false, expected: undefined },
-    { eventType: 'deleted', total: 0, isPaused: false, expected: false },
-    { eventType: 'deleted', total: 1, isPaused: false, expected: undefined },
-    { eventType: 'created', total: 1, isPaused: true, expected: undefined },
-    { eventType: 'updated', total: 1, isPaused: false, expected: undefined },
+    { eventType: 'created', total: 1, expected: true },
+    { eventType: 'created', total: 2, expected: undefined },
+    { eventType: 'deleted', total: 0, expected: false },
+    { eventType: 'deleted', total: 1, expected: undefined },
+    { eventType: 'updated', total: 1, expected: undefined },
   ])(
-    'returns $expected for a $eventType event with $total sources and paused=$isPaused',
-    ({ eventType, total, isPaused, expected }) => {
-      expect(getContinuousOnboardingTarget({ eventType, total, isPaused })).toBe(expected);
+    'returns $expected for a $eventType event with $total sources',
+    ({ eventType, total, expected }) => {
+      expect(getContinuousOnboardingTarget({ eventType, total })).toBe(expected);
     }
   );
 });

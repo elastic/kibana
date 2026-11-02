@@ -60,7 +60,6 @@ export const syncContinuousOnboarding = async ({
   const enabled = getContinuousOnboardingTarget({
     eventType: event.type,
     total,
-    isPaused: false,
   });
   if (enabled === undefined) {
     return;
