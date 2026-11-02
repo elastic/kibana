@@ -344,12 +344,12 @@ describe('ApprovalContent', () => {
   });
 
   describe('to-do proposal', () => {
-    it("offers a single I've applied button instead of Approve and Decline", () => {
+    it('offers Mark as applied and Decline instead of Approve', () => {
       renderContent({ proposal: todoProposal, secondaryActions: undefined, onDismiss: jest.fn() });
 
-      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent("I've applied");
+      expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Mark as applied');
       expect(screen.queryByText('Approve')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('approvalContent-dismiss')).not.toBeInTheDocument();
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeInTheDocument();
     });
 
     const appliedTodo: ApprovalProposal = {
@@ -398,7 +398,7 @@ describe('ApprovalContent', () => {
       expect(screen.getByTestId('approvalContent-reopen')).toBeDisabled();
     });
 
-    it("records the application through onApprove when I've applied is clicked", async () => {
+    it('records the application through onApprove when Mark as applied is clicked', async () => {
       const onApprove = jest.fn();
       renderContent({ proposal: todoProposal, onApprove });
 
@@ -407,10 +407,10 @@ describe('ApprovalContent', () => {
       await waitFor(() => expect(onApprove).toHaveBeenCalledTimes(1));
     });
 
-    it('reads its category as "To do" in the caption', () => {
+    it('reads its category as "Apply manually" in the caption', () => {
       renderContent({ proposal: todoProposal });
 
-      expect(screen.getByText(/^To do/)).toBeInTheDocument();
+      expect(screen.getByText(/Apply manually • .+ impact/)).toBeInTheDocument();
     });
 
     it('keeps Approve and Decline for a proposal without an action in another category', () => {
