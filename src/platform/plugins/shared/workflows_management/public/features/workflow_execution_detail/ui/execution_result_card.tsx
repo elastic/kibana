@@ -40,6 +40,10 @@ const i18nTexts = {
   executedBy: i18n.translate('workflows.executionFlyout.executedBy', {
     defaultMessage: 'Triggered by',
   }),
+  runAs: i18n.translate('workflows.executionFlyout.runAs', { defaultMessage: 'Run as' }),
+  runAsInherited: i18n.translate('workflows.execution.inheritedRunAsLabel', {
+    defaultMessage: 'Run as (inherited from parent)',
+  }),
 };
 
 interface ExecutionResultCardProps {
@@ -48,7 +52,7 @@ interface ExecutionResultCardProps {
   onFocusFailedStep: (stepExecutionId: string) => void;
 }
 
-/** Result, execution time and who triggered the run. */
+/** Result, execution time, who triggered the run and the identity it runs as. */
 export const ExecutionResultCard = ({
   workflowExecution,
   failedPosition,
@@ -74,6 +78,17 @@ export const ExecutionResultCard = ({
       )
     : undefined;
   const executedByDisplay = resolvedExecutedBy || '-';
+  const { effectiveIdentity } = workflowExecution;
+  const showRunAs = effectiveIdentity?.type === 'service_account';
+  const cellCss = {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    justifyContent: 'center',
+    gap: '2px',
+    minWidth: 0,
+    paddingInline: '8px',
+    boxShadow: `-1px 0 0 0 ${euiTheme.colors.borderBaseSubdued}`,
+  };
 
   return (
     <div
@@ -87,30 +102,25 @@ export const ExecutionResultCard = ({
         overflow: 'hidden',
       }}
     >
+      {/* With "Run as", the 4 cells form a 2x2 grid. Without it, the 3 cells share one row.
+          Each cell draws its separator as a left shadow; overflow clips the shadow of the first
+          cell in every row. */}
       <div
         css={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: '16px',
-          minWidth: 0,
+          display: 'grid',
+          gridTemplateColumns: `repeat(${showRunAs ? 2 : 3}, minmax(0, 1fr))`,
+          rowGap: '12px',
+          marginInline: '-8px',
+          overflow: 'hidden',
         }}
       >
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '2px',
-            flex: 1,
-            minWidth: 0,
-          }}
-        >
+        <div css={cellCss}>
           <EuiText size="s" color="subdued" css={{ fontWeight: 500, fontSize: '12px' }}>
             {i18nTexts.result}
           </EuiText>
           <EuiFlexGroup
             gutterSize="none"
-            css={{ gap: '4px', minWidth: 0 }}
+            css={{ gap: '4px', minWidth: 0, flexGrow: 0 }}
             alignItems="center"
             responsive={false}
           >
@@ -155,31 +165,13 @@ export const ExecutionResultCard = ({
           </EuiFlexGroup>
         </div>
 
-        <div
-          aria-hidden="true"
-          css={{
-            width: '1px',
-            alignSelf: 'stretch',
-            background: euiTheme.colors.borderBaseSubdued,
-            flexShrink: 0,
-          }}
-        />
-
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '2px',
-            flex: 1,
-            minWidth: 0,
-          }}
-        >
+        <div css={cellCss}>
           <EuiText size="s" color="subdued" css={{ fontWeight: 500, fontSize: '12px' }}>
             {i18nTexts.executionTime}
           </EuiText>
           <EuiFlexGroup
             gutterSize="none"
-            css={{ gap: '4px', minWidth: 0 }}
+            css={{ gap: '4px', minWidth: 0, flexGrow: 0 }}
             alignItems="center"
             responsive={false}
           >
@@ -194,26 +186,7 @@ export const ExecutionResultCard = ({
           </EuiFlexGroup>
         </div>
 
-        <div
-          aria-hidden="true"
-          css={{
-            width: '1px',
-            alignSelf: 'stretch',
-            background: euiTheme.colors.borderBaseSubdued,
-            flexShrink: 0,
-          }}
-        />
-
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '2px',
-            flex: 1,
-            minWidth: 0,
-          }}
-          data-test-subj="workflowExecutionFlyoutExecutedBy"
-        >
+        <div css={cellCss} data-test-subj="workflowExecutionFlyoutExecutedBy">
           <EuiText size="s" color="subdued" css={{ fontWeight: 500, fontSize: '12px' }}>
             {i18nTexts.executedBy}
           </EuiText>
@@ -222,7 +195,7 @@ export const ExecutionResultCard = ({
             alignItems="center"
             responsive={false}
             wrap={false}
-            css={{ minWidth: 0, width: '100%' }}
+            css={{ minWidth: 0, width: '100%', flexGrow: 0 }}
           >
             <EuiFlexItem grow css={{ minWidth: 0 }}>
               <EuiToolTip content={executedByDisplay} display="block">
@@ -263,20 +236,18 @@ export const ExecutionResultCard = ({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-          {workflowExecution?.effectiveIdentity?.type === 'service_account' && (
-            <EuiText size="s" data-test-subj="workflowExecutionFlyoutRunAs">
-              {workflowExecution.effectiveIdentity.inheritedFrom
-                ? i18n.translate('workflows.execution.inheritedRunAsLabel', {
-                    defaultMessage: 'Run as (inherited from parent)',
-                  })
-                : i18n.translate('workflows.executionFlyout.runAs', {
-                    defaultMessage: 'Run as',
-                  })}
-              {': '}
-              <ServiceAccountName id={workflowExecution.effectiveIdentity.id} />
-            </EuiText>
-          )}
         </div>
+
+        {effectiveIdentity?.type === 'service_account' && (
+          <div css={cellCss} data-test-subj="workflowExecutionFlyoutRunAs">
+            <EuiText size="s" color="subdued" css={{ fontWeight: 500, fontSize: '12px' }}>
+              {effectiveIdentity.inheritedFrom ? i18nTexts.runAsInherited : i18nTexts.runAs}
+            </EuiText>
+            <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px', minWidth: 0 }}>
+              <ServiceAccountName id={effectiveIdentity.id} />
+            </EuiText>
+          </div>
+        )}
       </div>
     </div>
   );
