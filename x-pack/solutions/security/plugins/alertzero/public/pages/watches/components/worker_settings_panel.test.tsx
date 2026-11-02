@@ -222,7 +222,7 @@ describe('WorkerSettingsPanel models and no-model block', () => {
     const core = renderPanel(WORKFLOW_ID, isAccordion);
 
     expect(screen.getByTestId(`alertZeroModelsRow-${WORKER_ID}`)).toHaveTextContent(
-      'This Worker uses models configured in Feature settings'
+      'This Worker uses the models configured in Feature settings'
     );
     const link = screen.getByTestId(`alertZeroModelsLink-${WORKER_ID}`);
     expect(link).toHaveAttribute('href', FEATURE_SETTINGS_URL);
