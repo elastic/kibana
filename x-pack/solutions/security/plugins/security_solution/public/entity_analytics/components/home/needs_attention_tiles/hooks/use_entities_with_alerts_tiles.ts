@@ -21,6 +21,7 @@ import {
   type EntityFilters,
   type TimeRange,
 } from '../../entities_grid/common';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 import { TILE_PROJECT_ROUTING } from './tile_project_routing';
@@ -134,9 +135,10 @@ export const useAlertBasedTiles = ({
     }
   );
 
-  const filteredError = (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
-    ? undefined
-    : (error as SecurityAppError | undefined);
+  // A space that has never run a detection rule has no alerts index: the tiles say so, like the
+  // risk tiles do without a risk score index.
+  const isMissingIndex = isMissingIndexError(error);
+  const filteredError = isMissingIndex ? undefined : error;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
@@ -168,6 +170,7 @@ export const useAlertBasedTiles = ({
     isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    isMissingIndex,
     error: filteredError ?? indexError,
     isTimedOut,
   };

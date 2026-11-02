@@ -660,6 +660,27 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
     });
   });
 
+  it('says the alert tiles need detection alerts in a space with no alerts index', () => {
+    mockTiles();
+    hooks.useAlertBasedTiles.mockReturnValue({
+      severeAlertsCount: 0,
+      severeAlertsEntityIds: [],
+      watchlistedCount: 0,
+      watchlistedEntityIds: [],
+      hasCount: false,
+      isLoading: false,
+      isCountPending: false,
+      isTimedOut: false,
+      isMissingIndex: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(getCard('entitiesWithAlerts')?.noDataMessage).toBe('Requires detection alerts');
+    expect(getCard('watchlisted')?.noDataMessage).toBe('Requires detection alerts');
+    expect(getCard('entitiesWithAlerts')?.isUnavailable).toBe(true);
+    expect(getCard('newEntity')?.noDataMessage).toBeUndefined();
+  });
+
   describe('when a count times out', () => {
     it('says so on its tiles, warns once for the page, and reports the timeout', () => {
       mockTiles();

@@ -312,3 +312,69 @@ describe('useEntitiesWithAnomaliesCount', () => {
     ).toBe(false);
   });
 });
+
+describe('useAlertBasedTiles in a space with no alerts index', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data: { search: { search: jest.fn() } } },
+    });
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: { indexName: '.entities-v1' },
+      isLoading: false,
+    });
+  });
+
+  const renderWithQueryError = (error: Error) => {
+    mockUseQuery.mockReturnValue({ data: undefined, isFetching: false, error });
+    return renderHook(() => useAlertBasedTiles({ spaceId: 'default' })).result.current;
+  };
+
+  it('says the alerts index is missing, without an error or a count', () => {
+    const result = renderWithQueryError(
+      new Error('no such index [.alerts-security.alerts-default]')
+    );
+    expect(result.isMissingIndex).toBe(true);
+    expect(result.error).toBeUndefined();
+    expect(result.hasCount).toBe(false);
+  });
+
+  it('reports any other failure as an error', () => {
+    const error = new Error('boom');
+    const result = renderWithQueryError(error);
+    expect(result.isMissingIndex).toBe(false);
+    expect(result.error).toBe(error);
+  });
+});
+
+describe.each([
+  ['useRiskMoversCount', useRiskMoversCount],
+  ['useNewlyHighCriticalCount', useNewlyHighCriticalCount],
+] as const)('%s when the entity index is missing', (_name, useCount) => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: { data: { search: { search: jest.fn() } } },
+    });
+    mockUseQuery.mockReturnValue({ data: undefined, isFetching: false, error: undefined });
+  });
+
+  afterEach(() => {
+    (useTileQueryInputs as jest.Mock).mockImplementation(actualUseTileQueryInputs);
+  });
+
+  it('reports it as an error, not as missing risk score history', () => {
+    const indexError = new Error('no such index [.entities.v2.latest.default]');
+    (useTileQueryInputs as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: indexError,
+      entityFilterClauses: [],
+    });
+
+    const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
+
+    expect(result.isMissingIndex).toBe(false);
+    expect(result.error).toBe(indexError);
+  });
+});
