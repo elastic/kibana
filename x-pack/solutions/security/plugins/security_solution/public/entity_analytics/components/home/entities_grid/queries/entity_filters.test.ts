@@ -31,6 +31,11 @@ describe('buildGroupValueBucketExpression', () => {
       null,
       '(entity.relationships.resolution.risk.calculated_level IS NULL AND entity.risk.calculated_level IS NULL)',
     ],
+    [
+      'entity.risk.calculated_level',
+      'Unknown',
+      '(entity.relationships.resolution.risk.calculated_level IN ("Unknown") OR (entity.relationships.resolution.risk.calculated_level IS NULL AND entity.risk.calculated_level IN ("Unknown")))',
+    ],
   ])('matches %s %s on the group value', (field, value, expected) => {
     expect(buildGroupValueBucketExpression(field, value)).toBe(expected);
   });
@@ -65,6 +70,13 @@ describe('buildGroupValueBucketQuery', () => {
         minimum_should_match: 1,
       },
     });
+  });
+
+  it('matches the Unknown bucket as the stored value, not as a missing level', () => {
+    const query = JSON.stringify(buildGroupValueBucketQuery('entity.risk.calculated_level', 'Unknown'));
+
+    expect(query).toContain('"Unknown"');
+    expect(query).not.toContain('{"exists":{"field":"entity.risk.calculated_level"}}');
   });
 
   it('matches a risk level on the group level first', () => {

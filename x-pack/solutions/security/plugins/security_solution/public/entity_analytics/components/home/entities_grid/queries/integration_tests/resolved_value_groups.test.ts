@@ -90,7 +90,8 @@ const GROUP_CASES: readonly GroupCase[] = [
       Critical: ['host:h1'],
       High: ['user:alice@okta', 'user:bob@okta'],
       Moderate: ['host:h2'],
-      Low: ['service:payments'],
+      // service:payments stores Unknown, host:h3 has no level: they are different buckets.
+      Unknown: ['service:payments'],
       [NULL_BUCKET]: ['host:h3'],
     },
   ],

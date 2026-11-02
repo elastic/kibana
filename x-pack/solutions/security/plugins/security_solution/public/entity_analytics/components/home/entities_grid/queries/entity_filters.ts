@@ -62,16 +62,27 @@ const buildCriticalityQuery = (values: readonly string[]): QueryDslQueryContaine
 const includesUnknown = (values: readonly string[]): boolean =>
   values.includes(RiskSeverity.Unknown);
 
-const buildRiskLevelCondition = (values: readonly string[]): string =>
-  includesUnknown(values)
+/** A bucket matches the stored levels only: entities without a level are the "no value" bucket. */
+interface RiskLevelMatch {
+  storedOnly?: boolean;
+}
+
+const matchesNoLevel = (values: readonly string[], { storedOnly }: RiskLevelMatch): boolean =>
+  !storedOnly && includesUnknown(values);
+
+const buildRiskLevelCondition = (values: readonly string[], match: RiskLevelMatch = {}): string =>
+  matchesNoLevel(values, match)
     ? `(${RISK_LEVEL_FIELD} IN (${toList(values)}) OR ${RISK_LEVEL_FIELD} IS NULL)`
     : `${RISK_LEVEL_FIELD} IN (${toList(values)})`;
 
 /** Plain field filters, not `COALESCE(…) IN (…)`: Lucene can only run filters on stored fields, not on computed values. */
-export const buildResolvedRiskLevelCondition = (values: readonly string[]): string =>
+export const buildResolvedRiskLevelCondition = (
+  values: readonly string[],
+  match: RiskLevelMatch = {}
+): string =>
   `(${RESOLUTION_RISK_LEVEL_FIELD} IN (${toList(
     values
-  )}) OR (${RESOLUTION_RISK_LEVEL_FIELD} IS NULL AND ${buildRiskLevelCondition(values)}))`;
+  )}) OR (${RESOLUTION_RISK_LEVEL_FIELD} IS NULL AND ${buildRiskLevelCondition(values, match)}))`;
 
 const SOURCE_FIELD = 'entity.source';
 const WATCHLISTS_FIELD = 'entity.attributes.watchlists';
@@ -97,7 +108,7 @@ export const buildGroupValueBucketExpression = (field: string, value: string | n
   if (field === RISK_LEVEL_FIELD) {
     return value == null
       ? `(${RESOLUTION_RISK_LEVEL_FIELD} IS NULL AND ${RISK_LEVEL_FIELD} IS NULL)`
-      : buildResolvedRiskLevelCondition([value]);
+      : buildResolvedRiskLevelCondition([value], { storedOnly: true });
   }
   return value == null ? `${field} IS NULL` : buildMvContainsExpression(field, [value]);
 };
@@ -123,11 +134,14 @@ export const buildEntityFiltersExpression = (
       : [`${field} IN (${toList(values)})`];
   }).join(' AND ');
 
-const buildRiskLevelQuery = (values: readonly string[]): QueryDslQueryContainer => ({
+const buildRiskLevelQuery = (
+  values: readonly string[],
+  match: RiskLevelMatch = {}
+): QueryDslQueryContainer => ({
   bool: {
     should: [
       { terms: { [RISK_LEVEL_FIELD]: [...values] } },
-      ...(includesUnknown(values)
+      ...(matchesNoLevel(values, match)
         ? [{ bool: { must_not: { exists: { field: RISK_LEVEL_FIELD } } } }]
         : []),
     ],
@@ -135,13 +149,16 @@ const buildRiskLevelQuery = (values: readonly string[]): QueryDslQueryContainer 
   },
 });
 
-const buildResolvedRiskLevelQuery = (values: readonly string[]): QueryDslQueryContainer => ({
+const buildResolvedRiskLevelQuery = (
+  values: readonly string[],
+  match: RiskLevelMatch = {}
+): QueryDslQueryContainer => ({
   bool: {
     should: [
       { terms: { [RESOLUTION_RISK_LEVEL_FIELD]: [...values] } },
       {
         bool: {
-          filter: [buildRiskLevelQuery(values)],
+          filter: [buildRiskLevelQuery(values, match)],
           must_not: [{ exists: { field: RESOLUTION_RISK_LEVEL_FIELD } }],
         },
       },
@@ -166,7 +183,7 @@ export const buildGroupValueBucketQuery = (
             ],
           },
         }
-      : buildResolvedRiskLevelQuery([value]);
+      : buildResolvedRiskLevelQuery([value], { storedOnly: true });
   }
   return value == null
     ? { bool: { must_not: { exists: { field } } } }
