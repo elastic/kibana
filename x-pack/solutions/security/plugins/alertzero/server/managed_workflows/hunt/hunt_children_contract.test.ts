@@ -248,12 +248,19 @@ describe('system-security-hunt-execute', () => {
   // step calling its own route -- see write_hunt_evidence.test.ts for the `deriveLastHuntStatus` /
   // script-shape coverage this test used to provide at the YAML level when it was still an
   // `elasticsearch.update` step.
-  it('only stamps the hunt-once gate once the coordinator confirms success', () => {
+  it('records the run once the coordinator has a result, whether or not it completed successfully', () => {
     const step = stepNamed(workflow, 'write_evidence');
-    expect(step.if).toBe(
-      '${{ steps.read_hunt_result.output.data.result.completed_successfully == true }}'
-    );
+    // A confirmed hit on a retryable run must still be written; the route decides what to stamp.
+    expect(step.if).toBe("${{ steps.read_hunt_result.output.data.state == 'completed' }}");
     expect(step.with?.path).toBe(`/s/{{ workflow.spaceId }}${WRITE_HUNT_EVIDENCE_URL}`);
+  });
+
+  it('sends the techniques the coordinator searched so the route can record them', () => {
+    const body = stepNamed(workflow, 'write_evidence').with?.body as Record<string, string>;
+
+    expect(body.searchedTechniqueIds).toBe(
+      '${{ steps.read_hunt_result.output.data.result.searched_technique_ids | compact }}'
+    );
   });
 
   it('writes the coordinator narrative as the hunt results message', () => {

@@ -46,11 +46,6 @@ import {
   type PendingTurn,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
-import {
-  selectRelevantSkills,
-  buildRecentContext,
-  type RelevantSkillSelection,
-} from './utils/relevant_skills/select_relevant_skills';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildResumeInitialization } from './utils/resume_initialization';
@@ -83,11 +78,7 @@ import { SubagentTracker } from './subagent_tracker';
 import type { StateUpdate } from './state';
 import {
   eventsForContext,
-  groupTimelineEntries,
-  isTimelineStandaloneEvent,
-  isTimelineRound,
   lastExecutionTerminal,
-  roundResponse,
   type ProcessedTimelineEvent,
 } from './utils/context_timeline';
 
@@ -275,6 +266,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     abortSignal,
     nextInput: processedConversation.nextInput,
     agentId,
+    runAs: context.runAs,
     conversationId: conversation?.id,
     conversationAccess,
     roundExecutionIndex,
@@ -324,30 +316,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   // Closed on every exit so a late background append is refused rather than queued for nothing.
   try {
-    const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
-      relevantSkillsEnabled && !pendingTurn
-        ? selectRelevantSkills({
-            skills: filteredSkills,
-            context: {
-              userMessage: processedConversation.nextInput.message,
-              recentContext: buildRecentContext(
-                groupTimelineEntries(processedConversation.timeline).flatMap((entry) => {
-                  // Standalone events carry no user input to match skills against.
-                  if (isTimelineStandaloneEvent(entry)) {
-                    return [];
-                  }
-                  return isTimelineRound(entry)
-                    ? [{ input: entry.userMessage.data, response: roundResponse(entry) }]
-                    : [{ input: entry.userMessage.data }];
-                })
-              ),
-            },
-            modelProvider,
-            logger,
-            abortSignal,
-          })
-        : undefined;
-
     const { staticTools, dynamicTools } = await selectTools({
       conversation: processedConversation,
       previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
@@ -432,9 +400,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
     processedConversation.subagentRosterFallback = subagentTracker.snapshot();
 
-    // On a resume the selection is already persisted as a `relevant_skills` step of the paused turn.
-    const relevantSkillsSelection = await relevantSkillsSelectionPromise;
-
     const imageResolver = createImageResolver({
       attachmentStateManager: context.attachmentStateManager,
       attachments,
@@ -509,7 +474,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         compactionSummary,
         previousRound,
         preExecutionWorkflow,
-        relevantSkillsSelection,
         initialTodos,
         initialAttachmentEvents: pendingTurn
           ? [
@@ -639,6 +603,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         request,
         abortSignal,
         agentId,
+        runAs: context.runAs,
         round,
         conversationId: conversation?.id,
         conversationAccess,
@@ -685,16 +650,14 @@ const getConversationState = ({
 };
 
 /**
- * The steps a fresh run starts with: workflow / relevant-skills bookkeeping, then the todos
+ * The steps a fresh run starts with: the workflow bookkeeping, then the todos
  * carried over from the previous round (the trailing singleton the first `todo_write` replaces).
  */
 const buildPreExecutionSteps = ({
   preExecutionWorkflow,
-  relevantSkillsSelection,
   initialTodos,
 }: {
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
-  relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
 }): ConversationRoundStep[] => {
   const carried = carriedOverTodos(initialTodos);
@@ -702,10 +665,7 @@ const buildPreExecutionSteps = ({
     carried !== undefined
       ? [{ type: ConversationRoundStepType.updateTodos, todos: carried, carried_over: true }]
       : [];
-  return [
-    ...createPreExecutionSteps({ preExecutionWorkflow, relevantSkillsSelection }),
-    ...carriedStep,
-  ];
+  return [...createPreExecutionSteps({ preExecutionWorkflow }), ...carriedStep];
 };
 
 const createInitializerCommand = ({
@@ -719,7 +679,6 @@ const createInitializerCommand = ({
   compactionSummary,
   previousRound,
   preExecutionWorkflow,
-  relevantSkillsSelection,
   initialTodos,
   initialAttachmentEvents,
 }: {
@@ -733,14 +692,12 @@ const createInitializerCommand = ({
   compactionSummary?: CompactionSummary;
   previousRound?: PreviousRoundInfo;
   preExecutionWorkflow?: PreExecutionWorkflowStepData;
-  relevantSkillsSelection?: RelevantSkillSelection;
   initialTodos?: TodoItem[];
   initialAttachmentEvents: AttachmentTimelineEvent[];
 }): Command => {
   if (!pendingTurn) {
     const preExecutionSteps = buildPreExecutionSteps({
       preExecutionWorkflow,
-      relevantSkillsSelection,
       initialTodos,
     });
     tracker.seed({ steps: preExecutionSteps, compactionSummary });

@@ -176,4 +176,71 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
       expectAskStepAccepted(askStep, winnerInput ?? firstInput);
     }
   );
+
+  spaceTest(
+    'rejects a step execution id that belongs to another execution',
+    async ({ apiServices }) => {
+      const { workflowsApi } = apiServices;
+      const workflow = await workflowsApi.create(HITL_WORKFLOW_YAML);
+      const [{ workflowExecutionId: executionA }, { workflowExecutionId: executionB }] =
+        await Promise.all([workflowsApi.run(workflow.id, {}), workflowsApi.run(workflow.id, {})]);
+
+      const [pausedA, pausedB] = await Promise.all(
+        [executionA, executionB].map((workflowExecutionId) =>
+          workflowsApi.waitForStatus({
+            workflowExecutionId,
+            status: ExecutionStatus.WAITING_FOR_INPUT,
+            timeout: WAITING_TIMEOUT,
+            // Step docs refresh separately from the execution doc, so wait for the step itself.
+            until: ({ stepExecutions }) => (findAskStep(stepExecutions)?.id ?? '').length > 0,
+          })
+        )
+      );
+      const stepA = findAskStep(pausedA.stepExecutions)?.id ?? '';
+      const stepB = findAskStep(pausedB.stepExecutions)?.id ?? '';
+      expectNonEmptyString(stepA);
+      expectNonEmptyString(stepB);
+
+      const crossResume = await workflowsApi.rawResume(
+        executionA,
+        { approved: true, source: 'cross-execution' },
+        { ignoreErrors: [409], stepExecutionId: stepB }
+      );
+      expect(crossResume.status).toBe(409);
+
+      const [resumeA, resumeB] = await Promise.all([
+        workflowsApi.rawResume(
+          executionA,
+          { approved: true, source: 'own-step-a' },
+          { stepExecutionId: stepA }
+        ),
+        workflowsApi.rawResume(
+          executionB,
+          { approved: false, source: 'own-step-b' },
+          { stepExecutionId: stepB }
+        ),
+      ]);
+      expect(resumeA.status).toBe(200);
+      expect(resumeB.status).toBe(200);
+
+      const [completedA, completedB] = await Promise.all(
+        [executionA, executionB].map((workflowExecutionId) =>
+          workflowsApi.waitForStatus({
+            workflowExecutionId,
+            status: ExecutionStatus.COMPLETED,
+            timeout: TERMINAL_TIMEOUT,
+            includeOutput: true,
+          })
+        )
+      );
+      expectAskStepAccepted(findAskStep(completedA.stepExecutions), {
+        approved: true,
+        source: 'own-step-a',
+      });
+      expectAskStepAccepted(findAskStep(completedB.stepExecutions), {
+        approved: false,
+        source: 'own-step-b',
+      });
+    }
+  );
 });

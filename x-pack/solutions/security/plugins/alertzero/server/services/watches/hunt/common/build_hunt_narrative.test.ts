@@ -358,6 +358,89 @@ describe('buildHuntNarrative', () => {
     expect(narrative).toContain('- nothing searched: D');
   });
 
+  it('says a retryable run with no hit leaves the report unmarked and eligible', () => {
+    const narrative = buildHuntNarrative(
+      result({ completeness: 'incomplete_retryable', completed_successfully: false }),
+      ctx
+    );
+
+    expect(narrative).toContain('the report is not marked as hunted, stays eligible');
+  });
+
+  it('says the hit of a retryable run stands, makes no eligibility claim and does not claim the write', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        tier1: hitTier1(),
+        has_confirmed_hit: true,
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('The confirmed hit stands');
+    expect(narrative).not.toContain('recorded on the report');
+    expect(narrative).not.toContain('stays eligible');
+  });
+
+  it('lists the techniques still to be searched when the run is retryable, and says they are continued', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        tier2: tier2([], {
+          incomplete: [
+            { reason: 'generation_budget', detail: 'over budget', technique_id: 'T1059' },
+            { reason: 'execute_failed', detail: 'failed', technique_id: 'T1105' },
+            { reason: 'collapsed', detail: 'shared', technique_id: 'T1566' },
+          ],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('**Still to be searched (2):** `T1059` and `T1105`.');
+    expect(narrative).toContain('while the report is still inside the sweep');
+    expect(narrative).toContain('techniques this run already searched are not repeated');
+    expect(narrative).not.toContain('`T1566`.');
+  });
+
+  it('does not promise a later search for a technique the run gave up on', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        pending_technique_ids: ['T1105'],
+        tier2: tier2([], {
+          incomplete: [
+            { reason: 'generation_budget', detail: 'not returned', technique_id: 'T1059' },
+            { reason: 'execute_failed', detail: 'failed', technique_id: 'T1105' },
+          ],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('**Still to be searched (1):** `T1105`.');
+    expect(narrative).not.toContain('`T1059`.');
+    // The gap itself is still reported.
+    expect(narrative).toContain('not returned');
+  });
+
+  it('lists nothing to continue on a run that is not retryable', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_final',
+        tier2: tier2([], {
+          incomplete: [{ reason: 'collapsed', detail: 'shared', technique_id: 'T1566' }],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).not.toContain('Still to be searched');
+  });
+
   it('carries the Tier 2 failure message when Tier 2 threw', () => {
     const narrative = buildHuntNarrative(
       result({
