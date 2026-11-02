@@ -1273,7 +1273,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         const size = safeOutputSize(ioPart.input) ?? 0;
         documents.push({ executionId: stepExecutionId, type: 'input', value: ioPart.input, size });
         if (this.state.getStepExecution(stepExecutionId)) {
-          this.state.updateStep(stepExecutionId, { inputSize: size });
+          this.state.updateStep(stepExecutionId, { id: stepExecutionId, inputSize: size });
         }
       }
       if ('output' in ioPart) {
@@ -1285,7 +1285,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
           size,
         });
         if (this.state.getStepExecution(stepExecutionId)) {
-          this.state.updateStep(stepExecutionId, { outputSize: size });
+          this.state.updateStep(stepExecutionId, { id: stepExecutionId, outputSize: size });
         }
       }
     }

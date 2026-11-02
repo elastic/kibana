@@ -477,7 +477,6 @@ describe('ExecutionsIoDataClient', () => {
             type: 'output',
             value: { done: true },
             size: 2,
-            '@timestamp': '',
           },
         ],
       });
