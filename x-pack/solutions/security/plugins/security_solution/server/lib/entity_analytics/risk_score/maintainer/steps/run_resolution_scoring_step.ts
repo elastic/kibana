@@ -17,6 +17,7 @@ import {
   calculateResolutionEntityScores,
 } from './score_resolution_entities';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import type { EntityStoreRefresh } from '../../persist_risk_scores_to_entity_store';
 import type { ResolutionStepResult } from './pipeline_types';
 import type { PageStepTimings } from '../instrumentation/page_timing_types';
 import type { ScopedLogger } from '../utils/with_log_context';
@@ -39,6 +40,8 @@ interface RunResolutionScoringParams {
   targetEntityIds?: string[];
   alertFilters: QueryDslQueryContainer[];
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** Entity store `refresh` for the per-page writes. Omit to wait, as single-entity runs do. */
+  entityStoreRefresh?: EntityStoreRefresh;
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
   /** Stage-owned collector shared across scoring and persistence, including failed pages. */
@@ -63,6 +66,7 @@ export const runResolutionScoringStep = async ({
   targetEntityIds,
   alertFilters,
   refresh,
+  entityStoreRefresh,
   collectScores,
   pageTimings,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
@@ -93,6 +97,7 @@ export const runResolutionScoringStep = async ({
         entityType,
         scores,
         enabled: idBasedRiskScoringEnabled,
+        refresh: entityStoreRefresh,
       })
     );
     scoresWrittenRiskIndex += docsWrittenRiskIndex;

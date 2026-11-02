@@ -12,8 +12,8 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 
 export interface UpdateActionPolicyParams {
+  id: string;
   data: UpdateActionPolicyData;
-  options: { id: string };
 }
 
 export interface CreateActionPolicyParams {
