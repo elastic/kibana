@@ -1,5 +1,19 @@
 {
   "operations": {
+    "addReaction": [
+      {
+        "method": "post",
+        "path": "/reactions.add",
+        "source": "web"
+      }
+    ],
+    "askQuestion": [
+      {
+        "method": "post",
+        "path": "/chat.postMessage",
+        "source": "web"
+      }
+    ],
     "createConversation": [
       {
         "method": "post",
@@ -31,6 +45,26 @@
       {
         "method": "get",
         "path": "/conversations.info",
+        "source": "web"
+      }
+    ],
+    "getConversationReplies": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "empty_string",
+          "request": {
+            "cursorParam": "cursor",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "hasMorePath": "has_more",
+            "itemsPath": "messages",
+            "nextPath": "response_metadata.next_cursor"
+          },
+          "style": "cursor"
+        },
+        "path": "/conversations.replies",
         "source": "web"
       }
     ],
@@ -176,6 +210,7 @@
         "source": "web"
       }
     ],
+    "uploadFile": [],
     "whoAmI": [
       {
         "method": "get",
@@ -187,7 +222,7 @@
   "sources": {
     "web": {
       "apiVersion": "1.7.0",
-      "fetchedAt": "2026-10-07T20:21:38.228Z",
+      "fetchedAt": "2026-11-02T13:53:51.007Z",
       "format": "swagger",
       "url": "https://raw.githubusercontent.com/slackapi/slack-api-specs/master/web-api/slack_web_openapi_v2.json"
     }
@@ -198,6 +233,13 @@
         "method": "post",
         "path": "/api/assistant.search.context",
         "reason": "Missing from Slack's published OpenAPI spec; documented at https://docs.slack.dev/reference/methods/assistant.search.context"
+      }
+    ],
+    "uploadFile": [
+      {
+        "method": "post",
+        "path": "/api/files.getUploadURLExternal",
+        "reason": "Missing from Slack's published OpenAPI spec, as is files.completeUploadExternal, the flow's last step, which recording doesn't reach; documented at https://docs.slack.dev/reference/methods/files.getUploadURLExternal"
       }
     ]
   }

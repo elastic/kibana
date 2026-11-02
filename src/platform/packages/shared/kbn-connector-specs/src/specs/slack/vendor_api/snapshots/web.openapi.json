@@ -3710,6 +3710,276 @@
         ]
       }
     },
+    "/conversations.replies": {
+      "get": {
+        "operationId": "conversations_replies",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ts",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "latest",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oldest",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "in": "query",
+            "name": "inclusive",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "has_more": {
+                      "type": "boolean"
+                    },
+                    "messages": {
+                      "items": {
+                        "items": [
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "last_read": {
+                                "$ref": "#/components/schemas/defs_ts"
+                              },
+                              "latest_reply": {
+                                "$ref": "#/components/schemas/defs_ts"
+                              },
+                              "reply_count": {
+                                "type": "integer"
+                              },
+                              "reply_users": {
+                                "items": {
+                                  "$ref": "#/components/schemas/defs_user_id"
+                                },
+                                "type": "array",
+                                "uniqueItems": true
+                              },
+                              "reply_users_count": {
+                                "type": "integer"
+                              },
+                              "source_team": {
+                                "$ref": "#/components/schemas/defs_team"
+                              },
+                              "subscribed": {
+                                "type": "boolean"
+                              },
+                              "team": {
+                                "$ref": "#/components/schemas/defs_team"
+                              },
+                              "text": {
+                                "type": "string"
+                              },
+                              "thread_ts": {
+                                "$ref": "#/components/schemas/defs_ts"
+                              },
+                              "ts": {
+                                "$ref": "#/components/schemas/defs_ts"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "unread_count": {
+                                "type": "integer"
+                              },
+                              "user": {
+                                "$ref": "#/components/schemas/defs_user_id"
+                              },
+                              "user_profile": {
+                                "$ref": "#/components/schemas/objs_user_profile_short"
+                              },
+                              "user_team": {
+                                "$ref": "#/components/schemas/defs_team"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "user",
+                              "text",
+                              "thread_ts",
+                              "reply_count",
+                              "subscribed",
+                              "ts"
+                            ],
+                            "type": "object"
+                          },
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "is_starred": {
+                                "type": "boolean"
+                              },
+                              "parent_user_id": {
+                                "$ref": "#/components/schemas/defs_user_id"
+                              },
+                              "source_team": {
+                                "$ref": "#/components/schemas/defs_team"
+                              },
+                              "team": {
+                                "$ref": "#/components/schemas/defs_team"
+                              },
+                              "text": {
+                                "type": "string"
+                              },
+                              "thread_ts": {
+                                "$ref": "#/components/schemas/defs_ts"
+                              },
+                              "ts": {
+                                "$ref": "#/components/schemas/defs_ts"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "user": {
+                                "$ref": "#/components/schemas/defs_user_id"
+                              },
+                              "user_profile": {
+                                "$ref": "#/components/schemas/objs_user_profile_short"
+                              },
+                              "user_team": {
+                                "$ref": "#/components/schemas/defs_team"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "user",
+                              "text",
+                              "thread_ts",
+                              "parent_user_id",
+                              "ts"
+                            ],
+                            "type": "object"
+                          }
+                        ]
+                      },
+                      "type": "array"
+                    },
+                    "ok": {
+                      "$ref": "#/components/schemas/defs_ok_true"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "messages"
+                  ],
+                  "title": "conversations.replies success schema",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "callstack": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "enum": [
+                        "missing_scope",
+                        "channel_not_found",
+                        "thread_not_found",
+                        "not_authed",
+                        "invalid_auth",
+                        "account_inactive",
+                        "invalid_arg_name",
+                        "invalid_array_arg",
+                        "invalid_charset",
+                        "invalid_form_data",
+                        "invalid_post_type",
+                        "missing_post_type",
+                        "team_added_to_org",
+                        "invalid_json",
+                        "json_not_object",
+                        "request_timeout",
+                        "upgrade_required"
+                      ],
+                      "type": "string"
+                    },
+                    "needed": {
+                      "type": "string"
+                    },
+                    "ok": {
+                      "$ref": "#/components/schemas/defs_ok_false"
+                    },
+                    "provided": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error"
+                  ],
+                  "title": "conversations.replies error schema",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "slackAuth": [
+              "channels:history",
+              "groups:history",
+              "im:history",
+              "mpim:history"
+            ]
+          }
+        ]
+      }
+    },
     "/files.info": {
       "get": {
         "operationId": "files_info",
@@ -4005,6 +4275,125 @@
           {
             "slackAuth": [
               "files:read"
+            ]
+          }
+        ]
+      }
+    },
+    "/reactions.add": {
+      "post": {
+        "operationId": "reactions_add",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "channel": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "timestamp": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "channel",
+                  "name",
+                  "timestamp"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "ok": {
+                      "$ref": "#/components/schemas/defs_ok_true"
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ],
+                  "title": "reactions.add schema",
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "callstack": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "enum": [
+                        "bad_timestamp",
+                        "message_not_found",
+                        "no_item_specified",
+                        "invalid_name",
+                        "already_reacted",
+                        "too_many_emoji",
+                        "too_many_reactions",
+                        "not_authed",
+                        "invalid_auth",
+                        "account_inactive",
+                        "no_permission",
+                        "invalid_arg_name",
+                        "invalid_array_arg",
+                        "invalid_charset",
+                        "invalid_form_data",
+                        "invalid_post_type",
+                        "missing_post_type",
+                        "team_added_to_org",
+                        "invalid_json",
+                        "json_not_object",
+                        "request_timeout",
+                        "upgrade_required"
+                      ],
+                      "type": "string"
+                    },
+                    "ok": {
+                      "$ref": "#/components/schemas/defs_ok_false"
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "error"
+                  ],
+                  "title": "reactions.add error schema",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "slackAuth": [
+              "reactions:write"
             ]
           }
         ]

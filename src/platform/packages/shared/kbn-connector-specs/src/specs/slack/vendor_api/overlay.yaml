@@ -18,6 +18,10 @@ actions:
     description: *bearer
     update:
       required: false
+  - target: $.paths['/reactions.add'].post.parameters[?@.name == 'token']
+    description: *bearer
+    update:
+      required: false
   - target: $.paths['/users.lookupByEmail'].get.parameters[?@.name == 'token']
     description: >-
       https://docs.slack.dev/apis/web-api/#authentication says tokens go in the Authorization HTTP
@@ -85,3 +89,36 @@ actions:
               type: string
             text:
               type: string
+  - target: $.paths['/reactions.add'].post.requestBody.content
+    description: *json
+    update:
+      application/json:
+        schema:
+          type: object
+          required: [channel, name, timestamp]
+          properties:
+            channel:
+              type: string
+            name:
+              type: string
+            timestamp:
+              type: string
+
+  - target: $.paths['/conversations.replies'].get.parameters[?@.name == 'ts']
+    description: &timestamp >-
+      https://docs.slack.dev/reference/methods/conversations.replies types `ts`, `latest` and
+      `oldest` as strings, and message timestamps such as "1482960137.003543" are strings in its
+      responses; the spec types them as numbers.
+    update:
+      schema:
+        type: string
+  - target: $.paths['/conversations.replies'].get.parameters[?@.name == 'latest']
+    description: *timestamp
+    update:
+      schema:
+        type: string
+  - target: $.paths['/conversations.replies'].get.parameters[?@.name == 'oldest']
+    description: *timestamp
+    update:
+      schema:
+        type: string
