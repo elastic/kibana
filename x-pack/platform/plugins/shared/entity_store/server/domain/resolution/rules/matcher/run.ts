@@ -157,7 +157,6 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
   // means no group can have a new member. An unresolved one is already known
   // from the watermark query, so only its absence needs the extra check.
   const nothingNew =
-    useCandidateValues &&
     state.lastProcessedTimestamp !== null &&
     maxTimestamp === null &&
     !(await hasNewerEntity(esClient, index, spec, state.lastProcessedTimestamp, signal));

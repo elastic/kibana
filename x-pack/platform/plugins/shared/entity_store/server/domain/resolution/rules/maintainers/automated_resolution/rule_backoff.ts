@@ -33,6 +33,18 @@ export const pickRuleFailure = (state: PerRuleState): Partial<PerRuleState> => (
   ...(typeof state.lastFailedAt === 'string' && { lastFailedAt: state.lastFailedAt }),
 });
 
+/** A rule state after a successful run: the failure streak and last error are cleared. */
+export const clearRuleFailure = (state: PerRuleState): PerRuleState => {
+  const {
+    consecutiveFailures: _consecutiveFailures,
+    nextAttemptAt: _nextAttemptAt,
+    lastFailedAt: _lastFailedAt,
+    lastError: _lastError,
+    ...cleared
+  } = state;
+  return cleared;
+};
+
 /** The time a backing-off rule may run again, or `undefined` when it may run now. */
 export const getBackoffUntil = (
   state: PerRuleState | undefined,

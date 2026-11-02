@@ -405,6 +405,40 @@ describe('automatedResolutionMaintainerConfig', () => {
     expect(runRelatedUserAliasResolution).toHaveBeenCalledTimes(1);
   });
 
+  it('clears the failure streak after related_user succeeds', async () => {
+    const enabled = DEFAULT_EFFECTIVE_RULES.map((rule) =>
+      rule.id === ALIAS_RESOLUTION_RULE ? { ...rule, enabled: true } : rule
+    );
+    (runRelatedUserAliasResolution as jest.Mock).mockImplementationOnce(async ({ state }) => ({
+      ...state,
+      lastRun: null,
+    }));
+
+    const result = await runConfig(
+      createEsClient(),
+      {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          [ALIAS_RESOLUTION_RULE]: {
+            lastProcessedTimestamp: null,
+            lastRun: null,
+            lastError: 'boom',
+            lastFailedAt: '2026-10-01T00:00:00.000Z',
+            consecutiveFailures: 3,
+            nextAttemptAt: '2026-10-01T01:00:00.000Z',
+          },
+        },
+      },
+      enabled
+    );
+
+    expect(runRelatedUserAliasResolution).toHaveBeenCalledTimes(1);
+    expect(result.rules[ALIAS_RESOLUTION_RULE]).toEqual({
+      lastProcessedTimestamp: null,
+      lastRun: null,
+    });
+  });
+
   describe('custom rules', () => {
     const customRule = {
       id: 'rule-1',

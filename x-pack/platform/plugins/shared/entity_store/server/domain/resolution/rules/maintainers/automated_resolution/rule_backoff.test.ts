@@ -6,6 +6,7 @@
  */
 
 import {
+  clearRuleFailure,
   getBackoffUntil,
   getConsecutiveFailures,
   getRuleBackoffDelayMs,
@@ -18,6 +19,19 @@ const MINUTE = 60_000;
 const NOW = Date.parse('2026-10-29T12:00:00Z');
 
 describe('rule backoff', () => {
+  it('clears the failure fields and keeps the rest of the state', () => {
+    const failed = withRuleFailure(
+      { ...EMPTY_RULE_STATE, lastProcessedTimestamp: '2026-10-01T00:00:00Z' },
+      'boom',
+      NOW
+    );
+
+    expect(clearRuleFailure(failed)).toEqual({
+      lastProcessedTimestamp: '2026-10-01T00:00:00Z',
+      lastRun: null,
+    });
+  });
+
   it('doubles from 5 minutes per failure in a row and caps at 6 hours', () => {
     expect([1, 2, 3, 4, 5, 6, 7, 8, 20].map((n) => getRuleBackoffDelayMs(n) / MINUTE)).toEqual([
       5, 10, 20, 40, 80, 160, 320, 360, 360,

@@ -226,14 +226,8 @@ describe('runEsqlMatcherRule', () => {
     expect(result.lastProcessedTimestamp).toBe('2026-08-01T00:00:00Z');
   });
 
-  it('scans a custom rule with the single group query, without a candidate step', async () => {
-    const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
-    const esqlQuery = mockEsClient.esql.query as jest.Mock;
-    esqlQuery
-      .mockResolvedValueOnce(watermarkResponse(null))
-      .mockResolvedValueOnce(esqlResponse(GROUP_COLUMNS, []));
-
-    await runEsqlMatcherRule(
+  describe('custom rule', () => {
+    const customDeps = (state: PerRuleState) =>
       createDeps(state, mockEsClient, mockResolutionClient, {
         spec: {
           namespaces: ['okta'],
@@ -241,11 +235,83 @@ describe('runEsqlMatcherRule', () => {
           declineSameNamespaceDuplicates: true,
         },
         ruleId: 'custom:email',
-      })
+      });
+
+    it('scans with the single group query, without a candidate step', async () => {
+      const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
+      const esqlQuery = mockEsClient.esql.query as jest.Mock;
+      esqlQuery
+        .mockResolvedValueOnce(watermarkResponse(WATERMARK))
+        .mockResolvedValueOnce(esqlResponse(GROUP_COLUMNS, []));
+
+      await runEsqlMatcherRule(customDeps(state));
+
+      expect(esqlQuery).toHaveBeenCalledTimes(2);
+      expect(esqlQuery.mock.calls[1][0].query).not.toContain('match_value IN');
+    });
+
+    it('skips the scan when nothing is newer than the watermark', async () => {
+      const state = createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' });
+      const esqlQuery = mockEsClient.esql.query as jest.Mock;
+      esqlQuery
+        .mockResolvedValueOnce(watermarkResponse(null))
+        .mockResolvedValueOnce(esqlResponse([MATCH_GROUP_COLUMNS.matchValue], []));
+
+      const result = await runEsqlMatcherRule(customDeps(state));
+
+      expect(esqlQuery).toHaveBeenCalledTimes(2);
+      expect(result.lastProcessedTimestamp).toBe('2026-08-01T00:00:00Z');
+    });
+  });
+
+  it('pages on the last candidate even when a full candidate page yields few groups', async () => {
+    const esqlQuery = mockEsClient.esql.query as jest.Mock;
+    const groupB = matchGroup({
+      matchValue: 'b@corp.com',
+      members: [
+        ['user-b1', 'okta'],
+        ['user-b2', 'entra_id'],
+      ],
+    });
+    const groupC = matchGroup({
+      matchValue: 'c@corp.com',
+      members: [
+        ['user-c1', 'okta'],
+        ['user-c2', 'entra_id'],
+      ],
+    });
+    esqlQuery
+      .mockResolvedValueOnce(watermarkResponse(WATERMARK))
+      // A full page of two candidates, only one of which forms a group.
+      .mockResolvedValueOnce(
+        esqlResponse([MATCH_GROUP_COLUMNS.matchValue], [['a@corp.com'], ['b@corp.com']])
+      )
+      .mockResolvedValueOnce(esqlResponse(GROUP_COLUMNS, [groupB.row]))
+      .mockResolvedValueOnce(candidatesResponse([groupC]))
+      .mockResolvedValueOnce(esqlResponse(GROUP_COLUMNS, [groupC.row]));
+    const entities = [...groupB.entities, ...groupC.entities];
+    (mockEsClient.search as jest.Mock).mockImplementation(async ({ query }) => {
+      const ids: string[] = query.bool.filter[0].terms['entity.id'];
+      return {
+        hits: {
+          hits: entities.filter(([id]) => ids.includes(id)).map((entity) => entityHit(...entity)),
+        },
+      };
+    });
+
+    await runEsqlMatcherRule(
+      createDeps(
+        createInitialState({ lastProcessedTimestamp: '2026-08-01T00:00:00Z' }),
+        mockEsClient,
+        mockResolutionClient,
+        {
+          pageSize: 2,
+        }
+      )
     );
 
-    expect(esqlQuery).toHaveBeenCalledTimes(2);
-    expect(esqlQuery.mock.calls[1][0].query).not.toContain('match_value IN');
+    expect(esqlQuery.mock.calls[3][0].query).toContain('match_value > "b@corp.com"');
+    expect(mockCascadeLink).toHaveBeenCalledTimes(2);
   });
 
   it('still scans for candidates on a first run when no unresolved entity is found', async () => {

@@ -21,7 +21,12 @@ import { RESOLUTION_RULE_CONFIGS } from '../..';
 import { runEsqlMatcherRule } from '../../matcher';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
 import { CUSTOM_RULES_DEADLINE_MARGIN_MS, runCustomResolutionRules } from './custom_rules';
-import { getBackoffUntil, getConsecutiveFailures, withRuleFailure } from './rule_backoff';
+import {
+  clearRuleFailure,
+  getBackoffUntil,
+  getConsecutiveFailures,
+  withRuleFailure,
+} from './rule_backoff';
 
 export const MAINTAINER_ID = 'automated-resolution';
 
@@ -109,15 +114,17 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             index,
           });
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
-          ruleStates[ruleConfig.id] = await runRelatedUserAliasResolution({
-            state: ruleState,
-            esClient,
-            logger,
-            resolutionClient,
-            signal,
-            telemetry,
-            index,
-          });
+          ruleStates[ruleConfig.id] = clearRuleFailure(
+            await runRelatedUserAliasResolution({
+              state: ruleState,
+              esClient,
+              logger,
+              resolutionClient,
+              signal,
+              telemetry,
+              index,
+            })
+          );
         } else {
           logger.warn(
             `Skipping resolution rule '${ruleConfig.id}': no matcher spec and unrecognized kind '${ruleConfig.kind}'`
