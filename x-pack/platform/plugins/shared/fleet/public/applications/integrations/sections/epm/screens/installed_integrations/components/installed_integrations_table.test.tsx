@@ -268,7 +268,9 @@ describe('InstalledIntegrationsTable', () => {
 
     it('shows the Collection badge for a package of the AWS flow without instances', () => {
       renderComponent([{ ...basePackage, name: 'aws' }], { isOnboardingEnabled: true });
-      expect(screen.getByTestId('installedIntegrationsTable.collectionBadge.aws')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('installedIntegrationsTable.collectionBadge.aws')
+      ).toBeInTheDocument();
     });
 
     it('shows no Collection badge for a package of the AWS flow when onboarding is off', () => {
