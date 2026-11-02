@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const ALL_VALUE = '*';
-
-export const SLO_GROUPINGS_PREFIX = 'slo.groupings.';
+export { ALL_VALUE, SLO_GROUPINGS_PREFIX, SLO_STATUS } from '@kbn/slo-constants';

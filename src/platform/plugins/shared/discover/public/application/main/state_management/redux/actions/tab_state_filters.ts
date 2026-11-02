@@ -8,8 +8,8 @@
  */
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { AggregateQuery } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery, Filter } from '@kbn/es-query';
+import { buildExistsFilter, buildPhrasesFilter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   appendFilteringWhereClauseForCascadeLayout,
@@ -20,7 +20,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { popularizeField } from '@kbn/unified-data-table';
 import type { TabState } from '../types';
 import type { DiscoverServices } from '../../../../../build_services';
-import { selectTabRuntimeState } from '../runtime_state';
+import { getTabDataView, selectTabRuntimeState } from '../runtime_state';
 import { isCascadedDocumentsVisible } from '../../../components/layout/cascaded_documents';
 import type { InternalStateThunkActionCreator, TabActionPayload } from '../internal_state';
 import { selectTab } from '../selectors';
@@ -42,6 +42,38 @@ const getEsqlFilterOperator = (fieldName: string, values: unknown, operation: '+
 };
 
 type DocViewFieldParam = NonNullable<Parameters<DocViewFilterFn>[0]>;
+
+const isPhraseFilterValue = (value: unknown): value is string | number | boolean =>
+  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
+
+// "Other" is everything except the displayed top values
+const generateOtherBucketFilters = ({
+  field,
+  value,
+  mode,
+  dataView,
+}: {
+  field: DocViewFieldParam;
+  value: Parameters<DocViewFilterFn>[1];
+  mode: Parameters<DocViewFilterFn>[2];
+  dataView: DataView;
+}): Filter[] => {
+  const terms = Array.isArray(value) ? value.filter(isPhraseFilterValue) : [];
+
+  if (typeof field === 'string' || !terms.length) {
+    return [];
+  }
+
+  const phrasesFilter = buildPhrasesFilter(field, terms, dataView);
+
+  if (mode === '-') {
+    return [phrasesFilter];
+  }
+
+  phrasesFilter.meta.negate = true;
+
+  return [phrasesFilter, buildExistsFilter(field, dataView)];
+};
 
 const addEsqlFilter = ({
   services,
@@ -116,6 +148,7 @@ const addClassicFilter = ({
   fieldName,
   value,
   mode,
+  otherBucket,
 }: {
   services: DiscoverServices;
   tabRuntimeState: ReturnType<typeof selectTabRuntimeState>;
@@ -124,8 +157,15 @@ const addClassicFilter = ({
   fieldName: string;
   value: Parameters<DocViewFilterFn>[1];
   mode: Parameters<DocViewFilterFn>[2];
+  otherBucket?: boolean;
 }) => {
-  const newFilters = generateFilters(services.filterManager, field, value, mode, dataView);
+  const newFilters = otherBucket
+    ? generateOtherBucketFilters({ field, value, mode, dataView })
+    : generateFilters(services.filterManager, field, value, mode, dataView);
+
+  if (!newFilters.length) {
+    return;
+  }
 
   void popularizeField(dataView, fieldName, services.dataViews, services.capabilities);
   services.filterManager.addFilters(newFilters);
@@ -147,9 +187,13 @@ export const addFilter: InternalStateThunkActionCreator<
       field: Parameters<DocViewFilterFn>[0];
       value: Parameters<DocViewFilterFn>[1];
       mode: Parameters<DocViewFilterFn>[2];
+      /**
+       * Filter on the "Other" bucket; `value` holds the displayed top values
+       */
+      otherBucket?: boolean;
     }>
   ]
-> = ({ tabId, field, value, mode }) =>
+> = ({ tabId, field, value, mode, otherBucket }) =>
   function addFilterThunkFn(_, getState, { runtimeStateManager, services }) {
     if (field == null) {
       return;
@@ -159,7 +203,7 @@ export const addFilter: InternalStateThunkActionCreator<
     const { query } = tabState.appState;
 
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const dataView = tabRuntimeState.currentDataView$.getValue();
+    const dataView = getTabDataView(tabRuntimeState);
     if (!dataView) {
       return;
     }
@@ -167,6 +211,11 @@ export const addFilter: InternalStateThunkActionCreator<
     const fieldName = typeof field === 'string' ? field : field.name;
 
     if (isOfAggregateQueryType(query)) {
+      if (otherBucket) {
+        // field stats are not available for ES|QL
+        return;
+      }
+
       addEsqlFilter({
         services,
         tabRuntimeState,
@@ -187,6 +236,7 @@ export const addFilter: InternalStateThunkActionCreator<
         fieldName,
         value,
         mode,
+        otherBucket,
       });
     }
   };

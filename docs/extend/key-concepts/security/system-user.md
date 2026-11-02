@@ -18,9 +18,9 @@ Consider these guidelines when reviewing changes to the `kibana_system` role des
 
 - System indices are managed entirely by the stack, and should never be accessed by end users.
 - Hidden indices are _typically_ managed by the stack, but _may_ be accessed by end users.
-- Data indices are those which an end user could conceivably create on their own. As a general rule, users can create indices of any pattern so long as it does not begin with a \``.`\` (dot). Users can also create hidden indices, so it is important that documentation exists for any stack-managed hidden indices to reduce the chance of conflict with user-managed indices.
+- Data indices are those which an end user could conceivably create on their own. As a general rule, users can create indices of any pattern so long as it does not begin with a `.` (dot). Users can also create hidden indices, so it is important that documentation exists for any stack-managed hidden indices to reduce the chance of conflict with user-managed indices.
 
-Therefore, Kibana should not have access to non-system indices which do not begin with a \``.`\` (dot).
+Therefore, Kibana should not have access to non-system indices which do not begin with a `.` (dot).
 
 Kibana should also not have the ability to modify system/hidden indices for which it is not the owner.
 

@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ToolbarSelector } from '@kbn/shared-ux-toolbar-selector';
+import { i18n } from '@kbn/i18n';
 import type { MetricsSort } from '../../types';
 import { useSortSelector } from './hooks/use_sort_selector';
 import { SortDirectionToggle } from './sort_selector_helpers';
@@ -24,16 +25,19 @@ interface SortSelectorProps {
 export const SortSelector = ({ sort, onChange, fullWidth = false }: SortSelectorProps) => {
   const { options, buttonLabel, selectedValue, handleSortByChange, handleDirectionChange } =
     useSortSelector({ sort, onChange });
-  const [, direction] = sort;
+  const { sortDirection: direction } = sort;
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={fullWidth}>
         <ToolbarSelector
           data-test-subj="metricsExperienceSortSelector"
           data-selected-value={selectedValue}
           searchable={false}
           buttonLabel={buttonLabel}
+          popoverTitle={i18n.translate('metricsExperience.sortSelector.popoverTitle', {
+            defaultMessage: 'Select sort',
+          })}
           options={options}
           singleSelection
           onChange={handleSortByChange}

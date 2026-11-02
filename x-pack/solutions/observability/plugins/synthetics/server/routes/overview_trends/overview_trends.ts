@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ObjectType } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import {
+  MAX_MONITOR_BATCH_SIZE,
+  MAX_ROUTE_ID_LENGTH,
+  MAX_ROUTE_STRING_LENGTH,
+  routeId,
+} from '../zod_query';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';
 import type { TrendsQuery } from './fetch_trends';
@@ -58,14 +63,15 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   writeAccess: false,
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
-    body: schema.arrayOf(
-      schema.object({
-        configId: schema.string(),
-        locationIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
-        schedule: schema.string(),
-      }),
-      { maxSize: 500 }
-    ) as unknown as ObjectType,
+    body: z
+      .array(
+        z.strictObject({
+          configId: routeId,
+          locationIds: z.array(z.string().max(MAX_ROUTE_ID_LENGTH)).max(100),
+          schedule: z.string().max(MAX_ROUTE_STRING_LENGTH),
+        })
+      )
+      .max(MAX_MONITOR_BATCH_SIZE),
   },
   handler: async (routeContext): Promise<TrendTable> => {
     const esClient = routeContext.syntheticsEsClient;

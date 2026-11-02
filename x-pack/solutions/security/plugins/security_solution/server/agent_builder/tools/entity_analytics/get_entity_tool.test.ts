@@ -26,7 +26,8 @@ import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
-import { buildRenderAttachmentTag, buildSingleEntityAttachmentId } from './entity_attachment_utils';
+import { buildRenderAttachmentTag } from './attachment_utils';
+import { buildSingleEntityAttachmentId } from './entity_attachment_utils';
 import { getEntityTool, SECURITY_GET_ENTITY_TOOL_ID } from './get_entity_tool';
 import { fetchRiskScoreGrounding } from './risk_score_grounding';
 import type { SharedServices } from '@kbn/ml-plugin/server/shared_services';
@@ -907,7 +908,7 @@ describe('getEntityTool', () => {
         );
       });
 
-      it('reports success=true and resultCount=0 when no entity is found', async () => {
+      it('reports success=false and resultCount=0 when no entity is found', async () => {
         (executeEsql as jest.Mock)
           .mockResolvedValueOnce({ columns: [], values: [] })
           .mockResolvedValueOnce({ columns: [], values: [] })
@@ -926,9 +927,9 @@ describe('getEntityTool', () => {
             actionType: 'read',
             entityTypes: ['host'],
             spaceId: 'default',
-            success: true,
+            success: false,
             resultCount: 0,
-            errorMessage: undefined,
+            errorMessage: 'No entity found for id: host:server1',
             userConfirmationOutcome: undefined,
           }
         );

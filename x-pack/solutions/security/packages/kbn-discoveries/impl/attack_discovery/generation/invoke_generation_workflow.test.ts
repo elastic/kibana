@@ -208,7 +208,7 @@ describe('invokeGenerationWorkflow', () => {
       expect(mockWorkflowsManagementApi.getWorkflowExecution).toHaveBeenCalledWith(
         'workflow-run-id',
         'default',
-        { includeOutput: true }
+        { includeOutput: true, request: mockRequest }
       );
     });
 
@@ -1075,7 +1075,9 @@ describe('invokeGenerationWorkflow', () => {
       };
 
       // Verify the API would return non-terminal status
-      const execution = await timeoutApi.getWorkflowExecution('test', 'default');
+      const execution = await timeoutApi.getWorkflowExecution('test', 'default', {
+        request: mockRequest,
+      });
 
       expect(execution?.status).toBe('pending');
 

@@ -150,7 +150,7 @@ describe('UploadFileModal', () => {
     await userEvent.click(await screen.findByTestId('testOnDone'));
 
     await waitFor(() =>
-      expect(createAttachmentsMock).toBeCalledWith({
+      expect(createAttachmentsMock).toHaveBeenCalledWith({
         caseId: 'foobar',
         caseOwner: mockedTestProvidersOwner[0],
         attachments: [

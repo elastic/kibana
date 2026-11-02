@@ -9,13 +9,6 @@
 
 import type { MenuItem } from '../../types';
 
-export const LOGO = {
-  href: '/security',
-  id: 'security',
-  label: 'Security',
-  iconType: 'logoSecurity',
-};
-
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'discover',
@@ -626,7 +619,6 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
 ];
 
 export const securityMock = {
-  logo: LOGO,
   navItems: {
     primaryItems: PRIMARY_MENU_ITEMS,
     overflowItems: [],

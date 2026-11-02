@@ -17,9 +17,7 @@ export const ROOT_STREAM_ID = '__ROOT__';
 /**
  * Content packs bundle portable stream configuration only (routing, mappings,
  * processing, lifecycle). Significant-event queries are intentionally not part of
- * content packs; they are managed exclusively through the dedicated significant-event
- * `/api/streams/{name}/queries` endpoints. This type therefore matches the wired
- * stream upsert shape exactly.
+ * content packs. This type therefore matches the wired stream upsert shape exactly.
  */
 export type ContentPackStreamRequest = Streams.WiredStream.UpsertRequest;
 

@@ -145,7 +145,7 @@ describe('createEntityAttachmentDefinition', () => {
 
       expect(buttons).toHaveLength(1);
       expect(buttons[0].label).toBe('Open in Entity Analytics');
-      expect(buttons[0].icon).toBe('popout');
+      expect(buttons[0].icon).toBe('external');
       expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
 
       buttons[0].handler();

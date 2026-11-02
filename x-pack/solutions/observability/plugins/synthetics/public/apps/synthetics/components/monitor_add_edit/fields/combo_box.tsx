@@ -22,6 +22,8 @@ export interface FormattedComboBoxProps {
   // Opt-in copy button; the combo box steals focus on click, so pills can't be
   // drag-selected/copied. Only meaningful for tag-like fields.
   enableCopy?: boolean;
+  options?: Array<EuiComboBoxOptionOption<string>>;
+  isLoading?: boolean;
 }
 
 export const FormattedComboBox = ({
@@ -29,6 +31,7 @@ export const FormattedComboBox = ({
   onBlur,
   selectedOptions,
   enableCopy = false,
+  options,
   ...props
 }: FormattedComboBoxProps) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
@@ -37,9 +40,9 @@ export const FormattedComboBox = ({
   const [isInvalid, setInvalid] = useState(false);
 
   const onOptionsChange = useCallback(
-    (options: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedOptions(options);
-      const formattedTags = options.map((option) => option.label);
+    (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedOptions(newOptions);
+      const formattedTags = newOptions.map((option) => option.label);
       onChange(formattedTags);
       setInvalid(false);
     },
@@ -80,7 +83,8 @@ export const FormattedComboBox = ({
   const comboBox = (
     <EuiComboBox<string>
       data-test-subj="syntheticsFleetComboBox"
-      noSuggestions
+      noSuggestions={!options?.length}
+      options={options}
       selectedOptions={formattedSelectedOptions}
       onCreateOption={onCreateOption}
       onChange={onOptionsChange}
@@ -97,27 +101,29 @@ export const FormattedComboBox = ({
   }
 
   const tagsToCopy = formattedSelectedOptions.map((option) => option.label).join('\n');
+  const copyTags = i18n.translate('xpack.synthetics.comboBox.copyTagsAriaLabel', {
+    defaultMessage: 'Copy tags',
+  });
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
       <EuiFlexItem>{comboBox}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiCopy textToCopy={tagsToCopy}>
+        <EuiCopy
+          textToCopy={tagsToCopy}
+          beforeMessage={copyTags}
+          tooltipProps={{ disableScreenReaderOutput: true }}
+        >
           {(copy) => (
             <EuiButtonIcon
-              iconType="copyClipboard"
+              iconType="copy"
               display="base"
               size="m"
               color="text"
               onClick={copy}
               isDisabled={formattedSelectedOptions.length === 0}
               data-test-subj="syntheticsFleetComboBoxCopyButton"
-              aria-label={i18n.translate('xpack.synthetics.comboBox.copyTagsAriaLabel', {
-                defaultMessage: 'Copy tags',
-              })}
-              title={i18n.translate('xpack.synthetics.comboBox.copyTagsTitle', {
-                defaultMessage: 'Copy tags',
-              })}
+              aria-label={copyTags}
             />
           )}
         </EuiCopy>

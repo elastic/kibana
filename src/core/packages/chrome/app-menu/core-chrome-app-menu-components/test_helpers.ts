@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// RTL interaction helpers (depend on @testing-library), so they live in this test-only entry.
-export { openAppMenuOverflow } from './src/test_helpers';
+/** @deprecated Import from `@kbn/app-menu/test_helpers` instead. */
+export { openAppMenuOverflow } from '@kbn/app-menu/test_helpers';

@@ -70,6 +70,8 @@ export type SingleMetricViewerPropsWithDeps = SingleMetricViewerProps & {
 
 export interface SingleMetricViewerProps {
   shouldShowForecastButton?: boolean;
+  isInteractive?: boolean;
+
   bounds?: TimeRangeBounds;
   forecastId?: string;
   selectedEntities?: MlEntity;
@@ -114,6 +116,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   selectedEntities,
   selectedJobId,
   shouldShowForecastButton,
+  isInteractive = true,
   uuid,
   isRenderComplete,
   wrapperRef,
@@ -273,9 +276,6 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
             }
           }}
           css={[timeseriesExplorerStyles, annotationStyles]}
-          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
-          data-rendering-count={1}
-          data-render-complete={isRenderComplete ?? false}
         >
           <KibanaRenderContextProvider {...startServices}>
             <KibanaContextProvider
@@ -317,6 +317,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       onRenderComplete={onRenderComplete}
                       onForecastComplete={onForecastComplete}
                       shouldShowForecastButton={shouldShowForecastButton}
+                      isInteractive={isInteractive}
                     />
                   )}
               </DatePickerContextProvider>

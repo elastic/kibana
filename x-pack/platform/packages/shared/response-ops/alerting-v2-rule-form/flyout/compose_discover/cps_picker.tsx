@@ -6,18 +6,10 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ProjectPickerContent, useFetchProjects } from '@kbn/cps-utils';
+import { ProjectPickerContent } from '@kbn/cps-utils';
 import type { ProjectRouting } from '@kbn/es-query';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 
@@ -43,7 +35,6 @@ export const CpsPicker = () => {
     (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
     [cpsManager]
   );
-  const cpsProjects = useFetchProjects(fetchCpsProjects, cpsDefaultRouting);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -52,52 +43,51 @@ export const CpsPicker = () => {
   }
 
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPopover
-        button={
-          <EuiToolTip title={CPS_BUTTON_ARIA_LABEL} content={CPS_DESCRIPTION}>
-            <EuiButton
-              color="text"
-              aria-label={CPS_BUTTON_ARIA_LABEL}
-              onClick={() => setIsOpen((open) => !open)}
-              size="s"
-              data-test-subj="querySandboxCpsPicker"
-              minWidth={0}
-            >
-              <EuiIcon type="crossProjectSearch" aria-hidden={true} />
-            </EuiButton>
-          </EuiToolTip>
-        }
-        isOpen={isOpen}
-        closePopover={() => setIsOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        ownFocus
-        aria-label={i18n.translate(
-          'xpack.alertingV2.composeDiscover.querySandbox.cpsPickerPopoverAriaLabel',
-          { defaultMessage: 'CPS settings' }
-        )}
-      >
-        <EuiPopoverTitle paddingSize="s">
-          <FormattedMessage
-            id="xpack.alertingV2.composeDiscover.querySandbox.cpsPickerTitle"
-            defaultMessage="Default CPS project routing settings from your space"
-          />
-          <EuiText size="xs" color="subdued">
+    <EuiPopover
+      button={
+        <EuiToolTip title={CPS_BUTTON_ARIA_LABEL} content={CPS_DESCRIPTION}>
+          <EuiButton
+            color="text"
+            aria-label={CPS_BUTTON_ARIA_LABEL}
+            onClick={() => setIsOpen((open) => !open)}
+            size="s"
+            data-test-subj="querySandboxCpsPicker"
+            minWidth={0}
+          >
+            <EuiIcon type="crossProjectSearch" aria-hidden={true} />
+          </EuiButton>
+        </EuiToolTip>
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      ownFocus
+      aria-label={i18n.translate(
+        'xpack.alertingV2.composeDiscover.querySandbox.cpsPickerPopoverAriaLabel',
+        { defaultMessage: 'CPS settings' }
+      )}
+    >
+      <ProjectPickerContent
+        customHeaderText={
+          <>
             <FormattedMessage
-              id="xpack.alertingV2.composeDiscover.querySandbox.cpsPickerSubtitle"
-              defaultMessage="Unless overridden in the ES|QL query, this routing will apply to rule
-            query executions."
+              id="xpack.alertingV2.composeDiscover.querySandbox.cpsPickerTitle"
+              defaultMessage="Default CPS project routing settings from your space"
             />
-          </EuiText>
-        </EuiPopoverTitle>
-        <ProjectPickerContent
-          projectRouting={cpsDefaultRouting}
-          onProjectRoutingChange={() => {}}
-          projects={cpsProjects}
-          controlsState="disabled"
-        />
-      </EuiPopover>
-    </EuiFlexItem>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.alertingV2.composeDiscover.querySandbox.cpsPickerSubtitle"
+                defaultMessage="Unless overridden in the ES|QL query, this routing will apply to rule
+            query executions."
+              />
+            </EuiText>
+          </>
+        }
+        projectRouting={cpsDefaultRouting}
+        fetchProjectsByRouting={fetchCpsProjects}
+        controlsState="disabled"
+      />
+    </EuiPopover>
   );
 };

@@ -118,6 +118,41 @@ describe('useServiceFlyoutTransactionData', () => {
       );
     });
 
+    it('sends x-project-routing when projectRouting is provided', async () => {
+      const http = makeHttp(EMPTY_MAIN_RESPONSE);
+
+      renderHook(() =>
+        useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, projectRouting: '_alias:*' })
+      );
+
+      await waitFor(() =>
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/apm/services/my-service/transactions/groups/main_statistics',
+          expect.objectContaining({
+            headers: { 'x-project-routing': '_alias:*' },
+          })
+        )
+      );
+      expect(mockedUsePreferredTransactionDataSource).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRouting: '_alias:*' })
+      );
+    });
+
+    it('omits x-project-routing when projectRouting is not provided', async () => {
+      const http = makeHttp(EMPTY_MAIN_RESPONSE);
+
+      renderHook(() => useServiceFlyoutTransactionData({ http, ...BASE_PARAMS }));
+
+      await waitFor(() =>
+        expect(http.get).toHaveBeenCalledWith(
+          expect.stringContaining('main_statistics'),
+          expect.anything()
+        )
+      );
+      const options = (http.get as jest.Mock).mock.calls[0][1];
+      expect(options.headers).toBeUndefined();
+    });
+
     it('URL-encodes the service name', async () => {
       const http = makeHttp(EMPTY_MAIN_RESPONSE);
 
@@ -261,6 +296,8 @@ describe('useServiceFlyoutTransactionData', () => {
       expect(mainCallsAfter).toBe(mainCallsBefore);
       expect(result.current.items).toHaveLength(1);
       expect(result.current.items[0].name).toBe('POST /api/checkout');
+      expect(result.current.presenceItems).toHaveLength(2);
+      expect(result.current.isServerSearch).toBe(false);
     });
 
     it('re-fetches server-side when searchQuery changes and maxCountExceeded is true', async () => {
@@ -281,6 +318,118 @@ describe('useServiceFlyoutTransactionData', () => {
       rerender({ searchQuery: 'checkout' });
 
       await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
+    });
+
+    it('treats an unsearched maxCountExceeded result as unable to prove absence while search is active', async () => {
+      let resolveServerSearch: (value: object) => void;
+      const serverSearchPromise = new Promise<object>((resolve) => {
+        resolveServerSearch = resolve;
+      });
+      let mainCall = 0;
+
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('detailed_statistics')) {
+            return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+          }
+          mainCall += 1;
+          if (mainCall === 1) {
+            // Truncated top groups without the searched transaction — a follow-up
+            // server search will run once maxCountExceeded flips.
+            return Promise.resolve({
+              transactionGroups: [TRANSACTION_GROUPS[1]],
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          return serverSearchPromise;
+        }),
+      } as unknown as HttpStart;
+
+      const { result } = renderHook(
+        ({ searchQuery }: { searchQuery: string }) =>
+          useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, searchQuery }),
+        { initialProps: { searchQuery: 'orders' } }
+      );
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+      // Intermediate unsearched response must not look conclusive while search is active.
+      expect(result.current.isServerSearch).toBe(true);
+      expect(result.current.presenceItems.map((item) => item.name)).toEqual(['POST /api/checkout']);
+
+      resolveServerSearch!({
+        transactionGroups: [TRANSACTION_GROUPS[0]],
+        maxCountExceeded: true,
+        hasActiveAlerts: false,
+      });
+
+      await waitFor(() =>
+        expect(result.current.items.map((item) => item.name)).toEqual(['GET /api/orders'])
+      );
+      expect(result.current.isServerSearch).toBe(true);
+    });
+
+    it('keeps isServerSearch true for the retained result while clearing search reloads', async () => {
+      let resolveUnsearchedMain: (value: object) => void;
+      const unsearchedMainPromise = new Promise<object>((resolve) => {
+        resolveUnsearchedMain = resolve;
+      });
+      let mainCall = 0;
+
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('detailed_statistics')) {
+            return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+          }
+          mainCall += 1;
+          if (mainCall === 1) {
+            return Promise.resolve({
+              transactionGroups: TRANSACTION_GROUPS,
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          if (mainCall === 2) {
+            return Promise.resolve({
+              transactionGroups: [TRANSACTION_GROUPS[0]],
+              maxCountExceeded: true,
+              hasActiveAlerts: false,
+            });
+          }
+          return unsearchedMainPromise;
+        }),
+      } as unknown as HttpStart;
+
+      const { result, rerender } = renderHook(
+        ({ searchQuery }: { searchQuery: string }) =>
+          useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, searchQuery }),
+        { initialProps: { searchQuery: '' } }
+      );
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+      expect(result.current.isServerSearch).toBe(false);
+
+      rerender({ searchQuery: 'orders' });
+      await waitFor(() => expect(result.current.isServerSearch).toBe(true));
+      expect(result.current.items).toHaveLength(1);
+
+      // Clear search — retained narrowed rows must stay marked as server-search until the
+      // unsearched request settles (otherwise the host can falsely freeze on them).
+      rerender({ searchQuery: '' });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(true));
+      expect(result.current.isServerSearch).toBe(true);
+      expect(result.current.items).toHaveLength(1);
+
+      resolveUnsearchedMain!({
+        transactionGroups: TRANSACTION_GROUPS,
+        maxCountExceeded: true,
+        hasActiveAlerts: false,
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.isServerSearch).toBe(false);
+      expect(result.current.items).toHaveLength(2);
     });
 
     it('resets maxCountExceeded when serviceName changes', async () => {
@@ -308,6 +457,35 @@ describe('useServiceFlyoutTransactionData', () => {
       await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
 
       rerender({ serviceName: 'other-service' });
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(false));
+    });
+
+    it('resets maxCountExceeded when projectRouting changes', async () => {
+      const http = {
+        get: jest
+          .fn()
+          .mockResolvedValueOnce({
+            transactionGroups: [],
+            maxCountExceeded: true,
+            hasActiveAlerts: false,
+          })
+          .mockResolvedValue({
+            transactionGroups: [],
+            maxCountExceeded: false,
+            hasActiveAlerts: false,
+          }),
+      } as unknown as HttpStart;
+
+      const { result, rerender } = renderHook(
+        ({ projectRouting }: { projectRouting?: string }) =>
+          useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, projectRouting }),
+        { initialProps: { projectRouting: '_alias:*' } }
+      );
+
+      await waitFor(() => expect(result.current.maxCountExceeded).toBe(true));
+
+      rerender({ projectRouting: '_alias:_origin' });
 
       await waitFor(() => expect(result.current.maxCountExceeded).toBe(false));
     });
@@ -339,6 +517,26 @@ describe('useServiceFlyoutTransactionData', () => {
               useDurationSummary: false,
               transactionNames: JSON.stringify(['GET /api/orders', 'POST /api/checkout']),
             }),
+          })
+        )
+      );
+    });
+
+    it('sends x-project-routing on detailed_statistics when projectRouting is provided', async () => {
+      const http = makeHttp(
+        { ...EMPTY_MAIN_RESPONSE, transactionGroups: TRANSACTION_GROUPS },
+        EMPTY_DETAILED_RESPONSE
+      );
+
+      renderHook(() =>
+        useServiceFlyoutTransactionData({ http, ...BASE_PARAMS, projectRouting: '_alias:*' })
+      );
+
+      await waitFor(() =>
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/apm/services/my-service/transactions/groups/detailed_statistics',
+          expect.objectContaining({
+            headers: { 'x-project-routing': '_alias:*' },
           })
         )
       );
@@ -645,6 +843,26 @@ describe('useServiceFlyoutTransactionData', () => {
       );
 
       await waitFor(() => expect(result.current.error).toBe(fetchError));
+    });
+
+    it('exposes a main statistics failure separately from a successful settle', async () => {
+      const fetchError = new Error('main stats failed');
+      const http = {
+        get: jest.fn().mockImplementation((url: string) => {
+          if (url.includes('main_statistics')) {
+            return Promise.reject(fetchError);
+          }
+          return Promise.resolve(EMPTY_DETAILED_RESPONSE);
+        }),
+      } as unknown as HttpStart;
+
+      const { result } = renderHook(() =>
+        useServiceFlyoutTransactionData({ http, ...BASE_PARAMS })
+      );
+
+      await waitFor(() => expect(result.current.mainError).toBe(fetchError));
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.error).toBeUndefined();
     });
 
     it('fires a danger toast when the data source fetch fails', async () => {

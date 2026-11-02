@@ -45,6 +45,20 @@ export interface ResourceDataInputStepCopy {
   fileUploadTitle: string;
 }
 
+export interface RulesFileUploadCopy {
+  description: string;
+  prompt: string;
+}
+
+export interface CopyExportQueryCopy {
+  description: ReactNode;
+  details?: Record<string, ReactNode>;
+}
+
+export interface EnhancementsCopy {
+  typeOptions: Record<string, string>;
+}
+
 export interface RuleMigrationVendorCopy {
   originalRule: OriginalRuleCopy;
   missingResources: MissingResourcesCopy;
@@ -52,6 +66,9 @@ export interface RuleMigrationVendorCopy {
   missingLookupsList: MissingLookupsListCopy;
   lookupsFileUpload: LookupsFileUploadCopy;
   resourceDataInputStep: ResourceDataInputStepCopy;
+  rulesFileUpload: RulesFileUploadCopy;
+  copyExportQuery: CopyExportQueryCopy;
+  enhancements?: EnhancementsCopy;
   copyrightNotice: string;
 }
 

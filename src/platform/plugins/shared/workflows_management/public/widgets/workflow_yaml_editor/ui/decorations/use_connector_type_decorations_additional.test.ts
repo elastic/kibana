@@ -21,6 +21,7 @@ const mockConnectorsMap = new Map<string, { stability?: string }>([
 ]);
 
 jest.mock('@kbn/workflows', () => ({
+  ...jest.requireActual('@kbn/workflows'),
   isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
   getBuiltInStepStability: (type: string) => {
     if (type === 'if') return 'tech_preview';

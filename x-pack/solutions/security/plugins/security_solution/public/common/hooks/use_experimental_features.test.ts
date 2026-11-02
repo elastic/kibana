@@ -32,7 +32,7 @@ describe('useExperimentalFeatures', () => {
   it('throws an error when unexisting feature', async () => {
     expect(() =>
       useIsExperimentalFeatureEnabled('unexistingFeature' as keyof ExperimentalFeatures)
-    ).toThrowError();
+    ).toThrow();
   });
   it('returns true when existing feature and is enabled', async () => {
     const result = useIsExperimentalFeatureEnabled('featureA' as keyof ExperimentalFeatures);

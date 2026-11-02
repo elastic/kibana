@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const MODAL_TITLE = i18n.translate('xpack.alertingV2.ruleForm.cancelModal.title', {
@@ -30,19 +30,25 @@ export interface ConfirmRuleCloseProps {
   onConfirm: () => void;
 }
 
-export const ConfirmRuleClose = ({ onCancel, onConfirm }: ConfirmRuleCloseProps) => (
-  <EuiConfirmModal
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    data-test-subj="alertingV2ConfirmRuleCloseModal"
-    buttonColor="danger"
-    defaultFocusedButton="cancel"
-    title={MODAL_TITLE}
-    confirmButtonText={CONFIRM_BUTTON}
-    cancelButtonText={CANCEL_BUTTON}
-  >
-    <EuiText>
-      <p>{MODAL_DESCRIPTION}</p>
-    </EuiText>
-  </EuiConfirmModal>
-);
+export const ConfirmRuleClose = ({ onCancel, onConfirm }: ConfirmRuleCloseProps) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
+  return (
+    <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      data-test-subj="alertingV2ConfirmRuleCloseModal"
+      buttonColor="danger"
+      defaultFocusedButton="cancel"
+      title={MODAL_TITLE}
+      titleProps={{ id: confirmModalTitleId }}
+      confirmButtonText={CONFIRM_BUTTON}
+      cancelButtonText={CANCEL_BUTTON}
+    >
+      <EuiText>
+        <p>{MODAL_DESCRIPTION}</p>
+      </EuiText>
+    </EuiConfirmModal>
+  );
+};

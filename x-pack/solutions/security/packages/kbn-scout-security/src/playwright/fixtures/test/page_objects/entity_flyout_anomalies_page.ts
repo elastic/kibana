@@ -135,17 +135,16 @@ export class EntityFlyoutAnomaliesPage {
   }
 
   async clickAnomaliesCountLink() {
-    // The anomalies section sits below the entity risk contributions section in the right
-    // panel and may be off-screen. Wait for the expandable panel to be in the DOM (anomaly
-    // data has loaded), then click.
+    // Attached rather than visible: the section sits below risk contributions and may be
+    // off-screen until the click scrolls to it.
     await this.anomaliesExpandablePanel.waitFor({ state: 'attached' });
-    // In rare cases the entity store resolves fast enough that the flyout auto-navigates to
-    // both panels before this click fires. EUI's panel slide-in uses CSS transform, so the
-    // anomalies tab is already Playwright-visible during the animation. Skip the click if so.
+    // The flyout sometimes auto-navigates to both panels before this runs, and clicking then
+    // would toggle the tab back off.
     if (!(await this.anomaliesTab.isVisible())) {
-      // noWaitAfter: true skips Playwright's post-click navigation wait — the URL update that
-      // opens the left panel triggers unmocked API calls that keep the tracker pending.
-      await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true });
+      // noWaitAfter: the URL update that opens the left panel triggers unmocked API calls that
+      // keep Playwright's navigation tracker pending. The extended timeout covers the tab mount,
+      // which React flushes synchronously before the browser acknowledges mouseup.
+      await this.anomaliesExpandablePanelTitleLink.click({ noWaitAfter: true, timeout: 30000 });
     }
     await this.anomaliesTab.waitFor({ state: 'visible' });
   }
@@ -173,12 +172,27 @@ export class EntityFlyoutAnomaliesPage {
     return this.page.testSubj.locator(`${ANOMALIES_TABLE_ROW_ACTION_TEST_ID_PREFIX}${actionKey}`);
   }
 
+  /**
+   * Click a row-actions menu item. dispatchEvent bypasses Playwright's obstruction
+   * check: the URL change from openRowActionsMenu re-renders the flyout and transiently
+   * repositions the popover, covering the menu item's center point. The click event
+   * source is EuiContextMenuItem (SecuritySolution/public/entity_analytics/components/anomalies).
+   */
+  async clickRowAction(actionKey: string) {
+    await this.getRowAction(actionKey).dispatchEvent('click');
+  }
+
   async selectMitreTactic(tactic: string) {
-    await this.getMitreTacticDot(tactic).click();
+    // dispatchEvent bypasses Playwright's obstruction check: the tactic dot is briefly
+    // occluded after scrollIntoView by the adjacent MitreTacticDotV3 hover chip overlay
+    // (SecuritySolution/public/entity_analytics/components/anomalies/MitreTacticDot).
+    await this.getMitreTacticDot(tactic).dispatchEvent('click');
   }
 
   async clearMitreTacticFilter() {
-    await this.mitreTacticClearChip.click();
+    // dispatchEvent: same occlusion race as selectMitreTactic — the hover chip is
+    // briefly covered after scroll by the MitreTacticDotV3 overlay.
+    await this.mitreTacticClearChip.dispatchEvent('click');
   }
 
   async expandAnomalyRow() {
@@ -188,10 +202,10 @@ export class EntityFlyoutAnomaliesPage {
 
   async openRowActionsMenu() {
     await this.anomaliesTabTableGrid.waitFor({ state: 'visible' });
-    // noWaitAfter: true skips Playwright's post-click navigation wait — opening the popover
-    // triggers a URL update from the flyout's state management that Playwright misidentifies
-    // as a pending navigation. The caller's getRowAction assertions are the real check.
-    await this.rowActionsButton.click({ noWaitAfter: true });
+    // dispatchEvent: the row-actions button sits inside the anomalies table grid; after scroll
+    // it is transiently covered by an adjacent element. Also avoids noWaitAfter — the URL
+    // update from the flyout's state management is not awaited by dispatchEvent anyway.
+    await this.rowActionsButton.dispatchEvent('click');
   }
 
   /**

@@ -10,6 +10,12 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import useAsync from 'react-use/lib/useAsync';
 import { fetchRulesByIds } from '../apis/fetch_rules_by_ids';
+import { fetchFromSource } from '../utils/fetch_from_sources';
+import { isPrivilegeFetchError } from '../utils/should_swallow_fetch_error';
+import {
+  useAdditionalEpisodesDataSource,
+  useQueryV2Source,
+} from '../context/episode_data_source_context';
 
 export interface UseAlertingRulesCacheOptions {
   ruleIds: string[];
@@ -26,6 +32,8 @@ type Rule = FindRulesResponse['items'][number];
  * Returns rulesCache as state so consumers re-render when rules are loaded.
  */
 export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCacheOptions) => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
+  const queryV2Source = useQueryV2Source();
   const [rulesCache, setRulesCache] = useState<Record<string, Rule>>({});
   const [missingRuleIds, setMissingRuleIds] = useState<ReadonlySet<string>>(new Set());
 
@@ -36,7 +44,27 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       return;
     }
 
-    const rules = await fetchRulesByIds({ http: services.http, ids: uncachedIds });
+    // v2 rules read is granted separately from v2 alerts read, so a forbidden lookup
+    // falls through to the additional source instead of failing the whole resolution.
+    // Transient failures still reject so the ids aren't cached as missing.
+    const v2Rules = queryV2Source
+      ? await fetchRulesByIds({ http: services.http, ids: uncachedIds }).catch((fetchError) => {
+          if (isPrivilegeFetchError(fetchError)) {
+            return [];
+          }
+          throw fetchError;
+        })
+      : [];
+    const resolvedByV2 = new Set(v2Rules.map((rule) => rule.id));
+    const unresolvedIds = uncachedIds.filter((id) => !resolvedByV2.has(id));
+
+    const { results: sourceRules } = unresolvedIds.length
+      ? await fetchFromSource(additionalEpisodesDataSource, (source) =>
+          source.resolveRules?.({ services, ids: unresolvedIds })
+        )
+      : { results: [] };
+
+    const rules = [...v2Rules, ...sourceRules.flat()];
     const returnedRuleIds = new Set(rules.map((rule) => rule.id));
 
     setRulesCache((prev) => {
@@ -56,7 +84,7 @@ export const useAlertingRulesCache = ({ ruleIds, services }: UseAlertingRulesCac
       });
       return next;
     });
-  }, [ruleIds, services.http]);
+  }, [ruleIds, services.http, additionalEpisodesDataSource, queryV2Source]);
 
   return {
     rulesCache,

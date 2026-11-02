@@ -28,6 +28,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import type { Filter } from '@kbn/es-query';
+import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import type { Connector, ElasticsearchIndex } from '@kbn/search-connectors';
 import { ConnectorStatus } from '@kbn/search-connectors';
 
@@ -104,6 +106,22 @@ const noPolicyLabel = i18n.translate('xpack.contentConnectors.connectorStats.noP
   defaultMessage: 'No policy found',
 });
 
+const LOGS_DATA_VIEW_ID = 'logs-*';
+
+const buildLogsPhraseFilter = (key: string, value: string): Filter => ({
+  meta: {
+    alias: null,
+    disabled: false,
+    index: LOGS_DATA_VIEW_ID,
+    key,
+    negate: false,
+    params: { query: value },
+    type: FILTERS.PHRASE,
+  },
+  query: { match_phrase: { [key]: value } },
+  $state: { store: FilterStateStore.APP_STATE },
+});
+
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
   connector,
   indexData,
@@ -131,34 +149,10 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
 
   const navigateToDiscoverPayload = agentlessAgentExists
     ? {
-        dataViewId: 'logs-*',
+        dataViewId: LOGS_DATA_VIEW_ID,
         filters: [
-          {
-            meta: {
-              key: 'labels.connector_id',
-              index: 'logs-*',
-              type: 'phrase',
-              params: connector.id,
-            },
-            query: {
-              match_phrase: {
-                'labels.connector_id': connector.id,
-              },
-            },
-          },
-          {
-            meta: {
-              key: 'elastic_agent.id',
-              index: 'logs-*',
-              type: 'phrase',
-              params: connector.id,
-            },
-            query: {
-              match_phrase: {
-                'elastic_agent.id': agentlessOverview.agent.id,
-              },
-            },
-          },
+          buildLogsPhraseFilter('labels.connector_id', connector.id),
+          buildLogsPhraseFilter('elastic_agent.id', agentlessOverview.agent.id),
         ],
         timeRange: {
           from: 'now-6h',

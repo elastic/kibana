@@ -7,9 +7,6 @@
 
 import React, { useEffect } from 'react';
 
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-
 import { useKibana } from '../../../shared_imports';
 import { UIM_MANAGE_PROCESSORS } from '../../constants';
 import { GeoipList } from './geoip_list';
@@ -22,23 +19,5 @@ export const ManageProcessors: React.FunctionComponent = () => {
     services.breadcrumbs.setBreadcrumbs('manage_processors');
   }, [services.metric, services.breadcrumbs]);
 
-  return (
-    <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="manageProcessorsTitle">
-            <FormattedMessage
-              id="xpack.ingestPipelines.manageProcessors.pageTitle"
-              defaultMessage="Manage Processors"
-            />
-          </span>
-        }
-      />
-
-      <EuiSpacer size="l" />
-
-      <GeoipList />
-    </>
-  );
+  return <GeoipList />;
 };

@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
-import { AlertEpisodeTags } from '../../actions/tags';
-import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
+import { TagBadges } from '../../actions/tags';
 import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineActionEventProps {
@@ -18,90 +21,105 @@ export interface AlertEpisodeTimelineActionEventProps {
   assigneeProfile: UserProfileWithAvatar | undefined;
 }
 
-/** Renders the sentence-flow event line for an action entry (verb + inline details). */
-export const AlertEpisodeTimelineActionEvent = ({
-  entry,
-  assigneeProfile,
-}: AlertEpisodeTimelineActionEventProps) => {
-  const parts: React.ReactNode[] = [
-    <EuiFlexItem key="verb" grow={false}>
-      {i18n.ACTION_LABELS[entry.action_type] ?? entry.action_type}
-    </EuiFlexItem>,
-  ];
+const formatExpiry = (expiry: string): string =>
+  new Date(expiry).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
-  if (entry.action_type === 'assign') {
+interface ActionSentenceProps extends AlertEpisodeTimelineActionEventProps {
+  /** Keeps the assignee avatar inline with the sentence instead of breaking the text flow. */
+  inlineDetailStyles: SerializedStyles;
+}
+
+/** Builds the complete sentence describing an action, with its details interpolated in place. */
+const ActionSentence = ({ entry, assigneeProfile, inlineDetailStyles }: ActionSentenceProps) => {
+  const { action_type: actionType } = entry;
+
+  if (actionType === 'assign') {
+    if (entry.assignee_uid == null) {
+      return <span data-test-subj="alertingV2TimelineActionAssignee">{i18n.REMOVED_ASSIGNEE}</span>;
+    }
+
     const assigneeName =
       assigneeProfile?.user.full_name ?? assigneeProfile?.user.username ?? entry.assignee_uid;
-    parts.push(
-      <EuiFlexItem key="assignee" grow={false} data-test-subj="alertingV2TimelineActionAssignee">
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {entry.assignee_uid != null ? i18n.ASSIGNED_TO : i18n.REMOVED_ASSIGNEE}
-          </EuiFlexItem>
-          {assigneeName && (
-            <>
-              {assigneeProfile && (
-                <EuiFlexItem grow={false}>
+
+    return (
+      <span data-test-subj="alertingV2TimelineActionAssignee">
+        <FormattedMessage
+          id="xpack.alertingV2EpisodesUi.details.timeline.assignedEpisodeTo"
+          defaultMessage="assigned the episode to {assignee}"
+          values={{
+            assignee: (
+              <span css={inlineDetailStyles}>
+                {assigneeProfile && (
                   <UserAvatar
                     user={assigneeProfile.user}
                     avatar={assigneeProfile.data?.avatar}
                     size="s"
                   />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>{assigneeName}</EuiFlexItem>
-            </>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+                )}
+                {assigneeName}
+              </span>
+            ),
+          }}
+        />
+      </span>
     );
   }
 
-  if (entry.action_type === 'tag' && Array.isArray(entry.tags) && entry.tags.length > 0) {
-    parts.push(
-      <EuiFlexItem key="tags" grow={false}>
-        <AlertEpisodeTags tags={entry.tags} oneLine />
-      </EuiFlexItem>
+  if (actionType === 'tag') {
+    const tags = entry.tags ?? [];
+    if (tags.length === 0) {
+      return <>{i18n.REMOVED_ALL_TAGS}</>;
+    }
+
+    return (
+      <FormattedMessage
+        id="xpack.alertingV2EpisodesUi.details.timeline.setEpisodeTagsTo"
+        defaultMessage="set the tags to {tags}"
+        values={{ tags: <TagBadges tags={tags} showAll /> }}
+      />
     );
   }
 
-  if (entry.action_type === 'snooze' && !entry.expiry) {
-    parts.push(
-      <EuiFlexItem key="expiry" grow={false}>
-        {i18n.SNOOZED_INDEFINITELY}
-      </EuiFlexItem>
+  if (actionType === 'snooze') {
+    if (!entry.expiry) {
+      return <>{i18n.SNOOZED_INDEFINITELY}</>;
+    }
+
+    const until = formatExpiry(entry.expiry);
+    const duration = i18n.formatSnoozeDuration(entry['@timestamp'], entry.expiry);
+
+    return (
+      <>{duration ? i18n.getSnoozedForLabel(duration, until) : i18n.getSnoozedUntilLabel(until)}</>
     );
   }
 
-  if (entry.expiry) {
-    const untilText = i18n.getSnoozedUntilLabel(
-      new Date(entry.expiry).toLocaleString(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })
-    );
-    const duration =
-      entry.action_type === 'snooze'
-        ? i18n.formatSnoozeDuration(entry['@timestamp'], entry.expiry)
-        : null;
-    parts.push(
-      <EuiFlexItem key="expiry" grow={false}>
-        {duration != null ? `${untilText} · ${duration}` : untilText}
-      </EuiFlexItem>
-    );
-  }
+  return <>{i18n.ACTION_LABELS[actionType] ?? actionType}</>;
+};
 
-  if (entry.reason) {
-    parts.push(
-      <EuiFlexItem key="reason" grow={false}>
-        {entry.reason}
-      </EuiFlexItem>
-    );
-  }
+/** Renders the sentence-flow event line for an action entry (verb phrase + optional reason). */
+export const AlertEpisodeTimelineActionEvent = ({
+  entry,
+  assigneeProfile,
+}: AlertEpisodeTimelineActionEventProps) => {
+  const { euiTheme } = useEuiTheme();
+  // The avatar is block-level, so it needs an inline-level box to stay in the text flow
+  const inlineDetailStyles = css`
+    display: inline-flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+    vertical-align: middle;
+  `;
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      {parts}
-    </EuiFlexGroup>
+    <span>
+      <ActionSentence
+        entry={entry}
+        assigneeProfile={assigneeProfile}
+        inlineDetailStyles={inlineDetailStyles}
+      />
+      {entry.reason && (
+        <span data-test-subj="alertingV2TimelineActionReason"> · {entry.reason}</span>
+      )}
+    </span>
   );
 };

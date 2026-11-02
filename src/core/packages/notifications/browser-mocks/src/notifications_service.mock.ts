@@ -12,6 +12,7 @@ import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notificat
 import { toastsServiceMock } from './toasts_service.mock';
 import { feedbackServiceMock } from './feedback_service.mock';
 import { toursServiceMock } from './tours_service.mock';
+import { screenReaderServiceMock } from './screen_reader_service.mock';
 import { createNotificationCoordinatorMock } from './notification_coordinator.mock';
 
 import { lazyObject } from '@kbn/lazy-object';
@@ -32,6 +33,7 @@ const createStartContractMock = () => {
     showErrorDialog: jest.fn(),
     feedback: feedbackServiceMock.createStartContract(),
     tours: toursServiceMock.createStartContract(),
+    screenReader: screenReaderServiceMock.createStartContract(),
   });
   return startContract;
 };
@@ -41,14 +43,14 @@ const createStartContractMock = () => {
  */
 export interface NotificationsServiceContract {
   setup: typeof createSetupContractMock;
-  start: ({ targetDomElement }: { targetDomElement: HTMLElement }) => void;
+  start: ({ targetDomElement }: { targetDomElement: HTMLElement }) => NotificationsStart;
   stop: () => void;
 }
 
 const createMock = () => {
   const mocked: jest.Mocked<NotificationsServiceContract> = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupContractMock()),
-    start: jest.fn(),
+    start: jest.fn().mockReturnValue(createStartContractMock()),
     stop: jest.fn(),
   });
 

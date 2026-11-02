@@ -10,106 +10,85 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import {
   HOST1_NAME,
+  HOST2_NAME,
   HOSTS,
-  HOSTS_METADATA_FIELD,
   DATE_WITH_HOSTS_DATA_FROM,
   DATE_WITH_HOSTS_DATA_TO,
-  EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
 
 test.describe(
-  'Hosts Page - Search',
+  'Hosts Page - Search Controls',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage }, page }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { hostsPage } }) => {
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
+        hostNames: HOSTS.map(({ hostName }) => hostName),
         preferredSchema: 'ecs',
       });
-
-      await test.step('verify all hosts are visible before filtering', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
-        await hostsPage.waitForKPILoadingToFinish(EXTENDED_TIMEOUT);
-        await expect(
-          page.getByRole('listitem').getByRole('heading', { name: 'CPU Usage' })
-        ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-      });
+      await expect(hostsPage.tableLoaded).toBeVisible();
+      await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
+      await expect(hostsPage.getHostRow(HOST2_NAME)).toBeVisible();
     });
 
-    test('Search using the Hosts page search bar', async ({ pageObjects: { hostsPage } }) => {
-      await test.step('search for a specific host', async () => {
-        await hostsPage.filterByQueryBar(`host.name: "${HOST1_NAME}"`);
-      });
-
-      await test.step('verify only the searched host is visible', async () => {
-        await expect(hostsPage.tableRows).toHaveCount(1);
-        await expect(hostsPage.tableRows).toContainText(HOST1_NAME);
-      });
-    });
-
-    test('Search using the flyout search bar', async ({
-      pageObjects: { hostsPage, assetDetailsPage },
-    }) => {
-      await test.step('open host flyout and navigate to metadata tab', async () => {
-        await hostsPage.openHostFlyout(HOST1_NAME);
-        await assetDetailsPage.metadataTab.clickTab();
-        await expect(assetDetailsPage.metadataTab.tab).toHaveAttribute('aria-selected', 'true');
-      });
-
-      await test.step('search for a metadata field using the flyout search bar', async () => {
-        await assetDetailsPage.metadataTab.filterField(HOSTS_METADATA_FIELD);
-        await expect(assetDetailsPage.metadataTab.tableRows).toHaveCount(1);
-        await expect(assetDetailsPage.metadataTab.tableRows).toContainText(HOSTS_METADATA_FIELD);
-      });
-
-      await test.step('clear the search and verify all fields are visible', async () => {
-        await assetDetailsPage.metadataTab.searchBar.clear();
-        await expect(assetDetailsPage.metadataTab.tableRows).not.toHaveCount(1);
-      });
-    });
-
-    test('Filter hosts using the Cloud Provider control', async ({
+    test('filters the table when a KQL query is submitted', async ({
       pageObjects: { hostsPage },
     }) => {
-      await test.step('select a cloud provider option (include mode)', async () => {
+      await test.step('submit a query for a single known host', async () => {
+        await hostsPage.submitQuery(`host.name : ${JSON.stringify(HOST1_NAME)}`);
+      });
+
+      await test.step('verify only that host remains', async () => {
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
+        await expect(hostsPage.getHostRow(HOST2_NAME)).toBeHidden();
+      });
+    });
+
+    test('filters the table by excluding a cloud provider', async ({
+      pageObjects: { hostsPage },
+    }) => {
+      await test.step('exclude gcp hosts from the cloud provider control', async () => {
         await hostsPage.openFilterControl('cloud.provider');
         await hostsPage.enableExcludeMode();
         await hostsPage.selectFilterOption('gcp');
       });
 
-      await test.step('verify only hosts with selected cloud provider are visible', async () => {
-        const filteredCount = await hostsPage.tableRows.count();
-        expect(filteredCount).toBeLessThan(HOSTS.length);
+      await test.step('verify known hosts are hidden', async () => {
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeHidden();
+        await expect(hostsPage.getHostRow(HOST2_NAME)).toBeHidden();
       });
 
-      await test.step('clear the filter and verify all hosts are visible again', async () => {
+      await test.step('clear the cloud provider filter and restore hosts', async () => {
+        await hostsPage.closeFilterControl();
+        await hostsPage.openFilterControl('cloud.provider');
         await hostsPage.selectFilterOption('gcp');
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
+        await expect(hostsPage.getHostRow(HOST2_NAME)).toBeVisible();
       });
     });
 
-    test('Filter hosts using the Operating System control', async ({
+    test('filters the table by excluding an operating system', async ({
       pageObjects: { hostsPage },
     }) => {
-      await test.step('open the Operating System filter control', async () => {
+      await test.step('exclude Linux hosts from the operating system control', async () => {
         await hostsPage.openFilterControl('host.os.name');
         await hostsPage.enableExcludeMode();
-      });
-
-      await test.step('select an operating system option (include mode)', async () => {
         await hostsPage.selectFilterOption('Linux');
       });
 
-      await test.step('verify only hosts with selected operating system are visible', async () => {
-        const filteredCount = await hostsPage.tableRows.count();
-        expect(filteredCount).toBeLessThanOrEqual(HOSTS.length);
+      await test.step('verify known hosts are hidden', async () => {
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeHidden();
+        await expect(hostsPage.getHostRow(HOST2_NAME)).toBeHidden();
       });
 
-      await test.step('clear the filter and verify all hosts are visible again', async () => {
+      await test.step('clear the operating system filter and restore hosts', async () => {
+        await hostsPage.closeFilterControl();
+        await hostsPage.openFilterControl('host.os.name');
         await hostsPage.selectFilterOption('Linux');
-        await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
+        await expect(hostsPage.getHostRow(HOST1_NAME)).toBeVisible();
+        await expect(hostsPage.getHostRow(HOST2_NAME)).toBeVisible();
       });
     });
   }

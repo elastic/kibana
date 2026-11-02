@@ -48,6 +48,9 @@ export function useBreadcrumbs(
       case 'rules_list':
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
         break;
+      case 'rule_library_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rule_library_list') }];
+        break;
       case 'rule_details':
         breadcrumbs = [
           rootBreadcrumb,

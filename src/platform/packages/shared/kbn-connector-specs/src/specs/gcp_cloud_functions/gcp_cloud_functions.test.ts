@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { getGcpIdToken } from '../../auth_types/gcp_jwt_helpers';
 import { GcpCloudFunctionsConnector } from './gcp_cloud_functions';
 
 jest.mock('../../auth_types/gcp_jwt_helpers', () => {
@@ -87,6 +88,27 @@ describe('GcpCloudFunctionsConnector', () => {
   });
 
   describe('invoke action', () => {
+    it('should exchange the ID token with the context fetch when one is set', async () => {
+      const fetchTestOnly = jest.fn();
+      mockClient.get.mockResolvedValue({
+        status: 200,
+        data: { uri: 'https://my-function-abc123-ew.a.run.app' },
+      });
+      mockClient.post.mockResolvedValue({ status: 200, data: {}, headers: {} });
+
+      await GcpCloudFunctionsConnector.actions.invoke.handler(
+        { ...mockContext, fetchTestOnly },
+        { functionName: 'my-function' }
+      );
+
+      expect(getGcpIdToken).toHaveBeenCalledWith(
+        'test@my-gcp-project.iam.gserviceaccount.com',
+        expect.any(String),
+        'https://my-function-abc123-ew.a.run.app',
+        fetchTestOnly
+      );
+    });
+
     it('should resolve service URL and invoke with an ID token', async () => {
       mockClient.get.mockResolvedValue({
         status: 200,
@@ -381,34 +403,24 @@ describe('GcpCloudFunctionsConnector', () => {
   });
 
   describe('test handler', () => {
+    const testSpec = GcpCloudFunctionsConnector.test;
+
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({ data: { services: [] } });
 
-      if (!GcpCloudFunctionsConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GcpCloudFunctionsConnector.test.handler(mockContext);
+      const result = await testSpec.handler(mockContext);
 
       expect(mockClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/v2/projects/my-gcp-project/locations/europe-west1/services'),
         expect.any(Object)
       );
-      expect(result).toEqual({
-        ok: true,
-        message: 'Successfully connected to GCP Cloud Run API',
-      });
+      expect(result).toEqual({});
     });
 
-    it('should return failure when API is not accessible', async () => {
+    it('should throw on error', async () => {
       mockClient.get.mockRejectedValue(new Error('Invalid credentials'));
 
-      if (!GcpCloudFunctionsConnector.test) {
-        throw new Error('Test handler not defined');
-      }
-      const result = await GcpCloudFunctionsConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Failed to connect');
+      await expect(testSpec.handler(mockContext)).rejects.toThrow();
     });
   });
 });

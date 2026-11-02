@@ -25,8 +25,8 @@ import type {
   DeprecatedCellValueElementProps,
   DeprecatedRowRenderer,
   Direction,
-  EntityType,
-} from '@kbn/timelines-plugin/common';
+} from '@kbn/securitysolution-timeline-common';
+import type { EntityType } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
@@ -140,8 +140,8 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const { uiSettings, data } = useKibana().services;
 
   const { dataView, status } = useDataView(pageScope);
-  const selectedPatterns = useSelectedPatterns(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const selectedPatterns = useSelectedPatterns(dataView);
+  const browserFields = useBrowserFields(dataView);
   const isLoadingIndexPattern = status !== 'ready';
   const dataViewId = dataView.id ?? null;
   const selectedDataViewId = dataView.id;

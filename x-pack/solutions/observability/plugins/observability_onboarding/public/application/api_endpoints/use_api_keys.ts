@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '../../hooks/use_kibana';
@@ -18,6 +18,8 @@ const CREATED_KEYS_STORAGE_KEY = 'observabilityOnboarding.apiEndpoints.createdKe
 
 export interface UseApiKeysResult {
   encodedApiKeys: Partial<Record<ApiEndpointId, string>>;
+  /** Ids of the keys created in this page session, used to verify ingest. */
+  apiKeyIds: Partial<Record<ApiEndpointId, string>>;
   keyCreatedBeforeByEndpointId: Partial<Record<ApiEndpointId, boolean>>;
   creatingEndpointId?: ApiEndpointId;
   createApiKey: (endpointId: ApiEndpointId) => Promise<void>;
@@ -28,21 +30,28 @@ export function useApiKeys(): UseApiKeysResult {
     services: { notifications },
   } = useKibana();
   const [encodedApiKeys, setEncodedApiKeys] = useState<Partial<Record<ApiEndpointId, string>>>({});
+  const [apiKeyIds, setApiKeyIds] = useState<Partial<Record<ApiEndpointId, string>>>({});
   const [creatingEndpointId, setCreatingEndpointId] = useState<ApiEndpointId | undefined>(
     undefined
   );
+  const isCreatingRef = useRef(false);
   const [createdKeysInStorage, setCreatedKeysInStorage] =
     useLocalStorage<Partial<Record<ApiEndpointId, boolean>>>(CREATED_KEYS_STORAGE_KEY);
 
   const createApiKey = useCallback(
     async (endpointId: ApiEndpointId) => {
+      if (isCreatingRef.current) {
+        return;
+      }
+      isCreatingRef.current = true;
       setCreatingEndpointId(endpointId);
       try {
-        const { encodedApiKey } = await callObservabilityOnboardingApi(
+        const { apiKeyId, encodedApiKey } = await callObservabilityOnboardingApi(
           'POST /internal/observability_onboarding/api_endpoints/create_key/{id}',
           { signal: null, params: { path: { id: endpointId } } }
         );
         setEncodedApiKeys((previous) => ({ ...previous, [endpointId]: encodedApiKey }));
+        setApiKeyIds((previous) => ({ ...previous, [endpointId]: apiKeyId }));
         setCreatedKeysInStorage({
           ...readStoredFlags(CREATED_KEYS_STORAGE_KEY),
           [endpointId]: true,
@@ -66,6 +75,7 @@ export function useApiKeys(): UseApiKeysResult {
             }),
         });
       } finally {
+        isCreatingRef.current = false;
         setCreatingEndpointId(undefined);
       }
     },
@@ -74,6 +84,7 @@ export function useApiKeys(): UseApiKeysResult {
 
   return {
     encodedApiKeys,
+    apiKeyIds,
     keyCreatedBeforeByEndpointId: sanitizeStoredFlags(createdKeysInStorage),
     creatingEndpointId,
     createApiKey,

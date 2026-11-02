@@ -38,6 +38,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { normalizeUrl } from '../../connector_utils';
+import { isReadOnlySql, READ_ONLY_STATEMENT_PREFIXES } from '../../lib/generic_db_connector';
 import type {
   ExecuteStatementInput,
   RunQueryInput,
@@ -83,49 +84,6 @@ const buildListParams = (input: {
   if (input.showLimit !== undefined) params.showLimit = input.showLimit;
   if (input.fromName !== undefined) params.fromName = input.fromName;
   return params;
-};
-
-// ---------------------------------------------------------------------------
-// Read-only SQL guardrail for `runQuery`
-//
-// Strips leading whitespace + SQL comments (line `-- ...` and block `/* ... */`)
-// and matches the first remaining token against an allowlist of read-only
-// statement keywords. Multi-statement submissions are rejected.
-// ---------------------------------------------------------------------------
-
-const READ_ONLY_STATEMENT_PREFIXES = /^(SELECT|WITH|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i;
-
-const stripLeadingCommentsAndWhitespace = (sql: string): string => {
-  let remaining = sql;
-  // Repeatedly strip whitespace, line comments, and block comments from the start
-  // until nothing matches.
-  while (true) {
-    const before = remaining;
-    remaining = remaining.replace(/^\s+/, '');
-    remaining = remaining.replace(/^--[^\n]*(?:\n|$)/, '');
-    remaining = remaining.replace(/^\/\*[\s\S]*?\*\//, '');
-    if (remaining === before) return remaining;
-  }
-};
-
-const hasTrailingStatement = (sql: string): boolean => {
-  // Detect semicolon-delimited multi-statement submissions. Anything after the
-  // first `;` that isn't whitespace or a comment counts as a second statement.
-  //
-  // Note: this is a conservative textual check — it does not parse string
-  // literals, so a query containing `;` inside a quoted string will be
-  // rejected. That is acceptable for a read-only guardrail; agents can
-  // rewrite such queries to avoid embedded semicolons.
-  const semicolonIndex = sql.indexOf(';');
-  if (semicolonIndex === -1) return false;
-  const trailing = stripLeadingCommentsAndWhitespace(sql.slice(semicolonIndex + 1));
-  return trailing.length > 0;
-};
-
-const isReadOnlyStatement = (sql: string): boolean => {
-  if (hasTrailingStatement(sql)) return false;
-  const head = stripLeadingCommentsAndWhitespace(sql);
-  return READ_ONLY_STATEMENT_PREFIXES.test(head);
 };
 
 // ---------------------------------------------------------------------------
@@ -194,13 +152,13 @@ export const Snowflake: ConnectorSpec = {
   metadata: {
     id: '.snowflake',
     displayName: 'Snowflake',
-    description: i18n.translate('core.kibanaConnectorSpecs.snowflake.metadata.description', {
+    description: i18n.translate('connectorSpecs.snowflake.metadata.description', {
       defaultMessage:
         'Run SQL, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search in Snowflake',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -213,28 +171,22 @@ export const Snowflake: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://{account}.snowflakecomputing.com/oauth/authorize',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.snowflake.auth.oauth.authorizationUrl.helpText',
+                'connectorSpecs.snowflake.auth.oauth.authorizationUrl.helpText',
                 {
                   defaultMessage:
                     "Snowflake OAuth authorization URL. Replace '{account}' with your Snowflake account identifier.",
-                  values: {
-                    accountPlaceholder: '{account}',
-                  },
                 }
               ),
             },
             tokenUrl: {
               placeholder: 'https://{account}.snowflakecomputing.com/oauth/token-request',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.snowflake.auth.oauth.tokenUrl.helpText',
-                {
-                  defaultMessage:
-                    'Snowflake OAuth token endpoint. Replace {accountPlaceholder} with your Snowflake account identifier.',
-                  values: {
-                    accountPlaceholder: '{account}',
-                  },
-                }
-              ),
+              helpText: i18n.translate('connectorSpecs.snowflake.auth.oauth.tokenUrl.helpText', {
+                defaultMessage:
+                  'Snowflake OAuth token endpoint. Replace {accountPlaceholder} with your Snowflake account identifier.',
+                values: {
+                  accountPlaceholder: '{account}',
+                },
+              }),
             },
             scope: {
               hidden: true,
@@ -246,16 +198,16 @@ export const Snowflake: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.snowflake.auth.bearer.label', {
             defaultMessage: 'Programmatic access token (PAT)',
           }),
           meta: {
             token: {
               sensitive: true,
-              label: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.pat.label', {
+              label: i18n.translate('connectorSpecs.snowflake.auth.pat.label', {
                 defaultMessage: 'Snowflake access token',
               }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.auth.pat.helpText', {
+              helpText: i18n.translate('connectorSpecs.snowflake.auth.pat.helpText', {
                 defaultMessage:
                   'A Snowflake programmatic access token (PAT) or manually obtained OAuth access token.',
               }),
@@ -279,16 +231,13 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://<account>.snowflakecomputing.com',
-          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.accountUrl.label', {
+          label: i18n.translate('connectorSpecs.snowflake.config.accountUrl.label', {
             defaultMessage: 'Snowflake Account URL',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.snowflake.config.accountUrl.helpText',
-            {
-              defaultMessage:
-                'The base URL for your Snowflake account (e.g. https://myorg-myaccount.snowflakecomputing.com).',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.snowflake.config.accountUrl.helpText', {
+            defaultMessage:
+              'The base URL for your Snowflake account (e.g. https://myorg-myaccount.snowflakecomputing.com).',
+          }),
         }),
       warehouse: z
         .string()
@@ -297,16 +246,13 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'COMPUTE_WH',
-          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.warehouse.label', {
+          label: i18n.translate('connectorSpecs.snowflake.config.warehouse.label', {
             defaultMessage: 'Default Warehouse',
           }),
-          helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.snowflake.config.warehouse.helpText',
-            {
-              defaultMessage:
-                'Default warehouse to use when executing statements. Case-sensitive. Can be overridden per request.',
-            }
-          ),
+          helpText: i18n.translate('connectorSpecs.snowflake.config.warehouse.helpText', {
+            defaultMessage:
+              'Default warehouse to use when executing statements. Case-sensitive. Can be overridden per request.',
+          }),
         }),
       database: z
         .string()
@@ -315,10 +261,10 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'MY_DATABASE',
-          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.database.label', {
+          label: i18n.translate('connectorSpecs.snowflake.config.database.label', {
             defaultMessage: 'Default Database',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.database.helpText', {
+          helpText: i18n.translate('connectorSpecs.snowflake.config.database.helpText', {
             defaultMessage:
               'Default database to use when executing statements. Case-sensitive. Can be overridden per request.',
           }),
@@ -330,10 +276,10 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'PUBLIC',
-          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.schema.label', {
+          label: i18n.translate('connectorSpecs.snowflake.config.schema.label', {
             defaultMessage: 'Default Schema',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.schema.helpText', {
+          helpText: i18n.translate('connectorSpecs.snowflake.config.schema.helpText', {
             defaultMessage:
               'Default schema to use when executing statements. Case-sensitive. Can be overridden per request.',
           }),
@@ -345,10 +291,10 @@ export const Snowflake: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'PUBLIC',
-          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.role.label', {
+          label: i18n.translate('connectorSpecs.snowflake.config.role.label', {
             defaultMessage: 'Default Role',
           }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.role.helpText', {
+          helpText: i18n.translate('connectorSpecs.snowflake.config.role.helpText', {
             defaultMessage:
               'Default role to use when executing statements. Case-sensitive. Can be overridden per request.',
           }),
@@ -363,11 +309,12 @@ export const Snowflake: ConnectorSpec = {
   actions: {
     runQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a read-only SQL query asynchronously in Snowflake. Accepts SELECT, WITH (CTE), SHOW, DESCRIBE / DESC, and EXPLAIN only. Write operations (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes (GRANT, REVOKE), stored procedure calls (CALL), and session state changes (USE, SET) are rejected before the request is sent. Returns a statement handle — use getStatementStatus to retrieve results, or cancelStatement to abort. Supports bind variables and session-scoped context (warehouse, database, schema, role). Single-statement only; multi-statement submissions are rejected. For write or DDL operations, ask the user to invoke executeStatement from a workflow.',
       input: RunQueryInputSchema,
       handler: async (ctx, input: RunQueryInput) => {
-        if (!isReadOnlyStatement(input.statement)) {
+        if (!isReadOnlySql(input.statement, READ_ONLY_STATEMENT_PREFIXES)) {
           throw new Error(
             'runQuery only accepts read-only SQL statements (SELECT, WITH, SHOW, DESCRIBE, DESC, EXPLAIN) and rejects semicolon-delimited multi-statement submissions. ' +
               'For write (INSERT / UPDATE / DELETE / MERGE), DDL (CREATE / ALTER / DROP / TRUNCATE), privilege, procedure, or session-state statements, use the executeStatement action from a workflow.'
@@ -379,6 +326,7 @@ export const Snowflake: ConnectorSpec = {
 
     executeStatement: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Run any SQL statement asynchronously in Snowflake. Exposed to workflow authors and direct API callers only — not available to agents (agents must use runQuery for read-only access). Can modify or destroy data: accepts SELECT, DML (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes, stored procedure calls, and session state statements. Returns a statement handle — use getStatementStatus to poll for results or cancelStatement to abort. Supports bind variables, multi-statement execution (via multiStatementCount), and session-scoped context (warehouse, database, schema, role).',
       input: ExecuteStatementInputSchema,
@@ -387,6 +335,7 @@ export const Snowflake: ConnectorSpec = {
 
     getStatementStatus: {
       isTool: true,
+      scope: 'read',
       description:
         'Check the status of a previously submitted SQL statement and retrieve results if execution is complete. Returns HTTP 200 with a ResultSet when finished, or HTTP 202 with a QueryStatus if still running. Use the statementHandle returned by runQuery. For large result sets, use the partition parameter to page through data.',
       input: GetStatementStatusInputSchema,
@@ -409,6 +358,7 @@ export const Snowflake: ConnectorSpec = {
 
     cancelStatement: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Cancel a running SQL statement in Snowflake. Use the statementHandle returned by runQuery. Returns a confirmation with the cancellation status. Only works on statements that are still executing.',
       input: CancelStatementInputSchema,
@@ -433,6 +383,7 @@ export const Snowflake: ConnectorSpec = {
 
     listDatabases: {
       isTool: true,
+      scope: 'read',
       description:
         'List Snowflake databases visible to the connector\'s role. Returns JSON objects (not SQL row arrays) with name, kind, owner, comment, created_on, and other metadata. Does not require a warehouse. Use this as the starting point for data discovery when the target database is unknown. Supports case-insensitive name filtering via "like" (SQL wildcards) and case-sensitive prefix filtering via "startsWith".',
       input: ListDatabasesInputSchema,
@@ -449,6 +400,7 @@ export const Snowflake: ConnectorSpec = {
 
     listSchemas: {
       isTool: true,
+      scope: 'read',
       description:
         'List schemas inside a Snowflake database. Returns JSON objects with name, database_name, owner, comment, and other metadata. Does not require a warehouse. Use after listDatabases to narrow down the target before listing tables or views. Database name is case-sensitive and must match exactly what listDatabases returned.',
       input: ListSchemasInputSchema,
@@ -466,6 +418,7 @@ export const Snowflake: ConnectorSpec = {
 
     listTables: {
       isTool: true,
+      scope: 'read',
       description:
         'List tables inside a Snowflake schema. Returns JSON objects with name, database_name, schema_name, kind, rows, bytes, cluster_by, comment, and other metadata. Does not require a warehouse. Use after listSchemas to find the specific table to describe or query. Database and schema names are case-sensitive. Optional: "history" to include dropped tables.',
       input: ListTablesInputSchema,
@@ -486,6 +439,7 @@ export const Snowflake: ConnectorSpec = {
 
     listViews: {
       isTool: true,
+      scope: 'read',
       description:
         "List views inside a Snowflake schema. Returns JSON objects with name, database_name, schema_name, owner, comment, and other metadata. Does not require a warehouse. Database and schema names are case-sensitive. Use describeView to retrieve a view's columns and underlying query text.",
       input: ListViewsInputSchema,
@@ -505,6 +459,7 @@ export const Snowflake: ConnectorSpec = {
 
     describeTable: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full definition of a Snowflake table, including columns (name, type, nullable, default, comment), clustering keys, row count, size in bytes, owner, and other metadata. Returns a clean JSON Table object (not SQL row arrays). Does not require a warehouse. Use this before runQuery to build correct SELECT or JOIN queries against the table. Database, schema, and table names are all case-sensitive.',
       input: DescribeTableInputSchema,
@@ -523,6 +478,7 @@ export const Snowflake: ConnectorSpec = {
 
     describeView: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the full definition of a Snowflake view, including columns, the underlying SELECT query text, owner, comment, and other metadata. Returns a clean JSON View object. Does not require a warehouse. Use to understand what a view exposes before querying it or building dependent logic. Database, schema, and view names are all case-sensitive.',
       input: DescribeViewInputSchema,
@@ -541,6 +497,7 @@ export const Snowflake: ConnectorSpec = {
 
     listCortexSearchServices: {
       isTool: true,
+      scope: 'read',
       description:
         'List Cortex Search services defined in a Snowflake schema. Cortex Search provides semantic + lexical search over indexed text columns. Returns JSON objects with name, database_name, schema_name, target_lag, warehouse, comment, and the underlying source query. Use before cortexSearch to discover what search services are available. Database and schema names are case-sensitive.',
       input: ListCortexSearchServicesInputSchema,
@@ -560,6 +517,7 @@ export const Snowflake: ConnectorSpec = {
 
     cortexSearch: {
       isTool: true,
+      scope: 'read',
       description:
         'Run a natural-language query against a Snowflake Cortex Search service. Cortex Search performs hybrid semantic + lexical matching over the service\'s indexed search column and returns ranked results as JSON. Use for unstructured text retrieval (support docs, product catalogs, chat logs) — much better than LIKE or CONTAINS in SQL. Supports additional attribute filtering via the "filter" DSL (@eq, @contains, @gte, @lte, @and, @or, @not). Example filter: {"@and": [{"@eq": {"REGION": "US"}}, {"@gte": {"YEAR": 2024}}]}. Prefer limit<=20 to keep LLM context small.',
       input: CortexSearchInputSchema,
@@ -585,36 +543,23 @@ export const Snowflake: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.snowflake.test.description', {
+    description: i18n.translate('connectorSpecs.snowflake.test.description', {
       defaultMessage:
         'Verifies connection to Snowflake by executing SELECT CURRENT_VERSION() and returning the result.',
     }),
     handler: async (ctx) => {
       const { accountUrl } = ctx.config as { accountUrl: string };
       const url = `${normalizeUrl(accountUrl)}${SNOWFLAKE_SQL_API_PATH}`;
-
-      const response = await ctx.client.post(
+      await ctx.client.post(
         url,
         { statement: 'SELECT CURRENT_VERSION()' },
         {
           validateStatus: (status) => status === 200 || status === 202,
         }
       );
-
-      if (response.status === 200 && response.data?.data) {
-        return {
-          ok: true,
-          message: `Connected to Snowflake. Version: ${response.data.data[0]?.[0] ?? 'unknown'}`,
-        };
-      }
-
-      return {
-        ok: true,
-        message: `Connected to Snowflake. Statement submitted (handle: ${
-          response.data?.statementHandle ?? 'unknown'
-        }).`,
-      };
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

@@ -35,7 +35,7 @@ export const DefaultEdge = memo(
     targetPosition,
     data,
   }: EdgeProps) => {
-    const color: EdgeColor = data?.color || 'primary';
+    const color: EdgeColor = 'subdued';
     const entityToConnector = data?.sourceShape !== 'group' && isConnectorShape(data?.targetShape);
     const connectorToEntity = isConnectorShape(data?.sourceShape) && data?.targetShape !== 'group';
     const isExtraAlignment = entityToConnector || connectorToEntity;

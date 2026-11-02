@@ -14,6 +14,7 @@ import { BarDetails } from './bar_details';
 
 jest.mock('../../utils', () => ({
   asDuration: (value: number) => `${value} ms`,
+  asInteger: (value: number) => value.toLocaleString('en-US'),
 }));
 jest.mock('./trace_waterfall_context', () => ({
   useTraceWaterfallContext: jest.fn(),
@@ -95,6 +96,90 @@ describe('BarDetails', () => {
         } as unknown as TraceWaterfallItem;
         const { getByTestId } = render(<BarDetails item={mockItemWithError} left={10} />);
         expect(getByTestId('apmBarDetailsErrorBadge')).toBeInTheDocument();
+      });
+    });
+
+    // errorSource drives the waterfall routing: 'unprocessedOtel' opens the span flyout while
+    // 'apm' and 'mixed' go to the Errors page. The click-handler tests inject errorSource
+    // themselves, so this is the only coverage of how the badge classifies a row.
+    describe('and the error badge classifies the row', () => {
+      const onErrorClick = jest.fn();
+
+      beforeEach(() => {
+        onErrorClick.mockClear();
+        (useTraceWaterfallContext as jest.Mock).mockReturnValue({ onErrorClick });
+      });
+
+      const clickErrorBadge = async (errors: TraceWaterfallItem['errors']) => {
+        const user = userEvent.setup();
+        const item = {
+          ...mockItem,
+          id: 'span-1',
+          traceId: 'trace-1',
+          errors,
+        } as unknown as TraceWaterfallItem;
+
+        const { getByTestId } = render(<BarDetails item={item} left={10} />);
+        await user.click(getByTestId('apmBarDetailsErrorBadge'));
+
+        return onErrorClick.mock.calls[0][0];
+      };
+
+      it('reports "apm" when every error is a classic APM error', async () => {
+        const payload = await clickErrorBadge([
+          { errorDocId: 'error-doc-id-1', source: 'apm' },
+          { errorDocId: 'error-doc-id-2', source: 'apm' },
+        ]);
+
+        expect(payload.errorSource).toBe('apm');
+      });
+
+      it('reports "unprocessedOtel" when every error is an unprocessed OTel exception', async () => {
+        const payload = await clickErrorBadge([
+          { errorDocId: 'error-doc-id-1', source: 'unprocessedOtel' },
+          { errorDocId: 'error-doc-id-2', source: 'unprocessedOtel' },
+        ]);
+
+        expect(payload.errorSource).toBe('unprocessedOtel');
+      });
+
+      it('reports "mixed" when the row carries both kinds', async () => {
+        const payload = await clickErrorBadge([
+          { errorDocId: 'error-doc-id-1', source: 'apm' },
+          { errorDocId: 'error-doc-id-2', source: 'unprocessedOtel' },
+        ]);
+
+        expect(payload.errorSource).toBe('mixed');
+      });
+
+      it('passes the single error document through when the row has exactly one error', async () => {
+        const payload = await clickErrorBadge([
+          {
+            errorDocId: 'error-doc-id-1',
+            errorDocIndex: 'logs-generic.otel-default',
+            source: 'unprocessedOtel',
+          },
+        ]);
+
+        expect(payload).toEqual({
+          traceId: 'trace-1',
+          docId: 'span-1',
+          errorCount: 1,
+          errorDocId: 'error-doc-id-1',
+          docIndex: 'logs-generic.otel-default',
+          errorSource: 'unprocessedOtel',
+        });
+      });
+
+      it('omits the error document reference when the row has more than one error', async () => {
+        const payload = await clickErrorBadge([
+          { errorDocId: 'error-doc-id-1', errorDocIndex: 'logs-apm.error-default', source: 'apm' },
+          { errorDocId: 'error-doc-id-2', errorDocIndex: 'logs-apm.error-default', source: 'apm' },
+        ]);
+
+        expect(payload.errorDocId).toBeUndefined();
+        expect(payload.docIndex).toBeUndefined();
+        expect(payload.errorCount).toBe(2);
       });
     });
 
@@ -532,6 +617,28 @@ describe('BarDetails', () => {
 
       const { queryByText } = render(<BarDetails item={mockItemWithColdStart} left={10} />);
       expect(queryByText('cold start')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('in case of token usage', () => {
+    it('renders input and output token badges when present', () => {
+      const mockItemWithTokens = {
+        ...mockItem,
+        inputTokens: 19,
+        outputTokens: 58,
+      } as unknown as TraceWaterfallItem;
+
+      const { getByTestId, getByText } = render(<BarDetails item={mockItemWithTokens} left={10} />);
+      expect(getByTestId('apmBarDetailsInputTokensBadge')).toBeInTheDocument();
+      expect(getByTestId('apmBarDetailsOutputTokensBadge')).toBeInTheDocument();
+      expect(getByText('input.tokens: 19')).toBeInTheDocument();
+      expect(getByText('output.tokens: 58')).toBeInTheDocument();
+    });
+
+    it('does not render token badges when token fields are missing', () => {
+      const { queryByTestId } = render(<BarDetails item={mockItem} left={10} />);
+      expect(queryByTestId('apmBarDetailsInputTokensBadge')).not.toBeInTheDocument();
+      expect(queryByTestId('apmBarDetailsOutputTokensBadge')).not.toBeInTheDocument();
     });
   });
 

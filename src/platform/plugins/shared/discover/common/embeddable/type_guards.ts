@@ -7,14 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
-  DiscoverSessionEsqlTab,
-  DiscoverSessionTab,
-} from '../../server';
-import type {
   SearchEmbeddableByValueState,
   SearchEmbeddablePanelApiState,
   SearchEmbeddableState,
@@ -26,10 +21,6 @@ export function isDiscoverSessionEmbeddableByReferenceState(
   state: DiscoverSessionEmbeddableState
 ): state is DiscoverSessionEmbeddableByReferenceState {
   return 'ref_id' in state;
-}
-
-export function isDiscoverSessionEsqlTab(tab: DiscoverSessionTab): tab is DiscoverSessionEsqlTab {
-  return 'data_source' in tab && tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
 }
 
 export function isSearchEmbeddableByValueState(

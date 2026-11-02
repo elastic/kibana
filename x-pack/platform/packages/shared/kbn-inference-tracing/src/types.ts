@@ -11,10 +11,12 @@ export enum GenAISemanticConventions {
   GenAIUsageCost = 'gen_ai.usage.cost',
   GenAIUsageInputTokens = 'gen_ai.usage.input_tokens',
   GenAIUsageCacheReadInputTokens = 'gen_ai.usage.cache_read.input_tokens',
+  GenAIUsageCacheWriteInputTokens = 'gen_ai.usage.cache_write.input_tokens',
   GenAIUsageOutputTokens = 'gen_ai.usage.output_tokens',
   GenAIOperationName = 'gen_ai.operation.name',
   GenAIResponseModel = 'gen_ai.response.model',
   GenAIRequestModel = 'gen_ai.request.model',
+  GenAIRequestReasoningLevel = 'gen_ai.request.reasoning.level',
   GenAIProviderName = 'gen_ai.provider.name',
   GenAIOutputType = 'gen_ai.output.type',
   GenAIToolCallId = 'gen_ai.tool.call.id',
@@ -39,12 +41,23 @@ export enum GenAISemanticConventions {
 export enum ElasticGenAIAttributes {
   InferenceSpanKind = 'elastic.inference.span.kind',
   ToolChoice = 'elastic.llm.toolChoice',
+  ConversationTitle = 'elastic.conversation.title',
+  CacheControlType = 'elastic.cache_control.type',
+  CacheControlTTL = 'elastic.cache_control.ttl',
+  CacheControlSessionId = 'elastic.cache_control.session_id',
+}
+
+export enum UserAttributes {
+  UserId = 'user.id',
+  UserName = 'user.name',
+  UserHash = 'user.hash',
 }
 
 export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIUsageCost]?: number;
   [GenAISemanticConventions.GenAIUsageInputTokens]?: number;
   [GenAISemanticConventions.GenAIUsageCacheReadInputTokens]?: number;
+  [GenAISemanticConventions.GenAIUsageCacheWriteInputTokens]?: number;
   [GenAISemanticConventions.GenAIUsageOutputTokens]?: number;
   [GenAISemanticConventions.GenAIOperationName]?:
     | 'chat'
@@ -52,6 +65,7 @@ export interface GenAISemConvAttributes {
     | 'invoke_agent'
     | 'invoke_workflow';
   [GenAISemanticConventions.GenAIRequestModel]?: string;
+  [GenAISemanticConventions.GenAIRequestReasoningLevel]?: string;
   [GenAISemanticConventions.GenAIResponseModel]?: string;
   [GenAISemanticConventions.GenAIProviderName]?: string;
   'error.type'?: string;
@@ -72,6 +86,10 @@ export interface GenAISemConvAttributes {
   [GenAISemanticConventions.GenAIWorkflowName]?: string;
   [ElasticGenAIAttributes.InferenceSpanKind]?: 'CHAIN' | 'AGENT' | 'LLM' | 'TOOL';
   [ElasticGenAIAttributes.ToolChoice]?: string;
+  [ElasticGenAIAttributes.ConversationTitle]?: string;
+  [UserAttributes.UserId]?: string;
+  [UserAttributes.UserName]?: string;
+  [UserAttributes.UserHash]?: string;
 }
 
 /**

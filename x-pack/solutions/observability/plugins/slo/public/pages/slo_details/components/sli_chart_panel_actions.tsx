@@ -95,7 +95,7 @@ export function SliChartPanelActions({ slo, timeRange }: SliChartPanelActionsPro
       button={
         <EuiButtonEmpty
           size="s"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsActionsOpen(!isActionsOpen)}
           data-test-subj="sliChartActionsButton"

@@ -32,11 +32,13 @@ jest.mock('./public/services/dashboard_api_services', () => {
 });
 
 jest.mock('./public/services/dashboard_recently_accessed_service', () => {
+  const recentlyAccessed = {
+    add: jest.fn(),
+    remove: jest.fn(),
+    get: jest.fn(),
+    get$: jest.fn(),
+  };
   return {
-    getDashboardRecentlyAccessedService: () => ({
-      add: jest.fn(),
-      get: jest.fn(),
-      get$: jest.fn(),
-    }),
+    getDashboardRecentlyAccessedService: () => recentlyAccessed,
   };
 });

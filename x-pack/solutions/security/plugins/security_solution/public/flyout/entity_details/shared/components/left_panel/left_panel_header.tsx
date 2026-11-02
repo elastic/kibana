@@ -50,7 +50,7 @@ export interface EntityDetailsPath {
 const TechnicalPreviewBadge = () => (
   <EuiIconTip
     aria-label="Technical Preview"
-    type={'beaker'}
+    type={'flask'}
     title={
       <FormattedMessage
         id="xpack.securitySolution.flyout.left.visualize.graphVisualizationButton.technicalPreviewLabel"

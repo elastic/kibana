@@ -47,7 +47,7 @@ export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
             <WorkflowsUiServicesProvider services={mockServices}>
               <MemoryRouter initialEntries={initialEntries}>
                 <I18nProviderMock>
-                  <MockAppHeaderProvider>
+                  <MockAppHeaderProvider chrome={mockServices.chrome}>
                     <Provider store={testStore}>{children}</Provider>
                   </MockAppHeaderProvider>
                 </I18nProviderMock>

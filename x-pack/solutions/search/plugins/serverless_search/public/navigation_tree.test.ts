@@ -29,7 +29,8 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
     expect(homeNode).toMatchObject({
-      title: 'Elasticsearch',
+      title: 'Home',
+      icon: 'home',
       link: 'searchHomepage',
     });
   });
@@ -44,6 +45,20 @@ describe('Navigation Tree', () => {
     expect(body[2]).toMatchObject({ link: 'context_engine' });
   });
 
+  it('includes service accounts in Admin and Settings', () => {
+    const { footer } = createNavigationTree(mockApplication);
+    const adminAndSettingsNode = footer?.find(
+      (item: { id?: string }) => item.id === 'admin_and_settings'
+    );
+    const accessSection = adminAndSettingsNode?.children?.find(
+      (item: { id?: string }) => item.id === 'settings_access'
+    );
+
+    expect(accessSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:service_accounts' })
+    );
+  });
+
   it('includes Manage jobs link to Stack Management anomaly detection jobs list under ML nav', () => {
     const { body } = createNavigationTree(mockApplication);
     const mlNode = body.find((item: any) => item.id === 'machine_learning');
@@ -56,6 +71,34 @@ describe('Navigation Tree', () => {
         link: 'management:anomaly_detection',
         title: 'Manage jobs',
       })
+    );
+  });
+
+  it('includes Stack Alerts in Admin and Settings > Alerts and insights', () => {
+    const { footer } = createNavigationTree(mockApplication);
+    const adminAndSettingsNode = footer?.find(
+      (item: { id?: string }) => item.id === 'admin_and_settings'
+    );
+    const alertsSection = adminAndSettingsNode?.children?.find(
+      (item: { id?: string }) => item.id === 'settings_alerts'
+    );
+
+    expect(alertsSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:triggersActionsAlerts' })
+    );
+  });
+
+  it('includes Stack Rules in Admin and Settings > Alerts and insights', () => {
+    const { footer } = createNavigationTree(mockApplication);
+    const adminAndSettingsNode = footer?.find(
+      (item: { id?: string }) => item.id === 'admin_and_settings'
+    );
+    const alertsSection = adminAndSettingsNode?.children?.find(
+      (item: { id?: string }) => item.id === 'settings_alerts'
+    );
+
+    expect(alertsSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:triggersActions' })
     );
   });
 
@@ -138,48 +181,49 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('shows Performance link in Organization section when showPerformanceLink is true', () => {
+  it('shows Monitor performance link in Project performance section when showPerformanceLink is true', () => {
     const { footer } = createNavigationTree({ ...mockApplication, showPerformanceLink: true });
 
     const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
-    const orgSection = adminAndSettingsNode?.children?.find(
-      (item: any) => item.id === 'organization'
+    const projectPerformanceSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'settings_project_performance'
     );
 
-    expect(orgSection).toBeDefined();
-    expect(orgSection?.children).toContainEqual(
+    expect(projectPerformanceSection?.children).toEqual([
       expect.objectContaining({
         id: 'cloudLinkDeployment',
         cloudLink: 'deployment',
-      })
-    );
+        title: 'Monitor performance',
+      }),
+      expect.objectContaining({ link: 'management:queryActivity' }),
+    ]);
   });
 
-  it('hides Performance link in Organization section when showPerformanceLink is false', () => {
+  it('hides Monitor performance link in Project performance section when showPerformanceLink is false', () => {
     const { footer } = createNavigationTree({ ...mockApplication, showPerformanceLink: false });
 
     const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
-    const orgSection = adminAndSettingsNode?.children?.find(
-      (item: any) => item.id === 'organization'
+    const projectPerformanceSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'settings_project_performance'
     );
 
-    expect(orgSection).toBeDefined();
-    expect(orgSection?.children).not.toContainEqual(
+    expect(projectPerformanceSection).toBeDefined();
+    expect(projectPerformanceSection?.children).not.toContainEqual(
       expect.objectContaining({
         id: 'cloudLinkDeployment',
       })
     );
   });
 
-  it('hides Performance link by default (no manage cluster privilege)', () => {
+  it('hides Monitor performance link by default (no manage cluster privilege)', () => {
     const { footer } = createNavigationTree(mockApplication);
 
     const adminAndSettingsNode = footer?.find((item: any) => item.id === 'admin_and_settings');
-    const orgSection = adminAndSettingsNode?.children?.find(
-      (item: any) => item.id === 'organization'
+    const projectPerformanceSection = adminAndSettingsNode?.children?.find(
+      (item: any) => item.id === 'settings_project_performance'
     );
 
-    expect(orgSection?.children).not.toContainEqual(
+    expect(projectPerformanceSection?.children).not.toContainEqual(
       expect.objectContaining({
         id: 'cloudLinkDeployment',
       })

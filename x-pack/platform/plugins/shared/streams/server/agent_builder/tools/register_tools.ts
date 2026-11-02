@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginSetup, ToolAvailabilityConfig } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
 import type { StreamsServer } from '../../types';
@@ -38,12 +38,14 @@ export function registerAgentBuilderTools({
   server,
   logger,
   telemetry,
+  availability,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
+  availability: ToolAvailabilityConfig;
 }): void {
   if (!agentBuilder) {
     return;
@@ -70,6 +72,9 @@ export function registerAgentBuilderTools({
   ];
 
   for (const tool of streamsTools) {
-    agentBuilder.tools.register(tool as Parameters<typeof agentBuilder.tools.register>[0]);
+    agentBuilder.tools.register({
+      ...(tool as Parameters<typeof agentBuilder.tools.register>[0]),
+      availability,
+    });
   }
 }

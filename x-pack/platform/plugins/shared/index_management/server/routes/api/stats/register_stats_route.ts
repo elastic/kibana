@@ -12,7 +12,7 @@ import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
-  indexName: schema.string(),
+  indexName: schema.string({ maxLength: 1000 }),
 });
 
 interface Hit {

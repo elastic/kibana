@@ -9,13 +9,7 @@ import type {
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  ATTACHMENT_REF_OPERATION,
-  hashContent,
-  getLatestVersion,
-  getVersion,
-} from '@kbn/agent-builder-common/attachments';
+import { hashContent, getLatestVersion, getVersion } from '@kbn/agent-builder-common/attachments';
 import {
   createAttachmentStateManager,
   type AttachmentStateManager,
@@ -746,64 +740,211 @@ describe('AttachmentStateManager', () => {
     });
   });
 
-  describe('access tracking', () => {
-    it('records created when adding', async () => {
-      const attachment = await manager.add({
-        id: 'att-1',
+  describe('change log', () => {
+    it('records added with current_version 1 on add()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      expect(manager.drainChanges()).toEqual([
+        { kind: 'added', attachment_id: created.id, attachment_type: 'text', current_version: 1 },
+      ]);
+    });
+
+    it('drainChanges() clears the log', async () => {
+      await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.drainChanges();
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('clearChanges() discards recorded changes', async () => {
+      await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records updated with previous/current version when content changes', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      await manager.update(created.id, { data: { content: 'b' } });
+      expect(manager.drainChanges()).toEqual([
+        {
+          kind: 'updated',
+          attachment_id: created.id,
+          attachment_type: 'text',
+          previous_version: 1,
+          current_version: 2,
+        },
+      ]);
+    });
+
+    it('records nothing on update() with identical content', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      await manager.update(created.id, { data: { content: 'a' } });
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records nothing on metadata-only update()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      await manager.update(created.id, { description: 'renamed', hidden: true, readonly: true });
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records deleted with hard_delete false on soft delete()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      manager.delete(created.id);
+      expect(manager.drainChanges()).toEqual([
+        { kind: 'deleted', attachment_id: created.id, attachment_type: 'text', hard_delete: false },
+      ]);
+    });
+
+    it('records nothing when delete() targets an already inactive attachment', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.delete(created.id);
+      manager.clearChanges();
+      manager.delete(created.id);
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records deleted with hard_delete true on permanentDelete() of an active attachment', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.clearChanges();
+      manager.permanentDelete(created.id);
+      expect(manager.drainChanges()).toEqual([
+        { kind: 'deleted', attachment_id: created.id, attachment_type: 'text', hard_delete: true },
+      ]);
+    });
+
+    it('records nothing on permanentDelete() of a tombstone', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' } });
+      manager.delete(created.id);
+      manager.clearChanges();
+      manager.permanentDelete(created.id);
+      expect(manager.drainChanges()).toEqual([]);
+    });
+
+    it('records restored on restore(), and nothing on rename() and updateOrigin()', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' }, description: 'd' });
+      manager.delete(created.id);
+      manager.clearChanges();
+      manager.restore(created.id);
+      manager.rename(created.id, 'new name');
+      await manager.updateOrigin(created.id, 'origin-1');
+      expect(manager.drainChanges()).toEqual([
+        {
+          kind: 'restored',
+          attachment_id: created.id,
+          attachment_type: 'text',
+          current_version: 1,
+          description: 'd',
+        },
+      ]);
+    });
+
+    it('flags changes of hidden attachments instead of skipping them', async () => {
+      const hidden = await manager.add({ type: 'text', data: { content: 'a' }, hidden: true });
+      await manager.update(hidden.id, { data: { content: 'b' } });
+      manager.delete(hidden.id);
+      expect(manager.drainChanges()).toEqual([
+        {
+          kind: 'added',
+          attachment_id: hidden.id,
+          attachment_type: 'text',
+          current_version: 1,
+          hidden: true,
+        },
+        {
+          kind: 'updated',
+          attachment_id: hidden.id,
+          attachment_type: 'text',
+          previous_version: 1,
+          current_version: 2,
+          hidden: true,
+        },
+        {
+          kind: 'deleted',
+          attachment_id: hidden.id,
+          attachment_type: 'text',
+          hard_delete: false,
+          hidden: true,
+        },
+      ]);
+    });
+
+    it('snapshots the description set in the same update as the content', async () => {
+      const created = await manager.add({
         type: 'text',
-        data: { content: 'test' },
+        data: { content: 'a' },
+        description: 'old',
       });
-
-      expect(manager.getAccessedRefs()).toEqual([
-        {
-          attachment_id: attachment.id,
-          version: 1,
-          operation: ATTACHMENT_REF_OPERATION.created,
-          actor: ATTACHMENT_REF_ACTOR.system,
-        },
+      manager.clearChanges();
+      await manager.update(created.id, { data: { content: 'b' }, description: 'new' });
+      expect(manager.drainChanges()).toEqual([
+        expect.objectContaining({ kind: 'updated', description: 'new' }),
       ]);
     });
 
-    it('records updated on update and does not override created', async () => {
-      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
-      await manager.update('att-1', { data: { content: 'v2' } });
+    it('never puts a description on a deletion', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' }, description: 'd' });
+      manager.clearChanges();
+      manager.delete(created.id);
+      expect(manager.drainChanges()[0]).not.toHaveProperty('description');
+    });
 
-      expect(manager.getAccessedRefs()).toEqual([
-        {
-          attachment_id: 'att-1',
-          version: 1,
-          operation: ATTACHMENT_REF_OPERATION.created,
-          actor: ATTACHMENT_REF_ACTOR.system,
-        },
-        {
-          attachment_id: 'att-1',
-          version: 2,
-          operation: ATTACHMENT_REF_OPERATION.updated,
-          actor: ATTACHMENT_REF_ACTOR.system,
-        },
+    it('stamps the tool call id on changes recorded through forToolCall, over shared state', async () => {
+      const view = manager.forToolCall('call-1');
+      const created = await view.add({ type: 'text', data: { content: 'a' } });
+      await manager.update(created.id, { data: { content: 'b' } });
+      expect(manager.getAttachmentRecord(created.id)?.current_version).toBe(2);
+      expect(view.hasChanges()).toBe(true);
+      expect(manager.drainChanges().map((change) => change.tool_call_id)).toEqual([
+        'call-1',
+        undefined,
       ]);
     });
 
-    it('records read via get() with actor', async () => {
-      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
-      manager.clearAccessTracking();
-
-      const latest = manager.get('att-1', { actor: ATTACHMENT_REF_ACTOR.agent });
-      const v1 = manager.get('att-1', { version: 1, actor: ATTACHMENT_REF_ACTOR.agent });
-
-      expect(latest?.version).toBe(1);
-      expect(v1?.version).toBe(1);
-      // After get() calls with actor, read tracking should be recorded
-      expect(manager.getAccessedRefs().length).toBeGreaterThanOrEqual(1);
+    it('records one change per mutation when a call adds then updates the same attachment', async () => {
+      const view = manager.forToolCall('call-1');
+      const created = await view.add({ type: 'text', data: { content: 'a' } });
+      await view.update(created.id, { data: { content: 'b' } });
+      expect(manager.drainChanges().map((change) => [change.kind, change.tool_call_id])).toEqual([
+        ['added', 'call-1'],
+        ['updated', 'call-1'],
+      ]);
     });
 
-    it('clears access tracking', async () => {
-      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
-      expect(manager.getAccessedRefs()).toHaveLength(1);
+    it('drains only the changes matching the filter and keeps the rest in order', async () => {
+      await manager.forToolCall('call-1').add({ id: 'a', type: 'text', data: { content: 'a' } });
+      await manager.forToolCall('call-2').add({ id: 'b', type: 'text', data: { content: 'b' } });
+      await manager.add({ id: 'c', type: 'text', data: { content: 'c' } });
+      expect(
+        manager
+          .drainChanges((change) => change.tool_call_id === 'call-2')
+          .map((c) => c.attachment_id)
+      ).toEqual(['b']);
+      expect(manager.drainChanges().map((c) => c.attachment_id)).toEqual(['a', 'c']);
+    });
 
-      manager.clearAccessTracking();
+    it('preserves insertion order across mixed mutations', async () => {
+      const a = await manager.add({ type: 'text', data: { content: 'a' } });
+      await manager.update(a.id, { data: { content: 'b' } });
+      manager.delete(a.id);
+      expect(manager.drainChanges().map((c) => c.kind)).toEqual(['added', 'updated', 'deleted']);
+    });
 
-      expect(manager.getAccessedRefs()).toHaveLength(0);
+    it('records a change if the update also unhides the attachment', async () => {
+      const created = await manager.add({ type: 'text', data: { content: 'a' }, hidden: true });
+      manager.clearChanges();
+      await manager.update(created.id, { hidden: false, data: { content: 'b' } });
+      expect(manager.drainChanges()).toEqual([
+        {
+          kind: 'updated',
+          attachment_id: created.id,
+          attachment_type: 'text',
+          previous_version: 1,
+          current_version: 2,
+        },
+      ]);
     });
   });
 

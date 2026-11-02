@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
 
 /**
  * WARNING: Do not modify the existing versioned schema(s) below; add a new version instead.
@@ -117,6 +118,64 @@ const stateSchemaV3 = stateSchemaV2.extends({
   ),
 });
 
+const stateSchemaV4 = stateSchemaV3.extends({
+  // `query.format` no longer exists, and both strategy vocabularies were
+  // renamed, so none of the v3 counters has a source any more.
+  count_by_query_format: undefined,
+  count_by_recovery_strategy: schema.maybe(
+    schema.object({
+      no_breach: schema.maybe(schema.number()),
+      condition: schema.maybe(schema.number()),
+      query: schema.maybe(schema.number()),
+      manual: schema.maybe(schema.number()),
+    })
+  ),
+  count_by_no_data_strategy: schema.maybe(
+    schema.object({
+      ignore: schema.maybe(schema.number()),
+      keep_last: schema.maybe(schema.number()),
+      resolve: schema.maybe(schema.number()),
+      alert: schema.maybe(schema.number()),
+    })
+  ),
+});
+
+// The agent-builder-assisted rule tag is no longer written, so neither counter
+// has a source. `action_policies_count_agent_builder_assisted` was stored but
+// never collected.
+const stateSchemaV5 = stateSchemaV4.extends({
+  count_agent_builder_assisted: undefined,
+  action_policies_count_agent_builder_assisted: undefined,
+});
+
+const countSchema = schema.maybe(schema.number());
+
+const stateSchemaV6 = stateSchemaV5.extends({
+  action_policies_count_by_status: schema.maybe(
+    schema.object({ enabled: countSchema, disabled: countSchema, snoozed: countSchema })
+  ),
+  action_policies_count_by_grouping_mode: schema.maybe(
+    schema.object({ per_alert: countSchema, per_field: countSchema, all: countSchema })
+  ),
+  action_policies_count_by_throttle_strategy: schema.maybe(
+    schema.object({
+      on_status_change: countSchema,
+      per_status_interval: countSchema,
+      time_interval: countSchema,
+      every_time: countSchema,
+      none: countSchema,
+    })
+  ),
+  action_policies_workflows_per_policy: schema.maybe(
+    schema.object({
+      p50: schema.nullable(schema.number()),
+      p99: schema.nullable(schema.number()),
+      avg: schema.nullable(schema.number()),
+    })
+  ),
+  action_policies_count_with_multiple_workflows: schema.maybe(schema.number()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -179,9 +238,36 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV3,
   },
+  4: {
+    up: (state: Record<string, unknown>) => ({
+      ...omit(state, 'count_by_query_format'),
+      count_by_recovery_strategy: undefined,
+      count_by_no_data_strategy: undefined,
+    }),
+    schema: stateSchemaV4,
+  },
+  5: {
+    up: (state: Record<string, unknown>) =>
+      omit(state, ['count_agent_builder_assisted', 'action_policies_count_agent_builder_assisted']),
+    schema: stateSchemaV5,
+  },
+  6: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      action_policies_count_by_status: state.action_policies_count_by_status ?? undefined,
+      action_policies_count_by_grouping_mode:
+        state.action_policies_count_by_grouping_mode ?? undefined,
+      action_policies_count_by_throttle_strategy:
+        state.action_policies_count_by_throttle_strategy ?? undefined,
+      action_policies_workflows_per_policy: state.action_policies_workflows_per_policy ?? undefined,
+      action_policies_count_with_multiple_workflows:
+        state.action_policies_count_with_multiple_workflows ?? undefined,
+    }),
+    schema: stateSchemaV6,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[3].schema;
+const latestTaskStateSchema = stateSchemaByVersion[6].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

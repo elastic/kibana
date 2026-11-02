@@ -272,6 +272,78 @@ describe('UnifiedWaterfallContainer', () => {
 
       expect(mockNavigateToUrl).not.toHaveBeenCalled();
     });
+
+    it('navigates to the Errors page for a single unprocessed OTel error (was: log doc flyout)', () => {
+      // Previously this case opened a log document flyout. Now every badge click goes
+      // to the Errors page regardless of errorSource — the page itself shows both
+      // "APM errors" and "Errors from logs" sections, scoped by the kuery.
+      mockRouterLink.mockReturnValue('/services/products-service/errors?kuery=...');
+      renderUnifiedWaterfallContainer();
+
+      act(() => {
+        capturedTraceWaterfallProps.onErrorClick({
+          traceId: 'trace-123',
+          docId: 'span-1',
+          errorCount: 1,
+          errorDocId: 'otel-error-1',
+          docIndex: 'logs-generic.otel-default',
+          errorSource: 'unprocessedOtel',
+        });
+      });
+
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
+      expect(mockRouterLink).toHaveBeenCalledWith(
+        '/services/{serviceName}/errors',
+        expect.objectContaining({
+          path: { serviceName: 'products-service' },
+        })
+      );
+    });
+
+    it('navigates to the Errors page for a pure-OTel row with several errors (was: span flyout)', () => {
+      // Previously this case opened the span flyout scrolled to the errors table.
+      // Now every badge click goes to the Errors page regardless of errorSource.
+      mockRouterLink.mockReturnValue('/services/products-service/errors?kuery=...');
+      renderUnifiedWaterfallContainer();
+
+      act(() => {
+        capturedTraceWaterfallProps.onErrorClick({
+          traceId: 'trace-123',
+          docId: 'span-1',
+          errorCount: 3,
+          errorSource: 'unprocessedOtel',
+        });
+      });
+
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
+      expect(mockRouterLink).toHaveBeenCalledWith(
+        '/services/{serviceName}/errors',
+        expect.objectContaining({
+          path: { serviceName: 'products-service' },
+        })
+      );
+    });
+
+    it('does not render a doc flyout for any error source', () => {
+      // The UnifiedDocViewerObservabilityTraceDocFlyout is no longer mounted by this
+      // component — it was removed when every error-badge click was unified to navigate.
+      renderUnifiedWaterfallContainer();
+
+      // Trigger a click that previously would have opened the log flyout.
+      act(() => {
+        capturedTraceWaterfallProps.onErrorClick({
+          traceId: 'trace-123',
+          docId: 'span-1',
+          errorCount: 1,
+          errorDocId: 'otel-error-1',
+          docIndex: 'logs-generic.otel-default',
+          errorSource: 'unprocessedOtel',
+        });
+      });
+
+      // The only side-effect is navigation — no flyout component is rendered.
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('getServiceBadgeHref', () => {

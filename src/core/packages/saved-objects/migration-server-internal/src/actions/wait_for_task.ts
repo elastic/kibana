@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import * as Either from 'fp-ts/Either';
 import type * as TaskEither from 'fp-ts/TaskEither';
 import * as Option from 'fp-ts/Option';
-import type { errors as EsErrors } from '@elastic/elasticsearch';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   catchRetryableEsClientErrors,
@@ -62,6 +62,37 @@ export interface TaskCompletedWithRetriableError {
   readonly message: string;
   readonly error?: Error;
 }
+
+/** GET _tasks 404 for a task that is neither running nor stored in `.tasks`. */
+export interface TaskNotFound {
+  readonly type: 'task_not_found';
+  readonly message: string;
+  readonly error?: Error;
+}
+
+const LOST_TASK_REASON =
+  /isn't running and hasn't stored its results|isn't part of the cluster and there is no record of the task/;
+
+/** Maps a lost-task 404 to `TaskNotFound` and rethrows every other error. */
+export const catchTaskNotFound = (e: unknown): Either.Either<TaskNotFound, never> => {
+  if (e instanceof EsErrors.ResponseError && isLostTaskResponse(e)) {
+    return Either.left({
+      type: 'task_not_found' as const,
+      message: e.body?.error?.reason ?? e.message,
+      error: e,
+    });
+  } else {
+    throw e;
+  }
+};
+
+const isLostTaskResponse = (e: EsErrors.ResponseError): boolean => {
+  return (
+    e.statusCode === 404 &&
+    e.body?.error?.type === 'resource_not_found_exception' &&
+    LOST_TASK_REASON.test(e.body?.error?.reason ?? '')
+  );
+};
 
 const catchWaitForTaskCompletionTimeout = (
   e: EsErrors.ResponseError

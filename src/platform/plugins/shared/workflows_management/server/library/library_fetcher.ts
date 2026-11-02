@@ -31,14 +31,13 @@ import { LibrarySource } from './library_source';
 import { resolveVersionId } from './resolve_version_id';
 
 /**
- * Default CDN URL the Workflow Template Library fetches its catalog from when
+ * Default CDN URL the Workflow Template library fetches its catalog from when
  * `workflowsManagement.library.registryUrl` is not explicitly configured. Kept
  * here (instead of on the config schema as a `defaultValue`) so the
  * `registryUrl` / `bundlePath` mutual-exclusion validator can distinguish "user
  * set this" from "schema defaulted it".
- * TODO: pointing to staging as a temporary/experimental measure, change to https://workflows.elastic.co/library/v1 when the feature is enabled in production.
  */
-const DEFAULT_LIBRARY_REGISTRY_URL = 'https://workflows-staging.elastic.co/library/v1';
+const DEFAULT_LIBRARY_REGISTRY_URL = 'https://workflows.elastic.co/library/v1';
 const DEFAULT_RETRY_OPTIONS = { retries: 3, factor: 2, minTimeout: 200 };
 /**
  * Per-request timeout (ms) applied to each individual attempt. Bounds a single
@@ -163,7 +162,7 @@ export class LibraryFetcher extends LibrarySource {
     if (!this.cache.catalog) {
       // Defensive: ensureFresh either loaded a catalog or threw.
       throw new LibraryFetchError(
-        'Workflow Template Library catalog could not be loaded.',
+        'Workflow Template library catalog could not be loaded.',
         'unavailable'
       );
     }

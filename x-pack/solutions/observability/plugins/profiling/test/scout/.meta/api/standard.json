@@ -1,20 +1,9 @@
 {
-  "sha1": "f0067f37d06f24cde6ad2981b061c934789f0723",
+  "sha1": "727d99bdef70f487bdc231761b1f383795cd6666",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
-    {
-      "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
-      "title": "Reset profiling state after API tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
-        "line": 13,
-        "column": 1
-      }
-    },
     {
       "id": "1219f91050e9ce3-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -27,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.setup.ts",
-        "line": 20,
+        "line": 15,
         "column": 1
       }
     },
@@ -41,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/00_has_no_setup.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 21,
+        "column": 65
       }
     },
     {
@@ -55,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/00_has_no_setup.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 33,
+        "column": 27
       }
     },
     {
@@ -69,8 +58,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/01_has_setup_apm_not_installed.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 24,
+        "column": 28
       }
     },
     {
@@ -83,8 +72,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/01_has_setup_apm_not_installed.spec.ts",
-        "line": 48,
-        "column": 12
+        "line": 37,
+        "column": 27
       }
     },
     {
@@ -97,8 +86,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/02_has_setup_with_data.spec.ts",
-        "line": 38,
-        "column": 10
+        "line": 28,
+        "column": 5
       }
     },
     {
@@ -111,8 +100,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/02_has_setup_with_data.spec.ts",
-        "line": 52,
-        "column": 10
+        "line": 42,
+        "column": 25
       }
     },
     {
@@ -125,8 +114,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/03_has_setup_with_integrations.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 61,
+        "column": 28
       }
     },
     {
@@ -139,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/03_has_setup_with_integrations.spec.ts",
-        "line": 92,
-        "column": 10
+        "line": 84,
+        "column": 12
       }
     },
     {
@@ -153,8 +142,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/04_functions.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 34,
+        "column": 27
       }
     },
     {
@@ -167,8 +156,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/05_flamegraph.spec.ts",
-        "line": 57,
-        "column": 10
+        "line": 58,
+        "column": 13
       }
     },
     {
@@ -181,8 +170,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
-        "line": 83,
-        "column": 10
+        "line": 89,
+        "column": 7
       }
     },
     {
@@ -195,8 +184,204 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
-        "line": 104,
+        "line": 107,
+        "column": 45
+      }
+    },
+    {
+      "id": "60f6134e51842aa-d3df98c48ed4cc0",
+      "title": "Profiling status matches the Universal Profiling setup status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/07_status.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "60f6134e51842aa-18d0b83a714f209",
+      "title": "Profiling status reports OTel data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/07_status.spec.ts",
+        "line": 93,
+        "column": 28
+      }
+    },
+    {
+      "id": "bb30001f65463ba-7f1659b4f206b31",
+      "title": "Profiling schemas API reports the schemas with data in the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/08_schemas.spec.ts",
+        "line": 54,
+        "column": 13
+      }
+    },
+    {
+      "id": "bb30001f65463ba-8dbd0936c0a809a",
+      "title": "Profiling schemas API only reports the schemas with data matching the query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/08_schemas.spec.ts",
+        "line": 87,
+        "column": 5
+      }
+    },
+    {
+      "id": "c5002c92d885184-ea049cd8d3fad06",
+      "title": "Profiling data APIs by schema queries the flamegraph of the requested schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 117,
+        "column": 45
+      }
+    },
+    {
+      "id": "c5002c92d885184-5f462034de2cae1",
+      "title": "Profiling data APIs by schema queries the functions of the requested schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 132,
+        "column": 96
+      }
+    },
+    {
+      "id": "c5002c92d885184-1b251b05f5941cb",
+      "title": "Profiling data APIs by schema queries the stacktraces of the requested schema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 150,
+        "column": 95
+      }
+    },
+    {
+      "id": "c5002c92d885184-9976c8937ba61a6",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by containers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-f114daf717144be",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by deployments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-c2267562153849d",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by executables",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-70b95cd850b0719",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by hosts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-2c473f131f286ce",
+      "title": "Profiling data APIs by schema groups the OTel stacktraces by threads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 163,
+        "column": 7
+      }
+    },
+    {
+      "id": "c5002c92d885184-e9bb220a08ff9a8",
+      "title": "Profiling data APIs by schema looks up the frames of the OTel stacktraces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/09_otel_data.spec.ts",
+        "line": 170,
         "column": 10
+      }
+    },
+    {
+      "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
+      "title": "Reset profiling state after API tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
+        "line": 6,
+        "column": 1
       }
     }
   ]

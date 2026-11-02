@@ -7,32 +7,26 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiPanel, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Position, type NodeProps } from '@xyflow/react';
+import { ConnectionHandle } from './connection_handle';
 import type { DestinationNode as DestinationNodeType } from '../types';
 import { DESTINATION_NODE_WIDTH } from '../canvas_constants';
 import { getNodeCardStyles } from './node_card_styles';
-
-const processingLabel = i18n.translate('xpack.streams.canvas.destinationNode.processingLabel', {
-  defaultMessage: 'Processing',
-});
+import { DESTINATION_SIGNAL_LABELS } from '../../../../streams_layout/destinations/destination_type_config';
 
 export function DestinationNode({ data, selected, dragging }: NodeProps<DestinationNodeType>) {
   const { euiTheme } = useEuiTheme();
 
   return (
     <>
-      <Handle type="target" position={Position.Left} isConnectable={false} />
+      <ConnectionHandle
+        type="target"
+        position={Position.Left}
+        isConnectable={Boolean(data.destinationId)}
+        destinationId={data.destinationId}
+      />
       <EuiPanel
         // `nokey` stops React Flow from arming a marquee when a Shift+drag starts
         // on the card, so Shift+click multi-select stays stable.
@@ -41,42 +35,74 @@ export function DestinationNode({ data, selected, dragging }: NodeProps<Destinat
         hasBorder
         paddingSize="m"
         data-test-subj="streamsCanvasDestinationNode"
-        css={getNodeCardStyles(euiTheme, { width: DESTINATION_NODE_WIDTH, selected, dragging })}
+        css={getNodeCardStyles(euiTheme, {
+          width: DESTINATION_NODE_WIDTH,
+          selected,
+          dragging,
+        })}
       >
-        <EuiText size="xs">
-          <strong>{data.title}</strong>
-        </EuiText>
-        {data.hasProcessing && (
-          <>
-            <EuiSpacer size="xs" />
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={processingLabel}>
-                  <EuiPanel
-                    hasShadow={false}
-                    hasBorder
-                    paddingSize="none"
-                    color="subdued"
-                    data-test-subj="streamsCanvasProcessingGlyph"
-                    css={css`
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      padding: ${euiTheme.size.xxs};
-                    `}
+        <div
+          css={css`
+            display: flex;
+            align-items: flex-start;
+            gap: ${euiTheme.size.s};
+          `}
+        >
+          <div
+            css={css`
+              flex: 1 1 auto;
+              min-width: 0;
+              overflow-wrap: anywhere;
+            `}
+          >
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: ${euiTheme.size.xs};
+                flex-wrap: wrap;
+              `}
+            >
+              <EuiText size="m">
+                <strong>{data.title}</strong>
+              </EuiText>
+              {data.signals?.map((signal) => (
+                <EuiBadge
+                  key={signal}
+                  color="hollow"
+                  data-test-subj="streamsCanvasDestinationSignalBadge"
+                >
+                  {DESTINATION_SIGNAL_LABELS[signal]}
+                </EuiBadge>
+              ))}
+              {typeof data.indexCount === 'number' && data.indexCount > 0 && (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.streams.canvas.destinationNode.indexCountTooltip',
+                    {
+                      defaultMessage: '{indexCount, plural, one {# index} other {# indices}}',
+                      values: { indexCount: data.indexCount },
+                    }
+                  )}
+                  disableScreenReaderOutput
+                >
+                  <EuiBadge
+                    color="hollow"
+                    tabIndex={0}
+                    data-test-subj="streamsCanvasDestinationIndexCountBadge"
                   >
-                    <EuiIcon type="processor" size="s" aria-label={processingLabel} />
-                  </EuiPanel>
+                    {data.indexCount}
+                  </EuiBadge>
                 </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {processingLabel}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
+              )}
+            </div>
+            {data.subtitle && (
+              <EuiText size="s" color="subdued">
+                {data.subtitle}
+              </EuiText>
+            )}
+          </div>
+        </div>
       </EuiPanel>
     </>
   );

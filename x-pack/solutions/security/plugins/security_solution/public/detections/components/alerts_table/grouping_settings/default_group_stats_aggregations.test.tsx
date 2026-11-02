@@ -179,4 +179,38 @@ describe('defaultGroupStatsAggregations', () => {
       },
     ]);
   });
+
+  it('should return values depending for destination.ip input field', () => {
+    const aggregations = defaultGroupStatsAggregations('destination.ip');
+    expect(aggregations).toEqual([
+      {
+        unitsCount: {
+          cardinality: {
+            field: 'kibana.alert.uuid',
+          },
+        },
+      },
+      {
+        rulesCountAggregation: {
+          cardinality: {
+            field: 'kibana.alert.rule.rule_id',
+          },
+        },
+      },
+      {
+        severitiesSubAggregation: {
+          terms: {
+            field: 'kibana.alert.severity',
+          },
+        },
+      },
+      {
+        hostsCountAggregation: {
+          cardinality: {
+            field: 'host.name',
+          },
+        },
+      },
+    ]);
+  });
 });

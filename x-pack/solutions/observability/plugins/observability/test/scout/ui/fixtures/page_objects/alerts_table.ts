@@ -6,7 +6,7 @@
  */
 
 import { encode } from '@kbn/rison';
-import { EuiDataGridWrapper, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import type { EuiDataGridObject, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { ALERTS_TABLE_TEST_SUBJECTS as SUBJ, ALERT_TABLE_DATE_RANGE } from '../constants';
 
 /**
@@ -31,12 +31,12 @@ export class AlertsTablePage {
   public readonly flyoutAlertDetailsButton: Locator;
   public readonly flyoutViewRuleDetailsLink: Locator;
   // Add-to-case row actions / dialogs
-  public readonly addToExistingCaseAction: Locator;
-  public readonly addToNewCaseAction: Locator;
-  public readonly createCaseFlyout: Locator;
+  public readonly addToCaseAction: Locator;
   public readonly addToExistingCaseModal: Locator;
+  public readonly createCaseAction: Locator;
+  public readonly createCaseFlyout: Locator;
   public readonly queryInput: Locator;
-  public readonly dataGrid: EuiDataGridWrapper;
+  public readonly dataGrid: EuiDataGridObject;
   public readonly groupSelector: Locator;
   // Alert summary widget (full-size, rendered above the table)
   public readonly summaryWidget: Locator;
@@ -49,7 +49,7 @@ export class AlertsTablePage {
 
   constructor(private readonly page: ScoutPage) {
     this.table = this.page.testSubj.locator(SUBJ.TABLE_LOADED);
-    this.dataGrid = new EuiDataGridWrapper(this.page, SUBJ.TABLE_LOADED);
+    this.dataGrid = this.page.components.dataGrid(SUBJ.TABLE_LOADED);
     this.pageWithData = this.page.testSubj.locator(SUBJ.PAGE_WITH_DATA);
     this.noDataState = this.page.testSubj.locator(SUBJ.TABLE_EMPTY_STATE);
     this.errorPrompt = this.page.testSubj.locator(SUBJ.TABLE_ERROR_PROMPT);
@@ -70,10 +70,10 @@ export class AlertsTablePage {
     this.flyoutViewInAppButton = this.page.testSubj.locator('alertsFlyoutViewInAppButton');
     this.flyoutAlertDetailsButton = this.page.testSubj.locator('alertsFlyoutAlertDetailsButton');
     this.flyoutViewRuleDetailsLink = this.page.testSubj.locator('viewRuleDetailsFlyout');
-    this.addToExistingCaseAction = this.page.testSubj.locator('add-to-existing-case-action');
-    this.addToNewCaseAction = this.page.testSubj.locator('add-to-new-case-action');
-    this.createCaseFlyout = this.page.testSubj.locator('create-case-flyout');
+    this.addToCaseAction = this.page.testSubj.locator('add-to-case-action');
     this.addToExistingCaseModal = this.page.testSubj.locator('all-cases-modal');
+    this.createCaseAction = this.page.testSubj.locator('cases-table-add-case-filter-bar');
+    this.createCaseFlyout = this.page.testSubj.locator('create-case-flyout');
     this.queryInput = this.page.testSubj.locator('queryInput');
   }
 
@@ -202,13 +202,21 @@ export class AlertsTablePage {
     await this.page.testSubj.click('viewRuleDetails');
   }
 
-  // Add to case (from the row actions menu opened via `openActionsMenuForRow`)
-  async clickAddToNewCase() {
-    await this.addToNewCaseAction.click();
+  async clickInvestigate() {
+    await this.page.testSubj.click('investigateAlert');
   }
 
-  async clickAddToExistingCase() {
-    await this.addToExistingCaseAction.click();
+  async clickViewInvestigation() {
+    await this.page.testSubj.click('viewAlertInvestigation');
+  }
+
+  // Add to case (from the row actions menu opened via `openActionsMenuForRow`)
+  async clickAddToCase() {
+    await this.addToCaseAction.click();
+  }
+
+  async clickCreateCase() {
+    await this.createCaseAction.click();
   }
 
   // Pagination

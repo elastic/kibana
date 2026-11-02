@@ -44,18 +44,26 @@ describe('CapabilitiesSection', () => {
     expect(screen.getByTestId('agentOverviewCapabilityCardTools')).toBeInTheDocument();
   });
 
-  it('omits the Plugins card when experimental features are disabled', () => {
+  it('omits the Plugins card when experimental features are disabled, but keeps Connectors', () => {
     render(<CapabilitiesSection {...baseProps} isExperimentalFeaturesEnabled={false} />);
 
     expect(screen.getByTestId('agentOverviewCapabilityCardSkills')).toBeInTheDocument();
     expect(screen.queryByTestId('agentOverviewCapabilityCardPlugins')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentOverviewCapabilityCardConnectors')).toBeInTheDocument();
     expect(screen.getByTestId('agentOverviewCapabilityCardTools')).toBeInTheDocument();
+  });
+
+  it('renders the Connectors card when experimental features are enabled', () => {
+    render(<CapabilitiesSection {...baseProps} isExperimentalFeaturesEnabled={true} />);
+
+    expect(screen.getByTestId('agentOverviewCapabilityCardConnectors')).toBeInTheDocument();
   });
 
   it('fires navigation handlers when non-loading cards are clicked', async () => {
     const user = userEvent.setup();
     const onNavigateToSkills = jest.fn();
     const onNavigateToTools = jest.fn();
+    const onNavigateToConnectors = jest.fn();
 
     render(
       <CapabilitiesSection
@@ -63,6 +71,7 @@ describe('CapabilitiesSection', () => {
         isExperimentalFeaturesEnabled={false}
         onNavigateToSkills={onNavigateToSkills}
         onNavigateToTools={onNavigateToTools}
+        onNavigateToConnectors={onNavigateToConnectors}
       />
     );
 
@@ -71,5 +80,24 @@ describe('CapabilitiesSection', () => {
 
     await user.click(screen.getByTestId('agentOverviewCapabilityCardTools'));
     expect(onNavigateToTools).toHaveBeenCalled();
+
+    await user.click(screen.getByTestId('agentOverviewCapabilityCardConnectors'));
+    expect(onNavigateToConnectors).toHaveBeenCalled();
+  });
+
+  it("does not navigate when the Connectors card's technical-preview badge is clicked", async () => {
+    const user = userEvent.setup();
+    const onNavigateToConnectors = jest.fn();
+
+    render(
+      <CapabilitiesSection
+        {...baseProps}
+        isExperimentalFeaturesEnabled={false}
+        onNavigateToConnectors={onNavigateToConnectors}
+      />
+    );
+
+    await user.click(screen.getByText('Technical preview'));
+    expect(onNavigateToConnectors).not.toHaveBeenCalled();
   });
 });

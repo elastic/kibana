@@ -44,4 +44,19 @@ describe('casesAnalyticsSkill', () => {
   it('does not register inline tools (it composes existing built-ins)', () => {
     expect(casesAnalyticsSkill.getInlineTools).toBeUndefined();
   });
+
+  it('documents case.template.id and case.template.version in the index field table', () => {
+    expect(casesAnalyticsSkill.content).toContain('case.template.id');
+    expect(casesAnalyticsSkill.content).toContain('case.template.version');
+  });
+
+  it('includes a template analytics section', () => {
+    expect(casesAnalyticsSkill.content).toContain('Template analytics');
+    expect(casesAnalyticsSkill.content).toContain('templated');
+  });
+
+  it('includes template-analytics in the referenced content', () => {
+    const names = casesAnalyticsSkill.referencedContent?.map((r) => r.name) ?? [];
+    expect(names).toContain('template-analytics');
+  });
 });

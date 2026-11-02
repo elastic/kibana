@@ -11,7 +11,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import type { AgentPolicy, PackagePolicy } from '../../../types';
+import type { AgentPolicy, AgentPolicyPackagePoliciesSummary, PackagePolicy } from '../../../types';
 import { createFleetTestRendererMock } from '../../../../../mock';
 
 import {
@@ -21,6 +21,7 @@ import {
 } from '../../../hooks';
 
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../../../../common/services/version_specific_policies_utils';
 
 jest.mock('../../../hooks', () => {
   return {
@@ -72,10 +73,12 @@ function createAgentPolicy(props: Partial<AgentPolicy> = {}): AgentPolicy {
 function renderMenu({
   agentPolicy,
   packagePolicies,
+  packagePoliciesSummary,
   hasFleetServer = false,
 }: {
   agentPolicy: AgentPolicy;
   packagePolicies?: PackagePolicy[];
+  packagePoliciesSummary?: AgentPolicyPackagePoliciesSummary;
   hasFleetServer?: boolean;
 }) {
   const renderer = createFleetTestRendererMock();
@@ -84,6 +87,7 @@ function renderMenu({
     <AgentPolicyDeleteProvider
       agentPolicy={agentPolicy}
       packagePolicies={packagePolicies}
+      packagePoliciesSummary={packagePoliciesSummary}
       hasFleetServer={hasFleetServer}
     >
       {(deleteAgentPolicyPrompt) => (
@@ -193,6 +197,15 @@ describe('AgentPolicyDeleteProvider', () => {
       const { utils } = renderMenu({ agentPolicy: createAgentPolicy() });
       await openModal(utils);
 
+      // the agents are counted by their base policy id, so agents on `#sentinel` are included
+      expect(sendGetAgentsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery: `${buildPolicyBaseIdWithFallbackKuery(
+            'agent-policy-1'
+          )} and not status: unenrolled`,
+        })
+      );
+
       const callout = utils.getByTestId('deleteAgentPolicyAgentsInUseCallout');
       expect(callout.textContent).toContain('3 agents are');
 
@@ -234,6 +247,50 @@ describe('AgentPolicyDeleteProvider', () => {
     expect(
       utils.getByTestId('deleteAgentPolicySharedIntegrationPoliciesCallout')
     ).toBeInTheDocument();
+  });
+
+  describe('with a package policies summary instead of the package policies', () => {
+    const packagePoliciesSummary: AgentPolicyPackagePoliciesSummary = {
+      count: 4301,
+      has_fleet_server: false,
+      has_managed: false,
+      has_root_integrations: false,
+      has_shared: false,
+    };
+
+    it('requires typing the policy name when the summary has package policies', async () => {
+      const { utils } = renderMenu({
+        agentPolicy: createAgentPolicy({ package_policies: undefined }),
+        packagePoliciesSummary,
+      });
+      await openModal(utils);
+
+      expect(utils.getByTestId('deleteAgentPolicyNameConfirmationInput')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+    });
+
+    it('does not require typing the policy name when the summary has no package policies', async () => {
+      const { utils } = renderMenu({
+        agentPolicy: createAgentPolicy({ package_policies: undefined }),
+        packagePoliciesSummary: { ...packagePoliciesSummary, count: 0 },
+      });
+      await openModal(utils);
+
+      expect(utils.queryByTestId('deleteAgentPolicyNameConfirmationInput')).not.toBeInTheDocument();
+    });
+
+    it('shows a warning when the summary has integration policies shared across agent policies', async () => {
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+      const { utils } = renderMenu({
+        agentPolicy: createAgentPolicy({ package_policies: undefined }),
+        packagePoliciesSummary: { ...packagePoliciesSummary, has_shared: true },
+      });
+      await openModal(utils);
+
+      expect(
+        utils.getByTestId('deleteAgentPolicySharedIntegrationPoliciesCallout')
+      ).toBeInTheDocument();
+    });
   });
 
   it('shows the Fleet Server note when the policy has a Fleet Server integration', async () => {

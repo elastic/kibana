@@ -7,96 +7,155 @@
 
 import {
   EuiButton,
-  EuiEmptyPrompt,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
-import { SourceRow } from './source_row';
+import React, { useMemo } from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
+import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { useCanReadConnectors } from '../../hooks/use_can_read_connectors';
+import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { useSourcesEditor } from '../../hooks/use_sources_editor';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
+import { SourceRows } from './source_rows';
+import { SourcePicker } from '../source_picker';
+import { SourceTypePanel } from '../source_type_panel';
 
 interface SourcesPanelProps {
   isLoading: boolean;
-  sources: AiIndexSource[];
-  canEdit: boolean;
-  onEditSources: () => void;
+  aiIndex: GetAiIndexResponse | undefined;
+  onSaved: () => void;
+  isManaged: boolean;
 }
 
-export const SourcesPanel = ({ isLoading, sources, canEdit, onEditSources }: SourcesPanelProps) => (
-  <EuiPanel hasBorder paddingSize="l">
-    <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-      <EuiFlexItem>
-        <EuiTitle size="s">
-          <h2>
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.title"
-              defaultMessage="Sources"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          iconType="pencil"
-          onClick={onEditSources}
-          isDisabled={!canEdit}
-          data-test-subj="contextEditSourcesButton"
-        >
-          <FormattedMessage
-            id="xpack.contextEngine.aiIndexDetail.sources.editButton"
-            defaultMessage="Edit"
-          />
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    <EuiText size="s" color="subdued">
-      <p>
+export const SourcesPanel = ({ isLoading, aiIndex, onSaved, isManaged }: SourcesPanelProps) => {
+  const sources = useMemo(() => aiIndex?.sources ?? [], [aiIndex?.sources]);
+  const { selectedSources, setSelectedSources, hasChanges, isSaving, save, cancel } =
+    useSourcesEditor({ aiIndex: isManaged ? undefined : aiIndex, onSaved });
+
+  const esqlSources = useMemo(() => sources.filter((source) => source.type === 'esql'), [sources]);
+  const connectorSources = useMemo(
+    () => sources.filter((source) => source.type === 'connector'),
+    [sources]
+  );
+
+  const canReadConnectors = useCanReadConnectors();
+  const { connectorNameById, connectorActionTypeById } = useDataConnectors({
+    enabled: isManaged && connectorSources.length > 0 && canReadConnectors,
+  });
+
+  return (
+    <div data-test-subj="contextSourcesPanel">
+      <AiIndexDetailPanelDescription>
         <FormattedMessage
           id="xpack.contextEngine.aiIndexDetail.sources.description"
-          defaultMessage="Sources that provide data for this AI index automations."
+          defaultMessage="Data that automations should analyze when generating Knowledge Indicators."
         />
-      </p>
-    </EuiText>
-    <EuiSpacer size="m" />
-    {isLoading ? (
-      <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />
-    ) : sources.length === 0 ? (
-      <EuiEmptyPrompt
-        iconType="editorCodeBlock"
-        titleSize="xs"
-        data-test-subj="contextAiIndexSourcesEmpty"
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.emptyTitle"
-              defaultMessage="No sources yet"
+      </AiIndexDetailPanelDescription>
+      <EuiSpacer size="m" />
+      {isLoading && <EuiSkeletonText lines={2} data-test-subj="contextAiIndexSourcesLoading" />}
+      {!isLoading && isManaged && (
+        <>
+          <SourceTypePanel
+            title={
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.tabs.elasticsearch"
+                defaultMessage="Elasticsearch data"
+              />
+            }
+            badgeCount={esqlSources.length}
+            data-test-subj="contextElasticsearchDataPanel"
+          >
+            <SourceRows
+              sources={esqlSources}
+              connectorNameById={connectorNameById}
+              connectorActionTypeById={connectorActionTypeById}
+              emptyMessage={
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.elasticsearchDataEmpty"
+                  defaultMessage="No Elasticsearch data sources."
+                />
+              }
             />
-          </h3>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.emptyBody"
-              defaultMessage="Add a source to start building context for this AI index."
+          </SourceTypePanel>
+          <EuiSpacer size="m" />
+          <SourceTypePanel
+            title={
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.tabs.connectors"
+                defaultMessage="Connectors"
+              />
+            }
+            badgeCount={connectorSources.length}
+            data-test-subj="contextConnectorsPanel"
+          >
+            <SourceRows
+              sources={connectorSources}
+              connectorNameById={connectorNameById}
+              connectorActionTypeById={connectorActionTypeById}
+              emptyMessage={
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.connectorsEmpty"
+                  defaultMessage="No connectors."
+                />
+              }
             />
-          </p>
-        }
-      />
-    ) : (
-      sources.map((source, index) => (
-        <React.Fragment key={`${source.type}-${index}`}>
-          <SourceRow source={source} />
-          {index < sources.length - 1 && <EuiSpacer size="s" />}
-        </React.Fragment>
-      ))
-    )}
-  </EuiPanel>
-);
+          </SourceTypePanel>
+        </>
+      )}
+      {!isLoading && !isManaged && (
+        <div data-test-subj="contextEditSourcesInlineEditor">
+          <SourcePicker
+            selectedSources={selectedSources}
+            onChange={setSelectedSources}
+            disabled={isSaving}
+          />
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                onClick={cancel}
+                isDisabled={!hasChanges || isSaving}
+                data-test-subj="contextEditSourcesCancelButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.sources.CANCEL,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.cancelButton"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                size="s"
+                onClick={save}
+                isLoading={isSaving}
+                isDisabled={!hasChanges || isSaving}
+                data-test-subj="contextEditSourcesDoneButton"
+                {...getEbtProps({
+                  element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageSourcesPanel,
+                  action: CONTEXT_ENGINE_UI_EBT.action.sources.SAVE,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.sources.saveButton"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      )}
+    </div>
+  );
+};

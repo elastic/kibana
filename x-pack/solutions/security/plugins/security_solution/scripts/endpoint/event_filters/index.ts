@@ -9,21 +9,16 @@ import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { KbnClient } from '@kbn/test';
-import type { AxiosError } from 'axios';
 import pMap from 'p-map';
 import type {
   CreateExceptionListItemSchema,
-  CreateExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_ARTIFACT_LISTS,
-  EXCEPTION_LIST_ITEM_URL,
-  EXCEPTION_LIST_URL,
-} from '@kbn/securitysolution-list-constants';
+import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { randomPolicyIdGenerator } from '../common/random_policy_id_generator';
 import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { isArtifactByPolicy } from '../../../common/endpoint/service/artifacts';
+import { ensureArtifactListExists } from '../common/endpoint_artifact_services';
 
 export const cli = () => {
   run(
@@ -59,22 +54,15 @@ class EventFilterDataLoaderError extends Error {
   }
 }
 
-const handleThrowAxiosHttpError = (err: AxiosError<{ message?: string }>): never => {
-  let message = err.message;
-
-  if (err.response) {
-    message = `[${err.response.status}] ${err.response.data.message ?? err.message} [ ${String(
-      err.response.config.method
-    ).toUpperCase()} ${err.response.config.url} ]`;
-  }
-  throw new EventFilterDataLoaderError(message, err.toJSON());
+const handleThrowHttpError = (err: Error): never => {
+  throw new EventFilterDataLoaderError(err.message, err);
 };
 
 const createEventFilters: RunFn = async ({ flags, log }) => {
   const eventGenerator = new ExceptionsListItemGenerator();
   const kbn = new KbnClient({ log, url: flags.kibana as string });
 
-  await ensureCreateEndpointEventFiltersList(kbn);
+  await ensureArtifactListExists(kbn, 'eventFilters');
 
   const randomPolicyId = await randomPolicyIdGenerator(kbn, log);
 
@@ -113,34 +101,8 @@ const createEventFilters: RunFn = async ({ flags, log }) => {
           path: EXCEPTION_LIST_ITEM_URL,
           body,
         })
-        .catch((e) => handleThrowAxiosHttpError(e));
+        .catch((e) => handleThrowHttpError(e));
     },
     { concurrency: 10 }
   );
-};
-
-const ensureCreateEndpointEventFiltersList = async (kbn: KbnClient) => {
-  const newListDefinition: CreateExceptionListSchema = {
-    description: ENDPOINT_ARTIFACT_LISTS.eventFilters.description,
-    list_id: ENDPOINT_ARTIFACT_LISTS.eventFilters.id,
-    meta: undefined,
-    name: ENDPOINT_ARTIFACT_LISTS.eventFilters.name,
-    os_types: [],
-    tags: [],
-    type: 'endpoint',
-    namespace_type: 'agnostic',
-  };
-
-  await kbn
-    .request({
-      method: 'POST',
-      path: EXCEPTION_LIST_URL,
-      body: newListDefinition,
-    })
-    .catch((e) => {
-      // Ignore if list was already created
-      if (e.response.status !== 409) {
-        handleThrowAxiosHttpError(e);
-      }
-    });
 };

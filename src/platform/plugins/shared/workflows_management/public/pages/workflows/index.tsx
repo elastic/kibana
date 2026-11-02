@@ -14,10 +14,11 @@ import {
   EuiPageTemplate,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AppHeader } from '@kbn/app-header';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
@@ -38,6 +39,7 @@ import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_st
 import { WorkflowList } from '../../features/workflow_list';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
+import { getAddConnectorsMenuItem } from '../../shared/ui/get_add_connectors_menu_item';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
@@ -137,7 +139,8 @@ export function WorkflowsPage() {
 
   /** Import uses bulk APIs that require both create and update; gate UI to match server authz. */
   const canImportWorkflows = Boolean(canCreateWorkflow && canUpdateWorkflow);
-  const isExecutionStatsBarEnabled = featureFlags?.getBooleanValue(
+  const addConnectorsMenuItem = useMemo(() => getAddConnectorsMenuItem(application), [application]);
+  const isExecutionStatsBarEnabled = featureFlags.useBooleanValue(
     WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID,
     false
   );
@@ -146,8 +149,26 @@ export function WorkflowsPage() {
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
   const shouldShowFilters = !shouldShowEmptyState || showManagedWorkflowsFilter;
 
-  const appMenu = useMemo<AppMenuConfig>(
-    () => ({
+  const appMenu = useMemo<AppMenuConfig>(() => {
+    const items: AppMenuItemType[] = [];
+    if (canImportWorkflows) {
+      items.push({
+        id: 'importWorkflows',
+        order: 1,
+        label: i18n.translate('workflows.importWorkflowsButton', {
+          defaultMessage: 'Import',
+        }),
+        iconType: 'download',
+        overflow: true,
+        run: () => setShowImportFlyout(true),
+        testId: 'importWorkflowsButton',
+      });
+    }
+    if (addConnectorsMenuItem) {
+      items.push(addConnectorsMenuItem);
+    }
+
+    return {
       primaryActionItem: canCreateWorkflow
         ? {
             id: 'createWorkflow',
@@ -159,24 +180,9 @@ export function WorkflowsPage() {
             testId: 'createWorkflowButton',
           }
         : undefined,
-      items: canImportWorkflows
-        ? [
-            {
-              id: 'importWorkflows',
-              order: 1,
-              label: i18n.translate('workflows.importWorkflowsButton', {
-                defaultMessage: 'Import',
-              }),
-              iconType: 'download',
-              overflow: true,
-              run: () => setShowImportFlyout(true),
-              testId: 'importWorkflowsButton',
-            },
-          ]
-        : [],
-    }),
-    [canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]
-  );
+      items,
+    };
+  }, [addConnectorsMenuItem, canCreateWorkflow, canImportWorkflows, navigateToCreateWorkflow]);
 
   return (
     <EuiPageTemplate
@@ -188,11 +194,18 @@ export function WorkflowsPage() {
         title={i18n.translate('workflows.pageTitle', { defaultMessage: 'Workflows' })}
         menu={appMenu}
         docLink={WORKFLOWS_DOCUMENTATION_URL}
-        showAddIntegrations
+        spacing="compact"
       />
-      <EuiPageTemplate.Section restrictWidth={false}>
+      {/* With no workflows, fill the page so the landing centers below the filters. */}
+      <EuiPageTemplate.Section
+        restrictWidth={false}
+        {...(shouldShowEmptyState
+          ? { grow: true, css: styles.fillColumn, contentProps: { css: styles.fillColumn } }
+          : {})}
+      >
         {shouldShowFilters ? (
-          <>
+          // A plain wrapper keeps the filters at their height in the empty-state flex column.
+          <div>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem>
                 <WorkflowSearchField
@@ -204,7 +217,9 @@ export function WorkflowsPage() {
                 <EuiFilterGroup>
                   <WorkflowsFilterPopover
                     filter="enabled"
-                    title="Enabled"
+                    title={i18n.translate('workflows.management.enabledFilter.title', {
+                      defaultMessage: 'Enabled',
+                    })}
                     values={filtersData?.enabled || []}
                     selectedValues={search.enabled || []}
                     onSelectedValuesChanged={(newValues) => {
@@ -225,7 +240,9 @@ export function WorkflowsPage() {
                 <EuiFilterGroup>
                   <WorkflowsFilterPopover
                     filter="createdBy"
-                    title="Created By"
+                    title={i18n.translate('workflows.management.createdByFilter.title', {
+                      defaultMessage: 'Created By',
+                    })}
                     values={filtersData?.createdBy || []}
                     selectedValues={search.createdBy || []}
                     onSelectedValuesChanged={(newValues) => {
@@ -238,7 +255,9 @@ export function WorkflowsPage() {
                 <EuiFilterGroup>
                   <WorkflowsFilterPopover
                     filter="tags"
-                    title="Tags"
+                    title={i18n.translate('workflows.management.tagsFilter.title', {
+                      defaultMessage: 'Tags',
+                    })}
                     values={filtersData?.tags || []}
                     selectedValues={search.tags || []}
                     onSelectedValuesChanged={(newValues) => {
@@ -271,14 +290,12 @@ export function WorkflowsPage() {
             {!shouldShowEmptyState && isExecutionStatsBarEnabled ? (
               <WorkflowExecutionStatsBar height={140} />
             ) : null}
-          </>
+          </div>
         ) : null}
 
-        <WorkflowList
-          search={search}
-          setSearch={setSearch}
-          onCreateWorkflow={navigateToCreateWorkflow}
-        />
+        <div css={shouldShowEmptyState ? styles.centeredEmptyState : undefined}>
+          <WorkflowList search={search} setSearch={setSearch} />
+        </div>
       </EuiPageTemplate.Section>
       {showImportFlyout ? (
         <ImportWorkflowsFlyout onClose={() => setShowImportFlyout(false)} />
@@ -286,3 +303,13 @@ export function WorkflowsPage() {
     </EuiPageTemplate>
   );
 }
+
+const styles = {
+  fillColumn: css({ display: 'flex', flexDirection: 'column', flexGrow: 1 }),
+  centeredEmptyState: css({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    flexGrow: 1,
+  }),
+};

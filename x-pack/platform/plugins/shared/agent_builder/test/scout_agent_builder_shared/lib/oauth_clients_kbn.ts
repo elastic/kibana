@@ -102,3 +102,16 @@ export async function revokeOAuthClient(
     body: { reason: 'scout cleanup' },
   });
 }
+
+/**
+ * Delete an OAuth client via the internal Kibana proxy route.
+ */
+export async function deleteOAuthClient(
+  apiClient: ApiClientFixture,
+  authHeaders: Record<string, string>,
+  clientId: string
+): Promise<void> {
+  await apiClient.delete(`${CLIENTS_BASE}/${encodeURIComponent(clientId)}`, {
+    headers: authHeaders,
+  });
+}

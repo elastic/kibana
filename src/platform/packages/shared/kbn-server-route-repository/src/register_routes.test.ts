@@ -144,6 +144,32 @@ describe('registerRoutes', () => {
     });
   });
 
+  it('forwards the OAS operation metadata to versioned routes', () => {
+    callRegisterRoutes({
+      'POST /api/public_route version': {
+        endpoint: 'POST /api/public_route version',
+        options: {
+          access: 'public',
+          summary: 'Create a resource',
+          description: 'Creates a resource.',
+          operationId: 'createResourceOp',
+        },
+        handler: jest.fn(),
+        security: disabledAuthz,
+      },
+    } satisfies ServerRouteRepository);
+
+    const [versionedRouteConfig] = postWithVersion.mock.calls[0];
+    expect(versionedRouteConfig).toEqual(
+      expect.objectContaining({
+        summary: 'Create a resource',
+        description: 'Creates a resource.',
+        operationId: 'createResourceOp',
+      })
+    );
+    expect(versionedRouteConfig.options).not.toHaveProperty('operationId');
+  });
+
   it('does not allow any params if no schema is provided', () => {
     const pathDoesNotAllowExcessKeys = () => {
       noParamsValidationObject.params.parse({
@@ -188,37 +214,12 @@ describe('registerRoutes', () => {
     expect(bodyDoesNotAllowExcessKeys).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_union\\",
-          \\"errors\\": [
-            [
-              {
-                \\"code\\": \\"unrecognized_keys\\",
-                \\"keys\\": [
-                  \\"unexpectedKey\\"
-                ],
-                \\"path\\": [],
-                \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
-              }
-            ],
-            [
-              {
-                \\"expected\\": \\"null\\",
-                \\"code\\": \\"invalid_type\\",
-                \\"path\\": [],
-                \\"message\\": \\"Invalid input: expected null, received object\\"
-              }
-            ],
-            [
-              {
-                \\"expected\\": \\"undefined\\",
-                \\"code\\": \\"invalid_type\\",
-                \\"path\\": [],
-                \\"message\\": \\"Invalid input: expected undefined, received object\\"
-              }
-            ]
+          \\"code\\": \\"unrecognized_keys\\",
+          \\"keys\\": [
+            \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Invalid input\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);
@@ -237,7 +238,7 @@ describe('registerRoutes', () => {
     const [_, wrappedHandler] = post.mock.calls[0];
     await wrappedHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-    expect(handler).toBeCalledTimes(1);
+    expect(handler).toHaveBeenCalledTimes(1);
     const [args] = handler.mock.calls[0];
     expect(Object.keys(args).sort()).toEqual(
       ['aService', 'request', 'response', 'context', 'params', 'logger'].sort()
@@ -376,7 +377,7 @@ describe('registerRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(handler).toBeCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
       const [args] = handler.mock.calls[0];
       const { params } = args;
       expect(params).toEqual({
@@ -448,7 +449,7 @@ describe('registerRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(handler).toBeCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
       const [args] = handler.mock.calls[0];
       const { params } = args;
       expect(params).toEqual({

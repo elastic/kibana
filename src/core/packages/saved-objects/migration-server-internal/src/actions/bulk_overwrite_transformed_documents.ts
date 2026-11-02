@@ -8,6 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import type * as TaskEither from 'fp-ts/TaskEither';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
@@ -47,6 +48,13 @@ export interface BulkOverwriteTransformedDocumentsParams {
    * active shards. Defaults to DEFAULT_TIMEOUT (300s).
    */
   timeout?: string;
+  /**
+   * When true, call `_cluster/allocation/explain` on unavailable-shard failures
+   * and include the decider reason in the returned error message. Callers
+   * should gate this on retry count to avoid hitting the cluster API on every
+   * retry of a long-running failure.
+   */
+  fetchAllocationExplain?: boolean;
 }
 
 /**
@@ -61,6 +69,7 @@ export const bulkOverwriteTransformedDocuments =
     refresh = false,
     useAliasToPreventAutoCreate = false,
     timeout = DEFAULT_TIMEOUT,
+    fetchAllocationExplain = false,
   }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
@@ -69,9 +78,10 @@ export const bulkOverwriteTransformedDocuments =
     | UnavailableShardsException,
     'bulk_index_succeeded'
   > =>
-  () => {
-    return client
-      .bulk({
+  async () => {
+    let res: Awaited<ReturnType<typeof client.bulk>>;
+    try {
+      res = await client.bulk({
         // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
         // can't bulkIndex to an alias with require_alias=true. This means if
         // users tamper during this operation (delete indices or restore a
@@ -87,44 +97,148 @@ export const bulkOverwriteTransformedDocuments =
         filter_path: ['items.*.error'],
         // we need to unwrap the existing BulkIndexOperationTuple's
         operations: operations.flat(),
-      })
-      .then((res) => {
-        // Filter out version_conflict_engine_exception since these just mean
-        // that another instance already updated these documents
-        const errors: estypes.ErrorCause[] = (res.items ?? [])
-          .filter((item) => item.index?.error)
-          .map((item) => item.index!.error!)
-          .filter(({ type }) => type !== 'version_conflict_engine_exception');
+      });
+    } catch (error) {
+      if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
+        return Either.left({ type: 'request_entity_too_large_exception' as const });
+      }
+      if (error instanceof esErrors.ElasticsearchClientError) {
+        return catchRetryableEsClientErrors(error);
+      }
+      throw error;
+    }
 
-        if (errors.length === 0) {
-          return Either.right('bulk_index_succeeded' as const);
-        } else {
-          if (errors.every(isWriteBlockException)) {
-            return Either.left({
-              type: 'target_index_had_write_block' as const,
-            });
-          }
-          if (errors.every(isIndexNotFoundException)) {
-            return Either.left({
-              type: 'index_not_found_exception' as const,
-              index,
-            });
-          }
-          if (errors.every(isUnavailableShardsException)) {
-            return Either.left({
-              type: 'unavailable_shards_exception' as const,
-              message: `[${index}] Not enough active copies to meet shard count of [ALL]`,
-            });
-          }
-          throw new Error(JSON.stringify(errors));
+    // Filter out version_conflict_engine_exception since these just mean
+    // that another instance already updated these documents
+    const errors: estypes.ErrorCause[] = (res.items ?? [])
+      .filter((item) => item.index?.error)
+      .map((item) => item.index!.error!)
+      .filter(({ type }) => type !== 'version_conflict_engine_exception');
+
+    if (errors.length === 0) {
+      return Either.right('bulk_index_succeeded' as const);
+    }
+
+    if (errors.every(isWriteBlockException)) {
+      return Either.left({ type: 'target_index_had_write_block' as const });
+    }
+
+    if (errors.every(isIndexNotFoundException)) {
+      return Either.left({ type: 'index_not_found_exception' as const, index });
+    }
+
+    if (errors.every(isUnavailableShardsException)) {
+      let allocationReason: Option.Option<string> = Option.none;
+      if (fetchAllocationExplain) {
+        try {
+          allocationReason = await explainShardAllocation(client, index);
+        } catch (explainError) {
+          allocationReason = Option.some(
+            `explain unavailable: ${
+              explainError instanceof Error ? explainError.message : String(explainError)
+            }`
+          );
         }
-      })
-      .catch((error) => {
-        if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
-          return Either.left({ type: 'request_entity_too_large_exception' as const });
-        } else {
-          throw error;
-        }
-      })
-      .catch(catchRetryableEsClientErrors);
+      }
+
+      const message = Option.isSome(allocationReason)
+        ? `[${index}] Not enough active copies to meet shard count of [ALL]. Shard allocation explain: ${allocationReason.value}`
+        : `[${index}] Not enough active copies to meet shard count of [ALL]`;
+
+      return Either.left({
+        type: 'unavailable_shards_exception' as const,
+        message,
+      });
+    }
+
+    throw new Error(JSON.stringify(errors));
   };
+
+const explainShardAllocation = async (
+  client: ElasticsearchClient,
+  index: string
+): Promise<Option.Option<string>> => {
+  const primaryExplain = await client.cluster.allocationExplain(
+    { index, shard: 0, primary: true, master_timeout: '30s' },
+    { maxRetries: 0 }
+  );
+
+  if (primaryExplain.current_state === 'started') {
+    try {
+      const replicaExplain = await client.cluster.allocationExplain(
+        { index, shard: 0, primary: false, master_timeout: '30s' },
+        { maxRetries: 0 }
+      );
+      return Option.some(formatAllocationExplanation(replicaExplain));
+    } catch (error) {
+      if (error instanceof esErrors.ResponseError && error.statusCode === 400) {
+        // Replica is gone from the routing table and the primary is already
+        // started: there is nothing left to explain.
+        return Option.none;
+      } else {
+        throw error;
+      }
+    }
+  } else {
+    return Option.some(formatAllocationExplanation(primaryExplain));
+  }
+};
+
+const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainResponse): string => {
+  const parts: string[] = [];
+
+  if (explain.unassigned_info) {
+    const { reason, details } = explain.unassigned_info;
+    parts.push(`unassigned reason: ${details ? `${reason}: ${details}` : reason}`);
+  }
+
+  if (explain.allocate_explanation) {
+    parts.push(explain.allocate_explanation.replace(/\.$/, ''));
+  }
+
+  if (explain.node_allocation_decisions) {
+    const groups = new Map<
+      string,
+      {
+        decider: string;
+        decision: string;
+        explanation: string;
+        count: number;
+        firstNodeName: string;
+      }
+    >();
+
+    for (const node of explain.node_allocation_decisions) {
+      for (const decider of node.deciders ?? []) {
+        if (decider.decision === 'NO' || decider.decision === 'THROTTLE') {
+          const key = `${decider.decider}|${decider.decision}`;
+          const existing = groups.get(key);
+          if (existing) {
+            existing.count++;
+          } else {
+            groups.set(key, {
+              decider: decider.decider,
+              decision: decider.decision,
+              explanation: decider.explanation,
+              count: 1,
+              firstNodeName: node.node_name,
+            });
+          }
+        }
+      }
+    }
+
+    if (groups.size > 0) {
+      const blockingReasons = [...groups.values()].map(
+        ({ decider, decision, explanation, count, firstNodeName }) => {
+          const nodeLabel =
+            count === 1 ? firstNodeName : `${count} nodes (${firstNodeName}, +${count - 1})`;
+          return `[${decider}] ${decision} on ${nodeLabel}: ${explanation}`;
+        }
+      );
+      parts.push(`blocking deciders: ${blockingReasons.join('; ')}`);
+    }
+  }
+
+  return parts.join('. ');
+};

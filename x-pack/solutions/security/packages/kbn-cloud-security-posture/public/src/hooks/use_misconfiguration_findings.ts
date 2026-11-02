@@ -39,7 +39,10 @@ const getEuidFromFindingDocument = (
     return undefined;
   }
   for (const entityType of EUID_FROM_DOCUMENT_ENTITY_ORDER) {
-    const value = euidApi?.euid.getEuidFromObject(entityType, source);
+    const value = euidApi?.euid.getEuidFromObject(
+      euidApi.getBuiltInEntityDefinition(entityType),
+      source
+    );
     if (value !== undefined && value.length > 0) {
       return value;
     }
@@ -75,13 +78,16 @@ export const useMisconfigurationFindings = (options: UseCspOptions) => {
       const {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
-        data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: buildMisconfigurationsFindingsQuery(
-            options,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            rulesStates!
-          ) as LatestFindingsRequest['params'],
-        })
+        data.search.search<LatestFindingsRequest, LatestFindingsResponse>(
+          {
+            params: buildMisconfigurationsFindingsQuery(
+              options,
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              rulesStates!
+            ) as LatestFindingsRequest['params'],
+          },
+          { projectRouting: '_alias:_origin' }
+        )
       );
       if (!aggregations && options.ignore_unavailable === false)
         throw new Error('expected aggregations to be defined');

@@ -5,32 +5,98 @@
  * 2.0.
  */
 
-import { spaceTest, tags, CUSTOM_QUERY_RULE, FULL_KIBANA_SECURITY_ROLE } from '@kbn/scout-security';
+import {
+  euiSelectors,
+  spaceTest,
+  tags,
+  CUSTOM_QUERY_RULE,
+  FULL_KIBANA_SECURITY_ROLE,
+} from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-// Failing: See https://github.com/elastic/kibana/issues/261392
-spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
-  let ruleName: string;
+const SOURCE_INDEX_PREFIX = 'scout-run-workflow-action';
 
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
+spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic] }, () => {
+  let ruleName: string;
+  let sourceIndex: string;
+
+  spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     // Enable the Workflows UI feature flag required for the "Run workflow" action to appear
     await scoutSpace.uiSettings.set({ 'workflows:ui:enabled': true });
+
+    // The StorageIndexAdapter for the workflows management plugin creates the
+    // .workflows* index template and backing index lazily on the first write.
+    // That cold-start takes >10 s under the 2-worker parallel config, which
+    // exceeds Scout's 10 s actionTimeout when the first write happens inside a
+    // test body via page.request.post().  Create and immediately delete a
+    // throwaway workflow here, where the 3-minute beforeAll budget and the
+    // undici-based kbnClient (no per-request deadline) absorb the latency.
+    const warmupYaml = [
+      "version: '1'",
+      `name: '__warmup_${Date.now()}__'`,
+      'enabled: false',
+      'triggers:',
+      '  - type: alert',
+      'steps:',
+      '  - name: log',
+      '    type: console',
+      '    with:',
+      "      message: 'warmup'",
+    ].join('\n');
+    const warmupResponse = await kbnClient.request<{ id: string }>({
+      method: 'POST',
+      path: `/s/${scoutSpace.id}/api/workflows/workflow`,
+      body: { yaml: warmupYaml },
+    });
+    await kbnClient.request({
+      method: 'DELETE',
+      path: `/s/${scoutSpace.id}/api/workflows/workflow/${warmupResponse.data.id}`,
+      ignoreErrors: [404],
+    });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+  spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace, kbnClient, esClient }) => {
     ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
-    await apiServices.detectionRule.createCustomQueryRule({
+    sourceIndex = `${SOURCE_INDEX_PREFIX}-${scoutSpace.id}`;
+
+    // Seed exactly one source document per test in a dedicated per-space index
+    // and point the rule only at it. The tests look up the alert row by rule
+    // name and expect a single match, so the rule must produce exactly one
+    // alert: leftover documents from a previous test, or any data in the
+    // default security indices (logs-*, etc.), would yield extra alerts.
+    await esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true });
+    await esClient.index({
+      index: sourceIndex,
+      document: { '@timestamp': new Date().toISOString(), message: 'scout run workflow event' },
+      refresh: true,
+    });
+
+    const { id: ruleId } = await apiServices.detectionRule.createCustomQueryRule({
       ...CUSTOM_QUERY_RULE,
+      index: [sourceIndex],
       name: ruleName,
     });
+
+    // Trigger an immediate rule execution rather than waiting for the scheduled
+    // cycle (default: 5 min).  The route returns 204 with an empty body.
+    await kbnClient.request({
+      method: 'POST',
+      path: `/s/${scoutSpace.id}/internal/alerting/rule/${ruleId}/_run_soon`,
+    });
+
+    // Block until the detection engine has indexed at least one alert for this
+    // rule (polls every 1 s, gives up after 60 s).
+    await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 60_000);
+
     // Use a custom role that includes workflowsManagement privileges (canExecuteWorkflow)
     // in addition to the security index privileges needed to view alerts
     await browserAuth.loginWithCustomRole(FULL_KIBANA_SECURITY_ROLE);
   });
 
-  spaceTest.afterEach(async ({ apiServices }) => {
+  spaceTest.afterEach(async ({ apiServices, esClient }) => {
     await apiServices.detectionRule.deleteAll();
     await apiServices.detectionAlerts.deleteAll();
+    await esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true });
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -74,10 +140,12 @@ spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.cl
 
         await expect(alertsTablePage.workflowPanel).toBeVisible();
 
-        // Select the created workflow from the list
-        await page
-          .getByTestId('workflowIdSelect')
-          .getByRole('option', { name: workflowName })
+        // Select the created workflow from the list. The workflow selector renders a
+        // secondary description alongside the name inside the option's label element,
+        // which breaks selectOption()'s exact-label match, so filter on options instead.
+        await page.components
+          .selectable('workflowIdSelect')
+          .options.filter({ hasText: workflowName })
           .click();
 
         await expect(alertsTablePage.executeWorkflowButton).toBeEnabled();
@@ -90,7 +158,7 @@ spaceTest.describe.skip('Run workflow alert action', { tag: [...tags.stateful.cl
 
         // Assert the "View workflow execution" link button is present in the toast
         const viewExecutionButton = page
-          .locator('.euiToast')
+          .locator(euiSelectors.globalToastList.TOAST_SELECTOR)
           .getByRole('button', { name: 'View workflow execution' });
         await expect(viewExecutionButton).toBeVisible();
 

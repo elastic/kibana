@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SchemaOutput } from '../schema_output';
+import type { APIKeyCodec } from '../schemas/settings';
 
-export const APIKeyCodec = t.type({
-  spaces: t.array(t.string),
-});
-
-export type SyntheticsProjectAPIKey = t.TypeOf<typeof APIKeyCodec>;
+export type SyntheticsProjectAPIKey = SchemaOutput<typeof APIKeyCodec>;

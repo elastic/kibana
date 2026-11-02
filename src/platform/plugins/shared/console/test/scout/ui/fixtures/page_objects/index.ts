@@ -8,3 +8,4 @@
  */
 
 export { ConsolePage } from './console_page';
+export { EmbeddedConsole } from './embedded_console';

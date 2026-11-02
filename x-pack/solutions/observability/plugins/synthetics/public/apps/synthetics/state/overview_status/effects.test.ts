@@ -8,8 +8,13 @@
 import { put, select } from 'redux-saga/effects';
 import type { OverviewStatus, OverviewStatusMetaData } from '../../../../../common/runtime_types';
 import { selectOverviewPageState } from '../overview/selectors';
-import { augmentStaleStatusWorker } from './effects';
-import { fetchOverviewStatusAction, fetchStaleStatusAction } from './actions';
+import { augmentStaleStatusWorker, refreshRemainingCardWindowWorker } from './effects';
+import {
+  appendOverviewStatusAction,
+  fetchOverviewStatusAction,
+  fetchStaleStatusAction,
+} from './actions';
+import { selectOverviewStatusReducer } from './selectors';
 
 const makeMeta = (
   overrides: Partial<OverviewStatusMetaData> & { configId: string }
@@ -77,5 +82,76 @@ describe('augmentStaleStatusWorker', () => {
     expect(gen.next().value).toEqual(select(selectOverviewPageState));
     // No date range -> bail out without dispatching a lookup.
     expect(gen.next({} as any).done).toBe(true);
+  });
+});
+
+describe('refreshRemainingCardWindowWorker', () => {
+  const pageState = { page: 1, perPage: 20, query: 'foo' };
+
+  beforeAll(() => {
+    jest.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+  });
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('dispatches the next silent append while the loaded window is not covered', () => {
+    const gen = refreshRemainingCardWindowWorker(
+      fetchOverviewStatusAction.success({ page: 1, perPage: 500, total: 600 } as any)
+    );
+
+    expect(gen.next().value).toEqual(select(selectOverviewStatusReducer));
+    expect(
+      gen.next({
+        refreshThrough: 600,
+        lastRequest: { scopeStatusByLocation: true, statusFilter: 'up' },
+      } as any).value
+    ).toEqual(select(selectOverviewPageState));
+    expect(gen.next(pageState as any).value).toEqual(
+      put(
+        appendOverviewStatusAction.get({
+          pageState: { ...pageState, page: 2, perPage: 500 } as any,
+          scopeStatusByLocation: true,
+          statusFilter: 'up',
+          silent: true,
+        })
+      )
+    );
+    expect(gen.next().done).toBe(true);
+  });
+
+  it('does nothing when refreshThrough is unset', () => {
+    const gen = refreshRemainingCardWindowWorker(
+      fetchOverviewStatusAction.success({ page: 1, perPage: 40 } as any)
+    );
+
+    expect(gen.next().value).toEqual(select(selectOverviewStatusReducer));
+    expect(gen.next({ refreshThrough: undefined } as any).done).toBe(true);
+  });
+
+  it('dispatches a silent fill append while a grouped fill is not covered', () => {
+    const gen = refreshRemainingCardWindowWorker(
+      fetchOverviewStatusAction.success({ page: 1, perPage: 500, total: 800 } as any)
+    );
+
+    expect(gen.next().value).toEqual(select(selectOverviewStatusReducer));
+    expect(
+      gen.next({
+        fillThrough: 800,
+        lastRequest: { scopeStatusByLocation: true },
+      } as any).value
+    ).toEqual(select(selectOverviewPageState));
+    expect(gen.next(pageState as any).value).toEqual(
+      put(
+        appendOverviewStatusAction.get({
+          pageState: { ...pageState, page: 2, perPage: 500 } as any,
+          scopeStatusByLocation: true,
+          statusFilter: undefined,
+          silent: true,
+          fillAll: true,
+        })
+      )
+    );
+    expect(gen.next().done).toBe(true);
   });
 });

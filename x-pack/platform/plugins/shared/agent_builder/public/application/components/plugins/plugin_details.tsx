@@ -82,7 +82,7 @@ export const PluginDetails: React.FC<PluginDetailsProps> = ({ plugin }) => {
         rightSideItems={[
           <EuiButtonEmpty
             key="back-to-plugins"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={createAgentBuilderUrl(appPaths.plugins.list)}
             data-test-subj="agentBuilderBackToPluginsButton"
             {...getEbtProps({

@@ -149,6 +149,7 @@ export const defaultGroupStatsRenderer = (
       return [...severityComponent, usersBadge, rulesBadge, ...defaultBadges];
     case 'user.name':
     case 'source.ip':
+    case 'destination.ip':
       return [...severityComponent, hostsBadge, rulesBadge, ...defaultBadges];
   }
   return [...severityComponent, rulesBadge, ...defaultBadges];

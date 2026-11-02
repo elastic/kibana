@@ -9,6 +9,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { type ExecutionStatus, type ExecutionType, isInProgressStatus } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -22,19 +23,12 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useSerialPolling } from '../../../hooks/use_serial_polling';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 
 export interface ExecutionListFiltersQueryParams {
   statuses: ExecutionStatus[];
   executionTypes: ExecutionType[];
   executedBy: string[];
 }
-
-const DEFAULT_FILTERS: ExecutionListFiltersQueryParams = {
-  statuses: [],
-  executionTypes: [],
-  executedBy: [],
-};
 
 interface WorkflowExecutionListProps {
   workflowId: string | null;
@@ -44,9 +38,10 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const { notifications } = useKibana().services;
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
-  const showExecutor = useWorkflowsExperimentalUiSetting(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID);
-  const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
+  const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
   const [isCancelInProgress, setIsCancelInProgress] = useState(false);
+  const { selectedExecutionId, lastViewedExecutionId, executionListFilters, updateUrlState } =
+    useWorkflowUrlState();
 
   const { canCancelWorkflowExecution } = useWorkflowsCapabilities();
 
@@ -57,11 +52,12 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     error,
     setPaginationObserver,
     refetch,
+    hasNextPage,
   } = useWorkflowExecutions({
     workflowId,
-    statuses: filters.statuses,
-    executionTypes: filters.executionTypes,
-    executedBy: filters.executedBy,
+    statuses: executionListFilters.statuses,
+    executionTypes: executionListFilters.executionTypes,
+    executedBy: executionListFilters.executedBy,
   });
 
   const workflowExecutionsRef = useRef(workflowExecutions);
@@ -85,11 +81,35 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     pollKey: workflowId,
   });
 
-  const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+  const setFilters = useCallback(
+    (next: ExecutionListFiltersQueryParams) => {
+      updateUrlState({
+        executionStatuses: next.statuses,
+        executionTypes: next.executionTypes,
+        executedBy: next.executedBy,
+      });
+    },
+    [updateUrlState]
+  );
 
-  const handleViewWorkflowExecution = (executionId: string) => {
-    setSelectedExecution(executionId);
-  };
+  const handleViewWorkflowExecution = useCallback(
+    (executionId: string) => {
+      // replace: false so Back returns to the draft. updateUrlState replaces by default.
+      // lastViewed stays in the URL after the detail closes, so the row is still highlighted
+      // when the list mounts again.
+      updateUrlState(
+        {
+          tab: 'executions',
+          executionId,
+          lastViewedExecutionId: executionId,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: false }
+      );
+    },
+    [updateUrlState]
+  );
 
   const onConfirmCancel = useCallback(async () => {
     if (!workflowId) {
@@ -138,13 +158,15 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       executions={workflowExecutions ?? null}
       onExecutionClick={handleViewWorkflowExecution}
       selectedId={selectedExecutionId ?? null}
+      lastViewedId={lastViewedExecutionId ?? null}
       isInitialLoading={isLoadingWorkflowExecutions}
       isLoadingMore={isLoadingMoreWorkflowExecutions}
       error={error as Error | null}
-      filters={filters}
+      filters={executionListFilters}
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
       showExecutor={showExecutor}
+      hasNextPage={Boolean(hasNextPage)}
       canCancel={canCancelWorkflowExecution}
       isCancelInProgress={isCancelInProgress}
       onConfirmCancel={onConfirmCancel}

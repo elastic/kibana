@@ -8,7 +8,7 @@
  */
 
 import type { monaco } from '@kbn/code-editor';
-import type { YamlValidationResult } from '../validate_workflow_yaml/model/types';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 
 jest.mock('../../../common/schema', () => {
   const mockWorkflowZodSchema = {};
@@ -21,6 +21,7 @@ jest.mock('../../../common/schema', () => {
 jest.mock('../../trigger_schemas', () => ({
   triggerSchemas: {
     getRegisteredIds: jest.fn(() => []),
+    getRegisteredTriggersForSchema: jest.fn(() => []),
   },
 }));
 
@@ -55,7 +56,7 @@ jest.mock('../validate_workflow_yaml/model/use_workflow_json_schema', () => ({
 jest.mock('../validate_workflow_yaml/lib/use_workflow_yaml_validation_context', () => {
   const mockValidationContextRef = {
     current: {
-      connectorTypes: {},
+      connectorTypes: { status: 'ready', value: {} },
       connectorsManagementUrl: 'http://test/connectors',
       workflows: { workflows: {}, totalWorkflows: 0 },
       getPropertyHandler: () => undefined,
@@ -65,6 +66,7 @@ jest.mock('../validate_workflow_yaml/lib/use_workflow_yaml_validation_context', 
 
   return {
     useWorkflowYamlValidationContextRef: jest.fn(() => mockValidationContextRef),
+    getWorkflowYamlValidationContextError: jest.fn(() => null),
   };
 });
 
@@ -92,10 +94,19 @@ jest.mock('@kbn/code-editor', () => {
   const { setPreviewValidationMarkerChangeListener } = jest.requireActual(
     './use_workflow_change_history_preview_validation_test_harness'
   ) as typeof import('./use_workflow_change_history_preview_validation_test_harness');
+  // Spread the real module rather than replacing it outright: `@kbn/workflows-ui`'s barrel
+  // export pulls in `workflow_monaco_layout_options.ts`, which reads static properties off
+  // `monaco.editor` (e.g. `ShowLightbulbIconMode`) at module load time. A narrower mock here
+  // silently breaks that unrelated module the next time it starts reading something new off
+  // `monaco.editor`.
+  const actual = jest.requireActual('@kbn/code-editor') as typeof import('@kbn/code-editor');
 
   return {
+    ...actual,
     monaco: {
+      ...actual.monaco,
       editor: {
+        ...actual.monaco.editor,
         onDidChangeMarkers: jest.fn((listener: (uris: monaco.Uri[]) => void) => {
           setPreviewValidationMarkerChangeListener(listener);
           return { dispose: jest.fn() };

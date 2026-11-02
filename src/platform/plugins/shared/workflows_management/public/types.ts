@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -18,6 +19,7 @@ import type { KqlPluginStart } from '@kbn/kql/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -26,7 +28,10 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type {
+  WorkflowsExtensionsPublicPluginSetup,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
 import type {
   AvailabilityService,
   ServerlessTierRequiredProducts,
@@ -38,7 +43,9 @@ import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 export interface WorkflowsPublicPluginSetup {}
 
 export interface WorkflowsPublicPluginSetupDependencies {
+  actions: ActionsPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
 export interface WorkflowsPublicPluginStart {
@@ -69,6 +76,7 @@ export interface WorkflowsPublicPluginStart {
 }
 
 export interface WorkflowsPublicPluginStartDependencies {
+  security: SecurityPluginStart;
   navigation: NavigationPublicPluginStart;
   serverless?: ServerlessPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -85,6 +93,7 @@ export interface WorkflowsPublicPluginStartDependencies {
 }
 
 export interface WorkflowsPublicPluginStartAdditionalServices {
+  securityUi: SecurityPluginStart['uiApi'];
   storage: Storage;
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
@@ -94,5 +103,5 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
 }
 
 export type WorkflowsServices = CoreStart &
-  WorkflowsPublicPluginStartDependencies &
+  Omit<WorkflowsPublicPluginStartDependencies, 'security'> &
   WorkflowsPublicPluginStartAdditionalServices;

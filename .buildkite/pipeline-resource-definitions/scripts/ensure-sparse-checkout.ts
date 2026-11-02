@@ -1,4 +1,4 @@
-#!/usr/bin/env ts-node-script
+#!/usr/bin/env node
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
@@ -17,7 +17,7 @@
  * out that very file and nothing else.
  *
  * Usage:
- *   ts-node .buildkite/pipeline-resource-definitions/scripts/ensure-sparse-checkout.ts <file.yml> [more.yml ...]
+ *   node .buildkite/pipeline-resource-definitions/scripts/ensure-sparse-checkout.ts <file.yml> [more.yml ...]
  */
 
 import fs from 'fs';

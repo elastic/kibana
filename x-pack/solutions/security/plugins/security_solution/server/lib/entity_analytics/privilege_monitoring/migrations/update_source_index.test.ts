@@ -128,6 +128,33 @@ describe('updatePrivilegedMonitoringSourceIndex', () => {
     expect(mockDeleteUsersWithSourceIndex).toHaveBeenCalledWith('*');
   });
 
+  describe('with spaceId defined', () => {
+    it('scopes the shouldRun check, SO query, and user deletion to the specified space', async () => {
+      const mockShouldRunMigration = jest.fn().mockResolvedValue(true);
+      mockShouldRunSourceMigrationFactory.mockReturnValue(mockShouldRunMigration);
+      mockGetStartServices.mockResolvedValue([
+        mockCore,
+        { security: mockSecurity, encryptedSavedObjects: mockEncryptedSavedObjects },
+      ]);
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [
+          { id: 'so-id-1', namespaces: ['my-space'], attributes: { indexPattern: 'pattern-1' } },
+        ],
+      });
+
+      await updatePrivilegedMonitoringSourceIndex({
+        ...DEFAULT_PARAMS,
+        spaceId: 'my-space',
+      });
+
+      expect(mockShouldRunMigration).toHaveBeenCalledWith('my-space');
+      expect(mockSoClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ namespaces: ['my-space'] })
+      );
+      expect(mockDeleteUsersWithSourceIndex).toHaveBeenCalledWith('my-space');
+    });
+  });
+
   it('logs error and skips if api key manager returns no client', async () => {
     mockShouldRunSourceMigrationFactory.mockReturnValue(jest.fn().mockResolvedValue(true));
     mockGetStartServices.mockResolvedValue([

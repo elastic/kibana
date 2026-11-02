@@ -59,7 +59,7 @@ export const AlertSummaryWidgetFullSize = ({
       element="div"
       data-test-subj="alertSummaryWidgetFullSize"
       hasShadow={false}
-      paddingSize="none"
+      paddingSize="m"
     >
       {!hideStats && (
         <EuiFlexItem data-test-subj="alertSummaryWidgetFullSizeStats">

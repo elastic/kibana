@@ -19,11 +19,14 @@ import {
   getLayerList,
   getLayerListRaw,
   getMapColors,
-  getMapReady,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
+import {
+  cancelRequest,
+  getInspectorAdapters,
+  getMapReady,
+} from '../reducers/non_serializable_instances';
 import { hideTOCDetails, setDrawMode, showTOCDetails, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
@@ -70,6 +73,7 @@ import type { IVectorSource } from '../classes/sources/vector_source';
 import { getDrawMode, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { isSpatialJoin } from '../classes/joins/is_spatial_join';
+import { getRuntimeState } from './get_runtime_state';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -117,15 +121,53 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
       dispatch({
         type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
       });
-    } else {
-      getLayerListRaw(getState()).forEach(({ id }) => {
-        dispatch(removeLayerFromLayerList(id));
+
+      newLayerList.forEach((layerDescriptor) => {
+        dispatch(addLayer(layerDescriptor));
       });
+      return;
     }
 
-    newLayerList.forEach((layerDescriptor) => {
-      dispatch(addLayer(layerDescriptor));
+    const newLayerIds = newLayerList.map(({ id }) => id);
+
+    const currentLayers: Record<string, LayerDescriptor> = {};
+    getLayerListRaw(getState()).forEach((layerDescriptor) => {
+      currentLayers[layerDescriptor.id] = layerDescriptor;
+
+      // Remove layers that no longer exist
+      if (!newLayerIds.includes(layerDescriptor.id)) {
+        dispatch(removeLayerFromLayerList(layerDescriptor.id));
+      }
     });
+
+    newLayerList.forEach((newLayerDescriptor) => {
+      const currentLayerDescriptor = currentLayers[newLayerDescriptor.id];
+      // Add layers that do not currently exist
+      if (!currentLayerDescriptor) {
+        dispatch(addLayer(newLayerDescriptor));
+        return;
+      }
+
+      // Reset layer with new state + current runtime
+      dispatch(
+        updateLayerDescriptor({
+          ...newLayerDescriptor,
+          ...getRuntimeState(currentLayerDescriptor),
+        })
+      );
+      dispatch(syncDataForLayerId(newLayerDescriptor.id, false));
+    });
+
+    // reset ordering
+    const replacedLayerList = getLayerListRaw(getState());
+    const newOrder = [];
+    for (let i = 0; i < newLayerList.length; i++) {
+      const index = replacedLayerList.findIndex(({ id }) => id === newLayerList[i].id);
+      if (index !== -1) {
+        newOrder.push(index);
+      }
+    }
+    dispatch(updateLayerOrder(newOrder));
   };
 }
 

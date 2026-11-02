@@ -102,6 +102,8 @@ describe('useServiceMapAlertsNavigateFactory', () => {
     // the alerts tab.
     expect(search.get('kuery')).toBe('');
     expect(search.get('environment')).toBe('production');
+    expect(search.get('rangeTo')).toBe('now');
+    expect(search.get('alertStatus')).toBe('active');
   });
 
   it('returns undefined when SPA navigation is unavailable (Agent Builder fallback)', () => {
@@ -116,7 +118,7 @@ describe('useServiceMapAlertsNavigateFactory', () => {
 
   it('routes through /mobile-services on the mobile map context', () => {
     mockedUseApmRoutePath.mockReturnValue(
-      '/mobile-services/{serviceName}/service-map' as unknown as ReturnType<typeof useApmRoutePath>
+      '/mobile-services/{serviceName}/overview' as unknown as ReturnType<typeof useApmRoutePath>
     );
 
     const { result } = renderHook(() => useServiceMapAlertsNavigateFactory());

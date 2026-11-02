@@ -69,6 +69,7 @@ export const useTabs = (
       tabs.push(
         getAnomaliesTab({
           entityId: entityStoreEntityId,
+          entityName: name,
           entityType: EntityType.user,
         })
       );

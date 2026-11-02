@@ -48,14 +48,22 @@ export const ImportExceptionListRequestQuery = lazySchema(() =>
 If any exception items have the same `item_id`, those are also overwritten.
 
       */
-    overwrite: BooleanFromString.optional().default(false),
+    overwrite: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        'Determines whether existing exception lists with the same `list_id` are overwritten.\nIf any exception items have the same `item_id`, those are also overwritten.\n'
+      ),
     /**
       * Determines whether the list being imported will have a new `list_id` generated.
 Additional `item_id`'s are generated for each exception item. Both the exception
 list and its items are overwritten.
 
       */
-    as_new_list: BooleanFromString.optional().default(false),
+    as_new_list: BooleanFromString.optional()
+      .default(false)
+      .describe(
+        "Determines whether the list being imported will have a new `list_id` generated.\nAdditional `item_id`'s are generated for each exception item. Both the exception\nlist and its items are overwritten.\n"
+      ),
   })
 );
 export type ImportExceptionListRequestQuery = z.infer<typeof ImportExceptionListRequestQuery>;

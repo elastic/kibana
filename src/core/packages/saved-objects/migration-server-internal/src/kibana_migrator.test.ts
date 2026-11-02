@@ -118,7 +118,7 @@ describe('KibanaMigrator', () => {
       const options = mockOptions();
       const kibanaMigrator = new KibanaMigrator(options);
       const doc = {} as any;
-      expect(() => kibanaMigrator.migrateDocument(doc)).toThrowError(
+      expect(() => kibanaMigrator.migrateDocument(doc)).toThrow(
         /Migrations are not ready. Make sure prepareMigrations is called first./i
       );
     });
@@ -130,8 +130,8 @@ describe('KibanaMigrator', () => {
       jest.spyOn(DocumentMigrator.prototype, 'migrate').mockImplementation((doc) => doc);
       const doc = {} as any;
 
-      expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
-      expect(DocumentMigrator.prototype.migrate).toBeCalledTimes(1);
+      expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrow();
+      expect(DocumentMigrator.prototype.migrate).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -379,6 +379,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "date_range",
       },
+      "kibana.alert.tracked": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
+      },
       "kibana.alert.updated_at": Object {
         "array": false,
         "required": false,

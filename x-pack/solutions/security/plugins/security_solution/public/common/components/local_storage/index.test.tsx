@@ -123,7 +123,7 @@ describe('useLocalStorage', () => {
 
       act(() => setValue(newValue));
 
-      expect(mockedUseKibana.services.storage.set).toBeCalledWith(
+      expect(mockedUseKibana.services.storage.set).toHaveBeenCalledWith(
         `${APP_ID}.${getSettingKey({
           category: TREEMAP_CATEGORY,
           page: ALERTS_PAGE,

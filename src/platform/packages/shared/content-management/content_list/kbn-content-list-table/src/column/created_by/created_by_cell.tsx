@@ -11,7 +11,7 @@ import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiAvatar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { UserAvatarTip } from '@kbn/user-profile-components';
+import { UserAvatar } from '@kbn/user-profile-components';
 import {
   useCreatedByFilterToggle,
   useProfile,
@@ -114,7 +114,7 @@ export const CreatedByCell = memo(({ createdBy, managed }: CreatedByCellProps) =
         data-test-subj={CONTENT_LIST_TEST_SUBJECTS.createdByNoCreator}
       >
         <EuiToolTip content={NO_CREATOR_USER_LABEL} position="top">
-          <EuiAvatar name={NO_CREATOR_USER_LABEL} size="s" iconType="userAvatar" color="subdued" />
+          <EuiAvatar name={NO_CREATOR_USER_LABEL} size="s" iconType="user" color="subdued" />
         </EuiToolTip>
       </span>
     );
@@ -137,7 +137,7 @@ export const CreatedByCell = memo(({ createdBy, managed }: CreatedByCellProps) =
       )}
       data-test-subj={CONTENT_LIST_TEST_SUBJECTS.createdByAvatar}
     >
-      <UserAvatarTip {...{ user: user.user, avatar: user.avatar, size: 's' }} />
+      <UserAvatar {...{ user: user.user, avatar: user.avatar, size: 's' }} />
     </span>
   );
 });

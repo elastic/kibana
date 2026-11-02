@@ -6,6 +6,10 @@
  */
 
 import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type {
   NotificationNamespace,
   NotificationTypeName,
   NotificationKindOf,
@@ -31,7 +35,7 @@ export interface NotificationSubmitter<
   /**
    * Validate the content, check the type's feature flag, build the `notification_id` from the
    * type's `kind`, stamp `@timestamp`, and append one document to the
-   * `.kibana-notification-center` data stream.
+   * `.kibana-notifications` data stream.
    */
   submit: (input: NotificationSubmitInput<N, T>) => Promise<SubmitNotificationResult>;
 }
@@ -53,6 +57,10 @@ export interface NotificationCenterPluginSetup {
 
 export type NotificationCenterPluginStart = Record<string, never>;
 
-export type NotificationCenterSetupDependencies = Record<string, never>;
+export interface NotificationCenterSetupDependencies {
+  taskManager: TaskManagerSetupContract;
+}
 
-export type NotificationCenterStartDependencies = Record<string, never>;
+export interface NotificationCenterStartDependencies {
+  taskManager: TaskManagerStartContract;
+}

@@ -15,6 +15,7 @@ import { setupDependencies } from './setup_dependencies';
 import { WorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 import '../workflow_event_logger/mocks';
@@ -51,13 +52,11 @@ describe('setupDependencies', () => {
 
   const mockConfig: WorkflowsExecutionEngineConfig = {
     enabled: true,
+    storage: { source: 'plain_index', dataRetention: '90d' },
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     maxWorkflowDepth: 10,
     logging: {
       console: true,
-    },
-    http: {
-      allowedHosts: ['*'],
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024),
     eviction: {
@@ -69,6 +68,7 @@ describe('setupDependencies', () => {
 
   let mockDependencies: ReturnType<typeof mockContextDependencies>;
   let mockWorkflowExecutionRepository: jest.Mocked<WorkflowExecutionRepository>;
+  let mockStepExecutionRepository: jest.Mocked<StepExecutionRepository>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -83,6 +83,8 @@ describe('setupDependencies', () => {
       updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
+    mockStepExecutionRepository = {} as unknown as jest.Mocked<StepExecutionRepository>;
+
     (WorkflowExecutionRepository as jest.Mock).mockImplementation(
       () => mockWorkflowExecutionRepository
     );
@@ -92,7 +94,11 @@ describe('setupDependencies', () => {
       getStepGraph: jest.fn().mockReturnThis(),
       topologicalOrder: ['entry-node'],
       getNode: jest.fn().mockReturnValue({ id: 'entry-node' }),
-      getNodeStack: jest.fn().mockReturnValue(['entry-node']),
+      getNodeStack: jest.fn().mockReturnValue([]),
+      getAllNodes: jest.fn().mockReturnValue([]),
+      getEdges: jest.fn().mockReturnValue([]),
+      getInnerStepIds: jest.fn().mockReturnValue(new Set()),
+      getWorkflowLevelTimeout: jest.fn(),
     };
     (WorkflowGraph.fromWorkflowDefinition as jest.Mock) = jest
       .fn()
@@ -122,6 +128,8 @@ describe('setupDependencies', () => {
       mockLogger,
       mockConfig,
       mockDependencies,
+      mockWorkflowExecutionRepository,
+      mockStepExecutionRepository,
       mockFakeRequest
     );
 
@@ -150,6 +158,8 @@ describe('setupDependencies', () => {
       mockLogger,
       mockConfig,
       mockDependencies,
+      mockWorkflowExecutionRepository,
+      mockStepExecutionRepository,
       mockFakeRequest
     );
 
@@ -181,6 +191,8 @@ describe('setupDependencies', () => {
         mockLogger,
         mockConfig,
         mockDependencies,
+        mockWorkflowExecutionRepository,
+        mockStepExecutionRepository,
         mockFakeRequest
       );
 
@@ -201,6 +213,8 @@ describe('setupDependencies', () => {
         mockLogger,
         mockConfig,
         mockDependencies,
+        mockWorkflowExecutionRepository,
+        mockStepExecutionRepository,
         mockFakeRequest
       );
 
@@ -238,6 +252,8 @@ describe('setupDependencies', () => {
           mockLogger,
           mockConfig,
           mockDependencies,
+          mockWorkflowExecutionRepository,
+          mockStepExecutionRepository,
           mockFakeRequest
         )
       ).rejects.toBeInstanceOf(WorkflowGraphSetupError);
@@ -266,6 +282,8 @@ describe('setupDependencies', () => {
           mockLogger,
           mockConfig,
           mockDependencies,
+          mockWorkflowExecutionRepository,
+          mockStepExecutionRepository,
           mockFakeRequest
         )
       ).rejects.toBe(otherError);
@@ -293,6 +311,8 @@ describe('setupDependencies', () => {
         mockLogger,
         mockConfig,
         mockDependencies,
+        mockWorkflowExecutionRepository,
+        mockStepExecutionRepository,
         mockFakeRequest
       )
     ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
@@ -334,6 +354,8 @@ describe('setupDependencies', () => {
         mockLogger,
         mockConfig,
         mockDependencies,
+        mockWorkflowExecutionRepository,
+        mockStepExecutionRepository,
         mockFakeRequest
       );
 

@@ -2,11 +2,21 @@
 
 ## What every reviewer must know
 
-Graph data flows from Security Solution flyout wrappers through `@kbn/cloud-security-posture-graph` (`GraphInvestigation` → `useFetchGraphData` POST to `/internal/cloud_security_posture/graph`) into ReactFlow rendering, while the CSP server validates requests, runs parallel ES|QL fetches (events, entity relationships, enrichment), and builds the response via a fetch-then-parse pipeline (`fetchGraph` → `parseRecords`). Reviewers must treat client payload size, ES|QL grouping/pinning correctness, and space-aware index resolution as first-class constraints — graphs can be massive and incorrect grouping or partial failure handling degrades investigation UX. Server-side label resolution and enrichment under `documentData` are intentional; do not reintroduce client-side label logic or expand the graph schema with per-node asset fields.
+Graph data flows from Security Solution flyout wrappers through `@kbn/cloud-security-posture-graph` (`GraphInvestigation` → `useFetchGraphData` POST to `/internal/cloud_security_posture/graph`) into ReactFlow rendering, while the CSP server validates requests, runs parallel ES|QL fetches (events, entity relationships, enrichment), and builds the response via a fetch-then-parse pipeline (`fetchGraph` → `parseRecords`). The DTO returned to the frontend must stay decoupled from the raw underlying data (logs-\* and entity latest index) — always transform raw fields into the neutral shape the graph package expects; leaking index-specific field names or entity-store schema details into the DTO breaks the backend's ability to evolve independently. ES|QL grouping (`STATS … BY`) must be maintained at the query level for correctness: pre-aggregation is the authoritative source for node counts and graph shape; TypeScript grouping is only acceptable for the final type/sub-type merge that requires post-enrichment data. Reviewers must treat client payload size, ES|QL grouping/pinning correctness, and space-aware index resolution as first-class constraints — graphs can be massive and incorrect grouping or partial failure handling degrades investigation UX. Server-side label resolution and enrichment under `documentData` are intentional; do not reintroduce client-side label logic or expand the graph schema with per-node asset fields. A second correctness surface sits on the client: `search_filters.ts` translates EUID namespace DSL into filter-bar chips, and that translator must agree exactly with its own translatability gate — an unmodeled clause shape silently produces an over-matching filter rather than a visible error.
 
 The graph visualization feature is owned by **@elastic/contextual-security-apps** (the `kbn-cloud-security-posture/graph` package, the `cloud_security_posture` graph routes, and the CPS common schema/types). The Security Solution flyout files that embed the graph are thin consumers owned by other teams per CODEOWNERS (`flyout_v2` → @elastic/security-threat-hunting; `flyout/entity_details` → @elastic/security-entity-analytics), and are not the domain's maintainers.
 
 ## Architectural invariants
+
+- **DTO must stay decoupled from the raw data sources** — The shape returned to the frontend must be neutral to the underlying data (logs-\* indices, entity latest index). Do not leak raw Elasticsearch field names, index-specific structures, or entity-store schema details into the graph DTO; always transform them into the shape the `@kbn/cloud-security-posture-graph` package expects. This decoupling lets the backend data model evolve (e.g. ENRICH → LOOKUP JOIN, entity-store v1 → v2) without breaking the frontend contract.
+
+- **ES|QL grouping must be maintained at the query level** — Pre-aggregation (`STATS … BY`) must stay in ES|QL rather than being deferred to TypeScript, at least to the extent CPS limitations allow. Readable, explicit ES|QL grouping (actor, target, relationship type) is the authoritative source of correctness for node counts and graph shape; TypeScript grouping is only acceptable for the final type/sub-type merge that depends on post-enrichment data. Removing ES|QL grouping degrades both readability and correctness (TypeScript then groups over LIMIT-truncated raw rows).
+
+- **The translatability gate and the translator must agree exactly on representable shapes** — `isFullyTranslatable` and `euidDslClauseToFilters` must model the same set of clause shapes. Any divergence produces a silently weakened filter rather than a visible error. Two consequences follow:
+  - **Handle both single-value and array clause shapes.** Elasticsearch DSL allows bool clauses (`must_not`, `must`, `should`, `filter`) to be either a single object or an array. Normalize to an array before iterating; a `?? []` default only covers `undefined`, not the single-object shape.
+  - **Fail closed on unmodeled shapes.** Do not fall through to `return []` for clause types the translator does not know (`match`, `terms`, `wildcard`, `range`). Return `undefined` or throw and catch in `buildEntityDslFilter` so `getEntityFilterSpec` falls back to the `fields` path — the broad-but-honest behavior. A silent fall-through contributes nothing to the surrounding AND and just weakens it, collapsing the filter to a single chip (`user.email: alice@example.com`) that matches `alice@aws`, `alice@okta` and `alice@entra_id` alike.
+
+  ([PR #289467](https://github.com/elastic/kibana/pull/289467) · @niros1 · `x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/filters/search_filters.ts`)
 
 - **Client payload must stay minimal** — The graph schema must pass only fields needed for the current use case (e.g. `entity.name`), not all entity/asset fields; violating this inflates responses for large graphs and risks client performance degradation. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph/v1.ts`)
 
@@ -56,7 +66,13 @@ The graph visualization feature is owned by **@elastic/contextual-security-apps*
 
 - **Unused schema types must be removed** — Schema types that existing schemas do not reuse must not be added or left in place. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @albertoblaz · `x-pack/solutions/security/packages/kbn-cloud-security-posture/common/schema/graph/v1.ts`)
 
+- **Graph filters and actions always expand, never narrow** — `addEntityFilter` intentionally wraps graph-generated chips in OR. This is by design: filters and actions performed on the graph always add to and expand the graph view. Intersecting all filters with AND would narrow the results too much and hide valuable investigative information. Do not change this to an AND relationship. (@alexreal1314, [PR #289467](https://github.com/elastic/kibana/pull/289467))
+
 ## Common review patterns (learned from real PRs)
+
+- **Count naming encodes what is counted** — `count` is the combined total (`uniqueEventsCount + uniqueAlertsCount`); use `uniqueEventsCount` and `uniqueAlertsCount` for the sub-aggregates. This is the intended convention across the entire graph API — schema, parser, and integration tests — not just test files. (@JordanSh, [PR #285449](https://github.com/elastic/kibana/pull/285449) · `x-pack/solutions/security/test/cloud_security_posture_api/routes/graph.ts`)
+
+- **EUID filter translation bugs are caught by unit/integration/FTR coverage, not archive fixtures** — The bugs in [PR #289467](https://github.com/elastic/kibana/pull/289467) were not caught because no fixture exercised condition-based namespaces (`local`, asset-discovery). Adding condition-based-namespace fixtures to the graph test archives is not a standing requirement — sufficient unit test, API integration, and FTR coverage is the team's standard. (@niros1, [PR #289467](https://github.com/elastic/kibana/pull/289467) · `search_filters.ts`)
 
 - **ESQL readability vs extraction** — Reviewers push back on over-extracting ES|QL into many variables or leaving entirely inline blobs; agreed balance is minimal splitting without large duplicated chunks. (@kfirpeled, @albertoblaz, [PR #227784](https://github.com/elastic/kibana/pull/227784) · `fetch_graph.ts`)
 
@@ -84,15 +100,19 @@ The graph visualization feature is owned by **@elastic/contextual-security-apps*
 
 ## Security considerations
 
+- **Silently weakened EUID filters are an authorization-adjacent correctness risk** — A filter that falls through to `return []` for an unmodeled clause shape does not fail visibly; it renders a chip that matches a broader entity population than the user's namespace intends (`user.email: alice@example.com` matching `alice@aws`, `alice@okta`, `alice@entra_id`). Reviewers must treat the fail-closed rule as a data-scoping guarantee, not a cosmetic filter-bar concern. An over-matching filter should not reach the user in practice — it can appear only briefly before the EUID API loads. ([PR #289467](https://github.com/elastic/kibana/pull/289467) · @niros1 · `search_filters.ts`)
+
 - **Origin IDs must not be logged** — Server route logging must omit origin IDs that may contain PII (e.g. IP addresses); operational logs can propagate PII into Kibana observability paths. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `cloud_security_posture/server/routes/graph/route.ts`)
 
 - **Index resolution must be space-aware** — Hard-coded `_default` suffixes for entity/asset indices can cause cross-space data access or wrong-space queries in multi-space deployments. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `fetch_entity_data.ts`, `common/utils/helpers.ts`)
 
 - **User vs internal ES client scope** — Data queries must use user permissions (`asCurrentUser`); internal system-status queries must use `asInternal` so permission gaps do not block legitimate system checks or leak unintended access patterns. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `fetch_graph.ts`)
 
+- **Platinum license gate is applied only on the main graph route** — `server/routes/graph/route.ts:63` checks `license.hasAtLeast('platinum')` before serving data. The `graph_events` and `graph_entities` detail routes gate on the `securitySolution` privilege only and have no license check. Reviewers adding new graph endpoints should apply the Platinum gate explicitly rather than assuming it is inherited. **Open question for the team:** whether the detail routes should enforce the gate independently, or whether reachability-only-after-the-main-route is considered sufficient. (`server/routes/graph/route.ts:63`, `server/routes/graph_events/route.ts:24`, `server/routes/graph_entities/route.ts`)
+
 - **Client payload minimization** — Passing full entity/asset field sets to the browser expands the attack surface for data exfiltration via large graph responses and increases exposure of fields not needed for visualization. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `common/schema/graph/v1.ts`)
 
-> **[VERIFY]:** Should `use_fetch_graph_data` continue hiding full error message/stack from the client for security, or is richer client-side error detail acceptable for authorized internal API callers? ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled)
+- **Full error messages and stacks must not reach the client** — `use_fetch_graph_data` deliberately withholds the full error message and stack from the browser; richer client-side error detail is not acceptable even for authorized internal API callers. Server logs are the place for diagnostic detail. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `graph/src/hooks/use_fetch_graph_data.ts`)
 
 ## Performance constraints
 
@@ -104,19 +124,21 @@ The graph visualization feature is owned by **@elastic/contextual-security-apps*
 
 - **8-FORK-branch ES|QL limit** — Relationship field additions approach an 8-branch FORK limit documented in constants; exceeding it breaks ES|QL query execution. ([PR #251178](https://github.com/elastic/kibana/pull/251178) · @kfirpeled · `common/constants.ts`)
 
-- **Enrichment pagination page size** — Parallel entity enrichment fetches should not use very small page sizes (e.g. 100); team settled on 1k after reviewer suggested 5k. ([PR #269755](https://github.com/elastic/kibana/pull/269755) · @kfirpeled · `fetch_entity_enrichment.ts`)
+- **Enrichment pagination page size** — Parallel entity enrichment fetches should not use very small page sizes (e.g. 100); team settled on 1k after reviewer suggested 5k. Entity enrichment is chunked at 1,000 IDs per query. ([PR #269755](https://github.com/elastic/kibana/pull/269755) · @kfirpeled · `fetch_entity_enrichment.ts`; chunk size referenced at `server/routes/graph/fetch_graph.ts:169`)
 
 - **ES|QL STATS for deduplication** — Prefer STATS in the query for known duplicate rows rather than shipping duplicates to the parser/client. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `fetch_entity_data.ts`)
 
 - **Server-side label resolution** — Label logic on the server reduces client CPU during ReactFlow re-renders for large graphs. ([PR #227784](https://github.com/elastic/kibana/pull/227784) · @kfirpeled · `graph/src/components/utils.ts`)
 
-> **[VERIFY]:** Raising ES|QL LIMIT to 50k for entity-ID-level grouping needs documented rationale and truncation handling given ES default max 10k rows. ([PR #269755](https://github.com/elastic/kibana/pull/269755) · @niros1)
+- **`nodesLimit` truncates the graph and emits a message** — `parseRecords` applies `nodesLimit` and emits `REACHED_NODES_LIMIT` when triggered; changes that increase node production per record push graphs into truncation sooner. ([code-architecture.md] · `server/routes/graph/parse_records.ts:74`)
 
 - **ES|QL `STATS … BY` pre-aggregation is mandatory; only the type/sub-type merge belongs in TypeScript** — Resolved by [PR #275276](https://github.com/elastic/kibana/pull/275276): the events and relationships queries must pre-aggregate in ES|QL (`STATS … BY` over pre-enrichment dimensions) so grouping runs before the `LIMIT`. Do not move grouping into TypeScript over raw rows. The only grouping allowed in TypeScript is the final merge by entity type/sub-type (`regroupEvents` / `regroupRelationships`), which is unavoidable because type/sub-type are only known after the follow-up enrichment query — and it must be a strict refinement of the ES|QL group key.
 
 ## Historical catches
 
-- [PR #243711](https://github.com/elastic/kibana/pull/243711) → [PR #258435](https://github.com/elastic/kibana/pull/258435) → [PR #269755](https://github.com/elastic/kibana/pull/269755) — Entity identification/enrichment evolved from ECS entity-namespace fields with Entity Store v1 `ENRICH`, to v2 (removing v1 `ENRICH`), to follow-up two-phase enrichment (fetch graph records, then fetch entity metadata by ID) replacing `LOOKUP JOIN` for CPS/project routing; a generic reviewer might reintroduce v1 `ENRICH` or `LOOKUP JOIN` patterns already superseded. (@alexreal1314, @kfirpeled)
+- [PR #289467](https://github.com/elastic/kibana/pull/289467) — Reviewer caught that `must_not` was destructured with an `= []` default and mapped directly, crashing with `TypeError: mustNot.map is not a function` when a node's namespace came from a condition-based `whenClause` (most commonly a local user) because `conditionToQueryDsl` emits `must_not` as a single object. A generic reviewer would read `must_not ?? []` as safe and would not know which upstream namespace resolution path produces the non-array shape. (@niros1 · `search_filters.ts`)
+
+- [PR #289467](https://github.com/elastic/kibana/pull/289467) — Reviewer caught that the DSL-to-filter translator fell through to `return []` for `match`/`terms`/`wildcard`/`range`, silently weakening the AND and re-introducing the exact entity over-matching (`alice@aws` / `alice@okta` / `alice@entra_id`) the PR set out to fix, for asset-discovery-namespaced entities. A generic reviewer would see an empty-array default as a harmless no-op rather than a silent scope expansion. (@niros1 · `search_filters.ts`)
 
 - [PR #275276](https://github.com/elastic/kibana/pull/275276) — All ES|QL `STATS … BY` grouping for the events and entities/relationships queries had been removed by mistake when the unsupported `LOOKUP JOIN` was dropped for CPS support. Without pre-aggregation the queries returned one raw row per document/triple, and grouping then ran in TypeScript over ungrouped (and `LIMIT`-truncated) records — degrading graph capability by producing fewer results and incorrect grouped nodes/counts. Fixed by restoring the `STATS … BY` clauses in ES|QL, keeping the TS type/sub-type merge as a strict refinement of the ES|QL group key. A generic reviewer would treat grouping location as a performance detail and miss that dropping ES|QL pre-aggregation changes the *correctness* of the rendered graph. (@alexreal1314 · `fetch_events_graph.ts`, `fetch_entity_relationships_graph.ts`, `parse_records.ts`)
 
@@ -124,22 +146,20 @@ The graph visualization feature is owned by **@elastic/contextual-security-apps*
 
 - [PR #272452](https://github.com/elastic/kibana/pull/272452) — Pinning logic must stay in ES|QL and check both actor and target sides when resolving pinned entities — runtime TypeScript splitting was rejected because it breaks pinning behavior invisible in UI-only review. (@kfirpeled, @albertoblaz · `fetch_entity_relationships_graph.ts`)
 
-- [PR #251178](https://github.com/elastic/kibana/pull/251178) — Relationship query failures must fail the whole graph request (not return partial results), and only five approved relationship fields are supported with an 8-FORK ES|QL branch limit — generic reviewers may treat partial data as acceptable degradation or add unapproved bidirectional fields. (@kfirpeled, @alexreal1314 · `fetch_entity_relationships_graph.ts`, `common/constants.ts`)
-
-- [PR #227784](https://github.com/elastic/kibana/pull/227784) — Client payload, `documentData` enrichment placement, space-aware indices, and PII-in-logs constraints were established together in the foundational graph API PR — changes touching schema, logging, or index helpers without these constraints regress core domain guarantees. (@kfirpeled · `common/schema/graph/v1.ts`, `route.ts`, `fetch_entity_data.ts`)
-
 ## Documentation
 
 _(none provided)_
 
 ## Who to contact
 
+- **Graph filter-bar semantics / EUID DSL translation:** @niros1 — `search_filters.ts` translator correctness, fail-closed design, `must_not` polymorphism, `@ts-ignore` policy, ES|QL row limits ([PR #289467](https://github.com/elastic/kibana/pull/289467), [PR #269755](https://github.com/elastic/kibana/pull/269755))
+
+- **Filter AND/OR semantics, enrichment data flow, API test assertions:** @JordanSh — `addEntityFilter` OR-wrapping behavior, conditional vs unconditional enrichment calls, count naming in integration tests ([PR #289467](https://github.com/elastic/kibana/pull/289467), [PR #285449](https://github.com/elastic/kibana/pull/285449))
+
 - **Architecture / data model / ES|QL grouping & pinning:** @kfirpeled — Graph API architecture, fetch→parse pipeline, payload size, CPS constraints, test strategy ([PR #227784](https://github.com/elastic/kibana/pull/227784), [PR #275276](https://github.com/elastic/kibana/pull/275276), [PR #272452](https://github.com/elastic/kibana/pull/272452))
 
 - **Schema consistency / frontend-backend alignment / test scope:** @albertoblaz — Schema reuse, entity flyout integration, business-requirement tests ([PR #227784](https://github.com/elastic/kibana/pull/227784), [PR #251178](https://github.com/elastic/kibana/pull/251178))
 
 - **Entity identification & enrichment evolution / integration tests:** @alexreal1314 — ECS entity-namespace alignment, Entity Store v1→v2 migration, LOOKUP JOIN → follow-up enrichment, connector terminology (`ConnectorEdges`), flaky-test stabilization ([PR #243711](https://github.com/elastic/kibana/pull/243711), [PR #251178](https://github.com/elastic/kibana/pull/251178), [PR #258435](https://github.com/elastic/kibana/pull/258435), [PR #269755](https://github.com/elastic/kibana/pull/269755))
-
-- **Type safety / ES query limits:** @niros1 — `@ts-ignore` policy, ES|QL row limits, LOOKUP JOIN migration completeness ([PR #269755](https://github.com/elastic/kibana/pull/269755))
 
 - **Team ownership (CODEOWNERS):** @elastic/contextual-security-apps owns and maintains the graph visualization feature — `kbn-cloud-security-posture/graph`, `cloud_security_posture` graph routes, and CPS common schema/types. Flyout embedding files are consumer-owned: @elastic/security-threat-hunting (`flyout_v2` graph wrappers) and @elastic/security-entity-analytics (`flyout/entity_details` graph preview).

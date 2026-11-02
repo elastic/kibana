@@ -5,15 +5,12 @@ steps:
       - label: "Cypress MKI - cypress:dw:qa:serverless:run"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
         key: test_defend_workflows
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 300
         parallelism: 5
         soft_fail:
@@ -25,15 +22,12 @@ steps:
       - label: "Cypress MKI - Osquery - cypress:qa:serverless:run"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows_osquery.sh cypress:qa:serverless:run
         key: test_osquery_defend_workflows
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 300
         parallelism: 3
         soft_fail:
@@ -45,15 +39,12 @@ steps:
       - label: "API MKI - edr_workflows:artifacts:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:artifacts:qa:serverless
         key: edr_workflows:artifacts:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -65,15 +56,12 @@ steps:
       - label: "API MKI - edr_workflows:authentication:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:authentication:qa:serverless
         key: edr_workflows:authentication:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -85,15 +73,12 @@ steps:
       - label: "API MKI - edr_workflows:metadata:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:metadata:qa:serverless
         key: edr_workflows:metadata:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -105,15 +90,12 @@ steps:
       - label: "API MKI - edr_workflows:package:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:package:qa:serverless
         key: edr_workflows:package:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -125,15 +107,12 @@ steps:
       - label: "API MKI - edr_workflows:policy:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:policy:qa:serverless
         key: edr_workflows:policy:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -145,15 +124,12 @@ steps:
       - label: "API MKI - edr_workflows:resolver:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:resolver:qa:serverless
         key: edr_workflows:resolver:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -165,15 +141,12 @@ steps:
       - label: "API MKI - edr_workflows:response_actions:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:response_actions:qa:serverless
         key: edr_workflows:response_actions:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -185,15 +158,12 @@ steps:
       - label: "API MKI - edr_workflows:role_migrations:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:role_migrations:qa:serverless
         key: edr_workflows:role_migrations:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -205,15 +175,12 @@ steps:
       - label: "API MKI - edr_workflows:scripts_library:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:scripts_library:qa:serverless
         key: edr_workflows:scripts_library:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:
@@ -225,15 +192,12 @@ steps:
       - label: "API MKI - edr_workflows:spaces:qa:serverless"
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:spaces:qa:serverless
         key: edr_workflows:spaces:qa:serverless
-        env:
-          CLEAR_YARN_CACHE: '1'
         agents:
           image: family/kibana-ubuntu-2404
           imageProject: elastic-images-prod
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
-          diskSizeGb: 130
         timeout_in_minutes: 120
         retry:
           automatic:

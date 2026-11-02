@@ -12,25 +12,18 @@ import type {
   SyntheticsParamRequest,
   SyntheticsParams,
 } from '../../../../../common/runtime_types';
-import {
-  SyntheticsParamsCodec,
-  SyntheticsParamsReadonlyCodec,
-  SyntheticsParamsReadonlyCodecList,
-} from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service/api_service';
 
 export const getGlobalParams = async (): Promise<SyntheticsParams[]> => {
-  return apiService.get<SyntheticsParams[]>(
-    SYNTHETICS_API_URLS.PARAMS,
-    { version: INITIAL_REST_VERSION },
-    SyntheticsParamsReadonlyCodecList
-  );
+  return apiService.get<SyntheticsParams[]>(SYNTHETICS_API_URLS.PARAMS, {
+    version: INITIAL_REST_VERSION,
+  });
 };
 
 export const addGlobalParam = async (
   paramRequest: SyntheticsParamRequest
 ): Promise<SyntheticsParams> =>
-  apiService.post(SYNTHETICS_API_URLS.PARAMS, paramRequest, SyntheticsParamsReadonlyCodec, {
+  apiService.post(SYNTHETICS_API_URLS.PARAMS, paramRequest, {
     version: INITIAL_REST_VERSION,
   });
 
@@ -46,14 +39,9 @@ export const editGlobalParam = async ({
     // omit empty value
     delete data.value;
   }
-  return await apiService.put<SyntheticsParams>(
-    SYNTHETICS_API_URLS.PARAMS + `/${id}`,
-    data,
-    SyntheticsParamsCodec,
-    {
-      version: INITIAL_REST_VERSION,
-    }
-  );
+  return await apiService.put<SyntheticsParams>(SYNTHETICS_API_URLS.PARAMS + `/${id}`, data, {
+    version: INITIAL_REST_VERSION,
+  });
 };
 
 export const deleteGlobalParams = async (ids: string[]): Promise<DeleteParamsResponse[]> => {
@@ -62,7 +50,6 @@ export const deleteGlobalParams = async (ids: string[]): Promise<DeleteParamsRes
     {
       ids,
     },
-    null,
     { version: INITIAL_REST_VERSION }
   );
 };

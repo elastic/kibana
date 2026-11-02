@@ -36,6 +36,7 @@ export type {
   EMSFileSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor,
+  RuntimeLayerState,
   TooltipFeature,
   TooltipFeatureAction,
   VectorLayerDescriptor,

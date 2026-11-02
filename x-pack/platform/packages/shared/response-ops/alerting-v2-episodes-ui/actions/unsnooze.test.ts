@@ -9,14 +9,14 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createUnsnoozeAction } from './unsnooze';
 import * as bulk from './bulk_create_alert_actions';
-import type { AlertEpisode } from '../queries/episodes_query';
-
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode => ({
   '@timestamp': '2026-04-23T00:00:00Z',
   'episode.id': 'e1',
   'episode.status': 'active' as any,
   'rule.id': 'r1',
   group_hash: 'g1',
+  series_id: 's1',
   first_timestamp: '2026-04-23T00:00:00Z',
   last_timestamp: '2026-04-23T00:00:00Z',
   duration: 0,
@@ -53,7 +53,7 @@ describe('createUnsnoozeAction', () => {
         episodes: [
           makeEpisode({
             last_snooze_action: 'snooze',
-            snooze_expiry: '2020-01-01T00:00:00.000Z',
+            snoozed_until: '2020-01-01T00:00:00.000Z',
           }),
         ],
       })
@@ -64,34 +64,45 @@ describe('createUnsnoozeAction', () => {
     expect(createUnsnoozeAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
-  it('execute: POSTs unique-by-group UNSNOOZE items, toasts, calls onSuccess', async () => {
+  it('not compatible when the episode has no series_id', () => {
+    expect(
+      createUnsnoozeAction(makeDeps()).isCompatible({
+        episodes: [makeEpisode({ series_id: null, last_snooze_action: 'snooze' })],
+      })
+    ).toBe(false);
+  });
+
+  it('execute: POSTs unique-by-series UNSNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 2, errors: [] });
+    jest
+      .spyOn(bulk, 'bulkUnsnoozeSeriesActions')
+      .mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [
         makeEpisode({ last_snooze_action: 'snooze' }),
-        makeEpisode({ 'episode.id': 'e2', group_hash: 'g2', last_snooze_action: 'snooze' }),
+        makeEpisode({ 'episode.id': 'e2', series_id: 's2', last_snooze_action: 'snooze' }),
+        makeEpisode({ 'episode.id': 'e3', last_snooze_action: 'snooze' }),
       ],
       onSuccess,
     });
-    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
-      { group_hash: 'g1', action_type: 'unsnooze' },
-      { group_hash: 'g2', action_type: 'unsnooze' },
+    expect(bulk.bulkUnsnoozeSeriesActions).toHaveBeenCalledWith(deps.http, [
+      { series_id: 's1' },
+      { series_id: 's2' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
   });
 
-  it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
+  it('execute: error path calls notifications.toasts.addError', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockRejectedValue(new Error('network error'));
+    jest.spyOn(bulk, 'bulkUnsnoozeSeriesActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [makeEpisode({ last_snooze_action: 'snooze' })],
       onSuccess,
     });
-    expect(deps.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });

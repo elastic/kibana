@@ -15,6 +15,8 @@ import type { ContextValue } from '../../../contexts';
 export const CONSOLE_ESQL_SOURCES_CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
 
 interface CachedSources {
+  /** Value of the entities refresh generation when this entry was fetched. */
+  generation: number;
   timestamp: number;
   result: ReturnType<typeof getESQLSources>;
 }
@@ -24,6 +26,8 @@ interface UseConsoleEsqlCallbacksParams {
   http: ContextValue['services']['http'];
   licensing: ContextValue['services']['licensing'];
   data: ContextValue['services']['data'];
+  /** Reads the latest autocomplete_entities refresh generation for lazy cache invalidation. */
+  getEntitiesRefreshGeneration: () => number;
 }
 
 export const useConsoleEsqlCallbacks = ({
@@ -31,16 +35,22 @@ export const useConsoleEsqlCallbacks = ({
   http,
   licensing,
   data,
+  getEntitiesRefreshGeneration,
 }: UseConsoleEsqlCallbacksParams): ESQLCallbacks => {
   const getSources = useMemo<Required<ESQLCallbacks>['getSources']>(() => {
     let cachedSources: CachedSources | undefined;
 
     return async () => {
-      // Re-fetch only when there is no cached result yet or the cached one has
-      // gone stale, so autocomplete does not hit the sources API on every keystroke.
-      // The staleness window mirrors the ES|QL editor's cache TTL for consistent behavior.
+      const entitiesRefreshGeneration = getEntitiesRefreshGeneration();
+
+      // Re-fetch only when there is no cached result yet, the entities have
+      // refreshed since it was fetched, or it has gone stale, so autocomplete
+      // does not hit the sources API on every keystroke. The staleness window
+      // mirrors the ES|QL editor's cache TTL for consistent behavior and still
+      // bounds staleness when autocomplete polling is disabled.
       if (
         !cachedSources ||
+        cachedSources.generation !== entitiesRefreshGeneration ||
         Date.now() - cachedSources.timestamp > CONSOLE_ESQL_SOURCES_CACHE_INVALIDATE_DELAY
       ) {
         const result = getESQLSources({ application, http }, licensing?.getLicense);
@@ -53,6 +63,7 @@ export const useConsoleEsqlCallbacks = ({
         });
 
         cachedSources = {
+          generation: entitiesRefreshGeneration,
           timestamp: Date.now(),
           result,
         };
@@ -60,7 +71,7 @@ export const useConsoleEsqlCallbacks = ({
 
       return cachedSources.result;
     };
-  }, [application, http, licensing?.getLicense]);
+  }, [application, getEntitiesRefreshGeneration, http, licensing?.getLicense]);
 
   const getColumnsFor = useCallback(
     async ({ query }: { query?: string } | undefined = {}) => {

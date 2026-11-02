@@ -7,24 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { asCodeResponseSchema, savedDataViewSpecSchemaWithoutId } from './schema';
-import { getDataViewsAsCodeService, handleErrors } from './utils';
+import { getDataViewsAsCodeService, requestHandler } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
-import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
+import type { RegisterRouteArgs } from './types';
 
 const UPDATE_DATA_VIEW_AS_CODE_PATH = BASE_PATH + '/{id}';
 
-export const registerPutDataViewAsCodeRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>
-) =>
+export const registerPutDataViewAsCodeRoute = ({
+  router,
+  getStartServices,
+  ...args
+}: RegisterRouteArgs) =>
   router.versioned
     .put({
       path: UPDATE_DATA_VIEW_AS_CODE_PATH,
-      access: 'internal',
-      description: 'Update a data view by id',
+      access: 'public',
+      enableQueryVersion: true,
+      summary: 'Upsert a data view',
+      description:
+        'Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`.',
+      options: {
+        tags: ['oas-tag:data-views-v2'],
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
+      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -34,6 +44,10 @@ export const registerPutDataViewAsCodeRoute = (
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).putDataViewOASOperationObject,
+        },
         validate: {
           request: {
             params: schema.object(
@@ -42,7 +56,7 @@ export const registerPutDataViewAsCodeRoute = (
                   minLength: 1,
                   maxLength: 1_000,
                   meta: {
-                    description: 'The id of the data view that will be created or updated.',
+                    description: 'The ID of the data view to create or update.',
                   },
                 }),
               },
@@ -65,16 +79,13 @@ export const registerPutDataViewAsCodeRoute = (
             403: {
               description: 'forbidden',
             },
-            404: {
-              description: 'not found',
-            },
             409: {
               description: 'conflict',
             },
           },
         },
       },
-      handleErrors(async (ctx, req, res) => {
+      requestHandler(args, async (ctx, req, res) => {
         const id = req.params.id;
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
         const response = await dataViewsAsCodeService.upsert(id, req.body);

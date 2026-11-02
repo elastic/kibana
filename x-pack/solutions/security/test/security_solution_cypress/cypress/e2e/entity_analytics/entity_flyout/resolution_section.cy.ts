@@ -70,12 +70,7 @@ describe(
     tags: ['@ess', '@serverless'],
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
-          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
-        ],
+        kbnServerArgs: ['--uiSettings.overrides.securitySolution:entityStoreEnableV2=true'],
       },
     },
   },

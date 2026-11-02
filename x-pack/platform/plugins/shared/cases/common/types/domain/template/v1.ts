@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import {
   MAX_TEMPLATE_KEY_LENGTH,
   MAX_TEMPLATE_NAME_LENGTH,
@@ -15,8 +15,8 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../constants';
 import { FieldSchema, isRefField } from './fields';
-import { CaseConnectorWithoutNameSchema } from '../../domain_zod/connector/v1';
-import { CaseAssigneesSchema } from '../../domain_zod/user/v1';
+import { CaseConnectorWithoutNameSchema } from '../connector/v1';
+import { CaseUserProfilesSchema } from '../user/v1';
 
 /** Template tag: non-empty and length-bounded, mirroring the client-side metadata validation. */
 const TemplateTagSchema = z.string().min(1).max(MAX_TEMPLATE_TAG_LENGTH);
@@ -61,7 +61,7 @@ export const TemplateSchema = z.object({
   /**
    * Deletion date, used to indicate soft-deletion. Elastic uses strings, but will narrow it some more to actual dates here.
    */
-  deletedAt: z.string().datetime().nullable(),
+  deletedAt: isoDateTime().nullable(),
 
   /**
    * Template description
@@ -105,7 +105,7 @@ export const TemplateSchema = z.object({
   /**
    * Last time this template was used
    */
-  lastUsedAt: z.string().datetime().optional(),
+  lastUsedAt: isoDateTime().optional(),
 
   /**
    * Whether this is the default template
@@ -164,7 +164,7 @@ export const ParsedTemplateDefinitionSchema = z.object({
   tags: z.array(z.string()).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).nullable().optional(),
   category: z.string().nullable().optional(),
-  assignees: CaseAssigneesSchema.optional(),
+  assignees: CaseUserProfilesSchema.optional(),
   /**
    * Default connector pre-selected when creating a case from this template (`name` resolved from
    * `id` at create time). A first-class case concept, separate from the `fields` system.

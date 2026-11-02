@@ -156,7 +156,6 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
               data-test-subj="enterpriseSearchAnalyticsCollectionTableButtonGroup"
               css={analyticsCollectionTableStyles.buttonGroup}
               onChange={(newFilterId) => setFilterId(newFilterId as FilterBy)}
-              color="primary"
               buttonSize="compressed"
               idSelected={filterId}
               isFullWidth

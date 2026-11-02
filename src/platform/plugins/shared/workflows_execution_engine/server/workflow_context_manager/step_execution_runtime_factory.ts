@@ -10,12 +10,12 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { WorkflowRuntimeGraph } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId } from '../utils';
@@ -88,7 +88,7 @@ export class StepExecutionRuntimeFactory {
     private params: {
       workflowExecutionState: WorkflowExecutionState;
       stepIoService: StepIoService;
-      workflowExecutionGraph: WorkflowGraph;
+      workflowExecutionGraph: WorkflowRuntimeGraph;
       workflowLogger: IWorkflowEventLogger;
       esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
       fakeRequest: KibanaRequest;
@@ -105,6 +105,9 @@ export class StepExecutionRuntimeFactory {
     stackFrames: StackFrame[];
   }): StepExecutionRuntime {
     const node = this.params.workflowExecutionGraph.getNode(nodeId);
+    if (!node) {
+      throw new Error(`Node not found for node id: ${nodeId}`);
+    }
     const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
 
     // Guard against duplicate node entries in stack frames by removing self-references.

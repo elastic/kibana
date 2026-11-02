@@ -6,11 +6,22 @@
  */
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { DURATION, KIND, SPAN_ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
+import {
+  DURATION,
+  GEN_AI_USAGE_INPUT_TOKENS,
+  GEN_AI_USAGE_OUTPUT_TOKENS,
+  KIND,
+  PARENT_ID,
+  SPAN_ID,
+  TRANSACTION_ID,
+} from '../../../common/es_fields/apm';
 import { getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
 
 // Use a small page size so tests don't need thousands of hits
-jest.mock('./trace_constants', () => ({ MAX_ITEMS_PER_PAGE: 2 }));
+jest.mock('./trace_constants', () => ({
+  ...jest.requireActual('./trace_constants'),
+  MAX_ITEMS_PER_PAGE: 2,
+}));
 
 const makeHit = (id: string, sort = [0, 0, id]) => ({
   fields: { [SPAN_ID]: [id] },
@@ -235,6 +246,18 @@ describe('getUnifiedTraceItemsPaginated', () => {
       expect(callArgs.fields).not.toContain(KIND);
     });
 
+    it('includes GenAI token fields when ecsOnly=true', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+        makeSearchResponse([makeHit('span-1')], 1)
+      );
+
+      await getUnifiedTraceItemsPaginated({ ...defaultParams, ecsOnly: true });
+
+      const callArgs = (mockApmEventClient.search as jest.Mock).mock.calls[0][1];
+      expect(callArgs.fields).toContain(GEN_AI_USAGE_INPUT_TOKENS);
+      expect(callArgs.fields).toContain(GEN_AI_USAGE_OUTPUT_TOKENS);
+    });
+
     it('includes OTel fields when ecsOnly=false', async () => {
       (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
         makeSearchResponse([makeHit('span-1')], 1)
@@ -267,6 +290,35 @@ describe('getUnifiedTraceItemsPaginated', () => {
 
       const options = (mockApmEventClient.search as jest.Mock).mock.calls[0][2];
       expect(options?.skipProcessorEventFilter).toBe(true);
+    });
+  });
+
+  describe('focused document reservation', () => {
+    it('does not search for ancestors when the trace fits in maxTraceItems', async () => {
+      (mockApmEventClient.search as jest.Mock).mockResolvedValueOnce(
+        makeSearchResponse(
+          [
+            {
+              fields: { [SPAN_ID]: ['focused'], [PARENT_ID]: ['missing-upstream'] },
+              sort: [0, 0, 'focused'],
+              _source: {},
+            },
+          ],
+          1
+        )
+      );
+
+      const result = await getUnifiedTraceItemsPaginated({
+        ...defaultParams,
+        focusedDocId: 'focused',
+        maxTraceItems: 10,
+      });
+
+      expect(mockApmEventClient.search).toHaveBeenCalledTimes(1);
+      expect((mockApmEventClient.search as jest.Mock).mock.calls[0][0]).toBe(
+        'get_unified_trace_items'
+      );
+      expect(result.hits).toHaveLength(1);
     });
   });
 });

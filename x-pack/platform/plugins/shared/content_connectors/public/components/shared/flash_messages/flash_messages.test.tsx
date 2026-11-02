@@ -35,7 +35,7 @@ describe('FlashMessages', () => {
     expect(callouts[0]).toHaveClass('euiCallOut--success');
     expect(screen.getByTestId('error')).toBeInTheDocument();
     expect(
-      callouts[callouts.length - 1].querySelector('[data-euiicon-type="info"]')
+      callouts[callouts.length - 1].querySelector('[data-euiicon-type="infoFill"]')
     ).toBeInTheDocument();
   });
 

@@ -17,6 +17,8 @@ import {
   checkInvestigationFieldSoValue,
   combineToNdJson,
   getCustomQueryRuleParams,
+  getMLRuleParams,
+  importRules,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -35,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('should migrate legacy actions in existing rule if overwrite is set to true', async () => {
+    it('should migrate legacy actions on overwrite, but not on an unchanged re-import', async () => {
       const ruleToOverwrite = getCustomQueryRuleParams({
         rule_id: 'rule-1',
         interval: '1h', // action frequency can't be shorter than the schedule interval
@@ -60,16 +62,36 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(sidecarActionsResults.hits.hits.length).toBe(1);
       expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).toBe(createdRule.id);
 
+      // An unchanged re-import is skipped, legacy actions are not migrated until later when changes are made
+      const { actions } = await fetchRule(supertest, { ruleId: 'rule-1' });
+      const reimport = await importRules({
+        getService,
+        rules: [{ ...ruleToOverwrite, actions }],
+        overwrite: true,
+      });
+
+      expect(reimport).toMatchObject({
+        success_count: 1,
+        rules_summary: { created: 0, updated: 0, skipped: 1, failed: 0 },
+      });
+      expect((await getLegacyActionSO(es)).hits.hits.length).toBe(1);
+
       const ndjson = combineToNdJson(
         getCustomQueryRuleParams({ rule_id: 'rule-1', name: 'some other name' })
       );
 
-      await supertest
+      const { body: overwrittenImport } = await supertest
         .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true`)
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '2023-10-31')
         .attach('file', Buffer.from(ndjson), 'rules.ndjson')
         .expect(200);
+
+      expect(overwrittenImport).toMatchObject({
+        success: true,
+        success_count: 1,
+        rules_summary: { created: 0, updated: 1, skipped: 0, failed: 0 },
+      });
 
       // legacy sidecar action should be gone
       const sidecarActionsPostResults = await getLegacyActionSO(es);
@@ -110,6 +132,81 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(403);
 
         await detectionsApi.readRule({ query: { rule_id: 'rbac-import-denied' } }).expect(404);
+      });
+
+      it('returns 403 when overwriting as a user without rules write privilege', async () => {
+        const existing = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({
+            rule_id: 'rbac-overwrite-denied',
+            name: 'Before denied overwrite',
+            enabled: false,
+          })
+        );
+        const ndjson = combineToNdJson(
+          getCustomQueryRuleParams({
+            rule_id: 'rbac-overwrite-denied',
+            name: 'After denied overwrite',
+            enabled: false,
+          })
+        );
+
+        await supertestWithoutAuth
+          .post(`${DETECTION_ENGINE_RULES_IMPORT_URL}?overwrite=true`)
+          .auth(ROLES.t1_analyst, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(403);
+
+        const { body } = await detectionsApi
+          .readRule({ query: { rule_id: 'rbac-overwrite-denied' } })
+          .expect(200);
+
+        expect(body.id).toBe(existing.id);
+        expect(body.name).toBe('Before denied overwrite');
+        expect(body.revision).toBe(existing.revision);
+      });
+
+      it('returns a per-rule error when the user is not an ML admin', async () => {
+        const ndjson = combineToNdJson(
+          getMLRuleParams({
+            rule_id: 'ml-authz-denied',
+            enabled: false,
+          }),
+          getCustomQueryRuleParams({
+            rule_id: 'query-ok',
+            enabled: false,
+          })
+        );
+
+        const { body } = await supertestWithoutAuth
+          .post(DETECTION_ENGINE_RULES_IMPORT_URL)
+          .auth(ROLES.hunter, 'changeme')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach('file', Buffer.from(ndjson), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).toMatchObject({
+          success: false,
+          success_count: 1,
+          rules_count: 2,
+          rules_summary: { created: 1, updated: 0, skipped: 0, failed: 1 },
+          errors: [
+            {
+              error: {
+                message: 'The current user is not a machine learning administrator.',
+                status_code: 400,
+              },
+              rule_id: 'ml-authz-denied',
+            },
+          ],
+        });
+
+        await detectionsApi.readRule({ query: { rule_id: 'ml-authz-denied' } }).expect(404);
+        await detectionsApi.readRule({ query: { rule_id: 'query-ok' } }).expect(200);
       });
 
       it('should successfully import rules without actions when user has no actions privileges', async () => {
@@ -200,6 +297,7 @@ export default ({ getService }: FtrProviderContext): void => {
           success: false,
           success_count: 0,
           rules_count: 1,
+          rules_summary: { created: 0, updated: 0, skipped: 0, failed: 1 },
           action_connectors_success: false,
           action_connectors_success_count: 0,
           action_connectors_errors: [
@@ -270,6 +368,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
           rules_count: 1,
+          rules_summary: { created: 0, updated: 0, skipped: 0, failed: 1 },
           action_connectors_success: false,
           action_connectors_success_count: 0,
           action_connectors_errors: [

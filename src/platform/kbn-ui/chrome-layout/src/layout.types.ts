@@ -65,10 +65,9 @@ export interface ChromeLayoutSlots {
 }
 
 /**
- * Chrome style variants.
+ * Visual appearance of the application shell.
  *
- * @todo - we want to make sure layout code is kibana agnostic, so we need to evaluate if these styles
- *         are generic enough or if they should be moved to a kibana specific package.
- *         https://github.com/elastic/kibana/issues/251035
+ * - `plain`: flush application area with no decorative framing
+ * - `framed`: card-like application panel with background, radius, and shadow
  */
-export type ChromeStyle = 'classic' | 'project';
+export type LayoutAppearance = 'plain' | 'framed';

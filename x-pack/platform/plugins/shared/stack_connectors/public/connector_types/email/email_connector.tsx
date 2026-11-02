@@ -182,6 +182,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <UseField
@@ -213,6 +214,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
       {showAllowHtmlConfig && (
         <EuiFlexGroup>
           <EuiFlexItem>
+            <EuiSpacer size="m" />
             <UseField
               path="config.allowHtml"
               component={ToggleField}
@@ -236,6 +238,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
 
       {!isEmpty(service) && service !== AdditionalEmailServices.EXCHANGE && (
         <>
+          <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <UseField
@@ -324,6 +327,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           </EuiFlexGroup>
           {hasAuth ? (
             <>
+              <EuiSpacer size="m" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
                   <UseField

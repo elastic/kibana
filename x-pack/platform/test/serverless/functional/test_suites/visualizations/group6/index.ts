@@ -74,5 +74,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     loadTestFile(require.resolve('./logsdb_smoke.ts'));
+    loadTestFile(require.resolve('./vega_chart.ts')); // 3m
   });
 };

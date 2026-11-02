@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ToolType } from '@kbn/agent-builder-common';
-import type { ScopedRunnerRunToolsParams, RunToolReturn } from '../runner';
+import type { ToolType, ToolConfirmationPolicy } from '@kbn/agent-builder-common';
+import type { RequestBoundRunToolParams, RunToolReturn } from '../runner';
 import type { InternalToolDefinition } from './internal';
 
 /**
@@ -32,6 +32,7 @@ export interface ToolCreateParams<TConfig extends object = {}> {
   description?: string;
   tags?: string[];
   configuration: TConfig;
+  confirmation?: ToolConfirmationPolicy;
 }
 
 /**
@@ -41,6 +42,7 @@ export interface ToolUpdateParams<TConfig extends object = {}> {
   description?: string;
   tags?: string[];
   configuration?: Partial<TConfig>;
+  confirmation?: ToolConfirmationPolicy;
 }
 
 /**
@@ -78,6 +80,6 @@ export interface ToolRegistry {
    * Execute a tool.
    */
   execute<TParams extends Record<string, unknown> = Record<string, unknown>>(
-    params: ScopedRunnerRunToolsParams<TParams>
+    params: RequestBoundRunToolParams<TParams>
   ): Promise<RunToolReturn>;
 }

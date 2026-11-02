@@ -20,6 +20,7 @@ import { getColumns } from '../utils/get_columns';
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../../main/constants/local_storage';
+import { withDocumentIndex } from '../../../../shared/utils/non_local_index';
 
 const DEFAULT_FROM = 'now-1d';
 const DEFAULT_TO = 'now';
@@ -29,6 +30,12 @@ export interface RelatedAlertsByAncestryProps {
    * Id of the document
    */
   documentId: string;
+  /**
+   * Project-qualified index of the ancestry document, prepended to the search indices so entity
+   * lookup can disambiguate the same `_id` across linked projects (CPS). `undefined` when the
+   * document has no index; required so every render site consciously threads it.
+   */
+  documentIndex: string | undefined;
   /**
    * Maintain backwards compatibility // TODO remove when possible
    */
@@ -50,6 +57,7 @@ export interface RelatedAlertsByAncestryProps {
  */
 export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = ({
   documentId,
+  documentIndex,
   scopeId,
   onShowAlert,
   useLegacyExpandableFlyout,
@@ -74,9 +82,14 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
     [storage]
   );
 
+  const indices = useMemo(
+    () => withDocumentIndex(indexPatterns, documentIndex),
+    [indexPatterns, documentIndex]
+  );
+
   const { loading, error, data, dataCount, refetch } = useFetchRelatedAlertsByAncestry({
     documentId,
-    indices: indexPatterns,
+    indices,
     interval: { from: start, to: end },
   });
 
@@ -109,6 +122,7 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
       <EuiSpacer size="m" />
       {error ? (
         <EuiCallOut
+          announceOnMount
           color="danger"
           iconType="warning"
           data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_ERROR_TEST_ID}

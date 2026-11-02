@@ -13,6 +13,15 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ASSET_INVENTORY_INDEX_PATTERN } from '../../../../asset_inventory/constants';
 import type { GenericEntityRecord } from '../../../../asset_inventory/types/generic_entity_record';
 import { useKibana } from '../../../../common/lib/kibana';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const GENERIC_ENTITY_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'generic_entity_search'
+);
 
 type GenericEntityRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type GenericEntityResponse = IKibanaSearchResponse<estypes.SearchResponse<GenericEntityRecord>>;
@@ -38,18 +47,21 @@ export const fetchGenericEntity = async (
   }
 
   return lastValueFrom(
-    dataService.search.search<GenericEntityRequest, GenericEntityResponse>({
-      params: {
-        index: ASSET_INVENTORY_INDEX_PATTERN,
-        query: {
-          bool: {
-            should: shouldClauses,
-            minimum_should_match: 1,
+    dataService.search.search<GenericEntityRequest, GenericEntityResponse>(
+      {
+        params: {
+          index: ASSET_INVENTORY_INDEX_PATTERN,
+          query: {
+            bool: {
+              should: shouldClauses,
+              minimum_should_match: 1,
+            },
           },
+          fields: ['*'],
         },
-        fields: ['*'],
       },
-    })
+      { executionContext: GENERIC_ENTITY_CONTEXT }
+    )
   );
 };
 

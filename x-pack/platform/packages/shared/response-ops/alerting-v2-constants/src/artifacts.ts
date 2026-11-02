@@ -11,22 +11,32 @@ export const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 /** Artifact type identifier for linked dashboards */
 export const DASHBOARD_ARTIFACT_TYPE = 'dashboard';
 
-/** Default maximum character length for artifact values (applies when no type-specific override exists) */
-export const DEFAULT_ARTIFACT_VALUE_LIMIT = 1024;
+/**
+ * Default maximum length for a short string field in a built-in artifact's
+ * `dataSchema` (e.g. a dashboard id). Unregistered types are never validated:
+ * they pass through verbatim so a disabled or rolled-back plugin cannot fail
+ * writes that were legal under the schema it once registered.
+ */
+export const DEFAULT_ARTIFACT_DATA_FIELD_LIMIT = 1024;
+
+/** Maximum length for a runbook artifact's `data.content` field. */
+export const RUNBOOK_CONTENT_LIMIT = 50_000;
 
 /**
- * Type-specific artifact value length limits.
- *
- * To raise or add a limit for a new artifact type, add an entry here.
- * The framework schema resolves: `ARTIFACT_VALUE_LIMITS[type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT`.
- * No framework code changes are needed — only this map.
+ * Framework ceiling for any single string in a registered `dataSchema`, checked
+ * against `maxLength` at `registerArtifactType` time. Must be ≥
+ * {@link RUNBOOK_CONTENT_LIMIT}.
  */
-export const ARTIFACT_VALUE_LIMITS: Readonly<Record<string, number>> = {
-  [RUNBOOK_ARTIFACT_TYPE]: 50_000,
-};
+export const MAX_ARTIFACT_STRING_LENGTH = 65_536;
 
-/** The highest value in ARTIFACT_VALUE_LIMITS (used as the Zod base .max()) */
-export const MAX_ARTIFACT_VALUE_LIMIT = Math.max(
-  DEFAULT_ARTIFACT_VALUE_LIMIT,
-  ...Object.values(ARTIFACT_VALUE_LIMITS)
-);
+/** Framework ceiling for any array's `maxItems` in a registered `dataSchema`. */
+export const MAX_ARTIFACT_ARRAY_ITEMS = 10;
+
+/**
+ * Ceiling for the worst-case `data` size implied by a registered `dataSchema`.
+ *
+ * "Bytes" is an approximation: the walk charges `maxLength` characters per
+ * string, so JSON escaping of non-ASCII values can serialize larger. This is a
+ * registration-time guardrail for schema authors, not an exact runtime cap.
+ */
+export const MAX_ARTIFACT_DATA_BYTES = MAX_ARTIFACT_STRING_LENGTH * 2;

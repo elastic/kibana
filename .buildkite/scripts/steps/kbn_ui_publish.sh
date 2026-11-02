@@ -15,7 +15,7 @@ set -euo pipefail
 #   DRY_RUN=1         — build everything but skip the publish step.
 #   BASE_REF=<ref>    — override the git base used for change detection.
 #   FORCE_ALL=1       — publish every kbn-ui package regardless of diff.
-#   SKIP_BOOTSTRAP=1  — skip `yarn kbn bootstrap` (local re-runs).
+#   SKIP_BOOTSTRAP=1  — skip `pnpm kbn bootstrap` (local re-runs).
 
 report_step() {
   echo "--- $1"
@@ -52,13 +52,7 @@ if [[ "${FORCE_ALL:-}" == "1" ]]; then
   affected="$(find src/platform/kbn-ui -mindepth 1 -maxdepth 1 -type d \
     ! -name '_*' -exec basename {} \;)"
 else
-  # tsconfig.base.json compiles for bundlers (module: preserve), which leaves
-  # import/export syntax untouched. ts-node then hands that straight to Node,
-  # which can't parse it as CommonJS and falls back to strict ESM resolution —
-  # breaking @kbn/moon's extensionless relative imports. Force ts-node back to
-  # plain CommonJS for this script's own execution.
-  affected="$(TS_NODE_COMPILER_OPTIONS='{"module":"commonjs","moduleResolution":"node"}' \
-    ts-node src/platform/kbn-ui/_tooling/affected_packages.ts "$base_ref" HEAD)"
+  affected="$(node .buildkite/scripts/steps/kbn_ui_affected_packages.ts "$base_ref" HEAD)"
 fi
 
 if [[ -z "$affected" ]]; then
@@ -149,7 +143,7 @@ for tarball in "${built_tarballs[@]}"; do
   # A 409 (already published with this version) is the expected no-op
   # for a content-hash-versioned artifact that hasn't changed. Convert
   # that into a success; anything else is still fatal.
-  npm publish "$new_tarball" --tag latest --userconfig "$NPMRC" || {
+  npm publish "$new_tarball" --tag main --userconfig "$NPMRC" || {
     publish_rc=$?
     if npm view "$(node -p "require('$pkg_manifest').name")@$(node -p "require('$pkg_manifest').version")" \
          --userconfig "$NPMRC" >/dev/null 2>&1; then

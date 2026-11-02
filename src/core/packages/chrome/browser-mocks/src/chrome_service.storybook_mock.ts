@@ -19,11 +19,12 @@ type ChromeStorybookStart = Pick<
   InternalChromeStart,
   'getBadge$' | 'getBreadcrumbsBadges$' | 'getHelpExtension$'
 > & {
-  next: Pick<InternalChromeStart['next'], 'getFeedbackHandler$'>;
+  help: Pick<InternalChromeStart['help'], 'getFeedbackHandler$' | 'getNewsfeedHandler$'>;
   componentDeps: {
     basePath: Pick<InternalChromeStart['componentDeps']['basePath'], 'get' | 'prepend'>;
     legacyActionMenu$: InternalChromeStart['componentDeps']['legacyActionMenu$'];
     capabilities: Pick<InternalChromeStart['componentDeps']['capabilities'], 'navLinks'>;
+    docTitleParts$: InternalChromeStart['componentDeps']['docTitleParts$'];
   };
 };
 
@@ -37,6 +38,8 @@ type ChromeStorybookStart = Pick<
  * single cast.
  */
 export const createChromeStorybookStart = (): InternalChromeStart => {
+  const getFeedbackHandler$ = () => new BehaviorSubject<(() => void) | undefined>(undefined);
+  const getNewsfeedHandler$ = () => new BehaviorSubject(undefined);
   const start: ChromeStorybookStart = {
     componentDeps: {
       basePath: {
@@ -47,9 +50,11 @@ export const createChromeStorybookStart = (): InternalChromeStart => {
       capabilities: {
         navLinks: { integrations: true },
       },
+      docTitleParts$: new BehaviorSubject<readonly string[]>(['Elastic']),
     },
-    next: {
-      getFeedbackHandler$: () => new BehaviorSubject<(() => void) | undefined>(undefined),
+    help: {
+      getFeedbackHandler$,
+      getNewsfeedHandler$,
     },
     getBadge$: () => new BehaviorSubject<ChromeBadge | undefined>(undefined),
     getBreadcrumbsBadges$: () => new BehaviorSubject<ChromeBreadcrumbsBadge[]>([]),

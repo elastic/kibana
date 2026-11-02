@@ -136,6 +136,7 @@ const CustomFilterChip: React.FC<CustomFilterChipProps> = ({
       {/* Field-Value pair in its own chip */}
       <EuiFlexItem grow={false}>
         <EuiPopover
+          aria-label={i18n.FILTER_DETAILS_ARIA_LABEL}
           isOpen={isTooltipOpen}
           closePopover={() => setIsTooltipOpen(false)}
           button={

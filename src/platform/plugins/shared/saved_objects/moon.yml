@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/i18n-react'
   - '@kbn/react-kibana-mount'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -35,6 +36,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

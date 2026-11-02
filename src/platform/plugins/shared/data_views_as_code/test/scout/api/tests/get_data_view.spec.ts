@@ -11,7 +11,7 @@ import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { BASE_PATH, COMMON_HEADERS, ID_OVER_MAX_LENGTH } from '../fixtures/constants';
 
-apiTest.describe('GET /api/data_views/{id} - as code', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('GET /api/data_views/v2/{id} - as code', { tag: tags.deploymentAgnostic }, () => {
   let adminApiCredentials: RoleApiCredentials;
 
   // Mock data view
@@ -51,7 +51,7 @@ apiTest.describe('GET /api/data_views/{id} - as code', { tag: tags.deploymentAgn
     // Validate the meta
     expect(getResponse.body.meta.managed).toBe(false);
     expect(getResponse.body.meta.version).toBeDefined();
-    expect(getResponse.body.meta.namespaces).toBeDefined();
+    expect(getResponse.body.meta.spaces).toBeDefined();
   });
 
   apiTest('returns 404 for a non-existing data view', async ({ apiClient }) => {

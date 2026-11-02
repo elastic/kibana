@@ -90,6 +90,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
 
       {!fleetRead && (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.manageDataSources.integrations.noAccessMessage"

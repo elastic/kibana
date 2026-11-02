@@ -9,13 +9,6 @@
 
 import type { MenuItem } from '../../types';
 
-export const LOGO = {
-  href: '/elasticsearch',
-  id: 'elasticsearch',
-  label: 'Elasticsearch',
-  iconType: 'logoElasticsearch',
-};
-
 export const PRIMARY_MENU_ITEMS: MenuItem[] = [
   {
     id: 'discover',
@@ -343,7 +336,6 @@ export const PRIMARY_MENU_FOOTER_ITEMS: MenuItem[] = [
 ];
 
 export const elasticsearchMock = {
-  logo: LOGO,
   navItems: {
     primaryItems: PRIMARY_MENU_ITEMS,
     overflowItems: [],

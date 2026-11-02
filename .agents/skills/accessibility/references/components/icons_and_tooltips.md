@@ -36,7 +36,7 @@ Each `EuiIcon` is **either decorative or meaningful** — pick one and mark it a
 <EuiIconTip
   content={i18n.translate('myFeature.helpTip', { defaultMessage: 'Help info' })}
   position="right"
-  type="questionInCircle"
+  type="question"
   aria-label={i18n.translate('myFeature.helpAria', { defaultMessage: 'Help' })}
 />
 ```
@@ -52,9 +52,9 @@ Each `EuiIcon` is **either decorative or meaningful** — pick one and mark it a
 
 // WRONG — verbose wrapper for a single icon
 <EuiToolTip content="Help">
-  <EuiIcon type="questionInCircle" />
+  <EuiIcon type="question" />
 </EuiToolTip>
 
 // RIGHT
-<EuiIconTip content="Help" type="questionInCircle" />
+<EuiIconTip content="Help" type="question" />
 ```

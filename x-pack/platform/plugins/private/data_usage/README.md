@@ -37,14 +37,24 @@ Plugin only displays if user has cluster: `['monitor']` privilege in Elasticsear
 
 # Tests
 
-Functional
+Scout (UI and API)
 
-- [[Data Usage] functional tests #203166](https://github.com/elastic/kibana/pull/203166)
-- [[Data Usage] add functional tests for privileges](https://github.com/elastic/kibana/pull/199377)
+- `test/scout`: UI privileges per role and the data streams API, on the default Scout servers.
+- `test/scout_data_usage_autoops`: the Data Usage page and the usage metrics API, on the `data_usage_autoops` server config set, which points AutoOps at a mock server started by the tests on port 9000.
 
-API Integration tests
+```
+node scripts/scout.js run-tests --arch serverless --domain security_complete --config x-pack/platform/plugins/private/data_usage/test/scout/ui/playwright.config.ts
+node scripts/scout.js run-tests --arch serverless --domain security_complete --config x-pack/platform/plugins/private/data_usage/test/scout/api/playwright.config.ts
+node scripts/scout.js run-tests --arch serverless --domain security_complete --config x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/ui/playwright.config.ts
+node scripts/scout.js run-tests --arch serverless --domain security_complete --config x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/api/playwright.config.ts
+```
 
-- [[Data Usage] setup integration tests #197112](https://github.com/elastic/kibana/pull/197112)
+To iterate on the `scout_data_usage_autoops` specs without restarting the servers on every run, start them once and then run Playwright against them:
+
+```
+node scripts/scout.js start-server --arch serverless --domain security_complete --serverConfigSet data_usage_autoops
+node scripts/playwright test --config x-pack/platform/plugins/private/data_usage/test/scout_data_usage_autoops/ui/playwright.config.ts --project local --grep @local-serverless-security_complete
+```
 
 Unit tests
 

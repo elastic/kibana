@@ -7,274 +7,219 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OnCompareCallback } from '@kbn/bench';
 import {
-  getMemoryMetricValuesBytes,
-  getOptionalMedianMemoryMetricBytes,
-  getOptionalMemoryMetricValuesBytes,
-  median,
+  aggregateForcedGcHeapStats,
+  aggregateProcStats,
+  type OnCompareCallback,
+  type PairedComparisonStart,
+} from '@kbn/bench';
+import {
   MAX_RSS_METRIC_KEY,
   TAIL_ARRAY_BUFFERS_METRIC_KEY,
   TAIL_EXTERNAL_MEMORY_METRIC_KEY,
   TAIL_HEAP_TOTAL_METRIC_KEY,
-  TAIL_HEAP_USED_METRIC_KEY,
   TAIL_RSS_METRIC_KEY,
+  WARM_START_BENCHMARK_NAME,
 } from './median_max_rss';
 import {
-  getAllowedRegressionDeltaBytes,
-  isMemoryRegression,
-  MAX_RSS_REGRESSION_THRESHOLD_POLICY,
-  TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY,
-  TAIL_RSS_REGRESSION_THRESHOLD_POLICY,
-} from './memory_regression_threshold';
+  evaluatePairedMemoryRule,
+  MIN_VALID_WARM_START_MEMORY_PAIRS,
+  WARM_START_MEMORY_THRESHOLD_BYTES,
+} from './paired_memory_rule';
 import {
-  buildWarmStartMemoryRegressionReport,
   getWarmStartMemoryRegressionReportContextFromEnv,
-  type WarmStartMemoryRegressionMetricName,
   type WarmStartMemoryRegressionReport,
-  type WarmStartMemoryDiagnosticMetricName,
   writeWarmStartMemoryRegressionReport,
 } from './memory_regression_report';
 
-const formatBytes = (bytes: number): string => {
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
-};
+const SETTLING_MS = 30_000;
+const TAIL_SAMPLE_COUNT = 8;
+const FORCED_GC_TIMEOUT_MS = 30_000;
 
-const formatSampleValues = (values: readonly number[]): string => {
-  return `[${values.map(formatBytes).join(', ')}]`;
-};
+const formatBytes = (bytes: number): string => `${(bytes / (1024 * 1024)).toFixed(2)} MiB`;
 
-const DIAGNOSTIC_METRICS: Array<{
-  readonly name: WarmStartMemoryDiagnosticMetricName;
-  readonly metricKey: string;
-}> = [
-  { name: 'tailHeapTotal', metricKey: TAIL_HEAP_TOTAL_METRIC_KEY },
-  { name: 'tailExternal', metricKey: TAIL_EXTERNAL_MEMORY_METRIC_KEY },
-  { name: 'tailArrayBuffers', metricKey: TAIL_ARRAY_BUFFERS_METRIC_KEY },
-];
-
-const REGRESSION_METRIC_LABELS: Record<WarmStartMemoryRegressionMetricName, string> = {
-  tailRss: 'Tail RSS',
-  maxRss: 'Max RSS',
-  tailHeapUsed: 'Tail heap used',
-};
-
-const getRegressionMetricEntries = (
-  report: WarmStartMemoryRegressionReport
-): Array<
-  [
-    WarmStartMemoryRegressionMetricName,
-    NonNullable<WarmStartMemoryRegressionReport['metrics'][WarmStartMemoryRegressionMetricName]>
-  ]
-> => {
-  return [
-    ['tailRss', report.metrics.tailRss],
-    ['maxRss', report.metrics.maxRss],
-    ...(report.metrics.tailHeapUsed
-      ? ([['tailHeapUsed', report.metrics.tailHeapUsed]] as Array<
-          [
-            WarmStartMemoryRegressionMetricName,
-            NonNullable<
-              WarmStartMemoryRegressionReport['metrics'][WarmStartMemoryRegressionMetricName]
-            >
-          ]
-        >)
-      : []),
+const getMetric = (start: PairedComparisonStart, metric: string): number | undefined => {
+  if (start.result.status !== 'completed') {
+    return;
+  }
+  return aggregateProcStats(start.result.stats)[
+    metric as keyof ReturnType<typeof aggregateProcStats>
   ];
 };
 
-const formatRegressionMetricForError = (
-  metricName: WarmStartMemoryRegressionMetricName,
-  metric: NonNullable<
-    WarmStartMemoryRegressionReport['metrics'][WarmStartMemoryRegressionMetricName]
-  >
-): string => {
-  return `${REGRESSION_METRIC_LABELS[metricName]} delta: ${formatBytes(
-    metric.deltaBytes
-  )} (baseline: ${formatBytes(metric.baselineBytes)}, target: ${formatBytes(
-    metric.targetBytes
-  )}, allowed: ${formatBytes(metric.allowedDeltaBytes)}, baseline samples: ${formatSampleValues(
-    metric.baselineSampleBytes
-  )}, target samples: ${formatSampleValues(metric.targetSampleBytes)})`;
+const getForcedGcMetric = (start: PairedComparisonStart, metric: string): number | undefined => {
+  if (start.result.status !== 'completed' || !start.result.forcedGcHeapStats) {
+    return;
+  }
+  const aggregated = aggregateForcedGcHeapStats(start.result.forcedGcHeapStats);
+  if (
+    metric !== 'postForcedGcHeapUsed' &&
+    metric !== 'forcedGcHeapReduction' &&
+    metric !== 'forcedGcDurationMs'
+  ) {
+    return;
+  }
+  return aggregated?.[metric];
 };
 
-const buildRegressionErrorMessage = (
-  report: WarmStartMemoryRegressionReport,
-  reportPath: string
-): string => {
-  const metricEntries = getRegressionMetricEntries(report);
-  const triggeredMetricEntries = metricEntries.filter(([metricName]) => {
-    return report.triggeredMetrics.includes(metricName);
-  });
-  const contextMetricEntries = metricEntries.filter(([metricName]) => {
-    return !report.triggeredMetrics.includes(metricName);
-  });
+const toStartRecord = (start: PairedComparisonStart): Record<string, unknown> => ({
+  attempt: start.attempt,
+  pair: start.pair,
+  side: start.side,
+  orderPosition: start.orderPosition,
+  status: start.result.status,
+  durationMs: start.result.status === 'completed' ? start.result.time : undefined,
+  failureReason: start.result.status === 'failed' ? start.result.error.message : undefined,
+  metrics: start.result.status === 'completed' ? aggregateProcStats(start.result.stats) : undefined,
+  samples: start.result.samples,
+  forcedGcHeapStats: start.result.forcedGcHeapStats,
+});
 
-  return [
-    'Warm-start memory regression detected.',
-    `Threshold failure(s): ${triggeredMetricEntries
-      .map(([metricName, metric]) => formatRegressionMetricForError(metricName, metric))
-      .join('; ')}`,
-    ...(contextMetricEntries.length
-      ? [
-          `Metric context: ${contextMetricEntries
-            .map(([metricName, metric]) => formatRegressionMetricForError(metricName, metric))
-            .join('; ')}`,
-        ]
-      : []),
-    `Triggered metric(s): ${report.triggeredMetrics.join(', ')}`,
-    `Report: ${reportPath}`,
-  ].join(' ');
+const getPairedMetric = (
+  pairs: ReadonlyArray<{ baseline: PairedComparisonStart; target: PairedComparisonStart }>,
+  metric: string,
+  getStartMetric: (start: PairedComparisonStart, metric: string) => number | undefined = getMetric
+): Record<string, unknown> => {
+  const values = pairs.flatMap(({ baseline, target }) => {
+    const baselineBytes = getStartMetric(baseline, metric);
+    const targetBytes = getStartMetric(target, metric);
+    return baselineBytes === undefined || targetBytes === undefined
+      ? []
+      : [{ baselineBytes, targetBytes, deltaBytes: targetBytes - baselineBytes }];
+  });
+  return {
+    pairs: values,
+    baselineMeanBytes:
+      values.length > 0
+        ? values.reduce((sum, value) => sum + value.baselineBytes, 0) / values.length
+        : undefined,
+    targetMeanBytes:
+      values.length > 0
+        ? values.reduce((sum, value) => sum + value.targetBytes, 0) / values.length
+        : undefined,
+  };
 };
 
-const buildGateSampleLogMessage = (report: WarmStartMemoryRegressionReport): string => {
-  return `Warm-start memory gate samples: ${getRegressionMetricEntries(report)
-    .map(([metricName, metric]) => formatRegressionMetricForError(metricName, metric))
-    .join('; ')}`;
+const getPairedDuration = (
+  pairs: ReadonlyArray<{ baseline: PairedComparisonStart; target: PairedComparisonStart }>
+): Record<string, unknown> => {
+  const values = pairs.flatMap(({ baseline, target }) => {
+    const baselineMs = getForcedGcMetric(baseline, 'forcedGcDurationMs');
+    const targetMs = getForcedGcMetric(target, 'forcedGcDurationMs');
+    return baselineMs === undefined || targetMs === undefined
+      ? []
+      : [{ baselineMs, targetMs, deltaMs: targetMs - baselineMs }];
+  });
+  return {
+    pairs: values,
+    baselineMeanMs:
+      values.length > 0
+        ? values.reduce((sum, value) => sum + value.baselineMs, 0) / values.length
+        : undefined,
+    targetMeanMs:
+      values.length > 0
+        ? values.reduce((sum, value) => sum + value.targetMs, 0) / values.length
+        : undefined,
+  };
 };
 
 export const compareWarmStartMemory: OnCompareCallback = async ({
-  leftSummary,
-  rightSummary,
+  left,
   log,
+  pairedComparison,
 }) => {
-  const baselineTailRssSampleBytes = getMemoryMetricValuesBytes(
-    leftSummary,
-    TAIL_RSS_METRIC_KEY,
-    'Tail RSS'
+  const pairedBenchmark = pairedComparison?.benchmarks.find(
+    ({ benchmarkName }) => benchmarkName === WARM_START_BENCHMARK_NAME
   );
-  const targetTailRssSampleBytes = getMemoryMetricValuesBytes(
-    rightSummary,
-    TAIL_RSS_METRIC_KEY,
-    'Tail RSS'
+  const comparisonRun = left.config.comparisonRun;
+  const validPairs = pairedBenchmark?.validPairs ?? [];
+  const heapPairs = getPairedMetric(validPairs, 'tailHeapUsed');
+  const heapDeltas = (heapPairs.pairs as Array<{ deltaBytes: number }>).map(
+    ({ deltaBytes }) => deltaBytes
   );
-  const baselineMaxRssSampleBytes = getMemoryMetricValuesBytes(
-    leftSummary,
-    MAX_RSS_METRIC_KEY,
-    'Max RSS'
+  const rule = evaluatePairedMemoryRule({ deltas: heapDeltas });
+  const postForcedGcHeapPairs = getPairedMetric(
+    validPairs,
+    'postForcedGcHeapUsed',
+    getForcedGcMetric
   );
-  const targetMaxRssSampleBytes = getMemoryMetricValuesBytes(
-    rightSummary,
-    MAX_RSS_METRIC_KEY,
-    'Max RSS'
-  );
-  const baselineTailHeapUsedSampleBytes = getOptionalMemoryMetricValuesBytes(
-    leftSummary,
-    TAIL_HEAP_USED_METRIC_KEY
-  );
-  const targetTailHeapUsedSampleBytes = getOptionalMemoryMetricValuesBytes(
-    rightSummary,
-    TAIL_HEAP_USED_METRIC_KEY
-  );
-  const baselineMedianTailRssBytes = median(baselineTailRssSampleBytes);
-  const targetMedianTailRssBytes = median(targetTailRssSampleBytes);
-  const baselineMedianMaxRssBytes = median(baselineMaxRssSampleBytes);
-  const targetMedianMaxRssBytes = median(targetMaxRssSampleBytes);
-  const baselineMedianTailHeapUsedBytes = baselineTailHeapUsedSampleBytes
-    ? median(baselineTailHeapUsedSampleBytes)
-    : undefined;
-  const targetMedianTailHeapUsedBytes = targetTailHeapUsedSampleBytes
-    ? median(targetTailHeapUsedSampleBytes)
-    : undefined;
-
-  const allowedTailRssDeltaBytes = getAllowedRegressionDeltaBytes(
-    baselineMedianTailRssBytes,
-    TAIL_RSS_REGRESSION_THRESHOLD_POLICY
-  );
-  const allowedMaxRssDeltaBytes = getAllowedRegressionDeltaBytes(
-    baselineMedianMaxRssBytes,
-    MAX_RSS_REGRESSION_THRESHOLD_POLICY
-  );
-  const allowedTailHeapUsedDeltaBytes =
-    baselineMedianTailHeapUsedBytes !== undefined
-      ? getAllowedRegressionDeltaBytes(
-          baselineMedianTailHeapUsedBytes,
-          TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY
-        )
-      : undefined;
-  const tailRssRegressed = isMemoryRegression(
-    baselineMedianTailRssBytes,
-    targetMedianTailRssBytes,
-    TAIL_RSS_REGRESSION_THRESHOLD_POLICY
-  );
-  const maxRssRegressed = isMemoryRegression(
-    baselineMedianMaxRssBytes,
-    targetMedianMaxRssBytes,
-    MAX_RSS_REGRESSION_THRESHOLD_POLICY
-  );
-  const tailHeapUsedRegressed =
-    baselineMedianTailHeapUsedBytes !== undefined && targetMedianTailHeapUsedBytes !== undefined
-      ? isMemoryRegression(
-          baselineMedianTailHeapUsedBytes,
-          targetMedianTailHeapUsedBytes,
-          TAIL_HEAP_USED_REGRESSION_THRESHOLD_POLICY
-        )
-      : false;
-
-  const diagnosticMetrics = Object.fromEntries(
-    DIAGNOSTIC_METRICS.flatMap(({ name, metricKey }) => {
-      const baselineBytes = getOptionalMedianMemoryMetricBytes(leftSummary, metricKey);
-      const targetBytes = getOptionalMedianMemoryMetricBytes(rightSummary, metricKey);
-
-      if (baselineBytes === undefined || targetBytes === undefined) {
-        return [];
-      }
-
-      return [[name, { baselineBytes, targetBytes }]];
-    })
-  );
-
-  const report = buildWarmStartMemoryRegressionReport({
-    metrics: {
-      tailRss: {
-        baselineBytes: baselineMedianTailRssBytes,
-        targetBytes: targetMedianTailRssBytes,
-        baselineSampleBytes: baselineTailRssSampleBytes,
-        targetSampleBytes: targetTailRssSampleBytes,
-        allowedDeltaBytes: allowedTailRssDeltaBytes,
-        regressed: tailRssRegressed,
-      },
-      maxRss: {
-        baselineBytes: baselineMedianMaxRssBytes,
-        targetBytes: targetMedianMaxRssBytes,
-        baselineSampleBytes: baselineMaxRssSampleBytes,
-        targetSampleBytes: targetMaxRssSampleBytes,
-        allowedDeltaBytes: allowedMaxRssDeltaBytes,
-        regressed: maxRssRegressed,
-      },
-      ...(baselineMedianTailHeapUsedBytes !== undefined &&
-      targetMedianTailHeapUsedBytes !== undefined &&
-      allowedTailHeapUsedDeltaBytes !== undefined &&
-      baselineTailHeapUsedSampleBytes &&
-      targetTailHeapUsedSampleBytes
-        ? {
-            tailHeapUsed: {
-              baselineBytes: baselineMedianTailHeapUsedBytes,
-              targetBytes: targetMedianTailHeapUsedBytes,
-              baselineSampleBytes: baselineTailHeapUsedSampleBytes,
-              targetSampleBytes: targetTailHeapUsedSampleBytes,
-              allowedDeltaBytes: allowedTailHeapUsedDeltaBytes,
-              regressed: tailHeapUsedRegressed,
-            },
-          }
-        : {}),
-    },
-    diagnosticMetrics,
-    triggeredMetrics: [
-      ...(tailRssRegressed ? (['tailRss'] as const) : []),
-      ...(maxRssRegressed ? (['maxRss'] as const) : []),
-      ...(tailHeapUsedRegressed ? (['tailHeapUsed'] as const) : []),
-    ],
-    context: getWarmStartMemoryRegressionReportContextFromEnv(),
+  const postForcedGcHeapRule = evaluatePairedMemoryRule({
+    deltas: (postForcedGcHeapPairs.pairs as Array<{ deltaBytes: number }>).map(
+      ({ deltaBytes }) => deltaBytes
+    ),
   });
+  const inconclusive = postForcedGcHeapRule.pairCount < MIN_VALID_WARM_START_MEMORY_PAIRS;
+  const regression =
+    !inconclusive &&
+    (postForcedGcHeapRule.meanBytes ?? Number.NEGATIVE_INFINITY) >
+      WARM_START_MEMORY_THRESHOLD_BYTES;
+  const outcome = inconclusive ? 'inconclusive' : regression ? 'regression' : 'observed';
 
-  log.info(buildGateSampleLogMessage(report));
+  const report: WarmStartMemoryRegressionReport = {
+    version: 2,
+    outcome,
+    context: getWarmStartMemoryRegressionReportContextFromEnv(),
+    protocol: {
+      monitorIntervalMs: left.config.monitorInterval,
+      postReadySettlingMs: SETTLING_MS,
+      tailSampleCount: TAIL_SAMPLE_COUNT,
+      forcedGcTimeoutMs: FORCED_GC_TIMEOUT_MS,
+      thresholdBytes: WARM_START_MEMORY_THRESHOLD_BYTES,
+    },
+    comparison: {
+      baselineIdentity: pairedComparison?.baselineIdentity,
+      targetIdentity: pairedComparison?.targetIdentity,
+      requestedPairs: pairedBenchmark?.requestedPairs ?? comparisonRun?.pairs ?? 0,
+      attemptedPairs: pairedBenchmark?.attemptedPairs ?? 0,
+      validPairs: validPairs.length,
+      order: pairedBenchmark?.order ?? [],
+    },
+    starts: (pairedBenchmark?.starts ?? []).map(toStartRecord),
+    pairs: heapPairs.pairs as Record<string, unknown>[],
+    tailHeapUsed: { ...heapPairs, ...rule },
+    postForcedGcHeapUsed: { ...postForcedGcHeapPairs, ...postForcedGcHeapRule },
+    diagnostics: {
+      forcedGcHeapReduction: getPairedMetric(
+        validPairs,
+        'forcedGcHeapReduction',
+        getForcedGcMetric
+      ),
+      forcedGcDurationMs: getPairedDuration(validPairs),
+      [TAIL_RSS_METRIC_KEY]: getPairedMetric(validPairs, 'tailRss'),
+      [MAX_RSS_METRIC_KEY]: getPairedMetric(validPairs, 'rssMax'),
+      [TAIL_HEAP_TOTAL_METRIC_KEY]: getPairedMetric(validPairs, 'tailHeapTotal'),
+      [TAIL_EXTERNAL_MEMORY_METRIC_KEY]: getPairedMetric(validPairs, 'tailExternal'),
+      [TAIL_ARRAY_BUFFERS_METRIC_KEY]: getPairedMetric(validPairs, 'tailArrayBuffers'),
+    },
+  };
+  const reportPath = await writeWarmStartMemoryRegressionReport(report);
 
-  if (!report.triggeredMetrics.length) {
+  if (inconclusive) {
+    log.warning(
+      `Warm-start memory comparison inconclusive: ${postForcedGcHeapRule.pairCount}/${
+        comparisonRun?.pairs ?? 0
+      } valid post-forced-GC pairs after ${
+        pairedBenchmark?.attemptedPairs ?? 0
+      } attempts. Report: ${reportPath}`
+    );
     return;
   }
 
-  const reportPath = await writeWarmStartMemoryRegressionReport(report);
+  log.info(`
+Warm-start paired heap growth: ${formatBytes(
+    postForcedGcHeapRule.meanBytes ?? 0
+  )} mean. ${formatBytes(WARM_START_MEMORY_THRESHOLD_BYTES)} threshold ${
+    regression ? 'exceeded' : 'not exceeded'
+  }.
 
-  throw new Error(buildRegressionErrorMessage(report, reportPath));
+Warm-start paired heap results:
+post-forced-GC mean: ${formatBytes(postForcedGcHeapRule.meanBytes ?? 0)}
+post-forced-GC SD: ${formatBytes(postForcedGcHeapRule.sampleStandardDeviationBytes ?? 0)}
+natural mean: ${formatBytes(rule.meanBytes ?? 0)}
+natural SD: ${formatBytes(rule.sampleStandardDeviationBytes ?? 0)}
+Report: ${reportPath}`);
+
+  if (regression) {
+    throw new Error(`Warm-start memory regression detected. Report: ${reportPath}`);
+  }
 };

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import { FtrService } from '../ftr_provider_context';
 
 export class SharePageObject extends FtrService {
@@ -16,15 +17,18 @@ export class SharePageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly appMenu = this.ctx.getPageObject('appMenu');
 
-  /**
-   * @description attempt to close the share modal, if it's open
-   */
+  /** Close the share modal if it appears, and wait until it is gone. */
   async closeShareModal() {
-    if (await this.isShareModalOpen()) {
-      await this.find.clickByCssSelector(
-        '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
-      );
-    }
+    if (!(await this.testSubjects.waitForExists('shareContextModal'))) return;
+
+    await this.retry.try(async () => {
+      if (await this.isShareModalOpen()) {
+        await this.find.clickByCssSelector(
+          '[data-test-subj="shareContextModal"] button[aria-label*="Close"]'
+        );
+      }
+      await this.testSubjects.missingOrFail('shareContextModal');
+    });
   }
 
   async clickTab(content: string) {
@@ -44,12 +48,17 @@ export class SharePageObject extends FtrService {
 
   async clickShareTopNavButton() {
     // The project header renders share as a title action revealed on header hover, outside the menu.
-    if (await this.testSubjects.exists('appHeader', { timeout: 1000 })) {
-      await this.testSubjects.moveMouseTo('appHeader');
-      await this.testSubjects.click('~shareTopNavButton');
+    // The app menu renders inside the project header, so list the header first.
+    const variant = await this.testSubjects.waitForFirst(
+      [APP_HEADER_TEST_SUBJECTS.root, APP_MENU_TEST_SUBJECTS.root],
+      { timeout: 5000 }
+    );
+    if (variant === APP_HEADER_TEST_SUBJECTS.root) {
+      await this.testSubjects.moveMouseTo(APP_HEADER_TEST_SUBJECTS.root);
+      await this.testSubjects.click(`~${APP_HEADER_TEST_SUBJECTS.shareButton}`);
       return;
     }
-    return this.appMenu.clickMenuItem('shareTopNavButton');
+    return this.appMenu.clickMenuItem(APP_HEADER_TEST_SUBJECTS.shareButton);
   }
 
   async openShareModalItem(itemTitle: 'link' | 'embed') {

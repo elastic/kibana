@@ -18,6 +18,7 @@ export function SyntheticsHeartbeatBadge({ origin }: { origin?: MonitorOrigin })
   return (
     <EuiToolTip content={HEARTBEAT_BADGE_TOOLTIP}>
       <EuiBadge
+        tabIndex={0}
         color="hollow"
         iconType="agentApp"
         data-test-subj="syntheticsHeartbeatBadge"

@@ -40,7 +40,7 @@ import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-constants';
 import { AgentIcon } from '@kbn/custom-icons';
 import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID } from '@kbn/deeplinks-observability';
@@ -112,13 +112,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { uiSettings, slo: sloPlugin, telemetry } = services;
   const { link } = useApmRouter();
-  const { query } = useAnyOfApmParams(
-    '/services',
-    '/services/{serviceName}',
-    '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
+  const { query } = useAnyOfApmParams('/services', '/services/{serviceName}', '/service-map');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
@@ -341,24 +335,25 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
         width: '40px',
         render: (_: unknown, sloItem: SLOWithSummaryResponse) => {
           const expanded = isSloExpanded(sloItem);
+          const buttonLabel = expanded
+            ? i18n.translate('xpack.apm.sloOverviewFlyout.collapseButton.ariaLabel', {
+                defaultMessage: 'Close SLO details',
+              })
+            : i18n.translate('xpack.apm.sloOverviewFlyout.expandButton.ariaLabel', {
+                defaultMessage: 'Open SLO details',
+              });
           return (
-            <EuiButtonIcon
-              data-test-subj="apmSloExpandButton"
-              data-event-element="sloExpandTable"
-              iconType={expanded ? 'minimize' : 'maximize'}
-              color="primary"
-              size="xs"
-              onClick={() => handleSloToggle(sloItem)}
-              aria-label={
-                expanded
-                  ? i18n.translate('xpack.apm.sloOverviewFlyout.collapseButton.ariaLabel', {
-                      defaultMessage: 'Close SLO details',
-                    })
-                  : i18n.translate('xpack.apm.sloOverviewFlyout.expandButton.ariaLabel', {
-                      defaultMessage: 'Open SLO details',
-                    })
-              }
-            />
+            <EuiToolTip content={buttonLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="apmSloExpandButton"
+                data-event-element="sloExpandTable"
+                iconType={expanded ? 'minimize' : 'maximize'}
+                color="primary"
+                size="xs"
+                onClick={() => handleSloToggle(sloItem)}
+                aria-label={buttonLabel}
+              />
+            </EuiToolTip>
           );
         },
       },

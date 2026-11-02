@@ -15,6 +15,7 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 export function defineGetOAuthConnectionRoute({
   router,
   getAuthenticationService,
+  serverlessProjectId,
 }: RouteDefinitionParams) {
   router.get(
     {
@@ -48,7 +49,8 @@ export function defineGetOAuthConnectionRoute({
         const result = await oauth.listConnections(
           request,
           request.params.client_id,
-          request.params.connection_id
+          request.params.connection_id,
+          serverlessProjectId
         );
         if (!result) {
           return response.notFound({

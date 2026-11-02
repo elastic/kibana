@@ -26,6 +26,8 @@ import type { ListDetails, Rule } from '../types';
 import { useExceptionListHeader } from './use_list_header';
 import { textWithEditContainerCss } from '../text_with_edit/text_with_edit.styles';
 
+export { EditModal };
+
 interface ExceptionListHeaderComponentProps {
   name: string;
   description?: string;
@@ -143,7 +145,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
           {
             text: (
               <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`} css={breadCrumbTextStyles}>
-                <EuiIcon size="s" type="chevronSingleLeft" />
+                <EuiIcon size="s" type="chevronSingleLeft" aria-hidden={true} />
                 {i18n.EXCEPTION_LIST_HEADER_BREADCRUMB}
               </div>
             ),

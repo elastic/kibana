@@ -5,6 +5,6 @@ The DistributionBar component visually represents data distribution, such as cri
 ## Storybook
 
 General look of the component can be checked visually running the following storybook:
-`yarn storybook security_solution_packages`
+`pnpm storybook security_solution_packages`
 
 Note that all the interactions are mocked.

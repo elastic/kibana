@@ -6,14 +6,11 @@
  */
 
 /**
- * The identifier in a saved object's `namespaces` array when it is shared globally to all spaces.
+ * Re-exported from `@kbn/core-spaces-common`, which is where these now live so that
+ * packages and plugins can reach them without depending on the Spaces plugin.
+ * Kept here so existing `@kbn/spaces-plugin/common` importers are unaffected.
  */
-export const ALL_SPACES_ID = '*';
-
-/**
- * The identifier in a saved object's `namespaces` array when it is shared to an unknown space (e.g., one that the end user is not authorized to see).
- */
-export const UNKNOWN_SPACE = '?';
+export { ALL_SPACES_ID, UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 
 /**
  * The minimum number of spaces required to show a search control.

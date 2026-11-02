@@ -20,7 +20,10 @@ import { Color } from '../../../../common/color_palette';
 import type { MetricsExplorerAggregation, MetricsExplorerRow } from '../../../../common/http_api';
 import { useSnapshot } from '../../../pages/metrics/inventory_view/hooks/use_snaphot';
 import { createInventoryMetricFormatter } from '../../../pages/metrics/inventory_view/lib/create_inventory_metric_formatter';
-import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import {
+  applyHeadroomToDomain,
+  calculateDomain,
+} from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -148,13 +151,14 @@ export const ExpressionChart = ({
   const firstTimestamp = first(firstSeries.rows)!.timestamp;
   const lastTimestamp = last(firstSeries.rows)!.timestamp;
   const dataDomain = calculateDomain(series, [metric], false);
-  const domain = {
-    max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1, // add 10% headroom.
-    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min) * 0.9, // add 10% floor
+  const domainWithThresholds = {
+    min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min),
+    max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max),
   };
+  let domain = applyHeadroomToDomain(domainWithThresholds, { min: 0.9, max: 1.1 });
 
   if (domain.min === first(convertedThresholds)) {
-    domain.min = domain.min * 0.9;
+    domain = applyHeadroomToDomain(domain, { min: 0.9 });
   }
 
   const { timeSize, timeUnit } = expression;

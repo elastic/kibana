@@ -12,7 +12,6 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import {
   EuiAccordion,
-  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +22,7 @@ import {
   EuiTextColor,
   htmlIdGenerator,
 } from '@elastic/eui';
+import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
@@ -119,7 +119,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
           <>
             <EuiSpacer size="s" />
             {pipelineCreated === true && pipelineError === undefined ? (
-              <EuiCallOut
+              <KbnSuccessCallout
                 announceOnMount
                 data-test-subj="mlTrainedModelsInferenceReviewAndCreateStepSuccessCallout"
                 title={i18n.translate(
@@ -129,48 +129,47 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                     values: { pipelineName },
                   }
                 )}
-                color="success"
-                iconType="check"
-              >
-                <p>
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.reIndexingMessage"
-                    defaultMessage="You can use this pipeline to infer against new data or infer against existing data by {reindexLink} with the pipeline."
-                    values={{
-                      reindexLink: (
-                        <EuiLink onClick={() => setIsNextStepsAccordionOpen('open')}>
-                          {'reindexing'}
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                  {application.capabilities.management?.ingest?.ingest_pipelines ? (
+                text={
+                  <p>
                     <FormattedMessage
-                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.ingestPipelinesManagementMessage"
-                      defaultMessage=" Navigate to {pipelineManagementLink} to view and manage pipelines."
+                      id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.reIndexingMessage"
+                      defaultMessage="You can use this pipeline to infer against new data or infer against existing data by {reindexLink} with the pipeline."
                       values={{
-                        pipelineManagementLink: (
-                          <EuiLink
-                            onClick={async () => {
-                              await application.navigateToApp(MANAGEMENT_APP_ID, {
-                                path: `/ingest/ingest_pipelines/?pipeline=${pipelineName}`,
-                                openInNewTab: true,
-                              });
-                            }}
-                            target="_blank"
-                            external
-                          >
-                            {'Ingest Pipelines'}
+                        reindexLink: (
+                          <EuiLink onClick={() => setIsNextStepsAccordionOpen('open')}>
+                            {'reindexing'}
                           </EuiLink>
                         ),
                       }}
                     />
-                  ) : null}
-                </p>
-              </EuiCallOut>
+                    {application.capabilities.management?.ingest?.ingest_pipelines ? (
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.ingestPipelinesManagementMessage"
+                        defaultMessage=" Navigate to {pipelineManagementLink} to view and manage pipelines."
+                        values={{
+                          pipelineManagementLink: (
+                            <EuiLink
+                              onClick={async () => {
+                                await application.navigateToApp(MANAGEMENT_APP_ID, {
+                                  path: `/ingest/ingest_pipelines/?pipeline=${pipelineName}`,
+                                  openInNewTab: true,
+                                });
+                              }}
+                              target="_blank"
+                              external
+                            >
+                              {'Ingest Pipelines'}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    ) : null}
+                  </p>
+                }
+              />
             ) : null}
             {pipelineError !== undefined ? (
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.failureMessage',
@@ -179,8 +178,6 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                     values: { pipelineName },
                   }
                 )}
-                color="danger"
-                iconType="error"
               >
                 <p>{pipelineError}</p>
                 <p>
@@ -205,7 +202,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                     }}
                   />
                 </p>
-              </EuiCallOut>
+              </KbnDangerCallout>
             ) : null}
           </>
         </EuiFlexItem>

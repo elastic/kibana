@@ -135,30 +135,32 @@ export const renderApp = (
 
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
   ReactDOM.render(
-    <I18nProvider>
-      <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
-        <EuiThemeProvider darkMode={core.theme.getTheme().darkMode}>
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-            }}
-          >
-            <CellActionsProvider
-              getTriggerCompatibleActions={plugins.uiActions.getTriggerCompatibleActions}
+    chrome.withProvider(
+      <I18nProvider>
+        <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
+          <EuiThemeProvider darkMode={core.theme.getTheme().darkMode}>
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+              }}
             >
-              <CloudContext>
-                <Provider store={store}>
-                  <Router history={params.history}>
-                    <App features={features} kibanaVersion={kibanaVersion} />
-                  </Router>
-                </Provider>
-              </CloudContext>
-            </CellActionsProvider>
-          </KibanaContextProvider>
-        </EuiThemeProvider>
-      </KibanaThemeProvider>
-    </I18nProvider>,
+              <CellActionsProvider
+                getTriggerCompatibleActions={plugins.uiActions.getTriggerCompatibleActions}
+              >
+                <CloudContext>
+                  <Provider store={store}>
+                    <Router history={params.history}>
+                      <App features={features} kibanaVersion={kibanaVersion} />
+                    </Router>
+                  </Provider>
+                </CloudContext>
+              </CellActionsProvider>
+            </KibanaContextProvider>
+          </EuiThemeProvider>
+        </KibanaThemeProvider>
+      </I18nProvider>
+    ) as React.ReactElement,
     params.element
   );
   return () => {

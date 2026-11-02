@@ -59,6 +59,6 @@ describe('waterfall filter', () => {
     fireEvent.click(button);
 
     expect(button).toBeInTheDocument();
-    expect(onClick).toBeCalled();
+    expect(onClick).toHaveBeenCalled();
   });
 });

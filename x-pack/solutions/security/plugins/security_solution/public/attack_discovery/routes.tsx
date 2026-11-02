@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { Redirect, type RouteComponentProps } from 'react-router-dom';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import {
   ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
 } from '@kbn/elastic-assistant-common';
 import { buildAttackDetailPath } from '../../common/utils/attack_detail_path';
 import { AttackDiscoveryPage } from './pages';
-import { AttackDiscoveryMovedPage } from './pages/attack_discovery_moved';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
@@ -23,25 +22,22 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { useSpaceId } from '../common/hooks/use_space_id';
 import { useIdsFromUrl } from './pages/results/history/use_ids_from_url';
-import { useIsAlertsAndAttacksAlignmentEnabled } from '../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
-
-/**
- * The legacy `/attack_discovery` → Attacks redirect (introduced when the Attacks page went
- * GA) is intentionally retained but disabled. Attack Discovery is now a permanent top-level
- * page that stays visible regardless of the alerts-and-attacks alignment setting, so the
- * redirect must not fire. We keep the logic behind this flag rather than deleting it so it
- * can be quickly restored if we later decide to fully retire the Attack Discovery page.
- */
-const ENABLE_LEGACY_ATTACK_DISCOVERY_REDIRECT = false;
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 
 export const AttackDiscoveryRoutes = React.memo((props: RouteComponentProps) => {
-  const enableAlertsAndAttacksAlignment = useIsAlertsAndAttacksAlignmentEnabled();
+  const enableAlertsAndAttacksAlignment = useIsExperimentalFeatureEnabled(
+    'enableAlertsAndAttacksAlignment'
+  );
 
   const spaceId = useSpaceId();
   const { ids } = useIdsFromUrl();
   const [searchParams] = useSearchParams();
 
-  if (ENABLE_LEGACY_ATTACK_DISCOVERY_REDIRECT && enableAlertsAndAttacksAlignment) {
+  // When alignment is enabled, the legacy Attack Discovery page is replaced by the Attacks page.
+  // Legacy `/attack_discovery?id=<id>` deep links (e.g. the `kibana.alert.url` generated for
+  // scheduled/manual Attack Discovery runs) resolve to the Attacks page with the attack flyout
+  // open, and any other `/attack_discovery` URL resolves to the main Attacks page.
+  if (enableAlertsAndAttacksAlignment) {
     if (ids.length > 0) {
       if (spaceId === undefined) {
         return null; // Wait for spaceId to be resolved before redirecting
@@ -63,7 +59,7 @@ export const AttackDiscoveryRoutes = React.memo((props: RouteComponentProps) => 
   return (
     <PluginTemplateWrapper>
       <SecurityRoutePageWrapper pageName={SecurityPageName.attackDiscovery}>
-        {enableAlertsAndAttacksAlignment ? <AttackDiscoveryMovedPage /> : <AttackDiscoveryPage />}
+        <AttackDiscoveryPage />
       </SecurityRoutePageWrapper>
     </PluginTemplateWrapper>
   );

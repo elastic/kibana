@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { AgentsStart } from '@kbn/agent-builder-server';
 import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
@@ -41,6 +43,7 @@ const githubSpec = {
     searchRepositories: { isTool: true, description: 'Search repos', handler: jest.fn() },
     internalAction: { isTool: false, description: 'Internal', handler: jest.fn() },
   },
+  test: { handler: jest.fn(), enabled: false },
 };
 
 const makeActionsStart = (
@@ -81,7 +84,11 @@ const makeActionsStart = (
  * drift between the tool schema and the attachment type's `validate`).
  */
 const createTestContext = () => {
-  const setupType = createConnectorSetupAttachmentType();
+  const setupType = createConnectorSetupAttachmentType({
+    getAgentsStart: async () => ({} as AgentsStart),
+    getActionsStart: async () => ({} as ActionsPluginStart),
+    logger: loggingSystemMock.createLogger(),
+  });
   const attachments = createAttachmentStateManager([], {
     getTypeDefinition: (type) =>
       type === CONNECTOR_SETUP_ATTACHMENT_TYPE
@@ -147,6 +154,7 @@ describe('connector-authoring inline tools', () => {
           supportedFeatureIds: ['agentBuilder'],
         },
         actions: {},
+        test: { handler: jest.fn(), enabled: false },
       } as never);
 
       const actionsStart = makeActionsStart([{ id: '.slack2', name: 'Slack' }]);

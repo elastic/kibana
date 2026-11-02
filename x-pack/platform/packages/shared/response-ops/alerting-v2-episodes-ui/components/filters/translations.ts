@@ -19,23 +19,23 @@ export const INLINE_FILTER_POPOVER_ARIA_LABEL = i18n.translate(
 export const TAG_FILTER_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.tagFilter.ariaLabel',
   {
-    defaultMessage: 'Tag filter',
+    defaultMessage: 'Alert tags filter',
   }
 );
 
 export const TAG_FILTER_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.label', {
-  defaultMessage: 'Tags',
+  defaultMessage: 'Alert tags',
 });
 
 export const TAG_FILTER_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alertingV2EpisodesUi.tagFilter.searchPlaceholder',
   {
-    defaultMessage: 'Search tags…',
+    defaultMessage: 'Search alert tags…',
   }
 );
 
 export const TAG_FILTER_NO_MATCH = i18n.translate('xpack.alertingV2EpisodesUi.tagFilter.noMatch', {
-  defaultMessage: 'No tags in this time range',
+  defaultMessage: 'No alert tags in this time range',
 });
 
 /** --- Rule filter --- */

@@ -202,8 +202,8 @@ describe('MaintenanceWindowClient - create', () => {
         rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
         schedule: mockMaintenanceWindow.schedule,
         categoryIds: ['securitySolution'],
-        scopedQuery: query,
-        scope: { alerting: query },
+        scopedQuery: { ...query },
+        scope: { alerting: { enabled: true, ...query } },
       },
     });
 
@@ -229,7 +229,7 @@ describe('MaintenanceWindowClient - create', () => {
     ).toEqual(`_id: '1234'`);
 
     expect(
-      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters[0]
+      (savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow).scope!.alerting!.filters![0]
     ).toEqual({
       $state: { store: 'appState' },
       meta: {
@@ -292,6 +292,7 @@ describe('MaintenanceWindowClient - create', () => {
           schedule: mockMaintenanceWindow.schedule,
           scope: {
             alerting: {
+              enabled: true,
               kql: `kibana.alert.rule.name: ${kqlPattern}`,
               filters: [],
             },
@@ -338,6 +339,7 @@ describe('MaintenanceWindowClient - create', () => {
           categoryIds: ['observability', 'securitySolution'],
           scope: {
             alerting: {
+              enabled: true,
               kql: 'invalid: ',
               filters: [],
             },
@@ -349,6 +351,68 @@ describe('MaintenanceWindowClient - create', () => {
       invalid: 
       ---------^"
     `);
+  });
+
+  it('should include attributes.scopeErrors with scope "alerting" for invalid alerting kql', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    let thrown: unknown;
+    try {
+      await createMaintenanceWindow(mockContext, {
+        data: {
+          title: mockMaintenanceWindow.title,
+          duration: mockMaintenanceWindow.duration,
+          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+          schedule: mockMaintenanceWindow.schedule,
+          scope: { alerting: { enabled: true, kql: 'invalid: ', filters: [] } },
+        },
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({
+      isBoom: true,
+      output: {
+        statusCode: 400,
+        payload: {
+          attributes: { scopeErrors: [expect.objectContaining({ scope: 'alerting' })] },
+        },
+      },
+    });
+  });
+
+  it('should include attributes.scopeErrors with scope "alertingV2" for invalid alertingV2 kql', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    let thrown: unknown;
+    try {
+      await createMaintenanceWindow(mockContext, {
+        data: {
+          title: mockMaintenanceWindow.title,
+          duration: mockMaintenanceWindow.duration,
+          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+          schedule: mockMaintenanceWindow.schedule,
+          scope: { alertingV2: { enabled: true, kql: 'invalid: ' } },
+        },
+      });
+    } catch (e) {
+      thrown = e;
+    }
+    expect(thrown).toMatchObject({
+      isBoom: true,
+      output: {
+        statusCode: 400,
+        payload: {
+          attributes: { scopeErrors: [expect.objectContaining({ scope: 'alertingV2' })] },
+        },
+      },
+    });
   });
 
   it('should throw if trying to create a maintenance window with invalid category ids', async () => {
@@ -406,6 +470,7 @@ describe('MaintenanceWindowClient - create', () => {
         schedule: mockMaintenanceWindow.schedule,
         scope: {
           alerting: {
+            enabled: true,
             kql: '',
             filters: [
               {
@@ -432,5 +497,47 @@ describe('MaintenanceWindowClient - create', () => {
     // Query DSL filters are passed through translateToQuery() as filter.query,
     // so the wildcard query should appear unchanged in the output — no index pattern needed.
     expect(parsedDsl.bool.filter[0]).toEqual(wildcardQuery);
+  });
+
+  it('should mirror a filters-only alerting scope into scopedQuery', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
+
+    const mockMaintenanceWindow = getMockMaintenanceWindow({
+      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+    });
+
+    savedObjectsClient.create.mockResolvedValueOnce({
+      attributes: mockMaintenanceWindow,
+      version: '123',
+      id: 'test-id',
+    } as unknown as SavedObject);
+
+    const filters = [
+      {
+        meta: { disabled: false, negate: false, alias: null },
+        $state: { store: FilterStateStore.APP_STATE },
+        query: { match_phrase: { 'kibana.alert.action_group': 'test' } },
+      },
+    ];
+
+    await createMaintenanceWindow(mockContext, {
+      data: {
+        title: mockMaintenanceWindow.title,
+        duration: mockMaintenanceWindow.duration,
+        rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
+        schedule: mockMaintenanceWindow.schedule,
+        scope: { alerting: { enabled: true, kql: '', filters } },
+      },
+    });
+
+    const { scopedQuery } = savedObjectsClient.create.mock.calls[0][1] as MaintenanceWindow;
+    expect(scopedQuery).toEqual({
+      kql: '',
+      filters,
+      dsl: expect.any(String),
+    });
+    expect(JSON.parse(scopedQuery!.dsl!).bool.filter).toEqual([
+      { match_phrase: { 'kibana.alert.action_group': 'test' } },
+    ]);
   });
 });

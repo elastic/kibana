@@ -8,14 +8,21 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiSpacer,
   EuiText,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { CaseUI, AttachmentUIV2 } from '../../../../../common/ui/types';
+import type { CommonAttachmentListViewProps } from '../../../../client/attachment_framework/types';
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
+import { useCasesContext } from '../../../cases_context/use_cases_context';
+import { RemoveSelectedAttachments } from '../remove_selected_attachments';
+import { useAttachmentSelection } from '../use_attachment_selection';
 import { SavedObjectLink } from './saved_object_link';
+import { SavedObjectDeleteButton } from './saved_object_delete_button';
 import { useSavedObjectInAppUrls } from './use_saved_object_in_app_url';
 import { getSavedObjectAttachmentAttributes, isSavedObjectAttachment } from './helpers';
 import * as i18n from './translations';
@@ -31,7 +38,8 @@ interface SavedObjectAttachmentRow {
   createdBy: string;
 }
 
-export interface SavedObjectAttachmentsTableProps {
+export interface SavedObjectAttachmentsTableProps
+  extends Pick<CommonAttachmentListViewProps, 'onRemove' | 'isRemoving'> {
   caseData: CaseUI;
   searchTerm?: string;
   /** Attachment registration id (e.g. `dashboard`, `map`, `discoverSession`). */
@@ -45,6 +53,8 @@ const PAGINATION_PROP = {
   pageSizeOptions: PAGE_SIZE_OPTIONS,
   initialPageSize: PAGE_SIZE_OPTIONS[0],
 } as const;
+
+const getRowId = ({ id }: SavedObjectAttachmentRow): string => id;
 
 const formatCreatedBy = (createdBy: AttachmentUIV2['createdBy'] | undefined): string => {
   if (!createdBy) {
@@ -88,7 +98,11 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
   searchTerm,
   attachmentTypeId,
   soType,
+  onRemove,
+  isRemoving,
 }) => {
+  const { permissions } = useCasesContext();
+
   const allRows = useMemo<SavedObjectAttachmentRow[]>(
     () =>
       caseData.comments.reduce<SavedObjectAttachmentRow[]>((rows, attachment) => {
@@ -115,11 +129,22 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
     );
   }, [allRows, searchTerm]);
 
+  const { selection, selectedIds, clearSelection } = useAttachmentSelection({
+    items: filteredRows,
+    getId: getRowId,
+    enabled: onRemove != null,
+  });
+
+  const onRemoveSelected = useCallback(
+    () => onRemove?.({ savedObjectIds: selectedIds }, { onSuccess: clearSelection }),
+    [onRemove, selectedIds, clearSelection]
+  );
+
   const ids = useMemo(() => filteredRows.map((row) => row.attachmentId), [filteredRows]);
   const pathById = useSavedObjectInAppUrls(soType, ids);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<SavedObjectAttachmentRow>>>(
-    () => [
+  const columns = useMemo<Array<EuiBasicTableColumn<SavedObjectAttachmentRow>>>(() => {
+    const baseColumns: Array<EuiBasicTableColumn<SavedObjectAttachmentRow>> = [
       {
         name: i18n.TITLE,
         field: 'title',
@@ -145,9 +170,25 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
         field: 'createdBy',
         'data-test-subj': 'cases-so-attachments-table-created-by',
       },
-    ],
-    [pathById]
-  );
+    ];
+
+    if (permissions.delete) {
+      baseColumns.push({
+        name: i18n.ACTIONS,
+        width: '80px',
+        actions: [
+          {
+            name: i18n.ACTIONS,
+            render: (row: SavedObjectAttachmentRow) => (
+              <SavedObjectDeleteButton caseId={caseData.id} commentId={row.id} />
+            ),
+          },
+        ],
+      });
+    }
+
+    return baseColumns;
+  }, [caseData.id, pathById, permissions.delete]);
 
   const rowProps = useCallback(
     (row: SavedObjectAttachmentRow) => ({
@@ -168,16 +209,33 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
 
   return (
     <>
-      <EuiText size="xs" color="subdued" data-test-subj="cases-so-attachments-table-results-count">
-        {i18n.SHOWING_COUNT(filteredRows.length)}
-      </EuiText>
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="cases-so-attachments-table-results-count"
+          >
+            {i18n.SHOWING_COUNT(filteredRows.length)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <RemoveSelectedAttachments
+            count={selectedIds.length}
+            onRemove={onRemoveSelected}
+            isRemoving={isRemoving}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiInMemoryTable
         tableCaption={i18n.TABLE_CAPTION}
         items={filteredRows}
+        itemId="id"
         columns={columns}
         pagination={PAGINATION_PROP}
         rowProps={rowProps}
+        selection={selection}
         data-test-subj={`cases-so-attachments-table-${attachmentTypeId}`}
       />
     </>

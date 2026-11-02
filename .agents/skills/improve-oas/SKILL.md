@@ -45,7 +45,7 @@ Most Kibana plugins are code-first. Spec-first is used primarily by Security sol
 - Edit the YAML spec files only. Never hand-edit `*.gen.ts` files — they are overwritten on regeneration.
 - Descriptions in YAML `description` fields flow through to generated TypeScript via JSDoc.
 - Examples in YAML `example`/`examples` fields do **not** flow to generated code — they are documentation-only artifacts in the YAML and bundled output.
-- After editing YAML, run the plugin's generation script (e.g. `yarn openapi` in the plugin directory) to regenerate.
+- After editing YAML, run the plugin's generation script (e.g. `pnpm openapi` in the plugin directory) to regenerate.
 
 ### Schema library (code-first only)
 

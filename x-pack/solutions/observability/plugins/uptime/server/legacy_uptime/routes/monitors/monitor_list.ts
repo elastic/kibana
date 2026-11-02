@@ -8,18 +8,26 @@
 import { schema } from '@kbn/config-schema';
 import type { UMRestApiRouteFactory } from '../types';
 import { API_URLS, CONTEXT_DEFAULTS } from '../../../../common/constants';
+import {
+  MAX_DATE_RANGE_LENGTH,
+  MAX_FILTER_LENGTH,
+  MAX_PAGINATION_LENGTH,
+  MAX_STATUS_LENGTH,
+  boundedString,
+  optionalBoundedString,
+} from '../schema_limits';
 
 export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
   method: 'GET',
   path: API_URLS.MONITOR_LIST,
   validate: {
     query: schema.object({
-      dateRangeStart: schema.string(),
-      dateRangeEnd: schema.string(),
-      filters: schema.maybe(schema.string()),
-      pagination: schema.maybe(schema.string()),
-      statusFilter: schema.maybe(schema.string()),
-      query: schema.maybe(schema.string()),
+      dateRangeStart: boundedString(MAX_DATE_RANGE_LENGTH),
+      dateRangeEnd: boundedString(MAX_DATE_RANGE_LENGTH),
+      filters: optionalBoundedString(MAX_FILTER_LENGTH),
+      pagination: optionalBoundedString(MAX_PAGINATION_LENGTH),
+      statusFilter: optionalBoundedString(MAX_STATUS_LENGTH),
+      query: optionalBoundedString(MAX_FILTER_LENGTH),
       pageSize: schema.number(),
     }),
   },

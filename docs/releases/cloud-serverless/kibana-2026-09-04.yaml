@@ -1,0 +1,351 @@
+products:
+- product: cloud-serverless
+  target: 2026-09-04
+  lifecycle: ga
+  repo: kibana
+  owner: elastic
+release-date: 2026-09-04
+hide-features:
+- data-federation
+entries:
+- file:
+    name: cps-breaking-change.yaml
+    checksum: 0aeb1e80257f0d0e047ec99a3d96a93786b7fa08
+  type: breaking-change
+  title: Predefined Serverless Security roles gain index-level read access to Elastic Defend and Osquery data
+  products:
+  - product: cloud-serverless
+    versions:
+    - 2026-09-04
+  impact: The 12 predefined Serverless Security roles now include read access to Elastic Defend and Osquery index patterns. Because predefined roles apply across all spaces, users with these roles can read this data from all spaces in Discover, regardless of space assignments. Spaces are not a data-isolation boundary for index-level access.
+  action: If you require space-level data isolation for Elastic Defend or Osquery data, replace predefined roles with custom roles scoped to specific spaces.
+  areas:
+  - Elastic Security
+- file:
+    name: 287194.yaml
+    checksum: 92fe2155f6f6a592e1b5eb379effa7095c33c865
+  type: enhancement
+  title: Add `policy_namespace` field to agent status change events
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287194
+  issues:
+  - https://github.com/elastic/kibana/issues/286395
+- file:
+    name: 285223.yaml
+    checksum: de9b354ed0963dee47b20bd0c27ff313013b38bd
+  type: bug-fix
+  title: Improve risk scoring performance by caching entity identifiers on alerts
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Entity unique identifiers are now stored on alerts at enrichment time instead of being recomputed on every risk scoring aggregation, significantly reducing processing time under load.
+  prs:
+  - https://github.com/elastic/kibana/pull/285223
+- file:
+    name: 287592.yaml
+    checksum: 8482889292d5fe961a937e4b7380a733d14b8e4a
+  type: bug-fix
+  title: Fix transform actions returning generic 500 errors on request timeouts
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes transform actions (start, stop, delete, reset, schedule now, reauthorize) failing with a generic 500 error when the Elasticsearch request timed out or failed at the transport level; these now report per-transform error messages.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/287592
+  issues:
+  - https://github.com/elastic/kibana/issues/282974
+- file:
+    name: 288124.yaml
+    checksum: 82450fe6f6da72c7666c146017768f88f0477045
+  type: bug-fix
+  title: Add validation for boolean flag arguments in Endpoint console commands
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288124
+- file:
+    name: 287576.yaml
+    checksum: ec9f79c2db2f341b6f95935f8ce8659688b14ae5
+  type: feature
+  title: Prettify the floating action dashboard button
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/287576
+- file:
+    name: 286849.yaml
+    checksum: 5480d4cebab6ebe439cae94e9e8f09462cf93e99
+  type: bug-fix
+  title: Fix stalled background streams blocking Kibana's event loop
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/286849
+- file:
+    name: 287043.yaml
+    checksum: 5e5be0cdb5ceb1ed87f21245e8147f9d7ca8d2b0
+  type: enhancement
+  title: Add the `cases.extendedFieldsUpdated` workflow trigger
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Adds the `cases.extendedFieldsUpdated` workflow trigger. This trigger fires whenever one or more extended-field values change on a case — including changes driven by a linked custom-field patch — and carries the list of changed field keys in its payload. Use a `cases.getCase` step to read current values.
+  prs:
+  - https://github.com/elastic/kibana/pull/287043
+- file:
+    name: 287347.yaml
+    checksum: c6818c58d2e02b44493f219a54fa29a00aa609af
+  type: bug-fix
+  title: Fix workflow variables not resolving when testing a single step with historical context
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287347
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19105'
+- file:
+    name: 287557.yaml
+    checksum: 3c8a7d9dcfcd39d5dd1ba5cee9a765af8be6a108
+  type: bug-fix
+  title: Validate the `data_stream.dataset` field for the `integration` package type
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: 'The `data_stream.dataset` field is now validated for all package types in the Fleet policy editor, not only `type: input` packages. Integration packages that expose a user-configurable dataset name (such as Custom AWS Logs) will now correctly reject names containing invalid characters (hyphens, spaces, uppercase letters, etc.). If you have existing integration policies with invalid dataset names, you will need to update them manually — a validation error will appear the next time you edit or upgrade those policies.'
+  prs:
+  - https://github.com/elastic/kibana/pull/287557
+- file:
+    name: 288163.yaml
+    checksum: ff17e7bc4701750ebce19b8c80564b24482c4ff5
+  type: bug-fix
+  title: Mark Alerting V2 privileges as experimental in Roles UI
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Relabels top level "Alerting" privilege to "Alerting V2" with experimental designation to clarify these privileges are for the experimental alerting system.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/288163
+- file:
+    name: 287633.yaml
+    checksum: 6e6df44aa6753b5f89912fd81c8ec074664dd500
+  type: bug-fix
+  title: Gate Cases tools and skills in projects or spaces where the Cases feature is unavailable
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Cases tools and skills are no longer registered in Agent Builder or the MCP server in projects or spaces where the Cases feature is unavailable, such as Elasticsearch solution spaces.
+  prs:
+  - https://github.com/elastic/kibana/pull/287633
+- file:
+    name: 287923.yaml
+    checksum: 00db849bb058d0869a84ef2b5ff30b660ae2b704
+  type: bug-fix
+  title: Fix orphaned panel state after deleting a dashboard section
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/287923
+  issues:
+  - https://github.com/elastic/kibana/issues/287838
+- file:
+    name: 287935.yaml
+    checksum: 8b68db033eea50742c51da8221836d9dd316fec3
+  type: bug-fix
+  title: Limit Canvas data table cell count to prevent excessive memory use
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/287935
+- file:
+    name: 287763.yaml
+    checksum: 23256834b036306a389a843b438b48ce8f2bda60
+  type: enhancement
+  title: Add streaming support to Agent Builder's Agent-to-Agent endpoint
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/287763
+  issues:
+  - https://github.com/elastic/kibana/issues/287702
+- file:
+    name: 283350.yaml
+    checksum: d45945f19ff305566bb7ebbf9e62c04b15faed9f
+  type: bug-fix
+  title: Enforce required global fields and workflow `extended_fields`
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: With case templates enabled, API and workflow case creates enforce required global fields. Workflow and public case create/update APIs accept `extended_fields`.
+  prs:
+  - https://github.com/elastic/kibana/pull/283350
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19065'
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19063'
+- file:
+    name: 285139.yaml
+    checksum: abfded823c2d7f6c0b96220e9ae0902a614f3ae5
+  type: bug-fix
+  title: Fix 500 error in Cloud Security graph when querying with pinned nodes
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/285139
+  issues:
+  - https://github.com/elastic/kibana/issues/268111
+  - https://github.com/elastic/kibana/issues/272474
+- file:
+    name: 288199.yaml
+    checksum: 19e9cb3d4e12f7469995fd64ab266737d66f33f4
+  type: bug-fix
+  title: Fix Entity Analytics AI summaries failing to save in Serverless
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Fixes a 500 error that prevented entity AI summaries from being persisted in Serverless environments when the metadata data stream did not exist.
+  prs:
+  - https://github.com/elastic/kibana/pull/288199
+  issues:
+  - https://github.com/elastic/kibana/issues/287784
+- file:
+    name: 288209.yaml
+    checksum: ed3d3cecaa8fa800dc0b78c72d165a595e814aef
+  type: bug-fix
+  title: Quote KQL value in snapshot query to handle ARN identifiers
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288209
+  issues:
+  - https://github.com/elastic/kibana/issues/288195
+- file:
+    name: 287914.yaml
+    checksum: 83d424256411fb8e601831b181fe59018ae9bbab
+  type: enhancement
+  title: Warn before disabling default status and TLS rules
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287914
+- file:
+    name: 286578.yaml
+    checksum: af2aaaf065747985fd7b146f099e3ccb13257190
+  type: bug-fix
+  title: Support context variables in ServiceNow and Jira additional fields
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Context variables can now be used in the `Additional fields` of the ServiceNow ITSM, ServiceNow SecOps and Jira connectors.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/286578
+  issues:
+  - '# PRIVATE: https://github.com/elastic/enhancements/issues/26370'
+- file:
+    name: 288107.yaml
+    checksum: 700f2255b592445984fa50d436a98dbeeed8b524
+  type: bug-fix
+  title: Block inference calls to non-default endpoints when default-only is set
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288107
+- file:
+    name: 286860.yaml
+    checksum: 0b39e52c7a7a2683871b664d25edc3231bfa902f
+  type: feature
+  title: Improve Agent Builder conversation layout and message attribution
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/286860
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/15820'
+- file:
+    name: 287949.yaml
+    checksum: fcd56418b647f334852a40805c5d35dd933da3ff
+  type: enhancement
+  title: Cancel async searches when navigating away from Discover or Dashboard
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  description: Async searches are now proactively cancelled when leaving the Discover and Dashboard apps mid-load via browser navigation (e.g. closing the browser or entering a new URL). This reduces wasteful work in Elasticsearch.
+  prs:
+  - https://github.com/elastic/kibana/pull/287949
+  issues:
+  - https://github.com/elastic/kibana/issues/242154
+- file:
+    name: 287420.yaml
+    checksum: 3ed2ea6274c311aa4d8c40da3686a6ee096234a5
+  type: enhancement
+  title: Add 'Add to chat' button to the alert details page
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287420
+  issues:
+  - https://github.com/elastic/kibana/issues/287572
+- file:
+    name: 288075.yaml
+    checksum: 276f0174bbbf3ff153dea85ab877faadb9ee6590
+  type: bug-fix
+  title: Preserve YAML formatting and comments in generated workflow edits
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/288075
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/19136'
+- file:
+    name: 287986.yaml
+    checksum: f543ac5d7c527980e8a192cedfba1bf285c7ed6a
+  type: bug-fix
+  title: Skip leftover ticks for disabled scheduled workflows
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287986
+  issues:
+  - https://github.com/elastic/kibana/issues/287985
+- file:
+    name: 287713.yaml
+    checksum: 26baa50a40d2e8535e9b335a01e811b360365ac5
+  type: feature
+  title: Enable the new `raw` memory dump response action type for Elastic Defend hosts
+  products:
+  - product: cloud-serverless
+  - product: kibana
+  prs:
+  - https://github.com/elastic/kibana/pull/287713

@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         RELEASE_BUILD: 'true'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
       allow_rebuilds: true
       default_branch: main
@@ -41,6 +41,8 @@ spec:
         skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
+          access_level: READ_ONLY
+        kibana-release-operators:
           access_level: BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

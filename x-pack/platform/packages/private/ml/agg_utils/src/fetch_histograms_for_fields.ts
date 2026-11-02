@@ -205,7 +205,8 @@ interface FetchHistogramsForFieldsParams {
  * @returns A promise that resolves with the fetched histograms.
  */
 export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsParams) => {
-  const { esClient, abortSignal, arguments: args } = params;
+  const { esClient, abortSignal } = params;
+  const args = params.arguments;
   const {
     indexPattern,
     query,
@@ -296,6 +297,7 @@ export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsP
           ? buildSamplerAggregation(chartDataAggs, samplerShardSize)
           : wrap(chartDataAggs),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

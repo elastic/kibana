@@ -18,8 +18,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
@@ -206,20 +206,36 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             <EuiButton
               onClick={onCreate.bind(null, updatedProps)}
               fill
-              aria-label={i18n.translate(
-                'xpack.aiops.embeddablePatternAnalysis.config.applyFlyoutAriaLabel',
-                {
-                  defaultMessage: 'Apply changes',
-                }
-              )}
+              aria-label={
+                isNewPanel
+                  ? i18n.translate(
+                      'xpack.aiops.embeddablePatternAnalysis.config.saveFlyoutAriaLabel',
+                      {
+                        defaultMessage: 'Save pattern analysis',
+                      }
+                    )
+                  : i18n.translate(
+                      'xpack.aiops.embeddablePatternAnalysis.config.applyFlyoutAriaLabel',
+                      {
+                        defaultMessage: 'Apply changes',
+                      }
+                    )
+              }
               isDisabled={!isFormValid}
-              iconType="check"
+              iconType={isNewPanel ? undefined : 'check'}
               data-test-subj="aiopsPatternAnalysisConfirmButton"
             >
-              <FormattedMessage
-                id="xpack.aiops.embeddablePatternAnalysis.config.applyAndCloseLabel"
-                defaultMessage="Apply and close"
-              />
+              {isNewPanel ? (
+                <FormattedMessage
+                  id="xpack.aiops.embeddablePatternAnalysis.config.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.aiops.embeddablePatternAnalysis.config.applyAndCloseLabel"
+                  defaultMessage="Apply and close"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -377,7 +393,7 @@ export const FormControls: FC<{
 const TextFieldWarning = () => {
   return (
     <>
-      <EuiCallOut
+      <KbnWarningCallout
         size="s"
         title={i18n.translate(
           'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title',
@@ -385,18 +401,13 @@ const TextFieldWarning = () => {
             defaultMessage: 'The selected data view does not contain any text fields.',
           }
         )}
-        color="warning"
-        iconType="warning"
-      >
-        <p>
-          {i18n.translate(
-            'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
-            {
-              defaultMessage: 'Pattern analysis can only be run on data views with a text field.',
-            }
-          )}
-        </p>
-      </EuiCallOut>
+        text={i18n.translate(
+          'xpack.aiops.logCategorization.embeddableMenu.textFieldWarning.title.description',
+          {
+            defaultMessage: 'Pattern analysis can only be run on data views with a text field.',
+          }
+        )}
+      />
       <EuiSpacer />
     </>
   );

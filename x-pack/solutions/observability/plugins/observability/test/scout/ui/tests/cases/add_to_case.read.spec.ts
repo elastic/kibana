@@ -16,7 +16,7 @@ import { CASES_READ_WITH_ALERTS_ROLE } from '../../fixtures/roles';
 // see the add-to-case row actions.
 test.describe(
   'Observability alerts - add to case (read-only)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);
@@ -34,8 +34,7 @@ test.describe(
       // case options must be absent for a read-only cases user.
       await alertsTablePage.openActionsMenuForRow(0);
       await expect(alertsTablePage.actionsMenu).toBeVisible();
-      await expect(alertsTablePage.addToExistingCaseAction).toBeHidden();
-      await expect(alertsTablePage.addToNewCaseAction).toBeHidden();
+      await expect(alertsTablePage.addToCaseAction).toBeHidden();
     });
   }
 );

@@ -22,10 +22,11 @@ import type { MouseEvent, HTMLAttributes } from 'react';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import React, { useState, useEffect, useCallback } from 'react';
 import { type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
 import type { FilterPanelOption } from '../../types';
@@ -36,7 +37,7 @@ import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
   filter: Filter;
-  indexPatterns: DataView[];
+  indexPatterns: FilterableSource[];
   className?: string;
   onUpdate: (filter: Filter) => void;
   onRemove: () => void;
@@ -68,8 +69,6 @@ export type FilterLabelStatus =
   | typeof FILTER_ITEM_OK
   | typeof FILTER_ITEM_WARNING
   | typeof FILTER_ITEM_ERROR;
-
-export const FILTER_EDITOR_WIDTH = 1200;
 
 const FILTER_ITEM_MENU = 'menu';
 const FILTER_ITEM_EDITOR = 'editFilter';
@@ -380,6 +379,12 @@ export function FilterItemComponent(props: FilterItemProps) {
 
 export const FilterItem = withCloseFilterEditorConfirmModal(FilterItemComponent);
 
+export const getFilterItemEditorContainerStyle = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    width: 1200,
+    maxWidth: '100%',
+  });
+
 const filterItemStyles = {
   /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
   popoverDragAndDrop: (euiThemeContext: UseEuiTheme) =>
@@ -390,11 +395,7 @@ const filterItemStyles = {
       filter: none !important;
       ${euiShadowMedium(euiThemeContext)}
     `,
-  filterItemEditorContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      width: FILTER_EDITOR_WIDTH,
-      maxWidth: '100%',
-    }),
+  filterItemEditorContainer: getFilterItemEditorContainerStyle,
   filterItem: ({ euiTheme }: UseEuiTheme) =>
     css({
       lineHeight: euiTheme.size.base,

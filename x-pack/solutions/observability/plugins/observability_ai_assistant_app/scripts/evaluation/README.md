@@ -16,7 +16,7 @@ This tool is developed for our team working on the Elastic Observability platfor
 
 #### To run the evaluation using a local Elasticsearch and Kibana instance:
 
-- Run Elasticsearch locally: `yarn es snapshot --license trial`
+- Run Elasticsearch locally: `pnpm es snapshot --license trial`
 - Start Kibana (Default address for Kibana in dev mode: `http://localhost:5601`)
 - Run this command to start evaluating:
 `$ node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js`

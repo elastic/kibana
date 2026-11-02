@@ -19,14 +19,19 @@ import {
   useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
+  getAccessControlEntryKey,
+  isEntryCoveredByOwner,
   type AgentAccessControlEntry,
   AgentAccessControlRole,
   type AgentDefinition,
+  type UserIdAndName,
 } from '@kbn/agent-builder-common';
 import { selectableRolesForAccessControlMode } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
 import { UserPicker } from './user_picker';
+import { useAccessControlEntryProfiles } from '../../../hooks/agents/use_access_control_entry_profiles';
 import {
   accessFlyoutNoPeople,
   accessFlyoutPeopleHelp,
@@ -36,7 +41,7 @@ import {
 interface AccessFormProps {
   agent: Pick<AgentDefinition, 'access_control'>;
   entries: AgentAccessControlEntry[];
-  ownerName?: string;
+  owner?: UserIdAndName;
   isDisabled?: boolean;
   onChange: (entries: AgentAccessControlEntry[]) => void;
 }
@@ -88,40 +93,60 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
 export const AccessForm: React.FC<AccessFormProps> = ({
   agent,
   entries,
-  ownerName,
+  owner,
   isDisabled,
   onChange,
 }) => {
   const { euiTheme } = useEuiTheme();
   const accessControlMode = agent.access_control?.access_mode;
+  const profileByUid = useAccessControlEntryProfiles(entries);
 
   const defaultRole = useMemo(() => {
     const allowed = selectableRolesForAccessControlMode(accessControlMode);
     return allowed.includes(AgentAccessControlRole.User) ? AgentAccessControlRole.User : allowed[0];
   }, [accessControlMode]);
 
-  const handleAdd = (entry: AgentAccessControlEntry) => {
-    onChange([...entries, entry]);
+  const visibleEntries = entries.filter((entry) => !isEntryCoveredByOwner(entry, owner));
+
+  const excludedUids = [...entries.map((entry) => entry.id), owner?.id].filter(
+    (id): id is string => id !== undefined
+  );
+
+  const excludedUsernames = [
+    ...entries.map((entry) => (entry.id === undefined ? entry.name : undefined)),
+    owner?.id === undefined ? owner?.username : undefined,
+  ].filter((name): name is string => name !== undefined);
+
+  const handleAdd = (profile: UserProfileWithAvatar) => {
+    const nextEntry: AgentAccessControlEntry = {
+      type: 'user',
+      id: profile.uid,
+      role: defaultRole,
+    };
+    onChange([...entries, nextEntry]);
   };
 
   const handleChangeRole = (target: AgentAccessControlEntry, role: AgentAccessControlRole) => {
-    onChange(
-      entries.map((e) => (e.type === target.type && e.name === target.name ? { ...e, role } : e))
-    );
+    const targetKey = getAccessControlEntryKey(target);
+
+    onChange(entries.map((e) => (getAccessControlEntryKey(e) === targetKey ? { ...e, role } : e)));
   };
 
   const handleRemove = (target: AgentAccessControlEntry) => {
-    onChange(entries.filter((e) => !(e.type === target.type && e.name === target.name)));
+    const targetKey = getAccessControlEntryKey(target);
+
+    onChange(entries.filter((e) => getAccessControlEntryKey(e) !== targetKey));
   };
 
   return (
     <Section title={accessFlyoutPeopleSection} helpText={accessFlyoutPeopleHelp}>
       <UserPicker
-        excludedUsernames={entries.map((u) => u.name)}
+        excludedUids={excludedUids}
+        excludedUsernames={excludedUsernames}
         isDisabled={isDisabled}
-        onAdd={(username) => handleAdd({ type: 'user', name: username, role: defaultRole })}
+        onAdd={handleAdd}
       />
-      {entries.length === 0 ? (
+      {visibleEntries.length === 0 ? (
         <EuiText size="xs" color="subdued" css={emptyStateStyles(euiTheme)}>
           {accessFlyoutNoPeople}
         </EuiText>
@@ -130,15 +155,15 @@ export const AccessForm: React.FC<AccessFormProps> = ({
           <EuiSpacer size="s" />
           <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
             <EuiPanel paddingSize="none" hasBorder={true} hasShadow={false}>
-              {ownerName && (
+              {owner?.username && (
                 <div css={ownerRowStyles(euiTheme)}>
                   <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiAvatar size="s" name={ownerName} />
+                      <EuiAvatar size="s" name={owner.username} />
                     </EuiFlexItem>
                     <EuiFlexItem grow>
                       <EuiText size="s">
-                        <strong>{ownerName}</strong>
+                        <strong>{owner.username}</strong>
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -147,10 +172,11 @@ export const AccessForm: React.FC<AccessFormProps> = ({
                   </EuiFlexGroup>
                 </div>
               )}
-              {entries.map((entry) => (
+              {visibleEntries.map((entry) => (
                 <PrincipalRow
-                  key={`user:${entry.name}`}
+                  key={getAccessControlEntryKey(entry)}
                   entry={entry}
+                  profile={entry.id !== undefined ? profileByUid.get(entry.id) : undefined}
                   accessControlMode={accessControlMode}
                   isDisabled={isDisabled}
                   onChangeRole={(role) => handleChangeRole(entry, role)}

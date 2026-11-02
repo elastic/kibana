@@ -76,6 +76,22 @@ describe('workflowAuthoringSkill', () => {
       expect(workflowAuthoringSkill.content).not.toMatch(/type: gemini\./);
     });
 
+    it('documents the Context Engine KI steps and the verified write pattern', () => {
+      expect(workflowAuthoringSkill.content).toContain('context-engine.createKi');
+      expect(workflowAuthoringSkill.content).toContain('context-engine.updateKi');
+      expect(workflowAuthoringSkill.content).toContain('context-engine.deleteKi');
+      expect(workflowAuthoringSkill.content).toContain('context-engine.verifyKi');
+      expect(workflowAuthoringSkill.content).toContain('`contextEngine:enabled` advanced setting');
+      expect(workflowAuthoringSkill.content).toContain('attributes.esql');
+      expect(workflowAuthoringSkill.content).toContain('passes with empty `results`');
+      expect(workflowAuthoringSkill.content).toContain(
+        'steps.create_ki.output.verification.passed : false'
+      );
+      expect(workflowAuthoringSkill.content).not.toContain(
+        'if: "steps.create_ki.output.verification.passed"'
+      );
+    });
+
     it('does not document the deleted low-level edit tools', () => {
       expect(workflowAuthoringSkill.content).not.toContain('workflow_insert_step');
       expect(workflowAuthoringSkill.content).not.toContain('workflow_modify_step');

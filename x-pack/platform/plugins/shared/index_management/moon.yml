@@ -46,7 +46,6 @@ dependsOn:
   - '@kbn/search-api-panels'
   - '@kbn/cloud-plugin'
   - '@kbn/code-editor'
-  - '@kbn/monaco'
   - '@kbn/console-plugin'
   - '@kbn/shared-ux-utility'
   - '@kbn/index-management-shared-types'
@@ -84,12 +83,14 @@ dependsOn:
   - '@kbn/streams-schema'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/app-header'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __jest__/**/*
@@ -99,6 +100,4 @@ fileGroups:
     - server/**/*
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

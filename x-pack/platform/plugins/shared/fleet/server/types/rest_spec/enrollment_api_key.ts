@@ -7,9 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
+import { ENROLLMENT_API_KEY_MAPPINGS, FLEET_SCHEMA_NAME_MAX_LENGTH } from '../../constants';
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
+import { isValidEnrollmentKeyExpiration } from '../../../common/services';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { EnrollmentAPIKeySchema } from '../models';
@@ -22,7 +23,8 @@ export const GetEnrollmentAPIKeysRequestSchema = {
       meta: { description: 'Number of results per page' },
     }),
     kuery: schema.maybe(
-      schema.string({
+      schema.searchFilter.warn({
+        label: 'fleet.enrollment_api_keys.kuery',
         meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(
@@ -42,7 +44,11 @@ export const GetEnrollmentAPIKeysRequestSchema = {
 
 export const GetOneEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
-    keyId: schema.string({ meta: { description: 'The ID of the enrollment API key' } }),
+    keyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.enrollment_api_keys.get.keyId',
+      meta: { description: 'The ID of the enrollment API key' },
+    }),
   }),
 };
 
@@ -53,7 +59,11 @@ export const EnrollmentAPIKeyResponseSchema = schema.object(
 
 export const DeleteEnrollmentAPIKeyRequestSchema = {
   params: schema.object({
-    keyId: schema.string({ meta: { description: 'The ID of the enrollment API key' } }),
+    keyId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.enrollment_api_keys.delete.keyId',
+      meta: { description: 'The ID of the enrollment API key' },
+    }),
   }),
   query: schema.object({
     forceDelete: schema.boolean({
@@ -81,9 +91,31 @@ export const DeleteEnrollmentAPIKeyResponseSchema = schema.object(
 export const PostEnrollmentAPIKeyRequestSchema = {
   body: schema.object(
     {
-      name: schema.maybe(schema.string()),
-      policy_id: schema.string(),
-      expiration: schema.maybe(schema.string()),
+      name: schema.maybe(
+        schema.displayName.warn({
+          minLength: 0,
+          maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+          label: 'fleet.enrollment_api_keys.create.name',
+        })
+      ),
+      policy_id: schema.savedObjectId.warn({
+        minLength: 0,
+        label: 'fleet.enrollment_api_keys.create.policy_id',
+      }),
+      expiration: schema.maybe(
+        schema.string({
+          maxLength: 20,
+          meta: {
+            description:
+              'The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.',
+          },
+          validate: (value) => {
+            if (!isValidEnrollmentKeyExpiration(value)) {
+              return 'Expiration must be a valid duration (for example, 30d, 24h, 90m, 60s)';
+            }
+          },
+        })
+      ),
     },
     { meta: { id: 'new_enrollment_api_key' } }
   ),
@@ -93,13 +125,20 @@ export const BulkDeleteEnrollmentAPIKeysRequestSchema = {
   body: schema.object(
     {
       tokenIds: schema.maybe(
-        schema.arrayOf(schema.string(), {
-          maxSize: 10000,
-          meta: { description: 'List of enrollment token IDs to delete.' },
-        })
+        schema.arrayOf(
+          schema.savedObjectId.warn({
+            minLength: 0,
+            label: 'fleet.enrollment_api_keys.bulk_delete.tokenIds',
+          }),
+          {
+            maxSize: 10000,
+            meta: { description: 'List of enrollment token IDs to delete.' },
+          }
+        )
       ),
       kuery: schema.maybe(
-        schema.string({
+        schema.searchFilter.warn({
+          label: 'fleet.enrollment_api_keys.bulk_delete.kuery',
           meta: { description: 'KQL query to select enrollment tokens to delete.' },
           validate: (value: string) => {
             const validationObj = validateKuery(

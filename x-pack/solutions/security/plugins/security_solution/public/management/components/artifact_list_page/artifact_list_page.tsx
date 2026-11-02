@@ -30,13 +30,15 @@ import { AutoDownload } from '../../../common/components/auto_download/auto_down
 import type { ServerApiError } from '../../../common/types';
 import { AdministrationListPage } from '../administration_list_page';
 
-import type { PaginatedContentProps } from '../paginated_content';
 import { PaginatedContent } from '../paginated_content';
+import type { ArtifactSimpleTableActionType } from './components/artifact_simple_table';
+import { ArtifactSimpleTable } from './components/artifact_simple_table';
 
 import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
 import type { ArtifactListPageLabels } from './translations';
+import type { ArtifactViewModeComponentProps, ArtifactListPageUrlParams } from './types';
 import { artifactListPageLabels } from './translations';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
@@ -47,13 +49,17 @@ import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_pr
 import { NoDataEmptyState } from './components/no_data_empty_state';
 import type { ArtifactFlyoutProps } from './components/artifact_flyout';
 import { ArtifactFlyout } from './components/artifact_flyout';
-import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
+import { ArtifactViewFlyout } from './components/artifact_view_flyout';
+import { useIsCreateEditFlyoutOpened } from './hooks/use_is_create_edit_flyout_opened';
 import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
-import type { ArtifactListPageUrlParams } from './types';
 import { useUrlParams } from '../../hooks/use_url_params';
+import { paginationFromUrlParams } from '../../hooks/use_url_pagination';
+import type { ArtifactEnabledStatus } from '../../common/utils';
+import { isArtifactEnabledStatus } from '../../common/utils';
 import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import type { XOR } from '../../../../common/utility_types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
@@ -67,24 +73,12 @@ import { ArtifactImportErrorsModal } from './components/artifact_import_errors_m
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
-type ArtifactListPagePaginatedContentComponent = PaginatedContentProps<
-  ExceptionListItemSchema,
-  ArtifactEntryCardType
->;
-
-export interface ArtifactListPageProps {
+interface ArtifactListPageBaseProps {
   apiClient: ExceptionsListApiClient;
   /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
   ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
   /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
   labels: ArtifactListPageLabels;
-  /**
-   * Define a callback to handle the submission of the form data instead of the internal one in
-   * `ArtifactListPage` being used.
-   * @param item
-   * @param mode
-   */
-  onFormSubmit?: Required<ArtifactFlyoutProps>['submitHandler'];
   /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
   searchableFields?: MaybeImmutable<string[]>;
   flyoutSize?: EuiFlyoutSize;
@@ -94,9 +88,59 @@ export interface ArtifactListPageProps {
   allowCardCreateAction?: boolean;
   secondaryPageInfo?: React.ReactNode;
   callout?: React.ReactNode;
-  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
   additionalActions?: Action[];
 }
+
+interface ArtifactListPageWithCardProps {
+  /**
+   * A component that will be used to decorate the artifact cards.
+   *
+   * Cannot be used in combination with `showAsSimpleTable`.
+   */
+  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+}
+
+interface ArtifactListPageWithSimpleTableProps {
+  /**
+   * When set, artifacts are rendered as a compact `EuiBasicTable` instead of cards.
+   * Create/edit/delete/import/export still use the same flyouts and modals.
+   *
+   * Cannot be used in combination with `CardDecorator`.
+   */
+  showAsSimpleTable: true;
+  /**
+   * When true, the simple table shows an Enabled column for toggling artifacts.
+   * Only applicable when `showAsSimpleTable` is true.
+   *
+   * Important: this just a UI flag - ManifestManager must also support enabling/disabling
+   * the given artifact type.
+   */
+  showEnabledColumn?: boolean;
+  /**
+   * When true, the view flyout lists the artifact's comments.
+   * Only applicable when `showAsSimpleTable` is true.
+   */
+  showCommentsInViewFlyout?: boolean;
+  /**
+   * Renders the artifact-specific definition in the view flyout.
+   * Receives the full artifact item.
+   */
+  ViewModeComponent: React.ComponentType<ArtifactViewModeComponentProps>;
+  /**
+   * When set, an info icon next to the policy assignment title in the view flyout
+   * shows this text in a tooltip.
+   */
+  policyAssignmentInfoTooltip?: string;
+}
+
+export type ArtifactListPageProps = ArtifactListPageBaseProps &
+  XOR<ArtifactListPageWithCardProps, ArtifactListPageWithSimpleTableProps>;
+
+/**
+ * Column fields that can be sorted when artifacts are shown as a simple table.
+ * Has no effect on the card list view.
+ */
+const SORTABLE_FIELDS: readonly string[] = ['name', 'updated_by', 'updated_at'];
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(
   ({
@@ -106,7 +150,6 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     labels: _labels = {},
     secondaryPageInfo,
     callout,
-    onFormSubmit,
     flyoutSize,
     'data-test-subj': dataTestSubj,
     allowCardEditAction = true,
@@ -114,6 +157,11 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     allowCardDeleteAction = true,
     CardDecorator,
     additionalActions,
+    showAsSimpleTable = false,
+    showEnabledColumn = false,
+    showCommentsInViewFlyout = false,
+    ViewModeComponent,
+    policyAssignmentInfoTooltip,
   }) => {
     const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
       'endpointExceptionsMovedUnderManagement'
@@ -125,7 +173,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const toasts = useToasts();
     const isMounted = useIsMounted();
 
-    const isFlyoutOpened = useIsFlyoutOpened(allowCardEditAction, allowCardCreateAction);
+    const isCreateOrEditFlyoutOpened = useIsCreateEditFlyoutOpened(
+      allowCardEditAction,
+      allowCardCreateAction
+    );
     const isImportFlyoutOpened =
       useIsImportFlyoutOpened(allowCardCreateAction) &&
       areEndpointExceptionsMovedUnderManagementFFEnabled;
@@ -133,9 +184,27 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const [importErrors, setImportErrors] = useState<BulkErrorSchema[] | undefined>(undefined);
 
     const setUrlParams = useSetUrlParams();
+    const { urlParams } = useUrlParams<ArtifactListPageUrlParams>();
     const {
-      urlParams: { filter, includedPolicies },
-    } = useUrlParams<ArtifactListPageUrlParams>();
+      filter,
+      includedPolicies,
+      enabledStatus: enabledStatusUrlParam,
+      sortField,
+      sortOrder,
+      show: showUrlParam,
+      itemId,
+    } = urlParams;
+    const { page: currentPage, pageSize: currentPageSize } = useMemo(
+      () => paginationFromUrlParams(urlParams),
+      [urlParams]
+    );
+
+    const isViewFlyoutOpened = showAsSimpleTable && showUrlParam === 'view' && Boolean(itemId);
+    const enabledStatus =
+      showEnabledColumn && isArtifactEnabledStatus(enabledStatusUrlParam)
+        ? enabledStatusUrlParam
+        : undefined;
+
     const { exportExceptionList } = useApi(http);
 
     const {
@@ -147,7 +216,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       error,
       refetch: refetchListData,
       dataUpdatedAt,
-    } = useWithArtifactListData(apiClient, searchableFields);
+    } = useWithArtifactListData(
+      apiClient,
+      searchableFields,
+      showAsSimpleTable ? SORTABLE_FIELDS : undefined,
+      enabledStatus
+    );
 
     useEffect(() => {
       if (!isLoading && error) {
@@ -192,6 +266,18 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       [setUrlParams]
     );
 
+    const handleSimpleTableAction = useCallback(
+      ({ type, item }: { type: ArtifactSimpleTableActionType; item: ExceptionListItemSchema }) => {
+        if (type === 'view') {
+          setUrlParams({ show: 'view', itemId: item.item_id });
+          return;
+        }
+
+        handleOnCardActionClick({ type, item });
+      },
+      [handleOnCardActionClick, setUrlParams]
+    );
+
     const handleCardProps = useArtifactCardPropsProvider({
       items,
       onAction: handleOnCardActionClick,
@@ -200,6 +286,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       dataTestSubj: getTestId('card'),
       allowCardDeleteAction,
       allowCardEditAction,
+      disabled: showAsSimpleTable,
     });
 
     const memoizedRouteState = useMemoizedRouteState(routeState);
@@ -220,20 +307,42 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       setUrlParams({ show: 'create' });
     }, [setUrlParams]);
 
-    const handlePaginationChange: ArtifactListPagePaginatedContentComponent['onChange'] =
-      useCallback(
-        ({ pageIndex, pageSize }) => {
-          setUrlParams({
-            page: pageIndex + 1,
-            pageSize,
-          });
+    const handlePaginationChange = useCallback(
+      ({
+        pageIndex,
+        pageSize,
+        sortField: nextSortField,
+        sortOrder: nextSortOrder,
+      }: {
+        pageIndex: number;
+        pageSize: number;
+        sortField?: string;
+        sortOrder?: 'asc' | 'desc';
+      }) => {
+        const resolvedSortField = nextSortField ?? sortField;
+        const resolvedSortOrder = nextSortOrder ?? sortOrder;
+        const didSortChange = resolvedSortField !== sortField || resolvedSortOrder !== sortOrder;
+        const nextPage = didSortChange ? 1 : pageIndex + 1;
 
-          // Scroll to the top to ensure that when new set of data is received and list updated,
-          // the user is back at the top of the list
-          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        },
-        [setUrlParams]
-      );
+        // `EuiBasicTable` requests the corrected page on every render while the displayed page is
+        // out of range, so pushing an unchanged URL again would cause an infinite update loop.
+        if (!didSortChange && nextPage === currentPage && pageSize === currentPageSize) {
+          return;
+        }
+
+        setUrlParams({
+          page: nextPage,
+          pageSize,
+          sortField: resolvedSortField,
+          sortOrder: resolvedSortOrder,
+        });
+
+        // Scroll to the top to ensure that when new set of data is received and list updated,
+        // the user is back at the top of the list
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      },
+      [currentPage, currentPageSize, setUrlParams, sortField, sortOrder]
+    );
 
     const handleOnSearch = useCallback<SearchExceptionsProps['onSearch']>(
       (filterValue: string, selectedPolicies: string, doHardRefresh) => {
@@ -256,12 +365,22 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
       [filter, includedPolicies, refetchListData, setUrlParams]
     );
 
+    const handleOnEnabledStatusChange = useCallback(
+      (newEnabledStatus: ArtifactEnabledStatus | undefined) => {
+        setUrlParams({ enabledStatus: newEnabledStatus });
+      },
+      [setUrlParams]
+    );
+
     const handleArtifactDeleteModalOnSuccess = useCallback(() => {
       if (isMounted()) {
         setSelectedItemForDelete(undefined);
+        if (isViewFlyoutOpened) {
+          setUrlParams({ show: undefined, itemId: undefined });
+        }
         refetchListData();
       }
-    }, [isMounted, refetchListData]);
+    }, [isMounted, isViewFlyoutOpened, refetchListData, setUrlParams]);
 
     const handleArtifactDeleteModalOnCancel = useCallback(() => {
       setSelectedItemForDelete(undefined);
@@ -275,6 +394,16 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     const handleArtifactFlyoutOnClose = useCallback(() => {
       setSelectedItemForEdit(undefined);
     }, []);
+
+    const handleArtifactViewFlyoutOnClose = useCallback(() => {
+      setUrlParams({ show: undefined, itemId: undefined });
+    }, [setUrlParams]);
+
+    const handleEnabledChangeRefresh = useCallback(async () => {
+      if (isMounted()) {
+        await refetchListData();
+      }
+    }, [isMounted, refetchListData]);
 
     const handleExport = useCallback(
       () =>
@@ -386,7 +515,44 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           onDownload={handleOnDownload}
         />
 
-        {isFlyoutOpened && (
+        {isViewFlyoutOpened &&
+          ViewModeComponent &&
+          itemId &&
+          (showEnabledColumn ? (
+            <ArtifactViewFlyout
+              apiClient={apiClient}
+              itemId={itemId}
+              size={flyoutSize}
+              labels={labels}
+              showEnabledSwitch={showEnabledColumn}
+              showComments={showCommentsInViewFlyout}
+              allowCardEditAction={allowCardEditAction}
+              allowCardDeleteAction={allowCardDeleteAction}
+              onTakeAction={handleOnCardActionClick}
+              onEnabledChangeRefresh={handleEnabledChangeRefresh}
+              onClose={handleArtifactViewFlyoutOnClose}
+              ViewModeComponent={ViewModeComponent}
+              policyAssignmentInfoTooltip={policyAssignmentInfoTooltip}
+              data-test-subj={getTestId('viewFlyout')}
+            />
+          ) : (
+            <ArtifactViewFlyout
+              apiClient={apiClient}
+              itemId={itemId}
+              size={flyoutSize}
+              labels={labels}
+              showComments={showCommentsInViewFlyout}
+              allowCardEditAction={allowCardEditAction}
+              allowCardDeleteAction={allowCardDeleteAction}
+              onTakeAction={handleOnCardActionClick}
+              onClose={handleArtifactViewFlyoutOnClose}
+              ViewModeComponent={ViewModeComponent}
+              policyAssignmentInfoTooltip={policyAssignmentInfoTooltip}
+              data-test-subj={getTestId('viewFlyout')}
+            />
+          ))}
+
+        {isCreateOrEditFlyoutOpened && (
           <ArtifactFlyout
             apiClient={apiClient}
             item={selectedItemForEdit}
@@ -395,8 +561,8 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
             FormComponent={ArtifactFormComponent}
             labels={labels}
             size={flyoutSize}
-            submitHandler={onFormSubmit}
             data-test-subj={getTestId('flyout')}
+            canCreateArtifactAsDisabled={showEnabledColumn}
           />
         )}
 
@@ -447,7 +613,9 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               data-test-subj={getTestId('emptyState')}
               secondaryAboutInfo={secondaryPageInfo}
               canCreateItems={allowCardCreateAction}
-              isAddDisabled={isFlyoutOpened || isImportFlyoutOpened}
+              isAddDisabled={
+                isCreateOrEditFlyoutOpened || isViewFlyoutOpened || isImportFlyoutOpened
+              }
             />
           </div>
         ) : (
@@ -465,6 +633,10 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                   placeholder={labels.searchPlaceholderInfo}
                   hasPolicyFilter
                   defaultIncludedPolicies={includedPolicies}
+                  enabledStatus={enabledStatus}
+                  onEnabledStatusChange={
+                    showEnabledColumn ? handleOnEnabledStatusChange : undefined
+                  }
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -473,7 +645,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                     <EuiButton
                       fill
                       iconType="plusCircle"
-                      isDisabled={isFlyoutOpened}
+                      isDisabled={isCreateOrEditFlyoutOpened || isViewFlyoutOpened}
                       onClick={handleOpenCreateFlyoutClick}
                       data-test-subj={getTestId('pageAddButton')}
                     >
@@ -501,19 +673,40 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
             <EuiSpacer size="s" />
 
-            <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
-              items={items}
-              ItemComponent={ArtifactEntryCard}
-              itemComponentProps={handleCardProps}
-              onChange={handlePaginationChange}
-              error={error as React.ReactNode}
-              loading={isLoading}
-              pagination={uiPagination}
-              contentClassName="card-container"
-              data-test-subj={getTestId('list')}
-              CardDecorator={CardDecorator}
-              dataUpdatedAt={dataUpdatedAt}
-            />
+            {showAsSimpleTable ? (
+              <ArtifactSimpleTable
+                items={items}
+                pagination={uiPagination}
+                onChange={handlePaginationChange}
+                onAction={handleSimpleTableAction}
+                labels={labels}
+                loading={isLoading}
+                error={(error?.body as ServerApiError)?.message || error?.message}
+                allowCardEditAction={allowCardEditAction}
+                allowCardDeleteAction={allowCardDeleteAction}
+                showEnabledColumn={showEnabledColumn}
+                apiClient={apiClient}
+                onEnabledChangeSuccess={handleEnabledChangeRefresh}
+                sortField={sortField}
+                sortOrder={sortOrder}
+                sortableFields={SORTABLE_FIELDS}
+                data-test-subj={getTestId('simpleTable')}
+              />
+            ) : (
+              <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
+                items={items}
+                ItemComponent={ArtifactEntryCard}
+                itemComponentProps={handleCardProps}
+                onChange={handlePaginationChange}
+                error={error as React.ReactNode}
+                loading={isLoading}
+                pagination={uiPagination}
+                contentClassName="card-container"
+                data-test-subj={getTestId('list')}
+                CardDecorator={CardDecorator}
+                dataUpdatedAt={dataUpdatedAt}
+              />
+            )}
           </>
         )}
       </AdministrationListPage>

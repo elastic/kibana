@@ -28,7 +28,7 @@ const createAlertDocument = ({
   endTime,
   ruleUuid,
 }: AlertDocumentParams) => ({
-  '@timestamp': new Date().toISOString(),
+  '@timestamp': alertStartTime,
   'event.action': status === 'active' ? 'active' : 'close',
   'event.kind': 'signal',
   'kibana.alert.duration.us': 63291000,

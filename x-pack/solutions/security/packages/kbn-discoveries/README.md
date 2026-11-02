@@ -10,6 +10,12 @@ This package is **server-only** (`"type": "shared-server"` in `kibana.jsonc`). I
 
 For the full architectural context — the four entry points, five workflow steps, anonymization boundary, security surfaces — see the canonical [discoveries plugin README](../../plugins/discoveries/README.md).
 
+### Carve-out: the Attack Discovery alert field map is a deliberate duplicate
+
+`impl/attack_discovery/alert_fields/` is the one part of this package that intentionally **duplicates** rather than de-duplicates. `attackDiscoveryAlertFieldMap`, `ATTACK_DISCOVERY_ALERTS_CONTEXT` (both in `alert_field_map.ts`) and the field-name constants in `alert_field_names.ts` are forked copies of the canonical definitions in `@kbn/attack-discovery-schedules-common`. The fork exists as a step toward `@kbn/discoveries` becoming a standalone package — the package is *not* standalone today (it still imports `@kbn/attack-discovery-schedules-common` at runtime, e.g. in `impl/attack_discovery/generation/deduplicate_scheduled_discoveries/`).
+
+Because `elastic_assistant` installs the canonical field map and the `discoveries` plugin installs this fork into the **same** alerts component template (`.adhoc.alerts-security.attack.discovery.alerts-mappings`), the two copies must stay identical or the installed mappings become install-order dependent. Do **not** merge them; update both together. Parity is enforced by [`discoveries/server/attack_discovery_index_parity.test.ts`](../../plugins/discoveries/server/attack_discovery_index_parity.test.ts) and recorded as ADR-015 in the [plugin README](../../plugins/discoveries/README.md).
+
 ## Overview
 
 This package contains reusable logic consumed by both the `elastic_assistant` and `discoveries` plugins:
@@ -120,7 +126,7 @@ These exports cross the security boundaries described in the plugin README. Read
 | `writeAttackDiscoveryEvent`, `ATTACK_DISCOVERY_EVENT_LOG_ACTION_*`, `getDurationNanoseconds` | Event log privacy contract | [Event Logging](../../plugins/discoveries/README.md#event-logging) |
 | `executeGenerationWorkflow`, `runManualOrchestration` *(deep import)* | Orchestrator entry points (pipeline + gate phase; throw when the FF is OFF) | [Orchestration, event logging, pre-execution validation](../../plugins/discoveries/README.md#orchestration-event-logging-pre-execution-validation-landed-in-pr-4) |
 | `reportMisconfiguration`, `reportStepFailure`, `reportScheduleAction`, `reportWorkflowSuccess`, `reportWorkflowError` *(deep import)* | EBT privacy contract | [Telemetry README](impl/lib/telemetry/README.md) |
-| `attackDiscoveryAlertFieldMap`, `ALERT_ATTACK_DISCOVERY_*` | Alert document schema | (no public-facing boundary; see field map source) |
+| `attackDiscoveryAlertFieldMap`, `ATTACK_DISCOVERY_ALERTS_CONTEXT`, `ALERT_ATTACK_DISCOVERY_*` | Alert document schema — **deliberate fork of `@kbn/attack-discovery-schedules-common`; both copies must stay identical** (they install the same component template) | [Carve-out above](#carve-out-the-attack-discovery-alert-field-map-is-a-deliberate-duplicate) · parity test: [`attack_discovery_index_parity.test.ts`](../../plugins/discoveries/server/attack_discovery_index_parity.test.ts) |
 
 ## Consumers
 

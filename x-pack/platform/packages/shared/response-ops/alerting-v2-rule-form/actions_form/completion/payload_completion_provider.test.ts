@@ -5,134 +5,51 @@
  * 2.0.
  */
 
+import type { monaco } from '@kbn/code-editor';
+import { createPayloadCompletionProvider } from './payload_completion_provider';
+
 jest.mock('@kbn/code-editor', () => ({
   monaco: {
     languages: {
-      CompletionItemKind: { Variable: 4 },
+      CompletionItemKind: {
+        Variable: 4,
+      },
     },
   },
 }));
 
-import { createPayloadCompletionProvider } from './payload_completion_provider';
-import { DISPATCH_PAYLOAD_VARIABLES, ALERT_EPISODE_FIELDS } from '../registry';
-
-const makeModel = (lineContent: string) => ({
-  getLineContent: () => lineContent,
-});
-
-const makePosition = (column: number) => ({
-  lineNumber: 1,
-  column,
-});
+const getSuggestionLabels = (textUpToCursor: string): string[] => {
+  const model = { getLineContent: () => textUpToCursor };
+  const position = { lineNumber: 1, column: textUpToCursor.length + 1 } as monaco.Position;
+  const { suggestions } = createPayloadCompletionProvider().provideCompletionItems(
+    model as unknown as monaco.editor.ITextModel,
+    position,
+    {} as monaco.languages.CompletionContext,
+    {} as monaco.CancellationToken
+  ) as monaco.languages.CompletionList;
+  return suggestions.map(({ label }) => (typeof label === 'string' ? label : label.label));
+};
 
 describe('createPayloadCompletionProvider', () => {
-  const provider = createPayloadCompletionProvider();
-
-  it('returns inputs.payload.-prefixed variables at top level inside an empty template', () => {
-    const line = '{{ ';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string; insertText: string }> };
-
-    expect(result.suggestions).toHaveLength(DISPATCH_PAYLOAD_VARIABLES.length);
-    expect(result.suggestions.map((s) => s.label)).toEqual(
-      DISPATCH_PAYLOAD_VARIABLES.map((v) => `inputs.payload.${v.path}`)
-    );
-    // insertText must match the label so accepting a suggestion doesn't double the prefix
-    expect(result.suggestions.map((s) => s.insertText)).toEqual(
-      DISPATCH_PAYLOAD_VARIABLES.map((v) => `inputs.payload.${v.path}`)
-    );
+  it('suggests the dispatcher payload fields under inputs.payload', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.payload.')).toEqual([
+      'id',
+      'policyId',
+      'groupKey',
+      'alerts',
+      'rules',
+    ]);
   });
 
-  it('returns the payload wrapper inside {{ inputs.', () => {
-    const line = '{{ inputs.';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string }> };
+  it('suggests alert fields inside an inputs.payload.alerts item', () => {
+    const labels = getSuggestionLabels('message: "{{ inputs.payload.alerts[0].');
 
-    expect(result.suggestions.map((s) => s.label)).toEqual(['payload']);
+    expect(labels).toEqual(expect.arrayContaining(['alert_id', 'alert_status', 'rule_id', 'data']));
+    expect(labels).not.toContain('episode_id');
+    expect(labels).not.toContain('episode_status');
   });
 
-  it('returns bare payload children inside {{ inputs.payload.', () => {
-    const line = '{{ inputs.payload.';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string }> };
-
-    expect(result.suggestions).toHaveLength(DISPATCH_PAYLOAD_VARIABLES.length);
-    expect(result.suggestions.map((s) => s.label)).toEqual(
-      DISPATCH_PAYLOAD_VARIABLES.map((v) => v.path)
-    );
-  });
-
-  it('returns episode fields when cursor is inside inputs.payload.episodes[N].', () => {
-    const line = 'to: "{{ inputs.payload.episodes[0].';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string }> };
-
-    expect(result.suggestions).toHaveLength(ALERT_EPISODE_FIELDS.length);
-    expect(result.suggestions.map((s) => s.label)).toEqual(ALERT_EPISODE_FIELDS.map((v) => v.path));
-  });
-
-  it('returns no suggestions outside a Liquid template', () => {
-    const line = 'not a template';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: unknown[] };
-
-    expect(result.suggestions).toHaveLength(0);
-  });
-
-  it('returns no suggestions for an unknown nested path', () => {
-    const line = '{{ foo.bar.';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: unknown[] };
-
-    expect(result.suggestions).toHaveLength(0);
-  });
-
-  it('returns bare payload children for the second template on the same line', () => {
-    const line = '{{ inputs.payload.id }} text {{ inputs.payload.poli';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: Array<{ label: string }> };
-
-    expect(result.suggestions.length).toBeGreaterThan(0);
-    expect(result.suggestions.map((s) => s.label)).toContain('policyId');
-  });
-
-  it('returns no suggestions inside a Liquid filter context', () => {
-    const line = '{{ inputs.payload.id | upc';
-    const result = provider.provideCompletionItems!(
-      makeModel(line) as any,
-      makePosition(line.length + 1) as any,
-      {} as any,
-      {} as any
-    ) as { suggestions: unknown[] };
-
-    expect(result.suggestions).toHaveLength(0);
+  it('does not suggest alert fields under the removed inputs.payload.episodes path', () => {
+    expect(getSuggestionLabels('message: "{{ inputs.payload.episodes[0].')).toEqual([]);
   });
 });

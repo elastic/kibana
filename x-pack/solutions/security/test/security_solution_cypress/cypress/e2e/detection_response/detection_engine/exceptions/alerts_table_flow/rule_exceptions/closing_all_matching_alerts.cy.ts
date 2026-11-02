@@ -28,7 +28,7 @@ import {
 import { createRule } from '../../../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../../../objects/rule';
 import { getExceptionList } from '../../../../../../objects/exception';
-import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
+import { RULE_SWITCH } from '../../../../../../screens/rule_details';
 import { ALERTS_COUNT, ALERT_EMBEDDABLE_EMPTY_PROMPT } from '../../../../../../screens/alerts';
 import {
   addExceptionEntryFieldValue,
@@ -72,7 +72,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
     waitForAlertsToPopulate();
     // Disables enabled rule
     clickDisableRuleSwitch();
-    cy.get(LOADING_INDICATOR).should('not.exist');
+    cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'false');
   });
   after(() => {
     cy.task('esArchiverUnload', { archiveName: 'exceptions' });
@@ -98,7 +98,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
 
     // Closed alert should appear in table
     goToClosedAlertsOnRuleDetailsPage();
-    cy.get(LOADING_INDICATOR).should('not.exist');
+    waitForAlerts();
     cy.get(ALERTS_COUNT).should('contain', '1');
   });
 

@@ -6,15 +6,13 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 export const Error: React.FunctionComponent<{
   title: JSX.Element;
   error: Error | string;
 }> = ({ title, error }) => {
   return (
-    <EuiCallOut title={title} color="danger" iconType="warning">
-      <p>{typeof error === 'string' ? error : error.message}</p>
-    </EuiCallOut>
+    <KbnDangerCallout title={title} text={typeof error === 'string' ? error : error.message} />
   );
 };

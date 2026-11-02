@@ -8,7 +8,7 @@
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 
-const EXPERIMENTAL_LABEL = i18n.translate('xpack.alertingV2.experimentalBadge.label', {
+export const experimentalBadgeLabel = i18n.translate('xpack.alertingV2.experimentalBadge.label', {
   defaultMessage: 'Experimental',
 });
 
@@ -18,7 +18,7 @@ const EXPERIMENTAL_TOOLTIP = i18n.translate('xpack.alertingV2.experimentalBadge.
 });
 
 export const experimentalBadge: AppHeaderBadge = {
-  label: EXPERIMENTAL_LABEL,
+  label: experimentalBadgeLabel,
   tooltip: EXPERIMENTAL_TOOLTIP,
   'data-test-subj': 'alertingV2ExperimentalBadge',
 };

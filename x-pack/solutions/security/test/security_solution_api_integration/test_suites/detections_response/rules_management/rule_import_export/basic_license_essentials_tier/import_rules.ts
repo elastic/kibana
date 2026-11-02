@@ -314,13 +314,15 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(found.data[0].name).toBe('Last in file');
       });
 
-      it('should NOT report a conflict if there is an attempt to import two rules with the same rule_id and overwrite is set to true', async () => {
+      it('should report a conflict if there is an attempt to import two rules with the same rule_id and overwrite is set to true', async () => {
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
             rule_id: 'rule-1',
+            name: 'First in file',
           }),
           getCustomQueryRuleParams({
             rule_id: 'rule-1',
+            name: 'Last in file',
           })
         );
 
@@ -330,11 +332,34 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body).toMatchObject({
-          errors: [],
-          success: true,
+          errors: [
+            {
+              error: {
+                message: 'More than one rule with rule-id: "rule-1" found',
+                status_code: 400,
+              },
+              rule_id: 'rule-1',
+            },
+          ],
+          success: false,
           success_count: 1,
           rules_count: 2,
+          rules_summary: { created: 1, updated: 0, skipped: 0, failed: 1 },
         });
+
+        // In-file duplicate still creates exactly one rule; last entry wins.
+        const { body: found } = await detectionsApi
+          .findRules({
+            query: {
+              page: 1,
+              per_page: 10,
+              filter: 'alert.attributes.params.ruleId: "rule-1"',
+            },
+          })
+          .expect(200);
+
+        expect(found.total).toBe(1);
+        expect(found.data[0].name).toBe('Last in file');
       });
 
       it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists', async () => {

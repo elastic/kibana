@@ -23,6 +23,8 @@ import { serviceAlertsCountRoute } from './service_alerts_count';
 import { serviceSlosRoute } from './service_slos';
 import { serviceMixedIngestionRoute } from './service_mixed_ingestion';
 import { serviceAnomalyScoreRoute } from './service_anomaly_score';
+import { serviceIngestionTypeRoute } from './service_ingestion_type';
+import { serviceHasSystemMetricsRoute } from './service_has_system_metrics';
 
 export const servicesRouteDefinitions = {
   servicesList: servicesListRoute,
@@ -44,6 +46,8 @@ export const servicesRouteDefinitions = {
   slos: serviceSlosRoute,
   mixedIngestion: serviceMixedIngestionRoute,
   anomalyScore: serviceAnomalyScoreRoute,
+  ingestionType: serviceIngestionTypeRoute,
+  hasSystemMetrics: serviceHasSystemMetricsRoute,
 };
 
 export type { ServicesItemsResponse, MergedServiceStat } from './services_list';
@@ -90,3 +94,5 @@ export type {
 export type { ServiceSlosResponse, StatusCounts } from './service_slos';
 export type { ServiceMixedIngestionResponse } from './service_mixed_ingestion';
 export type { ServiceAnomalyScoreResponse } from './service_anomaly_score';
+export type { ServiceIngestionTypeResponse } from './service_ingestion_type';
+export type { ServiceHasSystemMetricsResponse } from './service_has_system_metrics';

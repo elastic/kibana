@@ -8,6 +8,7 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { screen } from '@testing-library/react';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
@@ -68,9 +69,11 @@ describe('EsDeprecations', () => {
   const renderPage = () => {
     const history = createMemoryHistory();
     return renderWithI18n(
-      <Router history={history}>
-        <EsDeprecations />
-      </Router>
+      <MockAppHeaderProvider>
+        <Router history={history}>
+          <EsDeprecations />
+        </Router>
+      </MockAppHeaderProvider>
     );
   };
 

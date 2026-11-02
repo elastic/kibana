@@ -27,6 +27,7 @@ import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server
 import { isNumber, chunk } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { withSpan } from '@kbn/apm-utils';
+import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type {
   ScheduleBackfillError,
   ScheduleBackfillParams,
@@ -107,7 +108,8 @@ export class BackfillClient {
     opts.taskManagerSetup.registerTaskDefinitions({
       [BACKFILL_TASK_TYPE]: {
         title: 'Alerting Backfill Rule Run',
-        priority: TaskPriority.Low,
+        priority: TaskPriority.Maintenance,
+        taskTypeGroup: TaskTypeGroup.Alerting,
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
@@ -675,8 +677,8 @@ function getRuleOrError({ ruleId, rules, ruleTypeRegistry }: GetRuleOrErrorOpts)
     };
   }
 
-  // check that the API key is not null
-  if (!rule.apiKey) {
+  // check that the rule has a credential. A UIAM-only rule has no Elasticsearch key.
+  if (!rule.apiKey && !rule.uiamApiKey) {
     return {
       error: createBackfillError(`Rule ${ruleId} has no API key`, ruleId, rule.name),
     };

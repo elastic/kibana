@@ -333,4 +333,99 @@ describe('SimilarErrors', () => {
       );
     });
   });
+
+  describe('log level filter', () => {
+    const mockColumns = (...names: string[]) =>
+      mockGetESQLQueryColumnsRaw.mockResolvedValue(
+        [fieldConstants.SERVICE_NAME_FIELD, 'message', ...names].map((name) => ({
+          name,
+          type: 'keyword',
+        }))
+      );
+
+    it('filters on the log level of the selected document', async () => {
+      mockColumns(fieldConstants.LOG_LEVEL_FIELD);
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({ ...errorDocFields, [fieldConstants.LOG_LEVEL_FIELD]: 'error' })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: { fieldName: 'log.level', value: 'error' } })
+      );
+      expect(
+        screen.getByText(
+          `These errors are based on the following fields: ${fieldConstants.SERVICE_NAME_FIELD}, message, ${fieldConstants.LOG_LEVEL_FIELD}.`
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('falls back to error.log.level when log.level is missing', async () => {
+      mockColumns(fieldConstants.ERROR_LOG_LEVEL_FIELD);
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({ ...errorDocFields, [fieldConstants.ERROR_LOG_LEVEL_FIELD]: 'error' })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: { fieldName: 'error.log.level', value: 'error' } })
+      );
+    });
+
+    it('prefers log.level over error.log.level, like the section gate', async () => {
+      mockColumns(fieldConstants.LOG_LEVEL_FIELD, fieldConstants.ERROR_LOG_LEVEL_FIELD);
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({
+          ...errorDocFields,
+          [fieldConstants.LOG_LEVEL_FIELD]: 'warn',
+          [fieldConstants.ERROR_LOG_LEVEL_FIELD]: 'error',
+        })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: { fieldName: 'log.level', value: 'warn' } })
+      );
+    });
+
+    it('uses the first value when the level is an array', async () => {
+      mockColumns(fieldConstants.LOG_LEVEL_FIELD);
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({ ...errorDocFields, [fieldConstants.LOG_LEVEL_FIELD]: ['error', 'fatal'] })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: { fieldName: 'log.level', value: 'error' } })
+      );
+    });
+
+    it('filters on severity_text for an OTel document', async () => {
+      mockColumns('severity_text');
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({
+          [fieldConstants.SERVICE_NAME_FIELD]: 'test-service',
+          severity_text: 'ERROR',
+          message: 'test error message',
+        })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: { fieldName: 'severity_text', value: 'ERROR' } })
+      );
+    });
+
+    it('omits the level when its column is not queryable', async () => {
+      mockColumns();
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({ ...errorDocFields, [fieldConstants.LOG_LEVEL_FIELD]: 'error' })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: undefined })
+      );
+    });
+  });
 });

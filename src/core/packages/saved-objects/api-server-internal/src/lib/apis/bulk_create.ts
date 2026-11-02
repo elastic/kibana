@@ -12,7 +12,7 @@ import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-
 import {
   SavedObjectsErrorHelpers,
   errorContent,
-  type SavedObject,
+  type SavedObjectErrorResult,
   type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
@@ -175,9 +175,8 @@ export const performBulkCreate = async <T>(
   if (validObjects.length === 0) {
     // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
     return {
-      // Technically the returned array should only contain SavedObject results, but for errors this is not true (we cast to 'unknown' below)
-      saved_objects: expectedResults.map<SavedObject<T>>(
-        ({ value }) => value as unknown as SavedObject<T>
+      saved_objects: expectedResults.map<SavedObjectErrorResult>(
+        ({ value }) => value as SavedObjectErrorResult
       ),
     };
   }
@@ -359,10 +358,10 @@ export const performBulkCreate = async <T>(
       })
     : undefined;
 
-  const result = {
+  const result: SavedObjectsBulkResponse<T> = {
     saved_objects: expectedBulkResults.map((expectedResult) => {
       if (isLeft(expectedResult)) {
-        return expectedResult.value as any;
+        return expectedResult.value as SavedObjectErrorResult;
       }
 
       const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;

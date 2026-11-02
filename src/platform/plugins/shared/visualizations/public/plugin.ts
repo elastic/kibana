@@ -52,7 +52,6 @@ import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/naviga
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -176,7 +175,6 @@ export interface VisualizationsStartDeps {
   uiActions: UiActionsStart;
   application: ApplicationStart;
   navigation: NavigationStart;
-  presentationUtil: PresentationUtilPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   cps?: CPSPluginStart;
   spaces?: SpacesPluginStart;
@@ -358,9 +356,13 @@ export class VisualizationsPlugin
     const listingViewRegistry: ListingViewRegistry = new Set();
     const visEditorsRegistry = createVisEditorsRegistry();
 
+    const visualizeLibraryTitle = i18n.translate('visualizations.listingPageTitle', {
+      defaultMessage: 'Visualize library',
+    });
+
     core.application.register({
       id: VisualizeConstants.APP_ID,
-      title: 'Visualize library',
+      title: visualizeLibraryTitle,
       order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
@@ -433,7 +435,6 @@ export class VisualizationsPlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
           savedSearch: pluginsStart.savedSearch,
-          presentationUtil: pluginsStart.presentationUtil,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
           visEditorsRegistry,
@@ -468,7 +469,7 @@ export class VisualizationsPlugin
     if (home) {
       home.featureCatalogue.register({
         id: 'visualize',
-        title: 'Visualize library',
+        title: visualizeLibraryTitle,
         description: i18n.translate('visualizations.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
@@ -531,7 +532,7 @@ export class VisualizationsPlugin
       version: {
         latest: LATEST_VERSION,
       },
-      name: 'Visualize library',
+      name: visualizeLibraryTitle,
     });
 
     return {

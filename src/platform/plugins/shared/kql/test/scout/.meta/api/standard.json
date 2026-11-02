@@ -1,8 +1,7 @@
 {
   "sha1": "c3e26507ae6fb22b8e220d00bdba14090b1a3e6a",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -12,12 +11,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -27,8 +20,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions_time_filters.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 37,
+        "column": 52
       }
     },
     {
@@ -38,12 +31,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -53,8 +40,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions_time_filters.spec.ts",
-        "line": 66,
-        "column": 10
+        "line": 50,
+        "column": 22
       }
     },
     {
@@ -64,12 +51,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -79,8 +60,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions_time_filters.spec.ts",
-        "line": 85,
-        "column": 10
+        "line": 67,
+        "column": 5
       }
     },
     {
@@ -90,12 +71,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -105,8 +80,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions_time_filters.spec.ts",
-        "line": 104,
-        "column": 10
+        "line": 81,
+        "column": 14
       }
     },
     {
@@ -116,12 +91,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -131,8 +100,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 37,
-        "column": 10
+        "line": 25,
+        "column": 38
       }
     },
     {
@@ -142,12 +111,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -157,8 +120,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 49,
-        "column": 10
+        "line": 35,
+        "column": 5
       }
     },
     {
@@ -168,12 +131,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -183,8 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 61,
-        "column": 10
+        "line": 46,
+        "column": 12
       }
     },
     {
@@ -194,12 +151,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -209,8 +160,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 73,
-        "column": 10
+        "line": 56,
+        "column": 12
       }
     },
     {
@@ -220,12 +171,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -235,8 +180,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 84,
-        "column": 10
+        "line": 65,
+        "column": 45
       }
     },
     {
@@ -246,12 +191,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -261,8 +200,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 95,
-        "column": 10
+        "line": 77,
+        "column": 13
       }
     },
     {
@@ -272,12 +211,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -287,8 +220,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 106,
-        "column": 10
+        "line": 86,
+        "column": 54
       }
     },
     {
@@ -298,12 +231,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -313,8 +240,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions.spec.ts",
-        "line": 116,
-        "column": 10
+        "line": 96,
+        "column": 22
       }
     }
   ]

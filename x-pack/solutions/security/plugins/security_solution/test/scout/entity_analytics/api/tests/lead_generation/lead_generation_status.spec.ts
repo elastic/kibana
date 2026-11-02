@@ -73,8 +73,8 @@ apiTest.describe(
     apiTest(
       'totalLeads reflects the count of seeded documents',
       async ({ apiClient, esClient }) => {
-        await seedLead(esClient);
-        await seedLead(esClient);
+        await seedLead(esClient, { entityName: 'alice' });
+        await seedLead(esClient, { entityName: 'bob' });
 
         const response = await apiClient.get(LEAD_GENERATION_ROUTES.STATUS, {
           headers: defaultHeaders,

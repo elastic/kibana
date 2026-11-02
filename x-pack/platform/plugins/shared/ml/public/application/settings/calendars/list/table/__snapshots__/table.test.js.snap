@@ -51,13 +51,15 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       >
         <div
           class="euiFilterGroup emotion-euiFilterGroup-uncompressed"
+          data-display="regular"
+          data-dividers="true"
         />
       </div>
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+          class="euiButton emotion-euiButtonDisplay-s-base-primary"
           data-test-subj="mlCalendarButtonCreate"
           type="button"
         >
@@ -72,7 +74,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <button
-          class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-isDisabled-base-disabled"
+          class="euiButton emotion-euiButtonDisplay-s-isDisabled-base-disabled"
           data-test-subj="mlCalendarButtonDelete"
           disabled=""
           type="button"
@@ -97,7 +99,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
       data-test-subj="mlCalendarTable loaded"
     >
       <div
-        class="emotion-euiContainerCSS"
+        class="euiTable__wrapper emotion-euiContainerCSS"
       >
         <table
           class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"

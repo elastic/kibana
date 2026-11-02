@@ -10,53 +10,66 @@
 import { dataMapStepDefinition } from './data_map_step';
 import type { StepHandlerContext } from '../../step_registry/types';
 
+const resolveValue = (value: unknown, context: Record<string, unknown> | undefined): unknown => {
+  if (value === null || value === undefined) return value;
+  if (typeof value === 'string' && value.includes('{{')) {
+    if (!context) return value;
+    const match = value.match(/\{\{\s*(.+?)\s*\}\}/);
+    if (!match) return value;
+    const path = match[1].trim().split('.');
+    let current: unknown = context[path[0]];
+    for (let i = 1; i < path.length && current != null && typeof current === 'object'; i++) {
+      current = (current as Record<string, unknown>)[path[i]];
+    }
+    return current;
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => resolveValue(entry, context));
+  }
+  if (typeof value === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value)) {
+      result[key] = resolveValue(entry, context);
+    }
+    return result;
+  }
+  return value;
+};
+
 const createMockContext = (
   config: { items: unknown },
   input: { fields: Record<string, unknown> }
-): StepHandlerContext<any, any> => ({
-  config,
-  input,
-  rawInput: input,
-  contextManager: {
-    renderInputTemplate: jest.fn((templateInput, additionalContext) => {
-      const resolveValue = (value: unknown, ctx: Record<string, unknown> | undefined): unknown => {
-        if (value === null || value === undefined) return value;
-        if (typeof value === 'string' && value.includes('{{')) {
-          if (!ctx) return value;
-          const match = value.match(/\{\{\s*(.+?)\s*\}\}/);
-          if (!match) return value;
-          const path = match[1].trim().split('.');
-          let current: unknown = ctx[path[0]];
-          for (let i = 1; i < path.length && current != null && typeof current === 'object'; i++) {
-            current = (current as Record<string, unknown>)[path[i]];
-          }
-          return current;
-        }
-        if (Array.isArray(value)) {
-          return value.map((entry) => resolveValue(entry, ctx));
-        }
-        if (typeof value === 'object') {
-          const result: Record<string, unknown> = {};
-          for (const [k, v] of Object.entries(value)) {
-            result[k] = resolveValue(v, ctx);
-          }
-          return result;
-        }
-        return value;
-      };
-      return resolveValue(templateInput, additionalContext) as typeof templateInput;
-    }),
-  } as any,
-  logger: {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  },
-  abortSignal: new AbortController().signal,
-  stepId: 'test-step',
-  stepType: 'data.map',
-});
+): StepHandlerContext<any, any> => {
+  const getContext = jest.fn(() => ({}));
+  return {
+    config,
+    input,
+    rawInput: input,
+    contextManager: {
+      getContext,
+      renderInputTemplate: jest.fn((templateInput, additionalContext) => {
+        return resolveValue(templateInput, additionalContext) as typeof templateInput;
+      }),
+      createTemplateRenderer: jest.fn(() => {
+        const workflowContext = getContext();
+        return <T>(templateInput: T, additionalContext?: Record<string, unknown>) =>
+          resolveValue(templateInput, {
+            ...workflowContext,
+            ...additionalContext,
+          }) as T;
+      }),
+    } as any,
+    logger: {
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    },
+    abortSignal: new AbortController().signal,
+    stepId: 'test-step',
+    stepType: 'data.map',
+  };
+};
 
 describe('dataMapStepDefinition', () => {
   describe('handler', () => {
@@ -81,6 +94,32 @@ describe('dataMapStepDefinition', () => {
         { userId: 1, userName: 'Alice' },
         { userId: 2, userName: 'Bob' },
       ]);
+    });
+
+    it('should build the workflow context once and reuse it for every field and item', async () => {
+      const config = {
+        items: [{ id: 1 }, { id: 2 }],
+      };
+      const input = {
+        fields: {
+          id: '{{ item.id }}',
+          workflowName: '{{ workflow.name }}',
+        },
+      };
+      const context = createMockContext(config, input);
+      jest
+        .mocked(context.contextManager.getContext)
+        .mockReturnValue({ workflow: { name: 'cached workflow' } } as any);
+
+      const result = await dataMapStepDefinition.handler(context);
+
+      expect(result.output).toEqual([
+        { id: 1, workflowName: 'cached workflow' },
+        { id: 2, workflowName: 'cached workflow' },
+      ]);
+      expect(context.contextManager.getContext).toHaveBeenCalledTimes(1);
+      expect(context.contextManager.createTemplateRenderer).toHaveBeenCalledTimes(1);
+      expect(context.contextManager.renderInputTemplate).not.toHaveBeenCalled();
     });
 
     it('should provide index to template context', async () => {

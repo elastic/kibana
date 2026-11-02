@@ -14,6 +14,7 @@ import { INTEGRATIONS_ROUTING_PATHS } from '../../constants';
 import { IntegrationsStateContextProvider, useBreadcrumbs, useStartServices } from '../../hooks';
 
 import { CopyPackagePolicyPage } from '../../../fleet/sections/agent_policy/copy_package_policy_page';
+import { CreatePackagePolicyPage } from '../../../fleet/sections/agent_policy/create_package_policy_page';
 
 import { EPMHomePage } from './screens/home';
 import { AwsOnboardingPage } from './screens/aws_onboarding/version_switcher';
@@ -32,6 +33,9 @@ export const EPMApp: React.FunctionComponent = () => {
     <Routes>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_aws_onboarding}>
         <AwsOnboardingPage />
+      </Route>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
+        <CreatePackagePolicyPage />
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integration_policy_edit}>
         <Policy />

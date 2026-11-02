@@ -16,8 +16,8 @@ import {
   useEuiTheme,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { isCustomSkeletonNode, type SkeletonOutput } from '@kbn/content-list-assembly';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
+import { isCustomSkeletonNode, type SkeletonOutput } from './descriptor';
 import type { ResolvedColumn } from '../hooks/use_columns';
 
 /**

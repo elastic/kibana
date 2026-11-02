@@ -70,5 +70,5 @@ test('should use position of previous element, if latest element is no longer in
 
   expect(y).toBe(bottom);
   expect(x).toBe(left + (right - left) / 2);
-  expect(spy).not.toBeCalled();
+  expect(spy).not.toHaveBeenCalled();
 });

@@ -8,12 +8,12 @@ description: "Local cross cluster search setup"
 ### Local CCS (cross cluster search) instructions
 * Spin up a "remote" instance of Elasticsearch (this needs to start before the "local" instance for some odd reason):
 ```
-yarn es snapshot -E http.port=9500 -E transport.port=9600 -E path.data=../remote
+pnpm es snapshot -E http.port=9500 -E transport.port=9600 -E path.data=../remote
 ```
 
 * Spin up the "local" instance of Elasticsearch:
 ```
-yarn es snapshot
+pnpm es snapshot
 ```
 
 * Load data into both the "remote" and "local" clusters:
@@ -24,7 +24,7 @@ node scripts/makelogs.js -c 100000 -d 100/10 --url elastic:changeme@localhost:92
 
 * Spin up Kibana:
 ```
-yarn start
+pnpm start
 ```
 
 Once it is running, do the following:

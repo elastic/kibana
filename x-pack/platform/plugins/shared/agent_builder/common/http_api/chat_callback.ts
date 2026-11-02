@@ -9,10 +9,8 @@ import type {
   ConversationOrigin,
   ConversationRoundAuthor,
   ConversationOriginType,
-  ExecutionStatus,
-  SerializedExecutionError,
 } from '@kbn/agent-builder-common';
-import type { ChatRequestBodyPayload, ChatResponse } from './chat';
+import type { ChatRequestBodyPayload } from './chat';
 
 export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
   execution_idempotency_key: string;
@@ -25,27 +23,13 @@ export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
   };
 }
 
-export const isChatCallbackRequestBodyPayload = (
-  payload: ChatRequestBodyPayload | ChatCallbackRequestBodyPayload
-): payload is ChatCallbackRequestBodyPayload => {
-  return 'callback' in payload;
-};
-
 export interface ChatCallbackAcceptedResponse {
   execution_id: string;
-  status: ExecutionStatus.scheduled;
+  conversation_id: string;
 }
 
-export interface ChatCallbackSuccessPayload {
-  execution_id: string;
-  status: ExecutionStatus.completed;
-  response: ChatResponse;
-}
-
-export interface ChatCallbackFailurePayload {
-  execution_id: string;
-  status: ExecutionStatus.failed | ExecutionStatus.aborted;
-  error?: SerializedExecutionError;
-}
-
-export type CallbackPayload = ChatCallbackSuccessPayload | ChatCallbackFailurePayload;
+export type {
+  ChatCallbackEventResponse,
+  ChatCallbackFailureResponse,
+  ChatCallbackResponse,
+} from '@kbn/agent-builder-common';

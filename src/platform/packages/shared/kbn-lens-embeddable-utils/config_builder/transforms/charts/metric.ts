@@ -10,7 +10,7 @@
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
   buildTrendlineQueryWithMetricFieldMap,
-  buildTrendlineBucketExpression,
+  queryHasTsSourceCommand,
   LENS_METRIC_DEFAULT_COLOR_STEPS,
   type FormBasedPersistedState,
   type MetricVisualizationState,
@@ -21,8 +21,10 @@ import {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { VisIconType } from '@kbn/chart-icons';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -36,6 +38,7 @@ import {
   DEFAULT_SECONDARY_COMPARE_TO_PALETTE,
 } from './metric/defaults';
 import { DEFAULT_LAYER_ID } from '../../constants';
+import { LENS_DEFAULT_TIME_FIELD } from '../constants';
 import {
   addLayerColumn,
   buildDataSourceState,
@@ -109,12 +112,13 @@ export const iconCompat = getReversibleMappings<MetricIconName, string>([
   ['heart', 'heart'],
   ['map_marker', 'mapMarker'],
   ['pin', 'pin'],
+  ['popout', 'popout'],
   ['sort_down', 'sortDown'],
   ['sort_up', 'sortUp'],
   ['star_empty', 'starEmpty'],
   ['tag', 'tag'],
   ['temperature', 'temperature'],
-]);
+] satisfies Array<[MetricIconName, VisIconType]>);
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -156,12 +160,33 @@ function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is Pri
   return metric.type === 'primary';
 }
 
+function getSecondaryNameVisibility(
+  label: NonNullable<MetricStyling['secondary']>['label']
+): MetricVisualizationState['secondaryNameVisibility'] {
+  const isVisible = label?.visible ?? DEFAULT_SECONDARY_LABEL_VISIBLE;
+  if (!isVisible) {
+    return 'hidden';
+  }
+  return label?.placement ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+}
+
+function isSecondaryLabelHidden(visualization: MetricVisualizationState): boolean {
+  return visualization.secondaryNameVisibility === 'hidden' || visualization.secondaryLabel === '';
+}
+
 function convertStylingToStateFormat(
   styling: MetricStyling | undefined,
   hasSecondary: boolean
 ): Partial<MetricVisualizationState> {
   if (!styling) {
-    return { density: DEFAULT_DENSITY };
+    return {
+      density: DEFAULT_DENSITY,
+      ...(hasSecondary
+        ? {
+            secondaryNameVisibility: getSecondaryNameVisibility(undefined),
+          }
+        : {}),
+    };
   }
   const primaryStyling = styling.primary;
   const secondaryStyling = styling.secondary;
@@ -181,8 +206,7 @@ function convertStylingToStateFormat(
     iconAlign: styling.icon?.alignment,
     ...(hasSecondary
       ? stripUndefined({
-          secondaryLabel: secondaryStyling?.label?.visible === false ? '' : undefined,
-          secondaryLabelPosition: secondaryStyling?.label?.placement,
+          secondaryNameVisibility: getSecondaryNameVisibility(secondaryStyling?.label),
           secondaryAlign: secondaryStyling?.value?.alignment,
         })
       : {}),
@@ -218,7 +242,7 @@ function convertStylingToAPIFormat(
     }),
     secondary: hasSecondary
       ? {
-          ...(visualization.secondaryLabel === '' || visualization.secondaryPrefix === ''
+          ...(isSecondaryLabelHidden(visualization)
             ? {
                 label: {
                   visible: false,
@@ -226,9 +250,9 @@ function convertStylingToAPIFormat(
               }
             : {
                 label: {
-                  visible: DEFAULT_SECONDARY_LABEL_VISIBLE,
+                  visible: true,
                   placement:
-                    visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
+                    visualization.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
                 },
               }),
           value: {
@@ -520,13 +544,13 @@ function enrichConfigurationWithVisualizationProperties(
   }
 
   if (secondaryMetric) {
-    if (visualization.secondaryTrend?.type === 'dynamic') {
-      secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
+    // Leftover vis Label is what the chart paints; emit it as the API name so GET+PUT cannot change appearance.
+    if (visualization.secondaryLabel) {
+      secondaryMetric.label = visualization.secondaryLabel;
     }
 
-    const secondaryLabelOverride = visualization.secondaryLabel ?? visualization.secondaryPrefix;
-    if (secondaryLabelOverride && secondaryLabelOverride.length > 0) {
-      secondaryMetric.label = secondaryLabelOverride;
+    if (visualization.secondaryTrend?.type === 'dynamic') {
+      secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
@@ -574,7 +598,7 @@ function reverseBuildVisualizationState(
   );
 
   if (!dataSource || dataSource.type == null) {
-    throw new Error('Unsupported DataSource type');
+    throw new DatasourceUnsupportedError();
   }
 
   return {
@@ -605,6 +629,12 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
   const defaultLayer = layers[DEFAULT_LAYER_ID];
   const trendLineLayer = layers[TRENDLINE_LAYER_ID];
 
+  // Column ids of the metric columns as they live inside the trendline layer. They differ from the
+  // main layer ids, so any reference into the trendline layer (e.g. a terms breakdown `orderBy`)
+  // must use these to resolve to a column that actually exists in that layer.
+  const trendlineMetricColumnId = `${ACCESSOR}_trendline`;
+  const trendlineSecondaryColumnId = `${getAccessorName('secondary')}_trendlineX0`;
+
   if (trendLineLayer) {
     trendLineLayer.linkToLayers = [DEFAULT_LAYER_ID];
   }
@@ -624,25 +654,36 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
         drop_partial_intervals: false,
       })
     );
-    addLayerColumn(trendLineLayer, `${ACCESSOR}_trendline`, newPrimaryColumns);
+    addLayerColumn(trendLineLayer, trendlineMetricColumnId, newPrimaryColumns);
   }
 
   if (layer.breakdown_by) {
     const columnName = getAccessorName('breakdown');
-    const breakdownColumn = fromBucketLensApiToLensState(
-      layer.breakdown_by as LensApiBucketOperations,
-      [
-        ...newPrimaryColumns.map((col) => ({ column: col, id: getAccessorName('metric') })),
-        ...(newSecondaryColumns ?? []).map((col) => ({
-          column: col,
-          id: getAccessorName('secondary'),
-        })),
-      ]
+    const breakdownApiColumn = layer.breakdown_by as LensApiBucketOperations;
+
+    // A metric `rank_by.metric_index` resolves against this list, so the metric ids must match the
+    // ids of the metric columns in the layer the breakdown belongs to (main vs. trendline). Each
+    // call returns a fresh column so the two layers never share one mutable object.
+    const buildBreakdownColumn = (metricId: string, secondaryId: string) =>
+      fromBucketLensApiToLensState(breakdownApiColumn, [
+        ...newPrimaryColumns.map((column) => ({ column, id: metricId })),
+        ...(newSecondaryColumns ?? []).map((column) => ({ column, id: secondaryId })),
+      ]);
+
+    addLayerColumn(
+      defaultLayer,
+      columnName,
+      buildBreakdownColumn(getAccessorName('metric'), getAccessorName('secondary')),
+      true
     );
-    addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
 
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, breakdownColumn, true);
+      addLayerColumn(
+        trendLineLayer,
+        `${columnName}_trendline`,
+        buildBreakdownColumn(trendlineMetricColumnId, trendlineSecondaryColumnId),
+        true
+      );
     }
   }
 
@@ -650,7 +691,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
     const columnName = getAccessorName('secondary');
     addLayerColumn(defaultLayer, columnName, newSecondaryColumns);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newSecondaryColumns, false, 'X0');
+      addLayerColumn(trendLineLayer, trendlineSecondaryColumnId, newSecondaryColumns);
     }
   }
 
@@ -660,7 +701,7 @@ function buildFormBasedLayer(layer: MetricConfigNoESQL): FormBasedPersistedState
 
     addLayerColumn(defaultLayer, columnName, newColumn);
     if (trendLineLayer) {
-      addLayerColumn(trendLineLayer, `${columnName}_trendline`, newColumn, false, 'X0');
+      addLayerColumn(trendLineLayer, `${columnName}_trendlineX0`, newColumn, false);
     }
   }
 
@@ -734,7 +775,9 @@ function buildEsqlTrendlineLayer(
   const dataSource = 'data_source' in config ? config.data_source : undefined;
   if (!dataSource || dataSource.type !== 'esql') return undefined;
 
-  const timeField = mainLayer.timeField;
+  const timeField =
+    mainLayer.timeField ??
+    (queryHasTsSourceCommand(dataSource.query) ? LENS_DEFAULT_TIME_FIELD : undefined);
   if (!timeField) return undefined;
 
   const metricColumn = mainLayer.columns.find((c) => c.columnId === getAccessorName('metric'));
@@ -766,13 +809,12 @@ function buildEsqlTrendlineLayer(
     );
   }
 
-  // Build trendline columns: time bucket + copies of metric columns from main layer
-  // The fieldName must match the ES|QL result column name, which is the full
-  // BUCKET expression (e.g. "BUCKET(timestamp, 75, ?_tstart, ?_tend)"),
-  // not the raw field name.
+  // Build trendline columns: time bucket + copies of metric columns from main layer.
+  // Use the query helper's resolved result column so aliased TBUCKET expressions
+  // map to their actual ES|QL result field.
   const timeColumn: TextBasedLayerColumn = {
     columnId: HISTOGRAM_COLUMN_NAME,
-    fieldName: buildTrendlineBucketExpression(timeField),
+    fieldName: trendlineQueryResult.timeField,
     meta: { type: 'date' },
   };
 
@@ -838,6 +880,10 @@ export function fromAPItoLensState(config: MetricConfig): MetricAttributesWithou
   // For ES|QL metric charts with trendlines, create the trendline text-based layer.
   // buildDatasourceStates only creates the main layer; the trendline needs its own
   // layer with a BUCKET() time-bucketing query.
+  //
+  // If the query has no time field, skip the layer only — keep the visualization
+  // trendline accessors. Lens hydration rebuilds the layer after DataViews provide
+  // timeField. Clearing accessors here would drop the sparkline for good.
   const trendlineLayerId = (visualization as MetricVisualizationState).trendlineLayerId;
   const mainLayer = layers.textBased?.layers?.[DEFAULT_LAYER_ID];
   if (trendlineLayerId && isEsqlLayerWithIndex(mainLayer)) {

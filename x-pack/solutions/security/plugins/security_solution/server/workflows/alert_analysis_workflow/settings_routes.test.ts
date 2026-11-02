@@ -8,9 +8,12 @@
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { RouteValidationError } from '@kbn/core-http-server';
+import type { RouteValidationResultFactory } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
 import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AUTO_CLOSE_CONFIDENCE_SCORE_MAX_THRESHOLD,
@@ -20,6 +23,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT,
 } from '@kbn/management-settings-ids';
 import type { StartPlugins } from '../../plugin';
 import type {
@@ -47,6 +51,8 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     uninstall: jest.Mock;
     ready: jest.Mock;
     getWorkflowStatus: jest.Mock;
+    getInstalledWorkflowState: jest.Mock;
+    listInstalledWorkflowStates: jest.Mock;
     execute: jest.Mock;
   };
 
@@ -86,6 +92,8 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       uninstall: jest.fn().mockResolvedValue(undefined),
       ready: jest.fn().mockResolvedValue(undefined),
       getWorkflowStatus: jest.fn().mockResolvedValue({ status: 'intact' }),
+      getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
+      listInstalledWorkflowStates: jest.fn().mockResolvedValue([]),
       execute: jest.fn().mockResolvedValue('mock-execution-id'),
     };
 
@@ -109,6 +117,30 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
     );
   });
 
+  it('requires advanced settings and rules privileges on the settings GET route', () => {
+    const routeConfig = router.versioned.get.mock.calls[0][0];
+
+    expect(routeConfig.security?.authz).toEqual({
+      requiredPrivileges: [
+        {
+          allRequired: ['manage_advanced_settings', RULES_API_ALL],
+        },
+      ],
+    });
+  });
+
+  it('requires advanced settings and rules privileges on the settings PUT route', () => {
+    const routeConfig = router.versioned.put.mock.calls[0][0];
+
+    expect(routeConfig.security?.authz).toEqual({
+      requiredPrivileges: [
+        {
+          allRequired: ['manage_advanced_settings', RULES_API_ALL],
+        },
+      ],
+    });
+  });
+
   describe('GET', () => {
     const mockSettings = () => {
       uiSettingsClient.get
@@ -119,6 +151,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         .mockResolvedValueOnce('connector-abc') // connectorId
         .mockResolvedValueOnce('elastic-ai-agent') // agentId
         .mockResolvedValueOnce(true) // createConversation
+        .mockResolvedValueOnce(true) // usePrompt
         .mockResolvedValueOnce('alert-analysis'); // tagPrefix
     };
 
@@ -140,6 +173,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
             connectorId: 'connector-abc',
             agentId: 'elastic-ai-agent',
             createConversation: true,
+            usePrompt: true,
             tagPrefix: 'alert-analysis',
           },
           workflowId: SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
@@ -180,8 +214,42 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
       connectorId: 'connector-xyz',
       agentId: 'my-custom-agent',
       createConversation: false,
+      usePrompt: true,
       tagPrefix: 'alert-analysis',
     };
+
+    describe('request body validation', () => {
+      const validateBody = (body: Record<string, unknown>) => {
+        const { config } = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
+          .versions['1'];
+        const validation =
+          typeof config.validate === 'function' ? config.validate() : config.validate;
+        const validateRequestBody = validation && validation.request?.body;
+        if (typeof validateRequestBody !== 'function') {
+          throw new Error('Expected the PUT route to validate its body with a function');
+        }
+        const resultFactory: RouteValidationResultFactory = {
+          ok: (value) => ({ value }),
+          badRequest: (error, path) => ({ error: new RouteValidationError(error, path) }),
+        };
+        return validateRequestBody(body, resultFactory);
+      };
+
+      it('accepts the full settings', () => {
+        expect(validateBody(settings)).toHaveProperty('value');
+      });
+
+      // A partial body must not silently turn the option on or off, so it is rejected like a body
+      // that omits workflowEnabled or createConversation.
+      it.each(['usePrompt', 'createConversation', 'workflowEnabled'])(
+        'rejects a body that omits %s',
+        (field) => {
+          const { [field]: omitted, ...body } = settings as Record<string, unknown>;
+
+          expect(validateBody(body)).toHaveProperty('error');
+        }
+      );
+    });
 
     it('persists settings without reinstalling the workflow', async () => {
       const handler = router.versioned.getRoute('put', ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE)
@@ -201,6 +269,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: settings.agentId,
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
           settings.createConversation,
+        [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT]: settings.usePrompt,
         [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: settings.tagPrefix,
       });
       // The globally-installed workflow reads settings from uiSettings on its next run, so saving
@@ -230,6 +299,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
           workflowEnabled: settings.workflowEnabled,
           autoCloseEnabled: settings.autoCloseEnabled,
           createConversation: settings.createConversation,
+          usePrompt: settings.usePrompt,
           connectorConfigured: true,
           customAgent: true,
         })
@@ -275,6 +345,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
         .mockResolvedValueOnce('connector-abc') // connectorId
         .mockResolvedValueOnce('elastic-ai-agent') // agentId
         .mockResolvedValueOnce(true) // createConversation
+        .mockResolvedValueOnce(true) // usePrompt
         .mockResolvedValueOnce('alert-analysis'); // tagPrefix
     };
 
@@ -298,6 +369,7 @@ describe('registerAlertAnalysisWorkflowSettingsRoutes', () => {
           connectorId: 'connector-abc',
           agentId: 'elastic-ai-agent',
           createConversation: true,
+          usePrompt: true,
           tagPrefix: 'alert-analysis',
         },
       });

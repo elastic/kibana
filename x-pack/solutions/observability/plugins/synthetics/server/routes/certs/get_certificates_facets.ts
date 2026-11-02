@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { MAX_DATE_RANGE_LENGTH, MAX_ROUTE_STRING_LENGTH, queryBoolean } from '../zod_query';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
@@ -33,10 +34,11 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
   method: 'GET',
   path: SYNTHETICS_API_URLS.CERTS_FACETS,
   validate: {
-    query: schema.object({
-      from: schema.maybe(schema.string({ maxLength: 256 })),
-      to: schema.maybe(schema.string({ maxLength: 256 })),
-      remoteNames: schema.maybe(schema.string({ maxLength: 1024 })),
+    query: z.strictObject({
+      from: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+      to: z.string().max(MAX_DATE_RANGE_LENGTH).optional(),
+      remoteNames: z.string().max(MAX_ROUTE_STRING_LENGTH).optional(),
+      showFromAllSpaces: queryBoolean.optional(),
     }),
   },
   handler: async ({
@@ -47,7 +49,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
     server,
     spaceId,
   }) => {
-    const { from, to, remoteNames } = request.query;
+    const { from, to, remoteNames, showFromAllSpaces } = request.query;
 
     const ccsEnabled = isCCSEnabled(server);
 
@@ -63,6 +65,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
 
     const monitors = await monitorConfigRepository.getAll({
       filter: `${syntheticsMonitorAttributes}.${ConfigKey.ENABLED}: true`,
+      showFromAllSpaces,
     });
 
     // See `get_certificates.ts` for the CCS short-circuit rationale.
@@ -80,6 +83,7 @@ export const getSyntheticsCertsFacetsRoute: SyntheticsRestApiRouteFactory<{
       ccsEnabled,
       remoteNames: remoteNameList,
       spaceId,
+      showFromAllSpaces: Boolean(showFromAllSpaces),
     });
 
     return { data };

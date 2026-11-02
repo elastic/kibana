@@ -7,17 +7,77 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
-import type { GetRuleExecutionsQuery, GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  ListRuleExecutionsRequest,
+  ListRuleExecutionsResponse,
+  RuleExecutionOutcome,
+} from '@kbn/alerting-v2-schemas';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
 import { ruleExecutionKeys } from './query_key_factory';
 
-export const useFetchRuleExecutions = (params: Partial<GetRuleExecutionsQuery>) => {
+export interface ListRuleExecutionsUiParams {
+  page?: number;
+  perPage?: number;
+  ruleIds?: string[];
+  search?: string;
+  outcomes?: RuleExecutionOutcome[];
+  from?: string;
+  to?: string;
+  sortField?: 'startedAt' | 'duration';
+  sortOrder?: 'asc' | 'desc';
+  enabled?: boolean;
+  keepPreviousData?: boolean;
+}
+
+const SORT_FIELD_BY_UI_FIELD = {
+  startedAt: 'started_at',
+  duration: 'duration_ms',
+} as const satisfies Record<
+  NonNullable<ListRuleExecutionsUiParams['sortField']>,
+  ListRuleExecutionsRequest['sort_field']
+>;
+
+export const toListRuleExecutionsRequest = ({
+  page,
+  perPage,
+  ruleIds,
+  search,
+  outcomes,
+  from,
+  to,
+  sortField,
+  sortOrder,
+  ...rest
+}: Omit<ListRuleExecutionsUiParams, 'enabled' | 'keepPreviousData'>): Complete<
+  Partial<ListRuleExecutionsRequest>
+> => {
+  assertAllFieldsMapped(rest);
+  return {
+    page,
+    per_page: perPage,
+    rule_ids: ruleIds,
+    search,
+    outcomes,
+    from,
+    to,
+    sort_field: sortField && SORT_FIELD_BY_UI_FIELD[sortField],
+    sort_order: sortOrder,
+  };
+};
+
+export const useFetchRuleExecutions = ({
+  enabled = true,
+  keepPreviousData = true,
+  ...params
+}: ListRuleExecutionsUiParams) => {
   const api = useService(ExecutionHistoryApi);
 
-  return useQuery<GetRuleExecutionsResponse, Error>({
+  return useQuery<ListRuleExecutionsResponse, Error>({
     queryKey: ruleExecutionKeys.list(params),
-    queryFn: () => api.getRuleExecutions(params),
+    queryFn: () => api.listRuleExecutions(toListRuleExecutionsRequest(params)),
     refetchOnWindowFocus: false,
-    keepPreviousData: true,
+    keepPreviousData,
+    enabled,
   });
 };

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MiniMap, useReactFlow, useStore } from '@xyflow/react';
@@ -17,7 +17,7 @@ import {
   MINIMAP_MASK_COLOR,
   MINIMAP_WIDTH,
 } from './canvas_constants';
-import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
+import { DESTINATION_NODE_TYPE, PROCESSING_NODE_TYPE, SOURCE_NODE_TYPE } from './types';
 import { MapFoldedIcon } from './map_folded_icon';
 
 /**
@@ -32,8 +32,10 @@ const getNodeColor =
         return euiTheme.colors.primary;
       case DESTINATION_NODE_TYPE:
         return euiTheme.colors.success;
+      case PROCESSING_NODE_TYPE:
+        return euiTheme.colors.accent;
       default:
-        return euiTheme.colors.warning; // fallback
+        return euiTheme.colors.warning;
     }
   };
 
@@ -106,21 +108,22 @@ export function CanvasMinimap() {
       `}
     >
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-        <EuiButtonIcon
-          iconType="minus"
-          color="text"
-          size="xs"
-          aria-label={collapseLabel}
-          title={collapseLabel}
-          onClick={collapse}
-          data-test-subj="streamsCanvasMinimapCollapse"
-        />
+        <EuiToolTip content={collapseLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="minus"
+            color="text"
+            size="xs"
+            aria-label={collapseLabel}
+            onClick={collapse}
+            data-test-subj="streamsCanvasMinimapCollapse"
+          />
+        </EuiToolTip>
       </EuiFlexGroup>
       <MiniMap
         pannable
         zoomable
         ariaLabel={i18n.translate('xpack.streams.canvas.minimap.ariaLabel', {
-          defaultMessage: 'Canvas minimap',
+          defaultMessage: 'Map minimap',
         })}
         nodeColor={getNodeColor(euiTheme)}
         nodeStrokeWidth={2}

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { getSanitizeResponseBodySchema } from './schemas';
 
 /** The response body type for sanitizing a dashboard. */
-export type DashboardSanitizeResponseBody = TypeOf<
+export type DashboardSanitizeResponseBody = z.output<
   ReturnType<typeof getSanitizeResponseBodySchema>
 >;

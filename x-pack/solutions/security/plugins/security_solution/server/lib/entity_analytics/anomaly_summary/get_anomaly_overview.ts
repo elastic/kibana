@@ -6,10 +6,14 @@
  */
 
 import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { EntityType } from '@kbn/entity-store/common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
+import {
+  buildEntitiesFilter,
+  getMatchedEntityId,
+} from '../ml_anomaly_detection/build_entities_filter';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
 import {
   deriveBucketInterval,
@@ -20,7 +24,13 @@ import type {
   AnomalyOverviewHit,
   AnomalyScoreRange,
 } from '../../../../common/api/entity_analytics';
-import { buildScoreRangeFilter, getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
+import {
+  buildScoreRangeFilter,
+  getIdentityFieldsByEntityId,
+  getJobConfig,
+  getSecurityMlJobIds,
+  resolveRecordFields,
+} from '../ml_anomaly_detection';
 import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
 const NUM_RECENT_ANOMALIES = 3;
@@ -41,8 +51,9 @@ interface OverviewAggs {
 }
 
 interface GetEntityAnomalyOverviewParams {
-  entityId: string;
+  entityIds: string[];
   entityType: EntityType;
+  entityRecords: Entity[];
   fromMs?: number;
   toMs?: number;
   scoreRanges?: AnomalyScoreRange[];
@@ -51,6 +62,7 @@ interface GetEntityAnomalyOverviewParams {
   ml: MlPluginSetup;
   request: KibanaRequest;
   soClient: SavedObjectsClientContract;
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 const buildTacticCounts = (
@@ -78,8 +90,9 @@ interface AnomalyOverview {
 }
 
 export const getEntityAnomalyOverview = async ({
-  entityId,
+  entityIds,
   entityType,
+  entityRecords,
   fromMs,
   toMs,
   scoreRanges,
@@ -88,6 +101,7 @@ export const getEntityAnomalyOverview = async ({
   ml,
   request,
   soClient,
+  mitreDataClient,
 }: GetEntityAnomalyOverviewParams): Promise<AnomalyOverview> => {
   const effectiveToMs = toMs ?? Date.now();
   const effectiveFromMs = fromMs ?? effectiveToMs - DEFAULT_OVERVIEW_LOOKBACK_MS;
@@ -113,11 +127,19 @@ export const getEntityAnomalyOverview = async ({
     ml,
     request,
     soClient,
+    mitreDataClient,
   });
 
-  let resolvedJobIds = allSecurityJobIds;
+  // getJobConfig uses the space-aware anomalyDetectorsProvider and silently drops any job
+  // not installed in the current space, so its keys are the installed security job IDs.
+  // Using template IDs from getSecurityMlJobIds directly would match anomaly records from
+  // other spaces whose jobs share the same template-defined IDs.
+  const installedSecurityJobIds = [...allJobConfigs.keys()];
+  if (installedSecurityJobIds.length === 0) return empty;
+
+  let resolvedJobIds = installedSecurityJobIds;
   if (threatTactics && threatTactics.length > 0) {
-    const tacticMatchedIds = allSecurityJobIds.filter((id) =>
+    const tacticMatchedIds = installedSecurityJobIds.filter((id) =>
       allJobConfigs.get(id)?.threatTactics.some((t) => threatTactics.includes(t))
     );
     resolvedJobIds = tacticMatchedIds;
@@ -125,8 +147,19 @@ export const getEntityAnomalyOverview = async ({
 
   if (threatTactics && threatTactics.length > 0 && resolvedJobIds.length === 0) return empty;
 
+  const entityFilter = buildEntitiesFilter(entityType, entityRecords);
+  if (!entityFilter) {
+    logger.warn(
+      `Cannot build entity filter for "${entityIds.join(
+        ', '
+      )}" (type: ${entityType}): entity records lack identity fields`
+    );
+    return empty;
+  }
+
   let aggs: OverviewAggs | undefined;
-  let rawHits: RawAnomalyRecord[] = [];
+  let rawHits: Array<RawAnomalyRecord & { matched_queries?: string[] | Record<string, number> }> =
+    [];
   let totalAnomaliesCount = 0;
 
   try {
@@ -134,17 +167,15 @@ export const getEntityAnomalyOverview = async ({
       {
         size: NUM_RECENT_ANOMALIES,
         track_total_hits: true,
-        runtime_mappings: {
-          entity_id: euid.painless.getEuidRuntimeMapping(entityType),
-        },
         query: {
           bool: {
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
+              { exists: { field: 'detector_index' } },
               buildScoreRangeFilter(scoreRanges),
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
-              { term: { entity_id: entityId } },
+              entityFilter,
               ...(resolvedJobIds.length > 0 ? [{ terms: { job_id: resolvedJobIds } }] : []),
             ],
           },
@@ -171,12 +202,14 @@ export const getEntityAnomalyOverview = async ({
 
     aggs = resp.aggregations as unknown as OverviewAggs | undefined;
     rawHits = compact(
-      resp.hits.hits.map((h) => (h._source ? { ...h._source, _id: h._id } : undefined))
+      resp.hits.hits.map((h) =>
+        h._source ? { ...h._source, _id: h._id, matched_queries: h.matched_queries } : undefined
+      )
     );
     const total = resp.hits.total;
     totalAnomaliesCount = total == null ? 0 : typeof total === 'number' ? total : total.value;
   } catch (err) {
-    logger.warn(`Error fetching anomaly overview for "${entityId}": ${err}`);
+    logger.warn(`Error fetching anomaly overview for "${entityIds.join(', ')}": ${err}`);
     return empty;
   }
 
@@ -214,20 +247,25 @@ export const getEntityAnomalyOverview = async ({
 
   const tacticCounts = buildTacticCounts(aggs?.by_time?.buckets ?? [], tacticsByJob);
 
+  // Resolve causes against the group member each hit matched (same attribution as the summary).
+  const identityFieldsByEntityId = getIdentityFieldsByEntityId(entityType, entityRecords);
   const recentAnomalies: AnomalyOverviewHit[] = rawHits.map((anomaly) => {
     const jobConfig = allJobConfigs.get(anomaly.job_id);
     const detector = jobConfig?.detectors[anomaly.detector_index];
-    const detectorFunction = detector?.function ?? anomaly.function;
+    const matchedEntityId = getMatchedEntityId(anomaly.matched_queries, entityIds) ?? entityIds[0];
+    const record = resolveRecordFields(anomaly, identityFieldsByEntityId.get(matchedEntityId));
+    const detectorFunction = detector?.function ?? record.detectorFunction;
+    const { actual } = record;
 
     const anomalousValue = detectorFunction
       ? formatAnomalousValue({
           detectorFunction,
-          fieldName: detector?.field_name ?? anomaly.field_name,
-          actual: anomaly.actual,
-          byFieldValue: anomaly.by_field_value ?? undefined,
+          fieldName: detector?.field_name ?? record.fieldName,
+          actual: actual !== undefined ? [actual] : undefined,
+          byFieldValue: record.byFieldValue,
         })
-      : anomaly.actual?.[0] != null
-      ? String(anomaly.actual[0])
+      : actual !== undefined
+      ? String(actual)
       : null;
 
     return {

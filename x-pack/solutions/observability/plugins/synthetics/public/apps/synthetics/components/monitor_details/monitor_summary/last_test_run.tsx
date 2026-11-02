@@ -7,9 +7,7 @@
 
 import React from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonText,
@@ -21,6 +19,7 @@ import {
   useEuiTheme,
   EuiProgress,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { useParams } from 'react-router-dom';
@@ -96,7 +95,7 @@ export const LastTestRunComponent = ({
       {loading && <EuiProgress size="xs" color="accent" />}
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!(loading && !latestPing) && latestPing?.error ? (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           data-test-subj="monitorTestRunErrorCallout"
           style={{
@@ -106,38 +105,44 @@ export const LastTestRunComponent = ({
           }}
           title={latestPing?.error.message}
           size="s"
-          color="danger"
-          iconType="warning"
-        >
-          {isErrorDetails || !selectedLocation || !monitor?.[ConfigKey.CONFIG_ID] ? null : (
-            <EuiButton
-              data-test-subj="monitorTestRunViewErrorDetails"
-              color="danger"
-              href={getErrorDetailsUrl({
-                basePath,
-                configId: monitor[ConfigKey.CONFIG_ID],
-                locationId: selectedLocation.id,
-                stateId: latestPing.state?.id ?? '',
-                spaceId,
-                remoteName,
-              })}
-            >
-              {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
-                defaultMessage: 'View error details',
-              })}
-            </EuiButton>
-          )}
-        </EuiCallOut>
+          actionProps={
+            !isErrorDetails && selectedLocation && monitor?.[ConfigKey.CONFIG_ID]
+              ? {
+                  primary: {
+                    'data-test-subj': 'monitorTestRunViewErrorDetails',
+                    href: getErrorDetailsUrl({
+                      basePath,
+                      configId: monitor[ConfigKey.CONFIG_ID],
+                      locationId: selectedLocation.id,
+                      stateId: latestPing.state?.id ?? '',
+                      spaceId,
+                      remoteName,
+                    }),
+                    children: i18n.translate(
+                      'xpack.synthetics.monitorDetails.summary.viewErrorDetails',
+                      {
+                        defaultMessage: 'View error details',
+                      }
+                    ),
+                  },
+                }
+              : undefined
+          }
+        />
       ) : null}
 
       <EuiSpacer size="m" />
 
-      {monitor?.type === MonitorTypeEnum.BROWSER ? (
+      {monitor?.type === MonitorTypeEnum.BROWSER || monitor?.type === MonitorTypeEnum.API ? (
         <BrowserStepsList
           steps={stepsData?.steps ?? []}
           loading={stepsLoading}
           showStepNumber={true}
           showExpand={isErrorDetails}
+          // API journeys reuse the synthexec step pipeline but have no
+          // browser context to screenshot — keep the column out instead
+          // of rendering empty placeholders.
+          showScreenshots={monitor?.type === MonitorTypeEnum.BROWSER}
         />
       ) : (
         <SinglePingResult ping={latestPing} />
@@ -168,7 +173,11 @@ const PanelHeader = ({
   const formatter = useDateFormat();
   const lastRunTimestamp = formatter(latestPing?.['@timestamp']);
 
-  const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
+  // API monitors share the synthexec runtime with browser, so the panel
+  // header treats them the same (script step list available, duration shown).
+  const monitorType = monitor?.[ConfigKey.MONITOR_TYPE];
+  const isBrowserMonitor =
+    monitorType === MonitorTypeEnum.BROWSER || monitorType === MonitorTypeEnum.API;
 
   const TitleNode = (
     <EuiTitle size="xs">

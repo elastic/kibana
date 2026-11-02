@@ -10,32 +10,14 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../common/mo
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import React from 'react';
 
-import { PageScope } from '../../data_view_manager/constants';
-
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname }) };
 });
 
-const defaultDataViewPattern = 'test-dataview-patterns';
-const timelinePattern = 'test-timeline-patterns';
 const pathname = '/alerts';
 const store = createMockStore({
   ...mockGlobalState,
-  sourcerer: {
-    ...mockGlobalState.sourcerer,
-    defaultDataView: {
-      ...mockGlobalState.sourcerer.defaultDataView,
-      patternList: [defaultDataViewPattern],
-    },
-    sourcererScopes: {
-      ...mockGlobalState.sourcerer.sourcererScopes,
-      [PageScope.analyzer]: {
-        ...mockGlobalState.sourcerer.sourcererScopes[PageScope.timeline],
-        selectedPatterns: [timelinePattern],
-      },
-    },
-  },
   inputs: {
     ...mockGlobalState.inputs,
     timeline: {

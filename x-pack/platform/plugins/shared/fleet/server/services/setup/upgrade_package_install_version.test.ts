@@ -56,20 +56,20 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(mockedReinstallPackageForInstallation).toBeCalledTimes(2);
-    expect(mockedReinstallPackageForInstallation).toBeCalledWith(
+    expect(mockedReinstallPackageForInstallation).toHaveBeenCalledTimes(2);
+    expect(mockedReinstallPackageForInstallation).toHaveBeenCalledWith(
       expect.objectContaining({
         installation: expect.objectContaining({ name: 'test1' }),
       })
     );
-    expect(mockedReinstallPackageForInstallation).toBeCalledWith(
+    expect(mockedReinstallPackageForInstallation).toHaveBeenCalledWith(
       expect.objectContaining({
         installation: expect.objectContaining({ name: 'test2' }),
       })
     );
 
-    expect(logger.warn).not.toBeCalled();
-    expect(logger.error).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should log at error level when an error happens while reinstalling package', async () => {
@@ -93,7 +93,7 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(logger.error).toBeCalled();
+    expect(logger.error).toHaveBeenCalled();
   });
 
   it('should log a warn level when an error happens while reinstalling an uploaded package', async () => {
@@ -117,7 +117,7 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(logger.warn).toBeCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 
   it('should stamp the current version and log a warn level when an uploaded package has no matching bundled package to reinstall from', async () => {
@@ -144,13 +144,13 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(soClient.update).toBeCalledWith(
+    expect(soClient.update).toHaveBeenCalledWith(
       'epm-packages',
       'test1-so-id',
       expect.objectContaining({ installed_kibana_version: '9.1.0' })
     );
-    expect(logger.warn).toBeCalled();
-    expect(logger.error).not.toBeCalled();
+    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should stamp the current version and log a warn level when a bundled package has no matching bundled package to reinstall from', async () => {
@@ -177,13 +177,13 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(soClient.update).toBeCalledWith(
+    expect(soClient.update).toHaveBeenCalledWith(
       'epm-packages',
       'test1-so-id',
       expect.objectContaining({ installed_kibana_version: '9.1.0' })
     );
-    expect(logger.warn).toBeCalled();
-    expect(logger.error).not.toBeCalled();
+    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should reinstall a package whose Kibana assets were installed on a different Kibana major.minor version, even when the install format version is up to date', async () => {
@@ -210,8 +210,8 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(mockedReinstallPackageForInstallation).toBeCalledTimes(1);
-    expect(mockedReinstallPackageForInstallation).toBeCalledWith(
+    expect(mockedReinstallPackageForInstallation).toHaveBeenCalledTimes(1);
+    expect(mockedReinstallPackageForInstallation).toHaveBeenCalledWith(
       expect.objectContaining({
         installation: expect.objectContaining({ name: 'test1' }),
       })
@@ -242,6 +242,6 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(mockedReinstallPackageForInstallation).not.toBeCalled();
+    expect(mockedReinstallPackageForInstallation).not.toHaveBeenCalled();
   });
 });

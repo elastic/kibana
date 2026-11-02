@@ -10,10 +10,10 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux-v7';
 import { connect } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
-import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { RunTimeMappings, TimelineItem } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
@@ -86,8 +86,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openNotes } = useFlyoutApi();
 
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
   const { dataView } = useDataView(PageScope.timeline);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
   const runtimeMappings = useMemo(
     () => dataView.getRuntimeMappings() as RunTimeMappings,
@@ -236,7 +236,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
-  const leadingControlColumns = useTimelineControlColumn({
+  const rowAdditionalLeadingControls = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
@@ -262,7 +262,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       activeTab={TimelineTabs.pinned}
       updatedAt={refreshedAt}
       isTextBasedQuery={false}
-      leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+      rowAdditionalLeadingControls={rowAdditionalLeadingControls}
       trailingControlColumns={rowDetailColumn}
       onUpdatePageIndex={onUpdatePageIndex}
     />
@@ -289,7 +289,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+const connector = connect<StateProps, {}, TimelineTabCommonProps, State>(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 

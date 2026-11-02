@@ -5,120 +5,34 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiIcon,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RuleApiResponse } from '../../services/rules_api';
+import { useAlertingLocators } from '../../application/locator_context';
+import type { UseRuleMenuPanelsParams } from './use_rule_menu_panels';
+import {
+  getRuleDetailsLink,
+  RULE_MENU_ARIA_LABEL,
+  useRuleMenuPanels,
+} from './use_rule_menu_panels';
 
-export interface RuleActionsMenuProps {
-  rule: RuleApiResponse;
-  onEdit: (rule: RuleApiResponse) => void;
-  onClone: (rule: RuleApiResponse) => void;
-  onDelete: (rule: RuleApiResponse) => void;
-  onToggleEnabled?: (rule: RuleApiResponse) => void;
-  onRun?: (rule: RuleApiResponse) => void;
-}
+export type RuleActionsMenuProps = Omit<UseRuleMenuPanelsParams, 'closeMenu' | 'detailsLink'> & {
+  /** When true, adds a leading "View details" read action linking to the rule details page. */
+  showViewDetails?: boolean;
+};
 
-export const RuleActionsMenu = ({
-  rule,
-  onEdit,
-  onClone,
-  onDelete,
-  onToggleEnabled,
-  onRun,
-}: RuleActionsMenuProps) => {
+export const RuleActionsMenu = ({ showViewDetails = false, ...props }: RuleActionsMenuProps) => {
+  const { rulesLocators } = useAlertingLocators();
   const [isOpen, setIsOpen] = useState(false);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+  // The details URL is resolved only while the menu is open, so closed rows do no locator work.
+  const detailsLink =
+    showViewDetails && isOpen ? getRuleDetailsLink(rulesLocators, props.rule.id) : undefined;
+  const panels = useRuleMenuPanels({ ...props, detailsLink, closeMenu: closePopover });
 
-  const menuItems = [
-    ...(onRun
-      ? [
-          <EuiContextMenuItem
-            key="run"
-            icon={<EuiIcon type="play" size="m" aria-hidden={true} />}
-            disabled={!rule.enabled}
-            toolTipContent={
-              rule.enabled
-                ? undefined
-                : i18n.translate('xpack.alertingV2.rulesList.action.runDisabledTooltip', {
-                    defaultMessage: 'Enable the rule to run it',
-                  })
-            }
-            onClick={() => {
-              setIsOpen(false);
-              onRun(rule);
-            }}
-            data-test-subj={`runRule-${rule.id}`}
-          >
-            {i18n.translate('xpack.alertingV2.rulesList.action.run', { defaultMessage: 'Run' })}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-    <EuiContextMenuItem
-      key="edit"
-      icon={<EuiIcon type="pencil" size="m" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onEdit(rule);
-      }}
-      data-test-subj={`editRule-${rule.id}`}
-    >
-      {i18n.translate('xpack.alertingV2.rulesList.action.edit', { defaultMessage: 'Edit' })}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="clone"
-      icon={<EuiIcon type="copy" size="m" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onClone(rule);
-      }}
-      data-test-subj={`cloneRule-${rule.id}`}
-    >
-      {i18n.translate('xpack.alertingV2.rulesList.action.clone', { defaultMessage: 'Clone' })}
-    </EuiContextMenuItem>,
-    ...(onToggleEnabled
-      ? [
-          <EuiContextMenuItem
-            key="toggleEnabled"
-            icon={
-              <EuiIcon type={rule.enabled ? 'bellSlash' : 'bell'} size="m" aria-hidden={true} />
-            }
-            onClick={() => {
-              setIsOpen(false);
-              onToggleEnabled(rule);
-            }}
-            data-test-subj={`toggleEnabledRule-${rule.id}`}
-          >
-            {rule.enabled
-              ? i18n.translate('xpack.alertingV2.rulesList.action.disable', {
-                  defaultMessage: 'Disable',
-                })
-              : i18n.translate('xpack.alertingV2.rulesList.action.enable', {
-                  defaultMessage: 'Enable',
-                })}
-          </EuiContextMenuItem>,
-        ]
-      : []),
-    <EuiContextMenuItem
-      key="delete"
-      icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
-      onClick={() => {
-        setIsOpen(false);
-        onDelete(rule);
-      }}
-      data-test-subj={`deleteRule-${rule.id}`}
-    >
-      {i18n.translate('xpack.alertingV2.rulesList.action.delete', {
-        defaultMessage: 'Delete',
-      })}
-    </EuiContextMenuItem>,
-  ];
+  if (panels.length === 0 && !showViewDetails) {
+    return null;
+  }
 
   return (
     <EuiPopover
@@ -130,25 +44,23 @@ export const RuleActionsMenu = ({
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="ellipsis"
             aria-label={i18n.translate('xpack.alertingV2.rulesList.action.moreActions', {
               defaultMessage: 'More actions',
             })}
             color="text"
             onClick={() => setIsOpen((open) => !open)}
-            data-test-subj={`ruleActionsButton-${rule.id}`}
+            data-test-subj={`ruleActionsButton-${props.rule.id}`}
           />
         </EuiToolTip>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downRight"
-      aria-label={i18n.translate('xpack.alertingV2.rulesList.action.actionsMenu', {
-        defaultMessage: 'Rule actions',
-      })}
+      aria-label={RULE_MENU_ARIA_LABEL}
     >
-      <EuiContextMenuPanel items={menuItems} />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };

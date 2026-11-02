@@ -26,7 +26,7 @@ export const STEP_CREATE_DESCRIPTION = i18n.translate(
 export const STEP_FIELD_LIBRARY_TITLE = i18n.translate(
   'xpack.cases.templates.tour.fieldLibrary.title',
   {
-    defaultMessage: 'Reuse fields from the Field Library',
+    defaultMessage: 'Reuse fields from the field library',
   }
 );
 
@@ -79,6 +79,21 @@ export const EDITOR_STEP_ACTIONS_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Add new field definitions, insert from the field library, and add validation logic here.',
+  }
+);
+
+export const EDITOR_STEP_NAME_TITLE = i18n.translate(
+  'xpack.cases.templates.editorTour.name.title',
+  {
+    defaultMessage: 'Name your template',
+  }
+);
+
+export const EDITOR_STEP_NAME_DESCRIPTION = i18n.translate(
+  'xpack.cases.templates.editorTour.name.description',
+  {
+    defaultMessage:
+      'The template name is the page title — click it to rename. A name is required before you can save.',
   }
 );
 

@@ -32,14 +32,14 @@ import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/constants';
-import type { ServiceMapSelection } from '../popover/popover_content';
+import type { ServiceMapNode } from '../../../../../common/service_map';
 import { callApmApi as callLegacyApmApi } from '../../../../services/rest/create_call_apm_api';
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
   isOpen: boolean;
-  /** Selected node or edge from the service map. When omitted the form starts with an empty source node. */
-  selection?: ServiceMapSelection;
+  /** Selected node from the service map. When omitted the form starts with an empty source node. */
+  selection?: ServiceMapNode;
 }
 
 function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolean {
@@ -57,11 +57,7 @@ function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolea
 export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyoutProps) {
   const {
     query: { rangeFrom, rangeTo },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/service-map',
-    '/service-map',
-    '/mobile-services/{serviceName}/service-map'
-  );
+  } = useAnyOfApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const {
     services: { notifications },

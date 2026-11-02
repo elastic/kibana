@@ -16,7 +16,6 @@ export type ServiceDetailsPageTabName =
   | 'errors'
   | 'metrics'
   | 'infrastructure'
-  | 'service-map'
   | 'logs'
   | 'alerts'
   | 'dashboards';
@@ -41,7 +40,8 @@ export abstract class ServiceDetailsTab extends Tab {
       `${this.kbnUrl.app('apm')}/services/${urlServiceName}/${this.tabName}?${new URLSearchParams({
         rangeFrom: overrides.rangeFrom ?? testData.START_DATE,
         rangeTo: overrides.rangeTo ?? testData.END_DATE,
-      })}`
+      })}`,
+      { waitUntil: 'commit' }
     );
     await this.waitForTabLoad();
   }

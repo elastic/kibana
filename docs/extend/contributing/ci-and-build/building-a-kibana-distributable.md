@@ -11,7 +11,7 @@ as well as handle its different main configurations.
 At any given point, you can get CLI help running the following command:
 
 ```bash
-yarn build --help
+pnpm build --help
 ```
 
 ## Prerequisites
@@ -83,7 +83,7 @@ By doing that Linux installation packages and Docker images will be excluded and
 We can do it by simply running:
 
 ```bash
-yarn build --skip-os-packages
+pnpm build --skip-os-packages
 ```
 
 Note that we used `--skip-os-packages` which will skip the OS packages build.
@@ -113,7 +113,7 @@ Linux installation packages like rpm and deb or Docker images.
 To achieve it, you can run:
 
 ```bash
-yarn build
+pnpm build
 ```
 
 At the end you will get the Kibana distributable archives plus the Docker images and both an rpm and a deb package.
@@ -121,9 +121,9 @@ At the end you will get the Kibana distributable archives plus the Docker images
 To specify just a single installation package or Docker images to build instead of all of them you can add rpm, deb or docker-images as an argument:
 
 ```bash
-yarn build --deb
-yarn build --rpm
-yarn build --docker-images
+pnpm build --deb
+pnpm build --rpm
+pnpm build --docker-images
 ```
 
 Again the distributable contents resulting from running the build command can be found in a `target` folder created relative to the repository after the build completes.

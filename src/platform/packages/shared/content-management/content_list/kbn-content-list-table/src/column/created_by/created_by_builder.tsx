@@ -24,7 +24,7 @@ import { CreatedByCell } from './created_by_cell';
  * column header *and* the filter button, correcting the legacy
  * `TableListView` mismatch where the column said `'Creator'` but the filter
  * said `'Created by'`. Translators in `de-DE.json` / `fr-FR.json` /
- * `ja-JP.json` / `zh-CN.json` get fresh entries for this key — see the
+ * `ja-JP.json` / `pt-BR.json` / `zh-CN.json` get fresh entries for this key — see the
  * package README's "Naming and translation backfill" notes before changing
  * the wording.
  */

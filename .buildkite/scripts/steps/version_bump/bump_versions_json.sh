@@ -8,7 +8,7 @@ source "$(dirname "$0")/wait_for_pr_merge.sh"
 git fetch origin main
 git checkout -B main origin/main
 
-# Re-source after the checkout so the Node version matches main's .node-version
+# Re-source after the checkout so the Node version matches main's .nvmrc
 source .buildkite/scripts/common/setup_node.sh
 
 # --- Functions ---
@@ -139,7 +139,7 @@ echo "Opened PR: $prUrl"
 if [ "${DRY_RUN:-}" = "true" ]; then
   echo "DRY_RUN is enabled — skipping auto-merge and merge wait"
 else
-  gh pr merge --repo elastic/kibana --auto --squash --delete-branch "$prUrl"
+  gh pr merge --repo elastic/kibana --auto --squash "$prUrl"
 
   wait_for_pr_merge "$prUrl"
 fi

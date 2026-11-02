@@ -22,7 +22,6 @@ import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 const INITIAL_VALUE: ErrorsByTraceId = {
   traceErrors: [],
-  source: 'apm',
 };
 
 export function useFetchErrorsByTraceId({ traceId, docId }: { traceId: string; docId?: string }) {

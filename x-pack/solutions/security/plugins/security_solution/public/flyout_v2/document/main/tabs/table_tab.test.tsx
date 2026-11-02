@@ -45,6 +45,10 @@ jest.mock('../../../../data_view_manager/hooks/use_browser_fields', () => ({
   useBrowserFields: () => ({}),
 }));
 
+jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
+  useDataView: () => ({ dataView: {}, status: 'ready' }),
+}));
+
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => ({
   useRuleWithFallback: () => ({ rule: undefined }),
 }));

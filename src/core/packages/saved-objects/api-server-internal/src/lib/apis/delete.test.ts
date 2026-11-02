@@ -277,7 +277,7 @@ describe('#delete', () => {
         id: string,
         options?: SavedObjectsDeleteOptions
       ) => {
-        await expect(repository.delete(type, id, options)).rejects.toThrowError(
+        await expect(repository.delete(type, id, options)).rejects.toThrow(
           createGenericNotFoundErrorPayload(type, id)
         );
       };
@@ -285,7 +285,7 @@ describe('#delete', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.delete(type, id, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`throws when type is invalid`, async () => {
@@ -344,7 +344,7 @@ describe('#delete', () => {
 
         await expect(
           repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
         expect(client.get).toHaveBeenCalledTimes(2);
@@ -363,7 +363,7 @@ describe('#delete', () => {
 
         await expect(
           repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
         );
         expect(client.get).toHaveBeenCalledTimes(2);
@@ -397,7 +397,7 @@ describe('#delete', () => {
             result: 'something unexpected' as estypes.Result,
           } as estypes.DeleteResponse)
         );
-        await expect(repository.delete(type, id)).rejects.toThrowError(
+        await expect(repository.delete(type, id)).rejects.toThrow(
           'Unexpected Elasticsearch DELETE response'
         );
         expect(client.delete).toHaveBeenCalledTimes(1);

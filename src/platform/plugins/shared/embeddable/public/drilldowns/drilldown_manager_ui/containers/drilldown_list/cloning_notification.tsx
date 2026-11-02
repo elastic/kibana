@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiLink } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -45,7 +46,7 @@ export const CloningNotification: React.FC<CloningNotificationProps> = ({ count 
 
   return (
     <>
-      <EuiCallOut title={title} color="success" size="s" iconType="check" />
+      <KbnSuccessCallout title={title} size="s" />
       <EuiSpacer />
     </>
   );

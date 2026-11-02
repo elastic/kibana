@@ -12,8 +12,8 @@ import {
   LIQUID_BLOCK_FILTER_REGEX,
   LIQUID_BLOCK_KEYWORD_REGEX,
   LIQUID_FILTER_REGEX,
-  UNFINISHED_VARIABLE_REGEX_GLOBAL,
-  VARIABLE_REGEX_GLOBAL,
+  matchLastUnfinishedVariable,
+  matchLastVariable,
 } from '../regex';
 
 interface BaseLineParseResult {
@@ -233,9 +233,9 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   }
 
   // Try unfinished mustache (e.g., "{{ consts.api" at end of line)
-  const unfinishedMatch = [...lineUpToCursor.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)].pop();
+  const unfinishedMatch = matchLastUnfinishedVariable(lineUpToCursor);
   if (unfinishedMatch) {
-    const fullKey = cleanKey(unfinishedMatch.groups?.key ?? '');
+    const fullKey = cleanKey(unfinishedMatch.groups.key);
     const pathSegments = parsePath(fullKey);
     return {
       matchType: 'variable-unfinished',
@@ -247,9 +247,9 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
   }
 
   // Try complete mustache (e.g., "{{ consts.apiUrl }}")
-  const completeMatch = [...lineUpToCursor.matchAll(VARIABLE_REGEX_GLOBAL)].pop();
+  const completeMatch = matchLastVariable(lineUpToCursor);
   if (completeMatch) {
-    const fullKey = cleanKey(completeMatch.groups?.key ?? '');
+    const fullKey = cleanKey(completeMatch.groups.key);
     const pathSegments = parsePath(fullKey);
     return {
       matchType: 'variable-complete',

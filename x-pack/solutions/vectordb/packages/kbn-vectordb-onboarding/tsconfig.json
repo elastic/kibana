@@ -22,5 +22,8 @@
     "@kbn/try-in-console",
     "@kbn/cloud",
     "@kbn/core-doc-links-browser",
+    "@kbn/core-spaces-common",
+    "@kbn/shared-components",
+    "@kbn/ui-ai-components",
   ]
 }

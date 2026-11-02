@@ -17,6 +17,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -93,11 +94,12 @@ export interface StartPlugins {
   lens?: LensPublicStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  cps?: CPSPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesPublicStart;
   timelines?: OsqueryTimelinesStart;
-  uiActions?: UiActionsStart;
-  unifiedSearch?: UnifiedSearchPublicPluginStart;
+  uiActions: UiActionsStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   appName?: string;
 }
 

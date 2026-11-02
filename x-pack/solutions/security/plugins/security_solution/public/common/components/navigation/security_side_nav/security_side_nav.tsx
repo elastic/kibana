@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import {
@@ -22,7 +21,7 @@ import {
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { useIsAlertsAndAttacksAlignmentEnabled } from '../../../hooks/use_is_alerts_and_attacks_alignment_enabled';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { type GetSecuritySolutionLinkProps, useGetSecuritySolutionLinkProps } from '../../links';
 import { useNavLinks } from '../../../links/nav_links';
@@ -34,7 +33,6 @@ import { useKibana } from '../../../lib/kibana';
 import { getNavCategories } from './categories';
 import { useParentLinks } from '../../../links/links_hooks';
 import { CLASSIC_LAUNCHPAD_PANEL_LINK_ENTRIES } from '../../../../onboarding/links';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const EUI_HEADER_HEIGHT = '93px';
 
@@ -302,33 +300,20 @@ const usePanelBottomOffset = (): string | undefined => {
 export const SecuritySideNav: React.FC = () => {
   const {
     settings: { client },
-    featureFlags: { getBooleanValue },
   } = useKibana().services;
 
   const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
-  const isNewEAHomePageEnabled = useIsExperimentalFeatureEnabled(
-    'entityAnalyticsNewHomePageEnabled'
+  const enableAlertsAndAttacksAlignment = useIsExperimentalFeatureEnabled(
+    'enableAlertsAndAttacksAlignment'
   );
-  const enableAlertsAndAttacksAlignment = useIsAlertsAndAttacksAlignmentEnabled();
-  const isAgentBuilderNavAtTop = getBooleanValue(AGENT_BUILDER_NAV_AT_TOP_FLAG, false);
   const items = useSolutionSideNavItems(chatExperience);
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
 
   const categories = useMemo(() => {
-    return getNavCategories(
-      chatExperience,
-      enableAlertsAndAttacksAlignment,
-      isNewEAHomePageEnabled,
-      isAgentBuilderNavAtTop
-    );
-  }, [
-    enableAlertsAndAttacksAlignment,
-    isNewEAHomePageEnabled,
-    chatExperience,
-    isAgentBuilderNavAtTop,
-  ]);
+    return getNavCategories(chatExperience, enableAlertsAndAttacksAlignment);
+  }, [enableAlertsAndAttacksAlignment, chatExperience]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;

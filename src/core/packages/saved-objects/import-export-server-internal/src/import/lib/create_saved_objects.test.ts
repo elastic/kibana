@@ -9,7 +9,13 @@
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import { type SavedObject, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import {
+  type SavedObject,
+  type SavedObjectBulkResult,
+  type SavedObjectErrorResult,
+  isSavedObjectErrorResult,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { createSavedObjects } from './create_saved_objects';
 import { extractErrors } from './extract_errors';
@@ -175,11 +181,11 @@ describe('#createSavedObjects', () => {
     }),
     conflict: (type: string, id: string) => {
       const error = SavedObjectsErrorHelpers.createConflictError(type, id).output.payload;
-      return { type, id, error } as unknown as SavedObject;
+      return { type, id, error } as unknown as SavedObjectErrorResult;
     },
     unresolvableConflict: (type: string, id: string) => {
       const conflictMock = getResultMock.conflict(type, id);
-      conflictMock.error!.metadata = { isNotOverwritable: true };
+      conflictMock.error.metadata = { isNotOverwritable: true };
       return conflictMock;
     },
   };
@@ -193,10 +199,10 @@ describe('#createSavedObjects', () => {
    * In addition, extract the errors out of the created objects -- since we are testing with realistic objects/errors, we can use the real
    * `extractErrors` module to do so.
    */
-  const getExpectedResults = (resultObjects: SavedObject[], objects: SavedObject[]) => {
+  const getExpectedResults = (resultObjects: SavedObjectBulkResult[], objects: SavedObject[]) => {
     const remappedResults = resultObjects.map((result, i) => ({ ...result, id: objects[i].id }));
     return {
-      createdObjects: remappedResults.filter((obj) => !obj.error),
+      createdObjects: remappedResults.filter((obj) => !isSavedObjectErrorResult(obj)),
       errors: extractErrors(remappedResults, objects, [], new Map()),
     };
   };

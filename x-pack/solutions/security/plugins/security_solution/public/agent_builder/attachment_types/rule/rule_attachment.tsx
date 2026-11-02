@@ -14,6 +14,12 @@ import {
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
+import {
+  UserPrivilegesContext,
+  initialUserPrivilegesState,
+  type UserPrivilegesState,
+} from '../../../common/components/user_privileges/user_privileges_context';
+import { extractRulesCapabilities } from '../../../common/utils/rules_capabilities';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import { RuleInlineContent } from './rule_inline_content';
 import { buildRuleActionButtons } from './rule_action_buttons';
@@ -50,26 +56,49 @@ export const createRuleAttachmentDefinition = ({
   application: ApplicationStart;
   aiRuleCreation: AiRuleCreationService;
   uiSettings: IUiSettingsClient;
-}): AttachmentUIDefinition<RuleAttachment> => ({
-  getLabel: (attachment) =>
-    getRuleName(attachment) ??
-    i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.label', {
-      defaultMessage: 'Security Rule',
-    }),
-  getIcon: () => 'securityApp',
-  renderInlineContent: (props) => <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />,
-  getActionButtons: ({ attachment, updateOrigin }) => {
-    const intent = getRuleAttachmentIntent(attachment);
-    const ruleId = getRuleIdFromAttachment(attachment) ?? undefined;
-    return buildRuleActionButtons({
-      rule: parseRuleFromAttachment(attachment),
-      aiRuleCreation,
-      application,
-      uiSettings,
-      intent,
-      ruleId,
-      attachmentId: attachment.id,
-      updateOrigin,
-    });
-  },
-});
+}): AttachmentUIDefinition<RuleAttachment> => {
+  // `RuleInlineContent` only reads `rulesPrivileges.rules.read`, so derive privileges once from the
+  // already-loaded capabilities instead of mounting the fetching `UserPrivilegesProvider` per card
+  // (which fired duplicate privilege requests for every rendered attachment).
+  const privileges: UserPrivilegesState = {
+    ...initialUserPrivilegesState(),
+    rulesPrivileges: extractRulesCapabilities(application.capabilities),
+  };
+
+  return {
+    getLabel: (attachment) =>
+      getRuleName(attachment) ??
+      i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.label', {
+        defaultMessage: 'Security Rule',
+      }),
+    getIcon: () => 'securityApp',
+    renderInlineContent: (props) => (
+      <UserPrivilegesContext.Provider value={privileges}>
+        <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />
+      </UserPrivilegesContext.Provider>
+    ),
+    // Runs outside the render boundary, so a parse throw here would take down the whole card.
+    getActionButtons: ({ attachment, updateOrigin }) => {
+      try {
+        const intent = getRuleAttachmentIntent(attachment);
+        const ruleId = getRuleIdFromAttachment(attachment) ?? undefined;
+        return buildRuleActionButtons({
+          rule: parseRuleFromAttachment(attachment),
+          aiRuleCreation,
+          application,
+          uiSettings,
+          intent,
+          ruleId,
+          attachmentId: attachment.id,
+          updateOrigin,
+        });
+      } catch (error) {
+        window.console.warn(
+          'RuleAttachment.getActionButtons: failed to build rule action buttons',
+          error
+        );
+        return [];
+      }
+    },
+  };
+};

@@ -9,7 +9,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageSection, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { AppHeader } from '@kbn/app-header';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
@@ -122,7 +123,12 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
           defaultMessage: "Edit component template ''{name}''",
           values: { name: decodedName },
         })}
-        back="/app/management/data/index_management/component_templates"
+        back={{
+          href: '/app/management/data/index_management/component_templates',
+          label: i18n.translate('xpack.idxMgmt.componentTemplateEdit.backToListLabel', {
+            defaultMessage: 'Component templates',
+          }),
+        }}
         spacing="bleed"
       />
 
@@ -131,7 +137,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
 
         {componentTemplate?.deprecated && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -139,15 +145,14 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
                   defaultMessage="This component template is deprecated"
                 />
               }
-              iconType="warning"
-              color="warning"
               data-test-subj="deprecatedTemplateCallout"
-            >
-              <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"
-                defaultMessage="This component template is no longer supported and might be removed in a future release. Instead, use one of the other component templates available or create a new one."
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningDescription"
+                  defaultMessage="This component template is no longer supported and might be removed in a future release. Instead, use one of the other component templates available or create a new one."
+                />
+              }
+            />
             <EuiSpacer size="l" />
           </>
         )}

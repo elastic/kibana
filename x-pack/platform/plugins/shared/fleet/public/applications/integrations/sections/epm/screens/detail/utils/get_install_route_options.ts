@@ -96,5 +96,5 @@ export const getInstallPkgRouteOptions = ({
     return [INTEGRATIONS_PLUGIN_ID, { path: '/aws-onboarding', state }];
   }
 
-  return [PLUGIN_ID, { path, state }];
+  return [INTEGRATIONS_PLUGIN_ID, { path, state }];
 };

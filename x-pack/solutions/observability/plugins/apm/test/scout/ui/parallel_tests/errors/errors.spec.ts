@@ -29,9 +29,7 @@ test.describe(
       );
 
       await test.step('shows empty message when service has no errors', async () => {
-        await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-          testData.SERVICE_OPBEANS_NODE
-        );
+        await expect(page.getByTestId('appHeaderTitle')).toHaveText(testData.SERVICE_OPBEANS_NODE);
         await expect(page.locator('td').getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
           timeout: testData.EXTENDED_TIMEOUT,
         });

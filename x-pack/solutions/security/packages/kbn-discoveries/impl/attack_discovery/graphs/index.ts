@@ -18,6 +18,8 @@ export type {
   CombinedPrompts,
   GenerationPrompts,
 } from './default_attack_discovery_graph/prompts';
+export { getCombinedAttackDiscoveryPrompt } from './default_attack_discovery_graph/prompts';
+export { getAttackDiscoveriesGenerationSchema } from './default_attack_discovery_graph/schemas';
 
 export {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
@@ -29,3 +31,18 @@ export type {
   InvokeAttackDiscoveryGraphWithDocs,
   InvokeAttackDiscoveryGraphWithDocsParams,
 } from './invoke_attack_discovery_graph';
+
+export {
+  ATTACK_DISCOVERY_TEMPLATE_ID,
+  ATTACK_DISCOVERY_TEMPLATE_VERSION,
+  attackDiscoveryRefineTemplateRequest,
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  createAttackDiscoveryTemplateCompletion,
+  resolveAttackDiscoveryTemplateCompletion,
+} from './template_completion';
+export type {
+  AttackDiscoveryTemplateCompletion,
+  AttackDiscoveryTemplatePhase,
+  AttackDiscoveryTemplateRequest,
+} from './template_completion';

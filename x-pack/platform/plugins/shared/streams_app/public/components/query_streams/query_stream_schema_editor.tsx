@@ -519,6 +519,7 @@ const QueryStreamFieldActionsCell = ({
 
   return (
     <EuiPopover
+      aria-label={openActionsMenuLabel}
       id={contextMenuPopoverId}
       button={
         <EuiToolTip content={openActionsMenuLabel} disableScreenReaderOutput>

@@ -53,7 +53,9 @@ process_version() {
 
     # Bootstrap Kibana dependencies
     echo "Bootstrapping Kibana dependencies for version $version..."
-    if [ -f ".buildkite/scripts/bootstrap.sh" ]; then
+    if [ -f pnpm-lock.yaml ]; then
+      pnpm install || echo "pnpm install failed..."
+    elif [ -f yarn.lock ]; then
       yarn install || echo "yarn install failed..."
     fi
 

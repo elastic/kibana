@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/third-party-lens-navigation-prompt-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-visualizations'
+  defaultOwner: '@elastic/kibana-dashboards'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/third-party-lens-navigation-prompt-plugin'
   description: Moon project for @kbn/third-party-lens-navigation-prompt-plugin
   channel: ''
-  owner: '@elastic/kibana-visualizations'
+  owner: '@elastic/kibana-dashboards'
   sourceRoot: x-pack/examples/third_party_lens_navigation_prompt
 dependsOn:
   - '@kbn/core'

@@ -24,7 +24,7 @@ export default function ({ getService }) {
     it('returns gzip files when client only supports gzip', () =>
       supertest
         // We use the kbn-ui-shared-deps for these tests since they are always built with br compressed outputs,
-        // even in dev. Bundles built by @kbn/optimizer are only built with br compression in dist mode.
+        // even in dev. Bundles built by @kbn/rspack-optimizer are only built with br compression in dist mode.
         .get(`/${buildHash}/bundles/kbn-ui-shared-deps-npm/kbn-ui-shared-deps-npm.dll.js`)
         .set('Accept-Encoding', 'gzip')
         .expect(200)

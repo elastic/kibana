@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { type Error } from '@kbn/apm-types';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
@@ -56,6 +57,7 @@ export async function getApmTraceError(params: {
 
     return {
       id,
+      source: 'apm' as const,
       parent: {
         id: parent?.id ?? unflattened.span?.id,
       },
@@ -103,6 +105,32 @@ const optionalFields = asMutableArray([
 
 const excludedLogLevels = ['debug', 'info', 'warning'];
 
+// Waterfall items key errors by `span.id ?? transaction.id` (see `getErrorsByDocId`), so an error
+// carrying only a transaction ref belongs to the transaction doc. Mirroring that here keeps the
+// error badge count and the fetched errors in sync for classic APM transaction errors.
+function docIdQuery(docId?: string): QueryDslQueryContainer[] {
+  if (!docId) {
+    return [];
+  }
+
+  return [
+    {
+      bool: {
+        should: [
+          ...termQuery(SPAN_ID, docId),
+          {
+            bool: {
+              filter: termQuery(TRANSACTION_ID, docId),
+              must_not: { exists: { field: SPAN_ID } },
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+}
+
 function getApmTraceErrorQuery({
   apmEventClient,
   traceId,
@@ -129,11 +157,7 @@ function getApmTraceErrorQuery({
     size: 1000,
     query: {
       bool: {
-        filter: [
-          ...termQuery(TRACE_ID, traceId),
-          ...termQuery(SPAN_ID, docId),
-          ...rangeQuery(start, end),
-        ],
+        filter: [...termQuery(TRACE_ID, traceId), ...docIdQuery(docId), ...rangeQuery(start, end)],
         must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
     },

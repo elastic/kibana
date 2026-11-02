@@ -146,7 +146,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: customFieldConfiguration.defaultValue,
       });
@@ -238,7 +238,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 'My text test value 1!!!',
       });
@@ -278,7 +278,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: customFieldConfiguration.defaultValue,
       });
@@ -314,7 +314,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: null,
       });
@@ -484,8 +484,6 @@ describe('Edit inline variant', () => {
   const customField = customFieldsMock[0] as CaseCustomFieldText;
   const customFieldConfiguration = customFieldsConfigurationMock[0];
   const formFieldTestId = `case-text-custom-field-form-field-${customFieldConfiguration.key}`;
-  const confirmTestId = `template-field-confirm-${customFieldConfiguration.key}`;
-  const cancelTestId = `template-field-cancel-${customFieldConfiguration.key}`;
 
   it('renders correctly', async () => {
     render(
@@ -505,7 +503,7 @@ describe('Edit inline variant', () => {
     expect(await screen.findByTestId(formFieldTestId)).toBeInTheDocument();
     expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
     expect(await screen.findByTestId(formFieldTestId)).toHaveValue('My text test value 1');
-    expect(screen.queryByTestId(confirmTestId)).not.toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it('shows the optional label when the field is not required', async () => {
@@ -558,7 +556,6 @@ describe('Edit inline variant', () => {
     );
 
     expect(await screen.findByTestId(formFieldTestId)).toBeDisabled();
-    expect(screen.queryByTestId(confirmTestId)).not.toBeInTheDocument();
   });
 
   it('disables the field when loading', async () => {
@@ -638,17 +635,15 @@ describe('Edit inline variant', () => {
     await userEvent.click(await screen.findByTestId(formFieldTestId));
     await userEvent.paste('!');
 
-    await userEvent.click(await screen.findByTestId(confirmTestId));
-
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: `${customFieldConfiguration.defaultValue}!`,
       });
     });
   });
 
-  it('calls onSubmit when changing value', async () => {
+  it('calls onSubmit when changing value, with no confirm step', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
@@ -665,12 +660,8 @@ describe('Edit inline variant', () => {
     await userEvent.click(await screen.findByTestId(formFieldTestId));
     await userEvent.paste('!!!');
 
-    expect(await screen.findByTestId(confirmTestId)).not.toBeDisabled();
-
-    await userEvent.click(await screen.findByTestId(confirmTestId));
-
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 'My text test value 1!!!',
       });
@@ -693,19 +684,15 @@ describe('Edit inline variant', () => {
 
     await userEvent.clear(await screen.findByTestId(formFieldTestId));
 
-    expect(await screen.findByTestId(confirmTestId)).not.toBeDisabled();
-
-    await userEvent.click(await screen.findByTestId(confirmTestId));
-
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: null,
       });
     });
   });
 
-  it('hides confirm/cancel after canceling and resets the value', async () => {
+  it('does not call onSubmit again once the value is invalid', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
@@ -722,15 +709,22 @@ describe('Edit inline variant', () => {
     await userEvent.click(await screen.findByTestId(formFieldTestId));
     await userEvent.paste('!!!');
 
-    expect(await screen.findByTestId(confirmTestId)).toBeInTheDocument();
-    expect(await screen.findByTestId(formFieldTestId)).toHaveValue('My text test value 1!!!');
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: 'My text test value 1!!!',
+      });
+    });
 
-    await userEvent.click(await screen.findByTestId(cancelTestId));
+    onSubmit.mockClear();
+
+    // Required field left empty: invalid, so no further buffering happens.
+    await userEvent.clear(await screen.findByTestId(formFieldTestId));
 
     await waitFor(() => {
-      expect(screen.queryByTestId(confirmTestId)).not.toBeInTheDocument();
+      expect(screen.getByText('My test label 1 is required.')).toBeInTheDocument();
     });
-    expect(await screen.findByTestId(formFieldTestId)).toHaveValue('My text test value 1');
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 
   it('shows validation error if the field is required', async () => {
@@ -768,7 +762,12 @@ describe('Edit inline variant', () => {
 
     await userEvent.clear(await screen.findByTestId(formFieldTestId));
 
-    expect(await screen.findByTestId(confirmTestId)).not.toBeDisabled();
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        ...customField,
+        value: null,
+      });
+    });
     expect(screen.queryByText('My test label 1 is required.')).not.toBeInTheDocument();
   });
 
@@ -795,5 +794,84 @@ describe('Edit inline variant', () => {
         `The length of the My test label 1 is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH} characters.`
       )
     ).toBeInTheDocument();
+  });
+});
+
+describe('Edit inline variant, section not editing', () => {
+  const onSubmit = jest.fn();
+  const onRequestSectionEdit = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const customField = customFieldsMock[0] as CaseCustomFieldText;
+  const customFieldConfiguration = customFieldsConfigurationMock[0];
+  const formFieldTestId = `case-text-custom-field-form-field-${customFieldConfiguration.key}`;
+
+  it('renders a label/value row instead of the editable form', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          isSectionEditing={false}
+          onRequestSectionEdit={onRequestSectionEdit}
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
+    expect(await screen.findByText('My text test value 1')).toBeInTheDocument();
+    expect(screen.queryByTestId(formFieldTestId)).not.toBeInTheDocument();
+  });
+
+  it('requests section edit when the row is clicked', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          isSectionEditing={false}
+          onRequestSectionEdit={onRequestSectionEdit}
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={true}
+        />
+      </FormTestComponent>
+    );
+
+    await userEvent.click(
+      await screen.findByTestId(`template-field-edit-${customFieldConfiguration.key}`)
+    );
+
+    expect(onRequestSectionEdit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('does not offer to request section edit when the user lacks permissions', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Edit
+          editVariant="inline"
+          isSectionEditing={false}
+          onRequestSectionEdit={onRequestSectionEdit}
+          customField={customField}
+          customFieldConfiguration={customFieldConfiguration}
+          onSubmit={onSubmit}
+          isLoading={false}
+          canUpdate={false}
+        />
+      </FormTestComponent>
+    );
+
+    expect(
+      screen.queryByTestId(`template-field-edit-${customFieldConfiguration.key}`)
+    ).not.toBeInTheDocument();
   });
 });

@@ -45,9 +45,10 @@ export function fieldServiceProvider(
   indexPattern: string,
   isRollup: boolean,
   client: IScopedClusterClient,
-  dataViewsService: DataViewsService
+  dataViewsService: DataViewsService,
+  projectRouting?: string
 ) {
-  return new FieldsService(indexPattern, isRollup, client, dataViewsService);
+  return new FieldsService(indexPattern, isRollup, client, dataViewsService, projectRouting);
 }
 
 class FieldsService {
@@ -55,17 +56,20 @@ class FieldsService {
   private _isRollup: boolean;
   private _mlClusterClient: IScopedClusterClient;
   private _dataViewsService: DataViewsService;
+  private _projectRouting?: string;
 
   constructor(
     indexPattern: string,
     isRollup: boolean,
     client: IScopedClusterClient,
-    dataViewsService: DataViewsService
+    dataViewsService: DataViewsService,
+    projectRouting?: string
   ) {
     this._indexPattern = indexPattern;
     this._isRollup = isRollup;
     this._mlClusterClient = client;
     this._dataViewsService = dataViewsService;
+    this._projectRouting = projectRouting;
   }
 
   private async loadFieldCaps() {
@@ -73,6 +77,7 @@ class FieldsService {
       {
         index: this._indexPattern,
         fields: '*',
+        ...(this._projectRouting ? { project_routing: this._projectRouting } : {}),
       },
       { maxRetries: 0 }
     );

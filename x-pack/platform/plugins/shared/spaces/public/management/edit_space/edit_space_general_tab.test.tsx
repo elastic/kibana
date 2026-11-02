@@ -7,8 +7,10 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { CoreScopedHistory } from '@kbn/core/public';
 import {
   httpServiceMock,
   i18nServiceMock,
@@ -19,6 +21,7 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -33,7 +36,7 @@ import { getPrivilegeAPIClientMock } from '../privilege_api_client.mock';
 import { getRolesAPIClientMock } from '../roles_api_client.mock';
 import { getSecurityLicenseMock } from '../security_license.mock';
 
-const space = { id: 'default', name: 'Default', disabledFeatures: [], _reserved: true };
+const space = { id: asSpaceId('default'), name: 'Default', disabledFeatures: [], _reserved: true };
 const history = scopedHistoryMock.create();
 const getUrlForApp = (appId: string) => appId;
 const navigateToUrl = jest.fn();
@@ -142,7 +145,7 @@ describe('EditSpaceSettings', () => {
   it('shows feature visibility controls when allowed', async () => {
     const features = [
       new KibanaFeature({
-        id: 'feature-1',
+        id: asSpaceId('feature-1'),
         name: 'feature 1',
         app: [],
         category: DEFAULT_APP_CATEGORIES.kibana,
@@ -169,7 +172,7 @@ describe('EditSpaceSettings', () => {
 
   it('allows a space to be updated', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -214,7 +217,7 @@ describe('EditSpaceSettings', () => {
 
   it('specifies a color when updating a space without a color or imageUrl', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       initials: 'AB',
@@ -258,7 +261,7 @@ describe('EditSpaceSettings', () => {
 
   it('allows space to be deleted', async () => {
     const spaceToDelete = {
-      id: 'delete-me-space',
+      id: asSpaceId('delete-me-space'),
       name: 'Delete Me Space',
       description: 'This is a very nice space... for me to DELETE!',
       color: '#aabbcc',
@@ -293,7 +296,7 @@ describe('EditSpaceSettings', () => {
     // management page explicitly sets these fields when a new space is created, but it should also handle existing "legacy" spaces that do
     // not already have these fields set.
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: undefined,
@@ -333,7 +336,7 @@ describe('EditSpaceSettings', () => {
 
   it('warns when updating solution view', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -386,7 +389,7 @@ describe('EditSpaceSettings', () => {
 
   it('navigates away when cancel is clicked after changing the solution view', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -427,7 +430,7 @@ describe('EditSpaceSettings', () => {
   it('warns when updating features in the active space', async () => {
     const features = [
       new KibanaFeature({
-        id: 'feature-1',
+        id: asSpaceId('feature-1'),
         name: 'feature 1',
         app: [],
         category: DEFAULT_APP_CATEGORIES.kibana,
@@ -436,7 +439,7 @@ describe('EditSpaceSettings', () => {
     ];
 
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -489,7 +492,7 @@ describe('EditSpaceSettings', () => {
     expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('submits the disabled features list when the solution view is undefined', async () => {
+  it('no longer considers the form dirty once a change has been reverted', async () => {
     const features = [
       new KibanaFeature({
         id: 'feature-1',
@@ -501,7 +504,133 @@ describe('EditSpaceSettings', () => {
     ];
 
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: SOLUTION_VIEW_CLASSIC,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={features}
+          allowFeatureVisibility={true}
+          allowSolutionVisibility={true}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // the "Apply changes" button is only rendered while the form has unsaved changes
+    expect(screen.queryByTestId('save-space-button')).not.toBeInTheDocument();
+
+    const feature1Checkbox = screen.getByTestId('featureCheckbox_feature-1');
+    await userEvent.click(feature1Checkbox);
+
+    expect(await screen.findByTestId('save-space-button')).toBeInTheDocument();
+
+    await userEvent.click(feature1Checkbox);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('save-space-button')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('unsaved changes prompt', () => {
+    const spaceToUpdate = {
+      id: asSpaceId('existing-space'),
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      color: '#aabbcc',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: SOLUTION_VIEW_CLASSIC,
+    };
+
+    // A real ScopedHistory, rather than `scopedHistoryMock`: the prompt works by installing a
+    // `history.block` handler, which the mock does not implement, so a mocked history cannot tell
+    // whether the user would have been asked to confirm.
+    let realHistory: CoreScopedHistory;
+
+    const renderDirtyTab = async () => {
+      realHistory = new CoreScopedHistory(
+        createMemoryHistory({ initialEntries: ['/mock/edit/existing-space'] }),
+        '/mock'
+      );
+      overlays.openConfirm.mockClear();
+
+      render(
+        <TestComponent>
+          <EditSpaceSettingsTab
+            space={spaceToUpdate}
+            history={realHistory}
+            features={[]}
+            allowFeatureVisibility={false}
+            allowSolutionVisibility={true}
+            reloadWindow={reloadWindow}
+          />
+        </TestComponent>
+      );
+
+      fireEvent.change(screen.getByTestId('descriptionSpaceText'), {
+        target: { value: 'a new description' },
+      });
+      expect(await screen.findByTestId('save-space-button')).toBeInTheDocument();
+    };
+
+    it('prompts when navigating away with unsaved changes', async () => {
+      await renderDirtyTab();
+
+      realHistory.push('/');
+
+      await waitFor(() => {
+        expect(overlays.openConfirm).toHaveBeenCalled();
+      });
+      // navigation stays blocked until the user confirms
+      expect(realHistory.location.pathname).toBe('/edit/existing-space');
+    });
+
+    it('does not prompt when the form is cancelled', async () => {
+      await renderDirtyTab();
+
+      await userEvent.click(screen.getByTestId('cancel-space-button'));
+
+      await waitFor(() => {
+        expect(realHistory.location.pathname).toBe('/');
+      });
+      expect(overlays.openConfirm).not.toHaveBeenCalled();
+    });
+
+    it('does not prompt when the changes are saved', async () => {
+      await renderDirtyTab();
+
+      await userEvent.click(screen.getByTestId('save-space-button'));
+
+      await waitFor(() => {
+        expect(realHistory.location.pathname).toBe('/');
+      });
+      expect(overlays.openConfirm).not.toHaveBeenCalled();
+    });
+  });
+
+  it('submits the disabled features list when the solution view is undefined', async () => {
+    const features = [
+      new KibanaFeature({
+        id: asSpaceId('feature-1'),
+        name: 'feature 1',
+        app: [],
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        privileges: null,
+      }),
+    ];
+
+    const spaceToUpdate = {
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -556,7 +685,7 @@ describe('EditSpaceSettings', () => {
   it('empties the disabled features list when the solution view non-classic', async () => {
     const features = [
       new KibanaFeature({
-        id: 'feature-1',
+        id: asSpaceId('feature-1'),
         name: 'feature 1',
         app: [],
         category: DEFAULT_APP_CATEGORIES.kibana,
@@ -565,7 +694,7 @@ describe('EditSpaceSettings', () => {
     ];
 
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -657,7 +786,7 @@ describe('EditSpaceSettings', () => {
     }: {
       isTierEligible?: boolean;
       spaceForRender?: {
-        id: string;
+        id: SpaceId;
         name: string;
         disabledFeatures: string[];
         projectRouting?: string;
@@ -817,7 +946,7 @@ describe('EditSpaceSettings', () => {
 
   it('includes projectRouting in updateSpace request when space has projectRouting', async () => {
     const spaceToUpdate = {
-      id: 'existing-space',
+      id: asSpaceId('existing-space'),
       name: 'Existing Space',
       description: 'hey an existing space',
       color: '#aabbcc',
@@ -861,7 +990,7 @@ describe('EditSpaceSettings', () => {
       expect(updateSpaceSpy).toHaveBeenCalled();
       const callArgs = updateSpaceSpy.mock.calls[0][0];
       expect(callArgs).toMatchObject({
-        id: 'existing-space',
+        id: asSpaceId('existing-space'),
         name: 'Updated Space Name',
         projectRouting: '_alias:_origin',
       });

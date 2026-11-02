@@ -21,7 +21,6 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../../common/api/entity_analytics';
 import { buildAnnotationsFromError } from '../helpers';
-import { ScheduleRiskEngineCallout } from './schedule_risk_engine_callout';
 
 export const AssetCriticalityResultStep: React.FC<{
   result?: BulkUpsertAssetCriticalityRecordsResponse;
@@ -77,7 +76,10 @@ export const AssetCriticalityResultStep: React.FC<{
             id="xpack.securitySolution.entityAnalytics.assetCriticalityResultStep.successMessage"
           />
           <EuiSpacer size="s" />
-          <SecuritySolutionLinkButton deepLinkId={SecurityPageName.entityAnalytics} color="success">
+          <SecuritySolutionLinkButton
+            deepLinkId={SecurityPageName.entityAnalyticsHomePage}
+            color="success"
+          >
             {
               <FormattedMessage
                 defaultMessage="View asset criticality assignments."
@@ -87,7 +89,6 @@ export const AssetCriticalityResultStep: React.FC<{
           </SecuritySolutionLinkButton>
         </EuiCallOut>
         <EuiSpacer size="s" />
-        <ScheduleRiskEngineCallout />
         <ResultStepFooter onReturn={onReturn} />
       </>
     );

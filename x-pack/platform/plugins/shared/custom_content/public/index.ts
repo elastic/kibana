@@ -7,7 +7,6 @@
 
 import { CustomContentPlugin } from './plugin';
 
-export { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
 export type { CustomContentEmbeddableState } from '../server';
 
 export const plugin = () => new CustomContentPlugin();

@@ -199,7 +199,7 @@ function DefaultEditorAgg({
       actionIcons.push({
         id: 'dragHandle',
         color: 'text',
-        type: 'grab',
+        type: 'dragVertical',
         tooltip: i18n.translate('visDefaultEditor.agg.modifyPriorityButtonTooltip', {
           defaultMessage: 'Modify priority of {schemaTitle} {aggTitle} by dragging',
           values: { aggTitle, schemaTitle },

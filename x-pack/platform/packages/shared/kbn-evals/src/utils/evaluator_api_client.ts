@@ -12,6 +12,8 @@ import {
   EVALS_EVALUATE_URL,
   EvaluateResponse,
   type EvaluateRequestBodyInput,
+  type Direction,
+  type Model,
 } from '@kbn/evals-common';
 import type { Evaluator, EvaluatorKind, EvaluatorParams, Example, TaskOutput } from '../types';
 
@@ -44,6 +46,12 @@ export interface SubScore {
 export interface EvaluatorConfig {
   name: string;
   kind: EvaluatorKind;
+  /**
+   * Whether a higher score is an improvement (`maximize`), a lower score is
+   * an improvement (`minimize`), or the score cannot be compared across arms
+   * at all (`neutral`).
+   */
+  direction: Direction;
   version?: string;
   connectorId?: string;
   /** When set, the evaluator is composite: one output evaluator is produced per sub-score. */
@@ -102,6 +110,9 @@ export class EvaluatorApiClient {
     };
 
     return configs.flatMap((config) => {
+      let resolvedModel: Model | undefined;
+      let resolvedVersion = config.version;
+
       const outputs: ScoreSelector[] = config.subScores
         ? config.subScores.map(({ key, evaluatorName }) => ({
             name: evaluatorName,
@@ -119,6 +130,9 @@ export class EvaluatorApiClient {
       return outputs.map(({ name, pickScore, describe }) => ({
         name,
         kind: config.kind,
+        direction: config.direction,
+        getModel: () => resolvedModel,
+        getVersion: () => resolvedVersion,
         evaluate: async (params) => {
           try {
             const result = await evaluateForTrace(params);
@@ -126,6 +140,8 @@ export class EvaluatorApiClient {
             if (!item) {
               throw new Error(`No evaluation result returned for "${config.name}"`);
             }
+            resolvedModel = item.evaluator.model ?? resolvedModel;
+            resolvedVersion = item.evaluator.version;
             if (item.status === 'error') {
               throw new Error(item.error?.message ?? `Evaluator "${config.name}" failed`);
             }

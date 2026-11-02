@@ -38,10 +38,6 @@ jest.mock('@kbn/cell-actions', () => ({
 }));
 
 const mockDataViewId = 'security-default-dataview-id';
-const mockUseDataViewId = jest.fn((_: unknown) => mockDataViewId);
-jest.mock('../../hooks/use_data_view_id', () => ({
-  useDataViewId: (param: unknown) => mockUseDataViewId(param),
-}));
 
 const defaultProps = {
   triggerId: SECURITY_CELL_ACTIONS_DEFAULT,

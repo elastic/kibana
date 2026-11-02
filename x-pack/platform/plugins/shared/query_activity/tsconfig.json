@@ -5,6 +5,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
+    "@kbn/app-header",
     "@kbn/core",
     "@kbn/es-query",
     "@kbn/i18n",

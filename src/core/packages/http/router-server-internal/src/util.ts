@@ -54,17 +54,28 @@ function prepareValidation<P, Q, B>(validator: RouteValidator<P, Q, B>) {
 export function prepareRouteConfigValidation<P, Q, B>(
   config: InternalRouteConfig<P, Q, B, RouteMethod>
 ): InternalRouteConfig<P, Q, B, RouteMethod> {
+  /*
+   * DI route handlers may pass a class constructor as the route config, with
+   * `options` / `validate` exposed as static getters on the prototype chain.
+   * Object spread only copies enumerable own properties, so those getters are
+   * dropped unless we read them explicitly before reconstructing the config.
+   * Without this, `access: 'public'` is lost and the route is omitted from OAS.
+   */
+  const { options } = config;
+
   // Calculating schema validation can be expensive so when it is provided lazily
   // we only want to instantiate it once. This also provides idempotency guarantees
   if (typeof config.validate === 'function') {
     const validate = config.validate;
     return {
       ...config,
+      options,
       validate: onceCacheOnSuccess(() => prepareValidation(validate())),
     };
-  } else if (typeof config.validate === 'object' && typeof config.validate !== null) {
+  } else if (typeof config.validate === 'object' && config.validate !== null) {
     return {
       ...config,
+      options,
       validate: prepareValidation(config.validate),
     };
   }

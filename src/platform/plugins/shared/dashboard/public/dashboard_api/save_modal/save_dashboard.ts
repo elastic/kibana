@@ -12,14 +12,14 @@ import { getDashboardBackupService } from '../../services/dashboard_api_services
 import { coreServices } from '../../services/kibana_services';
 import { dashboardClient } from '../../dashboard_client';
 import { showDashboardSavedToast } from './show_dashboard_saved_toast';
-import type { SaveDashboardProps, SaveDashboardReturn } from './types';
+import type { SaveDashboardProps } from './types';
 
 export const saveDashboard = async ({
   lastSavedId,
   saveOptions,
   dashboardState,
   accessMode,
-}: SaveDashboardProps): Promise<SaveDashboardReturn> => {
+}: SaveDashboardProps): Promise<{ error: string } | { id: string; redirectRequired?: boolean }> => {
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
   try {
@@ -45,16 +45,19 @@ export const saveDashboard = async ({
     }
     return { id: newId };
   } catch (error) {
-    coreServices.notifications.toasts.addDanger({
-      title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-        defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
-        values: {
-          title: dashboardState.title,
-          errorMessage: error.message,
-        },
-      }),
-      'data-test-subj': 'saveDashboardFailure',
-    });
+    coreServices.notifications.toasts.addDanger(
+      generateDashboardNotSavedToast(dashboardState.title, error.message)
+    );
     return { error };
   }
 };
+
+export function generateDashboardNotSavedToast(title: string, errorMessage: string) {
+  return {
+    title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+      defaultMessage: `Dashboard ''{title}'' was not saved. Error: {errorMessage}`,
+      values: { title, errorMessage },
+    }),
+    'data-test-subj': 'saveDashboardFailure',
+  };
+}

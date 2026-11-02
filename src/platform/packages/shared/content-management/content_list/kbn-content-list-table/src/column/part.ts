@@ -10,7 +10,7 @@
 import type { FC, ReactNode } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
-import type { SkeletonOutput } from '@kbn/content-list-assembly';
+import type { SkeletonOutput } from '../skeleton/descriptor';
 import { table } from '../assembly';
 import type { ColumnBuilderContext } from './types';
 import type { NameColumnProps } from './name/name_builder';
@@ -92,7 +92,8 @@ export interface ColumnPresets {
 export const column = table.definePart<
   ColumnPresets,
   EuiBasicTableColumn<ContentListItem>,
-  ColumnBuilderContext
+  ColumnBuilderContext,
+  SkeletonOutput
 >({ name: 'column' });
 
 /**

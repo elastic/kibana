@@ -14,7 +14,7 @@ import type { StoredLogRateAnalysisEmbeddableState } from './types';
 
 describe('log rate analysis embeddable transforms', () => {
   it('validates the dashboard-as-code schema', () => {
-    const state = logRateAnalysisEmbeddableStateSchema.validate({
+    const state = logRateAnalysisEmbeddableStateSchema.parse({
       data_view_id: 'data-view-id',
     });
 
@@ -25,7 +25,7 @@ describe('log rate analysis embeddable transforms', () => {
 
   it('rejects an empty data_view_id', () => {
     expect(() =>
-      logRateAnalysisEmbeddableStateSchema.validate({
+      logRateAnalysisEmbeddableStateSchema.parse({
         data_view_id: '',
       })
     ).toThrow();

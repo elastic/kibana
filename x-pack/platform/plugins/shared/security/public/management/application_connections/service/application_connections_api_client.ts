@@ -45,7 +45,7 @@ export interface ListOAuthConnectionsResponse {
   connections: OAuthConnection[];
 }
 
-export interface BulkRevokeConnectionTarget {
+export interface BulkConnectionTarget {
   clientId: string;
   connectionId: string;
 }
@@ -62,15 +62,33 @@ export interface BulkRevokeConnectionsResponse {
   results: BulkRevokeConnectionResult[];
 }
 
-interface BulkRevokeConnectionsServerResponse {
+export interface BulkDeleteConnectionResult {
+  clientId: string;
+  connectionId: string;
+  status: 'deleted' | 'error';
+  statusCode?: number;
+  message?: string;
+}
+
+export interface BulkDeleteConnectionsResponse {
+  results: BulkDeleteConnectionResult[];
+}
+
+interface BulkConnectionsServerResponse<TStatus extends string> {
   results: Array<{
     client_id: string;
     connection_id: string;
-    status: 'revoked' | 'error';
+    status: TStatus | 'error';
     status_code?: number;
     message?: string;
   }>;
 }
+
+const toBulkConnectionTargetPayload = (connections: BulkConnectionTarget[]) =>
+  connections.map(({ clientId, connectionId }) => ({
+    client_id: clientId,
+    connection_id: connectionId,
+  }));
 
 const OAUTH_BASE_URL = '/internal/security/oauth';
 
@@ -122,18 +140,38 @@ export class ApplicationConnectionsAPIClient {
   }
 
   public async bulkRevokeConnections(
-    connections: BulkRevokeConnectionTarget[],
+    connections: BulkConnectionTarget[],
     reason?: string
   ): Promise<BulkRevokeConnectionsResponse> {
-    const response = await this.http.post<BulkRevokeConnectionsServerResponse>(
+    const response = await this.http.post<BulkConnectionsServerResponse<'revoked'>>(
       `${OAUTH_BASE_URL}/connections/_bulk_revoke`,
       {
         body: JSON.stringify({
-          connections: connections.map(({ clientId, connectionId }) => ({
-            client_id: clientId,
-            connection_id: connectionId,
-          })),
+          connections: toBulkConnectionTargetPayload(connections),
           reason,
+        }),
+      }
+    );
+
+    return {
+      results: response.results.map((item) => ({
+        clientId: item.client_id,
+        connectionId: item.connection_id,
+        status: item.status,
+        statusCode: item.status_code,
+        message: item.message,
+      })),
+    };
+  }
+
+  public async bulkDeleteConnections(
+    connections: BulkConnectionTarget[]
+  ): Promise<BulkDeleteConnectionsResponse> {
+    const response = await this.http.post<BulkConnectionsServerResponse<'deleted'>>(
+      `${OAUTH_BASE_URL}/connections/_bulk_delete`,
+      {
+        body: JSON.stringify({
+          connections: toBulkConnectionTargetPayload(connections),
         }),
       }
     );

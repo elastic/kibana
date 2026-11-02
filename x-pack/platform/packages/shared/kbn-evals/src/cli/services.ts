@@ -10,11 +10,27 @@ import Path from 'path';
 import { createHash } from 'crypto';
 import { execFileSync, spawn, type SpawnOptions } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
+  ES_SERVERLESS_REPO_KIBANA,
+  SERVERLESS_NODES,
+  SERVERLESS_SECRETS_DIR,
+  getUiamContainers,
+} from '@kbn/es';
+import { DEFAULT_SCOUT_TARGET, formatScoutTarget, type ScoutTarget } from './scout_target';
 
 const EVALS_DIR = 'target/evals';
 const STATE_FILE = 'target/evals/services.json';
 const DEFAULT_SERVER_CONFIG_SET = 'evals_tracing';
 export const EDOT_CONTAINER_NAME = 'kibana-edot-collector';
+const SERVERLESS_ES_NODE_NAMES: readonly string[] = SERVERLESS_NODES.map(({ name }) => name);
+const UIAM_CONTAINER_NAMES: readonly string[] = getUiamContainers({ includeOAuth: true }).map(
+  ({ name }) => name
+);
+const SERVERLESS_ES_REPOS: readonly string[] = [
+  ES_SERVERLESS_REPO_KIBANA,
+  ES_SERVERLESS_REPO_ELASTICSEARCH,
+];
 
 export type ServiceName = 'edot' | 'scout';
 
@@ -22,11 +38,17 @@ interface ServiceEntry {
   pid: number;
   logFile: string;
   startedAt: string;
-  /** SHA-256 of KIBANA_TESTING_AI_CONNECTORS at boot time (Scout only) */
+  /** SHA-256 of KIBANA_TESTING_INFERENCE_ENDPOINTS + KIBANA_TESTING_AI_CONNECTORS at boot time (Scout only) */
   connectorsHash?: string;
   /** The serverConfigSet used to start Scout */
   serverConfigSet?: string;
-  /** SHA-256 of env vars forwarded to Scout (e.g. TRACING_EXPORTERS, GCS_CREDENTIALS) */
+  /** The Scout arch/domain; entries written before these were recorded ran stateful/classic. */
+  scoutArch?: ScoutTarget['arch'];
+  scoutDomain?: string;
+  /**
+   * SHA-256 of the env the service was started with (Scout: TRACING_EXPORTERS,
+   * GCS_CREDENTIALS, suite scoutHook output; EDOT: ELASTICSEARCH_HOST).
+   */
   envHash?: string;
 }
 
@@ -65,15 +87,29 @@ export const isAlive = (pid: number): boolean => {
   }
 };
 
-export const connectorsHash = (): string => {
-  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS ?? '';
-  return createHash('sha256').update(raw).digest('hex').slice(0, 12);
-};
+const hashParts = (parts: Array<string | undefined>): string =>
+  createHash('sha256')
+    .update(parts.map((part) => part ?? '').join('\0'))
+    .digest('hex')
+    .slice(0, 12);
+
+export const connectorsHash = (): string =>
+  hashParts([
+    process.env.KIBANA_TESTING_INFERENCE_ENDPOINTS,
+    process.env.KIBANA_TESTING_AI_CONNECTORS,
+  ]);
 
 export const scoutEnvHash = (env: Record<string, string> | undefined): string => {
-  const parts = [env?.TRACING_EXPORTERS ?? '', env?.GCS_CREDENTIALS ?? ''];
-  return createHash('sha256').update(parts.join('\0')).digest('hex').slice(0, 12);
+  const { TRACING_EXPORTERS, GCS_CREDENTIALS, ...suiteEnv } = env ?? {};
+  const suiteParts = Object.entries(suiteEnv)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`);
+  // Suite hook output only extends the hash when present, so stacks started without it stay reusable.
+  return hashParts([TRACING_EXPORTERS, GCS_CREDENTIALS, ...suiteParts]);
 };
+
+export const edotEnvHash = (elasticsearchHost: string | undefined): string =>
+  hashParts([elasticsearchHost]);
 
 export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean => {
   const state = readState(repoRoot);
@@ -83,25 +119,29 @@ export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean =
 
 /**
  * Returns true if the running Scout was started with a different set of connectors
- * than what's currently in the environment, a different serverConfigSet, or
+ * than what's currently in the environment, a different serverConfigSet or arch/domain, or
  * different forwarded env vars (e.g. TRACING_EXPORTERS, GCS_CREDENTIALS).
  */
 export const isScoutStale = (
   repoRoot: string,
   requestedConfigSet?: string,
-  scoutEnv?: Record<string, string>
+  scoutEnv?: Record<string, string>,
+  requestedTarget: ScoutTarget = DEFAULT_SCOUT_TARGET
 ): { stale: boolean; reason?: string } => {
   const state = readState(repoRoot);
   const entry = state.scout;
   if (!entry || !isAlive(entry.pid)) return { stale: false };
 
   if (entry.connectorsHash !== connectorsHash()) {
-    return { stale: true, reason: 'KIBANA_TESTING_AI_CONNECTORS changed' };
+    return { stale: true, reason: 'connectors configuration changed' };
   }
 
   const currentEnvHash = scoutEnvHash(scoutEnv);
   if (entry.envHash && entry.envHash !== currentEnvHash) {
-    return { stale: true, reason: 'TRACING_EXPORTERS or GCS_CREDENTIALS changed' };
+    return {
+      stale: true,
+      reason: "TRACING_EXPORTERS, GCS_CREDENTIALS or the suite's scoutHook output changed",
+    };
   }
 
   const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;
@@ -114,6 +154,39 @@ export const isScoutStale = (
         entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET
       }, requested: ${targetConfigSet})`,
     };
+  }
+
+  const runningTarget = formatScoutTarget({
+    arch: entry.scoutArch ?? DEFAULT_SCOUT_TARGET.arch,
+    domain: entry.scoutDomain ?? DEFAULT_SCOUT_TARGET.domain,
+  });
+  const targetScout = formatScoutTarget(requestedTarget);
+  if (runningTarget !== targetScout) {
+    return {
+      stale: true,
+      reason: `Scout arch/domain changed (running: ${runningTarget}, requested: ${targetScout})`,
+    };
+  }
+
+  return { stale: false };
+};
+
+/**
+ * Returns true if the running EDOT collector exports to a different
+ * Elasticsearch than this run reads traces from. Switching profiles between
+ * runs is what moves the target, and a collector left pointing at the previous
+ * one goes on accepting spans while indexing them somewhere the trace-based
+ * evaluators never look.
+ */
+export const isEdotStale = (
+  repoRoot: string,
+  elasticsearchHost: string | undefined
+): { stale: boolean; reason?: string } => {
+  const entry = readState(repoRoot).edot;
+  if (!entry || !isAlive(entry.pid)) return { stale: false };
+
+  if (entry.envHash && entry.envHash !== edotEnvHash(elasticsearchHost)) {
+    return { stale: true, reason: 'TRACING_ES_URL changed' };
   }
 
   return { stale: false };
@@ -132,6 +205,7 @@ export const startService = (
   opts?: {
     connectorsHash?: string;
     serverConfigSet?: string;
+    scoutTarget?: ScoutTarget;
     envHash?: string;
     env?: Record<string, string | undefined>;
   }
@@ -164,6 +238,9 @@ export const startService = (
     startedAt: new Date().toISOString(),
     ...(opts?.connectorsHash ? { connectorsHash: opts.connectorsHash } : {}),
     ...(opts?.serverConfigSet ? { serverConfigSet: opts.serverConfigSet } : {}),
+    ...(opts?.scoutTarget
+      ? { scoutArch: opts.scoutTarget.arch, scoutDomain: opts.scoutTarget.domain }
+      : {}),
     ...(opts?.envHash ? { envHash: opts.envHash } : {}),
   };
   writeState(repoRoot, state);
@@ -225,6 +302,106 @@ const stopEdotDockerContainer = (repoRoot: string, log: ToolingLog): void => {
     log.info('[edot] Docker container stopped');
   } catch (err) {
     log.warning(`[edot] docker stop failed (${err instanceof Error ? err.message : err})`);
+  }
+};
+
+/**
+ * Stateful `es docker` also names its container `es01`, so ES nodes only count
+ * as serverless when they run a serverless image.
+ */
+const isServerlessContainer = (name: string, image: string): boolean =>
+  UIAM_CONTAINER_NAMES.includes(name) ||
+  (SERVERLESS_ES_NODE_NAMES.includes(name) &&
+    SERVERLESS_ES_REPOS.includes(image.replace(/[:@].*$/, '')));
+
+const listServerlessContainers = (): { containers: string[] } | { error: string } => {
+  try {
+    const output = execFileSync(
+      'docker',
+      [
+        'ps',
+        '--all',
+        ...[...SERVERLESS_ES_NODE_NAMES, ...UIAM_CONTAINER_NAMES].flatMap((name) => [
+          '--filter',
+          `name=^/${name}$`,
+        ]),
+        '--format',
+        '{{.Names}}\t{{.Image}}',
+      ],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 5_000 }
+    );
+    const containers = output
+      .split('\n')
+      .map((line) => line.trim().split('\t'))
+      .filter(([name, image = '']) => name && isServerlessContainer(name, image))
+      .map(([name]) => name);
+    return { containers };
+  } catch (err) {
+    const { signal, stderr } = err as Record<string, unknown>;
+    if (signal != null) {
+      return { error: 'docker ps timed out' };
+    }
+    return {
+      error: typeof stderr === 'string' && stderr.trim() ? stderr.trim() : String(err),
+    };
+  }
+};
+
+/**
+ * Remove the serverless ES and UIAM containers along with their secrets. kbn-es
+ * only tears these down on SIGINT, so terminating the Scout process group
+ * leaves them running.
+ */
+const removeServerlessDockerContainers = (log: ToolingLog): void => {
+  const result = listServerlessContainers();
+
+  if ('error' in result) {
+    log.warning(
+      `[scout] Could not list serverless Docker containers (${result.error}). ` +
+        `Leaving ${SERVERLESS_SECRETS_DIR} in place; check with: docker ps --all`
+    );
+    return;
+  }
+
+  const { containers } = result;
+
+  if (containers.length > 0) {
+    try {
+      execFileSync('docker', ['rm', '--force', ...containers], {
+        stdio: 'ignore',
+        timeout: 30_000,
+      });
+      log.info(`[scout] Removed serverless Docker containers: ${containers.join(', ')}`);
+    } catch (err) {
+      log.warning(
+        `[scout] docker rm failed (${err instanceof Error ? err.message : err}). ` +
+          `Remove them with: docker rm --force ${containers.join(' ')}`
+      );
+      return;
+    }
+  }
+
+  // The operator settings carry the cluster secrets, so they must not outlive the cluster.
+  Fs.rmSync(SERVERLESS_SECRETS_DIR, { recursive: true, force: true });
+};
+
+/**
+ * A stateful Scout never started the serverless containers, so leave any that
+ * exist alone. Without a tracked entry they may have been orphaned by an earlier stop.
+ */
+const ownsServerlessContainers = (entry: ServiceEntry | undefined): boolean =>
+  !entry || entry.scoutArch === 'serverless';
+
+const stopServiceContainers = (
+  repoRoot: string,
+  name: ServiceName,
+  entry: ServiceEntry | undefined,
+  log: ToolingLog
+): void => {
+  if (name === 'edot') {
+    stopEdotDockerContainer(repoRoot, log);
+  } else if (ownsServerlessContainers(entry)) {
+    removeServerlessDockerContainers(log);
   }
 };
 
@@ -293,7 +470,7 @@ const terminateProcessGroup = async (
 
 /**
  * Stop a service by PID. Sends SIGTERM, waits briefly, then SIGKILL if needed.
- * For EDOT, also tears down the Docker container.
+ * Also tears down the service's Docker containers (EDOT collector, serverless ES and UIAM).
  */
 export const stopService = async (
   repoRoot: string,
@@ -305,9 +482,7 @@ export const stopService = async (
 
   if (!entry) {
     log.info(`[${name}] no tracked process`);
-    if (name === 'edot') {
-      stopEdotDockerContainer(repoRoot, log);
-    }
+    stopServiceContainers(repoRoot, name, entry, log);
     return false;
   }
 
@@ -315,10 +490,7 @@ export const stopService = async (
     log.info(`[${name}] tracked process already exited (PID ${entry.pid})`);
 
     await terminateProcessGroup(entry.pid, log, name);
-
-    if (name === 'edot') {
-      stopEdotDockerContainer(repoRoot, log);
-    }
+    stopServiceContainers(repoRoot, name, entry, log);
 
     delete state[name];
     writeState(repoRoot, state);
@@ -328,10 +500,7 @@ export const stopService = async (
   log.info(`[${name}] stopping (PID ${entry.pid})...`);
 
   await terminateProcessGroup(entry.pid, log, name);
-
-  if (name === 'edot') {
-    stopEdotDockerContainer(repoRoot, log);
-  }
+  stopServiceContainers(repoRoot, name, entry, log);
 
   if (isProcessGroupAlive(entry.pid)) {
     log.warning(`[${name}] may not have fully stopped (PID ${entry.pid})`);

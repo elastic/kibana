@@ -13,9 +13,51 @@ import type {
   ManagedWorkflowSelector,
   ManagedWorkflowSolution,
   WorkflowListDto,
+  WorkflowsSearchParams,
+} from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
 } from '@kbn/workflows';
 import { TagsBadge } from './tags_badge';
 import * as i18n from './translations';
+
+export interface WorkflowSelectorVisibility {
+  selectors?: ManagedWorkflowSelector[];
+  solutions?: ManagedWorkflowSolution[];
+}
+
+export const getVisibilityContext = (
+  visibility: WorkflowSelectorVisibility | undefined
+): string[] | undefined => {
+  if (!visibility) return undefined;
+
+  const contexts = [
+    ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+    ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
+  ];
+
+  return contexts.length > 0 ? contexts : undefined;
+};
+
+export const getWorkflowsListQueryParams = ({
+  visibility,
+  canReadManagedWorkflow,
+}: {
+  visibility: WorkflowSelectorVisibility | undefined;
+  canReadManagedWorkflow: boolean;
+}): WorkflowsSearchParams => {
+  const visibilityContext = getVisibilityContext(visibility);
+
+  return {
+    size: 1000,
+    page: 1,
+    query: '',
+    ...(visibilityContext && canReadManagedWorkflow
+      ? { managed: 'all' as const, visibilityContext }
+      : {}),
+  };
+};
 
 export interface WorkflowValidationResult {
   severity: 'error' | 'warning';
@@ -38,12 +80,12 @@ export interface WorkflowOption {
   [key: string]: unknown; // Allow additional properties for EuiSelectable
 }
 
-export interface WorkflowSelectorVisibility {
-  selectors?: ManagedWorkflowSelector[];
-  solutions?: ManagedWorkflowSolution[];
-}
-
 export interface WorkflowSelectorConfig {
+  // Server-side managed workflow visibility — filters managed workflows by selector/solution
+  // before they are returned by the server. Only managed workflows tagged with a matching
+  // managedVisibilityContexts value are included. When omitted, no managed workflows are fetched.
+  visibility?: WorkflowSelectorVisibility;
+
   // Filtering
   filterFunction?: (workflows: WorkflowListDto['results']) => WorkflowListDto['results'];
 
@@ -66,7 +108,6 @@ export interface WorkflowSelectorConfig {
   hideViewWorkflowLink?: boolean;
   // When true (default), the selected workflow's name is displayed in the search input.
   showSelectedInSearch?: boolean;
-  visibility?: WorkflowSelectorVisibility;
 
   // Error Messages
   errorMessages?: {

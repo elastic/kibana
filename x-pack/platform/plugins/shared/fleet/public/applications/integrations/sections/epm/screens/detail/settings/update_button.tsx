@@ -14,11 +14,11 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiCheckbox,
-  EuiCallOut,
   EuiConfirmModal,
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
@@ -413,29 +413,30 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
       <>
         {conflictCount && conflictCount > 0 ? (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
-              color="warning"
-              iconType="warning"
               title={i18n.translate(
                 'xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.title',
                 { defaultMessage: 'Some integration policies have conflicts' }
               )}
-            >
-              <strong>
-                <FormattedMessage
-                  id="xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.integrationPolicyCount"
-                  defaultMessage="{conflictCount, plural, one { # integration policy} other { # integration policies}}"
-                  values={{ conflictCount }}
-                />
-              </strong>{' '}
-              <FormattedMessage
-                id="xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.body"
-                defaultMessage="{conflictCount, plural, one { has} other { have}} conflicts and will not be upgraded automatically.
+              text={
+                <>
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.integrationPolicyCount"
+                      defaultMessage="{conflictCount, plural, one { # integration policy} other { # integration policies}}"
+                      values={{ conflictCount }}
+                    />
+                  </strong>{' '}
+                  <FormattedMessage
+                    id="xpack.fleet.integrations.settings.confirmUpdateModal.conflictCallOut.body"
+                    defaultMessage="{conflictCount, plural, one { has} other { have}} conflicts and will not be upgraded automatically.
                   You can manually resolve these conflicts via agent policy settings in Fleet after performing this upgrade."
-                values={{ conflictCount }}
-              />
-            </EuiCallOut>
+                    values={{ conflictCount }}
+                  />
+                </>
+              }
+            />
 
             <EuiSpacer size="l" />
           </>

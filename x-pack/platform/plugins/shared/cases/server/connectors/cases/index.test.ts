@@ -36,11 +36,13 @@ describe('getCasesConnectorType', () => {
 
     caseConnectorType = getCasesConnectorType({
       getCasesClient: jest.fn(),
+      getActionsClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
       getUiSettingsClient: jest.fn(),
       getSpaceId: jest.fn(),
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: false,
+      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
     });
   });
 
@@ -48,7 +50,7 @@ describe('getCasesConnectorType', () => {
     // @ts-expect-error: only the subset of params used by getService is provided
     caseConnectorType.getService({});
 
-    expect(CasesConnectorMock).toBeCalledWith(
+    expect(CasesConnectorMock).toHaveBeenCalledWith(
       expect.objectContaining({
         casesParams: expect.objectContaining({ isTemplatesEnabled: false }),
       })
@@ -58,17 +60,19 @@ describe('getCasesConnectorType', () => {
   it('threads isTemplatesEnabled: true through to the CasesConnector when enabled', () => {
     const caseConnectorTypeWithTemplatesEnabled = getCasesConnectorType({
       getCasesClient: jest.fn(),
+      getActionsClient: jest.fn(),
       getUnsecuredSavedObjectsClient: jest.fn(),
       getUiSettingsClient: jest.fn(),
       getSpaceId: jest.fn(),
       isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: true,
+      isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
     });
 
     // @ts-expect-error: only the subset of params used by getService is provided
     caseConnectorTypeWithTemplatesEnabled.getService({});
 
-    expect(CasesConnectorMock).toBeCalledWith(
+    expect(CasesConnectorMock).toHaveBeenCalledWith(
       expect.objectContaining({
         casesParams: expect.objectContaining({ isTemplatesEnabled: true }),
       })
@@ -223,9 +227,9 @@ describe('getCasesConnectorType', () => {
                 },
               ],
               "autoPushCase": null,
+              "extractObservables": undefined,
               "groupedAlerts": null,
               "groupingBy": Array [],
-              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -237,6 +241,7 @@ describe('getCasesConnectorType', () => {
                   "my-tag",
                 ],
               },
+              "source": "rule",
               "templateId": null,
               "templateVersion": null,
               "timeWindow": "7d",
@@ -272,9 +277,9 @@ describe('getCasesConnectorType', () => {
                 },
               ],
               "autoPushCase": null,
+              "extractObservables": undefined,
               "groupedAlerts": null,
               "groupingBy": Array [],
-              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 10,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -286,6 +291,7 @@ describe('getCasesConnectorType', () => {
                   "my-tag",
                 ],
               },
+              "source": "rule",
               "templateId": null,
               "templateVersion": null,
               "timeWindow": "7d",
@@ -321,9 +327,9 @@ describe('getCasesConnectorType', () => {
                 },
               ],
               "autoPushCase": null,
+              "extractObservables": undefined,
               "groupedAlerts": null,
               "groupingBy": Array [],
-              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -335,6 +341,7 @@ describe('getCasesConnectorType', () => {
                   "my-tag",
                 ],
               },
+              "source": "rule",
               "templateId": "template_key_1",
               "templateVersion": null,
               "timeWindow": "7d",
@@ -368,9 +375,9 @@ describe('getCasesConnectorType', () => {
                 },
               ],
               "autoPushCase": null,
+              "extractObservables": undefined,
               "groupedAlerts": null,
               "groupingBy": Array [],
-              "internallyManagedAlerts": false,
               "maximumCasesToOpen": 5,
               "owner": "cases",
               "reopenClosedCases": false,
@@ -382,12 +389,45 @@ describe('getCasesConnectorType', () => {
                   "my-tag",
                 ],
               },
+              "source": "rule",
               "templateId": null,
               "templateVersion": null,
               "timeWindow": "7d",
             },
           }
         `);
+      });
+
+      it.each([
+        ['true', true],
+        ['false', false],
+        ['null', null],
+      ])('forwards an extractObservables override of %s', (_, extractObservables) => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        const connectorParams = adapter.buildActionParams({
+          // @ts-expect-error: not all fields are needed
+          alerts,
+          rule,
+          params: getParams({ extractObservables }),
+          spaceId: 'default',
+        });
+
+        expect(connectorParams.subActionParams.extractObservables).toBe(extractObservables);
+      });
+
+      it('forwards extractObservables as undefined when the rule omits it', () => {
+        const adapter = getCasesConnectorAdapter({ logger: mockLogger });
+
+        const connectorParams = adapter.buildActionParams({
+          // @ts-expect-error: not all fields are needed
+          alerts,
+          rule,
+          params: getParams(),
+          spaceId: 'default',
+        });
+
+        expect(connectorParams.subActionParams.extractObservables).toBeUndefined();
       });
 
       it('maps observability consumers to the correct owner', () => {
@@ -479,7 +519,7 @@ describe('getCasesConnectorType', () => {
         }
       });
 
-      it('correctly returns `internallyManagedAlerts` as `false` if rule type is not attack discovery', () => {
+      it('correctly returns `source` as `rule` if rule type is not attack discovery', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         for (const consumer of [AlertConsumers.SIEM]) {
@@ -491,7 +531,7 @@ describe('getCasesConnectorType', () => {
             spaceId: 'default',
           });
 
-          expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
+          expect(connectorParams.subActionParams.source).toBe('rule');
         }
       });
 
@@ -549,7 +589,7 @@ describe('getCasesConnectorType', () => {
         recovered: { data: [], count: 0 },
       };
 
-      it('returns `internallyManagedAlerts` set to `true`', () => {
+      it('returns `source` set to `attack`', () => {
         const adapter = getCasesConnectorAdapter({ logger: mockLogger });
 
         const connectorParams = adapter.buildActionParams({
@@ -560,7 +600,7 @@ describe('getCasesConnectorType', () => {
           spaceId: 'default',
         });
 
-        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
+        expect(connectorParams.subActionParams.source).toBe('attack');
       });
 
       it('returns `maximumCasesToOpen` set to `ATTACK_DISCOVERY_MAX_OPEN_CASES`', () => {
@@ -626,7 +666,7 @@ describe('getCasesConnectorType', () => {
             title: 'Coordinated multi-host malware campaign',
           },
         ]);
-        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
+        expect(connectorParams.subActionParams.source).toBe('attack');
       });
 
       it('correctly returns `groupedAlerts` as empty array in case there are no alerts', () => {
@@ -646,7 +686,7 @@ describe('getCasesConnectorType', () => {
         });
 
         expect(connectorParams.subActionParams.groupedAlerts).toEqual([]);
-        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
+        expect(connectorParams.subActionParams.source).toBe('attack');
       });
 
       it('keeps attack discovery grouping when alerts count is above the default ceiling', () => {
@@ -673,11 +713,11 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.groupedAlerts).toHaveLength(
           ATTACK_DISCOVERY_MAX_OPEN_CASES + 1
         );
-        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(true);
+        expect(connectorParams.subActionParams.source).toBe('attack');
         expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(
           ATTACK_DISCOVERY_MAX_OPEN_CASES
         );
-        expect(mockLogger.error).not.toBeCalled();
+        expect(mockLogger.error).not.toHaveBeenCalled();
       });
 
       it('correctly fallsback to general flow if alerts schema does not pass validation', () => {
@@ -692,9 +732,9 @@ describe('getCasesConnectorType', () => {
         });
 
         expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
-        expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
+        expect(connectorParams.subActionParams.source).toBe('rule');
         expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
-        expect(mockLogger.error).toBeCalledWith(
+        expect(mockLogger.error).toHaveBeenCalledWith(
           'Could not setup grouped Attack Discovery alerts, because of error: Error: [0.kibana.alert.attack_discovery.alert_ids]: expected value of type [array] but got [undefined]'
         );
       });

@@ -14,6 +14,21 @@ export const INSERT_TIMELINE = i18n.translate(
   }
 );
 
+export const INSERT_TIMELINE_ATTACH_HINT = i18n.translate(
+  'xpack.securitySolution.markdownEditor.plugins.timeline.attachHintDescription',
+  {
+    defaultMessage:
+      'Inserts a Timeline link in this comment. To add a Timeline to the Attachments tab, select the Attach button.',
+  }
+);
+
+export const SELECT_TIMELINE_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.markdownEditor.plugins.timeline.selectTimelineModalTitle',
+  {
+    defaultMessage: 'Select Timeline',
+  }
+);
+
 export const TIMELINE_ID = (timelineId: string) =>
   i18n.translate('xpack.securitySolution.markdownEditor.plugins.timeline.toolTip.timelineId', {
     defaultMessage: 'Timeline id: { timelineId }',

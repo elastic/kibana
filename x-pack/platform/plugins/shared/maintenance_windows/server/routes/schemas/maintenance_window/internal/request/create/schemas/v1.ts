@@ -9,7 +9,10 @@ import { schema } from '@kbn/config-schema';
 import { maintenanceWindowCategoryIdsSchemaV1 } from '../../../../shared';
 import { TITLE_MAX_LENGTH } from '../../../../shared/constants/latest';
 import { rRuleRequestSchemaV1 } from '../../../../../r_rule';
-import { alertsFilterQuerySchemaV1 } from '../../../../../alerts_filter_query';
+import {
+  alertsFilterQuerySchemaV1,
+  alertingV2ScopeSchemaV1,
+} from '../../../../../alerts_filter_query';
 
 export const createBodySchema = schema.object({
   title: schema.string({ maxLength: TITLE_MAX_LENGTH }),
@@ -17,4 +20,10 @@ export const createBodySchema = schema.object({
   r_rule: rRuleRequestSchemaV1,
   category_ids: maintenanceWindowCategoryIdsSchemaV1,
   scoped_query: schema.maybe(schema.nullable(alertsFilterQuerySchemaV1)),
+  scope: schema.maybe(
+    schema.object({
+      alerting: schema.maybe(alertsFilterQuerySchemaV1),
+      alerting_v2: schema.maybe(alertingV2ScopeSchemaV1),
+    })
+  ),
 });

@@ -7,8 +7,6 @@
 
 import { combineReducers } from 'redux-toolkit-v1';
 
-import type { MaintenanceWindowsState } from './maintenance_windows';
-import { maintenanceWindowsReducer } from './maintenance_windows';
 import type { CertsListState } from './certs';
 import { certsListReducer } from './certs';
 import type { CertificatesState } from './certificates/certificates';
@@ -47,11 +45,14 @@ import type { MonitorStatusHeatmap } from './status_heatmap';
 import { monitorStatusHeatmapReducer } from './status_heatmap';
 import type { AgentPoliciesState } from './agent_policies';
 import { agentPoliciesReducer } from './agent_policies';
+import type { AgentStatsState } from './agent_stats';
+import { agentStatsReducer } from './agent_stats';
 import type { MonitorHealthState } from './monitor_health';
 import { monitorHealthReducer } from './monitor_health';
 
 export interface SyntheticsAppState {
   agentPolicies: AgentPoliciesState;
+  agentStats: AgentStatsState;
   browserJourney: BrowserJourneyState;
   certificates: CertificatesState;
   certsList: CertsListState;
@@ -70,12 +71,12 @@ export interface SyntheticsAppState {
   serviceLocations: ServiceLocationsState;
   syntheticsEnablement: SyntheticsEnablementState;
   ui: UiState;
-  maintenanceWindows: MaintenanceWindowsState;
   monitorHealth: MonitorHealthState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
   agentPolicies: agentPoliciesReducer,
+  agentStats: agentStatsReducer,
   browserJourney: browserJourneyReducer,
   certificates: certificatesReducer,
   certsList: certsListReducer,
@@ -94,6 +95,5 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   serviceLocations: serviceLocationsReducer,
   syntheticsEnablement: syntheticsEnablementReducer,
   ui: uiReducer,
-  maintenanceWindows: maintenanceWindowsReducer,
   monitorHealth: monitorHealthReducer,
 });

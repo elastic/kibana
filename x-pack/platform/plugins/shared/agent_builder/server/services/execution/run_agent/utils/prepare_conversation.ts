@@ -6,235 +6,189 @@
  */
 
 import type {
-  CompactionSummary,
-  ConversationAction,
-  ConversationRound,
+  ConversationEvent,
+  ConversationRoundAuthor,
   ConverseInput,
-  RoundInput,
+  MetadataFieldValue,
+  SubagentEntry,
+  UserMessageEventData,
 } from '@kbn/agent-builder-common';
-import { createBadRequestError, createInternalError } from '@kbn/agent-builder-common';
-import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  getLatestVersion,
-  getContentKey,
-} from '@kbn/agent-builder-common/attachments';
-import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import { isAttachmentEvent, isTimelineEvent, isUserMessageEvent } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type {
-  AttachmentFormatContext,
   AttachmentResolveContext,
   AttachmentStateManager,
+  AttachmentValidateContext,
 } from '@kbn/agent-builder-server/attachments';
-import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
-import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
+import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inputs';
+import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
+import { formatAttachmentEvent } from './attachment_event_presentation';
+import type { ResumeAnchors } from './attachment_placement';
+import { formatAttachmentsMetadata } from './attachment_presentation';
+import type {
+  ContextTimelineEvent,
+  ProcessedStandaloneEvent,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from './context_timeline';
 import {
-  prepareAttachmentPresentation,
-  type AttachmentPresentation,
-} from './attachment_presentation';
-
-export interface ProcessedAttachmentType {
-  type: string;
-  description?: string;
-}
-
-export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
-  input: ProcessedRoundInput;
-};
+  groupTimelineRounds,
+  groupTimelineEntries,
+  isTimelineStandaloneEvent,
+  isTimelineRound,
+  linkedInputEvents,
+} from './context_timeline';
 
 export interface ProcessedConversation {
-  previousRounds: ProcessedConversationRound[];
+  /**
+   * The agent-context timeline: the previous rounds' events in order, with each `user_message`
+   * payload processed. Never trimmed: what a compaction summary covers is hidden at render time.
+   */
+  timeline: ProcessedTimelineEvent[];
   nextInput: ProcessedRoundInput;
   attachmentTypes: ProcessedAttachmentType[];
-  attachments: ProcessedAttachment[];
+  /** Description of an attachment type, resolved when rendering (types can appear mid-run). */
+  describeAttachmentType?: (type: string) => string | undefined;
+  /** Where each resume's input attachments render: `prompt_response` id → the items its pause waited on. */
+  resumeAnchors?: ResumeAnchors;
   attachmentStateManager: AttachmentStateManager;
-  /** Presentation configuration for versioned attachments (inline vs summary mode) */
-  versionedAttachmentPresentation?: AttachmentPresentation;
-  /** Compaction summary covering older rounds that were replaced by this summary */
-  compactionSummary?: CompactionSummary;
+  /** Persistent sub-agent roster */
+  subagentRosterFallback?: Record<string, SubagentEntry>;
+  /**
+   * Deserialized metadata from the active conversation template.
+   * Populated from `conversation.metadata` at prepare time so prompt factories
+   * receive it via `processedConversation` rather than as a separate parameter.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
+  /** ID of the template applied to this conversation, used to look up field definitions. */
+  template_id?: string;
+  /**
+   * Id of the paused round this run resumes. Only that round is left out of the history; a paused
+   * round the run does not resume is rendered as history.
+   */
+  resumedRoundId?: string;
 }
 
-const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
-  return {
-    request: agentContext.request,
-    spaceId: agentContext.spaceId,
-  };
-};
-
-/**
- * Promote legacy per-round attachments into conversation-level versioned attachments.
- **/
-const mergeInputAttachmentsIntoAttachmentState = async (
-  attachmentStateManager: AttachmentStateManager,
-  inputs: AttachmentInput[],
-  options: { updateOriginSnapshot?: boolean; resolveContext: AttachmentResolveContext }
-) => {
-  if (inputs.length === 0) return;
-
-  const existingByContentKey = new Map<string, string>(); // contentKey -> attachmentId
-
-  for (const existing of attachmentStateManager.getAll()) {
-    const latest = getLatestVersion(existing);
-    if (!latest) continue;
-    existingByContentKey.set(`${existing.type}:${latest.content_hash}`, existing.id);
-  }
-
-  for (const input of inputs) {
-    // Prefer stable IDs (if provided)
-    if (input.id) {
-      const existing = attachmentStateManager.getAttachmentRecord(input.id);
-      if (existing) {
-        await attachmentStateManager.update(
-          input.id,
-          {
-            data: input.data,
-            ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-          },
-          ATTACHMENT_REF_ACTOR.user
-        );
-        if (options?.updateOriginSnapshot && existing.origin !== undefined) {
-          await attachmentStateManager.updateOrigin(
-            input.id,
-            existing.origin,
-            ATTACHMENT_REF_ACTOR.user
-          );
-        }
-        continue;
-      }
-    }
-
-    const contentKey = getContentKey(input, 'unknown');
-    if (existingByContentKey.has(contentKey)) {
-      // already present (same content), nothing to do
-      continue;
-    }
-
-    const created = await attachmentStateManager.add(
-      {
-        ...(input.id ? { id: input.id } : {}),
-        type: input.type,
-        data: input.data,
-        ...(input.origin !== undefined ? { origin: input.origin } : {}),
-        ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
-        ...(input.description !== undefined ? { description: input.description } : {}),
-        ...(input.group_id !== undefined ? { group_id: input.group_id } : {}),
-      },
-      ATTACHMENT_REF_ACTOR.user,
-      options.resolveContext
-    );
-
-    const latest = getLatestVersion(created);
-    if (latest) {
-      existingByContentKey.set(`${created.type}:${latest.content_hash}`, created.id);
-    }
-  }
-};
-
-/**
- * Prepare conversation rounds and input based on the action.
- * - 'regenerate': Strip the last round and use its input for re-execution
- * - Default: Use rounds and input as provided
- */
-const prepareForAction = ({
-  action,
-  previousRounds,
-  nextInput,
-}: {
-  action?: ConversationAction;
-  previousRounds: ConversationRound[];
-  nextInput: ConverseInput;
-}): { effectiveRounds: ConversationRound[]; effectiveNextInput: ConverseInput } => {
-  // Regenerate: strip the last round and use its original input
-  if (action === 'regenerate') {
-    if (previousRounds.length === 0) {
-      throw createBadRequestError('Cannot regenerate: conversation has no rounds');
-    }
-    const lastRound = previousRounds[previousRounds.length - 1];
-    // Faithfully replay the original request by copying the full stored input shape
-    const regenerateInput: ConverseInput = { ...lastRound.input };
-    // Strip the last round from previous rounds
-    return {
-      effectiveRounds: previousRounds.slice(0, -1),
-      effectiveNextInput: regenerateInput,
-    };
-  }
-
-  // Default: use rounds and input as provided
-  return { effectiveRounds: previousRounds, effectiveNextInput: nextInput };
-};
-
 export const prepareConversation = async ({
-  previousRounds,
+  timeline,
   nextInput,
+  nextInputAuthor,
   context,
-  action,
+  metadata,
+  templateId,
+  resumeAnchors,
 }: {
-  previousRounds: ConversationRound[];
+  /** The conversation's normalized context timeline (see `eventsForContext`). */
+  timeline: ContextTimelineEvent[];
   nextInput: ConverseInput;
+  nextInputAuthor?: ConversationRoundAuthor;
   context: AgentHandlerContext;
-  action?: ConversationAction;
+  metadata?: Record<string, MetadataFieldValue>;
+  templateId?: string;
+  resumeAnchors?: ResumeAnchors;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
-  const formatContext = createFormatContext(context);
   const resolveContext: AttachmentResolveContext = {
     request: context.request,
     spaceId: context.spaceId,
     savedObjectsClient: context.savedObjectsClient,
   };
+  const validateContext: AttachmentValidateContext = {
+    request: context.request,
+  };
 
-  // Handle regenerate action: use last round's input and strip it from previous rounds
-  const { effectiveRounds, effectiveNextInput } = prepareForAction({
-    action,
-    previousRounds,
-    nextInput,
-  });
+  const effectiveRounds = groupTimelineRounds(timeline);
+  const effectiveNextInput = nextInput;
 
-  // Promote any legacy per-round attachments into conversation-level versioned attachments.
-  // We merge both previous rounds and next input, then strip per-round attachments so the LLM
-  // only sees the v2 conversation-level attachments (via attachment presentation/tools).
-  const previousAttachments = effectiveRounds.flatMap(
-    (round) => round.input.attachments ?? []
-  ) as AttachmentInput[];
+  // Process complete executions, independent messages and standalone events in order so attachment
+  // versions resolve consistently. Incomplete execution inputs remain outside the model history.
+  const processedInputs: ProcessedRoundInput[] = [];
+  const processedTimeline: ProcessedTimelineEvent[] = [];
+  const includedRounds = new Set(effectiveRounds.map((round) => round.id));
+  for (const round of groupTimelineEntries(timeline)) {
+    if (isTimelineStandaloneEvent(round)) {
+      // Rendered unescaped, so never taken from the stored event.
+      const processedEvent = isAttachmentEvent(round.event)
+        ? {
+            ...round.event,
+            representation: { type: 'text' as const, value: formatAttachmentEvent(round.event) },
+          }
+        : await processCustomEvent({ event: round.event, context });
+      if (processedEvent) {
+        processedTimeline.push(processedEvent);
+      }
+      continue;
+    }
+    if (isTimelineRound(round) && !includedRounds.has(round.id)) continue;
+    const input = round.userMessage.data;
+    if (input.attachments && input.attachments.length > 0) {
+      await mergeAttachmentInputs({
+        stateManager: attachmentStateManager,
+        inputs: input.attachments,
+        actor: ATTACHMENT_REF_ACTOR.user,
+        resolveContext,
+        validateContext,
+      });
+    }
+    const processedInput = prepareRoundInput({
+      input: { ...input, attachments: [] },
+      author: authorAndOrigin(round.userMessage).author,
+      attachmentStateManager,
+    });
+    processedInputs.push(processedInput);
+
+    const inputEvents = linkedInputEvents(round.events, round.userMessage.id);
+    const processedUserMessage: ProcessedUserMessageEvent = {
+      ...round.userMessage,
+      data:
+        inputEvents.length > 0
+          ? { ...processedInput, attachment_events: inputEvents }
+          : processedInput,
+    };
+    // A round carries its user message and its run; a standalone message itself and its inputs.
+    const events = isTimelineRound(round) ? round.events : [round.userMessage, ...round.events];
+
+    for (const event of events) {
+      if (event.id === round.userMessage.id) {
+        processedTimeline.push(processedUserMessage);
+      } else if (isTimelineEvent(event) && !isUserMessageEvent(event)) {
+        processedTimeline.push(event);
+      }
+    }
+  }
+
+  // History re-migration above is idempotent bookkeeping, not a user action: drop its changes so
+  // only the next input's attachments surface as chat_input attachment events.
+  attachmentStateManager.clearChanges();
   const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
-
-  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments, {
+  await mergeAttachmentInputs({
+    stateManager: attachmentStateManager,
+    inputs: nextInputAttachments,
+    actor: ATTACHMENT_REF_ACTOR.user,
     resolveContext,
-  });
-  attachmentStateManager.clearAccessTracking();
-  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments, {
+    validateContext,
     updateOriginSnapshot: true,
-    resolveContext,
+  });
+  const processedNextInput = prepareRoundInput({
+    input: { message: effectiveNextInput.message ?? '' },
+    author: nextInputAuthor,
+    attachmentStateManager,
   });
 
-  const strippedNextInput: ConverseInput = { ...effectiveNextInput, attachments: [] };
-  const processedNextInput = await prepareRoundInput({
-    input: strippedNextInput,
-    attachmentsService,
-    formatContext,
-  });
-
-  const processedRounds = await Promise.all(
-    effectiveRounds.map((round) => {
-      const strippedRound: ConversationRound = {
-        ...round,
-        input: { ...round.input, attachments: [] },
-      };
-      return prepareRound({ round: strippedRound, attachmentsService, formatContext });
-    })
-  );
-
-  const allAttachments = [
-    ...processedNextInput.attachments,
-    ...processedRounds.flatMap((round) => round.input.attachments),
-  ];
-
+  const legacyRefTypes = processedInputs
+    .flatMap((input) => input.attachment_refs ?? [])
+    .map((ref) => ref.type)
+    .filter((type): type is string => !!type);
+  const eventTypes = processedTimeline
+    .filter(isAttachmentEvent)
+    .map((event) => event.data.attachment_type);
   const conversationAttachmentTypes = attachmentStateManager.getActive().map((a) => a.type);
   const attachmentTypeIds = [
-    ...new Set<string>([
-      ...conversationAttachmentTypes,
-      ...allAttachments.map((attachment) => attachment.attachment.type),
-    ]),
+    ...new Set<string>([...conversationAttachmentTypes, ...legacyRefTypes, ...eventTypes]),
   ];
 
   const attachmentTypes = await Promise.all(
@@ -248,146 +202,88 @@ export const prepareConversation = async ({
     })
   );
 
-  const allVersionedAttachments = attachmentStateManager.getAll();
-
-  const versionedAttachmentPresentation = await prepareAttachmentPresentation(
-    allVersionedAttachments,
-    {
-      resolveMaxContentLength: (attachment) =>
-        attachmentsService.getTypeDefinition(attachment.type)?.maxContentLength,
-    },
-    async (attachment, data) => {
-      const definition = attachmentsService.getTypeDefinition(attachment.type);
-      if (!definition) {
-        return undefined;
-      }
-
-      try {
-        const typeReadonly = definition.isReadonly ?? false;
-        const isReadonly = typeReadonly || attachment.readonly === true;
-        if (!isReadonly) {
-          return undefined;
-        }
-        const formatted = await definition.format(
-          {
-            id: attachment.id,
-            type: attachment.type,
-            data,
-          },
-          formatContext
-        );
-        if (!formatted?.getRepresentation) {
-          return undefined;
-        }
-        const representation = await formatted.getRepresentation();
-        return representation?.type === 'text' ? representation.value : undefined;
-      } catch {
-        return undefined;
-      }
-    }
-  );
-
   return {
     nextInput: processedNextInput,
-    previousRounds: processedRounds,
+    timeline: processedTimeline,
     attachmentTypes,
-    attachments: allAttachments,
+    describeAttachmentType: (type) =>
+      attachmentsService.getTypeDefinition(type)?.getAgentDescription?.() ?? undefined,
     attachmentStateManager,
-    versionedAttachmentPresentation,
+    ...(resumeAnchors ? { resumeAnchors } : {}),
+    ...(metadata !== undefined ? { metadata } : {}),
+    ...(templateId !== undefined ? { template_id: templateId } : {}),
   };
 };
 
-const prepareRound = async ({
-  round,
-  attachmentsService,
-  formatContext,
+/**
+ * Resolves a custom event's LLM representation through its registered type definition. Events
+ * whose type is unknown (logged) or defines no `format` (by design) are left out of the agent
+ * context; a `format` that throws is logged and skipped, so third-party code cannot sink the round.
+ */
+const processCustomEvent = async ({
+  event,
+  context,
 }: {
-  round: ConversationRound;
-  attachmentsService: AttachmentsService;
-  formatContext: AttachmentFormatContext;
-}): Promise<ProcessedConversationRound> => {
-  return {
-    ...round,
-    input: await prepareRoundInput({ input: round.input, attachmentsService, formatContext }),
-  };
-};
-
-const prepareRoundInput = async ({
-  input,
-  attachmentsService,
-  formatContext,
-}: {
-  input: RoundInput | ConverseInput;
-  attachmentsService: AttachmentsService;
-  formatContext: AttachmentFormatContext;
-}): Promise<ProcessedRoundInput> => {
-  let attachments: ProcessedAttachment[] = [];
-  if (input.attachments?.length) {
-    attachments = await Promise.all(
-      input.attachments.map((attachment) => {
-        return prepareAttachment({ attachment, attachmentsService, formatContext });
-      })
+  event: ConversationEvent;
+  context: AgentHandlerContext;
+}): Promise<ProcessedStandaloneEvent | undefined> => {
+  const definition = context.conversationEvents?.getDefinition(event.type);
+  if (!definition) {
+    context.logger.debug(
+      `Skipping conversation event "${event.id}": type "${event.type}" is not registered`
     );
+    return undefined;
   }
+  // A type without `format` opts out of the agent context by design: nothing to report.
+  if (!definition.format) {
+    return undefined;
+  }
+  try {
+    // The payload was validated against `definition.payloadSchema` when the event was added.
+    const representation = await definition.format(event, {
+      request: context.request,
+      spaceId: context.spaceId,
+    });
+    return { ...event, representation };
+  } catch (error) {
+    context.logger.warn(
+      `Failed to format conversation event "${event.id}" (type "${event.type}"): ${error}`
+    );
+    return undefined;
+  }
+};
+
+const prepareRoundInput = ({
+  input,
+  author,
+  attachmentStateManager,
+}: {
+  input: UserMessageEventData;
+  author?: ConversationRoundAuthor;
+  attachmentStateManager: AttachmentStateManager;
+}): ProcessedRoundInput => {
+  const inputAttachments: Partial<ProcessedRoundInput> = {};
+  if (input.attachment_refs) {
+    inputAttachments.attachment_refs = input.attachment_refs.map((ref) => ({
+      ...ref,
+      type: attachmentStateManager.getAttachmentRecord(ref.attachment_id)?.type,
+    }));
+    if ('attachment_context' in input && input.attachment_context) {
+      inputAttachments.attachment_context = input.attachment_context;
+    } else {
+      inputAttachments.attachment_context = formatAttachmentsMetadata(
+        input.attachment_refs,
+        attachmentStateManager
+      );
+    }
+  }
+
   return {
     message: input.message ?? '',
-    attachments,
+    // attachments are always stripped before this function. this is here to satisfy the type
+    // for legacy compatibility
+    attachments: [],
+    ...(author !== undefined ? { author } : {}),
+    ...inputAttachments,
   };
-};
-
-const prepareAttachment = async ({
-  attachment: input,
-  attachmentsService,
-  formatContext,
-}: {
-  attachment: AttachmentInput;
-  attachmentsService: AttachmentsService;
-  formatContext: AttachmentFormatContext;
-}): Promise<ProcessedAttachment> => {
-  const definition = attachmentsService.getTypeDefinition(input.type);
-  if (!definition) {
-    throw createInternalError(`Found attachment with unknown type: "${input.type}"`);
-  }
-
-  const attachment = inputToFinal(input);
-
-  try {
-    const formatted = await definition.format(attachment, formatContext);
-    const tools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
-    if (!formatted.getRepresentation) {
-      return {
-        attachment,
-        representation: { type: 'text', value: JSON.stringify(attachment.data) },
-        tools,
-      };
-    }
-    const representation = await formatted.getRepresentation();
-
-    return {
-      attachment,
-      representation,
-      tools,
-    };
-  } catch (e) {
-    return {
-      attachment,
-      representation: { type: 'text', value: JSON.stringify(attachment.data) },
-      tools: [],
-    };
-  }
-};
-
-const inputToFinal = (input: AttachmentInput): Attachment => {
-  if (input.data === undefined) {
-    throw createInternalError(
-      'Attachment is missing data; by-reference attachments must be resolved before formatting'
-    );
-  }
-  return {
-    id: input.id ?? getToolResultId(),
-    type: input.type,
-    data: input.data,
-    hidden: input.hidden,
-    origin: input.origin,
-  } as Attachment;
 };

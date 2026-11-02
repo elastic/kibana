@@ -18,6 +18,7 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
@@ -41,13 +42,14 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import type {
   SavedObjectFindOptionsKueryNode,
   SavedObjectsBulkResponseWithErrors,
   SOWithErrors,
 } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { STATUS_ESMODEL_TO_EXTERNAL } from '../../common/constants';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
@@ -65,7 +67,7 @@ import type {
   CasesAttachmentsV2WriterContract,
 } from '../../cases_analytics_v2';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { createCaseError, isSOError } from '../../common/error';
+import { createCaseError } from '../../common/error';
 import type {
   ResolvedExtendedFieldFilter,
   ResolvedFieldLabelFilter,
@@ -82,10 +84,10 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import {
-  CaseTransformedAttributesRt,
+  CaseTransformedAttributesSchema,
   CasePersistedStatus,
-  getPartialCaseTransformedAttributesRt,
-  OwnerRt,
+  getPartialCaseTransformedAttributesSchema,
+  OwnerSchema,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
@@ -113,7 +115,7 @@ import {
   mergeSearchQuery,
 } from './utils';
 
-const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+const PartialCaseTransformedAttributesSchema = getPartialCaseTransformedAttributesSchema();
 
 /**
  * Merges the legacy (`cases-comments`) and unified (`cases-attachments`) responses for
@@ -333,7 +335,7 @@ export class CasesService {
 
     const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
     for (const so of response.saved_objects) {
-      const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+      const validatedAttributes = decodeOrThrowZod(OwnerSchema)(so.attributes);
 
       owners.push(Object.assign(so, { attributes: validatedAttributes }));
     }
@@ -749,7 +751,9 @@ export class CasesService {
       );
 
       const res = transformSavedObjectToExternalModel(caseSavedObject);
-      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        res.attributes
+      ) as CaseTransformedAttributes;
 
       return {
         ...res,
@@ -772,8 +776,14 @@ export class CasesService {
           caseId
         );
 
+      if (isSavedObjectErrorResult(resolveCaseResult.saved_object)) {
+        throw new Error(resolveCaseResult.saved_object.error.message);
+      }
+
       const resolvedSO = transformSavedObjectToExternalModel(resolveCaseResult.saved_object);
-      const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(resolvedSO.attributes);
+      const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        resolvedSO.attributes
+      ) as CaseTransformedAttributes;
 
       return {
         ...resolveCaseResult,
@@ -795,12 +805,14 @@ export class CasesService {
       );
 
       const res = cases.saved_objects.map((theCase) => {
-        if (isSOError(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           return theCase;
         }
 
         const so = Object.assign(theCase, transformSavedObjectToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(CaseTransformedAttributesRt)(so.attributes);
+        const decodeRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          so.attributes
+        ) as CaseTransformedAttributes;
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         return soWithDecodedRes;
@@ -811,6 +823,29 @@ export class CasesService {
       });
     } catch (error) {
       this.log.error(`Error on GET cases ${caseIds.join(', ')}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * The status of each case found, reading only the status field; cases not found are left out.
+   */
+  public async getCaseStatuses({ caseIds }: GetCasesArgs): Promise<Map<string, CaseStatuses>> {
+    try {
+      this.log.debug(`Attempting to GET the status of cases ${caseIds.join(', ')}`);
+      const { saved_objects: cases } = await this.unsecuredSavedObjectsClient.bulkGet<
+        Pick<CasePersistedAttributes, 'status'>
+      >(caseIds.map((id) => ({ type: CASE_SAVED_OBJECT, id, fields: ['status'] })));
+
+      return new Map(
+        cases.flatMap((theCase): Array<[string, CaseStatuses]> => {
+          if (isSavedObjectErrorResult(theCase)) return [];
+          const status = STATUS_ESMODEL_TO_EXTERNAL[theCase.attributes.status];
+          return status ? [[theCase.id, status]] : [];
+        })
+      );
+    } catch (error) {
+      this.log.error(`Error on GET the status of cases ${caseIds.join(', ')}: ${error}`);
       throw error;
     }
   }
@@ -827,7 +862,7 @@ export class CasesService {
       });
 
       const res = transformFindResponseToExternalModel(cases);
-      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesRt);
+      const decodeRes = bulkDecodeSOAttributes(res.saved_objects, CaseTransformedAttributesSchema);
 
       return {
         ...res,
@@ -880,7 +915,6 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
@@ -890,7 +924,6 @@ export class CasesService {
             sortField: defaultSortField,
             ...options,
           },
-          mode,
         });
       }
 
@@ -901,7 +934,6 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -918,7 +950,6 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-    mode = 'legacy',
   }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
@@ -940,7 +971,6 @@ export class CasesService {
           filter: options?.filter,
           ...options,
         },
-        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);
@@ -1078,7 +1108,9 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to create a new case`);
 
-      const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        attributes
+      ) as CaseTransformedAttributes;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
 
       transformedAttributes.attributes.total_alerts = 0;
@@ -1095,7 +1127,9 @@ export class CasesService {
       this.analyticsV2Writer.upsertCase(createdCase);
 
       const res = transformSavedObjectToExternalModel(createdCase);
-      const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
+      const decodedRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+        res.attributes
+      ) as CaseTransformedAttributes;
 
       return { ...res, attributes: decodedRes };
     } catch (error) {
@@ -1112,7 +1146,9 @@ export class CasesService {
       this.log.debug(`Attempting to bulk create cases`);
 
       const bulkCreateRequest = cases.map(({ id, ...attributes }) => {
-        const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+        const decodedAttributes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          attributes
+        ) as CaseTransformedAttributes;
 
         const { attributes: transformedAttributes, referenceHandler } =
           transformAttributesToESModel(decodedAttributes);
@@ -1145,13 +1181,15 @@ export class CasesService {
       const successfulAnalyticsV2Mirrors: Array<(typeof bulkCreateResponse.saved_objects)[number]> =
         [];
       const res = bulkCreateResponse.saved_objects.map((theCase) => {
-        if (isSOError<CasePersistedAttributes>(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           return theCase;
         }
         successfulAnalyticsV2Mirrors.push(theCase);
 
         const transformedCase = transformSavedObjectToExternalModel(theCase);
-        const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
+        const decodedRes = decodeOrThrowZod(CaseTransformedAttributesSchema)(
+          transformedCase.attributes
+        ) as CaseTransformedAttributes;
 
         return { ...transformedCase, attributes: decodedRes };
       });
@@ -1176,9 +1214,9 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
 
-      const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+      const decodedAttributes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
         updatedAttributes
-      );
+      ) as Partial<CaseTransformedAttributes>;
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
       // Compute the merged reference list once and share it between the SO
       // update and the analytics-writer synthesis. Mirrors the
@@ -1215,7 +1253,9 @@ export class CasesService {
       });
 
       const res = transformUpdateResponseToExternalModel(updatedCase);
-      const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
+        res.attributes
+      ) as Partial<CaseTransformedAttributes>;
 
       return {
         ...res,
@@ -1239,9 +1279,9 @@ export class CasesService {
       // after `bulkUpdate` succeeds. We can't read `bulkUpdate`'s response for
       // this because it returns partial attributes, not the full merged state.
       const perCaseUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
-        const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
+        const decodedAttributes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
           updatedAttributes
-        );
+        ) as Partial<CaseTransformedAttributes>;
         const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
         const builtReferences = referenceHandler.build(originalCase.references);
         return {
@@ -1276,7 +1316,7 @@ export class CasesService {
       const analyticsV2Mirrors: Array<SavedObject<CasePersistedAttributes>> = [];
 
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
-        if (isSOError(theCase)) {
+        if (isSavedObjectErrorResult(theCase)) {
           acc.push(theCase);
           return acc;
         }
@@ -1297,7 +1337,9 @@ export class CasesService {
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
+        const decodeRes = decodeOrThrowZod(PartialCaseTransformedAttributesSchema)(
+          so.attributes
+        ) as Partial<CaseTransformedAttributes>;
         const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
 
         acc.push(soWithDecodedRes);

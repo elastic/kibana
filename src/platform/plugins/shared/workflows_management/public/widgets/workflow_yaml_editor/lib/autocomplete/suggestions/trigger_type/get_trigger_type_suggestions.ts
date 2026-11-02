@@ -75,6 +75,7 @@ export function getTriggerTypeSuggestions(
     const triggerDef = triggerSchemas.getTriggerDefinition(triggerType.type);
     const snippetText = generateTriggerSnippet(triggerType.type, {
       defaultCondition: triggerDef?.snippets?.condition,
+      requiresConnectorId: triggerDef?.requiresConnectorId,
     });
 
     // Extended range for multi-line insertion
@@ -87,6 +88,9 @@ export function getTriggerTypeSuggestions(
 
     const isEventDriven = !isTriggerType(triggerType.type);
     const sortPrefix = isEventDriven ? '1_' : '0_';
+    // Label is the technical id (`alert`, `alerting.actions.alertAcked`). The
+    // display name (connector name plus event title) stays in detail. filterText
+    // is the same id so YAML schema suggestions dedupe on that key.
     suggestions.push({
       label: triggerType.type,
       kind: triggerType.icon,

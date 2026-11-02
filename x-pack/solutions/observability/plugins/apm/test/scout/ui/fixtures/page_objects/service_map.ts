@@ -12,8 +12,8 @@ import {
   type ScoutPage,
 } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
-import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_OPBEANS_JAVA } from '../constants';
+import { waitForApmAppMenuReady } from '../page_helpers';
+import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../constants';
 
 export class ServiceMapPage {
   public serviceMap: Locator;
@@ -31,7 +31,8 @@ export class ServiceMapPage {
   public serviceMapPopoverContent: Locator;
   public serviceMapPopoverTitle: Locator;
   public serviceMapDependencyDetailsButton: Locator;
-  public serviceMapEdgeExploreTracesButton: Locator;
+  public requestFlyout: Locator;
+  public requestFlyoutTitle: Locator;
   public serviceMapOptionsPanel: Locator;
   public serviceMapHideControlsButton: Locator;
   public serviceMapShowControlsButton: Locator;
@@ -71,9 +72,8 @@ export class ServiceMapPage {
     this.serviceMapDependencyDetailsButton = page.testSubj.locator(
       'apmDependencyContentsDependencyDetailsButton'
     );
-    this.serviceMapEdgeExploreTracesButton = page.testSubj.locator(
-      'apmEdgeContentsOpenInDiscoverButton'
-    );
+    this.requestFlyout = page.testSubj.locator('requestFlyout');
+    this.requestFlyoutTitle = page.testSubj.locator('requestFlyoutHeader');
     this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
     this.serviceMapHideControlsButton = page.testSubj.locator('serviceMapHideControlsButton');
     this.serviceMapShowControlsButton = page.testSubj.locator('serviceMapShowControlsButton');
@@ -107,16 +107,7 @@ export class ServiceMapPage {
       params.set('kuery', options.kuery);
     }
     await this.page.goto(`${this.kbnUrl.app('apm')}/service-map?${params.toString()}`);
-    return await waitForApmSettingsHeaderLink(this.page);
-  }
-
-  async gotoDetailedServiceMapWithDateSelected(start: string, end: string) {
-    await this.page.goto(
-      `${this.kbnUrl.app(
-        'apm'
-      )}/services/${SERVICE_OPBEANS_JAVA}/service-map?rangeFrom=${start}&rangeTo=${end}&environment=${PRODUCTION_ENVIRONMENT}`
-    );
-    return await waitForApmSettingsHeaderLink(this.page);
+    return await waitForApmAppMenuReady(this.page);
   }
 
   async getSearchBar() {
@@ -255,10 +246,10 @@ export class ServiceMapPage {
     await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
-  async openEdgePopover(edgeId: string) {
+  async openEdgeFlyout(edgeId: string) {
     await this.settleServiceMapLayout();
     await this.clickEdge(edgeId);
-    await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.requestFlyout.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   getNodeById(nodeId: string) {

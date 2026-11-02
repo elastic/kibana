@@ -15,7 +15,7 @@ import { saveTemplate, doesTemplateExist, getTemplateDataStreamOptions } from '.
 
 const bodySchema = templateSchema;
 const paramsSchema = schema.object({
-  name: schema.string(),
+  name: schema.string({ maxLength: 1000 }),
 });
 
 export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDependencies) {

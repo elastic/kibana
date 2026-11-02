@@ -19,11 +19,11 @@ import {
   EuiFlyoutFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiCallOut,
   EuiIconTip,
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import { MAX_FLYOUT_WIDTH } from '../constants';
 import {
@@ -36,7 +36,10 @@ import {
 import { agentPolicyRouteService, getYamlFormatters } from '../services';
 import type { YamlFormatters } from '../../../services/yaml_formatters';
 import { API_VERSIONS } from '../../../../common/constants';
-import { splitVersionSuffixFromPolicyId } from '../../../../common/services/version_specific_policies_utils';
+import {
+  splitVersionSuffixFromPolicyId,
+  hasAgentVersionSuffix,
+} from '../../../../common/services/version_specific_policies_utils';
 
 import { Loading } from '.';
 
@@ -52,7 +55,9 @@ export const AgentPolicyYamlFlyout = memo<{
   onClose: () => void;
 }>(({ policyId, revision, onClose }) => {
   const flyoutTitleId = useGeneratedHtmlId();
-  const { version: agentVersion } = splitVersionSuffixFromPolicyId(policyId);
+  const agentVersion = hasAgentVersionSuffix(policyId)
+    ? splitVersionSuffixFromPolicyId(policyId).version
+    : null;
   const [formatters, setFormatters] = useState<YamlFormatters | null>(null);
 
   useEffect(() => {
@@ -76,7 +81,7 @@ export const AgentPolicyYamlFlyout = memo<{
     isLoadingYaml || !formatters ? (
       <Loading />
     ) : error ? (
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={
           <FormattedMessage
@@ -84,11 +89,8 @@ export const AgentPolicyYamlFlyout = memo<{
             defaultMessage="Error loading agent policy yaml"
           />
         }
-        color="danger"
-        iconType="warning"
-      >
-        {error.message}
-      </EuiCallOut>
+        text={error.message}
+      />
     ) : (
       <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
         {formatters.fullAgentPolicyToYaml(yamlData!.item)}
@@ -159,7 +161,7 @@ export const AgentPolicyYamlFlyout = memo<{
         {!canReadSettings && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -168,23 +170,22 @@ export const AgentPolicyYamlFlyout = memo<{
                 />
               }
               size="m"
-              color="warning"
-              iconType="warning"
-            >
-              <FormattedMessage
-                id="xpack.fleet.policyDetails.secretsRedactedDescription"
-                defaultMessage="Proxy headers and TLS private keys are only visible to users with the {privilege} Kibana privilege for Fleet."
-                values={{
-                  privilege: <strong>{'Fleet > Settings: Read'}</strong>,
-                }}
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsRedactedDescription"
+                  defaultMessage="Proxy headers and TLS private keys are only visible to users with the {privilege} Kibana privilege for Fleet."
+                  values={{
+                    privilege: <strong>{'Fleet > Settings: Read'}</strong>,
+                  }}
+                />
+              }
+            />
           </>
         )}
         {packagePoliciesContainSecrets && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -193,17 +194,16 @@ export const AgentPolicyYamlFlyout = memo<{
                 />
               }
               size="m"
-              color="primary"
-              iconType="info"
-            >
-              <FormattedMessage
-                id="xpack.fleet.policyDetails.secretsDescription"
-                defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
-                values={{
-                  envVarPrefix: <code>{'${SECRET_0}'}</code>,
-                }}
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.fleet.policyDetails.secretsDescription"
+                  defaultMessage="Kibana does not have access to secret values. You will need to set these values manually after deploying the agent policy. Look out for environment variables in the format {envVarPrefix} in the agent configuration."
+                  values={{
+                    envVarPrefix: <code>{'${SECRET_0}'}</code>,
+                  }}
+                />
+              }
+            />
           </>
         )}
       </EuiFlyoutHeader>

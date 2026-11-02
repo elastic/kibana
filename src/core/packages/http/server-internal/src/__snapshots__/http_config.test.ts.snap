@@ -87,7 +87,9 @@ Object {
   "protocol": "http1",
   "prototypeHardening": true,
   "rateLimiter": Object {
+    "elu": 0.8,
     "enabled": false,
+    "term": "medium",
   },
   "requestId": Object {
     "allowFromAnyIp": false,
@@ -98,12 +100,16 @@ Object {
   "securityResponseHeaders": Object {
     "crossOriginOpenerPolicy": "same-origin",
     "disableEmbedding": false,
-    "permissionsPolicy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
+    "permissionsPolicy": "camera=(), display-capture=(), fullscreen=(self \\"https://play.vidyard.com\\"), geolocation=(self), microphone=(), web-share=()",
     "referrerPolicy": "strict-origin-when-cross-origin",
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
   },
   "selfHttp": Object {
+    "maxRedirects": 0,
+    "ssl": Object {
+      "verificationMode": "full",
+    },
     "target": "auto",
   },
   "serverTiming": false,

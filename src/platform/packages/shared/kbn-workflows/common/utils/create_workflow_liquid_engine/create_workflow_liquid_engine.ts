@@ -95,6 +95,8 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
     renderLimit,
     // Default max object allocations (array ops, string ops) per render
     memoryLimit,
+    // Enables grouped expressions (e.g. {% if a and (b or c) %})
+    groupedExpressions: true,
   });
   removeDisallowedLiquidTags(engine);
   registerWorkflowLiquidFilters(engine);
@@ -110,6 +112,17 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
  * eliminates the risk of divergence (e.g. a no-op stub instead of the real function).
  */
 export const registerWorkflowLiquidFilters = (engine: Liquid): void => {
+  // Decodes Base64 without interpreting binary data as UTF-8 text.
+  engine.registerFilter('base64_decode_bytes', function (value: unknown): Uint8Array {
+    const encoded = String(value ?? '');
+    this.context.memoryLimit.use(encoded.length);
+    const bytes =
+      typeof Buffer !== 'undefined'
+        ? Buffer.from(encoded, 'base64')
+        : Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+    return bytes;
+  });
+
   // Converts a JSON string to a parsed object; passes non-strings through unchanged.
   engine.registerFilter('json_parse', (value: unknown): unknown => {
     if (typeof value !== 'string') {
@@ -139,5 +152,23 @@ export const registerWorkflowLiquidFilters = (engine: Liquid): void => {
       value,
       paths.filter((path): path is string => typeof path === 'string')
     );
+  });
+
+  // Splits an array into consecutive groups of at most `size` items, so a `foreach` can
+  // iterate batches instead of single items
+  engine.registerFilter('chunk', (value: unknown, size: unknown): unknown => {
+    if (!Array.isArray(value)) {
+      return value;
+    }
+    const groupSize = Math.floor(Number(size));
+    const isUsableSize = Number.isInteger(groupSize) && groupSize >= 1;
+    if (!isUsableSize) {
+      return value.length > 0 ? [value] : [];
+    }
+    const groups: unknown[][] = [];
+    for (let index = 0; index < value.length; index += groupSize) {
+      groups.push(value.slice(index, index + groupSize));
+    }
+    return groups;
   });
 };

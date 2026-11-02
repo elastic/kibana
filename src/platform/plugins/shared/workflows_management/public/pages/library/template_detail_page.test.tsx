@@ -7,53 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { of } from 'rxjs';
 import type { TemplateBody } from '@kbn/workflows-library';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { LibraryTemplateDetailPage } from './template_detail_page';
-import { mockWorkflowsManagementCapabilities } from '../../hooks/__mocks__/use_workflows_capabilities';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
 const mockSetWorkflowsBreadcrumbs = jest.fn();
-const mockUseWorkflowsExperimentalUiSetting = jest.fn(() => false);
 let mockOnLoaded: ((template: TemplateBody) => void) | undefined;
 let mockShowGraphPreview: boolean | undefined;
+const mockUseTemplate = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
-  useWorkflowsCapabilities: jest.fn(),
+  useTemplate: (slug: string | undefined) => mockUseTemplate(slug),
   TemplateDetail: ({
     slug,
     onLoaded,
     showGraphPreview,
-    primaryAction,
   }: {
     slug: string;
     onLoaded: (template: TemplateBody) => void;
     showGraphPreview: boolean;
-    primaryAction?: React.ReactNode;
   }) => {
     mockOnLoaded = onLoaded;
     mockShowGraphPreview = showGraphPreview;
-    return (
-      <div data-test-subj="mockTemplateDetail">
-        {slug}
-        {primaryAction}
-      </div>
-    );
+    return <div data-test-subj="mockTemplateDetail">{slug}</div>;
   },
 }));
 
-const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
-  typeof useWorkflowsCapabilities
->;
-
-jest.mock('../../hooks/use_workflows_experimental_ui_setting', () => ({
-  useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
+jest.mock('./template_not_found_page', () => ({
+  TemplateNotFoundPage: ({ onBackToLibrary }: { onBackToLibrary: () => void }) => (
+    <div data-test-subj="workflowLibraryTemplateNotFoundPage">
+      <button
+        type="button"
+        data-test-subj="workflowLibraryTemplateNotFoundBackButton"
+        onClick={onBackToLibrary}
+      />
+    </div>
+  ),
 }));
 
 jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
@@ -64,8 +59,16 @@ function buildEnabledServices(): StartServicesMock {
   const services = createStartServicesMock();
   services.settings.globalClient.get.mockReturnValue(true);
   services.settings.globalClient.get$.mockReturnValue(of(true));
+  services.application.getUrlForApp.mockReturnValue('/app/workflows/library');
   return services;
 }
+
+const createHttpFetchError = (status: number): Error =>
+  Object.assign(new Error(`Request failed with status ${status}`), {
+    name: 'HttpFetchError',
+    request: {},
+    response: { status },
+  });
 
 const routeProps = (slug: string) =>
   ({
@@ -75,13 +78,12 @@ const routeProps = (slug: string) =>
 describe('LibraryTemplateDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseWorkflowsExperimentalUiSetting.mockReturnValue(false);
-    mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
     mockOnLoaded = undefined;
     mockShowGraphPreview = undefined;
+    mockUseTemplate.mockReturnValue({ error: null });
   });
 
-  it('resets breadcrumbs to Library when the route slug changes', async () => {
+  it('resets breadcrumbs to Library when the route slug changes', () => {
     const services = buildEnabledServices();
     const { rerender } = render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
       wrapper: getTestProvider({ services }),
@@ -93,63 +95,18 @@ describe('LibraryTemplateDetailPage', () => {
       } as TemplateBody);
     });
 
-    await waitFor(() => {
-      expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith(
-        expect.arrayContaining([expect.objectContaining({ text: 'First template' })])
-      );
-    });
+    expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith(
+      expect.arrayContaining([expect.objectContaining({ text: 'First template' })])
+    );
 
     rerender(<LibraryTemplateDetailPage {...routeProps('second-template')} />);
 
-    await waitFor(() => {
-      expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
-        expect.objectContaining({ text: 'Template Library' }),
-      ]);
-    });
+    expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
+      { text: 'Template library', href: '/app/workflows/library' },
+    ]);
   });
 
-  it('renders the "Add workflow" button when the user can create workflows', () => {
-    const services = buildEnabledServices();
-
-    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
-      wrapper: getTestProvider({ services }),
-    });
-
-    act(() => {
-      mockOnLoaded?.({
-        metadata: { slug: 'first-template', name: 'First template' },
-      } as TemplateBody);
-    });
-
-    expect(
-      screen.queryByTestId('workflowLibraryTemplateDetailAddWorkflowButton')
-    ).toBeInTheDocument();
-  });
-
-  it('hides the "Add workflow" button for users without create capability', () => {
-    mockUseWorkflowsCapabilities.mockReturnValue({
-      ...mockWorkflowsManagementCapabilities,
-      canCreateWorkflow: false,
-    });
-    const services = buildEnabledServices();
-
-    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
-      wrapper: getTestProvider({ services }),
-    });
-
-    act(() => {
-      mockOnLoaded?.({
-        metadata: { slug: 'first-template', name: 'First template' },
-      } as TemplateBody);
-    });
-
-    expect(
-      screen.queryByTestId('workflowLibraryTemplateDetailAddWorkflowButton')
-    ).not.toBeInTheDocument();
-  });
-
-  it('passes the visual editor flag through to the template detail preview', () => {
-    mockUseWorkflowsExperimentalUiSetting.mockReturnValue(true);
+  it('always enables the graph preview in the template detail', () => {
     const services = buildEnabledServices();
 
     render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
@@ -157,5 +114,32 @@ describe('LibraryTemplateDetailPage', () => {
     });
 
     expect(mockShowGraphPreview).toBe(true);
+  });
+
+  it('renders the not-found page when the template does not exist', () => {
+    const services = buildEnabledServices();
+    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(404) });
+
+    render(<LibraryTemplateDetailPage {...routeProps('no-such-template')} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+    expect(screen.getByTestId('workflowLibraryTemplateNotFoundPage')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockTemplateDetail')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('workflowLibraryTemplateNotFoundBackButton'));
+    expect(services.application.navigateToUrl).toHaveBeenCalledWith('/app/workflows/library');
+  });
+
+  it('keeps the template detail for errors other than not found', () => {
+    const services = buildEnabledServices();
+    mockUseTemplate.mockReturnValue({ error: createHttpFetchError(500) });
+
+    render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
+      wrapper: getTestProvider({ services }),
+    });
+
+    expect(screen.queryByTestId('workflowLibraryTemplateNotFoundPage')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockTemplateDetail')).toBeInTheDocument();
   });
 });

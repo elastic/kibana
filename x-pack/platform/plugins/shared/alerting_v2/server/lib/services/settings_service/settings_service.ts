@@ -7,10 +7,12 @@
 
 import type { IUiSettingsClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import type {
-  AlertingAdvancedSettingId,
-  AlertingAdvancedSettingValue,
+import {
+  ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
+  type AlertingAdvancedSettingId,
+  type AlertingAdvancedSettingValue,
 } from '@kbn/alerting-v2-constants';
+import { SpaceUiSettingsClientToken } from '../../../settings/tokens';
 import { UiSettingsClientToken } from './tokens';
 
 export interface SettingsServiceContract {
@@ -35,19 +37,29 @@ export interface SettingsServiceContract {
 export class SettingsService implements SettingsServiceContract {
   constructor(
     @inject(UiSettingsClientToken)
-    private readonly uiSettingsClient: IUiSettingsClient
+    private readonly globalUiSettingsClient: IUiSettingsClient,
+    @inject(SpaceUiSettingsClientToken)
+    private readonly spaceUiSettingsClient: IUiSettingsClient
   ) {}
 
   public async get<K extends AlertingAdvancedSettingId>(
     key: K
   ): Promise<AlertingAdvancedSettingValue<K>> {
-    return this.uiSettingsClient.get<AlertingAdvancedSettingValue<K>>(key);
+    return this.getClient(key).get<AlertingAdvancedSettingValue<K>>(key);
   }
 
   public async set<K extends AlertingAdvancedSettingId>(
     key: K,
     value: AlertingAdvancedSettingValue<K>
   ): Promise<void> {
-    await this.uiSettingsClient.set(key, value);
+    await this.getClient(key).set(key, value);
+  }
+
+  private getClient(key: AlertingAdvancedSettingId): IUiSettingsClient {
+    if (key === ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID) {
+      return this.spaceUiSettingsClient;
+    }
+
+    return this.globalUiSettingsClient;
   }
 }

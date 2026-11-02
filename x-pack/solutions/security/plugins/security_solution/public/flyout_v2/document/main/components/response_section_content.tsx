@@ -17,6 +17,7 @@ import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { EventKind } from '../constants/event_kinds';
 import { RESPONSE_BUTTON_TEST_ID, RESPONSE_SECTION_TEST_ID } from './test_ids';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 
 const KEY = 'response';
 
@@ -26,23 +27,17 @@ export interface ResponseSectionContentProps {
    */
   hit: DataTableRecord;
   /**
-   * Whether the flyout is opened in rule preview mode.
-   */
-  isRulePreview?: boolean;
-  /**
-   * Callback to show Response details. The host (Flyout v2 or legacy expandable flyout)
-   * decides whether this opens a tools flyout or navigates to the legacy left panel.
+   * Callback to show Response details.
    */
   onShowResponseDetails: () => void;
 }
 
 /**
- * Renders the Response overview section. Host-agnostic: takes an `onShowResponseDetails`
- * callback so it can be reused in both Flyout v2 and the legacy expandable flyout
- * without constructing a v2 tools flyout when not needed.
+ * Renders the Response overview section.
  */
 export const ResponseSectionContent = memo<ResponseSectionContentProps>(
-  ({ hit, isRulePreview = false, onShowResponseDetails }) => {
+  ({ hit, onShowResponseDetails }) => {
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const indexName = useMemo(
       () => hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '',
       [hit]

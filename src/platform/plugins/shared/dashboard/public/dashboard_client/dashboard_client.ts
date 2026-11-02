@@ -13,14 +13,8 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
-import { PAGINATION_DEFAULT_PER_PAGE } from '@kbn/as-code-shared-schemas';
-
-import type { LegacyDashboardSearchResponseBody } from '../../server/api/search/types';
-import type {
-  DashboardSearchRequestParams,
-  DashboardSearchResponseBody,
-  DashboardState,
-} from '../../server';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardSearchRequestParams, DashboardSearchResponseBody } from '../../server';
 import {
   DASHBOARD_API_PATH,
   DASHBOARD_API_VERSION,
@@ -112,28 +106,13 @@ export const dashboardClient = {
   search: async (searchParams: Partial<DashboardSearchRequestParams>) => {
     const { query, ...params } = searchParams;
 
-    const response = await coreServices.http.get<
-      DashboardSearchResponseBody | LegacyDashboardSearchResponseBody
-    >(DASHBOARD_API_PATH, {
+    const response = await coreServices.http.get<DashboardSearchResponseBody>(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
       query: {
         ...params,
         ...(query ? { query: `${query}*` } : {}),
       },
     });
-
-    // Normalize the legacy response shape to the GA shape so callers always receive `{ data, meta }`,
-    // regardless of whether the server has the `asCode.useGASchemas` feature flag enabled.
-    if ('dashboards' in response) {
-      return {
-        data: response.dashboards,
-        meta: {
-          page: response.page,
-          per_page: params.per_page ?? PAGINATION_DEFAULT_PER_PAGE,
-          total: response.total,
-        },
-      };
-    }
 
     return response;
   },

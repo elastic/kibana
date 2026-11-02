@@ -17,7 +17,7 @@ import {
 import { AgentConfigurationTable } from './agent_config_table';
 import { CommandsInstructionsCodeblock } from './commands_instructions_codeblock';
 
-const SECRET_TOKEN_COMMAND_PLACEHOLDER = '<SECRET_TOKEN>';
+export const SECRET_TOKEN_COMMAND_PLACEHOLDER = '<SECRET_TOKEN>';
 
 export function AgentConfigInstructions({
   variantId,

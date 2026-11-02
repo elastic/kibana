@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/usage-collection-plugin'
   - '@kbn/alerting-plugin'
+  - '@kbn/app-header'
   - '@kbn/actions-plugin'
   - '@kbn/cloud-plugin'
   - '@kbn/encrypted-saved-objects-plugin'
@@ -75,6 +76,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -83,6 +85,4 @@ fileGroups:
     - server/**/*.json
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

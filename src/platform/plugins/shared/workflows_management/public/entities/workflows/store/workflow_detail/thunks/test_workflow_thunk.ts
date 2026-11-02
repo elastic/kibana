@@ -52,7 +52,7 @@ export const testWorkflowThunk = createAsyncThunk<
       }
 
       const response = await api.testWorkflow({
-        workflowYaml: yamlString,
+        workflowYaml: workflow?.permissions?.edit === false ? undefined : yamlString,
         workflowId: workflow?.id,
         inputs,
       });

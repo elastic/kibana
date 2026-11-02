@@ -148,11 +148,18 @@ export function createCriteriaEvaluator({
           successful: sumBy(successful, ({ criterion }) => criterion.score),
           failed: sumBy(failed, ({ criterion }) => criterion.score),
           not_applicable: sumBy(notApplicable, ({ criterion }) => criterion.score),
+          criteria: results.map(({ criterion, evaluation }) => ({
+            id: criterion.id,
+            result: evaluation.result,
+            reason: evaluation.reason ?? null,
+            weight: criterion.score,
+          })),
         },
         score: normalize(totalScore / maxScore),
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name: 'criteria',
   };
 }

@@ -40,7 +40,7 @@ describe('useRestoreHistory', () => {
     mockGetHistory.mockReturnValue(history);
     renderHook(() => useRestoreHistory());
 
-    expect(mockDispatch).not.toBeCalled();
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
   test('dispatches nothing on a non pop event', () => {
@@ -48,12 +48,12 @@ describe('useRestoreHistory', () => {
     mockGetHistory.mockReturnValue({ action: 'not-pop' });
     const { rerender } = renderHook(() => useRestoreHistory());
 
-    expect(mockDispatch).not.toBeCalled();
+    expect(mockDispatch).not.toHaveBeenCalled();
 
     mockGetLocation.mockReturnValue({ state: encode({ some: 'state' }) });
     rerender();
 
-    expect(mockDispatch).not.toBeCalled();
+    expect(mockDispatch).not.toHaveBeenCalled();
   });
 
   test('dispatches restore history if state changes on a POP action', () => {

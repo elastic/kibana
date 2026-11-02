@@ -8,3 +8,4 @@
  */
 
 export { injectionServiceMock } from './src/service.mock';
+export { setup, start } from './src/utils';

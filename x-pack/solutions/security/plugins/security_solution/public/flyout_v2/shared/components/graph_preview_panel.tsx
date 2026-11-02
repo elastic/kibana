@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiBetaBadge } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -15,6 +15,7 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
+import { useGraphTelemetry } from '../hooks/use_graph_telemetry';
 import { ExpandablePanel } from './expandable_panel';
 import { GraphPreview } from './graph_preview';
 import { GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID, GRAPH_PREVIEW_TEST_ID } from './test_ids';
@@ -46,6 +47,11 @@ export const GraphPreviewPanel = ({
   showIcon,
 }: GraphPreviewPanelProps) => {
   const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
+  const { reportPreviewExpanded } = useGraphTelemetry();
+  const onExpandGraph = useCallback(() => {
+    reportPreviewExpanded();
+    onShowGraph?.();
+  }, [reportPreviewExpanded, onShowGraph]);
 
   useEffect(() => {
     if (shouldShowGraph) {
@@ -71,7 +77,7 @@ export const GraphPreviewPanel = ({
         headerContent: (
           <EuiBetaBadge
             alignment="middle"
-            iconType="beaker"
+            iconType="flask"
             data-test-subj={GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID}
             label={i18n.translate(
               'xpack.securitySolution.flyout.document.visualizations.graphPreview.technicalPreviewLabel',
@@ -86,10 +92,10 @@ export const GraphPreviewPanel = ({
             )}
           />
         ),
-        iconType: showIcon ? 'arrowStart' : undefined,
+        iconType: showIcon ? 'chevronLimitLeft' : undefined,
         ...(showLink && {
           link: {
-            callback: onShowGraph,
+            callback: onExpandGraph,
             tooltip: (
               <FormattedMessage
                 id="xpack.securitySolution.flyout.document.visualizations.graphPreview.openGraphTooltip"

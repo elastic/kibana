@@ -9,10 +9,9 @@ import React, { lazy, useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FlyoutOrigin } from '../../../common/lib/telemetry';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TOOL } from '../../../common/lib/telemetry';
-import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
+import { useDefaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../hooks/use_open_flyout';
-import { formatFlyoutTitle, NOTES_TITLE } from '../constants/flyout_titles';
-import { getDocumentTitle } from '../../document/main/utils/get_header_title';
+import { getNotesFlyoutTitle, getNotesFlyoutType } from './notes/utils/get_notes_flyout_details';
 import { useFlyoutSessionContext } from '../../session_context';
 import { useFlyoutV2UrlWriter } from '../url_state/flyout_v2_url_writer';
 import { FLYOUT_DESCRIPTOR_KIND, urlParamKeyForHistoryKey } from '../url_state/flyout_v2_url_param';
@@ -29,7 +28,7 @@ export interface OpenNotesParams {
 }
 
 export interface SharedToolsFlyoutApi {
-  /** Opens the notes tools flyout for a document. */
+  /** Opens the notes tools flyout for a document or an attack. */
   openNotes: (params: OpenNotesParams) => void;
 }
 
@@ -49,6 +48,7 @@ export interface SharedToolsFlyoutApi {
  */
 export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
   const { historyKey } = useFlyoutSessionContext();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
@@ -68,11 +68,12 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: FLYOUT_SESSION_KIND.START,
-          title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
+          title: getNotesFlyoutTitle(hit),
           onClose,
         },
         {
           surface: FLYOUT_SURFACE.TOOL,
+          flyoutType: getNotesFlyoutType(hit),
           tool: FLYOUT_TOOL.NOTES,
           session: FLYOUT_SESSION_KIND.START,
           origin,
@@ -80,7 +81,7 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   return useMemo(() => ({ openNotes }), [openNotes]);

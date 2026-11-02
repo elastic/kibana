@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import globby from 'globby';
+import { globby } from 'globby';
 import { resolve } from 'path';
 
 export async function resolveGlobs(globs: string[]): Promise<string[]> {

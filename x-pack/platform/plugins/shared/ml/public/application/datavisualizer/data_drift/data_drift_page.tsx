@@ -17,11 +17,12 @@ import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
-import { MlAppHeader } from '../../components/ml_app_header';
+import { MlAppHeader, useDataVisualizerBack } from '../../components/ml_app_header';
 
 export const DataDriftPage: FC = () => {
   const { services } = useMlKibana();
   const { dataVisualizer } = services;
+  const dataVisualizerBack = useDataVisualizerBack();
 
   const [DataDriftView, setDataDriftView] = useState<DataDriftSpec | null>(null);
 
@@ -49,6 +50,7 @@ export const DataDriftPage: FC = () => {
         title={i18n.translate('xpack.ml.dataDrift.pageHeader', {
           defaultMessage: 'Data drift',
         })}
+        back={dataVisualizerBack}
       />
       {dataView && DataDriftView ? (
         <DataDriftView

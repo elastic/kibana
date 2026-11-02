@@ -7,6 +7,7 @@
 
 import type { KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '../../../constants/api_headers';
 
 const SEEDED_ATTACK_TITLE = 'Scout seeded attack discovery';
 const SEEDED_SCHEDULE_NAME = 'Scout seeded attack schedule';
@@ -42,14 +43,13 @@ export const getAttackDiscoveryApiService = ({
   return {
     seedAttackData: async () => {
       await measurePerformanceAsync(log, 'security.attackDiscovery.seedAttackData', async () => {
+        // Unfiltered by type and owner: the seeded pair is one scheduled and one ad hoc, user-owned attack.
         const findSeededResponse = await kbnClient.request({
           method: 'GET',
           path: `${basePath}/api/attack_discovery/_find`,
           query: {
             per_page: 2,
             search: SEEDED_ATTACK_TITLE,
-            scheduled: true,
-            shared: true,
           },
         });
 
@@ -65,8 +65,7 @@ export const getAttackDiscoveryApiService = ({
           path: `${basePath}/internal/elastic_assistant/data_generator/attack_discoveries/_create`,
           headers: {
             'kbn-xsrf': 'true',
-            'x-elastic-internal-origin': 'Kibana',
-            'elastic-api-version': '1',
+            ...INTERNAL_API_HEADERS,
           },
           body: {
             alertsContextCount: 2,
@@ -189,7 +188,7 @@ export const getAttackDiscoveryApiService = ({
             path: `${basePath}/api/attack_discovery/schedules`,
             headers: {
               'kbn-xsrf': 'true',
-              'elastic-api-version': '2023-10-31',
+              ...PUBLIC_API_HEADERS,
             },
             body: {
               name: SEEDED_SCHEDULE_NAME,
@@ -256,7 +255,7 @@ export const getAttackDiscoveryApiService = ({
             path: `${basePath}/api/attack_discovery/schedules`,
             headers: {
               'kbn-xsrf': 'true',
-              'elastic-api-version': '2023-10-31',
+              ...PUBLIC_API_HEADERS,
             },
             ignoreErrors: [400, 500],
             body: {

@@ -11,9 +11,9 @@ import type { EvalsSetupDependencies } from './types';
 import { EvalsPublicPlugin } from './plugin';
 
 describe('EvalsPublicPlugin', () => {
-  const createPlugin = (enabled: boolean) =>
+  const createPlugin = (enabled: boolean, mode: 'runtime' | 'full' = 'full') =>
     new EvalsPublicPlugin({
-      config: { get: () => ({ enabled }) },
+      config: { get: () => ({ enabled, mode }) },
     } as unknown as PluginInitializerContext);
 
   const createManagementMock = () => {
@@ -46,7 +46,7 @@ describe('EvalsPublicPlugin', () => {
       getStartServices: jest.fn(),
     } as any);
 
-  it('registers the Stack Management AI entry when management is available', () => {
+  it('registers the standalone app and the Stack Management AI entry when management is available', () => {
     const plugin = createPlugin(true);
     const management = createManagementMock();
 
@@ -54,7 +54,14 @@ describe('EvalsPublicPlugin', () => {
 
     plugin.setup(coreSetup, { management });
 
-    expect(coreSetup.application.register).not.toHaveBeenCalled();
+    expect(coreSetup.application.register).toHaveBeenCalledTimes(1);
+    expect(coreSetup.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'evals',
+        appRoute: '/app/evals',
+        euiIconType: 'flask',
+      })
+    );
     expect(management.sections.section.ai.registerApp).toHaveBeenCalledTimes(1);
     expect(management.sections.section.ai.registerApp).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -65,15 +72,21 @@ describe('EvalsPublicPlugin', () => {
     );
   });
 
-  it('does not register the Stack Management AI entry when management is not available', () => {
+  it('registers the standalone app even when management is not available', () => {
     const plugin = createPlugin(true);
 
     const coreSetup = createCoreSetupMock();
 
     plugin.setup(coreSetup, {});
 
-    // nothing to assert besides no throw; management was undefined
-    expect(true).toBe(true);
+    expect(coreSetup.application.register).toHaveBeenCalledTimes(1);
+    expect(coreSetup.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'evals',
+        appRoute: '/app/evals',
+        euiIconType: 'flask',
+      })
+    );
   });
 
   it('registers the ai.evals.* Workflows editor steps when the feature flag is enabled', () => {
@@ -91,6 +104,19 @@ describe('EvalsPublicPlugin', () => {
 
     plugin.setup(createCoreSetupMock(), { workflowsExtensions });
 
+    expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
+  });
+
+  it('registers no app, management entry or Workflows steps in runtime mode', () => {
+    const plugin = createPlugin(true, 'runtime');
+    const coreSetup = createCoreSetupMock();
+    const management = createManagementMock();
+    const workflowsExtensions = createWorkflowsExtensionsMock();
+
+    plugin.setup(coreSetup, { management, workflowsExtensions });
+
+    expect(coreSetup.application.register).not.toHaveBeenCalled();
+    expect(management.sections.section.ai.registerApp).not.toHaveBeenCalled();
     expect(workflowsExtensions.registerStepDefinition).not.toHaveBeenCalled();
   });
 });

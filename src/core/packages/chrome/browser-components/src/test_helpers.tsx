@@ -13,6 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
@@ -31,13 +32,18 @@ import { ChromeComponentsProvider, type ChromeComponentsDeps } from './context';
  * Internal to this package — not re-exported from `index.ts`.
  */
 export const createMockChromeComponentsDeps = () => {
+  const currentLocation$ = new BehaviorSubject<string>('/');
+  const application = applicationServiceMock.createInternalStartContract();
+  application.currentLocation$ = currentLocation$;
+
   return {
-    application: applicationServiceMock.createInternalStartContract(),
+    application,
     http: httpServiceMock.createSetupContract({ basePath: '/test' }),
     docLinks: docLinksServiceMock.createStartContract(),
     customBranding: {
       customBranding$: new BehaviorSubject<CustomBranding>({}),
     },
+    notifications: notificationServiceMock.createStartContract(),
   } satisfies ChromeComponentsDeps;
 };
 

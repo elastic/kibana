@@ -11,7 +11,7 @@ set -euo pipefail
 #   DRY_RUN=1         — build everything but skip the publish step.
 #   BASE_REF=<ref>    — override the git base used for change detection.
 #   FORCE_ALL=1       — build and publish regardless of diff.
-#   SKIP_BOOTSTRAP=1  — skip `yarn kbn bootstrap` (local re-runs).
+#   SKIP_BOOTSTRAP=1  — skip `pnpm kbn bootstrap` (local re-runs).
 #   SKIP_BUILD=1      — skip packaging/scripts/build.sh; use whatever is
 #                       already in target/ (useful when re-running after a
 #                       successful build, or when testing the publish logic).
@@ -164,7 +164,7 @@ EOF
 PKG_MANIFEST="$TARGET_DIR/package.json"
 
 report_step "Publishing $(basename "$TARBALL") → $NPM_REGISTRY"
-npm publish "$TARBALL" --tag latest --userconfig "$NPMRC" || {
+npm publish "$TARBALL" --tag main --userconfig "$NPMRC" || {
   publish_rc=$?
   if npm view "$(node -p "require('$PKG_MANIFEST').name")@$(node -p "require('$PKG_MANIFEST').version")" \
        --userconfig "$NPMRC" >/dev/null 2>&1; then

@@ -16,6 +16,7 @@ export const transformMcpToolToFormData = (tool: McpToolDefinition): McpToolForm
     description: tool.description,
     connectorId: tool.configuration.connector_id,
     mcpToolName: tool.configuration.tool_name,
+    confirmation_ask_user: tool.confirmation?.askUser ?? 'never',
     labels: tool.tags,
     type: ToolType.mcp,
   };
@@ -33,6 +34,9 @@ export const transformFormDataToMcpTool = (data: McpToolFormData): McpToolDefini
     },
     tags: data.labels,
     type: ToolType.mcp,
+    ...(data.confirmation_ask_user
+      ? { confirmation: { askUser: data.confirmation_ask_user } }
+      : {}),
   };
 };
 

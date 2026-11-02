@@ -11,7 +11,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiCallOut } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '@kbn/search-connectors';
@@ -94,22 +94,21 @@ export const SearchIndexDocuments: React.FC = () => {
       documentComponent={
         <>
           {isAccessControlIndexNotFound && (
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="m"
               title={i18n.translate(
                 'xpack.contentConnectors.content.searchIndex.documents.noIndex.title',
                 { defaultMessage: 'Access Control Index not found' }
               )}
-              iconType="info"
-            >
-              <p>
-                {i18n.translate('xpack.contentConnectors.content.searchIndex.documents.noIndex', {
+              text={i18n.translate(
+                'xpack.contentConnectors.content.searchIndex.documents.noIndex',
+                {
                   defaultMessage:
                     "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
-                })}
-              </p>
-            </EuiCallOut>
+                }
+              )}
+            />
           )}
           {!isAccessControlIndexNotFound &&
             docs.length === 0 &&

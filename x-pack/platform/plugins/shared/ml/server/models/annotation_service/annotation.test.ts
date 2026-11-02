@@ -19,6 +19,11 @@ import type { MlClient } from '../../lib/ml_client/types';
 
 const acknowledgedResponseMock = { acknowledged: true };
 
+const serverlessMock = {
+  isServerless: false,
+  cpsEnabled: false,
+};
+
 const jobIdMock = 'job-id-mock';
 
 describe('annotation_service', () => {
@@ -48,7 +53,11 @@ describe('annotation_service', () => {
       getJobs: jest.fn().mockResolvedValue({ jobs: [{ job_id: jobIdMock }] }),
     };
 
-    annotationService = annotationServiceProvider(mlClusterClientSpy, mlClientSpy as MlClient);
+    annotationService = annotationServiceProvider(
+      mlClusterClientSpy,
+      mlClientSpy as MlClient,
+      serverlessMock
+    );
   });
 
   describe('deleteAnnotation()', () => {
@@ -110,7 +119,8 @@ describe('annotation_service', () => {
 
       const { getAnnotations } = annotationServiceProvider(
         mlClusterClientSpyError,
-        mlClientSpy as MlClient
+        mlClientSpy as MlClient,
+        serverlessMock
       );
 
       const indexAnnotationArgsMock: IndexAnnotationArgs = {

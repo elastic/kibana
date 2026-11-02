@@ -54,7 +54,7 @@ export const registerAutocompleteRoute = ({
             )
           ),
           // Caller-supplied type/tag refinements — same shape as on POST /sml/_search.
-          // Useful for specialized UI pickers (e.g. connectors-only @ menu).
+          // Useful for specialized UI pickers (e.g. connectors-only # menu).
           filters: schema.maybe(
             schema.object({
               types: schema.maybe(
@@ -92,18 +92,11 @@ export const registerAutocompleteRoute = ({
 
         const body: SmlAutocompleteHttpResponse = {
           results: results.map(
-            ({
+            ({ id, type, origin, title }): SmlAutocompleteHttpResultItem => ({
               id,
               type,
               origin,
               title,
-              matched_discovery_labels,
-            }): SmlAutocompleteHttpResultItem => ({
-              id,
-              type,
-              origin,
-              title,
-              matched_discovery_labels: matched_discovery_labels ?? [],
             })
           ),
         };

@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiCallOut,
   EuiCodeBlock,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -20,6 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { type AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import { THREAT_FIELD_LABEL } from '../../../detection_engine/rule_management/components/rule_details/translations';
 import type { RuleResponse } from '../../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import { toSimpleRuleSchedule } from '../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
@@ -36,12 +37,24 @@ import {
   SEVERITY_LABEL,
   RISK_SCORE_LABEL,
   TAGS_HEADING,
-  MITRE_HEADING,
   INTERVAL_LABEL,
   LOOKBACK_LABEL,
   LIMITATIONS_TITLE,
   LIMITATIONS_BODY,
+  DIFF_ACCORDION_LABEL,
+  DIFF_SAVED_LABEL,
+  DIFF_AI_LABEL,
+  DIFF_SAVED_DESCRIPTION,
+  DIFF_AI_DESCRIPTION,
 } from './translations';
+import {
+  RuleDiffTab,
+  getRuleDiffSources,
+} from '../../../detection_engine/rule_management/components/rule_details/rule_diff_tab';
+import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
+
+/* Server-populated on save; spurious diffs against an AI-proposed rule, so hidden on the card only. */
+const AGENT_BUILDER_HIDDEN_PROPERTIES: Array<keyof RuleResponse> = ['license', 'meta'];
 
 const SectionHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <EuiText size="s">
@@ -112,6 +125,20 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
   const isSaving = savingAttachmentIds?.has(attachment.id) ?? false;
 
   const rule = useMemo(() => parseRuleFromAttachment(attachment), [attachment]);
+
+  const { data: originalRule = null } = useRule(attachment.origin ?? '', false, {
+    enabled: Boolean(attachment.origin),
+  });
+
+  const hasDiff = useMemo(() => {
+    if (!originalRule || !rule) return false;
+    const [oldSource, newSource] = getRuleDiffSources(
+      originalRule,
+      { ...rule, threat: rule.threat ?? [] },
+      AGENT_BUILDER_HIDDEN_PROPERTIES
+    );
+    return oldSource !== newSource;
+  }, [originalRule, rule]);
 
   if (!rule) {
     return null;
@@ -215,15 +242,9 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       {rule.threat && rule.threat.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <SectionHeading>{MITRE_HEADING}</SectionHeading>
+          <SectionHeading>{THREAT_FIELD_LABEL}</SectionHeading>
           <EuiSpacer size="xs" />
-          <EuiFlexGrid columns={2} gutterSize="m" responsive={false}>
-            {rule.threat.map((entry, threatIndex) => (
-              <EuiFlexItem key={threatIndex}>
-                <MitreAttackDisplay threat={[entry]} />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
+          <MitreAttackDisplay threat={rule.threat} />
         </>
       )}
 
@@ -249,6 +270,27 @@ export const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
       <EuiCallOut size="s" color="primary" iconType="info" title={LIMITATIONS_TITLE}>
         <EuiText size="xs">{LIMITATIONS_BODY}</EuiText>
       </EuiCallOut>
+
+      {hasDiff && originalRule && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiAccordion
+            id={`rule-diff-accordion-${attachment.id}`}
+            buttonContent={DIFF_ACCORDION_LABEL}
+            paddingSize="none"
+          >
+            <RuleDiffTab
+              oldRule={originalRule}
+              newRule={{ ...rule, threat: rule.threat ?? [] }}
+              leftDiffSideLabel={DIFF_SAVED_LABEL}
+              rightDiffSideLabel={DIFF_AI_LABEL}
+              leftDiffSideDescription={DIFF_SAVED_DESCRIPTION}
+              rightDiffSideDescription={DIFF_AI_DESCRIPTION}
+              extraHiddenProperties={AGENT_BUILDER_HIDDEN_PROPERTIES}
+            />
+          </EuiAccordion>
+        </>
+      )}
     </EuiPanel>
   );
 };

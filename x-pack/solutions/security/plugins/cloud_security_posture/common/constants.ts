@@ -47,6 +47,9 @@ export const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
 export const GRAPH_RUNTIME_EVALUATIONS_ENABLED_SETTING =
   'cloudSecurityPosture:graphRuntimeEvaluationsEnabled';
 
+export const GRAPH_SHOW_UNKNOWN_TARGET_ENABLED_SETTING =
+  'cloudSecurityPosture:graphShowUnknownTargetEnabled';
+
 export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
   '/internal/cloud_security_posture/rules/_bulk_action';
 export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';

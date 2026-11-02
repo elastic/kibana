@@ -62,6 +62,7 @@ describe('Dashboard link component', () => {
           link={resolvedLink}
           layout={LINKS_VERTICAL_LAYOUT}
           parentApi={parentApi}
+          viewMode="view"
           {...overrides}
         />
       </EuiThemeProvider>
@@ -76,6 +77,7 @@ describe('Dashboard link component', () => {
               link={resolvedLink}
               layout={LINKS_VERTICAL_LAYOUT}
               parentApi={parentApi}
+              viewMode="view"
               {...overrides}
               {...newOverrides}
             />
@@ -107,7 +109,7 @@ describe('Dashboard link component', () => {
 
     // calls `navigate` on click
     await userEvent.click(link);
-    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: '456',
       filters: [],
       time_range: {
@@ -115,7 +117,35 @@ describe('Dashboard link component', () => {
         to: 'now',
       },
     });
-    expect(parentApi.locator?.navigate).toBeCalledTimes(1);
+    expect(parentApi.locator?.navigate).toHaveBeenCalledTimes(1);
+  });
+
+  test('viewMode non-interactive disables the link and prevents navigation', async () => {
+    const parentApi = createMockLinksParent({});
+    renderComponent({ parentApi, viewMode: 'non-interactive' });
+
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
+    expect(link).toBeDisabled();
+
+    fireEvent.click(link);
+    expect(parentApi.locator?.navigate).not.toHaveBeenCalled();
+    expect(window.open).not.toHaveBeenCalled();
+  });
+
+  test('viewMode non-interactive prevents window.open for open_in_new_tab links', async () => {
+    renderComponent({
+      link: {
+        ...resolvedLink,
+        options: { ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS, open_in_new_tab: true },
+      },
+      viewMode: 'non-interactive',
+    });
+
+    const link = screen.getByTestId('dashboardLink--Dashboard 1');
+    expect(link).toBeDisabled();
+
+    fireEvent.click(link);
+    expect(window.open).not.toHaveBeenCalled();
   });
 
   test('modified click does not trigger event.preventDefault', async () => {
@@ -145,7 +175,7 @@ describe('Dashboard link component', () => {
 
     // calls `window.open`
     await userEvent.click(link);
-    expect(parentApi.locator?.navigate).toBeCalledTimes(0);
+    expect(parentApi.locator?.navigate).toHaveBeenCalledTimes(0);
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');
   });
 
@@ -175,7 +205,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: '456',
       time_range: { from: 'now-7d', to: 'now' },
       filters: initialFilters,
@@ -212,7 +242,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: '456',
       filters: initialFilters,
       query: initialQuery as Query,
@@ -248,7 +278,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: '456',
       time_range: { from: 'now-7d', to: 'now' },
       filters: [],
@@ -285,8 +315,8 @@ describe('Dashboard link component', () => {
     const link = screen.getByTestId('dashboardLink--Dashboard 1');
     expect(link).toHaveTextContent('current dashboard');
     await userEvent.click(link);
-    expect(parentApi.locator?.navigate).toBeCalledTimes(0);
-    expect(window.open).toBeCalledTimes(0);
+    expect(parentApi.locator?.navigate).toHaveBeenCalledTimes(0);
+    expect(window.open).toHaveBeenCalledTimes(0);
   });
 
   test('shows dashboard title and description in tooltip', async () => {

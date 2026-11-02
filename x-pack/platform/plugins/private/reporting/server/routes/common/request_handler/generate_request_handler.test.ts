@@ -7,6 +7,7 @@
 
 jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
+import { ScheduleType } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
@@ -250,6 +251,20 @@ describe('Handle request to generate', () => {
           `);
     });
 
+    test('disallows an export type that a serverless feature flag has disabled', async () => {
+      const isExportTypeEnabled = jest
+        .spyOn(reportingCore, 'isExportTypeEnabled')
+        .mockResolvedValue(false);
+
+      expect(
+        await requestHandler.handleRequest({
+          exportTypeId: 'csv_searchsource',
+          jobParams: mockJobParams,
+        })
+      ).toEqual({ body: 'Invalid export-type of csv_searchsource' });
+      expect(isExportTypeEnabled).toHaveBeenCalledWith('csv_searchsource', ScheduleType.SINGLE);
+    });
+
     test('disallows invalid browser timezone', async () => {
       const handler = new GenerateRequestHandler({
         reporting: reportingCore,
@@ -269,17 +284,7 @@ describe('Handle request to generate', () => {
         await handler.getJobParams();
       } catch (err) {
         expect(err.statusCode).toBe(400);
-        expect(err.body).toMatchInlineSnapshot(`
-          "invalid params: [
-            {
-              \\"code\\": \\"custom\\",
-              \\"path\\": [
-                \\"browserTimezone\\"
-              ],
-              \\"message\\": \\"Invalid timezone\\"
-            }
-          ]"
-        `);
+        expect(err.body).toEqual('invalid params: browserTimezone: Invalid timezone');
       }
     });
 

@@ -21,7 +21,7 @@ import {
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_VISUALIZATION_GROUP, type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
-import { getAllEsqlControls } from '@kbn/esql-utils';
+import { getAllEsqlControls } from '@kbn/esql-controls-utils';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverAppLocator } from '../../../common';

@@ -14,7 +14,6 @@ import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import useLatest from 'react-use/lib/useLatest';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import type { MainHistoryLocationState } from '../../../../../common';
 import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
@@ -76,7 +75,7 @@ export const SingleTabView = ({
   const currentCustomizationService = useCurrentTabRuntimeState((tab) => tab.customizationService$);
   const scopedProfilesManager = useCurrentTabRuntimeState((tab) => tab.scopedProfilesManager$);
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
-  const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
+  const currentDataSource = useCurrentTabRuntimeState((tab) => tab.currentDataSource$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
@@ -131,15 +130,15 @@ export const SingleTabView = ({
 
   useEffect(() => {
     if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NotStarted) {
-      const historyLocationState = services.getScopedHistory<
-        MainHistoryLocationState & { defaultState?: DiscoverAppState }
-      >()?.location.state;
+      // The location state is captured by `initializeTabs` before the tab ID is pushed to the URL,
+      // which discards it, so it can't be read from the history here
+      const initialTabState = services.initialTabStateService.consume();
 
       initializeTab.current({
-        dataViewSpec: historyLocationState?.dataViewSpec,
-        esqlControls: historyLocationState?.esqlControls,
-        defaultUrlState: historyLocationState?.defaultState,
-        profileState: historyLocationState?.profileState,
+        dataViewSpec: initialTabState?.dataViewSpec,
+        esqlControls: initialTabState?.esqlControls,
+        defaultUrlState: initialTabState?.defaultState,
+        profileState: initialTabState?.profileState,
       });
     }
   }, [currentTabInitializationState.initializationStatus, initializeTab, services]);
@@ -158,7 +157,7 @@ export const SingleTabView = ({
             dispatch(
               internalStateActions.setInitializationState({
                 hasESData: true,
-                hasUserDataView: true,
+                hasDataView: true,
               })
             );
             const dataView = dataViewUnknown as DataView;
@@ -176,13 +175,13 @@ export const SingleTabView = ({
     );
   }
 
-  if (!currentDataStateContainer || !currentCustomizationService || !currentDataView) {
+  if (!currentDataStateContainer || !currentCustomizationService || !currentDataSource) {
     return <BrandedLoadingIndicator />;
   }
 
   return (
     <DiscoverCustomizationProvider value={currentCustomizationService}>
-      <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+      <RuntimeStateProvider currentDataSource={currentDataSource} adHocDataViews={adHocDataViews}>
         <ScopedServicesProvider
           scopedProfilesManager={scopedProfilesManager}
           scopedEBTManager={scopedEbtManager}
