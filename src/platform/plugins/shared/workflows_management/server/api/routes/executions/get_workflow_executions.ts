@@ -24,10 +24,6 @@ import {
 } from '@kbn/workflows';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
-<<<<<<< HEAD
-import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
-=======
-import { resolveExecutedByProfiles } from '../utils/resolve_executed_by_profiles';
 import {
   API_VERSION,
   AVAILABILITY,
@@ -36,7 +32,6 @@ import {
   MAX_PAGE_SIZE,
   OAS_TAG,
 } from '../utils/route_constants';
->>>>>>> c962cd80f421 ([One Workflow] Bound page and size on workflow list routes (#301966))
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
