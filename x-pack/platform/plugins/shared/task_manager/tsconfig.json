@@ -58,5 +58,11 @@
     "@kbn/std",
     "@kbn/mock-idp-utils",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*",
+    // PoC seam: plain-JS worker entry / dep-gate script require @kbn/setup-node-env,
+    // which must not be pulled into this TS project
+    "server/poc_coordinator/worker/coordinator_worker_entry.js",
+    "server/poc_coordinator/dep_check.js"
+  ]
 }
