@@ -131,13 +131,13 @@ const KUBERNETES: FakeIntegration = {
     {
       id: 'k8s-cluster-detail',
       name: 'Kubernetes OTel Cluster detail',
-      description: 'Per-cluster resource utilisation breakdown.',
+      description: 'Per-cluster entity utilisation breakdown.',
       aiFinding: 'Cluster k8s-eu-prod capacity headroom down 12% week over week.',
     },
     {
       id: 'k8s-node-overview',
       name: 'Kubernetes OTel Node overview',
-      description: 'Node health, allocatable resources, conditions.',
+      description: 'Node health, allocatable capacity, conditions.',
       aiFinding: '1 of 48 nodes reporting NotReady in the last 30 minutes.',
     },
     {
@@ -155,7 +155,7 @@ const KUBERNETES: FakeIntegration = {
     {
       id: 'k8s-pod-detail',
       name: 'Kubernetes OTel Pod detail',
-      description: 'Pod phase, restarts, and resource usage.',
+      description: 'Pod phase, restarts, and capacity usage.',
       aiFinding: 'payments-pod-7f9b2 restarted 3 times in the last 5 minutes.',
     },
   ],
@@ -850,7 +850,7 @@ const AZURE: FakeIntegration = {
       id: 'azure-skill-cost',
       type: 'AI skill',
       name: 'Azure cost optimisation advisor',
-      installation: 'Highlights idle and oversized resources.',
+      installation: 'Highlights idle and oversized entities.',
     },
   ],
   resources: [

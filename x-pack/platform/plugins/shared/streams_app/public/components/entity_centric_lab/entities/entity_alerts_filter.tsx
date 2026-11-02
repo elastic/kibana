@@ -111,7 +111,7 @@ export const EntityAlertsFilter = ({ value, onChange }: Props) => {
       isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.alertsFilter.ariaLabel',
-        { defaultMessage: 'Filter resources by alert status' }
+        { defaultMessage: 'Filter entities by alert status' }
       )}
       data-test-subj="entityCentricLabAlertsFilter"
       style={{ minWidth: 200 }}

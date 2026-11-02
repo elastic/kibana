@@ -339,7 +339,7 @@ const HealthDonut = ({
       onBlur={onHoverEnd}
       aria-label={i18n.translate('xpack.streams.entityCentricLab.entities.geomap.donut.ariaLabel', {
         defaultMessage:
-          'Filter by {region}: {total} resources — {healthy} healthy, {atRisk} at risk, {unhealthy} unhealthy',
+          'Filter by {region}: {total} entities — {healthy} healthy, {atRisk} at risk, {unhealthy} unhealthy',
         values: {
           region: bucket.geo.label,
           total: bucket.total,
@@ -459,7 +459,7 @@ const DonutTooltip = ({ hover, euiTheme }: { hover: HoverState; euiTheme: EuiThe
       <div style={{ fontWeight: 700 }}>{bucket.geo.label}</div>
       <div style={{ opacity: 0.7, marginBottom: 6 }}>
         {i18n.translate('xpack.streams.entityCentricLab.entities.geomap.tooltip.resources', {
-          defaultMessage: '{total, plural, one {# resource} other {# resources}}',
+          defaultMessage: '{total, plural, one {# entity} other {# entities}}',
           values: { total: bucket.total },
         })}
       </div>
@@ -559,7 +559,7 @@ const GeomapPanel = ({
           <EuiTitle size="xxs">
             <h4>
               {i18n.translate('xpack.streams.entityCentricLab.entities.geomap.title', {
-                defaultMessage: 'Resources by region',
+                defaultMessage: 'Entities by region',
               })}
             </h4>
           </EuiTitle>

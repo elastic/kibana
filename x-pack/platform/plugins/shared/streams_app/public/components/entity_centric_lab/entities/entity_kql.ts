@@ -67,6 +67,8 @@ const KNOWN_FIELDS = new Set([
   'os',
   'cloudprovider',
   'servicename',
+  'apmservicename',
+  'apmservicegroup',
   'alerts',
   CLOUD_ACCOUNT_ID_ATTR,
   CLOUD_ACCOUNT_NAME_ATTR,
@@ -78,6 +80,8 @@ const ATTR_FIELD_KEYS: Record<string, string> = {
   os: 'os',
   cloudprovider: 'cloudProvider',
   servicename: 'serviceName',
+  apmservicename: 'apmServiceName',
+  apmservicegroup: 'apmServiceGroup',
   [CLOUD_ACCOUNT_ID_ATTR.toLowerCase()]: CLOUD_ACCOUNT_ID_ATTR,
   [CLOUD_ACCOUNT_NAME_ATTR.toLowerCase()]: CLOUD_ACCOUNT_NAME_ATTR,
   [CLOUD_ACCOUNT_ECS_ID_FIELD.toLowerCase()]: CLOUD_ACCOUNT_ID_ATTR,
@@ -130,6 +134,8 @@ const fieldValues = (entity: Entity, rawField: string): string[] => {
     case 'os':
     case 'cloudprovider':
     case 'servicename':
+    case 'apmservicename':
+    case 'apmservicegroup':
     case CLOUD_ACCOUNT_ID_ATTR.toLowerCase():
     case CLOUD_ACCOUNT_NAME_ATTR.toLowerCase(): {
       const attrKey = ATTR_FIELD_KEYS[field] ?? field;
@@ -175,6 +181,8 @@ const freeTextHaystack = (entity: Entity): string =>
     entity.attributes?.node ?? '',
     entity.attributes?.[CLOUD_ACCOUNT_ID_ATTR] ?? '',
     entity.attributes?.[CLOUD_ACCOUNT_NAME_ATTR] ?? '',
+    entity.attributes?.apmServiceName ?? '',
+    entity.attributes?.apmServiceGroup ?? '',
   ]
     .join(' ')
     .toLowerCase();

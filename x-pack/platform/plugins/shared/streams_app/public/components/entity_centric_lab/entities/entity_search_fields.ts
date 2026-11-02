@@ -13,6 +13,11 @@ export const isKubernetesInventoryScope = (
   categoryScope?: EntityCategoryId
 ): boolean => categoryScope === 'kubernetes';
 
+/** Hosts or Kubernetes inventory (left nav or All entities category filter). */
+export const isHostsOrKubernetesInventoryScope = (
+  categoryScope?: EntityCategoryId
+): boolean => categoryScope === 'hosts' || categoryScope === 'kubernetes';
+
 /** True when the inventory is scoped to Cloud (category page or filter). */
 export const isCloudInventoryScope = (categoryScope?: EntityCategoryId): boolean =>
   categoryScope === 'cloud';
@@ -45,12 +50,15 @@ const KUBERNETES_SEARCH_FIELDS = [
   'subtype',
 ] as const;
 
+/** APM dimensions on Hosts / Kubernetes (from APM ↔ infra correlation). */
+const APM_HOSTS_K8S_SEARCH_FIELDS = ['apmServiceName', 'apmServiceGroup'] as const;
+
 /** Human labels shown in the unified search autocomplete. */
 export const ENTITY_SEARCH_FIELD_LABELS: Readonly<Record<string, string>> = {
   name: 'Name',
-  type: 'Type',
-  subtype: 'Resource type',
-  category: 'Category',
+  type: 'Entity type',
+  subtype: 'Entity subtype',
+  category: 'Entity category',
   health: 'Health',
   team: 'Team',
   environment: 'Environment',
@@ -67,6 +75,8 @@ export const ENTITY_SEARCH_FIELD_LABELS: Readonly<Record<string, string>> = {
   os: 'Operating system',
   cloudProvider: 'Cloud provider',
   serviceName: 'Service name',
+  apmServiceName: 'APM Service name',
+  apmServiceGroup: 'APM Service group',
 };
 
 /**
@@ -92,6 +102,9 @@ export const getEntitySearchFieldNames = (
   }
   if (isKubernetesInventoryScope(categoryScope)) {
     fields.push(...KUBERNETES_SEARCH_FIELDS);
+  }
+  if (isHostsOrKubernetesInventoryScope(categoryScope)) {
+    fields.push(...APM_HOSTS_K8S_SEARCH_FIELDS);
   }
   // Category-declared extras (e.g. Hosts → OS / Cloud provider / Service name).
   if (categoryScope) {

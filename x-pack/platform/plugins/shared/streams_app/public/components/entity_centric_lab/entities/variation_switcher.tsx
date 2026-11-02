@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.16';
+export const PROTOTYPE_VERSION = '1.17';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-02',
+    summary:
+      'Push flyout default, Entity terminology, pod runtime tabs, and inventory toolbar wrap.',
+    details:
+      'Flyout presentation defaults to Push with full-page inventory inset (list/hex, detail page, dashboard preview). Product copy uses Entity/Entities; filters and group-by use Entity category/type labels. Hosts and Kubernetes inventory can group by APM Service name and group; pods get APM services (empty when uncorrelated), Processes, and a Kubernetes Events tab (before Processes). Search toolbar wraps on narrow width; Max 3 days stays beside time controls when wrapped. Bump to v1.17.',
+  },
   {
     date: '2026-10-27',
     summary:

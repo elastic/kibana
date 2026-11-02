@@ -60,7 +60,7 @@ export interface EntityFlyoutServices {
     entityName: string
   ) => ReactNode;
   /**
-   * ElasticOn inventory copy uses "resource(s)" instead of "entity/entities".
+   * Legacy flag; inventory copy always uses "entity/entities".
    * Latest / entity-centric leave this unset (or false).
    */
   readonly resourceCopy?: boolean;

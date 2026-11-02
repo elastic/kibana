@@ -291,7 +291,7 @@ export const DashboardsTab = ({
             <p>
               {i18n.translate('entityCentricLabFlyout.flyout.dashboards.empty.body', {
                 defaultMessage:
-                  'Add dashboards for this resource type from "Manage resource types" to surface them here.',
+                  'Add dashboards for this entity type from "Manage entity types" to surface them here.',
               })}
             </p>
           </EuiText>

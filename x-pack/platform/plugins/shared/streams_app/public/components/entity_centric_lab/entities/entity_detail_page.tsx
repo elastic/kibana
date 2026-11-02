@@ -48,7 +48,9 @@ import {
   buildFakeEntityTabsData,
   isEntityTypeEnabled,
   entityShowsHostRuntimeFlyoutTabs,
+  entityShowsKubernetesPodEventsTab,
   resolveEntityTypeIdForName,
+  resolveHostedApmServiceNames,
   useFlyoutTemplateOverride,
   useEntityDisplayName,
   OverviewTab,
@@ -63,6 +65,7 @@ import {
   SlosTab,
   ServicesTab,
   ProcessesTab,
+  KubernetesEventsTab,
   labThing,
   alertRowToStableRuleUuid,
   entityTypeToKind,
@@ -99,6 +102,11 @@ import { buildFakeEntities, getCategoryDescriptor } from './fake_entities';
 import { VariationProvider, useVariation } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
 import type { DataVariation } from './variation_registry';
+import {
+  getInventoryPushShellCss,
+  inventoryPushBodyCss,
+  useInventoryPushInsetPx,
+} from './inventory_push_inset';
 
 // ---------------------------------------------------------------------------
 // Health badge colours (mirrors flyout)
@@ -131,6 +139,7 @@ type BuiltInTabId =
   | 'slos'
   | 'services'
   | 'processes'
+  | 'kubernetesEvents'
   | 'relationships'
   | 'dashboards'
   | 'custom'
@@ -146,6 +155,7 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'logs',
   'traces',
   'services',
+  'kubernetesEvents',
   'processes',
   'relationships',
   'metrics',
@@ -182,6 +192,7 @@ const PageTabContent = ({
   dashboardStyle = 'embedded',
   showDashboardThumbnails = false,
   onPreviewDashboard,
+  hostedApmServiceNames,
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -198,6 +209,7 @@ const PageTabContent = ({
   readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
   readonly showDashboardThumbnails?: boolean;
   readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
+  readonly hostedApmServiceNames?: readonly string[];
 }) => {
   const { resourceCopy = false, renderTabDashboard: renderDash, renderAlertsTab } =
     useEntityFlyoutServices();
@@ -241,9 +253,13 @@ const PageTabContent = ({
     case 'slos':
       return <SlosTab slos={tabsData.slos} />;
     case 'services':
-      return <ServicesTab entityName={entityName} />;
+      return (
+        <ServicesTab entityName={entityName} hostedApmServiceNames={hostedApmServiceNames} />
+      );
     case 'processes':
       return <ProcessesTab entityName={entityName} />;
+    case 'kubernetesEvents':
+      return <KubernetesEventsTab podName={entityName} />;
     case 'relationships':
       return (
         <RelationshipsTab
@@ -318,6 +334,7 @@ const EntityDetailPageInner = () => {
 
   const history = useHistory();
   const detailVariation = useVariation('detail');
+  const flyoutPresentation = useVariation('flyoutPresentation') as 'overlay' | 'push';
   const dataVariation = useVariation('data') as DataVariation;
   const phaseVariation = useVariation('phase');
   const dashboardStyleVariation = useVariation('dashboardStyle') as 'embedded' | 'list' | 'listWithPreview';
@@ -363,6 +380,11 @@ const EntityDetailPageInner = () => {
   const kind = useMemo(
     () => entityTypeToKind(entityType) ?? inferEntityKind(entityName),
     [entityType, entityName]
+  );
+
+  const hostedApmServiceNames = useMemo(
+    () => resolveHostedApmServiceNames(kind, entity?.attributes),
+    [kind, entity?.attributes]
   );
 
   // Fake data builders
@@ -477,6 +499,19 @@ const EntityDetailPageInner = () => {
                 defaultMessage: 'APM services',
               }),
             },
+            ...(entityShowsKubernetesPodEventsTab(kind, entityTypeId)
+              ? [
+                  {
+                    id: 'kubernetesEvents' as TabId,
+                    label: i18n.translate(
+                      'xpack.streams.entityCentricLab.detailPage.tabs.kubernetesEvents',
+                      {
+                        defaultMessage: 'Events',
+                      }
+                    ),
+                  },
+                ]
+              : []),
             {
               id: 'processes' as TabId,
               label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.processes', {
@@ -615,6 +650,18 @@ const EntityDetailPageInner = () => {
   const childEntityType = childEntityContext?.entityType ?? childEntity?.type;
   const childEntityHealth = childEntityContext?.health ?? childEntity?.health;
   const childEntityRegion = childEntityContext?.region ?? childEntity?.tags.region;
+
+  const childHostedApmServiceNames = useMemo(() => {
+    if (!childEntity) return undefined;
+    const childKind =
+      entityTypeToKind(childEntityType) ?? inferEntityKind(childEntityName ?? childEntity.name);
+    return resolveHostedApmServiceNames(childKind, childEntity.attributes);
+  }, [childEntity, childEntityType, childEntityName]);
+
+  const detailPushActive =
+    flyoutPresentation === 'push' && Boolean(childEntityName || dashboardPreview);
+  const detailPushInsetPx = useInventoryPushInsetPx(detailPushActive);
+  const detailPushShellCss = getInventoryPushShellCss(detailPushActive, detailPushInsetPx);
 
   const { rangeFrom, rangeTo } = useTimeRange();
   const { updateTimeRange } = useTimeRangeUpdate();
@@ -982,7 +1029,7 @@ const EntityDetailPageInner = () => {
               <h2>
                 {i18n.translate(
                   'xpack.streams.entityCentricLab.detailPage.unknownEntity.title',
-                  { defaultMessage: 'Resource not found' }
+                  { defaultMessage: 'Entity not found' }
                 )}
               </h2>
             }
@@ -1016,6 +1063,7 @@ const EntityDetailPageInner = () => {
 
   return (
     <EntityFlyoutServicesProvider services={flyoutServices}>
+      <div css={detailPushShellCss} data-test-subj="entityCentricLabDetailPushShell">
       <StreamsAppPageTemplate>
         <StreamsAppPageTemplate.Header
           pageTitle={
@@ -1149,7 +1197,7 @@ const EntityDetailPageInner = () => {
             ) : null}
           </EuiFlexGroup>
         </StreamsAppPageTemplate.Header>
-        <StreamsAppPageTemplate.Body>
+        <StreamsAppPageTemplate.Body css={detailPushActive ? inventoryPushBodyCss : undefined}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
             {activeTab === 'dashboards' &&
             (dashboardStyleVariation === 'list' ||
@@ -1189,20 +1237,24 @@ const EntityDetailPageInner = () => {
               dashboardStyle={dashboardStyleVariation}
               showDashboardThumbnails={showDashboardThumbnails}
               onPreviewDashboard={dashboardStyleVariation === 'listWithPreview' ? setDashboardPreview : undefined}
+              hostedApmServiceNames={hostedApmServiceNames}
             />
           </EuiPanel>
         </StreamsAppPageTemplate.Body>
         <VariationSwitcher />
       </StreamsAppPageTemplate>
+      </div>
 
       {childEntityName ? (
         <EntityFlyout
           session="never"
           size="m"
+          flyoutType={flyoutPresentation}
           entityName={childEntityName}
           entityType={childEntityType}
           entityHealth={childEntityHealth}
           region={childEntityRegion}
+          hostedApmServiceNames={childHostedApmServiceNames}
           onClose={closeChildEntity}
           onSelectEntity={openChildEntity}
           onNavigateEntity={openChildEntity}

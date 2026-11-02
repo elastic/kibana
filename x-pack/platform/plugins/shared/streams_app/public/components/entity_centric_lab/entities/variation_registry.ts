@@ -49,7 +49,7 @@ export const DATA_DIMENSION: VariationDimension = {
     {
       id: 'overflow',
       label: '10k+',
-      description: 'More than 10,000 resources — tests truncation banner',
+      description: 'More than 10,000 entities — tests truncation banner',
     },
     {
       id: 'empty',
@@ -197,6 +197,28 @@ export const DASHBOARD_STYLE_DIMENSION: VariationDimension = {
 export type DashboardThumbnailsVariation = 'hide' | 'show';
 
 /** Toggle dashboard preview thumbnails in the flyout Dashboards list tab. */
+export type FlyoutPresentationVariation = 'overlay' | 'push';
+
+/** EUI flyout `type` — push (default) vs overlay (narrows page content). */
+export const FLYOUT_PRESENTATION_DIMENSION: VariationDimension = {
+  id: 'flyoutPresentation',
+  label: 'Flyout presentation',
+  defaultOption: 'push',
+  options: [
+    {
+      id: 'overlay',
+      label: 'Overlay',
+      description: 'Flyout over the page (non-modal)',
+    },
+    {
+      id: 'push',
+      label: 'Push',
+      description:
+        'Insets the full inventory page (header + list/hex) by the flyout width (default)',
+    },
+  ],
+};
+
 export const DASHBOARD_THUMBNAILS_DIMENSION: VariationDimension = {
   id: 'dashboardThumbnails',
   label: 'Dashboard thumbnails',
@@ -221,6 +243,7 @@ export const VARIATION_DIMENSIONS: readonly VariationDimension[] = [
   SCENARIO_DIMENSION,
   DATA_DIMENSION,
   DETAIL_DIMENSION,
+  FLYOUT_PRESENTATION_DIMENSION,
   TABLE_STYLE_DIMENSION,
   DASHBOARD_STYLE_DIMENSION,
   DASHBOARD_THUMBNAILS_DIMENSION,

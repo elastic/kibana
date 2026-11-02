@@ -666,7 +666,7 @@ function createNavTree({
         link: 'streams:entitiesAll' as const,
         title: elasticOnEnabled
           ? i18n.translate('xpack.observability.obltNav.elasticOn.allResources', {
-              defaultMessage: 'All resources',
+              defaultMessage: 'All entities',
             })
           : i18n.translate('xpack.observability.obltNav.latest.allEntities', {
               defaultMessage: 'All entities',
@@ -949,7 +949,7 @@ function createNavTree({
         ...(elasticOnEnabled
           ? {
               title: i18n.translate('xpack.observability.obltNav.elasticOn.manageResourceTypes', {
-                defaultMessage: 'Manage resource types',
+                defaultMessage: 'Manage entity types',
               }),
             }
           : {}),

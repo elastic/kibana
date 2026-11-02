@@ -37,7 +37,7 @@ const stopGroupByInfoClick = (event: React.MouseEvent) => {
 const groupByInfoContent = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.infoTip', {
     defaultMessage:
-      'Nest resources into sections by one or more fields. For example, group by Alerts and Category, or by Availability Zone. Order matters: the first field is the top level, and each next field nests under it.',
+      'Nest sections by one or more fields—e.g. Entity category (Hosts, Kubernetes) and Entity type (Virtual machine, Pod). First field is the top level; each next nests under it.',
   });
 
 const GroupByInfoTip = () => (

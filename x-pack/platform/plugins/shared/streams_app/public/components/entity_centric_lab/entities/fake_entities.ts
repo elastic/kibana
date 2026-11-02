@@ -416,6 +416,26 @@ const HOST_SERVICE_NAME_VALUES: readonly string[] = [
   'mongodb',
 ];
 
+/** Demo APM correlation on Hosts / Kubernetes (group-by + KQL). */
+const APM_SERVICE_NAME_VALUES: readonly string[] = [
+  'checkout',
+  'payments-api',
+  'fraud-service',
+  'merchant-portal',
+  'billing-api',
+  'search-api',
+  'notifications-service',
+  'identity-service',
+];
+
+const APM_SERVICE_GROUP_VALUES: readonly string[] = [
+  'Payments',
+  'Checkout',
+  'Platform',
+  'Risk',
+  'Core',
+];
+
 /**
  * Per-category extra filters. Add an entry here (plus, if you want them to
  * filter something real, seed the matching attributes in the builders below)
@@ -556,6 +576,23 @@ const buildExtraAttributes = (
     attributes[def.key] = pickTag(def.pool, `${scope}-${def.key}`, index);
   }
   return attributes;
+};
+
+const mergeApmCorrelationAttributes = (
+  attributes: Record<string, string> | undefined,
+  seedKey: string,
+  index: number
+): Record<string, string> => {
+  const base = { ...(attributes ?? {}) };
+  // ~20% of Hosts/K8s entities have no APM correlation (Services tab empty state).
+  if (stableHash(`${seedKey}-apm-instrumented`) % 5 === 0) {
+    return base;
+  }
+  return {
+    ...base,
+    apmServiceName: pickTag(APM_SERVICE_NAME_VALUES, `${seedKey}-apmServiceName`, index),
+    apmServiceGroup: pickTag(APM_SERVICE_GROUP_VALUES, `${seedKey}-apmServiceGroup`, index),
+  };
 };
 
 // One region is deliberately "on fire" so the Geomap view tells a clear
@@ -1006,7 +1043,13 @@ const buildCategoryEntitiesWithScenario = (
       attributes: withAvailabilityZone(
         tags.region,
         name,
-        buildExtraAttributes(spec.category, spec.category, i)
+        spec.category === 'hosts'
+          ? mergeApmCorrelationAttributes(
+              buildExtraAttributes(spec.category, spec.category, i),
+              `${spec.category}-${name}`,
+              i
+            )
+          : buildExtraAttributes(spec.category, spec.category, i)
       ),
       alerts: alertsForCategory(spec.category, name, health),
     });
@@ -1014,10 +1057,6 @@ const buildCategoryEntitiesWithScenario = (
   return sortByHealth(entities);
 };
 
-/**
- * Build Kubernetes entities with optional sub-spec overrides and health
- * override.
- */
 /**
  * Seed K8s parent-context attributes (cluster, namespace, deployment, node)
  * on each entity based on its sub-type. These power the cascading filters
@@ -1125,14 +1164,18 @@ const buildKubernetesEntitiesWithScenario = (
         attributes: withAvailabilityZone(
           tags.region,
           name,
-          buildK8sAttributes(
-            sub.label,
-            name,
-            i,
-            clusterNames,
-            namespaceNames,
-            deploymentNames,
-            nodeNames
+          mergeApmCorrelationAttributes(
+            buildK8sAttributes(
+              sub.label,
+              name,
+              i,
+              clusterNames,
+              namespaceNames,
+              deploymentNames,
+              nodeNames
+            ),
+            `kubernetes-${sub.label}-${name}`,
+            globalIndex
           )
         ),
         alerts: buildAlerts(name, health),

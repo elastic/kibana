@@ -185,7 +185,7 @@ const AccordionBadges = ({
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
             {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesLabel', {
-              defaultMessage: 'Resources:',
+              defaultMessage: 'Entities:',
             })}
           </EuiText>
         </EuiFlexItem>
@@ -202,7 +202,7 @@ const AccordionBadges = ({
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
             {i18n.translate('xpack.streams.entityCentricLab.securityGrouping.stats.resourcesWithAlertsLabel', {
-              defaultMessage: 'Resources with alerts:',
+              defaultMessage: 'Entities with alerts:',
             })}
           </EuiText>
         </EuiFlexItem>

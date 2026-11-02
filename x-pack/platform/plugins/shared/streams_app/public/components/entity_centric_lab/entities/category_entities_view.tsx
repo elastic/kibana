@@ -144,7 +144,7 @@ const UnknownEntitiesScope = ({ label }: { label: string }) => {
                     'xpack.streams.entityCentricLab.entities.category.unknownPromptBodyResources',
                     {
                       defaultMessage:
-                        'This category isn\u2019t part of the entity-centric lab. Head back to All resources to see the full picture.',
+                        'This category isn\u2019t part of the entity-centric lab. Head back to All entities to see the full picture.',
                     }
                   )
                 : i18n.translate(
@@ -167,7 +167,7 @@ const UnknownEntitiesScope = ({ label }: { label: string }) => {
               {isElasticOn
                 ? i18n.translate(
                     'xpack.streams.entityCentricLab.entities.category.backToAllResources',
-                    { defaultMessage: 'Back to All resources' }
+                    { defaultMessage: 'Back to All entities' }
                   )
                 : i18n.translate('xpack.streams.entityCentricLab.entities.category.backToAll', {
                     defaultMessage: 'Back to All entities',

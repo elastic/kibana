@@ -9,19 +9,16 @@ import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../hooks/use_kibana';
 
 /**
- * ElasticOn copy uses "resource(s)" in place of "entity/entities". Latest and
- * entity-centric keep the original nouns. Interpolate these into i18n
- * `defaultMessage`s rather than duplicating every string.
+ * Inventory copy uses "entity/entities". The `isElasticOn` / `resourceCopy`
+ * flags are kept for call-site compatibility but no longer switch nouns.
  */
-export const labThing = (isElasticOn: boolean): string => (isElasticOn ? 'resource' : 'entity');
+export const labThing = (_isElasticOn: boolean): string => 'entity';
 
-export const labThings = (isElasticOn: boolean): string => (isElasticOn ? 'resources' : 'entities');
+export const labThings = (_isElasticOn: boolean): string => 'entities';
 
-export const labThingLabel = (isElasticOn: boolean): string =>
-  isElasticOn ? 'Resource' : 'Entity';
+export const labThingLabel = (_isElasticOn: boolean): string => 'Entity';
 
-export const labThingsLabel = (isElasticOn: boolean): string =>
-  isElasticOn ? 'Resources' : 'Entities';
+export const labThingsLabel = (_isElasticOn: boolean): string => 'Entities';
 
 export const useIsElasticOn = (): boolean => {
   const {

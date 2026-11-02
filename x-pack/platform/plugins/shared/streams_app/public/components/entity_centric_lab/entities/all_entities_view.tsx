@@ -49,7 +49,12 @@ const NO_GROW = css`
   flex-grow: 0;
 `;
 
-
+/** Toolbar rows that should reflow when the flyout narrows the inventory width. */
+const INVENTORY_TOOLBAR_WRAP = css`
+  flex-grow: 0;
+  flex-wrap: wrap;
+  row-gap: 8px;
+`;
 
 const k8sFilterGroupCss = css`
   gap: 4px;
@@ -67,6 +72,7 @@ import {
   inferEntityKind,
   isEntityTypeEnabled,
   resolveEntityTypeIdForName,
+  resolveHostedApmServiceNames,
   type EntityKind,
   type EntitySelectionContext,
 } from '@kbn/entity-centric-lab-flyout';
@@ -155,7 +161,18 @@ import { EntityGroupByControls } from './entity_group_by_controls';
 import { labThing, labThings, labThingsLabel } from '../lab_terminology';
 import { VariationProvider, useVariation, useVariationContext } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
-import type { DataVariation, DetailVariation, TableStyleVariation } from './variation_registry';
+import type {
+  DataVariation,
+  DetailVariation,
+  FlyoutPresentationVariation,
+  TableStyleVariation,
+} from './variation_registry';
+import {
+  getInventoryPushShellCss,
+  inventoryPushBodyCss,
+  inventoryPushFlexItemCss,
+  useInventoryPushInsetPx,
+} from './inventory_push_inset';
 import emptyStateIllustration from './assets/empty_state_illustration.png';
 import addDataPageImage from './assets/add_data_page.png';
 import { OldExperiencePage, consumeTourFlag } from './transition_modal';
@@ -856,6 +873,7 @@ const AllEntitiesViewInner = ({
   cloudProviderScope,
   cloudServiceScope,
 }: AllEntitiesViewProps = {}) => {
+  const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
   // Reactive location: the Latest nav's "Saved views" links carry a
   // `?loadView=<id>` param we resolve + apply (see effect below). Reading via
@@ -929,6 +947,77 @@ const AllEntitiesViewInner = ({
       { start: 'now-24h', end: 'now', label: 'Last 24 hours' },
       { start: 'now-3d', end: 'now', label: 'Last 3 days' },
     ],
+    []
+  );
+  const inventoryMaxRangeHint = i18n.translate(
+    'xpack.streams.entityCentricLab.entities.dateRange.maxHint',
+    { defaultMessage: 'Max 3 days' }
+  );
+  const inventorySearchBarShellCss = useMemo(
+    () => css`
+      container-type: inline-size;
+      min-width: 0;
+      max-width: 100%;
+      width: 100%;
+
+      [data-test-subj='kbnQueryBar'] {
+        justify-content: flex-start !important;
+        width: 100%;
+        align-items: flex-start;
+      }
+
+      [data-test-subj='unifiedQueryInput'] {
+        flex: 1 1 280px;
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      @container (max-width: 720px) {
+        [data-test-subj='unifiedQueryInput'] {
+          flex-basis: 100%;
+        }
+
+        [data-test-subj='kbnQueryBar'] > .euiFlexItem:last-child {
+          flex-basis: 100%;
+        }
+
+        /* Narrow: hint travels with the time row, directly after Refresh. */
+        [data-test-subj='kbnQueryBar']
+          > .euiFlexItem:last-child
+          .euiFlexGroup:has(.kbnQueryBar__datePickerWrapper)::after {
+          content: ${JSON.stringify(inventoryMaxRangeHint)};
+          align-self: center;
+          margin-left: ${euiTheme.size.xs};
+          font-size: ${euiTheme.font.scale.xs}rem;
+          line-height: ${euiTheme.size.l};
+          color: ${euiTheme.colors.textSubdued};
+          white-space: nowrap;
+        }
+      }
+
+      [data-test-subj='kbnQueryBar'] > .euiFlexItem:last-child {
+        flex: 0 1 auto;
+        max-width: 100%;
+      }
+    `,
+    [euiTheme, inventoryMaxRangeHint]
+  );
+  const inventoryMaxRangeHintWideCss = useMemo(
+    () => css`
+      flex: 0 0 auto;
+
+      @container (max-width: 720px) {
+        display: none;
+      }
+    `,
+    []
+  );
+  const inventorySearchBarRowCss = useMemo(
+    () => css`
+      flex: 1 1 280px;
+      min-width: 0;
+      max-width: 100%;
+    `,
     []
   );
   const handleTimeChange = useCallback(
@@ -1016,6 +1105,7 @@ const AllEntitiesViewInner = ({
 
   const dataVariation = useVariation('data') as DataVariation;
   const detailVariation = useVariation('detail') as DetailVariation;
+  const flyoutPresentation = useVariation('flyoutPresentation') as FlyoutPresentationVariation;
   const isDemoEmptyCategoryPage =
     isElasticOn &&
     dataVariation === 'default' &&
@@ -2106,6 +2196,27 @@ const AllEntitiesViewInner = ({
   const childEntityHealth = childEntityContext?.health ?? childEntity?.health;
   const childEntityRegion = childEntityContext?.region ?? childEntity?.tags.region;
 
+  const selectedHostedApmServiceNames = useMemo(() => {
+    if (!selectedEntity) return undefined;
+    const kind = entityTypeToKind(selectedEntity.type) ?? inferEntityKind(selectedEntity.name);
+    return resolveHostedApmServiceNames(kind, selectedEntity.attributes);
+  }, [selectedEntity]);
+
+  const childHostedApmServiceNames = useMemo(() => {
+    if (!childEntity) return undefined;
+    const kind =
+      entityTypeToKind(childEntityType) ?? inferEntityKind(childEntityName ?? childEntity.name);
+    return resolveHostedApmServiceNames(kind, childEntity.attributes);
+  }, [childEntity, childEntityType, childEntityName]);
+
+  const inventoryPushActive =
+    flyoutPresentation === 'push' && Boolean(selectedEntityName || childEntityName);
+  const inventoryPushInsetPx = useInventoryPushInsetPx(inventoryPushActive);
+  const inventoryPushShellCss = getInventoryPushShellCss(
+    inventoryPushActive,
+    inventoryPushInsetPx
+  );
+
   // Honours the per-entity-type enablement switch in "Manage entity types":
   // when the resolved type is disabled, opening is silently declined. Read
   // synchronously (not via the hook) so the gate stays in sync without
@@ -2844,6 +2955,7 @@ const AllEntitiesViewInner = ({
 
   return (
     <>
+      <div css={inventoryPushShellCss} data-test-subj="entityCentricLabInventoryPushShell">
       <StreamsAppPageTemplate.Header
         pageTitle={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -2863,7 +2975,7 @@ const AllEntitiesViewInner = ({
                 ? headerLabel
                 : isElasticOn
                 ? i18n.translate('xpack.streams.entityCentricLab.entities.titleResources', {
-                    defaultMessage: 'All resources',
+                    defaultMessage: 'All entities',
                   })
                 : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
                     defaultMessage: 'All entities',
@@ -3028,7 +3140,7 @@ const AllEntitiesViewInner = ({
               ]
         }
       />
-      <StreamsAppPageTemplate.Body>
+      <StreamsAppPageTemplate.Body css={inventoryPushActive ? inventoryPushBodyCss : undefined}>
         {dataset.totalBeforeTruncation && filteredEntities.length >= dataset.totalEntities ? (
           <>
             <EuiCallOut
@@ -3036,7 +3148,7 @@ const AllEntitiesViewInner = ({
                 'xpack.streams.entityCentricLab.allEntities.truncationBanner',
                 {
                   defaultMessage:
-                    'We can only show 10,000 resources at a time. Use filters to slice and dice further your data.',
+                    'We can only show 10,000 entities at a time. Use filters to slice and dice further your data.',
                 }
               )}
               color="warning"
@@ -3047,7 +3159,7 @@ const AllEntitiesViewInner = ({
           </>
         ) : null}
         <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem>
+          <EuiFlexItem css={inventoryPushActive ? inventoryPushFlexItemCss : undefined}>
             {showOverviewTab ? (
               categoryScope ? (
                 isDemoEmptyCategoryPage ? (
@@ -3088,8 +3200,8 @@ const AllEntitiesViewInner = ({
                   content={
                     <p>
                       {isPhase1
-                        ? 'Filter resources by name, team, or category-specific attributes using KQL. Add structured filters with the + button.'
-                        : 'Filter resources by name, health, team, or category-specific attributes using KQL. Add structured filters with the + button.'}
+                        ? 'Filter entities by name, team, or category-specific attributes using KQL. Add structured filters with the + button.'
+                        : 'Filter entities by name, health, team, or category-specific attributes using KQL. Add structured filters with the + button.'}
                     </p>
                   }
                   onFinish={closeTour}
@@ -3109,9 +3221,15 @@ const AllEntitiesViewInner = ({
                   }
                   anchorPosition="downCenter"
                 >
-                  <div css={NO_GROW}>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                      <EuiFlexItem>
+                  <div css={[NO_GROW, inventorySearchBarShellCss]}>
+                    <EuiFlexGroup
+                      gutterSize="xs"
+                      alignItems="center"
+                      responsive={false}
+                      wrap
+                      css={INVENTORY_TOOLBAR_WRAP}
+                    >
+                      <EuiFlexItem css={inventorySearchBarRowCss}>
                         <unifiedSearch.ui.SearchBar
                           appName="streamsApp"
                           indexPatterns={labDataView ? [labDataView] : []}
@@ -3142,8 +3260,7 @@ const AllEntitiesViewInner = ({
                           placeholder={i18n.translate(
                             'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
                             {
-                              defaultMessage:
-                                'Search {things} — e.g. {example}',
+                              defaultMessage: 'Search {things} — e.g. {example}',
                               values: {
                                 things: labThings(isElasticOn),
                                 example:
@@ -3165,21 +3282,24 @@ const AllEntitiesViewInner = ({
                           )}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                      <EuiFlexItem grow={false} css={inventoryMaxRangeHintWideCss}>
                         <EuiText size="xs" color="subdued">
-                          {i18n.translate(
-                            'xpack.streams.entityCentricLab.entities.dateRange.maxHint',
-                            { defaultMessage: 'Max 3 days' }
-                          )}
+                          {inventoryMaxRangeHint}
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </div>
                 </EuiTourStep>
                 <EuiSpacer size="xs" />
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap css={NO_GROW}>
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  responsive={false}
+                  wrap
+                  css={INVENTORY_TOOLBAR_WRAP}
+                >
                   {getVisibleTagKeys(isElasticOn, isPhase1).length > 0 ? (
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem grow={false} css={css`flex: 0 1 auto; max-width: 100%;`}>
                       <EntitiesTagFilters
                         facets={tagFacets}
                         activeFilters={activeTagFilters}
@@ -3192,7 +3312,14 @@ const AllEntitiesViewInner = ({
                     </EuiFlexItem>
                   ) : null}
                   {isCrossCategoryPage && categoriesWithEntities.length >= 2 ? (
-                    <EuiFlexItem grow={false}>
+                    <EuiFlexItem
+                      grow={false}
+                      css={css`
+                        flex: 0 1 auto;
+                        max-width: 100%;
+                        min-width: min(100%, 180px);
+                      `}
+                    >
                       <EuiComboBox
                         compressed
                         singleSelection={{ asPlainText: true }}
@@ -3205,7 +3332,7 @@ const AllEntitiesViewInner = ({
                             ? []
                             : categoriesWithEntities
                                 .filter((c) => c.id === categoryFilter)
-                                .map((c) => ({ label: `Category: ${c.label}`, value: c.id }))
+                                .map((c) => ({ label: `Entity category: ${c.label}`, value: c.id }))
                         }
                         onChange={(selected) => {
                           handleCategoryFilterChange(
@@ -3214,15 +3341,15 @@ const AllEntitiesViewInner = ({
                         }}
                         placeholder={i18n.translate(
                           'xpack.streams.entityCentricLab.entities.categoryFilter.placeholder',
-                          { defaultMessage: 'All categories' }
+                          { defaultMessage: 'All entity categories' }
                         )}
                         isClearable
                         aria-label={i18n.translate(
                           'xpack.streams.entityCentricLab.entities.categoryFilter.ariaLabel',
-                          { defaultMessage: 'Filter resources by category' }
+                          { defaultMessage: 'Filter by entity category' }
                         )}
                         data-test-subj="entityCentricLabCategoryFilter"
-                        style={{ minWidth: 150 }}
+                        fullWidth
                       />
                     </EuiFlexItem>
                   ) : null}
@@ -3343,9 +3470,15 @@ const AllEntitiesViewInner = ({
                   gutterSize="s"
                   responsive={false}
                   wrap
-                  css={NO_GROW}
+                  css={INVENTORY_TOOLBAR_WRAP}
                 >
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      flex: 1 1 200px;
+                      min-width: 0;
+                    `}
+                  >
                     <EuiTitle size="xxs">
                       <h3>
                         {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
@@ -3365,9 +3498,10 @@ const AllEntitiesViewInner = ({
                       </h3>
                     </EuiTitle>
                   </EuiFlexItem>
-                  <EuiFlexItem />
-                  <EuiFlexItem grow={false}>
-                    <EuiTourStep
+                  <EuiFlexItem grow={false} css={css`flex: 0 1 auto; max-width: 100%;`}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                      <EuiFlexItem grow={false}>
+                        <EuiTourStep
                       step={2}
                       stepsTotal={tourStepCount}
                       isStepOpen={isTourActive && tourStep === 2}
@@ -3409,31 +3543,33 @@ const AllEntitiesViewInner = ({
                         color="text"
                         data-test-subj="entityCentricLabEntitiesViewModeToggle"
                       />
-                    </EuiTourStep>
-                  </EuiFlexItem>
-                  {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
-                    <EuiFlexItem grow={false}>
-                      <ListDisplayOptionsPopover
-                        density={listDensity}
-                        onChange={setListDensity}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                  <EuiFlexItem grow={false}>
-                    <EntityGroupByControls
-                      fields={groupByFields}
-                      groupBy={groupBy}
-                      onChange={setGroupBy}
-                      lockedFieldIds={categoryScope ? ['category'] : []}
-                      variant="link"
-                      linkPrefix={i18n.translate(
-                        'xpack.streams.entityCentricLab.entities.groupBy.linkLabel',
-                        {
-                          defaultMessage: 'Group {things} by',
-                          values: { things: labThingsLabel(isElasticOn) },
-                        }
-                      )}
-                    />
+                        </EuiTourStep>
+                      </EuiFlexItem>
+                      {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
+                        <EuiFlexItem grow={false}>
+                          <ListDisplayOptionsPopover
+                            density={listDensity}
+                            onChange={setListDensity}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                      <EuiFlexItem grow={false}>
+                        <EntityGroupByControls
+                          fields={groupByFields}
+                          groupBy={groupBy}
+                          onChange={setGroupBy}
+                          lockedFieldIds={categoryScope ? ['category'] : []}
+                          variant="link"
+                          linkPrefix={i18n.translate(
+                            'xpack.streams.entityCentricLab.entities.groupBy.linkLabel',
+                            {
+                              defaultMessage: 'Group {things} by',
+                              values: { things: labThingsLabel(isElasticOn) },
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="s" />
@@ -3738,12 +3874,15 @@ const AllEntitiesViewInner = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </StreamsAppPageTemplate.Body>
+      </div>
       {selectedEntityName ? (
         <EntityErrorBoundary section="Entity detail">
         <EntityFlyoutServicesProvider services={flyoutServices}>
           <EntityFlyout
+            key={flyoutPresentation}
             session="start"
             size={flyoutSize}
+            flyoutType={flyoutPresentation}
             entityName={selectedEntityName}
             entityType={selectedEntityType}
             entityHealth={selectedEntityHealth}
@@ -3779,15 +3918,18 @@ const AllEntitiesViewInner = ({
                 ? () => handleAddToK8sFilter(selectedEntity)
                 : undefined
             }
+            hostedApmServiceNames={selectedHostedApmServiceNames}
           />
           {childEntityName ? (
             <EntityFlyout
               session="inherit"
               size="fill"
+              flyoutType={flyoutPresentation}
               entityName={childEntityName}
               entityType={childEntityType}
               entityHealth={childEntityHealth}
               region={childEntityRegion}
+              hostedApmServiceNames={childHostedApmServiceNames}
               onClose={closeChildEntity}
               onSelectEntity={openChildEntity}
               onNavigateEntity={openChildEntity}

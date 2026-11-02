@@ -29,7 +29,11 @@ import {
   getVisibleTagKeys,
 } from './fake_entities';
 import { CLOUD_PROVIDERS } from './cloud_providers';
-import { isCloudInventoryScope, isKubernetesInventoryScope } from './entity_search_fields';
+import {
+  isCloudInventoryScope,
+  isHostsOrKubernetesInventoryScope,
+  isKubernetesInventoryScope,
+} from './entity_search_fields';
 
 export type GroupByFieldId = string;
 
@@ -65,7 +69,7 @@ const UNKNOWN = i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.
  */
 export const UNGROUPED_LABEL = i18n.translate(
   'xpack.streams.entityCentricLab.entities.groupBy.ungrouped',
-  { defaultMessage: 'All resources' }
+  { defaultMessage: 'All entities' }
 );
 
 const HEALTH_LABEL: Record<string, string> = {
@@ -91,7 +95,7 @@ const CATEGORY_CANONICAL_ORDER: ReadonlyMap<string, number> = new Map(
 
 const ALERT_GROUP_LABELS = {
   firing: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.alerts.firing', {
-    defaultMessage: 'Resources with active alerts',
+    defaultMessage: 'Entities with active alerts',
   }),
   noSetup: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.alerts.noSetup', {
     defaultMessage: 'With no alerts set up',
@@ -127,7 +131,7 @@ const CORE_FIELDS: readonly GroupByFieldDef[] = [
   {
     id: 'category',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.category', {
-      defaultMessage: 'Category',
+      defaultMessage: 'Entity category',
     }),
     valueOf: (entity) => getCategoryDescriptor(entity.category)?.label ?? entity.category,
     canonicalOrder: CATEGORY_CANONICAL_ORDER,
@@ -135,7 +139,7 @@ const CORE_FIELDS: readonly GroupByFieldDef[] = [
   {
     id: 'type',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.groupBy.field.type', {
-      defaultMessage: 'Type',
+      defaultMessage: 'Entity type',
     }),
     valueOf: (entity) => {
       if (entity.category === 'kubernetes' && entity.subType) {
@@ -162,6 +166,25 @@ const CLOUD_PROVIDER_FIELD: GroupByFieldDef = {
   valueOf: (entity) =>
     entity.provider ? PROVIDER_LABEL[entity.provider] ?? entity.provider : UNKNOWN,
 };
+
+const APM_HOSTS_K8S_GROUP_BY_FIELDS: readonly GroupByFieldDef[] = [
+  {
+    id: 'apmServiceName',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.groupBy.field.apmServiceName',
+      { defaultMessage: 'APM Service name' }
+    ),
+    valueOf: (entity: Entity) => entity.attributes?.apmServiceName || UNKNOWN,
+  },
+  {
+    id: 'apmServiceGroup',
+    label: i18n.translate(
+      'xpack.streams.entityCentricLab.entities.groupBy.field.apmServiceGroup',
+      { defaultMessage: 'APM Service group' }
+    ),
+    valueOf: (entity: Entity) => entity.attributes?.apmServiceGroup || UNKNOWN,
+  },
+];
 
 const tagGroupByFields = (isElasticOn: boolean, isPhase1 = false): GroupByFieldDef[] =>
   getVisibleTagKeys(isElasticOn, isPhase1).map((key) => ({
@@ -200,9 +223,9 @@ const ENVIRONMENT_REGION_FIELDS: readonly GroupByFieldDef[] = [
  * Fields offered in the Group by dropdown. Includes the per-category "extra"
  * attributes (e.g. Hosts → OS / Cloud provider / Service name) when the
  * inventory is scoped to a category that declares them. K8s hierarchy fields
- * (Cluster / Namespace / Node) and Cloud provider follow the same scope
- * rules as the search bar ({@link getEntitySearchFieldNames}). ElasticOn
- * omits Application.
+ * (Cluster / Namespace / Node), Hosts/K8s APM correlation (Service name /
+ * Service group), and Cloud provider follow the same scope rules as the
+ * search bar ({@link getEntitySearchFieldNames}). ElasticOn omits Application.
  *
  * In Phase 1 the "Health" field is replaced by "Alerts" (no health concept).
  */
@@ -225,6 +248,9 @@ export const getGroupByFields = (
     : [];
 
   // K8s-specific group-by fields — only when the inventory is K8s-scoped.
+  const apmFields: GroupByFieldDef[] = isHostsOrKubernetesInventoryScope(inventoryCategoryScope)
+    ? [...APM_HOSTS_K8S_GROUP_BY_FIELDS]
+    : [];
   const k8sFields: GroupByFieldDef[] = isKubernetesInventoryScope(inventoryCategoryScope)
     ? [
         {
@@ -270,6 +296,7 @@ export const getGroupByFields = (
     ...fields,
     ...alertsField,
     ...k8sFields,
+    ...apmFields,
     ...tagFields,
     ...environmentRegionFields,
     ...attrFields,

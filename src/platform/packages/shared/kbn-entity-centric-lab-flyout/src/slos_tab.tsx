@@ -137,7 +137,7 @@ export const SlosTab = ({ slos }: SlosTabProps) => {
             <p>
               {i18n.translate('entityCentricLabFlyout.flyout.slos.empty.body', {
                 defaultMessage:
-                  'Service Level Objectives help you track reliability targets for this resource. Create an SLO to start monitoring availability, latency, or error rate against a target.',
+                  'Service Level Objectives help you track reliability targets for this entity. Create an SLO to start monitoring availability, latency, or error rate against a target.',
               })}
             </p>
           </EuiText>

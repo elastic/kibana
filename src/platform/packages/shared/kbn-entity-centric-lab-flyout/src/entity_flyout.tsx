@@ -52,6 +52,7 @@ import { AlertsTab } from './alerts_tab';
 import { RelationshipsTab } from './relationships_tab';
 import { ServicesTab } from './services_tab';
 import { ProcessesTab } from './processes_tab';
+import { KubernetesEventsTab } from './kubernetes_events_tab';
 import { TracesTab } from './traces_tab';
 import { ProfilingTab } from './profiling_tab';
 import { DashboardsTab, getOotbDashboards } from './dashboards_tab';
@@ -71,6 +72,7 @@ import type { EntityKind } from './kind_templates';
 import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
 import {
   entityShowsHostRuntimeFlyoutTabs,
+  entityShowsKubernetesPodEventsTab,
   resolveEntityTypeIdForName,
 } from './entity_type_id_mapping';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
@@ -159,6 +161,11 @@ interface EntityFlyoutProps {
    */
   readonly size?: EuiFlyoutSize | number | string;
   /**
+   * EUI flyout presentation — `overlay` (default) or `push` (narrows page
+   * content). The entity-centric lab exposes this via the variation switcher.
+   */
+  readonly flyoutType?: 'overlay' | 'push';
+  /**
    * Restrict the flyout to the core tab set (everything except Relationships)
    * used by the "Infra-short term" lab scenario. When false/undefined (the
    * default, i.e. the entity-centric long-term scenario) the flyout also
@@ -242,6 +249,11 @@ interface EntityFlyoutProps {
    * into shareable URL params (`rangeFrom` / `rangeTo`).
    */
   readonly onTimeRangeChange?: (range: { from: string; to: string }) => void;
+  /**
+   * Pod-only: explicit APM service names for the Services tab. Empty array →
+   * empty state. Omitted for hosts/nodes (demo generator).
+   */
+  readonly hostedApmServiceNames?: readonly string[];
 }
 
 type BuiltInTabId =
@@ -252,6 +264,7 @@ type BuiltInTabId =
   | 'slos'
   | 'services'
   | 'processes'
+  | 'kubernetesEvents'
   | 'relationships'
   | 'dashboards'
   | 'custom'
@@ -273,6 +286,7 @@ const BUILT_IN_TAB_IDS: readonly BuiltInTabId[] = [
   'logs',
   'traces',
   'services',
+  'kubernetesEvents',
   'processes',
   'relationships',
   'custom',
@@ -299,6 +313,7 @@ const CORE_TAB_IDS: readonly string[] = [
   'logs',
   'traces',
   'services',
+  'kubernetesEvents',
   'processes',
   'custom',
   'profiling',
@@ -485,6 +500,7 @@ export const EntityFlyout = ({
   onManageEntityType,
   session,
   size = 'l',
+  flyoutType = 'overlay',
   minimalTabs = false,
   onExpand,
   hideHealthBadge = false,
@@ -502,6 +518,7 @@ export const EntityFlyout = ({
   tabIntent,
   onTabChange,
   onTimeRangeChange,
+  hostedApmServiceNames,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Restore the last tab immediately so clicking another inventory row
@@ -948,6 +965,16 @@ export const EntityFlyout = ({
                 defaultMessage: 'APM services',
               }),
             },
+            ...(entityShowsKubernetesPodEventsTab(kind, entityTypeId)
+              ? [
+                  {
+                    id: 'kubernetesEvents' as TabId,
+                    label: i18n.translate('entityCentricLabFlyout.flyout.tabs.kubernetesEvents', {
+                      defaultMessage: 'Events',
+                    }),
+                  },
+                ]
+              : []),
             {
               id: 'processes' as TabId,
               label: i18n.translate('entityCentricLabFlyout.flyout.tabs.processes', {
@@ -1178,6 +1205,10 @@ export const EntityFlyout = ({
     ]
   );
 
+  // Lab "push" presentation in streams_app insets the inventory page in the
+  // host; keep the flyout on overlay + managed session so close/header work.
+  const euiFlyoutType = flyoutType === 'push' ? 'overlay' : flyoutType;
+
   return (
     <EuiFlyoutResizable
       // No overlay mask: the flyout stays non-modal so the page behind it
@@ -1185,6 +1216,7 @@ export const EntityFlyout = ({
       // another node opens a child flyout rather than being swallowed by a
       // lightbox.
       ownFocus={false}
+      type={euiFlyoutType}
       // When the host opts into a session (`'start'` for the parent,
       // `'inherit'` for the child) EUI's flyout manager docks the two
       // side by side. Undefined keeps the classic single-flyout behaviour.
@@ -1438,6 +1470,8 @@ export const EntityFlyout = ({
           dashboardStyle={dashboardStyle}
           showDashboardThumbnails={showDashboardThumbnails}
           onPreviewDashboard={dashboardStyle === 'listWithPreview' ? updateDashboardPreview : undefined}
+          flyoutType={flyoutType}
+          hostedApmServiceNames={hostedApmServiceNames}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -1507,6 +1541,8 @@ const TabContent = ({
   dashboardStyle = 'embedded',
   showDashboardThumbnails = false,
   onPreviewDashboard,
+  flyoutType = 'overlay',
+  hostedApmServiceNames,
 }: {
   readonly activeTab: TabId;
   readonly activeTabLabel: string;
@@ -1523,6 +1559,8 @@ const TabContent = ({
   readonly dashboardStyle?: 'embedded' | 'list' | 'listWithPreview';
   readonly showDashboardThumbnails?: boolean;
   readonly onPreviewDashboard?: (request: DashboardPreviewRequest) => void;
+  readonly flyoutType?: 'overlay' | 'push';
+  readonly hostedApmServiceNames?: readonly string[];
 }) => {
   const { resourceCopy = false, renderTabDashboard, renderAlertsTab } = useEntityFlyoutServices();
 
@@ -1553,7 +1591,9 @@ const TabContent = ({
     case 'overview':
       return <OverviewTab overview={overview} metrics={tabsData.metrics} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} hideEvents={hideEvents} />;
     case 'logs':
-      return <LogsTab entityName={entityName} logs={tabsData.logs} />;
+      return (
+        <LogsTab entityName={entityName} logs={tabsData.logs} flyoutType={flyoutType} />
+      );
     case 'traces':
       // The override path may surface this tab on a kind that doesn't
       // emit trace data — render the placeholder in that case rather
@@ -1568,9 +1608,13 @@ const TabContent = ({
     case 'slos':
       return <SlosTab slos={tabsData.slos} />;
     case 'services':
-      return <ServicesTab entityName={entityName} />;
+      return (
+        <ServicesTab entityName={entityName} hostedApmServiceNames={hostedApmServiceNames} />
+      );
     case 'processes':
       return <ProcessesTab entityName={entityName} />;
+    case 'kubernetesEvents':
+      return <KubernetesEventsTab podName={entityName} />;
     case 'relationships':
       return (
         <RelationshipsTab relationships={tabsData.relationships} onSelectEntity={onSelectEntity} />

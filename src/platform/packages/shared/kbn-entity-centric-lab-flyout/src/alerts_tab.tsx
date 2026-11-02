@@ -62,7 +62,7 @@ export const AlertsNotConfiguredPrompt = () => (
         <p>
           {i18n.translate('entityCentricLabFlyout.flyout.alerts.empty.body', {
             defaultMessage:
-              'Alert rules notify you when this resource crosses a threshold. Create an alert to start monitoring it.',
+              'Alert rules notify you when this entity crosses a threshold. Create an alert to start monitoring it.',
           })}
         </p>
       </EuiText>

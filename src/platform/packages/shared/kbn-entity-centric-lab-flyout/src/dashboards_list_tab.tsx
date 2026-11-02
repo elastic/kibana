@@ -64,8 +64,8 @@ const AVAILABLE_CUSTOM_DASHBOARDS: readonly { id: string; title: string; descrip
   [
     {
       id: 'custom-resource-usage',
-      title: 'Resource Usage Overview',
-      description: 'CPU, memory, disk utilization breakdown by resource',
+      title: 'Entity usage overview',
+      description: 'CPU, memory, disk utilization breakdown by entity',
     },
     {
       id: 'custom-network-traffic',
@@ -249,10 +249,10 @@ const ThumbnailCell: React.FC<{ title: string; id?: string }> = ({ title, id }) 
 
 const dashboardDescription = (d: DashboardDescriptor): string => {
   const t = d.title;
-  if (t.includes('Node')) return 'Node-level resource metrics and health status';
-  if (t.includes('Pod')) return 'Pod lifecycle, restarts, and resource consumption';
+  if (t.includes('Node')) return 'Node-level metrics and health status';
+  if (t.includes('Pod')) return 'Pod lifecycle, restarts, and capacity consumption';
   if (t.includes('Cluster')) return 'Cluster-wide capacity and workload distribution';
-  if (t.includes('Namespace')) return 'Namespace resource quotas and pod health';
+  if (t.includes('Namespace')) return 'Namespace quotas and pod health';
   if (t.includes('Deployment')) return 'Deployment rollout status, replica counts, and availability';
   if (t.includes('Workload')) return 'Workload health, replica sets, and rollout status';
   if (t.includes('Host') || t.includes('host'))
@@ -358,7 +358,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
           'entityCentricLabFlyout.dashboardsList.custom.createDashboardInitialMessageWithType',
           {
             defaultMessage:
-              'Create a dashboard for "{resourceName}" ({resourceType}). Design it for this resource type—not just this instance—so it works for any similar resource opened from Infrastructure. Include panels that support drill-down so linking with "Port resource name to dashboard" scopes the view to the current resource.',
+              'Create a dashboard for "{resourceName}" ({resourceType}). Design it for this entity type—not just this instance—so it works for any similar entity opened from Infrastructure. Include panels that support drill-down so linking with "Port entity name to dashboard" scopes the view to the current entity.',
             values: { resourceName: entityName, resourceType: entityType },
           }
         )
@@ -366,7 +366,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
           'entityCentricLabFlyout.dashboardsList.custom.createDashboardInitialMessage',
           {
             defaultMessage:
-              'Create a dashboard for "{resourceName}". Design it for this resource type—not just this instance—so it works for any similar resource opened from Infrastructure. Include panels that support drill-down so linking with "Port resource name to dashboard" scopes the view to the current resource.',
+              'Create a dashboard for "{resourceName}". Design it for this entity type—not just this instance—so it works for any similar entity opened from Infrastructure. Include panels that support drill-down so linking with "Port entity name to dashboard" scopes the view to the current entity.',
             values: { resourceName: entityName },
           }
         );
@@ -607,7 +607,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         <EuiText size="s" color="subdued">
           <p>
             {i18n.translate('entityCentricLabFlyout.dashboardsList.managed.empty', {
-              defaultMessage: 'No managed dashboards available for this resource type.',
+              defaultMessage: 'No managed dashboards available for this entity type.',
             })}
           </p>
         </EuiText>
@@ -739,14 +739,14 @@ const RemoveDashboardButton: React.FC<{
           <p>
             <strong>
               {i18n.translate('entityCentricLabFlyout.dashboardsList.custom.removeConfirmTitle', {
-                defaultMessage: 'Remove for all resources of this type?',
+                defaultMessage: 'Remove for all entities of this type?',
               })}
             </strong>
           </p>
           <p>
             {i18n.translate('entityCentricLabFlyout.dashboardsList.custom.removeConfirmBody', {
               defaultMessage:
-                'This dashboard is shared across every resource of the same type. Removing it removes it from all of them.',
+                'This dashboard is shared across every entity of the same type. Removing it removes it from all of them.',
             })}
           </p>
         </EuiText>
@@ -880,7 +880,7 @@ const AddDashboardPicker: React.FC<{
               id="show-for-similar-entities"
               label={i18n.translate(
                 'entityCentricLabFlyout.dashboardsList.custom.showForSimilar',
-                { defaultMessage: 'Also show on other resources of this type' }
+                { defaultMessage: 'Also show on other entities of this type' }
               )}
               checked={showForSimilar}
               onChange={(e) => setShowForSimilar(e.target.checked)}
@@ -896,9 +896,9 @@ const AddDashboardPicker: React.FC<{
                 'entityCentricLabFlyout.dashboardsList.custom.showForSimilarHelp',
                 {
                   defaultMessage:
-                    'When on, the dashboard appears for every resource of the same type (for example, all pods). Turn off to keep it only on this resource ({resourceType} {resourceName}).',
+                    'When on, the dashboard appears for every entity of the same type (for example, all pods). Turn off to keep it only on this entity ({resourceType} {resourceName}).',
                   values: {
-                    resourceType: entityType ?? 'resource',
+                    resourceType: entityType ?? 'entity',
                     resourceName: entityName,
                   },
                 }
@@ -913,7 +913,7 @@ const AddDashboardPicker: React.FC<{
               id="port-resource-name-to-dashboard"
               label={i18n.translate(
                 'entityCentricLabFlyout.dashboardsList.custom.portResourceName',
-                { defaultMessage: 'Port resource name to dashboard' }
+                { defaultMessage: 'Port entity name to dashboard' }
               )}
               checked={portResourceName}
               onChange={(e) => setPortResourceName(e.target.checked)}
@@ -930,7 +930,7 @@ const AddDashboardPicker: React.FC<{
                 'entityCentricLabFlyout.dashboardsList.custom.portResourceNameHelp',
                 {
                   defaultMessage:
-                    'When on, opening this dashboard applies a filter for "{resourceName}" so the dashboard opens scoped to this resource.',
+                    'When on, opening this dashboard applies a filter for "{resourceName}" so the dashboard opens scoped to this entity.',
                   values: { resourceName: entityName },
                 }
               )}

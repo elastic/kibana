@@ -213,7 +213,7 @@ export const IntegrationStatRow = ({ integration }: { integration: FakeIntegrati
         label={i18n.translate(
           'xpack.streams.entityCentricLab.integrations.stat.recommendedResources',
           {
-            defaultMessage: 'Recommended resources',
+            defaultMessage: 'Recommended entities',
           }
         )}
         value={stats.recommendedResources}

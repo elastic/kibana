@@ -25,6 +25,8 @@ export type { DashboardPreviewRequest } from './src/dashboards_list_tab';
 export { SlosTab } from './src/slos_tab';
 export { ServicesTab } from './src/services_tab';
 export { ProcessesTab } from './src/processes_tab';
+export { KubernetesEventsTab, generatePodKubernetesEvents } from './src/kubernetes_events_tab';
+export type { KubernetesPodEvent } from './src/kubernetes_events_tab';
 export { labThing } from './src/lab_terminology';
 export { formatIncidentTick } from './src/time_domain';
 export {
@@ -126,6 +128,8 @@ export {
   entityShowsHostRuntimeFlyoutTabs,
   entityTypeShowsHostRuntimeTabs,
   resolveEntityTypeIdForName,
+  resolveHostedApmServiceNames,
+  entityShowsKubernetesPodEventsTab,
 } from './src/entity_type_id_mapping';
 
 export {

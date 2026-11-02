@@ -914,7 +914,7 @@ const KIND_LABELS: Readonly<Record<EntityKind, string>> = {
     defaultMessage: 'Database',
   }),
   cloud: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.cloud', {
-    defaultMessage: 'Cloud resource',
+    defaultMessage: 'Cloud entity',
   }),
   middleware: i18n.translate('entityCentricLabFlyout.flyout.relationships.kind.middleware', {
     defaultMessage: 'Middleware',

@@ -1899,7 +1899,7 @@ const ColorByPopover = ({
         content={
           <p>
             Change coloring and group by options depending on your use case, then click
-            a hexagon or resource name in the table view to drill down.
+            a hexagon or entity name in the table view to drill down.
           </p>
         }
         onFinish={tourConfig.onClose}
@@ -2573,7 +2573,7 @@ const AlertCountBadge = ({ entities }: { readonly entities: readonly Entity[] })
           'xpack.streams.entityCentricLab.hexMap.alertCountTooltip',
           {
             defaultMessage:
-              '{count} {count, plural, one {resource} other {resources}} with active alerts',
+              '{count} {count, plural, one {entity} other {entities}} with active alerts',
             values: { count: alertCount },
           }
         )}

@@ -749,7 +749,7 @@ const AiSkillsSection = ({
 const ResourcesSection = ({ integration }: { integration: FakeIntegration }) => (
   <SectionPanel
     title={i18n.translate('xpack.streams.entityCentricLab.integrations.resources.title', {
-      defaultMessage: 'Recommended resources',
+      defaultMessage: 'Recommended entities',
     })}
     dataTestSubj="entityCentricLabIntegrationResources"
   >

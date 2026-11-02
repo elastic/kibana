@@ -413,7 +413,7 @@ const ENTITY_ALERTS_VALUES: readonly CategoricalValue[] = [
   {
     id: 'active',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.bucket.alerts.active', {
-      defaultMessage: 'Resources with active alerts',
+      defaultMessage: 'Entities with active alerts',
     }),
     tone: 'danger',
   },

@@ -381,7 +381,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         id: 'throughput',
         label: 'Throughput',
         unit: 'req/s',
-        description: 'How many requests this resource handles per second, across every instance.',
+        description: 'How many requests this entity handles per second, across every instance.',
         series: [
           series(
             'network-in',
@@ -407,7 +407,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         id: 'cpu-usage',
         label: 'Other metric',
         unit: '%',
-        description: 'CPU utilization as a percentage of capacity, averaged across the pods running this resource.',
+        description: 'CPU utilization as a percentage of capacity, averaged across the pods running this entity.',
         series: [
           series(
             'do-nyc1-demo-infra-1',
@@ -423,7 +423,7 @@ const buildGenericEntityTabsData = (entityName: string): EntityTabsData => ({
         id: 'memory-usage',
         label: 'Other metric',
         unit: '%',
-        description: 'Memory utilization as a percentage of capacity, averaged across the pods running this resource.',
+        description: 'Memory utilization as a percentage of capacity, averaged across the pods running this entity.',
         series: [
           series(
             'do-nyc1-demo-infra-2',

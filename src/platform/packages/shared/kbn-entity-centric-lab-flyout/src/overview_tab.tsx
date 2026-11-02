@@ -138,14 +138,7 @@ export const OverviewTab = ({
         data-test-subj="entityCentricLabOverviewEntityDetails"
       >
         <KeyValueGrid
-          rows={withoutRedundantName(
-            resourceCopy
-              ? overview.details.map((row) =>
-                  row.label === 'Entity id' ? { ...row, label: 'Resource id' } : row
-                )
-              : overview.details,
-            overview.displayName
-          )}
+          rows={withoutRedundantName(overview.details, overview.displayName)}
           ariaLabel={i18n.translate(
             'entityCentricLabFlyout.flyout.overview.entityDetailsAriaLabel',
             {

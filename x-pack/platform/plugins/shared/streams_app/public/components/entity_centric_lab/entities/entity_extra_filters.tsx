@@ -96,7 +96,7 @@ const ExtraFilterPopover = ({
         aria-label={i18n.translate(
           'xpack.streams.entityCentricLab.entities.extraFilter.selectableAriaLabel',
           {
-            defaultMessage: 'Filter resources by {label}',
+            defaultMessage: 'Filter entities by {label}',
             values: { label: def.label.toLowerCase() },
           }
         )}
@@ -143,7 +143,7 @@ export const EntityExtraFilters = ({
       css={NO_GROW}
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.extraFilter.groupAriaLabel',
-        { defaultMessage: 'Resource type filters' }
+        { defaultMessage: 'Entity type filters' }
       )}
       data-test-subj="entityCentricLabExtraFilters"
     >

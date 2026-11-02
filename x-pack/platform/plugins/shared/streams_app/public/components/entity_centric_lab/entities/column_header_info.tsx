@@ -82,47 +82,47 @@ export const ColumnHeaderWithInfo = ({
 
 export const healthColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.health', {
-    defaultMessage: 'Overall health of this resource: Healthy, At risk, or Unhealthy.',
+    defaultMessage: 'Overall health of this entity: Healthy, At risk, or Unhealthy.',
   });
 
 /** Data-grid alerts badge: active count, "0 active alerts", or "No alert set up". */
 export const alertsGridColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.alertsGrid', {
     defaultMessage:
-      'Active alerts on this resource. Grey means no alert rules are set up.',
+      'Active alerts on this entity. Grey means no alert rules are set up.',
   });
 
 /** Classic list badge: "Alerting (active/total)", OK, or N/A. */
 export const alertsListColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.alertsList', {
     defaultMessage:
-      'Alert rules on this resource. Red shows firing rules (active/total). Green means none firing. Grey (N/A) means no rules are configured.',
+      'Alert rules on this entity. Red shows firing rules (active/total). Green means none firing. Grey (N/A) means no rules are configured.',
   });
 
 export const lastHealthChangeColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.lastHealthChange', {
-    defaultMessage: 'When this resource last moved between Healthy, At risk, and Unhealthy.',
+    defaultMessage: 'When this entity last moved between Healthy, At risk, and Unhealthy.',
   });
 
 export const uptimeColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.uptime', {
-    defaultMessage: 'How long this resource has been running.',
+    defaultMessage: 'How long this entity has been running.',
   });
 
 export const anomalyDetectionColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.anomalyDetection', {
     defaultMessage:
-      'Anomaly insight for this resource. "No anomalies detected" means nothing stood out. Last value in the selected time range.',
+      'Anomaly insight for this entity. "No anomalies detected" means nothing stood out. Last value in the selected time range.',
   });
 
 export const firstSeenColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.firstSeen', {
-    defaultMessage: 'When this resource was first observed.',
+    defaultMessage: 'When this entity was first observed.',
   });
 
 export const lastSeenColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.lastSeen', {
-    defaultMessage: 'When this resource was last observed.',
+    defaultMessage: 'When this entity was last observed.',
   });
 
 const defaultCategoricalDescription = (): string =>
@@ -171,7 +171,7 @@ const customMetricDescription = (label: string): string => numericSparklineColum
 export const alertsMetricColumnDescription = (): string =>
   i18n.translate('xpack.streams.entityCentricLab.entities.columnHelp.alertsMetric', {
     defaultMessage:
-      'Active alerts on this resource. Red means active alerts; green means none; grey means no alert rules are set up.',
+      'Active alerts on this entity. Red means active alerts; green means none; grey means no alert rules are set up.',
   });
 
 export const metricColumnDescription = (metric: MetricDescriptor): string => {
@@ -495,37 +495,37 @@ const hexMapMetricConcept = (metric: MetricDescriptor): string => {
   if (metric.id === ENTITY_ALERTS_METRIC_ID) {
     return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.alerts', {
       defaultMessage:
-        'Active alerts on each resource. Red means active alerts; green means none; grey means no alert rules are set up.',
+        'Active alerts on each entity. Red means active alerts; green means none; grey means no alert rules are set up.',
     });
   }
   if (metric.id === ENTITY_HEALTH_METRIC_ID) {
     return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.health', {
-      defaultMessage: 'Overall health of each resource: Healthy, At risk, or Unhealthy.',
+      defaultMessage: 'Overall health of each entity: Healthy, At risk, or Unhealthy.',
     });
   }
   switch (metric.id) {
     case 'status':
       return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.status', {
         defaultMessage:
-          'Status of each resource: Running, Degraded, Down, or Unknown. Last value in the selected time range.',
+          'Status of each entity: Running, Degraded, Down, or Unknown. Last value in the selected time range.',
       });
     case 'condition':
       return i18n.translate(
         'xpack.streams.entityCentricLab.entities.hexMapLegend.concept.condition',
         {
           defaultMessage:
-            'Node condition of each resource: Ready, Memory pressure, Disk pressure, PID pressure, or Not ready. Last value in the selected time range.',
+            'Node condition of each entity: Ready, Memory pressure, Disk pressure, PID pressure, or Not ready. Last value in the selected time range.',
         }
       );
     case 'phase':
       return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.phase', {
         defaultMessage:
-          'Pod phase of each resource: Running, Succeeded, Pending, Failed, or Unknown. Last value in the selected time range.',
+          'Pod phase of each entity: Running, Succeeded, Pending, Failed, or Unknown. Last value in the selected time range.',
       });
     case 'rollout':
       return i18n.translate('xpack.streams.entityCentricLab.entities.hexMapLegend.concept.rollout', {
         defaultMessage:
-          'Rollout state of each resource: Available, Rolling out, Degraded, or Unavailable. Last value in the selected time range.',
+          'Rollout state of each entity: Available, Rolling out, Degraded, or Unavailable. Last value in the selected time range.',
       });
     case 'cpu-util':
     case 'cpu-usage':
@@ -575,7 +575,7 @@ const hexMapMetricConcept = (metric: MetricDescriptor): string => {
         ? i18n.translate(
             'xpack.streams.entityCentricLab.entities.hexMapLegend.concept.categoricalDefault',
             {
-              defaultMessage: 'Last value in the selected time range for each resource.',
+              defaultMessage: 'Last value in the selected time range for each entity.',
             }
           )
         : i18n.translate(

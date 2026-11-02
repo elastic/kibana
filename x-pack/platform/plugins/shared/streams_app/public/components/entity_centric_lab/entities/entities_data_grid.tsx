@@ -255,7 +255,7 @@ const BASE_HIDDEN_COLUMNS: readonly CatalogColumn[] = [
   {
     id: 'id',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.id', {
-      defaultMessage: 'Resource ID',
+      defaultMessage: 'Entity ID',
     }),
   },
 ];
@@ -849,7 +849,7 @@ const GridSectionHeader = ({
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               {i18n.translate('xpack.streams.entityCentricLab.entities.datagrid.resourcesLabel', {
-                defaultMessage: 'Resources:',
+                defaultMessage: 'Entities:',
               })}
             </EuiText>
           </EuiFlexItem>
@@ -867,7 +867,7 @@ const GridSectionHeader = ({
             <EuiText size="s">
               {i18n.translate(
                 'xpack.streams.entityCentricLab.entities.datagrid.resourcesWithAlertsLabel',
-                { defaultMessage: 'Resources with alerts:' }
+                { defaultMessage: 'Entities with alerts:' }
               )}
             </EuiText>
           </EuiFlexItem>
@@ -1169,7 +1169,7 @@ export const EntityDataGridSection = ({
       <EuiDataGrid
         ref={dataGridRef}
         aria-label={i18n.translate('xpack.streams.entityCentricLab.entities.grid.ariaLabel', {
-          defaultMessage: '{label} resources',
+          defaultMessage: '{label} entities',
           values: { label: captionLabel },
         })}
         columns={gridColumns}

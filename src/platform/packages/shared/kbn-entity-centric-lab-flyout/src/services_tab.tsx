@@ -11,6 +11,7 @@ import React, { useId, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -44,6 +45,12 @@ interface HostedService {
 
 interface ServicesTabProps {
   readonly entityName: string;
+  /**
+   * When set (Kubernetes pods), render exactly these APM services. An empty
+   * array shows the empty state. When omitted, hosts/nodes use the demo
+   * generator keyed on {@link entityName}.
+   */
+  readonly hostedApmServiceNames?: readonly string[];
 }
 
 const SPARKLINE_COLOR = {
@@ -115,81 +122,129 @@ const generateHostedServices = (hostName: string): readonly HostedService[] => {
   const seed = hostName.split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
   const rng = (n: number): number => ((seed * 9301 + 49297) % 233280) % n;
 
-  const servicePool: readonly ServiceSeed[] = [
-    {
-      name: 'payments-service',
-      sloStatus: 'Met',
-      language: 'Java',
-      latencyMs: 86,
-      transactionsPerMin: 1243,
-      errorRate: 0.02,
-    },
-    {
-      name: 'auth-service',
-      sloStatus: 'Breaching',
-      language: 'Go',
-      latencyMs: 412,
-      transactionsPerMin: 3891,
-      errorRate: 1.88,
-    },
-    {
-      name: 'order-service',
-      sloStatus: 'Met',
-      language: 'Node.js',
-      latencyMs: 124,
-      transactionsPerMin: 872,
-      errorRate: 0.15,
-    },
-    {
-      name: 'notification-service',
-      sloStatus: 'Degrading',
-      language: 'Python',
-      latencyMs: 248,
-      transactionsPerMin: 412,
-      errorRate: 0.79,
-    },
-    {
-      name: 'inventory-service',
-      sloStatus: 'Met',
-      language: 'Java',
-      latencyMs: 41,
-      transactionsPerMin: 2034,
-      errorRate: 0.01,
-    },
-    {
-      name: 'search-service',
-      sloStatus: 'No SLO',
-      language: 'Rust',
-      latencyMs: 18,
-      transactionsPerMin: 5210,
-      errorRate: 0.04,
-    },
-    {
-      name: 'user-profile-service',
-      sloStatus: 'Met',
-      language: 'Go',
-      latencyMs: 97,
-      transactionsPerMin: 1580,
-      errorRate: 0.09,
-    },
-    {
-      name: 'recommendation-engine',
-      sloStatus: 'Degrading',
-      language: 'Python',
-      latencyMs: 336,
-      transactionsPerMin: 290,
-      errorRate: 0.66,
-    },
-  ];
-
   const count = 2 + rng(5);
-  const start = rng(servicePool.length);
+  const start = rng(HOSTED_APM_SERVICE_POOL.length);
   const result: HostedService[] = [];
   for (let idx = 0; idx < count; idx++) {
-    result.push(withSparklines(servicePool[(start + idx) % servicePool.length]));
+    result.push(withSparklines(HOSTED_APM_SERVICE_POOL[(start + idx) % HOSTED_APM_SERVICE_POOL.length]));
   }
   return result;
 };
+
+const HOSTED_APM_SERVICE_POOL: readonly ServiceSeed[] = [
+  {
+    name: 'payments-service',
+    sloStatus: 'Met',
+    language: 'Java',
+    latencyMs: 86,
+    transactionsPerMin: 1243,
+    errorRate: 0.02,
+  },
+  {
+    name: 'auth-service',
+    sloStatus: 'Breaching',
+    language: 'Go',
+    latencyMs: 412,
+    transactionsPerMin: 3891,
+    errorRate: 1.88,
+  },
+  {
+    name: 'order-service',
+    sloStatus: 'Met',
+    language: 'Node.js',
+    latencyMs: 124,
+    transactionsPerMin: 872,
+    errorRate: 0.15,
+  },
+  {
+    name: 'notification-service',
+    sloStatus: 'Degrading',
+    language: 'Python',
+    latencyMs: 248,
+    transactionsPerMin: 412,
+    errorRate: 0.79,
+  },
+  {
+    name: 'inventory-service',
+    sloStatus: 'Met',
+    language: 'Java',
+    latencyMs: 41,
+    transactionsPerMin: 2034,
+    errorRate: 0.01,
+  },
+  {
+    name: 'search-service',
+    sloStatus: 'No SLO',
+    language: 'Rust',
+    latencyMs: 18,
+    transactionsPerMin: 5210,
+    errorRate: 0.04,
+  },
+  {
+    name: 'user-profile-service',
+    sloStatus: 'Met',
+    language: 'Go',
+    latencyMs: 97,
+    transactionsPerMin: 1580,
+    errorRate: 0.09,
+  },
+  {
+    name: 'recommendation-engine',
+    sloStatus: 'Degrading',
+    language: 'Python',
+    latencyMs: 336,
+    transactionsPerMin: 290,
+    errorRate: 0.66,
+  },
+  {
+    name: 'checkout',
+    sloStatus: 'Met',
+    language: 'Java',
+    latencyMs: 112,
+    transactionsPerMin: 980,
+    errorRate: 0.08,
+  },
+  {
+    name: 'payments-api',
+    sloStatus: 'Breaching',
+    language: 'Go',
+    latencyMs: 388,
+    transactionsPerMin: 2104,
+    errorRate: 1.42,
+  },
+  {
+    name: 'fraud-service',
+    sloStatus: 'Met',
+    language: 'Java',
+    latencyMs: 64,
+    transactionsPerMin: 640,
+    errorRate: 0.03,
+  },
+];
+
+const serviceSeedForName = (serviceName: string): ServiceSeed => {
+  const fromPool = HOSTED_APM_SERVICE_POOL.find(
+    (candidate) => candidate.name.toLowerCase() === serviceName.toLowerCase()
+  );
+  if (fromPool) {
+    return fromPool;
+  }
+  const seed = serviceName.split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+  const rng = (n: number): number => ((seed * 9301 + 49297) % 233280) % n;
+  const statuses: readonly SloStatus[] = ['Met', 'Breaching', 'Degrading', 'No SLO'];
+  const languages = ['Java', 'Go', 'Node.js', 'Python', 'Rust'] as const;
+  return {
+    name: serviceName,
+    sloStatus: statuses[rng(statuses.length)],
+    language: languages[rng(languages.length)],
+    latencyMs: 40 + rng(400),
+    transactionsPerMin: 100 + rng(4000),
+    errorRate: Number((rng(200) / 100).toFixed(2)),
+  };
+};
+
+const hostedServicesFromNames = (serviceNames: readonly string[]): readonly HostedService[] =>
+  serviceNames.map((name) => withSparklines(serviceSeedForName(name)));
 
 const MetricSparkline = ({
   values,
@@ -272,10 +327,15 @@ const MetricCell = ({
   </EuiFlexGroup>
 );
 
-export const ServicesTab = ({ entityName }: ServicesTabProps) => {
+export const ServicesTab = ({ entityName, hostedApmServiceNames }: ServicesTabProps) => {
   const { euiTheme } = useEuiTheme();
   const { density } = useEntityFlyoutServices();
-  const services = useMemo(() => generateHostedServices(entityName), [entityName]);
+  const services = useMemo(() => {
+    if (hostedApmServiceNames !== undefined) {
+      return hostedServicesFromNames(hostedApmServiceNames);
+    }
+    return generateHostedServices(entityName);
+  }, [entityName, hostedApmServiceNames]);
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
   const isCompact = density === 'compact';
@@ -359,6 +419,32 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
     ],
     [isCompact]
   );
+
+  if (services.length === 0) {
+    return (
+      <EuiEmptyPrompt
+        iconType="apmApp"
+        title={
+          <h2>
+            {i18n.translate('entityCentricLabFlyout.flyout.services.empty.title', {
+              defaultMessage: 'No APM services detected',
+            })}
+          </h2>
+        }
+        body={
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('entityCentricLabFlyout.flyout.services.empty.body', {
+                defaultMessage:
+                  'No APM-instrumented services were correlated to this entity for the selected time range.',
+              })}
+            </p>
+          </EuiText>
+        }
+        data-test-subj="entityCentricLabServicesEmpty"
+      />
+    );
+  }
 
   return (
     <>

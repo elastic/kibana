@@ -98,6 +98,7 @@ const HOST_RUNTIME_ENTITY_TYPE_IDS: ReadonlySet<string> = new Set([
   'gcp-compute',
   'azure-vm',
   'k8s-node',
+  'k8s-pod',
 ]);
 
 /** Whether this entity type should show the Services and Processes flyout tabs. */
@@ -107,13 +108,39 @@ export const entityTypeShowsHostRuntimeTabs = (entityTypeId: string | undefined)
 /**
  * Whether the flyout / detail page should surface Services + Processes.
  * Node keeps the K8s-first Overview; these tabs expose OS-level runtime
- * (scoped to the node name as `host.name`).
+ * (scoped to the node name as `host.name`). Pods reuse the same Services
+ * tab (APM correlation) and Processes tab as nodes.
  */
 export const entityShowsHostRuntimeFlyoutTabs = (
   kind: EntityKind | undefined,
   entityTypeId: string | undefined
 ): boolean =>
-  kind === 'host' || kind === 'node' || entityTypeShowsHostRuntimeTabs(entityTypeId);
+  kind === 'host' ||
+  kind === 'node' ||
+  kind === 'pod' ||
+  entityTypeShowsHostRuntimeTabs(entityTypeId);
+
+/**
+ * Pod flyout: explicit APM service names for the Services tab. Hosts/nodes
+ * pass `undefined` so the tab keeps its deterministic demo generator.
+ * An empty array means no correlated service → empty state.
+ */
+export const resolveHostedApmServiceNames = (
+  kind: EntityKind | undefined,
+  attributes?: Readonly<Record<string, string>>
+): readonly string[] | undefined => {
+  if (kind !== 'pod') {
+    return undefined;
+  }
+  const apmServiceName = attributes?.apmServiceName?.trim();
+  return apmServiceName ? [apmServiceName] : [];
+};
+
+/** Kubernetes pod flyout: Events tab (API events for this pod). */
+export const entityShowsKubernetesPodEventsTab = (
+  kind: EntityKind | undefined,
+  entityTypeId: string | undefined
+): boolean => kind === 'pod' || entityTypeId === 'k8s-pod';
 
 export const KIND_TO_ENTITY_TYPE_ID: Partial<Record<EntityKind, string>> = {
   service: 'apm-service',

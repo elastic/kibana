@@ -495,7 +495,7 @@ export const KubernetesResourceTypeFilter = ({
 }: KubernetesResourceTypeFilterProps) => {
   const allLabel = i18n.translate(
     'xpack.streams.entityCentricLab.entities.kubernetesResourceTypeFilter.allOption',
-    { defaultMessage: 'All resource types' }
+    { defaultMessage: 'All entity types' }
   );
   const options = useMemo<EuiComboBoxOptionOption[]>(() => buildResourceTypeOptions(), []);
   const allFlat = useMemo<EuiComboBoxOptionOption[]>(() => {
@@ -534,7 +534,7 @@ export const KubernetesResourceTypeFilter = ({
       isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.kubernetesResourceTypeFilter.ariaLabel',
-        { defaultMessage: 'Filter Kubernetes entities by resource type' }
+        { defaultMessage: 'Filter by entity type (Kubernetes)' }
       )}
       data-test-subj="entityCentricLabKubernetesResourceTypeFilter"
       style={{ minWidth: 140 }}
@@ -859,7 +859,7 @@ export const CategoryResourceTypeFilter = ({
 }: CategoryResourceTypeFilterProps) => {
   const allLabel = i18n.translate(
     'xpack.streams.entityCentricLab.entities.categoryResourceTypeFilter.allOption',
-    { defaultMessage: 'All types' }
+    { defaultMessage: 'All entity types' }
   );
   const options = useMemo<EuiComboBoxOptionOption[]>(
     () => typeLabels.map((label) => ({ label, value: label })),
@@ -869,7 +869,7 @@ export const CategoryResourceTypeFilter = ({
     () =>
       value === CATEGORY_RESOURCE_TYPE_ALL
         ? []
-        : [{ label: `Type: ${value}`, value }],
+        : [{ label: `Entity type: ${value}`, value }],
     [value]
   );
   const handleChange = useCallback(
@@ -889,7 +889,7 @@ export const CategoryResourceTypeFilter = ({
       isClearable
       aria-label={i18n.translate(
         'xpack.streams.entityCentricLab.entities.categoryResourceTypeFilter.ariaLabel',
-        { defaultMessage: 'Filter resources by type' }
+        { defaultMessage: 'Filter by entity type' }
       )}
       data-test-subj="entityCentricLabCategoryResourceTypeFilter"
       style={{ minWidth: 240 }}

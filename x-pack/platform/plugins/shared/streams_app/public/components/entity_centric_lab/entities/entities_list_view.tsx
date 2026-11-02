@@ -386,7 +386,7 @@ const CategorySectionHeader = ({
           <EuiFlexItem grow={false}>
             <StatBadge
               label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
-                defaultMessage: 'Resources:',
+                defaultMessage: 'Entities:',
               })}
               value={total}
             />
@@ -395,7 +395,7 @@ const CategorySectionHeader = ({
             <StatBadge
               label={i18n.translate(
                 'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-                { defaultMessage: 'Resources with alerts:' }
+                { defaultMessage: 'Entities with alerts:' }
               )}
               value={alertsCount}
               color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -441,7 +441,7 @@ const CloudProviderSectionHeader = ({
     <EuiFlexItem grow={false}>
       <StatBadge
         label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
-          defaultMessage: 'Resources:',
+          defaultMessage: 'Entities:',
         })}
         value={total}
       />
@@ -450,7 +450,7 @@ const CloudProviderSectionHeader = ({
       <StatBadge
         label={i18n.translate(
           'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-          { defaultMessage: 'Resources with alerts:' }
+          { defaultMessage: 'Entities with alerts:' }
         )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -496,7 +496,7 @@ const SectionHeader = ({
       <EuiFlexItem grow={false}>
         <StatBadge
           label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
-            defaultMessage: 'Resources:',
+            defaultMessage: 'Entities:',
           })}
           value={total}
         />
@@ -505,7 +505,7 @@ const SectionHeader = ({
         <StatBadge
           label={i18n.translate(
             'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-            { defaultMessage: 'Resources with alerts:' }
+            { defaultMessage: 'Entities with alerts:' }
           )}
           value={alertsCount}
           color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -682,7 +682,7 @@ const GroupSectionHeader = ({
     <EuiFlexItem grow={false}>
       <StatBadge
         label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
-          defaultMessage: 'Resources:',
+          defaultMessage: 'Entities:',
         })}
         value={total}
       />
@@ -691,7 +691,7 @@ const GroupSectionHeader = ({
       <StatBadge
         label={i18n.translate(
           'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-          { defaultMessage: 'Resources with alerts:' }
+          { defaultMessage: 'Entities with alerts:' }
         )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -720,7 +720,7 @@ const SubGroupSectionHeader = ({
     <EuiFlexItem grow={false}>
       <StatBadge
         label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
-          defaultMessage: 'Resources:',
+          defaultMessage: 'Entities:',
         })}
         value={total}
       />
@@ -729,7 +729,7 @@ const SubGroupSectionHeader = ({
       <StatBadge
         label={i18n.translate(
           'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-          { defaultMessage: 'Resources with alerts:' }
+          { defaultMessage: 'Entities with alerts:' }
         )}
         value={alertsCount}
         color={alertsCount > 0 ? 'danger' : 'hollow'}
@@ -774,7 +774,7 @@ const KubernetesSectionHeader = ({
           <EuiFlexItem grow={false}>
             <StatBadge
               label={i18n.translate('xpack.streams.entityCentricLab.entities.list.resourcesBadge', {
-                defaultMessage: 'Resources:',
+                defaultMessage: 'Entities:',
               })}
               value={total}
             />
@@ -783,7 +783,7 @@ const KubernetesSectionHeader = ({
             <StatBadge
               label={i18n.translate(
                 'xpack.streams.entityCentricLab.entities.list.resourcesWithAlertsBadge',
-                { defaultMessage: 'Resources with alerts:' }
+                { defaultMessage: 'Entities with alerts:' }
               )}
               value={alertsCount}
               color={alertsCount > 0 ? 'danger' : 'hollow'}

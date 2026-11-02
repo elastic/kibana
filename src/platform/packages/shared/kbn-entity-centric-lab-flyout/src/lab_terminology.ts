@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** ElasticOn copy uses "resource(s)" in place of "entity/entities". */
-export const labThing = (resourceCopy: boolean): string => (resourceCopy ? 'resource' : 'entity');
+/** Inventory copy uses "entity/entities". `resourceCopy` is ignored (compat only). */
+export const labThing = (_resourceCopy: boolean): string => 'entity';
 
-export const labThings = (resourceCopy: boolean): string =>
-  resourceCopy ? 'resources' : 'entities';
+export const labThings = (_resourceCopy: boolean): string => 'entities';
 
-export const labThingLabel = (resourceCopy: boolean): string =>
-  resourceCopy ? 'Resource' : 'Entity';
+export const labThingLabel = (_resourceCopy: boolean): string => 'Entity';
+
+export const labThingsLabel = (_resourceCopy: boolean): string => 'Entities';

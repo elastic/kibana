@@ -48,6 +48,7 @@ interface LogDocumentFlyoutProps {
   readonly totalCount: number;
   readonly onClose: () => void;
   readonly onNavigate: (direction: 'prev' | 'next') => void;
+  readonly flyoutType?: 'overlay' | 'push';
 }
 
 type DocTab = 'overview' | 'attributes' | 'table' | 'json';
@@ -110,6 +111,7 @@ export const LogDocumentFlyout = ({
   totalCount,
   onClose,
   onNavigate,
+  flyoutType = 'overlay',
 }: LogDocumentFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
   const [activeTab, setActiveTab] = useState<DocTab>('overview');
@@ -148,6 +150,7 @@ export const LogDocumentFlyout = ({
   return (
     <EuiFlyoutResizable
       ownFocus={false}
+      type={flyoutType === 'push' ? 'overlay' : flyoutType}
       session="inherit"
       onClose={onClose}
       size="s"

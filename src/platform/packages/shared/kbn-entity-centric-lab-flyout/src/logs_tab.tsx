@@ -40,6 +40,7 @@ import { useEntityFlyoutServices } from './services_context';
 interface LogsTabProps {
   readonly entityName: string;
   readonly logs: readonly LogRow[];
+  readonly flyoutType?: 'overlay' | 'push';
 }
 
 const SEVERITY_DOT_COLOR: Record<LogSeverity, string> = {
@@ -66,7 +67,7 @@ const serviceColor = (name: string): string => {
   return SERVICE_COLORS[hash % SERVICE_COLORS.length];
 };
 
-export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
+export const LogsTab = ({ entityName, logs, flyoutType = 'overlay' }: LogsTabProps) => {
   const { euiTheme } = useEuiTheme();
   const { density: serviceDensity } = useEntityFlyoutServices();
   const [{ pageIndex, pageSize }, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
@@ -982,6 +983,7 @@ export const LogsTab = ({ entityName, logs }: LogsTabProps) => {
           entityName={entityName}
           currentIndex={expandedDocIndex}
           totalCount={filteredLogs.length}
+          flyoutType={flyoutType}
           onClose={() => setExpandedDocIndex(null)}
           onNavigate={(dir) =>
             setExpandedDocIndex((prev) =>
