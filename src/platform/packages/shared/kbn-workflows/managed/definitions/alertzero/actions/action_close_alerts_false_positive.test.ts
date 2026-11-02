@@ -33,19 +33,22 @@ describe('Close alerts as false positive action', () => {
   // Mirrors WorkflowTemplatingEngine.evaluateExpression: strip the leading `$` and the
   // surrounding `{{ }}`, then evalValueSync the raw expression against a context — the
   // same call the execution engine makes for a step's `if` condition.
-  const evaluateIfCondition = (updated: number, alertIds: string[]): unknown => {
+  const evaluateIfCondition = (updated: number, alertIds: string[], alreadyClosed = 0): unknown => {
     const expression = (failStep.if as string)
       .replace(/^\$\{\{/, '')
       .replace(/\}\}$/, '')
       .trim();
     return engine.evalValueSync(expression, {
       steps: { close_alerts: { output: { updated } } },
+      variables: { expected_close_count: alertIds.length - alreadyClosed },
       inputs: { actionInput: { alertIds } },
     });
   };
 
   it('places the completeness guard between close_alerts and emit_result', () => {
     expect(workflow.steps.map((step) => step.name)).toEqual([
+      'count_already_closed',
+      'resolve_expected_close',
       'close_alerts',
       'fail_incomplete_close',
       'emit_result',
@@ -60,14 +63,20 @@ describe('Close alerts as false positive action', () => {
   // Approving a proposal runs this with the proposal's `alertIds`. The close is an update by
   // query, so any clause beyond the ids (a rule, a time range) would close alerts the analyst
   // was never shown.
-  it('closes only the alerts named in the approved input, with nothing else in the query', () => {
+  it('closes only the open alerts named in the approved input, with nothing else in the query', () => {
     const closeStep = workflow.steps.find((step) => step.name === 'close_alerts')!;
 
     expect(closeStep.with).toEqual({
       status: 'closed',
       reason: 'false_positive',
       conflicts: 'proceed',
-      query: { bool: { filter: { terms: { _id: '${{ inputs.actionInput.alertIds }}' } } } },
+      query: {
+        bool: {
+          filter: { terms: { _id: '${{ inputs.actionInput.alertIds }}' } },
+          // An analyst's earlier closure keeps its reason, user and time.
+          must_not: { term: { 'kibana.alert.workflow_status': 'closed' } },
+        },
+      },
     });
   });
 
@@ -88,6 +97,16 @@ describe('Close alerts as false positive action', () => {
     expect(evaluateIfCondition(2, ['alert-1', 'alert-2'])).toBe(false);
   });
 
+  // The analyst closed some alerts before approving. They are not this action's to close, so
+  // updating only the open ones is complete, not a shortfall.
+  it('does not fail when the alerts that were not updated were already closed', () => {
+    expect(evaluateIfCondition(1, ['alert-1', 'alert-2'], 1)).toBe(false);
+  });
+
+  it('does not fail when every requested alert was already closed', () => {
+    expect(evaluateIfCondition(0, ['alert-1', 'alert-2'], 2)).toBe(false);
+  });
+
   it('fails when fewer alerts were updated than requested', () => {
     expect(evaluateIfCondition(1, ['alert-1', 'alert-2'])).toBe(true);
   });
@@ -99,9 +118,10 @@ describe('Close alerts as false positive action', () => {
   it('renders a message naming the shortfall', () => {
     const rendered = engine.parseAndRenderSync(failStep.with!.message as string, {
       steps: { close_alerts: { output: { updated: 1 } } },
+      variables: { expected_close_count: 2, already_closed_count: 0 },
       inputs: { actionInput: { alertIds: ['alert-1', 'alert-2'] } },
     });
 
-    expect(rendered).toContain('Closed 1 of 2 requested alert(s) as false positive');
+    expect(rendered).toContain('Closed 1 of 2 open alert(s) as false positive');
   });
 });
