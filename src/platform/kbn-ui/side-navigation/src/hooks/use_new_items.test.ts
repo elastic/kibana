@@ -84,11 +84,18 @@ describe('useNewItems', () => {
   });
 
   describe('Max new items limits', () => {
-    it('enforces max 2 new primary items', () => {
-      const { result } = renderHook(() => useNewItems([...primaryItems, ...footerItems]));
+    it('enforces max 3 new primary items', () => {
+      const { result } = renderHook(() =>
+        useNewItems([
+          ...primaryItems,
+          createPrimary('discover', 'Discover', [], 'new'),
+          ...footerItems,
+        ])
+      );
 
       expect(result.current.getIsNewPrimary('home')).toBe(true);
       expect(result.current.getIsNewPrimary('dashboards')).toBe(true);
+      expect(result.current.getIsNewPrimary('discover')).toBe(true);
       expect(result.current.getIsNewPrimary('settings')).toBe(false);
     });
 
@@ -105,7 +112,7 @@ describe('useNewItems', () => {
 
   describe('localStorage persistence', () => {
     it('loads visited items from localStorage on mount', () => {
-      const visitedItems = ['dashboards', 'settings'];
+      const visitedItems = ['dashboards', 'footer-subitem-1'];
       localStorage.setItem(STORAGE_KEY, JSON.stringify(visitedItems));
 
       const { result } = renderHook(() => useNewItems([...primaryItems, ...footerItems]));

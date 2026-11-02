@@ -79,9 +79,7 @@ test.describe(
         timeout: WIRED_TOGGLE_TIMEOUT,
       });
 
-      // Close flyout with Escape key
-      await page.keyboard.press('Escape');
-      await expect(settingsFlyoutTitle).toBeHidden();
+      await pageObjects.streams.closeFlyout();
 
       // Verify logs.otel and logs.ecs indices were created
       await expect
@@ -115,9 +113,7 @@ test.describe(
         timeout: WIRED_TOGGLE_TIMEOUT,
       });
 
-      // Close flyout with Escape key
-      await page.keyboard.press('Escape');
-      await expect(settingsFlyoutTitle).toBeHidden();
+      await pageObjects.streams.closeFlyout();
 
       // Reload page to see updated streams
       await pageObjects.streams.goto();
@@ -132,8 +128,6 @@ test.describe(
       pageObjects,
       apiServices,
     }) => {
-      const settingsFlyoutTitle = page.locator('#streamsSettingsFlyoutTitle');
-
       // First enable wired streams
       await apiServices.streams.enable();
       await pageObjects.streams.goto();
@@ -158,9 +152,7 @@ test.describe(
       });
       await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
 
-      // Close flyout with Escape key
-      await page.keyboard.press('Escape');
-      await expect(settingsFlyoutTitle).toBeHidden();
+      await pageObjects.streams.closeFlyout();
 
       // Verify UI now shows empty state (no logs.otel or logs.ecs streams)
       await pageObjects.streams.goto();

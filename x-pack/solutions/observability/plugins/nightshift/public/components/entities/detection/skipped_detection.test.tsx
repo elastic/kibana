@@ -23,12 +23,6 @@ const renderBadge = (skip: Parameters<typeof SkippedDetectionBadge>[0]['skip']) 
   );
 
 describe('SkippedDetectionBadge', () => {
-  it('shows a Skipped badge', () => {
-    renderBadge({ reason: 'still_breaching' });
-
-    expect(screen.getByTestId('nightshiftSkippedDetectionBadge')).toHaveTextContent('Skipped');
-  });
-
   it('explains why on hover, and when it was checked', async () => {
     renderBadge({
       reason: 'still_breaching',

@@ -16,8 +16,9 @@ import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { getNightshiftBoundInvestigationWorkflowId } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { isEntryPointReady } from './lib/service_account/constants';
 
 export interface InvestigationInfrastructureAvailabilityDependencies {
   request: KibanaRequest;
@@ -33,6 +34,8 @@ export interface InvestigationInfrastructureAvailabilityDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  /** `xpack.security.serviceAccounts.enabled`; investigations only run as the service account. */
+  isServiceAccountExecutionEnabled?: () => boolean;
 }
 
 export const isInvestigationInfrastructureAvailable = async ({
@@ -47,6 +50,7 @@ export const isInvestigationInfrastructureAvailable = async ({
   spaces,
   workflowsExtensions,
   workflowsManagement,
+  isServiceAccountExecutionEnabled,
 }: InvestigationInfrastructureAvailabilityDependencies): Promise<boolean> => {
   const isFlagEnabled = await firstValueFrom(
     featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false)
@@ -66,14 +70,20 @@ export const isInvestigationInfrastructureAvailable = async ({
     return false;
   }
 
+  // Investigations run only as the Nightshift service account, through the workflow an admin
+  // binds per space. Without it the space cannot run investigations at all.
+  if (!isServiceAccountExecutionEnabled?.()) {
+    return false;
+  }
+
   try {
     const resolvedSpaceId =
       spaceId ?? spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     const workflow = await workflowsManagement.management
       .getClient(request)
-      .getWorkflow(NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID, resolvedSpaceId);
+      .getWorkflow(getNightshiftBoundInvestigationWorkflowId(resolvedSpaceId), resolvedSpaceId);
 
-    return Boolean(workflow?.definition);
+    return isEntryPointReady(workflow);
   } catch (error) {
     logger.warn(`Failed to check investigation infrastructure availability: ${String(error)}`);
     return false;
