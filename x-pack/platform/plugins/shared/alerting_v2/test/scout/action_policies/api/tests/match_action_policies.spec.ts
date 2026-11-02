@@ -15,36 +15,50 @@ import {
   type AlertingApiServicesFixture,
 } from '../fixtures';
 
-const MATCH_ACTION_POLICIES_URL = testData.INTERNAL_ACTION_POLICY_MATCH_API_PATH;
+// The match response reports `evaluated_count` / `is_truncated` over every
+// policy in the request's space, so these scenarios run in a dedicated,
+// suite-owned space. That keeps the counts deterministic without clearing the
+// default space, and teardown removes exactly what the suite created.
+const SPACE_ID = 'alerting-v2-match-action-policies';
+const MATCH_ACTION_POLICIES_URL = `/s/${SPACE_ID}${testData.INTERNAL_ACTION_POLICY_MATCH_API_PATH}`;
 
 apiTest.describe('Match action policies API', { tag: testData.API_ENGINE_TAG }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     readerCredentials = await requestAuth.getApiKeyForCustomRole(
       ALERTING_V2_ACTION_POLICIES_READ_ROLE
     );
     readerHeaders = { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader };
+
+    await apiServices.spaces.delete(SPACE_ID);
+    await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.actionPolicies.cleanUp();
+    await apiServices.alertingV2.actionPolicies.cleanUp({ spaceId: SPACE_ID });
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
-    await apiServices.alertingV2.actionPolicies.cleanUp();
+    await apiServices.spaces.delete(SPACE_ID);
   });
 
   const createMatchFixtures = async (apiServices: AlertingApiServicesFixture) => {
     const tagged = await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'Prod tagged policy', matcher: { tags: ['prod'] } })
+      buildCreateActionPolicyData({ name: 'Prod tagged policy', matcher: { tags: ['prod'] } }),
+      { spaceId: SPACE_ID }
     );
     const catchAll = await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'Catch-all policy' })
+      buildCreateActionPolicyData({ name: 'Catch-all policy' }),
+      { spaceId: SPACE_ID }
     );
     const nonMatching = await apiServices.alertingV2.actionPolicies.create(
-      buildCreateActionPolicyData({ name: 'Staging tagged policy', matcher: { tags: ['staging'] } })
+      buildCreateActionPolicyData({
+        name: 'Staging tagged policy',
+        matcher: { tags: ['staging'] },
+      }),
+      { spaceId: SPACE_ID }
     );
     return { tagged, catchAll, nonMatching };
   };
