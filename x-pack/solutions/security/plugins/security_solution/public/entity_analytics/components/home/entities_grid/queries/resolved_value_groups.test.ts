@@ -6,6 +6,7 @@
  */
 
 import { buildResolvedValueBuckets } from './resolved_entities';
+import { ESQL_MAX_RESULT_ROWS } from './esql';
 import { fetchResolvedValueGroups } from './resolved_value_groups';
 
 const ARGS = { namespace: 'default', concreteEntityIndexName: '.entities.v2.latest.default-00001' };
@@ -106,7 +107,39 @@ describe('fetchResolvedValueGroups', () => {
         { value: null, count: 1 },
       ],
       total: 4,
+      isTruncated: false,
     });
+  });
+
+  it('keeps every value of a field with more than 200 of them', async () => {
+    runQuery.mockImplementation(async (steps: string[]) => {
+      const query = steps.join('\n');
+      if (query.includes('STATS total')) return [{ total: 250 }];
+      if (query.includes('BY group_value')) {
+        return Array.from({ length: 250 }, (_, i) => ({ group_value: `wl-${i}`, n: 1 }));
+      }
+      return [];
+    });
+    const { buckets, isTruncated } = await fetchResolvedValueGroups(
+      ARGS,
+      'entity.attributes.watchlists',
+      runQuery
+    );
+
+    expect(buckets).toHaveLength(250);
+    expect(isTruncated).toBe(false);
+  });
+
+  it('reports a read that hit the row limit', async () => {
+    runQuery.mockImplementation(async (steps: string[]) =>
+      steps.join('\n').includes('BY group_value')
+        ? Array.from({ length: ESQL_MAX_RESULT_ROWS }, (_, i) => ({ group_value: `v-${i}`, n: 1 }))
+        : []
+    );
+
+    await expect(
+      fetchResolvedValueGroups(ARGS, 'entity.attributes.watchlists', runQuery)
+    ).resolves.toEqual(expect.objectContaining({ isTruncated: true }));
   });
 
   it('counts the in-view rows with the search and the entity filters', async () => {

@@ -11,6 +11,8 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { GridContext } from './use_entity_grid_context';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useGridContext } from './use_entity_grid_context';
 import { useResolvedValueGroups } from './use_resolved_value_groups';
 import type { UseResolvedValueGroupsOptions } from './use_resolved_value_groups';
@@ -19,6 +21,8 @@ const mockRunQuery = jest.fn();
 const mockFetchResolvedEntityFilterOverrides = jest.fn();
 
 jest.mock('../../../../../common/hooks/use_error_toast');
+jest.mock('../../../../../common/hooks/use_app_toasts');
+const mockAddWarning = jest.fn();
 jest.mock('./use_entity_grid_context', () => ({
   ...jest.requireActual('./use_entity_grid_context'),
   useGridContext: jest.fn(),
@@ -54,6 +58,7 @@ describe('useResolvedValueGroups', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useAppToasts).mockReturnValue({ addWarning: mockAddWarning } as never);
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     jest.mocked(useGridContext).mockReturnValue({
       queryClient,
@@ -163,5 +168,50 @@ describe('useResolvedValueGroups', () => {
     renderGroups({ ...OPTIONS, isQueryReady: false });
 
     expect(mockRunQuery).not.toHaveBeenCalled();
+  });
+
+  it('shows no groups, and the error, when the entities index is unavailable', async () => {
+    const error = new Error('The entities index is not available.');
+    jest.mocked(useGridContext).mockReturnValue({
+      ...jest.mocked(useGridContext)(),
+      spaceId: 'default',
+      concreteEntityIndexName: null,
+      entitiesIndexError: error,
+    });
+    const { result } = renderGroups();
+
+    expect(result.current.isFetching).toBe(false);
+    expect(result.current.groupData).toEqual({
+      groupByFields: { buckets: [] },
+      groupsCount: { value: 0 },
+      unitsCount: { value: 0 },
+    });
+    expect(useErrorToast).toHaveBeenCalledWith(expect.any(String), error);
+    expect(mockRunQuery).not.toHaveBeenCalled();
+  });
+
+  it('keeps more than 200 values and warns when the read is cut at the row limit', async () => {
+    mockRunQuery.mockImplementation(async (steps: string[]) => {
+      const query = steps.join('\n');
+      if (query.includes('STATS total')) return [{ total: 10_000 }];
+      if (query.includes('BY group_value')) {
+        return Array.from({ length: 10_000 }, (_, i) => ({ group_value: `wl-${i}`, n: 1 }));
+      }
+      return [];
+    });
+    const { result } = renderGroups({ ...OPTIONS, selectedGroup: 'entity.source' });
+
+    await waitFor(() => expect(result.current.groupData.groupsCount).toBeDefined());
+
+    expect(result.current.groupData.groupsCount).toEqual({ value: 10_000 });
+    expect(mockAddWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not warn when every value is listed', async () => {
+    const { result } = renderGroups();
+
+    await waitFor(() => expect(result.current.groupData.groupsCount).toBeDefined());
+
+    expect(mockAddWarning).not.toHaveBeenCalled();
   });
 });

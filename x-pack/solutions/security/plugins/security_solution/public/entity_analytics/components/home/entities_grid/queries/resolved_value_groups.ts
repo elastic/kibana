@@ -13,9 +13,6 @@ import { buildResolvedValueBuckets, fetchResolvedEntityValueChanges } from './re
 import type { ResolvedValueBucket } from './resolved_entities';
 import type { EsqlRunner } from './types';
 
-/** As many buckets as the filter bar lists. */
-export const MAX_RESOLVED_VALUE_BUCKETS = 200;
-
 type ResolvedValueGroupsArgs = Pick<
   QueryArgs,
   'namespace' | 'concreteEntityIndexName' | 'searchExpression' | 'entityExpression'
@@ -25,6 +22,8 @@ export interface ResolvedValueGroups {
   buckets: ResolvedValueBucket[];
   /** Resolved rows in view; buckets of multi-value fields overlap, so not their sum. */
   total: number;
+  /** The read hit the ES|QL row limit, so values (and their rows) may be missing. */
+  isTruncated: boolean;
 }
 
 /** A resolved row's risk level is its group's, else its own: both are stored on the main entity. */
@@ -68,10 +67,8 @@ export const fetchResolvedValueGroups = async (
     count: getNumber(row, 'n') ?? 0,
   }));
   return {
-    buckets: buildResolvedValueBuckets({ field, ownCounts, changes }).slice(
-      0,
-      MAX_RESOLVED_VALUE_BUCKETS
-    ),
+    buckets: buildResolvedValueBuckets({ field, ownCounts, changes }),
     total: (totalRow && getNumber(totalRow, 'total')) ?? 0,
+    isTruncated: ownRows.length >= ESQL_MAX_RESULT_ROWS,
   };
 };

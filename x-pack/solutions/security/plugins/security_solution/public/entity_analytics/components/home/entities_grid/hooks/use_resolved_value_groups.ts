@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { ParsedGroupingAggregation, ParsedRootAggregation } from '@kbn/grouping/src';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import type { EntitiesGroupingAggregation } from '../../entities_table/grouping/use_fetch_grouped_data';
 import { ENTITY_GRID_QUERY_KEY } from '../common';
@@ -28,6 +29,21 @@ import { useEntityFilterOverrides } from './use_entity_grid_data';
 const RESOLVED_VALUE_GROUPS_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.resolvedValueGroupsError',
   { defaultMessage: 'Error loading entity groups' }
+);
+
+const RESOLVED_VALUE_GROUPS_TRUNCATED_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.resolvedValueGroupsTruncated',
+  {
+    defaultMessage: 'Some groups are not shown',
+  }
+);
+
+const RESOLVED_VALUE_GROUPS_TRUNCATED_TEXT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.resolvedValueGroupsTruncatedText',
+  {
+    defaultMessage:
+      'There are too many values to list them all. Narrow the search or the filters to see the rest.',
+  }
 );
 
 /** The key `@kbn/grouping` gives the "no value" bucket. */
@@ -144,19 +160,41 @@ export const useResolvedValueGroups = ({
     }
   );
 
+  // Without an entities index no query runs: show no groups, not the loading placeholder.
+  const isIndexUnavailable = isEnabled && context.entitiesIndexError != null;
   useErrorToast(
     RESOLVED_VALUE_GROUPS_ERROR_TITLE,
-    isEnabled ? overrides.error ?? groups.error : undefined
+    isEnabled ? context.entitiesIndexError ?? overrides.error ?? groups.error : undefined
   );
 
+  const isTruncated = isEnabled && groups.data?.isTruncated === true;
+  const { addWarning } = useAppToasts();
+  useEffect(() => {
+    if (isTruncated) {
+      addWarning({
+        title: RESOLVED_VALUE_GROUPS_TRUNCATED_TITLE,
+        text: RESOLVED_VALUE_GROUPS_TRUNCATED_TEXT,
+      });
+    }
+  }, [isTruncated, addWarning]);
+
   const groupData = useMemo(
-    () => toResolvedValueGroupData(groups.data, selectedGroup, pageIndex, pageSize),
-    [groups.data, selectedGroup, pageIndex, pageSize]
+    () =>
+      isIndexUnavailable
+        ? toResolvedValueGroupData(
+            { buckets: [], total: 0, isTruncated: false },
+            selectedGroup,
+            0,
+            pageSize
+          )
+        : toResolvedValueGroupData(groups.data, selectedGroup, pageIndex, pageSize),
+    [isIndexUnavailable, groups.data, selectedGroup, pageIndex, pageSize]
   );
 
   return {
     isEnabled,
     groupData,
-    isFetching: isEnabled && (groups.isFetching || overrides.isFetching),
+    isFetching:
+      isEnabled && (groups.isFetching || overrides.isFetching || context.isEntitiesIndexLoading),
   };
 };
