@@ -32,6 +32,78 @@
       }
     ]
   },
+  "removeIamPolicyBinding": {
+    "input": {
+      "role": "roles/viewer",
+      "member": "user:revoked@example.com"
+    },
+    "responses": [
+      {
+        "source": "cloudresourcemanager_v1",
+        "method": "POST",
+        "path": "/v1/organizations/{organizationsId}:getIamPolicy",
+        "status": 200,
+        "body": {
+          "version": 3,
+          "etag": "BwYWQrTQ5lA=",
+          "bindings": [
+            {
+              "role": "roles/viewer",
+              "members": ["user:revoked@example.com", "user:kept@example.com"]
+            }
+          ]
+        }
+      },
+      {
+        "source": "cloudresourcemanager_v1",
+        "method": "POST",
+        "path": "/v1/projects/{resource}:getIamPolicy",
+        "status": 200,
+        "body": {
+          "version": 3,
+          "etag": "BwYWQrTQ5lA=",
+          "bindings": [
+            {
+              "role": "roles/viewer",
+              "members": ["user:revoked@example.com", "user:kept@example.com"]
+            }
+          ]
+        }
+      },
+      {
+        "source": "cloudresourcemanager_v2",
+        "method": "POST",
+        "path": "/v2/folders/{foldersId}:getIamPolicy",
+        "status": 200,
+        "body": {
+          "version": 3,
+          "etag": "BwYWQrTQ5lA=",
+          "bindings": [
+            {
+              "role": "roles/viewer",
+              "members": ["user:revoked@example.com", "user:kept@example.com"]
+            }
+          ]
+        }
+      },
+      {
+        "source": "iam_v1",
+        "method": "POST",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:getIamPolicy",
+        "status": 200,
+        "body": {
+          "version": 3,
+          "etag": "BwYWQrTQ5lA=",
+          "bindings": [
+            {
+              "role": "roles/viewer",
+              "members": ["user:revoked@example.com", "user:kept@example.com"]
+            }
+          ]
+        }
+      }
+    ]
+  },
   "testIamPermissions": {
     "queries": [
       {

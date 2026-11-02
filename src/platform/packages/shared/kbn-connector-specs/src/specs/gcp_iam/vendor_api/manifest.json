@@ -186,7 +186,17 @@
       },
       {
         "method": "post",
+        "path": "/v1/organizations/{organizationsId}:setIamPolicy",
+        "source": "cloudresourcemanager_v1"
+      },
+      {
+        "method": "post",
         "path": "/v1/projects/{resource}:getIamPolicy",
+        "source": "cloudresourcemanager_v1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{resource}:setIamPolicy",
         "source": "cloudresourcemanager_v1"
       },
       {
@@ -196,7 +206,17 @@
       },
       {
         "method": "post",
+        "path": "/v2/folders/{foldersId}:setIamPolicy",
+        "source": "cloudresourcemanager_v2"
+      },
+      {
+        "method": "post",
         "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:getIamPolicy",
+        "source": "iam_v1"
+      },
+      {
+        "method": "post",
+        "path": "/v1/projects/{projectsId}/serviceAccounts/{serviceAccountsId}:setIamPolicy",
         "source": "iam_v1"
       }
     ],
