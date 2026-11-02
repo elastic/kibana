@@ -138,19 +138,26 @@ function describeCondition(alert: Partial<AlertSnapshot>): string | undefined {
   return undefined;
 }
 
-function describeV2Rule({ rule_id: ruleId, rule_name: ruleName }: V2AlertSnapshot): string {
-  if (!ruleId) return ' (not created by a rule)';
-  return ` of rule ${
-    ruleName ? `"${sanitize(ruleName)}" (${sanitize(ruleId)})` : sanitize(ruleId)
-  }`;
-}
-
 function describeV2Alert(alert: V2AlertSnapshot): string {
+  const label = [
+    ...(alert.source ? [sanitize(alert.source)] : []),
+    ...(alert.rule_name ? [`"${sanitize(alert.rule_name)}"`] : []),
+  ].join(', ');
+  const subject = alert.rule_id
+    ? ` of rule ${
+        alert.rule_name
+          ? `"${sanitize(alert.rule_name)}" (${sanitize(alert.rule_id)})`
+          : sanitize(alert.rule_id)
+      }`
+    : label
+    ? ` (${label})`
+    : '';
+  const ruleNote = alert.rule_id ? ', and the rule is the v2 rule with the id above' : '';
   const lines = [
-    `Alerting v2 episode ${sanitize(alert.id)}${describeV2Rule(alert)} is ${sanitize(
+    `Alerting v2 episode ${sanitize(alert.id)}${subject} is ${sanitize(
       alert.status
     )}, first seen at ${sanitize(alert.start)}.`,
-    `This is a v2 alert, not a classic one: it is not stored in the .alerts-* indices. Its events are in the ${ALERT_EVENTS_DATA_STREAM} data stream (filter on episode.id and type == "alert"), its actions are in ${ALERT_ACTIONS_DATA_STREAM}, and the rule is the v2 rule with the id above.`,
+    `This is a v2 alert, not a classic one: it is not stored in the .alerts-* indices. Its events are in the ${ALERT_EVENTS_DATA_STREAM} data stream (filter on episode.id and type == "alert"), its actions are in ${ALERT_ACTIONS_DATA_STREAM}${ruleNote}.`,
     `Group hash: ${sanitize(alert.group_hash)}`,
   ];
 
