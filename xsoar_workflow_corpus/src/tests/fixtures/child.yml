@@ -1,0 +1,27 @@
+id: Detonate File - CrowdStrike Falcon Sandbox v2
+name: Detonate File - CrowdStrike Falcon Sandbox v2
+description: Nested vendor playbook
+starttaskid: "0"
+tasks:
+  "0":
+    id: "0"
+    type: start
+    task:
+      id: "0"
+      name: ""
+      brand: ""
+    nexttasks:
+      '#none#':
+        - "1"
+    skipunavailable: false
+  "1":
+    id: "1"
+    type: regular
+    task:
+      id: "1"
+      name: Detonate
+      script: CrowdStrike Falcon Sandbox|||cs-falcon-sandbox-submit
+      type: regular
+      iscommand: true
+      brand: CrowdStrike Falcon Sandbox
+    skipunavailable: false
