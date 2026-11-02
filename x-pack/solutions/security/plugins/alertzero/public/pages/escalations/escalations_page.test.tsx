@@ -25,6 +25,7 @@ import {
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
 import { useInvestigationDetails } from '../conversations/use_investigation_details';
+import { ESCALATIONS_READ_MORE_URL } from './constants';
 import { EscalationsPage } from './escalations_page';
 
 jest.mock('../../hooks/use_alertzero_investigations_capabilities');
@@ -298,6 +299,15 @@ describe('EscalationsPage', () => {
     expect(screen.queryByTestId('escalationsPageHeader')).not.toBeInTheDocument();
     expect(screen.queryByTestId('escalationQueue-open')).not.toBeInTheDocument();
     expect(screen.queryByTestId('escalationQueue-closed')).not.toBeInTheDocument();
+  });
+
+  it('links the explainer banner to the escalations docs page', () => {
+    mockBothQueues([], []);
+    renderPage();
+
+    const link = screen.getByTestId('alertZeroEscalationsEmptyBannerDocsLink');
+    expect(link).toHaveTextContent('Read more about escalations');
+    expect(link).toHaveAttribute('href', ESCALATIONS_READ_MORE_URL);
   });
 
   it('hides the explainer banner when any escalation exists', () => {
