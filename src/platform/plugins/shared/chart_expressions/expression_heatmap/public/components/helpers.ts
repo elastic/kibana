@@ -133,16 +133,14 @@ export const getSortPredicate = (column: DatatableColumn, predicate?: HeatmapSor
   }
 };
 
-// ES|QL ranges (e.g. "500.0..550.0") are strings, which the chart can only sort alphabetically.
-// Like a numeric axis, the largest range comes first unless the sort is ascending.
+// Sort by the lower bound of the range
 // TODO remove together with the number_range exception in getSortPredicate
 // https://github.com/elastic/elastic-charts/issues/2782
 export const sortRowsByRangeLowerBound = (
   rows: Datatable['rows'],
   columnId: string,
-  predicate?: HeatmapSortPredicate
+  isAscending: boolean
 ) => {
-  const isAscending = predicate === 'asc';
   const getLowerBound = (row: Datatable['rows'][number]) => {
     const [lowerBound] = String(row[columnId]).split('..');
     return Number(lowerBound);

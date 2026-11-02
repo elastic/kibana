@@ -465,7 +465,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
       chartData = sortRowsByRangeLowerBound(
         chartData,
         yAxisColumn.id,
-        args.gridConfig.ySortPredicate
+        args.gridConfig.ySortPredicate === 'asc'
       );
     }
 
