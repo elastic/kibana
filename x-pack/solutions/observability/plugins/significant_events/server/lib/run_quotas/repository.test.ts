@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_RUN_LIMITS } from '../../../common/run_quotas';
 import type { RunQuotaSettingsAttributes } from './saved_objects';
 import {
   patchRunQuotaSettings,
@@ -40,11 +41,7 @@ describe('run quota settings repository', () => {
 
     await expect(readRunQuotaSettings(repository)).resolves.toEqual({
       enabled: true,
-      limits: {
-        detection: 15,
-        investigation: 3,
-        ki_extraction: 3,
-      },
+      limits: DEFAULT_RUN_LIMITS,
     });
   });
 
