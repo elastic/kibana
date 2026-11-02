@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { spaceTest as baseSpaceTest, createLazyPageObject } from '@kbn/scout-security';
+import {
+  spaceTest as baseSpaceTest,
+  test as baseTest,
+  createLazyPageObject,
+} from '@kbn/scout-security';
 import type {
   SecurityTestFixtures,
   SecurityPageObjects,
@@ -13,6 +17,7 @@ import type {
   ScoutPage,
 } from '@kbn/scout-security';
 import { EntityCasesPage } from './page_objects/entity_cases_page';
+import { EntityAnalyticsHomePage } from './page_objects/entity_analytics_home_page';
 import { createEntityCasesApi } from './entity_cases_api';
 import type { EntityCasesApiFixture } from './entity_cases_api';
 
@@ -48,6 +53,29 @@ export const spaceTest = baseSpaceTest.extend<SecuritySolutionTestFixtures>({
     use: (entityCasesApi: EntityCasesApiFixture) => Promise<void>
   ) => {
     await use(createEntityCasesApi(apiServices.cases, scoutSpace.id));
+  },
+});
+
+interface EntityAnalyticsHomeTestFixtures extends SecurityTestFixtures {
+  pageObjects: SecurityPageObjects & { entityAnalyticsHome: EntityAnalyticsHomePage };
+}
+
+/** Sequential suites (`tests/`): the new home page is behind a server-wide feature flag. */
+export const test = baseTest.extend<EntityAnalyticsHomeTestFixtures>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: EntityAnalyticsHomeTestFixtures['pageObjects'];
+      page: ScoutPage;
+    },
+    use: (pageObjects: EntityAnalyticsHomeTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    await use({
+      ...pageObjects,
+      entityAnalyticsHome: createLazyPageObject(EntityAnalyticsHomePage, page),
+    });
   },
 });
 
