@@ -55,8 +55,6 @@ test.describe(
 
       await test.step('reload and re-attach', async () => {
         await page.reload();
-        // The saved conversation carries the message and the running execution; the view attaches
-        // and shows the run as in progress: Stop is offered because this user started the run.
         await expect(page.getByText(QUESTION)).toBeVisible({ timeout: RUN_TIMEOUT_MS });
         await expect(
           page.testSubj.locator('agentBuilderConversationInputCancelButton')

@@ -39,13 +39,7 @@ export interface AttachExecutionMutationBindings {
   markStreamStarted: (conversationId: string) => void;
 }
 
-/**
- * Attach mutation: follows an execution this copy of the UI did not start, found through the
- * conversation's `active_execution` pointer after a reload, on return, or in a shared
- * conversation. The replay from the start rebuilds the running turn; the live tail continues it.
- * Same single-scope `mutationFn` shape as the send and resume mutations, without a message to
- * send, an answer to record up front, or browser tools to run.
- */
+/** Replays and follows an existing execution into this view's timeline. */
 export const useAttachExecutionMutation = ({
   conversationStreamService,
   clearActiveStream,
@@ -53,8 +47,6 @@ export const useAttachExecutionMutation = ({
 }: AttachExecutionMutationBindings) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
-  // One controller per attached conversation; the execution id is the one we attached to, so
-  // Stop aborts that run. `useAttachExecutionMutation` is called exactly once, by the provider.
   const controllersRef = useRef<Map<string, StreamHandle>>(new Map());
 
   const { mutate, isLoading } = useMutation({
@@ -130,7 +122,6 @@ export const useAttachExecutionMutation = ({
           isAborted: () => isStreamCancelled(handle),
         }).catch(() => {});
 
-        // The connection closed because the view was unmounted, not because the run ended: skip the end-of-run handling.
         if (isDetached(handle)) {
           return;
         }

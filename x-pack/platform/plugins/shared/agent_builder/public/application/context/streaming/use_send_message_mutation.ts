@@ -242,7 +242,6 @@ export const useSendMessageMutation = ({
           }
         });
 
-        // The connection closed because the view was unmounted, not because the run ended: skip the end-of-run handling.
         if (isDetached(handle)) {
           return;
         }

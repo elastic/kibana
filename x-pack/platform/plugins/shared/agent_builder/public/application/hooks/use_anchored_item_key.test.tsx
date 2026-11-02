@@ -165,8 +165,6 @@ describe('useAnchoredItemKey', () => {
   });
 
   it('does not anchor an attached run: nothing was sent from here', () => {
-    // After a reload the conversation opens with its run already going; the view sticks to the
-    // bottom and the running turn streams there.
     const { result, update } = renderAnchor({ items: history });
 
     update({ isAttaching: true, isStreaming: true, items: history });

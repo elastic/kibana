@@ -143,7 +143,6 @@ describe('useSendMessageMutation', () => {
     expect(mockGet).not.toHaveBeenCalled();
     expect(resetAttachments).not.toHaveBeenCalled();
     expect(bindings.clearPendingMessage).not.toHaveBeenCalled();
-    // The run is not ours to stop; only the connection closes.
     expect(mockAbort).not.toHaveBeenCalled();
   });
 

@@ -165,8 +165,6 @@ export const StreamingProvider = ({
     [sendCancel, resumeCancel, attachCancel]
   );
 
-  // Each mutation hook owns its own `Map<conversationId, StreamHandle>` ref; ask each to close
-  // everything it has open.
   const detachAllStreams = useCallback(() => {
     sendDetachAll();
     resumeDetachAll();
