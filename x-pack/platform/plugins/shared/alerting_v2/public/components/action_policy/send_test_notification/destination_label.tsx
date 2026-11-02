@@ -16,9 +16,14 @@ import {
 } from '../details_flyout/workflow_connector_icons';
 import * as labels from './translations';
 
-/** The workflow of a destination, fetched only when the user can read it. */
-export const useDestinationWorkflow = ({ id, name }: ActionPolicyTestDestination) =>
-  useFetchWorkflow(id, name !== undefined, { staleTime: Infinity }).data;
+/**
+ * The workflow of a destination, fetched only when the user can read it.
+ * A failed fetch is reported once, by the observer that sets `notifyOnError`.
+ */
+export const useDestinationWorkflow = (
+  { id, name }: ActionPolicyTestDestination,
+  { notifyOnError }: { notifyOnError: boolean }
+) => useFetchWorkflow(id, name !== undefined, { notifyOnError }).data;
 
 interface Props {
   destination: ActionPolicyTestDestination;

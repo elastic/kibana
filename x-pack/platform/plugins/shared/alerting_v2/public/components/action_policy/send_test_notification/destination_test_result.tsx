@@ -21,7 +21,7 @@ interface Props {
 
 /** A destination the test notification was sent to, with the status of its test run. */
 export const DestinationTestResult = ({ destination, result }: Props) => {
-  const workflow = useDestinationWorkflow(destination);
+  const workflow = useDestinationWorkflow(destination, { notifyOnError: false });
 
   return (
     <EuiPanel

@@ -20,7 +20,7 @@ interface Props {
 /** A selectable destination of the test notification. */
 export const DestinationTestCard = ({ destination, checked, disabled, onChange }: Props) => {
   const { id } = destination;
-  const workflow = useDestinationWorkflow(destination);
+  const workflow = useDestinationWorkflow(destination, { notifyOnError: true });
   const description = workflow?.description;
 
   return (

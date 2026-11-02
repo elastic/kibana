@@ -66,7 +66,7 @@ jest.mock('./send_test_results_flyout', () => {
   };
 });
 
-const closeResultsFlyout = (reason: 'navigation-back' | 'close-button') => {
+const closeResultsFlyout = (reason: 'navigation-back' | 'close-button' | 'navigation-cascade') => {
   const { onClose } =
     mockResultsFlyoutProps.mock.calls[mockResultsFlyoutProps.mock.calls.length - 1][0];
   act(() => {
@@ -213,10 +213,28 @@ describe('SendTestNotificationFlyout', () => {
       );
     });
 
-    it('does not build a new preview when the test runs flyout is closed', () => {
+    it('shows a test run whose workflow is not in the previewed destinations', () => {
+      mockSendResponse = {
+        results: [{ workflow_id: 'wf-unknown', workflow_execution_id: 'exec-9' }],
+      };
+      renderFlyout();
+
+      expect(screen.getByTestId('sendTestNotificationResult-wf-unknown')).toBeInTheDocument();
+    });
+
+    it('builds a new preview when the test runs flyout is closed', () => {
       renderFlyout();
 
       closeResultsFlyout('close-button');
+
+      expect(mockResetSend).toHaveBeenCalledTimes(1);
+      expect(mockReload).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not build a new preview when the form flyout closes the test runs flyout', () => {
+      renderFlyout();
+
+      closeResultsFlyout('navigation-cascade');
 
       expect(mockResetSend).toHaveBeenCalledTimes(1);
       expect(mockReload).not.toHaveBeenCalled();

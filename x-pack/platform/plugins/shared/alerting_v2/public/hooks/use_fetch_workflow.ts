@@ -15,7 +15,7 @@ import { workflowKeys } from './query_key_factory';
 export const useFetchWorkflow = (
   id: string | undefined,
   isEnabled = true,
-  { staleTime }: { staleTime?: number } = {}
+  { notifyOnError = true }: { notifyOnError?: boolean } = {}
 ) => {
   const workflowsApi = useService(WorkflowApi);
   const { toasts } = useService(CoreStart('notifications'));
@@ -24,9 +24,11 @@ export const useFetchWorkflow = (
     queryKey: workflowKeys.detail(id!),
     queryFn: () => workflowsApi.getWorkflow(id!),
     enabled: !!id && isEnabled,
-    staleTime,
     refetchOnWindowFocus: false,
     onError: (error: Error) => {
+      if (!notifyOnError) {
+        return;
+      }
       toasts.addError(error, {
         title: i18n.translate('xpack.alertingV2.workflow.fetchError', {
           defaultMessage: 'Failed to load workflow',

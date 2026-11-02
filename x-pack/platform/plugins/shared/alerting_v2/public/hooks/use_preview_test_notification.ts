@@ -21,7 +21,7 @@ export const usePreviewTestNotification = (policyId: string) => {
   const queryClient = useQueryClient();
   const queryKey = actionPolicyKeys.testPreview(policyId);
 
-  const query = useQuery<ActionPolicyTestPreviewResponse, Error>({
+  const { data, isLoading, error } = useQuery<ActionPolicyTestPreviewResponse, Error>({
     queryKey,
     queryFn: () => actionPoliciesApi.previewTestNotification(policyId),
     refetchOnWindowFocus: false,
@@ -31,5 +31,5 @@ export const usePreviewTestNotification = (policyId: string) => {
 
   const reload = () => queryClient.resetQueries({ queryKey });
 
-  return { ...query, reload };
+  return { data, isLoading, error, reload };
 };

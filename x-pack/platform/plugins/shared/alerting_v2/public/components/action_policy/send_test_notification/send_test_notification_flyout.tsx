@@ -68,10 +68,11 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
 
   const closeResults: EuiFlyoutProps['onClose'] = (_event, meta) => {
     resetSend();
-    if (meta?.reason === 'navigation-back') {
-      setDeselectedIds(new Set());
-      reloadPreview();
+    if (meta?.reason === 'navigation-cascade') {
+      return;
     }
+    setDeselectedIds(new Set());
+    reloadPreview();
   };
 
   return (

@@ -35,8 +35,8 @@ export const SendTestResultsFlyout = ({
   historyKey,
   onClose,
 }: Props) => {
-  const resultsByWorkflowId = new Map(
-    sendResponse.results.map((result) => [result.workflow_id, result])
+  const destinationsById = new Map(
+    destinations.map((destination) => [destination.id, destination])
   );
 
   return (
@@ -57,16 +57,19 @@ export const SendTestResultsFlyout = ({
           gutterSize="s"
           data-test-subj="sendTestNotificationResults"
         >
-          {destinations.map((destination) => {
-            const result = resultsByWorkflowId.get(destination.id);
-            return (
-              result && (
-                <EuiFlexItem key={destination.id}>
-                  <DestinationTestResult destination={destination} result={result} />
-                </EuiFlexItem>
-              )
-            );
-          })}
+          {sendResponse.results.map((result) => (
+            <EuiFlexItem key={result.workflow_id}>
+              <DestinationTestResult
+                destination={
+                  destinationsById.get(result.workflow_id) ?? {
+                    id: result.workflow_id,
+                    executable: true,
+                  }
+                }
+                result={result}
+              />
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
       </Body>
     </FlyoutTemplate>
