@@ -13,8 +13,6 @@ import type { PodRunRequest, PodRunResponse } from './wire';
 
 export interface PodRoute {
   url: string;
-  /** This node's URL as reachable from the pod, used for remote-contract callbacks. */
-  callbackUrl: string;
 }
 
 /** How long Kibana waits past a task's timeout for the pod to answer before giving up. */
@@ -53,34 +51,22 @@ const podUnavailable = (message: string) =>
  * `processResult` handles it exactly as it would a local run.
  */
 export class RemoteTaskRunner implements CancellableTask {
-  private tokens = new Set<string>();
-
   constructor(
     private readonly params: {
       pod: PodRoute;
-      request: Omit<PodRunRequest, 'callback' | 'deadline'>;
+      request: Omit<PodRunRequest, 'deadline'>;
       /** The task's timeout; the pod is told to stop, and Kibana stops waiting, shortly after. */
       timeoutMs: number;
       /** Aborted when Task Manager cancels the run. */
       signal?: AbortSignal;
-      startRun: () => string;
-      endRun: (token: string) => Promise<void>;
       setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
       fetchFn?: typeof fetch;
     }
   ) {}
 
-  private async endRuns() {
-    const tokens = [...this.tokens];
-    this.tokens.clear();
-    await Promise.all(tokens.map((token) => this.params.endRun(token)));
-  }
-
   public async run(): Promise<RunResult | undefined | void> {
-    const { pod, request, timeoutMs, signal, startRun, setCustomTaskRunEventFields } = this.params;
+    const { pod, request, timeoutMs, signal, setCustomTaskRunEventFields } = this.params;
     const fetchFn = this.params.fetchFn ?? fetch;
-    const token = startRun();
-    this.tokens.add(token);
     const deadline = new Date(Date.now() + timeoutMs);
     const { signal: abort, dispose } = abortAfter(timeoutMs + DEADLINE_GRACE_MS, signal);
     try {
@@ -92,7 +78,6 @@ export class RemoteTaskRunner implements CancellableTask {
           body: JSON.stringify({
             ...request,
             deadline: deadline.toISOString(),
-            callback: { url: pod.callbackUrl, token },
           } satisfies PodRunRequest),
           signal: abort,
           ...(this.params.fetchFn ? {} : { dispatcher: getLongRunDispatcher() }),
@@ -121,8 +106,6 @@ export class RemoteTaskRunner implements CancellableTask {
       return deserializeRunResult(body.result);
     } finally {
       dispose();
-      this.tokens.delete(token);
-      await this.params.endRun(token);
     }
   }
 
@@ -139,8 +122,5 @@ export class RemoteTaskRunner implements CancellableTask {
     } catch {
       // The pod may be gone; Task Manager's own timeout handling already owns the outcome.
     }
-    // A run that was cancelled must not keep its callback token (or open finders) alive while the
-    // pod's response is still outstanding.
-    await this.endRuns();
   }
 }

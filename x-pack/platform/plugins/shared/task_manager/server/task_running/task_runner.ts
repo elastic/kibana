@@ -543,7 +543,6 @@ export class TaskManagerRunner implements TaskRunner {
           // so they always run in-process.
           const pod = runAs ? undefined : this.podDispatch?.getPod(this.taskType);
           if (pod && this.podDispatch) {
-            const { registry } = this.podDispatch;
             this.task = new RemoteTaskRunner({
               pod,
               request: {
@@ -560,13 +559,6 @@ export class TaskManagerRunner implements TaskRunner {
               },
               timeoutMs: parseIntervalAsMillisecond(this.timeout),
               signal: abortController.signal,
-              startRun: () =>
-                registry.startRun({
-                  executionUuid: this.uuid,
-                  taskType: this.taskType,
-                  getFakeRequest: () => fakeRequest,
-                }),
-              endRun: (token) => registry.endRun(token),
               setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
             });
           } else {

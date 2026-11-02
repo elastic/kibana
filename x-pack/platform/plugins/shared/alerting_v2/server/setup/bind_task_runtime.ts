@@ -17,6 +17,7 @@ import {
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
 import { initTaskSubscribers } from '../lib/events/init_subscribers';
+import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
 import type { AlertingServerSetupDependencies } from '../types';
 import { bindArtifactTypes } from './bind_artifact_types';
 import { bindDispatcherExecutionServices } from './bind_dispatcher_executor';
@@ -40,6 +41,13 @@ function bindTaskRuntimeOnSetup({ bind }: ContainerModuleLoadOptions) {
       ),
       logger: container.get(LoggerServiceToken).forSubsystem('savedObjects'),
     });
+
+    // The triggers the task runtime emits events for: a pod validates them against its own registry.
+    registerTriggerDefinitions(
+      container.get(
+        PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
+      )
+    );
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')

@@ -12,7 +12,7 @@ import murmurhash from 'murmurhash';
 import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
 import { omit, defaults, get } from 'lodash';
-import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { isSavedObjectErrorResult, type SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type {
@@ -34,11 +34,10 @@ import type {
 } from '@kbn/core/server';
 
 import {
-  isSavedObjectErrorResult,
   SavedObjectsErrorHelpers,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
-} from '@kbn/core/server';
+} from '@kbn/core-saved-objects-server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 

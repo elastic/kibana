@@ -12,13 +12,9 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { createServer } from 'http';
 import { fetch as undiciFetch } from 'undici';
 import type { Server } from 'http';
 import type { AddressInfo } from 'net';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { invokePodContract } from '../../routes/pod_contract';
-import { PodContractRegistry } from '../pod_contract_registry';
 import { RemoteTaskRunner } from '../remote_task_runner';
 import {
   isRetryableError,
@@ -26,32 +22,19 @@ import {
   throwUnrecoverableError,
 } from '../../task_running/errors';
 import { definePodPlugin } from './define_pod_plugin';
-import { callKibana } from './remote';
-import { createHttpStart } from './core/small_services';
+import {
+  createHttpStart,
+  createSecurityStart,
+  createUserProfileStart,
+  enrichPodFakeRequest,
+} from './core/small_services';
 import { bootPod, sortPlugins } from './plugin_system';
 import { startPodServer } from './server';
 
-const listen = (server: Server) =>
-  new Promise<number>((resolve) =>
-    server.listen(0, () => resolve((server.address() as AddressInfo).port))
-  );
-
-const readJson = (req: import('http').IncomingMessage) =>
-  new Promise<any>((resolve) => {
-    let body = '';
-    req.on('data', (chunk) => (body += chunk));
-    req.on('end', () => resolve(JSON.parse(body)));
-  });
-
 describe('task pod host', () => {
-  const logger = loggingSystemMock.createLogger();
   const originalEnv = process.env.ES_URL;
   let pod: Server;
-  let kibana: Server;
   let podUrl: string;
-  let kibanaUrl: string;
-  let registry: PodContractRegistry;
-  const echoed: unknown[] = [];
   let definitions: Awaited<ReturnType<typeof bootPod>>['taskDefinitions'];
 
   const originalFetch = global.fetch;
@@ -60,21 +43,6 @@ describe('task pod host', () => {
     // Jest's setup polyfills `fetch` with an XHR-based one; these are real network calls.
     global.fetch = undiciFetch as never;
     process.env.ES_URL = 'http://localhost:9';
-    registry = new PodContractRegistry(logger);
-    registry.register('test', {
-      whoAmI: async (_ctx, request, value) => {
-        echoed.push(value);
-        return { authorization: (request as any)?.headers?.authorization, value };
-      },
-    });
-
-    // Kibana's side of the callback channel: the route's own handling, minus the HTTP framework.
-    kibana = createServer(async (req, res) => {
-      const { status, body } = await invokePodContract(registry, logger, await readJson(req));
-      res.writeHead(status, { 'content-type': 'application/json' });
-      res.end(JSON.stringify(body));
-    });
-    kibanaUrl = `http://localhost:${await listen(kibana)}`;
 
     ({ taskDefinitions: definitions } = await bootPod({
       plugins: [
@@ -83,41 +51,21 @@ describe('task pod host', () => {
           requiredPlugins: ['taskManager'],
           setup: (_core, { taskManager }) => {
             taskManager.registerTaskDefinitions({
-              'test:call': {
+              'test:identity': {
+                // The pod rebuilds the run's fake request from the credentials Kibana sent.
                 createTaskRunner: ({ fakeRequest }: any) => ({
                   run: async () => ({
-                    state: await callKibana('test', 'whoAmI', [fakeRequest, 7]),
+                    state: {
+                      authorization: fakeRequest?.headers?.authorization,
+                      space: fakeRequest?.spaceId,
+                    },
                   }),
-                }),
-              },
-              'test:own_identity': {
-                // A task may call a contract with a request built from credentials other than its own.
-                createTaskRunner: ({ fakeRequest }: any) => ({
-                  run: async () => {
-                    const other = { ...fakeRequest, headers: { authorization: 'ApiKey other' } };
-                    return { state: await callKibana('test', 'whoAmI', [other, 8]) };
-                  },
                 }),
               },
               'test:fails': {
                 createTaskRunner: () => ({
                   run: async () => {
                     throwUnrecoverableError(new Error('rule is gone'));
-                  },
-                }),
-              },
-              'test:chained_late_call': {
-                createTaskRunner: () => ({
-                  run: async () => {
-                    // A subscriber whose follow-up call starts only after the first response.
-                    setImmediate(async () => {
-                      await callKibana('test', 'whoAmI', [undefined, 'first']);
-                      await new Promise((resolve) => setImmediate(resolve));
-                      await callKibana('test', 'whoAmI', [undefined, 'second']).catch(
-                        () => undefined
-                      );
-                    });
-                    return { state: {} };
                   },
                 }),
               },
@@ -140,17 +88,6 @@ describe('task pod host', () => {
                     new Promise((resolve) => setTimeout(() => resolve({ state: {} }), 300)),
                 }),
               },
-              'test:late_call': {
-                createTaskRunner: () => ({
-                  run: async () => {
-                    // Like an event subscriber: calls Kibana after run() has returned.
-                    setImmediate(() => {
-                      callKibana('test', 'whoAmI', [undefined, 'late']).catch(() => undefined);
-                    });
-                    return { state: {} };
-                  },
-                }),
-              },
             });
           },
         }),
@@ -164,7 +101,6 @@ describe('task pod host', () => {
 
   afterAll(async () => {
     pod.close();
-    kibana.close();
     process.env.ES_URL = originalEnv;
     global.fetch = originalFetch;
   });
@@ -174,16 +110,8 @@ describe('task pod host', () => {
     { timeoutMs = 60000, podUrl: url = podUrl, ...requestOverrides }: Record<string, any> = {}
   ) => {
     const taskId = 'task-1';
-    const startRun = jest.fn(() =>
-      registry.startRun({
-        executionUuid: `exec-${taskType}`,
-        taskType,
-        getFakeRequest: () => undefined,
-      })
-    );
-    const endRun = jest.fn((token: string) => registry.endRun(token));
     const runner = new RemoteTaskRunner({
-      pod: { url, callbackUrl: kibanaUrl },
+      pod: { url },
       request: {
         taskType,
         taskInstance: { id: taskId, taskType, params: {}, state: {}, attempts: 0 },
@@ -193,25 +121,15 @@ describe('task pod host', () => {
         ...requestOverrides,
       },
       timeoutMs,
-      startRun,
-      endRun,
       setCustomTaskRunEventFields: jest.fn(),
     });
-    return { runner, endRun };
+    return { runner };
   };
 
-  test('a task calls back into Kibana with the identity of the run, and the run ends cleanly', async () => {
-    const { runner, endRun } = run('test:call');
+  test('a task runs with a fake request built from the identity of the run', async () => {
+    const { runner } = run('test:identity');
     await expect(runner.run()).resolves.toEqual({
-      state: { authorization: 'ApiKey run-key', value: 7 },
-    });
-    expect(endRun).toHaveBeenCalledTimes(1);
-  });
-
-  test('a request built from other credentials keeps its own identity', async () => {
-    const { runner } = run('test:own_identity');
-    await expect(runner.run()).resolves.toEqual({
-      state: { authorization: 'ApiKey other', value: 8 },
+      state: { authorization: 'ApiKey run-key', space: 'default' },
     });
   });
 
@@ -222,23 +140,9 @@ describe('task pod host', () => {
     expect(isUnrecoverableError(error)).toBe(true);
   });
 
-  test('calls made after run() returns finish before the run is ended', async () => {
-    echoed.length = 0;
-    const { runner } = run('test:late_call');
-    await runner.run();
-    expect(echoed).toContain('late');
-  });
-
   test('an unregistered task type is a 404, not a hang', async () => {
     const { runner } = run('test:missing');
     await expect(runner.run()).rejects.toThrow('404');
-  });
-
-  test('a follow-up call that starts after an earlier response still finds a live token', async () => {
-    echoed.length = 0;
-    const { runner } = run('test:chained_late_call');
-    await runner.run();
-    expect(echoed).toEqual(expect.arrayContaining(['first', 'second']));
   });
 
   test('non-ASCII content survives the request body', async () => {
@@ -253,7 +157,7 @@ describe('task pod host', () => {
   });
 
   test('a run from a Kibana of another version is refused, and retried soon', async () => {
-    const { runner } = run('test:call', { kibanaVersion: '1.2.3' });
+    const { runner } = run('test:identity', { kibanaVersion: '1.2.3' });
     const error = await runner.run().catch((e) => e);
     expect(error.message).toContain('409');
     expect(isRetryableError(error)).toBeTruthy();
@@ -278,7 +182,7 @@ describe('task pod host', () => {
     afterAll(() => limited.close());
 
     test('does not serve task types outside its list', async () => {
-      const { runner } = run('test:call', { podUrl: limitedUrl });
+      const { runner } = run('test:identity', { podUrl: limitedUrl });
       await expect(runner.run()).rejects.toThrow('404');
     });
 
@@ -290,6 +194,124 @@ describe('task pod host', () => {
       expect(error.message).toContain('503');
       expect(isRetryableError(error)).toBeTruthy();
       await first;
+    });
+  });
+
+  describe('API keys in a pod', () => {
+    const request = (authorization?: string) => ({ headers: { authorization } } as never);
+
+    test('clones the request key through Elasticsearch, metadata before expiration', async () => {
+      const transport = { request: jest.fn().mockResolvedValue({ id: 'k2', api_key: 'secret' }) };
+      const { authc } = createSecurityStart({ transport } as never);
+
+      await authc.apiKeys.cloneAsInternalUser(request('ApiKey abc123'), {
+        name: 'TaskManager: workflow:run',
+        metadata: { managed: true },
+      });
+
+      const call = transport.request.mock.calls[0][0];
+      expect(call).toMatchObject({ method: 'POST', path: '/_security/api_key/clone' });
+      expect(Object.keys(call.body)).toEqual(['api_key', 'name', 'metadata', 'expiration']);
+      expect(call.body).toMatchObject({ api_key: 'abc123', expiration: null });
+    });
+
+    test.each([undefined, 'Bearer token'])('refuses to clone from %s', async (header) => {
+      const { authc } = createSecurityStart({ transport: { request: jest.fn() } } as never);
+      await expect(
+        authc.apiKeys.cloneAsInternalUser(request(header), { name: 'n' })
+      ).rejects.toThrow(/Unable to clone an API key/);
+    });
+
+    test('API keys are enabled unless Elasticsearch says they are not', async () => {
+      const security = { invalidateApiKey: jest.fn().mockResolvedValue({}) };
+      expect(
+        await createSecurityStart({ security } as never).authc.apiKeys.areAPIKeysEnabled()
+      ).toBe(true);
+
+      security.invalidateApiKey.mockRejectedValue(new Error('api keys are not enabled'));
+      expect(
+        await createSecurityStart({ security } as never).authc.apiKeys.areAPIKeysEnabled()
+      ).toBe(false);
+
+      security.invalidateApiKey.mockRejectedValue(new Error('connection refused'));
+      await expect(
+        createSecurityStart({ security } as never).authc.apiKeys.areAPIKeysEnabled()
+      ).rejects.toThrow('connection refused');
+    });
+  });
+
+  describe('user profile in a pod', () => {
+    const keyHeader = `ApiKey ${Buffer.from('key-1:secret').toString('base64')}`;
+
+    test('asks Elasticsearch for the profile linked to a bare API key request, as that key', async () => {
+      const getApiKey = jest.fn().mockResolvedValue({ api_keys: [{ profile_uid: 'u_profile' }] });
+      const child = jest.fn().mockReturnValue({ security: { getApiKey } });
+      const { getCurrentProfileId } = createUserProfileStart({ child } as never);
+
+      await expect(
+        getCurrentProfileId({ request: { headers: { authorization: keyHeader } } as never })
+      ).resolves.toBe('u_profile');
+      expect(child).toHaveBeenCalledWith({ headers: { authorization: keyHeader } });
+      expect(getApiKey).toHaveBeenCalledWith({ id: 'key-1', with_profile_uid: true });
+    });
+
+    test('uses the profile a request was enriched with, without asking', async () => {
+      const child = jest.fn();
+      const request = { headers: { authorization: keyHeader } } as never;
+      enrichPodFakeRequest(request, { profileId: 'u_enriched', username: 'elastic' });
+
+      await expect(
+        createUserProfileStart({ child } as never).getCurrentProfileId({ request })
+      ).resolves.toBe('u_enriched');
+      expect(child).not.toHaveBeenCalled();
+    });
+
+    test('has no profile for other credentials, or when the lookup fails', async () => {
+      const failing = {
+        child: () => ({ security: { getApiKey: jest.fn().mockRejectedValue(new Error('no')) } }),
+      };
+      const { getCurrentProfileId } = createUserProfileStart(failing as never);
+
+      await expect(
+        getCurrentProfileId({ request: { headers: { authorization: 'Bearer x' } } as never })
+      ).resolves.toBeNull();
+      await expect(
+        getCurrentProfileId({ request: { headers: { authorization: keyHeader } } as never })
+      ).resolves.toBeNull();
+    });
+  });
+
+  describe('Task Manager in a pod', () => {
+    test('has no scheduling unless the pod schedules tasks itself, and says so', async () => {
+      const taskManagerSeen: unknown[] = [];
+      await bootPod({
+        plugins: [
+          definePodPlugin({
+            id: 'consumer',
+            requiredPlugins: ['taskManager'],
+            start: (_core, { taskManager }) => taskManagerSeen.push(taskManager),
+          }),
+        ],
+      });
+      expect(() => (taskManagerSeen[0] as { schedule: () => void }).schedule()).toThrow(
+        /taskManager\.schedule is not available in a task pod/
+      );
+    });
+
+    test('uses the pod plugin that schedules tasks locally when there is one', async () => {
+      const local = { schedule: jest.fn().mockResolvedValue({ id: 'local' }) };
+      const seen: unknown[] = [];
+      await bootPod({
+        plugins: [
+          definePodPlugin({ id: 'taskScheduling', start: () => local }),
+          definePodPlugin({
+            id: 'consumer',
+            requiredPlugins: ['taskManager'],
+            start: (_core, { taskManager }) => seen.push(taskManager),
+          }),
+        ],
+      });
+      expect(seen[0]).toBe(local);
     });
   });
 

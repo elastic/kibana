@@ -16,6 +16,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from '@kbn/task-manager-plugin/server';
+import { TASK_ENCRYPTED_TYPES } from '@kbn/task-manager-plugin/server/saved_objects/encrypted_types';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 
 export interface TaskManagerDependenciesPluginSetup {
@@ -32,18 +33,9 @@ export interface TaskManagerDependenciesPluginStart {
 
 export class TaskManagerDependenciesPlugin {
   public setup(_: CoreSetup, plugin: TaskManagerDependenciesPluginSetup) {
-    plugin.encryptedSavedObjects.registerType({
-      type: 'task',
-      attributesToEncrypt: new Set(['apiKey', 'uiamApiKey', 'encryptedCredential']),
-      attributesToIncludeInAAD: new Set(['id', 'taskType', 'credential']),
-      enforceRandomId: false,
-    });
-
-    plugin.encryptedSavedObjects.registerType({
-      type: 'api_key_to_invalidate',
-      attributesToEncrypt: new Set(['uiamApiKey']),
-      attributesToIncludeInAAD: new Set(['apiKeyId', 'createdAt']),
-    });
+    TASK_ENCRYPTED_TYPES.forEach((registration) =>
+      plugin.encryptedSavedObjects.registerType(registration)
+    );
 
     plugin.taskManager.registerCanEncryptedSavedObjects(plugin.encryptedSavedObjects.canEncrypt);
 

@@ -140,9 +140,28 @@ export class PodSavedObjects {
       getTypeRegistry: () => this.getTypeRegistry(),
       createInternalRepository: (includedHiddenTypes?: string[]) =>
         this.getRepository(includedHiddenTypes),
+      createSerializer: () => new this.internals!.SavedObjectsSerializer(this.getTypeRegistry()),
+      /**
+       * A client over the internal user with the encryption extension, for code that creates or
+       * reads encrypted objects without a request. Extensions are not otherwise modelled in a pod,
+       * so `excludedExtensions` (security, spaces) is accepted and has nothing to exclude.
+       */
+      getUnsafeInternalClient: (options?: {
+        includedHiddenTypes?: string[];
+        excludedExtensions?: string[];
+      }) =>
+        this.getRepository(
+          options?.includedHiddenTypes,
+          this.encryptionExtensionFactory && {
+            encryptionExtension: this.encryptionExtensionFactory({
+              typeRegistry: this.getTypeRegistry(),
+              request: undefined as never,
+            }),
+          }
+        ),
       getScopedClient: (
         request: KibanaRequest & { spaceId?: string },
-        options?: { includedHiddenTypes?: string[] }
+        options?: { includedHiddenTypes?: string[]; excludedExtensions?: string[] }
       ) =>
         scopeToSpace(
           this.getRepository(

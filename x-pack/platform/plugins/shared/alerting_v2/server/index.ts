@@ -14,7 +14,6 @@ import { bindContract } from './setup/bind_contract';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
-import { bindTaskPodContracts } from './setup/bind_task_pod_contracts';
 import { bindTaskRuntime } from './setup/bind_task_runtime';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
@@ -26,7 +25,6 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
 
 const pluginModule = new ContainerModule((options) => {
   bindTaskRuntime(options);
-  bindTaskPodContracts(options);
   bindOnSetup(options);
   bindAgentBuilder(options);
   bindOnStart(options);

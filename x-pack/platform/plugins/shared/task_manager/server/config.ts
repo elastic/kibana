@@ -225,8 +225,6 @@ export const configSchema = schema.object(
         })
       )
     ),
-    /* This node's URL as reachable from task pods; defaults to the server's own host and port. */
-    pod_callback_url: schema.maybe(schema.string()),
     /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
     version_conflict_threshold: schema.number({
       defaultValue: DEFAULT_VERSION_CONFLICT_THRESHOLD,

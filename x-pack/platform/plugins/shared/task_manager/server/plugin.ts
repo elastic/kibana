@@ -29,9 +29,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InvalidateAPIKeysParams } from '@kbn/security-plugin-types-server';
 import { createPodDispatch } from './task_pod/pod_dispatch';
 import type { PodDispatch } from './task_pod/pod_dispatch';
-import { createTaskManagerPodHandlers } from './task_pod/task_manager_contract';
-import { PodContractRegistry } from './task_pod/pod_contract_registry';
-import type { PodContractHandlers } from './task_pod/pod_contract_registry';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -60,7 +57,6 @@ import {
   healthRoute,
   metricsRoute,
   executionControlRoutes,
-  podContractRoute,
 } from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
@@ -109,11 +105,6 @@ export interface TaskManagerSetupContract {
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
   registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
   registerTaskEventLogger: (logger: TaskEventLogger) => void;
-  /**
-   * Exposes methods of a plugin's own contract to task pods, which call back into Kibana for
-   * anything that isn't bundled in the pod. Only registered methods are callable.
-   */
-  registerPodContract: (pluginId: string, handlers: PodContractHandlers) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -180,7 +171,6 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private executionControlService?: TaskExecutionControlService;
   private heapSizeLimit: number = 0;
-  private podContractRegistry: PodContractRegistry;
   private podDispatch?: PodDispatch;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
@@ -197,7 +187,6 @@ export class TaskManagerPlugin
     this.initContext = initContext;
     this.logger = initContext.logger.get();
     this.config = initContext.config.get<TaskManagerConfig>();
-    this.podContractRegistry = new PodContractRegistry(this.logger, () => this.enrichFakeRequest);
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
     this.nodeRoles = initContext.node.roles;
@@ -303,24 +292,12 @@ export class TaskManagerPlugin
       getDefinitions: () => this.definitions,
     });
 
-    podContractRoute({ router, registry: this.podContractRegistry, logger: this.logger });
     if (this.config.pods?.length) {
-      const { protocol, hostname, port } = core.http.getServerInfo();
       this.podDispatch = createPodDispatch({
         pods: this.config.pods,
-        callbackUrl:
-          this.config.pod_callback_url ??
-          core.http.basePath.publicBaseUrl ??
-          `${protocol}://${hostname}:${port}${core.http.basePath.serverBasePath}`,
-        registry: this.podContractRegistry,
         kibanaVersion: this.kibanaVersion,
       });
       this.logger.info(`Task pods configured for ${this.config.pods.length} pod(s)`);
-      if (!this.config.pod_callback_url) {
-        this.logger.warn(
-          'xpack.task_manager.pod_callback_url is not set: pods call back to the server public base URL or this host. With several Kibana nodes each node needs its own pod_callback_url, because a run can only call back to the node that dispatched it.'
-        );
-      }
     }
 
     core.status.derivedStatus$.subscribe((status) =>
@@ -399,9 +376,6 @@ export class TaskManagerPlugin
       },
       registerTaskEventLogger: (logger: TaskEventLogger) => {
         this.taskEventLogger = logger;
-      },
-      registerPodContract: (pluginId: string, handlers: PodContractHandlers) => {
-        this.podContractRegistry.register(pluginId, handlers);
       },
     };
   }
@@ -611,17 +585,6 @@ export class TaskManagerPlugin
         this.invalidateUiamApiKeyFn = fn;
       },
     };
-
-    this.podContractRegistry.register(
-      'taskManager',
-      createTaskManagerPodHandlers(
-        () => this.startContract as never,
-        () => {
-          const uiam = security.authc.apiKeys.uiam;
-          return uiam ? (request, params) => uiam.invalidate(request, params) : undefined;
-        }
-      )
-    );
 
     return this.startContract;
   }

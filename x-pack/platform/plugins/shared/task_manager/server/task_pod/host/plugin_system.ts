@@ -7,9 +7,8 @@
 
 import type { Container } from 'inversify';
 import type { ServiceToken } from '@kbn/core-di';
-import { TASK_MANAGER_POD_METHODS } from '../task_manager_contract';
 import type { PodPluginDefinition, PodPluginInitializerContext } from './define_pod_plugin';
-import { remoteContract } from './remote';
+import { podContract } from './pod_contract';
 import { PodLogger } from './logger';
 import { createElasticsearchCore } from './core/elasticsearch';
 import { PodSavedObjects } from './core/saved_objects';
@@ -55,11 +54,16 @@ const PACKAGE_INFO = {
   dist: true,
 };
 
-/** Task Manager as seen by a pod plugin: registration is local, everything else calls Kibana. */
+/**
+ * Task Manager as seen by a pod plugin: registering task definitions is local, and scheduling comes
+ * from the `taskScheduling` pod plugin when the pod has one (a pod can't call Kibana).
+ */
 const createTaskManagerPodPlugin = (
   taskDefinitions: Map<string, CapturedTaskDefinition>
 ): PodPluginDefinition => ({
   id: 'taskManager',
+  // A pod that schedules tasks itself adds the `taskScheduling` pod plugin (see ../scheduling.ts).
+  optionalPlugins: ['taskScheduling'],
   setup: () => ({
     index: '.kibana_task_manager',
     addMiddleware: () => undefined,
@@ -70,11 +74,8 @@ const createTaskManagerPodPlugin = (
     },
     registerCanEncryptedSavedObjects: () => undefined,
     registerTaskEventLogger: () => undefined,
-    registerPodContract: () => {
-      throw new Error('registerPodContract is only available in Kibana');
-    },
   }),
-  start: () => remoteContract('taskManager', [...TASK_MANAGER_POD_METHODS]),
+  start: (_core, plugins) => plugins.taskScheduling ?? podContract('taskManager', {}),
 });
 
 /** Orders plugins so every plugin comes after the plugins it depends on; fails on a missing required one. */
@@ -94,7 +95,7 @@ export const sortPlugins = (plugins: PodPluginDefinition[]): PodPluginDefinition
       if (!found) {
         throw new Error(
           `Pod plugin '${plugin.id}' requires '${dependency}', but no pod plugin provides it. ` +
-            `Add a local or remote pod plugin for '${dependency}' to this pod.`
+            `Add a pod plugin for '${dependency}' to this pod.`
         );
       }
       visit(found, [...trail, plugin.id]);
@@ -215,8 +216,8 @@ export const bootPod = async ({
       rootLogger.get('savedObjects') as never
     ),
     http: createHttpStart(config),
-    security: createSecurityStart(),
-    userProfile: createUserProfileStart(),
+    security: createSecurityStart(elasticsearch.internalClient),
+    userProfile: createUserProfileStart(elasticsearch.internalClient),
     featureFlags: createFeatureFlagsStart(),
     uiSettings: uiSettings.start,
     analytics: analytics.start,

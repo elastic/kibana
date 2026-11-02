@@ -17,15 +17,11 @@ import { POD_KIBANA_VERSION } from './version';
 import { PodLogger } from './logger';
 
 const logger = new PodLogger('taskPod');
-import { runWithContext } from './run_context';
-import type { PodRunContext } from './run_context';
 
 interface InFlight {
   readonly abortController: AbortController;
   readonly task: { cancel?(): Promise<unknown> };
 }
-
-const MAX_DRAIN_ROUNDS = 20;
 
 const MAX_BODY_BYTES = 64 * 1024 * 1024;
 
@@ -54,24 +50,6 @@ const sendJson = (res: ServerResponse, status: number, body: unknown) => {
     'content-length': Buffer.byteLength(json),
   });
   res.end(json);
-};
-
-const tick = () => new Promise<void>((resolve) => setImmediate(resolve));
-
-/**
- * Work started by a run but finishing after `run()` returns (event subscribers publishing on
- * `setImmediate`, for example) may still call into Kibana. Wait for it before answering, because
- * Kibana revokes the run's callback token as soon as the response arrives.
- */
-const drainPendingCalls = async (context: PodRunContext, signal: AbortSignal) => {
-  for (let round = 0; round < MAX_DRAIN_ROUNDS && !signal.aborted; round++) {
-    await tick();
-    if (context.pending.size === 0) return;
-    await Promise.race([
-      Promise.allSettled([...context.pending]),
-      new Promise((resolve) => signal.addEventListener('abort', resolve, { once: true })),
-    ]);
-  }
 };
 
 /** Thrown for runs the pod refuses before starting them; the HTTP status tells Kibana to retry. */
@@ -156,51 +134,32 @@ export const startPodServer = ({
             })
         : undefined;
 
-    const context: PodRunContext = {
-      executionUuid: body.executionUuid,
-      callback: body.callback,
-      pending: new Set(),
+    const task = definition.createTaskRunner({
+      taskInstance: reviveTaskInstance(body.taskInstance),
+      fakeRequest,
+      enrichRequest,
       signal: abortController.signal,
-      calls: {},
-    };
-
-    return runWithContext(context, async () => {
-      const task = definition.createTaskRunner({
-        taskInstance: reviveTaskInstance(body.taskInstance),
-        fakeRequest,
-        enrichRequest,
-        signal: abortController.signal,
-        executionUuid: body.executionUuid,
-        setCustomTaskRunEventFields: (fields: Record<string, unknown>) => customFields.push(fields),
-      });
-      inFlight.set(body.executionUuid, { abortController, task });
-      try {
-        const result = await task.run();
-        await drainPendingCalls(context, abortController.signal);
-        return {
-          kind: 'result',
-          result: serializeRunResult(result as never),
-          customTaskRunEventFields: customFields.at(-1),
-        } as PodRunResponse;
-      } catch (error) {
-        await drainPendingCalls(context, abortController.signal);
-        return {
-          kind: 'thrown',
-          error: serializeTaskRunError(error),
-          customTaskRunEventFields: customFields.at(-1),
-        } as PodRunResponse;
-      } finally {
-        clearTimeout(deadlineTimer);
-        inFlight.delete(body.executionUuid);
-        if (Object.keys(context.calls).length) {
-          logger.info('task pod run finished', {
-            taskType: body.taskType,
-            executionUuid: body.executionUuid,
-            kibanaCalls: context.calls,
-          } as never);
-        }
-      }
+      executionUuid: body.executionUuid,
+      setCustomTaskRunEventFields: (fields: Record<string, unknown>) => customFields.push(fields),
     });
+    inFlight.set(body.executionUuid, { abortController, task });
+    try {
+      const result = await task.run();
+      return {
+        kind: 'result',
+        result: serializeRunResult(result as never),
+        customTaskRunEventFields: customFields.at(-1),
+      } as PodRunResponse;
+    } catch (error) {
+      return {
+        kind: 'thrown',
+        error: serializeTaskRunError(error),
+        customTaskRunEventFields: customFields.at(-1),
+      } as PodRunResponse;
+    } finally {
+      clearTimeout(deadlineTimer);
+      inFlight.delete(body.executionUuid);
+    }
   };
 
   const server = createServer(async (req, res) => {

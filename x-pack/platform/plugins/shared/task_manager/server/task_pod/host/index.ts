@@ -14,7 +14,7 @@ import { startPodServer } from './server';
 
 export { definePodPlugin } from './define_pod_plugin';
 export type { PodPluginDefinition, PodPluginInitializerContext } from './define_pod_plugin';
-export { callKibana, remoteContract } from './remote';
+export { podContract } from './pod_contract';
 
 /**
  * Entry of a pod process: boots the pod plugins and serves `/health`, `/run` and `/cancel`.

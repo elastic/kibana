@@ -5,11 +5,9 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of } from 'rxjs';
-import { isExternalUiamCredential } from '@kbn/core-security-server';
-import { callKibana } from '../remote';
-import { setPodRequestExtrasReader } from '../../wire';
 
 /**
  * Who a task's fake request acts for. Kibana resolves the originating user (name and profile) when
@@ -31,37 +29,119 @@ export const getPodRequestUser = (request: KibanaRequest) => {
   return user?.username || user?.profile_uid ? user : null;
 };
 
-// A request passed to a Kibana contract keeps its user and UIAM verdict.
-setPodRequestExtrasReader((request) => {
-  const user = requestUsers.get(request);
-  return {
-    ...(user?.profile_uid ? { userProfileId: user.profile_uid } : {}),
-    ...(user?.username ? { userName: user.username } : {}),
-    ...(isExternalUiamCredential(request as KibanaRequest) ? { uiamApiKeyExternal: true } : {}),
-  };
-});
+/**
+ * UIAM (serverless) key invalidation needs the UIAM client credentials only Kibana holds, so a pod
+ * can't do it. It fails, so the pending record is kept and retried by a node that can, rather than
+ * being dropped with the key still active.
+ */
+const uiamInvalidate = async () => {
+  throw new Error('UIAM API key invalidation is not supported in a task pod');
+};
 
 /**
- * UIAM (serverless) key invalidation is Security's job in Kibana; the pod forwards it, with the
- * request carrying the key's credentials, and Kibana answers `null` when UIAM isn't configured.
+ * Whether API keys can be created: Elasticsearch answers a harmless invalidation of a key that
+ * doesn't exist, unless security or API keys are off (what the Security plugin does too).
  */
-const remoteUiamInvalidate = (request: KibanaRequest, params: { id: string }) =>
-  callKibana('taskManager', 'uiamInvalidateApiKey', [request, params]);
+const areAPIKeysEnabled = (client: Client) => async () => {
+  try {
+    await client.security.invalidateApiKey({ ids: ['kibana-api-key-service-test'] });
+    return true;
+  } catch (error) {
+    const reason = (error as { message?: string }).message ?? '';
+    if (/api keys are not enabled|security.*(disabled|not enabled)/i.test(reason)) return false;
+    throw error;
+  }
+};
 
-export const createSecurityStart = () => ({
+/**
+ * An independent copy of the request's API key (same role descriptors, no expiration), owned by
+ * Task Manager: what a task scheduled from a request needs so it can outlive the request's key.
+ * The same Elasticsearch call the Security plugin makes.
+ */
+const cloneAsInternalUser =
+  (client: Client) =>
+  async (
+    request: KibanaRequest,
+    {
+      name,
+      metadata,
+      refresh,
+    }: { name: string; metadata?: Record<string, unknown>; refresh?: boolean }
+  ) => {
+    const authorization = request.headers?.authorization;
+    const [scheme, credentials] =
+      typeof authorization === 'string' ? authorization.split(/\s+/) : [];
+    if (!credentials) {
+      throw new Error(
+        'Unable to clone an API key, request does not contain an authorization header'
+      );
+    }
+    if (scheme.toLowerCase() !== 'apikey') {
+      throw new Error(
+        `Unable to clone an API key, expected ApiKey authorization scheme but got "${scheme}"`
+      );
+    }
+    return client.transport.request<{ id: string; name: string; api_key: string }>({
+      method: 'POST',
+      path: '/_security/api_key/clone',
+      body: {
+        api_key: credentials,
+        name,
+        // `metadata` must come before `expiration`: Elasticsearch drops the field after a null
+        // `expiration` (https://github.com/elastic/elasticsearch/pull/152874).
+        ...(metadata ? { metadata } : {}),
+        expiration: null,
+      },
+      ...(refresh !== undefined ? { querystring: { refresh } } : {}),
+    });
+  };
+
+export const createSecurityStart = (client: Client) => ({
   authc: {
     getCurrentUser: (request: KibanaRequest) => getPodRequestUser(request),
     getRedactedSessionId: () => undefined,
-    // Plugin-level invalidation of regular API keys is in the Security pod plugin.
-    apiKeys: { uiam: { invalidate: remoteUiamInvalidate } },
+    apiKeys: {
+      uiam: { invalidate: uiamInvalidate },
+      areAPIKeysEnabled: areAPIKeysEnabled(client),
+      cloneAsInternalUser: cloneAsInternalUser(client),
+    },
   },
+  // Tasks that run as service accounts always run in Kibana.
+  serviceAccounts: { isEnabled: () => false },
   audit: { asScoped: () => ({ log: () => undefined, enabled: false }) },
 });
 
-/** API-key-authenticated requests have no activated user profile in Kibana either. */
-export const createUserProfileStart = () => ({
-  getCurrentProfileId: async (request: KibanaRequest) =>
-    getPodRequestUser(request)?.profile_uid ?? null,
+/** The id inside an `ApiKey <base64(id:secret)>` header, which is how a task's own key arrives. */
+const extractApiKeyId = (authorization: unknown): string | undefined => {
+  if (typeof authorization !== 'string') return undefined;
+  const [scheme, credentials] = authorization.trim().split(/\s+/);
+  if (scheme?.toLowerCase() !== 'apikey' || !credentials) return undefined;
+  const [id, secret] = Buffer.from(credentials, 'base64').toString().split(':');
+  return id && secret ? id : undefined;
+};
+
+/**
+ * The profile of the user behind a request: what Kibana enriched the request with, or, for a bare
+ * API-key request, the profile Elasticsearch links to that key, asked as the key itself (the same
+ * lookup the Security plugin does). Without a profile, tasks that check ownership treat the request
+ * as anonymous, so private workflows owned by the key's user would not be found.
+ */
+export const createUserProfileStart = (client: Client) => ({
+  getCurrentProfileId: async ({ request }: { request: KibanaRequest }) => {
+    const enriched = getPodRequestUser(request)?.profile_uid;
+    if (enriched) return enriched;
+    const id = extractApiKeyId(request.headers?.authorization);
+    if (!id) return null;
+    try {
+      const scoped = client.child({
+        headers: { authorization: request.headers.authorization as string },
+      });
+      const response = await scoped.security.getApiKey({ id, with_profile_uid: true });
+      return response.api_keys?.[0]?.profile_uid ?? null;
+    } catch {
+      return null;
+    }
+  },
 });
 
 /** Feature flags have no evaluation backend in a pod, so every flag resolves to its fallback. */

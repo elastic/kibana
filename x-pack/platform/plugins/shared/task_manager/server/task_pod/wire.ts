@@ -29,8 +29,6 @@ export interface PodRunRequest {
   deadline?: string;
   /** The Kibana version dispatching the run; a pod built from another version refuses it. */
   kibanaVersion?: string;
-  /** Where and how the pod calls back into Kibana for remote plugin contracts. */
-  callback?: { url: string; token: string };
 }
 
 export interface SerializedRunResult {
@@ -49,17 +47,6 @@ export type PodRunResponse = (
   | { kind: 'result'; result?: SerializedRunResult }
   | { kind: 'thrown'; error: SerializedTaskRunError }
 ) & { customTaskRunEventFields?: Record<string, unknown> };
-
-export interface PodContractCallRequest {
-  token: string;
-  pluginId: string;
-  method: string;
-  args: unknown[];
-}
-
-export type PodContractCallResponse =
-  | { result: unknown }
-  | { error: SerializedTaskRunError; notFound?: boolean };
 
 const TASK_INSTANCE_DATE_FIELDS = ['scheduledAt', 'startedAt', 'retryAt', 'runAt'] as const;
 
@@ -95,64 +82,3 @@ export const deserializeRunResult = (serialized?: SerializedRunResult): RunResul
     ...(taskRunError ? { taskRunError: deserializeTaskRunError(taskRunError) } : {}),
   } as unknown as RunResult;
 };
-
-/**
- * A `KibanaRequest` argument never crosses the wire as an object (it carries live state). The pod
- * sends this marker holding only what identifies the request, its `authorization` header and
- * space, and Kibana rebuilds a fake request from it. Each request keeps its own identity: a task
- * may call a contract with requests built from credentials other than its own (for example an
- * action policy's API key).
- */
-export const POD_REQUEST_MARKER = '__podRequest';
-
-export interface PodRequestIdentity {
-  authorization?: string;
-  spaceId?: string;
-  userProfileId?: string;
-  userName?: string;
-  /** The key is an external (user-created) UIAM key, which must not carry the UIAM shared secret. */
-  uiamApiKeyExternal?: boolean;
-}
-
-type ExtraIdentity = Pick<PodRequestIdentity, 'userProfileId' | 'userName' | 'uiamApiKeyExternal'>;
-
-/**
- * What a request carries beyond its headers (user, UIAM verdict) lives in process-local state a
- * pod keeps itself, so the pod host registers how to read it; Kibana rebuilds it on the other side.
- */
-let describeRequestExtras: (request: object) => ExtraIdentity | undefined = () => undefined;
-export const setPodRequestExtrasReader = (
-  reader: (request: object) => ExtraIdentity | undefined
-) => {
-  describeRequestExtras = reader;
-};
-
-const isKibanaRequestLike = (
-  value: unknown
-): value is {
-  headers: Record<string, unknown>;
-  spaceId?: string;
-} =>
-  Boolean(
-    value &&
-      typeof value === 'object' &&
-      'isSystemRequest' in value &&
-      'headers' in value &&
-      'route' in value
-  );
-
-export const encodePodArgs = (args: unknown[]): string =>
-  JSON.stringify(args, function replacer(this: Record<string, unknown>, key, value) {
-    // `value` has already been through `toJSON()`, which for a real `KibanaRequest` drops what
-    // identifies it as one, so look at the raw property.
-    const raw = this[key];
-    return isKibanaRequestLike(raw)
-      ? {
-          [POD_REQUEST_MARKER]: {
-            authorization: raw.headers.authorization as string | undefined,
-            spaceId: raw.spaceId,
-            ...describeRequestExtras(raw),
-          } satisfies PodRequestIdentity,
-        }
-      : value;
-  });

@@ -19,7 +19,6 @@ import type {
 } from '../types';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
 import { registerCreateAlertEventStep } from '../lib/workflow_extensions/register_create_alert_event_step';
-import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
 import { registerAlertingV2ManagedWorkflowOwner } from '../lib/workflow_extensions/managed_workflows';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
@@ -50,7 +49,6 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
     );
     registerAlertingV2ManagedWorkflowOwner(workflowsExtensionsSetup);
-    registerTriggerDefinitions(workflowsExtensionsSetup);
 
     const getAlertEventsClient = (request: KibanaRequest) =>
       container

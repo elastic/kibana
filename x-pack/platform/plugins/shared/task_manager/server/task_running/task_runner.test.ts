@@ -453,9 +453,8 @@ describe('TaskManagerRunner', () => {
             instance: { credential, encryptedCredential },
             definitions,
             podDispatch: {
-              registry: {} as never,
               kibanaVersion: '9.6.0',
-              getPod: () => ({ url: 'http://pod', callbackUrl: 'http://kb' }),
+              getPod: () => ({ url: 'http://pod' }),
             },
           });
           store.getVerifiedCredential.mockResolvedValue(asOk(credential));
@@ -857,11 +856,9 @@ describe('TaskManagerRunner', () => {
         },
       });
       const podDispatch = (matches = true): PodDispatch & { fetch: jest.Mock } => {
-        const registry = { startRun: jest.fn(() => 'tok'), endRun: jest.fn(async () => {}) };
         return {
-          registry: registry as never,
           kibanaVersion: '9.6.0',
-          getPod: () => (matches ? { url: 'http://pod', callbackUrl: 'http://kb' } : undefined),
+          getPod: () => (matches ? { url: 'http://pod' } : undefined),
           fetch: jest.fn(),
         };
       };

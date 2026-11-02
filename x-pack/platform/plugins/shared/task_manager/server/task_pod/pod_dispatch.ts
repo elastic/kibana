@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { PodContractRegistry } from './pod_contract_registry';
 import type { PodRoute } from './remote_task_runner';
 
 export interface PodDispatch {
   getPod(taskType: string): PodRoute | undefined;
-  registry: PodContractRegistry;
   kibanaVersion: string;
 }
 
@@ -25,13 +23,9 @@ const globToRegExp = (glob: string) =>
 /** Routes task types to pods by glob, first matching pod wins. No pods configured = all local. */
 export const createPodDispatch = ({
   pods,
-  callbackUrl,
-  registry,
   kibanaVersion,
 }: {
   pods: PodConfig[];
-  callbackUrl: string;
-  registry: PodContractRegistry;
   kibanaVersion: string;
 }): PodDispatch => {
   const matchers = pods.map((pod) => ({
@@ -39,11 +33,10 @@ export const createPodDispatch = ({
     patterns: pod.task_types.map(globToRegExp),
   }));
   return {
-    registry,
     kibanaVersion,
     getPod: (taskType) => {
       const match = matchers.find(({ patterns }) => patterns.some((p) => p.test(taskType)));
-      return match ? { url: match.pod.url.replace(/\/$/, ''), callbackUrl } : undefined;
+      return match ? { url: match.pod.url.replace(/\/$/, '') } : undefined;
     },
   };
 };

@@ -12,4 +12,5 @@
  */
 export { definePodPlugin } from './host/define_pod_plugin';
 export type { PodPluginDefinition, PodPluginInitializerContext } from './host/define_pod_plugin';
-export { callKibana, podContract, remoteContract } from './host/remote';
+export { podContract } from './host/pod_contract';
+export { createTaskSchedulingPodPlugin } from './scheduling';
