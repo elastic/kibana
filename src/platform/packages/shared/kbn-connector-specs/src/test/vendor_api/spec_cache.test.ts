@@ -68,6 +68,18 @@ describe('createSpecCache', () => {
     expect(await cache().fetchText(URL_A)).toBe(`${URL_A} v2`);
   });
 
+  it('leaves no partial entry behind when a run is interrupted while writing', async () => {
+    const writeFile = jest.spyOn(fs, 'writeFile').mockImplementationOnce(async (file) => {
+      await fs.appendFile(file as string, '{"url":');
+      throw new Error('interrupted');
+    });
+    await expect(cache().fetchText(URL_A)).rejects.toThrow('interrupted');
+    writeFile.mockRestore();
+
+    expect(await cache().fetchText(URL_A)).toBe(`${URL_A} v1`);
+    expect(fetches).toEqual([URL_A, URL_A]);
+  });
+
   it('knows no fetch time for URLs it has not served', () => {
     expect(cache().fetchedAt(URL_A)).toBeUndefined();
   });

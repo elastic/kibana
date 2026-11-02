@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import fs from 'fs/promises';
 import path from 'path';
 import { z } from '@kbn/zod/v4';
@@ -66,7 +66,13 @@ export const createSpecCache = ({
       const text = await fetchText(url);
       const fetchedAt = now();
       await fs.mkdir(directory, { recursive: true });
-      await fs.writeFile(file, JSON.stringify({ url, fetchedAt: fetchedAt.toISOString(), text }));
+      // Renamed into place, so that concurrent or interrupted runs never leave a partial entry.
+      const temporaryFile = `${file}.${randomUUID()}.tmp`;
+      await fs.writeFile(
+        temporaryFile,
+        JSON.stringify({ url, fetchedAt: fetchedAt.toISOString(), text })
+      );
+      await fs.rename(temporaryFile, file);
       served.set(url, fetchedAt);
       return text;
     },
