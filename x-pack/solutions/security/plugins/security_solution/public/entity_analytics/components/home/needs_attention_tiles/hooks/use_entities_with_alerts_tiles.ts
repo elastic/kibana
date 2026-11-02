@@ -8,10 +8,8 @@
 import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildAlertBasedTilesQuery } from '../queries/entities_with_alerts_query';
@@ -144,14 +142,6 @@ export const useAlertBasedTiles = ({
   // timed-out refetch does not leave the last count on show as if it were current.
   const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
   const shownResult = isTimedOut ? undefined : queryResult;
-
-  // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-  useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
-      defaultMessage: 'There was an error loading entity alert data',
-    }),
-    isTimedOut ? undefined : filteredError ?? indexError
-  );
 
   return {
     severeAlertsCount: shownResult?.severeAlertsCount ?? 0,

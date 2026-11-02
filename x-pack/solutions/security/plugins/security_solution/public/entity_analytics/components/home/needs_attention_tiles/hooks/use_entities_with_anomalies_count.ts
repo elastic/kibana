@@ -8,10 +8,8 @@
 import { useMemo } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
-import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { isMissingIndexError } from '../../is_missing_index_error';
@@ -123,14 +121,6 @@ export const useEntitiesWithAnomaliesCount = ({
   // timed-out refetch does not leave the last count on show as if it were current.
   const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
   const shownResult = isTimedOut ? undefined : queryResult;
-
-  useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.entitiesWithAnomalies.queryError', {
-      defaultMessage: 'There was an error loading entities with anomalies count',
-    }),
-    // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : filteredError ?? indexError
-  );
 
   return {
     count: shownResult?.count ?? 0,
