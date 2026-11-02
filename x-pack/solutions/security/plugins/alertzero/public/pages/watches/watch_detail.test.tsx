@@ -97,6 +97,13 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
         getUrlForApp: jest.fn(() => '/app/workflows'),
         navigateToUrl: mockNavigateToUrl,
       },
+      docLinks: {
+        links: {
+          securitySolution: {
+            alertZero: { continuousThreatHunt: 'https://docs.example.com/continuous-threat-hunt' },
+          },
+        },
+      },
       overlays: { openConfirm: mockOpenConfirm },
       appParams: {
         get history() {
