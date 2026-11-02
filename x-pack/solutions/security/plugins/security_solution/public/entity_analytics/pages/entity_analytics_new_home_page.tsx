@@ -1086,44 +1086,44 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         ),
       },
       {
-        id: 'entitiesWithAnomalies',
+        id: 'newlyHighCritical',
         title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.title',
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.title',
           {
-            defaultMessage: 'Anomalous',
+            defaultMessage: 'Newly high-risk',
           }
         ),
-        value: anomaliesCount,
-        delta: anomaliesDelta,
-        isDeltaLoading: anomaliesDeltaLoading,
-        isDeltaUnavailable: anomaliesHistoryMissing,
-        trend: anomaliesTrend,
-        isLoading: anomaliesLoading,
-        hasCount: anomaliesHasCount,
-        entityIds: anomaliesEntityIds,
-        // Without ML jobs the tile shows 0, which isn't a real count.
-        isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
-        noDataMessage: !canReadAnomalies
-          ? NO_ANOMALIES_ACCESS_MESSAGE
-          : anomaliesTimedOut
+        value: newlyHCCount,
+        delta: newlyHCDelta,
+        isDeltaLoading: newlyHCDeltaLoading,
+        isDeltaUnavailable: newlyHCHistoryMissing,
+        trend: newlyHCTrend,
+        isLoading: newlyHCLoading,
+        hasCount: newlyHCHasCount,
+        entityIds: newlyHCEntityIds,
+        isUnavailable: Boolean(newlyHCError),
+        noDataMessage: !canReadRisk
+          ? NO_RISK_ACCESS_MESSAGE
+          : newlyHCTimedOut
           ? TILE_TIMEOUT_MESSAGE
-          : anomaliesMissingJobs
+          : newlyHCMissingIndex
           ? i18n.translate(
-              'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
-              { defaultMessage: 'Requires anomaly detection jobs' }
+              'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
+              {
+                defaultMessage: 'Requires risk score history data',
+              }
             )
           : undefined,
         description: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
           {
-            defaultMessage: 'Flagged by at least one ML anomaly',
+            defaultMessage: 'Risk level climbed to high or critical',
           }
         ),
         filterLabel: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.filterLabel',
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.filterLabel',
           {
-            defaultMessage: 'Entities with anomalies ({timeRange})',
-            values: { timeRange },
+            defaultMessage: 'Newly high/critical',
           }
         ),
       },
@@ -1168,44 +1168,73 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         ),
       },
       {
-        id: 'newlyHighCritical',
-        title: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.title',
-          {
-            defaultMessage: 'Newly high-risk',
-          }
-        ),
-        value: newlyHCCount,
-        delta: newlyHCDelta,
-        isDeltaLoading: newlyHCDeltaLoading,
-        isDeltaUnavailable: newlyHCHistoryMissing,
-        trend: newlyHCTrend,
-        isLoading: newlyHCLoading,
-        hasCount: newlyHCHasCount,
-        entityIds: newlyHCEntityIds,
-        isUnavailable: Boolean(newlyHCError),
-        noDataMessage: !canReadRisk
-          ? NO_RISK_ACCESS_MESSAGE
-          : newlyHCTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : newlyHCMissingIndex
-          ? i18n.translate(
-              'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
-              {
-                defaultMessage: 'Requires risk score history data',
-              }
-            )
-          : undefined,
+        id: 'newEntity',
+        title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newEntity.title', {
+          defaultMessage: 'New & alerting',
+        }),
+        value: newEntityCount,
+        delta: newEntityDelta,
+        isDeltaLoading: newEntityDeltaLoading,
+        isDeltaUnavailable: newEntityHistoryMissing,
+        trend: newEntityTrend,
+        isLoading: newEntityLoading,
+        hasCount: newEntityHasCount,
+        entityIds: newEntityEntityIds,
+        isUnavailable: Boolean(newEntityError),
+        noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
         description: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
+          'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
-            defaultMessage: 'Risk level climbed to high or critical',
+            defaultMessage: 'First seen in this period with at least one alert',
           }
         ),
         filterLabel: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.filterLabel',
+          'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.filterLabel',
           {
-            defaultMessage: 'Newly high/critical',
+            defaultMessage: 'New entity (last {timeRange})',
+            values: { timeRange },
+          }
+        ),
+      },
+      {
+        id: 'entitiesWithAnomalies',
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.title',
+          {
+            defaultMessage: 'Anomalous',
+          }
+        ),
+        value: anomaliesCount,
+        delta: anomaliesDelta,
+        isDeltaLoading: anomaliesDeltaLoading,
+        isDeltaUnavailable: anomaliesHistoryMissing,
+        trend: anomaliesTrend,
+        isLoading: anomaliesLoading,
+        hasCount: anomaliesHasCount,
+        entityIds: anomaliesEntityIds,
+        // Without ML jobs the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
+        noDataMessage: !canReadAnomalies
+          ? NO_ANOMALIES_ACCESS_MESSAGE
+          : anomaliesTimedOut
+          ? TILE_TIMEOUT_MESSAGE
+          : anomaliesMissingJobs
+          ? i18n.translate(
+              'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
+              { defaultMessage: 'Requires anomaly detection jobs' }
+            )
+          : undefined,
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
+          {
+            defaultMessage: 'Flagged by at least one ML anomaly',
+          }
+        ),
+        filterLabel: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.filterLabel',
+          {
+            defaultMessage: 'Entities with anomalies ({timeRange})',
+            values: { timeRange },
           }
         ),
       },
@@ -1244,35 +1273,6 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.filterLabel',
           {
             defaultMessage: 'Watchlisted',
-          }
-        ),
-      },
-      {
-        id: 'newEntity',
-        title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newEntity.title', {
-          defaultMessage: 'New & alerting',
-        }),
-        value: newEntityCount,
-        delta: newEntityDelta,
-        isDeltaLoading: newEntityDeltaLoading,
-        isDeltaUnavailable: newEntityHistoryMissing,
-        trend: newEntityTrend,
-        isLoading: newEntityLoading,
-        hasCount: newEntityHasCount,
-        entityIds: newEntityEntityIds,
-        isUnavailable: Boolean(newEntityError),
-        noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
-        description: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
-          {
-            defaultMessage: 'First seen in this period with at least one alert',
-          }
-        ),
-        filterLabel: i18n.translate(
-          'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.filterLabel',
-          {
-            defaultMessage: 'New entity (last {timeRange})',
-            values: { timeRange },
           }
         ),
       },
