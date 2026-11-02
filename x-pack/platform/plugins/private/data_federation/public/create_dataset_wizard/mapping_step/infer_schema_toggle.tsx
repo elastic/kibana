@@ -51,7 +51,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaDescription', {
                 defaultMessage:
-                  "Elastic infers any fields you don't map. All fields are available to query.",
+                  "Elastic infers any fields you don't define. All fields are available to query.",
               })}
             </EuiText>
 

@@ -145,7 +145,7 @@ export const createDatasetWizardStrings = {
     }
   ),
   inferSchemaLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaLabel', {
-    defaultMessage: 'Infer unmapped fields',
+    defaultMessage: 'Auto schema discovery',
   }),
   defineSchemaLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaLabel', {
     defaultMessage: 'Use mapped fields only',
@@ -348,7 +348,7 @@ export const createDatasetWizardStrings = {
   settingsFormatCsvDescription: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatCsvDescription',
     {
-      defaultMessage: 'Comma-separated values with a header row.',
+      defaultMessage: 'Character-separated values using comma delimiters.',
     }
   ),
 
@@ -371,7 +371,7 @@ export const createDatasetWizardStrings = {
   settingsFormatTsvDescription: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatTsvDescription',
     {
-      defaultMessage: 'Tab-separated values with a header row.',
+      defaultMessage: 'Character-separated values using tab delimiters.',
     }
   ),
 

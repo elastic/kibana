@@ -81,7 +81,7 @@ describe('StepReview', () => {
     expect(queryByTestId('createDatasetWizardReview-error_mode')).toBeNull();
 
     expect(getByTestId('createDatasetWizardReview-schema_mapping_mode')).toHaveTextContent(
-      'Infer unmapped fieldsDefault'
+      'Auto schema discoveryDefault'
     );
   });
 
@@ -120,7 +120,7 @@ describe('StepReview', () => {
       'DateDefault'
     );
     expect(getByTestId('createDatasetWizardReview-schema_mapping_mode')).toHaveTextContent(
-      'Infer unmapped fieldsDefault'
+      'Auto schema discoveryDefault'
     );
     expect(queryByTestId('createDatasetWizardReview-schema_resolution')).toBeNull();
     expect(queryByTestId('createDatasetWizardReview-timestamp_format')).toBeNull();
@@ -184,7 +184,7 @@ describe('StepReview', () => {
     // Without declared fields the request has no `mappings`, so the summary must not
     // claim the toggle was applied.
     expect(getByTestId('createDatasetWizardReview-schema_mapping_mode')).toHaveTextContent(
-      'Infer unmapped fieldsDefault'
+      'Auto schema discoveryDefault'
     );
     expect(queryByTestId('createDatasetWizardReview-mapped_fields')).toBeNull();
 
