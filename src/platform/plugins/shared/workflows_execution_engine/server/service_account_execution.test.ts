@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -19,10 +20,17 @@ import {
   getServiceAccountCallerTaskRunAs,
   getWorkflowOriginalRequest,
   getWorkflowTaskRunAs,
+  isPermanentMintFailure,
   withWorkflowBindingRequest,
   withWorkflowExecutionIdentity,
   withWorkflowTaskRunAs,
 } from './service_account_execution';
+
+const tokenExchangeError = (retryable: boolean) =>
+  Object.assign(new Error('token exchange failed'), {
+    name: 'ServiceAccountTokenExchangeError',
+    retryable,
+  });
 
 describe('workflow service account execution', () => {
   const execution = (accountId?: string) => ({
@@ -260,6 +268,18 @@ describe('workflow service account execution', () => {
         ensureWorkflowCallerAvailable(httpServerMock.createKibanaRequest(), { workflowId: 'child' })
       ).not.toThrow();
     });
+  });
+
+  it.each([
+    ['a missing binding', Boom.notFound('missing'), true],
+    ['a changed binding', Boom.forbidden('changed'), true],
+    ['a refused token exchange', tokenExchangeError(false), true],
+    ['a token exchange that can be retried', tokenExchangeError(true), false],
+    ['an unavailable dependency', Boom.serverUnavailable('down'), false],
+    ['rate limiting', Boom.tooManyRequests('slow down'), false],
+    ['a connection error', new Error('connect ECONNREFUSED'), false],
+  ])('tells whether %s is a permanent mint failure', (_, error, permanent) => {
+    expect(isPermanentMintFailure(error)).toBe(permanent);
   });
 
   it('does not fall back when the binding changed or the feature is disabled', async () => {

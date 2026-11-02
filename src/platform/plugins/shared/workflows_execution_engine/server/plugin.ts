@@ -10,6 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import isEqual from 'lodash/isEqual';
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -94,6 +95,8 @@ import {
   getExecutionTaskRunAs,
   getServiceAccountCallerTaskRunAs,
   getWorkflowOriginalRequest,
+  getWorkflowTaskRunAs,
+  isPermanentMintFailure,
   resolveInheritedWorkflowIdentity,
   withWorkflowBindingRequest,
   WORKFLOW_SERVICE_ACCOUNT_TYPE,
@@ -187,6 +190,9 @@ export class WorkflowsExecutionEnginePlugin
     WorkflowsExecutionEnginePluginStart
   >;
   private meteringService?: WorkflowsMeteringService;
+  // Task Manager mints a runAs task's request from the workload alone; this names the execution
+  // the request is minted for, for the service account audit events.
+  private readonly runAsExecutionId = new AsyncLocalStorage<string>();
 
   /** Set in start(); used by task runners to pass parent-resume into run/resume without exposing it on the public plugin contract. */
   private internalResumeWorkflowExecutionHandler?: InternalResumeWorkflowExecution;
@@ -269,11 +275,14 @@ export class WorkflowsExecutionEnginePlugin
         workloadTypes: [WORKFLOW_SERVICE_ACCOUNT_TYPE],
         withScopedRequest: async (params, fn) => {
           const [coreStart] = await core.getStartServices();
-          return coreStart.security.serviceAccounts.withScopedRequestForWorkload(params, fn);
+          return coreStart.security.serviceAccounts.withScopedRequestForWorkload(
+            { ...params, executionId: this.runAsExecutionId.getStore() },
+            fn
+          );
         },
       },
       createTaskRunner: (context) => {
-        const { fakeRequest, runAs, taskInstance } = context;
+        const { fakeRequest, runAs, taskInstance, setCustomTaskRunEventFields } = context;
         if (fakeRequest || !runAs) {
           return createTaskRunner(context);
         }
@@ -294,23 +303,35 @@ export class WorkflowsExecutionEnginePlugin
             }
             let minted = false;
             try {
-              return await runAs.withScopedRequest(
-                (request) => {
-                  minted = true;
-                  return withWorkflowBindingRequest(
-                    request,
-                    execution.id,
-                    executionRunAs,
-                    async () => {
-                      taskRunner = createTaskRunner({ ...context, fakeRequest: request });
-                      return taskRunner.run();
-                    }
-                  );
-                },
-                { expectedServiceAccountId: executionRunAs.expectedServiceAccountId }
+              return await this.runAsExecutionId.run(execution.id, () =>
+                runAs.withScopedRequest(
+                  (request) => {
+                    minted = true;
+                    return withWorkflowBindingRequest(
+                      request,
+                      execution.id,
+                      executionRunAs,
+                      async () => {
+                        taskRunner = createTaskRunner({ ...context, fakeRequest: request });
+                        return taskRunner.run();
+                      }
+                    );
+                  },
+                  { expectedServiceAccountId: executionRunAs.expectedServiceAccountId }
+                )
               );
             } catch (error) {
               if (minted) {
+                throw error;
+              }
+              const isLastAttempt = taskInstance.attempts >= (definition.maxAttempts ?? 1);
+              if (!isLastAttempt && !isPermanentMintFailure(error)) {
+                stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                  workflow_execution_id: workflowRunId,
+                  workflow_id: execution.workflowId,
+                  space_id: spaceId,
+                  outcome: 'failed',
+                });
                 throw error;
               }
               // Without a request the runner can't start, so fail the execution here rather than
@@ -343,6 +364,15 @@ export class WorkflowsExecutionEnginePlugin
                   workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
                   meteringService: this.meteringService,
                   cloudSetup: this.setupDependencies?.cloudSetup,
+                });
+              }
+              const outcome = current && mapExecutionStatusToOutcome(current.status);
+              if (outcome) {
+                stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
+                  workflow_execution_id: workflowRunId,
+                  workflow_id: execution.workflowId,
+                  space_id: spaceId,
+                  outcome,
                 });
               }
               this.logger.warn(
@@ -737,6 +767,8 @@ export class WorkflowsExecutionEnginePlugin
                   spaceId,
                   fakeRequest,
                   isUserInteractive,
+                  // This task's identity is the one the execution's other tasks have.
+                  runAs: getWorkflowTaskRunAs(fakeRequest),
                 });
                 // A request never loads workflow checkpoints or invokes steps. Busy
                 // runners keep their claim; this notification retries durably in TM.

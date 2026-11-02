@@ -305,19 +305,20 @@ export class WorkflowTaskManager {
     fakeRequest,
     isUserInteractive,
     regenerateApiKey,
+    ...params
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
     isUserInteractive?: boolean;
     regenerateApiKey?: boolean;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
     const priority = getTaskPriority({ isUserInteractive });
-    // An approver's request has no `runAs`, but the parked runner may run as the binding, and
-    // Task Manager rejects updating it with another identity.
+    // A caller that knows the identity of the execution's tasks passes it, even when it is none.
     const runAs =
-      (fakeRequest && getWorkflowTaskRunAs(fakeRequest)) ?? (await this.getStoredRunAs(taskId));
+      'runAs' in params ? params.runAs : await this.getHandoffRunAs(executionId, fakeRequest);
 
     await this.taskManager.ensureScheduled(
       {
@@ -336,26 +337,37 @@ export class WorkflowTaskManager {
     return { taskId };
   }
 
-  private async getStoredRunAs(taskId: string): Promise<WorkflowTaskRunAs | undefined> {
-    let task: ConcreteTaskInstance;
-    try {
-      task = await this.taskManager.get(taskId);
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        return undefined;
-      }
-      throw error;
+  /**
+   * The `runAs` of the tasks that hand off a resume for `executionId`. An approver's request has
+   * none, but a waiting execution's tasks may run as its binding, and Task Manager rejects updating
+   * a task with another identity, so the identity comes from the tasks the execution already has.
+   */
+  private async getHandoffRunAs(
+    executionId: string,
+    request: KibanaRequest | undefined
+  ): Promise<WorkflowTaskRunAs | undefined> {
+    const requestRunAs = request && getWorkflowTaskRunAs(request);
+    if (requestRunAs) {
+      return requestRunAs;
     }
-    const { type, workloadType, workloadId, spaceId, expectedServiceAccountId } =
-      task.credential ?? {};
-    return type === SERVICE_ACCOUNT_CREDENTIAL_TYPE && workloadType && workloadId && spaceId
-      ? {
+    const tasks = await this.taskManager.bulkGet([
+      getWorkflowImmediateResumeTaskId(executionId),
+      getWorkflowWakeTaskId(executionId),
+      getWorkflowGlobalTimeoutResumeTaskId(executionId),
+    ]);
+    for (const result of tasks) {
+      const { type, workloadType, workloadId, spaceId, expectedServiceAccountId } =
+        (result.tag === 'ok' && result.value.credential) || {};
+      if (type === SERVICE_ACCOUNT_CREDENTIAL_TYPE && workloadType && workloadId && spaceId) {
+        return {
           workloadType,
           workloadId,
           spaceId,
           expectedServiceAccountId: expectedServiceAccountId ?? null,
-        }
-      : undefined;
+        };
+      }
+    }
+    return undefined;
   }
 
   /**
@@ -397,6 +409,7 @@ export class WorkflowTaskManager {
     fakeRequest?: KibanaRequest;
     isUserInteractive?: boolean;
     regenerateApiKey?: boolean;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<boolean> {
     const { taskId } = await this.scheduleImmediateResume(params);
     try {
@@ -425,8 +438,9 @@ export class WorkflowTaskManager {
     isUserInteractive?: boolean;
     regenerateApiKey?: boolean;
   }): Promise<void> {
-    if (await this.tryRunImmediateResume(params)) return;
-    await this.ensureWakeTask(params);
+    const runAs = await this.getHandoffRunAs(params.executionId, params.fakeRequest);
+    if (await this.tryRunImmediateResume({ ...params, runAs })) return;
+    await this.ensureWakeTask({ ...params, runAs });
     try {
       await this.runSoonWithConflictRetry(
         getWorkflowWakeTaskId(params.executionId),
@@ -482,6 +496,7 @@ export class WorkflowTaskManager {
     spaceId: string;
     fakeRequest?: KibanaRequest;
     runAt?: Date;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<void> {
     await this.taskManager.ensureScheduled(
       {
@@ -492,9 +507,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: params.runAt ?? new Date(Date.now() + 1000),
         scope: [`workflow:execution:${params.executionId}`],
-        ...runAsFields(params.fakeRequest),
+        ...runAsFields(params.fakeRequest, params.runAs),
       },
-      cloneApiKeyOptions(params.fakeRequest)
+      params.runAs ? undefined : cloneApiKeyOptions(params.fakeRequest)
     );
   }
 

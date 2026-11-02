@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { TaskAlreadyRunningError, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -104,9 +105,7 @@ describe('workflow:resume task runner event fields', () => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     taskManagerStart = taskManagerMock.createStart();
-    taskManagerStart.get.mockRejectedValue(
-      SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'immediate-runner')
-    );
+    taskManagerStart.bulkGet.mockResolvedValue([]);
     coreSetup.getStartServices.mockResolvedValue([
       coreStart,
       {
@@ -128,6 +127,7 @@ describe('workflow:resume task runner event fields', () => {
       cloud: {} as never,
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
     });
+    return { coreStart };
   };
 
   beforeEach(() => {
@@ -689,8 +689,7 @@ describe('workflow:resume task runner event fields', () => {
     );
   });
 
-  it('fails the execution when the binding request cannot be minted', async () => {
-    setupPlugin();
+  describe('when the binding request cannot be minted', () => {
     const workflowRunId = 'exec-run-as-unmintable';
     const execution = {
       id: workflowRunId,
@@ -699,35 +698,127 @@ describe('workflow:resume task runner event fields', () => {
       status: 'waiting',
       workflowDefinition: { settings: { run_as: 'account-a' } },
     };
-    mockGetWorkflowExecutionById.mockResolvedValue(execution);
     const failedExecution = { ...execution, status: 'failed' };
-    mockFinalizeWorkflowIdentityFailure.mockResolvedValue(failedExecution);
-    const withScopedRequest = jest.fn().mockRejectedValue(new Error('binding removed'));
-    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+    const createRunner = (error: Error, attempts: number) => {
+      const setCustomTaskRunEventFields = jest.fn();
+      const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: {
+            ...taskManagerMock.createTask(),
+            attempts,
+            params: { workflowRunId, spaceId: 'default' },
+          },
+          fakeRequest: undefined,
+          runAs: { withScopedRequest: jest.fn().mockRejectedValue(error) },
+          setCustomTaskRunEventFields,
+        })
+      );
+      return { runner, setCustomTaskRunEventFields };
+    };
+
+    beforeEach(() => {
+      setupPlugin();
+      mockGetWorkflowExecutionById.mockResolvedValue(execution);
+      mockFinalizeWorkflowIdentityFailure.mockResolvedValue(failedExecution);
+    });
+
+    it('fails the execution when the binding is gone', async () => {
+      const { runner, setCustomTaskRunEventFields } = createRunner(
+        Boom.notFound('binding removed'),
+        1
+      );
+
+      await expect(runner.run()).resolves.toBeUndefined();
+
+      expect(mockFinalizeWorkflowIdentityFailure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowRunId,
+          spaceId: 'default',
+          error: { type: 'ServiceAccountExecutionError', message: 'binding removed' },
+        })
+      );
+      expect(mockCompleteIdentityFailureCleanup).toHaveBeenCalledWith(
+        failedExecution,
+        expect.objectContaining({ workflowRunId, spaceId: 'default' })
+      );
+      expect(setCustomTaskRunEventFields).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          workflow_execution_id: workflowRunId,
+          workflow_id: 'wf-run-as',
+          outcome: 'failed',
+        })
+      );
+      expect(mockResumeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('lets Task Manager retry a transient failure', async () => {
+      const { runner, setCustomTaskRunEventFields } = createRunner(
+        new Error('connect ECONNREFUSED'),
+        1
+      );
+
+      await expect(runner.run()).rejects.toThrow('connect ECONNREFUSED');
+
+      expect(mockFinalizeWorkflowIdentityFailure).not.toHaveBeenCalled();
+      expect(setCustomTaskRunEventFields).toHaveBeenLastCalledWith(
+        expect.objectContaining({ workflow_execution_id: workflowRunId, outcome: 'failed' })
+      );
+    });
+
+    it('fails the execution when a transient failure outlasts the retries', async () => {
+      const { runner } = createRunner(
+        new Error('connect ECONNREFUSED'),
+        taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].maxAttempts ?? 1
+      );
+
+      await expect(runner.run()).resolves.toBeUndefined();
+
+      expect(mockFinalizeWorkflowIdentityFailure).toHaveBeenCalled();
+    });
+  });
+
+  it('names the execution when Task Manager mints its binding request', async () => {
+    const { coreStart } = setupPlugin();
+    const workflowRunId = 'exec-run-as-audit';
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: workflowRunId,
+      workflowId: 'wf-run-as',
+      spaceId: 'default',
+      status: 'waiting',
+      workflowDefinition: { settings: { run_as: 'account-a' } },
+    });
+    const definition = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE];
+    const workload = {
+      workloadType: 'workflow',
+      workloadId: 'wf-run-as',
+      spaceId: 'default',
+      expectedServiceAccountId: 'account-a',
+    };
+    jest
+      .mocked(coreStart.security.serviceAccounts.withScopedRequestForWorkload)
+      .mockRejectedValue(Boom.forbidden('binding changed'));
+    const runner = definition.createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
           ...taskManagerMock.createTask(),
           params: { workflowRunId, spaceId: 'default' },
         },
         fakeRequest: undefined,
-        runAs: { withScopedRequest },
+        runAs: {
+          withScopedRequest: async (fn) => {
+            if (!definition.runAs) throw new Error('The resume task does not register runAs.');
+            return definition.runAs.withScopedRequest(workload, fn);
+          },
+        },
       })
     );
 
-    await expect(runner.run()).resolves.toBeUndefined();
+    await runner.run();
 
-    expect(mockFinalizeWorkflowIdentityFailure).toHaveBeenCalledWith(
-      expect.objectContaining({
-        workflowRunId,
-        spaceId: 'default',
-        error: { type: 'ServiceAccountExecutionError', message: 'binding removed' },
-      })
+    expect(coreStart.security.serviceAccounts.withScopedRequestForWorkload).toHaveBeenCalledWith(
+      { ...workload, executionId: workflowRunId },
+      expect.any(Function)
     );
-    expect(mockCompleteIdentityFailureCleanup).toHaveBeenCalledWith(
-      failedExecution,
-      expect.objectContaining({ workflowRunId, spaceId: 'default' })
-    );
-    expect(mockResumeWorkflow).not.toHaveBeenCalled();
   });
 
   it('rethrows a failure of the run itself without failing the identity', async () => {
