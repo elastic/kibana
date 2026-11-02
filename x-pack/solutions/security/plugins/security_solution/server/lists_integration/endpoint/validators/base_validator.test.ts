@@ -747,6 +747,23 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           );
         });
 
+        it('should log item IDs with lone surrogates without throwing', async () => {
+          const logger = jest.mocked(validator._getLogger());
+          const importItems: PromiseFromStreams = {
+            items: [{ ...item1Mock(), item_id: 'lone\ud800surrogate' }],
+            lists: [],
+          };
+
+          await expect(
+            validator._validatePreImportItems(importItems, createValidateFn({ 'name 1': 100 }))
+          ).resolves.toBeUndefined();
+
+          const debugArg = logger.debug.mock.calls[0][0];
+          expect(typeof debugArg === 'function' ? debugArg() : debugArg).toEqual(
+            'Validated 1 items of [list%20id%201] for import in 0.1s (0 invalid). Slowest: lone%EF%BF%BDsurrogate (100ms)'
+          );
+        });
+
         it('should not log when there are no items to validate', async () => {
           const logger = jest.mocked(validator._getLogger());
 

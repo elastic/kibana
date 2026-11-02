@@ -123,8 +123,9 @@ const IMPORT_VALIDATION_SLOWEST_ITEMS_LOGGED = 5;
 /**
  * IDs come from the import file. The pattern log layout keeps newlines and interprets `%` conversions
  * (e.g. `%date{...}`, which throws for an unknown format) inside messages, so they are logged URI-encoded.
+ * Lone surrogates are replaced first, as `encodeURIComponent` throws for them.
  */
-const toLoggableId = (id: string): string => encodeURIComponent(id);
+const toLoggableId = (id: string): string => encodeURIComponent(id.toWellFormed());
 
 /**
  * Provides base methods for doing validation that apply across endpoint exception entries
