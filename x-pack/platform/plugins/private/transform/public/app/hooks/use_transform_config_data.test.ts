@@ -90,9 +90,16 @@ describe('isSourceIndexUnavailableError', () => {
         'Bad Request: [[status_exception] Source indices have been deleted or closed.]: Source indices have been deleted or closed.',
     },
   };
+  const indexNotFoundError = {
+    body: {
+      message:
+        '[index_not_found_exception\n\tRoot causes:\n\t\tindex_not_found_exception: no such index [kibana_sample_data_ecommerce]]: no such index [kibana_sample_data_ecommerce]',
+    },
+  };
 
-  test('matches transform preview source index status errors', () => {
+  test('matches transform preview source index status errors and index not found errors', () => {
     expect(isSourceIndexUnavailableError(sourceIndexUnavailableError)).toBe(true);
+    expect(isSourceIndexUnavailableError(indexNotFoundError)).toBe(true);
   });
 
   test('does not match other preview errors', () => {
@@ -109,6 +116,9 @@ describe('isSourceIndexUnavailableError', () => {
     expect(
       isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError, '_id:linked-id')
     ).toBe(true);
+    expect(isProjectScopedSourceIndexUnavailableError(indexNotFoundError, '_id:linked-id')).toBe(
+      true
+    );
     expect(
       isProjectScopedSourceIndexUnavailableError(sourceIndexUnavailableError, PROJECT_ROUTING.ALL)
     ).toBe(false);
