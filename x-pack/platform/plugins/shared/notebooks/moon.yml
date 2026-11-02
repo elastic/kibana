@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/notebook-plugin
   channel: ''
   owner: '@elastic/kibana-dashboards'
-  sourceRoot: x-pack/platform/plugins/shared/notebook
+  sourceRoot: x-pack/platform/plugins/shared/notebooks
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'

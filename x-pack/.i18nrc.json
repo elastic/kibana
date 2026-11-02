@@ -217,7 +217,7 @@
     "xpack.urlDrilldown": "platform/plugins/private/drilldowns/url_drilldown",
     "xpack.watcher": "platform/plugins/private/watcher",
     "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace",
-    "xpack.notebook": "platform/plugins/shared/notebook",
+    "xpack.notebook": "platform/plugins/shared/notebooks",
     "xpack.notificationCenter": "platform/plugins/shared/notification_center",
     "xpack.customContent": [
       "platform/packages/shared/custom-content/custom-content-renderer",

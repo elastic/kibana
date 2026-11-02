@@ -2896,7 +2896,7 @@ importers:
         version: link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin
       '@kbn/notebook-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/notebook
+        version: link:x-pack/platform/plugins/shared/notebooks
       '@kbn/notification-center-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/notification_center
@@ -9502,7 +9502,7 @@ importers:
 
   x-pack/platform/plugins/shared/ml: {}
 
-  x-pack/platform/plugins/shared/notebook: {}
+  x-pack/platform/plugins/shared/notebooks: {}
 
   x-pack/platform/plugins/shared/notification_center: {}
 

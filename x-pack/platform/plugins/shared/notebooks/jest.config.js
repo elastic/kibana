@@ -8,10 +8,10 @@
 module.exports = {
   preset: '@kbn/jest',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/notebook'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/notebooks'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/notebook',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/notebooks',
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/notebook/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/notebooks/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
