@@ -524,6 +524,8 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
     'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
   ENTITY_ANALYTICS_HOME_PAGE_BANNER:
     'securitySolution.entityAnalyticsHomePage.productTourBannerDismissed.v9.6',
+  SIEM_MIGRATIONS_RULES_ADD_TO_CHAT_TOUR:
+    'securitySolution.siemMigrations.rules.addToChatTour.v9.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

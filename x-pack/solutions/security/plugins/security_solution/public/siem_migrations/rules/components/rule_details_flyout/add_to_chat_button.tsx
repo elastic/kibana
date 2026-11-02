@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
@@ -33,11 +33,14 @@ const TOOLTIP_ANCHOR_PROPS = {
 interface AddMigrationRuleToChatButtonProps {
   isAuthorized: boolean;
   rule: RuleMigrationRule;
+  /** Called after the chat is opened. */
+  onAddToChat?: () => void;
 }
 
 const AddMigrationRuleToChatButtonComponent: React.FC<AddMigrationRuleToChatButtonProps> = ({
   isAuthorized,
   rule,
+  onAddToChat,
 }) => {
   const attachment = useMemo(
     () => ({
@@ -67,9 +70,14 @@ const AddMigrationRuleToChatButtonComponent: React.FC<AddMigrationRuleToChatButt
     [uiSettings]
   );
 
+  const onClick = useCallback(() => {
+    openAgentBuilderFlyout();
+    onAddToChat?.();
+  }, [openAgentBuilderFlyout, onAddToChat]);
+
   const button = (
     <NewAgentBuilderAttachment
-      onClick={openAgentBuilderFlyout}
+      onClick={onClick}
       disabled={!isAuthorized || disabledSettings.length > 0}
       telemetry={ADD_TO_CHAT_TELEMETRY}
     />
