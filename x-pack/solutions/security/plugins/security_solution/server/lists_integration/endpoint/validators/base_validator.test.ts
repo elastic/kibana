@@ -712,7 +712,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           expect(logger.debug).toHaveBeenCalledTimes(1);
           const debugArg = logger.debug.mock.calls[0][0];
           expect(typeof debugArg === 'function' ? debugArg() : debugArg).toEqual(
-            'Validated 2 items of [list id 1, list id 2] for import in 0.5s (0 invalid). Slowest: itemId2 (300ms), itemId1 (200ms)'
+            'Validated 2 items of [list%20id%201, list%20id%202] for import in 0.5s (0 invalid). Slowest: itemId2 (300ms), itemId1 (200ms)'
           );
         });
 
@@ -726,7 +726,24 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
 
           expect(logger.debug).not.toHaveBeenCalled();
           expect(logger.warn).toHaveBeenCalledWith(
-            'Validated 2 items of [list id 1, list id 2] for import in 11.0s (1 invalid). Slowest: itemId2 (7000ms), itemId1 (4000ms)'
+            'Validated 2 items of [list%20id%201, list%20id%202] for import in 11.0s (1 invalid). Slowest: itemId2 (7000ms), itemId1 (4000ms)'
+          );
+        });
+
+        it('should log item IDs URI-encoded, as they come from the import file', async () => {
+          const logger = jest.mocked(validator._getLogger());
+
+          await validator._validatePreImportItems(
+            {
+              items: [{ ...item1Mock(), item_id: 'forged\n[ERROR] %date{invalid}' }],
+              lists: [],
+            },
+            createValidateFn({ 'name 1': 100 })
+          );
+
+          const debugArg = logger.debug.mock.calls[0][0];
+          expect(typeof debugArg === 'function' ? debugArg() : debugArg).toEqual(
+            'Validated 1 items of [list%20id%201] for import in 0.1s (0 invalid). Slowest: forged%0A%5BERROR%5D%20%25date%7Binvalid%7D (100ms)'
           );
         });
 

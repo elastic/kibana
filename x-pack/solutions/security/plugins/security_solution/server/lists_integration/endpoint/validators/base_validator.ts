@@ -121,6 +121,12 @@ const IMPORT_VALIDATION_WARN_THRESHOLD_MS = 10_000;
 const IMPORT_VALIDATION_SLOWEST_ITEMS_LOGGED = 5;
 
 /**
+ * IDs come from the import file. The pattern log layout keeps newlines and interprets `%` conversions
+ * (e.g. `%date{...}`, which throws for an unknown format) inside messages, so they are logged URI-encoded.
+ */
+const toLoggableId = (id: string): string => encodeURIComponent(id);
+
+/**
  * Provides base methods for doing validation that apply across endpoint exception entries
  */
 export class BaseValidator {
@@ -660,12 +666,12 @@ export class BaseValidator {
       const slowestItems = [...itemDurations]
         .sort((a, b) => b.durationMs - a.durationMs)
         .slice(0, IMPORT_VALIDATION_SLOWEST_ITEMS_LOGGED)
-        .map(({ itemId, durationMs }) => `${itemId} (${Math.round(durationMs)}ms)`)
+        .map(({ itemId, durationMs }) => `${toLoggableId(itemId)} (${Math.round(durationMs)}ms)`)
         .join(', ');
 
-      return `Validated ${itemDurations.length} items of [${[...listIds].join(
-        ', '
-      )}] for import in ${(totalDurationMs / 1000).toFixed(
+      return `Validated ${itemDurations.length} items of [${[...listIds]
+        .map(toLoggableId)
+        .join(', ')}] for import in ${(totalDurationMs / 1000).toFixed(
         1
       )}s (${invalidItemCount} invalid). Slowest: ${slowestItems}`;
     };
