@@ -814,6 +814,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     skip: skipAlertTiles,
     isReady: !alertBasedPending && !isDeltaLoading,
     reachesBack: alertBasedReachesBack,
+    hasCount: alertBasedHasCount,
     severeAlertsCount,
     watchlistedCount,
     severeAlertsBaseline: severeAlertsPrevious,
@@ -825,6 +826,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       skip: skipAnomaliesTile,
       isReady: !anomaliesPending && !anomaliesDeltaLoading,
       reachesBack: anomaliesReachesBack,
+      hasCount: anomaliesHasCount,
       count: anomaliesCount,
       deltaBaseline: anomaliesPrevious,
     });
@@ -832,6 +834,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     ...deltaOptions,
     isReady: !newEntityPending && !newEntityDeltaLoading,
     reachesBack: newEntityReachesBack,
+    hasCount: newEntityHasCount,
     count: newEntityCount,
     deltaBaseline: newEntityPrevious,
   });
@@ -848,6 +851,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       !riskMoversPending && !newlyHCPending && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
     riskMoversReachesBack,
     newlyHighCriticalReachesBack: newlyHCReachesBack,
+    riskMoversHasCount,
+    newlyHighCriticalHasCount: newlyHCHasCount,
     riskMoversCount,
     newlyHighCriticalCount: newlyHCCount,
     riskMoversBaseline: riskMoversPrevious,

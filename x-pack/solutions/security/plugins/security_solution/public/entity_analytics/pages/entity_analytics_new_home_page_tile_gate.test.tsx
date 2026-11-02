@@ -869,6 +869,9 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
 
     expect(lastOptions(DELTA_HOOKS.newEntity).hasCount).toBe(true);
     expect(lastOptions(DELTA_HOOKS.riskMovers).hasCount).toBe(false);
+    // The sparklines are told the same, so a count that did not come back draws no line.
+    expect(lastOptions(SERIES_HOOKS.newEntity).hasCount).toBe(true);
+    expect(lastOptions(SERIES_HOOKS.riskMovers).riskMoversHasCount).toBe(false);
   });
 
   it('passes whether each count has a result to its tile, so a missing count is not shown as 0', () => {

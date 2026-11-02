@@ -58,6 +58,8 @@ const DOTS = Array.from({ length: DOT_COUNT }, (_, i) => 10 + i);
 
 interface TileGate {
   count: number;
+  /** False for a count that failed or timed out; true when left out. */
+  hasCount?: boolean;
   reachesBack: boolean | undefined;
   /** The count the tile's delta compares with; undefined when it has no delta. */
   deltaBaseline?: number;
@@ -108,6 +110,7 @@ const HOOKS: readonly HookCase[] = [
           skip,
           entityFilters,
           reachesBack: severe.reachesBack,
+          hasCount: severe.hasCount ?? true,
           severeAlertsCount: severe.count,
           watchlistedCount: watchlisted.count,
           severeAlertsBaseline: severe.deltaBaseline,
@@ -134,6 +137,7 @@ const HOOKS: readonly HookCase[] = [
           skip,
           entityFilters,
           reachesBack: tile.reachesBack,
+          hasCount: tile.hasCount ?? true,
           count: tile.count,
           deltaBaseline: tile.deltaBaseline,
         })
@@ -158,6 +162,7 @@ const HOOKS: readonly HookCase[] = [
           skip,
           entityFilters,
           reachesBack: tile.reachesBack,
+          hasCount: tile.hasCount ?? true,
           count: tile.count,
           deltaBaseline: tile.deltaBaseline,
         })
@@ -189,6 +194,8 @@ const HOOKS: readonly HookCase[] = [
           entityFilters,
           riskMoversReachesBack: riskMovers.reachesBack,
           newlyHighCriticalReachesBack: newlyHighCritical.reachesBack,
+          riskMoversHasCount: riskMovers.hasCount ?? true,
+          newlyHighCriticalHasCount: newlyHighCritical.hasCount ?? true,
           riskMoversCount: riskMovers.count,
           newlyHighCriticalCount: newlyHighCritical.count,
           riskMoversBaseline: riskMovers.deltaBaseline,
@@ -280,6 +287,15 @@ describe('series hooks', () => {
       expect(isEnabled()).toBe(true);
     });
 
+    it('leaves the lines out when the count did not come back, although a cached history reaches back', () => {
+      // The history check is cached across filter changes, so `reachesBack` can be true for a count
+      // that has since timed out; its series must not run.
+      expect(runAll(hook, { count: 0, hasCount: false, reachesBack: true })).toEqual(
+        NO_LINES(hook)
+      );
+      expect(isEnabled()).toBe(false);
+    });
+
     it('waits for the history check before it decides, with the spinner on', () => {
       const result = runAll(hook, { count: 4, reachesBack: undefined }, { isReady: false });
       expect(isEnabled()).toBe(false);
@@ -362,6 +378,24 @@ describe('series hooks', () => {
   });
 
   describe('risk', () => {
+    it('hides only the tile whose count did not come back, and runs for the other', () => {
+      mockUseQuery.mockReturnValue(queryResult({ data: RISK.toQueryData(dotsOfTiles(RISK)) }));
+      const [movers, newlyHigh] = settledTiles(RISK);
+
+      const moversNoCount = run(RISK, { tiles: [{ ...movers, hasCount: false }, newlyHigh] });
+      expect(isEnabled()).toBe(true);
+      expect(moversNoCount.trends[0]).toBeUndefined();
+      expect(moversNoCount.trends[1]?.[DOT_COUNT - 1]).toBe(newlyHigh.count);
+
+      run(RISK, {
+        tiles: [
+          { ...movers, hasCount: false },
+          { ...newlyHigh, hasCount: false },
+        ],
+      });
+      expect(isEnabled()).toBe(false);
+    });
+
     it('hides only the tile whose own history is too short, and runs while the other reaches back', () => {
       mockUseQuery.mockReturnValue(queryResult({ data: RISK.toQueryData(dotsOfTiles(RISK)) }));
       const [movers, newlyHigh] = settledTiles(RISK);

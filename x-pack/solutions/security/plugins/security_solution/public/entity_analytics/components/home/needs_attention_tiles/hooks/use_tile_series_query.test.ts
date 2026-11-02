@@ -174,7 +174,7 @@ describe('getTileTrend', () => {
 });
 
 describe('getSeriesGate', () => {
-  const ready = { isReady: true, reachesBack: true };
+  const ready = { isReady: true, reachesBack: true, hasCount: true };
 
   it('runs when everything has settled and the history reaches back, whatever the count', () => {
     expect(getSeriesGate(ready)).toEqual({ canRun: true, isHidden: false });
@@ -184,6 +184,10 @@ describe('getSeriesGate', () => {
     const hidden = { canRun: false, isHidden: true };
     expect(getSeriesGate({ ...ready, reachesBack: false })).toEqual(hidden);
     expect(getSeriesGate({ ...ready, reachesBack: undefined })).toEqual(hidden);
+  });
+
+  it('hides the line when the count did not come back, even if a cached history reaches back', () => {
+    expect(getSeriesGate({ ...ready, hasCount: false })).toEqual({ canRun: false, isHidden: true });
   });
 
   it('neither runs nor hides while the counts and the delta are still loading', () => {
