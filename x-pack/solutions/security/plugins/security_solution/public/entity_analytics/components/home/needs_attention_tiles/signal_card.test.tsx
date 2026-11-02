@@ -137,10 +137,31 @@ describe('SignalCard', () => {
     expect(screen.queryByTestId('eaFaceliftSignalCardDelta')).not.toBeInTheDocument();
   });
 
-  it('shows a spinner next to the label while the delta loads, without the badge', () => {
+  it('shows a skeleton and the progress bar while the delta loads, without the badge', () => {
     renderCard({ isDeltaLoading: true, delta: 5 });
-    expect(screen.getByTestId('eaFaceliftSignalCardDeltaLabel')).toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaSkeleton')).toHaveTextContent(
+      'vs. previous 30d'
+    );
+    expect(screen.getByTestId('eaFaceliftSignalCardProgress')).toBeInTheDocument();
     expect(screen.queryByTestId('eaFaceliftSignalCardDeltaBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveAttribute(
+      'aria-busy',
+      'true'
+    );
+  });
+
+  it('shows only the progress bar, with no line, while the sparkline loads', () => {
+    renderCard({ isTrendLoading: true, delta: 5, trend: [1, 2, 3] });
+    expect(screen.getByTestId('eaFaceliftSignalCardProgress')).toBeInTheDocument();
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaSkeleton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toBeInTheDocument();
+    expect(mockSeriesData).toBeUndefined();
+  });
+
+  it('shows no progress bar once nothing is loading', () => {
+    renderCard({ delta: 5, trend: [1, 2, 3] });
+    expect(screen.queryByTestId('eaFaceliftSignalCardProgress')).not.toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).not.toHaveAttribute('aria-busy');
   });
 
   it('says there is not enough history to compare, in place of the delta', () => {
@@ -293,12 +314,14 @@ describe('SignalCard', () => {
     expect(onToggle).toHaveBeenCalledTimes(2);
   });
 
-  it('shows a dash and a spinner while the count loads, and is not clickable', () => {
+  it('shows skeletons for the count and the change and the progress bar while the count loads, and is not clickable', () => {
     const onToggle = jest.fn();
     renderCard({ isLoading: true }, { onToggle });
     const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
 
-    expect(screen.getByTestId('eaFaceliftSignalCardLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCardCountSkeleton')).toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaSkeleton')).toBeInTheDocument();
+    expect(screen.getByTestId('eaFaceliftSignalCardProgress')).toBeInTheDocument();
     fireEvent.click(tile);
     fireEvent.keyDown(tile, { key: 'Enter' });
     expect(onToggle).not.toHaveBeenCalled();

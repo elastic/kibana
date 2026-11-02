@@ -11,7 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLoadingSpinner,
+  EuiProgress,
+  EuiSkeletonRectangle,
   EuiText,
   EuiToolTip,
   useEuiFontSize,
@@ -447,10 +448,52 @@ const NOT_AVAILABLE = i18n.translate(
   { defaultMessage: 'N/A' }
 );
 
-const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolean) => {
-  if (isLoading) {
-    return <EuiLoadingSpinner size="l" data-test-subj="eaFaceliftSignalCardLoading" />;
-  }
+/** Where the count will be while it loads. */
+const CountSkeleton: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={css`
+        margin-block-end: ${euiTheme.size.s};
+      `}
+    >
+      <EuiSkeletonRectangle
+        width={64}
+        height={28}
+        borderRadius="m"
+        contentAriaLabel="Count"
+        data-test-subj="eaFaceliftSignalCardCountSkeleton"
+      />
+    </div>
+  );
+};
+
+/** Where the change will be while it loads, with the label it will have. */
+const DeltaSkeleton: React.FC<{ label: string }> = ({ label }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: ${euiTheme.size.xs};
+        max-inline-size: 100%;
+        min-block-size: ${BADGE_HEIGHT}px;
+      `}
+      data-test-subj="eaFaceliftSignalCardDeltaSkeleton"
+    >
+      <EuiSkeletonRectangle
+        width={36}
+        height={BADGE_HEIGHT}
+        borderRadius="m"
+        contentAriaLabel="Change"
+      />
+      <DeltaLabel text={label} />
+    </span>
+  );
+};
+
+const renderValueRow = (card: SignalCardData, isZero: boolean) => {
   // A 0 without a result (failed, skipped, timed out, no access) is not a count: keep the dash.
   if (isZero && !card.hasCount) {
     return '—';
@@ -494,11 +537,19 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
     : euiTheme.colors.borderBasePlain;
 
   const { delta, trend } = card;
+  // Each part that is still loading has a skeleton or no line, and the tile gets one progress bar.
+  const isDeltaLoading = interactive && Boolean(card.isDeltaLoading);
+  const isTrendLoading = interactive && Boolean(card.isTrendLoading);
+  const showProgress = isLoading || isDeltaLoading || isTrendLoading;
   const shownDelta =
     interactive && !card.isDeltaLoading && delta !== undefined && delta !== 0 ? delta : undefined;
   // No line next to "Not enough history to compare": the short history would make it misleading.
   const shownTrend =
-    interactive && card.isDeltaUnavailable !== true && trend !== undefined && trend.length > 1
+    interactive &&
+    !showProgress &&
+    card.isDeltaUnavailable !== true &&
+    trend !== undefined &&
+    trend.length > 1
       ? trend
       : undefined;
   const showNoHistory =
@@ -533,6 +584,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
       tabIndex={canToggle ? 0 : -1}
       aria-pressed={canToggle ? selected : undefined}
       aria-disabled={!canToggle || undefined}
+      aria-busy={showProgress || undefined}
       aria-label={ariaLabel}
       data-test-subj={`eaFaceliftSignalCard-${card.id}`}
       onClick={canToggle ? onToggle : undefined}
@@ -573,6 +625,21 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
         }
       `}
     >
+      {showProgress ? (
+        <EuiProgress
+          size="xs"
+          color="primary"
+          position="absolute"
+          aria-hidden
+          data-test-subj="eaFaceliftSignalCardProgress"
+          css={css`
+            z-index: 2;
+            inset-block-start: auto;
+            inset-block-end: 0;
+            border-radius: 0;
+          `}
+        />
+      ) : null}
       {shownTrend ? (
         <div
           css={css`
@@ -663,7 +730,9 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
                 gap: ${DELTA_VALUE_GAP}px;
               `}
             >
-              {countIssue?.kind === 'locked' ? (
+              {isLoading ? (
+                <CountSkeleton />
+              ) : countIssue?.kind === 'locked' ? (
                 <EuiText size="xs" color="subdued" data-test-subj="eaFaceliftSignalCardLocked">
                   <EuiIcon
                     type="lock"
@@ -689,7 +758,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
                   `}
                   data-test-subj={countIssue ? 'eaFaceliftSignalCardUnavailable' : undefined}
                 >
-                  {countIssue ? NOT_AVAILABLE : renderValueRow(card, isLoading, isZero)}
+                  {countIssue ? NOT_AVAILABLE : renderValueRow(card, isZero)}
                 </EuiText>
               )}
               {countIssue?.kind === 'issue' ? (
@@ -700,11 +769,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
                   testSubj="eaFaceliftSignalCardCountIssue"
                 />
               ) : null}
-              {interactive && card.isDeltaLoading ? (
-                <span>
-                  <EuiLoadingSpinner size="s" /> <DeltaLabel text={vsPreviousPeriod} />
-                </span>
-              ) : null}
+              {isLoading || isDeltaLoading ? <DeltaSkeleton label={vsPreviousPeriod} /> : null}
               {shownDelta !== undefined ? (
                 <MetricTrendBadge delta={shownDelta} label={vsPreviousPeriod} />
               ) : null}
