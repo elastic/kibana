@@ -298,7 +298,7 @@ describe('series hooks', () => {
       expect(run(hook)).toEqual(NO_LINES(hook));
     });
 
-    it('sends one query and reads the dots of each tile from its own columns', async () => {
+    it('sends one query, in the local project only, and reads the dots of each tile from its own columns', async () => {
       const columns = hook.columns.flatMap((column, t) =>
         Array.from({ length: DOT_COUNT }, (_, k) => ({ name: column(k), value: 1000 * t + k }))
       );
@@ -314,8 +314,13 @@ describe('series hooks', () => {
       expect(mockUseQuery).toHaveBeenCalledTimes(1);
       const [key, queryFn] = lastCall();
       expect(key[0]).toBe(hook.tileKey);
+      const parsed = await queryFn({ signal: undefined });
+      expect(mockSearch).toHaveBeenCalledWith(
+        { params: { query: key[1] } },
+        expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+      );
       // Oldest first: the first dot is column 5 of the tile, the last is column 0.
-      hook.fromParsed(await queryFn({ signal: undefined })).forEach((dots, t) => {
+      hook.fromParsed(parsed).forEach((dots, t) => {
         expect(dots[0]).toBe(1000 * t + DOT_COUNT - 1);
         expect(dots[DOT_COUNT - 1]).toBe(1000 * t);
       });
@@ -389,28 +394,6 @@ describe('series hooks', () => {
       mockJobs.mockReturnValue({ jobIds: ['job_a'], loading: true });
       run(ANOMALIES);
       expect(isEnabled()).toBe(false);
-    });
-  });
-
-  describe('new entity', () => {
-    it('runs on the local cluster only, like the count', async () => {
-      mockSearch.mockReturnValue(
-        of({
-          rawResponse: {
-            columns: Array.from({ length: DOT_COUNT }, (_, k) => ({
-              name: NEW_ENTITY.columns[0](k),
-            })),
-            values: [Array.from({ length: DOT_COUNT }, () => 0)],
-          },
-        })
-      );
-      run(NEW_ENTITY);
-      const [key, queryFn] = lastCall();
-      await queryFn({ signal: undefined });
-      expect(mockSearch).toHaveBeenCalledWith(
-        { params: { query: key[1] } },
-        expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
-      );
     });
   });
 });
