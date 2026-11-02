@@ -37,7 +37,7 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 import { createConversationActions } from '../conversation/use_conversation_actions';
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
-import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import { isDetached, isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 import { isDisconnectError } from '../../../services/chat/reattach_on_disconnect';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
@@ -242,6 +242,11 @@ export const useSendMessageMutation = ({
           }
         });
 
+        // The connection closed because the view was unmounted, not because the run ended: skip the end-of-run handling.
+        if (isDetached(handle)) {
+          return;
+        }
+
         // The message and its attachments are persisted whether the run completed or was stopped, so reset the composer.
         vars.resetAttachments?.();
         clearActiveStream(vars.conversationId);
@@ -275,17 +280,17 @@ export const useSendMessageMutation = ({
     [chatService]
   );
 
-  const cancelAll = useCallback(() => {
-    for (const { controller, executionId } of controllersRef.current.values()) {
-      chatService.abort(executionId).catch(() => {});
+  /** Closes every connection locally; the runs keep going on the server. */
+  const detachAll = useCallback(() => {
+    for (const { controller } of controllersRef.current.values()) {
       controller.abort();
     }
-  }, [chatService]);
+  }, []);
 
   return {
     mutate,
     isLoading,
     cancel,
-    cancelAll,
+    detachAll,
   };
 };

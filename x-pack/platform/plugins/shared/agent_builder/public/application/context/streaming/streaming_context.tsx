@@ -37,7 +37,8 @@ export interface StreamingContextValue {
   mutateSendMessage: (vars: SendMessageVars) => void;
   mutateResumeRound: (vars: ResumeRoundVars) => void;
   cancelStream: (conversationId: string) => void;
-  cancelAllStreams: () => void;
+  /** Closes this UI's connections locally; the runs keep going on the server. */
+  detachAllStreams: () => void;
 }
 
 const StreamingContext = createContext<StreamingContextValue | null>(null);
@@ -119,10 +120,10 @@ export const StreamingProvider = ({
   // whole object would re-evaluate every render. The individual fields below are stable.
   const sendMutate = sendMutation.mutate;
   const sendCancel = sendMutation.cancel;
-  const sendCancelAll = sendMutation.cancelAll;
+  const sendDetachAll = sendMutation.detachAll;
   const resumeMutate = resumeMutation.mutate;
   const resumeCancel = resumeMutation.cancel;
-  const resumeCancelAll = resumeMutation.cancelAll;
+  const resumeDetachAll = resumeMutation.detachAll;
 
   const cancelStream = useCallback(
     (conversationId: string) => {
@@ -136,12 +137,12 @@ export const StreamingProvider = ({
     [sendCancel, resumeCancel]
   );
 
-  // Each mutation hook owns its own `Map<conversationId, AbortController>` ref; ask each
-  // to cancel everything it has installed.
-  const cancelAllStreams = useCallback(() => {
-    sendCancelAll();
-    resumeCancelAll();
-  }, [sendCancelAll, resumeCancelAll]);
+  // Each mutation hook owns its own `Map<conversationId, StreamHandle>` ref; ask each to close
+  // everything it has open.
+  const detachAllStreams = useCallback(() => {
+    sendDetachAll();
+    resumeDetachAll();
+  }, [sendDetachAll, resumeDetachAll]);
 
   // Wrappers around `mutate` that set the per-id `activeStreams` entry SYNCHRONOUSLY before
   // queueing the mutation, so the conversation reads as streaming (Stop, the scroll anchor) in
@@ -174,7 +175,7 @@ export const StreamingProvider = ({
       mutateSendMessage,
       mutateResumeRound,
       cancelStream,
-      cancelAllStreams,
+      detachAllStreams,
     }),
     [
       conversationStreamService,
@@ -183,7 +184,7 @@ export const StreamingProvider = ({
       mutateSendMessage,
       mutateResumeRound,
       cancelStream,
-      cancelAllStreams,
+      detachAllStreams,
     ]
   );
 
