@@ -80,6 +80,16 @@ export interface LatencyMapProps {
   /** The selection. The map is controlled: pass back what `onSelectionCommit` gives. */
   selection?: LatencyMapSelection;
   /**
+   * Whether the host filters the query to failed spans (`FAILED_SPAN_CONDITION`). With
+   * `onFailedOnlyChange`, the "Failed only" switch is the host's: the switch asks the host to
+   * write or remove that filter, a selection's condition never carries the failure clause
+   * itself, and this prop is what the switch shows. Without it, the switch is the map's own
+   * state and a selection says `failedOnly` on its own.
+   */
+  failedOnly?: boolean;
+  /** The "Failed only" switch changed, for hosts that keep the failure filter in their query. */
+  onFailedOnlyChange?: (failedOnly: boolean) => void;
+  /**
    * Called once a draw, move or resize ends, and when the selection is cleared, with the
    * selection and its ES|QL condition (both undefined on clear). The map never navigates.
    */
@@ -119,6 +129,8 @@ export function LatencyMap({
   mapFilters,
   selectionCondition,
   selection,
+  failedOnly: hostFailedOnly,
+  onFailedOnlyChange,
   onSelectionCommit,
   onCellClick,
   onStats,
@@ -173,11 +185,18 @@ export function LatencyMap({
     [stats, timeGrid, plot]
   );
 
-  const [failedOnly, setFailedOnly] = useState(Boolean(selection?.failedOnly));
+  // With `onFailedOnlyChange` the host's query filter owns the outcome and the prop is the
+  // switch; a selection whose condition still carries the failure clause (a shared URL from
+  // before the host filter) shows as failed too. Without it, the map keeps its own state.
+  const controlled = onFailedOnlyChange !== undefined;
+  const [localFailedOnly, setLocalFailedOnly] = useState(Boolean(selection?.failedOnly));
   const selectionFailedOnly = selection ? Boolean(selection.failedOnly) : undefined;
   useEffect(() => {
-    if (selectionFailedOnly !== undefined) setFailedOnly(selectionFailedOnly);
+    if (selectionFailedOnly !== undefined) setLocalFailedOnly(selectionFailedOnly);
   }, [selectionFailedOnly]);
+  const failedOnly = controlled
+    ? Boolean(hostFailedOnly || selection?.failedOnly)
+    : localFailedOnly;
   // Once the user chooses an outcome with the switch, a drawn region keeps it: the failure
   // inference below only speaks while the user has not.
   const outcomeChosen = useRef(false);
@@ -246,9 +265,16 @@ export function LatencyMap({
   const selectedCounts = useMemo(
     () =>
       grid && timeGrid && stats && selection
-        ? getSelectionCounts({ grid, timeGrid, stats, selection })
+        ? getSelectionCounts({
+            grid,
+            timeGrid,
+            stats,
+            // Under a host's failure filter the selection condition does not say failed
+            // itself, but the query returns failed spans alone, and so must the counts.
+            selection: failedOnly ? { ...selection, failedOnly: true } : selection,
+          })
         : { spans: 0, failed: 0, estimated: false },
-    [grid, timeGrid, stats, selection]
+    [grid, timeGrid, stats, selection, failedOnly]
   );
 
   // Stable, so renders that change nothing of the chart do not reach the memoized heatmap.
@@ -257,16 +283,31 @@ export function LatencyMap({
       if (!geometry) return;
       const range = clampRange(requested, geometry.bins, geometry.rows);
       if (selection && committedRange && isSameRange(range, committedRange)) return;
-      let next = geometry.rangeToSelection(range, failedOnly);
+      // With a host filter the failure clause is the host's, never the selection's.
+      let next = geometry.rangeToSelection(range, controlled ? undefined : failedOnly);
       // A region where failures concentrate is about them: the selection says so on its
       // own, as long as the user has not chosen an outcome with the switch.
       if (!failedOnly && !outcomeChosen.current && grid && timeGrid && stats) {
         const counts = getSelectionCounts({ grid, timeGrid, stats, selection: next });
-        if (isFailureRegion(counts, getGridTotals(grid))) next = { ...next, failedOnly: true };
+        if (isFailureRegion(counts, getGridTotals(grid))) {
+          if (controlled) onFailedOnlyChange?.(true);
+          else next = { ...next, failedOnly: true };
+        }
       }
       commit(label ? { ...next, label } : next);
     },
-    [geometry, selection, committedRange, commit, failedOnly, grid, timeGrid, stats]
+    [
+      geometry,
+      selection,
+      committedRange,
+      commit,
+      failedOnly,
+      controlled,
+      onFailedOnlyChange,
+      grid,
+      timeGrid,
+      stats,
+    ]
   );
 
   const clickCell = useCallback(
@@ -338,7 +379,14 @@ export function LatencyMap({
 
   const changeFailedOnly = (next: boolean) => {
     outcomeChosen.current = true;
-    setFailedOnly(next);
+    if (controlled) {
+      onFailedOnlyChange?.(next);
+      // The host filter owns the outcome now: a selection condition still carrying the
+      // failure clause of its own (a shared URL from before) is normalized out of it.
+      if (selection?.failedOnly) commit(withoutFailedOnly(selection));
+      return;
+    }
+    setLocalFailedOnly(next);
     if (selection) {
       commit(next ? { ...selection, failedOnly: true } : withoutFailedOnly(selection));
     }
@@ -592,6 +640,7 @@ export function LatencyMap({
             selection={selection}
             spans={selectedCounts.spans}
             failed={selectedCounts.failed}
+            failedOnly={failedOnly}
             unit={unit}
             sampled={sampled || selectedCounts.estimated}
             timeZone={timeZone}

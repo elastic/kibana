@@ -13,7 +13,13 @@ import { EuiPanel } from '@elastic/eui';
 import { appendToESQLQuery, getESQLResults } from '@kbn/esql-utils';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { LatencyMap, isSelectionCondition, parseSelectionCondition } from '@kbn/trace-latency-map';
+import {
+  FAILED_SPAN_CONDITION,
+  LatencyMap,
+  isFailedOnlyCondition,
+  isSelectionCondition,
+  parseSelectionCondition,
+} from '@kbn/trace-latency-map';
 import type { LatencyMapCell, LatencyMapSelection, RunEsql } from '@kbn/trace-latency-map';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { extractFilters } from '../../../utils';
@@ -48,9 +54,12 @@ export function TracesLatencyMapView({
   const { updateESQLQuery, setExpandedDoc } = actions;
   const selectionClause = filters.find(isSelectionCondition);
   const selection = selectionClause ? parseSelectionCondition(selectionClause) : undefined;
+  const failedOnly = filters.some(isFailedOnlyCondition);
 
+  // The map reads the query without its own clauses: the whole range, failed and not, so it
+  // can paint "failed only" from the counts it has and show what a selection would catch.
   const baseFilters = useMemo(
-    () => filters.filter((filter) => filter !== selectionClause),
+    () => filters.filter((filter) => filter !== selectionClause && !isFailedOnlyCondition(filter)),
     [filters, selectionClause]
   );
   const source = useStableTraceSource({ indexPattern, filters: baseFilters, timeFrom, timeTo });
@@ -86,6 +95,23 @@ export function TracesLatencyMapView({
         return esqlCondition
           ? appendToESQLQuery(withoutSelection, `| WHERE ${esqlCondition}`)
           : withoutSelection;
+      });
+    },
+    [updateESQLQuery]
+  );
+
+  // The "Failed only" switch is a filter of the query itself, like the selection: the
+  // documents table follows it, it survives a reload and a shared link carries it.
+  const changeFailedOnly = useCallback(
+    (next: boolean) => {
+      updateESQLQuery?.((query) => {
+        // Found in the query being updated, not in the rendered props, as in commitSelection.
+        const withoutFailedOnly = extractFilters(query)
+          .filter(isFailedOnlyCondition)
+          .reduce(removeWhere, query);
+        return next
+          ? appendToESQLQuery(withoutFailedOnly, `| WHERE ${FAILED_SPAN_CONDITION}`)
+          : withoutFailedOnly;
       });
     },
     [updateESQLQuery]
@@ -148,6 +174,8 @@ export function TracesLatencyMapView({
         source={source}
         runEsql={runEsql}
         selection={selection}
+        failedOnly={failedOnly}
+        onFailedOnlyChange={changeFailedOnly}
         onSelectionCommit={commitSelection}
         onCellClick={setExpandedDoc ? openExampleSpan : undefined}
         timeZone={timeZone}

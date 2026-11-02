@@ -709,6 +709,77 @@ describe('LatencyMap', () => {
     });
   });
 
+  describe('with a host failure filter', () => {
+    it('asks the host to change the filter instead of flipping the switch itself', async () => {
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ failedOnly: false, onFailedOnlyChange });
+      await waitForChart();
+      fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+      expect(onFailedOnlyChange).toHaveBeenCalledWith(true);
+      expect(onSelectionCommit).not.toHaveBeenCalled();
+      // The switch shows the host's filter, which has not come back yet.
+      expect(screen.getByTestId('traceLatencyMapFailedOnly')).not.toBeChecked();
+    });
+
+    it('paints the failed spans alone while the filter is on', async () => {
+      renderMap({ failedOnly: true, onFailedOnlyChange: jest.fn() });
+      await waitForChart();
+      expect(screen.getByTestId('traceLatencyMapFailedOnly')).toBeChecked();
+      expect(
+        mockChart.heatmap.data.filter((datum: { spans: number }) => datum.spans > 0)
+      ).toHaveLength(2);
+    });
+
+    it('commits a selection without the failure clause: the host filter carries it', async () => {
+      const { onSelectionCommit } = renderMap({
+        failedOnly: true,
+        onFailedOnlyChange: jest.fn(),
+      });
+      await waitForChart();
+      brush([3, 5], [5]);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+
+    it('turns on the host filter for a region where failures concentrate', async () => {
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ failedOnly: false, onFailedOnlyChange });
+      await waitForChart();
+      brush([30, 31], [20]);
+      expect(onFailedOnlyChange).toHaveBeenCalledWith(true);
+      const [selection, condition] = onSelectionCommit.mock.calls[0];
+      expect(selection.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+
+    it('counts the failed spans of a selection under the filter and says failed only', async () => {
+      const selection = geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 });
+      renderMap({ selection, failedOnly: true, onFailedOnlyChange: jest.fn() });
+      const summary = await screen.findByTestId('traceLatencyMapSelectionSummary');
+      expect(summary).toHaveTextContent('10 spans');
+      expect(summary).toHaveTextContent('failed only');
+    });
+
+    it('normalizes a selection that carries its own failure clause when the switch changes', async () => {
+      // A selection from before the host filter (a shared URL): its condition says failed.
+      const selection = {
+        ...geometry.rangeToSelection({ x0: 3, x1: 5, y0: 5, y1: 6 }),
+        failedOnly: true,
+      };
+      const onFailedOnlyChange = jest.fn();
+      const { onSelectionCommit } = renderMap({ selection, failedOnly: false, onFailedOnlyChange });
+      await screen.findByTestId('traceLatencyMapSelectionBar');
+      // The legacy clause shows as failed even though the host filter is off.
+      expect(screen.getByTestId('traceLatencyMapFailedOnly')).toBeChecked();
+      fireEvent.click(screen.getByTestId('traceLatencyMapFailedOnly'));
+      expect(onFailedOnlyChange).toHaveBeenCalledWith(false);
+      const [next, condition] = onSelectionCommit.mock.calls[0];
+      expect(next.failedOnly).toBeUndefined();
+      expect(condition).not.toContain('event.outcome');
+    });
+  });
+
   describe('with the keyboard', () => {
     const press = (layer: HTMLElement, key: string, shiftKey = false) =>
       fireEvent.keyDown(layer, { key, shiftKey });

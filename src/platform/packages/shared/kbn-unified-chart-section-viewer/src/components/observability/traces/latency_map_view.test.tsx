@@ -10,7 +10,11 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { getESQLResults } from '@kbn/esql-utils';
-import { LatencyMap, selectionToEsqlCondition } from '@kbn/trace-latency-map';
+import {
+  FAILED_SPAN_CONDITION,
+  LatencyMap,
+  selectionToEsqlCondition,
+} from '@kbn/trace-latency-map';
 import type { LatencyMapProps } from '@kbn/trace-latency-map';
 import { TracesLatencyMapView } from './latency_map_view';
 import type { TracesLatencyMapViewProps } from './latency_map_view';
@@ -114,6 +118,50 @@ describe('TracesLatencyMapView', () => {
     expect(updater(`FROM traces-apm*\n| WHERE ${selectionClause}`)).toBe(
       `FROM traces-apm*\n| WHERE ${nextCondition}`
     );
+  });
+
+  it('reads the failure filter from the query and keeps it out of the map source', () => {
+    const { mapProps } = renderView({
+      filters: ['service.name == "cart"', FAILED_SPAN_CONDITION, selectionClause],
+    });
+    expect(mapProps.failedOnly).toBe(true);
+    expect(mapProps.selection).toEqual(selection);
+    // The map still reads the whole range: it paints "failed only" from the counts it has.
+    expect(mapProps.source.filters).toEqual(['service.name == "cart"']);
+  });
+
+  it('writes the failure filter into the query when the switch goes on, and removes it after', () => {
+    const { actions, mapProps } = renderView();
+    expect(mapProps.failedOnly).toBe(false);
+
+    mapProps.onFailedOnlyChange!(true);
+    let updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    const withFilter = updater('FROM traces-apm*');
+    expect(withFilter).toBe(`FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`);
+
+    mapProps.onFailedOnlyChange!(false);
+    updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    expect(updater(withFilter)).toBe('FROM traces-apm*');
+  });
+
+  it('replaces a failure filter already in the query rather than stacking another', () => {
+    const { actions, mapProps } = renderView();
+    mapProps.onFailedOnlyChange!(true);
+    const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    expect(updater(`FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`)).toBe(
+      `FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`
+    );
+  });
+
+  it('leaves the failure filter in place when the selection changes or clears', () => {
+    const { actions, mapProps } = renderView({
+      filters: ['service.name == "cart"', FAILED_SPAN_CONDITION, selectionClause],
+    });
+    mapProps.onSelectionCommit(undefined, undefined);
+    const updater = actions.updateESQLQuery.mock.lastCall?.[0] as (query: string) => string;
+    expect(
+      updater(`FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}\n| WHERE ${selectionClause}`)
+    ).toBe(`FROM traces-apm*\n| WHERE ${FAILED_SPAN_CONDITION}`);
   });
 
   it('opens the newest span of a clicked cell in the document flyout', async () => {

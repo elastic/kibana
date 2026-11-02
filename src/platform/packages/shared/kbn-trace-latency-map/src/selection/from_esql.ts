@@ -68,3 +68,12 @@ export function parseSelectionCondition(condition: string): LatencyMapSelection 
 export function isSelectionCondition(condition: string): boolean {
   return parseSelectionCondition(condition) !== undefined;
 }
+
+/**
+ * Whether a clause is the failed-spans condition a host writes for the map's "Failed only"
+ * switch (`FAILED_SPAN_CONDITION`). Exact, like `isSelectionCondition`: a hand-edited clause
+ * stays an ordinary filter of the host's query.
+ */
+export function isFailedOnlyCondition(condition: string): boolean {
+  return condition === FAILED_SPAN_CONDITION;
+}
