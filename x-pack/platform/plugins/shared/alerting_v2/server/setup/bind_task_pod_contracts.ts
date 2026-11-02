@@ -10,7 +10,6 @@ import { OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
 import { POD_CONTRACT_PREFIX } from '../pod_contracts';
 import { createAlertStatusChangedHandlers } from '../pod_contracts/alert_status_changed';
 import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
-import { createEncryptedSavedObjectsHandlers } from '../pod_contracts/encrypted_saved_objects';
 import {
   createWorkflowsExtensionsHandlers,
   createWorkflowsManagementHandlers,
@@ -37,10 +36,6 @@ export function bindTaskPodContracts({ bind }: ContainerModuleLoadOptions) {
     taskManager.registerPodContract(
       `${POD_CONTRACT_PREFIX}.alertStatusChanged`,
       createAlertStatusChangedHandlers(() => container.get(AlertStatusChangedOptIns))
-    );
-    taskManager.registerPodContract(
-      `${POD_CONTRACT_PREFIX}.encryptedSavedObjects`,
-      createEncryptedSavedObjectsHandlers(start('encryptedSavedObjects') as never)
     );
     taskManager.registerPodContract(
       `${POD_CONTRACT_PREFIX}.workflowsExtensions`,

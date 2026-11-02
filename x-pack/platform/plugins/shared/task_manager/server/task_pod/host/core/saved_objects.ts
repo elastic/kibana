@@ -10,6 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { POD_KIBANA_VERSION } from '../version';
 
@@ -32,6 +33,11 @@ const importSavedObjectsInternals = async (): Promise<SavedObjectsInternals> => 
 
 /** The Kibana version this bundle was built against; only used for migration bookkeeping. */
 const KIBANA_VERSION = POD_KIBANA_VERSION;
+
+type EncryptionExtensionFactory = (params: {
+  typeRegistry: ISavedObjectTypeRegistry;
+  request: KibanaRequest;
+}) => unknown;
 
 // Index of the options argument (where `namespace` goes) per repository method.
 const NAMESPACE_OPTION_ARG: Record<string, number> = {
@@ -97,8 +103,17 @@ export class PodSavedObjects {
   private readonly repositories = new Map<string, ISavedObjectsRepository>();
   private client?: Client;
   private logger?: Logger;
+  private encryptionExtensionFactory?: EncryptionExtensionFactory;
 
   public readonly setup = {
+    /**
+     * Like Core's: the Encrypted Saved Objects plugin hands over the extension that encrypts and
+     * decrypts attributes. It applies to request-scoped clients, as in Kibana; the internal
+     * repository stays plain and decryption is explicit through the ESO client.
+     */
+    setEncryptionExtension: (factory: EncryptionExtensionFactory) => {
+      this.encryptionExtensionFactory = factory;
+    },
     registerType: (type: RegisteredType) => {
       if (this.internals) {
         throw new Error(`Saved object type '${type.name}' registered after setup`);
@@ -130,7 +145,15 @@ export class PodSavedObjects {
         options?: { includedHiddenTypes?: string[] }
       ) =>
         scopeToSpace(
-          this.getRepository(options?.includedHiddenTypes),
+          this.getRepository(
+            options?.includedHiddenTypes,
+            this.encryptionExtensionFactory && {
+              encryptionExtension: this.encryptionExtensionFactory({
+                typeRegistry: this.getTypeRegistry(),
+                request,
+              }),
+            }
+          ),
           request.spaceId ?? 'default'
         ),
     };
@@ -145,10 +168,14 @@ export class PodSavedObjects {
     return this.typeRegistry;
   }
 
-  private getRepository(includedHiddenTypes?: string[]): ISavedObjectsRepository {
+  private getRepository(
+    includedHiddenTypes?: string[],
+    extensions?: Record<string, unknown>
+  ): ISavedObjectsRepository {
     const hidden = (includedHiddenTypes ?? []).slice().sort();
     const key = hidden.join(',');
-    const existing = this.repositories.get(key);
+    // Repositories with per-request extensions are not shared.
+    const existing = extensions ? undefined : this.repositories.get(key);
     if (existing) return existing;
     if (!this.client || !this.logger) throw new Error('Saved objects are not started');
 
@@ -178,9 +205,10 @@ export class PodSavedObjects {
       '.kibana',
       this.client as never,
       this.logger,
-      hidden
+      hidden,
+      extensions as never
     );
-    this.repositories.set(key, repository);
+    if (!extensions) this.repositories.set(key, repository);
     return repository;
   }
 }

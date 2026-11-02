@@ -11,8 +11,9 @@
  * Kibana-side handlers registered with Task Manager's `registerPodContract`. Ids are namespaced
  * with this plugin so another task owner can register its own view of the same plugin.
  *
- * These cover only the members alerting v2's tasks use. They are owned here because the plugins
- * behind them (workflows lives under `src/`, which cannot reference x-pack Task Manager) cannot ship
- * a pod contract themselves yet; once a shared package for pod authoring exists, each owner should.
+ * These cover only the members alerting v2's tasks use (workflows and alert status change
+ * opt-ins). They are owned here because the plugins behind them (workflows lives under `src/`, which
+ * cannot reference x-pack Task Manager) cannot ship a pod contract themselves yet; once a shared
+ * package for pod authoring exists, each owner should.
  */
 export const POD_CONTRACT_PREFIX = 'alertingVTwo';

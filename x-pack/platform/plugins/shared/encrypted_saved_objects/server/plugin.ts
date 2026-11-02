@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import nodeCrypto from '@elastic/node-crypto';
 import { createHash } from 'crypto';
 
 import type {
@@ -28,6 +27,7 @@ import {
   EncryptionError,
   EncryptionKeyRotationService,
 } from './crypto';
+import { createCryptos } from './crypto/create_cryptos';
 import { defineRoutes } from './routes';
 import type { ClientInstanciator } from './saved_objects';
 import { SavedObjectsEncryptionExtension, setupSavedObjects } from './saved_objects';
@@ -98,12 +98,7 @@ export class EncryptedSavedObjectsPlugin
       );
     }
 
-    const primaryCrypto = config.encryptionKey
-      ? nodeCrypto({ encryptionKey: config.encryptionKey })
-      : undefined;
-    const decryptionOnlyCryptos = config.keyRotation.decryptionOnlyKeys.map((decryptionKey) =>
-      nodeCrypto({ encryptionKey: decryptionKey })
-    );
+    const { primaryCrypto, decryptionOnlyCryptos } = createCryptos(config);
 
     this.#service = Object.freeze(
       new EncryptedSavedObjectsService({

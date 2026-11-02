@@ -13,10 +13,10 @@ import { podPlugins as spacesPodPlugins } from '@kbn/spaces-plugin/server/task_p
 import { podPlugins as eventLogPodPlugins } from '@kbn/event-log-plugin/server/task_pod';
 import { ContainerModule } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
+import { podPlugins as encryptedSavedObjectsPodPlugins } from '@kbn/encrypted-saved-objects-plugin/server/task_pod';
 import { AlertStatusChangedOptIns } from './lib/alert_status_changed';
 import { configSchema } from './config';
 import { RemoteAlertStatusChangedOptIns } from './pod_contracts/alert_status_changed';
-import { encryptedSavedObjectsPodPlugin } from './pod_contracts/encrypted_saved_objects';
 import {
   workflowsExtensionsPodPlugin,
   workflowsManagementPodPlugin,
@@ -66,7 +66,7 @@ export const podPlugins = [
   ...licensingPodPlugins,
   ...maintenanceWindowsPodPlugins,
   ...eventLogPodPlugins,
-  encryptedSavedObjectsPodPlugin,
+  ...encryptedSavedObjectsPodPlugins,
   workflowsExtensionsPodPlugin,
   workflowsManagementPodPlugin,
 ];

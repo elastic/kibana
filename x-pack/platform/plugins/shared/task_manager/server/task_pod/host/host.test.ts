@@ -27,6 +27,7 @@ import {
 } from '../../task_running/errors';
 import { definePodPlugin } from './define_pod_plugin';
 import { callKibana } from './remote';
+import { createHttpStart } from './core/small_services';
 import { bootPod, sortPlugins } from './plugin_system';
 import { startPodServer } from './server';
 
@@ -289,6 +290,22 @@ describe('task pod host', () => {
       expect(error.message).toContain('503');
       expect(isRetryableError(error)).toBeTruthy();
       await first;
+    });
+  });
+
+  describe('Core http in a pod', () => {
+    test('exposes the public base URL and base path from the kibana.yml server keys', () => {
+      const http = createHttpStart({
+        server: { publicBaseUrl: 'https://kibana.example', basePath: '/kbn' },
+      });
+      expect(http.basePath.publicBaseUrl).toBe('https://kibana.example');
+      expect(http.basePath.prepend('/app')).toBe('/kbn/app');
+    });
+
+    test('falls back to Kibana-like server defaults', () => {
+      const http = createHttpStart({});
+      expect(http.basePath.publicBaseUrl).toBeUndefined();
+      expect(http.getServerInfo()).toMatchObject({ hostname: 'localhost', port: 5601 });
     });
   });
 

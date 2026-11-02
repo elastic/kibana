@@ -72,22 +72,28 @@ dependency with neither is a boot error, never a silent stub.
 
 ## Remote contracts
 
-For a contract that belongs to another plugin's domain (the event log, encrypted saved objects,
-workflows), the pod calls back into Kibana:
+For a contract that belongs to another plugin's domain and is heavyweight logic that only Kibana
+runs (workflows, UIAM key invalidation), the pod calls back into Kibana:
 
 - Pod: `callKibana(pluginId, method, args)`, or `remoteContract(...)`.
 - Kibana: `taskManager.registerPodContract(pluginId, { method: (ctx, ...args) => ... })`. Only
   registered methods are callable, and only while the run that was handed the token is in flight.
 - A `KibanaRequest` argument is sent as its `authorization` header, space, user and UIAM verdict and
   rebuilt in Kibana, so a request built from other credentials keeps its own identity.
-- The pod holds no encryption key: decryption is a remote contract.
 - `podContract(pluginId, provided)` assembles a contract from the members that work in a pod; any
   other member throws when called.
 
-A dependency is remote only if it needs a secret Kibana holds (encrypted saved objects) or is
-heavyweight logic owned by another plugin (workflows). Anything that only talks to Elasticsearch
-(spaces, licensing, the event log, security key invalidation) is local: no round trip, and the pod
-keeps working if the callback is slow.
+A dependency is remote only if it is heavyweight logic owned by another plugin (workflows) or state
+that lives in Kibana's memory (alert status change opt-ins). Anything that only talks to
+Elasticsearch (spaces, licensing, the event log, security key invalidation) is local: no round trip,
+and the pod keeps working if the callback is slow.
+
+**Encrypted saved objects are local too.** The ESO plugin ships a pod plugin
+(`encrypted_saved_objects/server/task_pod.ts`) with the same service, client and encryption
+extension, so a task decrypts without calling Kibana. The pod's config (`POD_CONFIG`, a yml with
+kibana.yml keys) needs the same `xpack.encryptedSavedObjects.encryptionKey` (and
+`keyRotation.decryptionOnlyKeys`) as Kibana, or decryption fails. A pod that holds the key can
+decrypt any encrypted saved object, so give it only to pods that run on a trusted network.
 
 Import what a pod needs from small packages (`@kbn/core-saved-objects-utils-server`, not
 `@kbn/core/server`) and subpaths (`@kbn/task-manager-plugin/server/task_helpers`). The build fails if

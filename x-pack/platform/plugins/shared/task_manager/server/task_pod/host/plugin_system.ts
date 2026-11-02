@@ -17,6 +17,7 @@ import { POD_KIBANA_VERSION } from './version';
 import {
   createAnalytics,
   createFeatureFlagsStart,
+  createHttpStart,
   createSecurityStart,
   createUiSettings,
   createUserProfileStart,
@@ -213,6 +214,7 @@ export const bootPod = async ({
       elasticsearch.internalClient,
       rootLogger.get('savedObjects') as never
     ),
+    http: createHttpStart(config),
     security: createSecurityStart(),
     userProfile: createUserProfileStart(),
     featureFlags: createFeatureFlagsStart(),

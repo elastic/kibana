@@ -103,3 +103,31 @@ export const createAnalytics = () => ({
   },
   start: { reportEvent: () => undefined, telemetryCounter$: of() },
 });
+
+/**
+ * The slice of Core's HTTP start a task uses to build links back to Kibana. A pod serves no Kibana
+ * routes, so it takes the same `server.*` keys Kibana's config has: set `server.publicBaseUrl` to
+ * how users reach Kibana, or the URL falls back to `server.host`/`server.port` like Kibana's own.
+ */
+export const createHttpStart = (config: Record<string, unknown>) => {
+  const server = ((config.server as Record<string, unknown> | undefined) ?? {}) as {
+    publicBaseUrl?: string;
+    basePath?: string;
+    host?: string;
+    port?: number;
+  };
+  const serverBasePath = server.basePath ?? '';
+  return {
+    basePath: {
+      publicBaseUrl: server.publicBaseUrl,
+      serverBasePath,
+      prepend: (path: string) => `${serverBasePath}${path}`,
+    },
+    getServerInfo: () => ({
+      name: 'kibana',
+      protocol: 'http' as const,
+      hostname: server.host ?? 'localhost',
+      port: server.port ?? 5601,
+    }),
+  };
+};

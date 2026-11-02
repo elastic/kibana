@@ -8,6 +8,7 @@
     "integration_tests/**/*"
   ],
   "kbn_references": [
+    "@kbn/task-manager-plugin",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/utility-types",

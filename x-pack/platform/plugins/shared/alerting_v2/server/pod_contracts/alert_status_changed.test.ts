@@ -6,8 +6,11 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { Container } from 'inversify';
 import { callKibana } from '@kbn/task-manager-plugin/server/task_pod';
 import { createLoggerService } from '../lib/services/logger_service/logger_service.mock';
+import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
+import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
 import {
   RemoteAlertStatusChangedOptIns,
@@ -53,6 +56,27 @@ describe('alert status changed pod contract', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('in the pod container', () => {
+    it('is built by dependency injection with the logger, like the class it replaces', async () => {
+      const { loggerService } = createLoggerService();
+      const container = new Container();
+      container.bind(LoggerServiceToken).toConstantValue(loggerService);
+      container.bind(AlertStatusChangedOptIns).toSelf().inSingletonScope();
+      container.unbind(AlertStatusChangedOptIns);
+      container
+        .bind(AlertStatusChangedOptIns)
+        .to(RemoteAlertStatusChangedOptIns)
+        .inSingletonScope();
+      // A failing call goes through the injected logger, which is what a missing injection breaks.
+      callKibanaMock.mockRejectedValue(new Error('kibana is down'));
+
+      const optIns = container.get(AlertStatusChangedOptIns);
+
+      expect(optIns).toBeInstanceOf(RemoteAlertStatusChangedOptIns);
+      await expect(optIns.isEnabled(request)).resolves.toBe(false);
     });
   });
 

@@ -8,8 +8,12 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PodContractHandlers } from '@kbn/task-manager-plugin/server';
 import { callKibana } from '@kbn/task-manager-plugin/server/task_pod';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../lib/services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
 import { POD_CONTRACT_PREFIX } from '.';
 
@@ -22,6 +26,11 @@ const CONTRACT = `${POD_CONTRACT_PREFIX}.alertStatusChanged`;
  */
 @injectable()
 export class RemoteAlertStatusChangedOptIns extends AlertStatusChangedOptIns {
+  // Inversify does not inherit the parent's constructor injection, so it is repeated here.
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    super(loggerService);
+  }
+
   public async isEnabled(request: KibanaRequest): Promise<boolean> {
     try {
       return Boolean(await callKibana<boolean>(CONTRACT, 'isEnabled', [request]));

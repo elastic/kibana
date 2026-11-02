@@ -7,20 +7,19 @@
 
 import pMap from 'p-map';
 
-import {
-  type ISavedObjectsPointInTimeFinder,
-  type ISavedObjectsRepository,
-  type ISavedObjectTypeRegistry,
-  type Logger,
-  type SavedObject,
-  type SavedObjectsBaseOptions,
-  type SavedObjectsCreatePointInTimeFinderDependencies,
-  type SavedObjectsCreatePointInTimeFinderOptions,
-  SavedObjectsErrorHelpers,
-  type SavedObjectsServiceSetup,
-  type StartServicesAccessor,
+import type {
+  ISavedObjectsPointInTimeFinder,
+  ISavedObjectsRepository,
+  ISavedObjectTypeRegistry,
+  Logger,
+  SavedObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsCreatePointInTimeFinderDependencies,
+  SavedObjectsCreatePointInTimeFinderOptions,
+  SavedObjectsServiceSetup,
+  StartServicesAccessor,
 } from '@kbn/core/server';
-import { errorContent } from '@kbn/core-saved-objects-server';
+import { errorContent, SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
