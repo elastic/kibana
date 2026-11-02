@@ -10,7 +10,12 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { setNodeLabel, type GraphDispatch } from '../../state_management';
+import {
+  groupSelectedNodes,
+  setNodeLabel,
+  type GraphDispatch,
+  ungroupNode,
+} from '../../state_management';
 import type { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
@@ -34,10 +39,10 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
   });
 
   const onGroupButtonClick = () => {
-    workspace.groupSelections(selectedNode);
+    dispatch(groupSelectedNodes(selectedNode.id));
   };
   const onClickUngroup = () => {
-    workspace.ungroup(selectedNode);
+    dispatch(ungroupNode(selectedNode.id));
   };
   const onChangeSelectedVertexLabel = (event: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setNodeLabel({ nodeId: selectedNode.id, label: event.target.value }));
