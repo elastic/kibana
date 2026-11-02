@@ -104,9 +104,9 @@ describe('createSandboxAllowlistClient', () => {
   it('throws SandboxAllowlistValidationError without writing when any entry is invalid', async () => {
     const { client, request, soClient } = setup();
 
-    await expect(
-      client.replace(request, { hosts: ['api.github.com', '*.com'] })
-    ).rejects.toThrow(SandboxAllowlistValidationError);
+    await expect(client.replace(request, { hosts: ['api.github.com', '*.com'] })).rejects.toThrow(
+      SandboxAllowlistValidationError
+    );
     expect(soClient.create).not.toHaveBeenCalled();
   });
 
