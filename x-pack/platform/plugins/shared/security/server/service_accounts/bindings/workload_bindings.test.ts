@@ -524,6 +524,86 @@ describe('ServiceAccountWorkloadBindings', () => {
     });
   });
 
+  describe('#getServiceAccountSummary', () => {
+    const summary = {
+      id: 'service-account-id',
+      name: 'Nightshift relay',
+      enabled: true,
+      assumable: true,
+    };
+
+    beforeEach(() => {
+      backend.getSummary.mockResolvedValue(summary);
+    });
+
+    it('names the account of the verified binding, scoped to the plugin Core supplied', async () => {
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
+      ).resolves.toEqual(summary);
+      expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
+      expect(backend.getSummary).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('names the account when it is the one the caller expected', async () => {
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, {
+          ...WORKLOAD_IN_SPACE,
+          expectedServiceAccountId: 'service-account-id',
+        })
+      ).resolves.toEqual(summary);
+      expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
+    });
+
+    it('resolves `null` without reading an account when the workload is unbound', async () => {
+      store.getVerified.mockResolvedValue(null);
+
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
+      ).resolves.toBeNull();
+      expect(backend.getSummary).not.toHaveBeenCalled();
+    });
+
+    // A past run records the account it ran as. Once the workload is bound to another, the summary
+    // must not name either: the recorded id is not one Core verified.
+    it('resolves `null` without reading an account when the binding names another one', async () => {
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, {
+          ...WORKLOAD_IN_SPACE,
+          expectedServiceAccountId: 'another-account',
+        })
+      ).resolves.toBeNull();
+      expect(backend.getSummary).not.toHaveBeenCalled();
+    });
+
+    it('resolves `null` when the bound account no longer exists', async () => {
+      backend.getSummary.mockResolvedValue(null);
+
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
+      ).resolves.toBeNull();
+    });
+
+    it('propagates a binding that fails its integrity check', async () => {
+      const error = new Error('failed integrity verification');
+      store.getVerified.mockRejectedValue(error);
+
+      await expect(bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)).rejects.toBe(
+        error
+      );
+      expect(backend.getSummary).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(store.getVerified).not.toHaveBeenCalled();
+      expect(backend.getSummary).not.toHaveBeenCalled();
+    });
+  });
+
   describe('#withScopedRequest', () => {
     it('rejects a rebind between the consumer lookup and credential creation', async () => {
       const original = await bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE);

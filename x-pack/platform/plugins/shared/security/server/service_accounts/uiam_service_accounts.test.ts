@@ -994,6 +994,7 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
       ).rejects.toMatchObject({ output: { statusCode: 404 } });
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('propagates any other UIAM refusal unchanged', async () => {
@@ -1003,6 +1004,7 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.get(createMockRequest('Bearer essu_my_token'), 'service-account-id')
       ).rejects.toBe(refusal);
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
 
     it('answers 404 for an account UIAM still holds but has revoked', async () => {
@@ -1052,6 +1054,7 @@ describe('UiamServiceAccounts', () => {
       mockUiam.getServiceAccount.mockRejectedValue(uiamRefusal('0xEDF789', 403));
 
       await expect(serviceAccounts.getSummary('service-account-id')).resolves.toBeNull();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('resolves `null` for an account UIAM still holds but has revoked', async () => {

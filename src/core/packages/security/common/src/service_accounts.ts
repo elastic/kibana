@@ -116,6 +116,16 @@ export interface ServiceAccountBoundWorkload {
   href?: string;
 }
 
+/** Parameters for naming the account a workload is bound to, optionally pinned to one. @public */
+export interface ServiceAccountWorkloadSummaryParams extends ServiceAccountWorkloadCoordinates {
+  /**
+   * Resolve `null` if the verified binding points to another account. Pass the account a past run
+   * of the workload recorded, so that the summary names that account only while the workload is
+   * still bound to it.
+   */
+  expectedServiceAccountId?: string;
+}
+
 /** Parameters for minting credentials for a workload, optionally pinned to an account. @public */
 export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkloadCoordinates {
   /** Reject before minting if the verified binding points to another account. */
@@ -170,12 +180,17 @@ export interface ServiceAccountSummary {
   id: string;
   /** See {@link ServiceAccount.name}. */
   name: string;
-  /** Whether the account can authenticate. */
+  /**
+   * Whether the account can authenticate. Always `true` on Serverless for now, because UIAM does
+   * not yet report whether an account is disabled.
+   */
   enabled: boolean;
   /**
-   * Whether this Kibana holds a credential for the account. It is not confirmed against the
-   * account's identity provider, so it can be stale for an account that was deleted and recreated
-   * outside Kibana.
+   * Whether this Kibana expects to be able to run as the account, judged without asking the
+   * account's identity provider. On Elasticsearch, that means Kibana holds a credential for it,
+   * which can be stale for an account that was deleted and recreated outside Kibana. On
+   * Serverless, it is always `true`, because UIAM only returns accounts that this project may
+   * assume.
    */
   assumable: boolean;
 }

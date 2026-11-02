@@ -82,7 +82,7 @@ describe('getDefaultSecurityImplementation', () => {
       'bindWorkload',
       'unbindWorkload',
       'getWorkloadBinding',
-      'getServiceAccountSummary',
+      'getWorkloadServiceAccountSummary',
       'withScopedRequestForWorkload',
     ] as const)('%s rejects', async (method) => {
       await expect(

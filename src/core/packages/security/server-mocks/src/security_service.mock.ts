@@ -35,7 +35,7 @@ const createServiceAccountsStartMock = (): jest.MockedObjectDeep<CoreServiceAcco
     bindWorkload: jest.fn(),
     unbindWorkload: jest.fn(),
     getWorkloadBinding: jest.fn().mockResolvedValue(null),
-    getServiceAccountSummary: jest.fn().mockResolvedValue(null),
+    getWorkloadServiceAccountSummary: jest.fn().mockResolvedValue(null),
     withScopedRequestForWorkload: jest.fn(),
   });
 

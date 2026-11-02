@@ -42,7 +42,7 @@ import {
   ES_SERVICE_ACCOUNT_ROLE_NAME_MAX_LENGTH,
 } from './es_role_limits';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
-import { parseEsServiceAccountId } from './es_service_account_id';
+import { parseBindableEsServiceAccountId, parseEsServiceAccountId } from './es_service_account_id';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
@@ -57,8 +57,6 @@ import {
   ES_SERVICE_ACCOUNT_NAMESPACE,
   ES_SERVICE_ACCOUNT_TOKEN_NAME,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
-  SERVICE_ACCOUNT_NAME_REGEX,
 } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
@@ -515,7 +513,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const principal = parseEsServiceAccountId(id);
+    // Only an account Kibana could run as is named. Any other id names nothing a workload can be
+    // bound to, so it is missing rather than malformed.
+    const principal = parseBindableEsServiceAccountId(id);
     if (!principal) {
       return null;
     }
@@ -817,13 +817,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const principal = parseEsServiceAccountId(serviceAccountId);
-    if (
-      !principal ||
-      principal.namespace !== ES_SERVICE_ACCOUNT_NAMESPACE ||
-      principal.name.length > SERVICE_ACCOUNT_NAME_MAX_LENGTH ||
-      !SERVICE_ACCOUNT_NAME_REGEX.test(principal.name)
-    ) {
+    const principal = parseBindableEsServiceAccountId(serviceAccountId);
+    if (!principal) {
       throw Boom.badRequest('Invalid Elasticsearch service account ID.');
     }
 

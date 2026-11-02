@@ -410,12 +410,17 @@ describe('buildSecurityApi', () => {
       );
     });
 
-    it('delegates getServiceAccountSummary to the backend and returns its result', async () => {
+    it('delegates getWorkloadServiceAccountSummary and returns its result', async () => {
       const summary = { id: 'ns/name', name: 'name', enabled: true, assumable: true };
-      serviceAccounts!.backend.getSummary.mockResolvedValue(summary);
+      serviceAccounts!.workloads.getServiceAccountSummary.mockResolvedValue(summary);
 
-      await expect(api.serviceAccounts.getServiceAccountSummary('ns/name')).resolves.toBe(summary);
-      expect(serviceAccounts!.backend.getSummary).toHaveBeenCalledWith('ns/name');
+      await expect(
+        api.serviceAccounts.getWorkloadServiceAccountSummary('alerting', WORKLOAD_IN_SPACE)
+      ).resolves.toBe(summary);
+      expect(serviceAccounts!.workloads.getServiceAccountSummary).toHaveBeenCalledWith(
+        'alerting',
+        WORKLOAD_IN_SPACE
+      );
     });
 
     it('delegates withScopedRequest, passing the callback through', async () => {
@@ -452,7 +457,10 @@ describe('buildSecurityApi', () => {
         'getWorkloadBinding',
         () => api.serviceAccounts.getWorkloadBinding('alerting', WORKLOAD_IN_SPACE),
       ],
-      ['getServiceAccountSummary', () => api.serviceAccounts.getServiceAccountSummary('ns/name')],
+      [
+        'getWorkloadServiceAccountSummary',
+        () => api.serviceAccounts.getWorkloadServiceAccountSummary('alerting', WORKLOAD_IN_SPACE),
+      ],
       [
         'withScopedRequestForWorkload',
         () =>

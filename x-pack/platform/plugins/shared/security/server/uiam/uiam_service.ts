@@ -17,6 +17,7 @@ import {
   HTTPAuthorizationHeader,
   isExternalUiamCredential,
   resolveUiamClientAuthentication,
+  UIAM_ERROR_CODES,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import type {
@@ -925,7 +926,14 @@ export class UiamService implements UiamServicePublic {
       this.#logger.debug(`Successfully got service account ${serviceAccountId}.`);
       return response;
     } catch (err) {
-      this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
+      // An unknown account is an answer rather than a failure: callers report it as missing.
+      if (
+        UiamService.#getErrorCode(err) === UIAM_ERROR_CODES.ORGANIZATION_SERVICE_ACCOUNT_NOT_FOUND
+      ) {
+        this.#logger.debug(`Service account ${serviceAccountId} was not found.`);
+      } else {
+        this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
+      }
 
       throw err;
     }
@@ -1521,6 +1529,15 @@ export class UiamService implements UiamServicePublic {
     };
 
     throw err;
+  }
+
+  static #getErrorCode(err: unknown): string | undefined {
+    if (!Boom.isBoom(err)) {
+      return undefined;
+    }
+
+    const payload = err.output?.payload as { error?: UiamErrorDetails } | undefined;
+    return payload?.error?.code;
   }
 
   static #getOAuthTokenExchangeErrorAttributes(err: unknown): {

@@ -24,6 +24,7 @@ import {
 import { EsServiceAccounts } from './es_service_accounts';
 import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../common/service_accounts';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { securityTelemetry } from '../otel/instrumentation';
 
@@ -1482,16 +1483,26 @@ describe('EsServiceAccounts', () => {
       expect(credentialStore.findExisting).not.toHaveBeenCalled();
     });
 
-    it('resolves `null` for a built-in account, which is not Kibana to name', async () => {
+    it('resolves `null` for an account Elasticsearch reports as not user-managed', async () => {
       clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
-        'elastic/kibana': { type: 'built_in', role_descriptor: {} },
+        [ACCOUNT_ID]: { type: 'built_in', role_descriptor: {} },
       });
 
-      await expect(serviceAccounts.getSummary('elastic/kibana')).resolves.toBeNull();
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toBeNull();
     });
 
-    it('resolves `null` for an id that is not namespace/service, without reaching Elasticsearch', async () => {
-      for (const id of ['nightshift-relay', 'kibana/../_cluster', 'a/b/c', '']) {
+    it('resolves `null` for an id Kibana could never run as, without reaching Elasticsearch', async () => {
+      for (const id of [
+        'nightshift-relay',
+        'kibana/../_cluster',
+        'a/b/c',
+        '',
+        'kibana/',
+        '/nightshift-relay',
+        'elastic/kibana',
+        'other/nightshift-relay',
+        `kibana/${'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH + 1)}`,
+      ]) {
         await expect(serviceAccounts.getSummary(id)).resolves.toBeNull();
       }
       expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();

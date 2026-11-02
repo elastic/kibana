@@ -365,8 +365,12 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     try {
       account = await this.uiam.getServiceAccount(id);
     } catch (e) {
+      const notFound = getNotFound(id, e);
+      if (notFound) {
+        throw notFound;
+      }
       this.logger.error(`Failed to get service account: ${getDetailedErrorMessage(e)}`);
-      throw getNotFound(id, e) ?? e;
+      throw e;
     }
 
     // UIAM keeps a revoked account around for a while, but it is gone as far as Kibana is

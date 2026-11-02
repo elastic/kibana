@@ -63,6 +63,7 @@ export const serviceAccountsServiceMock = {
       }),
       unbindWorkload: jest.fn().mockResolvedValue(true),
       getBinding: jest.fn().mockResolvedValue(null),
+      getServiceAccountSummary: jest.fn().mockResolvedValue(null),
       withScopedRequest: jest.fn().mockImplementation(async (_pluginId, _params, fn) =>
         fn(
           httpServerMock.createFakeKibanaRequest({

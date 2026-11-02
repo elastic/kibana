@@ -60,8 +60,8 @@ export interface ServiceAccountsBackend {
   /**
    * Reads the name and status of one service account as Kibana, resolving `null` when there is no
    * such account. Performs no user authorization: it backs
-   * `core.security.serviceAccounts.getServiceAccountSummary`, whose callers authorize their users
-   * against a workload first. Unlike {@link get}, `assumable` is taken from the credential Kibana
+   * `core.security.serviceAccounts.getWorkloadServiceAccountSummary`, which only names the account
+   * of a workload's verified binding, and whose callers authorize their users against the workload. Unlike {@link get}, `assumable` is taken from the credential Kibana
    * stored, without asking the identity provider.
    */
   getSummary(id: string): Promise<ServiceAccountSummary | null>;

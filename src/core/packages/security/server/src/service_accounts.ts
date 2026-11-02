@@ -17,6 +17,7 @@ import type {
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
+  ServiceAccountWorkloadSummaryParams,
   ServiceAccountSummary,
 } from '@kbn/core-security-common';
 
@@ -134,16 +135,20 @@ export interface CoreServiceAccountsService {
   ): Promise<ServiceAccountWorkloadBinding | null>;
 
   /**
-   * Returns the name and status of a service account, or `null` when there is no such account.
-   * Throws if the account cannot be read, or if service accounts are unavailable.
+   * Returns the name and status of the account a workload is bound to, so that a user who can see
+   * the workload can see which account it runs as without having to manage service accounts.
    *
-   * Kibana reads the account as itself, so this performs no user authorization. It exists so that
-   * a user who can see a workload can see which account it runs as without having to manage
-   * service accounts. Before calling it on a user's behalf, the calling plugin must confirm that
-   * the user can see a workload that runs, or ran, as the account. Never pass it an account id
-   * the user supplied: that would let them read the name of any account.
+   * Resolves `null` when the workload has no binding, when the binding names another account than
+   * `expectedServiceAccountId`, or when the account no longer exists. Rejects when the workload
+   * type was not registered by the calling plugin, the workload ID is malformed, the stored binding
+   * fails its integrity check, the account cannot be read, or bindings are unavailable.
+   *
+   * Kibana reads the account as itself, so this performs no user authorization. Before calling it
+   * on a user's behalf, the calling plugin must confirm that the user can see the workload.
    */
-  getServiceAccountSummary(serviceAccountId: string): Promise<ServiceAccountSummary | null>;
+  getWorkloadServiceAccountSummary(
+    params: ServiceAccountWorkloadSummaryParams
+  ): Promise<ServiceAccountSummary | null>;
 
   /**
    * Runs `fn` with a request authenticated as the workload's service account, for use with

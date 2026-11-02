@@ -11,10 +11,12 @@ import { randomBytes } from 'crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   BindServiceAccountWorkloadParams,
+  ServiceAccountSummary,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadRequestParams,
+  ServiceAccountWorkloadSummaryParams,
 } from '@kbn/core-security-server';
 import type {
   AuditLogger,
@@ -63,6 +65,11 @@ export interface ServiceAccountWorkloadBindingsApi {
     pluginId: string,
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
+
+  getServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadSummaryParams
+  ): Promise<ServiceAccountSummary | null>;
 
   withScopedRequest<T>(
     pluginId: string,
@@ -255,6 +262,29 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   ): Promise<ServiceAccountWorkloadBinding | null> {
     this.ensureAvailable();
     return await this.store.getVerified(this.toCoordinates(pluginId, params));
+  }
+
+  /**
+   * Names the account of the workload's verified binding, never an account the caller names, so
+   * that it can only describe an account the workload runs as.
+   */
+  async getServiceAccountSummary(
+    pluginId: string,
+    { expectedServiceAccountId, ...params }: ServiceAccountWorkloadSummaryParams
+  ): Promise<ServiceAccountSummary | null> {
+    const binding = await this.getBinding(pluginId, params);
+    if (!binding) {
+      return null;
+    }
+
+    if (
+      expectedServiceAccountId !== undefined &&
+      binding.serviceAccountId !== expectedServiceAccountId
+    ) {
+      return null;
+    }
+
+    return await this.backend.getSummary(binding.serviceAccountId);
   }
 
   async withScopedRequest<T>(

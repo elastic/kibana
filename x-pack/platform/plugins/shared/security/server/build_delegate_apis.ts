@@ -132,8 +132,8 @@ export const buildSecurityApi = ({
         requireServiceAccounts().workloads.unbindWorkload(pluginId, request, params),
       getWorkloadBinding: async (pluginId, params) =>
         requireServiceAccounts().workloads.getBinding(pluginId, params),
-      getServiceAccountSummary: async (serviceAccountId) =>
-        requireServiceAccounts().backend.getSummary(serviceAccountId),
+      getWorkloadServiceAccountSummary: async (pluginId, params) =>
+        requireServiceAccounts().workloads.getServiceAccountSummary(pluginId, params),
       withScopedRequestForWorkload: async (pluginId, params, fn) =>
         requireServiceAccounts().workloads.withScopedRequest(pluginId, params, fn),
     },
