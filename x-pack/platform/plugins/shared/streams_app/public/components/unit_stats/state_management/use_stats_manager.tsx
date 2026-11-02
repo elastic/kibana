@@ -21,6 +21,7 @@ import type {
 } from '../../../services/unit_stats_client/types';
 import { createUnitStatsClient } from '../../../services/unit_stats_client/unit_stats_client';
 import { getSlotStats, type SlotStats } from './get_slot_stats';
+import { pageVisible$ } from './page_visibility';
 import { createStatsManagerImplementations, statsManagerMachine } from './stats_manager_machine';
 import type { StatsEntry } from './types';
 
@@ -55,6 +56,23 @@ const StatsFailureToast = () => {
     });
     return () => subscription.unsubscribe();
   }, [actorRef, toasts]);
+
+  return null;
+};
+
+/**
+ * Pauses polling while the page is hidden, for example in a background tab, and resumes it when
+ * the page is back. The provider renders it, so every view that polls gets it and none can forget it.
+ */
+const PausePollingWhileHidden = () => {
+  const actorRef = StatsManagerContext.useActorRef();
+
+  useEffect(() => {
+    const subscription = pageVisible$.subscribe((isVisible) =>
+      actorRef.send({ type: isVisible ? 'stats.resumePolling' : 'stats.pausePolling' })
+    );
+    return () => subscription.unsubscribe();
+  }, [actorRef]);
 
   return null;
 };
@@ -97,6 +115,7 @@ export const StatsManagerProvider = ({
   return (
     <StatsManagerContext.Provider logic={logic} options={{ input: { getWindow, pollIntervalMs } }}>
       <StatsFailureToast />
+      <PausePollingWhileHidden />
       {children}
     </StatsManagerContext.Provider>
   );

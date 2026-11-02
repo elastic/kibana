@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 import { createActor } from 'xstate';
 import { createFixtureUnitStatsClient } from '../../../services/unit_stats_client/fixture_unit_stats_client';
 import type { StatsWindow, UnitStatsClient } from '../../../services/unit_stats_client/types';
-import { STATS_BATCH_DEBOUNCE_MS } from './constants';
+import { STATS_BATCH_DEBOUNCE_MS, STATS_FRESHNESS_MS } from './constants';
 import { createStatsManagerImplementations, statsManagerMachine } from './stats_manager_machine';
 
 const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
@@ -476,6 +476,94 @@ describe('polling', () => {
     const windows = fetchStats.mock.calls.map(([request]) => request.window);
     expect(windows.length).toBeGreaterThanOrEqual(2);
     expect(new Set(windows.map((window) => JSON.stringify(window))).size).toBe(windows.length);
+  });
+
+  describe('pausing', () => {
+    it('stops polling while paused', async () => {
+      const { client, fetchStats } = createClient();
+      const { actor, register } = startManager({ client, pollIntervalMs: POLL_INTERVAL_MS });
+
+      register(ES_PROD);
+      await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
+      actor.send({ type: 'stats.pausePolling' });
+      await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS * 5);
+
+      expect(actor.getSnapshot().matches({ polling: 'paused' })).toBe(true);
+      expect(fetchStats).toHaveBeenCalledTimes(1);
+    });
+
+    it('fetches at once on resume when a value has become old', async () => {
+      const { client, fetchStats } = createClient();
+      const { actor, register } = startManager({ client, pollIntervalMs: POLL_INTERVAL_MS });
+
+      register(ES_PROD);
+      await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
+      actor.send({ type: 'stats.pausePolling' });
+      await jest.advanceTimersByTimeAsync(STATS_FRESHNESS_MS);
+      expect(fetchStats).toHaveBeenCalledTimes(1);
+
+      actor.send({ type: 'stats.resumePolling' });
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(fetchStats).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not fetch a value that is still fresh on resume', async () => {
+      const { client, fetchStats } = createClient();
+      const { actor, register } = startManager({ client, pollIntervalMs: POLL_INTERVAL_MS });
+
+      register(ES_PROD);
+      await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
+      actor.send({ type: 'stats.pausePolling' });
+      await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
+      actor.send({ type: 'stats.resumePolling' });
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(fetchStats).toHaveBeenCalledTimes(1);
+    });
+
+    it('polls again on each interval after it resumes', async () => {
+      const { client, fetchStats } = createClient();
+      const { actor, register } = startManager({ client, pollIntervalMs: POLL_INTERVAL_MS });
+
+      register(ES_PROD);
+      await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
+      actor.send({ type: 'stats.pausePolling' });
+      actor.send({ type: 'stats.resumePolling' });
+      await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
+
+      expect(actor.getSnapshot().matches({ polling: 'active' })).toBe(true);
+      expect(fetchStats).toHaveBeenCalledTimes(2);
+    });
+
+    it('lets a request in flight finish', async () => {
+      const { client } = createClient({ delayMs: 1500 });
+      const { actor, register, destinationEntry } = startManager({
+        client,
+        pollIntervalMs: POLL_INTERVAL_MS,
+      });
+
+      register(ES_PROD);
+      await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS + 100);
+      actor.send({ type: 'stats.pausePolling' });
+      await jest.advanceTimersByTimeAsync(1500);
+
+      expect(destinationEntry('es-prod')?.status).toBe('ready');
+    });
+
+    it('is ignored when polling is off', async () => {
+      const { client, fetchStats } = createClient();
+      const { actor, register } = startManager({ client });
+
+      register(ES_PROD);
+      await jest.advanceTimersByTimeAsync(STATS_BATCH_DEBOUNCE_MS);
+      actor.send({ type: 'stats.pausePolling' });
+      actor.send({ type: 'stats.resumePolling' });
+      await jest.advanceTimersByTimeAsync(STATS_FRESHNESS_MS);
+
+      expect(actor.getSnapshot().matches({ polling: 'disabled' })).toBe(true);
+      expect(fetchStats).toHaveBeenCalledTimes(1);
+    });
   });
 });
 

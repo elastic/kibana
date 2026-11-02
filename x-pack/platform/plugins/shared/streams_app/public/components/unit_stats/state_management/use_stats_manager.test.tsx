@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, render, renderHook } from '@testing-library/react';
 import { STATS_FIXTURE_RESPONSES } from '../../../services/unit_stats_client/fixture_unit_stats_client';
-import { STATS_BATCH_DEBOUNCE_MS, STATS_POLL_INTERVAL_MS } from './constants';
+import { STATS_BATCH_DEBOUNCE_MS, STATS_FRESHNESS_MS, STATS_POLL_INTERVAL_MS } from './constants';
 import type { ProcessingNodeRef } from '../../../services/unit_graph';
 import {
   StatsManagerProvider,
@@ -236,6 +236,57 @@ describe('the failure toast', () => {
 
     expect(mockFetch.mock.calls.length).toBeGreaterThan(1);
     expect(mockAddDanger).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('polling while the page is hidden', () => {
+  let visibilityState: DocumentVisibilityState = 'visible';
+
+  const changeVisibility = (next: DocumentVisibilityState) =>
+    act(() => {
+      visibilityState = next;
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+
+  const pollingWrapper = ({ children }: React.PropsWithChildren<{}>) => (
+    <StatsManagerProvider unitId={UNIT_ID} pollIntervalMs={STATS_POLL_INTERVAL_MS}>
+      {children}
+    </StatsManagerProvider>
+  );
+
+  beforeEach(() => {
+    visibilityState = 'visible';
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => visibilityState,
+    });
+  });
+
+  afterEach(() => {
+    delete (document as { visibilityState?: unknown }).visibilityState;
+  });
+
+  it('polls on each interval while the page is in view', async () => {
+    renderHook(() => useDestinationStats('es-prod'), { wrapper: pollingWrapper });
+
+    await advance(STATS_BATCH_DEBOUNCE_MS);
+    await advance(STATS_POLL_INTERVAL_MS);
+
+    expect(mockFetch.mock.calls.length).toBeGreaterThan(1);
+  });
+
+  it('does not poll while the page is hidden, and fetches again when it is back', async () => {
+    visibilityState = 'hidden';
+    renderHook(() => useDestinationStats('es-prod'), { wrapper: pollingWrapper });
+
+    await advance(STATS_BATCH_DEBOUNCE_MS);
+    await advance(STATS_FRESHNESS_MS * 2);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    await changeVisibility('visible');
+    await advance(0);
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });
 

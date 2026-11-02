@@ -101,6 +101,16 @@ export interface StatsWindowChangedEvent {
   type: 'stats.windowChanged';
 }
 
+/** Polling stops until it is resumed, for example while nobody can see the numbers. */
+export interface StatsPausePollingEvent {
+  type: 'stats.pausePolling';
+}
+
+/** Polling starts again, and what became due while it was paused is fetched at once. */
+export interface StatsResumePollingEvent {
+  type: 'stats.resumePolling';
+}
+
 // Raised by the machine itself
 
 /** Something may be due: the debounce ended, or a request resolved. A request in flight wins. */
@@ -119,6 +129,8 @@ export type StatsManagerEvent =
   | StatsRefreshEvent
   | StatsUnitPersistedEvent
   | StatsWindowChangedEvent
+  | StatsPausePollingEvent
+  | StatsResumePollingEvent
   | StatsFetchDueEvent
   | StatsPollEvent;
 
@@ -377,6 +389,18 @@ export const statsManagerMachine = setup({
               target: 'active',
               reenter: true,
               actions: raise({ type: 'stats.poll' }),
+            },
+          },
+          on: { 'stats.pausePolling': 'paused' },
+        },
+        // No timer runs. Resuming fetches what became due meanwhile, so the numbers are current
+        // at once and not after up to a poll interval. It is not a forced poll, so a value that is
+        // still fresh is not fetched again.
+        paused: {
+          on: {
+            'stats.resumePolling': {
+              target: 'active',
+              actions: raise({ type: 'stats.fetchDue' }),
             },
           },
         },
