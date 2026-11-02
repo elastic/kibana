@@ -16,7 +16,7 @@ export const storybooks = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/storybooks/build_and_upload.sh',
     label: 'Build Storybooks',
     agents: {
-      ...spotAgent('n4-standard-16', spotZones.allUS),
+      ...spotAgent('n4-standard-16', spotZones.n4),
       ...hyperdiskBalanced,
     },
     key: 'storybooks',

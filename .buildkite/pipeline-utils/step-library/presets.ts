@@ -63,7 +63,6 @@ export const usZones = [
 ] as const satisfies readonly Zone[];
 
 export const spotZones = {
-  allUS: usZones,
   n2: [
     'asia-south2-a',
     'asia-south2-b',
@@ -71,6 +70,14 @@ export const spotZones = {
     'northamerica-northeast2-a',
     'northamerica-northeast2-b',
     'northamerica-northeast2-c',
+  ],
+  n4: [
+    'asia-south2-a',
+    'asia-south2-b',
+    'asia-south2-c',
+    'southamerica-east1-a',
+    'southamerica-east1-b',
+    'southamerica-east1-c',
   ],
   // Zones aligned with the preemptible N2D CPU quota, which is separate from the standard quota.
   n2dPreemptible: [
