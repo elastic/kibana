@@ -211,17 +211,20 @@ const MetricTrendBadge: React.FC<{ delta: number }> = ({ delta }) => {
   );
 };
 
+/**
+ * The filter icon in the tile's corner. It is decorative: the tile itself is the one control that
+ * turns the filter on and off, so the icon is not a second, nested button.
+ */
 const CornerControl: React.FC<{
   selected: boolean;
   emphasized: boolean;
-  onClear?: () => void;
-}> = ({ selected, emphasized, onClear }) => {
+}> = ({ selected, emphasized }) => {
   const { euiTheme } = useEuiTheme();
 
   // Match default filter chrome; selection is signaled by the accent dot only.
   const iconColor = emphasized ? 'primary' : euiTheme.colors.textSubdued;
 
-  const icon = (
+  return (
     <span
       css={css`
         position: relative;
@@ -255,41 +258,6 @@ const CornerControl: React.FC<{
       ) : null}
     </span>
   );
-
-  if (selected && onClear) {
-    return (
-      <button
-        type="button"
-        aria-label={i18n.translate(
-          'xpack.securitySolution.entityAnalytics.facelift.signalCard.clearFilter',
-          { defaultMessage: 'Clear table filter' }
-        )}
-        data-test-subj="eaFaceliftSignalCardClearFilter"
-        onMouseDown={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-        }}
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onClear();
-        }}
-        css={css`
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          border: 0;
-          background: transparent;
-          cursor: pointer;
-        `}
-      >
-        {icon}
-      </button>
-    );
-  }
-
-  return icon;
 };
 
 /**
@@ -382,12 +350,17 @@ const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolea
   if (isLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="eaFaceliftSignalCardLoading" />;
   }
-  return isZero ? '—' : formatTileNumber(card.value);
+  // A 0 without a result (failed, skipped, timed out, no access) is not a count: keep the dash.
+  if (isZero && !card.hasCount) {
+    return '—';
+  }
+  return formatTileNumber(card.value);
 };
 
 /**
  * A Needs-attention KPI tile (EUI layout + area sparkline), ported from the designer's v6
- * prototype. The whole card is the filter toggle, with hover and selected states.
+ * prototype. The whole card is the one control that toggles the filter (select and clear), with
+ * hover and selected states.
  */
 export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle }) => {
   const { euiTheme } = useEuiTheme();
@@ -398,6 +371,8 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
   const isLoading = card.isLoading ?? false;
   const isZero = card.value === 0;
   const interactive = !isZero && !isLoading;
+  // A selected tile stays clickable at 0, so the filter it applies can still be cleared.
+  const canToggle = (!isZero || selected) && !isLoading;
   const noDataMessage = isZero && !isLoading ? card.noDataMessage : undefined;
   // Hover only: mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
@@ -434,7 +409,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
-      if (!interactive) {
+      if (!canToggle) {
         return;
       }
       if (event.key === 'Enter' || event.key === ' ') {
@@ -442,23 +417,23 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         onToggle();
       }
     },
-    [interactive, onToggle]
+    [canToggle, onToggle]
   );
 
   const cardNode = (
     <div
       role="button"
-      tabIndex={interactive ? 0 : -1}
-      aria-pressed={interactive ? selected : undefined}
-      aria-disabled={!interactive || undefined}
+      tabIndex={canToggle ? 0 : -1}
+      aria-pressed={canToggle ? selected : undefined}
+      aria-disabled={!canToggle || undefined}
       aria-label={ariaLabel}
       data-test-subj={`eaFaceliftSignalCard-${card.id}`}
-      onClick={interactive ? onToggle : undefined}
+      onClick={canToggle ? onToggle : undefined}
       onKeyDown={onKeyDown}
       onMouseDown={(event) => {
         // Keep mouse activation from focusing the card, so deselection returns to
         // the default tile (not sticky focus-as-hover) when the pointer leaves.
-        if (interactive && event.button === 0) {
+        if (canToggle && event.button === 0) {
           event.preventDefault();
         }
       }}
@@ -475,16 +450,19 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         border: 1px solid ${borderColor};
         border-radius: ${euiTheme.border.radius.panel};
         background: ${tileBackground};
-        cursor: ${interactive ? 'pointer' : 'default'};
-        outline: none;
+        cursor: ${canToggle ? 'pointer' : 'default'};
         overflow: hidden;
         position: relative;
         z-index: ${selected || emphasized ? 2 : 1};
         transition: border-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
           background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
 
+        /* A ring on the tile's own outline: painted above its children (the sparkline), so it
+           goes all the way round the tile; the raised z-index keeps a neighbour from covering it. */
         &:focus-visible {
           border-color: ${selected ? activeBorder : hoverBorder};
+          outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+          z-index: 3;
         }
       `}
     >
@@ -551,11 +529,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
           </EuiFlexItem>
           {interactive ? (
             <EuiFlexItem grow={false}>
-              <CornerControl
-                selected={selected}
-                emphasized={emphasized}
-                onClear={selected ? onToggle : undefined}
-              />
+              <CornerControl selected={selected} emphasized={emphasized} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

@@ -7,13 +7,10 @@
 
 import React from 'react';
 import { ApprovalModal } from '@kbn/proposals-ui';
-import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApprovalProposal, DeclineParams } from '@kbn/proposals-ui';
 import type { Investigation } from '../../types';
 import type { CardActionType } from '../actions/base_actions';
 import type { EscalationModalMode } from './escalation_modal/types';
-import { BaseActionModal } from './base_action_modal';
-import { MODAL_TRANSLATIONS } from './translations';
 
 export interface CloseInvestigationModalRenderProps {
   /** The investigation being closed. Used to access `conversationId` and `status`. */
@@ -37,14 +34,13 @@ export interface InvestigationActionModalsProps<
 > {
   /** Action awaiting confirmation, or `null` when no action modal is open. */
   action: CardActionType | null;
-  recordId: Investigation['recordId'] | null;
-  initialAssignee?: string | null;
-  /** Full investigation for actions that need more than recordId (e.g. escalation). */
+  /** The investigation the action applies to. The close and escalation modals need it. */
   investigation?: Investigation;
   /** Proposal awaiting a decision, if any. */
   approvalProposal?: TProposal;
   onCloseAction: () => void;
-  onCloseApproval: () => void;
+  /** Closes the approval modal. Needed by hosts that pass `approvalProposal`. */
+  onCloseApproval?: () => void;
   /**
    * Commits the approval. Receives the proposal rather than closing over it, so a caller's
    * handler stays referentially stable across renders. Falls back to closing the modal, so a
@@ -67,25 +63,10 @@ export interface InvestigationActionModalsProps<
   isSubmitting?: 'applying' | 'declining';
   /** Who's approving, for the modal's "Applying"/"Declining" caption. */
   currentActorName?: string;
-  /** See `ApprovalModalProps.basePath`. */
-  basePath?: IBasePath;
-  /**
-   * Replaces the default rationale-only dismiss modal. Supplied when a solution's
-   * dismissal captures more than a rationale — a structured reason, say — which changes
-   * what the modal renders and what local state it owns, not just what confirming does.
-   * @deprecated Prefer `renderCloseModal`, which receives the full investigation. This
-   * prop is kept for the flyout-footer backward-compat adapter and will be removed once
-   * all callers migrate.
-   */
-  renderDismissModal?: (props: {
-    recordId?: string | null;
-    onClose: () => void;
-  }) => React.ReactNode;
   /**
    * Renders the close-investigation confirmation modal for the 'close' action.
    * Receives the full investigation so the modal can key on `conversationId` rather than
    * `recordId` (which is the proposal id and is undefined in the flyout context).
-   * When provided, takes precedence over `renderDismissModal`.
    */
   renderCloseModal?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
   /**
@@ -104,7 +85,6 @@ export interface InvestigationActionModalsProps<
  */
 export const InvestigationActionModals = <TProposal extends ApprovalProposal = ApprovalProposal>({
   action,
-  recordId,
   investigation,
   approvalProposal,
   readOnly,
@@ -112,15 +92,13 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   onCloseApproval,
   onConfirmApproval,
   onDismissApproval,
-  renderDismissModal,
   renderCloseModal,
   renderEscalationModal,
   isSubmitting,
   currentActorName,
-  basePath,
 }: InvestigationActionModalsProps<TProposal>) => (
   <>
-    {approvalProposal ? (
+    {approvalProposal && onCloseApproval ? (
       <ApprovalModal
         proposal={approvalProposal}
         readOnly={readOnly}
@@ -137,30 +115,11 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
         }
         isSubmitting={isSubmitting}
         currentActorName={currentActorName}
-        basePath={basePath}
       />
     ) : null}
 
-    {action === 'close'
-      ? renderCloseModal && investigation
-        ? renderCloseModal({ investigation, onClose: onCloseAction })
-        : recordId
-        ? renderDismissModal?.({ recordId, onClose: onCloseAction }) ?? (
-            <BaseActionModal
-              type="dismiss"
-              title={MODAL_TRANSLATIONS.dismiss.title}
-              recordId={recordId}
-              onClose={onCloseAction}
-              rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-              primaryAction={{
-                color: 'danger',
-                label: MODAL_TRANSLATIONS.dismiss.actionButtonLabel,
-                // TODO: use dismiss action API call hook
-                onClick: onCloseAction,
-              }}
-            />
-          )
-        : null
+    {action === 'close' && renderCloseModal && investigation
+      ? renderCloseModal({ investigation, onClose: onCloseAction })
       : null}
 
     {(action === 'createEscalation' || action === 'attachToEscalation') && investigation

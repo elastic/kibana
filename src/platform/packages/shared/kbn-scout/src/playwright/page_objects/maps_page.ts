@@ -20,7 +20,6 @@ const DEFAULT_MAP_LOADING_TIMEOUT = 20_000;
 
 export class MapsPage {
   public readonly mapsPlugin;
-  public readonly mapRenderComplete;
   public readonly saveAndReturnButton;
   public readonly saveButton;
   public readonly addLayerButton;
@@ -43,8 +42,6 @@ export class MapsPage {
   constructor(private readonly page: ScoutPage) {
     // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
     this.mapsPlugin = this.page.locator('#maps-plugin');
-    // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
-    this.mapRenderComplete = this.page.locator('#maps-plugin[data-map-loaded="true"]');
     this.saveAndReturnButton = this.page.testSubj.locator('mapSaveAndReturnButton');
     this.saveButton = this.page.testSubj.locator('mapSaveButton');
     this.addLayerButton = this.page.testSubj.locator('addLayerButton');
@@ -66,7 +63,7 @@ export class MapsPage {
 
   async gotoNewMap() {
     await this.page.gotoApp('maps/map');
-    await this.waitForRenderComplete();
+    await this.waitForLayersToLoad();
   }
 
   /** Opens the AppHeader overflow menu when Full screen is not inline. */
@@ -83,16 +80,6 @@ export class MapsPage {
   async clickSaveButton() {
     await this.appMenu.revealItem(this.saveButton);
     await this.saveButton.click();
-  }
-
-  async waitForRenderComplete() {
-    // first wait for the top level container to be present
-    await this.mapsPlugin.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
-    // then wait for the map to be fully rendered
-    return this.mapRenderComplete.waitFor({
-      state: 'attached',
-      timeout: DEFAULT_MAP_LOADING_TIMEOUT,
-    });
   }
 
   async expectOnMapPage() {
@@ -174,7 +161,7 @@ export class MapsPage {
     await this.documentsItem.click();
     await this.selectGeoIndexPatternLayer(indexPattern);
     await this.importFileButton.click();
-    await this.waitForRenderComplete();
+    await this.waitForLayersToLoad();
     await this.saveAndReturnButton.click();
   }
 
@@ -309,8 +296,14 @@ export class MapsPage {
   /**
    * Opens the inspector, selects a request by name, reads its raw JSON response,
    * closes the inspector, and returns the parsed response body.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller types
+   *   right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
-  async getResponse(requestName: string): ReturnType<typeof this.inspector.getResponse> {
+  async getResponse(
+    requestName: string,
+    waitForFocusQuiet: boolean = false
+  ): ReturnType<typeof this.inspector.getResponse> {
     await this.inspector.open();
     try {
       await this.inspector.openInspectorRequestsView();
@@ -320,7 +313,7 @@ export class MapsPage {
 
       return await this.inspector.getResponse();
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
@@ -328,10 +321,14 @@ export class MapsPage {
    * Opens the inspector, switches to the Requests view, optionally selects `requestName`,
    * switches to the statistics tab, calls `getStat` to read a value, closes the inspector,
    * and returns the result.
+   *
+   * @param waitForFocusQuiet - Forwarded to `inspector.close`. Set when the caller types
+   *   right after, so restored focus can't swallow its keystrokes. Defaults to `false`.
    */
   private async getRequestStat(
     getStat: () => Promise<string>,
-    requestName?: string
+    requestName?: string,
+    waitForFocusQuiet: boolean = false
   ): Promise<string> {
     await this.inspector.open();
     try {
@@ -344,7 +341,7 @@ export class MapsPage {
       await this.inspector.openRequestsStatisticsTab();
       return await getStat();
     } finally {
-      await this.inspector.close();
+      await this.inspector.close(waitForFocusQuiet);
     }
   }
 
@@ -352,16 +349,23 @@ export class MapsPage {
    * Opens the inspector, reads "Hits" from the statistics tab of the optionally
    * selected `requestName`, closes the inspector, and returns the value.
    */
-  async getHits(requestName?: string): Promise<string> {
-    return this.getRequestStat(() => this.inspector.getHits(), requestName);
+  async getHits(requestName?: string, waitForFocusQuiet: boolean = false): Promise<string> {
+    return this.getRequestStat(() => this.inspector.getHits(), requestName, waitForFocusQuiet);
   }
 
   /**
    * Opens the inspector, reads "Request timestamp" from the statistics tab of the
    * optionally selected `requestName`, closes the inspector, and returns the value.
    */
-  async getRequestTimestamp(requestName?: string): Promise<string> {
-    return this.getRequestStat(() => this.inspector.getRequestTimestamp(), requestName);
+  async getRequestTimestamp(
+    requestName?: string,
+    waitForFocusQuiet: boolean = false
+  ): Promise<string> {
+    return this.getRequestStat(
+      () => this.inspector.getRequestTimestamp(),
+      requestName,
+      waitForFocusQuiet
+    );
   }
 
   /** Opens the map settings panel and enables "Auto fit map to data bounds". */
@@ -460,6 +464,21 @@ export class MapsPage {
       .locator(`layerTocActionsPanel${escapedName}`)
       .waitFor({ state: 'visible' });
     await this.page.testSubj.click('layerSettingsButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /** Opens the layer settings panel, sets the layer filter query, and applies it. */
+  async setLayerQuery(layerName: string, query: string) {
+    await this.openLayerPanel(layerName);
+    await this.page.testSubj.click('mapLayerPanelOpenFilterEditorButton');
+    const queryInput = this.page.locator(
+      '[data-test-subj="mapFilterEditor"] [data-test-subj="queryInput"]'
+    );
+    await queryInput.clear();
+    await queryInput.pressSequentially(query);
+    // Dismiss any open autocomplete dropdown before clicking submit.
+    await queryInput.press('Escape');
+    await this.page.testSubj.click('mapFilterEditorSubmitButton');
     await this.waitForLayersToLoad();
   }
 
