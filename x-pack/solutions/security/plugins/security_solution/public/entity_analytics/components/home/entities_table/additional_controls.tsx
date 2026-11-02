@@ -21,7 +21,9 @@ const getShortCount = (count: number): string =>
 /** The short count, with the exact one on hover. */
 const TotalCount = ({ total }: { total: number }) => (
   <EuiToolTip content={<FormattedNumber value={total} />}>
-    <span tabIndex={0}>{getShortCount(total)}</span>
+    <span tabIndex={0} data-test-subj="entityAnalyticsEntitiesTotal">
+      {getShortCount(total)}
+    </span>
   </EuiToolTip>
 );
 

@@ -384,6 +384,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         <EntityGridRowsContext.Provider value={rowsContext}>
           <EuiDataGrid
             aria-label={GRID_ARIA_LABEL}
+            data-test-subj="entityAnalyticsEntitiesGrid"
             leadingControlColumns={
               isIndividualRows
                 ? INDIVIDUAL_LEADING_CONTROL_COLUMNS

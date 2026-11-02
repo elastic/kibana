@@ -562,6 +562,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
                 </EuiText>
               ) : (
                 <EuiText
+                  data-test-subj="eaFaceliftSignalCardValue"
                   css={css`
                     font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
                     font-size: ${VALUE_FONT_SIZE}px;
