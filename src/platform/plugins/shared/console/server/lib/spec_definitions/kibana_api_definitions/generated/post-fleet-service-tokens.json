@@ -1,0 +1,19 @@
+{
+  "post-fleet-service-tokens": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/service_tokens"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-service-tokens",
+    "data_autocomplete_rules": {
+      "remote": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

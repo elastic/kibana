@@ -1,0 +1,23 @@
+{
+  "ExportExceptionList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/exception_lists/_export"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ExportExceptionList",
+    "url_params": {
+      "id": [],
+      "list_id": [],
+      "namespace_type": [
+        "agnostic",
+        "single"
+      ],
+      "include_expired_exceptions": [
+        "true",
+        "false"
+      ]
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "put-security-role-name": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/role/{name}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-role-name",
+    "url_params": {
+      "createOnly": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "description": "",
+      "elasticsearch": {
+        "cluster": [],
+        "global": {
+          "application": {},
+          "data_source": [
+            {}
+          ],
+          "profile": {},
+          "role": {}
+        },
+        "indices": [
+          {
+            "allow_restricted_indices": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "field_security": {},
+            "names": [],
+            "privileges": [],
+            "query": ""
+          }
+        ],
+        "remote_cluster": [
+          {
+            "clusters": [],
+            "privileges": []
+          }
+        ],
+        "remote_indices": [
+          {
+            "allow_restricted_indices": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "clusters": [],
+            "field_security": {},
+            "names": [],
+            "privileges": [],
+            "query": ""
+          }
+        ],
+        "run_as": []
+      },
+      "kibana": [
+        {
+          "base": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "feature": {},
+          "spaces": {
+            "__one_of": [
+              "*"
+            ]
+          }
+        }
+      ],
+      "metadata": {}
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "get-fleet-cloud-connectors": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/cloud_connectors"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-cloud-connectors",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "kuery": []
+    }
+  }
+}

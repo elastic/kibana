@@ -1,0 +1,25 @@
+{
+  "InitializeSecuritySolution": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_solution/initialize"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-InitializeSecuritySolution",
+    "data_autocomplete_rules": {
+      "flows": [
+        {
+          "__one_of": [
+            "create-list-indices",
+            "security-data-views",
+            "init-prebuilt-rules",
+            "init-endpoint-protection",
+            "init-ai-prompts",
+            "init-detection-rule-monitoring"
+          ]
+        }
+      ]
+    }
+  }
+}

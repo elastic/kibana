@@ -1,0 +1,11 @@
+{
+  "CreateListIndex": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/lists/index"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-CreateListIndex"
+  }
+}

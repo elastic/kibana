@@ -1,0 +1,20 @@
+{
+  "post-fleet-agent-policies-delete": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/delete"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agent-policies-delete",
+    "data_autocomplete_rules": {
+      "agentPolicyId": "",
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

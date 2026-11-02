@@ -1,0 +1,65 @@
+{
+  "PerformPromptsBulkAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/prompts/_bulk_action"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PerformPromptsBulkAction",
+    "data_autocomplete_rules": {
+      "create": [
+        {
+          "categories": [],
+          "color": "",
+          "consumer": "",
+          "content": "",
+          "isDefault": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "isNewConversationDefault": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "name": "",
+          "promptType": {
+            "__one_of": [
+              "system",
+              "quick"
+            ]
+          }
+        }
+      ],
+      "delete": {
+        "ids": [],
+        "query": ""
+      },
+      "update": [
+        {
+          "categories": [],
+          "color": "",
+          "consumer": "",
+          "content": "",
+          "id": "",
+          "isDefault": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "isNewConversationDefault": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

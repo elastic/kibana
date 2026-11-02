@@ -1,0 +1,11 @@
+{
+  "post-fleet-uninstall-tokens-agentpolicyid-rotate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/uninstall_tokens/{agentPolicyId}/rotate"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-uninstall-tokens-agentpolicyid-rotate"
+  }
+}

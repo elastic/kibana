@@ -1,0 +1,14 @@
+{
+  "post-alerting-v2-action-policies-id-snooze": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/action_policies/{id}/_snooze"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-action-policies-id-snooze",
+    "data_autocomplete_rules": {
+      "snoozed_until": ""
+    }
+  }
+}

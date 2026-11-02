@@ -1,0 +1,21 @@
+{
+  "DeleteListItem": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/lists/items"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteListItem",
+    "url_params": {
+      "id": [],
+      "list_id": [],
+      "value": [],
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
+    }
+  }
+}

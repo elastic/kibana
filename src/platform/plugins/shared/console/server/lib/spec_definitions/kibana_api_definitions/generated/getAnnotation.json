@@ -1,0 +1,16 @@
+{
+  "getAnnotation": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/services/{serviceName}/annotation/search"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getAnnotation",
+    "url_params": {
+      "environment": [],
+      "start": [],
+      "end": []
+    }
+  }
+}

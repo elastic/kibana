@@ -1,0 +1,56 @@
+{
+  "get-workflows-workflow-executions": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/workflow/executions"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-workflow-executions",
+    "url_params": {
+      "kql": [],
+      "statuses": [
+        "pending",
+        "waiting",
+        "waiting_for_input",
+        "waiting_for_child",
+        "running",
+        "queued",
+        "completed",
+        "failed",
+        "cancelled",
+        "timed_out",
+        "skipped"
+      ],
+      "executionTypes": [
+        "test",
+        "production"
+      ],
+      "executedBy": [],
+      "concurrencyGroupKey": [],
+      "startedAfter": [],
+      "startedBefore": [],
+      "finishedAfter": [],
+      "finishedBefore": [],
+      "collapse": [
+        "concurrencyGroupKey",
+        "status",
+        "executedBy",
+        "triggeredBy"
+      ],
+      "sortField": [
+        "startedAt",
+        "duration",
+        "workflowId",
+        "triggeredBy"
+      ],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ],
+      "page": [],
+      "size": [],
+      "trackTotalHits": "__flag__"
+    }
+  }
+}

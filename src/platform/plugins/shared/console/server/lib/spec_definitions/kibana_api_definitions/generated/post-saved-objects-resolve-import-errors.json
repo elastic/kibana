@@ -1,0 +1,15 @@
+{
+  "post-saved-objects-resolve-import-errors": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/saved_objects/_resolve_import_errors"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-saved-objects-resolve-import-errors",
+    "url_params": {
+      "createNewCopies": "__flag__",
+      "compatibilityMode": "__flag__"
+    }
+  }
+}

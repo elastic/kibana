@@ -1,0 +1,11 @@
+{
+  "EnableAttackDiscoverySchedules": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/{id}/_enable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EnableAttackDiscoverySchedules"
+  }
+}

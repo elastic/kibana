@@ -1,0 +1,11 @@
+{
+  "delete-streams-name": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/streams/{name}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-streams-name"
+  }
+}

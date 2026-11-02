@@ -1,0 +1,14 @@
+{
+  "GetPolicyResponse": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/policy_response"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-GetPolicyResponse",
+    "url_params": {
+      "agentId": []
+    }
+  }
+}

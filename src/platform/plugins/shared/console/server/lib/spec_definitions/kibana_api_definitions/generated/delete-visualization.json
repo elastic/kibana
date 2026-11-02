@@ -1,0 +1,11 @@
+{
+  "delete-visualization": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/visualizations/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-visualization"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "OsqueryGetUnifiedHistory": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/history"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryGetUnifiedHistory",
+    "url_params": {
+      "pageSize": [],
+      "nextPage": [],
+      "kuery": [],
+      "userIds": [],
+      "sourceFilters": [],
+      "startDate": [],
+      "endDate": []
+    }
+  }
+}

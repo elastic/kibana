@@ -1,0 +1,27 @@
+{
+  "post-alerting-v2-rules-delete-by-query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/_delete_by_query"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-rules-delete-by-query",
+    "data_autocomplete_rules": {
+      "filter": "",
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "match_all": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "search": ""
+    }
+  }
+}

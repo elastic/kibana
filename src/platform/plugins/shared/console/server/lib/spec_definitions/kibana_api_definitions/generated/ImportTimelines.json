@@ -1,0 +1,20 @@
+{
+  "ImportTimelines": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline/_import"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ImportTimelines",
+    "data_autocomplete_rules": {
+      "file": "",
+      "isImmutable": {
+        "__one_of": [
+          "true",
+          "false"
+        ]
+      }
+    }
+  }
+}

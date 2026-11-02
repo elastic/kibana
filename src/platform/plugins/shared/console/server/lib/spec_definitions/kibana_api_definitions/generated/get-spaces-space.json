@@ -1,0 +1,19 @@
+{
+  "get-spaces-space": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/spaces/space"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-spaces-space",
+    "url_params": {
+      "purpose": [
+        "any",
+        "copySavedObjectsIntoSpace",
+        "shareSavedObjectsIntoSpace"
+      ],
+      "include_authorized_purposes": "__flag__"
+    }
+  }
+}

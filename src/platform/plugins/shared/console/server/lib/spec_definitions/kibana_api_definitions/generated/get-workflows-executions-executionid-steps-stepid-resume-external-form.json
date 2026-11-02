@@ -1,0 +1,14 @@
+{
+  "get-workflows-executions-executionid-steps-stepid-resume-external-form": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-executions-executionid-steps-stepid-resume-external-form",
+    "url_params": {
+      "token": []
+    }
+  }
+}

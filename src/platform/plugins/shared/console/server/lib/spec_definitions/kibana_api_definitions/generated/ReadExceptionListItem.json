@@ -1,0 +1,19 @@
+{
+  "ReadExceptionListItem": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/exception_lists/items"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadExceptionListItem",
+    "url_params": {
+      "id": [],
+      "item_id": [],
+      "namespace_type": [
+        "agnostic",
+        "single"
+      ]
+    }
+  }
+}

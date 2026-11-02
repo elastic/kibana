@@ -1,0 +1,27 @@
+{
+  "FindKnowledgeBaseEntries": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base/entries/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-FindKnowledgeBaseEntries",
+    "url_params": {
+      "fields": [],
+      "filter": [],
+      "sort_field": [
+        "created_at",
+        "is_default",
+        "title",
+        "updated_at"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "page": [],
+      "per_page": []
+    }
+  }
+}

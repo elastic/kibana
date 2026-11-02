@@ -1,0 +1,21 @@
+{
+  "get-workflows-executions-executionid-logs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/logs"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-workflows-executions-executionid-logs",
+    "url_params": {
+      "stepExecutionId": [],
+      "size": [],
+      "page": [],
+      "sortField": [],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "DeleteMonitoringEngine": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/engine/delete"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteMonitoringEngine",
+    "url_params": {
+      "data": "__flag__"
+    }
+  }
+}

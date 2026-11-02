@@ -1,0 +1,61 @@
+{
+  "findCasesDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/_find"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-findCasesDefaultSpace",
+    "url_params": {
+      "assignees": [],
+      "category": [],
+      "defaultSearchOperator": [],
+      "from": [],
+      "owner": [
+        "cases",
+        "observability",
+        "securitySolution",
+        "cases",
+        "observability",
+        "securitySolution"
+      ],
+      "page": [],
+      "perPage": [],
+      "reporters": [],
+      "search": [],
+      "searchFields": [
+        "description",
+        "title",
+        "description",
+        "title"
+      ],
+      "severity": [
+        "critical",
+        "high",
+        "low",
+        "medium"
+      ],
+      "sortField": [
+        "createdAt",
+        "updatedAt",
+        "closedAt",
+        "title",
+        "category",
+        "status",
+        "severity"
+      ],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ],
+      "status": [
+        "closed",
+        "in-progress",
+        "open"
+      ],
+      "tags": [],
+      "to": []
+    }
+  }
+}

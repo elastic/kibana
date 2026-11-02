@@ -1,0 +1,26 @@
+{
+  "post-fleet-agents-bulk-remove-collectors": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_remove_collectors"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-bulk-remove-collectors",
+    "data_autocomplete_rules": {
+      "agents": "",
+      "dryRun": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "includeInactive": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

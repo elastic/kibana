@@ -1,0 +1,48 @@
+{
+  "post-alerting-rule-rule-id-alert-alert-id-snooze": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-rule-rule-id-alert-alert-id-snooze",
+    "url_params": {
+      "validate_alerts_existence": "__flag__"
+    },
+    "url_components": {
+      "rule_id": "__kibana_rule"
+    },
+    "data_autocomplete_rules": {
+      "condition_operator": {
+        "__one_of": [
+          "any",
+          "all"
+        ]
+      },
+      "conditions": [
+        {
+          "type": {
+            "__one_of": [
+              "field_change"
+            ]
+          },
+          "value": {
+            "__one_of": [
+              "critical",
+              "major",
+              "high",
+              "medium",
+              "minor",
+              "low",
+              "warning",
+              "info"
+            ]
+          },
+          "field": ""
+        }
+      ],
+      "expires_at": ""
+    }
+  }
+}

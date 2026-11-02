@@ -1,0 +1,11 @@
+{
+  "get-fleet-epm-packages-pkgname-pkgversion-filepath": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-fleet-epm-packages-pkgname-pkgversion-filepath"
+  }
+}

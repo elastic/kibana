@@ -1,0 +1,25 @@
+{
+  "OsqueryExportLiveQueryResults": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/live_queries/{id}/results/{actionId}/_export"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-OsqueryExportLiveQueryResults",
+    "url_params": {
+      "format": [
+        "ndjson",
+        "json",
+        "csv"
+      ]
+    },
+    "data_autocomplete_rules": {
+      "agentIds": [],
+      "esFilters": [
+        {}
+      ],
+      "kuery": ""
+    }
+  }
+}

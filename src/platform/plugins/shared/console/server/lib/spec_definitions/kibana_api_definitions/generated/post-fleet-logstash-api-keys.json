@@ -1,0 +1,11 @@
+{
+  "post-fleet-logstash-api-keys": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/logstash_api_keys"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-logstash-api-keys"
+  }
+}

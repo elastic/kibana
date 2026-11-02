@@ -1,0 +1,26 @@
+{
+  "post-fleet-proxies": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/proxies"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-proxies",
+    "data_autocomplete_rules": {
+      "certificate": "",
+      "certificate_authorities": "",
+      "certificate_key": "",
+      "id": "",
+      "is_preconfigured": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "name": "",
+      "proxy_headers": {},
+      "url": ""
+    }
+  }
+}

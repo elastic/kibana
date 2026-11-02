@@ -1,0 +1,16 @@
+{
+  "PersistPinnedEventRoute": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/pinned_event"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-PersistPinnedEventRoute",
+    "data_autocomplete_rules": {
+      "eventId": "",
+      "pinnedEventId": "",
+      "timelineId": ""
+    }
+  }
+}

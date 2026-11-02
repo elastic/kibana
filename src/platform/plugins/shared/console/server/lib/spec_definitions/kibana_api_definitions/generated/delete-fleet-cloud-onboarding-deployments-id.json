@@ -1,0 +1,11 @@
+{
+  "delete-fleet-cloud-onboarding-deployments-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/cloud_onboarding_deployments/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-fleet-cloud-onboarding-deployments-id"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "post-agent-builder-mcp": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/mcp"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-agent-builder-mcp",
+    "url_params": {
+      "namespace": []
+    }
+  }
+}

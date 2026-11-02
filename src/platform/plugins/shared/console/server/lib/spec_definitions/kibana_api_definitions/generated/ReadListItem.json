@@ -1,0 +1,16 @@
+{
+  "ReadListItem": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/lists/items"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadListItem",
+    "url_params": {
+      "id": [],
+      "list_id": [],
+      "value": []
+    }
+  }
+}

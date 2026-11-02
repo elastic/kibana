@@ -1,0 +1,28 @@
+{
+  "post-fleet-agents-bulk-request-diagnostics": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_request_diagnostics"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-bulk-request-diagnostics",
+    "data_autocomplete_rules": {
+      "additional_metrics": [
+        {
+          "__one_of": [
+            "CPU"
+          ]
+        }
+      ],
+      "agents": "",
+      "batchSize": "",
+      "dryRun": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

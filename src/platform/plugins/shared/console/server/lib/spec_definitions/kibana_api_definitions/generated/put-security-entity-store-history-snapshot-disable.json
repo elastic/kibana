@@ -1,0 +1,19 @@
+{
+  "put-security-entity-store-history-snapshot-disable": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/history_snapshot/disable"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-security-entity-store-history-snapshot-disable",
+    "data_autocomplete_rules": {
+      "clearHistorySnapshots": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

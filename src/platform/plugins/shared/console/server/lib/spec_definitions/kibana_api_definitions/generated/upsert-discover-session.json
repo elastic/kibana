@@ -1,0 +1,278 @@
+{
+  "upsert-discover-session": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/discover_sessions/{id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-upsert-discover-session",
+    "data_autocomplete_rules": {
+      "description": "",
+      "tabs": [
+        {
+          "breakdown_field": "",
+          "column_order": [],
+          "column_settings": {},
+          "control_panels": [
+            {
+              "config": {},
+              "grow": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "id": "",
+              "type": {
+                "__one_of": [
+                  "esql_control"
+                ]
+              },
+              "width": {
+                "__one_of": [
+                  "small",
+                  "medium",
+                  "large"
+                ]
+              }
+            }
+          ],
+          "counter_aggregation": {
+            "__one_of": [
+              "avg",
+              "sum",
+              "min",
+              "max"
+            ]
+          },
+          "data_source": {
+            "allow_hidden_indices": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "field_filters": [],
+            "field_settings": {},
+            "index_pattern": "",
+            "name": "",
+            "time_field": "",
+            "type": {
+              "__one_of": [
+                "data_view_reference"
+              ]
+            },
+            "ref_id": ""
+          },
+          "default_rendered_nodes": "",
+          "density": {
+            "__one_of": [
+              "compact",
+              "expanded",
+              "normal"
+            ]
+          },
+          "dimensions": [],
+          "documents_display_mode": {
+            "__one_of": [
+              "table",
+              "json"
+            ]
+          },
+          "esql_approximation": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "gauge_aggregation": {
+            "__one_of": [
+              "avg",
+              "sum",
+              "min",
+              "max"
+            ]
+          },
+          "grid_sort_direction": {
+            "__one_of": [
+              "asc",
+              "desc"
+            ]
+          },
+          "grid_sort_field": {
+            "__one_of": [
+              "alphabetically",
+              "recency"
+            ]
+          },
+          "header_row_height": {
+            "__one_of": [
+              "auto"
+            ]
+          },
+          "hide_chart": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "hide_nulls": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "hide_table": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "histogram_percentile": {
+            "__one_of": [
+              "p50",
+              "p75",
+              "p90",
+              "p95",
+              "p99"
+            ]
+          },
+          "id": "",
+          "label": "",
+          "refresh_interval": {
+            "pause": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "value": ""
+          },
+          "row_height": {
+            "__one_of": [
+              "auto"
+            ]
+          },
+          "rows_per_page": "",
+          "search_term": "",
+          "sort": [
+            {
+              "direction": {
+                "__one_of": [
+                  "asc",
+                  "desc"
+                ]
+              },
+              "name": ""
+            }
+          ],
+          "time_range": {
+            "from": "",
+            "mode": {
+              "__one_of": [
+                "absolute",
+                "relative"
+              ]
+            },
+            "to": ""
+          },
+          "type": {
+            "__one_of": [
+              "default"
+            ]
+          },
+          "vis_context": {
+            "attributes": {},
+            "suggestion_type": {
+              "__one_of": [
+                "lensSuggestion",
+                "histogramForESQL",
+                "histogramForDataView"
+              ]
+            }
+          },
+          "wrap_lines": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "chart_interval": {
+            "__one_of": [
+              "auto",
+              "ms",
+              "s",
+              "m",
+              "h",
+              "d",
+              "w",
+              "M",
+              "y"
+            ]
+          },
+          "filters": [
+            {
+              "controlled_by": "",
+              "data_view_id": "",
+              "disabled": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "dsl": {},
+              "is_multi_index": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "label": "",
+              "negate": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "type": {
+                "__one_of": [
+                  "condition"
+                ]
+              },
+              "field": "",
+              "params": "",
+              "group": {},
+              "condition": {}
+            }
+          ],
+          "hide_aggregated_preview": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "query": {
+            "expression": "",
+            "language": {
+              "__one_of": [
+                "kql",
+                "lucene"
+              ]
+            }
+          },
+          "sample_size": "",
+          "view_mode": {
+            "__one_of": [
+              "documents",
+              "patterns",
+              "aggregated"
+            ]
+          }
+        }
+      ],
+      "tags": [],
+      "title": ""
+    }
+  }
+}

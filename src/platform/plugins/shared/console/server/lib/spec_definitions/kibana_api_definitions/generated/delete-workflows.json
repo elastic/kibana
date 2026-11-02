@@ -1,0 +1,18 @@
+{
+  "delete-workflows": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/workflows"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-workflows",
+    "url_params": {
+      "acknowledgeAclLoss": "__flag__",
+      "force": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "ids": []
+    }
+  }
+}

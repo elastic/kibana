@@ -1,0 +1,35 @@
+{
+  "BulkUpsertAssetCriticalityRecords": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/asset_criticality/bulk"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-BulkUpsertAssetCriticalityRecords",
+    "data_autocomplete_rules": {
+      "records": [
+        {
+          "criticality_level": {
+            "__one_of": [
+              "low_impact",
+              "medium_impact",
+              "high_impact",
+              "extreme_impact",
+              "unassigned"
+            ]
+          },
+          "id_field": {
+            "__one_of": [
+              "host.name",
+              "user.name",
+              "service.name",
+              "entity.id"
+            ]
+          },
+          "id_value": ""
+        }
+      ]
+    }
+  }
+}

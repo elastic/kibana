@@ -1,0 +1,11 @@
+{
+  "EndpointScriptLibraryPatchUpdateScript": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/endpoint/scripts_library/{script_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-EndpointScriptLibraryPatchUpdateScript"
+  }
+}

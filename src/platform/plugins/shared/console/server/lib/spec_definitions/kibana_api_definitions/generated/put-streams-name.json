@@ -1,0 +1,35 @@
+{
+  "put-streams-name": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/streams/{name}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-put-streams-name",
+    "data_autocomplete_rules": {
+      "dashboards": [],
+      "rules": [],
+      "stream": {
+        "description": "",
+        "ingest": {
+          "failure_store": {},
+          "lifecycle": {},
+          "processing": {},
+          "settings": {},
+          "wired": {}
+        },
+        "query_streams": [
+          {
+            "name": ""
+          }
+        ],
+        "type": {
+          "__one_of": [
+            "wired"
+          ]
+        }
+      }
+    }
+  }
+}

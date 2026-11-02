@@ -1,0 +1,44 @@
+{
+  "getCaseTemplatesDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/templates"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-getCaseTemplatesDefaultSpace",
+    "url_params": {
+      "page": [],
+      "perPage": [],
+      "sortField": [
+        "templateId",
+        "name",
+        "templateVersion",
+        "owner",
+        "deletedAt",
+        "author",
+        "usageCount",
+        "fieldCount",
+        "lastUsedAt",
+        "isDefault",
+        "isLatest"
+      ],
+      "sortOrder": [
+        "asc",
+        "desc"
+      ],
+      "search": [],
+      "owner": [
+        "cases",
+        "observability",
+        "securitySolution",
+        "cases",
+        "observability",
+        "securitySolution"
+      ],
+      "tags": [],
+      "author": [],
+      "isEnabled": "__flag__"
+    }
+  }
+}

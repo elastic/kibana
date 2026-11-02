@@ -1,0 +1,21 @@
+{
+  "post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize",
+    "url_params": {
+      "prerelease": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "transforms": [
+        {
+          "transformId": ""
+        }
+      ]
+    }
+  }
+}

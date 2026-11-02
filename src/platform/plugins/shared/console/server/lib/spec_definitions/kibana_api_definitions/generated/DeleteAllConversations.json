@@ -1,0 +1,14 @@
+{
+  "DeleteAllConversations": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/current_user/conversations"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-DeleteAllConversations",
+    "data_autocomplete_rules": {
+      "excludedIds": []
+    }
+  }
+}

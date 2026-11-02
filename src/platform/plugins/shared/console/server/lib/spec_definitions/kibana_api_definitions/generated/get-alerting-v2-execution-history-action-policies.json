@@ -1,0 +1,32 @@
+{
+  "get-alerting-v2-execution-history-action-policies": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/v2/execution_history/action_policies"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-alerting-v2-execution-history-action-policies",
+    "url_params": {
+      "page": [],
+      "per_page": [],
+      "from": [],
+      "to": [],
+      "alert_ids": [],
+      "sort_field": [
+        "dispatched_at"
+      ],
+      "sort_order": [
+        "asc",
+        "desc"
+      ],
+      "search": [],
+      "rule_ids": [],
+      "outcomes": [
+        "success",
+        "throttled",
+        "failure"
+      ]
+    }
+  }
+}

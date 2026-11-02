@@ -1,0 +1,37 @@
+{
+  "post-fleet-epm-packages-bulk-upgrade": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/_bulk_upgrade"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-epm-packages-bulk-upgrade",
+    "data_autocomplete_rules": {
+      "force": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "packages": [
+        {
+          "name": "",
+          "version": ""
+        }
+      ],
+      "prerelease": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "upgrade_package_policies": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    }
+  }
+}

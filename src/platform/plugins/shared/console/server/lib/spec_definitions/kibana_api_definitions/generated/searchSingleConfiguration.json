@@ -1,0 +1,25 @@
+{
+  "searchSingleConfiguration": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration/search"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-searchSingleConfiguration",
+    "data_autocomplete_rules": {
+      "error": "",
+      "etag": "",
+      "mark_as_applied_by_agent": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "service": {
+        "environment": "",
+        "name": ""
+      }
+    }
+  }
+}

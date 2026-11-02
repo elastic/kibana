@@ -1,0 +1,46 @@
+{
+  "post-security-entity-store-install": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/entity_store/install"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-security-entity-store-install",
+    "data_autocomplete_rules": {
+      "entityTypes": [
+        {
+          "__one_of": [
+            "user",
+            "host",
+            "service",
+            "generic"
+          ]
+        }
+      ],
+      "excludedUserNames": [],
+      "historySnapshot": {
+        "frequency": "",
+        "retentionDays": ""
+      },
+      "logExtraction": {
+        "additionalIndexPatterns": [],
+        "delay": "",
+        "docsLimit": "",
+        "excludedIndexPatterns": [],
+        "fieldHistoryLength": "",
+        "frequency": "",
+        "lookbackPeriod": "",
+        "maxLogsPerPage": "",
+        "maxLogsPerWindow": "",
+        "maxLogsPerWindowCapBehavior": {
+          "__one_of": [
+            "defer",
+            "drop"
+          ]
+        },
+        "maxTimeWindowSize": ""
+      }
+    }
+  }
+}

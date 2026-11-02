@@ -1,0 +1,11 @@
+{
+  "post-alerting-v2-alerts-id-unack": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/alerts/{id}/_unack"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-alerting-v2-alerts-id-unack"
+  }
+}

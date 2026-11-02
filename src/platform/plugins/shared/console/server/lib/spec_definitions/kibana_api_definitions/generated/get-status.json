@@ -1,0 +1,15 @@
+{
+  "get-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/status"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-get-status",
+    "url_params": {
+      "v7format": "__flag__",
+      "v8format": "__flag__"
+    }
+  }
+}

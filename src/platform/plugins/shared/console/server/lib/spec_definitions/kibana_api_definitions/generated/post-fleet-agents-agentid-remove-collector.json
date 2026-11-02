@@ -1,0 +1,11 @@
+{
+  "post-fleet-agents-agentid-remove-collector": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/remove_collector"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-fleet-agents-agentid-remove-collector"
+  }
+}

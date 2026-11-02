@@ -1,0 +1,11 @@
+{
+  "ReadAlertsIndex": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/detection_engine/index"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-ReadAlertsIndex"
+  }
+}
