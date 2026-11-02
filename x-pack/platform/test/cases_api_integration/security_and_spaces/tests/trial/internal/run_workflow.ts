@@ -19,6 +19,7 @@ import {
   addObservable,
   createWorkflow,
   deleteWorkflow,
+  getWorkflowExecution,
   runCaseWorkflow,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
@@ -61,6 +62,7 @@ steps:
 export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const retry = getService('retry');
 
   describe('run workflow', () => {
     let enabledWorkflowId: string;
@@ -724,6 +726,84 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           expectedHttpCode: 400,
           auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
+        });
+      });
+
+      describe('when the alert is attached under an alias of its index', () => {
+        // Two backing indices, as after a rollover, so single-document reads through the alias
+        // fail and the alert's concrete index can only be found by searching the alias.
+        const alias = 'cases-ftr-run-workflow-alerts';
+        const olderIndex = `${alias}-000001`;
+        const newerIndex = `${alias}-000002`;
+        const alertId = 'alias-alert-1';
+        let caseId: string;
+
+        before(async () => {
+          await es.indices.create({ index: olderIndex, aliases: { [alias]: {} } });
+          await es.indices.create({ index: newerIndex, aliases: { [alias]: {} } });
+          await es.index({
+            index: olderIndex,
+            id: alertId,
+            document: { message: 'alert written before the rollover' },
+            refresh: 'wait_for',
+          });
+        });
+
+        after(async () => {
+          await es.indices.delete({ index: [olderIndex, newerIndex], ignore_unavailable: true });
+        });
+
+        beforeEach(async () => {
+          const theCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            { user: superUser, space: 'space1' }
+          );
+          await createComment({
+            supertest: supertestWithoutAuth,
+            caseId: theCase.id,
+            params: { ...postCommentAlertReq, alertId, index: alias },
+            auth: { user: superUser, space: 'space1' },
+          });
+          caseId = theCase.id;
+        });
+
+        const runOnAlertSelectedIn = (index: string, expectedHttpCode?: number) =>
+          runCaseWorkflow({
+            supertest: supertestWithoutAuth,
+            workflowId: enabledWorkflowId,
+            params: {
+              caseIds: [caseId],
+              inputs: { event: { alertIds: [{ _id: alertId, _index: index }] } },
+              origin: {
+                type: 'cases.attachments',
+                caseId,
+                attachmentType: 'security.alert',
+                attachmentIds: [alertId],
+              },
+            },
+            expectedHttpCode,
+            auth: { user: secAllWorkflowExecuteUser, space: 'space1' },
+          });
+
+        it('returns 200 when the alert is selected under the backing index it lives in', async () => {
+          const { workflowExecutionId } = await runOnAlertSelectedIn(olderIndex);
+
+          // The suite deletes the workflow afterwards, which is refused while an execution is running.
+          await retry.try(async () => {
+            const { status } = await getWorkflowExecution({
+              supertest: supertestWithoutAuth,
+              executionId: workflowExecutionId,
+              auth: { user: superUser, space: 'space1' },
+            });
+
+            expect(status).to.be('completed');
+          });
+        });
+
+        it('returns 400 when the alert is selected under a backing index it does not live in', async () => {
+          await runOnAlertSelectedIn(newerIndex, 400);
         });
       });
 

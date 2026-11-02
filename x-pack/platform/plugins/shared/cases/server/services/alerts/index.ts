@@ -557,12 +557,12 @@ export class AlertService {
   }
 
   /**
-   * Whether Elasticsearch refused a read because the caller holds no privilege on the pattern.
+   * Whether Elasticsearch refused a read because the caller holds no privilege on what it searched.
    *
-   * A caller with read somewhere else gets an empty result for a pattern it cannot see, because
-   * the wildcard resolves to no authorized index. A caller with no index privileges at all is
+   * A caller with read somewhere else gets an empty result for an index or pattern it cannot see,
+   * because it resolves to no authorized index. A caller with no index privileges at all is
    * refused the search action outright, before resolution, so the same absence arrives as an
-   * error instead. Both mean the attack is not readable, so they must be treated alike.
+   * error instead. Both mean the document is not readable, so they must be treated alike.
    */
   private static isUnauthorizedRead(error: unknown): boolean {
     const candidate = error as {
@@ -638,6 +638,73 @@ export class AlertService {
     );
 
     return sourcesById;
+  }
+
+  /**
+   * Returns the concrete index of each referenced alert, searching its stored index as the caller.
+   *
+   * Some attach paths store the alerts alias rather than the backing index, and single-document
+   * operations against an alias fail once it spans more than one index. Alerts the caller cannot
+   * read, that no longer exist, or whose stored index is remote are left out of the result.
+   */
+  public async resolveAlertIndices({ alerts }: { alerts: AlertInfo[] }): Promise<AlertInfo[]> {
+    try {
+      const idsByIndex = new Map<string, Set<string>>();
+
+      for (const { id, index } of this.getNonEmptyAlerts(alerts)) {
+        if (!isNonLocalIndexName(index)) {
+          const ids = idsByIndex.get(index) ?? new Set<string>();
+          ids.add(id);
+          idsByIndex.set(index, ids);
+        }
+      }
+
+      const resolved = await pMap(
+        Array.from(idsByIndex.entries()),
+        async ([index, indexIds]): Promise<AlertInfo[]> => {
+          const ids = Array.from(indexIds);
+          let hits;
+
+          try {
+            ({ hits } = await this.scopedClusterClient.search({
+              index,
+              size: ids.length,
+              query: { ids: { values: ids } },
+              _source: false,
+              track_total_hits: false,
+              // A stored index that no longer resolves to anything holds no alerts.
+              ignore_unavailable: true,
+              allow_no_indices: true,
+            }));
+          } catch (error) {
+            if (!AlertService.isUnauthorizedRead(error)) {
+              throw error;
+            }
+
+            this.logger.debug(
+              `Caller cannot read ${index}, leaving its referenced alerts unresolved: ${ids.join(
+                ', '
+              )}`
+            );
+
+            return [];
+          }
+
+          return hits.hits.flatMap(({ _id: id, _index: hitIndex }) =>
+            id != null ? [{ id, index: hitIndex }] : []
+          );
+        },
+        { concurrency: MAX_CONCURRENT_SEARCHES }
+      );
+
+      return resolved.flat();
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to resolve alert indices: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
   }
 
   /**

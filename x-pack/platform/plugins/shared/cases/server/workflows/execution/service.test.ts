@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  elasticsearchServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { z } from '@kbn/zod/v4';
@@ -50,9 +46,7 @@ describe('CasesWorkflowRunService', () => {
     isActive: true,
     hasAtLeast: jest.fn(() => licenseValid),
   };
-  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const context = {
-    core: Promise.resolve({ elasticsearch: { client: { asCurrentUser: esClient } } }),
     licensing: Promise.resolve({ license }),
   } as unknown as CasesRequestHandlerContext;
   const management = {
@@ -166,7 +160,7 @@ describe('CasesWorkflowRunService', () => {
       undefined as never
     );
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([]);
-    esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+    clientArgs.services.alertsService.resolveAlertIndices.mockResolvedValue([]);
     management.getWorkflow.mockResolvedValue({
       id: 'workflow-1',
       name: 'Investigate case',
@@ -809,9 +803,9 @@ describe('CasesWorkflowRunService', () => {
 
     beforeEach(() => {
       setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: alertsAlias });
-      esClient.search.mockResolvedValue({
-        hits: { hits: [{ _id: 'alert-1', _index: backingIndex }] },
-      } as never);
+      clientArgs.services.alertsService.resolveAlertIndices.mockResolvedValue([
+        { id: 'alert-1', index: backingIndex },
+      ]);
     });
 
     it('runs on the alert selected under its backing index', async () => {
@@ -823,10 +817,22 @@ describe('CasesWorkflowRunService', () => {
         })
       ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
 
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({ index: alertsAlias, query: { ids: { values: ['alert-1'] } } })
-      );
+      expect(clientArgs.services.alertsService.resolveAlertIndices).toHaveBeenCalledWith({
+        alerts: [{ id: 'alert-1', index: alertsAlias }],
+      });
       expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not resolve an alert selected under the index the case stores', async () => {
+      await expect(
+        run({
+          caseIds: ['case-1'],
+          inputs: { event: { alertIds: [{ _id: 'alert-1', _index: alertsAlias }] } },
+          origin: alertOrigin('alert-1'),
+        })
+      ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
+
+      expect(clientArgs.services.alertsService.resolveAlertIndices).not.toHaveBeenCalled();
     });
 
     it('rejects an index the alias does not resolve the alert to', async () => {

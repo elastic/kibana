@@ -73,6 +73,29 @@ export const deleteWorkflow = async ({
 };
 
 /**
+ * Gets a workflow execution via GET /api/workflows/executions/{executionId}.
+ */
+export const getWorkflowExecution = async ({
+  supertest: st,
+  executionId,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  executionId: string;
+  auth?: { user: User; space: string | null } | null;
+}): Promise<{ status: string }> => {
+  const apiCall = st.get(
+    `${getSpaceUrlPrefix(auth?.space)}/api/workflows/executions/${executionId}`
+  );
+
+  void setupAuth({ apiCall, headers: {}, auth });
+
+  const { body } = await apiCall.set('elastic-api-version', WORKFLOWS_API_VERSION).expect(200);
+
+  return body as { status: string };
+};
+
+/**
  * Calls POST /internal/cases/workflows/{workflowId}/run.
  * Returns the parsed body; callers should assert on expectedHttpCode and the body shape.
  */

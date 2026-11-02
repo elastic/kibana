@@ -242,14 +242,11 @@ export class CasesWorkflowRunService {
             })
           : Promise.resolve([]),
       ]);
-      const resolvedAttachedAlerts =
-        selectedAlerts.length > 0
-          ? await resolveAttachedAlertIndices({
-              selected: selectedAlerts,
-              attached: attachedAlerts,
-              esClient: (await context.core).elasticsearch.client.asCurrentUser,
-            })
-          : attachedAlerts;
+      const resolvedAttachedAlerts = await resolveAttachedAlertIndices({
+        selected: selectedAlerts,
+        attached: attachedAlerts,
+        resolveAlertIndices: workflowOperations.resolveAlertIndices,
+      });
       resolvedAttachmentOrigin = validateOrigin({
         origin: body.origin,
         theCase,

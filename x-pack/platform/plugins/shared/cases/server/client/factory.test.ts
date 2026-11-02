@@ -70,6 +70,7 @@ describe('CasesClientFactory', () => {
       ensureAuthorizedToRunWorkflow: expect.any(Function),
       preflightWorkflowExecution: expect.any(Function),
       recordWorkflowExecution: expect.any(Function),
+      resolveAlertIndices: expect.any(Function),
     });
   });
 

@@ -1229,6 +1229,104 @@ describe('updateAlertsStatus', () => {
       ).rejects.toThrow(/Failed to authorize attacks/);
     });
   });
+
+  describe('resolveAlertIndices', () => {
+    const ALIAS = '.alerts-security.alerts-default';
+    const BACKING_INDEX = '.internal.alerts-security.alerts-default-000001';
+
+    const searchHits = (...hits: Array<{ _id: string; _index: string }>) =>
+      ({ hits: { hits } } as never);
+
+    it('returns the concrete index of each alert found behind its stored index', async () => {
+      esClient.search.mockResolvedValueOnce(searchHits({ _id: 'alert-1', _index: BACKING_INDEX }));
+
+      await expect(
+        alertService.resolveAlertIndices({ alerts: [{ id: 'alert-1', index: ALIAS }] })
+      ).resolves.toEqual([{ id: 'alert-1', index: BACKING_INDEX }]);
+
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: ALIAS,
+        size: 1,
+        query: { ids: { values: ['alert-1'] } },
+        _source: false,
+        track_total_hits: false,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+      });
+    });
+
+    it('searches each stored index once, for its own ids only', async () => {
+      const otherAlias = '.alerts-security.alerts-other';
+      esClient.search
+        .mockResolvedValueOnce(searchHits({ _id: 'alert-1', _index: BACKING_INDEX }))
+        .mockResolvedValueOnce(searchHits());
+
+      await alertService.resolveAlertIndices({
+        alerts: [
+          { id: 'alert-1', index: ALIAS },
+          { id: 'alert-2', index: ALIAS },
+          { id: 'alert-1', index: ALIAS },
+          { id: 'alert-3', index: otherAlias },
+        ],
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ALIAS,
+          size: 2,
+          query: { ids: { values: ['alert-1', 'alert-2'] } },
+        })
+      );
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: otherAlias,
+          size: 1,
+          query: { ids: { values: ['alert-3'] } },
+        })
+      );
+    });
+
+    it.each([
+      ['an empty', ''],
+      ['a remote', `remote_cluster:${ALIAS}`],
+    ])('does not search %s stored index', async (_, index) => {
+      // An empty index would search every index, and a remote one would reach another cluster.
+      await expect(
+        alertService.resolveAlertIndices({ alerts: [{ id: 'alert-1', index }] })
+      ).resolves.toEqual([]);
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a 403', { statusCode: 403 }],
+      ['a security exception', { body: { error: { type: 'security_exception' } } }],
+    ])('leaves the alerts unresolved when the search is refused with %s', async (_, error) => {
+      esClient.search.mockRejectedValueOnce(error as never);
+
+      await expect(
+        alertService.resolveAlertIndices({ alerts: [{ id: 'alert-1', index: ALIAS }] })
+      ).resolves.toEqual([]);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Caller cannot read ${ALIAS}, leaving its referenced alerts unresolved: alert-1`
+      );
+    });
+
+    it('wraps and rethrows other search failures', async () => {
+      esClient.search.mockRejectedValueOnce(
+        Object.assign(new Error('unavailable_shards_exception'), {
+          statusCode: 503,
+          body: { error: { type: 'unavailable_shards_exception' } },
+        }) as never
+      );
+
+      await expect(
+        alertService.resolveAlertIndices({ alerts: [{ id: 'alert-1', index: ALIAS }] })
+      ).rejects.toThrow(/Failed to resolve alert indices: .*unavailable_shards_exception/);
+    });
+  });
 });
 
 describe('updateAlertsStatus — event bus', () => {
