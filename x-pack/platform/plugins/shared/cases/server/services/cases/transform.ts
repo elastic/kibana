@@ -8,7 +8,6 @@
 /* eslint-disable @kbn/compat/typescript-naming-convention */
 
 import { omit } from 'lodash';
-import { getStatusKeyField } from '../../common/custom_statuses';
 
 import type {
   SavedObject,
@@ -19,6 +18,7 @@ import type {
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import { getStatusKeyField } from '../../common/custom_statuses';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { Case, CaseCustomFields, ExternalService } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
