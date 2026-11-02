@@ -12,7 +12,7 @@ import {
 } from '@kbn/streams-schema';
 import { STATS_FIXTURE_RESPONSES } from './fixture_unit_stats_client';
 import { STATS_REQUEST_FAILED_ERROR_CODE } from './map_stats_response';
-import { buildStatsRequestBody, createUnitStatsClient } from './unit_stats_client';
+import { buildStatsRequestBody, createUnitStatsClient, toFailureReason } from './unit_stats_client';
 
 const UNIT_ID = 'unit-under-test';
 
@@ -51,6 +51,31 @@ describe('buildStatsRequestBody', () => {
     const body = buildStatsRequestBody({ components: [], window: { kind: 'default' } });
 
     expect(body).toEqual({ components: [] });
+  });
+});
+
+describe('toFailureReason', () => {
+  // An HTTP error is an Error with the request that failed. Its message is the status text.
+  const httpError = (body?: { message?: string }) =>
+    Object.assign(new Error('Forbidden'), { name: 'HttpFetchError', request: {}, body });
+
+  it('gives the message that the server sent, and not the status text', () => {
+    const error = httpError({ message: 'The current user cannot read the stats stream.' });
+
+    expect(toFailureReason(error)).toBe('The current user cannot read the stats stream.');
+  });
+
+  it('gives the message of the error when the server sent none', () => {
+    expect(toFailureReason(httpError())).toBe('Forbidden');
+    expect(toFailureReason(httpError({}))).toBe('Forbidden');
+  });
+
+  it('gives the message of an error that is not an HTTP error', () => {
+    expect(toFailureReason(new Error('Network down'))).toBe('Network down');
+  });
+
+  it('gives a value that is not an error as text', () => {
+    expect(toFailureReason('broken')).toBe('broken');
   });
 });
 

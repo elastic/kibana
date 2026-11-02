@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
 import type { StreamsUnit } from '@kbn/streams-schema';
@@ -26,8 +27,17 @@ export const buildStatsRequestBody = ({
     : {}),
 });
 
-export const toFailureReason = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
+/**
+ * The reason shown to the user when a stats request fails. It is the server's message when there
+ * is one, for example that the user cannot read the stats. The message of an HTTP error is only
+ * its status text.
+ */
+export const toFailureReason = (error: unknown): string => {
+  if (isHttpFetchError(error) && typeof error.body?.message === 'string') {
+    return error.body.message;
+  }
+  return error instanceof Error ? error.message : String(error);
+};
 
 /**
  * Takes any number of components and sends them in requests of at most the limit of the route,

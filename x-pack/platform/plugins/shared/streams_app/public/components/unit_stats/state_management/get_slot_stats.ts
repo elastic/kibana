@@ -13,18 +13,24 @@ import type {
 import { findSlotInstance } from './find_slot_instance';
 import type { StatsEntry } from './types';
 
-export interface SlotStats {
-  /**
-   * `unknown` when there is nothing to show yet: no processors, a result still to arrive, or a
-   * failure. Once every processor has a result it is `ready`, and a missing value is `null`. It is
-   * `stale` when the numbers are shown but a processor's last refresh failed.
-   */
-  status: 'unknown' | 'ready' | 'stale';
+interface SlotNumbers {
   /** Records per second that reach the slot. Nothing is known about what leaves it. */
   eventsRate: number | null;
   /** Seconds that a record spends in the slot, on average. */
   durationAverage: number | null;
 }
+
+/**
+ * - `unknown`: there is nothing to show yet, because there are no processors or a result is still
+ *   to arrive.
+ * - `ready`: every processor has a result. A missing value is `null`.
+ * - `stale`: the numbers are shown, but the last refresh of a processor failed.
+ * - `error`: the stats of a processor could not be loaded, so there are no numbers. The reason is
+ *   the one of the first processor that failed.
+ */
+export type SlotStats =
+  | ({ status: 'unknown' | 'ready' | 'stale' } & SlotNumbers)
+  | ({ status: 'error'; errorReason: string } & { eventsRate: null; durationAverage: null });
 
 const UNKNOWN: SlotStats = { status: 'unknown', eventsRate: null, durationAverage: null };
 
@@ -43,6 +49,16 @@ export const getSlotStats = (
   entries: ReadonlyArray<StatsEntry<ProcessorStatsView> | undefined>
 ): SlotStats => {
   if (entries.length === 0) return UNKNOWN;
+
+  const failed = entries.find((entry) => entry?.status === 'error');
+  if (failed?.error) {
+    return {
+      status: 'error',
+      eventsRate: null,
+      durationAverage: null,
+      errorReason: failed.error.reason,
+    };
+  }
 
   const instances: Array<ProcessorInstanceStatsView | undefined> = [];
   for (const entry of entries) {

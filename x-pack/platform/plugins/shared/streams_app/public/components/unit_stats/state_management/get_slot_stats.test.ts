@@ -42,22 +42,41 @@ describe('getSlotStats', () => {
       ['a processor has no entry yet', [undefined]],
       ['a request is in flight', [{ status: 'loading' }]],
       [
-        'a processor failed',
-        [{ status: 'error', stats: { instances: [] }, error: { code: 'error', reason: 'x' } }],
-      ],
-      [
         'one processor of two is still loading',
         [entryWith(instance(10, 0.001)), { status: 'loading' }],
       ],
-      [
-        'one processor of two failed',
-        [
-          entryWith(instance(10, 0.001)),
-          { status: 'error', stats: { instances: [] }, error: { code: 'error', reason: 'x' } },
-        ],
-      ],
     ])('is unknown when %s', (_description, entries) => {
       expect(getSlotStats(SLOT, entries)).toEqual(UNKNOWN);
+    });
+  });
+
+  describe('when the stats of a processor could not be loaded', () => {
+    const failed = (reason: string): StatsEntry<ProcessorStatsView> => ({
+      status: 'error',
+      stats: { instances: [] },
+      error: { code: 'unavailable', reason },
+    });
+
+    it('is an error with the reason, and no numbers', () => {
+      expect(getSlotStats(SLOT, [failed('Elasticsearch is unavailable')])).toEqual({
+        status: 'error',
+        eventsRate: null,
+        durationAverage: null,
+        errorReason: 'Elasticsearch is unavailable',
+      });
+    });
+
+    it('is an error when one processor of two failed, because the slot cannot be summed', () => {
+      expect(getSlotStats(SLOT, [entryWith(instance(10, 0.001)), failed('first')])).toMatchObject({
+        status: 'error',
+        errorReason: 'first',
+      });
+    });
+
+    it('gives the reason of the first processor that failed', () => {
+      expect(getSlotStats(SLOT, [failed('first'), failed('second')])).toMatchObject({
+        errorReason: 'first',
+      });
     });
   });
 

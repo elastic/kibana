@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { ProcessingNodeRef } from '../../../../../services/unit_graph';
 import type { Unit } from '../../../../../services/unit_repository';
 import type { SlotStats } from '../../../../unit_stats/state_management/get_slot_stats';
@@ -171,6 +171,34 @@ describe('ProcessingNodeStats', () => {
 
       expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
       expect(text('streamsCanvasProcessingNodeDuration')).toBe('-');
+    });
+
+    it('marks the node with a warning, and shows no numbers, when the stats could not be loaded', () => {
+      renderRow(ROUTE_SLOT, {
+        status: 'error',
+        eventsRate: null,
+        durationAverage: null,
+        errorReason: 'Elasticsearch is unavailable',
+      });
+
+      expect(isShown('streamsCanvasProcessingNodeStats')).toBe(true);
+      expect(isShown('streamsCanvasProcessingNodeError')).toBe(true);
+      expect(isShown('streamsCanvasProcessingNodeRate')).toBe(false);
+      expect(isShown('streamsCanvasProcessingNodeDuration')).toBe(false);
+    });
+
+    it('explains why in the tooltip of the warning', async () => {
+      renderRow(ROUTE_SLOT, {
+        status: 'error',
+        eventsRate: null,
+        durationAverage: null,
+        errorReason: 'Elasticsearch is unavailable',
+      });
+
+      fireEvent.mouseOver(screen.getByTestId('streamsCanvasProcessingNodeError'));
+
+      expect(await screen.findByText(/Could not load stats\./)).toBeTruthy();
+      expect(await screen.findByText(/Elasticsearch is unavailable/)).toBeTruthy();
     });
 
     it('keeps its row and shows no numbers while nothing is known', () => {

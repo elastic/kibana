@@ -16,7 +16,7 @@ import {
 } from '../../../../../services/unit_stats_client/format_stats';
 import { useSlotStats } from '../../../../unit_stats/state_management/use_stats_manager';
 import { useCanvasPersistedUnit, useCanvasUnitDefinition } from '../state_management';
-import { StaleStatsIcon } from './stale_stats_icon';
+import { StatsProblemIcon } from './stats_problem_icon';
 
 interface ProcessingNodeStatsProps {
   slot: ProcessingNodeRef;
@@ -50,7 +50,14 @@ export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
         min-height: ${euiTheme.size.xxl};
       `}
     >
-      {stats.status !== 'unknown' && (
+      {stats.status === 'error' && (
+        <StatsProblemIcon
+          problem="error"
+          reason={stats.errorReason}
+          dataTestSubj="streamsCanvasProcessingNodeError"
+        />
+      )}
+      {(stats.status === 'ready' || stats.status === 'stale') && (
         <>
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -60,7 +67,7 @@ export function ProcessingNodeStats({ slot }: ProcessingNodeStatsProps) {
             </EuiFlexItem>
             {stats.status === 'stale' && (
               <EuiFlexItem grow={false}>
-                <StaleStatsIcon dataTestSubj="streamsCanvasProcessingNodeStale" />
+                <StatsProblemIcon problem="stale" dataTestSubj="streamsCanvasProcessingNodeStale" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

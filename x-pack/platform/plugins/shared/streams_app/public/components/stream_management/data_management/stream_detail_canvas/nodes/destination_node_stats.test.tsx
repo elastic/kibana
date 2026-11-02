@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { DestinationStatsView } from '../../../../../services/unit_stats_client/types';
 import type { StatsEntry } from '../../../../unit_stats/state_management/types';
 import { DestinationNodeStats } from './destination_node_stats';
@@ -88,10 +88,6 @@ describe('DestinationNodeStats', () => {
     it.each<[string, StatsEntry<DestinationStatsView> | undefined]>([
       ['no entry yet', undefined],
       ['a request in flight', { status: 'loading' }],
-      [
-        'an error',
-        { status: 'error', error: { code: 'unavailable', reason: 'Elasticsearch is unavailable' } },
-      ],
     ])('shows no status and no rate for %s, and keeps its row', (_description, entry) => {
       renderFooter(entry);
 
@@ -99,6 +95,33 @@ describe('DestinationNodeStats', () => {
       expect(isShown('streamsCanvasDestinationLive')).toBe(false);
       expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
       expect(isShown('streamsCanvasDestinationRate')).toBe(false);
+      expect(isShown('streamsCanvasDestinationError')).toBe(false);
+    });
+  });
+
+  describe('when the stats could not be loaded', () => {
+    const FAILED: StatsEntry<DestinationStatsView> = {
+      status: 'error',
+      error: { code: 'unavailable', reason: 'Elasticsearch is unavailable' },
+    };
+
+    it('marks the node with a warning, and shows no status and no rate', () => {
+      renderFooter(FAILED);
+
+      expect(isShown('streamsCanvasDestinationStats')).toBe(true);
+      expect(isShown('streamsCanvasDestinationError')).toBe(true);
+      expect(isShown('streamsCanvasDestinationLive')).toBe(false);
+      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
+      expect(isShown('streamsCanvasDestinationRate')).toBe(false);
+    });
+
+    it('explains why in the tooltip of the warning', async () => {
+      renderFooter(FAILED);
+
+      fireEvent.mouseOver(screen.getByTestId('streamsCanvasDestinationError'));
+
+      expect(await screen.findByText(/Could not load stats\./)).toBeTruthy();
+      expect(await screen.findByText(/Elasticsearch is unavailable/)).toBeTruthy();
     });
   });
 

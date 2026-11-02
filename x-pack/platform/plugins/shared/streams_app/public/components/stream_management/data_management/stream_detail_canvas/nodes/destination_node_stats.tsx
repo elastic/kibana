@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { formatEventsRate } from '../../../../../services/unit_stats_client/format_stats';
 import { useDestinationStats } from '../../../../unit_stats/state_management/use_stats_manager';
 import { getDestinationFlowStatus } from './destination_stats_status';
-import { StaleStatsIcon } from './stale_stats_icon';
+import { StatsProblemIcon } from './stats_problem_icon';
 
 interface DestinationNodeStatsProps {
   destinationId: string;
@@ -65,7 +65,14 @@ export function DestinationNodeStats({ destinationId, indexCount }: DestinationN
         </EuiHealth>
       )}
       {entry?.status === 'stale' && status !== 'unknown' && (
-        <StaleStatsIcon dataTestSubj="streamsCanvasDestinationStale" />
+        <StatsProblemIcon problem="stale" dataTestSubj="streamsCanvasDestinationStale" />
+      )}
+      {entry?.status === 'error' && entry.error && (
+        <StatsProblemIcon
+          problem="error"
+          reason={entry.error.reason}
+          dataTestSubj="streamsCanvasDestinationError"
+        />
       )}
       {typeof indexCount === 'number' && indexCount > 0 && (
         <EuiText
