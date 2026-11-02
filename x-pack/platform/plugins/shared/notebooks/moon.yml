@@ -18,10 +18,12 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/notebooks
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-menu'
   - '@kbn/config-schema'
   - '@kbn/content-management-table-list-view'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/content-management-table-list-view-table'
+  - '@kbn/core-chrome-app-menu'
   - '@kbn/core-saved-objects-server'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'

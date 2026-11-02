@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditTitle,
   EuiSuperDatePicker,
 } from '@elastic/eui';
+import type { AppMenuConfig } from '@kbn/app-menu';
+import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import useObservable from 'react-use/lib/useObservable';
 import type { InputCellDefinition } from '../../common/types';
 import { findPinnedTimeCell } from '../model/cell_factory';
+import { useNotebookServices } from '../services';
 import { useNotebook } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
 
@@ -52,14 +53,54 @@ export const NotebookHeader = ({
   isSaving?: boolean;
 }) => {
   const { store, scheduler } = useNotebook();
+  const { core } = useNotebookServices();
   const title = useStateFromPublishingSubject(store.title$);
   const cells = useStateFromPublishingSubject(store.cells$);
   const isDirty = useObservable(store.isDirty$, false);
   const pinnedTime = findPinnedTimeCell(cells);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  const appMenu = useMemo<AppMenuConfig>(
+    () => ({
+      items: [
+        {
+          id: 'runAll',
+          order: 1,
+          label: i18n.translate('xpack.notebook.header.runAll', { defaultMessage: 'Run all' }),
+          iconType: 'play',
+          testId: 'notebookRunAll',
+          run: () => scheduler.runAll(),
+        },
+        {
+          id: 'settings',
+          order: 2,
+          label: i18n.translate('xpack.notebook.header.settings', { defaultMessage: 'Settings' }),
+          iconType: 'gear',
+          testId: 'notebookSettings',
+          run: () => setIsSettingsOpen(true),
+        },
+      ],
+      ...(onSave
+        ? {
+            primaryActionItem: {
+              id: 'save',
+              label: i18n.translate('xpack.notebook.header.save', { defaultMessage: 'Save' }),
+              iconType: 'save',
+              testId: 'notebookSave',
+              isLoading: isSaving,
+              disableButton: !isDirty,
+              run: onSave,
+            },
+          }
+        : {}),
+    }),
+    [scheduler, onSave, isSaving, isDirty]
+  );
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
+      <AppMenu setAppMenu={core.chrome.setAppMenu} config={appMenu} />
+      {isSettingsOpen && <NotebookSettingsFlyout onClose={() => setIsSettingsOpen(false)} />}
       <EuiFlexItem grow css={{ minWidth: 240 }}>
         <EuiInlineEditTitle
           heading="h1"
@@ -84,42 +125,6 @@ export const NotebookHeader = ({
       {pinnedTime && (
         <EuiFlexItem grow={false}>
           <PinnedTimePicker cell={pinnedTime} />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="play"
-          onClick={() => scheduler.runAll()}
-          data-test-subj="notebookRunAll"
-        >
-          {i18n.translate('xpack.notebook.header.runAll', { defaultMessage: 'Run all' })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="gear"
-          onClick={() => setIsSettingsOpen(true)}
-          data-test-subj="notebookSettings"
-        >
-          {i18n.translate('xpack.notebook.header.settings', { defaultMessage: 'Settings' })}
-        </EuiButtonEmpty>
-        {isSettingsOpen && <NotebookSettingsFlyout onClose={() => setIsSettingsOpen(false)} />}
-      </EuiFlexItem>
-      {onSave && (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            fill
-            iconType="save"
-            onClick={onSave}
-            isLoading={isSaving}
-            isDisabled={!isDirty}
-            data-test-subj="notebookSave"
-          >
-            {i18n.translate('xpack.notebook.header.save', { defaultMessage: 'Save' })}
-          </EuiButton>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiPageTemplate } from '@elastic/eui';
+import useLatest from 'react-use/lib/useLatest';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition, NotebookAttributes } from '../../common/types';
 import { isPinnedTimeCell } from '../model/cell_factory';
@@ -78,22 +79,22 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     return () => notebook.scheduler.stop();
   }, [notebook]);
 
-  const save = onSave
-    ? async () => {
-        setIsSaving(true);
-        try {
-          await onSave(notebook.store);
-        } finally {
-          setIsSaving(false);
-        }
-      }
-    : undefined;
+  const latestOnSave = useLatest(onSave);
+  const save = useCallback(async () => {
+    if (!latestOnSave.current) return;
+    setIsSaving(true);
+    try {
+      await latestOnSave.current(notebook.store);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [latestOnSave, notebook]);
 
   return (
     <NotebookContext.Provider value={notebook}>
       <EuiPageTemplate restrictWidth={1200} paddingSize="m">
         <EuiPageTemplate.Section paddingSize="m" grow={false}>
-          <NotebookHeader onSave={save} isSaving={isSaving} />
+          <NotebookHeader onSave={onSave ? save : undefined} isSaving={isSaving} />
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section paddingSize="m">
           <CellList />
