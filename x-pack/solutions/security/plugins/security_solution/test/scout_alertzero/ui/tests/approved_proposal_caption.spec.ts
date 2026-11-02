@@ -18,38 +18,40 @@ import {
 
 test.describe('AlertZero approved proposal caption', { tag: tags.stateful.classic }, () => {
   let restoreAlertZero: (() => Promise<void>) | undefined;
-  let seeded: { investigationId: string; proposalId: string } | undefined;
+  let investigationId: string | undefined;
+  let proposalId: string | undefined;
 
   test.beforeAll(async ({ apiServices, kbnClient, esClient }) => {
     restoreAlertZero = await enableAlertZero({ apiServices, kbnClient });
-    const investigationId = await createInvestigation(kbnClient, 'Scout approved proposal caption');
-    const proposalId = await seedApprovedNoActionProposal(esClient, {
+    investigationId = await createInvestigation(kbnClient, 'Scout approved proposal caption');
+    proposalId = await seedApprovedNoActionProposal(esClient, {
       conversationId: investigationId,
       title: 'Review detection gap',
       decidedBy: { username: 'ada', fullName: 'Ada Lovelace', email: null },
     });
-    seeded = { investigationId, proposalId };
   });
 
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPlatformEngineer();
   });
 
   test.afterAll(async ({ kbnClient, esClient }) => {
-    if (seeded) {
-      await cleanupProposalsOfConversation(esClient, seeded.investigationId);
-      await deleteInvestigation(kbnClient, seeded.investigationId);
+    try {
+      if (investigationId) {
+        await cleanupProposalsOfConversation(esClient, investigationId);
+        await deleteInvestigation(kbnClient, investigationId);
+      }
+    } finally {
+      await restoreAlertZero?.();
     }
-    await restoreAlertZero?.();
   });
 
   test('names who approved a proposal that had no action to run, and when', async ({
     pageObjects,
   }) => {
-    if (!seeded) {
+    if (!investigationId || !proposalId) {
       throw new Error('The investigation and its proposal were not seeded');
     }
-    const { investigationId, proposalId } = seeded;
     const { alertZeroQueue } = pageObjects;
 
     await alertZeroQueue.gotoInvestigationFlyout(investigationId, proposalId);
