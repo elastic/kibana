@@ -406,6 +406,64 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
 
+  it('makes the conversation readable by the analyst and links it from the verdict note', () => {
+    const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
+      'public-conversation': string;
+    };
+    // A private conversation belongs to the run-as identity, so the linked page would be
+    // unreachable for the analyst who started the run. It must follow create-conversation.
+    expect(agentStep['public-conversation']).toBe('${{ variables.create_conversation }}');
+
+    const normalizeStep = findStepByName(workflow.steps, 'normalize_batch_result') as {
+      with: Record<string, string>;
+    };
+    // The prompt path creates no conversation, so the id must fall back to "" there.
+    expect(normalizeStep.with.batch_result_conversation_id).toBe(
+      "{{ steps.runAgent_step.output.conversation_id | default: '' }}"
+    );
+
+    const verdictNoteStep = findStepByName(workflow.steps, 'add_verdict_note_to_alert') as {
+      with: { body: { note: { note: string } } };
+    };
+    const { note } = verdictNoteStep.with.body.note;
+    expect(note).toContain("variables.batch_result_conversation_id != ''");
+    expect(note).toContain(
+      '/s/{{ workflow.spaceId }}/app/agent_builder/conversations/{{ variables.batch_result_conversation_id }}'
+    );
+  });
+
+  it('collects one conversation id per batch and exposes them as a workflow output', () => {
+    const initStep = findStepByName(workflow.steps, 'set_workflow_variables') as {
+      with: { conversation_ids: unknown[] };
+    };
+    expect(initStep.with.conversation_ids).toEqual([]);
+
+    // Gated on a non-empty id, so a batch without a conversation adds nothing.
+    const gate = findStepByName(workflow.steps, 'collect_batch_conversation_id') as {
+      condition: string;
+    };
+    expect(gate.condition).toBe("${{ variables.batch_result_conversation_id != '' }}");
+    const pushStep = findStepByName(workflow.steps, 'push_batch_conversation_id') as {
+      with: Record<string, string>;
+    };
+    const pushed = evaluateExpression(
+      createWorkflowLiquidEngine(),
+      pushStep.with.conversation_ids,
+      {
+        variables: {
+          conversation_ids: ['conversation-1'],
+          batch_result_conversation_id: 'conversation-2',
+        },
+      }
+    );
+    expect(pushed).toEqual(['conversation-1', 'conversation-2']);
+
+    const emitStep = findStepByName(workflow.steps, 'emit_workflow_output') as {
+      with: Record<string, string>;
+    };
+    expect(emitStep.with.conversation_ids).toBe('${{ variables.conversation_ids }}');
+  });
+
   it('lets one failed batch fall through instead of aborting the whole execution', () => {
     const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'on-failure': { retry: { 'max-attempts': number }; continue: boolean };
