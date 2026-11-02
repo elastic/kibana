@@ -147,7 +147,12 @@ const createEsClient = (): ElasticsearchClient => {
       ? { auth: { username, password } }
       : {}),
     ...(ca.length > 0 || rejectUnauthorized === false
-      ? { tls: { ...(ca.length > 0 ? { ca } : {}), rejectUnauthorized: rejectUnauthorized !== false ? true : false } }
+      ? {
+          tls: {
+            ...(ca.length > 0 ? { ca } : {}),
+            rejectUnauthorized: rejectUnauthorized !== false ? true : false,
+          },
+        }
       : {}),
   });
   // ElasticsearchClient is Client minus a few internals; structurally compatible.

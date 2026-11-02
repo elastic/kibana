@@ -52,7 +52,7 @@ const main = () => {
   const before = Object.keys(require.cache).length;
 
   // 1 + 2: load the coordinator module graph and audit it.
-  const coordinatorModule = require('./index');
+  const coordinatorModule = require('.');
   const configModule = require('../config');
   const {
     SavedObjectsSerializer,

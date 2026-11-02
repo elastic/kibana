@@ -119,9 +119,7 @@ export class CoordinatorDiscoveryService {
     });
 
     const nodes: ActiveNode[] = [];
-    for (const hit of result.hits.hits as Array<
-      estypes.SearchHit<RawBackgroundTaskNodeSource>
-    >) {
+    for (const hit of result.hits.hits as Array<estypes.SearchHit<RawBackgroundTaskNodeSource>>) {
       const attributes = hit._source?.[BACKGROUND_TASK_NODE_SO_NAME];
       if (attributes) nodes.push({ attributes });
     }

@@ -123,9 +123,12 @@ export class WorkerCoordinatorBridge {
       `Starting PoC coordinator worker thread (log file: ${workerData.logFilePath ?? 'none'})`
     );
 
-    this.worker = new Worker(Path.resolve(__dirname, 'poc_coordinator/worker/coordinator_worker_entry.js'), {
-      workerData,
-    });
+    this.worker = new Worker(
+      Path.resolve(__dirname, 'poc_coordinator/worker/coordinator_worker_entry.js'),
+      {
+        workerData,
+      }
+    );
 
     this.worker.on('message', (message: CoordinatorToExecutorMessage) => {
       switch (message.kind) {

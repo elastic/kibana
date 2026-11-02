@@ -211,7 +211,9 @@ export function describePocEsConnection(connection: PocEsConnection): string {
     : connection.username
     ? `basic(${connection.username}/[REDACTED])`
     : 'none';
-  return `node=${connection.node}, auth=${auth}, ca=${connection.caPaths.length} file(s), rejectUnauthorized=${connection.rejectUnauthorized}, sources=[${connection.sources.join(
-    ', '
-  )}]`;
+  return `node=${connection.node}, auth=${auth}, ca=${
+    connection.caPaths.length
+  } file(s), rejectUnauthorized=${
+    connection.rejectUnauthorized
+  }, sources=[${connection.sources.join(', ')}]`;
 }

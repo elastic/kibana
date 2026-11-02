@@ -220,9 +220,7 @@ async function searchAvailableTasks({
   const excludedTaskTypes = new Set(
     definitions
       .getAllTypes()
-      .filter((type) =>
-        excludedTaskTypePatterns.some((pattern) => minimatch(type, pattern))
-      )
+      .filter((type) => excludedTaskTypePatterns.some((pattern) => minimatch(type, pattern)))
   );
   const claimPartitions = buildClaimPartitions({
     types: taskTypes,

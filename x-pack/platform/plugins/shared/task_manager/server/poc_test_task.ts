@@ -50,7 +50,9 @@ export function registerPocTestTaskDefinitions(
         async run() {
           const durationMs = Number(taskInstance.params.durationMs) || 30_000;
           logger.warn(
-            `[poc-kill-test] task ${taskInstance.id} BLOCKING the main-thread event loop for ${durationMs}ms starting ${new Date().toISOString()}`
+            `[poc-kill-test] task ${
+              taskInstance.id
+            } BLOCKING the main-thread event loop for ${durationMs}ms starting ${new Date().toISOString()}`
           );
           const until = Date.now() + durationMs;
           // Synchronous hot spin: nothing on this event loop runs until done.
@@ -58,7 +60,9 @@ export function registerPocTestTaskDefinitions(
             // spin
           }
           logger.warn(
-            `[poc-kill-test] task ${taskInstance.id} finished blocking at ${new Date().toISOString()}`
+            `[poc-kill-test] task ${
+              taskInstance.id
+            } finished blocking at ${new Date().toISOString()}`
           );
           return { state: {} };
         },
@@ -71,7 +75,9 @@ export function registerPocTestTaskDefinitions(
       createTaskRunner: ({ taskInstance }) => ({
         async run() {
           logger.info(
-            `[poc-noop] task ${taskInstance.id} executed at ${new Date().toISOString()} (runAt was ${taskInstance.runAt?.toISOString()})`
+            `[poc-noop] task ${
+              taskInstance.id
+            } executed at ${new Date().toISOString()} (runAt was ${taskInstance.runAt?.toISOString()})`
           );
           return { state: {} };
         },
@@ -129,7 +135,9 @@ export function registerPocTestRoutes({
         await contract.runSoon(task.id, { requestImmediateClaim: true });
       }
       logger.info(
-        `[poc] scheduled ${taskType} task ${task.id} (durationMs=${durationMs}, nudge=${nudge}) at ${new Date().toISOString()}`
+        `[poc] scheduled ${taskType} task ${
+          task.id
+        } (durationMs=${durationMs}, nudge=${nudge}) at ${new Date().toISOString()}`
       );
       return res.ok({
         body: { id: task.id, taskType: task.taskType, scheduledAt: task.scheduledAt },

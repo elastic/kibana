@@ -76,6 +76,8 @@ fileGroups:
     - test/scout_uiam_local/**/*
     - test/scout_task_manager_claim_nudge/**/*
     - '!target/**/*'
+    - '!server/poc_coordinator/worker/coordinator_worker_entry.js'
+    - '!server/poc_coordinator/dep_check.js'
   jest-config:
     - jest.config.js
 tasks: {}
