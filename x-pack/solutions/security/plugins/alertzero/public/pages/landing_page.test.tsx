@@ -24,6 +24,10 @@ import {
 import { queryKeys } from '../query_keys';
 import { useWorkers } from '../hooks/use_workers_api';
 import { useInvestigationsCount } from '../hooks/use_investigations_api';
+import { of } from 'rxjs';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { AppChromeLayout } from '../components/app_chrome';
 import { LandingPage } from './landing_page';
 
 jest.mock('../hooks/use_workers_api', () => ({
@@ -500,5 +504,26 @@ describe('LandingPage', () => {
     renderPage();
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+  });
+});
+
+describe('LandingPage app heading', () => {
+  it('keeps the AlertZero heading on onboarding', () => {
+    // The app heading's menu subscribes to the feedback handler, which the chrome mock leaves unset.
+    const chrome = chromeServiceMock.createStartContract();
+    (chrome.help.getFeedbackHandler$ as unknown as jest.Mock) = jest.fn(() => of(undefined));
+
+    render(
+      wrap(
+        <MockChromeContextProvider chrome={chrome as never}>
+          <AppChromeLayout>
+            <LandingPage />
+          </AppChromeLayout>
+        </MockChromeContextProvider>
+      )
+    );
+
+    expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('AlertZero');
   });
 });
