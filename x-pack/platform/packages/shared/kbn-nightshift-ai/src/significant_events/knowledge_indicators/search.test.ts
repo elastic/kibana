@@ -553,6 +553,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_ids: ['redis-cache'],
       },
       getSourceIds: async () => ['src-a', 'src-b'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async (sourceId) => [
         makeFeature({
           id: 'frontend-redis',
@@ -600,6 +601,7 @@ describe('searchKnowledgeIndicators', () => {
     const res = await searchKnowledgeIndicators({
       params: { kind: ['feature'] },
       getSourceIds: async () => ['src-a', 'src-b'],
+      resolveTopologySeeds: noTopology,
       getFeatures: async (sourceId) =>
         [
           makeFeature({ id: 'shared', uuid: `${sourceId}:shared`, source_id: sourceId }),

@@ -427,6 +427,7 @@ describe('searchKnowledgeIndicatorsToolHandler', () => {
     const result = await searchKnowledgeIndicatorsToolHandler({
       catalog,
       kiClient,
+      topologySnapshotClient,
       logger,
       params: { kind: ['feature'] },
       view: 'compact',
