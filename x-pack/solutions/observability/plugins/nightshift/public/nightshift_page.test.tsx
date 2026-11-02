@@ -90,6 +90,15 @@ jest.mock('./settings/page', () => ({
     );
   },
 }));
+jest.mock('./components/start_investigation_panel', () => ({
+  StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="startInvestigationPanelStub">
+      <button onClick={onClose} type="button">
+        Close start investigation
+      </button>
+    </div>
+  ),
+}));
 jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('./hooks/use_developer_mode', () => ({
   useDeveloperMode: () => ({
@@ -210,6 +219,63 @@ describe('NightshiftPage', () => {
       renderPage();
 
       expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
+    });
+  });
+
+  describe('Investigate action', () => {
+    const withInvestigationsClient = (capabilities: Record<string, boolean>) => {
+      const { services } = mockUseKibana();
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...services,
+          nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } },
+          application: {
+            ...services.application,
+            capabilities: { nightshift: capabilities },
+          },
+        },
+      });
+    };
+
+    it('opens and closes the start investigation modal from the header primary action', async () => {
+      withInvestigationsClient({
+        [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+      });
+      renderPage();
+
+      const investigateButton = await screen.findByTestId(
+        'o11yNightshiftAppStartInvestigationButton'
+      );
+      expect(investigateButton).toHaveTextContent('Investigate');
+      expect(screen.queryByTestId('startInvestigationPanelStub')).not.toBeInTheDocument();
+
+      await act(async () => fireEvent.click(investigateButton));
+      expect(screen.getByTestId('startInvestigationPanelStub')).toBeInTheDocument();
+
+      await act(async () =>
+        fireEvent.click(screen.getByRole('button', { name: 'Close start investigation' }))
+      );
+      expect(screen.queryByTestId('startInvestigationPanelStub')).not.toBeInTheDocument();
+    });
+
+    it('hides the action without the Nightshift manage privilege', async () => {
+      withInvestigationsClient({ [NIGHTSHIFT_UI_PRIVILEGES.show]: true });
+      renderPage();
+
+      await screen.findByTestId('nightshiftAppStub');
+      expect(
+        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the action when the investigations client is unavailable', async () => {
+      renderPage();
+
+      await screen.findByTestId('nightshiftAppStub');
+      expect(
+        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+      ).not.toBeInTheDocument();
     });
   });
 
