@@ -70,8 +70,8 @@ const USER_MAPPING = {
   ),
 };
 
-const mappingsOf = (fields: readonly string[], type: string) =>
-  Object.fromEntries(fields.map((field) => [field, { type }]));
+const mappingsOf = (fields: readonly string[], mapping: Record<string, string>) =>
+  Object.fromEntries(fields.map((field) => [field, mapping]));
 
 const isAlreadyExists = (error: unknown): boolean =>
   error instanceof Error && /already[ _]exists/i.test(error.message);
@@ -95,9 +95,9 @@ const ensureProposalsStorage = async (esClient: EsLike): Promise<void> => {
           mappings: {
             dynamic: 'strict',
             properties: {
-              ...mappingsOf(KEYWORD_FIELDS, 'keyword'),
-              ...mappingsOf(DATE_FIELDS, 'date'),
-              ...mappingsOf(TEXT_FIELDS, 'text'),
+              ...mappingsOf(KEYWORD_FIELDS, { type: 'keyword' }),
+              ...mappingsOf(DATE_FIELDS, { type: 'date', format: 'strict_date_optional_time' }),
+              ...mappingsOf(TEXT_FIELDS, { type: 'text' }),
               actionInput: { type: 'flattened' },
               revision: { type: 'long' },
               ranks: { properties: { impact: { type: 'byte' }, confidence: { type: 'byte' } } },
