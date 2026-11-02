@@ -25,8 +25,9 @@ const chatModel = await inferenceStart.getChatModel({
 ```
 
 The chat model can also target an inference feature instead of a connector, by passing a
-`featureId` instead of a `connectorId`. The feature's top endpoint is resolved once when the
-model is created, and every call then goes through `chatComplete({ featureId })`:
+`featureId` instead of a `connectorId`. The feature's top endpoint is resolved when the model is
+created to snapshot the connector exposed by `getConnector()`, and every call then goes through
+`chatComplete({ featureId })`, which resolves the feature again at call time:
 
 ```ts
 const chatModel = await inferenceStart.getChatModel({
