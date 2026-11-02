@@ -101,6 +101,12 @@ export interface InvestigationAgentTypeOptions {
   telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
+  /**
+   * Resolves connector ids this type inherits from another agent on every run, in addition to the
+   * telemetry connectors. The assistant inherits the investigator's saved connectors so both
+   * agents share the single allow list users edit on the investigator.
+   */
+  getInheritedConnectorIds?: (ctx: AgentConfigContext) => Promise<string[]>;
   logger?: Logger;
 }
 
@@ -141,6 +147,29 @@ const appendCustomContext = async ({
   }
 };
 
+const inheritConnectorIds = async ({
+  connectorIds,
+  ctx,
+  getInheritedConnectorIds,
+  logger,
+}: {
+  connectorIds: string[];
+  ctx: AgentConfigContext;
+  getInheritedConnectorIds: (ctx: AgentConfigContext) => Promise<string[]>;
+  logger?: Logger;
+}): Promise<string[]> => {
+  try {
+    return [...new Set([...connectorIds, ...(await getInheritedConnectorIds(ctx))])];
+  } catch (error) {
+    // Inherited connectors only widen the allow list, so failing to read them must not block a
+    // run: the agent keeps the telemetry connectors from its own type.
+    logger?.warn(
+      `Failed to resolve inherited connectors for space "${ctx.spaceId}": ${error.message}`
+    );
+    return connectorIds;
+  }
+};
+
 /** Options of the Nightshift agent types that share the investigator's tools and hooks. */
 export type NightshiftAgentTypeOptions = Omit<
   InvestigationAgentTypeOptions,
@@ -161,10 +190,23 @@ export const buildNightshiftAgentConfiguration = ({
   telemetryConnectorId,
   telemetryConfig,
   getCustomContextInstructions,
+  getInheritedConnectorIds,
   logger,
 }: NightshiftAgentTypeOptions & {
   instructions: string;
 }): AgentTypeDefinition['baseConfiguration'] => {
+  const telemetryConnectorIds: string[] = telemetryConfig
+    ? [
+        ...new Set(
+          getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
+            connectorId ? [connectorId] : []
+          )
+        ),
+      ]
+    : telemetryConnectorId
+    ? [telemetryConnectorId]
+    : [];
+
   const configurationFor = ({
     materializeWorkflowId,
     optimizeWorkflowId,
@@ -182,17 +224,7 @@ export const buildNightshiftAgentConfiguration = ({
         },
       ],
       enable_elastic_capabilities: false,
-      connector_ids: telemetryConfig
-        ? [
-            ...new Set(
-              getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
-                connectorId ? [connectorId] : []
-              )
-            ),
-          ]
-        : telemetryConnectorId
-        ? [telemetryConnectorId]
-        : [],
+      connector_ids: telemetryConnectorIds,
       ...(() => {
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
@@ -214,17 +246,29 @@ export const buildNightshiftAgentConfiguration = ({
   // The hooks are per space, so the configuration always resolves per request.
   return async (ctx) => {
     const baseConfiguration = configurationFor(hooksFor(ctx.spaceId));
-    return getCustomContextInstructions
-      ? {
-          ...baseConfiguration,
-          instructions: await appendCustomContext({
+    const [resolvedInstructions, connectorIds] = await Promise.all([
+      getCustomContextInstructions
+        ? appendCustomContext({
             instructions: baseConfiguration.instructions,
             ctx,
             getCustomContextInstructions,
             logger,
-          }),
-        }
-      : baseConfiguration;
+          })
+        : baseConfiguration.instructions,
+      getInheritedConnectorIds
+        ? inheritConnectorIds({
+            connectorIds: baseConfiguration.connector_ids,
+            ctx,
+            getInheritedConnectorIds,
+            logger,
+          })
+        : baseConfiguration.connector_ids,
+    ]);
+    return {
+      ...baseConfiguration,
+      instructions: resolvedInstructions,
+      connector_ids: connectorIds,
+    };
   };
 };
 
@@ -263,6 +307,7 @@ export const registerInvestigationAgentType = (
     telemetryConnectorId,
     telemetryConfig,
     getCustomContextInstructions,
+    getInheritedConnectorIds,
     logger,
   }: InvestigationAgentTypeOptions
 ): void => {
@@ -277,6 +322,7 @@ export const registerInvestigationAgentType = (
       telemetryConnectorId,
       telemetryConfig,
       getCustomContextInstructions,
+      getInheritedConnectorIds,
       logger,
     })
   );

@@ -7,10 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function getEslintrcForGeneratedCode() {
-  return {
-    rules: {
-      '@typescript-eslint/naming-convention': 0,
-    },
-  };
-}
+require('@kbn/setup-node-env');
+require('@kbn/connector-specs/scripts/connector_emulate');
