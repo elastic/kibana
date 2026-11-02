@@ -8,15 +8,14 @@
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { SearchHit } from '../../../common/search_strategy';
-import { useCreateEaseAlertsDataView } from '../../detections/hooks/alert_summary/use_create_data_view';
+import type { SearchHit } from '../../../../../common/search_strategy';
+import { useCreateEaseAlertsDataView } from '../../../hooks/alert_summary/use_create_data_view';
 import { useDocumentDetails } from './hooks/use_document_details';
-import { useRuleWithFallback } from '../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';
-import { FlyoutLoading } from '../../flyout_v2/shared/components/flyout_loading';
-import type { EaseDetailsProps } from './types';
-import { FlyoutError } from '../../flyout_v2/shared/components/flyout_error';
-import { useBasicDataFromDetailsData } from '../document_details/shared/hooks/use_basic_data_from_details_data';
+import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import type { GetFieldsData } from '../../../../flyout/document_details/shared/hooks/use_get_fields_data';
+import { FlyoutLoading } from '../../../../flyout_v2/shared/components/flyout_loading';
+import { FlyoutError } from '../../../../flyout_v2/shared/components/flyout_error';
+import { useBasicDataFromDetailsData } from '../../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
 
 export interface EaseDetailsContext {
   /**
@@ -50,12 +49,16 @@ export interface EaseDetailsContext {
  */
 export const EaseDetailsContext = createContext<EaseDetailsContext | undefined>(undefined);
 
-export type EaseDetailsProviderProps = {
+export interface EaseDetailsProviderProps {
   /**
    * React components to render
    */
   children: React.ReactNode;
-} & Partial<EaseDetailsProps['params']>;
+  /**
+   * Id of the alert to display
+   */
+  id?: string;
+}
 
 export const EaseDetailsProvider = memo(({ id, children }: EaseDetailsProviderProps) => {
   const { dataView } = useCreateEaseAlertsDataView();

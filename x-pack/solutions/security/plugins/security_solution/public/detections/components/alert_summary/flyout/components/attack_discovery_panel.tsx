@@ -13,8 +13,8 @@ import { css } from '@emotion/react';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 import { i18n } from '@kbn/i18n';
 import { AttackDiscoveryDetails } from './attack_discovery_details';
-import { useIdsFromUrl } from '../../../attack_discovery/pages/results/history/use_ids_from_url';
-import { useAttackDiscoveryHistoryTimerange } from '../../../attack_discovery/pages/use_attack_discovery_history_timerange';
+import { useIdsFromUrl } from '../../../../../attack_discovery/pages/results/history/use_ids_from_url';
+import { useAttackDiscoveryHistoryTimerange } from '../../../../../attack_discovery/pages/use_attack_discovery_history_timerange';
 
 export const ATTACK_DISCOVERY_VIEW_DETAILS_BUTTON_TEST_ID =
   'ease-alert-flyout-attack-discovery-view-details-button';

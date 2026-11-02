@@ -13,7 +13,7 @@ import {
   SUGGESTED_PROMPTS_SECTION_TEST_ID,
 } from './ai_assistant_section';
 import { useEaseDetailsContext } from '../context';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../../common/mock';
 
 jest.mock('../context');
 

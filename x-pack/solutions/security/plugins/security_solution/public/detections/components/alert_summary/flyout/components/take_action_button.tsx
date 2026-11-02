@@ -10,9 +10,9 @@ import { EuiButton, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { flattenObject } from '@kbn/object-utils';
 import { useEaseDetailsContext } from '../context';
-import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
-import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
-import { AlertSummaryActionMenu } from '../../../detections/components/alert_summary/action_menu/alert_summary_action_menu';
+import { useAddToCaseActions } from '../../../alerts_table/timeline_actions/use_add_to_case_actions';
+import { useAlertTagsActions } from '../../../alerts_table/timeline_actions/use_alert_tags_actions';
+import { AlertSummaryActionMenu } from '../../action_menu/alert_summary_action_menu';
 
 export const TAKE_ACTION_BUTTON_TEST_ID = 'alert-summary-flyout-take-action';
 

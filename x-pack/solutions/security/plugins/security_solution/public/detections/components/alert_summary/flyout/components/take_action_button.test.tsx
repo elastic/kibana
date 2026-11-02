@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { TAKE_ACTION_BUTTON_TEST_ID, TakeActionButton } from './take_action_button';
-import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useAlertsPrivileges } from '../../../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useEaseDetailsContext } from '../context';
 import userEvent from '@testing-library/user-event';
 
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../context');
 
 describe('TakeActionButton', () => {

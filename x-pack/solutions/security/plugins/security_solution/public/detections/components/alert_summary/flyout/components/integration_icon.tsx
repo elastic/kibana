@@ -6,8 +6,8 @@
  */
 
 import React, { memo } from 'react';
-import { IntegrationIcon as Icon } from '../../../detections/components/alert_summary/common/integration_icon';
-import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
+import { IntegrationIcon as Icon } from '../../common/integration_icon';
+import { useFetchIntegrations } from '../../../../hooks/alert_summary/use_fetch_integrations';
 
 export const INTEGRATION_TEST_ID = 'alert-summary-flyout';
 
