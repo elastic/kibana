@@ -12,7 +12,7 @@ import type { ApplicationSource } from '../../../../common/types/applications';
 import { SOURCE_LABELS } from '../../../labels';
 import { applicationSourceRt } from '../../../utils/application_source';
 import { APPLICATIONS_LIST_EBT_ELEMENTS } from '../../../ebt_constants';
-import { SingleSelectFilter } from './single_select_filter';
+import { SingleSelectFilter } from '../../../components/single_select_filter';
 
 const SOURCE_LABEL = i18n.translate('xpack.digitalExperience.sourceFilter.label', {
   defaultMessage: 'Source',

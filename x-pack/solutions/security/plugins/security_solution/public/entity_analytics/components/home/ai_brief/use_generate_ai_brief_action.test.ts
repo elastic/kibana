@@ -12,6 +12,7 @@ const card = (overrides: Partial<SignalCardData>): SignalCardData => ({
   id: 'entitiesWithAnomalies',
   title: 'Entities with anomalies',
   value: 0,
+  hasCount: true,
   description: 'Entities with at least one ML anomaly',
   filterLabel: 'Entities with anomalies',
   ...overrides,
