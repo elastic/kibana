@@ -145,9 +145,16 @@ describe('ScheduleIntervalField (Sep 14 Every N unit)', () => {
     expect(onValidityChange).toHaveBeenLastCalledWith(true);
   });
 
+  it('leads with the same "Runs every" wording as the header band badge', () => {
+    render(<ScheduleIntervalField workerId={WORKER_ID} current="1h" onChange={onChange} />);
+    expect(screen.getByTestId(`alertZeroTriggerField-${WORKER_ID}`)).toHaveTextContent(
+      /^Runs every/
+    );
+  });
+
   it('reads the unit options as singular when the amount is one', () => {
     // The collapsed header band pluralizes its cadence badge, so a unit-only plural here would
-    // have the same Worker read "Runs every hour" collapsed and "Every 1 hours" expanded.
+    // have the same Worker read "Runs every hour" collapsed and "Runs every 1 hours" expanded.
     render(
       <ScheduleIntervalField
         workerId={WORKER_ID}
