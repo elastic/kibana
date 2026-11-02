@@ -26,8 +26,10 @@ import { playwrightChecks } from './checks/playwright';
 import { localServerChecks } from './checks/local_servers';
 import { esSnapshotChecks } from './checks/es_snapshot';
 import { dockerChecks } from './checks/docker';
+import { qafChecks } from './checks/qaf';
 
 export type DoctorArch = 'stateful' | 'serverless';
+export type DoctorLocation = 'local' | 'cloud';
 
 interface ReportedResult extends CheckResult {
   group: DoctorCheckGroup;
@@ -75,20 +77,27 @@ const toListrTasks = (group: DoctorCheckGroup, results: ReportedResult[]): Listr
 
 const ARCHS: DoctorArch[] = ['stateful', 'serverless'];
 
-const getGroups = (arch?: DoctorArch): DoctorCheckGroup[] => [
-  environmentChecks,
-  playwrightChecks,
-  localServerChecks,
-  ...(arch !== 'serverless' ? [esSnapshotChecks] : []),
-  ...(arch !== 'stateful' ? [dockerChecks] : []),
-];
+const getGroups = (location: DoctorLocation, arch?: DoctorArch): DoctorCheckGroup[] =>
+  location === 'cloud'
+    ? [environmentChecks, playwrightChecks, qafChecks]
+    : [
+        environmentChecks,
+        playwrightChecks,
+        localServerChecks,
+        ...(arch !== 'serverless' ? [esSnapshotChecks] : []),
+        ...(arch !== 'stateful' ? [dockerChecks] : []),
+      ];
 
-const runChecks = async (log: ToolingLog, arch?: DoctorArch): Promise<ReportedResult[]> => {
+const runChecks = async (
+  log: ToolingLog,
+  location: DoctorLocation,
+  arch?: DoctorArch
+): Promise<ReportedResult[]> => {
   const startTime = Date.now();
   const results: ReportedResult[] = [];
 
   await new Listr(
-    getGroups(arch).map((group) => ({
+    getGroups(location, arch).map((group) => ({
       title: group.title,
       task: (_, task) =>
         task.newListr(toListrTasks(group, results), {
@@ -187,50 +196,64 @@ const printFixCommands = (log: ToolingLog, results: CheckResult[]) => {
   log.write(chalk.dim(`\n Or let doctor run them: node scripts/scout doctor --fix`));
 };
 
-const printNextSteps = (log: ToolingLog, archs: DoctorArch[], readyArchs: DoctorArch[]) => {
+const printNextSteps = (
+  log: ToolingLog,
+  location: DoctorLocation,
+  archs: DoctorArch[],
+  readyArchs: DoctorArch[]
+) => {
   log.write('');
   if (readyArchs.length < archs.length) {
     log.write(chalk.red.bold(' ✖ Fix the failed checks before using Scout'));
   }
 
+  const locationFlag = location === 'cloud' ? ' --location cloud' : '';
   for (const arch of readyArchs) {
-    const [domain, ...otherDomains] = testTargets.local
+    const [domain, ...otherDomains] = testTargets[location]
       .filter((target) => target.arch === arch)
       .map((target) => target.domain);
-    log.write(chalk.green.bold(` ✔ Ready for ${arch}, start the servers and run tests with:`));
+    log.write(chalk.green.bold(` ✔ Ready for ${location} ${arch}, run tests with:`));
     log.write(
       `   ${chalk.cyan(
-        `node scripts/scout run-tests --arch ${arch} --domain ${domain} --config <playwright_config_path>`
+        `node scripts/scout run-tests${locationFlag} --arch ${arch} --domain ${domain} --config <playwright_config_path>`
       )}`
     );
     log.write(chalk.dim(`   other domains: ${otherDomains.join(', ')}`));
   }
 
-  if (readyArchs.length) {
-    log.write(`\n To keep the servers running between test runs:`);
-    log.write(
-      `   ${chalk.cyan('node scripts/scout start-server --arch <arch> --domain <domain>')}`
-    );
+  if (!readyArchs.length) {
+    return;
+  }
+  if (location === 'cloud') {
+    log.write(`\n Or with Playwright directly (ech for stateful, mki for serverless):`);
     log.write(
       `   ${chalk.cyan(
-        'node scripts/playwright test --config <playwright_config_path> --project local'
+        'node scripts/playwright test --config <playwright_config_path> --project <ech|mki>'
       )}\n`
     );
+    return;
   }
+  log.write(`\n To keep the servers running between test runs:`);
+  log.write(`   ${chalk.cyan('node scripts/scout start-server --arch <arch> --domain <domain>')}`);
+  log.write(
+    `   ${chalk.cyan(
+      'node scripts/playwright test --config <playwright_config_path> --project local'
+    )}\n`
+  );
 };
 
 export const runDoctor = async (
   log: ToolingLog,
-  { arch, fix }: { arch?: DoctorArch; fix: boolean }
+  { location, arch, fix }: { location: DoctorLocation; arch?: DoctorArch; fix: boolean }
 ) => {
-  const target = `local · ${arch ?? 'stateful + serverless'}`;
+  const target = `${location} · ${arch ?? 'stateful + serverless'}`;
   log.write(`\n ${chalk.bold.inverse(' Scout doctor ')}  ${target}\n`);
 
-  let results = await runChecks(log, arch);
+  let results = await runChecks(log, location, arch);
   if (fix && results.some((result) => result.fix)) {
     await applyFixes(log, results);
     log.write(`\n ${chalk.bold('Checking again')}\n`);
-    results = await runChecks(log, arch);
+    results = await runChecks(log, location, arch);
   }
   if (!fix) {
     printFixCommands(log, results);
@@ -239,9 +262,9 @@ export const runDoctor = async (
   const archs = arch ? [arch] : ARCHS;
   const readyArchs = archs.filter((checkedArch) =>
     results.every(
-      ({ status, group }) => status !== 'fail' || !getGroups(checkedArch).includes(group)
+      ({ status, group }) => status !== 'fail' || !getGroups(location, checkedArch).includes(group)
     )
   );
-  printNextSteps(log, archs, readyArchs);
+  printNextSteps(log, location, archs, readyArchs);
   return readyArchs.length === archs.length;
 };

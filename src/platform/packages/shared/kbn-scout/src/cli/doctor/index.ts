@@ -15,18 +15,20 @@ import { runDoctor } from './run_doctor';
  */
 export const doctorCmd: Command<void> = {
   name: 'doctor',
-  description: 'Check that your local setup is ready to run Scout tests',
+  description: 'Check that your setup is ready to run Scout tests locally or on Elastic Cloud',
   flags: {
-    string: ['arch'],
+    string: ['location', 'arch'],
     boolean: ['fix'],
     help: `
+    --location          Where tests run (one of: local, cloud) [default: local]
     --arch              Server architecture to check (one of: stateful, serverless) [default: both]
     --fix               Run the commands that fix failed checks and warnings, asking first for destructive ones
     `,
   },
   run: async ({ flagsReader, log }) => {
+    const location = flagsReader.enum('location', ['local', 'cloud']) ?? 'local';
     const arch = flagsReader.enum('arch', ['stateful', 'serverless']);
-    if (!(await runDoctor(log, { arch, fix: flagsReader.boolean('fix') }))) {
+    if (!(await runDoctor(log, { location, arch, fix: flagsReader.boolean('fix') }))) {
       process.exitCode = 1;
     }
   },
