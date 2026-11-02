@@ -37,8 +37,6 @@ import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id
 import { toBoolean, toNumber } from '../../../context/url_params_context/helpers';
 import { SearchQueryActions } from '../../../services/telemetry';
 
-export { DEFAULT_REFRESH_INTERVAL };
-
 function useSearchBarParams(defaultKuery?: string) {
   const { path, query } = useApmParams('/*');
   const urlKuery = 'kuery' in query ? query.kuery : undefined;
