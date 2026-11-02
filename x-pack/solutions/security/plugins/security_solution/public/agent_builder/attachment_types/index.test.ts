@@ -76,6 +76,34 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(alertsCall).toBeDefined();
     expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
   });
+
+  describe('security.alerts label', () => {
+    const getAlertsLabel = (data: Record<string, unknown>) => {
+      register();
+      const alertsCall = mockAddAttachmentType.mock.calls.find(
+        (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
+      );
+      return alertsCall![1].getLabel({
+        id: 'test',
+        type: SecurityAgentBuilderAttachments.alerts,
+        data,
+      });
+    };
+
+    it('counts the alerts of a batch that lists them by id', () => {
+      expect(getAlertsLabel({ alertIds: ['a', 'b'] })).toBe('2 alerts');
+    });
+
+    it('uses the attachmentLabel of a batch that references alerts by tag', () => {
+      expect(
+        getAlertsLabel({ tags: ['az:proposal:p1'], attachmentLabel: 'Alerts in this proposal' })
+      ).toBe('Alerts in this proposal');
+    });
+
+    it('falls back to the default label for a batch referenced by tag without a label', () => {
+      expect(getAlertsLabel({ tags: ['az:proposal:p1'] })).toBe('Security alerts');
+    });
+  });
 });
 
 describe('registerEntityAttachment impact entity opener', () => {

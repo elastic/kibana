@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import Os from 'os';
 import { safeExec } from './utils';
 import {
   readSuiteSecretFromDevVault,
   readVaultConfigFromDevVault,
   resetDevVaultConfigCache,
+  resolveDefaultJudgeConnectorId,
 } from './profiles';
 
 jest.mock('./utils', () => ({
@@ -144,5 +146,36 @@ describe('readSuiteSecretFromDevVault', () => {
     expect(readSuiteSecretFromDevVault('nightshift')).toBeUndefined();
     expect(loggedOutput()).toContain('does not match the suite config shape');
     expect(loggedOutput()).not.toContain('leaked-secret');
+  });
+});
+
+describe('resolveDefaultJudgeConnectorId', () => {
+  // A repo root without vault config files.
+  const repoRoot = Os.tmpdir();
+
+  beforeEach(() => {
+    resetDevVaultConfigCache();
+    mockedSafeExec.mockReset();
+    jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('uses evaluationConnectorId from the dev-vault profile', () => {
+    mockedSafeExec.mockReturnValue(encode(VALID_CONFIG));
+    expect(resolveDefaultJudgeConnectorId(repoRoot, 'dev-vault')).toBe('judge');
+  });
+
+  it('is undefined when the profile has no config', () => {
+    expect(resolveDefaultJudgeConnectorId(repoRoot, 'missing')).toBeUndefined();
+  });
+
+  it('is undefined when the profile value is a placeholder', () => {
+    mockedSafeExec.mockReturnValue(
+      encode({ ...VALID_CONFIG, evaluationConnectorId: 'REPLACE_ME' })
+    );
+    expect(resolveDefaultJudgeConnectorId(repoRoot, 'dev-vault')).toBeUndefined();
   });
 });

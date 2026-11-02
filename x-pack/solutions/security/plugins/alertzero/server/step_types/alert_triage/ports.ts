@@ -20,6 +20,7 @@ import {
   VERDICT_TAGS,
   type AlertSeverity,
 } from '../../alert_triage/constants';
+import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
 import { getDetection } from '../../alert_triage/pattern_key';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
 import type { TriageAlert } from '../../alert_triage/types';
@@ -387,7 +388,6 @@ const expandDottedKeys = (source: Record<string, unknown>): Record<string, unkno
     return expanded;
   }, {});
 
-/** Loads a batch's alert documents by id, as `{ _id, _index, ...source }` for Alert Analysis. */
 export interface KeyHistory {
   falsePositive: number;
   truePositive: number;
@@ -449,24 +449,36 @@ export const readKeyHistory = async (
   };
 };
 
-/** With `fields`, only those `_source` paths are returned, which keeps a read of many alerts small. */
+/** Ids per search, so a proposal of up to 1,000 alerts does not exceed the 10 MiB response cap. */
+const LOAD_CHUNK_SIZE = 100;
+
+/**
+ * Loads alerts by id as `{ _id, _index, ...source }` with only the `LOADED_ALERT_FIELDS`, which are
+ * what Alert Analysis, the pattern keys and the proposal text read. The load is in chunks of
+ * `LOAD_CHUNK_SIZE` ids, and a failing chunk fails the load.
+ */
 export const loadAlertsByIds = async (
   { callKibanaApi }: KibanaApi,
-  alertIds: readonly string[],
-  fields?: readonly string[]
+  alertIds: readonly string[]
 ): Promise<LoadedAlerts> => {
-  const { body } = await callKibanaApi<{
-    hits?: { hits?: Array<AlertHit & { _index?: string }> };
-  }>({
-    method: 'POST',
-    path: SIGNALS_SEARCH_PATH,
-    body: {
-      size: alertIds.length,
-      query: { ids: { values: alertIds } },
-      ...(fields && { _source: fields }),
-    },
-  });
-  const hits = body.hits?.hits ?? [];
+  const chunks = Array.from({ length: Math.ceil(alertIds.length / LOAD_CHUNK_SIZE) }, (_, index) =>
+    alertIds.slice(index * LOAD_CHUNK_SIZE, (index + 1) * LOAD_CHUNK_SIZE)
+  );
+  const hits: Array<AlertHit & { _index?: string }> = [];
+  for (const ids of chunks) {
+    const { body } = await callKibanaApi<{
+      hits?: { hits?: Array<AlertHit & { _index?: string }> };
+    }>({
+      method: 'POST',
+      path: SIGNALS_SEARCH_PATH,
+      body: {
+        size: ids.length,
+        query: { ids: { values: ids } },
+        _source: LOADED_ALERT_FIELDS,
+      },
+    });
+    hits.push(...(body.hits?.hits ?? []));
+  }
   const found = new Set(hits.map(({ _id }) => _id));
   return {
     alerts: hits.map(({ _id, _index, _source = {} }) => ({
