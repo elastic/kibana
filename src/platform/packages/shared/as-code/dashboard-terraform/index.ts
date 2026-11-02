@@ -9,3 +9,13 @@
 
 export { buildAttributeTree } from './src/attribute_tree';
 export type { AttributeTree } from './src/attribute_tree';
+export { createDashboardConverter, DashboardConversionError } from './src/convert_dashboard';
+export type {
+  DashboardConversion,
+  DashboardConverter,
+  JsonObject,
+  JsonValue,
+  SkippedPanel,
+} from './src/convert_dashboard';
+export { loadDashboardOas } from './src/dashboard_oas';
+export { DASHBOARD_RESOURCE_TYPE, TERRAFORM_PROVIDER } from './src/provider';

@@ -3,6 +3,5 @@
   "id": "@kbn/as-code-dashboard-terraform",
   "owner": "@elastic/kibana-dashboards",
   "group": "platform",
-  "visibility": "shared",
-  "devOnly": true
+  "visibility": "shared"
 }

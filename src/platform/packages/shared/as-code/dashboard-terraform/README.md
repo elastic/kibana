@@ -18,8 +18,16 @@ published OpenAPI file. This package reads only that document.
   regenerating the OpenAPI files.
 - Sections are a documented special case in `compileDashboardRoot`: the API interleaves sections and panels in
   `panels[]`, while the provider keeps two lists.
+- `createDashboardConverter` turns a dashboard in the API's shape into the body of the resource in Terraform JSON
+  syntax, with the API paths of the fields it dropped and the panels it skipped. Panels are converted one by one, so
+  one unsupported panel does not fail the export. Every string is escaped (`${` → `$${`, `%{` → `%%{`) so Terraform
+  does not evaluate user text as a template. The dashboard plugin's Export → Terraform route calls it.
+- At runtime the converter reads `src/dashboard_schemas.oas.json`, the dashboard schemas of the published OpenAPI
+  file (the whole file is not shipped with Kibana). `TERRAFORM_PROVIDER` is the provider version the mapping was
+  verified against; exports require `>=` it.
 
 When a schema or its mapping changes, regenerate the published files in `oas_docs/output` so the tests here read the
 new mapping: `node scripts/capture_oas_snapshot` with the `--include-path` flags of
-`.buildkite/scripts/steps/checks/capture_oas_snapshot.sh`, then `make api-docs` in `oas_docs`. On a PR, CI does this
-and commits the result.
+`.buildkite/scripts/steps/checks/capture_oas_snapshot.sh`, then `make api-docs` in `oas_docs`, then
+`node scripts/build_dashboard_terraform_oas` to refresh `src/dashboard_schemas.oas.json`. On a PR, CI does this and
+commits the result.

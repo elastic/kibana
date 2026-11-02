@@ -814,6 +814,9 @@ importers:
       '@kbn/as-code-dashboard-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/dashboard-schema
+      '@kbn/as-code-dashboard-terraform':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/as-code/dashboard-terraform
       '@kbn/as-code-data-views-schema':
         specifier: workspace:*
         version: link:src/platform/packages/shared/as-code/data-views-schema
@@ -5177,9 +5180,6 @@ importers:
       '@kbn/api-contracts':
         specifier: workspace:*
         version: link:packages/kbn-api-contracts
-      '@kbn/as-code-dashboard-terraform':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/as-code/dashboard-terraform
       '@kbn/axe-config':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-axe-config

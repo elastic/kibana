@@ -1,0 +1,85 @@
+{
+  "title": "Metric ES|QL",
+  "panels": [
+    {
+      "type": "vis",
+      "grid": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 6
+      },
+      "config": {
+        "type": "metric",
+        "title": "Metric - ESQL with trendline",
+        "description": "ESQL Metric with trend background chart",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM kibana_sample_data_logs | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS avg_bytes = AVG(bytes)"
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "avg_bytes",
+            "background_chart": {
+              "type": "trend"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "vis",
+      "grid": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 6
+      },
+      "config": {
+        "type": "metric",
+        "title": "Metric - ESQL Complex case",
+        "description": "ESQL Metric with background chart and breakdown",
+        "data_source": {
+          "type": "esql",
+          "query": "FROM logs | STATS ..."
+        },
+        "metrics": [
+          {
+            "type": "primary",
+            "column": "count",
+            "color": {
+              "type": "dynamic",
+              "range": "absolute",
+              "steps": [
+                {
+                  "lt": 0,
+                  "color": "red"
+                }
+              ]
+            },
+            "background_chart": {
+              "type": "bar",
+              "max_value": {
+                "column": "bytes"
+              }
+            }
+          },
+          {
+            "type": "secondary",
+            "column": "bytes",
+            "compare": {
+              "to": "baseline",
+              "baseline": 100,
+              "palette": "status",
+              "value": false
+            }
+          }
+        ],
+        "breakdown_by": {
+          "column": "extension.keyword"
+        }
+      }
+    }
+  ]
+}

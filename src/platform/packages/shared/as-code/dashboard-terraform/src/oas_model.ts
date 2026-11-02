@@ -66,6 +66,10 @@ export interface Variant {
   /** Discriminator values recognized as this variant. */
   values: string[];
   content: TNode;
+  /** How a structural union recognizes this variant. */
+  match?: TfVariantMeta['match'];
+  /** The discriminator stays in the variant body. */
+  keepDiscriminator: boolean;
 }
 
 export type TNode =
@@ -82,7 +86,7 @@ export type TNode =
       variants: Variant[];
     };
 
-type KeyedNode = Extract<TNode, { k: 'keyed' }>;
+export type KeyedNode = Extract<TNode, { k: 'keyed' }>;
 
 const refName = (raw: OasSchema): string | undefined => raw.$ref?.split('/').pop();
 
@@ -377,7 +381,13 @@ export class Compiler {
   compileKeyed(branches: OasSchema[], m: TfUnionMeta, stack: string[], location = ''): KeyedNode {
     const disc = m.structural ? undefined : m.discriminator;
     const discOutside = m.discriminator_placement === 'outside';
-    const byKey = new Map<string, { raws: OasSchema[]; values: string[]; location: string }>();
+    const byKey = new Map<
+      string,
+      Pick<Variant, 'values' | 'match' | 'keepDiscriminator'> & {
+        raws: OasSchema[];
+        location: string;
+      }
+    >();
     let outsideRaw: OasSchema | undefined;
     let outsideLocation = location;
     for (const b of branches) {
@@ -418,13 +428,15 @@ export class Compiler {
         raws: [],
         values: [],
         location: m.content ? `${branchAt}.${m.content}` : branchAt,
+        match: v.match,
+        keepDiscriminator: !!v.keep_discriminator,
       };
       entry.raws.push(withLeaves);
       entry.values.push(...values);
       byKey.set(key, entry);
     }
     const variants: Variant[] = [...byKey.entries()].map(
-      ([key, { raws, values, location: variantAt }]) => {
+      ([key, { raws, values, location: variantAt, match, keepDiscriminator }]) => {
         const raw =
           raws.length > 1
             ? raws.map((r) => this.normalize(r)).reduce((a, b) => this.mergeObjects(a, b, 'any'))
@@ -433,6 +445,8 @@ export class Compiler {
           key,
           values: [...new Set(values)],
           content: this.compile(raw, undefined, stack, variantAt),
+          match,
+          keepDiscriminator,
         };
       }
     );
