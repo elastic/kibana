@@ -91,6 +91,13 @@ describe('run query helpers', () => {
       expect(params[1]).toHaveProperty('_tend');
     });
 
+    it('should return the geotile precision param only when given and used', () => {
+      const query = 'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision)';
+      expect(getNamedParams(query, undefined, [], 7)).toEqual([{ _geotile_precision: 7 }]);
+      expect(getNamedParams(query)).toEqual([]);
+      expect(getNamedParams('FROM foo', undefined, [], 7)).toEqual([]);
+    });
+
     it('should return only the variables used in the query', () => {
       const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
       const query = 'FROM foo | KEEP ??field | WHERE agent.name == ?agent_name';
@@ -239,6 +246,24 @@ describe('run query helpers', () => {
           params: expect.not.objectContaining({
             settings: expect.anything(),
           }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('getESQLQueryColumnsRaw binds ?_geotile_precision so the column lookup is valid', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLQueryColumnsRaw({
+        esqlQuery: 'FROM foo | STATS BY ST_GEOTILE(location, ?_geotile_precision)',
+        search,
+      });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ params: [{ _geotile_precision: 0 }] }),
         }),
         expect.anything()
       );

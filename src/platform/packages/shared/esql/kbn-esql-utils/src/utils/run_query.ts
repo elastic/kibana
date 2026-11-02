@@ -42,6 +42,8 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
   return [];
 };
 
+const SCHEMA_ONLY_GEOTILE_PRECISION = 0;
+
 export const hasGeotilePrecisionParam = (query: string) =>
   new RegExp(`\\?${GEOTILE_PRECISION_PARAM}\\b`, 'i').test(query);
 
@@ -57,9 +59,13 @@ export const getGeotilePrecisionParams = (query: string, precision?: number) =>
 export const getNamedParams = (
   query: string,
   timeRange?: TimeRange,
-  variables?: ESQLControlVariable[]
+  variables?: ESQLControlVariable[],
+  geotilePrecision?: number
 ) => {
-  const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
+  const namedParams: ESQLSearchParams['params'] = [
+    ...getStartEndParams(query, timeRange),
+    ...getGeotilePrecisionParams(query, geotilePrecision),
+  ];
   if (variables?.length) {
     const usedVariables = new Set(getESQLQueryVariables(query));
     variables
@@ -96,6 +102,7 @@ export async function getESQLQueryColumnsRaw({
   dropNullColumns,
   timeRange,
   variables,
+  geotilePrecision = SCHEMA_ONLY_GEOTILE_PRECISION,
   includeColumnMetadata,
 }: {
   esqlQuery: string;
@@ -105,10 +112,12 @@ export async function getESQLQueryColumnsRaw({
   filter?: unknown;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
+  /** Value for `?_geotile_precision`. Columns are resolved with `LIMIT 0`, so any valid level works. */
+  geotilePrecision?: number;
   includeColumnMetadata?: boolean;
 }): Promise<ESQLColumn[]> {
   try {
-    const namedParams = getNamedParams(esqlQuery, timeRange, variables);
+    const namedParams = getNamedParams(esqlQuery, timeRange, variables, geotilePrecision);
     const response = await lastValueFrom(
       search(
         {
