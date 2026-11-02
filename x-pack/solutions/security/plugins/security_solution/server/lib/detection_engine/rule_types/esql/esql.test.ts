@@ -384,6 +384,33 @@ describe('esqlExecutor', () => {
       expect(result.success).toBe(true);
     });
 
+    it('should create one alert per row when the expanded field is a reserved metadata column', async () => {
+      mockedArguments.sharedParams = getSharedParamsMock({
+        ruleParams: getEsqlRuleParams({
+          query: 'from auditbeat* metadata _id, _ignored | mv_expand _ignored',
+        }),
+      });
+      (getMvExpandFields as jest.Mock).mockReturnValue(['_ignored']);
+      mockEsqlResult(
+        [
+          { name: '_id', type: 'keyword' },
+          { name: '_ignored', type: 'keyword' },
+        ],
+        [
+          ['doc-1', 'host.name'],
+          ['doc-1', 'agent.name'],
+        ]
+      );
+
+      await esqlExecutor(mockedArguments);
+
+      const alertDocuments = ruleServices.alertWithPersistence.mock.calls[0][0];
+      expect(alertDocuments).toHaveLength(2);
+      alertDocuments.forEach((alertDocument) =>
+        expect(alertDocument._source).not.toHaveProperty('_ignored')
+      );
+    });
+
     describe('when the search needs more than one iteration', () => {
       const firstPage = {
         id: 'QUERY-ID',

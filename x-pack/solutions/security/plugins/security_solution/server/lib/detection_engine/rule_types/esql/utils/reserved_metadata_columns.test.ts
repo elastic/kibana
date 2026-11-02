@@ -5,47 +5,65 @@
  * 2.0.
  */
 
-import { removeReservedMetadataColumns } from './reserved_metadata_columns';
+import {
+  getReservedMetadataColumns,
+  omitReservedMetadataColumns,
+} from './reserved_metadata_columns';
 
-describe('removeReservedMetadataColumns', () => {
-  it('removes reserved columns and keeps the others', () => {
-    const documents = [
-      { _source: '{"a":1}', _ignored: 'host.name', 'host.name': 'host-1', _custom: 'value' },
-    ];
+describe('reserved metadata columns', () => {
+  describe('getReservedMetadataColumns', () => {
+    it('returns the unique reserved column names without duplicates across documents', () => {
+      const documents: Array<Record<string, string>> = [
+        { _source: '{"a":1}', _ignored: 'host.name' },
+        { _source: '{"b":2}' },
+        { 'host.name': 'host-1' },
+      ];
 
-    expect(removeReservedMetadataColumns(documents).documents).toEqual([
-      { 'host.name': 'host-1', _custom: 'value' },
-    ]);
+      expect(getReservedMetadataColumns(documents)).toEqual(['_source', '_ignored']);
+    });
+
+    it('includes _data_stream_timestamp, which Elasticsearch rejects as well', () => {
+      expect(getReservedMetadataColumns([{ _data_stream_timestamp: 'x' }])).toEqual([
+        '_data_stream_timestamp',
+      ]);
+    });
+
+    it('returns an empty array when no column is reserved', () => {
+      const documents = [{ _id: 'doc-1', _score: '1', _custom: 'value', 'host.name': 'host-1' }];
+
+      expect(getReservedMetadataColumns(documents)).toEqual([]);
+    });
+
+    it('handles an empty list of documents', () => {
+      expect(getReservedMetadataColumns([])).toEqual([]);
+    });
   });
 
-  it('returns the removed column names without duplicates across documents', () => {
-    const documents: Array<Record<string, string>> = [
-      { _source: '{"a":1}', _ignored: 'host.name' },
-      { _source: '{"b":2}' },
-      { 'host.name': 'host-1' },
-    ];
+  describe('omitReservedMetadataColumns', () => {
+    it('removes reserved fields and keeps the others', () => {
+      const source = {
+        _source: '{"a":1}',
+        _ignored: 'host.name',
+        'host.name': 'host-1',
+        _custom: 'value',
+      };
 
-    expect(removeReservedMetadataColumns(documents).removedColumns).toEqual([
-      '_source',
-      '_ignored',
-    ]);
-  });
+      expect(omitReservedMetadataColumns(source)).toEqual({
+        'host.name': 'host-1',
+        _custom: 'value',
+      });
+    });
 
-  it('returns no removed columns when no column is reserved', () => {
-    const documents = [{ _id: 'doc-1', _score: '1', _custom: 'value', 'host.name': 'host-1' }];
+    it('does not modify the original source', () => {
+      const source = { _source: '{"a":1}', 'host.name': 'host-1' };
 
-    expect(removeReservedMetadataColumns(documents)).toEqual({ documents, removedColumns: [] });
-  });
+      omitReservedMetadataColumns(source);
 
-  it('does not modify the original documents', () => {
-    const documents = [{ _source: '{"a":1}', 'host.name': 'host-1' }];
+      expect(source).toEqual({ _source: '{"a":1}', 'host.name': 'host-1' });
+    });
 
-    removeReservedMetadataColumns(documents);
-
-    expect(documents).toEqual([{ _source: '{"a":1}', 'host.name': 'host-1' }]);
-  });
-
-  it('handles an empty list of documents', () => {
-    expect(removeReservedMetadataColumns([])).toEqual({ documents: [], removedColumns: [] });
+    it('returns undefined when there is no source', () => {
+      expect(omitReservedMetadataColumns(undefined)).toBeUndefined();
+    });
   });
 });

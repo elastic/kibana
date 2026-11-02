@@ -29,7 +29,7 @@ import {
   getSourceDocument,
   getTransformedQuery,
   checkMissingIdFieldWarning,
-  removeReservedMetadataColumns,
+  getReservedMetadataColumns,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
@@ -197,11 +197,9 @@ export const esqlExecutor = async ({
           `ES|QL query iteration\nIteration: ${iteration}. Search took: ${esqlSearchDuration}ms.`
         );
 
-        const { documents: results, removedColumns } = removeReservedMetadataColumns(
-          response.values.map((row) => rowToDocument(response.columns, row))
-        );
+        const results = response.values.map((row) => rowToDocument(response.columns, row));
         totalEventsFound += results.length;
-        removedColumns.forEach((column) => removedMetadataColumns.add(column));
+        getReservedMetadataColumns(results).forEach((column) => removedMetadataColumns.add(column));
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SignalSource } from '../../types';
+
 /**
  * Elasticsearch metadata fields that cannot be added inside a document. An ES|QL result column
  * with one of these names (for example from `METADATA _source, _ignored`) would make the alert
@@ -20,24 +22,31 @@ const RESERVED_METADATA_FIELDS: ReadonlySet<string> = new Set([
   '_seq_no',
   '_field_names',
   '_nested_path',
+  '_data_stream_timestamp',
 ]);
 
+const isReserved = (name: string): boolean => RESERVED_METADATA_FIELDS.has(name);
+
 /**
- * Removes the columns that cannot be stored in an alert from the ES|QL result documents.
- * Returns the cleaned documents and the unique names of the columns that were removed.
+ * Returns the unique names of the columns in the ES|QL result documents that cannot be stored in an alert.
  */
-export const removeReservedMetadataColumns = (
-  documents: Array<Record<string, string>>
-): { documents: Array<Record<string, string>>; removedColumns: string[] } => {
-  const isReserved = (name: string): boolean => RESERVED_METADATA_FIELDS.has(name);
-
+export const getReservedMetadataColumns = (documents: Array<Record<string, string>>): string[] => {
   const columnNames = documents.flatMap((document) => Object.keys(document));
-  const removedColumns = [...new Set(columnNames.filter(isReserved))];
+  return [...new Set(columnNames.filter(isReserved))];
+};
 
-  const cleanedDocuments = documents.map((document) => {
-    const keptEntries = Object.entries(document).filter(([name]) => !isReserved(name));
-    return Object.fromEntries(keptEntries);
-  });
+/**
+ * Returns a copy of the event source without the fields that cannot be stored in an alert.
+ * The values are still needed to generate the alert id and the suppression terms, so this must
+ * only be applied to the document the alert is built from.
+ */
+export const omitReservedMetadataColumns = (
+  source: SignalSource | undefined
+): SignalSource | undefined => {
+  if (!source) {
+    return source;
+  }
 
-  return { documents: cleanedDocuments, removedColumns };
+  const keptEntries = Object.entries(source).filter(([name]) => !isReserved(name));
+  return Object.fromEntries(keptEntries);
 };
