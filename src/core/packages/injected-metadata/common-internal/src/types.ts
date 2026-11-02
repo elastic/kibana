@@ -111,11 +111,11 @@ export interface InjectedMetadata {
   uiPlugins: InjectedMetadataPlugin[];
   legacyMetadata: {
     uiSettings: {
-      defaults: Record<string, any>; // UiSettingsRuntimeEntry (value, type, readonlyMode)
+      defaults: Record<string, any>; // UiSettingsRuntimeEntry (name, value, type, readonly, readonlyMode)
       user: Record<string, any>; // UserProvidedValues (userValue, isOverridden)
     };
     globalUiSettings: {
-      defaults: Record<string, any>; // UiSettingsRuntimeEntry (value, type, readonlyMode)
+      defaults: Record<string, any>; // UiSettingsRuntimeEntry (name, value, type, readonly, readonlyMode)
       user: Record<string, any>; // UserProvidedValues (userValue, isOverridden)
     };
   };

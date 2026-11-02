@@ -57,7 +57,7 @@ export interface IUiSettingsClient {
 
   /**
    * Gets all uiSettings entries, including the type, default value, and user value
-   * for each key. Does not include display metadata (name, description, category).
+   * for each key. Does not include display metadata such as description and category.
    */
   getAll: () => Readonly<UiSettingsRuntimeState>;
 

@@ -65,7 +65,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {
         "theme:darkMode": Object {
@@ -167,7 +169,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -265,7 +269,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {
         "theme:darkMode": Object {
@@ -367,7 +373,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -465,7 +473,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -567,7 +577,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -665,7 +677,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -763,7 +777,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -861,7 +877,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -959,7 +977,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -1062,7 +1082,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {
         "theme:darkMode": Object {
@@ -1166,7 +1188,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -1269,7 +1293,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {
         "theme:darkMode": Object {
@@ -1376,7 +1402,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -1474,7 +1502,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -1581,7 +1611,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -1684,7 +1716,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -1787,7 +1821,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -1892,7 +1928,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },
@@ -1997,7 +2035,9 @@ Object {
     },
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {},
+        "registered": Object {
+          "name": "title",
+        },
       },
       "user": Object {},
     },

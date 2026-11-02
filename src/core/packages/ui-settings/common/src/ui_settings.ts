@@ -164,12 +164,14 @@ export interface UserProvidedValues<T = any> {
 /**
  * The minimal set of fields needed by the browser-side runtime settings client.
  * This is what gets injected into the page HTML — only the fields required for
- * value resolution, type coercion, and access control.
+ * value resolution, type coercion, access control, and labeling.
  * @public
  */
 export interface UiSettingsRuntimeEntry {
+  name?: string;
   value?: unknown;
   type?: UiSettingsType;
+  readonly?: boolean;
   readonlyMode?: ReadonlyModeType;
 }
 

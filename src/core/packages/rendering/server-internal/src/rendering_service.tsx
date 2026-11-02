@@ -504,7 +504,7 @@ const withAsyncDefaultValues = async (
 
 /**
  * Strip full UiSettingsParams down to the minimal fields needed by the browser
- * runtime client: value, type, and readonlyMode.
+ * runtime client: name, value, type, readonly, and readonlyMode.
  */
 const toRuntimeDefaults = (
   fullDefaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>
@@ -512,7 +512,9 @@ const toRuntimeDefaults = (
   const slim: Record<string, UiSettingsRuntimeEntry> = {};
   for (const [key, def] of Object.entries(fullDefaults)) {
     const entry: UiSettingsRuntimeEntry = { value: def.value };
+    if (def.name) entry.name = def.name;
     if (def.type) entry.type = def.type;
+    if (def.readonly) entry.readonly = def.readonly;
     if (def.readonlyMode) entry.readonlyMode = def.readonlyMode;
     slim[key] = entry;
   }
