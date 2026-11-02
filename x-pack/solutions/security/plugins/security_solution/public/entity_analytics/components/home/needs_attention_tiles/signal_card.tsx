@@ -54,6 +54,7 @@ const SELECTED_DOT_OFFSET = 8;
 
 const TREND_UPWARD = '\u{2191}';
 const TREND_DOWNWARD = '\u{2193}';
+const TREND_NONE = '=';
 
 const notEnoughHistory = i18n.translate(
   'xpack.securitySolution.entityAnalytics.facelift.signalCard.deltaNoHistory',
@@ -127,13 +128,20 @@ interface TrendBadgeColors {
 
 /**
  * Lens CompareTo secondary-metric palette with Trend reversed: for these tiles an increase is
- * bad (red) and a decrease is good (green).
+ * bad (red) and a decrease is good (green); no change is grey.
  */
 const getTrendReversedBadgeColors = (
   delta: number,
   euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
-): TrendBadgeColors =>
-  delta < 0
+): TrendBadgeColors => {
+  if (delta === 0) {
+    return {
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      textColor: euiTheme.colors.textSubdued,
+      icon: TREND_NONE,
+    };
+  }
+  return delta < 0
     ? {
         backgroundColor: euiTheme.colors.backgroundLightSuccess,
         textColor: euiTheme.colors.textSuccess,
@@ -144,6 +152,7 @@ const getTrendReversedBadgeColors = (
         textColor: euiTheme.colors.textDanger,
         icon: TREND_UPWARD,
       };
+};
 
 /** From this size on, a tile number is shortened: precision at that scale does not help triage. */
 const COMPACT_NUMBER_FROM = 10_000;
@@ -167,6 +176,14 @@ const getDeltaDescription = (
   showNoHistory: boolean
 ): string | undefined => {
   if (shownDelta === undefined) return showNoHistory ? notEnoughHistoryDescription : undefined;
+  if (shownDelta === 0) {
+    return i18n.translate(
+      'xpack.securitySolution.entityAnalytics.facelift.signalCard.ariaLabelNoChange',
+      {
+        defaultMessage: 'No change compared with the previous period',
+      }
+    );
+  }
   // Exact, even where the badge shortens it.
   const amount = Math.abs(shownDelta).toLocaleString();
   return shownDelta > 0
@@ -541,8 +558,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
   const isDeltaLoading = interactive && Boolean(card.isDeltaLoading);
   const isTrendLoading = interactive && Boolean(card.isTrendLoading);
   const showProgress = isLoading || isDeltaLoading || isTrendLoading;
-  const shownDelta =
-    interactive && !card.isDeltaLoading && delta !== undefined && delta !== 0 ? delta : undefined;
+  const shownDelta = interactive && !card.isDeltaLoading && delta !== undefined ? delta : undefined;
   // No line next to "Not enough history to compare": the short history would make it misleading.
   const shownTrend =
     interactive &&

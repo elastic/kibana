@@ -128,11 +128,13 @@ describe('SignalCard', () => {
     expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('-2,270↓');
   });
 
-  it('shows no delta for a zero or missing delta', () => {
-    const { unmount } = renderCard({ delta: 0 });
-    expect(screen.queryByTestId('eaFaceliftSignalCardDelta')).not.toBeInTheDocument();
-    unmount();
+  it('shows a grey "0 =" badge when nothing changed', () => {
+    renderCard({ delta: 0 });
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('0=');
+    expect(screen.getByTestId('eaFaceliftSignalCardDelta')).toHaveTextContent('vs. previous 30d');
+  });
 
+  it('shows no delta for a missing delta', () => {
     renderCard({ delta: undefined });
     expect(screen.queryByTestId('eaFaceliftSignalCardDelta')).not.toBeInTheDocument();
   });
@@ -244,6 +246,14 @@ describe('SignalCard', () => {
     it('adds that the history is too short when the tile says so', () => {
       renderCard({ isDeltaUnavailable: true });
       expect(tile()).toHaveAttribute('aria-label', 'New entity. Not enough history to compare');
+    });
+
+    it('says nothing changed when the change is 0', () => {
+      renderCard({ delta: 0 });
+      expect(tile()).toHaveAttribute(
+        'aria-label',
+        'New entity. No change compared with the previous period'
+      );
     });
 
     it('stays the title alone while the delta loads or at a zero count', () => {
