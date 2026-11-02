@@ -8,6 +8,6 @@
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
-  testDir: `${__dirname}/evals`,
+  testDir: `${__dirname}/evals/attack_discovery`,
   timeout: 30 * 60_000,
 });

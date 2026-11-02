@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/discoveries'
   - '@kbn/kbn-client'
+  - '@kbn/workflows'
 tags:
   - functional-tests
   - package

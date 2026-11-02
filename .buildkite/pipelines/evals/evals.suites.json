@@ -521,6 +521,19 @@
       "serverConfigSet": "evals_attack_discovery_fp_tp"
     },
     {
+      "id": "security-attack-discovery-generation-path",
+      "name": "Attack Discovery Generation Path",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/generation_path.playwright.config.ts",
+      "tags": [
+        "security",
+        "attack-discovery"
+      ],
+      "ciLabels": [
+        "evals:security-attack-discovery-generation-path"
+      ],
+      "serverConfigSet": "evals_attack_discovery_generation_path"
+    },
+    {
       "id": "skill-selection-benchmark",
       "name": "Skill Selection Benchmark",
       "slackChannel": "#agent-builder-alerts",
