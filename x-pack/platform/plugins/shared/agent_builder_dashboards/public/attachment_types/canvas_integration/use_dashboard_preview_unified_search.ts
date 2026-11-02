@@ -197,7 +197,7 @@ export const useDashboardPreviewUnifiedSearch = ({
           'xpack.agentBuilderDashboards.esqlApproximationToggle.additionalText',
           {
             defaultMessage:
-              'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+              'Fast mode can only apply to panels based on an ES|QL query with a STATS command.',
           }
         ),
       },
