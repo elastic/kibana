@@ -22,6 +22,7 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { FlyoutApi } from '../../use_flyout_api';
 import { useFlyoutApi } from '../../use_flyout_api';
+import { getAttackAlertIds } from '../../attack/utils/get_attack_alert_ids';
 import type {
   AnalyzerDescriptor,
   AttackCorrelationsDescriptor,
@@ -108,11 +109,24 @@ const NEEDS_ATTACK_HIT = new Set<string>(['attackCorrelations', 'attackEntities'
 // Per-kind restorer helpers (pure functions, not hooks)
 // ---------------------------------------------------------------------------
 
-interface RestoreContext {
+export interface RestoreContext {
   docHit?: DataTableRecord;
   attackHit?: DataTableRecord;
   iocIndicator?: Indicator;
 }
+
+/**
+ * Rebuilds an `Indicator` from its fetched record. Carries `_index` through (the `Indicator` type
+ * only declares `_id`/`fields`, but the IOC opener reads `_index` off the raw hit to re-persist the
+ * URL descriptor). Without it, re-opening on restore would rewrite the descriptor with an empty
+ * index and a second refresh would no longer restore the flyout.
+ */
+export const recordToIndicator = (record: DataTableRecord): Indicator =>
+  ({
+    _id: record.raw._id ?? '',
+    _index: record.raw._index,
+    fields: (record.raw.fields ?? {}) as Indicator['fields'],
+  } as Indicator);
 
 /**
  * Builds the tool-header "show entity" callback for a restored entity tool flyout.
@@ -381,7 +395,11 @@ export const openDescriptorAsStart = (
     case 'attackCorrelations': {
       const d = descriptor as AttackCorrelationsDescriptor;
       if (ctx.attackHit) {
-        api.openAttackCorrelations({ hit: ctx.attackHit, alertIds: d.alertIds, ...originParams });
+        api.openAttackCorrelations({
+          hit: ctx.attackHit,
+          alertIds: getAttackAlertIds(ctx.attackHit),
+          ...originParams,
+        });
       } else {
         api.openAttackFlyout({
           attackId: d.attackId,
@@ -394,7 +412,11 @@ export const openDescriptorAsStart = (
     case 'attackEntities': {
       const d = descriptor as AttackEntitiesDescriptor;
       if (ctx.attackHit) {
-        api.openAttackEntities({ hit: ctx.attackHit, alertIds: d.alertIds, ...originParams });
+        api.openAttackEntities({
+          hit: ctx.attackHit,
+          alertIds: getAttackAlertIds(ctx.attackHit),
+          ...originParams,
+        });
       } else {
         api.openAttackFlyout({
           attackId: d.attackId,
@@ -445,11 +467,13 @@ export const openDescriptorAsStart = (
         entityName: d.entityName,
         entityId: d.entityId,
         ...(d.subTab ? { subTab: d.subTab as RiskScoreLeftPanelSubTab } : {}),
+        scopeId: d.scopeId,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
           entityId: d.entityId,
+          scopeId: d.scopeId,
         }),
       });
       break;
@@ -773,7 +797,15 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
   const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
   const history = useHistory();
   const flyoutApi = useFlyoutApi();
+  // The deferred restore open must use the latest API: on the first render `useIsInSecurityApp`
+  // has not resolved yet, so that render's API carries Discover's history key, whose flyouts never
+  // write the URL param. A descriptor that needs no fetch restores right on that first render.
+  const flyoutApiRef = useRef(flyoutApi);
   const hasRestoredRef = useRef(false);
+
+  useEffect(() => {
+    flyoutApiRef.current = flyoutApi;
+  }, [flyoutApi]);
 
   // Read URL param exactly once (useState initializer runs on the first render only).
   // Rule preview documents are stored in a transient index that no longer exists after the page
@@ -982,17 +1014,7 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // Build resolved context. `useEsDocSearch` already returns `DataTableRecord`s.
     const docHit = docHitRecord ?? undefined;
     const attackHit = attackHitRecord ?? undefined;
-    // Carry `_index` through on the reconstructed indicator (the `Indicator` type only declares
-    // `_id`/`fields`, but the IOC opener reads `_index` off the raw hit to re-persist the URL
-    // descriptor). Without it, re-opening on restore would rewrite the descriptor with an empty
-    // index and a second refresh would no longer restore the flyout.
-    const iocIndicator: Indicator | undefined = iocHitRecord
-      ? ({
-          _id: iocHitRecord.raw._id ?? '',
-          _index: iocHitRecord.raw._index,
-          fields: (iocHitRecord.raw.fields ?? {}) as Indicator['fields'],
-        } as Indicator)
-      : undefined;
+    const iocIndicator = iocHitRecord ? recordToIndicator(iocHitRecord) : undefined;
 
     const ctx: RestoreContext = { docHit, attackHit, iocIndicator };
     const [first, second] = descriptors;
@@ -1000,9 +1022,10 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     // Defer to a macrotask to avoid z-index ordering races with Timeline restore, which also
     // fires on mount and claims its slot in the same render cycle.
     setTimeout(() => {
-      openDescriptorAsStart(first, ctx, flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
+      const { current: api } = flyoutApiRef;
+      openDescriptorAsStart(first, ctx, api, FLYOUT_ORIGIN.URL_RESTORE);
       if (second) {
-        openDescriptorAsChild(second, ctx, flyoutApi, FLYOUT_ORIGIN.URL_RESTORE);
+        openDescriptorAsChild(second, ctx, api, FLYOUT_ORIGIN.URL_RESTORE);
       }
     }, 0);
   }, [
@@ -1018,6 +1041,5 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
     attackHitRecord,
     iocRequestState,
     iocHitRecord,
-    flyoutApi,
   ]);
 };

@@ -7,6 +7,7 @@
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type {
+  ChatCompletionReasoning,
   InferenceConnector,
   EisInferenceEndpointMetadata,
   CspRegion,
@@ -40,6 +41,9 @@ export interface SearchInferenceEndpointsConfigType {
 
 export interface InferenceEndpointSetting {
   id: string;
+  parameters?: {
+    reasoning?: Pick<ChatCompletionReasoning, 'effort'>;
+  };
 }
 
 export interface InferenceFeatureSetting {

@@ -30,7 +30,7 @@ import type {
   HasUniqueId,
   PresentationContainer,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesDescription,
   PublishesEditablePauseFetch,
   PublishesHideBorder,
@@ -179,7 +179,7 @@ export type DashboardApi = CanExpandPanels &
   HasUniqueId &
   PresentationContainer &
   PublishesDataLoading &
-  PublishesDataViews &
+  PublishesDataSources &
   PublishesDescription &
   PublishesHideBorder &
   Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
