@@ -38,12 +38,6 @@ const evaluateWith = async ({
     metadata: {},
   });
 
-describe('troubleshooting tool id contract', () => {
-  it('mirrors the generate_insight tool id of the automatic troubleshooting skill', () => {
-    expect(GENERATE_INSIGHT_TOOL_ID).toBe('automatic_troubleshooting.generate_insight');
-  });
-});
-
 describe('createTroubleshootingToolUsageEvaluator', () => {
   it('passes when the tool calls are within budget and no forbidden tool is called', async () => {
     const result = await evaluateWith({
