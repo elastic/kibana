@@ -646,6 +646,51 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     ).not.toContain('did not fully succeed');
   });
 
+  // The close sets `false_positive`, so a live alert closed with another reason was closed by an
+  // analyst before the approval. Searching the live ids only keeps an analyst's revision out.
+  it('counts live alerts an analyst closed first by their close reason', () => {
+    const search = stepByName('count_analyst_closed');
+
+    expect(branchStepNames('handle_approved')).toContain('count_analyst_closed');
+    expect(search?.type).toBe('elasticsearch.search');
+    expect(search?.with).toMatchObject({
+      index: '.alerts-security.alerts-{{ workflow.spaceId }}',
+      size: 0,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter: [
+            { terms: { _id: '${{ variables.live_alert_ids }}' } },
+            { term: { 'kibana.alert.workflow_status': 'closed' } },
+          ],
+          must_not: [{ term: { 'kibana.alert.workflow_reason': 'false_positive' } }],
+        },
+      },
+    });
+  });
+
+  it.each([
+    [
+      'some alerts were closed by an analyst first',
+      { output: { hits: { total: { value: 2 } } } },
+      true,
+    ],
+    ['the search reports none', { output: { hits: { total: { value: 0 } } } }, false],
+    ['the search failed', { error: { message: 'x' } }, false],
+  ])('posts the already-closed sentence only when %s', (_scenario, searchResult, posted) => {
+    const template = (stepByName('post_comment_outcome_approved')?.with as { message: string })
+      .message;
+    const rendered = renderString(template, {
+      variables: { fp_candidate_count: 3, failed_retag_count: 0 },
+      steps: { count_analyst_closed: searchResult, retag_approved_leftovers: {}, get_proposal: {} },
+    });
+    const sentence = 'Alerts an analyst had already closed kept their original reason.';
+
+    expect(rendered).toContain('3 alerts are now closed.');
+    expect(rendered.includes(sentence)).toBe(posted);
+    expect(rendered.includes('already closed')).toBe(posted);
+  });
+
   it('re-tags by the proposal tag and by id, in every outcome that uses the live revision', () => {
     [
       'retag_approved_leftovers',
