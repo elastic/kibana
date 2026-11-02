@@ -39,6 +39,7 @@ import type {
 } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError, PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
+import type { FlexGridLayoutData, FlexGridLayoutPanel } from '@kbn/grid-layout/flex_grid/types';
 import { i18n } from '@kbn/i18n';
 import type { PanelPackage, SerializedTitles } from '@kbn/presentation-publishing';
 import {
@@ -54,9 +55,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 import type { MaybePromise } from '@kbn/utility-types';
-
-import type { DashboardPanel } from '@kbn/as-code-dashboard-schema';
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/constants';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
@@ -84,7 +83,6 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
-
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
   initialPanels: DashboardState['panels'],
@@ -104,6 +102,8 @@ export function initializeLayoutManager(
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
+  const pinnedLayout$ = new BehaviorSubject(transformPinnedPanelsToGridLayout(initialLayout));
+  console.log({ pinnedLayout$: pinnedLayout$.getValue() });
   const panelResizeSettings$: Observable<{ [panelType: string]: LayoutConstraints }> = layout$.pipe(
     map(({ panels }) => {
       return [...new Set(Object.values(panels).map((panel) => panel.type))];
@@ -126,6 +126,7 @@ export function initializeLayoutManager(
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
     ([layout, panelResizeSettings]) => {
       gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
+      pinnedLayout$.next(transformPinnedPanelsToGridLayout(layout));
     }
   );
 
@@ -541,6 +542,7 @@ export function initializeLayoutManager(
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
+      pinnedLayout$,
       childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
@@ -748,6 +750,24 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
     ? baseTitle + ` (${clonedTag})`
     : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
 }
+
+const transformPinnedPanelsToGridLayout = (layout: DashboardLayout) => {
+  const newLayout: FlexGridLayoutData = {};
+  Object.keys(layout.pinnedPanels).forEach((panelId) => {
+    const panel = layout.pinnedPanels[panelId];
+    const basePanel = {
+      id: panelId,
+      order: panel.order,
+      width: panel.width === 'large' ? 12 : panel.width === 'medium' ? 6 : 3,
+      height: 1,
+      resizeOptions: { maxHeight: 1, minHeight: 1 },
+    } as FlexGridLayoutPanel;
+    newLayout[panelId] = {
+      ...basePanel,
+    };
+  });
+  return newLayout;
+};
 
 const transformDashboardLayoutToGridLayout = (
   layout: DashboardLayout,

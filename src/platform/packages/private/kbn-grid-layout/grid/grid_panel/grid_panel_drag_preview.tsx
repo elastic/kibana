@@ -24,6 +24,7 @@ export const GridPanelDragPreview = React.memo(() => {
       const styleSubscription = gridLayoutStateManager.activePanelEvent$
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe((activePanel) => {
+          console.log({ activePanel });
           if (!dragPreviewRef.current) return;
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
           const sectionId = activePanel?.targetSection;

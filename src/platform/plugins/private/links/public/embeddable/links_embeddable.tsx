@@ -210,6 +210,7 @@ export const getLinksEmbeddableFactory = () => {
           });
         },
         supportsJsonExport: true,
+        isPinnable: true,
       });
 
       const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
