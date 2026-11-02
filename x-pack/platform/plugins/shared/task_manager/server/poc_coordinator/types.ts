@@ -134,7 +134,10 @@ export interface CoordinatorWorkerData {
     node: string;
     username?: string;
     password?: string;
-    apiKey?: string;
+    serviceAccountToken?: string;
+    /** PEM file paths; the worker reads them itself. */
+    caPaths?: string[];
+    rejectUnauthorized?: boolean;
   };
   /** Optional side-channel log file, written with sync fs so logs survive a blocked main thread. */
   logFilePath?: string;

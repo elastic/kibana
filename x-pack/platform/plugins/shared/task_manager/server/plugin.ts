@@ -358,8 +358,9 @@ export class TaskManagerPlugin
 
     this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
-    // PoC seam: dev-only kill-test scaffolding, gated behind TM_POC_TEST_TASK.
-    if (isPocTestTaskEnabled()) {
+    // PoC seam: kill-test scaffolding. Default ON in serverless builds of
+    // this branch (QAF smoke); TM_POC_TEST_TASK=false disables.
+    if (isPocTestTaskEnabled(isServerless)) {
       this.logger.warn('PoC test task scaffolding enabled (TM_POC_TEST_TASK=true)');
       registerPocTestTaskDefinitions(this.definitions, this.logger);
       registerPocTestRoutes({
@@ -394,6 +395,9 @@ export class TaskManagerPlugin
     const enrichFakeRequest = this.enrichFakeRequest;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+    // PoC seam: worker coordinator defaults ON for serverless builds of this
+    // branch; TM_POC_WORKER_COORDINATOR=false is the kill switch.
+    const pocWorkerCoordinatorEnabled = isPocWorkerCoordinatorEnabled(isServerless);
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -419,7 +423,7 @@ export class TaskManagerPlugin
       onNodesCounted: (numOfNodes: number) => this.numOfKibanaInstances$.next(numOfNodes),
     });
 
-    if (this.shouldRunBackgroundTasks && !isPocWorkerCoordinatorEnabled()) {
+    if (this.shouldRunBackgroundTasks && !pocWorkerCoordinatorEnabled) {
       this.kibanaDiscoveryService.start().catch(() => {});
     } else if (this.shouldRunBackgroundTasks) {
       // PoC seam: the worker-thread coordinator runs its own discovery
@@ -490,7 +494,7 @@ export class TaskManagerPlugin
 
     // Only poll for tasks if configured to run tasks
     if (this.shouldRunBackgroundTasks) {
-      if (!isPocWorkerCoordinatorEnabled()) {
+      if (!pocWorkerCoordinatorEnabled) {
         this.claimNudgeService?.start();
       } else {
         // PoC seam: the worker-thread coordinator watches for nudges itself;
@@ -530,6 +534,7 @@ export class TaskManagerPlugin
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
         claimNudgeService: this.claimNudgeService,
+        pocWorkerCoordinator: { enabled: pocWorkerCoordinatorEnabled, isServerless },
       });
     }
 

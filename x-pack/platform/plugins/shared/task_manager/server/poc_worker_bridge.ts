@@ -25,6 +25,7 @@ import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerConfig } from './config';
+import { resolvePocEsConnection, describePocEsConnection } from './poc_es_config';
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type {
   CapacitySnapshot,
@@ -39,9 +40,18 @@ import type {
 
 export const POC_WORKER_COORDINATOR_ENV_FLAG = 'TM_POC_WORKER_COORDINATOR';
 
-/** PoC gate: default behaviour is untouched unless this env var is set. */
-export function isPocWorkerCoordinatorEnabled(): boolean {
-  return process.env[POC_WORKER_COORDINATOR_ENV_FLAG] === 'true';
+/**
+ * PoC gate. QAF serverless deployments cannot inject env vars or config, so
+ * on SERVERLESS builds of this branch the worker coordinator is ON by default
+ * (this branch never merges); TM_POC_WORKER_COORDINATOR=false is the kill
+ * switch. On traditional builds (dev, jest, stateful dist) the default stays
+ * OFF and TM_POC_WORKER_COORDINATOR=true opts in.
+ */
+export function isPocWorkerCoordinatorEnabled(isServerless: boolean): boolean {
+  const flag = process.env[POC_WORKER_COORDINATOR_ENV_FLAG];
+  if (flag === 'true') return true;
+  if (flag === 'false') return false;
+  return isServerless;
 }
 
 /** Capacity/report push cadence. Deliberately simple for the PoC. */
@@ -88,24 +98,29 @@ export class WorkerCoordinatorBridge {
   public start() {
     const { config, context } = this.opts;
 
+    // Re-derive the ES connection from env/argv/config files (core does not
+    // expose its resolved credentials to plugins). Secrets never logged.
+    const connection = resolvePocEsConnection();
+    this.logger.info(
+      `PoC coordinator worker ES connection: ${describePocEsConnection(connection)}`
+    );
+
     const workerData: CoordinatorWorkerData = {
       config,
       context,
       es: {
-        node: process.env.TM_POC_ES_NODE ?? 'http://localhost:9200',
-        // kibana_system: the only stock user with allow_restricted_indices on
-        // the Kibana system indices (superuser cannot write them).
-        username: process.env.TM_POC_ES_USER ?? 'kibana_system',
-        password: process.env.TM_POC_ES_PASS ?? 'changeme',
-        apiKey: process.env.TM_POC_ES_API_KEY,
+        node: connection.node,
+        username: connection.username,
+        password: connection.password,
+        serviceAccountToken: connection.serviceAccountToken,
+        caPaths: connection.caPaths,
+        rejectUnauthorized: connection.rejectUnauthorized,
       },
       logFilePath: process.env.TM_POC_WORKER_LOG_FILE,
     };
 
     this.logger.info(
-      `Starting PoC coordinator worker thread (es node: ${workerData.es.node}, log file: ${
-        workerData.logFilePath ?? 'none'
-      })`
+      `Starting PoC coordinator worker thread (log file: ${workerData.logFilePath ?? 'none'})`
     );
 
     this.worker = new Worker(Path.resolve(__dirname, 'poc_coordinator/worker/coordinator_worker_entry.js'), {

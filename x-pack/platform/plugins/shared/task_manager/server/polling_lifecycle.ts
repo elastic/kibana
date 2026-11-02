@@ -81,11 +81,7 @@ import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import type { TaskExecutionControlService, TaskExecutionControlState } from './execution_control';
-import {
-  WorkerCoordinatorBridge,
-  isPocWorkerCoordinatorEnabled,
-  serializeTaskDefinitions,
-} from './poc_worker_bridge';
+import { WorkerCoordinatorBridge, serializeTaskDefinitions } from './poc_worker_bridge';
 import { TASK_MANAGER_CLAIM_NUDGE_INDEX } from './constants';
 import type { CapacitySnapshot, ClaimedTaskBatch } from './poc_coordinator/types';
 
@@ -112,6 +108,8 @@ export interface TaskPollingLifecycleOpts {
   enrichFakeRequest?: FakeRequestEnricher;
   /** Requests extra claim cycles; ignored during Elasticsearch backpressure and its recovery. */
   claimNudgeService?: TaskManagerClaimNudgeService;
+  /** PoC seam: run coordination (polling/claiming/discovery/nudge) in a worker thread. */
+  pocWorkerCoordinator?: { enabled: boolean; isServerless: boolean };
 }
 
 export type TaskLifecycleEvent =
@@ -188,6 +186,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     eventLogger,
     enrichFakeRequest,
     claimNudgeService,
+    pocWorkerCoordinator,
   }: TaskPollingLifecycleOpts) {
     this.logger = logger;
     this.middleware = middleware;
@@ -331,7 +330,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       .pipe(pairwise())
       .subscribe(([previous, current]) => this.handleExecutionControlTransition(previous, current));
 
-    if (isPocWorkerCoordinatorEnabled()) {
+    if (pocWorkerCoordinator?.enabled) {
       // PoC seam: coordination (polling, claiming, discovery, claim-nudge
       // watching) runs in a worker thread. The executor side keeps the pool,
       // hydrates claimed refs and re-emits lifecycle events for monitoring.
@@ -347,7 +346,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
           podName: taskPartitioner.getPodName(),
           taskIndex: taskStore.index,
           claimNudgeIndex: TASK_MANAGER_CLAIM_NUDGE_INDEX,
-          isServerless: process.env.TM_POC_IS_SERVERLESS === 'true',
+          isServerless: pocWorkerCoordinator.isServerless,
           definitions: serializeTaskDefinitions(definitions),
           startingCapacity,
           excludedTaskTypes: config.unsafe.exclude_task_types,

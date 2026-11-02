@@ -26,7 +26,7 @@
  */
 
 import { parentPort, workerData, threadId } from 'worker_threads';
-import { appendFileSync } from 'fs';
+import { appendFileSync, readFileSync, writeSync } from 'fs';
 import { Subject } from 'rxjs';
 import { Client } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -56,15 +56,34 @@ const post = (message: CoordinatorToExecutorMessage) => port.postMessage(message
 /* ------------------------------- logger ------------------------------- */
 
 const createLogger = (): CoordinatorLogger => {
+  // Secrets must never reach a log line; scrub them even from ES error bodies.
+  const secrets = [data.es.serviceAccountToken, data.es.password].filter(
+    (secret): secret is string => typeof secret === 'string' && secret.length > 0
+  );
+  const redact = (message: string) => {
+    let out = message;
+    for (const secret of secrets) out = out.split(secret).join('[REDACTED]');
+    return out;
+  };
   const write = (level: string, message: string) => {
-    const line = `[${new Date().toISOString()}][${level}][task-coordinator-worker:${threadId}] ${message}`;
-    // stdout write goes through the parent process's stream relay; the sync
-    // file write below is the main-thread-block-proof evidence channel.
-    // eslint-disable-next-line no-console
-    console.log(line);
+    // ECS-shaped JSON, written straight to fd 1 with fs.writeSync: this
+    // bypasses the worker->parent stdout relay, so claim-cycle evidence
+    // reaches container stdout even while the main thread event loop is
+    // blocked (the cloud smoke's only evidence channel).
+    const line = `${JSON.stringify({
+      '@timestamp': new Date().toISOString(),
+      'log.level': level,
+      'log.logger': `task-coordinator-worker:${threadId}`,
+      message: redact(message),
+    })}\n`;
+    try {
+      writeSync(1, line);
+    } catch {
+      // best effort
+    }
     if (data.logFilePath) {
       try {
-        appendFileSync(data.logFilePath, `${line}\n`);
+        appendFileSync(data.logFilePath, line);
       } catch {
         // best effort
       }
@@ -102,19 +121,33 @@ const createSerializer = () => {
 /* ------------------------------- es client ------------------------------- */
 
 const createEsClient = (): ElasticsearchClient => {
-  const { node, username, password, apiKey } = data.es;
+  const { node, username, password, serviceAccountToken, caPaths, rejectUnauthorized } = data.es;
+  const ca = (caPaths ?? [])
+    .map((path) => {
+      try {
+        return readFileSync(path, 'utf8');
+      } catch (error) {
+        logger.warn(`Could not read ES certificate authority at ${path}: ${error.message}`);
+        return undefined;
+      }
+    })
+    .filter((pem): pem is string => pem !== undefined);
+
   const client = new Client({
     node,
     // Finding: .kibana_task_manager is a restricted system index. Even the
     // elastic superuser cannot write it (superuser grants
     // allow_restricted_indices: false); the coordinator must authenticate as
-    // kibana_system (allow_restricted_indices: true on Kibana system indices).
+    // kibana_system / the kibana service account (allow_restricted_indices).
     // The product-origin header suppresses system-index deprecation warnings.
     headers: { 'x-elastic-product-origin': 'kibana' },
-    ...(apiKey
-      ? { auth: { apiKey } }
+    ...(serviceAccountToken
+      ? { auth: { bearer: serviceAccountToken } }
       : username && password
       ? { auth: { username, password } }
+      : {}),
+    ...(ca.length > 0 || rejectUnauthorized === false
+      ? { tls: { ...(ca.length > 0 ? { ca } : {}), rejectUnauthorized: rejectUnauthorized !== false ? true : false } }
       : {}),
   });
   // ElasticsearchClient is Client minus a few internals; structurally compatible.

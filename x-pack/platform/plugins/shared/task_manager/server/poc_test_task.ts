@@ -22,8 +22,16 @@ import type { TaskManagerStartContract } from './plugin';
 
 export const POC_TEST_TASK_ENV_FLAG = 'TM_POC_TEST_TASK';
 
-export function isPocTestTaskEnabled(): boolean {
-  return process.env[POC_TEST_TASK_ENV_FLAG] === 'true';
+/**
+ * Default ON for serverless builds of this branch (QAF cannot inject env
+ * vars; needed for the cloud smoke); TM_POC_TEST_TASK=false is the kill
+ * switch. Default OFF everywhere else, opt in with TM_POC_TEST_TASK=true.
+ */
+export function isPocTestTaskEnabled(isServerless: boolean): boolean {
+  const flag = process.env[POC_TEST_TASK_ENV_FLAG];
+  if (flag === 'true') return true;
+  if (flag === 'false') return false;
+  return isServerless;
 }
 
 export const POC_BLOCKER_TASK_TYPE = 'pocEventLoopBlocker';
