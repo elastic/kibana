@@ -16,8 +16,8 @@
  *     --testFiles x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page.spec.ts
  */
 
+import { test, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
-import { test, tags } from '../fixtures';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 
 const NEW_HOME_PAGE_FLAG = 'securitySolution.useNewEntityAnalyticsPage';
@@ -43,7 +43,7 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsT1Analyst();
-    await pageObjects.entityAnalyticsHome.goto();
+    await pageObjects.entityAnalyticsHomePage.goto();
   });
 
   test.afterAll(async ({ apiServices }) => {
@@ -54,36 +54,36 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
   });
 
   test('loads with the six tiles and the entities grid', async ({ pageObjects }) => {
-    const { entityAnalyticsHome } = pageObjects;
+    const { entityAnalyticsHomePage } = pageObjects;
 
     for (const id of SIGNAL_CARD_IDS) {
-      await expect(entityAnalyticsHome.tile(id)).toBeVisible();
+      await expect(entityAnalyticsHomePage.tile(id)).toBeVisible();
     }
-    await expect(entityAnalyticsHome.gridRow(NEW_RISKY_HOST)).toBeVisible();
-    await expect(entityAnalyticsHome.gridRow(OTHER_HOST)).toBeVisible();
+    await expect(entityAnalyticsHomePage.gridRow(NEW_RISKY_HOST)).toBeVisible();
+    await expect(entityAnalyticsHomePage.gridRow(OTHER_HOST)).toBeVisible();
   });
 
   test('a tile filters the grid to its entities, and a second click clears it', async ({
     pageObjects,
   }) => {
-    const { entityAnalyticsHome } = pageObjects;
-    const newEntityTile = entityAnalyticsHome.tile('newEntity');
+    const { entityAnalyticsHomePage } = pageObjects;
+    const newEntityTile = entityAnalyticsHomePage.tile('newEntity');
 
     await test.step('the tile has entities, so it can be clicked', async () => {
       await expect(newEntityTile).toHaveAttribute('aria-pressed', 'false');
-      await expect(entityAnalyticsHome.gridRow(OTHER_HOST)).toBeVisible();
+      await expect(entityAnalyticsHomePage.gridRow(OTHER_HOST)).toBeVisible();
     });
 
     await test.step('selecting it keeps only its entities in the grid', async () => {
-      await entityAnalyticsHome.toggleTile('newEntity', { selected: true });
-      await expect(entityAnalyticsHome.gridRow(OTHER_HOST)).toBeHidden();
-      await expect(entityAnalyticsHome.gridRow(NEW_RISKY_HOST)).toBeVisible();
+      await entityAnalyticsHomePage.toggleTile('newEntity', { selected: true });
+      await expect(entityAnalyticsHomePage.gridRow(OTHER_HOST)).toBeHidden();
+      await expect(entityAnalyticsHomePage.gridRow(NEW_RISKY_HOST)).toBeVisible();
     });
 
     await test.step('selecting it again brings every entity back', async () => {
-      await entityAnalyticsHome.toggleTile('newEntity', { selected: false });
-      await expect(entityAnalyticsHome.gridRow(OTHER_HOST)).toBeVisible();
-      await expect(entityAnalyticsHome.gridRow(NEW_RISKY_HOST)).toBeVisible();
+      await entityAnalyticsHomePage.toggleTile('newEntity', { selected: false });
+      await expect(entityAnalyticsHomePage.gridRow(OTHER_HOST)).toBeVisible();
+      await expect(entityAnalyticsHomePage.gridRow(NEW_RISKY_HOST)).toBeVisible();
     });
   });
 });

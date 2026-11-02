@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout-security';
-import type { SignalCardId } from '../../../../../../common/entity_analytics/home/constants';
+import type { ScoutPage, Locator } from '@kbn/scout';
+
+const PAGE_URL = 'security/entity_analytics_home_page';
 
 /** The new Entity Analytics home page: its Needs attention tiles and its entities grid. */
 export class EntityAnalyticsHomePage {
@@ -19,10 +20,11 @@ export class EntityAnalyticsHomePage {
   }
 
   async goto(): Promise<void> {
-    await this.page.gotoApp('security/entity_analytics_home_page', { readyWhen: this.root });
+    await this.page.gotoApp(PAGE_URL, { readyWhen: this.root });
   }
 
-  tile(id: SignalCardId): Locator {
+  /** A Needs attention tile by its id, e.g. `newEntity`. */
+  tile(id: string): Locator {
     return this.page.testSubj.locator(`eaFaceliftSignalCard-${id}`);
   }
 
@@ -31,7 +33,7 @@ export class EntityAnalyticsHomePage {
   }
 
   /** Clicks a tile and waits for it to report the new filter state. */
-  async toggleTile(id: SignalCardId, { selected }: { selected: boolean }): Promise<void> {
+  async toggleTile(id: string, { selected }: { selected: boolean }): Promise<void> {
     const tile = this.tile(id);
     await tile.click();
     await tile
