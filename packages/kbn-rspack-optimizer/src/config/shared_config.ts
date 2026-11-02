@@ -483,6 +483,14 @@ export function getSharedModuleRules(
     getImageLoaderRule(),
     getFontLoaderRule(),
     getTextLoaderRule(),
+    // The MapLibre worker imports the shared module by relative filename.
+    {
+      test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl-(?:worker|shared)\.mjs$/,
+      resourceQuery: /asUrl/,
+      type: 'asset/resource',
+      sideEffects: true,
+      generator: { filename: 'maplibre-gl/[name][ext]' },
+    },
     getRawQueryLoaderRule(),
     getPeggyLoaderRule(),
   ];
