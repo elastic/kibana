@@ -24,7 +24,7 @@ import { useNotebook } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
 
 const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
-  const { store } = useNotebook();
+  const { store, scheduler } = useNotebook();
   const inputValues = useStateFromPublishingSubject(store.inputValues$);
   const value = inputValues[cell.id];
   if (value?.kind !== 'time') return null;
@@ -35,10 +35,10 @@ const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
       width="auto"
       start={value.range.from}
       end={value.range.to}
-      showUpdateButton={false}
       onTimeChange={({ start, end }) =>
         store.setInputValue(cell.id, { kind: 'time', range: { from: start, to: end } })
       }
+      onRefresh={() => scheduler.refresh()}
       data-test-subj="notebookTimePicker"
     />
   );
@@ -86,16 +86,6 @@ export const NotebookHeader = ({
           <PinnedTimePicker cell={pinnedTime} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="refresh"
-          onClick={() => scheduler.refresh()}
-          data-test-subj="notebookRefresh"
-        >
-          {i18n.translate('xpack.notebook.header.refresh', { defaultMessage: 'Refresh' })}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           size="s"
