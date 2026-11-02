@@ -91,6 +91,7 @@ import {
 } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
+import { getInvestigatorConnectorIds } from './agents/assistant/inherited_connectors';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
@@ -284,20 +285,27 @@ export class NightshiftInvestigationsPlugin
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
+        // Both agent types allow every configured telemetry connector; the investigator narrows
+        // the list per conversation in the sandbox workspace manager.
+        telemetryConfig: config.sandbox,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
-        logger: this.logger.get('custom_context'),
+        logger: this.logger.get('agent_types'),
       };
       registerInvestigationAgentType(plugins.agentBuilder, {
         ...nightshiftAgentOptions,
-        telemetryConfig: config.sandbox,
         decisionTreesEnabled: this.decisionTreesEnabled,
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
       if (plugins.sandbox?.isAvailable) {
-        registerAssistantAgentType(plugins.agentBuilder, nightshiftAgentOptions);
+        registerAssistantAgentType(plugins.agentBuilder, {
+          ...nightshiftAgentOptions,
+          // Types register in setup but resolve after start, so read the start contract lazily.
+          getInheritedConnectorIds: ({ request }) =>
+            getInvestigatorConnectorIds({ agentBuilder: this.agentBuilder, request }),
+        });
         this.assistantEnabled = true;
       }
 
