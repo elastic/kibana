@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import type { estypes } from '@elastic/elasticsearch';
 import type { DateInterval, ZonedDateRange } from '@kbn/es-date-rounding';
 import { fitsInBuckets, ianaTimeZone, pickDateRounding } from '@kbn/es-date-rounding';
@@ -15,7 +16,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 
-const INDEX = 'date-rounding-parity';
+const INDEX = `date-rounding-parity-${randomUUID()}`;
 const MINUTE_MS = 6e4;
 const HOUR_MS = 36e5;
 
@@ -283,7 +284,7 @@ apiTest.describe(
         const [dslKeys, esqlResponse] = await Promise.all([
           dateHistogramKeys(esClient, range, [picked]),
           esClient.esql.query({
-            query: `FROM ${INDEX}
+            query: `FROM "${INDEX}"
               | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
               | STATS BY bucket = BUCKET(@timestamp, ${maxBuckets}, ?_tstart, ?_tend)
               | SORT bucket`,
