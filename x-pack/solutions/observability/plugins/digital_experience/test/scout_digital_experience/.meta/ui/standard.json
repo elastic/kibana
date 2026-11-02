@@ -1,5 +1,5 @@
 {
-  "sha1": "c6bebff579d3a7648f31eb8e93a931f931c58e7a",
+  "sha1": "962c59b7d7984172c2316b8c3992ba720e4744bb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -163,8 +163,50 @@
       }
     },
     {
-      "id": "c43b695191ca032-8d02a0fbae70808",
-      "title": "Delete the mock OTel RUM data",
+      "id": "ad8ceb6a0ebceff-96350a6b008ca98",
+      "title": "Digital Experience sessions opens the Sessions tab of an EDOT Browser application, keeping the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/sessions.spec.ts",
+        "line": 21,
+        "column": 8
+      }
+    },
+    {
+      "id": "ad8ceb6a0ebceff-ea5b43cb056c788",
+      "title": "Digital Experience sessions filters, searches and pages through the sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/sessions.spec.ts",
+        "line": 27,
+        "column": 38
+      }
+    },
+    {
+      "id": "ad8ceb6a0ebceff-708e74e148734ab",
+      "title": "Digital Experience sessions opens a session with its waterfall, then goes back to the same list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/sessions.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "c43b695191ca032-8e492a8059f7505",
+      "title": "Delete the mock OTel RUM data and sessions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -172,7 +214,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/global.teardown.ts",
-        "line": 12,
+        "line": 13,
         "column": 35
       }
     }
