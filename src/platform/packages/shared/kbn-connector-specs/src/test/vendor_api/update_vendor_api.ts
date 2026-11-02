@@ -10,16 +10,35 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
-import { applyOverlay, convertSwagger2 } from '@kbn/connector-emulate';
+import {
+  applyOverlay,
+  convertDiscovery,
+  convertSwagger2,
+  isDiscoveryDocument,
+} from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
 import { bundleSpec } from './bundle_spec';
-import { isJsonObject } from './json_pointer';
+import { forEachRef, isJsonObject } from './json_pointer';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
-import type { ManifestSource, UnmatchedRequest, VendorApiManifest } from './manifest';
-import { parseManifest, serializeManifest } from './manifest';
+import { loadMarkdownReference } from './load_markdown_reference';
+import type {
+  ManifestOperation,
+  ManifestPagination,
+  ManifestSource,
+  MarkdownSourceFormat,
+  UnmatchedRequest,
+  VendorApiManifest,
+} from './manifest';
+import {
+  markdownSourceFormatSchema,
+  matchesPathTemplate,
+  parseManifest,
+  serializeManifest,
+} from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
+import { assessPagination } from './propose_pagination';
 import type { RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
@@ -35,6 +54,10 @@ export interface UpdateVendorApiOptions {
   readonly directory: string;
   /** Sources to add or point elsewhere, by name; the manifest's are kept otherwise. */
   readonly sources?: Readonly<Record<string, string>>;
+  /** Sources that are Markdown references, by name, with the template their pages follow. */
+  readonly formats?: Readonly<Record<string, MarkdownSourceFormat>>;
+  /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
+  readonly pages?: Readonly<Record<string, readonly string[]>>;
   /**
    * Fetches the full vendor specs. Without it, actions are recorded against the committed
    * snapshots, which only picks up changes on the connector's side.
@@ -70,6 +93,9 @@ const readOptional = async (file: string): Promise<string | undefined> => {
   }
 };
 
+const isMarkdownFormat = (format: string | undefined): format is MarkdownSourceFormat =>
+  markdownSourceFormatSchema.safeParse(format).success;
+
 const formatOf = (document: OpenApiDocument): ManifestSource['format'] =>
   document.swagger === '2.0' ? 'swagger' : 'openapi';
 
@@ -97,12 +123,22 @@ const describeFinding = (finding: RecordingFinding): string => {
       return `${finding.action}: no generated input passes the action's schema; add an input to ${FIXTURES}`;
     case 'handler-error':
       return `${finding.action}: the handler threw: ${finding.message}`;
+    case 'no-auth-type':
+      return `${
+        finding.action
+      }: threw before sending a request under every auth type: ${Object.entries(finding.errors)
+        .map(([authType, message]) => `${authType}: ${message}`)
+        .join('; ')}`;
+    case 'auth-type-error':
+      return `auth type ${finding.authType} can't be used against the contract mock, so no action was recorded with it: ${finding.message}`;
     case 'request-violation':
       return `${finding.action}: ${finding.request} breaks the spec: ${finding.violations
         .map(({ message }) => message)
         .join('; ')}`;
-    case 'read-only':
-      return `${finding.action}: marked readOnly but sent ${finding.request}`;
+    case 'read-scope':
+      return `${finding.action}: has scope 'read' but sent ${finding.request}; if the operation only queries, add it to the action's "queries" in ${FIXTURES}, otherwise correct the scope`;
+    case 'unused-query':
+      return `${finding.action}: lists ${finding.operation} in "queries" in ${FIXTURES}, but no request of a 'read' scoped run needed it; remove it`;
     case 'rejected-response':
       return `${finding.action}: the response override for ${
         finding.operation
@@ -111,7 +147,12 @@ const describeFinding = (finding: RecordingFinding): string => {
 };
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
-  kind === 'read-only' || kind === 'rejected-response';
+  kind === 'no-auth-type' ||
+  kind === 'auth-type-error' ||
+  kind === 'request-violation' ||
+  kind === 'read-scope' ||
+  kind === 'unused-query' ||
+  kind === 'rejected-response';
 
 /**
  * Regenerates a connector's `vendor_api` artifacts: records its actions against the vendor
@@ -122,6 +163,8 @@ export const updateVendorApi = async ({
   connector,
   directory,
   sources: sourceFlags = {},
+  formats: formatFlags = {},
+  pages: pageFlags = {},
   refresh = false,
   check = false,
   fetchText,
@@ -151,22 +194,52 @@ export const updateVendorApi = async ({
       `${connector.metadata.id} has no ${MANIFEST} yet; pass its sources with --source`
     );
   }
-  const fetchAll = refresh || Object.keys(sourceFlags).length > 0;
+  // Naming a source, or how to read one, means fetching it again.
+  const fetchAll =
+    refresh || [sourceFlags, formatFlags, pageFlags].some((flags) => Object.keys(flags).length > 0);
+
+  for (const name of [...Object.keys(formatFlags), ...Object.keys(pageFlags)]) {
+    if (!(name in urls)) {
+      throw new Error(`--format and --pages name a source, but there is no source "${name}"`);
+    }
+  }
+  const markdownFormatOf = (name: string): MarkdownSourceFormat | undefined => {
+    const format = formatFlags[name] ?? previous?.sources[name]?.format;
+    return isMarkdownFormat(format) ? format : undefined;
+  };
+  const pagesOf = (name: string): readonly string[] | undefined =>
+    pageFlags[name] ?? previous?.sources[name]?.pages;
 
   const raw: Record<string, OpenApiDocument> = {};
   const formats: Record<string, ManifestSource['format']> = {};
   for (const [name, url] of Object.entries(urls)) {
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name));
-    if (snapshot === undefined) {
-      log.info(`Fetching ${name} from ${url}`);
-      const document = parseSpecText(await fetchText(url)) as OpenApiDocument;
-      const load = async (documentUrl: string) => parseSpecText(await fetchText(documentUrl));
-      const bundled = await bundleSpec(document, { url, load });
-      formats[name] = formatOf(bundled);
-      raw[name] = formats[name] === 'swagger' ? convertSwagger2(bundled) : bundled;
-    } else {
+    const markdownFormat = markdownFormatOf(name);
+    if (snapshot !== undefined) {
       raw[name] = JSON.parse(snapshot);
       formats[name] = previous?.sources[name]?.format ?? 'openapi';
+    } else if (markdownFormat) {
+      log.info(`Fetching ${name} from the pages ${url} links to`);
+      formats[name] = markdownFormat;
+      raw[name] = await loadMarkdownReference({
+        format: markdownFormat,
+        url,
+        pages: pagesOf(name),
+        fetchText,
+      });
+    } else {
+      if (pagesOf(name) !== undefined) {
+        throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
+      }
+      log.info(`Fetching ${name} from ${url}`);
+      const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
+      // Discovery `$ref`s are schema names, which bundling would take for relative URLs.
+      const discovery = isDiscoveryDocument(parsed);
+      const document = discovery ? convertDiscovery(parsed) : parsed;
+      const load = async (documentUrl: string) => parseSpecText(await fetchText(documentUrl));
+      const bundled = await bundleSpec(document, { url, load });
+      formats[name] = discovery ? 'discovery' : formatOf(bundled);
+      raw[name] = formats[name] === 'swagger' ? convertSwagger2(bundled) : bundled;
     }
   }
 
@@ -199,16 +272,57 @@ export const updateVendorApi = async ({
   for (const finding of recording.findings) {
     (isProblem(finding) ? problems : warnings).add(describeFinding(finding));
   }
+
+  const operationKey = ({ source, method, path: operationPath }: ManifestOperation) =>
+    `${method.toUpperCase()} ${operationPath} (${source})`;
+  // Assessed operations too, so each is proposed or reported once across actions.
+  const declared = new Map<string, ManifestPagination | undefined>(
+    Object.values(previous?.operations ?? {})
+      .flat()
+      .flatMap(({ pagination, ...entry }) =>
+        pagination ? [[operationKey(entry), pagination] as const] : []
+      )
+  );
+  const paginationOf = (operation: ManifestOperation): ManifestPagination | undefined => {
+    const key = operationKey(operation);
+    if (declared.has(key)) {
+      return declared.get(key);
+    }
+    const assessment = assessPagination(specs[operation.source], operation);
+    const proposed = assessment.listLike ? assessment.proposal : undefined;
+    if (assessment.listLike && proposed) {
+      warnings.add(
+        `${key}: proposed "pagination" from ${proposed.basis} in ${MANIFEST}; review it`
+      );
+    } else if (assessment.listLike) {
+      problems.add(
+        `${key} looks like it returns a collection, as ${assessment.reason}; declare its "pagination" in ${MANIFEST}, or "none" if it returns everything at once`
+      );
+    }
+    declared.set(key, proposed?.pagination);
+    return proposed?.pagination;
+  };
+  const operations = Object.fromEntries(
+    Object.entries(recording.operations).map(([action, entries]) => [
+      action,
+      entries.map((entry) => {
+        const pagination = paginationOf(entry);
+        return pagination ? { ...entry, pagination } : entry;
+      }),
+    ])
+  );
   warnings.forEach((warning) => log.warning(warning));
 
   const unmatched: Record<string, UnmatchedRequest[]> = {};
   for (const [action, requests] of Object.entries(recording.unmatched)) {
     for (const { method, path: requestPath } of requests) {
       const acknowledged = previous?.unmatched?.[action]?.find(
-        (entry) => entry.method === method && entry.path === requestPath
+        (entry) => entry.method === method && matchesPathTemplate(entry.path, requestPath)
       );
       if (acknowledged) {
-        unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
+        if (!unmatched[action]?.includes(acknowledged)) {
+          unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
+        }
       } else {
         const refreshHint = fetchAll ? '' : '; if it is new to the connector, rerun with --refresh';
         problems.add(
@@ -218,27 +332,40 @@ export const updateVendorApi = async ({
     }
   }
 
+  // Offline runs apply the overlay to the snapshots, so they keep what its updates reference.
+  const overlayRefs: string[] = [];
+  overlay?.actions.forEach(({ update }) => forEachRef(update, (ref) => overlayRefs.push(ref)));
   const files: Record<string, string> = {};
   const sources: Record<string, ManifestSource> = {};
   for (const [name, document] of Object.entries(raw)) {
-    const operations = Object.values(recording.operations)
+    const used = Object.values(recording.operations)
       .flat()
       .filter(({ source }) => source === name);
     const file = snapshotFile(name);
-    files[file] = toStableJson(projectSpec(document, operations));
+    files[file] = toStableJson(projectSpec(document, used, overlayRefs));
     const unchanged = (await read(file)) === files[file];
-    const apiVersion = fetchAll ? apiVersionOf(document) : previous?.sources[name]?.apiVersion;
+    const markdown = isMarkdownFormat(formats[name]);
+    // Markdown references carry no version of the reference as a whole.
+    const apiVersion = markdown
+      ? undefined
+      : fetchAll
+      ? apiVersionOf(document)
+      : previous?.sources[name]?.apiVersion;
+    const pages = markdown ? pagesOf(name) : undefined;
     const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;
+    const note = previous?.sources[name]?.note;
     sources[name] = {
       format: formats[name],
       url: urls[name],
+      ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),
+      ...(note === undefined ? {} : { note }),
     };
   }
   files[MANIFEST] = serializeManifest({
     sources,
-    operations: recording.operations,
+    operations,
     ...(Object.keys(unmatched).length === 0 ? {} : { unmatched }),
   });
 

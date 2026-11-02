@@ -135,6 +135,7 @@ import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboa
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import { syncContinuousOnboarding } from './lib/continuous_onboarding/sync_continuous_onboarding';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
@@ -252,6 +253,8 @@ export class SignificantEventsPlugin
         services: significantEventsServices,
         dataStreams: coreStart.dataStreams,
         esClient: scopedClusterClient.asCurrentUser,
+        internalEsClient: scopedClusterClient.asInternalUser,
+        logger: this.logger,
         space,
         getAlertEventsClient,
         triggerEmitter: createTriggerEmitter({
@@ -563,6 +566,17 @@ export class SignificantEventsPlugin
             await syncWorkflowService?.ensureEnabled({ request, spaceId: request.spaceId });
           }
         },
+        syncContinuousOnboarding: (event) =>
+          syncContinuousOnboarding({
+            event,
+            workflowService: continuousOnboardingWorkflowService,
+            maintenanceService: this.maintenanceService,
+            getStartServices: async () => {
+              const [coreStart, pluginsStart] = await core.getStartServices();
+              return { coreStart, pluginsStart };
+            },
+            logger: this.logger,
+          }),
       })
     );
 

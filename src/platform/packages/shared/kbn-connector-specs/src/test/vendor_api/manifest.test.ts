@@ -25,9 +25,28 @@ const manifest: VendorApiManifest = {
       fetchedAt: '2026-10-07T00:00:00Z',
     },
   },
-  operations: { search: [{ source: 'v1', method: 'get', path: '/search' }] },
+  operations: {
+    search: [
+      {
+        source: 'v1',
+        method: 'get',
+        path: '/search',
+        pagination: {
+          style: 'cursor',
+          request: { cursorParam: 'cursor' },
+          response: { itemsPath: 'results', nextPath: 'next' },
+        },
+      },
+    ],
+    tags: [{ source: 'v1', method: 'get', path: '/tags', pagination: 'none' }],
+  },
   unmatched: { mute: [{ method: 'post', path: '/v1/mute', reason: 'Missing from the spec' }] },
 };
+
+const withPagination = (pagination: unknown) => ({
+  ...manifest,
+  operations: { search: [{ source: 'v1', method: 'get', path: '/search', pagination }] },
+});
 
 describe('serializeManifest', () => {
   it('sorts keys at every depth and round-trips', () => {
@@ -40,14 +59,61 @@ describe('serializeManifest', () => {
     expect(serializeManifest(parseManifest(json))).toBe(json);
   });
 
+  it('accepts a next_url descriptor without a request, for opaque next links', () => {
+    const opaque = withPagination({
+      style: 'next_url',
+      response: { itemsPath: 'value', nextPath: 'nextLink' },
+    }) as VendorApiManifest;
+
+    expect(parseManifest(serializeManifest(opaque))).toEqual(opaque);
+  });
+
   it.each([
     ['an unknown field', { ...manifest, extra: true }],
     [
       'an unmatched request without a reason',
       { ...manifest, unmatched: { mute: [{ method: 'post', path: '/mute', reason: '' }] } },
     ],
+    [
+      'a pagination style with another style’s fields',
+      withPagination({
+        style: 'page',
+        request: { cursorParam: 'cursor' },
+        response: { itemsPath: '' },
+      }),
+    ],
+    ['an unknown pagination value', withPagination('all')],
   ])('rejects %s', (_, invalid) => {
     expect(() => serializeManifest(invalid as VendorApiManifest)).toThrow();
+  });
+});
+
+describe('Markdown reference sources', () => {
+  const withSource = (source: Record<string, unknown>) =>
+    JSON.stringify({
+      ...manifest,
+      sources: { docs: { fetchedAt: '2026-10-07T00:00:00Z', ...source } },
+    });
+
+  it('accepts a Markdown reference with the pages to fetch', () => {
+    const json = withSource({
+      format: 'databricks-markdown',
+      url: 'https://docs.databricks.com/api/llms.txt',
+      pages: ['workspace/jobs/'],
+    });
+
+    expect(parseManifest(json).sources.docs.pages).toEqual(['workspace/jobs/']);
+  });
+
+  it('rejects pages on other sources, and an empty list of pages', () => {
+    expect(() =>
+      parseManifest(withSource({ format: 'openapi', url: 'https://x.com/a.json', pages: ['a/'] }))
+    ).toThrow('only applies to Markdown references');
+    expect(() =>
+      parseManifest(
+        withSource({ format: 'brave-markdown', url: 'https://x.com/llms.txt', pages: [] })
+      )
+    ).toThrow();
   });
 });
 
@@ -55,8 +121,8 @@ describe('fixtures', () => {
   it('converts response overrides to mock fixtures', () => {
     const fixtures = vendorApiFixturesSchema.parse({
       getCard: {
-        readOnly: true,
         input: { cardId: '5f0c1e2d3b4a596877665544' },
+        queries: [{ method: 'POST', path: '/cards/search' }],
         responses: [{ source: 'v1', method: 'GET', path: '/cards/{id}', status: 200, body: {} }],
       },
     });
@@ -70,6 +136,6 @@ describe('fixtures', () => {
   });
 
   it('rejects unknown fields', () => {
-    expect(() => vendorApiFixturesSchema.parse({ getCard: { readonly: true } })).toThrow();
+    expect(() => vendorApiFixturesSchema.parse({ getCard: { readOnly: true } })).toThrow();
   });
 });

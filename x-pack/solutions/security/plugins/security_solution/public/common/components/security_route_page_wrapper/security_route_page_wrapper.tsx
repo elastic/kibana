@@ -13,6 +13,7 @@ import { useLinkInfo } from '../../links';
 import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { SecurityAppHeader } from '../app_header';
 
 interface SecurityRoutePageWrapperOptionProps {
   /**
@@ -65,7 +66,7 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
       return (
         <>
           <SpyRoute pageName={pageName} />
-          <UpsellingPage />
+          <UpsellingPage appHeader={SecurityAppHeader} />
         </>
       );
     }

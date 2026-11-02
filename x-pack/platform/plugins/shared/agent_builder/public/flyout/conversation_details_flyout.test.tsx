@@ -371,4 +371,22 @@ describe('ConversationDetailsFlyout', () => {
     expect(trailingActions).toHaveBeenCalledWith({ conversation });
     expect(flyoutMenuProps?.trailingActions).toEqual(trailingActions.mock.results[0].value);
   });
+
+  it('opens resizable at the remembered width', () => {
+    localStorage.setItem('agentBuilder.conversationDetailsFlyoutWidth', '620');
+    jest.mocked(useConversation).mockReturnValue({
+      conversation: createConversation(),
+      isLoading: false,
+    } as ReturnType<typeof useConversation>);
+    jest.mocked(useAgentBuilderServices).mockReturnValue({
+      conversationTemplatesService: new ConversationTemplatesService(),
+    } as ReturnType<typeof useAgentBuilderServices>);
+
+    render(<ConversationDetailsFlyout onClose={jest.fn()} />, { wrapper: EuiProvider });
+
+    const [flyoutProps] = jest.mocked(EuiFlyout).mock.lastCall ?? [{}];
+    expect(flyoutProps).toEqual(
+      expect.objectContaining({ size: 620, minWidth: 400, maxWidth: 640, resizable: true })
+    );
+  });
 });

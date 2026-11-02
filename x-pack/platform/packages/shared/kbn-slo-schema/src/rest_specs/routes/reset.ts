@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { sloDefinitionSchema, sloIdSchema } from '../../schema/zod/slo';
+import { sloDefinitionSchema, sloIdSchema } from '../../schema/slo';
 
 const resetSLOParamsSchema = z.object({
   path: z.object({ id: sloIdSchema }),

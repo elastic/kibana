@@ -104,7 +104,7 @@ export function getSharedResolveFallback(): Record<string, false> {
  * Common SWC options for both TypeScript and JavaScript files.
  * Uses @kbn/transpiler-config for consistent settings across Babel and SWC.
  */
-function getSwcOptions(dist: boolean, hmr: boolean = false) {
+export function getSwcOptions(dist: boolean, hmr: boolean = false) {
   const sharedConfig = getSharedConfig();
 
   return {
@@ -490,6 +490,21 @@ export function getSharedModuleRules(
     getImageLoaderRule(),
     getFontLoaderRule(),
     getTextLoaderRule(),
+    // The MapLibre worker imports the shared module by relative filename.
+    {
+      test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl-(?:worker|shared)\.mjs$/,
+      resourceQuery: /asUrl/,
+      type: 'asset/resource',
+      sideEffects: true,
+      generator: { filename: 'maplibre-gl/[name][ext]' },
+    },
+    // MapLibre 6 imports .mjs plugins, but evaluates .js plugins, which Kibana's CSP blocks.
+    {
+      test: /[\\/]@mapbox[\\/]mapbox-gl-rtl-text[\\/]mapbox-gl-rtl-text\.min\.js$/,
+      resourceQuery: /asUrl/,
+      type: 'asset/resource',
+      generator: { filename: 'maplibre-gl/[name].[contenthash].mjs' },
+    },
     getRawQueryLoaderRule(),
     getPeggyLoaderRule(),
   ];
