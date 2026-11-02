@@ -179967,10 +179967,8 @@ components:
       type: object
       properties:
         taskId:
-          anyOf:
-            - type: string
-            - type: number
           description: The task id of the purge operation
+          type: string
     Kibana_HTTP_APIs_SLOCreateResponse:
       additionalProperties: true
       type: object

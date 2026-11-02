@@ -809,14 +809,6 @@
       "prUrl": "https://github.com/elastic/kibana/pull/302124"
     },
     {
-      "path": "/api/observability/slos/_bulk_purge_rollup",
-      "method": "post",
-      "reason": "Documentation only: the 2xx response schema is now generated from the route's zod schema instead of the hand-written oas_schemas.yaml. The response body the API returns is unchanged. taskId is now documented as string | number (the TaskId type in @elastic/elasticsearch-types). Elasticsearch returns the delete-by-query task id as a string, so the returned value is unchanged; the hand-written spec documented string only.",
-      "approvedBy": "@elastic/obs-ux-management-team",
-      "oasdiffId": "response-property-list-of-types-widened",
-      "prUrl": "https://github.com/elastic/kibana/pull/302124"
-    },
-    {
       "path": "/api/observability/slos/_bulk_snapshot",
       "method": "post",
       "reason": "Documentation only: `at` is documented as format date-time. Request validation is unchanged and still accepts any date string that `new Date()` can parse.",

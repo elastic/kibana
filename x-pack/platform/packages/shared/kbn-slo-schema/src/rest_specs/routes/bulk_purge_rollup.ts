@@ -53,10 +53,7 @@ const bulkPurgeRollupSchema = lazySchema(() =>
 const bulkPurgeRollupResponseSchema = lazySchema(() =>
   z
     .object({
-      taskId: z
-        .union([z.string(), z.number()])
-        .optional()
-        .describe('The task id of the purge operation'),
+      taskId: z.string().optional().describe('The task id of the purge operation'),
     })
     .meta({
       id: 'SLOBulkPurgeRollupResponse',

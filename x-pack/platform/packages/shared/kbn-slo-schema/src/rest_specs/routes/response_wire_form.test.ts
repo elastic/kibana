@@ -104,12 +104,9 @@ describe('SLO response schemas accept their own wire form', () => {
     expectWireFormToParse(bulkDeleteStatusResponseSchema, value);
   });
 
-  it.each([{ taskId: 'node:1' }, { taskId: 42 }, {}])(
-    'bulkPurgeRollupResponseSchema %p',
-    (value) => {
-      expectWireFormToParse(bulkPurgeRollupResponseSchema, value);
-    }
-  );
+  it.each([{ taskId: 'node:1' }, {}])('bulkPurgeRollupResponseSchema %p', (value) => {
+    expectWireFormToParse(bulkPurgeRollupResponseSchema, value);
+  });
 
   it('snapshotResponseSchema with a summary and an error result', () => {
     expectWireFormToParse(snapshotResponseSchema, {
