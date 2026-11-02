@@ -72,6 +72,11 @@ export const ChromeLayoutComponent = ({ children, ...props }: ChromeLayoutCompon
 
   return (
     <div css={styles.css} style={styles.style}>
+      {/* POC: same fixed dot field as login and the boot splash (/ui/ambient_bg.js).
+          Slots above z-index 0 paint over it; transparent nav and chrome gutters show through. */}
+      {React.createElement('elastic-ambient-bg', {
+        'data-test-subj': 'chromeAmbientBg',
+      })}
       {banner}
       {header}
       {navigation}

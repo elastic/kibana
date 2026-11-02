@@ -8,7 +8,9 @@
   if (typeof window === 'undefined' || !window.customElements) return;
   if (customElements.get('elastic-ambient-bg')) return;
 
-  // Defaults = tuned prototype values.
+  // Defaults = tuned prototype values. Dark keeps these.
+  // Light uses a wider, non-plateau falloff: the same #4D4D4F dots on #ECF1F9
+  // read much stronger than on #07101F, and the blob centres are the corners.
   var DEFAULTS = {
     speed: 1.1,       // time multiplier
     sway: 0.18,       // complementary grow/shrink amount (fraction of radius)
@@ -17,7 +19,12 @@
     pitch: 10,        // px — grid spacing between dot centres
     'dot-size': 2,    // px — max dot diameter
     opacity: 0.24,    // max dot alpha (deepest inside a blob)
-    color: '#4D4D4F'  // dot fill (hard-coded, light theme)
+    color: '#4D4D4F'  // dot fill
+  };
+  var LIGHT = {
+    feather: 720,     // POC: wider than the blob radius so corners fade instead of a flat disk
+    opacity: 0.35,
+    color: '#6E7D96'  // closer to the light page than charcoal
   };
   // Blob anchors: r = radius factor, x/y = anchor as fraction of viewport.
   var PRESET = { tl: { r: 0.62, x: 0, y: 0 }, br: { r: 0.58, x: 1, y: 1 } };
@@ -63,6 +70,18 @@
     this._ro = new ResizeObserver(function () { if (self._reduce) self._draw(0); });
     this._ro.observe(this);
 
+    this._scheme = window.matchMedia('(prefers-color-scheme: dark)');
+    this._syncTheme();
+    this._onScheme = function () { self._syncTheme(); if (self._reduce) self._draw(0); };
+    if (this._scheme.addEventListener) this._scheme.addEventListener('change', this._onScheme);
+    else this._scheme.addListener(this._onScheme);
+    this._themeObs = new MutationObserver(function () {
+      var prev = self._dark;
+      self._syncTheme();
+      if (self._reduce && prev !== self._dark) self._draw(0);
+    });
+    this._themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'class'] });
+
     this._restart();
   };
 
@@ -74,15 +93,45 @@
       if (this._mq.removeEventListener) this._mq.removeEventListener('change', this._onMQ);
       else this._mq.removeListener(this._onMQ);
     }
+    if (this._scheme) {
+      if (this._scheme.removeEventListener) this._scheme.removeEventListener('change', this._onScheme);
+      else this._scheme.removeListener(this._onScheme);
+    }
+    if (this._themeObs) this._themeObs.disconnect();
   };
 
   P.attributeChangedCallback = function () {
     if (this._reduce && this._canvas) this._draw(0);
   };
 
+  P._palette = function () {
+    return this._dark ? DEFAULTS : LIGHT;
+  };
+
+  // html background is the splash color and the live theme page color.
+  P._syncTheme = function () {
+    var dark = false;
+    var bg = getComputedStyle(document.documentElement).backgroundColor;
+    var m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:[,\s/]+([\d.]+%?))?/.exec(bg || '');
+    if (m) {
+      var alpha = m[4] == null ? 1 : (m[4].charAt(m[4].length - 1) === '%' ? parseFloat(m[4]) / 100 : parseFloat(m[4]));
+      if (alpha >= 0.5) {
+        var y = (0.2126 * +m[1] + 0.7152 * +m[2] + 0.0722 * +m[3]) / 255;
+        dark = y < 0.4;
+      } else if (this._scheme) {
+        dark = this._scheme.matches;
+      }
+    } else if (this._scheme) {
+      dark = this._scheme.matches;
+    }
+    this._dark = dark;
+  };
+
   P._num = function (name) {
     var v = parseFloat(this.getAttribute(name));
-    return isFinite(v) ? v : DEFAULTS[name];
+    if (isFinite(v)) return v;
+    var themed = this._palette()[name];
+    return themed != null ? themed : DEFAULTS[name];
   };
 
   P._restart = function () {
@@ -148,7 +197,9 @@
           if (f > v) v = f;
         }
         if (v <= 0) continue;
-        v = v >= 1 ? 1 : v * v * (3 - 2 * v); // smoothstep falloff
+        // Light: never plateau, so the corner anchors fade out. Dark keeps the prototype disk.
+        if (this._dark) v = v >= 1 ? 1 : v * v * (3 - 2 * v);
+        else v = v / (1 + v);
         var li = Math.min(LEVELS - 1, Math.floor(v * LEVELS));
         var r = dotR * (0.55 + 0.45 * v);
         buckets[li].moveTo(x + r, y);
@@ -156,7 +207,7 @@
         used[li] = true;
       }
     }
-    ctx.fillStyle = this.getAttribute('color') || DEFAULTS.color;
+    ctx.fillStyle = this.getAttribute('color') || this._palette().color || DEFAULTS.color;
     var maxA = this._num('opacity');
     for (var k = 0; k < LEVELS; k++) {
       if (!used[k]) continue;
