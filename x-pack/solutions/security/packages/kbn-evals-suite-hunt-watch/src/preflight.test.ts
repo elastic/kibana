@@ -29,8 +29,18 @@ const JUDGE_CONNECTOR: EvalConnector = {
   taskType: 'completion',
 };
 
+interface InferenceFeature {
+  feature_id: string;
+  endpoints: Array<{ id: string }>;
+}
+
 interface MockOverrides {
-  tierFeaturesWithEndpoint?: string[];
+  /** Inference feature picks each space has before the preflight, keyed by space id. */
+  initialInferenceFeaturesBySpace?: Record<string, InferenceFeature[]>;
+  /** Receives every inference-settings PUT, keyed by space id. */
+  inferenceWrites?: Array<{ spaceId: string; features: InferenceFeature[] }>;
+  /** Accept inference-settings PUTs without storing them, so the read-back sees the old picks. */
+  dropInferenceWrites?: boolean;
   threatIntelSupplyBySpace?: Record<
     string,
     { huntEnabled?: boolean; hardGateOk?: boolean; drift?: boolean }
@@ -49,7 +59,9 @@ interface MockOverrides {
 
 const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
   const {
-    tierFeaturesWithEndpoint = [],
+    initialInferenceFeaturesBySpace = {},
+    inferenceWrites = [],
+    dropInferenceWrites = false,
     threatIntelSupplyBySpace = {},
     enableWorkerErrorSpaces = [],
     builtInRoleMissing = false,
@@ -58,6 +70,10 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
     existingSpaces,
     spaceWrites = [],
   } = overrides;
+
+  const inferenceFeaturesBySpace = new Map<string, InferenceFeature[]>(
+    Object.entries(initialInferenceFeaturesBySpace)
+  );
 
   return jest.fn(async (...args: unknown[]) => {
     const first = args[0];
@@ -109,15 +125,17 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
       });
       return {};
     }
-    if (/\/internal\/search_inference_endpoints\/settings$/.test(path)) {
-      return {
-        data: {
-          features: tierFeaturesWithEndpoint.map((featureId) => ({
-            feature_id: featureId,
-            endpoints: [{ id: 'some-endpoint' }],
-          })),
-        },
-      };
+    const inferenceMatch =
+      /^(?:\/s\/([^/]+))?\/internal\/search_inference_endpoints\/settings$/.exec(path);
+    if (inferenceMatch) {
+      const spaceId = inferenceMatch[1] ? decodeURIComponent(inferenceMatch[1]) : 'default';
+      if (method === 'PUT') {
+        const { features } = JSON.parse(body ?? '{}') as { features: InferenceFeature[] };
+        inferenceWrites.push({ spaceId, features });
+        if (!dropInferenceWrites) inferenceFeaturesBySpace.set(spaceId, features);
+        return { data: { features } };
+      }
+      return { data: { features: inferenceFeaturesBySpace.get(spaceId) ?? [] } };
     }
     if (/\/internal\/alertzero\/workers$/.test(path) && method === 'GET') {
       return {
@@ -282,20 +300,95 @@ describe('runPreflight', () => {
     });
   });
 
-  it('throws naming the assigned tier feature when an alertzero_* tier endpoint is already assigned', async () => {
-    await expect(
-      run(buildMockFetch({ tierFeaturesWithEndpoint: ['alertzero_efficient'] }))
-    ).rejects.toThrow(/alertzero_efficient/);
+  it('routes every alertzero tier to the subject connector in every eval space and keeps other picks', async () => {
+    const inferenceWrites: MockOverrides['inferenceWrites'] = [];
+    await run(
+      buildMockFetch({
+        initialInferenceFeaturesBySpace: {
+          default: [
+            { feature_id: 'agent_builder', endpoints: [{ id: 'developer-endpoint' }] },
+            { feature_id: 'alertzero_frontier', endpoints: [{ id: 'recommended-opus' }] },
+          ],
+        },
+        inferenceWrites,
+      })
+    );
+
+    expect(inferenceWrites.map(({ spaceId }) => spaceId).sort()).toEqual(
+      [...EVAL_SPACE_IDS].sort()
+    );
+    for (const { features } of inferenceWrites) {
+      for (const tier of ['alertzero_efficient', 'alertzero_balanced', 'alertzero_frontier']) {
+        expect(features.filter(({ feature_id: id }) => id === tier)).toEqual([
+          { feature_id: tier, endpoints: [{ id: CONNECTOR.id }] },
+        ]);
+      }
+    }
+    expect(inferenceWrites.find(({ spaceId }) => spaceId === 'default')?.features).toContainEqual({
+      feature_id: 'agent_builder',
+      endpoints: [{ id: 'developer-endpoint' }],
+    });
   });
 
-  it('writes no subject connector to any space when a tier endpoint is assigned', async () => {
-    const settingsWrites: MockOverrides['settingsWrites'] = [];
-    await expect(
-      run(buildMockFetch({ tierFeaturesWithEndpoint: ['alertzero_efficient'], settingsWrites }))
-    ).rejects.toThrow(/alertzero_efficient/);
+  it('throws naming the tier and space when the tier pick does not read back', async () => {
+    await expect(run(buildMockFetch({ dropInferenceWrites: true }))).rejects.toThrow(
+      /did not stick in space "default" for alertzero_efficient, alertzero_balanced, alertzero_frontier/
+    );
+  });
+
+  it('restores the previous tier picks in every space after the run', async () => {
+    const inferenceWrites: MockOverrides['inferenceWrites'] = [];
+    const developerPicks = [
+      { feature_id: 'alertzero_frontier', endpoints: [{ id: 'developer-endpoint' }] },
+    ];
+    const cleanup = await run(
+      buildMockFetch({
+        initialInferenceFeaturesBySpace: { default: developerPicks },
+        inferenceWrites,
+      })
+    );
+    inferenceWrites.length = 0;
+    await cleanup();
+
     expect(
-      settingsWrites.filter(({ changes }) => 'genAiSettings:defaultAIConnector' in changes)
-    ).toEqual([]);
+      Object.fromEntries(inferenceWrites.map(({ spaceId, features }) => [spaceId, features]))
+    ).toEqual({ default: developerPicks, 'hunt-a': [], 'hunt-b': [], 'hunt-blocked': [] });
+  });
+
+  it('restores the previous connector and tier picks when the tier read-back throws', async () => {
+    const settingsWrites: MockOverrides['settingsWrites'] = [];
+    const inferenceWrites: MockOverrides['inferenceWrites'] = [];
+    await expect(
+      run(
+        buildMockFetch({
+          dropInferenceWrites: true,
+          previousDefaultConnectorBySpace: { default: 'developer-connector' },
+          settingsWrites,
+          inferenceWrites,
+        })
+      )
+    ).rejects.toThrow(/did not stick/);
+
+    const lastConnectorWrite = Object.fromEntries(
+      settingsWrites
+        .filter(({ changes }) => 'genAiSettings:defaultAIConnector' in changes)
+        .map(({ spaceId, changes }) => [spaceId, changes['genAiSettings:defaultAIConnector']])
+    );
+    expect(lastConnectorWrite).toEqual({
+      default: 'developer-connector',
+      'hunt-a': null,
+      'hunt-b': null,
+      'hunt-blocked': null,
+    });
+    const lastInferenceWrite = Object.fromEntries(
+      inferenceWrites.map(({ spaceId, features }) => [spaceId, features])
+    );
+    expect(lastInferenceWrite).toEqual({
+      default: [],
+      'hunt-a': [],
+      'hunt-b': [],
+      'hunt-blocked': [],
+    });
   });
 
   it('restores the previous connector in every space when a gate after the bridge throws', async () => {

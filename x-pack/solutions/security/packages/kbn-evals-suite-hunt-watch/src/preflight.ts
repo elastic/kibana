@@ -48,6 +48,7 @@ const DEFAULT_INDEX_SETTING_ID = 'securitySolution:defaultIndex';
  * plugin as `@kbn/alertzero-common`'s `API_VERSIONS`, so not borrowed from there even though
  * both happen to be `'1'` today. */
 const SEARCH_INFERENCE_ENDPOINTS_API_VERSION = '1';
+const INFERENCE_SETTINGS_PATH = '/internal/search_inference_endpoints/settings';
 
 const ALERTZERO_TIER_FEATURE_IDS: readonly string[] = [
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
@@ -194,71 +195,106 @@ const configureIndexScope = async ({
   }
 };
 
+interface InferenceFeatureSetting {
+  feature_id: string;
+  endpoints: Array<{ id: string }>;
+}
+
+const readInferenceFeatures = async (
+  fetch: HttpHandler,
+  spaceId: string
+): Promise<InferenceFeatureSetting[]> => {
+  const response = await fetch<{ data: { features: InferenceFeatureSetting[] } }>(
+    spacePath(spaceId, INFERENCE_SETTINGS_PATH),
+    { method: 'GET', headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION) }
+  );
+  return response.data.features;
+};
+
+const writeInferenceFeatures = async (
+  fetch: HttpHandler,
+  spaceId: string,
+  features: readonly InferenceFeatureSetting[]
+): Promise<void> => {
+  await fetch(spacePath(spaceId, INFERENCE_SETTINGS_PATH), {
+    method: 'PUT',
+    headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
+    body: JSON.stringify({ features }),
+  });
+};
+
+const pinTierFeatures = (
+  features: readonly InferenceFeatureSetting[],
+  connectorId: string
+): InferenceFeatureSetting[] => [
+  ...features.filter(({ feature_id: id }) => !ALERTZERO_TIER_FEATURE_IDS.includes(id)),
+  ...ALERTZERO_TIER_FEATURE_IDS.map((featureId) => ({
+    feature_id: featureId,
+    endpoints: [{ id: connectorId }],
+  })),
+];
+
+interface SpaceModelState {
+  defaultConnector: string | null;
+  inferenceFeatures: InferenceFeatureSetting[];
+}
+
 /**
- * Bridges the subject model into the Worker: sets `genAiSettings:defaultAIConnector` to the
- * subject connector id in each eval space, then asserts no `alertzero_*` tier inference feature
- * has an endpoint assigned. `scoped_model.ts` resolves the Worker's model from tier endpoints
- * first — if one is assigned, the connector set here is silently ignored and every weekly run
- * tests whatever model that tier endpoint points at instead of the six subject models under
- * test. Fails loud rather than lying about which model actually ran.
+ * Bridges the subject model into the Worker in each eval space. `scoped_model.ts` resolves the
+ * Worker's model from the `alertzero_*` tier endpoints first and every tier registers
+ * `ignoreGlobalDefault: true`, so with no tier pick the Worker runs the tier's first recommended
+ * endpoint whatever the subject is. Each tier is therefore pointed at the subject connector
+ * (inference settings are a per-space saved object) and read back, failing loud if the pick did
+ * not stick. `genAiSettings:defaultAIConnector` is also set, for the connector-chain fallback.
  */
 const bridgeSubjectModel = async ({
   fetch,
   log,
   connectorId,
+  previous,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
-}): Promise<Map<string, string | null>> => {
-  // Checked in every space before anything is written: a throw here must not leave the spaces
-  // already visited pointed at the subject connector with no cleanup to put them back.
-  // `/internal/search_inference_endpoints/settings` reports which inference endpoint (if any)
-  // is assigned per feature id; a non-empty `endpoints` array for a tier feature means that
-  // tier takes precedence over the genAiSettings bridge below.
-  for (const spaceId of EVAL_SPACE_IDS) {
-    const settingsResponse = await fetch<{
-      data: { features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }> };
-    }>(spacePath(spaceId, '/internal/search_inference_endpoints/settings'), {
-      method: 'GET',
-      headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
-    });
-
-    const assignedTierFeatures = settingsResponse.data.features.filter(
-      (feature) =>
-        ALERTZERO_TIER_FEATURE_IDS.includes(feature.feature_id) && feature.endpoints.length > 0
-    );
-    if (assignedTierFeatures.length > 0) {
-      throw new Error(
-        `[hunt-watch] space "${spaceId}" has a tier inference endpoint assigned for ` +
-          `${assignedTierFeatures.map((f) => f.feature_id).join(', ')}. Tier endpoints take ` +
-          `precedence over "genAiSettings:defaultAIConnector" in scoped_model.ts, so the Worker ` +
-          `would silently ignore the subject connector this suite bridges. Unassign the tier ` +
-          `endpoint(s) in this deployment before running this suite. A per-tier bridge is a follow-up.`
-      );
-    }
-  }
-
-  const previous = new Map<string, string | null>();
+  /** Filled before each space is written, so a throw part-way still restores what was touched. */
+  previous: Map<string, SpaceModelState>;
+}): Promise<void> => {
   for (const spaceId of EVAL_SPACE_IDS) {
     // Remembered so the cleanup can put the space back the way it was. The Worker stays enabled
     // in every eval space between runs, and on a long-lived stack the default space is the
     // developer's own: clearing the connector there would leave their Worker with no model.
-    previous.set(
-      spaceId,
+    const inferenceFeatures = await readInferenceFeatures(fetch, spaceId);
+    const defaultConnector =
       (await getUiSetting<string>({ fetch, spaceId, key: GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR })) ??
-        null
-    );
+      null;
+    previous.set(spaceId, { defaultConnector, inferenceFeatures });
+
     log.info(
-      `[hunt-watch] setting genAiSettings:defaultAIConnector="${connectorId}" in space "${spaceId}"`
+      `[hunt-watch] routing ${ALERTZERO_TIER_FEATURE_IDS.join(', ')} and ` +
+        `genAiSettings:defaultAIConnector to "${connectorId}" in space "${spaceId}"`
     );
+    await writeInferenceFeatures(fetch, spaceId, pinTierFeatures(inferenceFeatures, connectorId));
     await setUiSettings({
       fetch,
       spaceId,
       changes: { [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: connectorId },
     });
   }
-  return previous;
+
+  for (const spaceId of EVAL_SPACE_IDS) {
+    const readBack = await readInferenceFeatures(fetch, spaceId);
+    const unpinned = ALERTZERO_TIER_FEATURE_IDS.filter((featureId) => {
+      const endpoints = readBack.find(({ feature_id: id }) => id === featureId)?.endpoints ?? [];
+      return endpoints[0]?.id !== connectorId;
+    });
+    if (unpinned.length > 0) {
+      throw new Error(
+        `[hunt-watch] tier inference settings did not stick in space "${spaceId}" for ` +
+          `${unpinned.join(', ')}: expected endpoint "${connectorId}". The Worker would run ` +
+          `the tier's recommended endpoint instead of the subject model.`
+      );
+    }
+  }
 };
 
 interface ServiceAccountEntry {
@@ -480,7 +516,7 @@ export const runPreflight = async ({
     await ensureSecuritySpace({ fetch, log, spaceId });
   }
   await configureIndexScope({ fetch, log });
-  const previousConnectors = await bridgeSubjectModel({ fetch, log, connectorId });
+  const previous = new Map<string, SpaceModelState>();
 
   // The eval spaces are left in place on purpose. Deleting them here and recreating them on the
   // next run races the per-space Worker install, its service-account binding and the managed
@@ -490,28 +526,28 @@ export const runPreflight = async ({
   // The Security solution view is not reverted either, `default` included: the Worker stays
   // enabled there between runs.
   const restoreConnectors: PreflightCleanup = async () => {
-    for (const spaceId of EVAL_SPACE_IDS) {
+    for (const [spaceId, { defaultConnector, inferenceFeatures }] of previous) {
       try {
+        await writeInferenceFeatures(fetch, spaceId, inferenceFeatures);
         await setUiSettings({
           fetch,
           spaceId,
-          changes: {
-            [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: previousConnectors.get(spaceId) ?? null,
-          },
+          changes: { [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: defaultConnector },
         });
       } catch (err) {
         log.warning(
-          `[hunt-watch] failed to restore genAiSettings:defaultAIConnector in space "${spaceId}": ${errorMessage(
-            err
-          )}`
+          `[hunt-watch] failed to restore the tier inference settings or ` +
+            `genAiSettings:defaultAIConnector in space "${spaceId}": ${errorMessage(err)}`
         );
       }
     }
   };
 
-  // Every gate below can throw, and a worker fixture that throws before `use()` never runs the
-  // cleanup it would have returned, so the connectors are put back here before the error leaves.
+  // The bridge's read-back and every gate below can throw, and a worker fixture that throws
+  // before `use()` never runs the cleanup it would have returned, so the model settings are put
+  // back here before the error leaves.
   try {
+    await bridgeSubjectModel({ fetch, log, connectorId, previous });
     await enableWorkerInEvalSpaces({ fetch, log });
     await assertThreatIntelSupplyReady({ fetch, log });
     await ensureEntityStoreRunning({ fetch, log });
