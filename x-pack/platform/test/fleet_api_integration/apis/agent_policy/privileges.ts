@@ -270,6 +270,7 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await setupTestUsers(getService('security'));
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
 
       await supertest
         .post(`/api/fleet/agent_policies`)
