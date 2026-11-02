@@ -197,6 +197,60 @@ describe('fetchInvestigationAlertSnapshots', () => {
     expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
   });
 
+  const v2Columns = [
+    'episode.id',
+    'first_timestamp',
+    'last_timestamp',
+    'episode.status',
+    'rule.id',
+    'group_hash',
+  ];
+  const v2Row = (ruleId: string | null, groupHash: string | null = 'hash') => [
+    'episode-1',
+    '2026-09-02T10:00:00.000Z',
+    '2026-09-02T10:05:00.000Z',
+    'active',
+    ruleId,
+    groupHash,
+  ];
+
+  it('names a v2 episode without a rule from its data', async () => {
+    const lookup = makeLookup({
+      columns: v2Columns,
+      rows: [v2Row(null)],
+      episodeData: { 'episode-1': '{"rule_name":"Ad hoc"}' },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toEqual(
+      expect.objectContaining({ alert_version: 'v2', id: 'episode-1', rule_name: 'Ad hoc' })
+    );
+    expect(snapshot).not.toHaveProperty('rule_id', expect.any(String));
+    expect(lookup.getRulesClient).not.toHaveBeenCalled();
+  });
+
+  it('keeps a v2 episode whose data rule name is empty', async () => {
+    const lookup = makeLookup({
+      columns: v2Columns,
+      rows: [v2Row(null)],
+      episodeData: { 'episode-1': '{"rule_name":""}' },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toEqual(expect.objectContaining({ id: 'episode-1' }));
+    expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
+  });
+
+  it('treats a malformed v2 episode as not found', async () => {
+    const lookup = makeLookup({ columns: v2Columns, rows: [v2Row('v2-rule', null)] });
+
+    await expect(run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1'])).rejects.toThrow(
+      'Alert with id episode-1 not found'
+    );
+  });
+
   it('omits the data of a v2 episode that is too large to store in a subject snapshot', async () => {
     const lookup = makeLookup({
       columns: [
