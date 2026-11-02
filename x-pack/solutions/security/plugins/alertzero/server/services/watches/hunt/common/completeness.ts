@@ -35,10 +35,9 @@ import type {
  * that is not in the catalog, input this run truncated, and rows it could not interpret
  * all stay final: those reproduce. Retries are not bounded here, because a bound needs an
  * attempt count kept alongside the report: `writeHuntEvidence` keeps it and retires a report
- * whose model output is rejected for `MAX_HUNT_RETRY_ATTEMPTS` runs. Outages and
- * `extraction_pending` do not count toward it. The one bound here is: a technique an earlier
- * run left pending and this run's extraction did not return gets no further run
- * (`finalTechniqueIds`).
+ * that stays retryable for `MAX_HUNT_RETRY_ATTEMPTS` runs, not counting runs whose retryable
+ * gaps all came from the environment. The one bound here is: a technique an earlier run left
+ * pending and this run's extraction did not return gets no further run (`finalTechniqueIds`).
  */
 const RETRYABLE_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompleteReason>([
   'search_partial',

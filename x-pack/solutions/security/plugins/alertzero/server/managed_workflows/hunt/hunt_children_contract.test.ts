@@ -270,7 +270,7 @@ describe('system-security-hunt-execute', () => {
     expect(body.incompleteReasons).toContain('result.incomplete |');
     expect(body.incompleteReasons).toContain('result.tier1.incomplete');
     expect(body.incompleteReasons).toContain('result.tier2.incomplete');
-    expect(body.incompleteReasons).toContain("map: 'reason' | uniq");
+    expect(body.incompleteReasons).toContain("map: 'reason' | compact | uniq");
   });
 
   it('writes the coordinator narrative as the hunt results message', () => {

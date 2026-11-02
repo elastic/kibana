@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { HuntCompleteness, HuntIncompleteReason } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
+import { isRetryableIncompleteReason } from './completeness';
 import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
 
 export type LastHuntStatus = 'hit' | 'clean' | 'incomplete';
@@ -16,26 +17,28 @@ export type LastHuntStatus = 'hit' | 'clean' | 'incomplete';
 export const MAX_HUNT_RETRY_ATTEMPTS = 3;
 
 /**
- * Gaps where the model answered and the gates rejected its output. Only these repeat on the same
- * report text, so only a run with one of them counts toward {@link MAX_HUNT_RETRY_ATTEMPTS}. The
- * other retryable gaps (a model or index outage, enrichment not finished) say nothing about the
- * report, so they must not retire it.
+ * Retryable gaps caused by the environment rather than the report, so they never count toward
+ * {@link MAX_HUNT_RETRY_ATTEMPTS}. `generation_failed` and `execute_failed` are left out on
+ * purpose: they usually mean the generated query failed validation or execution, which repeats.
  */
-const MODEL_REJECTION_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompleteReason>([
-  'query_out_of_scope',
-  'query_ungrounded',
-  'quote_ungrounded',
+const ENVIRONMENT_GAP_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompleteReason>([
+  'index_unavailable',
+  'search_partial',
+  'catalog_unavailable',
+  'extraction_pending',
 ]);
 
 /**
- * Whether a retryable run counts toward the retry bound. Unknown reasons (a caller that predates
- * the field) count, which keeps the bound in place rather than retrying forever.
+ * Whether a retryable run counts toward the retry bound: it does unless every retryable gap came
+ * from the environment. Missing reasons count, so the bound holds for a caller that sends none.
  */
 export const countsTowardRetryBound = (
   incompleteReasons?: readonly HuntIncompleteReason[]
 ): boolean =>
-  incompleteReasons === undefined ||
-  incompleteReasons.some((reason) => MODEL_REJECTION_REASONS.has(reason));
+  !incompleteReasons?.length ||
+  incompleteReasons.some(
+    (reason) => isRetryableIncompleteReason(reason) && !ENVIRONMENT_GAP_REASONS.has(reason)
+  );
 
 /**
  * Collapses the coordinator's hit/completeness pair to exactly the three statuses
@@ -87,9 +90,9 @@ export const deriveLastHuntStatus = ({
  * consecutive retryable runs that searched nothing new:
  * - a retryable run on an element that is still unsettled (never stamped, or stamped with coverage
  *   pending) adds one, or restarts at one when it grew the ledger, since that run made progress;
- * - a retryable run that `params.count_run` excludes (its gaps were all outages, not rejected model
- *   output) keeps the count as it was: it neither adds one nor resets it, so runs that alternate
- *   between an outage and a rejection still reach the bound;
+ * - a retryable run that `params.count_run` excludes (its retryable gaps all came from the
+ *   environment) keeps the count as it was: it neither adds one nor resets it, so runs that
+ *   alternate between an outage and a failure that repeats still reach the bound;
  * - a retryable run on a settled element is the first of a new run, so it starts at one rather
  *   than inheriting an old count;
  * - a run that stamps, or that the ledger cap settles, resets it to zero.

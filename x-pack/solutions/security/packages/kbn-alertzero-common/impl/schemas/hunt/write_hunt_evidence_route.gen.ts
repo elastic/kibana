@@ -62,14 +62,14 @@ export const WriteHuntEvidenceRequestBody = lazySchema(() =>
           "From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run."
         ),
       /**
-       * Distinct reasons from every coverage gap the coordinator and both tiers reported. A retryable run counts toward the retry bound only when one of them is rejected model output; a run whose gaps were all outages leaves the count as it was. Omit to count every retryable run.
+       * Distinct reasons from every coverage gap the coordinator and both tiers reported. A retryable run whose retryable gaps all came from the environment (an unavailable index or catalog, a partial search, enrichment not finished) leaves the retry count as it was. Omit or send none to count every retryable run.
        */
       incompleteReasons: z
         .array(HuntIncompleteReason)
         .max(100)
         .optional()
         .describe(
-          'Distinct reasons from every coverage gap the coordinator and both tiers reported. A retryable run counts toward the retry bound only when one of them is rejected model output; a run whose gaps were all outages leaves the count as it was. Omit to count every retryable run.'
+          'Distinct reasons from every coverage gap the coordinator and both tiers reported. A retryable run whose retryable gaps all came from the environment (an unavailable index or catalog, a partial search, enrichment not finished) leaves the retry count as it was. Omit or send none to count every retryable run.'
         ),
     })
     .strict()

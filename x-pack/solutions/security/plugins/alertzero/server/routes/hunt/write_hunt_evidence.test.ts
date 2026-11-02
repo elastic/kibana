@@ -220,7 +220,7 @@ describe('registerWriteHuntEvidenceRoute', () => {
     );
   });
 
-  it('passes the gap reasons through, so an outage does not count toward the retry bound', async () => {
+  it('passes the gap reasons through, so an environment gap does not count toward the retry bound', async () => {
     const { handler, context, asInternalUser } = makeDeps();
 
     await handler(
@@ -228,7 +228,7 @@ describe('registerWriteHuntEvidenceRoute', () => {
       requestFor({
         completeness: 'incomplete_retryable',
         searchedTechniqueIds: ['T1001'],
-        incompleteReasons: ['generation_failed'],
+        incompleteReasons: ['index_unavailable'],
       }),
       httpServerMock.createResponseFactory()
     );

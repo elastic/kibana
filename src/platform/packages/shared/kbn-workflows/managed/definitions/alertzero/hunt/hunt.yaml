@@ -329,7 +329,7 @@ steps:
         pendingTechniqueIds: "${{ steps.read_hunt_result.output.data.result.pending_technique_ids }}"
         replayedWholeReport: "${{ steps.read_hunt_result.output.data.result.replayed_whole_report }}"
         # `result.incomplete` holds only the coordinator's own gaps; each tier reports its own.
-        incompleteReasons: "${{ steps.read_hunt_result.output.data.result.incomplete | concat: steps.read_hunt_result.output.data.result.tier1.incomplete | concat: steps.read_hunt_result.output.data.result.tier2.incomplete | map: 'reason' | uniq }}"
+        incompleteReasons: "${{ steps.read_hunt_result.output.data.result.incomplete | concat: steps.read_hunt_result.output.data.result.tier1.incomplete | concat: steps.read_hunt_result.output.data.result.tier2.incomplete | map: 'reason' | compact | uniq }}"
     on-failure:
       continue: true
 

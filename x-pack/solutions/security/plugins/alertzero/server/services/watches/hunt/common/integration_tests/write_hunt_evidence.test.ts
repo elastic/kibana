@@ -352,7 +352,7 @@ describe('writeHuntEvidence against Elasticsearch', () => {
       expect(stored?.last_hunted_at).toBeUndefined();
     });
 
-    it('keeps the count through runs whose gaps were all outages, so an outage never retires a report', async () => {
+    it('keeps the count through runs whose gaps all came from the environment, so an outage never retires a report', async () => {
       const reportId = await newReport([
         {
           space_id: SPACE,
@@ -366,7 +366,7 @@ describe('writeHuntEvidence against Elasticsearch', () => {
       for (let run = 0; run <= MAX_HUNT_RETRY_ATTEMPTS; run++) {
         await write(reportId, {
           ...retryableNoHit(`outage-${run}`),
-          incompleteReasons: ['generation_failed', 'index_unavailable'],
+          incompleteReasons: ['index_unavailable', 'search_partial'],
         });
       }
 
@@ -381,7 +381,7 @@ describe('writeHuntEvidence against Elasticsearch', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('counts a run that mixes an outage with rejected model output', async () => {
+    it('counts a run that mixes an outage with a gap that can repeat', async () => {
       const reportId = await newReport([
         {
           space_id: SPACE,
@@ -394,7 +394,7 @@ describe('writeHuntEvidence against Elasticsearch', () => {
 
       await write(reportId, {
         ...retryableNoHit('run-mixed'),
-        incompleteReasons: ['index_unavailable', 'query_ungrounded'],
+        incompleteReasons: ['index_unavailable', 'generation_failed'],
       });
 
       expect(await element(reportId)).toEqual(

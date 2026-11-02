@@ -63,32 +63,37 @@ describe('shouldStampHunt', () => {
 });
 
 describe('countsTowardRetryBound', () => {
-  it.each([['query_ungrounded'], ['quote_ungrounded'], ['query_out_of_scope']] as const)(
-    'counts a run whose model output was rejected (%s)',
-    (reason) => {
-      expect(countsTowardRetryBound([reason])).toBe(true);
-    }
-  );
+  it.each([
+    ['query_ungrounded'],
+    ['quote_ungrounded'],
+    ['query_out_of_scope'],
+    ['generation_failed'],
+    ['execute_failed'],
+  ] as const)('counts a run with a gap that can repeat on the same report (%s)', (reason) => {
+    expect(countsTowardRetryBound([reason])).toBe(true);
+  });
 
-  it('does not count a run whose gaps were all outages or unfinished enrichment', () => {
+  it('does not count a run whose retryable gaps all came from the environment', () => {
     expect(
       countsTowardRetryBound([
-        'generation_failed',
         'index_unavailable',
         'search_partial',
-        'execute_failed',
         'catalog_unavailable',
         'extraction_pending',
       ])
     ).toBe(false);
   });
 
-  it('counts a run that mixes an outage with rejected model output', () => {
-    expect(countsTowardRetryBound(['index_unavailable', 'query_ungrounded'])).toBe(true);
+  it('ignores final gaps, which do not make the run retryable', () => {
+    expect(countsTowardRetryBound(['index_unavailable', 'input_truncated'])).toBe(false);
   });
 
-  it('counts when the caller sent no reasons, so the bound still holds', () => {
-    expect(countsTowardRetryBound(undefined)).toBe(true);
+  it('counts a run that mixes an environment gap with one that can repeat', () => {
+    expect(countsTowardRetryBound(['index_unavailable', 'generation_failed'])).toBe(true);
+  });
+
+  it.each([[undefined], [[]]])('counts when no reasons arrived (%p)', (reasons) => {
+    expect(countsTowardRetryBound(reasons)).toBe(true);
   });
 });
 
