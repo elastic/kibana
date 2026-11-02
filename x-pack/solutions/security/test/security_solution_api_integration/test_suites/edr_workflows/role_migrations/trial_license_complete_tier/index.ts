@@ -10,5 +10,6 @@ export default function endpointAPIIntegrationTests({ loadTestFile }: FtrProvide
   describe('Endpoint related user role migrations, feature deprecations', function () {
     loadTestFile(require.resolve('./siem_artifact_api_actions'));
     loadTestFile(require.resolve('./siem_artifact_sub_privileges'));
+    loadTestFile(require.resolve('./siem_deprecated_ui_actions'));
   });
 }
