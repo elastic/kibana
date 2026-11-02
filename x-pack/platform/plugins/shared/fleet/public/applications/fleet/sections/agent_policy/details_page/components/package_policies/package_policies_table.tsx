@@ -35,13 +35,10 @@ import {
   useMultipleAgentPolicies,
   useGetOutputs,
   useDefaultOutput,
-  useStartServices,
+  useOnboardingInstanceUrl,
 } from '../../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
-import {
-  ONBOARDING_APP_ID,
-  getOnboardingInstancePath,
-} from '../../../../../../../services/aws_onboarding_override';
+import { ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE } from '../../../../../../../services/aws_onboarding_override';
 
 import {
   OTEL_INPUTS_MINIMUM_VERSION,
@@ -66,6 +63,42 @@ interface FilterOption {
   value: string;
 }
 
+// Links to the onboarding instance; explains why there is no link while the onboarding flow is off.
+const ManagedByOnboardingBadge = ({
+  onboardingInstanceUrl,
+}: {
+  onboardingInstanceUrl: string | undefined;
+}) => {
+  const label = (
+    <FormattedMessage
+      id="xpack.fleet.policyDetails.packagePoliciesTable.managedByOnboardingBadge"
+      defaultMessage="Managed by AWS onboarding"
+    />
+  );
+
+  return onboardingInstanceUrl ? (
+    <EuiBadge
+      data-test-subj="PackagePoliciesTableManagedByOnboardingBadge"
+      color="hollow"
+      iconType="lock"
+      href={onboardingInstanceUrl}
+    >
+      {label}
+    </EuiBadge>
+  ) : (
+    <EuiToolTip content={ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE}>
+      <EuiBadge
+        data-test-subj="PackagePoliciesTableManagedByOnboardingBadge"
+        color="hollow"
+        iconType="lock"
+        tabIndex={0}
+      >
+        {label}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+};
+
 const stringSortAscending = (a: string, b: string): number => a.localeCompare(b);
 const toFilterOption = (value: string): FilterOption => ({ name: value, value });
 
@@ -86,7 +119,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     getUpgradeVersion,
   } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
-  const { application } = useStartServices();
+  const getOnboardingInstanceUrl = useOnboardingInstanceUrl();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
   const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
@@ -182,19 +215,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
             {packagePolicy.onboarding_deployment_id && (
               // It can only be changed from the onboarding flow, which the badge opens.
               <EuiFlexItem grow={false}>
-                <EuiBadge
-                  data-test-subj="PackagePoliciesTableManagedByOnboardingBadge"
-                  color="hollow"
-                  iconType="lock"
-                  href={application.getUrlForApp(ONBOARDING_APP_ID, {
-                    path: getOnboardingInstancePath(packagePolicy.onboarding_deployment_id),
-                  })}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.policyDetails.packagePoliciesTable.managedByOnboardingBadge"
-                    defaultMessage="Managed by AWS onboarding"
-                  />
-                </EuiBadge>
+                <ManagedByOnboardingBadge
+                  onboardingInstanceUrl={getOnboardingInstanceUrl(
+                    packagePolicy.onboarding_deployment_id
+                  )}
+                />
               </EuiFlexItem>
             )}
             {enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && (
@@ -416,7 +441,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     [
       canReadIntegrationPolicies,
       getHref,
-      application,
+      getOnboardingInstanceUrl,
       agentPolicy,
       enableOtelIntegrations,
       canUseMultipleAgentPolicies,

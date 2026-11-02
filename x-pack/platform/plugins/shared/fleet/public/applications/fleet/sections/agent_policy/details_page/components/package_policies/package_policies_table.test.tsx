@@ -70,12 +70,14 @@ describe('PackagePoliciesTable', () => {
     keepPoliciesUpToDate?: boolean;
     pendingUpgradeReview?: object;
     onboardingDeploymentId?: string;
+    onboardingEnabled?: boolean;
   }) => {
     const {
       hasUpgrade = false,
       keepPoliciesUpToDate = false,
       pendingUpgradeReview,
       onboardingDeploymentId,
+      onboardingEnabled = true,
     } = overrides;
 
     jest.mocked(useIsPackagePolicyUpgradable).mockReturnValue({
@@ -87,6 +89,7 @@ describe('PackagePoliciesTable', () => {
     });
 
     const renderer = createFleetTestRendererMock();
+    renderer.startServices.featureFlags.useBooleanValue.mockReturnValue(onboardingEnabled);
     renderer.startServices.application.getUrlForApp.mockImplementation(
       (appId, { path = '' } = {}) => `/app/${appId}${path}`
     );
@@ -147,6 +150,15 @@ describe('PackagePoliciesTable', () => {
         'href',
         '/app/onboarding/aws?deploymentId=deploy-1'
       );
+    });
+
+    it('shows the badge without a link while the onboarding flow is turned off', async () => {
+      const result = renderTable({ onboardingDeploymentId: 'deploy-1', onboardingEnabled: false });
+      await act(async () => {});
+
+      const badge = result.getByTestId('PackagePoliciesTableManagedByOnboardingBadge');
+      expect(badge).toHaveTextContent('Managed by AWS onboarding');
+      expect(badge.closest('a') ?? badge.querySelector('a')).toBeNull();
     });
 
     it('does not offer the upgrade page, which edits the policy', async () => {

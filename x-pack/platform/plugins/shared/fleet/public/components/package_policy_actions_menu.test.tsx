@@ -32,9 +32,6 @@ jest.mock('../hooks', () => {
     useStartServices: jest.fn().mockReturnValue({
       application: {
         navigateToApp: jest.fn(),
-        getUrlForApp: jest.fn(
-          (appId: string, { path = '' }: { path?: string } = {}) => `/app/${appId}${path}`
-        ),
       },
       notifications: {
         toasts: { addSuccess: jest.fn(), addWarning: jest.fn(), addError: jest.fn() },
@@ -99,6 +96,7 @@ function renderMenu({
   defaultIsOpen = true,
   onUpgraded,
   agent,
+  onboardingEnabled = true,
 }: {
   agentPolicies: AgentPolicy[];
   packagePolicy: InMemoryPackagePolicy;
@@ -106,8 +104,14 @@ function renderMenu({
   defaultIsOpen?: boolean;
   onUpgraded?: () => void;
   agent?: Agent;
+  onboardingEnabled?: boolean;
 }) {
   const renderer = createIntegrationsTestRendererMock();
+  // Read by useOnboardingInstanceUrl, which uses the renderer's services.
+  renderer.startServices.featureFlags.useBooleanValue.mockReturnValue(onboardingEnabled);
+  renderer.startServices.application.getUrlForApp.mockImplementation(
+    (appId, { path = '' } = {}) => `/app/${appId}${path}`
+  );
 
   const utils = renderer.render(
     <PackagePolicyActionsMenu
@@ -298,6 +302,20 @@ describe('PackagePolicyActionsMenu', () => {
       expect(utils.queryByText('Delete integration')).toBeNull();
       // A copy is not managed by the onboarding instance.
       expect(utils.getByTestId('PackagePolicyActionsCopyItem')).toBeInTheDocument();
+    });
+
+    it('explains instead of linking while the onboarding flow is turned off', async () => {
+      const { utils } = renderMenu({
+        agentPolicies: createMockAgentPolicies(),
+        packagePolicy: onboardingPackagePolicy(),
+        onboardingEnabled: false,
+      });
+
+      const manageItem = await utils.findByTestId('PackagePolicyActionsManageInOnboardingItem');
+      expect(manageItem).toBeDisabled();
+      expect(manageItem).not.toHaveAttribute('href');
+      expect(utils.queryByTestId('PackagePolicyActionsEditItem')).toBeNull();
+      expect(utils.queryByText('Delete integration')).toBeNull();
     });
 
     it('does not link to the upgrade page of an agent-based policy, which edits it', async () => {

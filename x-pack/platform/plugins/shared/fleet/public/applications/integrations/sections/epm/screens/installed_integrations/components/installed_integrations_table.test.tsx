@@ -293,6 +293,25 @@ describe('InstalledIntegrationsTable', () => {
       expect(screen.queryByText(/View \d+ polic/)).not.toBeInTheDocument();
     });
 
+    it('keeps the pending upgrade review warning when the onboarding flow manages every policy', () => {
+      const { container } = renderComponent(
+        [
+          {
+            ...withPolicies(2, 2),
+            installationInfo: {
+              ...basePackage.installationInfo,
+              pending_upgrade_review: { target_version: '1.3.0' },
+            },
+            ui: { installation_status: 'pending_upgrade_review' },
+          } as InstalledPackageUIPackageListItem,
+        ],
+        { onboardingEnabled: true }
+      );
+
+      expect(screen.queryByText(/View \d+ polic/)).not.toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="warning"]')).toBeInTheDocument();
+    });
+
     it('counts them when the onboarding flow is disabled', () => {
       renderComponent([withPolicies(3, 2)]);
 

@@ -23,11 +23,12 @@ import {
   useAuthz,
   useGetOneAgentPolicy,
   useLink,
+  useOnboardingInstanceUrl,
   useStartServices,
   useUpgradeReviewActions,
 } from '../hooks';
 import { isAgentlessPoliciesUIEnabled, policyHasFleetServer } from '../services';
-import { ONBOARDING_APP_ID, getOnboardingInstancePath } from '../services/aws_onboarding_override';
+import { ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE } from '../services/aws_onboarding_override';
 
 import { scheduleAutoOpenModal } from '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status';
 import { useAgentlessPolicyUpgrade } from '../applications/integrations/sections/epm/screens/detail/policies/components/use_agentless_policy_upgrade';
@@ -88,6 +89,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const isAgentlessPolicy = packagePolicy.supports_agentless;
   // A policy managed by a cloud onboarding instance can only be changed from the onboarding flow.
   const onboardingDeploymentId = packagePolicy.onboarding_deployment_id;
+  const getOnboardingInstanceUrl = useOnboardingInstanceUrl();
+  const onboardingInstanceUrl = onboardingDeploymentId
+    ? getOnboardingInstanceUrl(onboardingDeploymentId)
+    : undefined;
 
   const {
     isAgentlessUpgrade,
@@ -235,9 +240,11 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       <EuiContextMenuItem
         data-test-subj="PackagePolicyActionsManageInOnboardingItem"
         icon="popout"
-        href={application.getUrlForApp(ONBOARDING_APP_ID, {
-          path: getOnboardingInstancePath(onboardingDeploymentId),
-        })}
+        href={onboardingInstanceUrl}
+        disabled={!onboardingInstanceUrl}
+        toolTipContent={
+          onboardingInstanceUrl ? undefined : ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE
+        }
         key="packagePolicyManageInOnboarding"
       >
         <FormattedMessage

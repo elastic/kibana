@@ -527,6 +527,8 @@ export function usePackagePolicyWithRelatedData(
           created_by: agentlessPolicy.created_by,
           updated_at: agentlessPolicy.updated_at,
           updated_by: agentlessPolicy.updated_by,
+          // Read-only, so kept out of the form policy (the update request rejects it).
+          onboarding_deployment_id: agentlessPolicy.onboarding_deployment_id,
         } as PackagePolicy);
 
         const newValidationResults = validatePackagePolicy(

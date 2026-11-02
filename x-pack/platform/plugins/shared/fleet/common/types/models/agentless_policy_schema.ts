@@ -111,6 +111,15 @@ export const AgentlessPolicySchema = schema.object(
       maxLength: 1024,
       meta: { description: 'User who last updated the policy.' },
     }),
+    onboarding_deployment_id: schema.maybe(
+      schema.string({
+        maxLength: 255,
+        meta: {
+          description:
+            'ID of the cloud onboarding instance that manages this managed integration. Set by Fleet, read-only.',
+        },
+      })
+    ),
   },
   { meta: { id: 'managed_integration' } }
 );

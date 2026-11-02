@@ -706,6 +706,23 @@ describe('usePackagePolicy - agentless', () => {
     jest.restoreAllMocks();
   });
 
+  it('keeps the onboarding instance managing the policy on the original policy only', async () => {
+    jest.mocked(sendGetAgentlessPolicy).mockResolvedValue({
+      item: { ...agentlessPolicy, onboarding_deployment_id: 'deploy-1' },
+    } as any);
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('agentless-1', { isAgentless: true })
+    );
+
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('agentless-1'));
+
+    // The edit page shows the onboarding callout from the original policy, while the form policy
+    // stays free of the read-only field the update request rejects.
+    expect(result.current.originalPackagePolicy?.onboarding_deployment_id).toBe('deploy-1');
+    expect(result.current.packagePolicy).not.toHaveProperty('onboarding_deployment_id');
+  });
+
   it('reads through the agentless API and skips the upgrade dry-run', async () => {
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>

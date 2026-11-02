@@ -385,15 +385,36 @@ describe('edit package policy page', () => {
     });
   });
 
-  it('shows a callout instead of the form for a policy managed by a cloud onboarding instance', async () => {
+  const renderOnboardingManagedPolicy = ({ onboardingEnabled }: { onboardingEnabled: boolean }) => {
     (sendGetOnePackagePolicy as MockFn).mockResolvedValue({
       data: { item: { ...mockPackagePolicy, onboarding_deployment_id: 'deploy-1' } },
     });
-    const getUrlForApp = jest.fn(
-      (appId: string, { path = '' }: { path?: string } = {}) => `/app/${appId}${path}`
+    testRenderer.startServices.application.getUrlForApp.mockImplementation(
+      (appId, { path = '' } = {}) => `/app/${appId}${path}`
     );
-    Object.assign(useStartServices().application, { getUrlForApp });
+    testRenderer.startServices.featureFlags.useBooleanValue.mockImplementation(
+      (flag: string, fallback: boolean) =>
+        flag === 'ingestHub.onboardingEnabled' ? onboardingEnabled : fallback
+    );
     render();
+  };
+
+  it('explains without linking to the onboarding flow while it is turned off', async () => {
+    renderOnboardingManagedPolicy({ onboardingEnabled: false });
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('editPackagePolicyManagedByOnboardingCallout')
+      ).toHaveTextContent('which is turned off');
+    });
+    expect(
+      renderResult.queryByTestId('editPackagePolicyManageInOnboardingButton')
+    ).not.toBeInTheDocument();
+    expect(renderResult.queryByText('Save integration')).not.toBeInTheDocument();
+  });
+
+  it('shows a callout instead of the form for a policy managed by a cloud onboarding instance', async () => {
+    renderOnboardingManagedPolicy({ onboardingEnabled: true });
 
     await waitFor(() => {
       expect(

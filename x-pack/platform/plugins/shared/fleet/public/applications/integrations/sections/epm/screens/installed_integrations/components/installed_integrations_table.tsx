@@ -310,7 +310,9 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   </EuiLink>
                 </DisabledWrapperTooltip>
               ) : null;
-              if (policyCount && showPendingReview) {
+              // The warning shows even without viewable policies, e.g. when the onboarding flow
+              // manages all of them.
+              if (showPendingReview) {
                 return (
                   <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
                     {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
