@@ -27,6 +27,7 @@ import { logWorkflowsRouteError } from './log_workflows_route_error';
 import { WorkflowChangeHistoryDisabledError } from '../../../lib/workflow_change_history_disabled_error';
 import { WorkflowHistoryEventNotFoundError } from '../../../lib/workflow_history_event_not_found_error';
 import { WorkflowHistoryPaginationError } from '../../../lib/workflow_history_pagination_error';
+import { isResultWindowTooLargeError } from '../../lib/es_error_helpers';
 import { WorkflowForbiddenError } from '../../workflow_forbidden_error';
 import { WorkflowTriggerInputError } from '../../workflow_trigger_input_error';
 
@@ -140,6 +141,14 @@ export function handleRouteError(
     return response.badRequest({
       body: {
         message: error.message,
+      },
+    });
+  }
+
+  if (isResultWindowTooLargeError(error)) {
+    return response.badRequest({
+      body: {
+        message: 'Pagination exceeds the maximum result window. Use a smaller page or size.',
       },
     });
   }
