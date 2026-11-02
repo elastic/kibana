@@ -23,12 +23,17 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/observability-shared-plugin'
   - '@kbn/app-header'
+  - '@kbn/data-service'
+  - '@kbn/unified-search-plugin'
+  - '@kbn/kibana-react-plugin'
+  - '@kbn/es-query'
+  - '@kbn/datemath'
+  - '@kbn/data-views-plugin'
   - '@kbn/typed-react-router-config'
   - '@kbn/deeplinks-observability'
   - '@kbn/share-plugin'
   - '@kbn/ebt-click'
   - '@kbn/i18n-react'
-  - '@kbn/kibana-react-plugin'
 tags:
   - plugin
   - prod

@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { AWS_ONBOARDING_PACKAGE_NAMES } from '../../common/constants';
+
 // Keep in sync with @kbn/ingest-hub-plugin/common/core/constants
 export const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 export const ONBOARDING_APP_ID = 'onboarding';
@@ -20,16 +22,8 @@ export const AWS_ONBOARDING_PACKAGE_NAME = 'aws';
 
 // hiding tiles that are included in the AWS onboarding flow: https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ingest_hub/public/onboarding/aws_service_matrix.ts#L188
 export const HIDDEN_TILE_NAMES = new Set([
-  'aws',
-  'aws_bedrock',
-  'aws_bedrock_agentcore',
-  'aws_billing',
-  'aws_cloudwatch_input_otel',
-  'aws_logs',
-  'aws_mq',
-  'aws_securityhub',
-  'amazon_security_lake',
-  'awsfargate',
+  ...AWS_ONBOARDING_PACKAGE_NAMES,
+  // Content packages of the flow's services.
   'aws_cloudtrail_otel',
   'aws_ec2_otel',
   'aws_ecs_otel',
