@@ -359,6 +359,58 @@ describe('useSingleAgentMenuItems', () => {
     });
   });
 
+  describe('View agent policy action', () => {
+    it('should enable view agent policy when user can read integration policies', () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          readAgents: true,
+          readAgentPolicies: true,
+        },
+        integrations: {
+          readIntegrationPolicies: true,
+        },
+      } as any);
+
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ policy_id: 'policy-1' }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const maintenance = result.current.find((item) => item.id === 'maintenance');
+      const viewPolicy = maintenance?.children?.find((item) => item.id === 'view-agent-policy');
+      expect(viewPolicy?.disabled).toBe(false);
+      expect(viewPolicy?.toolTipContent).toBeUndefined();
+    });
+
+    it('should disable view agent policy when user cannot read integration policies', () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          readAgents: true,
+          readAgentPolicies: true,
+        },
+        integrations: {
+          readIntegrationPolicies: false,
+        },
+      } as any);
+
+      const { result } = renderer.renderHook(() =>
+        useSingleAgentMenuItems({
+          agent: createMockAgent({ policy_id: 'policy-1' }),
+          agentPolicy: createMockAgentPolicy(),
+          callbacks: mockCallbacks,
+        })
+      );
+
+      const maintenance = result.current.find((item) => item.id === 'maintenance');
+      const viewPolicy = maintenance?.children?.find((item) => item.id === 'view-agent-policy');
+      expect(viewPolicy?.disabled).toBe(true);
+      expect(viewPolicy?.toolTipContent).toBeDefined();
+    });
+  });
+
   describe('Migrate action', () => {
     it('should include migrate in maintenance submenu for eligible agent', () => {
       const { result } = renderer.renderHook(() =>
