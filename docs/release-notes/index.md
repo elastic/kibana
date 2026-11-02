@@ -417,6 +417,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix deleting snapshots failing on long-running deletions of up to 30 minutes, and a snapshot that no longer exists blocking the deletion of others in the same request [#290071]({{kib-pull}}290071).
 * Fix creating and fetching data views with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving the data view [#299790]({{kib-pull}}299790).
 * Fix the data view edit flyout discarding your edits when {{kib}} refreshes the data view fields while the flyout is open [#299603]({{kib-pull}}299603).
+* Fix runtime field preview issues, runtime scripts not being preserved when you change a field to composite, and the runtime field editor ignoring **Save** while the preview updates [#299810]({{kib-pull}}299810), [#299025]({{kib-pull}}299025), [#294753]({{kib-pull}}294753).
 
 **Developer tools**:
 * Fix Console not explaining that timed-out {{es}} requests might still be running [#289481]({{kib-pull}}289481).
@@ -429,7 +430,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix labels in the time range selector, including custom presets that come from the **Quick ranges** setting, and add a `(rounded)` suffix to rounded relative time ranges. You can no longer delete quick ranges that you configure in **{{stack-manage-app}}** [#289066]({{kib-pull}}289066), [#283527]({{kib-pull}}283527).
 * Fix CSV exports covering a different time window than Discover showed for relative time ranges [#278305]({{kib-pull}}278305).
 * Fix the histogram breakdown button with an invalid breakdown field [#298832]({{kib-pull}}298832).
-* Fix runtime field preview issues, runtime scripts not being preserved when you change a field to composite, and the runtime field editor ignoring **Save** while the preview updates [#299810]({{kib-pull}}299810), [#299025]({{kib-pull}}299025), [#294753]({{kib-pull}}294753).
 * Fix field formatter relative URLs when {{kib}} uses a base path [#299116]({{kib-pull}}299116).
 * Fix field formatters, including `alwaysShowSign` on values that round to zero, percent format with `fractional: false` rendering `NaN`, the Short Dots transform dropping single-character segments, the Base64 Decode transform, the Date Nanos formatter ignoring `dateFormat` for numeric values, Geo point DMS output near zero coordinates, and highlighting when a string formatter applies case transforms [#282919]({{kib-pull}}282919), [#282915]({{kib-pull}}282915), [#281930]({{kib-pull}}281930), [#281366]({{kib-pull}}281366), [#281343]({{kib-pull}}281343), [#281336]({{kib-pull}}281336), [#281098]({{kib-pull}}281098).
 * Fix server-side date formatting ignoring changes to the time zone or date format, and fix null dates showing `-` instead of `(null)` in server-generated CSV exports [#282501]({{kib-pull}}282501), [#281367]({{kib-pull}}281367).
