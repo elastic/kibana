@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function getEslintrcForGeneratedCode() {
-  return {
-    rules: {
-      '@typescript-eslint/naming-convention': 0,
-    },
-  };
-}
+import { EuiThemeProviderDecorator } from '@kbn/kibana-react-plugin/common';
+import * as jest from 'jest-mock';
+import '@elastic/charts/dist/theme_only_light.css';
+
+window.jest = jest;
+export const decorators = [EuiThemeProviderDecorator];

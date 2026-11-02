@@ -178,6 +178,20 @@ describe('Nightshift investigation agent type', () => {
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
   });
 
+  it('adds inherited connectors to the telemetry allow-list when a resolver is given', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        telemetryConnectorId: 'elasticsearch-telemetry',
+        getInheritedConnectorIds: async () => ['github', 'elasticsearch-telemetry'],
+        ...ALL_PLUGINS,
+      })
+    );
+
+    expect(base.connector_ids).toEqual(['elasticsearch-telemetry', 'github']);
+  });
+
   it('offers the investigation and proposal tools only when their plugins are enabled', async () => {
     const base = await baseFor(
       getInvestigationAgentType({

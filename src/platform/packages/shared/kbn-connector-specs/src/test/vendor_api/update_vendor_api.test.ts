@@ -420,6 +420,117 @@ actions:
     expect((await update()).changed).toEqual([]);
   });
 
+  describe('Markdown references', () => {
+    const LLMS_URL = 'https://docs.search.example.com/llms.txt';
+    const SEARCH_PAGE = 'https://docs.search.example.com/api-reference/web/search.md';
+    const SEARCH_BASE = 'https://api.search.example.com/res';
+    const PARAMETERS = [
+      '| Name | Location | Type | Required | Constraints | Description |',
+      '|------|----------|------|----------|-------------|-------------|',
+    ];
+    const searchPage = [
+      '# Search',
+      '',
+      '`GET` `/v1/web/search`',
+      '',
+      `**Base URL:** \`${SEARCH_BASE}\``,
+      '',
+      '## Query Parameters',
+      '',
+      ...PARAMETERS,
+      '| `q` | query | string | Yes |  | The search query. |',
+      '',
+      '## Responses',
+      '',
+      '### 200',
+      'Successful Response',
+      '',
+      '| Field | Type | Description |',
+      '|-------|------|-------------|',
+      '| `type` | string |  |',
+    ].join('\n');
+
+    const searcher: ConnectorSpec = {
+      ...connector,
+      actions: {
+        search: {
+          scope: 'read',
+          input: z.object({ q: z.string().min(1).max(400) }),
+          handler: async ({ client }, { q }) =>
+            (await client.get(`${SEARCH_BASE}/v1/web/search`, { params: { q } })).data,
+        },
+      },
+    };
+
+    beforeEach(() => {
+      documents[LLMS_URL] = [
+        '# Search API',
+        '- [Web search](api-reference/web/search.md)',
+        '- [Guide](guides/quickstart.md)',
+      ].join('\n');
+      documents[SEARCH_PAGE] = searchPage;
+    });
+
+    it('fetches the pages an llms.txt index links to, and keeps the format and pages in the manifest', async () => {
+      const result = await update({
+        connector: searcher,
+        sources: { search: LLMS_URL },
+        formats: { search: 'brave-markdown' },
+        pages: { search: ['api-reference/'] },
+      });
+
+      expect(result).toEqual({
+        changed: ['snapshots/search.openapi.json', 'manifest.json'],
+        problems: [],
+      });
+      expect(fetched).toEqual([LLMS_URL, SEARCH_PAGE]);
+      expect(await readJson('manifest.json')).toEqual({
+        sources: {
+          search: {
+            format: 'brave-markdown',
+            url: LLMS_URL,
+            pages: ['api-reference/'],
+            fetchedAt: '2026-10-07T12:00:00.000Z',
+          },
+        },
+        operations: { search: [{ source: 'search', method: 'get', path: '/v1/web/search' }] },
+      });
+      const snapshot = await readJson('snapshots/search.openapi.json');
+      expect(snapshot.servers).toEqual([{ url: SEARCH_BASE }]);
+      expect(Object.keys(snapshot.paths)).toEqual(['/v1/web/search']);
+    });
+
+    it('re-records offline against the snapshot, and refreshes from the manifest without flags', async () => {
+      await update({
+        connector: searcher,
+        sources: { search: LLMS_URL },
+        formats: { search: 'brave-markdown' },
+        pages: { search: ['api-reference/'] },
+      });
+      fetched = [];
+
+      expect(await update({ connector: searcher })).toEqual({ changed: [], problems: [] });
+      expect(fetched).toEqual([]);
+      expect(await update({ connector: searcher, refresh: true })).toEqual({
+        changed: [],
+        problems: [],
+      });
+      expect(fetched).toEqual([LLMS_URL, SEARCH_PAGE]);
+    });
+
+    it('refuses --pages for a source that is not a Markdown reference', async () => {
+      await expect(
+        update({ sources: { main: SPEC_URL }, pages: { main: ['api/'] } })
+      ).rejects.toThrow('main: --pages only applies to Markdown references; pass --format');
+    });
+
+    it('refuses --format and --pages for a source that does not exist', async () => {
+      await expect(
+        update({ sources: { main: SPEC_URL }, formats: { other: 'brave-markdown' } })
+      ).rejects.toThrow('there is no source "other"');
+    });
+  });
+
   it('removes snapshots of sources that are gone', async () => {
     await update({ sources: { main: SPEC_URL } });
     await fs.writeFile(path.join(directory, 'snapshots/old.openapi.json'), '{}');
