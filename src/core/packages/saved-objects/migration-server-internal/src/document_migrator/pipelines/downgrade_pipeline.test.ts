@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import type { Transform, TypeTransforms, TransformFn, TypeVersionSchema } from '../types';
 import { TransformType } from '../types';
@@ -62,6 +63,84 @@ describe('DocumentMigratorPipeline', () => {
     const defaultImpl: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
     return jest.fn().mockImplementation(impl ?? defaultImpl);
   };
+
+  describe.each([undefined, false, true])(
+    'type changes with allowSkipClone=%s',
+    (allowSkipClone) => {
+      it.each(['in place', 'returned document'])(
+        'rejects a type change in the %s',
+        (changeMode) => {
+          const document = createDoc({
+            type: 'foo',
+            typeMigrationVersion: '8.8.0',
+          });
+          const changeType = createTransformFn((doc) => {
+            if (changeMode === 'in place') {
+              doc.type = 'bar';
+              return { transformedDoc: doc, additionalDocs: [] };
+            }
+            return { transformedDoc: { ...doc, type: 'bar' }, additionalDocs: [] };
+          });
+          const typeTransforms = getTypeTransforms([
+            {
+              transformType: TransformType.Migrate,
+              version: '8.8.0',
+              transform: createTransformFn(),
+              transformDown: changeType,
+            },
+          ]);
+          const pipeline = new DocumentDowngradePipeline({
+            document,
+            kibanaVersion: defaultKibanaVersion,
+            allowSkipClone,
+            typeTransforms,
+            targetTypeVersion: '8.7.0',
+          });
+
+          expect(() => pipeline.run()).toThrow(
+            `Changing a document's type during a migration is not supported.`
+          );
+        }
+      );
+    }
+  );
+
+  it.each([undefined, false, true])(
+    'only lets downgrade transforms mutate the input when allowSkipClone=%s is true',
+    (allowSkipClone) => {
+      const document = createDoc({
+        type: 'foo',
+        attributes: { nested: { value: 'original' } },
+        typeMigrationVersion: '8.8.0',
+      });
+      const transformDown = createTransformFn((doc) => {
+        set(doc, 'attributes.nested.value', 'migrated');
+        return { transformedDoc: doc, additionalDocs: [] };
+      });
+      const pipeline = new DocumentDowngradePipeline({
+        document,
+        kibanaVersion: defaultKibanaVersion,
+        allowSkipClone,
+        targetTypeVersion: '8.7.0',
+        typeTransforms: getTypeTransforms([
+          {
+            transformType: TransformType.Migrate,
+            version: '8.8.0',
+            transform: createTransformFn(),
+            transformDown,
+          },
+        ]),
+      });
+
+      const { document: migratedDoc } = pipeline.run();
+
+      expect(migratedDoc.typeMigrationVersion).toBe('8.7.0');
+      expect(migratedDoc.attributes).toEqual({ nested: { value: 'migrated' } });
+      expect(document.attributes.nested.value).toBe(allowSkipClone ? 'migrated' : 'original');
+      expect(migratedDoc.attributes === document.attributes).toBe(allowSkipClone === true);
+      expect(transformDown.mock.calls[0][0] === document).toBe(allowSkipClone === true);
+    }
+  );
 
   it('calls multiple `Migrate` transform functions in order', () => {
     const document = createDoc({
