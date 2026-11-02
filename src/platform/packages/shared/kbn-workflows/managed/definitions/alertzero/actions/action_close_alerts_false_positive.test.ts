@@ -18,6 +18,10 @@ interface ParsedStep {
   with?: Record<string, unknown>;
 }
 
+interface AlertsSearchQuery {
+  bool: { filter: Array<Record<string, unknown>> };
+}
+
 describe('Close alerts as false positive action', () => {
   const workflow = parse(ACTION_CLOSE_ALERTS_FALSE_POSITIVE_YAML) as {
     consts?: { actionMetadata?: { category?: string } };
@@ -95,6 +99,38 @@ describe('Close alerts as false positive action', () => {
     ).toEqual(['alert-1', 'alert-2']);
   });
 
+  // Both searches must count closed alerts the way close_alerts decides to skip them. If the
+  // closed term drifted from the must_not above, already-closed alerts would be counted wrong
+  // or the read-back would pass while alerts stay open.
+  describe.each(['count_already_closed', 'verify_close'])('%s search', (stepName) => {
+    const searchWith = getStep(stepName).with!;
+
+    it('is a size 0 search on the space alerts index with an exact total', () => {
+      expect(searchWith).toMatchObject({
+        index: '.alerts-security.alerts-{{ workflow.spaceId }}',
+        size: 0,
+        track_total_hits: true,
+      });
+    });
+
+    it('counts only the approved ids that are closed, with nothing else in the query', () => {
+      expect((searchWith.query as AlertsSearchQuery).bool.filter).toEqual([
+        { terms: { _id: '${{ inputs.actionInput.alertIds }}' } },
+        { term: { 'kibana.alert.workflow_status': 'closed' } },
+      ]);
+    });
+
+    it('matches the closed term close_alerts skips', () => {
+      const closeQuery = getStep('close_alerts').with!.query as {
+        bool: { must_not: unknown };
+      };
+
+      expect((searchWith.query as AlertsSearchQuery).bool.filter).toContainEqual(
+        closeQuery.bool.must_not
+      );
+    });
+  });
+
   // The analyst closed some alerts before approving, or a retried close finished the rest.
   // Either way the end state is complete, so a lower `updated` is not a shortfall.
   it('does not fail when every requested alert is closed after the close', () => {
@@ -126,5 +162,20 @@ describe('Close alerts as false positive action', () => {
 
     expect(rendered).toContain('Only 1 of 2 requested alert(s) are closed after the close');
     expect(rendered).toContain('0 were already closed before it');
+  });
+
+  // The approval message and the Investigation read closed_count, so it must exclude alerts an
+  // analyst closed first.
+  it('reports as closed only the alerts this action closed', () => {
+    const closedCount = (
+      (getStep('emit_result').with as Record<string, string>).closed_count as string
+    ).trim();
+
+    expect(
+      evaluateExpression(closedCount, {
+        steps: { count_already_closed: { output: { hits: { total: { value: 2 } } } } },
+        inputs: { actionInput: { alertIds: ['alert-1', 'alert-2', 'alert-3', 'alert-4'] } },
+      })
+    ).toBe(2);
   });
 });
