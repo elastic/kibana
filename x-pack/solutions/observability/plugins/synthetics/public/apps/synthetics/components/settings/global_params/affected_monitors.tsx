@@ -24,6 +24,9 @@ const AFFECTED_REASON_LABELS: Record<AffectedMonitorReason, string> = {
   redirects: i18n.translate('xpack.synthetics.secretConnection.affectedReason.redirects', {
     defaultMessage: 'follows redirects',
   }),
+  kerberos: i18n.translate('xpack.synthetics.secretConnection.affectedReason.kerberos', {
+    defaultMessage: 'uses Kerberos',
+  }),
   host: i18n.translate('xpack.synthetics.secretConnection.affectedReason.host', {
     defaultMessage: 'other host',
   }),
@@ -62,7 +65,7 @@ export const AffectedMonitorsCallout = ({ result }: { result: AffectedMonitorsRe
     <p>
       {i18n.translate('xpack.synthetics.secretConnection.affectedMonitorsExplanation', {
         defaultMessage:
-          'Browser monitors, monitors that follow redirects and monitors that target a host that is not on the list cannot use a connection with allowed monitor hosts.',
+          'Browser monitors, monitors that follow redirects or use Kerberos, and monitors that target a host that is not on the list cannot use a connection with allowed monitor hosts.',
       })}
     </p>
   </KbnWarningCallout>

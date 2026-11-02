@@ -67,6 +67,8 @@ export const getAffectedMonitorsRoute: SyntheticsRestApiRouteFactory<
   method: 'GET',
   path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_affected_monitors',
   validate: {},
+  // It decrypts every monitor of the space, like the other routes that scan them.
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
   handler: whenSecretConnectionsEnabled(async (routeContext) => {
     const restricted = (await listConnections(routeContext)).flatMap(({ name, config }) =>
       name && config?.allowedMonitorHosts?.length

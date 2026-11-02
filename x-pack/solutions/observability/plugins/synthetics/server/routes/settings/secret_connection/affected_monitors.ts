@@ -7,6 +7,7 @@
 
 import { isIP } from 'net';
 import { isPlainObject, omit } from 'lodash';
+import ipaddr from 'ipaddr.js';
 import type { RouteContext } from '../../types';
 import type { SyntheticsMonitor } from '../../../../common/runtime_types';
 import type {
@@ -30,12 +31,14 @@ const HOST_RESTRICTABLE_TYPES = new Set<string>([
 
 const MAX_LISTED_AFFECTED_MONITORS = 20;
 
-// IPs in their canonical form (as Heartbeat compares them), names lowercase without a trailing dot.
+// IPs in their canonical form, IPv4-mapped IPv6 unmapped (as Heartbeat compares them), names
+// lowercase without a trailing dot. Only strict IP literals are parsed as IPs: Heartbeat reads
+// anything else, `1234` included, as a name.
 const canonicalHost = (host: string): string => {
   const normalized = normalizeAllowedMonitorHost(host);
-  if (isIP(normalized) !== 6) return normalized;
+  if (isIP(normalized) === 0) return normalized;
   try {
-    return new URL(`http://[${normalized}]`).hostname.replace(/^\[|\]$/g, '');
+    return ipaddr.process(normalized).toString();
   } catch {
     return normalized;
   }
@@ -54,6 +57,11 @@ const hostOfTarget = (target: unknown): string | undefined => {
     return undefined;
   }
 };
+
+// The Kerberos server is a destination Heartbeat cannot check, so it refuses the monitor.
+const isKerberosEnabled = (kerberos: unknown): boolean =>
+  isPlainObject(kerberos) &&
+  [true, 'true'].includes((kerberos as { enabled?: unknown }).enabled as boolean);
 
 const asList = (value: unknown): unknown[] => (Array.isArray(value) ? value : [value]);
 
@@ -78,8 +86,8 @@ const resolveParams = (value: unknown, params: Record<string, string>): unknown 
 
 /**
  * Why Heartbeat would refuse the monitor once the connection is restricted to `allowedHosts`, or
- * `undefined` when it can still use it. Mirrors Heartbeat's check: browser monitors and redirects
- * are refused, and every target and the proxy must be on the list.
+ * `undefined` when it can still use it. Mirrors Heartbeat's check: browser monitors, redirects and
+ * Kerberos are refused, and every target and the proxy must be on the list.
  */
 export const getAllowedHostsRefusal = (
   monitor: Record<string, unknown>,
@@ -89,6 +97,9 @@ export const getAllowedHostsRefusal = (
   if (typeof type !== 'string' || !HOST_RESTRICTABLE_TYPES.has(type)) return 'monitor_type';
   if (type === MonitorTypeEnum.HTTP && Number(monitor[ConfigKey.MAX_REDIRECTS]) > 0) {
     return 'redirects';
+  }
+  if (type === MonitorTypeEnum.HTTP && isKerberosEnabled(monitor[ConfigKey.KERBEROS])) {
+    return 'kerberos';
   }
 
   const targets = [
@@ -133,9 +144,35 @@ export const findAffectedMonitors = (
       AFFECTED_MONITORS_TIMEOUT_MS
     );
   });
-  return Promise.race([scanAffectedMonitors(routeContext, checks), timeout]).finally(() =>
+  return Promise.race([sharedScan(routeContext, checks), timeout]).finally(() =>
     clearTimeout(timer)
   );
+};
+
+// Repeated loads and edits while a scan for the same space and hosts is still running reuse it
+// instead of starting another. Results are the same for every caller: monitors are read as the
+// internal user. A scan is shared for at most the time limit, so one that never finishes cannot
+// hold up later requests.
+const inFlightScans = new Map<string, Promise<Record<string, AffectedMonitorsResult>>>();
+
+const sharedScan = (
+  routeContext: Pick<
+    RouteContext,
+    'syntheticsMonitorClient' | 'monitorConfigRepository' | 'spaceId'
+  >,
+  checks: readonly AllowedHostsCheck[]
+): Promise<Record<string, AffectedMonitorsResult>> => {
+  const key = JSON.stringify([routeContext.spaceId, checks]);
+  const running = inFlightScans.get(key);
+  if (running) return running;
+  const scan = scanAffectedMonitors(routeContext, checks);
+  inFlightScans.set(key, scan);
+  const forget = () => {
+    if (inFlightScans.get(key) === scan) inFlightScans.delete(key);
+  };
+  const expiry = setTimeout(forget, AFFECTED_MONITORS_TIMEOUT_MS);
+  scan.then(forget, forget).finally(() => clearTimeout(expiry));
+  return scan;
 };
 
 const scanAffectedMonitors = async (

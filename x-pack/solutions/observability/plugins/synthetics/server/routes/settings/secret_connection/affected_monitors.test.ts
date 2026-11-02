@@ -18,6 +18,32 @@ describe('getAllowedHostsRefusal', () => {
     expect(getAllowedHostsRefusal(monitor, allowed)).toBeUndefined();
   });
 
+  it.each([
+    ['an IPv4-mapped IPv6 tcp host', { type: 'tcp', hosts: '[::ffff:10.0.0.1]:443' }],
+    ['an IPv4-mapped IPv6 ICMP host', { type: 'icmp', hosts: '::ffff:10.0.0.1' }],
+    ['an IPv4-mapped IPv6 http target', { type: 'http', urls: 'https://[::ffff:10.0.0.1]/x' }],
+  ])('unmaps %s like Heartbeat, so its allowed IPv4 address matches', (_name, monitor) => {
+    expect(getAllowedHostsRefusal(monitor, allowed)).toBeUndefined();
+  });
+
+  it('refuses http monitors that use Kerberos, whatever their host', () => {
+    expect(
+      getAllowedHostsRefusal(
+        { type: 'http', urls: 'https://api.example.com', kerberos: { enabled: true } },
+        allowed
+      )
+    ).toBe('kerberos');
+  });
+
+  it('lets http monitors with Kerberos turned off use the connection', () => {
+    expect(
+      getAllowedHostsRefusal(
+        { type: 'http', urls: 'https://api.example.com', kerberos: { enabled: false } },
+        allowed
+      )
+    ).toBeUndefined();
+  });
+
   it('refuses a bare IPv6 ICMP host that is not on the list', () => {
     expect(getAllowedHostsRefusal({ type: 'icmp', hosts: '2001:db8::2' }, allowed)).toBe('host');
   });

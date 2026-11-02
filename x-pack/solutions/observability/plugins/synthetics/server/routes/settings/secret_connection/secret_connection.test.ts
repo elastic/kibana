@@ -19,6 +19,7 @@ import {
 } from './secret_connection';
 import { testHashiCorpVault } from './vault_client';
 import { AFFECTED_MONITORS_TIMEOUT_MS } from './affected_monitors';
+import { SECRET_CONNECTION_WRITE_API } from '../../../feature';
 import { SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
 import { hostNotAllowedMessage, LOOPBACK_NOT_TESTABLE_MESSAGE } from './address_guard';
 import { connectionInUseMessage, SECRET_CONNECTIONS_DISABLED_MESSAGE } from './connection_utils';
@@ -468,6 +469,23 @@ describe('affected monitors routes', () => {
       expect(await preview(routeContext)).toEqual({ monitors: [], total: 0 });
     });
 
+    it('reuses a scan that is still running for the same space and hosts', async () => {
+      const { routeContext } = setup({
+        body: previewBody(['api.example.com']),
+        monitors,
+        globalParams,
+      });
+
+      const [first, second] = await Promise.all([preview(routeContext), preview(routeContext)]);
+
+      expect(first).toEqual(second);
+      expect(routeContext.monitorConfigRepository.findDecryptedMonitors).toHaveBeenCalledTimes(1);
+
+      // Only running scans are shared: a later request reads the monitors again.
+      await preview(routeContext);
+      expect(routeContext.monitorConfigRepository.findDecryptedMonitors).toHaveBeenCalledTimes(2);
+    });
+
     it('gives up on a slow lookup instead of leaving the request hanging', async () => {
       jest.useFakeTimers();
       try {
@@ -484,6 +502,10 @@ describe('affected monitors routes', () => {
         await jest.advanceTimersByTimeAsync(AFFECTED_MONITORS_TIMEOUT_MS);
 
         expect(await outcome).toContain('timed out');
+
+        // The stuck scan is not shared any more: the next request starts its own.
+        routeContext.monitorConfigRepository.findDecryptedMonitors.mockResolvedValue([]);
+        expect(await preview(routeContext)).toEqual({ monitors: [], total: 0 });
       } finally {
         jest.useRealTimers();
       }
@@ -493,6 +515,13 @@ describe('affected monitors routes', () => {
   describe('GET (saved connections)', () => {
     const getAffected = (routeContext: unknown) =>
       getAffectedMonitorsRoute().handler(routeContext as any);
+
+    it('needs the privilege to manage connections, like the other routes that scan monitors', () => {
+      expect(getAffectedMonitorsRoute().requiredPrivileges).toEqual([SECRET_CONNECTION_WRITE_API]);
+      expect(previewAffectedMonitorsRoute().requiredPrivileges).toEqual([
+        SECRET_CONNECTION_WRITE_API,
+      ]);
+    });
 
     it('reports only the saved connections that have allowed hosts, in one scan', async () => {
       const { routeContext } = setup({

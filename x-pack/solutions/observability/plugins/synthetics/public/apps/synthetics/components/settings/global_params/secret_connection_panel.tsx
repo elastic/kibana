@@ -215,16 +215,19 @@ export const SecretConnectionPanel = () => {
     try {
       const res = await http.get<SecretConnectionStatus[]>(SYNTHETICS_API_URLS.SECRET_CONNECTION);
       setConnections(Array.isArray(res) ? res : []);
-      // Advisory and slower than the list, so it fills in when it arrives.
-      getAffectedMonitors()
-        .then(setAffectedBySaved)
-        .catch(() => setAffectedBySaved({}));
+      // Advisory and slower than the list, so it fills in when it arrives. It needs the same
+      // privilege as editing a connection.
+      if (canManage) {
+        getAffectedMonitors()
+          .then(setAffectedBySaved)
+          .catch(() => setAffectedBySaved({}));
+      }
     } catch (e) {
       // Surface the failure rather than showing an empty list (which reads as
       // "no connections configured").
       notifications?.toasts.addError(e as Error, { title: LOAD_ERROR_TOAST });
     }
-  }, [http, notifications]);
+  }, [http, notifications, canManage]);
 
   useEffect(() => {
     load();
@@ -775,7 +778,7 @@ const ALLOWED_MONITOR_HOSTS_HELP = i18n.translate(
   'xpack.synthetics.secretConnection.allowedMonitorHostsHelp',
   {
     defaultMessage:
-      'Optional. Only HTTP, TCP and ICMP monitors whose targets and proxies are all on this list can use this connection, so secrets are only sent to these hosts. Monitors that target another host, follow redirects or run in a browser report down without sending the secret. Leave empty to allow any host. Enter host names or IP addresses without a scheme, port, path or wildcard.',
+      'Optional. Only HTTP, TCP and ICMP monitors whose targets and proxies are all on this list can use this connection, so secrets are only sent to these hosts. Monitors that target another host, follow redirects, use Kerberos or run in a browser report down without sending the secret. Leave empty to allow any host. Enter host names or IP addresses without a scheme, port, path or wildcard.',
   }
 );
 const ALLOWED_MONITOR_HOSTS_INVALID = i18n.translate(

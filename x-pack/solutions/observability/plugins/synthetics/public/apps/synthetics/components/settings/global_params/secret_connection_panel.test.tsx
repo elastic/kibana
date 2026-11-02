@@ -207,6 +207,22 @@ describe('SecretConnectionPanel allowed monitor hosts', () => {
       expect(screen.queryByTestId('syntheticsVaultAffectedMonitorsNone')).not.toBeInTheDocument();
     });
 
+    it('does not ask for the saved state without the privilege to manage connections', async () => {
+      const { uptime } = mockServices.application.capabilities;
+      uptime.canManageSecretConnections = false;
+      try {
+        render(
+          <I18nProvider>
+            <SecretConnectionPanel />
+          </I18nProvider>
+        );
+        await waitFor(() => expect(mockGet).toHaveBeenCalled());
+        expect(mockGetAffected).not.toHaveBeenCalled();
+      } finally {
+        uptime.canManageSecretConnections = true;
+      }
+    });
+
     it('shows the current state in the connection table', async () => {
       mockGet.mockResolvedValue([
         {

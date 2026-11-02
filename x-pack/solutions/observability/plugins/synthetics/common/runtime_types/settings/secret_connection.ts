@@ -73,7 +73,7 @@ export interface SecretConnectionStatus {
   hasSecret?: boolean;
 }
 
-export type AffectedMonitorReason = 'monitor_type' | 'redirects' | 'host';
+export type AffectedMonitorReason = 'monitor_type' | 'redirects' | 'kerberos' | 'host';
 
 /** A monitor Heartbeat will refuse to run with a connection once it has allowed monitor hosts. */
 export interface AffectedMonitor {
