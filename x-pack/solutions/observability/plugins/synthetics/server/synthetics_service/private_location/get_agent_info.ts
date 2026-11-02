@@ -28,6 +28,8 @@ export interface AgentInfo {
    * monitors can run only on these agents.
    */
   complete: boolean;
+  /** Agent policy revision the agent last reported applying, or null if none yet. */
+  policyRevision: number | null;
 }
 
 interface AgentLocalMetadata {
@@ -134,6 +136,7 @@ export const getAgentInfo = async (
         lastCheckin: last,
         memoryMib,
         complete: isCompleteElasticAgent(agent.local_metadata),
+        policyRevision: agent.policy_revision ?? null,
       });
     }
 
