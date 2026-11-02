@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { SortDirection } from '@kbn/data-plugin/common/search';
-import { SCALING_TYPES, SOURCE_TYPES } from '../../../../../common';
+import { GRID_RESOLUTION, SCALING_TYPES, SOURCE_TYPES } from '../../../../../common';
 
 const applyForceRefreshSchema = z.boolean().default(true).optional().meta({
   description: `When true, results are re-fetched when page's automatic refresh fires or user clicks 'Refresh'.`,
@@ -107,6 +107,17 @@ export const ESQLSourceSchema = z
     }),
     narrowByGlobalSearch,
     narrowByGlobalTime,
+    resolution: z
+      .union([
+        z.literal(GRID_RESOLUTION.COARSE),
+        z.literal(GRID_RESOLUTION.FINE),
+        z.literal(GRID_RESOLUTION.MOST_FINE),
+        z.literal(GRID_RESOLUTION.SUPER_FINE),
+      ])
+      .optional()
+      .meta({
+        description: `Grid resolution used to calculate the value of the '?_geotile_precision' ES|QL parameter from the map zoom level. Ignored when the ES|QL statement does not use '?_geotile_precision'. Defaults to '${GRID_RESOLUTION.MOST_FINE}'.`,
+      }),
     type: z.literal(SOURCE_TYPES.ESQL),
   })
   .strict()

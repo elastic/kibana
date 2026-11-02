@@ -6,8 +6,8 @@
  */
 
 import { of } from 'rxjs';
+import { GRID_RESOLUTION, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { ESQLSource } from './esql_source';
-import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import type { DataRequest } from '../../util/data_request';
 
 const mockSearch = jest.fn();
@@ -259,5 +259,29 @@ describe('getSyncMeta', () => {
   test('should not include geotilePrecision when the query does not use ?_geotile_precision', () => {
     const source = createSource('FROM logs');
     expect(source.getSyncMeta({ zoom: 4.2 } as any)).not.toHaveProperty('geotilePrecision');
+  });
+});
+
+describe('getGeotilePrecision', () => {
+  const createSource = (resolution?: GRID_RESOLUTION) =>
+    new ESQLSource({
+      esql: 'FROM logs | STATS BY ST_GEOTILE(geo.coordinates, ?_geotile_precision)',
+      geoField: 'geo.coordinates',
+      resolution,
+    });
+
+  test('should default to most fine resolution', () => {
+    expect(createSource().getGeotilePrecision(4.5)).toBe(9);
+  });
+
+  test.each([
+    [GRID_RESOLUTION.COARSE, 7],
+    [GRID_RESOLUTION.FINE, 8],
+    [GRID_RESOLUTION.MOST_FINE, 9],
+    [GRID_RESOLUTION.SUPER_FINE, 13],
+  ])('should use source resolution %s', (resolution, expected) => {
+    const source = createSource(resolution);
+    expect(source.getGeotilePrecision(4.5)).toBe(expected);
+    expect(source.getSyncMeta({ zoom: 4.5 } as any).geotilePrecision).toBe(expected);
   });
 });

@@ -18,7 +18,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
+import { hasGeotilePrecisionParam } from '@kbn/esql-utils';
+import { GRID_RESOLUTION } from '../../../../common/constants';
 import { ESQLEditor } from './esql_editor';
+import { GeotileResolutionEditor } from './geotile_resolution_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 import type { getFields } from './esql_utils';
 import type { NormalizedESQLSourceDescriptor } from './esql_source';
@@ -159,6 +162,15 @@ export function UpdateSourceEditor(props: Props) {
               props.onChange(...changes);
             }}
           />
+
+          {hasGeotilePrecisionParam(props.sourceDescriptor.esql) && (
+            <GeotileResolutionEditor
+              resolution={props.sourceDescriptor.resolution ?? GRID_RESOLUTION.MOST_FINE}
+              onChange={(resolution: GRID_RESOLUTION) => {
+                props.onChange({ propName: 'resolution', value: resolution });
+              }}
+            />
+          )}
 
           <ForceRefreshCheckbox
             applyForceRefresh={props.sourceDescriptor.applyForceRefresh}

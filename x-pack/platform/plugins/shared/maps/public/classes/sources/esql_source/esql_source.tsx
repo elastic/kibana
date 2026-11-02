@@ -61,6 +61,8 @@ import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ESQLField } from '../../fields/esql_field';
 
+const DEFAULT_GEOTILE_PRECISION_RESOLUTION = GRID_RESOLUTION.MOST_FINE;
+
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
   'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
@@ -389,11 +391,15 @@ export class ESQLSource
   }
 
   /**
-   * Geotile precision bound to `?_geotile_precision`. The source has no resolution setting yet,
-   * so it uses the geo grid layer's most fine resolution.
+   * Geotile precision bound to `?_geotile_precision`, calculated from the map zoom and
+   * the source's grid resolution (same calculation as the geo grid source).
    */
   getGeotilePrecision(zoom: number): number {
-    return getGeoGridPrecision(zoom, GRID_RESOLUTION.MOST_FINE, RENDER_AS.GRID);
+    return getGeoGridPrecision(
+      zoom,
+      this._descriptor.resolution ?? DEFAULT_GEOTILE_PRECISION_RESOLUTION,
+      RENDER_AS.GRID
+    );
   }
 
   getSyncMeta(dataFilters?: DataFilters): ESQLSourceSyncMeta {
