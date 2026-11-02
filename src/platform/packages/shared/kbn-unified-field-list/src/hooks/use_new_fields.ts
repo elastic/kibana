@@ -26,7 +26,7 @@ export interface UseNewFieldsResult<T extends FieldListItem> {
 }
 
 /**
- * This hook is used to get the new fields of previous fields for wildcards request, and merges those
+ * This hook is used to get the new or remapped fields of previous fields for wildcards request, and merges those
  * with the existing fields.
  */
 export function useNewFields<T extends FieldListItem = DataViewField>({

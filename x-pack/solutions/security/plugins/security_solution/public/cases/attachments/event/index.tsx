@@ -24,6 +24,7 @@ import {
   DELETE_EVENTS_SUCCESS_TOAST,
   EVENT_COMMENT_LABEL_TITLE,
   EVENT_DISPLAY_NAME,
+  EVENTS_COUNT,
   MULTIPLE_EVENTS_COMMENT_LABEL_TITLE,
   REMOVED_EVENT_LABEL_TITLE,
   REMOVED_EVENTS_LABEL_TITLE,
@@ -97,6 +98,7 @@ export const getEventType = () =>
   defineAttachment({
     id: SECURITY_EVENT_ATTACHMENT_TYPE,
     getLabel: () => EVENT_DISPLAY_NAME,
+    getCountLabel: ({ count }) => EVENTS_COUNT(count),
     getIcon: () => 'bell',
     schema: SecurityEventAttachmentPayloadSchema,
     getCreationActivity,

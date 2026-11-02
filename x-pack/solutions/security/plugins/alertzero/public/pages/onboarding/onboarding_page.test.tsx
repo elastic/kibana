@@ -25,7 +25,7 @@ import {
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID, SecurityPageName } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
-import { ONBOARDING_READ_MORE_URL_PLACEHOLDER } from './constants';
+import { ONBOARDING_READ_MORE_URL } from './constants';
 import { OnboardingPage } from './onboarding_page';
 
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
@@ -155,7 +155,12 @@ const renderPage = ({
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
   }
 
-  return { history, application: core.application, toasts: core.notifications.toasts };
+  return {
+    history,
+    application: core.application,
+    reportEvent: core.analytics.reportEvent as jest.Mock,
+    toasts: core.notifications.toasts,
+  };
 };
 
 describe('OnboardingPage', () => {
@@ -193,13 +198,6 @@ describe('OnboardingPage', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('shows a disabled video placeholder', () => {
-      renderPage({ canWrite: true, skipIntro: false });
-
-      expect(screen.getByTestId('alertZeroOnboardingVideoPlaceholder')).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /video placeholder/ })).toBeDisabled();
-    });
-
     it('switches the preview section when a dot is selected', () => {
       renderPage({ canWrite: true, skipIntro: false });
 
@@ -227,7 +225,7 @@ describe('OnboardingPage', () => {
 
       expect(screen.getByTestId('alertZeroOnboardingReadMoreLink')).toHaveAttribute(
         'href',
-        ONBOARDING_READ_MORE_URL_PLACEHOLDER
+        ONBOARDING_READ_MORE_URL
       );
     });
 
@@ -351,7 +349,7 @@ describe('OnboardingPage', () => {
       renderPage({ canWrite: true });
       const link = screen.getByTestId('alertZeroOnboardingReadMoreLink');
       expect(link).toHaveTextContent('Read more about Watches in the documentation');
-      expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL_PLACEHOLDER);
+      expect(link).toHaveAttribute('href', ONBOARDING_READ_MORE_URL);
     });
 
     it('links to Watch settings from the intro', () => {
@@ -386,6 +384,21 @@ describe('OnboardingPage', () => {
             : worker
         ),
       };
+      mockEnsureWorkerServiceAccounts.mockImplementation(
+        async (_http: unknown, _serviceAccounts: unknown, workerIds: string[]) =>
+          new Map(
+            workerIds.map((id) => [
+              id,
+              {
+                ok: true,
+                serviceAccountId:
+                  id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+                    ? 'kibana/existing'
+                    : 'account-a',
+              },
+            ])
+          )
+      );
       renderPage({ canWrite: true, httpPatch, serverWorkers });
 
       fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
@@ -396,8 +409,32 @@ describe('OnboardingPage', () => {
           expect.objectContaining({ body: JSON.stringify({ enabled: true }) })
         )
       );
-      expect(mockEnsureWorkerServiceAccounts.mock.calls[0][2]).not.toContain(
-        SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+      // The binding is handed over so a missing account can be replaced, and kept when it exists.
+      expect(mockEnsureWorkerServiceAccounts.mock.calls[0][3].boundAccountIds).toEqual(
+        new Map([[SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID, 'kibana/existing']])
+      );
+    });
+
+    it('replaces the account of a worker whose bound account no longer exists', async () => {
+      const httpPatch = jest.fn().mockResolvedValue({ worker: { id: 'mock', enabled: true } });
+      const serverWorkers = {
+        workers: ALL_WORKERS_RESPONSE.workers.map((worker) =>
+          worker.id === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID
+            ? { ...worker, enabled: true, settings: { serviceAccountId: 'kibana/gone' } }
+            : worker
+        ),
+      };
+      renderPage({ canWrite: true, httpPatch, serverWorkers });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+
+      await waitFor(() =>
+        expect(httpPatch).toHaveBeenCalledWith(
+          expect.stringContaining(SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID),
+          expect.objectContaining({
+            body: expect.stringContaining('"serviceAccountId":"account-a"'),
+          })
+        )
       );
     });
 
@@ -554,6 +591,27 @@ describe('OnboardingPage', () => {
         )
       );
       expect(history.location.pathname).toBe('/onboarding');
+    });
+
+    it('reports each failed enable and the partial save as onboarding errors', async () => {
+      const triageId = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+      const httpPatch = jest.fn(async (url: string) => {
+        if (url.includes(triageId)) {
+          throw new Error('blocked by index [secret]');
+        }
+        return { worker: { id: 'mock', enabled: true } };
+      });
+      const { reportEvent } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+      );
+
+      expect(reportEvent.mock.calls).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'onboarding' }],
+        ['alertzero_ui_error_shown', { error_class: 'partial_failure', surface: 'onboarding' }],
+      ]);
     });
 
     it('sends the saved revision when Enable and run is retried after a partial save', async () => {

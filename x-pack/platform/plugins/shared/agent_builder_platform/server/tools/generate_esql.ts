@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import {
@@ -12,11 +13,15 @@ import {
   GenerateEsqlNoDataError,
   setDefaultEsqlCacheKey,
 } from '@kbn/agent-builder-genai-utils';
-import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { toHashedId, type DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
-import { includeFrozenSchema } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 
 const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
   try {
@@ -29,7 +34,7 @@ const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
   }
 };
 
-const nlToEsqlToolSchema = z.object({
+const createNlToEsqlToolSchemaShape = () => ({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),
   index: z
     .string()
@@ -68,15 +73,29 @@ const nlToEsqlToolSchema = z.object({
     .describe(
       '(optional) Time range to use for named parameters ?_tstart and ?_tend when validating the generated query. If not provided, falls back to the time range from the screen context.'
     ),
-  include_frozen: includeFrozenSchema,
 });
+
+const createNlToEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    ...createNlToEsqlToolSchemaShape(),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+const createServerlessNlToEsqlToolSchema = once(() => z.object(createNlToEsqlToolSchemaShape()));
+
+type NlToEsqlToolSchema =
+  | ReturnType<typeof createNlToEsqlToolSchema>
+  | ReturnType<typeof createServerlessNlToEsqlToolSchema>;
 
 export const generateEsqlTool = ({
   organizationId,
+  isServerless = false,
 }: {
   /** Raw organization id used to derive a stable EIS session id for prompt-cache stickiness. */
   organizationId?: string;
-} = {}): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
+  isServerless?: boolean;
+} = {}): DynamicSchemaBuiltinToolDefinition<NlToEsqlToolSchema> => {
   if (organizationId) {
     setDefaultEsqlCacheKey(toHashedId(organizationId));
   }
@@ -97,19 +116,19 @@ Set the time range with \`time_range\` rather than describing it in \`query\`, u
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: nlToEsqlToolSchema,
-    handler: async (
-      {
+    getSchema: async (schemaContext) =>
+      isServerless
+        ? createServerlessNlToEsqlToolSchema()
+        : createNlToEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (params, { esClient, modelProvider, logger, events, attachments }) => {
+      const {
         query: nlQuery,
         index,
         context,
         execute_query: executeQuery = true,
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
-        include_frozen: includeFrozen = false,
-      },
-      { esClient, modelProvider, logger, events, attachments }
-    ) => {
+      } = params;
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
       const { response: esqlResponse, noDataError } = await callGenerateEsql({
@@ -121,7 +140,7 @@ Set the time range with \`time_range\` rather than describing it in \`query\`, u
         timeRange,
         includeDatasets: true,
         includeViews: true,
-        includeFrozen,
+        includeFrozen: getIncludeFrozenParam(params),
         modelProvider,
         esClient: esClient.asCurrentUser,
         internalEsClient: esClient.asInternalUser,

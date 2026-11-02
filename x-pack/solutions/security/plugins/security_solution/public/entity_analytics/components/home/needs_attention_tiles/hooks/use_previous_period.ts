@@ -12,13 +12,14 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { REACHES_BACK_COLUMN } from '../queries/history_reaches_back';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 interface PreviousPeriodQueryOptions<T> {
   queryKey: string;
   query: string | null;
   enabled: boolean;
   parse: (raw: ESQLSearchResponse) => T;
-  localOnly?: boolean;
 }
 
 /**
@@ -30,7 +31,6 @@ const usePreviousPeriodQuery = <T>({
   query,
   enabled,
   parse,
-  localOnly = false,
 }: PreviousPeriodQueryOptions<T>): {
   data: T | undefined;
   isPending: boolean;
@@ -42,14 +42,16 @@ const usePreviousPeriodQuery = <T>({
     [queryKey, query],
     async ({ signal }) => {
       if (!query) return undefined;
-      const result = await lastValueFrom(
-        services.search.search(
-          { params: { query } },
-          {
-            abortSignal: signal,
-            strategy: 'esql_async',
-            ...(localOnly ? { projectRouting: '_alias:_origin' } : {}),
-          }
+      const result = await runWithTileTimeout(signal, (tileSignal) =>
+        lastValueFrom(
+          services.search.search(
+            { params: { query } },
+            {
+              abortSignal: tileSignal,
+              strategy: 'esql_async',
+              projectRouting: TILE_PROJECT_ROUTING,
+            }
+          )
         )
       );
       return parse(result.rawResponse as unknown as ESQLSearchResponse);
@@ -59,7 +61,7 @@ const usePreviousPeriodQuery = <T>({
       keepPreviousData: true,
       ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
@@ -93,8 +95,6 @@ interface PreviousPeriodOptions<T> {
   /** True once the page's counts have loaded, the tile is not skipped and its count is above 0. */
   enabled: boolean;
   parse: (raw: ESQLSearchResponse) => T;
-  /** Run only against the local cluster, like the tile's count. */
-  localOnly?: boolean;
 }
 
 /**
@@ -110,7 +110,6 @@ export const usePreviousPeriod = <T>({
   previousQuery,
   enabled,
   parse,
-  localOnly,
 }: PreviousPeriodOptions<T>): {
   previous: T | undefined;
   /**
@@ -126,7 +125,6 @@ export const usePreviousPeriod = <T>({
     query: guardQuery,
     enabled,
     parse: parseReachesBack,
-    localOnly,
   });
   const guardSettled = guard.data !== undefined && !guard.isPending;
   const hasHistory = guardSettled && guard.data === true;
@@ -136,7 +134,6 @@ export const usePreviousPeriod = <T>({
     query: previousQuery,
     enabled: enabled && hasHistory,
     parse,
-    localOnly,
   });
 
   const isError = guard.isError || previousPeriod.isError;

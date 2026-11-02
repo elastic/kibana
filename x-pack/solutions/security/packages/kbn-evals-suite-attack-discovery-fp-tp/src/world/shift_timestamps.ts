@@ -32,10 +32,11 @@ const shiftValue = (value: unknown, deltaMs: number): unknown => {
   return value;
 };
 
+/** Moves every ISO timestamp in `value` by `deltaMs`. */
+export const shiftTimestamps = <T>(value: T, deltaMs: number): T => shiftValue(value, deltaMs) as T;
+
 /**
  * Moves a frozen twin's ISO timestamps forward so `now-24h` UI queries still see it.
  */
-export const shiftTwinToNow = <T>(twin: T, now: Date): T => {
-  const deltaMs = now.getTime() - FP_TP_BASE_TIME.getTime();
-  return shiftValue(twin, deltaMs) as T;
-};
+export const shiftTwinToNow = <T>(twin: T, now: Date): T =>
+  shiftTimestamps(twin, now.getTime() - FP_TP_BASE_TIME.getTime());

@@ -84,6 +84,8 @@ export interface SecurityAlertsTableContext {
    * actions without accessing the store directly.
    */
   openDocumentFlyout: (documentIndex: number) => void;
+  /** Adds a "Remove from case" item to each row's more actions menu. */
+  onRemoveFromCase?: (alertId: string) => void;
 }
 
 export type SecurityAlertsTableProps = AlertsTablePropsWithRef<SecurityAlertsTableContext>;

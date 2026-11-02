@@ -135,8 +135,21 @@ export function useAllRelayAppBindings(): UseAllRelayAppBindings {
   };
 }
 
-export const formatChannelLabel = (binding: SlackChannelBinding): string =>
-  binding.displayName != null ? `#${binding.displayName}` : binding.channel ?? '';
+/** Plain-text label; the Relay withholds a private channel's name. */
+export const formatChannelLabel = ({
+  displayName,
+  visibility,
+  channel,
+}: SlackChannelBinding): string => {
+  if (displayName != null) return `#${displayName}`;
+  if (visibility === 'private') {
+    return i18n.translate('xpack.nightshift.settings.apps.privateChannelLabel', {
+      defaultMessage: 'Private · {channelId}',
+      values: { channelId: channel ?? '' },
+    });
+  }
+  return channel ?? '';
+};
 
 /** Label for a stored channel value; a value that is not a connected channel id is kept as is. */
 export const formatChannelValue = (value: string, bindings: SlackChannelBinding[]): string => {
@@ -144,34 +157,62 @@ export const formatChannelValue = (value: string, bindings: SlackChannelBinding[
   return binding ? formatChannelLabel(binding) : value;
 };
 
+export type BindFailureReason =
+  | 'not_a_member'
+  | 'private_channel_access_required'
+  | 'channel_taken'
+  | 'other';
+
+export interface BindFailure {
+  reason: BindFailureReason;
+  message: string;
+}
+
+const KNOWN_BIND_REASONS: readonly string[] = [
+  'not_a_member',
+  'private_channel_access_required',
+  'channel_taken',
+];
+
+export const toBindFailure = (error: unknown): BindFailure => {
+  const { body } = error as {
+    body?: { message?: unknown; attributes?: { data?: { reason?: unknown } } };
+  };
+  const reason = body?.attributes?.data?.reason;
+  return {
+    reason:
+      typeof reason === 'string' && KNOWN_BIND_REASONS.includes(reason)
+        ? (reason as BindFailureReason)
+        : 'other',
+    message: getFormattedError(error).message,
+  };
+};
+
 export interface UseBindChannel {
   bind: (channelId: string) => Promise<void>;
   isLoading: boolean;
+  failure?: BindFailure;
+  clearFailure: () => void;
 }
 
 /** Mutation hook for binding a channel to this deployment. */
 export function useBindChannel(): UseBindChannel {
   const {
-    services: { http, notifications },
+    services: { http },
   } = useKibana();
   const queryClient = useQueryClient();
 
   const mutation = useMutation<SlackAppBindChannelResponse, Error, string>({
     mutationFn: (channelId: string) =>
       http.post<SlackAppBindChannelResponse>(buildPath(BIND_CHANNEL_ROUTE, { channelId })),
-    onError: (error) => {
-      notifications.toasts.addError(getFormattedError(error), {
-        title: i18n.translate('xpack.nightshift.settings.apps.bindChannelError', {
-          defaultMessage: 'Failed to bind the Slack channel',
-        }),
-      });
-    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: RELAY_APP_BINDINGS_QUERY_KEY }),
   });
 
   return {
     bind: (channelId: string) => mutation.mutateAsync(channelId).then(() => undefined),
     isLoading: mutation.isLoading,
+    failure: mutation.error ? toBindFailure(mutation.error) : undefined,
+    clearFailure: mutation.reset,
   };
 }
 

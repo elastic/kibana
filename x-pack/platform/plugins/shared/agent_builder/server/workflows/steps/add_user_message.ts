@@ -12,6 +12,7 @@ import {
   addUserMessageStepCommonDefinition,
   type AddUserMessageInputSchema,
 } from '../../../common/workflows/steps/add_user_message';
+import { normalizeOptionalStringParam } from '../../../common/normalize_optional_string_param';
 import type { ConversationStepDeps } from '../registry';
 
 export const addUserMessageStepDefinition = ({ getExecutionService }: ConversationStepDeps) =>
@@ -21,7 +22,12 @@ export const addUserMessageStepDefinition = ({ getExecutionService }: Conversati
       try {
         const request = context.contextManager.getFakeRequest();
 
-        const { conversation_id: conversationId, message } = context.input;
+        const {
+          conversation_id: conversationId,
+          message,
+          author_name: authorNameRaw,
+        } = context.input;
+        const authorName = normalizeOptionalStringParam(authorNameRaw);
 
         await getExecutionService().maybeExecuteAgent({
           mode: AgentExecutionMode.conversation,
@@ -30,6 +36,7 @@ export const addUserMessageStepDefinition = ({ getExecutionService }: Conversati
             conversationId,
             nextInput: { message },
             triggerMode: ChatTriggerMode.Never,
+            ...(authorName ? { author: { full_name: authorName } } : {}),
           },
         });
 

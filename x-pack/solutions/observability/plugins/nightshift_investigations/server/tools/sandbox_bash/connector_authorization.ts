@@ -28,8 +28,7 @@ export const authorizeConnector = async (
     return {
       errorMessage:
         `Connector '${connectorId}' is not assigned to this agent. ` +
-        `Assigned connectors: ${callContext.allowedConnectorIds.join(', ') || 'none'}. ` +
-        `Check /workspace/connectors.md.`,
+        `Check /workspace/connectors.md for available connectors.`,
     };
   }
 

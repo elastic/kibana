@@ -134,6 +134,12 @@ export type {
   ExtractedEntityDefinition,
 } from './domain/definitions/entity_schema';
 
+// Consumed by the entity inventory plugin, which must not restate the store's definition rules.
+export { entitySchema } from './domain/definitions/entity_schema';
+export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
+export type { DynamicAttribute, DynamicSource } from './domain/definitions/dynamic';
+export { getIdentityFields, getPresenceFilter } from './domain/definitions/dynamic';
+
 export type {
   Entity,
   HostEntity,

@@ -34,7 +34,7 @@ export interface SavedObjectsModelVersion {
    *
    * @example Adding a new indexed field with a default value
    * ```ts
-   * const version1: SavedObjectsModelVersion = {
+   * const version2: SavedObjectsModelVersion = {
    *   changes: [
    *     {
    *       type: 'mappings_addition',
@@ -54,7 +54,7 @@ export interface SavedObjectsModelVersion {
    *
    * @example A version with multiple mappings addition coming from different changes
    * ```ts
-   * const version1: SavedObjectsModelVersion = {
+   * const version2: SavedObjectsModelVersion = {
    *   changes: [
    *     {
    *       type: 'mappings_addition',
@@ -103,7 +103,7 @@ export interface SavedObjectsFullModelVersion {
    *
    * @example Adding a new indexed field with a default value
    * ```ts
-   * const version1: SavedObjectsModelVersion = {
+   * const version2: SavedObjectsFullModelVersion = {
    *   changes: [
    *     {
    *       type: 'mappings_addition',
@@ -118,12 +118,16 @@ export interface SavedObjectsFullModelVersion {
    *       },
    *     },
    *   ],
+   *   schemas: {
+   *     forwardCompatibility: schemaV2.extends({}, { unknowns: 'ignore' }),
+   *     create: schemaV2,
+   *   },
    * };
    * ```
    *
    * @example A version with multiple mappings addition coming from different changes
    * ```ts
-   * const version1: SavedObjectsModelVersion = {
+   * const version2: SavedObjectsFullModelVersion = {
    *   changes: [
    *     {
    *       type: 'mappings_addition',
@@ -138,6 +142,10 @@ export interface SavedObjectsFullModelVersion {
    *       },
    *     },
    *   ],
+   *   schemas: {
+   *     forwardCompatibility: schemaV2.extends({}, { unknowns: 'ignore' }),
+   *     create: schemaV2,
+   *   },
    * };
    * ```
    *

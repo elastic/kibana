@@ -35,6 +35,7 @@ import type {
 import {
   ConfigKey,
   isExternalSyntheticsMonitor,
+  isHeartbeatSyntheticsMonitor,
   MonitorTypeEnum,
 } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
@@ -187,6 +188,7 @@ export const MonitorDetailsPanel = ({
                 configId={configId}
                 monitorLocations={monitor.locations}
                 spaces={savedMonitor?.[ConfigKey.KIBANA_SPACES]}
+                origin={isHeartbeatSyntheticsMonitor(monitor) ? monitor.origin : undefined}
               />
             </EuiDescriptionListDescription>
           </>

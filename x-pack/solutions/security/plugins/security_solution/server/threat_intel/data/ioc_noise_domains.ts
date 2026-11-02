@@ -131,6 +131,12 @@ export const IOC_NOISE_DOMAIN_LIST: readonly NoiseDomainEntry[] = [
     source: 'manual',
   },
   {
+    domain: 'atlas.mitre.org',
+    rationale: 'MITRE ATLAS framework URL — framework citation, not IOC',
+    added: '2026-10-15',
+    source: 'manual',
+  },
+  {
     domain: 'nvd.nist.gov',
     rationale: 'NIST NVD CVE database — vulnerability reference, not IOC',
     added: '2026-06-08',

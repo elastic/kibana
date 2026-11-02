@@ -20,6 +20,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 
 import type {
   EncryptedSyntheticsSavedMonitor,
+  MonitorOrigin,
   ServiceLocation,
 } from '../../../../../../common/runtime_types';
 import { useStatusByLocation } from '../../../hooks';
@@ -31,6 +32,7 @@ export const MonitorLocationSelect = ({
   compressed,
   onChange,
   isDisabled,
+  origin,
 }: {
   compressed?: boolean;
   isDisabled?: boolean;
@@ -38,11 +40,13 @@ export const MonitorLocationSelect = ({
   onChange: (label: string, id: string) => void;
   selectedLocation?: ServiceLocation | null;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
+  origin?: MonitorOrigin;
 }) => {
   const theme = useEuiTheme();
   const { locations: locationsStatus, loading: loadingLocationsStatus } = useStatusByLocation({
     configId,
     monitorLocations,
+    origin,
   });
 
   const [isLocationListOpen, setIsLocationListOpen] = useState(false);

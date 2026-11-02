@@ -7,13 +7,22 @@
 
 import { ACTION_POLICY_AUTHORING_SKILL_ID, ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
+import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
+import type { FindActionPoliciesToolDeps } from '../tools/find_action_policies';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import { createAlertingV2Availability } from './alerting_v2_availability';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
+import {
+  referencedContentSkillPath,
+  WORKFLOW_DISPATCH_PAYLOAD_REFERENCE,
+  WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF,
+} from './action_policy_management_references';
 
-const createDeps = (): ManageActionPolicyToolDeps & {
-  availability: ReturnType<typeof createAlertingV2Availability>;
-} => ({
+const createDeps = (): ManageActionPolicyToolDeps &
+  FindActionPoliciesToolDeps &
+  AttachActionPolicyToolDeps & {
+    availability: ReturnType<typeof createAlertingV2Availability>;
+  } => ({
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
@@ -23,6 +32,8 @@ const createDeps = (): ManageActionPolicyToolDeps & {
   } as unknown as LoggerServiceContract,
   getWorkflowClient: jest.fn(() => ({ getWorkflow: jest.fn(async () => null) })),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
+  getActionPolicyClient: jest.fn(),
+  getPrivilegeChecker: jest.fn(),
   availability: createAlertingV2Availability({
     getActiveSpace: jest.fn().mockResolvedValue({}),
   }),
@@ -65,13 +76,17 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(uiSettings.get).not.toHaveBeenCalled();
   });
 
-  it('exposes only the manage action policy inline tool', async () => {
+  it('exposes only the action policy inline tools to manage, find and attach policies', async () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 
     const inlineTools = (await skill.getInlineTools?.()) ?? [];
     const inlineToolIds = inlineTools.map((tool) => tool.id);
 
-    expect(inlineToolIds).toEqual([ALERTING_TOOL_IDS.manageActionPolicy]);
+    expect(inlineToolIds).toEqual([
+      ALERTING_TOOL_IDS.manageActionPolicy,
+      ALERTING_TOOL_IDS.findActionPolicies,
+      ALERTING_TOOL_IDS.attachActionPolicy,
+    ]);
     expect(inlineToolIds).not.toContain(ALERTING_TOOL_IDS.manageRule);
   });
 
@@ -79,6 +94,8 @@ describe('createActionPolicyAuthoringSkill', () => {
     const skill = createActionPolicyAuthoringSkill(createDeps());
 
     expect(skill.content).toContain('Action Policy Discovery');
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.findActionPolicies);
+    expect(skill.content).toContain(ALERTING_TOOL_IDS.attachActionPolicy);
     expect(skill.content).toContain('space-scoped saved object');
     expect(skill.content).not.toContain('Part 1: Action Policies');
     expect(skill.content).toContain('Default Notification Setup');
@@ -109,10 +126,33 @@ describe('createActionPolicyAuthoringSkill', () => {
     expect(payloadRef?.content).toContain('Action Policy Workflow Dispatch Payload');
     expect(payloadRef?.content).toContain('### `data`');
     expect(payloadRef?.content).toContain('## Example');
-    expect(payloadRef?.content).toContain('`policyId`');
-    expect(payloadRef?.content).toContain('`alerts`');
-    expect(payloadRef?.content).toContain('`rules`');
-    expect(payloadRef?.content).toContain('`alert_status`');
+    expect(payloadRef?.content).toContain('"policyId"');
+    expect(payloadRef?.content).toContain('"alerts"');
+    expect(payloadRef?.content).toContain('"rules"');
+    expect(payloadRef?.content).toContain('"alert_status"');
+  });
+
+  it('derives the workflow dispatch payload filestore path from the registered reference', () => {
+    const skill = createActionPolicyAuthoringSkill(createDeps());
+    const payloadRef = skill.referencedContent?.find(
+      (entry) => entry.name === WORKFLOW_DISPATCH_PAYLOAD_REFERENCE.name
+    );
+
+    expect(payloadRef).toEqual(expect.objectContaining(WORKFLOW_DISPATCH_PAYLOAD_REFERENCE));
+    expect(skill.basePath).toBe('skills/platform/alerting');
+    expect(WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF).toBe(
+      referencedContentSkillPath({
+        basePath: skill.basePath,
+        name: skill.name,
+        referencedContent: {
+          name: payloadRef?.name ?? '',
+          relativePath: payloadRef?.relativePath ?? '',
+        },
+      })
+    );
+    expect(WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF).toBe(
+      'skills/platform/alerting/action-policy-authoring/references/workflow-dispatch-payload.md'
+    );
   });
 
   it('exposes schema-generated matcher, grouping, and throttle references', () => {
