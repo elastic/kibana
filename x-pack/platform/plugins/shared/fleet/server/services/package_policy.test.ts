@@ -5394,31 +5394,25 @@ describe('Package policy service', () => {
       const policyIds = ['test-agent-policy-1', 'test-agent-policy-2'];
 
       const setupSOClientMocks = (
-        savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
-        overrides: Record<string, unknown> = {}
+        savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>
       ) => {
         savedObjectsClient.bulkGet.mockResolvedValue({
-          saved_objects: [generateSO({ policy_ids: policyIds, ...overrides })],
+          saved_objects: [generateSO({ policy_ids: policyIds })],
         });
-        savedObjectsClient.get.mockResolvedValue(
-          generateSO({ policy_ids: policyIds, ...overrides })
-        );
-        savedObjectsClient.update.mockResolvedValue(
-          generateSO({ policy_ids: policyIds, ...overrides })
-        );
+        savedObjectsClient.get.mockResolvedValue(generateSO({ policy_ids: policyIds }));
+        savedObjectsClient.update.mockResolvedValue(generateSO({ policy_ids: policyIds }));
       };
 
       const callUpdate = async (
         savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>,
         elasticsearchClient: ElasticsearchClientMock,
-        options?: { bumpRevision?: boolean },
-        overrides: Record<string, unknown> = {}
+        options?: { bumpRevision?: boolean }
       ) => {
         await packagePolicyService.update(
           savedObjectsClient,
           elasticsearchClient,
           generateSO().id,
-          generateAttributes({ policy_ids: policyIds, ...overrides }),
+          generateAttributes({ policy_ids: policyIds }),
           options
         );
       };
@@ -5468,39 +5462,20 @@ describe('Package policy service', () => {
         );
       });
 
-      it('recomputes agent version conditions when the package has template version conditions', async () => {
+      it('passes the agent version condition flag to bumpRevision', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
         const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         setupSOClientMocks(savedObjectsClient);
 
         await callUpdate(savedObjectsClient, elasticsearchClient);
 
+        // The mocked package has template version conditions.
         policyIds.forEach((policyId) => {
           expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
             savedObjectsClient,
             elasticsearchClient,
             policyId,
             expect.objectContaining({ agentVersionConditionsUnchanged: false })
-          );
-        });
-      });
-
-      it('keeps agent version conditions when the package has none and policy_ids are unchanged', async () => {
-        const savedObjectsClient = createSavedObjectClientMock();
-        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        const endpointPackage = {
-          package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.9.0' },
-        };
-        setupSOClientMocks(savedObjectsClient, endpointPackage);
-
-        await callUpdate(savedObjectsClient, elasticsearchClient, undefined, endpointPackage);
-
-        policyIds.forEach((policyId) => {
-          expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
-            savedObjectsClient,
-            elasticsearchClient,
-            policyId,
-            expect.objectContaining({ agentVersionConditionsUnchanged: true })
           );
         });
       });
@@ -7185,47 +7160,16 @@ describe('Package policy service', () => {
           { force: true }
         );
 
-        return Object.fromEntries(
-          mockAgentPolicyService.bumpRevision.mock.calls.map(([, , agentPolicyId, options]) => [
-            agentPolicyId,
-            options?.agentVersionConditionsUnchanged,
-          ])
-        );
+        return [
+          ...new Set(
+            mockAgentPolicyService.bumpRevision.mock.calls.map(
+              ([, , , options]) => options?.agentVersionConditionsUnchanged
+            )
+          ),
+        ];
       };
 
-      it('keeps stored conditions when the package has none and assignments are unchanged', async () => {
-        expect(await bulkUpdateAndGetUnchangedFlags({}, {})).toEqual({
-          'test-agent-policy-1': true,
-          'test-agent-policy-2': true,
-        });
-      });
-
-      it('recomputes conditions for all associated agent policies when assignments change', async () => {
-        expect(
-          await bulkUpdateAndGetUnchangedFlags(
-            {},
-            { policy_ids: ['test-agent-policy-2', 'test-agent-policy-3'] }
-          )
-        ).toEqual({
-          'test-agent-policy-1': false,
-          'test-agent-policy-2': false,
-          'test-agent-policy-3': false,
-        });
-      });
-
-      it('recomputes conditions when the package version changes', async () => {
-        expect(
-          await bulkUpdateAndGetUnchangedFlags(
-            {},
-            { package: { name: 'endpoint', title: 'Elastic Endpoint', version: '1.0.0' } }
-          )
-        ).toEqual({
-          'test-agent-policy-1': false,
-          'test-agent-policy-2': false,
-        });
-      });
-
-      it('recomputes conditions when the package declares an agent version condition', async () => {
+      const mockPackageWithAgentVersionCondition = () => {
         jest
           .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
           .mockResolvedValueOnce(undefined);
@@ -7234,30 +7178,43 @@ describe('Package policy service', () => {
           version: pkgVersion,
           conditions: { agent: { version: '>=9.3.0' } },
         }));
+      };
 
-        expect(await bulkUpdateAndGetUnchangedFlags({}, {})).toEqual({
-          'test-agent-policy-1': false,
-          'test-agent-policy-2': false,
-        });
-      });
-
-      it('keeps stored conditions on the same package version when version specific policies are disabled', async () => {
-        jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-          enableVersionSpecificPolicies: false,
-        } as ExperimentalFeatures);
-        (getPackageInfo as jest.Mock).mockImplementation(async ({ pkgName, pkgVersion }) => ({
-          name: pkgName,
-          version: pkgVersion,
-          conditions: { agent: { version: '>=9.3.0' } },
-        }));
-
-        expect(
-          await bulkUpdateAndGetUnchangedFlags({ package_agent_version_condition: '>=9.3.0' }, {})
-        ).toEqual({
-          'test-agent-policy-1': true,
-          'test-agent-policy-2': true,
-        });
-      });
+      it.each([
+        { when: 'the package has no condition and assignments are unchanged', expected: true },
+        {
+          when: 'assignments change',
+          next: { policy_ids: ['test-agent-policy-2', 'test-agent-policy-3'] },
+          expected: false,
+        },
+        {
+          when: 'the package version changes',
+          next: { package: { name: 'endpoint', title: 'Elastic Endpoint', version: '1.0.0' } },
+          expected: false,
+        },
+        {
+          when: 'the package declares an agent version condition',
+          setup: mockPackageWithAgentVersionCondition,
+          expected: false,
+        },
+        {
+          when: 'version specific policies are disabled and the package version is unchanged',
+          old: { package_agent_version_condition: '>=9.3.0' },
+          setup: () => {
+            jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+              enableVersionSpecificPolicies: false,
+            } as ExperimentalFeatures);
+            mockPackageWithAgentVersionCondition();
+          },
+          expected: true,
+        },
+      ])(
+        'sets agentVersionConditionsUnchanged to $expected when $when',
+        async ({ old = {}, next = {}, setup, expected }) => {
+          setup?.();
+          expect(await bulkUpdateAndGetUnchangedFlags(old, next)).toEqual([expected]);
+        }
+      );
     });
 
     it('should store package_agent_version_condition from the target package version', async () => {

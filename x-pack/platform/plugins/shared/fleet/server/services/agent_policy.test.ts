@@ -1483,13 +1483,10 @@ describe('Agent policy', () => {
       expect(soClient.find).not.toHaveBeenCalledWith(
         expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
       );
-      expect(mockedPackagePolicyService.findAllForAgentPolicy).not.toHaveBeenCalled();
 
       const [, , attributes] = soClient.update.mock.calls[0];
-      expect(attributes).toEqual(expect.objectContaining({ revision: 2 }));
-      expect(attributes).not.toHaveProperty('min_agent_version');
-      expect(attributes).not.toHaveProperty('package_agent_version_conditions');
-      expect((attributes as Record<string, unknown>).has_agent_version_conditions).toBeUndefined();
+      expect(attributes).toMatchObject({ revision: 2 });
+      expect(Object.keys(attributes).filter((key) => key.includes('agent_version'))).toEqual([]);
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
 

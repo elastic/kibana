@@ -244,16 +244,17 @@ class AgentPolicyService {
       skipValidation: boolean;
       returnUpdatedPolicy?: boolean;
       asyncDeploy?: boolean;
-      hasAgentVersionConditions?: boolean;
-      minAgentVersion?: string | null;
-      packageAgentVersionConditions?: AgentPolicyAgentVersionCondition[] | null;
+      /**
+       * `recompute` derives the agent version condition fields from the package policies. `keep`
+       * leaves the stored ones, unless the agent policy has never stored them.
+       */
+      agentVersionConditions?: 'recompute' | 'keep';
     } = {
       bumpRevision: true,
       removeProtection: false,
       skipValidation: false,
       returnUpdatedPolicy: true,
       asyncDeploy: false,
-      hasAgentVersionConditions: false,
     }
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('_update');
@@ -305,6 +306,14 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
+    // Policies not updated since these fields were introduced have nothing stored to keep yet.
+    const agentVersionData =
+      options.agentVersionConditions === 'recompute' ||
+      (options.agentVersionConditions === 'keep' &&
+        typeof existingAgentPolicy.has_agent_version_conditions !== 'boolean')
+        ? await this.computeMinAgentVersionData(soClient, id)
+        : undefined;
+
     agentPolicy = this.normalizeDownloadSourceFields(agentPolicy);
     await soClient
       .update<AgentPolicySOAttributes>(savedObjectType, id, {
@@ -315,13 +324,7 @@ class AgentPolicyService {
           : { is_protected: agentPolicy.is_protected }),
         updated_at: new Date().toISOString(),
         updated_by: user ? user.username : 'system',
-        has_agent_version_conditions: options.hasAgentVersionConditions,
-        ...(options.minAgentVersion !== undefined
-          ? { min_agent_version: options.minAgentVersion }
-          : {}),
-        ...(options.packageAgentVersionConditions !== undefined
-          ? { package_agent_version_conditions: options.packageAgentVersionConditions }
-          : {}),
+        ...agentVersionData,
       })
       .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
 
@@ -359,7 +362,7 @@ class AgentPolicyService {
     if (
       appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
       existingAgentPolicy.has_agent_version_conditions &&
-      options.hasAgentVersionConditions === false
+      agentVersionData?.has_agent_version_conditions === false
     ) {
       logger.debug(
         `Agent policy [${id}] no longer has agent version conditions, reassigning agents from version-specific policies back to the base policy`
@@ -1150,15 +1153,11 @@ class AgentPolicyService {
     }
 
     const { space_ids: _, ...preparedAgentPolicySo } = agentPolicy;
-    const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
-      await this.computeMinAgentVersionData(soClient, id);
     return this._update(soClient, esClient, id, { ...preparedAgentPolicySo }, options?.user, {
       bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
-      hasAgentVersionConditions,
-      minAgentVersion: minAgentVersion ?? null,
-      packageAgentVersionConditions: packageAgentVersionConditions ?? null,
+      agentVersionConditions: 'recompute',
     })
       .then((updatedAgentPolicy) => {
         return this.runExternalCallbacks(
@@ -1324,56 +1323,24 @@ class AgentPolicyService {
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
-      const agentVersionData = await this.getAgentVersionDataForBump(
-        soClient,
-        id,
-        options?.agentVersionConditionsUnchanged
-      );
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
         skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
-        ...agentVersionData,
+        agentVersionConditions: options?.agentVersionConditionsUnchanged ? 'keep' : 'recompute',
       });
     });
-  }
-
-  // An empty result makes `_update` keep the stored version condition fields.
-  private async getAgentVersionDataForBump(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    conditionsUnchanged?: boolean
-  ): Promise<{
-    hasAgentVersionConditions?: boolean;
-    minAgentVersion?: string | null;
-    packageAgentVersionConditions?: AgentPolicyAgentVersionCondition[] | null;
-  }> {
-    if (conditionsUnchanged) {
-      const agentPolicy = await this.get(soClient, id, false);
-      // Policies not bumped since these fields were introduced have nothing stored to keep yet.
-      if (typeof agentPolicy?.has_agent_version_conditions === 'boolean') {
-        return {};
-      }
-    }
-
-    const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
-      await this.computeMinAgentVersionData(soClient, id);
-    return {
-      hasAgentVersionConditions,
-      minAgentVersion: minAgentVersion ?? null,
-      packageAgentVersionConditions: packageAgentVersionConditions ?? null,
-    };
   }
 
   private async computeMinAgentVersionData(
     soClient: SavedObjectsClientContract,
     policyId: string
   ): Promise<{
-    hasAgentVersionConditions: boolean;
-    minAgentVersion: string | undefined;
-    packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
+    has_agent_version_conditions: boolean;
+    min_agent_version: string | null;
+    package_agent_version_conditions: AgentPolicyAgentVersionCondition[] | null;
   }> {
     // getPackageInfo only reuses results inside a runWithCache session. Sync updates never
     // opened one, so every package policy paid a full lookup.
@@ -1386,9 +1353,9 @@ class AgentPolicyService {
       const hasConditions = conditions.length > 0;
 
       return {
-        hasAgentVersionConditions: hasConditions || hasTemplateConditions,
-        minAgentVersion: hasConditions ? highestMinAgentVersion(conditions) : undefined,
-        packageAgentVersionConditions: hasConditions ? conditions : undefined,
+        has_agent_version_conditions: hasConditions || hasTemplateConditions,
+        min_agent_version: (hasConditions && highestMinAgentVersion(conditions)) || null,
+        package_agent_version_conditions: hasConditions ? conditions : null,
       };
     });
   }
