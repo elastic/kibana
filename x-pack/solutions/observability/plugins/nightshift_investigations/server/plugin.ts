@@ -486,6 +486,7 @@ export class NightshiftInvestigationsPlugin
             getAgentBuilder: () => this.agentBuilder,
             isEvalsAvailable: () => this.evals !== undefined,
             isPaused: isOnlineEvalsPaused,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
