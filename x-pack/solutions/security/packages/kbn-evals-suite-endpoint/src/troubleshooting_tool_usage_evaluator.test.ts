@@ -72,6 +72,17 @@ describe('createTroubleshootingToolUsageEvaluator', () => {
     expect(result).toEqual({ score: 1, label: 'pass' });
   });
 
+  it('passes when generate_insight is retried once after an error', async () => {
+    const result = await evaluateWith({
+      steps: [
+        toolCall(GENERATE_INSIGHT_TOOL_ID, 'error'),
+        toolCall(GENERATE_INSIGHT_TOOL_ID, 'error'),
+      ],
+    });
+
+    expect(result).toEqual({ score: 1, label: 'pass' });
+  });
+
   it.each([
     {
       name: 'the tool calls exceed the budget',
@@ -84,10 +95,11 @@ describe('createTroubleshootingToolUsageEvaluator', () => {
       forbiddenTools: [GENERATE_INSIGHT_TOOL_ID],
     },
     {
-      name: 'generate_insight is called again after it returned an error',
+      name: 'generate_insight is called more than once after it returned an error',
       steps: [
         toolCall(GENERATE_INSIGHT_TOOL_ID, 'error'),
         toolCall(ARTIFACTS_TOOL_ID),
+        toolCall(GENERATE_INSIGHT_TOOL_ID, 'error'),
         toolCall(GENERATE_INSIGHT_TOOL_ID, 'other'),
       ],
     },

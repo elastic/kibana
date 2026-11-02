@@ -60,7 +60,7 @@ export const generateInsightTool = (
     type: ToolType.builtin,
     description: `Generate and store structured Automatic Troubleshooting insights.
 
-This tool MUST be called when the findings concern one or more specific endpoints. Do not call it when no specific endpoint is involved, and do not call it again after it returns an error.
+This tool MUST be called when the findings concern one or more specific endpoints. Do not call it when no specific endpoint is involved. If it rejects the endpoint IDs, do not call it again; after any other error, retry it at most once.
 
 This tool creates structured insights for persisting the results of the troubleshooting session.
 

@@ -40,17 +40,22 @@ const hasErrorResult = (step: ToolCallStep): boolean =>
   Array.isArray(step.results) &&
   step.results.some((result) => isRecord(result) && result.type === 'error');
 
-const retriedGenerateInsightAfterError = (steps: ToolCallStep[]): boolean => {
+const MAX_GENERATE_INSIGHT_CALLS_AFTER_ERROR = 1;
+
+const exceedsGenerateInsightRetryCap = (steps: ToolCallStep[]): boolean => {
   const generateInsightSteps = steps.filter((step) => step.tool_id === GENERATE_INSIGHT_TOOL_ID);
   const firstErrorIndex = generateInsightSteps.findIndex(hasErrorResult);
 
-  return firstErrorIndex !== -1 && firstErrorIndex < generateInsightSteps.length - 1;
+  return (
+    firstErrorIndex !== -1 &&
+    generateInsightSteps.length - firstErrorIndex - 1 > MAX_GENERATE_INSIGHT_CALLS_AFTER_ERROR
+  );
 };
 
 /**
  * Deterministic tool usage evaluator for troubleshooting answers: enforces the optional
  * `max_tool_calls` budget and `forbidden_tools`, and always fails when `generate_insight`
- * is called again after it returned an error.
+ * is called more than once after it returned an error.
  */
 export function createTroubleshootingToolUsageEvaluator(): Evaluator<
   SecurityDatasetExample,
@@ -69,8 +74,7 @@ export function createTroubleshootingToolUsageEvaluator(): Evaluator<
       const forbiddenToolsAbsent = steps.every(
         (step) => typeof step.tool_id !== 'string' || !forbiddenTools.includes(step.tool_id)
       );
-      const passed =
-        withinBudget && forbiddenToolsAbsent && !retriedGenerateInsightAfterError(steps);
+      const passed = withinBudget && forbiddenToolsAbsent && !exceedsGenerateInsightRetryCap(steps);
 
       return {
         score: passed ? 1 : 0,
