@@ -69,7 +69,7 @@ outputs:
 steps:
   # An analyst can close the proposal's alerts before approving it. Those alerts are counted here and
   # left out of the close below, so the update script does not rewrite their reason, user and time,
-  # and the completeness check does not count them as closed by this action.
+  # and are reported as already_closed_count rather than as closed by this action.
   - name: count_already_closed
     type: elasticsearch.search
     with:
@@ -87,12 +87,6 @@ steps:
       retry:
         max-attempts: 3
         delay: 5s
-
-  - name: resolve_expected_close
-    type: data.set
-    with:
-      already_closed_count: "${{ steps.count_already_closed.output.hits.total.value }}"
-      expected_close_count: "${{ inputs.actionInput.alertIds | size | minus: steps.count_already_closed.output.hits.total.value }}"
 
   # Close the alerts. `conflicts: proceed` prevents one alert whose mapping
   # changed mid-request from aborting the close for the entire batch.
@@ -124,17 +118,37 @@ steps:
   # whether its execute step (execute_as_approver / execute_as_worker) errored,
   # not closed_count, so an incomplete close
   # would otherwise be reported as a full success and the Investigation closed
-  # while some alerts remain open. Fail loud instead so that check catches it.
+  # while some alerts remain open. Read the end state back instead of trusting the
+  # update's `updated`: a retried close or an analyst closing an alert mid-run
+  # changes `updated` but not whether every requested alert is closed. Counting
+  # closed ids (not open ones) also catches a requested alert that no longer exists.
+  - name: verify_close
+    type: elasticsearch.search
+    with:
+      index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+      size: 0
+      track_total_hits: true
+      query:
+        bool:
+          filter:
+            - terms:
+                _id: "${{ inputs.actionInput.alertIds }}"
+            - term:
+                kibana.alert.workflow_status: closed
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+
   - name: fail_incomplete_close
     type: workflow.fail
-    if: "${{ steps.close_alerts.output.updated != variables.expected_close_count }}"
+    if: "${{ steps.verify_close.output.hits.total.value != inputs.actionInput.alertIds.size }}"
     with:
       message: >-
-        Closed {{ steps.close_alerts.output.updated }} of
-        {{ variables.expected_close_count }} open alert(s) as false
-        positive ({{ variables.already_closed_count }} of
-        {{ inputs.actionInput.alertIds.size }} requested were already closed); the rest were not updated (conflicts: proceed skips
-        version conflicts and no-ops instead of aborting the batch).
+        Only {{ steps.verify_close.output.hits.total.value }} of
+        {{ inputs.actionInput.alertIds.size }} requested alert(s) are closed
+        after the close ({{ steps.count_already_closed.output.hits.total.value }}
+        were already closed before it); the rest are still open or no longer exist.
 
   # Emit a structured result so the caller (Worker or gate) can verify the
   # close landed. `workflow.execute` declares its output as unknown, so the
@@ -144,6 +158,6 @@ steps:
     type: workflow.output
     status: completed
     with:
-      closed_count: "${{ steps.close_alerts.output.updated }}"
+      closed_count: "${{ inputs.actionInput.alertIds | size | minus: steps.count_already_closed.output.hits.total.value }}"
       alert_ids: "${{ inputs.actionInput.alertIds }}"
-      already_closed_count: "${{ variables.already_closed_count }}"
+      already_closed_count: "${{ steps.count_already_closed.output.hits.total.value }}"

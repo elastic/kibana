@@ -23,33 +23,38 @@ describe('Close alerts as false positive action', () => {
     consts?: { actionMetadata?: { category?: string } };
     steps: ParsedStep[];
   };
-  const failStep = workflow.steps.find((step) => step.name === 'fail_incomplete_close')!;
+  const getStep = (name: string): ParsedStep => workflow.steps.find((step) => step.name === name)!;
+  const failStep = getStep('fail_incomplete_close');
   const engine = createWorkflowLiquidEngine();
+
+  // Mirrors WorkflowTemplatingEngine.evaluateExpression: strip the leading `$` and the
+  // surrounding `{{ }}`, then evalValueSync the raw expression against a context — the
+  // same call the execution engine makes for a step's `if` condition or `with` value.
+  const evaluateExpression = (template: string, context: Record<string, unknown>): unknown =>
+    engine.evalValueSync(
+      template
+        .replace(/^\$\{\{/, '')
+        .replace(/\}\}$/, '')
+        .trim(),
+      context
+    );
+
+  // The completeness guard reads the end state back: how many of the requested ids are closed.
+  const evaluateIfCondition = (closedAfter: number, alertIds: string[]): unknown =>
+    evaluateExpression(failStep.if as string, {
+      steps: { verify_close: { output: { hits: { total: { value: closedAfter } } } } },
+      inputs: { actionInput: { alertIds } },
+    });
 
   it('queues under Investigate so Respond stays reserved for containment actions', () => {
     expect(workflow.consts?.actionMetadata?.category).toBe('investigate');
   });
 
-  // Mirrors WorkflowTemplatingEngine.evaluateExpression: strip the leading `$` and the
-  // surrounding `{{ }}`, then evalValueSync the raw expression against a context — the
-  // same call the execution engine makes for a step's `if` condition.
-  const evaluateIfCondition = (updated: number, alertIds: string[], alreadyClosed = 0): unknown => {
-    const expression = (failStep.if as string)
-      .replace(/^\$\{\{/, '')
-      .replace(/\}\}$/, '')
-      .trim();
-    return engine.evalValueSync(expression, {
-      steps: { close_alerts: { output: { updated } } },
-      variables: { expected_close_count: alertIds.length - alreadyClosed },
-      inputs: { actionInput: { alertIds } },
-    });
-  };
-
-  it('places the completeness guard between close_alerts and emit_result', () => {
+  it('places the read-back and the completeness guard between close_alerts and emit_result', () => {
     expect(workflow.steps.map((step) => step.name)).toEqual([
       'count_already_closed',
-      'resolve_expected_close',
       'close_alerts',
+      'verify_close',
       'fail_incomplete_close',
       'emit_result',
     ]);
@@ -64,9 +69,7 @@ describe('Close alerts as false positive action', () => {
   // query, so any clause beyond the ids (a rule, a time range) would close alerts the analyst
   // was never shown.
   it('closes only the open alerts named in the approved input, with nothing else in the query', () => {
-    const closeStep = workflow.steps.find((step) => step.name === 'close_alerts')!;
-
-    expect(closeStep.with).toEqual({
+    expect(getStep('close_alerts').with).toEqual({
       status: 'closed',
       reason: 'false_positive',
       conflicts: 'proceed',
@@ -81,9 +84,8 @@ describe('Close alerts as false positive action', () => {
   });
 
   it('resolves the close query to the approved ids', () => {
-    const closeStep = workflow.steps.find((step) => step.name === 'close_alerts')!;
     const idsExpression = (
-      closeStep.with!.query as { bool: { filter: { terms: { _id: string } } } }
+      getStep('close_alerts').with!.query as { bool: { filter: { terms: { _id: string } } } }
     ).bool.filter.terms._id.trim();
 
     expect(
@@ -93,35 +95,36 @@ describe('Close alerts as false positive action', () => {
     ).toEqual(['alert-1', 'alert-2']);
   });
 
-  it('does not fail when every requested alert was updated', () => {
+  // The analyst closed some alerts before approving, or a retried close finished the rest.
+  // Either way the end state is complete, so a lower `updated` is not a shortfall.
+  it('does not fail when every requested alert is closed after the close', () => {
     expect(evaluateIfCondition(2, ['alert-1', 'alert-2'])).toBe(false);
   });
 
-  // The analyst closed some alerts before approving. They are not this action's to close, so
-  // updating only the open ones is complete, not a shortfall.
-  it('does not fail when the alerts that were not updated were already closed', () => {
-    expect(evaluateIfCondition(1, ['alert-1', 'alert-2'], 1)).toBe(false);
-  });
-
-  it('does not fail when every requested alert was already closed', () => {
-    expect(evaluateIfCondition(0, ['alert-1', 'alert-2'], 2)).toBe(false);
-  });
-
-  it('fails when fewer alerts were updated than requested', () => {
+  it('fails when a requested alert is still open after the close', () => {
     expect(evaluateIfCondition(1, ['alert-1', 'alert-2'])).toBe(true);
   });
 
-  it('fails when none of the requested alerts were updated (conflicts: proceed no-op)', () => {
+  it('fails when none of the requested alerts are closed after the close', () => {
     expect(evaluateIfCondition(0, ['alert-1', 'alert-2'])).toBe(true);
+  });
+
+  // A deleted alert never matches a search, so an open-count read-back would miss it. Counting
+  // closed ids against the requested ids keeps the guard failing loudly.
+  it('fails when a requested alert no longer exists', () => {
+    expect(evaluateIfCondition(1, ['alert-1', 'alert-2'])).toBe(true);
   });
 
   it('renders a message naming the shortfall', () => {
     const rendered = engine.parseAndRenderSync(failStep.with!.message as string, {
-      steps: { close_alerts: { output: { updated: 1 } } },
-      variables: { expected_close_count: 2, already_closed_count: 0 },
+      steps: {
+        verify_close: { output: { hits: { total: { value: 1 } } } },
+        count_already_closed: { output: { hits: { total: { value: 0 } } } },
+      },
       inputs: { actionInput: { alertIds: ['alert-1', 'alert-2'] } },
     });
 
-    expect(rendered).toContain('Closed 1 of 2 open alert(s) as false positive');
+    expect(rendered).toContain('Only 1 of 2 requested alert(s) are closed after the close');
+    expect(rendered).toContain('0 were already closed before it');
   });
 });
