@@ -27,8 +27,7 @@ If you want to use a Kibana release in production, give it a test run, or just p
 
 ### Building and Running Kibana, and/or Contributing Code
 
-You might want to build Kibana locally to contribute some code, test out the latest features, or try
-out an open PR:
+You can build Kibana locally to contribute code, test the latest features, or try an open PR:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) will help you get Kibana up and running.
 - If you would like to contribute code, please follow our [STYLEGUIDE.mdx](STYLEGUIDE.mdx).
