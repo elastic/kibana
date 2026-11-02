@@ -25,7 +25,7 @@ const NUMERIC_EVENT_ID = /^\d{1,10}$/;
 const EVENT_ID_OR_UUID =
   /^(\d{1,10}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 
-/** Attribute types and categories MISP accepts, from its OpenAPI spec (AttributeType, AttributeCategory). */
+/** Attribute types and categories MISP accepts, from its describeTypes.json (types, categories). */
 export const MISP_ATTRIBUTE_TYPES = [
   'md5',
   'sha1',
@@ -68,7 +68,7 @@ export const MISP_ATTRIBUTE_TYPES = [
   'pattern-in-file',
   'pattern-in-traffic',
   'pattern-in-memory',
-  'pattern-filename',
+  'filename-pattern',
   'pgp-public-key',
   'pgp-private-key',
   'yara',
@@ -215,6 +215,12 @@ export const MISP_ATTRIBUTE_TYPES = [
   'cortex',
   'boolean',
   'anonymised',
+  'dom-hash',
+  'ssh-fingerprint',
+  'integer',
+  'azure-application-id',
+  'uuid',
+  'onion-address',
 ] as const;
 
 export const MISP_ATTRIBUTE_CATEGORIES = [

@@ -3,6 +3,20 @@ info:
   title: MISP Automation API corrections
   version: 1.0.0
 actions:
+  - target: $.components.schemas.AttributeType.enum
+    description: >-
+      MISP validates attribute types against the list in its describeTypes.json
+      (https://github.com/MISP/MISP/blob/2.5/describeTypes.json). The spec's enum leaves out these
+      seven, and has pattern-filename where describeTypes.json has filename-pattern.
+    update:
+      - dom-hash
+      - filename-pattern
+      - ssh-fingerprint
+      - integer
+      - azure-application-id
+      - uuid
+      - onion-address
+
   - target: $.servers[?@.url == 'https://misp.local']
     description: >-
       MISP is self-hosted: the API is served by each instance at its own base URL

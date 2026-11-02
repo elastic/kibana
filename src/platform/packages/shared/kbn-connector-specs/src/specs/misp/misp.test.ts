@@ -101,6 +101,19 @@ describe('Misp', () => {
       ).toBe(true);
     });
 
+    it.each([
+      'dom-hash',
+      'filename-pattern',
+      'ssh-fingerprint',
+      'integer',
+      'azure-application-id',
+      'uuid',
+      'onion-address',
+    ])('accepts the %s attribute type, which the OpenAPI spec leaves out', (type) => {
+      const base = { eventId: '1', value: '1.2.3.4' };
+      expect(AddAttributeInputSchema.safeParse({ ...base, type }).success).toBe(true);
+    });
+
     it('defaults createEvent published to false', () => {
       expect(CreateEventInputSchema.parse({ info: 'Alert' })).toEqual({
         info: 'Alert',
