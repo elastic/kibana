@@ -52,13 +52,13 @@ export const RunButton = ({
   return (
     <EuiSplitButton size="s" color={runMode === 'auto' ? 'primary' : 'text'}>
       <EuiSplitButton.ActionPrimary
+        isIconOnly
         iconType="play"
+        aria-label={RUN_LABEL}
         onClick={onRun}
         tooltipProps={{ title, content: description }}
         data-test-subj="notebookCellRun"
-      >
-        {RUN_LABEL}
-      </EuiSplitButton.ActionPrimary>
+      />
       <EuiSplitButton.ActionSecondary
         iconType="chevronSingleDown"
         aria-label={i18n.translate('xpack.notebook.runButton.modeAriaLabel', {
