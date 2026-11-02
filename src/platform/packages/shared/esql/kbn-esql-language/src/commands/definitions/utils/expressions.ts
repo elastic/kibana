@@ -29,7 +29,7 @@ import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { UnmappedFieldsStrategy } from '../../registry/types';
 import { inOperators } from '../all_operators';
-import { TIME_SYSTEM_PARAMS } from './literals';
+import { GEOTILE_PRECISION_SYSTEM_PARAM, TIME_SYSTEM_PARAMS } from './literals';
 import { getUnmappedFieldType } from './settings';
 import { getPromqlFunctionDefinition } from './promql';
 import { applyTimeSeriesAggregateArgTypes } from './time_series_aggregate_args';
@@ -64,6 +64,9 @@ export function getExpressionType(
   if (isLiteral(root)) {
     if (root.literalType === 'param' && TIME_SYSTEM_PARAMS.includes(root.text)) {
       return 'keyword';
+    }
+    if (root.literalType === 'param' && root.text === GEOTILE_PRECISION_SYSTEM_PARAM) {
+      return 'integer';
     }
     return root.literalType;
   }

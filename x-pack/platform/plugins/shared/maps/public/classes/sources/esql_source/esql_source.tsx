@@ -17,8 +17,10 @@ import {
   getESQLQueryColumnsRaw,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
+  getGeotilePrecisionParams,
   getProjectRoutingFromEsqlQuery,
   getStartEndParams,
+  hasGeotilePrecisionParam,
   hasStartEndParams,
 } from '@kbn/esql-utils';
 import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
@@ -36,6 +38,7 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import type {
+  DataFilters,
   ESQLSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -54,10 +57,12 @@ import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ESQLField } from '../../fields/esql_field';
 
+const MAX_GEOTILE_LEVEL = 29;
+
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
   'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
->;
+> & { geotilePrecision?: number };
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -258,7 +263,13 @@ export class ESQLSource
       }
     }
 
-    const namedParams = getStartEndParams(this._descriptor.esql, timeRange);
+    const namedParams = [
+      ...getStartEndParams(this._descriptor.esql, timeRange),
+      ...getGeotilePrecisionParams(
+        this._descriptor.esql,
+        this.getGeotilePrecision(requestMeta.zoom)
+      ),
+    ];
     if (namedParams.length) {
       params.params = namedParams;
     }
@@ -373,8 +384,19 @@ export class ESQLSource
     );
   }
 
-  getSyncMeta(): ESQLSourceSyncMeta {
+  /**
+   * Geotile precision bound to `?_geotile_precision`, one level finer than the map zoom
+   * (same resolution as the geo grid source's default).
+   */
+  getGeotilePrecision(zoom: number): number {
+    return Math.min(Math.ceil(zoom) + 1, MAX_GEOTILE_LEVEL);
+  }
+
+  getSyncMeta(dataFilters?: DataFilters): ESQLSourceSyncMeta {
     return {
+      ...(dataFilters && hasGeotilePrecisionParam(this._descriptor.esql)
+        ? { geotilePrecision: this.getGeotilePrecision(dataFilters.zoom) }
+        : {}),
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,
       geoField: this._descriptor.geoField,

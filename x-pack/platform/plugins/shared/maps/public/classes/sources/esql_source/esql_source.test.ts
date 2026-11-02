@@ -28,11 +28,15 @@ jest.mock('../../../kibana_services', () => ({
   getIndexPatternService: () => ({}),
 }));
 
+const mockGetGeotilePrecisionParams = jest.fn().mockReturnValue([]);
+
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: () => mockGetESQLQueryColumnsRaw(),
   getLimitFromESQLQuery: (...args: any[]) => mockGetLimitFromESQLQuery(...args),
   getStartEndParams: () => [],
   hasStartEndParams: () => false,
+  getGeotilePrecisionParams: (...args: any[]) => mockGetGeotilePrecisionParams(...args),
+  hasGeotilePrecisionParam: (query: string) => query.includes('?_geotile_precision'),
   getIndexPatternFromESQLQuery: () => 'logstash-*',
   getProjectRoutingFromEsqlQuery: () => undefined,
   getESQLAdHocDataview: jest.fn(),
@@ -158,6 +162,7 @@ describe('getGeoJsonWithMeta', () => {
   beforeEach(() => {
     mockSearch.mockReset();
     mockGetLimitFromESQLQuery.mockReturnValue(10000);
+    mockGetGeotilePrecisionParams.mockReset().mockReturnValue([]);
   });
 
   test('should return features and resultsCount from ES|QL response', async () => {
@@ -190,5 +195,21 @@ describe('getGeoJsonWithMeta', () => {
 
     expect(meta?.resultsCount).toBe(3);
     expect(meta?.areResultsTrimmed).toBe(true);
+  });
+
+  test('should bind ?_geotile_precision to a precision derived from the map zoom', async () => {
+    mockGetGeotilePrecisionParams.mockReturnValue([{ _geotile_precision: 6 }]);
+    mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(1), requestParams: {} }));
+
+    await createSource().getGeoJsonWithMeta(
+      'test',
+      { ...requestMeta, zoom: 4.5 } as any,
+      jest.fn(),
+      jest.fn(),
+      makeInspectorAdapters() as any
+    );
+
+    expect(mockGetGeotilePrecisionParams).toHaveBeenCalledWith(ESQL, 6);
+    expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 6 }]);
   });
 });

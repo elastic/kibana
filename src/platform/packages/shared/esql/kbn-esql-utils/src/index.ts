@@ -86,6 +86,8 @@ export {
   formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
+  hasGeotilePrecisionParam,
+  getGeotilePrecisionParams,
   getNamedParams,
   getEsqlSearchParams,
 } from './utils/run_query';

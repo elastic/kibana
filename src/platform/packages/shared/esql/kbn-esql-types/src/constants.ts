@@ -38,6 +38,12 @@ export const LOOKUP_INDEX_RECREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/recreate`;
 export const LOOKUP_INDEX_PRIVILEGES_ROUTE = `${LOOKUP_INDEX_ROUTE}/privileges`;
 export const LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE = `${LOOKUP_INDEX_ROUTE}/update_mappings`;
 
+/**
+ * System named param, like `?_tstart`/`?_tend`, that consumers with a map context (e.g. Maps)
+ * populate with the geotile precision (0-29) matching the current zoom level.
+ */
+export const GEOTILE_PRECISION_PARAM = '_geotile_precision';
+
 export enum SOURCES_TYPES {
   INDEX = 'Index',
   TIMESERIES = 'Timeseries',

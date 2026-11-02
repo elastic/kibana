@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { within, isESQLNamedParamLiteral } from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
-import { TIME_SYSTEM_PARAMS } from '../../commands';
+import { GEOTILE_PRECISION_SYSTEM_PARAM, TIME_SYSTEM_PARAMS } from '../../commands';
 import { getFunctionDefinition } from '../../commands/definitions/utils';
 import { fromCache, setToCache } from './hover_cache';
 
@@ -61,6 +61,17 @@ export async function getFunctionArgumentHover(
   }
 
   const contents: { value: string }[] = [];
+  if (
+    isESQLNamedParamLiteral(argumentAtOffset) &&
+    argumentAtOffset.text === GEOTILE_PRECISION_SYSTEM_PARAM
+  ) {
+    contents.push({
+      value: `**${GEOTILE_PRECISION_SYSTEM_PARAM}**: ${i18n.translate(
+        'esqlLanguage.esql.autocomplete.geotilePrecisionSystemParam',
+        { defaultMessage: 'The geotile precision for the current map zoom level' }
+      )}`,
+    });
+  }
   if (argumentAtOffset && isESQLNamedParamLiteral(argumentAtOffset)) {
     const bestMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(argumentAtOffset.text));
     // We only know if it's start or end after first 3 characters (?t_s or ?t_e)

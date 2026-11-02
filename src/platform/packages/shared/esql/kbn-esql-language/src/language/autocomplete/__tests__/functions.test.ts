@@ -428,6 +428,22 @@ describe('functions arg suggestions', () => {
       expect(labels).toEqual(expect.arrayContaining(['textField', 'keywordField']));
     });
 
+    it('ST_GEOTILE precision: suggests the ?_geotile_precision system param', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | STATS BY ST_GEOTILE(geoPointField, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toContain('?_geotile_precision');
+    });
+
+    it('does not suggest ?_geotile_precision for other functions', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL result = ROUND(doubleField, /)');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).not.toContain('?_geotile_precision');
+    });
+
     it('after unknown-type field: suggests type-compatible fields/functions based on function param type', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = ABS(unknownField /)');

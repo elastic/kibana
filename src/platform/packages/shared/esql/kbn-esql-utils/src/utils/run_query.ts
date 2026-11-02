@@ -17,7 +17,7 @@ import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
-import { type ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, GEOTILE_PRECISION_PARAM } from '@kbn/esql-types';
 import { getESQLQueryVariables } from './query_parsing_helpers';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
@@ -41,6 +41,18 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
   }
   return [];
 };
+
+export const hasGeotilePrecisionParam = (query: string) =>
+  new RegExp(`\\?${GEOTILE_PRECISION_PARAM}\\b`, 'i').test(query);
+
+/**
+ * Returns the `?_geotile_precision` named param when the query uses it.
+ * The caller provides the precision, e.g. derived from the map zoom.
+ */
+export const getGeotilePrecisionParams = (query: string, precision?: number) =>
+  precision !== undefined && hasGeotilePrecisionParam(query)
+    ? [{ [GEOTILE_PRECISION_PARAM]: precision }]
+    : [];
 
 export const getNamedParams = (
   query: string,

@@ -43,6 +43,7 @@ import {
   valuePlaceholderConstant,
   defaultValuePlaceholderConstant,
 } from '../../../../../registry/complete_items';
+import { getGeotilePrecisionLiterals, supportsGeotilePrecisionParam } from '../../../literals';
 import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 import { getTimeSeriesAggregateFieldTypes } from '../../../time_series_aggregate_args';
 
@@ -184,6 +185,18 @@ function buildLiteralSuggestions(
     .build();
 
   suggestions.push(...constantOnlySuggestions);
+
+  if (
+    functionDefinition &&
+    paramDefinitions.some(({ name }) => supportsGeotilePrecisionParam(functionDefinition.name, name))
+  ) {
+    suggestions.push(
+      ...getGeotilePrecisionLiterals({
+        addComma: config.shouldAddComma,
+        advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+      })
+    );
+  }
 
   // Date literals (now(), 1 hour, 2 days, ?_tstart, ?_tend) - only add if not already added by constantOnly path
   // Skip for:

@@ -37,6 +37,8 @@ export {
   parseTimeFieldFromESQLQuery,
   getStartEndParams,
   hasStartEndParams,
+  hasGeotilePrecisionParam,
+  getGeotilePrecisionParams,
   getNamedParams,
   getEsqlSearchParams,
   prettifyQuery,

@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ControlTriggerSource, ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import {
+  ControlTriggerSource,
+  ESQLVariableType,
+  GEOTILE_PRECISION_PARAM,
+  type ESQLControlVariable,
+} from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../registry/types';
@@ -17,6 +22,27 @@ import { commaCompleteItem } from '../../registry/complete_items';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
+export const GEOTILE_PRECISION_SYSTEM_PARAM = `?${GEOTILE_PRECISION_PARAM}`;
+
+/** Functions whose `precision` argument can be bound to the geotile precision system param. */
+const GEOTILE_PRECISION_FUNCTIONS = ['st_geotile'];
+
+export const supportsGeotilePrecisionParam = (functionName: string, paramName?: string) =>
+  paramName === 'precision' && GEOTILE_PRECISION_FUNCTIONS.includes(functionName.toLowerCase());
+
+export function getGeotilePrecisionLiterals(options?: DateLiteralsOptions) {
+  return buildConstantsDefinitions(
+    [GEOTILE_PRECISION_SYSTEM_PARAM],
+    i18n.translate('esqlLanguage.esql.autocomplete.namedParamGeotilePrecisionDefinition', {
+      defaultMessage: 'Bind to map zoom level',
+    }),
+    options,
+    i18n.translate('esqlLanguage.esql.autocomplete.geotilePrecisionNamedParamDoc', {
+      defaultMessage: `Use the \`?_geotile_precision\` parameter to bind the precision to the zoom level of the map.`,
+    }),
+    SuggestionCategory.TIME_PARAM
+  );
+}
 
 // Targeted: define option interfaces for constants/date literals
 export interface BuildConstantsOptions {
