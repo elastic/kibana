@@ -437,18 +437,19 @@ export interface ConnectorSpec {
   // has richer context about how to use the connector's sub-actions.
   skill?: string;
 
-  // Skill files installed into Agent Builder when a connector instance is created.
+  // Skills registered as built-in Agent Builder skills. An agent is granted a skill at run time
+  // when it has a connector of this type, so the content must work for any instance of the type.
   skillFiles?: ConnectorSkillSpec[];
 }
 
 export interface ConnectorSkillSpec {
-  /** Stable identifier used internally. */
+  /** Stable identifier. The built-in skill is registered as `platform.connectors.<id>`. */
   id: string;
   /** Display name. Lowercase letters, numbers, and hyphens only. Max 64 chars. */
   name: string;
   /** Describes what the skill does and when to use it. Max 1024 chars. */
   description: string;
-  /** Skill instructions (markdown). Use {{CONNECTOR_ID}} where the instance ID should appear. */
+  /** Skill instructions (markdown). Shared by every connector of this type. */
   content: string;
   /** Supplemental reference files co-located with the skill. */
   resources?: ConnectorSkillResource[];
@@ -459,7 +460,7 @@ export interface ConnectorSkillResource {
   name: string;
   /** Path relative to the skill directory, e.g. './resources' */
   relativePath: string;
-  /** File content (markdown). Use {{CONNECTOR_ID}} where the instance ID should appear. */
+  /** File content (markdown). Shared by every connector of this type. */
   content: string;
 }
 

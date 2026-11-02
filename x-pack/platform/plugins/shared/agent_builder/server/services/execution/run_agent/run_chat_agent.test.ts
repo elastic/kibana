@@ -395,6 +395,93 @@ describe('runDefaultAgentMode', () => {
         expect.objectContaining({ additionalSkillIds: [] })
       );
     });
+
+    it("resolves connector skills from the agent's connector ids", async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.connectorSkills.resolveSkillIds.mockResolvedValue(['platform.connectors.github']);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], connector_ids: ['gh-1', 'pd-1'] } as any,
+        },
+        context
+      );
+
+      expect(context.connectorSkills.resolveSkillIds).toHaveBeenCalledWith(['gh-1', 'pd-1']);
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalSkillIds: ['platform.connectors.github'] })
+      );
+    });
+
+    it('resolves connector skills for an agent without connectors as an empty list', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+        },
+        context
+      );
+
+      expect(context.connectorSkills.resolveSkillIds).toHaveBeenCalledWith([]);
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalSkillIds: [] })
+      );
+    });
+
+    it('passes plugin and connector skill ids together', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.plugins.resolveSkillIds.mockResolvedValue(['skill-a']);
+      context.connectorSkills.resolveSkillIds.mockResolvedValue(['platform.connectors.github']);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: {
+            tools: [],
+            plugin_ids: ['plugin-1'],
+            connector_ids: ['gh-1'],
+          } as any,
+        },
+        context
+      );
+
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          additionalSkillIds: ['skill-a', 'platform.connectors.github'],
+        })
+      );
+    });
+
+    it('filters connector skill ids to the override list when skill_ids override is set', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.connectorSkills.resolveSkillIds.mockResolvedValue([
+        'platform.connectors.github',
+        'platform.connectors.pagerduty',
+      ]);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], connector_ids: ['gh-1', 'pd-1'] } as any,
+          configurationOverrides: { skill_ids: ['platform.connectors.pagerduty'] },
+        },
+        context
+      );
+
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalSkillIds: ['platform.connectors.pagerduty'] })
+      );
+    });
   });
 
   describe('threaded roundId', () => {

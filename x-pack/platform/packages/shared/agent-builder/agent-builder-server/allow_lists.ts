@@ -17,7 +17,7 @@ import {
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { SkillDefinition } from './skills/type_definition';
-import { ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
+import { CONNECTORS_SKILLS_BASE_PATH, ELASTIC_SKILLS_BASE_PATH } from './skills/type_definition';
 
 /**
  * This is a manually maintained list of all built-in tools registered in Agent Builder.
@@ -333,7 +333,11 @@ export const isAllowedBuiltinSkill = (skillId: string): skillId is AgentBuilderB
 export const isAllowedSkillRegistration = (
   skill: Pick<SkillDefinition, 'id' | 'basePath'>
 ): boolean => {
-  return isAllowedBuiltinSkill(skill.id) || skill.basePath === ELASTIC_SKILLS_BASE_PATH;
+  return (
+    isAllowedBuiltinSkill(skill.id) ||
+    skill.basePath === ELASTIC_SKILLS_BASE_PATH ||
+    skill.basePath === CONNECTORS_SKILLS_BASE_PATH
+  );
 };
 
 /**

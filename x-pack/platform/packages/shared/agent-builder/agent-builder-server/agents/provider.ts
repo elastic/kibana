@@ -38,6 +38,7 @@ import type {
   ConversationStateManager,
   SkillsService,
   PluginsService,
+  ConnectorSkillsService,
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
@@ -312,6 +313,10 @@ export interface AgentHandlerContext {
    * Plugins service to resolve plugin-contributed skill IDs during execution.
    */
   plugins: PluginsService;
+  /**
+   * Resolves the skills contributed by the types of an agent's connectors.
+   */
+  connectorSkills: ConnectorSkillsService;
   /**
    * Tool manager to manage active tools for the agent.
    */

@@ -31,6 +31,7 @@ import type {
   ConversationEventTypesService,
   ConversationStateManager,
   PluginsService,
+  ConnectorSkillsService,
   PromptManager,
   SkillsService,
   ToolManager,
@@ -80,6 +81,7 @@ export type ToolStateManagerMock = jest.Mocked<ToolStateManager>;
 export type SkillServiceStartMock = jest.Mocked<SkillServiceStart>;
 export type PluginsServiceStartMock = jest.Mocked<PluginsServiceStart>;
 export type PluginsServiceMock = jest.Mocked<PluginsService>;
+export type ConnectorSkillsServiceMock = jest.Mocked<ConnectorSkillsService>;
 
 export const createToolProviderMock = (): ToolProviderMock => {
   return {
@@ -239,6 +241,12 @@ export const createPluginsServiceMock = (): PluginsServiceMock => {
   };
 };
 
+export const createConnectorSkillsServiceMock = (): ConnectorSkillsServiceMock => {
+  return {
+    resolveSkillIds: jest.fn().mockResolvedValue([]),
+  };
+};
+
 export const createSkillRegistryMock = (): SkillRegistryMock => {
   return {
     has: jest.fn().mockResolvedValue(false),
@@ -328,6 +336,7 @@ export interface AgentHandlerContextMock extends AgentHandlerContext {
   attachments: AttachmentsServiceMock;
   skills: SkillsServiceMock;
   plugins: PluginsServiceMock;
+  connectorSkills: ConnectorSkillsServiceMock;
   toolManager: ToolManagerMock;
   conversationEvents: jest.Mocked<ConversationEventTypesService>;
 }
@@ -371,6 +380,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     bashService: undefined,
     skills: createSkillsServiceMock(),
     plugins: createPluginsServiceMock(),
+    connectorSkills: createConnectorSkillsServiceMock(),
     conversationTemplates: createInMemoryConversationTemplates(),
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
