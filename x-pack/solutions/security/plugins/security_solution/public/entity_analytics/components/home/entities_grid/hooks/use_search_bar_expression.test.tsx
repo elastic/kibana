@@ -79,8 +79,8 @@ describe('useSearchBarExpression', () => {
     it('waits for the overrides, then adds them to the expression', async () => {
       const { result } = renderSearch();
 
-      expect(result.current.isSearchPending).toBe(true);
-      await waitFor(() => expect(result.current.isSearchPending).toBe(false));
+      expect(result.current.isSearchOverridesPending).toBe(true);
+      await waitFor(() => expect(result.current.isSearchOverridesPending).toBe(false));
 
       expect(result.current.searchOverrides).toEqual({ include: ['host:a'], exclude: ['host:b'] });
       expect(result.current.searchExpression).toContain('entity.id IN ("host:a")');
@@ -100,7 +100,7 @@ describe('useSearchBarExpression', () => {
       mockFetchResolvedEntityOverrides.mockRejectedValue(new Error('too many'));
       const { result } = renderSearch();
 
-      await waitFor(() => expect(result.current.isSearchPending).toBe(false));
+      await waitFor(() => expect(result.current.isSearchOverridesPending).toBe(false));
       expect(result.current.searchOverrides).toBeUndefined();
       expect(result.current.mainEntityOnlySearch).toBeDefined();
       expect(result.current.mainEntityOnlySearch).toBe(result.current.searchExpression);
@@ -115,7 +115,7 @@ describe('useSearchBarExpression', () => {
 
       expect(result.current.searchOverrides).toBeUndefined();
       expect(result.current.searchExpression).toBeUndefined();
-      expect(result.current.isSearchPending).toBe(false);
+      expect(result.current.isSearchOverridesPending).toBe(false);
     });
 
     it.each([
@@ -143,7 +143,7 @@ describe('useSearchBarExpression', () => {
 
       expect(result.current.mainEntityOnlySearch).toBeDefined();
       expect(result.current.mainEntityOnlySearch).toBe(result.current.searchExpression);
-      expect(result.current.isSearchPending).toBe(false);
+      expect(result.current.isSearchOverridesPending).toBe(false);
       expect(result.current.searchOverrides).toBeUndefined();
       expect(mockFetchResolvedEntityOverrides).not.toHaveBeenCalled();
     });
@@ -164,7 +164,7 @@ describe('useSearchBarExpression', () => {
     mockQuery = { query: 'bob', language: 'kuery' };
     const { result } = renderSearch('individual');
 
-    expect(result.current.isSearchPending).toBe(false);
+    expect(result.current.isSearchOverridesPending).toBe(false);
     expect(mockFetchResolvedEntityOverrides).not.toHaveBeenCalled();
     expect(result.current.mainEntityOnlySearch).toBeUndefined();
   });

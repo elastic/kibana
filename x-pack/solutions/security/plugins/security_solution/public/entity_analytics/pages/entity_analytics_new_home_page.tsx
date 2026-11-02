@@ -550,7 +550,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const { searchExpression, searchOverrides, isSearchPending, mainEntityOnlySearch } =
+  const { searchExpression, searchOverrides, isSearchOverridesPending, mainEntityOnlySearch } =
     useSearchBarExpression(rowsMode);
   useEffect(() => {
     if (!mainEntityOnlySearch) return;
@@ -902,7 +902,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     spaceId: resolvedSpaceId,
     searchExpression: tileSearchExpression,
     isReady:
-      !isSearchPending &&
+      !isSearchOverridesPending &&
       !alertBasedPending &&
       !anomaliesPending &&
       !newEntityPending &&
@@ -937,7 +937,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     entityExpression: gridEntityExpression,
   });
   const isGroupingQueryReady =
-    !isSearchPending &&
+    !isSearchOverridesPending &&
     (!isFilteringByGroupValue({ rowsMode, entityExpression: gridEntityExpression }) ||
       entityFilterOverrides != null);
   const groupingQuery = useMemo(
@@ -1479,7 +1479,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 watchlistNames={watchlistNames}
                 searchExpression={gridSearchExpression}
                 entityExpression={gridEntityExpression}
-                isSearchPending={isSearchPending}
+                isSearchOverridesPending={isSearchOverridesPending}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
                 readAccess={readAccess}

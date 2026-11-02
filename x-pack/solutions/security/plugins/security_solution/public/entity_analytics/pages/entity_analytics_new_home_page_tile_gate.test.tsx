@@ -84,7 +84,7 @@ jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state
   }),
 }));
 jest.mock('../components/home/entities_grid/hooks/use_search_bar_expression', () => ({
-  useSearchBarExpression: jest.fn(() => ({ isSearchPending: false })),
+  useSearchBarExpression: jest.fn(() => ({ isSearchOverridesPending: false })),
 }));
 jest.mock('../components/home/entities_grid/components/entities_grid', () => ({
   EntitiesGrid: jest.fn(() => null),
@@ -622,7 +622,7 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   it("shows each tile's searched entities, without its delta and sparkline", () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
-      isSearchPending: false,
+      isSearchOverridesPending: false,
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: {
@@ -651,7 +651,7 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   it('warns once per search that matches main entities only', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("bob")',
-      isSearchPending: false,
+      isSearchOverridesPending: false,
       mainEntityOnlySearch: 'KQL("bob")',
     });
     const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
@@ -663,7 +663,7 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   it('gives the brief the searched count and entities of each tile', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
-      isSearchPending: false,
+      isSearchOverridesPending: false,
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: {
@@ -689,7 +689,7 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     mockRowsMode = 'individual';
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
-      isSearchPending: false,
+      isSearchOverridesPending: false,
     });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
@@ -698,7 +698,7 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   });
 
   it('keeps the counts, deltas and sparklines without a search', () => {
-    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchPending: false });
+    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
     expect(getCard('entitiesWithAlerts')).toMatchObject({ value: 5, delta: 1 });
@@ -707,7 +707,7 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   it('loads the tiles while the search is checked', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
-      isSearchPending: false,
+      isSearchOverridesPending: false,
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: undefined,
@@ -721,7 +721,7 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   it('waits for the search overrides before it checks the tiles, and loads them meanwhile', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("asset.criticality: low_impact")',
-      isSearchPending: true,
+      isSearchOverridesPending: true,
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: undefined,

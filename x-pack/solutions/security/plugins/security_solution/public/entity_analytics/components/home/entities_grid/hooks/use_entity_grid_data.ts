@@ -231,7 +231,7 @@ export const useEntityGridData = (
   const resolvedEntityFilterOverrides = useResolvedEntityFilterOverrides(context, options);
   // Every query of the view waits for the overrides of its filters.
   const isReady =
-    !options.isSearchPending &&
+    !options.isSearchOverridesPending &&
     (!isFilteringByGroupValue(options) || resolvedEntityFilterOverrides.data != null);
   // The filters judge resolved entities by their group's values, so the overrides join the filter.
   const viewOptions = useMemo(
