@@ -130,52 +130,43 @@ const runChecks = async (log: ToolingLog, arch?: DoctorArch): Promise<ReportedRe
   return results;
 };
 
-const getFixes = (results: CheckResult[]): Array<Fix & { hint?: string }> => [
+type FixWithHint = Fix & { hint?: string };
+
+const getFixes = (results: CheckResult[]): FixWithHint[] => [
   // several checks can suggest the same command, e.g. stopping running Scout servers
   ...new Map(
     results.flatMap(({ fix, hint }) => (fix ? [[fix.command, { ...fix, hint }] as const] : []))
   ).values(),
 ];
 
-const confirm = async (count: number) => {
-  // destructive fixes need someone to say yes
+const selectFixes = async (fixes: FixWithHint[]): Promise<FixWithHint[]> => {
+  // without a terminal nobody can approve fixes that delete files or stop processes
   if (!process.stdin.isTTY) {
-    return false;
+    return fixes.filter(({ destructive }) => !destructive);
   }
 
-  const { confirmed } = await inquirer.prompt<{ confirmed: boolean }>({
-    type: 'confirm',
-    name: 'confirmed',
-    default: false,
-    message: `Run ${count === 1 ? 'this command' : `these ${count} commands`}?`,
+  const { selected } = await inquirer.prompt<{ selected: FixWithHint[] }>({
+    type: 'checkbox',
+    name: 'selected',
+    message: 'Select fixes to run (space to toggle, a to toggle all, enter to run)',
+    choices: fixes.map((fix) => ({
+      name: `${chalk.cyan(fix.command)}${
+        fix.destructive ? chalk.yellow(`  ${fix.hint ?? 'deletes files or stops processes'}`) : ''
+      }`,
+      value: fix,
+      checked: !fix.destructive,
+    })),
   });
-  return confirmed;
+  return selected;
 };
 
 const applyFixes = async (log: ToolingLog, results: CheckResult[]) => {
-  const fixes = getFixes(results);
-  const hasDestructive = fixes.some(({ destructive }) => destructive);
-
-  log.write(`\n Doctor will run:`);
-  fixes.forEach(({ command, destructive, hint }) =>
-    log.write(
-      `   ${chalk.cyan(command)}${
-        destructive ? chalk.yellow(`  ${hint ?? 'deletes files or stops processes'}`) : ''
-      }`
-    )
-  );
-  log.write('');
-
-  const approved = !hasDestructive || (await confirm(fixes.length));
-  if (!approved) {
-    log.write(chalk.dim(' Skipping commands that delete files or stop processes'));
+  const selected = await selectFixes(getFixes(results));
+  if (!selected.length) {
+    log.write(chalk.dim('\n No fixes selected'));
   }
 
-  for (const { command, destructive, run } of fixes) {
-    if (destructive && !approved) {
-      continue;
-    }
-
+  for (const { command, run } of selected) {
     log.write(`\n ${chalk.cyan('▶')} ${command}`);
     try {
       await (run ? run() : execa.command(command, { stdio: 'inherit' }));
