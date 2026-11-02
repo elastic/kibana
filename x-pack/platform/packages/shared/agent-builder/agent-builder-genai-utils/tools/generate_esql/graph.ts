@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { TimeRange } from '@kbn/agent-builder-common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
@@ -22,7 +23,7 @@ import {
   extractEsqlQueries,
   executeEsql,
   validateEsqlQuery,
-  buildTimeRangeParams,
+  buildEsqlParams,
   buildTimeSeriesTimeRangeFilter,
 } from '../utils/esql';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
@@ -67,6 +68,7 @@ const StateAnnotation = Annotation.Root({
   rowLimit: Annotation<number | undefined>(),
   disableNamedParams: Annotation<boolean | undefined>(),
   timeRange: Annotation<TimeRange>(),
+  esqlVariables: Annotation<ESQLControlVariable[] | undefined>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
@@ -322,7 +324,11 @@ export const createNlToEsqlGraph = ({
     try {
       const results = await executeEsql({
         query,
-        params: buildTimeRangeParams(state.timeRange),
+        params: buildEsqlParams({
+          query,
+          timeRange: state.timeRange,
+          esqlVariables: state.esqlVariables,
+        }),
         // The schema probe only collects columns, so bounding it to the time range is safe and
         // keeps TS and PROMQL queries from aggregating all data.
         ...(schemaOnly

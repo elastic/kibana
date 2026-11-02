@@ -1,5 +1,5 @@
 {
-  "sha1": "ecb025017276426f802a896d4cbd524776b15bb9",
+  "sha1": "dcce18cc43b0c1794b08d9b74f3cf4f6a5ddd23b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -162,6 +162,258 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/attachments_api.spec.ts",
         "line": 270,
         "column": 90
+      }
+    },
+    {
+      "id": "8341b2408e202de-05127d26837f1fa",
+      "title": "Agent Builder — agents bound to a service account refuses to change the binding without manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 406,
+        "column": 32
+      }
+    },
+    {
+      "id": "8341b2408e202de-b559e83cd139329",
+      "title": "Agent Builder — agents bound to a service account reports the binding on read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 409,
+        "column": 9
+      }
+    },
+    {
+      "id": "8341b2408e202de-405c0a52b874dd4",
+      "title": "Agent Builder — agents bound to a service account runs the conversation as the service account for a caller with the invoke privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 418,
+        "column": 96
+      }
+    },
+    {
+      "id": "8341b2408e202de-3db9823965e6385",
+      "title": "Agent Builder — agents bound to a service account ignores a request for local execution on a bound agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 428,
+        "column": 27
+      }
+    },
+    {
+      "id": "8341b2408e202de-07eedf768d43e7c",
+      "title": "Agent Builder — agents bound to a service account runs the next round of an earlier conversation as the service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 433,
+        "column": 79
+      }
+    },
+    {
+      "id": "8341b2408e202de-35baa4d1fcb5b7f",
+      "title": "Agent Builder — agents bound to a service account refuses the next round of a conversation owned by a caller without the invoke privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 450,
+        "column": 10
+      }
+    },
+    {
+      "id": "8341b2408e202de-b6584c6376d354e",
+      "title": "Agent Builder — agents bound to a service account refuses a caller without the invoke privilege on a conversation shared with them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 471,
+        "column": 30
+      }
+    },
+    {
+      "id": "8341b2408e202de-192c05bba7f8c3e",
+      "title": "Agent Builder — agents bound to a service account refuses runtime configuration overrides from a caller that is not the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 489,
+        "column": 30
+      }
+    },
+    {
+      "id": "8341b2408e202de-94ac38eca19fc88",
+      "title": "Agent Builder — agents bound to a service account runs a private agent as the service account for its owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 502,
+        "column": 99
+      }
+    },
+    {
+      "id": "8341b2408e202de-d0f639a37c19434",
+      "title": "Agent Builder — agents bound to a service account gives the account no access of its own to the private agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 507,
+        "column": 14
+      }
+    },
+    {
+      "id": "8341b2408e202de-1824fd756e4988b",
+      "title": "Agent Builder — agents bound to a service account runs inline for the bound account itself",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 528,
+        "column": 21
+      }
+    },
+    {
+      "id": "8341b2408e202de-939b422d9fba3d0",
+      "title": "Agent Builder — agents bound to a service account runs as the bound account for another service account with the invoke privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 536,
+        "column": 60
+      }
+    },
+    {
+      "id": "8341b2408e202de-b843b68b42f0872",
+      "title": "Agent Builder — agents bound to a service account refuses a caller without the invoke privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 548,
+        "column": 7
+      }
+    },
+    {
+      "id": "8341b2408e202de-fa9935254de3fb9",
+      "title": "Agent Builder — agents bound to a service account refuses a service account caller without the invoke privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 553,
+        "column": 16
+      }
+    },
+    {
+      "id": "8341b2408e202de-5a6b3b1a98405f2",
+      "title": "Agent Builder — agents bound to a service account refuses any edit of a bound agent without manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 561,
+        "column": 87
+      }
+    },
+    {
+      "id": "8341b2408e202de-81377d6ee7fbe62",
+      "title": "Agent Builder — agents bound to a service account keeps the binding on an edit by a binder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 569,
+        "column": 19
+      }
+    },
+    {
+      "id": "8341b2408e202de-8b3b5290c3e36e0",
+      "title": "Agent Builder — agents bound to a service account refuses to delete a bound agent without manage_security",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 579,
+        "column": 30
+      }
+    },
+    {
+      "id": "8341b2408e202de-b38dc85e0e24fc6",
+      "title": "Agent Builder — agents bound to a service account runs as the caller again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/bound_agent_api.spec.ts",
+        "line": 588,
+        "column": 66
       }
     },
     {
