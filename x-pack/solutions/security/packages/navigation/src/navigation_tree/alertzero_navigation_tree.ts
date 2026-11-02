@@ -6,6 +6,7 @@
  */
 
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import { AlertZeroIcon } from '../alertzero_icon';
 import { ALERTZERO_APP_ID, SecurityPageName } from '../constants';
 import { i18nStrings } from '../i18n_strings';
 import { alertZeroLink } from '../links';
@@ -22,14 +23,14 @@ import { alertZeroLink } from '../links';
  * The AlertZero nodes that open the solution navigation body, in display order.
  *
  * Returned as a list rather than a single node because AlertZero contributes several top-level entries that
- * interleave with platform ones (Agents and Context sit between this group and Watches when Agents is on).
+ * interleave with platform ones (Agents sits between this group and Watches when Agents is on).
  */
 export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
   {
     link: alertZeroLink(),
     // Note the sidebar sentence-cases every label, so "AlertZero" is also registered in the `@kbn/shared-ux-label-formatter` title case glossary.
     title: i18nStrings.alertZero.title,
-    icon: 'sun',
+    icon: AlertZeroIcon,
   },
   {
     link: alertZeroLink(SecurityPageName.alertZeroEscalations),
@@ -37,7 +38,7 @@ export const createAlertZeroNavigationTree = (): NodeDefinition[] => [
   },
 ];
 
-/** AlertZero nodes that follow the Agents and Context entries, or the Escalations entry without Agents. */
+/** AlertZero nodes that follow the Agents entry, or the Escalations entry without Agents. */
 export const createAlertZeroSecondaryNavigationTree = (): NodeDefinition[] => [
   {
     // Kept a flat entry on purpose: the per-watch, Workers and Skills links are registered as deep
