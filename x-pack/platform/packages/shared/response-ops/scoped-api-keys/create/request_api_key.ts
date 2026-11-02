@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { isUiamCredential } from '@kbn/core-security-server';
-import { decodeStoredApiKey } from './stored_api_key';
+import { decodeStoredApiKey } from '../store/stored_api_key';
 
 export interface RequestApiKeyCredentials {
   /** Key id; absent for user-created Cloud (UIAM) API keys, which are raw `essu_` secrets. */

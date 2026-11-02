@@ -11,7 +11,7 @@ import type {
   ScopedApiKeysDeps,
   ScopedEsApiKey,
   ScopedUiamApiKey,
-} from './scoped_credentials';
+} from './types';
 
 type GrantOpts = Pick<
   ResolveScopedApiKeysOpts,

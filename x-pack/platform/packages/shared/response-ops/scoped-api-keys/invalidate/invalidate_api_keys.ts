@@ -13,7 +13,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from './types';
-import { getUiamApiKeySecret } from '../stored_api_key';
+import { getUiamApiKeySecret } from '../store/stored_api_key';
 
 export type InvalidateAPIKeyResult =
   | { apiKeysEnabled: false }

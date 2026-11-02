@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { ApiKeyInvalidationTarget } from './invalidation/get_api_key_invalidation_targets';
+import type { ApiKeyInvalidationTarget } from '../invalidate/get_api_key_invalidation_targets';
 
 export interface ScopedEsApiKey {
   id: string;
@@ -71,7 +71,3 @@ export interface ResolveScopedApiKeysOpts {
 export type ResolveScopedApiKeysResult =
   | { enabled: false }
   | { enabled: true; credentials: Map<string, ScopedCredentials> };
-
-/** Encodes an id and secret into the `base64(id:secret)` envelope API keys are stored in. */
-export const encodeApiKey = (id: string, secret: string): string =>
-  Buffer.from(`${id}:${secret}`).toString('base64');

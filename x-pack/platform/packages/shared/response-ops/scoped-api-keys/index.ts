@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-export { decodeStoredApiKey, getUiamApiKeyId, getUiamApiKeySecret } from './stored_api_key';
-export { getApiKeyFromRequest } from './request_api_key';
-export type { RequestApiKeyCredentials } from './request_api_key';
-export { resolveScopedApiKeys, reuseRequestApiKey } from './resolve_scoped_api_keys';
-export { encodeApiKey } from './scoped_credentials';
+export { resolveScopedApiKeys } from './create/resolve_scoped_api_keys';
+export { reuseRequestApiKey } from './create/reuse_request_api_key';
+export { getApiKeyFromRequest } from './create/request_api_key';
+export type { RequestApiKeyCredentials } from './create/request_api_key';
 export type {
   ResolveScopedApiKeysOpts,
   ResolveScopedApiKeysResult,
@@ -19,20 +18,25 @@ export type {
   ScopedCredentials,
   ScopedEsApiKey,
   ScopedUiamApiKey,
-} from './scoped_credentials';
-export { buildApiKeyFakeRequest } from './fake_request';
-export type { BuildApiKeyFakeRequestOpts } from './fake_request';
-export { getApiKeyInvalidationTargets } from './invalidation/get_api_key_invalidation_targets';
+} from './create/types';
+
+export { encodeApiKey } from './store/encode_api_key';
+export { decodeStoredApiKey, getUiamApiKeyId, getUiamApiKeySecret } from './store/stored_api_key';
+
+export { buildApiKeyFakeRequest } from './use/fake_request';
+export type { BuildApiKeyFakeRequestOpts } from './use/fake_request';
+
+export { getApiKeyInvalidationTargets } from './invalidate/get_api_key_invalidation_targets';
 export type {
   ApiKeyInvalidationTarget,
   GetApiKeyInvalidationTargetsOpts,
-} from './invalidation/get_api_key_invalidation_targets';
-export { runInvalidate } from './invalidation/run_invalidate';
-export type { RunInvalidateResult, SavedObjectTypesToQuery } from './invalidation/run_invalidate';
+} from './invalidate/get_api_key_invalidation_targets';
+export { runInvalidate } from './invalidate/run_invalidate';
+export type { RunInvalidateResult, SavedObjectTypesToQuery } from './invalidate/run_invalidate';
 export type {
   ApiKeyInvalidationFn,
   ApiKeyPendingInvalidation,
   GetSOIdsUsedByRunningTasksFn,
   RunningTask,
   UiamApiKeyInvalidationFn,
-} from './invalidation/types';
+} from './invalidate/types';

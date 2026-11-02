@@ -11,7 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { resolveScopedApiKeys } from './resolve_scoped_api_keys';
-import type { ResolveScopedApiKeysOpts } from './scoped_credentials';
+import type { ResolveScopedApiKeysOpts } from './types';
 
 const b64 = (value: string) => Buffer.from(value).toString('base64');
 
