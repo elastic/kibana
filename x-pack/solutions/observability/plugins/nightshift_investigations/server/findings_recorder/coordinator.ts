@@ -16,6 +16,12 @@ interface ConversationState {
   lastWrittenTicket: number;
   /** The live pass in flight, if any. */
   live?: { done: Promise<void>; abort: AbortController };
+  /** The final pass in flight or waiting its turn, if any. */
+  final?: { done: Promise<void>; abort: AbortController };
+  /** How many final passes are in flight or waiting. The state is released when the last one ends. */
+  pendingFinals: number;
+  /** The ticket of the newest final pass. An older final pass is superseded and must not write. */
+  finalTicket: number;
   /** Set once the final pass has taken over: no live pass may start or write after it. */
   finalized: boolean;
   /** The recorder's earlier answers, replayed in its conversation. */
@@ -49,7 +55,14 @@ export class FindingsCoordinator {
         const oldest = this.states.keys().next().value;
         if (oldest !== undefined) this.states.delete(oldest);
       }
-      state = { nextTicket: 1, lastWrittenTicket: 0, finalized: false, turns: [] };
+      state = {
+        nextTicket: 1,
+        lastWrittenTicket: 0,
+        pendingFinals: 0,
+        finalTicket: 0,
+        finalized: false,
+        turns: [],
+      };
       this.states.set(conversationId, state);
     }
     return state;
@@ -58,15 +71,23 @@ export class FindingsCoordinator {
   private guardFor(
     state: ConversationState,
     signal: AbortSignal,
-    { ignoreAbort = false }: { ignoreAbort?: boolean } = {}
+    { final = false }: { final?: boolean } = {}
   ): PassGuard {
     const ticket = state.nextTicket++;
+    if (final) state.finalTicket = ticket;
     return {
       signal,
       claimWrite: () => {
-        // The final pass is the newest, so its own timeout stops the model call but must not
-        // stop it recording the fallback. A live pass that was aborted is stale: it must not write.
-        if ((signal.aborted && !ignoreAbort) || ticket < state.lastWrittenTicket) return false;
+        // The newest final pass's own timeout stops the model call but must not stop it recording
+        // the fallback. A live pass that was aborted is stale, and so is a final pass of an
+        // earlier round once a later one has arrived: neither may write.
+        if (
+          (signal.aborted && !final) ||
+          ticket < state.lastWrittenTicket ||
+          (final && ticket < state.finalTicket)
+        ) {
+          return false;
+        }
         state.lastWrittenTicket = ticket;
         return true;
       },
@@ -124,7 +145,9 @@ export class FindingsCoordinator {
 
   /**
    * Runs the final pass: stops the live pass, waits for it to settle, then runs with the newest
-   * ticket. The state is released afterwards, since the investigation round is over.
+   * ticket. A final pass of a later round takes its ticket on arrival, stops the earlier one and
+   * runs once it has settled, so the most recent round writes last and the earlier one's write is
+   * dropped. The state is released once the last final pass is done.
    */
   async runFinal<T>({
     conversationId,
@@ -137,19 +160,36 @@ export class FindingsCoordinator {
   }): Promise<T> {
     const state = this.state(conversationId);
     state.finalized = true;
-    if (state.live) {
-      state.live.abort.abort();
-      await state.live.done;
-    }
-
     const abort = new AbortController();
-    const timer = setTimeout(() => abort.abort(), timeoutMs);
-    timer.unref?.();
+    const guard = this.guardFor(state, abort.signal, { final: true });
+    const previous = state.final;
+    previous?.abort.abort();
+    state.pendingFinals++;
+
+    let timer: NodeJS.Timeout | undefined;
+    const result = (async () => {
+      if (state.live) {
+        state.live.abort.abort();
+        await state.live.done;
+      }
+      await previous?.done;
+      timer = setTimeout(() => abort.abort(), timeoutMs);
+      timer.unref?.();
+      return run(guard);
+    })();
+    const done = result.then(
+      () => undefined,
+      () => undefined
+    );
+    state.final = { done, abort };
     try {
-      return await run(this.guardFor(state, abort.signal, { ignoreAbort: true }));
+      return await result;
     } finally {
       clearTimeout(timer);
-      this.states.delete(conversationId);
+      if (state.final?.done === done) state.final = undefined;
+      if (--state.pendingFinals === 0 && this.states.get(conversationId) === state) {
+        this.states.delete(conversationId);
+      }
     }
   }
 

@@ -182,6 +182,43 @@ describe('FindingsCoordinator', () => {
     }
   });
 
+  it('runs the final pass of a later round after the earlier one settles, and drops the earlier write', async () => {
+    const coordinator = new FindingsCoordinator();
+    const gate = deferred();
+    const events: string[] = [];
+    let olderClaim: boolean | undefined;
+
+    const older = coordinator.runFinal({
+      conversationId: 'c1',
+      timeoutMs: 1000,
+      run: async (guard) => {
+        events.push('older starts');
+        await gate.promise;
+        olderClaim = guard.claimWrite();
+        events.push('older ends');
+      },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    const newer = coordinator.runFinal({
+      conversationId: 'c1',
+      timeoutMs: 1000,
+      run: async (guard) => {
+        events.push('newer starts');
+        events.push(`newer claims ${guard.claimWrite()}`);
+      },
+    });
+    await Promise.resolve();
+    expect(events).toEqual(['older starts']);
+
+    gate.resolve();
+    await Promise.all([older, newer]);
+
+    expect(olderClaim).toBe(false);
+    expect(events).toEqual(['older starts', 'older ends', 'newer starts', 'newer claims true']);
+    expect(coordinator.memory('c1').turns()).toEqual([]);
+  });
+
   it('aborts a live pass with its execution and after its timeout', async () => {
     jest.useFakeTimers();
     try {
