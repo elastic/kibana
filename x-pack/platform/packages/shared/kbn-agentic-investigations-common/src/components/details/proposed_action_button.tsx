@@ -17,7 +17,7 @@ import {
 import {
   ApprovalActorTime,
   ApprovalModal,
-  type ApprovalActorTimeProps,
+  getApprovalActorOutcome,
   getApprovalOutcomeBadge,
   getProposalCaption,
   ProposalCaption,
@@ -56,17 +56,6 @@ export interface ProposedActionButtonProps {
   isReopening?: boolean;
   'data-test-subj'?: string;
 }
-
-const ACTOR_OUTCOME_BY_STATUS: Partial<Record<ApprovalPhase, ApprovalActorTimeProps['outcome']>> = {
-  applied: 'approved',
-  applying: 'approved',
-  // An approved proposal that had no action to run.
-  no_action: 'approved',
-  // A to-do proposal, marked as applied by the human who carried it out.
-  marked_applied: 'applied',
-  declined: 'declined',
-  failed: 'executed',
-};
 
 const PENDING_BADGE = {
   color: 'primary' as const,
@@ -165,7 +154,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds
     // "by {name}" when there is a real actor to name. Only the outcomes below read naturally with
     // one; any other status (an expired proposal that has an actor, say) keeps the badge label.
-    const actorOutcome = decision ? ACTOR_OUTCOME_BY_STATUS[decision.status] : undefined;
+    const actorOutcome = decision ? getApprovalActorOutcome(decision.status) : undefined;
     const caption =
       decision?.actorName && actorOutcome ? (
         <ApprovalActorTime

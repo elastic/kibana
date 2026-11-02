@@ -12,6 +12,8 @@ import { FormattedMessage, FormattedRelative, FormattedTime } from '@kbn/i18n-re
 import { selectUnit } from '@formatjs/intl-utils';
 import { DATE_TIME_FORMAT } from './proposal_helpers';
 
+export type ApprovalActorOutcome = 'approved' | 'applied' | 'declined' | 'executed';
+
 export interface ApprovalActorTimeProps {
   actorName: string;
   /**
@@ -32,7 +34,7 @@ export interface ApprovalActorTimeProps {
    * Leads the caption with the outcome in sentence case ("Approved by …"), for a caption that
    * stands on its own rather than following other header text. Wins over `executed`.
    */
-  outcome?: 'approved' | 'applied' | 'declined' | 'executed';
+  outcome?: ApprovalActorOutcome;
 }
 
 const UPDATE_INTERVAL_SECONDS = 1;
