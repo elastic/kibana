@@ -24,22 +24,24 @@ export type LevelCardFactPart =
   | { kind: 'text'; text: string };
 
 export interface LevelCardFact {
-  /** Sentence-case fact label (same size as value; rendered semibold). */
-  label: string;
+  /** Optional sentence-case label beside the value (rendered semibold). Omit for a sentence-only row. */
+  label?: string;
   /** Complete sentence; `<you>`/`<worker>` mark where an actor pill is inserted. */
   value: string;
 }
 
 export interface AutonomyLevelCard {
   level: WatchAutonomyLevel;
-  /** One-sentence "who" summary under the level name. */
-  who: string;
+  /** Optional one-sentence summary under the level name. */
+  who?: string;
   facts: LevelCardFact[];
 }
 
 export interface AutonomyLevelCardsCopy {
   /** Optional subdued line under the Autonomy label. */
   intro?: string;
+  /** Warning shown when the highest level is selected. Falls back to a generic warning. */
+  supervisedWarning?: string;
   levels: AutonomyLevelCard[];
 }
 
@@ -125,55 +127,47 @@ export const supervisedWarnForWorker = (workerName: string): string => supervise
 
 /**
  * Consequence-forward level cards per Worker: copy describes what each level does for THIS Worker,
- * not a generic autonomy definition, and may only name behaviour the Worker actually has.
+ * not a generic autonomy definition, and may only name behaviour the Worker actually has. Each row
+ * is one sentence that starts with who acts, so the cards need no summary line or row labels.
  */
 const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.intro', {
       defaultMessage:
-        'Decides whether escalating an Investigation to an incident waits for your approval.',
+        'Select whether starting a deep forensics investigation requires your approval.',
     }),
+    supervisedWarning: i18n.translate(
+      'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervisedWarning',
+      {
+        defaultMessage:
+          'At this autonomy level, Attack Discovery starts forensics investigations without your approval.',
+      }
+    ),
     levels: [
       {
         level: 'manual',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.who',
-          {
-            defaultMessage:
-              'Runs on its schedule and opens Investigations; escalating to an incident waits for you.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.incidents',
-              { defaultMessage: 'Incidents' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.incidentsValue',
-              '<you> approve each escalation'
+              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.workerValue',
+              "<worker> opens an investigation for each attack and proposes a forensics investigation for those that aren't false positives."
+            ),
+          },
+          {
+            value: factValue(
+              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.manual.youValue',
+              '<you> approve or decline each proposed forensics investigation.'
             ),
           },
         ],
       },
       {
         level: 'supervised',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.who',
-          {
-            defaultMessage:
-              'Runs on its schedule, opens Investigations, and escalates to incidents on its own.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.incidents',
-              { defaultMessage: 'Incidents' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.incidentsValue',
-              '<worker> escalates Investigations automatically'
+              'xpack.alertzero.watches.settings.autonomyCards.attackDiscovery.supervised.workerValue',
+              '<worker> opens an investigation for each attack and starts forensics investigations without waiting for your approval.'
             ),
           },
         ],
@@ -182,69 +176,46 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.alertTriage.intro', {
-      defaultMessage:
-        'It analyzes, tags, and writes notes, then responds to new alerts. The level determines whether closures require your approval.',
+      defaultMessage: 'Select whether closing false positives requires your approval.',
     }),
+    supervisedWarning: i18n.translate(
+      'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervisedWarning',
+      {
+        defaultMessage:
+          'At this autonomy level, Alert Triage closes false positives without your approval.',
+      }
+    ),
     levels: [
       {
         level: 'manual',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.who',
-          {
-            defaultMessage: 'Analyzes every batch; every closure waits for you.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.classifies',
-              { defaultMessage: 'Classifies' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.classifiesValue',
-              '<worker> every batch'
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.workerValue',
+              '<worker> classifies new alerts and proposes closing false positives.'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.closures',
-              { defaultMessage: 'Closures' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.closuresValue',
-              '<you> answer each Proposal — accept to close, or reject and re-tag'
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.manual.youValue',
+              '<you> approve or decline each proposed closure.'
             ),
           },
         ],
       },
       {
         level: 'supervised',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.who',
-          {
-            defaultMessage:
-              'Closes false positives on its own — you can reopen any you disagree with.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.classifies',
-              { defaultMessage: 'Classifies' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.classifiesValue',
-              '<worker> every batch'
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.workerValue',
+              '<worker> classifies new alerts and closes false positives automatically.'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.closures',
-              { defaultMessage: 'Closures' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.closuresValue',
-              '<worker> closes false positives on its own — <you> reopen any you disagree with'
+              'xpack.alertzero.watches.settings.autonomyCards.alertTriage.supervised.youValue',
+              '<you> can reopen closed alerts you disagree with.'
             ),
           },
         ],
@@ -253,65 +224,36 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.threatHunt.intro', {
-      defaultMessage:
-        'Hunt Watch runs on a fixed Manual autonomy: it hunts on its own, and every Proposal still waits for you.',
+      defaultMessage: 'This Watch always runs at Manual autonomy.',
     }),
     levels: [
       {
         level: 'manual',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.who',
-          {
-            defaultMessage: 'Hunts on its own; every Proposal still waits for you.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.hunt',
-              { defaultMessage: 'Hunt' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.huntValue',
-              '<worker> hunts every report automatically'
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.workerValue',
+              '<worker> hunts each threat report, opens an investigation for it, and proposes actions to contain a threat it found.'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.proposals',
-              { defaultMessage: 'Proposals' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.proposalsValue',
-              '<you> approve each'
+              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.youValue',
+              '<you> approve or decline each proposed action.'
             ),
           },
         ],
       },
       {
         level: 'assisted',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.who',
-          {
-            defaultMessage: 'Hunts on its own; every Proposal still waits for you.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.hunt',
-              { defaultMessage: 'Hunt' }
-            ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.huntValue',
               '<worker> hunts every report automatically'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.proposals',
-              { defaultMessage: 'Proposals' }
-            ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.assisted.proposalsValue',
               '<you> approve each'
@@ -321,28 +263,14 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
       },
       {
         level: 'supervised',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.who',
-          {
-            defaultMessage: 'Hunts and acts on its own. You review afterwards.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.hunt',
-              { defaultMessage: 'Hunt' }
-            ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.huntValue',
               '<worker> hunts every report automatically'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.proposals',
-              { defaultMessage: 'Proposals' }
-            ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.supervised.proposalsValue',
               '<worker> answers them automatically — reversible by <you>. Every action is recorded.'
@@ -355,68 +283,39 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleTuning.intro', {
       defaultMessage:
-        'Decides whether an entry checkpoint stands before analysis. Applying tuning always waits for your approval.',
+        'Select whether this Worker analyzes a rule on its own. Applying a tuning change always waits for your approval.',
     }),
     levels: [
       {
         level: 'manual',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.who',
-          {
-            defaultMessage:
-              'Two checkpoints: you approve what it analyzes, and every tuning proposal waits for you.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.analysis',
-              { defaultMessage: 'Analysis' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.analysisValue',
-              '<you> approve before it analyzes a rule'
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.workerValue',
+              '<worker> finds each qualifying rule and proposes a tuning change.'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.proposals',
-              { defaultMessage: 'Proposals' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.proposalsValue',
-              '<you> approve each'
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.manual.youValue',
+              '<you> approve before the Worker analyzes a rule, and approve or decline each proposed tuning change.'
             ),
           },
         ],
       },
       {
         level: 'assisted',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.who',
-          {
-            defaultMessage: 'Analyzes on its own; every tuning proposal still waits for you.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.analysis',
-              { defaultMessage: 'Analysis' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.analysisValue',
-              '<worker> analyzes every qualifying rule automatically'
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.workerValue',
+              '<worker> analyzes each qualifying rule and proposes a tuning change.'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.proposals',
-              { defaultMessage: 'Proposals' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.proposalsValue',
-              '<you> approve each'
+              'xpack.alertzero.watches.settings.autonomyCards.ruleTuning.assisted.youValue',
+              '<you> approve or decline each proposed tuning change.'
             ),
           },
         ],
@@ -426,69 +325,39 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.intro', {
       defaultMessage:
-        'Decides whether an entry checkpoint stands before drafting. Installing always waits for your approval.',
+        'Select whether this Worker checks a coverage gap on its own. The proposed next step always waits for your approval.',
     }),
     levels: [
       {
         level: 'manual',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.who',
-          {
-            defaultMessage:
-              'Two checkpoints: you approve what it drafts against, and every rule waits for you.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.drafting',
-              { defaultMessage: 'Drafting' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.draftingValue',
-              '<you> approve before it drafts against a gap'
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.workerValue',
+              '<worker> reviews coverage gaps that Continuous Threat Hunt recorded.'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.proposals',
-              { defaultMessage: 'Proposals' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.proposalsValue',
-              '<you> approve each'
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.manual.youValue',
+              '<you> approve before the Worker checks a gap, and approve or decline each proposed next step.'
             ),
           },
         ],
       },
       {
         level: 'assisted',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.who',
-          {
-            defaultMessage:
-              'Drafts on its own from coverage gap signals; every rule still waits for you.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.drafting',
-              { defaultMessage: 'Drafting' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.draftingValue',
-              '<worker> drafts against every gap signal automatically'
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.workerValue',
+              '<worker> checks each coverage gap and proposes a next step.'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.proposals',
-              { defaultMessage: 'Proposals' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.proposalsValue',
-              '<you> approve each'
+              'xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.assisted.youValue',
+              '<you> approve or decline each proposed next step.'
             ),
           },
         ],
@@ -497,68 +366,40 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.intro', {
-      defaultMessage: 'Determines whether response actions run automatically.',
+      defaultMessage: 'Select whether response actions run without your approval.',
     }),
+    supervisedWarning: i18n.translate(
+      'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervisedWarning',
+      {
+        defaultMessage:
+          'At this autonomy level, Endpoint Analysis runs response actions without your approval.',
+      }
+    ),
     levels: [
       {
         level: 'manual',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.who',
-          {
-            defaultMessage:
-              'Runs a forensics pass for an investigation and attaches findings to it.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.findings',
-              { defaultMessage: 'Findings' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.analysisValue',
-              '<worker> attaches a timeline, IOCs and its rationale to the investigation'
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.workerValue',
+              '<worker> adds an attack timeline, indicators of compromise, and its rationale to the investigation, and proposes response actions.'
             ),
           },
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.response',
-              { defaultMessage: 'Response' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.containmentValue',
-              '<you> approve each proposed response — isolate host, kill process, or suspend process'
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.manual.youValue',
+              '<you> approve or decline each proposed response action.'
             ),
           },
         ],
       },
       {
         level: 'supervised',
-        who: i18n.translate(
-          'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.who',
-          {
-            defaultMessage: 'Runs a forensics pass and executes responses automatically.',
-          }
-        ),
         facts: [
           {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.findings',
-              { defaultMessage: 'Findings' }
-            ),
             value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.analysisValue',
-              '<worker> attaches a timeline, IOCs and its rationale to the investigation'
-            ),
-          },
-          {
-            label: i18n.translate(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.response',
-              { defaultMessage: 'Response' }
-            ),
-            value: factValue(
-              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.containmentValue',
-              '<worker> executes responses automatically'
+              'xpack.alertzero.watches.settings.autonomyCards.endpointAnalysis.supervised.workerValue',
+              '<worker> adds an attack timeline, indicators of compromise, and its rationale to the investigation, and runs response actions without waiting for your approval.'
             ),
           },
         ],
