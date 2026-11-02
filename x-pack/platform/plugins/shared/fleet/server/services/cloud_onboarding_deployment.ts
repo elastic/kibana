@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
 
 import {
@@ -20,6 +21,14 @@ import type {
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
 const CLOUD_ONBOARDING_DEPLOYMENT_LIMIT = 100;
+const MAX_UPDATE_ATTEMPTS = 5;
+const UPDATE_RETRY_BASE_DELAY_MS = 25;
+
+// Jittered delay (0..base * attempt ms) so concurrent writers that just conflicted don't retry in lockstep.
+const sleepWithJitter = (attempt: number) =>
+  new Promise<void>((resolve) =>
+    setTimeout(resolve, Math.random() * UPDATE_RETRY_BASE_DELAY_MS * attempt)
+  );
 
 class CloudOnboardingDeploymentService {
   public async create(
@@ -93,29 +102,41 @@ class CloudOnboardingDeploymentService {
   ): Promise<CloudOnboardingDeployment> {
     // soClient.update sends a partial ES doc update. ES deep-merges nested objects, so keys
     // removed from record fields like policyIdsByInstance or serviceVars would persist in the
-    // stored document. Use get + create(overwrite) for a full-replace write instead.
-    const existing = await soClient.get<CloudOnboardingDeploymentSOAttributes>(
-      CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-      id
-    );
+    // stored document. Use get + create(overwrite) for a full-replace write instead. The write
+    // carries the version from the read, so a concurrent write is rejected with a conflict
+    // instead of being clobbered; the update is then re-applied over the fresh document.
     // A null description or namespace clears it. The saved object schema has no null for them, so
     // the key is removed rather than stored.
     const { description, namespace, ...rest } = update;
-    const attributes: CloudOnboardingDeploymentSOAttributes = {
-      ...existing.attributes,
-      ...rest,
-      ...(description ? { description } : {}),
-      ...(namespace ? { namespace } : {}),
-    };
-    if (description === null || description === '') delete attributes.description;
-    if (namespace === null || namespace === '') delete attributes.namespace;
-    await soClient.create<CloudOnboardingDeploymentSOAttributes>(
-      CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-      attributes,
-      { id, overwrite: true, references: existing.references }
-    );
 
-    return this.getById(soClient, id);
+    for (let attempt = 1; ; attempt++) {
+      const existing = await soClient.get<CloudOnboardingDeploymentSOAttributes>(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        id
+      );
+      const attributes: CloudOnboardingDeploymentSOAttributes = {
+        ...existing.attributes,
+        ...rest,
+        ...(description ? { description } : {}),
+        ...(namespace ? { namespace } : {}),
+      };
+      if (description === null || description === '') delete attributes.description;
+      if (namespace === null || namespace === '') delete attributes.namespace;
+
+      try {
+        const so = await soClient.create<CloudOnboardingDeploymentSOAttributes>(
+          CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          attributes,
+          { id, overwrite: true, references: existing.references, version: existing.version }
+        );
+        return { id: so.id, ...so.attributes };
+      } catch (error) {
+        if (!SavedObjectsErrorHelpers.isConflictError(error) || attempt >= MAX_UPDATE_ATTEMPTS) {
+          throw error;
+        }
+        await sleepWithJitter(attempt);
+      }
+    }
   }
 
   public async delete(soClient: SavedObjectsClientContract, id: string): Promise<void> {
