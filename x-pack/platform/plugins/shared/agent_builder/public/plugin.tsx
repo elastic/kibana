@@ -448,8 +448,14 @@ export class AgentBuilderPlugin
 
         openSidebarInternal(options);
       },
-      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
-        return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
+      updateAttachmentOrigin: async (
+        conversationId: string,
+        attachmentId: string,
+        origin: string
+      ) => {
+        const result = await attachmentsService.updateOrigin(conversationId, attachmentId, origin);
+        eventsService.notifyConversationUpdated(conversationId);
+        return result;
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
