@@ -556,6 +556,28 @@ describe('install', () => {
       expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
     });
 
+    it('should not report an installation lookup failure as a rejected bundled upgrade', async () => {
+      mockGetBundledPackageByPkgKey.mockResolvedValue({
+        name: 'test_package',
+        version: '2.0.0',
+        getBuffer: async () => Buffer.from('test_package'),
+      });
+      jest.mocked(assertBreakingChangesAcknowledged).mockClear();
+      jest.mocked(getInstallation).mockRejectedValueOnce(new Error('lookup failed'));
+
+      await expect(
+        installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'registry',
+          pkgkey: 'test_package-2.0.0',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          checkBreakingChanges: true,
+        })
+      ).rejects.toThrow('lookup failed');
+      expect(assertBreakingChangesAcknowledged).not.toHaveBeenCalled();
+    });
+
     it('should install from bundled package if one exists', async () => {
       (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValue({});
       jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);

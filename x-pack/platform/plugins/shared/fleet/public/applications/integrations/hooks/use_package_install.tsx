@@ -194,8 +194,15 @@ function usePackageInstall({ startServices }: { startServices: StartServices }) 
         }
 
         const missingAssets = getMissingAssetsFromError(error);
+        // The breaking changes are listed in the error details of the toast.
         const toastMessage = isBreakingChangesNotAcknowledgedError(error)
-          ? error.message
+          ? i18n.translate(
+              'xpack.fleet.integrations.packageInstallBreakingChangesErrorDescription',
+              {
+                defaultMessage:
+                  'This upgrade includes breaking changes that were not acknowledged. Review them and confirm the upgrade.',
+              }
+            )
           : isAssetVerificationError(error) && missingAssets?.length
           ? i18n.translate('xpack.fleet.integrations.packageInstallVerificationErrorDescription', {
               defaultMessage:

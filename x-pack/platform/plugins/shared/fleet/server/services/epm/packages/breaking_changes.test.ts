@@ -159,6 +159,41 @@ describe('breaking changes', () => {
       });
 
       expect(breakingChanges.map(({ version }) => version)).toEqual(['3.0.0', '2.0.0']);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Ignoring 2 invalid entries in the changelog of test-3.0.0 for the breaking changes check'
+      );
+    });
+
+    it('should keep the breaking changes of an entry with an incomplete change', async () => {
+      const promise = assertBreakingChangesAcknowledged({
+        pkgName: 'test',
+        fromVersion: '2.0.0',
+        toVersion: '3.0.0',
+        archiveIterator: archiveIteratorWithChangelog(
+          'test',
+          '3.0.0',
+          `
+- version: "3.0.0"
+  changes:
+    - description: Removed the foo input.
+      type: breaking-change
+    - type: enhancement
+`
+        ),
+      });
+
+      await expect(promise).rejects.toMatchObject({
+        message: expect.stringContaining('- 3.0.0: Removed the foo input.\n'),
+        attributes: {
+          breaking_changes: [
+            {
+              version: '3.0.0',
+              changes: [{ description: 'Removed the foo input.', type: 'breaking-change' }],
+            },
+          ],
+        },
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('should read the changelog from the installed package assets when no archive is provided', async () => {
@@ -291,13 +326,30 @@ describe('breaking changes', () => {
 
       await expect(promise).rejects.toThrow(PackageBreakingChangesNotAcknowledgedError);
       await expect(promise).rejects.toMatchObject({
-        message: expect.stringMatching(/Package policy policy-1:[\s\S]*Package policy policy-2:/),
+        message: expect.stringMatching(
+          /^Package policy policy-1: Upgrading test from 1\.0\.0[\s\S]*Package policy policy-2: Upgrading test from 2\.0\.0[\s\S]*confirm the upgrade from the test integration in Kibana/
+        ),
         attributes: {
           breaking_changes: [
             expect.objectContaining({ version: '3.0.0' }),
             expect.objectContaining({ version: '2.0.0' }),
           ],
         },
+      });
+    });
+
+    it('should list the policies of the same package and version once', async () => {
+      const policies = Array.from({ length: 12 }, (_, i) =>
+        packagePolicy(`policy-${i + 1}`, 'test', '2.0.0')
+      );
+
+      const promise = assertPackagePoliciesUpgradeAcknowledged(policies);
+
+      await expect(promise).rejects.toMatchObject({
+        message: `Package policies policy-1, policy-2, policy-3, policy-4, policy-5, policy-6, policy-7, policy-8, policy-9, policy-10 and 2 more: Upgrading test from 2.0.0 to 3.0.0 includes breaking changes:
+- 3.0.0: Removed the foo input. (https://github.com/elastic/integrations/pull/3)
+
+Review the breaking changes and confirm the upgrade from the test integration in Kibana, or set acknowledge_breaking_changes to true.`,
       });
     });
 
@@ -319,6 +371,9 @@ describe('breaking changes', () => {
       ]);
 
       await expect(promise).rejects.toMatchObject({
+        message: expect.stringContaining(
+          'confirm the upgrade from the pkga, pkgb integrations in Kibana'
+        ),
         attributes: {
           breaking_changes: [
             expect.objectContaining({

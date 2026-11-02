@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isEqual, uniqWith } from 'lodash';
+import { isEqual, uniq, uniqWith } from 'lodash';
+import pMap from 'p-map';
 import { parse } from 'yaml';
 import semverLte from 'semver/functions/lte';
 import semverLt from 'semver/functions/lt';
@@ -17,6 +18,7 @@ import {
   type Changelog,
   type ChangelogEntry,
 } from '../../../../common/services/changelog_utils';
+import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS } from '../../../constants';
 import { PackageBreakingChangesNotAcknowledgedError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { getAsset } from '../archive/storage';
@@ -30,24 +32,18 @@ export interface PackagePolicyBreakingChanges {
   breakingChanges: BreakingChangesLog;
 }
 
+// Only the entry shape is validated: a change with a missing field must not hide the breaking
+// changes of its version, the breaking changes are picked by type later on.
 const isValidChangelogEntry = (entry: unknown): entry is ChangelogEntry => {
   if (typeof entry !== 'object' || entry === null) {
     return false;
   }
   const { version, changes } = entry as Partial<ChangelogEntry>;
-  return (
-    typeof version === 'string' &&
-    Array.isArray(changes) &&
-    changes.every(
-      (change) =>
-        typeof change === 'object' &&
-        change !== null &&
-        typeof change.type === 'string' &&
-        typeof change.description === 'string' &&
-        typeof change.link === 'string'
-    )
-  );
+  return typeof version === 'string' && Array.isArray(changes);
 };
+
+// Maximum number of package policy IDs listed per group in the error message.
+const MAX_POLICY_IDS_IN_MESSAGE = 10;
 
 const getChangelogPath = (pkgName: string, pkgVersion: string) =>
   `${pkgName}-${pkgVersion}/changelog.yml`;
@@ -117,7 +113,25 @@ export async function getPackageChangelog(options: {
       return [];
     }
     const changelog = parse(changelogText);
-    return Array.isArray(changelog) ? changelog.filter(isValidChangelogEntry) : [];
+    if (!Array.isArray(changelog)) {
+      appContextService
+        .getLogger()
+        .warn(
+          `The changelog of ${options.pkgName}-${options.pkgVersion} is not a list, skipping the breaking changes check`
+        );
+      return [];
+    }
+    const validEntries = changelog.filter(isValidChangelogEntry);
+    if (validEntries.length < changelog.length) {
+      appContextService
+        .getLogger()
+        .warn(
+          `Ignoring ${changelog.length - validEntries.length} invalid entries in the changelog of ${
+            options.pkgName
+          }-${options.pkgVersion} for the breaking changes check`
+        );
+    }
+    return validEntries;
   } catch (error) {
     appContextService
       .getLogger()
@@ -150,24 +164,38 @@ export async function getBreakingChangesForUpgrade({
   return getBreakingChangesInRange(changelog, fromVersion, toVersion);
 }
 
-export function formatBreakingChangesMessage({
-  pkgName,
-  fromVersion,
-  toVersion,
-  breakingChanges,
-}: {
+interface BreakingChangesMessageParams {
   pkgName: string;
   fromVersion: string;
   toVersion: string;
   breakingChanges: BreakingChangesLog;
-}) {
+}
+
+const formatBreakingChangesList = ({
+  pkgName,
+  fromVersion,
+  toVersion,
+  breakingChanges,
+}: BreakingChangesMessageParams) => {
   const changes = breakingChanges
     .flatMap(({ version, changes: versionChanges }) =>
-      versionChanges.map(({ description, link }) => `- ${version}: ${description} (${link})`)
+      versionChanges.map(
+        ({ description, link }) =>
+          `- ${version}: ${description ?? ''}${typeof link === 'string' ? ` (${link})` : ''}`
+      )
     )
     .join('\n');
 
-  return `Upgrading ${pkgName} from ${fromVersion} to ${toVersion} includes breaking changes:\n${changes}\nReview the breaking changes and confirm the upgrade from the ${pkgName} integration in Kibana, or set acknowledge_breaking_changes to true.`;
+  return `Upgrading ${pkgName} from ${fromVersion} to ${toVersion} includes breaking changes:\n${changes}`;
+};
+
+const formatAcknowledgeHint = (pkgNames: string[]) =>
+  `Review the breaking changes and confirm the upgrade from the ${pkgNames.join(', ')} ${
+    pkgNames.length > 1 ? 'integrations' : 'integration'
+  } in Kibana, or set acknowledge_breaking_changes to true.`;
+
+export function formatBreakingChangesMessage(params: BreakingChangesMessageParams) {
+  return `${formatBreakingChangesList(params)}\n${formatAcknowledgeHint([params.pkgName])}`;
 }
 
 /**
@@ -207,37 +235,70 @@ export async function getPackagePoliciesUpgradeBreakingChanges(
   }
 
   const savedObjectsClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
-  const results: PackagePolicyBreakingChanges[] = [];
 
-  for (const [pkgName, pkgPolicies] of packagePoliciesByPackage) {
-    const installation = await getInstallation({ savedObjectsClient, pkgName });
-    const toVersion = installation?.version;
-    if (!toVersion) {
-      continue;
-    }
-
-    const policiesToUpgrade = pkgPolicies.filter((packagePolicy) =>
-      semverLt(packagePolicy.package!.version, toVersion)
-    );
-    if (policiesToUpgrade.length === 0) {
-      continue;
-    }
-
-    const changelog = await getPackageChangelog({ pkgName, pkgVersion: toVersion });
-    for (const packagePolicy of policiesToUpgrade) {
-      const breakingChanges = getBreakingChangesInRange(
-        changelog,
-        packagePolicy.package!.version,
-        toVersion
-      );
-      if (breakingChanges.length > 0) {
-        results.push({ packagePolicy, toVersion, breakingChanges });
+  const resultsByPackage = await pMap(
+    packagePoliciesByPackage.entries(),
+    async ([pkgName, pkgPolicies]) => {
+      const installation = await getInstallation({ savedObjectsClient, pkgName });
+      const toVersion = installation?.version;
+      if (!toVersion) {
+        return [];
       }
-    }
+
+      const policiesToUpgrade = pkgPolicies.filter((packagePolicy) =>
+        semverLt(packagePolicy.package!.version, toVersion)
+      );
+      if (policiesToUpgrade.length === 0) {
+        return [];
+      }
+
+      const changelog = await getPackageChangelog({ pkgName, pkgVersion: toVersion });
+      return policiesToUpgrade.flatMap((packagePolicy) => {
+        const breakingChanges = getBreakingChangesInRange(
+          changelog,
+          packagePolicy.package!.version,
+          toVersion
+        );
+        return breakingChanges.length > 0 ? [{ packagePolicy, toVersion, breakingChanges }] : [];
+      });
+    },
+    { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
+  );
+
+  return resultsByPackage.flat();
+}
+
+/**
+ * Formats the error message of the package policies upgrade. Policies of the same package and
+ * version share the same breaking changes, so they are grouped to keep the message short.
+ */
+const formatPackagePoliciesBreakingChangesMessage = (results: PackagePolicyBreakingChanges[]) => {
+  const groups = new Map<string, { policyIds: string[]; params: BreakingChangesMessageParams }>();
+  for (const { packagePolicy, toVersion, breakingChanges } of results) {
+    const pkgName = packagePolicy.package!.name;
+    const fromVersion = packagePolicy.package!.version;
+    const key = `${pkgName}@${fromVersion}`;
+    const group = groups.get(key) ?? {
+      policyIds: [],
+      params: { pkgName, fromVersion, toVersion, breakingChanges },
+    };
+    group.policyIds.push(packagePolicy.id);
+    groups.set(key, group);
   }
 
-  return results;
-}
+  const sections = [...groups.values()].map(({ policyIds, params }) => {
+    const listedIds = policyIds.slice(0, MAX_POLICY_IDS_IN_MESSAGE).join(', ');
+    const moreIds =
+      policyIds.length > MAX_POLICY_IDS_IN_MESSAGE
+        ? ` and ${policyIds.length - MAX_POLICY_IDS_IN_MESSAGE} more`
+        : '';
+    const label = policyIds.length > 1 ? 'Package policies' : 'Package policy';
+    return `${label} ${listedIds}${moreIds}: ${formatBreakingChangesList(params)}`;
+  });
+
+  const pkgNames = uniq(results.map(({ packagePolicy }) => packagePolicy.package!.name));
+  return `${sections.join('\n\n')}\n\n${formatAcknowledgeHint(pkgNames)}`;
+};
 
 export function packagePolicyBreakingChangesToError({
   packagePolicy,
@@ -263,7 +324,7 @@ export async function assertPackagePoliciesUpgradeAcknowledged(packagePolicies: 
   const results = await getPackagePoliciesUpgradeBreakingChanges(packagePolicies);
   if (results.length > 0) {
     throw new PackageBreakingChangesNotAcknowledgedError(
-      results.map((result) => packagePolicyBreakingChangesToError(result).message).join('\n\n'),
+      formatPackagePoliciesBreakingChangesMessage(results),
       // Policies of the same package share entries; entries of different packages are kept even
       // when they have the same version.
       uniqWith(

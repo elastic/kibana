@@ -1127,26 +1127,26 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       const archiveBuffer = await matchingBundledPackage.getBuffer();
 
       if (checkBreakingChanges && !acknowledgeBreakingChanges) {
-        try {
-          const installation = await getInstallation({
-            savedObjectsClient,
-            pkgName: matchingBundledPackage.name,
-          });
-          if (installation) {
+        const installation = await getInstallation({
+          savedObjectsClient,
+          pkgName: matchingBundledPackage.name,
+        });
+        if (installation) {
+          try {
             await assertBreakingChangesAcknowledged({
               pkgName: matchingBundledPackage.name,
               fromVersion: installation.version,
               toVersion: matchingBundledPackage.version,
               archiveIterator: createArchiveIterator(archiveBuffer, 'application/zip'),
             });
+          } catch (error) {
+            return {
+              error,
+              installType: 'update',
+              installSource: 'bundled',
+              pkgName: matchingBundledPackage.name,
+            };
           }
-        } catch (error) {
-          return {
-            error,
-            installType: 'update',
-            installSource: 'bundled',
-            pkgName: matchingBundledPackage.name,
-          };
         }
       }
 
