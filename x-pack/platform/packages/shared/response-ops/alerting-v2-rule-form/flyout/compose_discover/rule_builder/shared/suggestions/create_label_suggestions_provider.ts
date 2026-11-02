@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { escapeField } from '@kbn/alerting-v2-rule-builders';
 import type { ExpressionSuggestionType, SuggestionsProvider } from './types';
-import { escapeField } from '../escape_esql_identifier';
 
 /**
  * Characters that terminate a bare (non-backtick-quoted) identifier in an ES|QL expression.

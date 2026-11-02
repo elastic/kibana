@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EvaluationDefinition, StatDefinition } from '@kbn/alerting-v2-rule-builders';
+import { getAvailableMetricLabels } from '@kbn/alerting-v2-rule-builders';
 import type { SuggestionsProvider } from '../shared/suggestions/types';
 import { createLabelSuggestionsProvider } from '../shared/suggestions/create_label_suggestions_provider';
-import type { EvaluationDefinition, StatDefinition } from './form_types';
-import { getAvailableMetricLabels } from './form_types';
 
 /**
  * Builds a suggestions provider offering the metric labels (stats + other evaluations)
