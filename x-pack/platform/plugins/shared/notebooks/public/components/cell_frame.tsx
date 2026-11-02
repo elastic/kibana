@@ -8,12 +8,10 @@
 import React, { useState, type PropsWithChildren, type ReactNode } from 'react';
 import {
   EuiButtonIcon,
-  EuiCode,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIconTip,
   EuiInlineEditText,
   EuiPanel,
@@ -29,6 +27,7 @@ import type { CellDefinition, CellType } from '../../common/types';
 import { CELL_NAME_PATTERN } from '../model/references';
 import { duplicateCell, type NewCellKind } from '../model/cell_factory';
 import type { CellRuntime } from '../model/types';
+import { CellFooter } from './cell_footer';
 import { CellStatusBadge } from './cell_status_badge';
 import { RunButton } from './run_button';
 import { useNotebook } from './notebook_context';
@@ -61,10 +60,6 @@ const getTypeLabel = (cell: CellDefinition): string => {
 };
 
 const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
-
-const OUTPUTS_LABEL = i18n.translate('xpack.notebook.cell.outputs', {
-  defaultMessage: 'Outputs',
-});
 
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
@@ -214,34 +209,11 @@ export const CellFrame = ({
           </>
         )}
         {children}
-        {outputs && outputs.length > 0 && (
-          <>
-            <EuiHorizontalRule margin="s" />
-            <EuiFlexGroup
-              gutterSize="xs"
-              alignItems="center"
-              wrap
-              responsive={false}
-              data-test-subj="notebookCellOutputs"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  type="inputOutput"
-                  content={OUTPUTS_LABEL}
-                  aria-label={OUTPUTS_LABEL}
-                  color="subdued"
-                  size="s"
-                  position="left"
-                />
-              </EuiFlexItem>
-              {outputs.map((output) => (
-                <EuiFlexItem grow={false} key={output}>
-                  <EuiCode>{output}</EuiCode>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </>
-        )}
+        <CellFooter
+          outputs={outputs}
+          lastRunAt={runtime?.lastRunAt}
+          durationMs={runtime?.durationMs}
+        />
       </EuiPanel>
       {onRun && 'runMode' in cell && (
         <div
