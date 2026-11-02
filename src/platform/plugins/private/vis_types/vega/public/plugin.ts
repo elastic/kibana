@@ -7,12 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { distinctUntilChanged, type Subscription } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  firstValueFrom,
+  map,
+  ReplaySubject,
+  take,
+  type Subscription,
+} from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type {
+  BasicVisualizationClient,
+  VisTypeAlias,
+  VisualizationsSetup,
+} from '@kbn/visualizations-plugin/public';
 import type {
   Setup as InspectorSetup,
   Start as InspectorStart,
@@ -23,6 +37,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   ADD_CANVAS_ELEMENT_TRIGGER,
   ADD_PANEL_TRIGGER,
@@ -42,11 +57,19 @@ import {
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
+import type { VegaByReferenceState } from '../server';
 
 import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_SAVED_OBJECT_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
+import { getVegaVisualizationClient } from './library/vega_library_client';
+import { VegaIcon, vegaTitleInWizard } from './vega_icon';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -75,6 +98,7 @@ export interface VegaPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
   usageCollection: UsageCollectionStart;
   inspector: InspectorStart;
 }
@@ -83,6 +107,16 @@ export interface VegaPluginStartDependencies {
 export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
   private standaloneEmbeddableFlagSubscription?: Subscription;
+  private libraryFlagsSubscription?: Subscription;
+  private libraryAliasSubscription?: Subscription;
+  private addFromLibrarySubscription?: Subscription;
+  /**
+   * Whether dashboard panels can use Vega library items: both the standalone embeddable and the
+   * library API must be enabled. Emits once `start` has read the flags.
+   */
+  private readonly isLibraryEnabled$ = new ReplaySubject<boolean>(1);
+  private registerLibraryAlias?: () => void;
+  private registerAddFromLibrary?: () => void;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -106,6 +140,15 @@ export class VegaPlugin implements Plugin<void, void> {
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
+    // Resolves when the editor closes.
+    const openLibraryEditor = async (id: string) => {
+      const [[coreStart, startDeps], { openVegaLibraryEditor }] = await Promise.all([
+        core.getStartServices(),
+        import('./library/open_vega_library_editor'),
+      ]);
+      await openVegaLibraryEditor({ core: coreStart, deps: startDeps, id });
+    };
+
     visualizations.createBaseVisualizationAsync('vega', async () => {
       const [[, startPlugins], { vegaVisType, createVegaFn, getVegaVisRenderer }] =
         await Promise.all([core.getStartServices(), import('./async_module')]);
@@ -116,15 +159,70 @@ export class VegaPlugin implements Plugin<void, void> {
       return vegaVisType;
     });
 
+    // Lists Vega library items in the Visualize library next to legacy Vega visualizations.
+    const libraryAlias: VisTypeAlias = {
+      name: 'vegaLibrary',
+      title: vegaTitleInWizard,
+      icon: 'visualizeApp',
+      description: i18n.translate('visTypeVega.libraryAlias.description', {
+        defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
+        description: 'Vega and Vega-Lite are product names and should not be translated',
+      }),
+      stage: 'production',
+      disableCreate: true,
+      appExtensions: {
+        visualizations: {
+          docTypes: [VEGA_SAVED_OBJECT_TYPE],
+          searchFields: ['title^3', 'description'],
+          client: (_contentManagement, http) =>
+            getVegaVisualizationClient(http) as BasicVisualizationClient,
+          toListItem: ({ id, type, attributes, updatedAt, managed }) => ({
+            id,
+            title: attributes.title,
+            description: attributes.description,
+            updatedAt,
+            managed,
+            icon: VegaIcon,
+            typeTitle: vegaTitleInWizard,
+            stage: 'production',
+            savedObjectType: type,
+            editor: { onEdit: openLibraryEditor },
+          }),
+        },
+      },
+    };
+
+    // Registered in `start`, once the feature flag can be read.
+    this.registerLibraryAlias = () => visualizations.registerAlias(libraryAlias);
+
     embeddable.registerEmbeddablePublicDefinition(VEGA_EMBEDDABLE_TYPE, async () => {
-      const [startCore, startDeps] = await core.getStartServices();
-      const { vegaEmbeddableFactory } = await import('./embeddable/vega_embeddable');
+      const [[startCore, startDeps], { vegaEmbeddableFactory }] = await Promise.all([
+        core.getStartServices(),
+        import('./embeddable/vega_embeddable'),
+      ]);
       return vegaEmbeddableFactory(startCore, {
         uiActions: startDeps.uiActions,
         SearchBar: startDeps.unifiedSearch.ui.SearchBar,
         visualizationDependencies,
+        libraryEditorDependencies: startDeps,
+        // Taken once per panel, so the panel library actions match the server schema.
+        isLibraryEnabled: await firstValueFrom(this.isLibraryEnabled$),
       });
     });
+
+    // Registered in `start`, once the feature flags can be read.
+    this.registerAddFromLibrary = () =>
+      embeddable.registerAddFromLibraryType({
+        onAdd: (container, savedObject) => {
+          container.addNewPanel<VegaByReferenceState>(
+            { panelType: VEGA_EMBEDDABLE_TYPE, serializedState: { ref_id: savedObject.id } },
+            { displaySuccessMessage: true }
+          );
+        },
+        savedObjectType: VEGA_SAVED_OBJECT_TYPE,
+        savedObjectName: vegaTitleInWizard,
+        getIconForSavedObject: () => VegaIcon,
+      });
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {
@@ -136,6 +234,30 @@ export class VegaPlugin implements Plugin<void, void> {
     setMapsEms(deps.mapsEms);
     setThemeService(core.theme);
     setUsageCollectionStart(deps.usageCollection);
+
+    const apiEnabled$ = core.featureFlags.getBooleanValue$(VEGA_API_ENABLED_FLAG, false);
+
+    this.libraryFlagsSubscription = combineLatest([
+      core.featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false),
+      apiEnabled$,
+    ])
+      .pipe(
+        map(
+          ([standaloneEmbeddableEnabled, apiEnabled]) => standaloneEmbeddableEnabled && apiEnabled
+        ),
+        distinctUntilChanged()
+      )
+      .subscribe(this.isLibraryEnabled$);
+
+    // Without the flag, the Visualize listing shouldn't query the library API.
+    this.libraryAliasSubscription = apiEnabled$
+      .pipe(filter(Boolean), take(1))
+      .subscribe(() => this.registerLibraryAlias?.());
+
+    // Library items can only be added as panels once the standalone embeddable is enabled too.
+    this.addFromLibrarySubscription = this.isLibraryEnabled$
+      .pipe(filter(Boolean), take(1))
+      .subscribe(() => this.registerAddFromLibrary?.());
 
     deps.uiActions.registerActionAsync(ADD_VEGA_PANEL_ACTION_ID, async () => {
       const { getAddVegaPanelAction } = await import('./add_vega_panel_action');
@@ -170,5 +292,8 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public stop() {
     this.standaloneEmbeddableFlagSubscription?.unsubscribe();
+    this.libraryFlagsSubscription?.unsubscribe();
+    this.libraryAliasSubscription?.unsubscribe();
+    this.addFromLibrarySubscription?.unsubscribe();
   }
 }
