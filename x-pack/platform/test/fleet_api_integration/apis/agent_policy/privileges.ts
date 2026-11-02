@@ -89,6 +89,53 @@ const READ_SCENARIOS_FULL_POLICIES = [
   },
 ];
 
+const READ_SCENARIOS_COMPILED_POLICY = [
+  {
+    user: testUsers.fleet_all_int_read,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_agent_policies_read_int_read,
+    statusCode: 200,
+  },
+  {
+    user: testUsers.fleet_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_agent_policies_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_agent_policies_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.integr_all_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_agents_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_no_access,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_minimal_read_only,
+    statusCode: 403,
+  },
+  {
+    user: testUsers.fleet_settings_read_only,
+    statusCode: 403,
+  },
+];
+
 const ALL_SCENARIOS = [
   {
     user: testUsers.fleet_all_only,
@@ -145,6 +192,10 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const es = getService('es');
+
+  // The reserved fleet-setup privilege cannot be granted through the Kibana role API
+  const FLEET_SETUP_ONLY_USER = { username: 'fleet_setup_only', password: 'changeme' };
 
   const ROUTES = [
     {
@@ -164,10 +215,19 @@ export default function (providerContext: FtrProviderContext) {
     },
     {
       method: 'GET',
+      path: '/api/fleet/agent_policies/policy-test-privileges-1/full',
+      scenarios: [
+        ...READ_SCENARIOS_COMPILED_POLICY,
+        { user: FLEET_SETUP_ONLY_USER, statusCode: 403 },
+      ],
+    },
+    {
+      method: 'GET',
       path: '/api/fleet/agent_policies/policy-test-privileges-1/download',
-      scenarios: READ_SCENARIOS.filter(
-        (scenario) => scenario.user.username !== testUsers.fleet_agents_read_only.username
-      ),
+      scenarios: [
+        ...READ_SCENARIOS_COMPILED_POLICY,
+        { user: FLEET_SETUP_ONLY_USER, statusCode: 200 },
+      ],
     },
     {
       method: 'GET',
@@ -279,6 +339,21 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await kibanaServer.savedObjects.cleanStandardList();
       await setupTestUsers(getService('security'));
+      await es.security.putRole({
+        name: FLEET_SETUP_ONLY_USER.username,
+        applications: [
+          {
+            application: 'kibana-.kibana',
+            privileges: ['reserved_fleet-setup'],
+            resources: ['*'],
+          },
+        ],
+      });
+      await es.security.putUser({
+        username: FLEET_SETUP_ONLY_USER.username,
+        password: FLEET_SETUP_ONLY_USER.password,
+        roles: [FLEET_SETUP_ONLY_USER.username],
+      });
       const fleetAndAgents = getService('fleetAndAgents');
       await fleetAndAgents.setup();
 
@@ -296,6 +371,8 @@ export default function (providerContext: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await es.security.deleteUser({ username: FLEET_SETUP_ONLY_USER.username });
+      await es.security.deleteRole({ name: FLEET_SETUP_ONLY_USER.username });
     });
 
     runPrivilegeTests(ROUTES, supertestWithoutAuth);

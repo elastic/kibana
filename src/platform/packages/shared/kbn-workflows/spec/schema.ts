@@ -1244,15 +1244,18 @@ export const WorkflowOutputStepSchema = BaseStepSchema.extend({
 });
 export type WorkflowOutputStep = z.infer<typeof WorkflowOutputStepSchema>;
 
-export const WorkflowFailStepSchema = BaseStepSchema.extend({
-  type: z.literal('workflow.fail'),
-  with: z
-    .object({
-      message: z.string().optional(),
-      reason: z.string().optional(),
-    })
-    .optional(),
-});
+export const WorkflowFailStepSchema = lazySchema(() =>
+  BaseStepSchema.extend({
+    type: z.literal('workflow.fail'),
+    with: z
+      .object({
+        message: z.string().optional(),
+        reason: z.string().optional(),
+        type: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 export type WorkflowFailStep = z.infer<typeof WorkflowFailStepSchema>;
 
 /* --- Outputs --- */

@@ -21,6 +21,7 @@ import {
   getElasticsearchErrorMessage,
   isElasticsearchQueryError,
   isIndexNotFoundError,
+  isResultWindowTooLargeError,
 } from './es_error_helpers';
 
 interface SearchWorkflowExecutionsParams {
@@ -97,6 +98,10 @@ export const searchWorkflowExecutions = async ({
         page,
         total: 0,
       };
+    }
+
+    if (isResultWindowTooLargeError(error)) {
+      throw error;
     }
 
     if (isElasticsearchQueryError(error)) {
