@@ -403,7 +403,7 @@ describe('WatchDetailPage', () => {
       within(attackDiscovery).getByTestId(
         `alertZeroWorkerScheduleBadge-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
       )
-    ).toHaveTextContent('Every 24 hours');
+    ).toHaveTextContent('Runs every 24 hours');
     expect(
       within(alertTriage).queryByTestId(
         `alertZeroWorkerScheduleBadge-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`

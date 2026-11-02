@@ -41,7 +41,7 @@ jest.mock('./common/resolve_index_scope', () => ({
 
 jest.mock('./common/match_hunt_datasets', () => ({
   ...jest.requireActual('./common/match_hunt_datasets'),
-  matchDatasetsWithModel: jest.fn().mockResolvedValue(undefined),
+  matchDatasetsWithModel: jest.fn().mockResolvedValue({ status: 'empty' }),
 }));
 
 jest.mock('./common/load_report_context', () => ({
@@ -440,6 +440,72 @@ describe('huntCoordinator', () => {
 
         expect(mockModelMatch).toHaveBeenCalledTimes(1);
         expect(result.tier2_skipped_reason).toBe('no_tier2_targets');
+        expect(result.completeness).toBe('complete');
+        expect(result.completed_successfully).toBe(true);
+      });
+
+      it('stays retryable as no_inference when the efficient model was asked and the call failed', async () => {
+        nothingElsePointsAnywhere();
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'connector down' });
+
+        const result = await run('run-efficient-match-failed');
+
+        expect(mockModelMatch).toHaveBeenCalledTimes(1);
+        expect(result.tier2_skipped_reason).toBe('no_inference');
+        expect(result.tier2_skip_detail).toBe('connector down');
+        expect(result.completeness).toBe('incomplete_retryable');
+        expect(result.completed_successfully).toBe(false);
+        expect(result.message).toContain('dataset-match model call failed');
+        expect(result.narrative).toContain('the model call that chooses where to hunt failed');
+        expect(result.narrative).not.toContain('Efficient tier had no model');
+      });
+
+      it('stays retryable as no_inference when the cyber model was asked and the call failed', async () => {
+        nothingElsePointsAnywhere();
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'template rejected' });
+        const cyber = {
+          chatModel: { withStructuredOutput },
+          connector: { connectorId: 'daybreak', metadata: {} },
+        } as unknown as ScopedModel;
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          { frontier, cyber },
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'scheduled',
+            run_id: 'run-cyber-match-failed',
+            tier2_when: 'always',
+            iocs: [{ type: 'ip', value: '192.0.2.30' }],
+            text: 'report text',
+          }
+        );
+
+        expect(mockModelMatch.mock.calls[0][0].model).toBe(cyber);
+        expect(result.tier2_skipped_reason).toBe('no_inference');
+        expect(result.tier2_skip_detail).toBe('template rejected');
+        expect(result.completeness).toBe('incomplete_retryable');
+        expect(result.completed_successfully).toBe(false);
+      });
+
+      it('still hunts other targets and completes when the match call failed but process telemetry is in scope', async () => {
+        mockScope.mockResolvedValueOnce({
+          ...okScope,
+          report_matches: [],
+          actionable_indices: ['logs-endpoint.events.process-default*'],
+          discovered: [oktaDataset],
+        });
+        mockT1.mockResolvedValueOnce(tier1(false));
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'connector down' });
+
+        const result = await run('run-match-failed-has-actionable');
+
+        expect(mockModelMatch).toHaveBeenCalledTimes(1);
+        expect(mockT2).toHaveBeenCalledTimes(1);
+        expect(result.tier2_skipped_reason).toBeUndefined();
+        expect(result.tier2_skip_detail).toBeUndefined();
         expect(result.completeness).toBe('complete');
         expect(result.completed_successfully).toBe(true);
       });
@@ -1549,8 +1615,29 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_final');
       expect(result.pending_technique_ids).toEqual([]);
+      expect(result.retryable_reasons).toEqual([]);
       // The gaps are still reported, so the narrative names what was not searched.
       expect(result.tier2?.incomplete).toEqual([budgetGap('T1059'), budgetGap('T1003')]);
+    });
+
+    it('reports only the gaps still retryable, not the budget gap of a technique it gave up on', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [{ technique_id: 'T1059', execution: { executed: false } }],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'search_partial', technique_id: 'T1059', detail: 'shards failed' },
+          budgetGap('T1003'),
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-partial-and-dropped');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.retryable_reasons).toEqual(['search_partial']);
     });
 
     it('keeps a pending technique the run extracted again but left over budget', async () => {
@@ -1588,6 +1675,7 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_retryable');
       expect(result.pending_technique_ids).toEqual(['T1059']);
+      expect(result.retryable_reasons).toEqual(['execute_failed']);
     });
 
     it('keeps a pending technique the model returned but whose quote did not ground', async () => {
@@ -1946,7 +2034,7 @@ describe('huntCoordinator', () => {
     beforeEach(() => {
       mockT2.mockClear();
       mockModelMatch.mockClear();
-      mockModelMatch.mockResolvedValue(undefined);
+      mockModelMatch.mockResolvedValue({ status: 'empty' });
     });
 
     it('unions the report match, the indices Tier 1 hit, and the actionable indices, and records each source', async () => {
@@ -2035,6 +2123,7 @@ describe('huntCoordinator', () => {
       });
       mockT1.mockResolvedValueOnce(tier1Clean());
       mockModelMatch.mockResolvedValueOnce({
+        status: 'matched',
         matches: [oktaDataset],
         confidence: 0.9,
         scored: [{ dataset: 'okta.system', confidence: 0.9 }],
