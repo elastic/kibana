@@ -187,9 +187,21 @@ export const createSandboxBashTool = ({
       secretValues = resolved.secretValues;
     }
 
-    const spaceAllowedHosts = sandboxAllowlistClient
-      ? await sandboxAllowlistClient.getHostsForCommand(context.request)
-      : [];
+    let spaceAllowedHosts: string[] = [];
+    if (sandboxAllowlistClient) {
+      try {
+        spaceAllowedHosts = await sandboxAllowlistClient.getHostsForCommand(context.request);
+      } catch {
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: 'Space sandbox egress allowlist is invalid or unavailable.' },
+            },
+          ],
+        };
+      }
+    }
 
     logger.debug(`Executing sandbox bash command for session ${rawConversationId}: ${command}`);
 

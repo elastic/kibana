@@ -7,6 +7,7 @@
 
 import {
   MAX_SANDBOX_ALLOWLIST_HOSTS,
+  MAX_SANDBOX_ALLOWLIST_RULE_LENGTH,
   normalizeSandboxAllowlistHost,
   validateSandboxAllowlist,
 } from './sandbox_allowlist';
@@ -50,6 +51,18 @@ describe('normalizeSandboxAllowlistHost', () => {
   ])('rejects %p', (raw, expectedError) => {
     const result = normalizeSandboxAllowlistHost(raw);
     expect(result).toEqual({ error: expect.stringContaining(expectedError) });
+  });
+  it('accepts canonical rules up to 512 characters and rejects 513 characters', () => {
+    const prefix = 'allow https api.github.com:443 GET /';
+    const pathExact512 = 'a'.repeat(MAX_SANDBOX_ALLOWLIST_RULE_LENGTH - prefix.length);
+    const rule512 = `${prefix}${pathExact512}`;
+    expect(rule512).toHaveLength(MAX_SANDBOX_ALLOWLIST_RULE_LENGTH);
+    expect(normalizeSandboxAllowlistHost(rule512)).toEqual({ host: rule512 });
+
+    const rule513 = `${rule512}x`;
+    expect(normalizeSandboxAllowlistHost(rule513)).toEqual({
+      error: expect.stringContaining(`at most ${MAX_SANDBOX_ALLOWLIST_RULE_LENGTH}`),
+    });
   });
 });
 

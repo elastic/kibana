@@ -68,7 +68,7 @@ const setup = ({
       context
     );
 
-  return { tool, run, runCommand, writeFiles, request, logger, session };
+  return { tool, run, runCommand, writeFiles, request, logger, session, sandboxAllowlistClient };
 };
 
 describe('sandbox bash tool', () => {
@@ -142,6 +142,23 @@ describe('sandbox bash tool — connector credentials', () => {
       'allow pypi.org GET,HEAD /simple/',
       'deny api.github.com POST /gists',
     ]);
+  });
+
+  it('returns a structured tool error without running the command when getHostsForCommand rejects', async () => {
+    const { run, runCommand, sandboxAllowlistClient } = setup();
+    sandboxAllowlistClient.getHostsForCommand.mockRejectedValueOnce(new Error('corrupted policy'));
+
+    const res = await run({});
+
+    expect(res).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: 'Space sandbox egress allowlist is invalid or unavailable.' },
+        },
+      ],
+    });
+    expect(runCommand).not.toHaveBeenCalled();
   });
 
   it('passes no credentials without a connector_id', async () => {

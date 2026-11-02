@@ -78,9 +78,10 @@ export const createSandboxAllowlistClient = ({
         NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID
       );
       const raw = existing.attributes.hosts;
-      return Array.isArray(raw)
-        ? raw.filter((item): item is string => typeof item === 'string')
-        : [];
+      if (!Array.isArray(raw) || !raw.every((item): item is string => typeof item === 'string')) {
+        throw new SandboxAllowlistValidationError('Stored sandbox allowlist is malformed');
+      }
+      return raw;
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         return [];

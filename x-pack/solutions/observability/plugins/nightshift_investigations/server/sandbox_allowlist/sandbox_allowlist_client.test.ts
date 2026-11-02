@@ -136,13 +136,80 @@ describe('createSandboxAllowlistClient', () => {
         SandboxAllowlistValidationError
       );
     });
+
+    it('fails closed when stored hosts attribute is not a string array', async () => {
+      const { client, request } = setup({ stored: ['api.github.com', 123] });
+      await expect(client.getHostsForCommand(request)).rejects.toThrow(
+        SandboxAllowlistValidationError
+      );
+    });
+  });
+
+  it('keeps stored policies isolated per space across replace and get round-trips', async () => {
+    const bySpace = new Map<string, string[]>();
+    const savedObjects = savedObjectsServiceMock.createStartContract();
+    const rootClient = savedObjectsClientMock.create();
+    savedObjects.getScopedClient.mockReturnValue(rootClient);
+    rootClient.asScopedToNamespace.mockImplementation((ns) => {
+      const space = Array.isArray(ns) ? ns[0] : ns;
+      const scoped = savedObjectsClientMock.create();
+      scoped.get.mockImplementation(async () => {
+        const hosts = bySpace.get(space);
+        if (!hosts) {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+            NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+            NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID
+          );
+        }
+        return {
+          id: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
+          type: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
+          references: [],
+          version: 'v1',
+          attributes: { hosts },
+        };
+      });
+      scoped.create.mockImplementation(async (type, attributes: { hosts: string[] }) => {
+        bySpace.set(space, attributes.hosts);
+        return {
+          id: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
+          type,
+          references: [],
+          version: 'v1',
+          attributes,
+        };
+      });
+      return scoped;
+    });
+
+    let activeSpace = 'space-a';
+    const spaces = {
+      spacesService: { getSpaceId: jest.fn(() => activeSpace) },
+    } as unknown as SpacesPluginStart;
+    const client = createSandboxAllowlistClient({
+      getDeps: () => ({ savedObjects, spaces }),
+    });
+    const req = httpServerMock.createKibanaRequest();
+
+    await client.replace(req, { hosts: ['api.github.com'] });
+    activeSpace = 'space-b';
+    await client.replace(req, { hosts: ['pypi.org GET /simple/'] });
+
+    activeSpace = 'space-a';
+    await expect(client.getHostsForCommand(req)).resolves.toEqual(['api.github.com']);
+    activeSpace = 'space-b';
+    await expect(client.getHostsForCommand(req)).resolves.toEqual([
+      'allow * pypi.org GET /simple/',
+    ]);
   });
 });
 
 describe('nightshiftSandboxAllowlistSavedObjectType schema', () => {
   const schema = nightshiftSandboxAllowlistSavedObjectType.modelVersions![1].schemas.create;
 
-  it('accepts a normalized list of hosts and DSL rules', () => {
+  it('accepts a normalized list of hosts and DSL rules including rules over 253 chars up to 512 chars', () => {
+    const prefix = 'allow https api.github.com:443 GET /';
+    const rule512 = `${prefix}${'a'.repeat(512 - prefix.length)}`;
     expect(() =>
       schema.validate({
         hosts: [
@@ -151,9 +218,12 @@ describe('nightshiftSandboxAllowlistSavedObjectType schema', () => {
           'allow * pypi.org GET,HEAD /simple/',
           'deny * api.github.com POST /gists',
           'xn--bcher-kva.example',
+          rule512,
         ],
       })
     ).not.toThrow();
+
+    expect(() => schema.validate({ hosts: [`${rule512}x`] })).toThrow();
   });
 
   it.each([[['*']], [['*.com']], [['API.github.com']], [['a.example', 'a.example']]])(
