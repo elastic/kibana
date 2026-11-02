@@ -88,7 +88,7 @@ const MIN_VALUE = '__euid_min';
  * point, or the low surrogate when the high surrogates match, and both order like code points.
  */
 const MIN_VALUE_PREAMBLE = [
-  `int __euid_cmp(String a, String b) { int n = Math.min(a.length(), b.length()); for (int i = 0; i < n; i++) { if (a.charAt(i) != b.charAt(i)) { return a.codePointAt(i) < b.codePointAt(i) ? -1 : 1; } } return a.length() - b.length(); }`,
+  `int __euid_cmp(String a, String b) { int n = a.length() < b.length() ? a.length() : b.length(); for (int i = 0; i < n; i++) { if (a.charAt(i) != b.charAt(i)) { return a.codePointAt(i) < b.codePointAt(i) ? -1 : 1; } } return a.length() - b.length(); }`,
   `String __euid_scalar(def v) { if (v == null || v instanceof Map || v instanceof List) { return null; } String r = String.valueOf(v); return r == "" ? null : r; }`,
   `String ${MIN_VALUE}(def values) { String m = null; for (def v : values) { String s = __euid_scalar(v); if (s != null && (m == null || __euid_cmp(s, m) < 0)) { m = s; } } return m; }`,
 ].join(' ');
