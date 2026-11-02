@@ -43,6 +43,7 @@ import {
   isIndexNotFoundError,
   pickLatestPerGroup,
   queryEsql,
+  resolveTimeBound,
 } from '../latest_source_query';
 import {
   SIGNIFICANT_EVENT_INVESTIGATION_STATES,
@@ -800,25 +801,30 @@ export class RuleEventsClient {
    * Reads, in one query, the live series (`active` or `recovering`) the requested rules are members
    * of, with each member's latest stored signal. A rule in none is absent from the map.
    *
-   * `from` bounds the read on a series' latest version, applied after `created_at` is computed over
-   * the whole lineage: bounding earlier would clip `created_at` and make an old series look young.
-   * A live series with no write since `from` is read as "not a live member", which sends its
-   * detections to the agent. Capped at MAX_DEDUP_SCAN_LIMIT series, newest first; a space with more
-   * can omit older ones, which callers must read the same way.
+   * `lookback` (ISO or date math) bounds which versions are read, before `created_at` is computed,
+   * so `created_at` is the earliest version within it; `from` bounds a series' latest version,
+   * after `created_at`. A series outside either bound reads as "not a live member". Capped at
+   * MAX_DEDUP_SCAN_LIMIT series, newest first.
    */
   async findLiveMemberships({
     ruleUuids,
+    lookback,
     from,
   }: {
     ruleUuids: string[];
-    from: string;
+    lookback?: string;
+    from?: string;
   }): Promise<Map<string, LiveRuleMembership[]>> {
     const live = new Map<string, LiveRuleMembership[]>();
     if (ruleUuids.length === 0) return live;
 
     const requested = new Set(ruleUuids);
-    const lineage = buildBaseQuery(this.clients.space)
-      .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
+    const base = buildBaseQuery(this.clients.space);
+    const lookbackIso = lookback === undefined ? undefined : resolveTimeBound(lookback);
+    const lineage = (lookbackIso === undefined
+      ? base
+      : base.where`@timestamp >= TO_DATETIME(${{ lookbackIso }})`
+    ).pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
     const query = applyTimeRange({
       query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD),
       from,
