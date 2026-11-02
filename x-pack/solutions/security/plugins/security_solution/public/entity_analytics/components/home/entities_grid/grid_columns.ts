@@ -42,14 +42,14 @@ const COLUMNS = [
     schema: 'numeric',
   },
   { id: 'asset.criticality', displayAsText: 'Asset criticality', initialWidth: 160 },
-  { id: 'entity.source', displayAsText: 'Source', initialWidth: 140 },
-  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 140 },
-  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
-  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120, schema: 'numeric' },
-  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, schema: 'numeric' },
+  { id: 'entity.source', displayAsText: 'Source', initialWidth: 170 },
+  { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 180 },
+  { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 140 },
+  { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 110, schema: 'numeric' },
+  { id: 'case_count', displayAsText: 'Cases', initialWidth: 90, schema: 'numeric' },
   { id: 'entity.attributes.watchlists', displayAsText: 'Watchlists', initialWidth: 200 },
-  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 180 },
-  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 180 },
+  { id: 'entity.lifecycle.first_seen', displayAsText: 'First seen', initialWidth: 140 },
+  { id: '@timestamp', displayAsText: 'Last seen', initialWidth: 140 },
 ] as const satisfies readonly EuiDataGridColumn[];
 
 export type GridColumnId = (typeof COLUMNS)[number]['id'];
