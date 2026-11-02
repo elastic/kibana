@@ -23,6 +23,7 @@ import {
   deleteTestIndex,
   findListed,
   getSource,
+  listRecommendedSources,
   listSources,
   setSourceEnabled,
   testIndexName,
@@ -33,8 +34,7 @@ import {
 
 const TITLE_PREFIX = 'scout-sources-authz';
 
-// Failing: See https://github.com/elastic/kibana/issues/298822
-apiTest.describe.skip(
+apiTest.describe(
   'Nightshift sources authorization',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -76,6 +76,7 @@ apiTest.describe.skip(
       );
       expect(listed).toHaveStatusCode(200);
       expect(findListed(listed.body, sourceId)?.id).toBe(sourceId);
+      expect(await listRecommendedSources(apiClient, cookieHeader)).toHaveStatusCode(200);
 
       const fetched = await getSource(apiClient, cookieHeader, sourceId);
       expect(fetched).toHaveStatusCode(200);
@@ -118,6 +119,7 @@ apiTest.describe.skip(
       const { cookieHeader } = await samlAuth.asInteractiveUser(NO_NIGHTSHIFT_ROLE);
 
       expect(await listSources(apiClient, cookieHeader)).toHaveStatusCode(403);
+      expect(await listRecommendedSources(apiClient, cookieHeader)).toHaveStatusCode(403);
       expect(await getSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
       expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
