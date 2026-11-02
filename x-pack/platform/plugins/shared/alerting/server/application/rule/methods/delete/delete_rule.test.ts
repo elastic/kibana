@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 
@@ -19,9 +20,13 @@ jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invali
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
 
-jest.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
+jest.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => ({
+  softDeleteGapsByQuery: jest.fn(),
+}));
 
-const softDeleteGapsMock = softDeleteGaps as jest.Mock;
+const softDeleteGapsByQueryMock = softDeleteGapsByQuery as jest.Mock;
+
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
@@ -204,22 +209,93 @@ describe('delete()', () => {
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
-  test('attempts to soft delete gaps', async () => {
-    await rulesClient.delete({ id: '1' });
-    expect(softDeleteGapsMock).toHaveBeenCalledWith({
-      ruleIds: ['1'],
-      logger: rulesClientParams.logger,
-      eventLogClient,
-      eventLogger: rulesClientParams.eventLogger,
+  describe('gap soft-deletion', () => {
+    beforeEach(() => {
+      softDeleteGapsByQueryMock.mockReset();
+      softDeleteGapsByQueryMock.mockResolvedValue(undefined);
     });
-  });
 
-  test('swallows errors when soft deleting gaps fails', async () => {
-    softDeleteGapsMock.mockRejectedValueOnce(new Error('Boom!'));
-    await rulesClient.delete({ id: '1' });
-    expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
-      'delete(): Failed to soft delete gaps for rule 1: Boom!'
-    );
+    test('soft-deletes the gaps of the deleted rule', async () => {
+      await rulesClient.delete({ id: '1' });
+      await flushPromises();
+
+      expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(1);
+      expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
+        ruleIds: ['1'],
+        eventLogClient,
+        logger: rulesClientParams.logger,
+      });
+    });
+
+    test('does not wait for the gap soft-deletion to finish', async () => {
+      softDeleteGapsByQueryMock.mockReturnValue(new Promise(() => {}));
+
+      const result = await rulesClient.delete({ id: '1' });
+
+      expect(result).toEqual({ success: true });
+    });
+
+    test('soft-deletes gaps after the rule saved object is deleted, not before', async () => {
+      const callOrder: string[] = [];
+      unsecuredSavedObjectsClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('deleteRuleSo');
+        return { success: true };
+      });
+      softDeleteGapsByQueryMock.mockImplementationOnce(async () => {
+        callOrder.push('softDeleteGaps');
+      });
+
+      await rulesClient.delete({ id: '1' });
+      await flushPromises();
+
+      expect(callOrder).toEqual(['deleteRuleSo', 'softDeleteGaps']);
+    });
+
+    test('does not soft-delete gaps when the rule saved object delete fails', async () => {
+      unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(new Error('Delete failed'));
+
+      await expect(rulesClient.delete({ id: '1' })).rejects.toThrow('Delete failed');
+      await flushPromises();
+
+      expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
+    });
+
+    test('soft-deletes gaps once when the rule delete is retried after a conflict', async () => {
+      unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, '1')
+      );
+
+      await rulesClient.delete({ id: '1' });
+      await flushPromises();
+
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledTimes(2);
+      expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(1);
+    });
+
+    test('swallows errors when soft deleting gaps fails', async () => {
+      softDeleteGapsByQueryMock.mockRejectedValueOnce(new Error('Boom!'));
+
+      const result = await rulesClient.delete({ id: '1' });
+      await flushPromises();
+
+      expect(result).toEqual({ success: true });
+      expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+        'delete(): Failed to soft delete gaps for rule 1: Boom!'
+      );
+    });
+
+    test('swallows errors when getEventLogClient fails', async () => {
+      rulesClientParams.getEventLogClient.mockRejectedValueOnce(new Error('No event log client'));
+
+      const result = await rulesClient.delete({ id: '1' });
+      await flushPromises();
+
+      expect(result).toEqual({ success: true });
+      expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
+      expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+        'delete(): Failed to soft delete gaps for rule 1: No event log client'
+      );
+    });
   });
 
   test('falls back to SOC.get when getDecryptedAsInternalUser throws an error', async () => {

@@ -20,7 +20,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
-import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
@@ -119,25 +119,22 @@ async function deleteRuleWithOCC(
     })
   );
 
-  try {
-    const eventLogClient = await context.getEventLogClient();
-
-    await softDeleteGaps({
-      ruleIds: [id],
-      logger: context.logger,
-      eventLogClient,
-      eventLogger: context.eventLogger,
-    });
-  } catch (error) {
-    // Failing to soft delete gaps should not block the rule deletion
-    context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
-  }
-
   const removeResult = await deleteRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     id,
   });
   const deleteTime = Date.now();
+
+  // Not awaited: gap soft-deletion must not block the response. The catch keeps
+  // a failure from becoming an unhandled promise rejection.
+  context
+    .getEventLogClient()
+    .then((eventLogClient) =>
+      softDeleteGapsByQuery({ ruleIds: [id], eventLogClient, logger: context.logger })
+    )
+    .catch((error) => {
+      context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
+    });
 
   await logRuleChanges({
     ruleSOs: [rule],

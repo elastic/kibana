@@ -1335,6 +1335,18 @@ describe('bulkDelete', () => {
       expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
     });
 
+    test('should not wait for gap soft-deletion to finish', async () => {
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
+      });
+      softDeleteGapsByQueryMock.mockReturnValueOnce(new Promise(() => {}));
+
+      const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(result.errors).toEqual([]);
+      expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(1);
+    });
+
     test('should soft-delete gaps after SO deletion, not before', async () => {
       const callOrder: string[] = [];
 

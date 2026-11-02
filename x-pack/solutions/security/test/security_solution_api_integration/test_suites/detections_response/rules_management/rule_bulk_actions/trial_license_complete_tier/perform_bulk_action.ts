@@ -413,8 +413,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await fetchRule(ruleId).expect(404);
 
-      // Gap soft-deletion is synchronous (a blocking update_by_query), so gaps are
-      // updated by the time the API responds; retry only covers ES refresh visibility.
+      // Gap soft-deletion runs in the background after the API responds, so the
+      // assertions must poll until the update_by_query has completed.
       await retry.tryForTime(30_000, async () => {
         expect(await countSoftDeletedGaps(createdRule.id)).toBe(5);
         expect(await countActiveGaps(createdRule.id)).toBe(0);

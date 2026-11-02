@@ -293,21 +293,24 @@ const bulkDeleteWithOCC = async (
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
   if (deletedRuleIds.length > 0) {
-    try {
-      const eventLogClient = await context.getEventLogClient();
-      await softDeleteGapsByQuery({
-        ruleIds: deletedRuleIds,
-        eventLogClient,
-        logger: context.logger,
+    // Not awaited: gap soft-deletion must not block the response. The catch keeps
+    // a failure from becoming an unhandled promise rejection.
+    context
+      .getEventLogClient()
+      .then((eventLogClient) =>
+        softDeleteGapsByQuery({
+          ruleIds: deletedRuleIds,
+          eventLogClient,
+          logger: context.logger,
+        })
+      )
+      .catch((error) => {
+        context.logger.error(
+          `delete(): Failed to soft delete gaps for rules: ${deletedRuleIds.join(',')}: ${
+            error.message
+          }`
+        );
       });
-    } catch (error) {
-      // Failing to soft delete gaps should not block the rule deletion
-      context.logger.error(
-        `delete(): Failed to soft delete gaps for rules: ${deletedRuleIds.join(',')}: ${
-          error.message
-        }`
-      );
-    }
   }
 
   await logRuleChanges({
