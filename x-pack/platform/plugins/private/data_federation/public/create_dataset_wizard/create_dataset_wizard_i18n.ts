@@ -49,7 +49,7 @@ export const createDatasetWizardStrings = {
     }
   ),
   mappingStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappingStepLabel', {
-    defaultMessage: 'Schema mappings',
+    defaultMessage: 'Schema',
   }),
   mappingStepErrorsTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.mappingStepErrorsTitle',
@@ -60,8 +60,7 @@ export const createDatasetWizardStrings = {
   defineSchemaRequiresFieldError: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.defineSchemaRequiresField',
     {
-      defaultMessage:
-        'When Manual schema definition is selected, you must define at least one field.',
+      defaultMessage: 'When Fixed schema is selected, you must define at least one field.',
     }
   ),
   configureSchemaResolutionOptional: i18n.translate(
@@ -146,10 +145,10 @@ export const createDatasetWizardStrings = {
     }
   ),
   inferSchemaLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaLabel', {
-    defaultMessage: 'Auto schema discovery',
+    defaultMessage: 'Auto schema inference',
   }),
   defineSchemaLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaLabel', {
-    defaultMessage: 'Manual schema definition',
+    defaultMessage: 'Fixed schema',
   }),
   mappedFieldsLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappedFieldsLabel', {
     defaultMessage: 'Mapped fields',
