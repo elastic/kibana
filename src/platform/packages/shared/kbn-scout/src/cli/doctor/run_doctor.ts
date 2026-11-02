@@ -19,7 +19,7 @@ import type {
 import { Listr, ListrDefaultRendererLogLevels } from 'listr2';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { testTargets } from '@kbn/scout-info';
-import type { CheckResult, DoctorCheck, DoctorCheckGroup } from './types';
+import type { CheckResult, DoctorCheck, DoctorCheckGroup, Fix } from './types';
 import { fail } from './types';
 import { environmentChecks } from './checks/environment';
 import { playwrightChecks } from './checks/playwright';
@@ -130,7 +130,14 @@ const runChecks = async (log: ToolingLog, arch?: DoctorArch): Promise<ReportedRe
   return results;
 };
 
-const confirm = async (result: CheckResult) => {
+const getFixes = (results: CheckResult[]): Array<Fix & { hint?: string }> => [
+  // several checks can suggest the same command, e.g. stopping running Scout servers
+  ...new Map(
+    results.flatMap(({ fix, hint }) => (fix ? [[fix.command, { ...fix, hint }] as const] : []))
+  ).values(),
+];
+
+const confirm = async (count: number) => {
   // destructive fixes need someone to say yes
   if (!process.stdin.isTTY) {
     return false;
@@ -140,23 +147,38 @@ const confirm = async (result: CheckResult) => {
     type: 'confirm',
     name: 'confirmed',
     default: false,
-    message: `${result.message}${result.hint ? ` (${result.hint})` : ''}\n  Run ${chalk.cyan(
-      result.fix?.command
-    )}?`,
+    message: `Run ${count === 1 ? 'this command' : `these ${count} commands`}?`,
   });
   return confirmed;
 };
 
 const applyFixes = async (log: ToolingLog, results: CheckResult[]) => {
-  for (const result of results) {
-    const { fix } = result;
-    if (!fix || (fix.destructive && !(await confirm(result)))) {
+  const fixes = getFixes(results);
+  const hasDestructive = fixes.some(({ destructive }) => destructive);
+
+  log.write(`\n Doctor will run:`);
+  fixes.forEach(({ command, destructive, hint }) =>
+    log.write(
+      `   ${chalk.cyan(command)}${
+        destructive ? chalk.yellow(`  ${hint ?? 'deletes files or stops processes'}`) : ''
+      }`
+    )
+  );
+  log.write('');
+
+  const approved = !hasDestructive || (await confirm(fixes.length));
+  if (!approved) {
+    log.write(chalk.dim(' Skipping commands that delete files or stop processes'));
+  }
+
+  for (const { command, destructive, run } of fixes) {
+    if (destructive && !approved) {
       continue;
     }
 
-    log.write(`\n ${chalk.cyan('▶')} ${fix.command}`);
+    log.write(`\n ${chalk.cyan('▶')} ${command}`);
     try {
-      await (fix.run ? fix.run() : execa.command(fix.command, { stdio: 'inherit' }));
+      await (run ? run() : execa.command(command, { stdio: 'inherit' }));
     } catch (error) {
       log.write(chalk.red(` ✖ ${error.message}`));
     }
@@ -164,7 +186,7 @@ const applyFixes = async (log: ToolingLog, results: CheckResult[]) => {
 };
 
 const printFixCommands = (log: ToolingLog, results: CheckResult[]) => {
-  const commands = results.flatMap(({ fix }) => (fix ? [fix.command] : []));
+  const commands = getFixes(results).map(({ command }) => command);
   if (!commands.length) {
     return;
   }

@@ -8,7 +8,8 @@
  */
 
 import Net from 'net';
-import type { DoctorCheck, DoctorCheckGroup } from '../types';
+import execa from 'execa';
+import type { DoctorCheck, DoctorCheckGroup, Fix } from '../types';
 import { fail, pass, warn } from '../types';
 import { defaultConfig } from '../../../servers/configs/config_sets/default/stateful/base.config';
 import { tryExec } from '../utils';
@@ -43,6 +44,32 @@ const getScoutServerPids = async () => {
   });
 };
 
+// ES and Kibana outlive start-server on SIGTERM, so stop its whole process group when it leads one
+const stopScoutServersFix = async (pids: string[]): Promise<Fix> => {
+  const targets = await Promise.all(
+    pids.map(async (pid) =>
+      (await tryExec('ps', ['-o', 'pgid=', '-p', pid]))?.trim() === pid ? `-${pid}` : pid
+    )
+  );
+  return { command: `kill -- ${targets.join(' ')}`, destructive: true };
+};
+
+// Docker publishes the ports of serverless containers, so stop the containers, not Docker
+const isDocker = (command?: string) => /^(com\.docker|docker)/.test(command ?? '');
+
+const stopContainersFix = (port: number): Fix => ({
+  command: `docker ps -q --filter publish=${port} | xargs docker kill`,
+  destructive: true,
+  run: async () => {
+    const ids = (await tryExec('docker', ['ps', '-q', '--filter', `publish=${port}`]))
+      ?.split('\n')
+      .filter(Boolean);
+    if (ids?.length) {
+      await execa('docker', ['kill', ...ids], { stdio: 'inherit' });
+    }
+  },
+});
+
 const portCheck = (name: string, port: number): DoctorCheck => ({
   title: `${name} port ${port}`,
   run: async () => {
@@ -59,15 +86,19 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
           ', '
         )})`,
         {
-          hint: 'Reuse them with run-tests, or stop them before starting new ones',
-          fix: { command: `kill ${scoutServerPids.join(' ')}`, destructive: true },
+          hint: 'stops the running Scout servers, say no to keep using them',
+          fix: await stopScoutServersFix(scoutServerPids),
         }
       );
     }
-    return fail(
-      `${name} port ${port} is used${usedBy}`,
-      owner ? { fix: { command: `kill ${owner.pid}`, destructive: true } } : undefined
-    );
+    if (!owner) {
+      return fail(`${name} port ${port} is used`);
+    }
+    return fail(`${name} port ${port} is used${usedBy}`, {
+      fix: isDocker(owner.command)
+        ? stopContainersFix(port)
+        : { command: `kill ${owner.pid}`, destructive: true },
+    });
   },
 });
 
