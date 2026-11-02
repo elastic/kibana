@@ -62,6 +62,7 @@ import type { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } fr
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
 import { isMvt } from './is_mvt';
+import { getGeoGridPrecision, getGeoGridPrecisionResolutionDelta } from './get_geo_grid_precision';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
 
@@ -69,8 +70,6 @@ type ESGeoGridSourceSyncMeta = ESAggsSourceSyncMeta &
   Pick<ESGeoGridSourceDescriptor, 'requestType' | 'resolution'> & {
     geogridPrecision: number;
   };
-
-const MAX_GEOTILE_LEVEL = 29;
 
 export const clustersTitle = i18n.translate('xpack.maps.source.esGridClustersTitle', {
   defaultMessage: 'Clusters',
@@ -230,55 +229,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       return 0;
     }
 
-    const targetGeotileLevel = Math.ceil(zoom) + this._getGeoGridPrecisionResolutionDelta();
-    return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
+    return getGeoGridPrecision(zoom, this._descriptor.resolution, this._descriptor.requestType);
   }
 
   _getGeoGridPrecisionResolutionDelta() {
-    // Hexagon resolutions do not scale evenly to zoom levels.
-    // zoomX and zoomX + 1 may result in the same hexagon resolution.
-    // To avoid FINE and MOST_FINE providing potenitally the same resolution,
-    // use 3 level resolution system that increases zoom + 3 per resolution step.
-    if (this._descriptor.requestType === RENDER_AS.HEX) {
-      if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
-        return 2;
-      }
-
-      if (
-        this._descriptor.resolution === GRID_RESOLUTION.FINE ||
-        this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE
-      ) {
-        return 5;
-      }
-
-      if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
-        return 8;
-      }
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
-      return 2;
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.FINE) {
-      return 3;
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.MOST_FINE) {
-      return 4;
-    }
-
-    if (this._descriptor.resolution === GRID_RESOLUTION.SUPER_FINE) {
-      return 8;
-    }
-
-    throw new Error(
-      i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
-        defaultMessage: `Grid resolution param not recognized: {resolution}`,
-        values: {
-          resolution: this._descriptor.resolution,
-        },
-      })
+    return getGeoGridPrecisionResolutionDelta(
+      this._descriptor.resolution,
+      this._descriptor.requestType
     );
   }
 

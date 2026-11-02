@@ -34,6 +34,8 @@ import { asyncMap } from '@kbn/std';
 import {
   FIELD_ORIGIN,
   GEOJSON_FEATURE_ID_PROPERTY_NAME,
+  GRID_RESOLUTION,
+  RENDER_AS,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
@@ -51,13 +53,12 @@ import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_sou
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { getData, getHttp, getIndexPatternService, getUiSettings } from '../../../kibana_services';
+import { getGeoGridPrecision } from '../es_geo_grid_source/get_geo_grid_precision';
 import { convertToGeoJson } from './convert_to_geojson';
 import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ESQLField } from '../../fields/esql_field';
-
-const MAX_GEOTILE_LEVEL = 29;
 
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
@@ -385,11 +386,11 @@ export class ESQLSource
   }
 
   /**
-   * Geotile precision bound to `?_geotile_precision`, one level finer than the map zoom
-   * (same resolution as the geo grid source's default).
+   * Geotile precision bound to `?_geotile_precision`. The source has no resolution setting yet,
+   * so it uses the geo grid layer's most fine resolution.
    */
   getGeotilePrecision(zoom: number): number {
-    return Math.min(Math.ceil(zoom) + 1, MAX_GEOTILE_LEVEL);
+    return getGeoGridPrecision(zoom, GRID_RESOLUTION.MOST_FINE, RENDER_AS.GRID);
   }
 
   getSyncMeta(dataFilters?: DataFilters): ESQLSourceSyncMeta {

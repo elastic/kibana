@@ -198,7 +198,7 @@ describe('getGeoJsonWithMeta', () => {
   });
 
   test('should bind ?_geotile_precision to a precision derived from the map zoom', async () => {
-    mockGetGeotilePrecisionParams.mockReturnValue([{ _geotile_precision: 6 }]);
+    mockGetGeotilePrecisionParams.mockReturnValue([{ _geotile_precision: 9 }]);
     mockSearch.mockReturnValue(of({ rawResponse: makeEsqlResponse(1), requestParams: {} }));
 
     await createSource().getGeoJsonWithMeta(
@@ -209,7 +209,7 @@ describe('getGeoJsonWithMeta', () => {
       makeInspectorAdapters() as any
     );
 
-    expect(mockGetGeotilePrecisionParams).toHaveBeenCalledWith(ESQL, 6);
-    expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 6 }]);
+    expect(mockGetGeotilePrecisionParams).toHaveBeenCalledWith(ESQL, 9);
+    expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 9 }]);
   });
 });
