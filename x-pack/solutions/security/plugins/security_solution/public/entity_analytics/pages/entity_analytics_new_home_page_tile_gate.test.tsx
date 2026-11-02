@@ -571,6 +571,57 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
     });
   });
 
+  describe('a tile with more entities than the table is filtered by', () => {
+    const manyIds = Array.from({ length: 1423 }, (_, i) => `entity-${i}`);
+    const lastGridProps = () => {
+      const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
+      return gridCalls[gridCalls.length - 1][0];
+    };
+    const selectBigTile = () => {
+      mockUrlStateOverrides = { activeTile: 'newEntity' };
+      hooks.useNewEntityCount.mockReturnValue({
+        count: manyIds.length,
+        entityIds: manyIds,
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+    };
+
+    it('tells the grid how many entities the tile has, for the resolved rows', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toEqual({ total: 1423, limit: 1000 });
+    });
+
+    it('says nothing of it for individual records, which are a different count', () => {
+      mockRowsMode = 'individual';
+      selectBigTile();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toBeUndefined();
+    });
+
+    it('says nothing of it while the tile fits the table', () => {
+      mockRowsMode = 'resolved';
+      selectBigTile();
+      hooks.useNewEntityCount.mockReturnValue({
+        count: 1000,
+        entityIds: manyIds.slice(0, 1000),
+        hasCount: true,
+        isLoading: false,
+        isMissingIndex: false,
+        isCountPending: false,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastGridProps().cappedTile).toBeUndefined();
+    });
+  });
+
   it('holds the load while the active tile is loading, and releases it once it settles', () => {
     mockUrlStateOverrides = { activeTile: 'newEntity' };
     const loadingTile = {

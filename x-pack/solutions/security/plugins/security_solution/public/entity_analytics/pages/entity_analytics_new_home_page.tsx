@@ -969,6 +969,16 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     () => (activeTile ? getCappedTileEntityIds(selectedEntityIds) : null),
     [activeTile, selectedEntityIds]
   );
+  // The tile counts entities, so only the table of resolved entities can say how many of them it
+  // shows; individual records are a different count.
+  const selectedEntityCount = selectedEntityIds.length;
+  const cappedTile = useMemo(
+    () =>
+      rowsMode === 'resolved' && selectedEntityCount > MAX_TILE_FILTER_ENTITY_IDS
+        ? { total: selectedEntityCount, limit: MAX_TILE_FILTER_ENTITY_IDS }
+        : undefined,
+    [rowsMode, selectedEntityCount]
+  );
 
   const activeFilters = useMemo(
     (): ActiveFilters => ({
@@ -1636,6 +1646,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 rowActions={rowActions}
                 readAccess={readAccess}
                 toolbarControls={tableControls}
+                cappedTile={cappedTile}
                 sortField={sortField}
                 sortDirection={sortDirection}
                 onSortChange={setSort}
