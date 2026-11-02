@@ -23,6 +23,7 @@ import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import { CUSTOM_YARA_SIGNATURES_VALIDATE_ROUTE } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { ValidateCustomYaraSignatureResponse } from '@kbn/security-solution-plugin/common/api/endpoint/custom_yara_signatures';
+import { MAX_YARA_RULE_VALIDATE_REQUEST_LENGTH } from '@kbn/security-solution-plugin/common/api/endpoint/custom_yara_signatures';
 import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from '@kbn/security-solution-plugin/server/endpoint/lib/custom_yara_signatures';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
@@ -1657,8 +1658,8 @@ export default function ({ getService }: FtrProviderContext) {
             });
         });
 
-        it(`should return 200 with a line-0 error if yara_rule is far more than ${MAX_YARA_RULE_CONTENT_BYTE_LENGTH} bytes long`, async () => {
-          const yaraRuleLength = MAX_YARA_RULE_CONTENT_BYTE_LENGTH * 3;
+        it(`should return 400 if yara_rule is more than ${MAX_YARA_RULE_VALIDATE_REQUEST_LENGTH} characters long`, async () => {
+          const yaraRuleLength = MAX_YARA_RULE_VALIDATE_REQUEST_LENGTH + 1;
           const yaraRule =
             dummyRuleWithComment + 'a'.repeat(yaraRuleLength - dummyRuleWithComment.length);
 
@@ -1666,9 +1667,11 @@ export default function ({ getService }: FtrProviderContext) {
             yara_rule: yaraRule,
             os_types: ['windows'],
           })
-            .expect(200)
-            .expect((res: { body: ValidateCustomYaraSignatureResponse }) => {
-              expect(res.body).to.eql(oversizeDiagnostic(yaraRuleLength));
+            .expect(400)
+            .expect((res: { body: { message: string } }) => {
+              expect(res.body.message).to.contain(
+                `value has length [${yaraRuleLength}] but it must have a maximum length of [${MAX_YARA_RULE_VALIDATE_REQUEST_LENGTH}]`
+              );
             });
         });
 
