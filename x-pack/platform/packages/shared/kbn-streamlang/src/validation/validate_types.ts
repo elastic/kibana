@@ -661,7 +661,6 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
                 values: {
                   fieldName,
                   processorNumber: i + 1,
-                  types: Array.from(types).join(', '),
                 },
               }),
               processorId,

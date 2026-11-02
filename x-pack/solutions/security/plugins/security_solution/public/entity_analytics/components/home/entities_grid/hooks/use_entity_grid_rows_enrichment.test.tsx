@@ -28,14 +28,12 @@ jest.mock('../queries/esql', () => ({
   createEsqlRunner: () => jest.fn(),
 }));
 jest.mock('../grid_columns', () => ({
-  PAGE_ENRICHERS: {
-    resolved: [
-      {
-        fields: ['alert_count'],
-        fetch: (rows: readonly Row[]) => mockEnrich(rows),
-      },
-    ],
-  },
+  getPageEnrichers: () => [
+    {
+      fields: ['alert_count'],
+      fetch: (rows: readonly Row[]) => mockEnrich(rows),
+    },
+  ],
 }));
 
 describe('getLoadedRows', () => {
@@ -156,6 +154,7 @@ describe('useEntityGridRowsEnrichment', () => {
     timeRange: '7d',
     rowsMode: 'resolved',
     keepFields: [],
+    columnIds: ['alert_count'],
   };
   const CONTEXT = {
     searchService: {},

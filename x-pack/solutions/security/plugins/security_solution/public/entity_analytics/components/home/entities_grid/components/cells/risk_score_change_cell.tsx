@@ -20,8 +20,9 @@ const DECREASED_BY = i18n.translate(
 
 export const RiskScoreChangeCell = memo(({ value }: { value: unknown }) => {
   if (typeof value !== 'number') return <>{'—'}</>;
-  const delta = value;
-  if (delta === 0) return <EuiTextColor color="subdued">{'—'}</EuiTextColor>;
+  // Compare the displayed (rounded) value so a change that shows as 0 isn't flagged as a rise or drop.
+  const delta = Math.round(value);
+  if (delta === 0) return <EuiTextColor color="subdued">{'0'}</EuiTextColor>;
   const worse = delta > 0;
   // The arrow is decorative, so screen readers get the direction as text.
   return (
@@ -31,7 +32,7 @@ export const RiskScoreChangeCell = memo(({ value }: { value: unknown }) => {
         <EuiScreenReaderOnly>
           <span>{worse ? INCREASED_BY : DECREASED_BY}</span>
         </EuiScreenReaderOnly>
-        {` ${Math.abs(Math.round(delta))}%`}
+        {` ${Math.abs(delta)}`}
       </EuiTextColor>
     </EuiText>
   );

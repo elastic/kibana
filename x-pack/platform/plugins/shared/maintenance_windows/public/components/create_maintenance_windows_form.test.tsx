@@ -302,11 +302,20 @@ describe('CreateMaintenanceWindowForm', () => {
         />
       );
 
-    const fillTitle = async () => {
-      const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
-      await user.click(titleInput);
-      await user.paste('My window');
-    };
+    // Omitting `maintenanceWindowId` keeps the form in create mode while `initialValue` seeds it.
+    const renderCreateMode = (scope?: NonNullable<FormProps['scope']>) =>
+      appMockRenderer.render(
+        <CreateMaintenanceWindowForm
+          {...formProps}
+          initialValue={{
+            title: 'My window',
+            startDate: '2023-03-24',
+            endDate: '2023-03-26',
+            recurring: false,
+            scope,
+          }}
+        />
+      );
 
     const confirmApplyToAllAlerts = async (expectedBody: string) => {
       const modal = await screen.findByTestId('applyToAllAlertsConfirmModal');
@@ -314,11 +323,50 @@ describe('CreateMaintenanceWindowForm', () => {
       await user.click(within(modal).getByRole('button', { name: 'Apply to all alerts' }));
     };
 
-    it('creates with the default scope when Alerts is on and no filters are set', async () => {
+    it('creates with the title entered by the user', async () => {
       appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-      await fillTitle();
+      const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
+      await user.click(titleInput);
+      await user.paste('My entered title');
       await user.click(screen.getByTestId('create-submit'));
+
+      expect(createMutate).not.toHaveBeenCalled();
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({
+          title: 'My entered title',
+          scope: { alerting: { enabled: true } },
+        });
+      });
+    });
+
+    it('creates with only unfiltered Episodes after toggling Alerts off and Episodes on', async () => {
+      renderCreateMode();
+
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
+      await user.click(screen.getByTestId('alertingV2ScopedQuerySwitch'));
+      await user.click(screen.getByTestId('create-submit'));
+
+      expect(createMutate).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({ title: 'My window' });
+        expect(createMutate.mock.calls[0][0].scope).toEqual({
+          alertingV2: { enabled: true },
+        });
+      });
+    });
+
+    it('creates with the default scope when Alerts is on and no filters are set', async () => {
+      renderCreateMode();
+
+      await user.click(await screen.findByTestId('create-submit'));
       await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
 
       await waitFor(() => {
@@ -333,9 +381,8 @@ describe('CreateMaintenanceWindowForm', () => {
     });
 
     it('calls create when user toggles Alerts off then confirms save without scopes modal', async () => {
-      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+      renderCreateMode();
 
-      await fillTitle();
       // Turn v1 off so the "no scope" path is reached.
       await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
 
@@ -356,9 +403,8 @@ describe('CreateMaintenanceWindowForm', () => {
     });
 
     it('does not call create when user cancels save without scopes modal', async () => {
-      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+      renderCreateMode();
 
-      await fillTitle();
       // Turn v1 off first so the modal appears.
       await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
       await user.click(screen.getByTestId('create-submit'));
@@ -383,11 +429,10 @@ describe('CreateMaintenanceWindowForm', () => {
     });
 
     it('shows the generic body when only Episodes is on with no filter', async () => {
-      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+      renderCreateMode({ alertingV2: { enabled: true } });
 
-      await fillTitle();
+      // Alerts (v1) is force-selected in create mode, so it still has to be toggled off.
       await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
-      await user.click(screen.getByTestId('alertingV2ScopedQuerySwitch'));
       await user.click(screen.getByTestId('create-submit'));
 
       await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);

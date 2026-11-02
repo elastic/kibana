@@ -22,6 +22,7 @@ import type {
   ToolProvider,
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { isDynamicToolEvent, isDynamicToolRunReturn } from '@kbn/agent-builder-server/runner';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -103,6 +104,7 @@ export interface BuildToolContentParams {
   results: ToolResult[];
   toolId: string;
   toolCallId: string;
+  dynamicToolId?: string;
 }
 
 export type BuildToolContentFn = (params: BuildToolContentParams) => string;
@@ -154,6 +156,7 @@ export const toolToLangchain = async ({
           results: toolReturn.results ?? [],
           toolId: tool.id,
           toolCallId,
+          dynamicToolId: isDynamicToolRunReturn(toolReturn) ? toolReturn.dynamicToolId : undefined,
         });
         return [content, toolReturn];
       } catch (e) {
@@ -205,6 +208,11 @@ export function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
 
 const getToolEventConverter = ({ toolId, toolCallId }: { toolId: string; toolCallId: string }) => {
   return (toolEvent: AgentBuilderToolEvent): ChatAgentEvent => {
+    if (isDynamicToolEvent(toolEvent)) {
+      return getToolEventConverter({ toolId: toolEvent.data.tool_id, toolCallId })(
+        toolEvent.data.event
+      );
+    }
     if (toolEvent.type === ChatEventType.toolProgress) {
       return {
         type: ChatEventType.toolProgress,

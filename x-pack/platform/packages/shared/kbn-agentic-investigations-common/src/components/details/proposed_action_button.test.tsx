@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
 import { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
 
@@ -50,7 +51,14 @@ describe('ProposedActionButton', () => {
     renderButton();
     expect(screen.getByText('Isolate cfo-mbp-14 — host isolation')).toBeInTheDocument();
     expect(screen.getByText('Needs review')).toBeInTheDocument();
-    expect(screen.getByText('Response action • Irreversible')).toBeInTheDocument();
+    expect(screen.getByTestId('proposedAction')).toHaveTextContent(
+      'Response action • Irreversible'
+    );
+  });
+
+  it('shows "Irreversible" in the danger color', () => {
+    renderButton();
+    expect(screen.getByText('Irreversible').className).toMatch(/danger/i);
   });
 
   it('names the row with its own title and status, not a fixed string every row shares', () => {
@@ -125,6 +133,25 @@ describe('ProposedActionButton', () => {
     expect(
       screen.getAllByText('Isolate cfo-mbp-14 — host isolation').length
     ).toBeGreaterThanOrEqual(2);
+  });
+
+  it('hands the base path to the modal, so in-app links in the comment survive server.basePath', () => {
+    const basePath = {
+      serverBasePath: '/kbn',
+      prepend: (path: string) => `/kbn${path}`,
+    } as unknown as IBasePath;
+    renderButton({
+      basePath,
+      proposal: {
+        ...mockProposal,
+        comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)',
+      },
+    });
+    fireEvent.click(screen.getByTestId('proposedAction'));
+
+    expect(
+      within(screen.getByRole('dialog')).getByRole('link', { name: /Noisy rule/ })
+    ).toHaveAttribute('href', '/kbn/app/security/rules/id/abc');
   });
 
   it('commits the approval by calling onConfirm from the modal', () => {
@@ -202,7 +229,15 @@ describe('ProposedActionButton', () => {
       expect(screen.getByText('Applied')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
-      expect(screen.queryByText('Response action • Irreversible')).not.toBeInTheDocument();
+      expect(screen.queryByText('Irreversible')).not.toBeInTheDocument();
+    });
+
+    it('shows the full date and time in a tooltip on the time of the decision', async () => {
+      renderButton({ proposal: decidedProposal });
+
+      fireEvent.mouseOver(screen.getByText(/^\d{1,2}:\d{2}/));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(/^1 Jan 2024, \d{2}:\d{2}$/);
     });
 
     it('shows a Declined badge for a dismissed proposal', () => {
@@ -215,6 +250,7 @@ describe('ProposedActionButton', () => {
       ['approved', {}, /^Approved by\s/],
       ['declined', { decision: 'dismissed' }, /^Declined by\s/],
       ['failed', { status: 'failed' }, /^Executed by\s/],
+      ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, /^Applied by\s/],
     ])('captions a %s proposal with who acted and when', (_, overrides, caption) => {
       renderButton({ proposal: { ...decidedProposal, ...overrides } });
 

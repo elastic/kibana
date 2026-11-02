@@ -25,7 +25,7 @@ import {
   removeCaseType,
 } from './cases';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
+// eslint-disable-next-line @kbn/compat/typescript-naming-convention
 const create_7_14_0_case = ({
   connector,
   externalService,

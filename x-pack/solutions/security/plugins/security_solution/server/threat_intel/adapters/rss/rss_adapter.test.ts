@@ -20,14 +20,14 @@ const FEED_BODY = `<?xml version="1.0" encoding="UTF-8"?>
     <title>Item one</title>
     <guid>acme:1</guid>
     <link>https://acme.example/1</link>
-    <pubDate>Mon, 12 May 2025 09:30:00 GMT</pubDate>
+    <pubDate>Tue, 12 May 2026 09:30:00 GMT</pubDate>
     <description><![CDATA[<p>Body one</p>]]></description>
   </item>
   <item>
     <title>Item two</title>
     <guid>acme:2</guid>
     <link>https://acme.example/2</link>
-    <pubDate>Tue, 13 May 2025 09:30:00 GMT</pubDate>
+    <pubDate>Wed, 13 May 2026 09:30:00 GMT</pubDate>
     <description>Body two</description>
   </item>
 </channel></rss>`;
@@ -81,6 +81,7 @@ describe('rssAdapter', () => {
         body_text: 'Body one',
         language: 'en',
         article_url: 'https://acme.example/1',
+        published_at: '2026-05-12T09:30:00.000Z',
       },
       severity: { level: 'medium', score: 40 },
       lineage: {
@@ -149,6 +150,30 @@ describe('rssAdapter', () => {
     expect(requested).not.toContain('https://acme.example/2');
   });
 
+  it('resolves the UK NCSC news feed URL and keeps every entry', async () => {
+    const feed = FEED_BODY.replace(
+      'https://acme.example/1',
+      'https://www.ncsc.gov.uk/news/example-advisory'
+    ).replace('https://acme.example/2', 'https://www.ncsc.gov.uk/news/example');
+    const fetchMock = jest.fn().mockResolvedValue(okResponse(feed));
+
+    const reports = await rssAdapter.run(
+      {
+        _id: 'rss:uk-ncsc',
+        _source: { adapter_type: 'rss', name: 'UK National Cyber Security Centre' },
+      },
+      buildContext(fetchMock)
+    );
+
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      'https://www.ncsc.gov.uk/api/1/services/v1/news-rss-feed.xml'
+    );
+    expect(reports.map(({ content }) => content.article_url)).toEqual([
+      'https://www.ncsc.gov.uk/news/example-advisory',
+      'https://www.ncsc.gov.uk/news/example',
+    ]);
+  });
+
   it('removes credentials from entry provenance', async () => {
     const feed = FEED_BODY.replace(
       'https://acme.example/1',
@@ -177,8 +202,41 @@ describe('rssAdapter', () => {
 
   // The fingerprint used to be feed URL + guid + title only, so an advisory
   // that kept its guid and title while revising the text deduped away forever.
+  describe('Atom fingerprint', () => {
+    const atomWith = (published: string) => `<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Acme</title>
+  <entry><id>acme:1</id><title>Item one</title><link href="https://acme.example/1"/>
+    <published>${published}</published><updated>2026-05-14T08:00:00Z</updated>
+    <summary>Body one</summary></entry>
+</feed>`;
+
+    const fingerprintFor = async (feed: string) => {
+      const [report] = await rssAdapter.run(
+        buildSource(),
+        buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+      );
+      return report.content_fingerprint;
+    };
+
+    // Entries ingested before <published> became the preferred date were fingerprinted on
+    // <updated>; changing that would re-ingest and re-enrich every Atom entry once.
+    it('keeps folding <updated> into the fingerprint, whatever <published> says', async () => {
+      expect(await fingerprintFor(atomWith('2026-05-10T08:00:00Z'))).toBe(
+        await fingerprintFor(atomWith('2026-05-11T08:00:00Z'))
+      );
+    });
+
+    it('still stamps <published> as content.published_at', async () => {
+      const [report] = await rssAdapter.run(
+        buildSource(),
+        buildContext(jest.fn().mockResolvedValue(okResponse(atomWith('2026-05-10T08:00:00Z'))))
+      );
+      expect(report.content.published_at).toBe('2026-05-10T08:00:00.000Z');
+    });
+  });
+
   describe('revision detection', () => {
-    const feedWith = ({ body = 'Body one', pubDate = 'Mon, 12 May 2025 09:30:00 GMT' } = {}) =>
+    const feedWith = ({ body = 'Body one', pubDate = 'Tue, 12 May 2026 09:30:00 GMT' } = {}) =>
       `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
   <title>Acme</title>
@@ -210,10 +268,41 @@ describe('rssAdapter', () => {
     });
 
     it('changes when only the publish timestamp moves', async () => {
-      expect(await fingerprintFor(feedWith({ pubDate: 'Wed, 14 May 2025 09:30:00 GMT' }))).not.toBe(
+      expect(await fingerprintFor(feedWith({ pubDate: 'Thu, 14 May 2026 09:30:00 GMT' }))).not.toBe(
         await fingerprintFor(feedWith())
       );
     });
+  });
+
+  it('leaves content.published_at absent when the feed gives no date', async () => {
+    const feed = FEED_BODY.replace(/<pubDate>[^<]*<\/pubDate>/g, '');
+    const reports = await rssAdapter.run(
+      buildSource(),
+      buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+    );
+
+    expect(reports).toHaveLength(2);
+    expect(reports[0].content).not.toHaveProperty('published_at');
+  });
+
+  it('drops entries published more than 30 days before now and keeps the boundary', async () => {
+    const rfc822 = (ms: number) => new Date(ms).toUTCString();
+    const dayMs = 86_400_000;
+    const item = (guid: string, pubDate: string) =>
+      `<item><title>${guid}</title><guid>${guid}</guid><pubDate>${pubDate}</pubDate><description>Body ${guid}</description></item>`;
+    const feed = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Acme</title>
+${item('boundary', rfc822(NOW.getTime() - 30 * dayMs))}
+${item('just-old', rfc822(NOW.getTime() - 30 * dayMs - 3_600_000))}
+${item('from-2022', 'Tue, 10 May 2022 09:30:00 GMT')}
+</channel></rss>`;
+
+    const reports = await rssAdapter.run(
+      buildSource(),
+      buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+    );
+
+    expect(reports.map((report) => report.lineage.source_doc_ref?.id)).toEqual(['boundary']);
   });
 
   it('stamps space_id from the source when set', async () => {

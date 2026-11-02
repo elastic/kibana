@@ -9,33 +9,40 @@ import type { Logger } from '@kbn/core/server';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
-  ConvergedProposal,
   PackageReportInput,
-  PackageReportMintPayload,
   PackageReportOutput,
 } from '../../../../../common/step_types/package_report';
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
+import {
+  resolveProposals,
+  type AppendAlsoRaisedBy,
+  type CountExistingProposals,
+  type ResolvedProposals,
+  type ResolveProposalSlot,
+} from '../../../proposals/dedup';
+
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import type { AppendAlsoRaisedBy } from './converge_on_live_proposal';
-import { buildConvergenceNote } from './converge_on_live_proposal';
 import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import {
   buildCleanInvestigationSummary,
   buildInvestigationSummary,
 } from './build_investigation_summary';
+import { dedupeCoverageGaps, describeGaps, gapCountPhrase } from './dedupe_coverage_gaps';
 import { deriveCleanCoverageSubjects } from './derive_clean_coverage_subjects';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
 import type { EsReportContextClient } from './load_report_hunt_context';
 import { loadReportHuntContext } from './load_report_hunt_context';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
-import type { ResolveProposalSlot } from './resolve_proposal_slot';
 import type {
   CoordinatorInputs,
   CoverageSubject,
   CoverageWriteResult,
   UnresolvedMintPayload,
 } from './types';
+
+/** Keeps the Investigation's summary short; the report-scoped KI carries the full list. */
+const MAX_CLOSURE_GAP_CHARS = 500;
 
 export class PackageReportIdentityError extends Error {
   constructor(message: string) {
@@ -49,19 +56,6 @@ export type ListRespondActions = (
 ) => Promise<{ ok: true; actions: ActionCatalogEntry[] } | { ok: false; reason: 'catalog_error' }>;
 
 export type WriteCoverageKis = (subjects: CoverageSubject[]) => Promise<CoverageWriteResult>;
-
-type MintSuppression = Extract<PackageReportOutput, { status: 'packaged' }>['mintSuppression'];
-
-/**
- * Count of Proposals the Investigation already carries (any status, including settled), before
- * this run's own proposals are minted. It is the baseline `expectedProposalCount` is built on (see
- * below), so the settlement barrier each gate checks accounts for proposals that already existed
- * before this run, not just the ones this run mints. Not a guard: whether a finding gets a
- * Proposal is decided per subject by {@link ResolveProposalSlot}, not by whether the Investigation
- * has any. See the implementation (`check_existing_proposals.ts`) for which statuses count as
- * "existing" and why.
- */
-export type CountExistingProposals = (investigationConversationId: string) => Promise<number>;
 
 /**
  * Whether the Investigation has a Proposal still open (`pending` or `executing`), i.e. one an
@@ -121,102 +115,52 @@ const resolveDismissHold = async (
 };
 
 /**
- * Turns what `decidePackageReport` wants to propose into what this run actually mints: each
- * finding either gets a free id to be created under, or converges onto a live Proposal that
- * already holds its subject, possibly one another Investigation raised.
- *
- * Throws if any lookup does, so the caller fails closed and mints nothing. A revision already
- * made to a live Proposal by then is harmless to repeat: the comment already names this
- * Investigation, and the next run skips it.
+ * The closing line for a run that cleared no hit. A retired run never says "nothing matched":
+ * part of the report was not searched, so the claim would be false. With no gap list (a Worker that
+ * does not forward one) it drops the count rather than falling back to the clean wording.
  */
-const settleProposals = async ({
-  wanted,
-  investigationConversationId,
-  spaceId,
-  deps,
+const buildNoHitClosureSummary = ({
+  reportId,
+  dismissHold,
+  retired,
+  gapPhrase,
+  gapDescription,
 }: {
-  wanted: UnresolvedMintPayload[];
-  investigationConversationId: string;
-  spaceId: string;
-  deps: Pick<RunPackageReportDeps, 'resolveProposalSlot' | 'appendAlsoRaisedBy'>;
-}): Promise<{
-  proposals: PackageReportMintPayload[];
-  converged: ConvergedProposal[];
-  alreadyOpenCount: number;
-}> => {
-  const proposals: PackageReportMintPayload[] = [];
-  const converged: ConvergedProposal[] = [];
-  let alreadyOpenCount = 0;
-
-  for (const proposal of wanted) {
-    const slot = await deps.resolveProposalSlot({
-      subjectKey: proposal.subjectKey,
-      actionInput: proposal.actionInput,
-    });
-    if (slot.kind === 'mint') {
-      proposals.push({ ...proposal, proposalId: slot.proposalId });
-      continue;
-    }
-
-    const outcome = await deps.appendAlsoRaisedBy({
-      live: slot.live,
-      investigationConversationId,
-    });
-    // This Investigation's own Proposal, found again by a rerun: nothing to add to it and no
-    // journal line to write, but the run still created nothing for this finding, which its
-    // summary has to be able to say.
-    if (outcome === 'same_investigation') {
-      alreadyOpenCount += 1;
-      continue;
-    }
-    converged.push({
-      title: proposal.title ?? slot.live.title,
-      proposalId: slot.live.proposalId,
-      ownerConversationId: slot.live.conversationId,
-      outcome,
-      note: buildConvergenceNote({ spaceId, live: slot.live, outcome }) ?? '',
-    });
+  reportId: string;
+  dismissHold: DismissHold;
+  retired: boolean;
+  gapPhrase?: string;
+  /** What was not searched, bounded; this closure summary is the Investigation's own summary. */
+  gapDescription?: string;
+}): string => {
+  const found = `Hunt for report ${reportId} found no confirmed hits`;
+  if (dismissHold !== 'none') {
+    const held =
+      dismissHold === 'open_proposal'
+        ? 'it still has a pending or executing Proposal from an earlier run.'
+        : 'could not verify whether it has an open Proposal.';
+    return `${found}${
+      retired ? ', but part of the report could not be searched' : ''
+    }. Leaving the Investigation open: ${held}`;
   }
-
-  return { proposals, converged, alreadyOpenCount };
+  if (!retired) {
+    return `${found}. Closing: nothing in this environment matched the report at the confirming-index bar.`;
+  }
+  const unsearched = gapPhrase
+    ? `${gapPhrase} left part of the report unsearched`
+    : 'part of the report could not be searched';
+  const named = gapDescription ? ` Not searched: ${gapDescription}.` : '';
+  return `${found}, but ${unsearched}.${named} Closing: the report is retired without a full search.`;
 };
-
-/**
- * The settlement barrier threshold each gate checks before closing the Investigation
- * (`hunt_proposal_gate.yaml`'s `created_count >= expectedProposalCount`). Baselined on
- * `existingProposalCount` rather than just `newProposalCount`: nothing on a Proposal records
- * which run minted it, so a gate's `created_count` is always the Investigation's all-time total,
- * never scoped to a single run. Comparing that all-time total against only this run's new-proposal
- * count would let the barrier be satisfied by an earlier run's history alone, before this run's
- * own proposals exist. The baseline makes the barrier track what it actually means: the all-time
- * total has to reach "everything that existed before this run, plus everything this run adds."
- *
- * Only what this run mints is added to the baseline. A finding that converges onto a live Proposal
- * mints nothing, and that Proposal belongs to its owner's conversation, so it counts on neither
- * side: not in this Investigation's all-time total, and not in what it expects. A Proposal this
- * Investigation already holds (a rerun finding the same subject) is in the baseline already.
- *
- * Exported and kept as a pure function, separate from the decision above, so the arithmetic can
- * be tested on its own. A rerun that mints a new Proposal beside an Investigation's older ones is
- * exactly the case it exists for. Do not simplify it back to `newProposalCount` because that
- * looks like the usual case -- that is the bug this baseline was fixing.
- */
-export const computeExpectedProposalCount = ({
-  mintSuppression,
-  existingProposalCount,
-  newProposalCount,
-}: {
-  mintSuppression: MintSuppression;
-  existingProposalCount: number;
-  newProposalCount: number;
-}): number => (mintSuppression === 'none' ? existingProposalCount + newProposalCount : 0);
 
 /**
  * Orchestrates packaging for one Investigation run. Throws
  * {@link PackageReportIdentityError} when the conversation id does not match the report
  * binding; returns typed `run_incomplete` when the run claimed a hit whose current-run SSE
  * state cannot be read, when fewer current-run SSEs were found than the hunt prepared (a
- * partial `attach_sse` foreach), and when a hunt that did not complete left nothing to package.
+ * partial `attach_sse` foreach), and when a hunt that did not complete and will be retried left
+ * nothing to package. A no-hit hunt that settled packages as a dismissal: `success` as a clean
+ * one, `retired_incomplete` as one that names what was never searched.
  */
 export const runPackageReport = async ({
   spaceId,
@@ -259,10 +203,10 @@ export const runPackageReport = async ({
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
-  const expectedId = buildHuntInvestigationConversationId(reportId);
+  const expectedId = buildHuntInvestigationConversationId({ spaceId, reportId });
   if (investigationConversationId !== expectedId) {
     throw new PackageReportIdentityError(
-      `investigationConversationId does not match hunt:report:${reportId} binding`
+      `investigationConversationId does not match hunt:report:${spaceId}|${reportId} binding`
     );
   }
 
@@ -282,12 +226,17 @@ export const runPackageReport = async ({
     // (a rerun colliding on the attachment id, or a failed attach), which stays
     // `run_incomplete` so the Worker reports the sweep as partial.
     //
-    // Only a hunt that completed may close, though. The hunt-once gate keys on
-    // `evidence.last_hunted_at`, which the hunt writes only for a run it considers
-    // recorded, so a retryable-incomplete or failed run leaves its report eligible and a
-    // later sweep hunts it again. Closing here would have that sweep write its findings --
-    // a real hit included -- into an Investigation this run had already closed.
-    if (!hasConfirmedHit && huntStatus === 'success') {
+    // Only a settled hunt may close, though. The hunt-once gate keys on `evidence.last_hunted_at`,
+    // which the hunt writes only for a run it considers recorded. Three cases:
+    //  - `success`: settled and clean; nothing matched at the confirming-index bar.
+    //  - `retired_incomplete`: settled but not clean. The gate is stamped because a rerun cannot
+    //    close the gap, so no later sweep comes back to this report; the dismissal says part of it
+    //    was never searched rather than claiming nothing matched.
+    //  - `partial` / `failed`: not settled. The report stays eligible and a later sweep hunts it
+    //    again, so closing here would have that sweep write its findings -- a real hit included --
+    //    into an Investigation this run had already closed.
+    const retired = huntStatus === 'retired_incomplete';
+    if (!hasConfirmedHit && (huntStatus === 'success' || retired)) {
       // No SSE exists here, so the coordinator result the hunt child passed along is the only
       // source for the executed Tier 2 queries and the dataset hint. The report supplies the
       // threat story; a failed or missing load degrades to what the inputs alone can say
@@ -304,6 +253,8 @@ export const runPackageReport = async ({
         deps.hasOpenProposal,
         investigationConversationId
       );
+      const unsearched = retired ? dedupeCoverageGaps(coordinator.coverageGaps) : undefined;
+      const hasGaps = unsearched !== undefined && unsearched.gaps.length > 0;
       const subjects = deriveCleanCoverageSubjects({
         spaceId,
         reportId,
@@ -314,8 +265,11 @@ export const runPackageReport = async ({
           inputs: coordinator,
           reportContext,
           dismissHold,
+          retired,
+          unsearched,
         }),
         investigationConversationId,
+        unsearched,
       });
       const coverage = await deps.writeCoverageKis(subjects);
       return {
@@ -328,14 +282,13 @@ export const runPackageReport = async ({
         omittedProposalCount: 0,
         dismiss: dismissHold === 'none',
         dismissHold,
-        closureSummary:
-          dismissHold === 'none'
-            ? `Hunt for report ${reportId} found no confirmed hits. Closing: nothing in this environment matched the report at the confirming-index bar.`
-            : `Hunt for report ${reportId} found no confirmed hits. Leaving the Investigation open: ${
-                dismissHold === 'open_proposal'
-                  ? 'it still has a pending or executing Proposal from an earlier run.'
-                  : 'could not verify whether it has an open Proposal.'
-              }`,
+        closureSummary: buildNoHitClosureSummary({
+          reportId,
+          dismissHold,
+          retired,
+          gapPhrase: hasGaps ? gapCountPhrase(unsearched) : undefined,
+          gapDescription: hasGaps ? describeGaps(unsearched, MAX_CLOSURE_GAP_CHARS) : undefined,
+        }),
         expectedProposalCount: 0,
         mintSuppression: 'none',
       };
@@ -344,7 +297,9 @@ export const runPackageReport = async ({
       status: 'run_incomplete',
       reason: hasConfirmedHit
         ? `No current-run SSE attachment for runId=${runId}`
-        : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}`,
+        : `Hunt did not complete (status=${huntStatus}), so there is no verdict to record for runId=${runId}${
+            huntStatus === 'partial' ? '; the report stays eligible for a later sweep' : ''
+          }`,
     };
   }
 
@@ -386,28 +341,23 @@ export const runPackageReport = async ({
   // Only a run that would otherwise mint something needs the lookup: a dismissal (no confirmed
   // hit) has no proposals to suppress, and `decidePackageReport` never returns `dismiss: false`
   // with an empty `proposals` (the analyst-recommendation fallback always fills it).
-  let mintSuppression: MintSuppression = 'none';
-  let existingProposalCount = 0;
-  let proposals: PackageReportMintPayload[] = [];
-  let converged: ConvergedProposal[] = [];
-  let alreadyOpenCount = 0;
-  if (!decided.dismiss) {
-    try {
-      existingProposalCount = await deps.countExistingProposals(investigationConversationId);
-      ({ proposals, converged, alreadyOpenCount } = await settleProposals({
-        wanted: decided.proposals,
+  const resolved: ResolvedProposals<UnresolvedMintPayload> = decided.dismiss
+    ? {
+        proposals: [],
+        converged: [],
+        alreadyOpenSubjectKeys: [],
+        alreadyOpenCount: 0,
+        existingProposalCount: 0,
+        expectedProposalCount: 0,
+        mintSuppression: 'none',
+      }
+    : await resolveProposals({
+        candidates: decided.proposals,
         investigationConversationId,
         spaceId,
         deps,
-      }));
-    } catch {
-      // Fails closed: the one case it must not mishandle is the one where it cannot tell what
-      // already exists, because minting then could duplicate a Proposal an analyst is deciding on.
-      // `proposals`, `converged` and `alreadyOpenCount` still hold their empty starting values:
-      // they are only assigned from a `settleProposals` that returned.
-      mintSuppression = 'check_failed';
-    }
-  }
+      });
+  const { proposals, converged, alreadyOpenCount, mintSuppression } = resolved;
 
   const subjects = deriveCoverageSubjects({
     spaceId,
@@ -434,11 +384,7 @@ export const runPackageReport = async ({
   // barrier each gate checks before closing the Investigation. Not persisted to
   // conversation metadata: the platform `investigation` template's schema has no room
   // for it.
-  const expectedProposalCount = computeExpectedProposalCount({
-    mintSuppression,
-    existingProposalCount,
-    newProposalCount: proposals.length,
-  });
+  const { expectedProposalCount } = resolved;
 
   const { bullets: proposalBullets, omittedCount: omittedProposalCount } =
     buildProposalSummaryBullets(proposals);

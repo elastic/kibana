@@ -7,8 +7,8 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createOpenProposalChecker } from '../../services/watches/hunt/packaging/check_open_proposals';
-import { createAlsoRaisedByAppender } from '../../services/watches/hunt/packaging/converge_on_live_proposal';
-import { createProposalSlotResolver } from '../../services/watches/hunt/packaging/resolve_proposal_slot';
+import { createAlsoRaisedByAppender } from '../../services/proposals/dedup/converge_on_live_proposal';
+import { createProposalSlotResolver } from '../../services/proposals/dedup/resolve_proposal_slot';
 import { runPackageReport } from '../../services/watches/hunt/packaging/run_package_report';
 import { getPackageReportStepDefinition } from './package_report_step';
 
@@ -19,12 +19,12 @@ jest.mock('../../services/watches/hunt/packaging/run_package_report', () => ({
 jest.mock('../../services/watches/hunt/packaging/check_open_proposals', () => ({
   createOpenProposalChecker: jest.fn(),
 }));
-jest.mock('../../services/watches/hunt/packaging/converge_on_live_proposal', () => ({
-  ...jest.requireActual('../../services/watches/hunt/packaging/converge_on_live_proposal'),
+jest.mock('../../services/proposals/dedup/converge_on_live_proposal', () => ({
+  ...jest.requireActual('../../services/proposals/dedup/converge_on_live_proposal'),
   createAlsoRaisedByAppender: jest.fn(),
 }));
-jest.mock('../../services/watches/hunt/packaging/resolve_proposal_slot', () => ({
-  ...jest.requireActual('../../services/watches/hunt/packaging/resolve_proposal_slot'),
+jest.mock('../../services/proposals/dedup/resolve_proposal_slot', () => ({
+  ...jest.requireActual('../../services/proposals/dedup/resolve_proposal_slot'),
   createProposalSlotResolver: jest.fn(),
 }));
 
@@ -154,5 +154,60 @@ describe('package_report step wiring', () => {
         deps: expect.objectContaining({ appendAlsoRaisedBy, resolveProposalSlot }),
       })
     );
+  });
+
+  describe('coverage gaps', () => {
+    const run = async (extra: Record<string, unknown>) => {
+      runPackageReportMock.mockResolvedValue({ status: 'run_incomplete', reason: 'stub' });
+      const definition = getPackageReportStepDefinition({
+        getActionsService: () => ({ list: jest.fn() } as never),
+        getConversations: () =>
+          ({
+            getScopedClient: async () => ({ get: async () => ({ attachments: [] }) }),
+          } as never),
+        getHuntServices: () =>
+          ({
+            getProposalsService: () => ({}),
+            getProposalPrivileges: () => ({ canManage: async () => true }),
+          } as never),
+        isContextEngineEnabled: async () => false,
+      });
+      await definition.handler({
+        input: {
+          spaceId: 'default',
+          reportId: 'rpt-1',
+          investigationConversationId: 'conv-1',
+          runId: 'run-1',
+          huntStatus: 'retired_incomplete',
+          hasConfirmedHit: false,
+          ...extra,
+        },
+        contextManager: {
+          getContext: () => ({ workflow: { spaceId: 'default' } }),
+          getFakeRequest: () => ({}),
+          getScopedEsClient: () => ({}),
+        },
+      } as never);
+    };
+
+    it('hands the gaps to runPackageReport as coordinator inputs', async () => {
+      const coverageGaps = [{ reason: 'collapsed', detail: 'T1059 shares artifacts' }];
+      await run({ coverageGaps });
+      expect(runPackageReportMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          huntStatus: 'retired_incomplete',
+          coordinator: expect.objectContaining({ coverageGaps }),
+        })
+      );
+    });
+
+    it('passes undefined when the Worker did not forward any', async () => {
+      await run({});
+      expect(runPackageReportMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          coordinator: expect.objectContaining({ coverageGaps: undefined }),
+        })
+      );
+    });
   });
 });

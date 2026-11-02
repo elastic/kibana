@@ -79,6 +79,36 @@ describe('unit repository', () => {
     });
   });
 
+  it('warns when API keys for removed components may still be active', async () => {
+    const addWarning = jest.fn();
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ acknowledged: true })
+      .mockResolvedValueOnce({ acknowledged: true, api_keys_may_remain: true });
+    const repository = createUnitRepository({
+      streamsRepositoryClient: { fetch } as never,
+      toasts: { addWarning } as never,
+    });
+
+    await repository.persist(storedUnit);
+    expect(addWarning).not.toHaveBeenCalled();
+
+    await repository.persist(storedUnit);
+    expect(addWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it('sends secrets in the PUT envelope when given', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const secrets = { 'es-prod-api-key': 'plaintext' };
+
+    await expect(repository.persist(storedUnit, secrets)).resolves.toEqual(storedUnit);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: { ...storedUnit, secrets } },
+      signal: null,
+    });
+  });
+
   it('wires a source, destination, and pipeline in the temporary default unit', () => {
     expect(createDefaultUnit()).toEqual({
       unit: {

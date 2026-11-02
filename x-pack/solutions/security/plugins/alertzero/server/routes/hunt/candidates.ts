@@ -8,11 +8,14 @@
 import type { CandidatesResponse } from '@kbn/alertzero-common';
 import { API_VERSIONS, CandidatesRequestBody, INTERNAL_API_ACCESS } from '@kbn/alertzero-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import { MAX_PROPOSALS_PAGE_OFFSET, MAX_PROPOSALS_PAGE_SIZE } from '@kbn/proposals-common';
+import {
+  MAX_PROPOSALS_PAGE_OFFSET,
+  MAX_PROPOSALS_PAGE_SIZE,
+  OPEN_PROPOSAL_STATUSES,
+} from '@kbn/proposals-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ, CANDIDATES_URL } from '../../../common/constants';
-import { OPEN_PROPOSAL_STATUSES } from '../../../common/proposals/open_statuses';
 import { buildCandidateQuery } from '../../services/watches/hunt/common/build_candidate_query';
 import type { OpenProposalConversationIdsReader } from '../../services/watches/hunt/common/build_candidate_query';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
@@ -115,7 +118,7 @@ export const registerCandidatesRoute = ({
           // asCurrentUser fails for every non-superuser. Access is gated by the route
           // authz above and narrowed by the explicit space filter in the query.
           const esClient = (await context.core).elasticsearch.client.asInternalUser;
-          const { report_ids, limit } = request.body;
+          const { report_ids, limit, lookback_days } = request.body;
 
           const trigger =
             report_ids && report_ids.length > 0 ? ('manual' as const) : ('scheduled' as const);
@@ -132,6 +135,7 @@ export const registerCandidatesRoute = ({
               report_ids: report_ids ?? undefined,
               spaceId,
               limit,
+              lookbackDays: lookback_days,
             },
             readOpenProposalConversationIds
           );

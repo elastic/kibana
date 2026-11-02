@@ -5,91 +5,24 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiHorizontalRule,
-  EuiSkeletonText,
-  EuiPortal,
-  EuiSpacer,
-  EuiTabbedContent,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
-import styled from '@emotion/styled';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { isEmpty } from 'lodash';
-import React, { Fragment } from 'react';
-import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
-import { Duration, Timestamp } from '@kbn/apm-ui-shared';
-import { OpenInDiscover } from '../links/discover_links/open_in_discover';
-import { SPAN_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
-import type { Span } from '../../../../typings/es_schemas/ui/span';
-import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { SpanMetadata } from '../metadata_table/span_metadata';
-import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
-import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
-import { useGenAiData } from '../genai_tab/use_genai_data';
-import { Summary } from '../summary';
-import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
-import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
-import { SyncBadge } from '../badge/sync_badge';
-import { FailureBadge } from '../badge/failure_badge';
-import { ResponsiveFlyout } from '../responsive_flyout';
-import { SpanDatabase } from './span_db';
-import { StickySpanProperties } from './sticky_span_properties';
+import React from 'react';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { SpanLinksCount } from '../span_links';
+import { useSpanDatabaseSection } from './span_db';
+import { SPAN_DETAILS_LABEL, useSpanFlyoutHeader } from './use_span_flyout_header';
+import { useSpanFlyoutMenuProps } from './use_span_flyout_menu_props';
+import { useSpanFlyoutTabs } from './use_span_flyout_tabs';
 
-function formatType(type: string) {
-  switch (type) {
-    case 'db':
-      return 'DB';
-    case 'hard-navigation':
-      return i18n.translate(
-        'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
-        {
-          defaultMessage: 'Navigation timing',
-        }
-      );
-    default:
-      return type;
+const COMPOSITE_WARNING = i18n.translate(
+  'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
+  {
+    defaultMessage: 'This is a sample document for a group of consecutive, similar spans',
   }
-}
-
-function formatSubtype(subtype: string | undefined) {
-  switch (subtype) {
-    case 'mysql':
-      return 'MySQL';
-    default:
-      return subtype;
-  }
-}
-
-function getSpanTypes(span: Span) {
-  const { type, subtype, action } = span.span;
-
-  return {
-    spanType: formatType(type),
-    spanSubtype: formatSubtype(subtype),
-    spanAction: action,
-  };
-}
-
-const ContainerWithMarginRight = styled.div`
-  /* add margin to all direct descendants */
-  & > * {
-    margin-right: ${({ theme }) => theme.euiTheme.size.xs};
-  }
-`;
+);
 
 interface Props {
   spanId: string;
@@ -103,11 +36,6 @@ interface Props {
   rangeTo: string;
   kuery?: string;
 }
-
-const INITIAL_DATA = {
-  span: undefined,
-  parentTransaction: undefined,
-};
 
 export function SpanFlyout({
   spanId,
@@ -123,7 +51,7 @@ export function SpanFlyout({
 }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { data = INITIAL_DATA, status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/traces/{traceId}/spans/{spanId}', {
         params: {
@@ -135,242 +63,60 @@ export function SpanFlyout({
     [traceId, spanId, parentTransactionId, start, end]
   );
 
-  const { span, parentTransaction } = data;
-
+  // The fetcher keeps the previous document while the next one loads; gate on the status so a
+  // switch between waterfall items never shows the previous span.
   const isLoading = isPending(status);
+  const span = isLoading ? undefined : data?.span;
+  const parentTransaction = isLoading ? undefined : data?.parentTransaction;
 
-  const spanDetailsTitle = i18n.translate(
-    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
-    {
-      defaultMessage: 'Span details',
-    }
-  );
+  const { metaBlocks, infoBlocks, badges } = useSpanFlyoutHeader({
+    span,
+    parentTransaction,
+    totalDuration,
+  });
+  const tabs = useSpanFlyoutTabs({ span, parentTransaction, spanLinksCount });
+  const databaseSection = useSpanDatabaseSection(span?.span?.db);
+
+  const flyoutMenuProps = useSpanFlyoutMenuProps({
+    isSpanLoaded: !!span,
+    spanId,
+    rangeFrom,
+    rangeTo,
+    kuery,
+  });
 
   return (
-    <EuiPortal>
-      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true} aria-label={spanDetailsTitle}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h2>{spanDetailsTitle}</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            {span && (
-              <EuiFlexItem grow={false}>
-                <OpenInDiscover
-                  dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
-                  label={i18n.translate('xpack.apm.spanFlyout.openInDiscover', {
-                    defaultMessage: 'Open in Discover',
-                  })}
-                  variant="emptyButton"
-                  indexType="traces"
-                  rangeFrom={rangeFrom}
-                  rangeTo={rangeTo}
-                  queryParams={{
-                    kuery,
-                    spanId,
-                    sortDirection: 'DESC',
-                  }}
-                  ebt={{ element: SPAN_FLYOUT_EBT_ELEMENTS.HEADER }}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          {span?.span.composite && (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiCallOut announceOnMount color="warning" iconType="gear" size="s">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.compositeExampleWarning',
-                    {
-                      defaultMessage:
-                        'This is a sample document for a group of consecutive, similar spans',
-                    }
-                  )}
-                </EuiCallOut>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiSkeletonText isLoading={isLoading}>
-            {span && (
-              <SpanFlyoutBody
-                span={span}
-                parentTransaction={parentTransaction}
-                totalDuration={totalDuration}
-                spanLinksCount={spanLinksCount}
-                flyoutDetailTab={flyoutDetailTab}
-              />
-            )}
-          </EuiSkeletonText>
-        </EuiFlyoutBody>
-      </ResponsiveFlyout>
-    </EuiPortal>
-  );
-}
-
-function SpanFlyoutBody({
-  span,
-  parentTransaction,
-  totalDuration,
-  spanLinksCount,
-  flyoutDetailTab,
-}: {
-  span: Span;
-  parentTransaction?: Transaction;
-  totalDuration?: number;
-  spanLinksCount: SpanLinksCount;
-  flyoutDetailTab?: string;
-}) {
-  const stackframes = span.span.stacktrace;
-  const plaintextStacktrace = span.code?.stacktrace;
-  const codeLanguage = parentTransaction?.service?.language?.name;
-  const spanDb = span.span.db;
-  const spanTypes = getSpanTypes(span);
-  const spanHttpStatusCode =
-    span.http?.response?.status_code || span.span?.http?.response?.status_code;
-  const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
-  const spanHttpMethod = span.http?.request?.method || span.span?.http?.method;
-
-  const spanLinksTabContent = getSpanLinksTabContent({
-    spanLinksCount,
-    traceId: span.trace?.id,
-    spanId: span.span?.id,
-    processorEvent: ProcessorEvent.span,
-  });
-
-  const { metadata, isMetadataLoading, isGenAiSpan, genAi } = useGenAiData({
-    processorEvent: ProcessorEvent.span,
-    id: span.span?.id,
-    timestamp: span['@timestamp'],
-  });
-
-  const { core } = useApmPluginContext();
-
-  const genAiTabContent = getGenAiTabContent({
-    isGenAiSpan,
-    genAi,
-    ebt: { element: SPAN_FLYOUT_EBT_ELEMENTS.TABS },
-    reportEvent: core.analytics.reportEvent,
-    resourceId: span.span?.id,
-  });
-
-  const tabs = [
-    {
-      id: 'metadata',
-      name: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
-        defaultMessage: 'Metadata',
-      }),
-      content: (
-        <Fragment>
-          <EuiSpacer size="m" />
-          <SpanMetadata
-            span={span}
-            prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
+    <FlyoutTemplate
+      data-test-subj="spanFlyout"
+      onClose={onClose}
+      ownFocus
+      size="m"
+      flyoutMenuProps={flyoutMenuProps}
+      tabs={tabs.map(({ tab }) => tab)}
+      defaultSelectedTabId={flyoutDetailTab}
+      tabBarProps={{ 'data-test-subj': 'spanFlyoutTabs' }}
+    >
+      <FlyoutTemplate.Header title={SPAN_DETAILS_LABEL} data-test-subj="spanFlyoutHeader">
+        {metaBlocks}
+        {infoBlocks}
+        {badges}
+      </FlyoutTemplate.Header>
+      <FlyoutTemplate.Body>
+        {span?.span?.composite ? (
+          <FlyoutTemplate.Body.Callout
+            level="warning"
+            title={COMPOSITE_WARNING}
+            data-test-subj="spanFlyoutCompositeCallout"
           />
-        </Fragment>
-      ),
-    },
-    ...(!isEmpty(stackframes) || !isEmpty(plaintextStacktrace)
-      ? [
-          {
-            id: 'stack-trace',
-            'data-test-subj': 'spanStacktraceTab',
-            name: i18n.translate('xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel', {
-              defaultMessage: 'Stack Trace',
-            }),
-            content: (
-              <Fragment>
-                <EuiSpacer size="l" />
-                {stackframes ? (
-                  <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
-                ) : (
-                  <PlaintextStacktrace
-                    stacktrace={plaintextStacktrace}
-                    codeLanguage={codeLanguage}
-                  />
-                )}
-              </Fragment>
-            ),
-          },
-        ]
-      : []),
-    ...(spanLinksTabContent ? [spanLinksTabContent] : []),
-    ...(genAiTabContent ? [genAiTabContent] : []),
-  ];
-
-  const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
-  return (
-    <>
-      <StickySpanProperties span={span} transaction={parentTransaction} />
-      <EuiSpacer size="m" />
-      <Summary
-        items={[
-          <Timestamp timestamp={getTimestampUs(span) / 1000} renderMode="tooltip" />,
-          <>
-            <Duration
-              duration={span.span.duration.us}
-              parent={{ duration: totalDuration, type: 'transaction', loading: false }}
-              showTooltip
-            />
-            {span.span.composite && (
-              <CompositeSpanDurationSummaryItem
-                count={span.span.composite.count}
-                durationSum={span.span.composite.sum.us}
-              />
-            )}
-          </>,
-          <ContainerWithMarginRight>
-            {spanHttpUrl && (
-              <HttpInfoSummaryItem
-                method={spanHttpMethod}
-                url={spanHttpUrl}
-                status={spanHttpStatusCode}
-              />
-            )}
-            <EuiToolTip
-              content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanType', {
-                defaultMessage: 'Type',
-              })}
-            >
-              <EuiBadge color="hollow" tabIndex={0}>
-                {spanTypes.spanType}
-              </EuiBadge>
-            </EuiToolTip>
-            {spanTypes.spanSubtype && (
-              <EuiToolTip
-                content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanSubtype', {
-                  defaultMessage: 'Subtype',
-                })}
-              >
-                <EuiBadge color="hollow" tabIndex={0}>
-                  {spanTypes.spanSubtype}
-                </EuiBadge>
-              </EuiToolTip>
-            )}
-            {spanTypes.spanAction && (
-              <EuiToolTip
-                content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanAction', {
-                  defaultMessage: 'Action',
-                })}
-              >
-                <EuiBadge color="hollow" tabIndex={0}>
-                  {spanTypes.spanAction}
-                </EuiBadge>
-              </EuiToolTip>
-            )}
-
-            <FailureBadge outcome={span.event?.outcome} />
-
-            <SyncBadge sync={span.span.sync} agentName={span.agent?.name} />
-          </ContainerWithMarginRight>,
-        ]}
-      />
-      <EuiHorizontalRule />
-      <SpanDatabase spanDb={spanDb} />
-      <EuiTabbedContent tabs={tabs} initialSelectedTab={initialTab} />
-    </>
+        ) : null}
+        {databaseSection}
+        {isLoading ? <EuiSkeletonText isLoading /> : null}
+        {tabs.map(({ tab, panel }) => (
+          <FlyoutTemplate.Body.TabPanel key={tab.id} tabId={tab.id}>
+            {panel}
+          </FlyoutTemplate.Body.TabPanel>
+        ))}
+      </FlyoutTemplate.Body>
+    </FlyoutTemplate>
   );
 }

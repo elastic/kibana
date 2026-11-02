@@ -32,10 +32,9 @@ test.describe(
         });
       }
 
-      await pageObjects.streams.gotoPartitioningTab('logs.otel');
-      // A cold Cloud bootstrap can outlast the first drag's 10s action timeout.
-      await expect(page.getByTestId('routingRuleDragHandle-logs.otel.first')).toBeVisible({
-        timeout: 30_000,
+      await pageObjects.streams.gotoPartitioningTab('logs.otel', {
+        // A cold Cloud bootstrap can outlast Playwright's navigation timeout.
+        readyWhen: page.getByTestId('routingRuleDragHandle-logs.otel.first'),
       });
     });
 

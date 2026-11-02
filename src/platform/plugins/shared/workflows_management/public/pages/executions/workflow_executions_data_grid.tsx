@@ -81,10 +81,10 @@ const SelectionHeaderCell = () => {
 
   const title =
     isIndeterminate || areAllVisibleSelected
-      ? i18n.translate('workflowsManagement.executionsPage.grid.deselectAllRows', {
+      ? i18n.translate('workflows.executionsPage.grid.deselectAllRows', {
           defaultMessage: 'Deselect all visible rows',
         })
-      : i18n.translate('workflowsManagement.executionsPage.grid.selectAllRows', {
+      : i18n.translate('workflows.executionsPage.grid.selectAllRows', {
           defaultMessage: 'Select all visible rows',
         });
 
@@ -92,7 +92,7 @@ const SelectionHeaderCell = () => {
     <>
       <EuiScreenReaderOnly>
         <span>
-          {i18n.translate('workflowsManagement.executionsPage.grid.selectColumnHeader', {
+          {i18n.translate('workflows.executionsPage.grid.selectColumnHeader', {
             defaultMessage: 'Select column',
           })}
         </span>
@@ -133,7 +133,7 @@ const SelectionRowCell = ({
   }
 
   const toggleDocumentSelectionLabel = i18n.translate(
-    'workflowsManagement.executionsPage.grid.selectExecution',
+    'workflows.executionsPage.grid.selectExecution',
     {
       defaultMessage: `Select execution ''{rowNumber}''`,
       values: { rowNumber: rowIndex + 1 },

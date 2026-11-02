@@ -32,6 +32,35 @@ export const WriteHuntEvidenceRequestBody = lazySchema(() =>
        * Tier 1's total-hits count for this run.
        */
       totalHits: z.number().int().min(0).describe("Tier 1's total-hits count for this run."),
+      /**
+       * Technique ids this run actually searched, from the coordinator's `searched_technique_ids`. Unioned into the report's per-space ledger so a later run does not spend its behavior budget on them again.
+       */
+      searchedTechniqueIds: z
+        .array(z.string().min(1).max(32))
+        .max(100)
+        .optional()
+        .describe(
+          "Technique ids this run actually searched, from the coordinator's `searched_technique_ids`. Unioned into the report's per-space ledger so a later run does not spend its behavior budget on them again."
+        ),
+      /**
+       * Technique ids this run could not search but a later run still should, from the coordinator's `pending_technique_ids`. Replaces the report's recorded list for the space, so the next run keeps them as pending even if its own extraction no longer returns them. Omit when Tier 2 did not run, which leaves the recorded list as it is.
+       */
+      pendingTechniqueIds: z
+        .array(z.string().min(1).max(32))
+        .max(100)
+        .optional()
+        .describe(
+          "Technique ids this run could not search but a later run still should, from the coordinator's `pending_technique_ids`. Replaces the report's recorded list for the space, so the next run keeps them as pending even if its own extraction no longer returns them. Omit when Tier 2 did not run, which leaves the recorded list as it is."
+        ),
+      /**
+       * From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run.
+       */
+      replayedWholeReport: z
+        .boolean()
+        .optional()
+        .describe(
+          "From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run."
+        ),
     })
     .strict()
 );
@@ -41,6 +70,15 @@ export type WriteHuntEvidenceRequestBodyInput = z.input<typeof WriteHuntEvidence
 export const WriteHuntEvidenceResponse = lazySchema(() =>
   z.object({
     acknowledged: z.boolean(),
+    /**
+     * True when the report's coverage ledger could not hold every technique, so a retryable run was settled and stamped as hunted instead of left eligible for a later sweep.
+     */
+    settledByCap: z
+      .boolean()
+      .optional()
+      .describe(
+        "True when the report's coverage ledger could not hold every technique, so a retryable run was settled and stamped as hunted instead of left eligible for a later sweep."
+      ),
   })
 );
 export type WriteHuntEvidenceResponse = z.infer<typeof WriteHuntEvidenceResponse>;
