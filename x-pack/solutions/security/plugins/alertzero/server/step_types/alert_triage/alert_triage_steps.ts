@@ -7,7 +7,10 @@
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { AlertDocumentsTooLargeError } from '@kbn/workflows-management-plugin/server';
+import {
+  AlertDocumentsTooLargeError,
+  TooManyAlertDocumentsError,
+} from '@kbn/workflows-management-plugin/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
@@ -172,10 +175,19 @@ export const getTriageLoadAlertsStepDefinition = ({
       try {
         const management = getWorkflowsManagement();
         if (management && input.space_id) {
+          // The loader reads the index as the user and checks no space access, so the space comes
+          // from the execution and an input naming another space (or a wildcard) is refused.
+          const { spaceId } = contextManager.getContext().workflow;
+          if (input.space_id !== spaceId) {
+            throw new ExecutionError({
+              type: 'InvalidInput',
+              message: `space_id must be the workflow's space "${spaceId}".`,
+            });
+          }
           // EXPERIMENT: shared platform loader instead of the detection-engine search route.
           const { alerts, missingIds } = await management.loadAlertDocuments({
             request: contextManager.getFakeRequest(),
-            alerts: { ids: input.alert_ids, index: `.alerts-security.alerts-${input.space_id}` },
+            alerts: { ids: input.alert_ids, index: `.alerts-security.alerts-${spaceId}` },
             sourceIncludes: LOADED_ALERT_FIELDS,
             maxBytes: MAX_LOADED_ALERT_BYTES,
           });
@@ -184,7 +196,10 @@ export const getTriageLoadAlertsStepDefinition = ({
         const { alerts, missingAlertIds } = await loadAlertsByIds(contextManager, input.alert_ids);
         return { output: { alerts, missing_alert_ids: missingAlertIds } };
       } catch (error) {
-        if (error instanceof AlertDocumentsTooLargeError) {
+        if (
+          error instanceof AlertDocumentsTooLargeError ||
+          error instanceof TooManyAlertDocumentsError
+        ) {
           throw new ExecutionError({ type: 'StepSizeLimitExceeded', message: error.message });
         }
         throw toApiError(error, 'load triage batch alerts');

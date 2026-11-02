@@ -6,7 +6,10 @@
  */
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { AlertDocumentsTooLargeError } from '@kbn/workflows-management-plugin/server';
+import {
+  AlertDocumentsTooLargeError,
+  TooManyAlertDocumentsError,
+} from '@kbn/workflows-management-plugin/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
 import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
@@ -248,7 +251,11 @@ describe('triage load alerts step', () => {
     const createLoaderContext = (input: Record<string, unknown>, callKibanaApi: jest.Mock) =>
       ({
         input,
-        contextManager: { callKibanaApi, getFakeRequest: () => request },
+        contextManager: {
+          callKibanaApi,
+          getFakeRequest: () => request,
+          getContext: () => ({ workflow: { spaceId: 'default' } }),
+        },
         logger: { warn: jest.fn() },
       } as unknown as StepHandlerContext<unknown, unknown>);
 
@@ -277,17 +284,37 @@ describe('triage load alerts step', () => {
       });
     });
 
-    it('reports documents over the byte cap as StepSizeLimitExceeded', async () => {
-      const loadAlertDocuments = jest
-        .fn()
-        .mockRejectedValue(new AlertDocumentsTooLargeError(10, 20));
+    it.each([
+      ['documents over the byte cap', new AlertDocumentsTooLargeError(10, 20)],
+      ['more alerts than one load allows', new TooManyAlertDocumentsError(1000, 1001)],
+    ])(
+      'reports %s as StepSizeLimitExceeded, which the workflow does not retry',
+      async (_label, error) => {
+        const loadAlertDocuments = jest.fn().mockRejectedValue(error);
 
-      await expect(
-        getTriageLoadAlertsStepDefinition({
-          getWorkflowsManagement: () => ({ loadAlertDocuments }),
-        }).handler(createLoaderContext({ alert_ids: ['a-1'], space_id: 'default' }, jest.fn()))
-      ).rejects.toMatchObject({ type: 'StepSizeLimitExceeded' });
-    });
+        await expect(
+          getTriageLoadAlertsStepDefinition({
+            getWorkflowsManagement: () => ({ loadAlertDocuments }),
+          }).handler(createLoaderContext({ alert_ids: ['a-1'], space_id: 'default' }, jest.fn()))
+        ).rejects.toMatchObject({ type: 'StepSizeLimitExceeded' });
+      }
+    );
+
+    it.each(['other-space', '*'])(
+      'refuses space_id %s, so a workflow cannot read the alerts of another space',
+      async (spaceId) => {
+        const loadAlertDocuments = jest.fn();
+        const callKibanaApi = jest.fn();
+
+        await expect(
+          getTriageLoadAlertsStepDefinition({
+            getWorkflowsManagement: () => ({ loadAlertDocuments }),
+          }).handler(createLoaderContext({ alert_ids: ['a-1'], space_id: spaceId }, callKibanaApi))
+        ).rejects.toMatchObject({ type: 'InvalidInput' });
+        expect(loadAlertDocuments).not.toHaveBeenCalled();
+        expect(callKibanaApi).not.toHaveBeenCalled();
+      }
+    );
 
     it('falls back to the search route when the input has no space_id', async () => {
       const loadAlertDocuments = jest.fn();
