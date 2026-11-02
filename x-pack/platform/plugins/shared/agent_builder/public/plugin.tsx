@@ -91,10 +91,12 @@ export class AgentBuilderPlugin
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
+  private readonly isServerless: boolean;
   private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
   }
   setup(
     core: CoreSetup<AgentBuilderStartDependencies, AgentBuilderPluginStart>,
@@ -230,6 +232,7 @@ export class AgentBuilderPlugin
       accessChecker,
       eventsService,
       isEarsEnabled: this.isEarsEnabled,
+      isServerless: this.isServerless,
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },

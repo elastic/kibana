@@ -31,21 +31,23 @@ export const registerTools = ({
   coreSetup,
   setupDeps,
   getSecurity,
+  isServerless,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
   getSecurity: () => SecurityPluginStart | undefined;
+  isServerless: boolean;
 }) => {
   const { agentBuilder } = setupDeps;
 
   const tools: Array<StaticToolRegistration<any>> = [
-    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
+    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets, isServerless }),
     getDocumentByIdTool(),
-    executeEsqlTool(),
-    generateEsqlTool(),
-    getIndexMappingsTool(),
+    executeEsqlTool({ isServerless }),
+    generateEsqlTool({ isServerless }),
+    getIndexMappingsTool({ isServerless }),
     listIndicesTool(),
-    indexExplorerTool(),
+    indexExplorerTool({ isServerless }),
     createVisualizationTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),

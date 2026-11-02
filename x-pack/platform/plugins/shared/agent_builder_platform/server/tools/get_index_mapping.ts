@@ -5,30 +5,44 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
+import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { IndexFieldsResult, MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
+
+const createGetIndexMappingsSchemaShape = () => ({
+  indices: z
+    .array(z.string())
+    .min(1)
+    .describe('List of indices, aliases or datastreams to retrieve mappings for.'),
+  raw: z
+    .boolean()
+    .default(false)
+    .describe('Whether to return the raw mapping tree instead of the summarized fields.'),
+});
 
 const createGetIndexMappingsSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
-    indices: z
-      .array(z.string())
-      .min(1)
-      .describe('List of indices, aliases or datastreams to retrieve mappings for.'),
-    raw: z
-      .boolean()
-      .default(false)
-      .describe('Whether to return the raw mapping tree instead of the summarized fields.'),
+    ...createGetIndexMappingsSchemaShape(),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
   })
 );
 
-type GetIndexMappingsSchema = ReturnType<typeof createGetIndexMappingsSchema>;
+const createServerlessGetIndexMappingsSchema = once(() =>
+  z.object(createGetIndexMappingsSchemaShape())
+);
+
+type GetIndexMappingsSchema =
+  | ReturnType<typeof createGetIndexMappingsSchema>
+  | ReturnType<typeof createServerlessGetIndexMappingsSchema>;
 
 const formatField = (field: MappingField): string => {
   const description = field.meta.description ? ` ${field.meta.description}` : '';
@@ -44,24 +58,33 @@ const NO_FIELDS_NOTE = 'No fields found.';
 // the frozen tier. Index and data stream fields come from `_mapping` / `_data_stream/_mappings`.
 const noFieldsNote = (
   { type, fields }: IndexFieldsResult,
-  includeFrozen: boolean
+  frozenExcluded: boolean
 ): string | undefined => {
   if (fields.length > 0 || (type !== 'alias' && type !== 'indexPattern')) {
     return undefined;
   }
-  return includeFrozen ? NO_FIELDS_NOTE : NO_FIELDS_FROZEN_EXCLUDED_NOTE;
+  return frozenExcluded ? NO_FIELDS_FROZEN_EXCLUDED_NOTE : NO_FIELDS_NOTE;
 };
 
 type GetIndexMappingsTool = DynamicSchemaBuiltinToolDefinition<GetIndexMappingsSchema>;
 
-export const getIndexMappingsTool = (): GetIndexMappingsTool => {
+export const getIndexMappingsTool = ({
+  isServerless = false,
+}: {
+  isServerless?: boolean;
+} = {}): GetIndexMappingsTool => {
   return {
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
     description: 'Retrieve mappings for indices, aliases or datastreams.',
     getSchema: async (schemaContext) =>
-      createGetIndexMappingsSchema(await getIncludeFrozenByDefault(schemaContext)),
-    handler: async ({ indices, raw, include_frozen: includeFrozen }, { esClient }) => {
+      isServerless
+        ? createServerlessGetIndexMappingsSchema()
+        : createGetIndexMappingsSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (params, { esClient }) => {
+      const { indices, raw } = params;
+      const includeFrozen = getIncludeFrozenParam(params);
+      const frozenExcluded = !isServerless && !includeFrozen;
       // getIndexFields transparently handles the local-vs-CCS split:
       //  - local indices use _mapping API (full mapping tree in rawMapping)
       //  - CCS indices use batched _field_caps API (flat field list)
@@ -76,7 +99,7 @@ export const getIndexMappingsTool = (): GetIndexMappingsTool => {
           if (raw && v.rawMapping) {
             return [name, { type: v.type, mappings: v.rawMapping }];
           }
-          const note = noFieldsNote(v, includeFrozen);
+          const note = noFieldsNote(v, frozenExcluded);
           if (raw) {
             return [
               name,
