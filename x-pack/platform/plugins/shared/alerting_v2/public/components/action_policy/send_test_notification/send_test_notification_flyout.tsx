@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { normalizeMatcher } from '@kbn/alerting-v2-utils';
@@ -13,7 +14,7 @@ import React, { useState } from 'react';
 import { usePreviewTestNotification } from '../../../hooks/use_preview_test_notification';
 import { useSendTestNotification } from '../../../hooks/use_send_test_notification';
 import { DestinationTestCard } from './destination_test_card';
-import { DestinationTestResult } from './destination_test_result';
+import { SendTestResultsFlyout } from './send_test_results_flyout';
 import * as labels from './translations';
 
 interface Props {
@@ -39,6 +40,8 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     reset: resetSend,
   } = useSendTestNotification(policy.id);
   const [deselectedIds, setDeselectedIds] = useState<ReadonlySet<string>>(new Set());
+  const [ownHistoryKey] = useState(() => Symbol('sendTestNotificationFlyout'));
+  const flyoutHistoryKey = historyKey ?? ownHistoryKey;
 
   const destinations = preview?.destinations ?? [];
   const selectedIds = destinations
@@ -46,9 +49,6 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     .map(({ id }) => id);
   const payload = preview?.groups[0];
   const hasKqlMatcher = Boolean(normalizeMatcher(policy.matcher)?.expression);
-  const resultsByWorkflowId = new Map(
-    (sendResponse?.results ?? []).map((result) => [result.workflow_id, result])
-  );
 
   const toggleDestination = (id: string) =>
     setDeselectedIds((current) => {
@@ -66,145 +66,118 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     sendTestNotification({ seed: preview.seed, destinationIds: selectedIds });
   };
 
-  const goBack = () => {
+  const closeResults: EuiFlyoutProps['onClose'] = (_event, meta) => {
     resetSend();
-    setDeselectedIds(new Set());
-    reloadPreview();
+    if (meta?.reason === 'navigation-back') {
+      setDeselectedIds(new Set());
+      reloadPreview();
+    }
   };
 
   return (
-    <FlyoutTemplate
-      type="overlay"
-      size="m"
-      resizable
-      ownFocus={false}
-      session="start"
-      historyKey={historyKey}
-      onClose={onClose}
-      data-test-subj="sendTestNotificationFlyout"
-    >
-      <Header title={labels.FLYOUT_TITLE} description={policy.name} />
-      {sendResponse ? (
-        <>
-          <Body>
-            <Body.Section
-              id="results"
-              title={labels.RESULTS_TITLE}
-              data-test-subj="sendTestNotificationResults"
-            >
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {destinations.map((destination) => {
-                  const result = resultsByWorkflowId.get(destination.id);
-                  return (
-                    result && (
-                      <EuiFlexItem key={destination.id}>
-                        <DestinationTestResult destination={destination} result={result} />
-                      </EuiFlexItem>
-                    )
-                  );
-                })}
-              </EuiFlexGroup>
-            </Body.Section>
-          </Body>
-          <Footer>
-            <Footer.SecondaryAction
-              label={labels.BACK}
-              iconType="arrowLeft"
-              onClick={goBack}
-              data-test-subj="sendTestNotificationBackButton"
-            />
-            <Footer.PrimaryAction
-              label={labels.CLOSE}
-              onClick={onClose}
-              data-test-subj="sendTestNotificationCloseButton"
-            />
-          </Footer>
-        </>
-      ) : (
-        <>
-          <Body>
+    <>
+      <FlyoutTemplate
+        type="overlay"
+        size="m"
+        resizable
+        ownFocus={false}
+        session="start"
+        historyKey={flyoutHistoryKey}
+        onClose={onClose}
+        data-test-subj="sendTestNotificationFlyout"
+      >
+        <Header title={labels.FLYOUT_TITLE} description={policy.name} />
+        <Body>
+          <Body.Callout
+            id="realChannels"
+            level="warning"
+            title={labels.REAL_CHANNELS_TITLE}
+            text={labels.REAL_CHANNELS_TEXT}
+            data-test-subj="sendTestNotificationRealChannelsCallout"
+          />
+          <Body.Callout
+            id="syntheticValues"
+            level="info"
+            title={labels.SYNTHETIC_VALUES_TITLE}
+            text={hasKqlMatcher ? labels.SYNTHETIC_VALUES_KQL_TEXT : labels.SYNTHETIC_VALUES_TEXT}
+            data-test-subj="sendTestNotificationSyntheticValuesCallout"
+          />
+          {error && (
             <Body.Callout
-              id="realChannels"
-              level="warning"
-              title={labels.REAL_CHANNELS_TITLE}
-              text={labels.REAL_CHANNELS_TEXT}
-              data-test-subj="sendTestNotificationRealChannelsCallout"
+              id="previewError"
+              level="danger"
+              title={labels.PREVIEW_ERROR_TITLE}
+              text={error.message}
+              data-test-subj="sendTestNotificationPreviewErrorCallout"
             />
-            <Body.Callout
-              id="syntheticValues"
-              level="info"
-              title={labels.SYNTHETIC_VALUES_TITLE}
-              text={hasKqlMatcher ? labels.SYNTHETIC_VALUES_KQL_TEXT : labels.SYNTHETIC_VALUES_TEXT}
-              data-test-subj="sendTestNotificationSyntheticValuesCallout"
-            />
-            {error && (
-              <Body.Callout
-                id="previewError"
-                level="danger"
-                title={labels.PREVIEW_ERROR_TITLE}
-                text={error.message}
-                data-test-subj="sendTestNotificationPreviewErrorCallout"
-              />
+          )}
+          {isLoading && <EuiLoadingSpinner size="l" />}
+          <Body.Section
+            id="payload"
+            title={labels.PAYLOAD_TITLE}
+            data-test-subj="sendTestNotificationPayload"
+          >
+            {payload ? (
+              <EuiCodeBlock
+                language="json"
+                fontSize="s"
+                paddingSize="m"
+                overflowHeight={480}
+                isCopyable
+                data-test-subj="sendTestNotificationPayloadCode"
+              >
+                {JSON.stringify(payload, null, 2)}
+              </EuiCodeBlock>
+            ) : (
+              <EuiText size="s" color="subdued">
+                <p>{labels.NO_PAYLOAD}</p>
+              </EuiText>
             )}
-            {isLoading && <EuiLoadingSpinner size="l" />}
-            <Body.Section
-              id="payload"
-              title={labels.PAYLOAD_TITLE}
-              data-test-subj="sendTestNotificationPayload"
-            >
-              {payload ? (
-                <EuiCodeBlock
-                  language="json"
-                  fontSize="s"
-                  paddingSize="m"
-                  overflowHeight={480}
-                  isCopyable
-                  data-test-subj="sendTestNotificationPayloadCode"
-                >
-                  {JSON.stringify(payload, null, 2)}
-                </EuiCodeBlock>
-              ) : (
-                <EuiText size="s" color="subdued">
-                  <p>{labels.NO_PAYLOAD}</p>
-                </EuiText>
-              )}
-            </Body.Section>
-            <Body.Section
-              id="destinations"
-              title={labels.DESTINATIONS_TITLE}
-              data-test-subj="sendTestNotificationDestinations"
-            >
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {destinations.map((destination) => (
-                  <EuiFlexItem key={destination.id}>
-                    <DestinationTestCard
-                      destination={destination}
-                      checked={destination.executable && !deselectedIds.has(destination.id)}
-                      disabled={!destination.executable || isSending}
-                      onChange={() => toggleDestination(destination.id)}
-                    />
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </Body.Section>
-          </Body>
-          <Footer>
-            <Footer.SecondaryAction
-              label={labels.CLOSE}
-              onClick={onClose}
-              data-test-subj="sendTestNotificationCloseButton"
-            />
-            <Footer.PrimaryAction
-              label={labels.SEND}
-              iconType="send"
-              onClick={send}
-              isLoading={isSending}
-              isDisabled={!payload || selectedIds.length === 0}
-              data-test-subj="sendTestNotificationSendButton"
-            />
-          </Footer>
-        </>
+          </Body.Section>
+          <Body.Section
+            id="destinations"
+            title={labels.DESTINATIONS_TITLE}
+            data-test-subj="sendTestNotificationDestinations"
+          >
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {destinations.map((destination) => (
+                <EuiFlexItem key={destination.id}>
+                  <DestinationTestCard
+                    destination={destination}
+                    checked={destination.executable && !deselectedIds.has(destination.id)}
+                    disabled={!destination.executable || isSending}
+                    onChange={() => toggleDestination(destination.id)}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </Body.Section>
+        </Body>
+        <Footer>
+          <Footer.SecondaryAction
+            label={labels.CLOSE}
+            onClick={onClose}
+            data-test-subj="sendTestNotificationCloseButton"
+          />
+          <Footer.PrimaryAction
+            label={labels.SEND}
+            iconType="send"
+            onClick={send}
+            isLoading={isSending}
+            isDisabled={!payload || selectedIds.length === 0}
+            data-test-subj="sendTestNotificationSendButton"
+          />
+        </Footer>
+      </FlyoutTemplate>
+      {sendResponse && (
+        <SendTestResultsFlyout
+          policyName={policy.name}
+          destinations={destinations}
+          sendResponse={sendResponse}
+          historyKey={flyoutHistoryKey}
+          onClose={closeResults}
+        />
       )}
-    </FlyoutTemplate>
+    </>
   );
 };

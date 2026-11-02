@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import React, { type ComponentProps } from 'react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {
   ActionPolicyResponse,
@@ -16,6 +16,7 @@ import type {
 import { ExecutionStatus } from '@kbn/workflows';
 import { createTestQueryClient, TestProviders } from '../../../test_utils/test_providers';
 import { SendTestNotificationFlyout } from './send_test_notification_flyout';
+import type { SendTestResultsFlyout } from './send_test_results_flyout';
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -51,6 +52,27 @@ jest.mock('../../../hooks/use_send_test_notification', () => ({
     reset: mockResetSend,
   }),
 }));
+
+const mockResultsFlyoutProps = jest.fn<void, [ComponentProps<typeof SendTestResultsFlyout>]>();
+jest.mock('./send_test_results_flyout', () => {
+  const { SendTestResultsFlyout: ActualSendTestResultsFlyout } = jest.requireActual(
+    './send_test_results_flyout'
+  );
+  return {
+    SendTestResultsFlyout: (props: ComponentProps<typeof SendTestResultsFlyout>) => {
+      mockResultsFlyoutProps(props);
+      return <ActualSendTestResultsFlyout {...props} />;
+    },
+  };
+});
+
+const closeResultsFlyout = (reason: 'navigation-back' | 'close-button') => {
+  const { onClose } =
+    mockResultsFlyoutProps.mock.calls[mockResultsFlyoutProps.mock.calls.length - 1][0];
+  act(() => {
+    onClose(new MouseEvent('click'), { reason });
+  });
+};
 
 jest.mock('../../../hooks/use_fetch_workflow', () => ({
   useFetchWorkflow: (id: string) => ({ data: { id, name: `Workflow ${id}` } }),
@@ -123,8 +145,7 @@ describe('SendTestNotificationFlyout', () => {
       expect(getCheckbox('wf-1')).toBeInTheDocument();
       expect(getCheckbox('wf-2')).toBeInTheDocument();
       expect(getCheckbox('wf-3')).toBeInTheDocument();
-      expect(screen.queryByTestId('sendTestNotificationResults')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('sendTestNotificationBackButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sendTestNotificationResultsFlyout')).not.toBeInTheDocument();
     });
 
     it('sends the previewed seed to the selected destinations', async () => {
@@ -147,12 +168,12 @@ describe('SendTestNotificationFlyout', () => {
       };
     });
 
-    it('replaces the form with the results of the workflows sent to', () => {
+    it('opens the test runs of the workflows sent to on top of the form', () => {
       renderFlyout();
 
-      expect(screen.queryByTestId('sendTestNotificationSendButton')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('sendTestNotificationDestination-wf-1')).not.toBeInTheDocument();
-      expect(screen.getByTestId('sendTestNotificationResults')).toHaveTextContent('Test runs');
+      const resultsFlyout = within(screen.getByTestId('sendTestNotificationResultsFlyout'));
+      expect(resultsFlyout.getByText('Test runs')).toBeInTheDocument();
+      expect(resultsFlyout.queryByTestId('sendTestNotificationSendButton')).not.toBeInTheDocument();
       expect(screen.getByTestId('sendTestNotificationResult-wf-1')).toHaveTextContent('Pager');
       expect(screen.getByTestId('sendTestNotificationResult-wf-2')).toHaveTextContent('Slack');
       expect(screen.queryByTestId('sendTestNotificationResult-wf-3')).not.toBeInTheDocument();
@@ -180,16 +201,25 @@ describe('SendTestNotificationFlyout', () => {
       mockSendResponse = { results: [{ workflow_id: 'wf-1', error: 'boom' }] };
       renderFlyout();
 
+      expect(screen.getByTestId('sendTestNotificationResultsFlyout')).toBeInTheDocument();
       expect(screen.getByTestId('sendTestNotificationResult-wf-1')).toBeInTheDocument();
-      expect(screen.queryByTestId('sendTestNotificationSendButton')).not.toBeInTheDocument();
     });
 
-    it('closes the flyout', async () => {
-      const { onClose } = renderFlyout();
+    it('links the test runs flyout to the form flyout history', () => {
+      renderFlyout();
 
-      await userEvent.click(screen.getByTestId('sendTestNotificationCloseButton'));
+      expect(mockResultsFlyoutProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({ historyKey: expect.any(Symbol) })
+      );
+    });
 
-      expect(onClose).toHaveBeenCalledTimes(1);
+    it('does not build a new preview when the test runs flyout is closed', () => {
+      renderFlyout();
+
+      closeResultsFlyout('close-button');
+
+      expect(mockResetSend).toHaveBeenCalledTimes(1);
+      expect(mockReload).not.toHaveBeenCalled();
     });
 
     it('goes back to the form with a new preview and every destination selected', async () => {
@@ -199,13 +229,13 @@ describe('SendTestNotificationFlyout', () => {
       mockSendResponse = { results: [{ workflow_id: 'wf-1', workflow_execution_id: 'exec-1' }] };
       rerender();
 
-      await userEvent.click(screen.getByTestId('sendTestNotificationBackButton'));
+      closeResultsFlyout('navigation-back');
 
       expect(mockResetSend).toHaveBeenCalledTimes(1);
       expect(mockReload).toHaveBeenCalledTimes(1);
       mockSendResponse = undefined;
       rerender();
-      expect(screen.queryByTestId('sendTestNotificationResults')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sendTestNotificationResultsFlyout')).not.toBeInTheDocument();
       expect(getCheckbox('wf-1')).toBeChecked();
       expect(getCheckbox('wf-2')).toBeChecked();
       expect(getCheckbox('wf-3')).toBeChecked();

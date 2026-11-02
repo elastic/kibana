@@ -89,10 +89,6 @@ export const SEND = i18n.translate('xpack.alertingV2.actionPolicy.sendTestNotifi
   defaultMessage: 'Send',
 });
 
-export const BACK = i18n.translate('xpack.alertingV2.actionPolicy.sendTestNotification.back', {
-  defaultMessage: 'Back',
-});
-
 export const RESULTS_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicy.sendTestNotification.results.title',
   { defaultMessage: 'Test runs' }
