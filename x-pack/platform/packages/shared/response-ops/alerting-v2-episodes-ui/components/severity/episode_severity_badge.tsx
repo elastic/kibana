@@ -26,11 +26,7 @@ export const AlertEpisodeSeverityBadge = ({ severity }: AlertEpisodeSeverityBadg
   }
 
   return (
-    <EuiBadge
-      color={entry.color}
-      fill
-      data-test-subj={`alertingV2EpisodeSeverityBadge-${entry.value}`}
-    >
+    <EuiBadge color={entry.color} data-test-subj={`alertingV2EpisodeSeverityBadge-${entry.value}`}>
       {entry.label}
     </EuiBadge>
   );

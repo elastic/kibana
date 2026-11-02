@@ -586,24 +586,26 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    *   path: 'path/{id}',
    *   validate: {
    *     params: schema.object({
-   *       id: schema.string(),
+   *       id: schema.savedObjectId(),
    *     }),
-   *     query: schema.object({...}),
-   *     body: schema.object({...}),
+   *     query: schema.object({}),
+   *     body: schema.object({}),
    *   },
+   *   security: { authz: { requiredPrivileges: ['my-app'] } },
    * },
-   * (context, req, res,) {
+   * (context, req, res) => {
    *   req.params; // type Readonly<{id: string}>
-   *   console.log(req.params.id); // value
+   *   return res.ok({ body: req.params.id });
    * });
    *
    * router.get({
    *   path: 'path/{id}',
    *   validate: false, // handler has no access to params, query, body values.
+   *   security: { authz: { requiredPrivileges: ['my-app'] } },
    * },
-   * (context, req, res,) {
-   *   req.params; // type Readonly<{}>;
-   *   console.log(req.params.id); // undefined
+   * (context, req, res) => {
+   *   req.params; // type unknown (value is {} at runtime)
+   *   return res.ok();
    * });
    *
    * router.get({
@@ -612,11 +614,12 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    *     // handler has access to raw non-validated params in runtime
    *     params: schema.object({}, { unknowns: 'allow' })
    *   },
+   *   security: { authz: { requiredPrivileges: ['my-app'] } },
    * },
-   * (context, req, res,) {
-   *   req.params; // type Readonly<{}>;
-   *   console.log(req.params.id); // value
+   * (context, req, res) => {
+   *   req.params; // type Readonly<{}>
    *   myValidationLibrary.validate({ params: req.params });
+   *   return res.ok();
    * });
    * ```
    */

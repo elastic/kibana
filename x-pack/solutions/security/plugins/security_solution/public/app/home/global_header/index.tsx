@@ -24,6 +24,7 @@ import {
   isCoverageOverviewPath,
   isDashboardViewPath,
   isDetectionsPath,
+  isManageLandingPath,
   isRuleChangesHistoryPath,
   isRulesAddPath,
   isRulesManagementPath,
@@ -75,6 +76,7 @@ export const GlobalHeader = React.memo(() => {
   const onboardingPath = isOnboardingPath(pathname);
   // Cloud Security Posture pages own "Add integrations" in their own app header.
   const cloudSecurityPosturePath = isCloudSecurityPosturePath(pathname);
+  const manageLandingPath = isManageLandingPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -83,9 +85,9 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules, Add Elastic rules, MITRE coverage, Shared Exception Lists, Exception list details and
-    // Cloud Security Posture page app headers render their own actions (ML job settings, Add integrations),
-    // so clear the global header action menu there to avoid duplicating them.
+    // The Rules, Add Elastic rules, MITRE coverage, Shared Exception Lists, Exception list details,
+    // Cloud Security Posture and Manage page app headers render their own actions (ML job settings,
+    // Add integrations), so clear the global header action menu there to avoid duplicating them.
     // Onboarding is a page without the global header action menu
     if (
       changesHistoryPath ||
@@ -94,7 +96,8 @@ export const GlobalHeader = React.memo(() => {
       coverageOverviewPath ||
       exceptionsPath ||
       onboardingPath ||
-      cloudSecurityPosturePath
+      cloudSecurityPosturePath ||
+      manageLandingPath
     ) {
       setHeaderActionMenu(undefined);
       return;
@@ -129,6 +132,7 @@ export const GlobalHeader = React.memo(() => {
     exceptionsPath,
     onboardingPath,
     cloudSecurityPosturePath,
+    manageLandingPath,
   ]);
 
   return (

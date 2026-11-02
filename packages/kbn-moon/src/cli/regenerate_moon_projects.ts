@@ -30,7 +30,6 @@ import {
   filterPackages,
   readFile,
   readJsonWithComments,
-  resolveFirstExisting,
   sortObjectByKeyPriority,
   writeYaml,
   yamlMatchesFile,
@@ -111,7 +110,7 @@ export function regenerateMoonProjects() {
 
       applyPackageJsonSettings(projectConfig, pathInPackage('package.json'));
 
-      applyJestTaskConfig(projectConfig);
+      applyTestTaskTags(projectConfig);
 
       projectConfig = applyDevOverrides(
         projectConfig,
@@ -285,29 +284,26 @@ function applyTsConfigSettings(
   }
 }
 
-function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
+function applyTestTaskTags(projectConfig: MoonProjectConfig) {
   if (!hasSourceRoot(projectConfig)) {
-    logger.warning('Skipping jest task config - no sourceRoot found in project config');
+    logger.warning('Skipping test task tags - no sourceRoot found in project config');
     return;
   }
 
-  const jestConfigName = resolveFirstExisting(
-    projectConfig.project.sourceRoot,
-    MOON_CONST.JEST_CONFIG_FILES
-  );
+  const sourceRoot = projectConfig.project.sourceRoot;
+  const hasConfig = (pattern: string) =>
+    fs.globSync(pattern, {
+      cwd: sourceRoot,
+      exclude: (filePath) => filePath.includes('__fixtures__'),
+    }).length > 0;
+  const tags = [
+    hasConfig('**/jest.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_UNIT,
+    hasConfig('**/jest.integration.config.{js,cjs,json}') && MOON_CONST.TAG_JEST_INTEGRATION,
+    hasConfig('**/test/scout*/**/*playwright.config.ts') && MOON_CONST.TAG_SCOUT,
+  ].filter((tag): tag is string => Boolean(tag));
 
-  if (jestConfigName && jestConfigName !== 'jest.config.js') {
-    throw createFailError(
-      `Unsupported Jest config ${jestConfigName} for ${projectConfig.id}. Moon Jest tasks require jest.config.js.`
-    );
-  }
-
-  if (!jestConfigName) {
-    logger.warning(
-      `Could not find jest config for ${projectConfig.id} @ ${projectConfig.project.sourceRoot}`
-    );
-  } else {
-    projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
+  if (tags.length > 0) {
+    projectConfig.tags = [...new Set([...(projectConfig.tags || []), ...tags])];
   }
 }
 

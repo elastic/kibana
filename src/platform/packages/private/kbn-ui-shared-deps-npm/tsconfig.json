@@ -13,6 +13,7 @@
   ],
   "exclude": [
     "**/*.config.js",
+    "src/set_public_path.js",
     "target/**/*",
   ],
   "kbn_references": [

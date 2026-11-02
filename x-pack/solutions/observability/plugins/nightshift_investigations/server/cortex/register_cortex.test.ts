@@ -128,7 +128,10 @@ describe('runCortexOptimize', () => {
   const toolCalls: InvestigationToolCall[] = [
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
-    { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
+    {
+      tool_id: 'nightshift_sandbox_view_file',
+      params: { file_path: '/workspace/.connector-docs/elastic.md' },
+    },
   ];
   const recordHypotheses: InvestigationToolCall = {
     tool_id: 'agentic_investigations.set_hypotheses',

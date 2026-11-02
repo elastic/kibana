@@ -53,6 +53,13 @@ describe('Suggest users route', () => {
       );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual(getSuggestUsersResponseMock());
+      expect(context.elasticAssistant.userProfile.suggest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requiredPrivileges: expect.objectContaining({
+            privileges: { kibana: ['feature_securitySolutionAssistant.all'] },
+          }),
+        })
+      );
     });
 
     test('catches error if search throws error', async () => {

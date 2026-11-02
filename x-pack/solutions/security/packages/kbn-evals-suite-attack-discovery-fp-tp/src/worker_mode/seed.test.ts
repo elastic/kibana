@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { FP_TP_INFERENCE_FEATURE_ID } from '../constants';
 import type { FpTpLiveKbnRequest } from '../world';
-import { buildWorkerModePlan } from './plan';
+import { buildWorkerModePlan, hostUserFromAlerts } from './plan';
 import {
   cleanupWorkerModeSpace,
   ensureAttackDiscoveryWorkflowsSetting,
@@ -16,6 +16,7 @@ import {
   ensureAnonymizationFields,
   ensureReasoningMapping,
   ensureWorkerModeSpace,
+  readWorkerModeHostUser,
   seedWorkerModePlan,
 } from './seed';
 
@@ -91,6 +92,69 @@ describe('cleanupWorkerModeSpace', () => {
     });
     expect(esClient.deleteByQuery).not.toHaveBeenCalled();
   });
+
+  it("on serverless sweeps the seeder-owned streams by seed label, in the space's namespace only", async () => {
+    const stream = 'logs-endpoint.events.fp-tp-process-qa-fp';
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      deleteByQuery: jest.fn().mockResolvedValue({}),
+      indices: { getDataStream: jest.fn().mockResolvedValue({ data_streams: [{ name: stream }] }) },
+    };
+    await cleanupWorkerModeSpace({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest: okKbnRequest(),
+      space: 'qa-fp',
+      serverless: true,
+    });
+    expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
+      name: 'logs-endpoint.events.fp-tp-*',
+    });
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: stream,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'data_stream.namespace': 'qa-fp' } },
+              {
+                bool: {
+                  should: [{ prefix: { 'labels.ad_portable_seed': 'ad-fp-tp-twins-2026-09' } }],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+  });
+
+  it.each([
+    [404, 'resolves'],
+    [403, 'rejects'],
+  ])('on a %s from the data stream lookup, %s', async (statusCode, outcome) => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
+      deleteByQuery: jest.fn().mockResolvedValue({}),
+      indices: {
+        getDataStream: jest.fn().mockRejectedValue(Object.assign(new Error('es'), { statusCode })),
+      },
+    };
+    const cleanup = cleanupWorkerModeSpace({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest: okKbnRequest(),
+      space: 'qa-fp',
+      serverless: true,
+    });
+    if (outcome === 'resolves') {
+      await expect(cleanup).resolves.toEqual({ alerts: 0, hostIds: [] });
+      expect(esClient.deleteByQuery).not.toHaveBeenCalledWith(
+        expect.objectContaining({ index: expect.stringMatching(/^logs-endpoint\.events\./) })
+      );
+    } else {
+      await expect(cleanup).rejects.toThrow('es');
+    }
+  });
 });
 
 describe('seedWorkerModePlan', () => {
@@ -113,6 +177,9 @@ describe('seedWorkerModePlan', () => {
       plan.alertOperations,
       plan.eventOperations,
     ]);
+    expect(esClient.bulk).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pipeline: expect.anything() })
+    );
     expect(
       kbnRequest.mock.calls.filter(([{ method }]) => method === 'POST').map(([{ path }]) => path)
     ).toEqual(
@@ -145,6 +212,111 @@ describe('seedWorkerModePlan', () => {
         query: { ids: { values: plan.alertIds } },
       })
     );
+  });
+
+  it('on serverless provisions the raw-event store and attaches the pipeline', async () => {
+    const serverlessPlan = buildWorkerModePlan({
+      space: 'qa-fp',
+      exampleId: 'encoded-powershell.fp',
+      now: new Date('2026-10-14T12:00:00.000Z'),
+      suffix: 'run1',
+      serverless: true,
+    });
+    const store = {
+      putIndexTemplate: jest.fn().mockResolvedValue({ acknowledged: true }),
+      createDataStream: jest.fn().mockResolvedValue({ acknowledged: true }),
+      putPipeline: jest.fn().mockResolvedValue({ acknowledged: true }),
+    };
+    const esClient = {
+      bulk: jest.fn().mockResolvedValue({ errors: false }),
+      updateByQuery: jest.fn().mockResolvedValue({ updated: 1 }),
+      indices: store,
+      ingest: { putPipeline: store.putPipeline },
+    };
+    const kbnRequest = okKbnRequest();
+    await seedWorkerModePlan({
+      esClient: esClient as unknown as EsClient,
+      kbnRequest,
+      plan: serverlessPlan,
+    });
+
+    const eventBulk = esClient.bulk.mock.calls.find(
+      ([{ operations }]) => operations === serverlessPlan.eventOperations
+    )?.[0];
+    expect(eventBulk).toEqual(
+      expect.objectContaining({
+        pipeline: 'alertzero-fp-tp-raw-events',
+        refresh: 'wait_for',
+      })
+    );
+    expect(store.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'alertzero-fp-tp-raw-events' })
+    );
+    for (const name of new Set(serverlessPlan.events.map(({ index }) => index))) {
+      expect(store.createDataStream).toHaveBeenCalledWith({ name });
+    }
+  });
+
+  it('leaves the shared host entities when a later set fails', async () => {
+    const first = buildWorkerModePlan({
+      space: 'qa-fp',
+      exampleId: 'encoded-powershell.tp',
+      now: new Date('2026-10-14T12:00:00.000Z'),
+      suffix: 'run1',
+    });
+    const shared = buildWorkerModePlan({
+      space: 'qa-fp',
+      exampleId: 'encoded-powershell.tp',
+      now: new Date('2026-10-14T12:00:00.000Z'),
+      suffix: 'run2',
+      hostUser: hostUserFromAlerts(first.world.alerts),
+    });
+    const esClient = {
+      bulk: jest
+        .fn()
+        .mockResolvedValueOnce({ errors: false })
+        .mockResolvedValueOnce({ errors: true, items: [] }),
+      deleteByQuery: jest.fn().mockResolvedValue({}),
+      search: jest.fn(),
+    };
+    const kbnRequest = okKbnRequest();
+
+    await expect(
+      seedWorkerModePlan({
+        esClient: esClient as unknown as EsClient,
+        kbnRequest,
+        plan: shared,
+      })
+    ).rejects.toThrow('events bulk had item errors');
+    expect(esClient.search).not.toHaveBeenCalled();
+    expect(kbnRequest).not.toHaveBeenCalled();
+  });
+});
+
+describe('readWorkerModeHostUser', () => {
+  it('returns the host and user on the existing seed', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            { _source: { host: { id: 'host-1', name: 'wks-alice-01' }, user: { name: 'alice' } } },
+            { _source: { host: { id: 'host-1', name: 'wks-alice-01' }, user: { name: 'alice' } } },
+          ],
+        },
+      }),
+    };
+
+    await expect(
+      readWorkerModeHostUser({ esClient: esClient as unknown as EsClient, space: 'qa-fp' })
+    ).resolves.toEqual({ hostId: 'host-1', hostName: 'wks-alice-01', userName: 'alice' });
+  });
+
+  it('throws when the space has no seed', async () => {
+    const esClient = { search: jest.fn().mockResolvedValue({ hits: { hits: [] } }) };
+
+    await expect(
+      readWorkerModeHostUser({ esClient: esClient as unknown as EsClient, space: 'qa-fp' })
+    ).rejects.toThrow('--append needs an existing seed');
   });
 });
 

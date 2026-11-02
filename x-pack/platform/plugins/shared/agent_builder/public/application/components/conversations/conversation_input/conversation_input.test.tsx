@@ -15,6 +15,7 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import {
   useAgentId,
   useConversationReadOnly,
@@ -44,6 +45,9 @@ jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
 }));
 jest.mock('../../../hooks/agents/use_agent_model', () => ({
   useAgentModel: jest.fn(),
+}));
+jest.mock('../../../hooks/use_ui_privileges', () => ({
+  useUiPrivileges: jest.fn(),
 }));
 jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
   useAgentBuilderAgentById: jest.fn(),
@@ -168,6 +172,7 @@ const mockedUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
 const mockedUseValidateAgentId = jest.mocked(useValidateAgentId);
 const mockedUseAgentModel = jest.mocked(useAgentModel);
 const mockedUseAgentBuilderAgentById = jest.mocked(useAgentBuilderAgentById);
+const mockedUseUiPrivileges = jest.mocked(useUiPrivileges);
 const mockedUseAgentId = jest.mocked(useAgentId);
 const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
@@ -224,6 +229,7 @@ describe('ConversationInput', () => {
       Boolean(agentId)) as never);
     mockedUseAgentModel.mockReturnValue({ isLoading: false, isLocked: false });
     mockedUseAgentBuilderAgentById.mockReturnValue({ agent: undefined, isLoading: false } as never);
+    mockedUseUiPrivileges.mockReturnValue({ invokeBoundAgents: false } as never);
     mockedUseAgentId.mockReturnValue('elastic-ai-agent');
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: false });
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
@@ -294,6 +300,50 @@ describe('ConversationInput', () => {
 
     expect(mockedUseAgentModel).toHaveBeenCalledWith('elastic-ai-agent');
     expect(submitMessage).not.toHaveBeenCalled();
+  });
+
+  describe('agents bound to a service account', () => {
+    const boundAgent = { id: 'elastic-ai-agent', service_account_id: 'kibana/sa-1' };
+
+    it('blocks sending and explains why when the caller lacks the invoke privilege', () => {
+      mockedUseAgentBuilderAgentById.mockReturnValue({
+        agent: boundAgent,
+        isLoading: false,
+      } as never);
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('agentBoundForbiddenCallout')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      expect(submitMessage).not.toHaveBeenCalled();
+    });
+
+    it('lets a caller with the invoke privilege send', () => {
+      mockedUseAgentBuilderAgentById.mockReturnValue({
+        agent: boundAgent,
+        isLoading: false,
+      } as never);
+      mockedUseUiPrivileges.mockReturnValue({ invokeBoundAgents: true } as never);
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.queryByTestId('agentBoundForbiddenCallout')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      expect(submitMessage).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not gate an unbound agent', () => {
+      mockedUseAgentBuilderAgentById.mockReturnValue({
+        agent: { id: 'elastic-ai-agent' },
+        isLoading: false,
+      } as never);
+
+      renderInput(<ConversationInput />);
+
+      expect(screen.queryByTestId('agentBoundForbiddenCallout')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      expect(submitMessage).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('rendering cost', () => {
