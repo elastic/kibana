@@ -273,7 +273,11 @@ export const triggerInvestigationStepDefinition = (
             notificationDestinations: input.notificationDestinations,
             slack_thread: input.slack_thread,
           },
-          { automationBudget }
+          {
+            automationBudget,
+            // A Slack thread subject means a Slack message started the run.
+            entryPoint: input.subject_type === 'slack_thread' ? 'slack' : 'automation',
+          }
         );
         return { output: result };
       } catch (error) {
