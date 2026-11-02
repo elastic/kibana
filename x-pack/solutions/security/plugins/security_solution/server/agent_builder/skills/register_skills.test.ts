@@ -80,6 +80,29 @@ describe('registerSkills - endpoint response actions', () => {
     expect(registeredSkillIds(agentBuilder)).not.toContain(ENDPOINT_RESPONSE_ACTIONS_SKILL_ID);
   });
 
+  it.each([
+    [true, false, true],
+    [true, true, false],
+    [false, false, false],
+  ])(
+    'registers the old troubleshooting skill with legacy=%s universal=%s: %s',
+    async (automaticTroubleshootingSkill, automaticTroubleshootingUniversalSkill, registered) => {
+      const agentBuilder = createAllowListEnforcingAgentBuilder();
+      const opts = buildOpts(agentBuilder);
+      await registerSkills({
+        ...opts,
+        experimentalFeatures: {
+          ...opts.experimentalFeatures,
+          automaticTroubleshootingSkill,
+          automaticTroubleshootingUniversalSkill,
+        },
+      });
+      expect(registeredSkillIds(agentBuilder).includes('automatic_troubleshooting')).toBe(
+        registered
+      );
+    }
+  );
+
   it('uses a skill id that is on the agent-builder built-in allow-list', () => {
     // Guards against drift between the id this plugin registers and the Agent
     // Builder team's manually maintained `AGENT_BUILDER_BUILTIN_SKILLS`. An
