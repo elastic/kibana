@@ -264,6 +264,15 @@ describe('system-security-hunt-execute', () => {
     );
   });
 
+  it('sends the gap reasons from the coordinator and both tiers, so the route can tell an outage from rejected output', () => {
+    const body = stepNamed(workflow, 'write_evidence').with?.body as Record<string, string>;
+
+    expect(body.incompleteReasons).toContain('result.incomplete |');
+    expect(body.incompleteReasons).toContain('result.tier1.incomplete');
+    expect(body.incompleteReasons).toContain('result.tier2.incomplete');
+    expect(body.incompleteReasons).toContain("map: 'reason' | uniq");
+  });
+
   it('writes the coordinator narrative as the hunt results message', () => {
     const inputs = stepNamed(workflow, 'write_hunt_results_message').with?.inputs as Record<
       string,

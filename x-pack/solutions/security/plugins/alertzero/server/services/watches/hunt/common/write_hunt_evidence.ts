@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { HuntCompleteness } from '@kbn/alertzero-common';
+import type { HuntCompleteness, HuntIncompleteReason } from '@kbn/alertzero-common';
 import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
 
@@ -14,6 +14,28 @@ export type LastHuntStatus = 'hit' | 'clean' | 'incomplete';
 
 /** Consecutive retryable runs after which a report that never settled is retired as `incomplete`. */
 export const MAX_HUNT_RETRY_ATTEMPTS = 3;
+
+/**
+ * Gaps where the model answered and the gates rejected its output. Only these repeat on the same
+ * report text, so only a run with one of them counts toward {@link MAX_HUNT_RETRY_ATTEMPTS}. The
+ * other retryable gaps (a model or index outage, enrichment not finished) say nothing about the
+ * report, so they must not retire it.
+ */
+const MODEL_REJECTION_REASONS: ReadonlySet<HuntIncompleteReason> = new Set<HuntIncompleteReason>([
+  'query_out_of_scope',
+  'query_ungrounded',
+  'quote_ungrounded',
+]);
+
+/**
+ * Whether a retryable run counts toward the retry bound. Unknown reasons (a caller that predates
+ * the field) count, which keeps the bound in place rather than retrying forever.
+ */
+export const countsTowardRetryBound = (
+  incompleteReasons?: readonly HuntIncompleteReason[]
+): boolean =>
+  incompleteReasons === undefined ||
+  incompleteReasons.some((reason) => MODEL_REJECTION_REASONS.has(reason));
 
 /**
  * Collapses the coordinator's hit/completeness pair to exactly the three statuses
@@ -65,6 +87,9 @@ export const deriveLastHuntStatus = ({
  * consecutive retryable runs that searched nothing new:
  * - a retryable run on an element that is still unsettled (never stamped, or stamped with coverage
  *   pending) adds one, or restarts at one when it grew the ledger, since that run made progress;
+ * - a retryable run that `params.count_run` excludes (its gaps were all outages, not rejected model
+ *   output) keeps the count as it was: it neither adds one nor resets it, so runs that alternate
+ *   between an outage and a rejection still reach the bound;
  * - a retryable run on a settled element is the first of a new run, so it starts at one rather
  *   than inheriting an old count;
  * - a run that stamps, or that the ledger cap settles, resets it to zero.
@@ -106,7 +131,8 @@ for (def el : targets) {
   int retries = 0;
   if (!params.stamp && !settledByCap) {
     int previous = unsettled && el.hunt_retry_count instanceof Number ? ((Number) el.hunt_retry_count).intValue() : 0;
-    retries = capped.size() > ledgerBefore ? 1 : previous + 1;
+    if (capped.size() > ledgerBefore) { retries = 1; }
+    else { retries = params.count_run ? previous + 1 : previous; }
   }
   boolean settledByRetries = retries >= params.max_retries;
   if (settledByRetries) { pending = false; }
@@ -163,6 +189,11 @@ export interface WriteHuntEvidenceParams {
    * pending `hit` is kept.
    */
   replayedWholeReport?: boolean;
+  /**
+   * Why the run was incomplete, from every gap the coordinator and both tiers reported. Decides
+   * whether a retryable run counts toward the retry bound; see {@link countsTowardRetryBound}.
+   */
+  incompleteReasons?: HuntIncompleteReason[];
 }
 
 /**
@@ -199,6 +230,7 @@ export const writeHuntEvidence = async (
     searchedTechniqueIds = [],
     pendingTechniqueIds,
     replayedWholeReport = false,
+    incompleteReasons,
   }: WriteHuntEvidenceParams,
   logger: Logger
 ): Promise<{ settledByCap: boolean }> => {
@@ -235,6 +267,7 @@ export const writeHuntEvidence = async (
         pending_technique_ids: pendingTechniqueIds ?? null,
         replayed_whole_report: replayedWholeReport && completeness === 'complete',
         coverage_pending: coveragePending,
+        count_run: countsTowardRetryBound(incompleteReasons),
         max_ids: MAX_HUNT_TECHNIQUE_IDS,
         max_retries: MAX_HUNT_RETRY_ATTEMPTS,
       },
@@ -246,10 +279,15 @@ export const writeHuntEvidence = async (
   const settledByCap = coveragePending && stored?.coverage_pending === false;
   if (!settledByCap) return { settledByCap };
 
+  // A cap settle resets the count to zero, so a count at the bound always means retirement.
   if (!stamp && (stored.hunt_retry_count ?? 0) >= MAX_HUNT_RETRY_ATTEMPTS) {
+    const lastGaps = incompleteReasons?.length
+      ? ` Last run's gaps: ${incompleteReasons.join(', ')}.`
+      : '';
     logger.warn(
       `Hunt for report ${reportId} in space ${spaceId} ended retryable ${stored.hunt_retry_count} ` +
-        `runs in a row, so the report was retired as incomplete instead of being retried again.`
+        `runs in a row, so the report was retired as incomplete instead of being retried again.` +
+        lastGaps
     );
   } else {
     logger.warn(

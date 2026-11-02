@@ -82,6 +82,17 @@ paths:
                     this run's result replace an earlier finding the report
                     still carries while its coverage is pending. Omit when
                     Tier 2 did not run.
+                incompleteReasons:
+                  type: array
+                  maxItems: 100
+                  description: >-
+                    Distinct reasons from every coverage gap the coordinator
+                    and both tiers reported. A retryable run counts toward the
+                    retry bound only when one of them is rejected model
+                    output; a run whose gaps were all outages leaves the count
+                    as it was. Omit to count every retryable run.
+                  items:
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteReason'
             examples:
               WriteHuntEvidenceRequestExample:
                 summary: Stamp a clean run as hunted.

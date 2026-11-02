@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MAX_HUNT_TECHNIQUE_IDS } from './hunt_technique_limit';
 import {
+  countsTowardRetryBound,
   deriveLastHuntStatus,
   MAX_HUNT_RETRY_ATTEMPTS,
   shouldStampHunt,
@@ -58,6 +59,36 @@ describe('shouldStampHunt', () => {
     expect(shouldStampHunt({ hasConfirmedHit: false, completeness: 'incomplete_retryable' })).toBe(
       false
     );
+  });
+});
+
+describe('countsTowardRetryBound', () => {
+  it.each([['query_ungrounded'], ['quote_ungrounded'], ['query_out_of_scope']] as const)(
+    'counts a run whose model output was rejected (%s)',
+    (reason) => {
+      expect(countsTowardRetryBound([reason])).toBe(true);
+    }
+  );
+
+  it('does not count a run whose gaps were all outages or unfinished enrichment', () => {
+    expect(
+      countsTowardRetryBound([
+        'generation_failed',
+        'index_unavailable',
+        'search_partial',
+        'execute_failed',
+        'catalog_unavailable',
+        'extraction_pending',
+      ])
+    ).toBe(false);
+  });
+
+  it('counts a run that mixes an outage with rejected model output', () => {
+    expect(countsTowardRetryBound(['index_unavailable', 'query_ungrounded'])).toBe(true);
+  });
+
+  it('counts when the caller sent no reasons, so the bound still holds', () => {
+    expect(countsTowardRetryBound(undefined)).toBe(true);
   });
 });
 
@@ -385,6 +416,27 @@ describe('writeHuntEvidence', () => {
 
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('retired as incomplete'));
+  });
+
+  it('names the last run gaps in the retirement warning', async () => {
+    const esClient = makeEsClient([
+      { space_id: 'default', coverage_pending: false, hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS },
+    ]);
+
+    await write(esClient, {
+      spaceId: 'default',
+      reportId: 'report-1',
+      runId: 'run-1',
+      hasConfirmedHit: false,
+      completeness: 'incomplete_retryable',
+      totalHits: 0,
+      searchedTechniqueIds: ['T1001'],
+      incompleteReasons: ['query_ungrounded', 'index_unavailable'],
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining("Last run's gaps: query_ungrounded, index_unavailable.")
+    );
   });
 
   describe('a manual replay of the whole report', () => {

@@ -352,6 +352,60 @@ describe('writeHuntEvidence against Elasticsearch', () => {
       expect(stored?.last_hunted_at).toBeUndefined();
     });
 
+    it('keeps the count through runs whose gaps were all outages, so an outage never retires a report', async () => {
+      const reportId = await newReport([
+        {
+          space_id: SPACE,
+          hunted_technique_ids: ['T1001'],
+          pending_technique_ids: ['T1002'],
+          coverage_pending: true,
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS - 1,
+        },
+      ]);
+
+      for (let run = 0; run <= MAX_HUNT_RETRY_ATTEMPTS; run++) {
+        await write(reportId, {
+          ...retryableNoHit(`outage-${run}`),
+          incompleteReasons: ['generation_failed', 'index_unavailable'],
+        });
+      }
+
+      const stored = await element(reportId);
+      expect(stored).toEqual(
+        expect.objectContaining({
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS - 1,
+          coverage_pending: true,
+        })
+      );
+      expect(stored?.last_hunted_at).toBeUndefined();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('counts a run that mixes an outage with rejected model output', async () => {
+      const reportId = await newReport([
+        {
+          space_id: SPACE,
+          hunted_technique_ids: ['T1001'],
+          pending_technique_ids: ['T1002'],
+          coverage_pending: true,
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS - 1,
+        },
+      ]);
+
+      await write(reportId, {
+        ...retryableNoHit('run-mixed'),
+        incompleteReasons: ['index_unavailable', 'query_ungrounded'],
+      });
+
+      expect(await element(reportId)).toEqual(
+        expect.objectContaining({
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS,
+          coverage_pending: false,
+          last_hunt_status: 'incomplete',
+        })
+      );
+    });
+
     it('keeps an earlier clean result when the bound retires a report that was still pending', async () => {
       const reportId = await newReport([
         {

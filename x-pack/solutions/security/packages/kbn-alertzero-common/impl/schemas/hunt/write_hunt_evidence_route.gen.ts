@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { HuntCompleteness } from '../components/hunt.gen';
+import { HuntCompleteness, HuntIncompleteReason } from '../components/hunt.gen';
 
 export const WriteHuntEvidenceRequestBody = lazySchema(() =>
   z
@@ -60,6 +60,16 @@ export const WriteHuntEvidenceRequestBody = lazySchema(() =>
         .optional()
         .describe(
           "From the coordinator's `replayed_whole_report`. True lets this run's result replace an earlier finding the report still carries while its coverage is pending. Omit when Tier 2 did not run."
+        ),
+      /**
+       * Distinct reasons from every coverage gap the coordinator and both tiers reported. A retryable run counts toward the retry bound only when one of them is rejected model output; a run whose gaps were all outages leaves the count as it was. Omit to count every retryable run.
+       */
+      incompleteReasons: z
+        .array(HuntIncompleteReason)
+        .max(100)
+        .optional()
+        .describe(
+          'Distinct reasons from every coverage gap the coordinator and both tiers reported. A retryable run counts toward the retry bound only when one of them is rejected model output; a run whose gaps were all outages leaves the count as it was. Omit to count every retryable run.'
         ),
     })
     .strict()
