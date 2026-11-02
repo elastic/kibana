@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stringify } from 'safe-stable-stringify';
+import { configure } from 'safe-stable-stringify';
+
+// v3 defaults the circular marker to "[Circular: N]". Pin the v2 marker so
+// cache keys and hashes that run through stableStringify stay stable.
+const stringify = configure({ circularValue: '[Circular]' });
 
 export interface StableStringifyOptions {
   /**
