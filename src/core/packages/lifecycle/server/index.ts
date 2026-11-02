@@ -7,4 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CorePreboot, CoreSetup, CoreStart, StartServicesAccessor } from './src';
+export type {
+  CorePreboot,
+  CoreSetup,
+  CoreStart,
+  CoreTasksSetup,
+  CoreTasksStart,
+  StartServicesAccessor,
+} from './src';

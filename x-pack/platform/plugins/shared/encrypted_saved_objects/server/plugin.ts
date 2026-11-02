@@ -31,6 +31,7 @@ import { createCryptos } from './crypto/create_cryptos';
 import { defineRoutes } from './routes';
 import type { ClientInstanciator } from './saved_objects';
 import { SavedObjectsEncryptionExtension, setupSavedObjects } from './saved_objects';
+import { encryptedSavedObjectsBridge } from './tasks/bridge';
 
 export interface EncryptedSavedObjectsPluginSetup {
   /**
@@ -131,7 +132,7 @@ export class EncryptedSavedObjectsPlugin
       buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
-    return {
+    const setupContract = {
       canEncrypt,
       registerType: (typeRegistration: EncryptedSavedObjectTypeRegistration) => {
         this.#service?.registerType(typeRegistration);
@@ -174,14 +175,18 @@ export class EncryptedSavedObjectsPlugin
         });
       },
     };
+    encryptedSavedObjectsBridge.setSetup(setupContract);
+    return setupContract;
   }
 
   public start() {
     this.logger.debug('Starting plugin');
-    return {
+    const startContract = {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getClient: (options = {}) => this.savedObjectsSetup(options),
     };
+    encryptedSavedObjectsBridge.setStart(startContract);
+    return startContract;
   }
 
   public stop() {

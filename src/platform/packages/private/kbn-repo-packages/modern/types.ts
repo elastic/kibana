@@ -126,6 +126,12 @@ export interface PluginPackageManifest extends PackageManifestBaseFields {
     optionalPlugins?: string[];
     requiredBundles?: string[];
     runtimePluginDependencies?: string[];
+    /**
+     * Opts the plugin into task runtimes (Kibana and task pods) with a `server/tasks` entry. The listed
+     * dependencies are edges between tasks entries and must each be a subset of the plugin's
+     * `requiredPlugins`/`optionalPlugins`.
+     */
+    tasks?: { requiredPlugins?: string[]; optionalPlugins?: string[] };
     enabledOnAnonymousPages?: boolean;
     type?: 'preboot';
     extraPublicDirs?: string[];

@@ -6,6 +6,7 @@
   "include": [
     "encryption_keys/**/*",
     "health_gateway/**/*",
+    "task_pod/**/*",
     "keystore/**/*",
     "plugin/**/*",
     "profiler/**/*",
@@ -27,6 +28,8 @@
     "@kbn/config",
     "@kbn/dev-utils",
     "@kbn/projects-solutions-groups",
+    "@kbn/repo-packages",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*",

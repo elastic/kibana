@@ -13,7 +13,13 @@ import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { IContextProvider, IRouter } from '@kbn/core-http-server';
 import type { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
-import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type {
+  CorePreboot,
+  CoreSetup,
+  CoreStart,
+  CoreTasksSetup,
+  CoreTasksStart,
+} from '@kbn/core-lifecycle-server';
 import type {
   CoreRequestHandlerContext,
   RequestHandlerContext,
@@ -25,6 +31,8 @@ import type {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
+  PluginsServiceTasksSetupDeps,
+  PluginsServiceTasksStartDeps,
 } from './plugins_service';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import type { IRuntimePluginContractResolver } from './plugin_contract_resolver';
@@ -447,5 +455,78 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     userStorage: {
       asScoped: deps.userStorage.asScoped,
     },
+  };
+}
+
+/**
+ * The `setup` context of a plugin's `server/tasks` entry. Nothing here registers routes, status,
+ * deprecations or anything else that only makes sense in a server, so the same context can be
+ * built by Kibana and by a task pod.
+ *
+ * @internal
+ */
+export function createPluginTasksSetupContext<TPlugin, TPluginDependencies>({
+  deps,
+  plugin,
+}: {
+  deps: PluginsServiceTasksSetupDeps;
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>;
+}): CoreTasksSetup {
+  return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      registerEventType: deps.analytics.registerEventType,
+      reportEvent: deps.analytics.reportEvent,
+    },
+    http: { basePath: deps.http.basePath },
+    injection: {
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
+    savedObjects: {
+      registerType: deps.savedObjects.registerType,
+      setEncryptionExtension: deps.savedObjects.setEncryptionExtension,
+      getDefaultIndex: deps.savedObjects.getDefaultIndex,
+    },
+    getStartServices: () =>
+      plugin.startDependencies as unknown as ReturnType<CoreTasksSetup['getStartServices']>,
+  };
+}
+
+/**
+ * The `start` context of a plugin's `server/tasks` entry.
+ *
+ * @internal
+ */
+export function createPluginTasksStartContext<TPlugin, TPluginDependencies>({
+  deps,
+  plugin,
+}: {
+  deps: PluginsServiceTasksStartDeps;
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>;
+}): CoreTasksStart {
+  return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
+    elasticsearch: {
+      client: deps.elasticsearch.client,
+      createClient: deps.elasticsearch.createClient,
+    },
+    featureFlags: deps.featureFlags,
+    http: { basePath: deps.http.basePath },
+    injection: {
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
+    savedObjects: deps.savedObjects,
+    security: {
+      authc: deps.security.authc,
+      audit: deps.security.audit,
+      serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
+    },
+    uiSettings: deps.uiSettings,
+    userProfile: deps.userProfile,
   };
 }

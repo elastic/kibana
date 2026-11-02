@@ -10,6 +10,7 @@
 export type {
   PrebootPlugin,
   Plugin,
+  TasksPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,
@@ -22,3 +23,5 @@ export type {
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';
+export { createTasksKibanaBridge } from './src/tasks_bridge';
+export type { TasksKibanaBridge } from './src/tasks_bridge';

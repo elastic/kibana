@@ -41,6 +41,7 @@ fileGroups:
   src:
     - encryption_keys/**/*
     - health_gateway/**/*
+    - task_pod/**/*
     - keystore/**/*
     - plugin/**/*
     - profiler/**/*

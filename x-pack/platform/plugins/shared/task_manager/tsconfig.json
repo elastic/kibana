@@ -62,6 +62,7 @@
     "@kbn/core-di-server-internal",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/core-plugins-server",
   ],
   "exclude": ["target/**/*"]
 }

@@ -311,6 +311,7 @@ export { PluginType } from '@kbn/core-base-common';
 export type {
   PrebootPlugin,
   Plugin,
+  TasksPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,
@@ -585,6 +586,8 @@ export type {
   CorePreboot,
   CoreSetup,
   CoreStart,
+  CoreTasksSetup,
+  CoreTasksStart,
   StartServicesAccessor,
 } from '@kbn/core-lifecycle-server';
 

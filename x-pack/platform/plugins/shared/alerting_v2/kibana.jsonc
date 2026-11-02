@@ -8,6 +8,19 @@
     "id": "alertingVTwo",
     "browser": true,
     "server": true,
+    "tasks": {
+      "requiredPlugins": [
+        "taskManager",
+        "spaces",
+        "security",
+        "encryptedSavedObjects",
+        "workflowsManagement",
+        "workflowsExtensions",
+        "maintenanceWindows",
+        "eventLog",
+        "licensing"
+      ]
+    },
     "configPath": ["xpack", "alerting_v2"],
     "requiredPlugins": [
       "taskManager",

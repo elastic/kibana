@@ -217,7 +217,10 @@ export class PluginWrapper<
   protected async getPluginDefinition(): Promise<
     PluginDefinition<TSetup, TStart, TPluginsSetup, TPluginsStart>
   > {
-    return (await import(join(this.path, 'server'))) ?? {};
+    const entry = this.isTasksPlugin()
+      ? join(this.path, 'server', 'tasks')
+      : join(this.path, 'server');
+    return (await import(entry)) ?? {};
   }
 
   protected async createPluginInstance() {
@@ -255,6 +258,39 @@ export class PluginWrapper<
     }
 
     return instance;
+  }
+
+  /** Whether this wrapper is the `server/tasks` entry of a plugin. */
+  public isTasksPlugin() {
+    return this.manifest.type === PluginType.tasks;
+  }
+
+  /**
+   * Creates the wrapper for this plugin's `server/tasks` entry. It gets its own opaque id, so its
+   * DI container and bindings never collide with the `server` entry's, and a manifest whose
+   * dependencies are the `tasks` block's.
+   */
+  public createTasksWrapper(): PluginWrapper {
+    const { tasks } = this.manifest;
+    if (!tasks) {
+      throw new Error(`Plugin "" does not declare a "tasks" entry in its manifest.`);
+    }
+
+    return new PluginWrapper({
+      path: this.path,
+      opaqueId: Symbol(`.tasks`),
+      initializerContext: this.initializerContext,
+      manifest: {
+        ...this.manifest,
+        type: PluginType.tasks,
+        server: true,
+        ui: false,
+        requiredPlugins: tasks.requiredPlugins,
+        optionalPlugins: tasks.optionalPlugins,
+        requiredBundles: [],
+        runtimePluginDependencies: [],
+      },
+    });
   }
 
   private isPrebootPluginInstance(

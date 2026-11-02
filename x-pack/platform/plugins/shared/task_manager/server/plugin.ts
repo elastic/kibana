@@ -27,6 +27,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InvalidateAPIKeysParams } from '@kbn/security-plugin-types-server';
+import { taskManagerBridge } from './tasks/bridge';
 import { createPodDispatch } from './task_pod/pod_dispatch';
 import type { PodDispatch } from './task_pod/pod_dispatch';
 import {
@@ -363,7 +364,7 @@ export class TaskManagerPlugin
 
     this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
-    return {
+    const setupContract: TaskManagerSetupContract = {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
         this.middleware = addMiddlewareToChain(this.middleware, middleware);
@@ -378,6 +379,8 @@ export class TaskManagerPlugin
         this.taskEventLogger = logger;
       },
     };
+    taskManagerBridge.setSetup(setupContract);
+    return setupContract;
   }
 
   public start(
@@ -586,6 +589,7 @@ export class TaskManagerPlugin
       },
     };
 
+    taskManagerBridge.setStart(this.startContract);
     return this.startContract;
   }
 

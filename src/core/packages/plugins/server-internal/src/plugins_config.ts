@@ -50,6 +50,14 @@ const configSchema = schema.object({
    * navigation dependency enforcement test.
    */
   exposeNavDependencies: schema.maybe(schema.boolean({ defaultValue: false })),
+
+  /**
+   * Internal config. Boots the `server/tasks` entry of every plugin that has one in this process
+   * too, with the same dependency edges and the smaller `CoreTasks` task pods run with. Off by
+   * default: the `server` entries already run the same task code, and a plugin's `server` and
+   * `tasks` entries must not both register it.
+   */
+  bootTasksEntries: schema.boolean({ defaultValue: false }),
 });
 
 type InternalPluginsConfigType = TypeOf<typeof configSchema>;
@@ -85,6 +93,9 @@ export class PluginsConfig {
    */
   public readonly shouldEnableAllPlugins: boolean;
 
+  /** Whether to boot plugins' `server/tasks` entries in this process. */
+  public readonly bootTasksEntries: boolean;
+
   /**
    * Specify an allowlist of plugin groups.
    * Allows reducing the amount of plugins that are taken into account.
@@ -98,5 +109,6 @@ export class PluginsConfig {
     this.additionalPluginPaths = rawConfig.paths;
     this.allowlistPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS);
     this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
+    this.bootTasksEntries = rawConfig.bootTasksEntries;
   }
 }

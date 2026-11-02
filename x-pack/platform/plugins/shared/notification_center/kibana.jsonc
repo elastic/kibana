@@ -8,6 +8,7 @@
   "plugin": {
     "id": "notificationCenter",
     "server": true,
+    "tasks": { "requiredPlugins": ["taskManager"] },
     "browser": true,
     "configPath": ["xpack", "notificationCenter"],
     "requiredPlugins": ["taskManager"],

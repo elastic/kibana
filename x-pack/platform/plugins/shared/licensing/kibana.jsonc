@@ -10,6 +10,7 @@
     "id": "licensing",
     "browser": true,
     "server": true,
+    "tasks": {},
     "configPath": [
       "xpack",
       "licensing"

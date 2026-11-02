@@ -7,15 +7,14 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-import { EncryptedSavedObjectsService } from './crypto';
-import { createCryptos } from './crypto/create_cryptos';
-import { podPlugins } from './task_pod';
+import { plugin as tasksPlugin } from '.';
+import { EncryptedSavedObjectsService } from '../crypto';
+import { createCryptos } from '../crypto/create_cryptos';
 
 const KEY = 'a'.repeat(32);
 const TYPE = 'secret-type';
 
 const buildPod = async (podKey: string | undefined) => {
-  const [plugin] = podPlugins;
   const logger = loggingSystemMock.createLogger();
   const context = {
     opaqueId: Symbol('encryptedSavedObjects'),
@@ -57,12 +56,13 @@ const buildPod = async (podKey: string | undefined) => {
     getStartServices: async () => [coreStart, {}, {}],
   };
 
-  const setup = plugin.setup!(core, {}, context) as {
+  const instance = await tasksPlugin(context as never);
+  const setup = instance.setup(core as never) as {
     canEncrypt: boolean;
     registerType: (registration: { type: string; attributesToEncrypt: Set<string> }) => void;
   };
   setup.registerType({ type: TYPE, attributesToEncrypt: new Set(['secret']) });
-  const start = plugin.start!(coreStart, {}, context) as {
+  const start = instance.start() as unknown as {
     getClient: () => {
       createPointInTimeFinderDecryptedAsInternalUser: (options: unknown) => Promise<{
         find: () => AsyncGenerator<{ saved_objects: Array<Record<string, unknown>> }>;
@@ -92,7 +92,7 @@ const decryptedPages = async (pod: Awaited<ReturnType<typeof buildPod>>) => {
   return pages;
 };
 
-describe('encrypted saved objects in a task pod', () => {
+describe('encrypted saved objects in a task runtime', () => {
   it('decrypts what Kibana encrypted, with the same key, without calling Kibana', async () => {
     const pod = await buildPod(KEY);
     expect(pod.setup.canEncrypt).toBe(true);
@@ -126,8 +126,9 @@ describe('encrypted saved objects in a task pod', () => {
 
   it('only provides what tasks use', async () => {
     const pod = await buildPod(KEY);
-    expect(() =>
-      (pod.setup as unknown as { createMigration: () => void }).createMigration()
-    ).toThrow(/not available in a task pod/);
+
+    // Anything else (migrations, model versions) belongs to Kibana; the typed contract rules it out.
+    expect(Object.keys(pod.setup).sort()).toEqual(['canEncrypt', 'registerType']);
+    expect(Object.keys(pod.start).sort()).toEqual(['getClient', 'isEncryptionError']);
   });
 });

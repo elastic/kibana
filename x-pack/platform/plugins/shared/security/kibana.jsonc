@@ -11,6 +11,7 @@
     "id": "security",
     "browser": true,
     "server": true,
+    "tasks": {},
     "configPath": [
       "xpack",
       "security"

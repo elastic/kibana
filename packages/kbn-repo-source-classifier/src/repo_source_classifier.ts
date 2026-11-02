@@ -233,7 +233,8 @@ export class RepoSourceClassifier {
     }
 
     if (root === 'server') {
-      return 'server package';
+      // `server/tasks` is the plugin's task runtime entry, which also runs in task pods
+      return dirs[0] === 'tasks' ? 'tasks package' : 'server package';
     }
 
     return 'common package';

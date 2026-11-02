@@ -10,6 +10,7 @@
     "id": "taskManager",
     "browser": false,
     "server": true,
+    "tasks": { "requiredPlugins": ["encryptedSavedObjects"] },
     "configPath": [
       "xpack",
       "task_manager"
@@ -19,6 +20,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "encryptedSavedObjects",
       "usageCollection",
     ]
   }

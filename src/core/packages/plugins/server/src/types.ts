@@ -22,7 +22,13 @@ import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-comm
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
-import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
+import type {
+  CorePreboot,
+  CoreSetup,
+  CoreStart,
+  CoreTasksSetup,
+  CoreTasksStart,
+} from '@kbn/core-lifecycle-server';
 import type { SharedGlobalConfigKeys } from './shared_global_config';
 type Maybe<T> = T | undefined;
 
@@ -223,6 +229,15 @@ export interface PluginManifest {
   readonly runtimePluginDependencies: readonly string[];
 
   /**
+   * Present when the plugin has a `server/tasks` entry. Its dependencies are edges between the
+   * tasks entries of the listed plugins.
+   */
+  readonly tasks?: {
+    readonly requiredPlugins: readonly PluginName[];
+    readonly optionalPlugins: readonly PluginName[];
+  };
+
+  /**
    * Specifies whether plugin includes some client/browser specific functionality
    * that should be included into client bundle via `public/ui_plugin.js` file.
    */
@@ -297,6 +312,26 @@ export interface Plugin<
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
+
+  stop?(): MaybePromise<void>;
+}
+
+/**
+ * The interface that should be returned by the `plugin` export of a plugin's `server/tasks`
+ * entry. Same lifecycle as a standard plugin, with the smaller {@link CoreTasksSetup} and
+ * {@link CoreTasksStart} and only the contracts of the other plugins' tasks entries.
+ *
+ * @public
+ */
+export interface TasksPlugin<
+  TSetup = void,
+  TStart = void,
+  TPluginsSetup extends Record<string, any> = {},
+  TPluginsStart extends Record<string, any> = {}
+> {
+  setup(core: CoreTasksSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
+
+  start(core: CoreTasksStart, plugins: TPluginsStart): TStart;
 
   stop?(): MaybePromise<void>;
 }

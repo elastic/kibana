@@ -12,7 +12,7 @@ import path from 'path';
 import type { Type, TypeOf } from '@kbn/config-schema';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { AppenderConfigType, Logger } from '@kbn/core/server';
-import { config as coreConfig } from '@kbn/core/server';
+import { appendersSchema } from '@kbn/core-logging-server-internal';
 import { i18n } from '@kbn/i18n';
 import { getLogsPath } from '@kbn/utils';
 
@@ -303,7 +303,7 @@ export const ConfigSchema = schema.object({
   audit: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     include_saved_object_names: schema.boolean({ defaultValue: true }),
-    appender: schema.maybe(coreConfig.logging.appenders),
+    appender: schema.maybe(appendersSchema as Type<AppenderConfigType>),
     ignore_filters: schema.maybe(
       schema.arrayOf(
         schema.object({

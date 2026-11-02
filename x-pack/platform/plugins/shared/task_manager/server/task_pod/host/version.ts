@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-declare const __POD_BUILD_VERSION__: string | undefined;
+import { kibanaPackageJson } from '@kbn/repo-info';
 
 /**
- * The Kibana version this pod was built from. The build script bakes it in; `POD_KIBANA_VERSION`
- * overrides it. Kibana sends its own version with every run and the pod refuses a mismatch, since
- * task state schemas and saved object migrations are versioned with Kibana.
+ * The Kibana version this pod runs as (`POD_KIBANA_VERSION` overrides it). Kibana sends its own
+ * version with every run and the pod refuses a mismatch, since task state schemas and saved object
+ * migrations are versioned with Kibana.
  */
 export const POD_KIBANA_VERSION: string =
-  process.env.POD_KIBANA_VERSION ??
-  (typeof __POD_BUILD_VERSION__ !== 'undefined' ? __POD_BUILD_VERSION__ : '0.0.0');
+  process.env.POD_KIBANA_VERSION ?? kibanaPackageJson.version;

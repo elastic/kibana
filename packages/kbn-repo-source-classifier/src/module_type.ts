@@ -13,5 +13,6 @@ export type ModuleType =
   | 'static'
   | 'tooling'
   | 'server package'
+  | 'tasks package'
   | 'browser package'
   | 'common package';

@@ -140,6 +140,7 @@ async function testSetup() {
 
   pluginsConfig = {
     initialize: true,
+    bootTasksEntries: false,
     paths: [],
     allowlistPluginGroups: ['observability'],
   };
@@ -750,6 +751,7 @@ describe('PluginsService', () => {
         config: {
           additionalPluginPaths: [],
           allowlistPluginGroups: ['observability'],
+          bootTasksEntries: false,
           initialize: true,
           pluginSearchPaths: [
             resolve(REPO_ROOT, '..', 'kibana-extra'),

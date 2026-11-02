@@ -10,6 +10,7 @@
     "id": "eventLog",
     "browser": false,
     "server": true,
+    "tasks": {},
     "configPath": [
       "xpack",
       "eventLog"

@@ -10,6 +10,7 @@
 import { withTimeout, isPromise } from '@kbn/std';
 import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
 import type { PluginWrapper } from './plugin';
@@ -18,11 +19,15 @@ import {
   createPluginPrebootSetupContext,
   createPluginSetupContext,
   createPluginStartContext,
+  createPluginTasksSetupContext,
+  createPluginTasksStartContext,
 } from './plugin_context';
 import type {
   PluginsServicePrebootSetupDeps,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
+  PluginsServiceTasksSetupDeps,
+  PluginsServiceTasksStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
 
@@ -89,7 +94,11 @@ export class PluginsSystem<T extends PluginType> {
   }
 
   public async setupPlugins(
-    deps: T extends PluginType.preboot ? PluginsServicePrebootSetupDeps : PluginsServiceSetupDeps
+    deps: T extends PluginType.preboot
+      ? PluginsServicePrebootSetupDeps
+      : T extends PluginType.tasks
+      ? PluginsServiceTasksSetupDeps
+      : PluginsServiceSetupDeps
   ): Promise<Map<string, unknown>> {
     const contracts = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
@@ -127,6 +136,11 @@ export class PluginsSystem<T extends PluginType> {
           deps: deps as PluginsServicePrebootSetupDeps,
           plugin,
         });
+      } else if (this.type === PluginType.tasks) {
+        pluginSetupContext = createPluginTasksSetupContext({
+          deps: deps as PluginsServiceTasksSetupDeps,
+          plugin,
+        }) as unknown as CoreSetup;
       } else {
         pluginSetupContext = createPluginSetupContext({
           deps: deps as PluginsServiceSetupDeps,
@@ -169,7 +183,9 @@ export class PluginsSystem<T extends PluginType> {
     return contracts;
   }
 
-  public async startPlugins(deps: PluginsServiceStartDeps) {
+  public async startPlugins(
+    deps: T extends PluginType.tasks ? PluginsServiceTasksStartDeps : PluginsServiceStartDeps
+  ) {
     if (this.type === PluginType.preboot) {
       throw new Error('Preboot plugins cannot be started.');
     }
@@ -196,10 +212,18 @@ export class PluginsSystem<T extends PluginType> {
       }, {} as Record<PluginName, unknown>);
 
       let contract: unknown;
-      const contractOrPromise = plugin.start(
-        createPluginStartContext({ deps, plugin, runtimeResolver: this.runtimeResolver }),
-        pluginDepContracts
-      );
+      const startContext =
+        this.type === PluginType.tasks
+          ? (createPluginTasksStartContext({
+              deps: deps as PluginsServiceTasksStartDeps,
+              plugin,
+            }) as unknown as CoreStart)
+          : createPluginStartContext({
+              deps: deps as PluginsServiceStartDeps,
+              plugin,
+              runtimeResolver: this.runtimeResolver,
+            });
+      const contractOrPromise = plugin.start(startContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {
         if (this.coreContext.env.mode.dev) {
           this.log.warn(

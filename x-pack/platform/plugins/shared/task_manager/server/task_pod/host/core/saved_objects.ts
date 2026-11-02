@@ -114,6 +114,7 @@ export class PodSavedObjects {
     setEncryptionExtension: (factory: EncryptionExtensionFactory) => {
       this.encryptionExtensionFactory = factory;
     },
+    getDefaultIndex: () => '.kibana',
     registerType: (type: RegisteredType) => {
       if (this.internals) {
         throw new Error(`Saved object type '${type.name}' registered after setup`);

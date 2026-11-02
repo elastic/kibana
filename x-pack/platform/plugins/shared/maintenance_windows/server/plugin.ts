@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { registerSavedObject } from './saved_objects';
+import { maintenanceWindowsBridge } from './tasks/bridge';
 import {
   initializeMaintenanceWindowEventsGenerator,
   scheduleMaintenanceWindowEventsGenerator,
@@ -70,6 +71,7 @@ export class MaintenanceWindowsPlugin
     plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
     registerSavedObject(core.savedObjects);
+    maintenanceWindowsBridge.setSetup(true);
 
     initializeMaintenanceWindowEventsGenerator(
       this.logger,

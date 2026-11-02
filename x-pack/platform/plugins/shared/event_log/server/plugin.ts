@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
+import { eventLogBridge } from './tasks/bridge';
 
 import type {
   IEventLogConfig,
@@ -91,6 +92,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
       event: { provider: PROVIDER },
     });
 
+    eventLogBridge.setSetup(this.eventLogService);
     return this.eventLogService;
   }
 

@@ -21,8 +21,19 @@ import { formatSuggestions, toList } from '../helpers/report';
 const ANY = Symbol();
 
 const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | typeof ANY> = {
-  'non-package': ['non-package', 'server package', 'browser package', 'common package', 'static'],
-  'server package': ['common package', 'server package', 'static'],
+  'non-package': [
+    'non-package',
+    'server package',
+    'tasks package',
+    'browser package',
+    'common package',
+    'static',
+  ],
+  'server package': ['common package', 'server package', 'tasks package', 'static'],
+  // A plugin's `server/tasks` entry also runs in task pods, which only have what other plugins'
+  // tasks entries and Core's tasks surface expose, so it can use its own plugin's server code but
+  // only other plugins' `server/tasks` code (checked below).
+  'tasks package': ['common package', 'server package', 'tasks package', 'static'],
   'browser package': ['common package', 'browser package', 'static'],
   'common package': ['common package', 'static'],
 
@@ -37,6 +48,7 @@ export const NoBoundaryCrossingRule: CreateOnceRule = {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
     },
     messages: {
+      CROSS_PLUGIN_TASKS: `A "tasks" file can only import another plugin's "server/tasks" code, but this imports "{{importedType}}" code from "{{pkgId}}". Expose what you need from "{{pkgId}}/server/tasks" instead.`,
       TYPE_MISMATCH: `"{{importedType}}" code can not be imported from "{{ownType}}" code.{{suggestion}}`,
     },
   },
@@ -91,6 +103,22 @@ export const NoBoundaryCrossingRule: CreateOnceRule = {
             },
           });
           return;
+        }
+
+        if (
+          self.type === 'tasks package' &&
+          imported.type === 'server package' &&
+          imported.manifest?.type === 'plugin' &&
+          imported.pkgInfo?.pkgId !== self.pkgInfo?.pkgId
+        ) {
+          context.report({
+            node,
+            messageId: 'CROSS_PLUGIN_TASKS',
+            data: {
+              importedType: imported.type,
+              pkgId: imported.pkgInfo?.pkgId ?? 'another package',
+            },
+          });
         }
       };
     });

@@ -24,6 +24,7 @@
     "@kbn/serverless",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/task-manager-plugin",
+    "@kbn/core-plugins-server",
   ],
   "exclude": [
     "target/**/*",

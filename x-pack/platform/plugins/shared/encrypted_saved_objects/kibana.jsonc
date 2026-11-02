@@ -11,6 +11,7 @@
     "id": "encryptedSavedObjects",
     "browser": false,
     "server": true,
+    "tasks": {},
     "configPath": [
       "xpack",
       "encryptedSavedObjects"

@@ -11,7 +11,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { serializeTaskRunError } from '../../task_running/errors';
 import type { PodRunRequest, PodRunResponse } from '../wire';
 import { reviveTaskInstance, serializeRunResult } from '../wire';
-import type { CapturedTaskDefinition } from './plugin_system';
+import type { CapturedTaskDefinition } from './boot_tasks_plugins';
 import { enrichPodFakeRequest } from './core/small_services';
 import { POD_KIBANA_VERSION } from './version';
 import { PodLogger } from './logger';

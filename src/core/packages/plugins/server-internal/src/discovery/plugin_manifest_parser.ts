@@ -46,6 +46,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     requiredPlugins: true,
     optionalPlugins: true,
     runtimePluginDependencies: true,
+    tasks: true,
     ui: true,
     server: true,
     extraPublicDirs: true,
@@ -219,6 +220,18 @@ export async function parseManifest(
     owner: manifest.owner!,
     description: manifest.description,
     enabledOnAnonymousPages: manifest.enabledOnAnonymousPages,
+    ...(manifest.tasks
+      ? {
+          tasks: {
+            requiredPlugins: Array.isArray(manifest.tasks.requiredPlugins)
+              ? manifest.tasks.requiredPlugins
+              : [],
+            optionalPlugins: Array.isArray(manifest.tasks.optionalPlugins)
+              ? manifest.tasks.optionalPlugins
+              : [],
+          },
+        }
+      : {}),
   };
 }
 

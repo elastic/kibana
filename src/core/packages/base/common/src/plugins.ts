@@ -30,6 +30,11 @@ export enum PluginType {
    * Standard plugins are plugins that start to function as soon as Kibana is fully booted and are active until it shuts down.
    */
   standard = 'standard',
+  /**
+   * Tasks plugins are the `server/tasks` entry of a plugin: a small runtime that only registers and
+   * runs task code, booted by Kibana and by task pods with the same dependency edges.
+   */
+  tasks = 'tasks',
 }
 
 /**

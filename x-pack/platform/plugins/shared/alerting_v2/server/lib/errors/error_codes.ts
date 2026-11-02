@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import {
-  ALERT_ACTION_NO_OP_CODE,
-  INVALID_ALERT_STATE_TRANSITION_CODE,
+import type {
+  ALERT_ACTION_NO_OP_CODE as SCHEMA_ALERT_ACTION_NO_OP_CODE,
+  INVALID_ALERT_STATE_TRANSITION_CODE as SCHEMA_INVALID_ALERT_STATE_TRANSITION_CODE,
 } from '@kbn/alerting-v2-schemas';
+
+// Values are repeated here (type-checked against the schemas package) so this file, which most
+// of the task runtime imports, doesn't load the whole schemas package at runtime.
+const ALERT_ACTION_NO_OP_CODE =
+  'ALERT_ACTION_NO_OP' satisfies typeof SCHEMA_ALERT_ACTION_NO_OP_CODE;
+const INVALID_ALERT_STATE_TRANSITION_CODE =
+  'INVALID_ALERT_STATE_TRANSITION' satisfies typeof SCHEMA_INVALID_ALERT_STATE_TRANSITION_CODE;
 
 /**
  * This file hosts two distinct catalogs:

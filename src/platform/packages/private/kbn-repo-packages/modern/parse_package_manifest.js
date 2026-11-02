@@ -64,6 +64,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     optionalPlugins,
     requiredBundles,
     runtimePluginDependencies,
+    tasks,
     enabledOnAnonymousPages,
     type,
     __category__,
@@ -111,6 +112,26 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
       runtimePluginDependencies,
       `must be an array of strings in camel or snake case`
     );
+  }
+
+  if (tasks !== undefined) {
+    if (!isObj(tasks)) {
+      throw err(`plugin.tasks`, tasks, `must be an object`);
+    }
+    if (tasks.requiredPlugins !== undefined && !isArrOfIds(tasks.requiredPlugins)) {
+      throw err(
+        `plugin.tasks.requiredPlugins`,
+        tasks.requiredPlugins,
+        `must be an array of strings in camel or snake case`
+      );
+    }
+    if (tasks.optionalPlugins !== undefined && !isArrOfIds(tasks.optionalPlugins)) {
+      throw err(
+        `plugin.tasks.optionalPlugins`,
+        tasks.optionalPlugins,
+        `must be an array of strings in camel or snake case`
+      );
+    }
   }
 
   if (requiredBundles !== undefined && !isArrOfIds(requiredBundles)) {
@@ -165,6 +186,7 @@ function validatePackageManifestPlugin(plugin, repoRoot, path) {
     optionalPlugins,
     requiredBundles,
     runtimePluginDependencies,
+    tasks,
     enabledOnAnonymousPages,
     extraPublicDirs,
     [PLUGIN_CATEGORY]: __category__,

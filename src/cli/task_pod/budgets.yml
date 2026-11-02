@@ -1,0 +1,7 @@
+./x-pack/platform/plugins/shared/task_manager/server/task_pod/host/boot_tasks_plugins: 59
+./x-pack/platform/plugins/shared/alerting_v2/server/tasks: 149
+./x-pack/platform/plugins/shared/task_manager/server/tasks: 28
+./x-pack/platform/plugins/shared/spaces/server/tasks: 10
+./x-pack/platform/plugins/shared/licensing/server/tasks: 10
+./x-pack/platform/plugins/shared/event_log/server/tasks: 15
+./x-pack/platform/plugins/shared/security/server/tasks: 8

@@ -10,6 +10,7 @@
 export type {
   PrebootPlugin,
   Plugin,
+  TasksPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,

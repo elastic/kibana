@@ -51,7 +51,8 @@
     "@kbn/alerting-v2-constants",
     "@kbn/alerting-v2-utils",
     "@kbn/kql",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/core-plugins-server",
   ],
   "exclude": ["target/**/*"]
 }

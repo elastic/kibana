@@ -39,7 +39,7 @@ import { createBrowserConfig } from './create_browser_config';
 
 /** @internal */
 export type DiscoveredPlugins = {
-  [key in PluginType]: {
+  [key in Exclude<PluginType, PluginType.tasks>]: {
     pluginTree: PluginDependencies;
     pluginPaths: string[];
     uiPlugins: UiPlugins;
@@ -69,6 +69,43 @@ export type PluginsServiceSetupDeps = InternalCoreSetup;
 /** @internal */
 export type PluginsServiceStartDeps = InternalCoreStart;
 
+/**
+ * The Core services a `tasks` plugin system needs during `setup`. Kibana passes its full internal
+ * core setup, task pods pass the real services they boot.
+ * @internal
+ */
+export interface PluginsServiceTasksSetupDeps {
+  analytics: Pick<
+    PluginsServiceSetupDeps['analytics'],
+    'optIn' | 'registerEventType' | 'reportEvent'
+  >;
+  http: Pick<PluginsServiceSetupDeps['http'], 'basePath'>;
+  injection: Pick<PluginsServiceSetupDeps['injection'], 'getContainer'>;
+  savedObjects: Pick<
+    PluginsServiceSetupDeps['savedObjects'],
+    'registerType' | 'setEncryptionExtension' | 'getDefaultIndex'
+  >;
+}
+
+/**
+ * The Core services a `tasks` plugin system needs during `start`.
+ * @internal
+ */
+export interface PluginsServiceTasksStartDeps {
+  analytics: Pick<
+    PluginsServiceStartDeps['analytics'],
+    'optIn' | 'reportEvent' | 'telemetryCounter$'
+  >;
+  elasticsearch: Pick<PluginsServiceStartDeps['elasticsearch'], 'client' | 'createClient'>;
+  featureFlags: PluginsServiceStartDeps['featureFlags'];
+  http: Pick<PluginsServiceStartDeps['http'], 'basePath'>;
+  injection: Pick<PluginsServiceStartDeps['injection'], 'fork' | 'getContainer'>;
+  savedObjects: Omit<PluginsServiceStartDeps['savedObjects'], 'createExporter' | 'createImporter'>;
+  security: Pick<PluginsServiceStartDeps['security'], 'authc' | 'audit' | 'serviceAccounts'>;
+  uiSettings: PluginsServiceStartDeps['uiSettings'];
+  userProfile: PluginsServiceStartDeps['userProfile'];
+}
+
 /** @internal */
 export interface PluginsServiceDiscoverDeps {
   environment: InternalEnvironmentServicePreboot;
@@ -85,6 +122,7 @@ export class PluginsService
   private readonly prebootUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
   private readonly standardPluginsSystem: PluginsSystem<PluginType.standard>;
   private readonly standardUiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
+  private readonly tasksPluginsSystem: PluginsSystem<PluginType.tasks>;
   private readonly configService: IConfigService;
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
@@ -98,6 +136,7 @@ export class PluginsService
       .pipe(map((rawConfig) => new PluginsConfig(rawConfig, coreContext.env)));
     this.prebootPluginsSystem = new PluginsSystem(this.coreContext, PluginType.preboot);
     this.standardPluginsSystem = new PluginsSystem(this.coreContext, PluginType.standard);
+    this.tasksPluginsSystem = new PluginsSystem(this.coreContext, PluginType.tasks);
   }
 
   public async discover({
@@ -174,6 +213,8 @@ export class PluginsService
     let contracts = new Map<PluginName, unknown>();
     if (config.initialize) {
       contracts = await this.standardPluginsSystem.setupPlugins(deps);
+      // Tasks entries only register, so they set up after every standard plugin and before any starts.
+      await this.tasksPluginsSystem.setupPlugins(deps);
     } else {
       this.log.info(
         'Skipping `setup` for `standard` plugins since plugin initialization is disabled.'
@@ -201,6 +242,7 @@ export class PluginsService
     this.arePrebootPluginsStopped = true;
 
     const contracts = await this.standardPluginsSystem.startPlugins(deps);
+    await this.tasksPluginsSystem.startPlugins(deps);
     return { contracts };
   }
 
@@ -212,6 +254,7 @@ export class PluginsService
       await this.prebootPluginsSystem.stopPlugins();
     }
 
+    await this.tasksPluginsSystem.stopPlugins();
     await this.standardPluginsSystem.stopPlugins();
   }
 
@@ -355,6 +398,9 @@ export class PluginsService
           this.prebootPluginsSystem.addPlugin(plugin);
         } else {
           this.standardPluginsSystem.addPlugin(plugin);
+          if (config.bootTasksEntries && plugin.manifest.tasks) {
+            this.tasksPluginsSystem.addPlugin(plugin.createTasksWrapper());
+          }
         }
       } else if (isEnabled) {
         disabledDependants.push(pluginName);
@@ -405,6 +451,24 @@ export class PluginsService
         throw new Error(
           `Plugin bundle with id "${requiredBundleId}" is required by plugin "${name}" and expected to have "${manifest.type}" type, but its type is "${requiredPlugin.manifest.type}".`
         );
+      }
+    }
+
+    // validate the `tasks` block: its dependencies are edges between tasks entries
+    if (manifest.tasks) {
+      const declared = new Set([...requiredPlugins, ...plugin.optionalPlugins]);
+      for (const id of [...manifest.tasks.requiredPlugins, ...manifest.tasks.optionalPlugins]) {
+        if (!declared.has(id)) {
+          throw new Error(
+            `Plugin "${name}" lists "${id}" in "tasks" dependencies but not in "requiredPlugins" or "optionalPlugins".`
+          );
+        }
+        const target = pluginEnableStatuses.get(id);
+        if (target && !target.plugin.manifest.tasks) {
+          throw new Error(
+            `Plugin "${name}" depends on the tasks entry of "${id}", but "${id}" has no "tasks" entry in its manifest.`
+          );
+        }
       }
     }
 

@@ -1,0 +1,19 @@
+{
+  // The task pod family for alerting v2: every plugin whose `server/tasks` entry the pod boots. A
+  // plugin's tasks dependencies must be listed here (checked at pod boot).
+  "family": "alerting_v2",
+  "taskTypes": ["alerting_v2:*"],
+  "plugins": [
+    "alertingVTwo",
+    "taskManager",
+    "spaces",
+    "security",
+    "licensing",
+    "eventLog",
+    "encryptedSavedObjects",
+    "maintenanceWindows",
+    "workflowsExtensions",
+    "workflowsManagement",
+    "workflowsExecutionEngine"
+  ]
+}

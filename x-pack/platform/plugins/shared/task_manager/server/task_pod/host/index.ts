@@ -8,40 +8,36 @@
 import { readFileSync } from 'fs';
 import { parse } from 'yaml';
 import { PodLogger } from './logger';
-import type { PodPluginDefinition } from './define_pod_plugin';
-import { bootPod } from './plugin_system';
+import { bootTasksPlugins } from './boot_tasks_plugins';
 import { startPodServer } from './server';
 
-export { definePodPlugin } from './define_pod_plugin';
-export type { PodPluginDefinition, PodPluginInitializerContext } from './define_pod_plugin';
-export { podContract } from './pod_contract';
-
 /**
- * Entry of a pod process: boots the pod plugins and serves `/health`, `/run` and `/cancel`.
- * Env: ES_URL, ES_USERNAME/ES_PASSWORD (or ES_API_KEY), PORT, POD_CONFIG (yml with kibana.yml keys).
+ * Entry of a pod process: boots the tasks entries of the family's plugins and serves `/health`,
+ * `/run` and `/cancel`. Env: ES_URL, ES_USERNAME/ES_PASSWORD (or ES_API_KEY), PORT, POD_CONFIG (yml
+ * with kibana.yml keys).
  */
 export const startPod = async ({
-  plugins,
+  pluginIds,
   defaultPort,
 }: {
-  plugins: PodPluginDefinition[];
+  pluginIds: string[];
   defaultPort: number;
 }) => {
   // Without a cap, V8 sizes the young generation from the machine's heap limit and a pod can sit
-  // ~100 MB higher than it needs to. The build script emits a launcher that sets it.
+  // ~100 MB higher than it needs to. `bin/kibana-task-pod` sets it.
   if (
     !`${process.env.NODE_OPTIONS ?? ''} ${process.execArgv.join(' ')}`.includes(
       'max-semi-space-size'
     )
   ) {
     new PodLogger('taskPod').warn(
-      'task pod started without --max-semi-space-size; use the .sh launcher the build wrote to keep memory down'
+      'task pod started without --max-semi-space-size; use bin/kibana-task-pod to keep memory down'
     );
   }
   const config = process.env.POD_CONFIG
     ? (parse(readFileSync(process.env.POD_CONFIG, 'utf8')) as Record<string, unknown>) ?? {}
     : {};
-  const { taskDefinitions } = await bootPod({ plugins, config: nestDottedKeys(config) });
+  const { taskDefinitions } = await bootTasksPlugins({ pluginIds, config: nestDottedKeys(config) });
   startPodServer({ taskDefinitions, port: Number(process.env.PORT ?? defaultPort) });
 };
 

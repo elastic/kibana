@@ -6,11 +6,7 @@
  */
 
 /**
- * Light public entry for plugins that want to run their tasks in a task pod. Importing this does
- * not pull in the host (core-di internals, saved objects, the HTTP server), only the definition
- * helpers, so it is cheap to import from a plugin's `server/task_pod.ts`.
+ * Light public entry for the task pod: it does not pull in the host (core-di internals, saved
+ * objects, the HTTP server) until `startPod` is called.
  */
-export { definePodPlugin } from './host/define_pod_plugin';
-export type { PodPluginDefinition, PodPluginInitializerContext } from './host/define_pod_plugin';
-export { podContract } from './host/pod_contract';
-export { createTaskSchedulingPodPlugin } from './scheduling';
+export { startPod } from './host';
