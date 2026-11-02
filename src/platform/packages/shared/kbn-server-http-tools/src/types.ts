@@ -27,6 +27,7 @@ export interface IHttpConfig {
   protocol: ServerProtocol;
   host: string;
   port: number;
+  socketPath?: string;
   maxPayload: ByteSizeValue;
   keepaliveTimeout: number;
   socketTimeout: number;

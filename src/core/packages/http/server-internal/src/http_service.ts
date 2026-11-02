@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve as pathResolve } from 'node:path';
 import type { Observable, Subscription } from 'rxjs';
 import { combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
@@ -62,6 +63,7 @@ import {
   type SelfClientOwnClientAuthenticationCheck,
   type SelfClientUiamAttestationGetter,
 } from './self_client';
+import { SidecarProcess } from './sidecar_process';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;
@@ -93,6 +95,8 @@ export class HttpService
 
   private readonly log: Logger;
   private readonly env: Env;
+  private sidecar?: SidecarProcess;
+  private sidecarSocketPath?: string;
   private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: IContextContainer;
@@ -108,10 +112,13 @@ export class HttpService
       configService.atPath<ExternalUrlConfigType>(externalUrlConfig.path),
       configService.atPath<PermissionsPolicyConfigType>(permissionsPolicyConfig.path),
     ]).pipe(
-      map(
-        ([http, csp, externalUrl, permissionsPolicy]) =>
-          new HttpConfig(http, csp, externalUrl, permissionsPolicy)
-      )
+      map(([http, csp, externalUrl, permissionsPolicy]) => {
+        const cfg = new HttpConfig(http, csp, externalUrl, permissionsPolicy);
+        if (this.sidecarSocketPath) {
+          cfg.socketPath = this.sidecarSocketPath;
+        }
+        return cfg;
+      })
     );
     const shutdownTimeout$ = this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout));
     this.prebootServer = new HttpServer(coreContext, 'Preboot', shutdownTimeout$);
@@ -123,6 +130,14 @@ export class HttpService
     this.log.debug('setting up preboot server');
 
     const config = await firstValueFrom(this.config$);
+
+    if (config.sidecar.enabled) {
+      const sidecarBinPath = pathResolve(this.env.homeDir, 'src/platform/sidecar/kbn-sidecar');
+      this.sidecar = new SidecarProcess(config, sidecarBinPath, this.log.get('sidecar'));
+      await this.sidecar.start();
+      this.sidecarSocketPath = this.sidecar.socketPath;
+      config.socketPath = this.sidecarSocketPath;
+    }
 
     const prebootSetup = await this.prebootServer.setup({
       config$: this.config$,
@@ -435,6 +450,7 @@ export class HttpService
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
+    await this.sidecar?.stop();
     await this.selfClient?.close();
     this.selfClient = undefined;
   }

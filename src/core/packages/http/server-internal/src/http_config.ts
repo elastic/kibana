@@ -316,6 +316,10 @@ const configSchema = schema.object(
       /** In production: only allow false, default to false */
       schema.oneOf([schema.literal(false)], { defaultValue: false })
     ),
+
+    sidecar: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   },
   {
     validate: (rawConfig) => {
@@ -455,6 +459,8 @@ export class HttpConfig implements IHttpConfig {
   public serverTimingElasticsearch: boolean;
 
   public eluMonitor: IHttpEluMonitorConfig;
+  public sidecar: { enabled: boolean };
+  public socketPath?: string;
 
   /**
    * @internal
@@ -521,6 +527,7 @@ export class HttpConfig implements IHttpConfig {
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
     this.oas = rawHttpConfig.oas;
+    this.sidecar = rawHttpConfig.sidecar;
   }
 }
 
