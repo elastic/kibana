@@ -6,6 +6,7 @@
  */
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { AlertDocumentsTooLargeError } from '@kbn/workflows-management-plugin/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { TM_DELAY_LIMIT_MS } from '../../alert_triage/constants';
 import { LOADED_ALERT_FIELDS } from '../../alert_triage/loaded_alert_fields';
@@ -218,9 +219,9 @@ describe('triage load alerts step', () => {
       },
     });
 
-    const { output } = await getTriageLoadAlertsStepDefinition({ getWorkflowsManagement: () => undefined }).handler(
-      createContext({ alert_ids: ['a-1', 'a-2'] }, callKibanaApi)
-    );
+    const { output } = await getTriageLoadAlertsStepDefinition({
+      getWorkflowsManagement: () => undefined,
+    }).handler(createContext({ alert_ids: ['a-1', 'a-2'] }, callKibanaApi));
 
     expect(output).toEqual({
       alerts: [
@@ -239,6 +240,67 @@ describe('triage load alerts step', () => {
       size: 2,
       query: { ids: { values: ['a-1', 'a-2'] } },
       _source: LOADED_ALERT_FIELDS,
+    });
+  });
+
+  describe('with the shared workflows alert loader', () => {
+    const request = { id: 'fake-request' };
+    const createLoaderContext = (input: Record<string, unknown>, callKibanaApi: jest.Mock) =>
+      ({
+        input,
+        contextManager: { callKibanaApi, getFakeRequest: () => request },
+        logger: { warn: jest.fn() },
+      } as unknown as StepHandlerContext<unknown, unknown>);
+
+    it('loads through management.loadAlertDocuments as the requesting user, not the search route', async () => {
+      const callKibanaApi = jest.fn();
+      const loadAlertDocuments = jest
+        .fn()
+        .mockResolvedValue({ alerts: [{ _id: 'a-1', _index: 'idx' }], missingIds: ['a-2'] });
+
+      const { output } = await getTriageLoadAlertsStepDefinition({
+        getWorkflowsManagement: () => ({ loadAlertDocuments }),
+      }).handler(
+        createLoaderContext({ alert_ids: ['a-1', 'a-2'], space_id: 'default' }, callKibanaApi)
+      );
+
+      expect(loadAlertDocuments).toHaveBeenCalledWith({
+        request,
+        alerts: { ids: ['a-1', 'a-2'], index: '.alerts-security.alerts-default' },
+        sourceIncludes: LOADED_ALERT_FIELDS,
+        maxBytes: 9 * 1024 * 1024,
+      });
+      expect(callKibanaApi).not.toHaveBeenCalled();
+      expect(output).toEqual({
+        alerts: [{ _id: 'a-1', _index: 'idx' }],
+        missing_alert_ids: ['a-2'],
+      });
+    });
+
+    it('reports documents over the byte cap as StepSizeLimitExceeded', async () => {
+      const loadAlertDocuments = jest
+        .fn()
+        .mockRejectedValue(new AlertDocumentsTooLargeError(10, 20));
+
+      await expect(
+        getTriageLoadAlertsStepDefinition({
+          getWorkflowsManagement: () => ({ loadAlertDocuments }),
+        }).handler(createLoaderContext({ alert_ids: ['a-1'], space_id: 'default' }, jest.fn()))
+      ).rejects.toMatchObject({ type: 'StepSizeLimitExceeded' });
+    });
+
+    it('falls back to the search route when the input has no space_id', async () => {
+      const loadAlertDocuments = jest.fn();
+      const callKibanaApi = jest
+        .fn()
+        .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+
+      await getTriageLoadAlertsStepDefinition({
+        getWorkflowsManagement: () => ({ loadAlertDocuments }),
+      }).handler(createLoaderContext({ alert_ids: ['a-1'] }, callKibanaApi));
+
+      expect(loadAlertDocuments).not.toHaveBeenCalled();
+      expect(callKibanaApi).toHaveBeenCalledTimes(1);
     });
   });
 

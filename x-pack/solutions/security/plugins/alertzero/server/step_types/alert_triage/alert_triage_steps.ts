@@ -174,7 +174,7 @@ export const getTriageLoadAlertsStepDefinition = ({
         if (management && input.space_id) {
           // EXPERIMENT: shared platform loader instead of the detection-engine search route.
           const { alerts, missingIds } = await management.loadAlertDocuments({
-            esClient: contextManager.getScopedEsClient(),
+            request: contextManager.getFakeRequest(),
             alerts: { ids: input.alert_ids, index: `.alerts-security.alerts-${input.space_id}` },
             sourceIncludes: LOADED_ALERT_FIELDS,
             maxBytes: MAX_LOADED_ALERT_BYTES,
