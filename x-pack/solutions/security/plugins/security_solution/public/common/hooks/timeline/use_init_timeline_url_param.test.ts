@@ -5,10 +5,54 @@
  * 2.0.
  */
 
-import { hasTimelineStateChanged } from './use_init_timeline_url_param';
+import React from 'react';
+import { renderHook } from '@testing-library/react';
+import { Provider } from 'react-redux-v7';
+import {
+  hasTimelineStateChanged,
+  useInitTimelineFromUrlParam,
+} from './use_init_timeline_url_param';
+import { TimelineId } from '../../../../common/types';
+import { createMockStore } from '../../mock';
+import { timelineActions } from '../../../timelines/store';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import type { TimelineModel } from '../../../timelines/store/model';
+import type { TimelineModel, TimelineUrl } from '../../../timelines/store/model';
+
+let mockUrlState: TimelineUrl | null = null;
+
+jest.mock('../../utils/global_query_string', () => ({
+  // Mirrors the real hook: calls the initializer once on mount with the parsed URL param.
+  useInitializeUrlParam: (_key: string, onInitialize: (state: unknown) => void) => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { useEffect } = require('react');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => onInitialize(mockUrlState), []);
+  },
+}));
+
+// Mirrors `useQueryTimelineById` for a timeline without a saved object: it applies the URL query,
+// which the `timelineChangedMiddleware` turns into `changed: true`.
+jest.mock('../../../timelines/components/open_timeline/helpers', () => ({
+  useQueryTimelineById: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { useDispatch: useReduxDispatch } = require('react-redux-v7');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { timelineActions: actions } = require('../../../timelines/store');
+    const dispatch = useReduxDispatch();
+    return () =>
+      dispatch(
+        actions.applyKqlFilterQuery({
+          id: 'timeline-1',
+          filterQuery: {
+            kuery: { kind: 'kuery', expression: 'service.name: "a"' },
+            serializedQuery: '',
+          },
+        })
+      );
+  },
+}));
 
 const activeTimeline: TimelineModel = {
   ...timelineDefaults,
@@ -60,5 +104,38 @@ describe('hasTimelineStateChanged', () => {
         { id: 'abc-123', isOpen: true, activeTab: TimelineTabs.query, savedSearchId: 'search-1' }
       )
     ).toBe(true);
+  });
+});
+
+describe('useInitTimelineFromUrlParam', () => {
+  const renderInit = (store: ReturnType<typeof createMockStore>) =>
+    renderHook(() => useInitTimelineFromUrlParam(), {
+      wrapper: ({ children }: React.PropsWithChildren<{}>) =>
+        React.createElement(Provider, { store }, children),
+    });
+
+  const getChanged = (store: ReturnType<typeof createMockStore>) =>
+    selectTimelineById(store.getState(), TimelineId.active).changed;
+
+  it('does not mark a timeline rebuilt from the URL as changed', () => {
+    // Real flow: the user confirmed leaving, then came back (browser back) to a URL that still
+    // carries the `timeline` param. Re-applying its query must not bring the prompt back.
+    const store = createMockStore();
+    store.dispatch(timelineActions.setChanged({ id: TimelineId.active, changed: false }));
+    mockUrlState = { isOpen: false, activeTab: TimelineTabs.query };
+
+    renderInit(store);
+
+    expect(getChanged(store)).toBe(false);
+  });
+
+  it('does not touch `changed` when the URL has no timeline param', () => {
+    const store = createMockStore();
+    store.dispatch(timelineActions.updateProviders({ id: TimelineId.active, providers: [] }));
+    mockUrlState = null;
+
+    renderInit(store);
+
+    expect(getChanged(store)).toBe(true);
   });
 });

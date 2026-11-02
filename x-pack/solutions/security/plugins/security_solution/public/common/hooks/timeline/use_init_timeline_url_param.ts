@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect } from 'react';
 import { safeDecode } from '@kbn/rison';
-import { useSelector } from 'react-redux-v7';
+import { useDispatch, useSelector } from 'react-redux-v7';
 
 import type { State } from '../../store';
 import { TimelineId } from '../../../../common/types';
@@ -15,9 +15,11 @@ import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { useQueryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import type { TimelineModel, TimelineUrl } from '../../../timelines/store/model';
 import { selectTimelineById } from '../../../timelines/store/selectors';
+import { timelineActions } from '../../../timelines/store';
 import { URL_PARAM_KEY } from '../use_url_state';
 
 export const useInitTimelineFromUrlParam = () => {
+  const dispatch = useDispatch();
   const queryTimelineById = useQueryTimelineById();
   const activeTimeline = useSelector((state: State) =>
     selectTimelineById(state, TimelineId.active)
@@ -34,9 +36,17 @@ export const useInitTimelineFromUrlParam = () => {
           savedSearchId: initialState.savedSearchId,
           query: initialState.query,
         });
+
+        if (initialState.id == null) {
+          // A timeline without a saved object is rebuilt from the URL only. Applying its query
+          // marks it as changed, but the URL is the baseline here, so the user has no unsaved work.
+          // Otherwise coming back to the app (e.g. browser back) prompts again after the user
+          // already chose to leave without saving.
+          dispatch(timelineActions.setChanged({ id: TimelineId.active, changed: false }));
+        }
       }
     },
-    [queryTimelineById]
+    [dispatch, queryTimelineById]
   );
 
   useEffect(() => {
