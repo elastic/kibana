@@ -1565,6 +1565,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             <SignalCards
               activeTile={activeTile}
               cards={shownSignalCards}
+              timeRange={timeRange}
               onFilterForCard={handleFilterForCard}
             />
           </div>

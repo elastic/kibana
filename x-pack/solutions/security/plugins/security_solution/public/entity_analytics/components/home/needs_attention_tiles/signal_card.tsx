@@ -21,11 +21,14 @@ import { css } from '@emotion/react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 
+import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
 import type { SignalCardData } from './data';
 
 export interface SignalCardProps {
   card: SignalCardData;
   selected: boolean;
+  /** The selected range; the delta compares with the range just before it. */
+  timeRange: TimeRange;
   onToggle: () => void;
 }
 
@@ -56,10 +59,11 @@ const notEnoughHistory = i18n.translate(
   { defaultMessage: 'Not enough history to compare' }
 );
 
-const vsPreviousPeriod = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.facelift.signalCard.vsPreviousPeriod',
-  { defaultMessage: 'vs previous period' }
-);
+const getVsPreviousPeriod = (timeRange: TimeRange) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.vsPreviousWindow', {
+    defaultMessage: 'vs. previous {window}',
+    values: { window: timeRange },
+  });
 
 /** Matches Elastic Charts metric title/subtitle truncation (line clamp). */
 const metricLineClamp = (maxLines: number) => css`
@@ -133,8 +137,8 @@ const getDeltaDescription = (
       });
 };
 
-const DeltaLabel: React.FC<{ text?: string; testSubj?: string }> = ({
-  text = vsPreviousPeriod,
+const DeltaLabel: React.FC<{ text: string; testSubj?: string }> = ({
+  text,
   testSubj = 'eaFaceliftSignalCardDeltaLabel',
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -159,7 +163,7 @@ const DeltaLabel: React.FC<{ text?: string; testSubj?: string }> = ({
 };
 
 /** Secondary metric: trend badge with the label after it. */
-const MetricTrendBadge: React.FC<{ delta: number }> = ({ delta }) => {
+const MetricTrendBadge: React.FC<{ delta: number; label: string }> = ({ delta, label }) => {
   const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
   const { backgroundColor, textColor, icon } = getTrendReversedBadgeColors(delta, euiTheme);
@@ -206,7 +210,7 @@ const MetricTrendBadge: React.FC<{ delta: number }> = ({ delta }) => {
           {icon}
         </span>
       </span>
-      <DeltaLabel />
+      <DeltaLabel text={label} />
     </span>
   );
 };
@@ -362,8 +366,9 @@ const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolea
  * prototype. The whole card is the one control that toggles the filter (select and clear), with
  * hover and selected states.
  */
-export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle }) => {
+export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRange, onToggle }) => {
   const { euiTheme } = useEuiTheme();
+  const vsPreviousPeriod = getVsPreviousPeriod(timeRange);
   const { fontSize: titleFontSize } = useEuiFontSize('s');
   const { fontSize: subtitleFontSize } = useEuiFontSize('xs');
   const [hovered, setHovered] = useState(false);
@@ -577,10 +582,12 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
               )}
               {interactive && card.isDeltaLoading ? (
                 <span>
-                  <EuiLoadingSpinner size="s" /> <DeltaLabel />
+                  <EuiLoadingSpinner size="s" /> <DeltaLabel text={vsPreviousPeriod} />
                 </span>
               ) : null}
-              {shownDelta !== undefined ? <MetricTrendBadge delta={shownDelta} /> : null}
+              {shownDelta !== undefined ? (
+                <MetricTrendBadge delta={shownDelta} label={vsPreviousPeriod} />
+              ) : null}
               {showNoHistory ? (
                 <DeltaLabel
                   text={notEnoughHistory}

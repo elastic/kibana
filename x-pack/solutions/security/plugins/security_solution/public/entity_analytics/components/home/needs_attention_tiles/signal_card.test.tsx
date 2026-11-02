@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
 import type { SignalCardData } from './data';
 import { SignalCard } from './signal_card';
 
@@ -38,12 +39,13 @@ const card = (overrides: Partial<SignalCardData> = {}): SignalCardData => ({
 
 const renderCard = (
   cardOverrides: Partial<SignalCardData> = {},
-  props: { selected?: boolean; onToggle?: () => void } = {}
+  props: { selected?: boolean; onToggle?: () => void; timeRange?: TimeRange } = {}
 ) =>
   render(
     <SignalCard
       card={card(cardOverrides)}
       selected={props.selected ?? false}
+      timeRange={props.timeRange ?? '30d'}
       onToggle={props.onToggle ?? jest.fn()}
     />
   );
@@ -105,7 +107,16 @@ describe('SignalCard', () => {
     const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
     expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toHaveTextContent('+12↑');
     expect(tile).not.toHaveTextContent('%');
-    expect(tile).toHaveTextContent('vs previous period');
+    expect(tile).toHaveTextContent('vs. previous 30d');
+  });
+
+  it.each([
+    ['24h', 'vs. previous 24h'],
+    ['7d', 'vs. previous 7d'],
+    ['30d', 'vs. previous 30d'],
+  ] as const)('compares with the range before the selected %s', (timeRange, label) => {
+    renderCard({ value: 12, delta: 12 }, { timeRange });
+    expect(screen.getByTestId('eaFaceliftSignalCardDeltaLabel')).toHaveTextContent(label);
   });
 
   it('formats large changes with a thousands separator, like the main number', () => {
