@@ -21,6 +21,7 @@ import moment from 'moment';
 import useInterval from 'react-use/lib/useInterval';
 
 const RELATIVE_TIME_REFRESH_MS = 30_000;
+const JUST_NOW_MS = 60_000;
 
 const OUTPUTS_LABEL = i18n.translate('xpack.notebook.cell.outputs', {
   defaultMessage: 'Outputs',
@@ -30,22 +31,28 @@ const LastRun = ({ lastRunAt, durationMs }: { lastRunAt: number; durationMs?: nu
   const [, setTick] = useState(0);
   useInterval(() => setTick((tick) => tick + 1), RELATIVE_TIME_REFRESH_MS);
 
+  const ranAt = moment(lastRunAt);
+  const time = ranAt.format(ranAt.isSame(moment(), 'day') ? 'LT' : 'LLL');
   const tooltip =
     durationMs === undefined
-      ? moment(lastRunAt).format('LLL')
+      ? time
       : i18n.translate('xpack.notebook.cell.lastRunTooltip', {
           defaultMessage: '{time} · took {duration} ms',
-          values: { time: moment(lastRunAt).format('LLL'), duration: durationMs },
+          values: { time, duration: durationMs },
         });
 
   return (
     <EuiToolTip content={tooltip} position="left">
       <EuiText size="xs" color="subdued" tabIndex={0} data-test-subj="notebookCellLastRun">
-        <FormattedMessage
-          id="xpack.notebook.cell.lastRun"
-          defaultMessage="Ran {time}"
-          values={{ time: <FormattedRelative value={lastRunAt} /> }}
-        />
+        {Date.now() - lastRunAt < JUST_NOW_MS ? (
+          <FormattedMessage id="xpack.notebook.cell.lastRunJustNow" defaultMessage="Ran just now" />
+        ) : (
+          <FormattedMessage
+            id="xpack.notebook.cell.lastRun"
+            defaultMessage="Ran {time}"
+            values={{ time: <FormattedRelative value={lastRunAt} /> }}
+          />
+        )}
       </EuiText>
     </EuiToolTip>
   );
