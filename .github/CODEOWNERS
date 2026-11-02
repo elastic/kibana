@@ -2669,10 +2669,10 @@ x-pack/platform/plugins/shared/actions/server/lib/relay @elastic/nightshift
 
 
 ## Bearer with TLS / Kubernetes auth
-src/platform/packages/shared/kbn-connector-specs/src/auth_types/bearer_with_tls* @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/auth_types/pem_ca_tls* @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/auth_types/eks_token_helpers* @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_* @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/bearer_with_tls* @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/pem_ca_tls* @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/eks_token_helpers* @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/auth_types/kubernetes_* @elastic/nightshift
 
 
 # Connector Specs
@@ -2691,16 +2691,16 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/aws_cloudwatch/** @el
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_eks/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_x_ray/** @elastic/workflows-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/azure_aks/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/azure_aks/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/azure_functions/** @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/specs/azure_monitor/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/azure_functions/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/azure_monitor/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/azure_sql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/bigquery/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/bitbucket/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/box/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/buildkite/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/buildkite/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/censys/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/databricks/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/dropbox/** @elastic/workchat-eng
@@ -2714,7 +2714,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/github/** @elastic/wo
 src/platform/packages/shared/kbn-connector-specs/src/specs/gitlab/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_calendar/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitoring/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitoring/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_docs/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
@@ -2726,7 +2726,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/w
 src/platform/packages/shared/kbn-connector-specs/src/specs/inbound_webhook/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
-src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/monday_com/** @elastic/workchat-eng
@@ -2735,12 +2735,12 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/mysql/** @elastic/wor
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/okta/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_drive/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/argocd/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/argocd/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/one_password/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/opensearch_aws_opensearch_service/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/outlook/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/pagerduty/** @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/prometheus/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/salesforce/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/servicenow_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_online/** @elastic/workchat-eng
@@ -2764,14 +2764,14 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/zoom/** @elastic/work
 
 # Connector Agent Skills
 src/platform/packages/shared/kbn-connector-specs/.claude/skills @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-specs/src/specs/posthog/** @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/specs/ansible_controller/** @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/specs/new_relic/** @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/specs/grafana/** @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/specs/rootly/** @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/specs/sentry/** @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/specs/dynatrace/** @elastic/nightshift-context-and-research-team
-src/platform/packages/shared/kbn-connector-specs/src/specs/zabbix/** @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-specs/src/specs/posthog/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/ansible_controller/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/new_relic/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/grafana/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/rootly/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/sentry/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/dynatrace/** @elastic/nightshift
+src/platform/packages/shared/kbn-connector-specs/src/specs/zabbix/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/workflows-eng
 
 
