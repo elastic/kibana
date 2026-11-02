@@ -312,12 +312,7 @@ export class NotebookScheduler {
         this.setStatus(id, 'done');
         return;
       }
-      this.publish(id, {
-        status: 'done',
-        output: { kind: 'input', params },
-        memoKey,
-        lastRunAt: this.now().getTime(),
-      });
+      this.publish(id, { status: 'done', output: { kind: 'input', params }, memoKey });
       return;
     }
 
@@ -332,18 +327,20 @@ export class NotebookScheduler {
       return;
     }
 
-    let options: string[] = [];
-    let durationMs: number | undefined;
-    if (optionsQuery.trim()) {
-      this.setStatus(id, 'running');
-      const result = await this.run({ query: optionsQuery, params: queryParams, signal });
-      if (signal.aborted) return;
-      options = getOptions(result.table);
-      durationMs = result.durationMs;
+    if (!optionsQuery.trim()) {
+      this.publish(id, { status: 'done', output: { kind: 'input', params, options: [] }, memoKey });
+      return;
     }
+    this.setStatus(id, 'running');
+    const { table, durationMs } = await this.run({
+      query: optionsQuery,
+      params: queryParams,
+      signal,
+    });
+    if (signal.aborted) return;
     this.publish(id, {
       status: 'done',
-      output: { kind: 'input', params, options },
+      output: { kind: 'input', params, options: getOptions(table) },
       memoKey,
       lastRunAt: this.now().getTime(),
       durationMs,

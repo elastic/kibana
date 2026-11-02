@@ -723,5 +723,22 @@ describe('NotebookScheduler', () => {
         options: ['win', 'mac', '7'],
       });
     });
+
+    it('records a run time only for inputs that ran a query', async () => {
+      const env = track(
+        setup([
+          pinnedTime('time'),
+          range('bytes'),
+          dropdown('static_choice'),
+          dropdown('os', 'FROM logs | STATS BY os'),
+        ])
+      );
+      await env.open();
+
+      expect(env.runtime('time').lastRunAt).toBeUndefined();
+      expect(env.runtime('bytes').lastRunAt).toBeUndefined();
+      expect(env.runtime('static_choice').lastRunAt).toBeUndefined();
+      expect(env.runtime('os').lastRunAt).toEqual(expect.any(Number));
+    });
   });
 });

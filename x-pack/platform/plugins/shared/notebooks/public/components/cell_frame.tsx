@@ -211,7 +211,7 @@ export const CellFrame = ({
         {children}
         <CellFooter
           outputs={outputs}
-          lastRunAt={'runMode' in cell ? runtime?.lastRunAt : undefined}
+          lastRunAt={runtime?.lastRunAt}
           durationMs={runtime?.durationMs}
         />
       </EuiPanel>
