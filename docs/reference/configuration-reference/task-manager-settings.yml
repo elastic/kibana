@@ -101,6 +101,42 @@ groups:
           self: ga
           ech: ga
 
+      - setting: xpack.task_manager.event_loop_watchdog.enabled
+        description: |
+          Enables a watchdog thread that detects when a task blocks the event loop and flags the task responsible. Sampling only happens while the event loop is already blocked.
+        datatype: bool
+        default: true
+        applies_to:
+          self: preview
+          ech: preview
+
+      - setting: xpack.task_manager.event_loop_watchdog.flag_threshold_ms
+        description: |
+          The shortest event loop block, in milliseconds, that can flag a task. Must be at least 1000, because sampling starts half a second into a block and shorter blocks cannot be attributed.
+        datatype: int
+        default: 5000
+        applies_to:
+          self: preview
+          ech: preview
+
+      - setting: xpack.task_manager.event_loop_watchdog.min_cpu_ratio
+        description: |
+          The minimum ratio of process CPU time to wall time during a block for a task to be flagged, so that a throttled or starved node is not blamed on a task. It also exempts blocks caused by blocking system calls. Set to 0 to disable the check.
+        datatype: float
+        default: 0.5
+        applies_to:
+          self: preview
+          ech: preview
+
+      - setting: xpack.task_manager.event_loop_watchdog.live_report_interval_ms
+        description: |
+          How often, in milliseconds, a block that is still ongoing is written to stderr.
+        datatype: int
+        default: 3000
+        applies_to:
+          self: preview
+          ech: preview
+
       - setting: xpack.task_manager.version_conflict_threshold
         description: |
           The percentage threshold of workers experiencing version conflicts above which Task Manager shifts its polling interval to avoid overloading Elasticsearch. Accepts values between 50 and 100.

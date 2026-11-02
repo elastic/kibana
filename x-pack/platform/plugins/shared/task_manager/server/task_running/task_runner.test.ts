@@ -17,6 +17,7 @@ import {
   TaskRunResult,
 } from '.';
 import type { TaskEvent, TaskRun } from '../task_events';
+import type { EventLoopBlockReport, EventLoopRunObserver } from '../event_loop_watchdog';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
 import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
 import {
@@ -821,6 +822,108 @@ describe('TaskManagerRunner', () => {
       const createTaskRunnerParams = createTaskRunnerFn.mock.calls[0][0];
       expect(createTaskRunnerParams.fakeRequest).toBeDefined();
       expect(createTaskRunnerParams.taskInstance).toEqual(instance);
+    });
+
+    describe('event loop block flag', () => {
+      const evidence = {
+        blockedMs: 7000,
+        observedMs: 6500,
+        opaqueMs: 0,
+        unsampledMs: 500,
+        inferredMs: 0,
+        samples: 25,
+        cpuRatio: 1,
+        startedAt: 'start',
+        endedAt: 'end',
+      };
+      const blockReport = (executionUuid: string) =>
+        ({
+          flag: { flagged: true, taskId: 'foo', taskType: 'bar', executionUuid, evidence },
+        } as unknown as EventLoopBlockReport);
+      const setup = (end: jest.Mock, run: () => Promise<undefined> = async () => undefined) => {
+        const observation = { end };
+        const eventLoopWatchdog = { beginRun: jest.fn(() => observation) };
+        const onTaskEvent = jest.fn();
+        return {
+          eventLoopWatchdog,
+          onTaskEvent,
+          ready: readyToRunStageSetup({
+            instance: { ...mockInstance(), schedule: { interval: '10m' } },
+            definitions: { bar: { title: 'Bar!', createTaskRunner: () => ({ run }) } },
+            onTaskEvent,
+            eventLoopWatchdog,
+          }),
+        };
+      };
+      const lastTiming = (onTaskEvent: jest.Mock) =>
+        onTaskEvent.mock.calls[onTaskEvent.mock.calls.length - 1][0].timing;
+
+      test('observes the run and records the flag on the timing before the results are processed', async () => {
+        const end = jest.fn().mockResolvedValue([blockReport(TASK_EXECUTION_UUID)]);
+        const { eventLoopWatchdog, onTaskEvent, ready } = setup(end);
+        const { runner, logger, store } = await ready;
+
+        await runner.run();
+
+        expect(eventLoopWatchdog.beginRun).toHaveBeenCalledWith(TASK_EXECUTION_UUID);
+        expect(end).toHaveBeenCalledTimes(1);
+        expect(lastTiming(onTaskEvent).eventLoopBlock).toEqual(evidence);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('blocked the event loop for ~7000ms'),
+          { tags: ['bar', 'bar foo', 'event-loop-blocked', 'event-loop-watchdog'] }
+        );
+        // known before the task document is written
+        expect(end.mock.invocationCallOrder[0]).toBeLessThan(
+          store.partialUpdate.mock.invocationCallOrder[0]
+        );
+      });
+
+      test('ignores a flag that names another execution', async () => {
+        const { onTaskEvent, ready } = setup(
+          jest.fn().mockResolvedValue([blockReport('another-execution')])
+        );
+        const { runner, logger } = await ready;
+
+        await runner.run();
+
+        expect(lastTiming(onTaskEvent).eventLoopBlock).toBeUndefined();
+        expect(logger.warn).not.toHaveBeenCalledWith(
+          expect.stringContaining('blocked the event loop'),
+          expect.anything()
+        );
+      });
+
+      test('does nothing extra when the run did not block', async () => {
+        const end = jest.fn().mockResolvedValue([]);
+        const { onTaskEvent, ready } = setup(end);
+        const { runner } = await ready;
+
+        await runner.run();
+
+        expect(end).toHaveBeenCalledTimes(1);
+        expect(lastTiming(onTaskEvent).eventLoopBlock).toBeUndefined();
+      });
+
+      test('also records the flag when the task throws', async () => {
+        const end = jest.fn().mockResolvedValue([blockReport(TASK_EXECUTION_UUID)]);
+        const { onTaskEvent, ready } = setup(end, async () => {
+          throw new Error('boom');
+        });
+        const { runner } = await ready;
+
+        await runner.run();
+
+        expect(end).toHaveBeenCalledTimes(1);
+        expect(lastTiming(onTaskEvent).eventLoopBlock).toEqual(evidence);
+      });
+
+      test('never fails the run when the lookup fails', async () => {
+        const { onTaskEvent, ready } = setup(jest.fn().mockRejectedValue(new Error('nope')));
+        const { runner } = await ready;
+
+        await expect(runner.run()).resolves.toBeDefined();
+        expect(lastTiming(onTaskEvent).eventLoopBlock).toBeUndefined();
+      });
     });
 
     test('calls enrichFakeRequest with the fake request and userProfileId when both are present', async () => {
@@ -4497,6 +4600,7 @@ describe('TaskManagerRunner', () => {
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     enrichFakeRequest?: jest.Mock;
+    eventLoopWatchdog?: EventLoopRunObserver;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -4577,6 +4681,7 @@ describe('TaskManagerRunner', () => {
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
       enrichFakeRequest: opts.enrichFakeRequest,
+      eventLoopWatchdog: opts.eventLoopWatchdog,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {
