@@ -85,7 +85,7 @@ Run from the Kibana worktree, with its pinned Node on PATH:
 node scripts/jest --config x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis/jest.config.js --runInBand
 node scripts/type_check --project x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis/tsconfig.json
 node scripts/eslint x-pack/solutions/security/packages/kbn-evals-suite-alertzero-endpoint-analysis --no-cache
-node scripts/evals start --profile local --suite alertzero-endpoint-analysis --judge gemini-3-1-pro --repetitions 1
+node scripts/evals start --profile local --suite alertzero-endpoint-analysis --judge eis-zai-glm-5-2 --repetitions 1
 ```
 
 AlertZero routes 404 outside a Security solution space. The `evals_alertzero_endpoint_analysis`
