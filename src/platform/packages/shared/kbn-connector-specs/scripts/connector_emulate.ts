@@ -10,7 +10,7 @@
 import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import type { ContractCall, OpenApiDocument } from '@kbn/connector-emulate';
+import type { ContractCall } from '@kbn/connector-emulate';
 import {
   createCertificateAuthority,
   createEmulatorFetch,
@@ -21,6 +21,7 @@ import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { findConnector } from '../src/test/vendor_api/find_connector';
+import { fixedHttpsOrigins } from '../src/test/vendor_api/fixed_https_origins';
 import { loadVendorSpecs, readOptional } from '../src/test/vendor_api/load_vendor_specs';
 
 const DEFAULT_PORT = 5690;
@@ -47,20 +48,6 @@ const loadCertificateAuthority = async (directory: string) => {
   await fs.writeFile(certFile, certificateAuthority.cert);
   await fs.writeFile(keyFile, certificateAuthority.key, { mode: 0o600 });
   return { certificateAuthority, certFile };
-};
-
-// Server URLs with variables, such as https://{subdomain}.zendesk.com, depend on connector config.
-const fixedHttpsOrigins = (specs: Readonly<Record<string, OpenApiDocument>>): string[] => {
-  const origins = new Set<string>();
-  for (const { servers } of Object.values(specs)) {
-    for (const server of Array.isArray(servers) ? servers : []) {
-      const url = typeof server?.url === 'string' ? server.url : '';
-      if (url.startsWith('https://') && !url.includes('{')) {
-        origins.add(new URL(url).origin);
-      }
-    }
-  }
-  return [...origins].sort();
 };
 
 const kibanaSettings = (proxyUrl: URL, certFile: string, origins: readonly string[]): string =>
