@@ -148,7 +148,7 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
     );
   });
 
-  test('logs and also queues when ES invalidation reports errors and invalidated nothing (current behavior)', async () => {
+  test('logs and also queues when ES invalidation reports errors and invalidated nothing', async () => {
     securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValueOnce({
       ...emptyInvalidateResult,
       error_count: 1,
@@ -175,7 +175,7 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
     expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
-  test('logs and does not queue or throw when ES invalidation throws', async () => {
+  test('logs and queues the key, without throwing, when ES invalidation throws', async () => {
     const error = new Error('es down');
     securityService.authc.apiKeys.invalidateAsInternalUser.mockRejectedValueOnce(error);
 
@@ -185,10 +185,14 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
       'Failed to synchronously invalidate ES API key for alerting rule : rule-x: es down',
       { error: { stack_trace: error.stack } }
     );
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [ES_KEY] },
+      rulesClientFactoryParams.logger,
+      rulesClientFactoryParams.internalSavedObjectsRepository
+    );
   });
 
-  test('logs and does not queue or throw when UIAM invalidation throws', async () => {
+  test('logs and queues the key, without throwing, when UIAM invalidation throws', async () => {
     const error = new Error('uiam down');
     uiamInvalidate.mockRejectedValueOnce(error);
 
@@ -199,7 +203,11 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
       { tags: UIAM_LOGS_INVALIDATE_TAGS, error: { stack_trace: error.stack } }
     );
     expect(securityService.authc.apiKeys.invalidateAsInternalUser).not.toHaveBeenCalled();
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [UIAM_KEY] },
+      rulesClientFactoryParams.logger,
+      rulesClientFactoryParams.internalSavedObjectsRepository
+    );
   });
 
   test('logs a non-UIAM credential error for a raw essu_ uiamApiKey and invalidates nothing', async () => {

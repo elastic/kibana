@@ -22,6 +22,7 @@ import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../..
 import { getMappedParams, API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type {
   RulesClientContext,
@@ -233,13 +234,11 @@ async function updateWithOCC<Params extends RuleParams = never>(
     );
   }
 
-  const apiKeysToInvalidate = [];
-  if (apiKey && !apiKeyCreatedByUser) {
-    apiKeysToInvalidate.push(apiKey);
-  }
-  if (uiamApiKey && !apiKeyCreatedByUser) {
-    apiKeysToInvalidate.push(uiamApiKey);
-  }
+  const apiKeysToInvalidate = getRuleApiKeysToInvalidate({
+    apiKey,
+    uiamApiKey,
+    apiKeyCreatedByUser,
+  });
 
   await Promise.all([
     apiKeysToInvalidate.length > 0
@@ -407,19 +406,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       },
     });
   } catch (e) {
-    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updatedRuleAttributes;
-
-    const apiKeysToInvalidate = [];
-    if (apiKey && !apiKeyCreatedByUser) {
-      apiKeysToInvalidate.push(apiKey);
-    }
-    if (uiamApiKey && !apiKeyCreatedByUser) {
-      apiKeysToInvalidate.push(uiamApiKey);
-    }
-
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: apiKeysToInvalidate },
+      { apiKeys: getRuleApiKeysToInvalidate(updatedRuleAttributes) },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

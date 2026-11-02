@@ -13,6 +13,7 @@ import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
@@ -161,16 +162,7 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
       },
     });
   } catch (e) {
-    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updateAttributes;
-
-    const apiKeysToInvalidate = [];
-    if (apiKey && !apiKeyCreatedByUser) {
-      apiKeysToInvalidate.push(apiKey);
-    }
-    if (uiamApiKey) {
-      apiKeysToInvalidate.push(uiamApiKey);
-    }
-
+    const apiKeysToInvalidate = getRuleApiKeysToInvalidate(updateAttributes);
     if (apiKeysToInvalidate.length > 0) {
       // Avoid unused API key
       await bulkMarkApiKeysForInvalidation(
@@ -185,13 +177,11 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
     throw e;
   }
 
-  const oldApiKeysToInvalidate = [];
-  if (oldApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
-    oldApiKeysToInvalidate.push(oldApiKeyToInvalidate);
-  }
-  if (oldUiamApiKeyToInvalidate && !oldApiKeyCreatedByUser) {
-    oldApiKeysToInvalidate.push(oldUiamApiKeyToInvalidate);
-  }
+  const oldApiKeysToInvalidate = getRuleApiKeysToInvalidate({
+    apiKey: oldApiKeyToInvalidate,
+    uiamApiKey: oldUiamApiKeyToInvalidate,
+    apiKeyCreatedByUser: oldApiKeyCreatedByUser,
+  });
 
   if (oldApiKeysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(

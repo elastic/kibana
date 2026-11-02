@@ -529,7 +529,7 @@ describe('bulkEditRules', () => {
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
       {
-        apiKeys: ['333:essu_new-uia-key', 'new-api-key'],
+        apiKeys: ['new-api-key', '333:essu_new-uia-key'],
       },
       logger,
       unsecuredSavedObjectsClient

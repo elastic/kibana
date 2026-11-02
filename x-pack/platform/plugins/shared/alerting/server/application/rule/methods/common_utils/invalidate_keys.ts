@@ -6,6 +6,7 @@
  */
 
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import type { RulesClientContext } from '../../../../rules_client/types';
 
 export interface ApiKeyEntry {
@@ -18,11 +19,7 @@ export const invalidateKeys = async (
   entries: Iterable<ApiKeyEntry>,
   context: RulesClientContext
 ): Promise<void> => {
-  const keys: string[] = [];
-  for (const { apiKey, uiamApiKey, apiKeyCreatedByUser } of entries) {
-    if (apiKey && !apiKeyCreatedByUser) keys.push(apiKey);
-    if (uiamApiKey && !apiKeyCreatedByUser) keys.push(uiamApiKey);
-  }
+  const keys = [...entries].flatMap(getRuleApiKeysToInvalidate);
   if (keys.length === 0) return;
   // Writes pending-invalidation SOs; logs errors internally, never throws.
   await bulkMarkApiKeysForInvalidation(

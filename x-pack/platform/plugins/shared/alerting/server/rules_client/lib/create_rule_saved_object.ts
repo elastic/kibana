@@ -9,6 +9,7 @@ import type { SavedObjectReference, SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { Rule, RuleWithLegacyId, RawRule, RuleTypeParams } from '../../types';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import type { SavedObjectOptions } from '../types';
 import type { RulesClientContext } from '../types';
@@ -60,6 +61,16 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     })
   );
 
+  const invalidateUnusedApiKeys = async () => {
+    const apiKeysToInvalidate = getRuleApiKeysToInvalidate(rawRule);
+    if (apiKeysToInvalidate.length === 0) return;
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: apiKeysToInvalidate },
+      context.logger,
+      context.unsecuredSavedObjectsClient
+    );
+  };
+
   let createdAlert: SavedObject<RawRule>;
   try {
     createdAlert = await withSpan(
@@ -76,27 +87,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
         })
     );
   } catch (e) {
-    // Avoid unused API key
-    const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rawRule;
-
-    const apiKeysToInvalidate = [];
-
-    if (apiKey && !apiKeyCreatedByUser) {
-      apiKeysToInvalidate.push(apiKey);
-    }
-
-    if (uiamApiKey && !apiKeyCreatedByUser) {
-      apiKeysToInvalidate.push(uiamApiKey);
-    }
-
-    await bulkMarkApiKeysForInvalidation(
-      {
-        apiKeys: apiKeysToInvalidate,
-      },
-      context.logger,
-      context.unsecuredSavedObjectsClient
-    );
-
+    await invalidateUnusedApiKeys();
     throw e;
   }
   if (rawRule.enabled) {
@@ -117,6 +108,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
           savedObjectsClient: context.unsecuredSavedObjectsClient,
           id: createdAlert.id,
         });
+        await invalidateUnusedApiKeys();
       } catch (err) {
         // Skip the cleanup error and throw the task manager error to avoid confusion
         context.logger.error(

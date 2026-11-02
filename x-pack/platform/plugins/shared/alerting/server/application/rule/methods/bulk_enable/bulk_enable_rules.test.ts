@@ -287,7 +287,7 @@ describe('bulkEnableRules', () => {
     });
   });
 
-  test('does not invalidate the UIAM key of a rule that fails before it is queued for the write', async () => {
+  test('invalidates only the new key set, not the UIAM key, of a rule that fails before it is queued for the write', async () => {
     const attributes = {
       ...disabledRule1.attributes,
       apiKey: null,
@@ -320,10 +320,15 @@ describe('bulkEnableRules', () => {
     expect(result.errors).toEqual([
       expect.objectContaining({ message: 'Failed to build the rule attributes' }),
     ]);
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [Buffer.from('123:abc').toString('base64')] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
-  test('does not invalidate the UIAM key of a rule that failed to enable', async () => {
+  test('invalidates only the new key set, not the UIAM key, of a rule that failed to enable', async () => {
     const disabledUiamOnlyRule: SavedObject<RawRule> = {
       ...disabledRule1,
       id: savedObjectWith500Error.id,
@@ -347,7 +352,12 @@ describe('bulkEnableRules', () => {
 
     await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
 
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+      { apiKeys: [Buffer.from('123:abc').toString('base64')] },
+      expect.any(Object),
+      expect.any(Object)
+    );
   });
 
   test('does not invalidate a user-created UIAM key', async () => {

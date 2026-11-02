@@ -297,10 +297,18 @@ export class RulesClientFactory {
     }
   }
 
+  private async queueApiKeysForInvalidation(apiKeys: string[]): Promise<void> {
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys },
+      this.logger,
+      this.internalSavedObjectsRepository
+    );
+  }
+
   /**
    * Synchronously invalidates the rule's ES and/or UIAM API keys, bypassing the pending
-   * invalidation queue. Errors are logged but never rethrown so that this cannot break
-   * the surrounding rule delete operation.
+   * invalidation queue. Errors are logged and the key is queued instead, but never rethrown
+   * so that this cannot break the surrounding rule delete operation.
    *
    * Authentication for both branches is derived from server-side state rather than the
    * caller's request, so the sync path works regardless of how the delete was authenticated:
@@ -354,6 +362,7 @@ export class RulesClientFactory {
                   error: { stack_trace: err instanceof Error ? err.stack : undefined },
                 }
               );
+              await this.queueApiKeysForInvalidation([uiamApiKey]);
             }
           })()
         );
@@ -392,11 +401,7 @@ export class RulesClientFactory {
               this.logger.warn(
                 `Synchronous ES API key invalidation found no key for alerting rule : ${ruleName}; queueing for delayed invalidation.`
               );
-              await bulkMarkApiKeysForInvalidation(
-                { apiKeys: [apiKey] },
-                this.logger,
-                this.internalSavedObjectsRepository
-              );
+              await this.queueApiKeysForInvalidation([apiKey]);
             }
           } catch (err) {
             this.logger.error(
@@ -405,6 +410,9 @@ export class RulesClientFactory {
               }`,
               { error: { stack_trace: err instanceof Error ? err.stack : undefined } }
             );
+            if (apiKey) {
+              await this.queueApiKeysForInvalidation([apiKey]);
+            }
           }
         })()
       );

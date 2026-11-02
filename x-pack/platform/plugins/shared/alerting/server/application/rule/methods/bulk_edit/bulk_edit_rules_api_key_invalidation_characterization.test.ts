@@ -181,7 +181,7 @@ describe('bulkEdit() API key invalidation characterization', () => {
       validateScheduleLimit.mockResolvedValue({ interval: 1, intervalAvailable: 0 });
     });
 
-    test('queues new framework keys UIAM first, then ES, and never the old keys', async () => {
+    test('queues new framework keys, ES first, and never the old keys', async () => {
       mockRules({ apiKey: OLD_ES_KEY, uiamApiKey: OLD_UIAM_KEY, apiKeyCreatedByUser: false });
       createAPIKeyMock.mockResolvedValueOnce({
         apiKeysEnabled: true,
@@ -193,10 +193,10 @@ describe('bulkEdit() API key invalidation characterization', () => {
 
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       expect(result.errors).toHaveLength(1);
-      expectBulkMarkCalledOnceWith([NEW_UIAM_KEY, NEW_ES_KEY]);
+      expectBulkMarkCalledOnceWith([NEW_ES_KEY, NEW_UIAM_KEY]);
     });
 
-    test('queues a new user-created ES key because newApiKeyCreatedByUser is not checked (current behavior)', async () => {
+    test('does not queue a new user-created ES key', async () => {
       mockRules({ apiKey: OLD_ES_KEY, apiKeyCreatedByUser: true });
       isAuthenticationTypeApiKeyMock.mockReturnValue(true);
       getAuthenticationApiKeyMock.mockReturnValue({
@@ -209,10 +209,10 @@ describe('bulkEdit() API key invalidation characterization', () => {
       expect(getAuthenticationApiKeyMock).toHaveBeenCalledWith(
         'Alerting: myType/my rule name-user-created'
       );
-      expectBulkMarkCalledOnceWith([encode('user-es-id:user-es-secret')]);
+      expect(bulkMarkMock).not.toHaveBeenCalled();
     });
 
-    test('queues a new user-created base64(id:essu_) UIAM key because newApiKeyCreatedByUser is not checked (current behavior)', async () => {
+    test('does not queue a new user-created base64(id:essu_) UIAM key', async () => {
       mockRules({ apiKey: null, uiamApiKey: OLD_UIAM_KEY, apiKeyCreatedByUser: true });
       isAuthenticationTypeApiKeyMock.mockReturnValue(true);
       getAuthenticationApiKeyMock.mockReturnValue({
@@ -222,10 +222,10 @@ describe('bulkEdit() API key invalidation characterization', () => {
 
       await rulesClient.bulkEdit({ filter: '', operations: scheduleOperations });
 
-      expectBulkMarkCalledOnceWith([encode('user-uiam-id:essu_user')]);
+      expect(bulkMarkMock).not.toHaveBeenCalled();
     });
 
-    test('passes a new user-created raw essu_ key to bulkMarkApiKeysForInvalidation (current behavior)', async () => {
+    test('does not queue a new user-created raw essu_ key', async () => {
       mockRules({ apiKey: null, uiamApiKey: 'essu_user_raw', apiKeyCreatedByUser: true });
       isAuthenticationTypeApiKeyMock.mockReturnValue(true);
       getAuthenticationApiKeyMock.mockReturnValue({
@@ -235,7 +235,7 @@ describe('bulkEdit() API key invalidation characterization', () => {
 
       await rulesClient.bulkEdit({ filter: '', operations: scheduleOperations });
 
-      expectBulkMarkCalledOnceWith(['essu_user_raw']);
+      expect(bulkMarkMock).not.toHaveBeenCalled();
     });
   });
 
@@ -284,14 +284,14 @@ describe('bulkEdit() API key invalidation characterization', () => {
       expectBulkMarkCalledOnceWith([NEW_ES_KEY, NEW_UIAM_KEY]);
     });
 
-    test('queues the new keys, UIAM first, when bulkCreate throws', async () => {
+    test('queues the new keys, ES first, when bulkCreate throws', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockRejectedValue(new Error('Fail'));
 
       await expect(
         rulesClient.bulkEdit({ filter: '', operations: tagsOperations })
       ).rejects.toThrow('Fail');
 
-      expectBulkMarkCalledOnceWith([NEW_UIAM_KEY, NEW_ES_KEY]);
+      expectBulkMarkCalledOnceWith([NEW_ES_KEY, NEW_UIAM_KEY]);
     });
   });
 });

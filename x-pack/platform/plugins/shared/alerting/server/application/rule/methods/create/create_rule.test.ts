@@ -4347,12 +4347,7 @@ describe('create()', () => {
     );
     expect(taskManager.schedule).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-      { apiKeys: [] },
-      expect.any(Object),
-      expect.any(Object)
-    );
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
   });
 
   describe('actions', () => {

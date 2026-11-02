@@ -12,6 +12,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type {
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
@@ -24,6 +25,7 @@ import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import type { RawRule, RuleTypeParams } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
 import { convertRuleIdsToKueryNode, authorizeRuleTypeParams } from '../../../../lib';
@@ -188,7 +190,9 @@ const bulkEnableRulesWithOCC = async (
   const profileUid = await context.getProfileUid();
   const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
   // UIAM keys held by rules that get a new key set below, keyed by rule id
-  const replacedUiamApiKeys = new Map<string, string>();
+  const replacedUiamApiKeys = new Map<string, string[]>();
+  // API keys created below, keyed by rule id, so they can be invalidated if the rule is not written
+  const newApiKeys = new Map<string, string[]>();
   let scheduleValidationError = '';
 
   await withSpan(
@@ -271,6 +275,9 @@ const bulkEnableRulesWithOCC = async (
                   refresh: false,
                 })
               : undefined;
+            if (newApiKeyAttributes) {
+              newApiKeys.set(rule.id, getRuleApiKeysToInvalidate(newApiKeyAttributes));
+            }
 
             const updatedAttributes = updateMetaAttributes(context, {
               ...(newApiKeyAttributes
@@ -331,12 +338,14 @@ const bulkEnableRulesWithOCC = async (
             // longer uses that key once it gets a new key set. Invalidate it after the write.
             // Recorded only once the rule is queued for the write, so a rule that fails before
             // then keeps the key it still holds.
-            if (
-              newApiKeyAttributes &&
-              rule.attributes.uiamApiKey &&
-              !rule.attributes.apiKeyCreatedByUser
-            ) {
-              replacedUiamApiKeys.set(rule.id, rule.attributes.uiamApiKey);
+            if (newApiKeyAttributes) {
+              replacedUiamApiKeys.set(
+                rule.id,
+                getRuleApiKeysToInvalidate({
+                  uiamApiKey: rule.attributes.uiamApiKey,
+                  apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser,
+                })
+              );
             }
 
             context.auditLogger?.log(
@@ -378,15 +387,15 @@ const bulkEnableRulesWithOCC = async (
     }
   );
 
-  if (tasksToSchedule.length > 0) {
-    await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
-      context.taskManager.bulkSchedule(tasksToSchedule)
-    );
-  }
+  let result: SavedObjectsBulkResponse<RawRule>;
+  try {
+    if (tasksToSchedule.length > 0) {
+      await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
+        context.taskManager.bulkSchedule(tasksToSchedule)
+      );
+    }
 
-  const result = await withSpan(
-    { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
-    () =>
+    result = await withSpan({ name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' }, () =>
       // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
       // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
       // bulk_disable, bulk_enable, etc. to fix this cast
@@ -397,7 +406,18 @@ const bulkEnableRulesWithOCC = async (
           overwrite: true,
         },
       })
-  );
+    );
+  } catch (error) {
+    const unusedApiKeys = [...newApiKeys.values()].flat();
+    if (unusedApiKeys.length > 0) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: unusedApiKeys },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      );
+    }
+    throw error;
+  }
 
   await logRuleChanges({
     ruleSOs: result.saved_objects,
@@ -423,12 +443,20 @@ const bulkEnableRulesWithOCC = async (
     }
   });
 
-  const uiamApiKeysToInvalidate = [...replacedUiamApiKeys.entries()]
-    .filter(([ruleId]) => !ruleIdsFailedToEnable[ruleId])
-    .map(([, uiamApiKey]) => uiamApiKey);
-  if (uiamApiKeysToInvalidate.length > 0) {
+  const writtenRuleIds = new Set(
+    result.saved_objects.filter((rule) => !isSavedObjectErrorResult(rule)).map(({ id }) => id)
+  );
+  const apiKeysToInvalidate = [
+    ...[...replacedUiamApiKeys.entries()]
+      .filter(([ruleId]) => writtenRuleIds.has(ruleId))
+      .flatMap(([, apiKeys]) => apiKeys),
+    ...[...newApiKeys.entries()]
+      .filter(([ruleId]) => !writtenRuleIds.has(ruleId))
+      .flatMap(([, apiKeys]) => apiKeys),
+  ];
+  if (apiKeysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: uiamApiKeysToInvalidate },
+      { apiKeys: apiKeysToInvalidate },
       context.logger,
       context.unsecuredSavedObjectsClient
     );

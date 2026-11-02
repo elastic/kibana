@@ -83,17 +83,6 @@ describe('createRuleSavedObject() API key invalidation characterization', () => 
         { apiKey: null, uiamApiKey: UIAM_KEY, apiKeyCreatedByUser: false },
         [UIAM_KEY],
       ],
-      [
-        'user-created ES + UIAM calls with an empty list (current behavior)',
-        { apiKey: ES_KEY, uiamApiKey: UIAM_KEY, apiKeyCreatedByUser: true },
-        [],
-      ],
-      [
-        'user-created raw essu_ calls with an empty list (current behavior)',
-        { apiKey: null, uiamApiKey: 'essu_raw', apiKeyCreatedByUser: true },
-        [],
-      ],
-      ['no keys calls with an empty list (current behavior)', { apiKey: null }, []],
     ])('%s', async (_title, attributes, expected) => {
       await expect(run(buildRawRule(attributes))).rejects.toThrow('Fail');
 
@@ -104,9 +93,25 @@ describe('createRuleSavedObject() API key invalidation characterization', () => 
         unsecuredSavedObjectsClient
       );
     });
+
+    test.each<[string, Partial<RawRule>]>([
+      [
+        'user-created ES + UIAM',
+        { apiKey: ES_KEY, uiamApiKey: UIAM_KEY, apiKeyCreatedByUser: true },
+      ],
+      [
+        'user-created raw essu_',
+        { apiKey: null, uiamApiKey: 'essu_raw', apiKeyCreatedByUser: true },
+      ],
+      ['no keys', { apiKey: null }],
+    ])('%s queues nothing', async (_title, attributes) => {
+      await expect(run(buildRawRule(attributes))).rejects.toThrow('Fail');
+
+      expect(bulkMarkMock).not.toHaveBeenCalled();
+    });
   });
 
-  test('does not invalidate keys when task scheduling fails after the rule is created (current behavior)', async () => {
+  test('queues the keys of the deleted rule when task scheduling fails after it is created', async () => {
     const rawRule = buildRawRule({
       apiKey: ES_KEY,
       uiamApiKey: UIAM_KEY,
@@ -127,7 +132,11 @@ describe('createRuleSavedObject() API key invalidation characterization', () => 
       '1',
       undefined
     );
-    expect(bulkMarkMock).not.toHaveBeenCalled();
+    expect(bulkMarkMock).toHaveBeenCalledWith(
+      { apiKeys: [ES_KEY, UIAM_KEY] },
+      logger,
+      unsecuredSavedObjectsClient
+    );
   });
 
   test('does not invalidate keys when the rule is created', async () => {

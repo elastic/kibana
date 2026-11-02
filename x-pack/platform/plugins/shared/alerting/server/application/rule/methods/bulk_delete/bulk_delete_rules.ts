@@ -19,6 +19,7 @@ import {
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { tryToRemoveTasks } from '../../../../rules_client/common';
 import {
@@ -201,8 +202,7 @@ const bulkDeleteWithOCC = async (
 
   const rulesToDelete: Array<SavedObject<RawRule>> = [];
   const migratedRuleIds = new Set<string>();
-  const apiKeyToRuleIdMapping: Record<string, string> = {};
-  const uiamApiKeyToRuleIdMapping: Record<string, string> = {};
+  const apiKeysToRuleIdMapping: Record<string, string[]> = {};
   const taskIdToRuleIdMapping: Record<string, string> = {};
   const ruleNameToRuleIdMapping: Record<string, string> = {};
 
@@ -218,14 +218,7 @@ const bulkDeleteWithOCC = async (
         });
         migratedIds.forEach((id) => migratedRuleIds.add(id));
         for (const rule of response.saved_objects) {
-          const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
-
-          if (apiKey && !apiKeyCreatedByUser) {
-            apiKeyToRuleIdMapping[rule.id] = apiKey;
-          }
-          if (uiamApiKey && !apiKeyCreatedByUser) {
-            uiamApiKeyToRuleIdMapping[rule.id] = uiamApiKey;
-          }
+          apiKeysToRuleIdMapping[rule.id] = getRuleApiKeysToInvalidate(rule.attributes);
           const ruleName = rule.attributes.name;
           if (ruleName) {
             ruleNameToRuleIdMapping[rule.id] = ruleName;
@@ -273,12 +266,7 @@ const bulkDeleteWithOCC = async (
 
   result.statuses.forEach((status) => {
     if (status.error === undefined) {
-      if (apiKeyToRuleIdMapping[status.id]) {
-        apiKeysToInvalidate.add(apiKeyToRuleIdMapping[status.id]);
-      }
-      if (uiamApiKeyToRuleIdMapping[status.id]) {
-        apiKeysToInvalidate.add(uiamApiKeyToRuleIdMapping[status.id]);
-      }
+      apiKeysToRuleIdMapping[status.id]?.forEach((apiKey) => apiKeysToInvalidate.add(apiKey));
       if (taskIdToRuleIdMapping[status.id]) {
         taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
       }

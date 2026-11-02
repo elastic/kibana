@@ -32,6 +32,7 @@ import {
 import { API_KEY_GENERATE_CONCURRENCY } from '../constants';
 import type { BulkEditOperationResult } from './retry_if_bulk_edit_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import type {
   ApiKeysMap,
   ParamsModifier,
@@ -48,6 +49,26 @@ export interface BulkEditOccOptions<Params extends RuleParams> {
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
   changeTracking?: RuleChangeTracking;
 }
+
+type ApiKeysMapEntry = ApiKeysMap extends Map<string, infer Entry> ? Entry : never;
+
+const getNewApiKeysToInvalidate = (entry?: ApiKeysMapEntry): string[] =>
+  entry
+    ? getRuleApiKeysToInvalidate({
+        apiKey: entry.newApiKey,
+        uiamApiKey: entry.newUiamApiKey,
+        apiKeyCreatedByUser: entry.newApiKeyCreatedByUser,
+      })
+    : [];
+
+const getOldApiKeysToInvalidate = (entry?: ApiKeysMapEntry): string[] =>
+  entry
+    ? getRuleApiKeysToInvalidate({
+        apiKey: entry.oldApiKey,
+        uiamApiKey: entry.oldUiamApiKey,
+        apiKeyCreatedByUser: entry.oldApiKeyCreatedByUser,
+      })
+    : [];
 
 const isValidInterval = (interval: string | undefined): interval is string => {
   return interval !== undefined;
@@ -124,16 +145,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
     });
 
     if (validationPayload) {
-      const apiKeysToInvalidate = [];
-
-      for (const { newUiamApiKey, newApiKey } of apiKeysMap.values()) {
-        if (newUiamApiKey) {
-          apiKeysToInvalidate.push(newUiamApiKey);
-        }
-        if (newApiKey) {
-          apiKeysToInvalidate.push(newApiKey);
-        }
-      }
+      const apiKeysToInvalidate = [...apiKeysMap.values()].flatMap(getNewApiKeysToInvalidate);
 
       return {
         apiKeysToInvalidate: options.shouldInvalidateApiKeys ? apiKeysToInvalidate : [],
@@ -234,59 +246,26 @@ async function saveBulkUpdatedRules({
   } catch (e) {
     // avoid unused newly generated API keys
 
-    if (apiKeysMap.size > 0) {
-      const newApiKeysToInvalidate = [];
-
-      for (const { newUiamApiKey, newApiKey, newApiKeyCreatedByUser } of apiKeysMap.values()) {
-        if (newUiamApiKey && !newApiKeyCreatedByUser) {
-          newApiKeysToInvalidate.push(newUiamApiKey);
-        }
-        if (newApiKey && !newApiKeyCreatedByUser) {
-          newApiKeysToInvalidate.push(newApiKey);
-        }
-      }
-      if (newApiKeysToInvalidate.length > 0) {
-        await bulkMarkApiKeysForInvalidation(
-          { apiKeys: newApiKeysToInvalidate },
-          context.logger,
-          context.unsecuredSavedObjectsClient
-        );
-      }
+    const newApiKeysToInvalidate = [...apiKeysMap.values()].flatMap(getNewApiKeysToInvalidate);
+    if (newApiKeysToInvalidate.length > 0) {
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: newApiKeysToInvalidate },
+        context.logger,
+        context.unsecuredSavedObjectsClient
+      );
     }
     throw e;
   }
 
   if (shouldInvalidateApiKeys) {
     result.saved_objects.map((so) => {
-      const { id } = so;
-      const apiKey = apiKeysMap.get(id);
-
-      const oldApiKey = apiKey?.oldApiKey;
-      const oldApiKeyCreatedByUser = apiKey?.oldApiKeyCreatedByUser;
-      const newApiKey = apiKey?.newApiKey;
-      const newApiKeyCreatedByUser = apiKey?.newApiKeyCreatedByUser;
-      const oldUiamApiKey = apiKey?.oldUiamApiKey;
-      const newUiamApiKey = apiKey?.newUiamApiKey;
-
-      // if SO wasn't saved and has new API key it will be invalidated
-      if (isSavedObjectErrorResult(so)) {
-        if (newApiKey && !newApiKeyCreatedByUser) {
-          apiKeysToInvalidate.push(newApiKey);
-        }
-
-        if (newUiamApiKey && !newApiKeyCreatedByUser) {
-          apiKeysToInvalidate.push(newUiamApiKey);
-        }
-      } else {
-        // if SO saved and has old Api Key it will be invalidate
-        if (oldApiKey && !oldApiKeyCreatedByUser) {
-          apiKeysToInvalidate.push(oldApiKey);
-        }
-
-        if (oldUiamApiKey && !oldApiKeyCreatedByUser) {
-          apiKeysToInvalidate.push(oldUiamApiKey);
-        }
-      }
+      const entry = apiKeysMap.get(so.id);
+      // a rule that failed to save drops its new keys, a saved rule drops its old keys
+      apiKeysToInvalidate.push(
+        ...(isSavedObjectErrorResult(so)
+          ? getNewApiKeysToInvalidate(entry)
+          : getOldApiKeysToInvalidate(entry))
+      );
     });
   }
 

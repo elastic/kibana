@@ -13,6 +13,7 @@ import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { untrackRuleAlerts, deleteLegacyActionsForRules } from '../../../../rules_client/lib';
@@ -197,7 +198,12 @@ function invalidateRuleApiKeys({
   apiKeyCreatedByUser?: boolean | null;
   invalidateNow?: boolean;
 }): Promise<unknown> | null {
-  if (apiKeyCreatedByUser || (!apiKey && !uiamApiKey)) {
+  const apiKeysToInvalidate = getRuleApiKeysToInvalidate({
+    apiKey,
+    uiamApiKey,
+    apiKeyCreatedByUser,
+  });
+  if (apiKeysToInvalidate.length === 0) {
     return null;
   }
 
@@ -212,9 +218,7 @@ function invalidateRuleApiKeys({
   }
 
   return bulkMarkApiKeysForInvalidation(
-    {
-      apiKeys: [...(apiKey ? [apiKey] : []), ...(uiamApiKey ? [uiamApiKey] : [])],
-    },
+    { apiKeys: apiKeysToInvalidate },
     context.logger,
     context.unsecuredSavedObjectsClient
   );

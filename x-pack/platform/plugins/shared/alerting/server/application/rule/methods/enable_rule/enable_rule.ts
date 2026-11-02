@@ -13,6 +13,7 @@ import { resetMonitoringLastRun, getNextRun } from '../../../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { getRuleApiKeysToInvalidate } from '../../../../invalidate_pending_api_keys/get_rule_api_keys_to_invalidate';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
@@ -210,16 +211,7 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       // on every attempt, so leaving these behind leaks a key per attempt. Only keys this call
       // created can be invalidated: when the rule already had one, `apiKeyAttributes` is empty and
       // the stored key stays in use.
-      const { apiKey, apiKeyCreatedByUser, uiamApiKey } = apiKeyAttributes;
-      const apiKeysToInvalidate = [];
-
-      if (apiKey && !apiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(apiKey);
-      }
-      if (uiamApiKey && !apiKeyCreatedByUser) {
-        apiKeysToInvalidate.push(uiamApiKey);
-      }
-
+      const apiKeysToInvalidate = getRuleApiKeysToInvalidate(apiKeyAttributes);
       if (apiKeysToInvalidate.length > 0) {
         await bulkMarkApiKeysForInvalidation(
           { apiKeys: apiKeysToInvalidate },
@@ -237,9 +229,15 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     // A rule with only a UIAM key, such as one created by a UIAM service account, gets a new key
     // set above, so the UIAM key it held is no longer used. The key may also be a stale one that
     // was already invalidated, and invalidating it again is harmless.
-    if (!existingApiKey && attributes.uiamApiKey && !attributes.apiKeyCreatedByUser) {
+    const replacedUiamApiKeys = existingApiKey
+      ? []
+      : getRuleApiKeysToInvalidate({
+          uiamApiKey: attributes.uiamApiKey,
+          apiKeyCreatedByUser: attributes.apiKeyCreatedByUser,
+        });
+    if (replacedUiamApiKeys.length > 0) {
       await bulkMarkApiKeysForInvalidation(
-        { apiKeys: [attributes.uiamApiKey] },
+        { apiKeys: replacedUiamApiKeys },
         context.logger,
         context.unsecuredSavedObjectsClient
       );
