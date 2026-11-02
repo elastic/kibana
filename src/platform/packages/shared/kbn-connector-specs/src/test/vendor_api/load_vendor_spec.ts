@@ -17,16 +17,24 @@ import {
 } from '@kbn/connector-emulate';
 import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from './json_pointer';
+import { loadMarkdownReference } from './load_markdown_reference';
 import type { ManifestSource } from './manifest';
+import { isMarkdownFormat } from './manifest';
 import { parseSpecText } from './parse_spec_text';
 
 export interface LoadedVendorSpec {
   /** The format the vendor publishes. */
   readonly format: ManifestSource['format'];
-  /** The spec's `info.version`. */
+  /** The spec's `info.version`; Markdown references have none. */
   readonly apiVersion?: string;
   /** The spec as one OpenAPI 3.x document, with external `$ref`s bundled in. */
   readonly document: OpenApiDocument;
+}
+
+/** What can't be told from the document: a Markdown reference's template and pages to fetch. */
+export interface VendorSpecSource {
+  readonly format?: ManifestSource['format'];
+  readonly pages?: readonly string[];
 }
 
 const apiVersionOf = ({ info }: OpenApiDocument): { apiVersion?: string } => {
@@ -35,13 +43,20 @@ const apiVersionOf = ({ info }: OpenApiDocument): { apiVersion?: string } => {
 };
 
 /**
- * Fetches a vendor spec and turns it into one OpenAPI 3.x document: Google Discovery and
- * Swagger 2.0 are converted, external `$ref`s are bundled.
+ * Fetches a vendor spec and turns it into one OpenAPI 3.x document: Google Discovery, Smithy,
+ * Swagger 2.0 and Markdown references are converted, external `$ref`s are bundled.
  */
 export const loadVendorSpec = async (
   url: string,
-  fetchText: (url: string) => Promise<string>
+  fetchText: (url: string) => Promise<string>,
+  { format: declaredFormat, pages }: VendorSpecSource = {}
 ): Promise<LoadedVendorSpec> => {
+  if (isMarkdownFormat(declaredFormat)) {
+    return {
+      format: declaredFormat,
+      document: await loadMarkdownReference({ format: declaredFormat, url, pages, fetchText }),
+    };
+  }
   const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
   // Discovery `$ref`s are schema names, and Smithy's are shape targets, which bundling would take
   // for relative URLs.

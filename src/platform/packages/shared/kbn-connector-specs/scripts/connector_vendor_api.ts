@@ -14,24 +14,46 @@ import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { findConnector, findVendorApiDirectory } from '../src/test/vendor_api/find_connector';
 import { inspectVendorApi } from '../src/test/vendor_api/inspect_vendor_api';
-import { SOURCE_NAME_PATTERN } from '../src/test/vendor_api/manifest';
+import type { MarkdownSourceFormat } from '../src/test/vendor_api/manifest';
+import { markdownSourceFormatSchema, SOURCE_NAME_PATTERN } from '../src/test/vendor_api/manifest';
 import { createSpecCache } from '../src/test/vendor_api/spec_cache';
 import { updateVendorApi } from '../src/test/vendor_api/update_vendor_api';
 
 const SPEC_CACHE = path.join(REPO_ROOT, 'data', 'connector_vendor_api');
 
-const parseSource = (flag: string): [string, string] => {
+const parseNamed = (option: string, flag: string, value: string): [string, string] => {
   const separator = flag.indexOf('=');
   if (separator < 1) {
-    throw createFlagError(`--source must look like name=url, got "${flag}"`);
+    throw createFlagError(`--${option} must look like name=${value}, got "${flag}"`);
   }
   const name = flag.slice(0, separator);
   if (!SOURCE_NAME_PATTERN.test(name)) {
     throw createFlagError(
-      `--source names are lowercase snake_case, such as v2 or users_v1, since the snapshot file takes the name; got "${name}"`
+      `--${option} source names are lowercase snake_case, such as v2 or users_v1, since the snapshot file takes the name; got "${name}"`
     );
   }
   return [name, flag.slice(separator + 1)];
+};
+
+const parseFormat = (flag: string): [string, MarkdownSourceFormat] => {
+  const [name, format] = parseNamed('format', flag, 'format');
+  const parsed = markdownSourceFormatSchema.safeParse(format);
+  if (!parsed.success) {
+    throw createFlagError(
+      `--format takes ${markdownSourceFormatSchema.options.join(' or ')}, got "${format}"`
+    );
+  }
+  return [name, parsed.data];
+};
+
+// Repeated `--pages name=prefix` flags add up to one list per source.
+const groupPages = (flags: readonly string[]): Record<string, string[]> => {
+  const pages: Record<string, string[]> = {};
+  for (const flag of flags) {
+    const [name, prefix] = parseNamed('pages', flag, 'prefix');
+    pages[name] = [...(pages[name] ?? []), prefix];
+  }
+  return pages;
 };
 
 const fetchText = async (url: string): Promise<string> => {
@@ -47,8 +69,12 @@ run(
     const check = flagsReader.boolean('check');
     const refresh = flagsReader.boolean('refresh');
     const sources = Object.fromEntries(
-      (flagsReader.arrayOfStrings('source') ?? []).map(parseSource)
+      (flagsReader.arrayOfStrings('source') ?? []).map((flag) => parseNamed('source', flag, 'url'))
     );
+    const formats = Object.fromEntries(
+      (flagsReader.arrayOfStrings('format') ?? []).map(parseFormat)
+    );
+    const pages = groupPages(flagsReader.arrayOfStrings('pages') ?? []);
     const now = () => new Date();
     const cache = createSpecCache({ directory: SPEC_CACHE, fetchText, refresh, now, log });
 
@@ -92,6 +118,8 @@ run(
       connector,
       directory,
       sources,
+      formats,
+      pages,
       refresh,
       check,
       fetchText: cache.fetchText,
@@ -129,13 +157,17 @@ run(
       Fetched specs are kept in data/connector_vendor_api, so a spec inspected before writing a
       connector is the one it is recorded against. --refresh fetches them again.`,
     flags: {
-      string: ['connector', 'source', 'operation', 'grep', 'depth'],
+      string: ['connector', 'source', 'format', 'pages', 'operation', 'grep', 'depth'],
       boolean: ['refresh', 'check', 'inspect'],
       help: `
         --connector  Connector metadata.id, for example datadog or .datadog (required unless --inspect)
         --source     name=url of a vendor spec to add or move; repeatable. Loads every source.
+        --format     name=format of a source that is a Markdown API reference, whose url is its
+                     llms.txt index: databricks-markdown or brave-markdown. Kept in manifest.json.
+        --pages      name=prefix of the reference pages to fetch, absolute or relative to the
+                     index, such as an API group's folder; repeatable. Kept in manifest.json.
         --refresh    Fetch every source URL again, instead of using the specs fetched before
-        --check      Write nothing; fail if artifacts would change or problems are found
+        --check     Write nothing; fail if artifacts would change or problems are found
         --inspect    List the operations of the --source specs, or of the connector's manifest
                      sources, with its overlay applied. With --connector, adds new --source specs
                      to its manifest.json, so recording needs no --source

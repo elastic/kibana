@@ -60,4 +60,32 @@ describe('loadVendorSpec', () => {
     expect(format).toBe('openapi');
     expect(apiVersion).toBe('1');
   });
+
+  it('reads a Markdown reference from its index and pages, without a version', async () => {
+    const pages: Record<string, string> = {
+      'https://docs.example.com/llms.txt': '- [Search](api/search.md)\n- [Guide](guide.md)',
+      'https://docs.example.com/api/search.md': [
+        '# Search',
+        '',
+        '`GET` `/v1/search`',
+        '',
+        '**Base URL:** `https://api.example.com`',
+        '',
+        '## Responses',
+        '',
+        '### 200',
+        'Successful Response',
+      ].join('\n'),
+    };
+
+    const { format, apiVersion, document } = await loadVendorSpec(
+      'https://docs.example.com/llms.txt',
+      async (url) => pages[url],
+      { format: 'brave-markdown', pages: ['api/'] }
+    );
+
+    expect(format).toBe('brave-markdown');
+    expect(apiVersion).toBeUndefined();
+    expect(Object.keys(document.paths ?? {})).toEqual(['/v1/search']);
+  });
 });

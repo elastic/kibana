@@ -19,10 +19,16 @@ import type {
   ManifestOperation,
   ManifestPagination,
   ManifestSource,
+  MarkdownSourceFormat,
   UnmatchedRequest,
   VendorApiManifest,
 } from './manifest';
-import { matchesPathTemplate, parseManifest, serializeManifest } from './manifest';
+import {
+  isMarkdownFormat,
+  matchesPathTemplate,
+  parseManifest,
+  serializeManifest,
+} from './manifest';
 import type { VendorApiLog } from './load_vendor_specs';
 import {
   applyOverlayToSources,
@@ -47,6 +53,10 @@ export interface UpdateVendorApiOptions {
   readonly directory: string;
   /** Sources to add or point elsewhere, by name; the manifest's are kept otherwise. */
   readonly sources?: Readonly<Record<string, string>>;
+  /** Sources that are Markdown references, by name, with the template their pages follow. */
+  readonly formats?: Readonly<Record<string, MarkdownSourceFormat>>;
+  /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
+  readonly pages?: Readonly<Record<string, readonly string[]>>;
   /**
    * Fetches the full vendor specs. Without it, actions are recorded against the committed
    * snapshots, which only picks up changes on the connector's side.
@@ -127,6 +137,8 @@ export const updateVendorApi = async ({
   connector,
   directory,
   sources: sourceFlags = {},
+  formats: formatFlags = {},
+  pages: pageFlags = {},
   refresh = false,
   check = false,
   fetchText,
@@ -157,7 +169,21 @@ export const updateVendorApi = async ({
       `${connector.metadata.id} has no ${MANIFEST} yet; pass its sources with --source`
     );
   }
-  const fetchAll = refresh || Object.keys(sourceFlags).length > 0;
+  // Naming a source, or how to read one, means fetching it again.
+  const fetchAll =
+    refresh || [sourceFlags, formatFlags, pageFlags].some((flags) => Object.keys(flags).length > 0);
+
+  for (const name of [...Object.keys(formatFlags), ...Object.keys(pageFlags)]) {
+    if (!(name in urls)) {
+      throw new Error(`--format and --pages name a source, but there is no source "${name}"`);
+    }
+  }
+  const markdownFormatOf = (name: string): MarkdownSourceFormat | undefined => {
+    const format = formatFlags[name] ?? previous?.sources[name]?.format;
+    return isMarkdownFormat(format) ? format : undefined;
+  };
+  const pagesOf = (name: string): readonly string[] | undefined =>
+    pageFlags[name] ?? previous?.sources[name]?.pages;
 
   const raw: Record<string, OpenApiDocument> = {};
   const formats: Record<string, ManifestSource['format']> = {};
@@ -166,8 +192,16 @@ export const updateVendorApi = async ({
   for (const [name, url] of Object.entries(urls)) {
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name));
     if (snapshot === undefined) {
+      const markdownFormat = markdownFormatOf(name);
+      const pages = pagesOf(name);
+      if (!markdownFormat && pages !== undefined) {
+        throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
+      }
       log.info(`Loading ${name} from ${url}`);
-      const { format, apiVersion, document } = await loadVendorSpec(url, fetchText);
+      const { format, apiVersion, document } = await loadVendorSpec(url, fetchText, {
+        format: markdownFormat,
+        pages,
+      });
       formats[name] = format;
       raw[name] = document;
       loaded.set(name, apiVersion);
@@ -262,6 +296,7 @@ export const updateVendorApi = async ({
     files[file] = toStableJson(projectSpec(document, used, overlayRefs));
     const unchanged = (await read(file)) === files[file];
     const apiVersion = loaded.has(name) ? loaded.get(name) : previous?.sources[name]?.apiVersion;
+    const pages = isMarkdownFormat(formats[name]) ? pagesOf(name) : undefined;
     const fetchedAt = unchanged
       ? previous?.sources[name]?.fetchedAt
       : (fetchedAtOf?.(urls[name]) ?? now()).toISOString();
@@ -269,6 +304,7 @@ export const updateVendorApi = async ({
     sources[name] = {
       format: formats[name],
       url: urls[name],
+      ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),
       ...(note === undefined ? {} : { note }),
