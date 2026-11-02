@@ -14,6 +14,7 @@ import { REACHES_BACK_COLUMN } from '../queries/history_reaches_back';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 import { TILE_PROJECT_ROUTING } from './tile_project_routing';
+import type { TileDeltaFailure } from '../data';
 
 interface PreviousPeriodQueryOptions<T> {
   queryKey: string;
@@ -119,6 +120,8 @@ export const usePreviousPeriod = <T>({
   reachesBack: boolean | undefined;
   isHistoryMissing: boolean;
   isError: boolean;
+  /** Which part failed: the history check, or the previous-period query that follows it. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const guard = usePreviousPeriodQuery({
     queryKey: `${guardKey}HistoryReachesBack`,
@@ -144,6 +147,7 @@ export const usePreviousPeriod = <T>({
     reachesBack: !guard.isError && guardSettled ? guard.data : undefined,
     isHistoryMissing: !isError && guardSettled && guard.data === false,
     isError,
+    failure: guard.isError ? 'history' : previousPeriod.isError ? 'delta' : undefined,
   };
 };
 

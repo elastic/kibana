@@ -14,6 +14,7 @@ import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_cri
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
 import { readFirstNumber } from './read_first_number';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
+import type { TileDeltaFailure } from '../data';
 
 interface RiskTileDeltaOptions {
   spaceId: string;
@@ -55,6 +56,8 @@ const useRiskTileDelta = (
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
   reachesBack: boolean | undefined;
+  /** Set when the history check or the previous-period query failed. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const {
     data: resolvedIndex,
@@ -69,7 +72,7 @@ const useRiskTileDelta = (
     [buildPrevious, spaceId, index, timeRange, entityFilterClauses]
   );
 
-  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError, failure } = usePreviousPeriod({
     tileKey,
     // Both risk tiles read the same history with the same query: one request.
     guardKey: RISK_HISTORY_GUARD_KEY,
@@ -84,6 +87,7 @@ const useRiskTileDelta = (
     previous,
     isHistoryMissing,
     reachesBack,
+    failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
       count,

@@ -166,6 +166,28 @@ describe('SignalCard', () => {
     expect(screen.getByTestId('eaFaceliftSignalCardDeltaBadge')).toBeInTheDocument();
   });
 
+  it.each(['delta', 'history'] as const)(
+    'says the comparison is unavailable, with an error icon, when its %s query failed',
+    (deltaFailure) => {
+      renderCard({ delta: undefined, deltaFailure });
+
+      expect(screen.getByTestId('eaFaceliftSignalCardDeltaFailed')).toHaveTextContent(
+        'Comparison unavailable'
+      );
+      expect(screen.getByTestId('eaFaceliftSignalCardIssueIcon-error')).toBeInTheDocument();
+      expect(screen.queryByTestId('eaFaceliftSignalCardDeltaBadge')).not.toBeInTheDocument();
+    }
+  );
+
+  it('does not say the comparison failed at a zero count, or while the delta loads', () => {
+    const { unmount } = renderCard({ value: 0, deltaFailure: 'delta' });
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaFailed')).not.toBeInTheDocument();
+    unmount();
+
+    renderCard({ isDeltaLoading: true, deltaFailure: 'delta' });
+    expect(screen.queryByTestId('eaFaceliftSignalCardDeltaFailed')).not.toBeInTheDocument();
+  });
+
   describe('accessible name', () => {
     const tile = () => screen.getByTestId('eaFaceliftSignalCard-newEntity');
 

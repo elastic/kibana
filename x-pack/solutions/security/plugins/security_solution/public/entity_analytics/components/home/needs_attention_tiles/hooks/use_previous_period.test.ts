@@ -139,6 +139,7 @@ describe('usePreviousPeriod', () => {
       reachesBack: true,
       isHistoryMissing: false,
       isError: true,
+      failure: 'delta',
     });
 
     // A failed history check leaves nothing to follow.
@@ -148,6 +149,7 @@ describe('usePreviousPeriod', () => {
       reachesBack: undefined,
       isHistoryMissing: false,
       isError: true,
+      failure: 'history',
     });
   });
 

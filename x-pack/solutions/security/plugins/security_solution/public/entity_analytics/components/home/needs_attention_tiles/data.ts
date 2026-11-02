@@ -26,6 +26,9 @@ export type TileCountIssue =
   | { kind: 'locked'; text: string }
   | { kind: 'issue'; icon: 'warning' | 'error'; text: string; tooltip: string };
 
+/** Why a tile's change can't be shown even though history exists: the history check or the previous-period query failed. */
+export type TileDeltaFailure = 'history' | 'delta';
+
 export interface SignalCardData {
   id: SignalCardId;
   title: string;
@@ -44,6 +47,8 @@ export interface SignalCardData {
   isDeltaLoading?: boolean;
   /** True when the history is too short to compare with the previous period: the tile says so. */
   isDeltaUnavailable?: boolean;
+  /** Set when a query behind the change failed; the tile says it can't compare. */
+  deltaFailure?: TileDeltaFailure;
   /** The entities the tile counts, as its query returns them. */
   entityIds?: readonly string[];
   /** True when the tile's query failed or can't run, so the value shown isn't a real count. */

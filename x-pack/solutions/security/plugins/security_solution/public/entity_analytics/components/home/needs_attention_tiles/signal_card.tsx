@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiLoadingSpinner,
   EuiText,
   EuiToolTip,
@@ -23,7 +22,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
-import type { SignalCardData } from './data';
+import type { SignalCardData, TileDeltaFailure } from './data';
 
 export interface SignalCardProps {
   card: SignalCardData;
@@ -85,6 +84,22 @@ const getNotEnoughHistoryTooltip = (timeRange: TimeRange) =>
       'Comparing needs twice the selected range of history: this period and the one before it. The comparison will be available after {duration} of data.',
     values: { duration: HISTORY_NEEDED[timeRange] },
   });
+
+const COMPARISON_UNAVAILABLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.comparisonUnavailable',
+  { defaultMessage: 'Comparison unavailable' }
+);
+
+const COMPARISON_FAILURE_TOOLTIP: Record<TileDeltaFailure, string> = {
+  delta: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCard.comparisonFailedTip',
+    { defaultMessage: "Couldn't load the previous period to compare with." }
+  ),
+  history: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.facelift.signalCard.historyCheckFailedTip',
+    { defaultMessage: "Couldn't check how much history is available to compare with." }
+  ),
+};
 
 const getVsPreviousPeriod = (timeRange: TimeRange) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.vsPreviousWindow', {
@@ -189,26 +204,10 @@ const DeltaLabel: React.FC<{ text: string; testSubj?: string }> = ({
   );
 };
 
-/** A warning or error icon whose tooltip explains the note next to it. */
-const IssueIconTip: React.FC<{ icon: 'warning' | 'error'; tooltip: string; label: string }> = ({
-  icon,
-  tooltip,
-  label,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  return (
-    <EuiIconTip
-      type={icon}
-      color={icon === 'error' ? euiTheme.colors.textDanger : 'warning'}
-      size="s"
-      content={tooltip}
-      aria-label={tooltip || label}
-      iconProps={{ 'data-test-subj': `eaFaceliftSignalCardIssueIcon-${icon}` }}
-    />
-  );
-};
-
-/** The delta row when there is something to say instead of a change: an icon, a short reason, a tooltip. */
+/**
+ * The delta row when there is something to say instead of a change: an icon, a short reason and a
+ * tooltip. The whole note is the hover target, not just the small icon.
+ */
 const DeltaNote: React.FC<{
   icon: 'warning' | 'error';
   text: string;
@@ -218,30 +217,40 @@ const DeltaNote: React.FC<{
   const { euiTheme } = useEuiTheme();
   const { fontSize } = useEuiFontSize('xs');
   return (
-    <span
-      css={css`
-        display: inline-flex;
-        align-items: center;
-        justify-content: flex-end;
-        gap: ${euiTheme.size.xs};
-        max-inline-size: 100%;
-        min-block-size: ${BADGE_HEIGHT}px;
-        text-align: end;
-      `}
-      data-test-subj={testSubj}
-    >
-      <IssueIconTip icon={icon} tooltip={tooltip} label={text} />
+    <EuiToolTip content={tooltip} position="top">
       <span
+        tabIndex={0}
+        aria-label={`${text}. ${tooltip}`}
         css={css`
-          min-inline-size: 0;
-          font-size: ${fontSize};
-          line-height: ${METRIC_LINE_HEIGHT};
-          color: ${euiTheme.colors.textSubdued};
+          display: inline-flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: ${euiTheme.size.xs};
+          max-inline-size: 100%;
+          min-block-size: ${BADGE_HEIGHT}px;
+          text-align: end;
         `}
+        data-test-subj={testSubj}
       >
-        {text}
+        <EuiIcon
+          type={icon}
+          color={icon === 'error' ? euiTheme.colors.textDanger : 'warning'}
+          size="s"
+          aria-hidden
+          data-test-subj={`eaFaceliftSignalCardIssueIcon-${icon}`}
+        />
+        <span
+          css={css`
+            min-inline-size: 0;
+            font-size: ${fontSize};
+            line-height: ${METRIC_LINE_HEIGHT};
+            color: ${euiTheme.colors.textSubdued};
+          `}
+        >
+          {text}
+        </span>
       </span>
-    </span>
+    </EuiToolTip>
   );
 };
 
@@ -497,6 +506,10 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
     card.isDeltaUnavailable === true &&
     !card.isDeltaLoading &&
     shownDelta === undefined;
+  const failedComparison =
+    interactive && !card.isDeltaLoading && shownDelta === undefined && !showNoHistory
+      ? card.deltaFailure
+      : undefined;
 
   const deltaDescription = getDeltaDescription(shownDelta, showNoHistory);
   const ariaLabel = deltaDescription ? `${card.title}. ${deltaDescription}` : card.title;
@@ -701,6 +714,14 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
                   text={notEnoughHistory}
                   tooltip={getNotEnoughHistoryTooltip(timeRange)}
                   testSubj="eaFaceliftSignalCardDeltaUnavailable"
+                />
+              ) : null}
+              {failedComparison ? (
+                <DeltaNote
+                  icon="error"
+                  text={COMPARISON_UNAVAILABLE}
+                  tooltip={COMPARISON_FAILURE_TOOLTIP[failedComparison]}
+                  testSubj="eaFaceliftSignalCardDeltaFailed"
                 />
               ) : null}
             </div>

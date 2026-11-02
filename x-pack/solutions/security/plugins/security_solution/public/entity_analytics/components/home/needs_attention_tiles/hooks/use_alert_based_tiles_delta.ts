@@ -13,6 +13,7 @@ import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { parseAlertBasedTilesResponse } from './use_entities_with_alerts_tiles';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
+import type { TileDeltaFailure } from '../data';
 
 interface AlertBasedTilesDeltaOptions {
   spaceId: string;
@@ -51,6 +52,8 @@ export const useAlertBasedTilesDelta = ({
   isHistoryMissing: boolean;
   /** True once the history check passed, so the sparkline can follow the same rule. */
   reachesBack: boolean | undefined;
+  /** Set when the history check or the previous-period query failed. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const {
     data: resolvedIndex,
@@ -69,7 +72,7 @@ export const useAlertBasedTilesDelta = ({
   );
 
   const highestCount = Math.max(severeAlertsCount, watchlistedCount);
-  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError, failure } = usePreviousPeriod({
     tileKey: 'alertBasedTiles',
     guardQuery,
     previousQuery,
@@ -84,6 +87,7 @@ export const useAlertBasedTilesDelta = ({
     watchlistedPrevious: previous?.watchlistedCount,
     isHistoryMissing,
     reachesBack,
+    failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
       count: highestCount,

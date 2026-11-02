@@ -13,6 +13,7 @@ import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { readFirstNumber } from './read_first_number';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
+import type { TileDeltaFailure } from '../data';
 
 interface NewEntityDeltaOptions {
   spaceId: string;
@@ -45,6 +46,8 @@ export const useNewEntityDelta = ({
   isHistoryMissing: boolean;
   /** True once the history check passed, so the sparkline can follow the same rule. */
   reachesBack: boolean | undefined;
+  /** Set when the history check or the previous-period query failed. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const {
     data: resolvedIndex,
@@ -60,7 +63,7 @@ export const useNewEntityDelta = ({
     [index, timeRange, entityFilterClauses]
   );
 
-  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError, failure } = usePreviousPeriod({
     tileKey: 'newEntity',
     guardQuery,
     previousQuery,
@@ -73,6 +76,7 @@ export const useNewEntityDelta = ({
     previous,
     isHistoryMissing,
     reachesBack,
+    failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
       count,
