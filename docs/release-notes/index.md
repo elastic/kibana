@@ -305,6 +305,10 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the copy button on a user message to say **Copy prompt** instead of **Copy response** [#286131]({{kib-pull}}286131).
 * Fix the attachment input pill border color [#282279]({{kib-pull}}282279).
 * Fix Anthropic stream parsing and retries of empty responses [#281616]({{kib-pull}}281616).
+* Fix agent tool calls failing when a model calls a tool by a name that contains characters tool names don't allow, such as dots [#296516]({{kib-pull}}296516).
+* Fix the Agent Builder natural language search tool querying indices that aren't allowed to the tool. The tool now returns an error when no allowed indices are available [#295885]({{kib-pull}}295885).
+* Fix the Universal Alerting rule-authoring skill in Agent Builder not finding or editing existing rules unless `agentBuilder:experimentalFeatures` is on [#301256]({{kib-pull}}301256).
+% Consider #294871 (release_note:bug): {{kib}} now checks a model's structured answers against their schema, and rejects answers that fail limits such as `max`, `min`, or `enum` [#294871]({{kib-pull}}294871). It is left out because the reader impact is not clear from the PR. The one visible effect is on generated chat titles.
 
 **Alerting and cases**:
 * Fix a rule running again for the same occurrence when Task Manager claims it before its `runAt` time [#297486]({{kib-pull}}297486).
@@ -401,6 +405,9 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the offline agent CPU and memory metrics tooltip, the Linux aarch64 install command indentation, long policy names in the **Assign to new policy** combobox, the order of policies in the **Assign new agent policy** modal, and the YAML field code editor border [#286386]({{kib-pull}}286386), [#286353]({{kib-pull}}286353), [#286381]({{kib-pull}}286381), [#296067]({{kib-pull}}296067), [#286360]({{kib-pull}}286360).
 * Fix the managed OTLP API key being created without the `apm/event:write` privilege, which made the managed OTLP service reject it, and default OpenTelemetry metrics data streams to the `time_series` index mode [#281261]({{kib-pull}}281261), [#281295]({{kib-pull}}281295).
 * Fix `expiration` not being passed in `POST /enrollment_api_keys` to the security APIs [#281324]({{kib-pull}}281324).
+* Fix integration upgrades failing with a `400` error from a proxy in front of {{es}} when the data stream namespace contains non-ASCII characters [#301496]({{kib-pull}}301496).
+* Fix the Certificate Authority set in the Advanced YAML of an output with a proxy not being used for the {{fleet}} Server connection to {{es}} when the {{fleet}} Server host has {{es}} SSL settings [#301626]({{kib-pull}}301626).
+* Fix the **Error patterns** panel on the OpenTelemetry collector details page loading indefinitely when its request fails [#301922]({{kib-pull}}301922).
 
 **Data management**:
 * Fix editing or cloning an index template moving component templates listed in `ignore_missing_component_templates` to the end of `composed_of` [#290171]({{kib-pull}}290171).
@@ -409,6 +416,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix transform actions failing with a generic `500` error when the {{es}} request timed out or failed at the transport level [#287592]({{kib-pull}}287592).
 * Fix deleting snapshots failing on long-running deletions of up to 30 minutes, and a snapshot that no longer exists blocking the deletion of others in the same request [#290071]({{kib-pull}}290071).
 * Fix creating and fetching data views with `allowNoIndex: true` whose title targets a remote cluster that doesn't exist, which returned a `400` error while still saving the data view [#299790]({{kib-pull}}299790).
+* Fix the data view edit flyout discarding your edits when {{kib}} refreshes the data view fields while the flyout is open [#299603]({{kib-pull}}299603).
 
 **Developer tools**:
 * Fix Console not explaining that timed-out {{es}} requests might still be running [#289481]({{kib-pull}}289481).
@@ -479,6 +487,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix {{kib}} adding the `report-to` parameter of the `Permissions-Policy` headers to only the last directive, so violation reports for the other directives now reach your reporting endpoint [#299786]({{kib-pull}}299786).
 * Fix the OpenTelemetry process resource including CLI arguments, which now records how many arguments were present instead [#295796]({{kib-pull}}295796).
 * Fix {{kib}} failing to start with the error `APM is disabled, but context propagation is enabled` when OpenTelemetry tracing is on, `elastic.apm.active` is `false`, and `elastic.apm.contextPropagationOnly` isn't set [#300651]({{kib-pull}}300651).
+* Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
 
 **Machine learning and {{infer}}**:
 * Fix token usage tracking for chat completions that are retried [#282747]({{kib-pull}}282747).
@@ -557,9 +566,15 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix legacy workflow inputs missing from tool schemas [#285149]({{kib-pull}}285149).
 * Fix executing a workflow requiring the `read` privilege [#284822]({{kib-pull}}284822).
 
-% !!DEFERRED!! The following entry is not in build candidate 9.6.0-6bafad71 (Kibana commit 2bbc632e52c3). Re-check it against the next build candidate.
+% !!DEFERRED!! The following entries are not in build candidate 9.6.0-6bafad71 (Kibana commit 2bbc632e52c3). Re-check them against the next build candidate.
 % * Show a waiting `waitForInput` step in the workflow execution flyout with a **Provide action** link instead of a banner, and make the execution flyout resizable [#294078]({{kib-pull}}294078).
 % Not on the 9.6 branch (backport:skip, merged to main on Oct 28 with a v9.6.0 label). Check the label before you keep it.
+% * Require the **Integrations** read privilege for the full agent policy APIs, and disable **View policy**, **View agent policy**, and the standalone enrollment option when you can't read integration policies [#301951]({{kib-pull}}301951).
+% Merged to 9.6 after build candidate 9.6.0-6bafad71. Users with Agents **All** but no Integrations read lose the standalone enrollment instructions, so consider a breaking change entry if it ships.
+% * Cap `size` at 10000 on `GET /api/workflows`, and return a `400` error instead of a `500` error when `page * size` goes past 10000 on the workflow list and execution routes [#301966]({{kib-pull}}301966).
+% Not on the 9.6 branch yet (no backport).
+% * Hide models outside your region preferences on the Feature settings page [#298958]({{kib-pull}}298958).
+% Not on the 9.6 branch (no backport). The PR carries release_note:bug.
 
 % Removed from 9.6.0: Data Federation is not announced yet. Add these back when the feature is announced.
 % * Support federated data sources in the alerting v2 threshold rule builder [#279142]({{kib-pull}}279142).
@@ -583,6 +598,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % Removed from 9.6.0: Team:Security Investigations owns these. They belong in the Security solution notes.
 % * Enable agents to find case templates by name [#287744]({{kib-pull}}287744).
 % (partial: 279680,287638) * Add a case attachments tool to Agent Builder, and document template fields in the cases-analytics skill [#279680]({{kib-pull}}279680), [#291716]({{kib-pull}}291716), [#287638]({{kib-pull}}287638).
+% * Fix **Run workflow** on **Select all** alerts running the workflow on only the loaded page of about 100 alerts. It now runs on every matching alert, up to 500 [#292151]({{kib-pull}}292151). Team:Security Investigations, label release_note:bug.
 % * Add the `cases.deleteAttachments` workflow step, and enable the cases agent in Agent Builder to delete case attachments [#298188]({{kib-pull}}298188).
 % * Add the `cases.attachmentsDeleted`, `cases.observablesAdded`, and `cases.extendedFieldsUpdated` workflow triggers [#295254]({{kib-pull}}295254), [#288224]({{kib-pull}}288224), [#287043]({{kib-pull}}287043).
 % * Remove alerts from a case in the case **Attachments** tab [#299266]({{kib-pull}}299266).
@@ -651,7 +667,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % Removed from 9.6.0: other entries that the notes leave out.
 % * Fix the APM waterfall silently re-rooting on truncated traces [#284971]({{kib-pull}}284971). Observability solution.
 % * Fix the approximation badge rendering above the **Group by** button instead of in line with the toolbar controls in Discover [#300717]({{kib-pull}}300717). Same-release polish of the approximation badge that 9.6.0 adds in #291464.
-% * Let the rule-authoring skill find and edit existing Universal Alerting rules without experimental flags [#301256]({{kib-pull}}301256). The PR carries both release_note:fix and release_note:skip.
 
 % Folded into the single Kibana Universal Alerting entry for 9.6.0. Add these back only if you want separate entries.
 % * Add quick-fix code actions, a **Prettify** shortcut, live validation, inline completions, and an {{esql}} help menu with recommended queries to the {{esql}} query sandbox in the alerting v2 rule editor [#289736]({{kib-pull}}289736), [#289532]({{kib-pull}}289532), [#290863]({{kib-pull}}290863).
