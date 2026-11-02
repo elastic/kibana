@@ -22,22 +22,13 @@ import { Config, readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
+import { createKibanaPlatformPluginsBuilder } from './build_kibana_platform_plugins';
 import type { RunTestsOptions } from './flags';
 /**
  * Run servers and tests for each config
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
-  if (!process.env.CI) {
-    log.warning('❗️❗️❗️');
-    log.warning('❗️❗️❗️');
-    log.warning('❗️❗️❗️');
-    log.warning(
-      "   Don't forget to use `node scripts/build_kibana_platform_plugins` to build plugins you plan on testing"
-    );
-    log.warning('❗️❗️❗️');
-    log.warning('❗️❗️❗️');
-    log.warning('❗️❗️❗️');
-  }
+  const ensureKibanaPlatformPluginsBuilt = createKibanaPlatformPluginsBuilder();
 
   const settingOverrides = {
     mochaOpts: {
@@ -123,6 +114,16 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                   shutdownEs = shutdown;
                 })
               : undefined;
+          // Observe ES failures during the plugin build; Promise.all propagates them below.
+          void esPromise?.catch(() => {});
+
+          await withSpan('build_kibana_platform_plugins', () =>
+            ensureKibanaPlatformPluginsBuilt({
+              procs,
+              config,
+              installDir: options.installDir,
+            })
+          );
 
           const kibanaPromise = withSpan('start_kibana', () =>
             runKibanaServer({
