@@ -171,6 +171,28 @@ describe('endpointForensicAnalysisSkill', () => {
       expect(Date.parse(searched.end) - Date.parse(searched.start)).toBe(24 * 60 * 60 * 1000);
     });
 
+    it('counts an alias match as available data, not as a pattern without data', async () => {
+      resolveIndex.mockResolvedValue({
+        data_streams: [],
+        indices: [{ name: 'restored-process-events-000001', attributes: ['open'] }],
+        aliases: [
+          {
+            name: 'logs-endpoint.events.process-restored',
+            indices: ['restored-process-events-000001'],
+          },
+        ],
+      });
+
+      const data = await runHandler({ hosts: ['SRV-DC01'] });
+
+      expect(data.available_indices).toContain('logs-endpoint.events.process-restored');
+      expect(data.patterns_without_data).toEqual([
+        'logs-endpoint.events.network-*',
+        'logs-endpoint.events.file-*',
+        'logs-endpoint.events.registry-*',
+      ]);
+    });
+
     // The worker hands the agent an incident window. The tool is what applies the margin and
     // hands back the exact range, so the agent never does date arithmetic itself.
     it('anchors on the incident window and tells the agent the exact range to query', async () => {

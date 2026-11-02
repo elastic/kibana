@@ -262,6 +262,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
           availableIndices = [
             ...resolved.data_streams.map(({ name }) => name),
             ...resolved.indices.filter(({ data_stream: ds }) => !ds).map(({ name }) => name),
+            ...resolved.aliases.map(({ name }) => name),
           ].sort();
         } catch (error) {
           discoveryError = error instanceof Error ? error.message : String(error);
