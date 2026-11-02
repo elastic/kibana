@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
+import { isRunQuotaReached, type RunQuotasResponse } from '@kbn/significant-events-plugin/common';
 import type { Automation } from '../hooks/use_automations';
 import { getTriggerDisplay } from './trigger_display';
 
@@ -64,9 +64,12 @@ export const isAutomationRateLimited = (
 
 export const isGlobalInvestigationLimitReached = (quotas?: RunQuotasResponse): boolean =>
   quotas !== undefined &&
-  quotas.enabled &&
-  quotas.limits.investigation > 0 &&
-  quotas.counts.investigation >= quotas.limits.investigation;
+  isRunQuotaReached({
+    group: 'investigation',
+    enabled: quotas.enabled,
+    limit: quotas.limits.investigation,
+    count: quotas.counts.investigation,
+  });
 
 export const getAutomationFacets = (
   automation: Automation,
