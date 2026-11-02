@@ -2236,7 +2236,6 @@ owner: elastic`,
     });
 
     it('falls back to bundled archive when EPR returns 404 for a package not in the registry', async () => {
-      const { RegistryResponseError } = jest.requireActual('../../../errors');
       MockRegistry.getPackage.mockRejectedValue(new RegistryResponseError('not found', 404));
       MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
 
