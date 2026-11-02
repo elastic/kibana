@@ -19,20 +19,3 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE = 'fleet-cloud-onboar
  * name could be cut and two policies of one deploy could end up with the same name.
  */
 export const CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH = 160;
-
-/**
- * The packages the AWS onboarding flow can deploy. Kept in sync with the packages of the flow's
- * service matrix (`ingest_hub`), which a test there checks.
- */
-export const AWS_ONBOARDING_PACKAGE_NAMES: readonly string[] = [
-  'aws',
-  'aws_bedrock',
-  'aws_bedrock_agentcore',
-  'aws_billing',
-  'aws_cloudwatch_input_otel',
-  'aws_logs',
-  'aws_mq',
-  'aws_securityhub',
-  'amazon_security_lake',
-  'awsfargate',
-];
