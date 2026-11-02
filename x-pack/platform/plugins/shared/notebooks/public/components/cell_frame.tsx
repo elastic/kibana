@@ -212,7 +212,7 @@ export const CellFrame = ({
             position: absolute;
             top: 0;
             left: 100%;
-            padding: ${euiTheme.size.xs} 0 0 ${euiTheme.size.s};
+            padding-left: ${euiTheme.size.s};
             opacity: ${isRunMenuOpen ? 1 : 0};
             transition: opacity ${euiTheme.animation.fast};
           `}
