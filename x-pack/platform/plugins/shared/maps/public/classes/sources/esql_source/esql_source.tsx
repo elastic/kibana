@@ -8,8 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Sha256 } from '@kbn/crypto-browser';
-import { lastValueFrom } from 'rxjs';
-import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
@@ -18,15 +16,10 @@ import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   getProjectRoutingFromEsqlQuery,
-  getStartEndParams,
   hasStartEndParams,
 } from '@kbn/esql-utils';
-import { buildEsQuery, getTimeZoneFromSettings } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
-import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
-import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
-import { getTime } from '@kbn/data-plugin/public';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { GeoJsonProperties } from 'geojson';
 import { asyncMap } from '@kbn/std';
 import {
@@ -47,7 +40,7 @@ import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_sou
 import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_source';
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
-import { getData, getHttp, getIndexPatternService, getUiSettings } from '../../../kibana_services';
+import { getData, getHttp, getIndexPatternService } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
 import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -199,23 +192,19 @@ export class ESQLSource
     inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const limit = getLimitFromESQLQuery(this._descriptor.esql);
-    const params: ESQLSearchParams = {
-      query: this._descriptor.esql,
-      dropNullColumns: true,
-    };
 
-    const query: Query[] = [];
-    const filters: Filter[] = [];
+    const kqlQuery: Query[] = [];
+    const kibanaFilters: Filter[] = [];
     if (this._descriptor.narrowByGlobalSearch) {
       if (requestMeta.query) {
-        query.push(requestMeta.query);
+        kqlQuery.push(requestMeta.query);
       }
       if (requestMeta.embeddableSearchContext?.query) {
-        query.push(requestMeta.embeddableSearchContext.query);
+        kqlQuery.push(requestMeta.embeddableSearchContext.query);
       }
-      filters.push(...requestMeta.filters);
+      kibanaFilters.push(...requestMeta.filters);
       if (requestMeta.embeddableSearchContext) {
-        filters.push(...requestMeta.embeddableSearchContext.filters);
+        kibanaFilters.push(...requestMeta.embeddableSearchContext.filters);
       }
     }
 
@@ -229,7 +218,7 @@ export class ESQLSource
         );
       }
       const extentFilter = createExtentFilter(requestMeta.buffer, [this._descriptor.geoField]);
-      filters.push(extentFilter);
+      kibanaFilters.push(extentFilter);
     }
 
     const timeRange = requestMeta.timeslice
@@ -240,70 +229,41 @@ export class ESQLSource
         }
       : requestMeta.timeFilters;
 
-    if (requestMeta.applyGlobalTime) {
-      if (!this._descriptor.dateField) {
-        throw new Error(
-          i18n.translate('xpack.maps.source.esql.noDateFieldError', {
-            defaultMessage:
-              'Unable to narrow ES|QL statement by global time, date field is not provided',
-          })
-        );
-      }
-      const timeFilter = getTime(undefined, timeRange, {
-        fieldName: this._descriptor.dateField,
-      });
-
-      if (timeFilter) {
-        filters.push(timeFilter);
-      }
+    if (requestMeta.applyGlobalTime && !this._descriptor.dateField) {
+      throw new Error(
+        i18n.translate('xpack.maps.source.esql.noDateFieldError', {
+          defaultMessage:
+            'Unable to narrow ES|QL statement by global time, date field is not provided',
+        })
+      );
     }
-
-    const namedParams = getStartEndParams(this._descriptor.esql, timeRange);
-    if (namedParams.length) {
-      params.params = namedParams;
-    }
-
-    const esQueryConfigs = getEsQueryConfig(getUiSettings());
-
-    params.filter = buildEsQuery(undefined, query, filters, esQueryConfigs);
-    params.time_zone = esQueryConfigs.dateFormatTZ
-      ? getTimeZoneFromSettings(esQueryConfigs.dateFormatTZ)
-      : 'UTC';
-
-    const requestResponder = inspectorAdapters.requests!.start(
-      getLayerFeaturesRequestName(layerName),
-      {
-        id: this._getRequestId(),
-      }
-    );
-    requestResponder.json(params);
 
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
 
-    const { rawResponse, requestParams } = await lastValueFrom(
-      getData()
-        .search.search(
-          { params },
-          {
-            strategy: ESQL_ASYNC_SEARCH_STRATEGY,
-            abortSignal: abortController.signal,
-            sessionId: requestMeta.searchSessionId,
-            projectRouting: requestMeta.projectRouting,
-          }
-        )
-        .pipe(
-          tap({
-            error(error) {
-              requestResponder.error({
-                json: 'attributes' in error ? error.attributes : { message: error.message },
-              });
-            },
-          })
-        )
+    // timeRange always fills the ?_tstart and ?_tend params; timeField also narrows by time
+    const { rawResponse } = await getData().search.esql(
+      {
+        query: this._descriptor.esql,
+        dropNullColumns: true,
+        kibanaQueryContext: {
+          timeRange,
+          timeField: requestMeta.applyGlobalTime ? this._descriptor.dateField : undefined,
+          kibanaFilters,
+          kqlQuery,
+        },
+        projectRouting: requestMeta.projectRouting,
+      },
+      {
+        abortSignal: abortController.signal,
+        sessionId: requestMeta.searchSessionId,
+        inspector: {
+          adapter: inspectorAdapters.requests!,
+          title: getLayerFeaturesRequestName(layerName),
+          id: this._getRequestId(),
+        },
+      }
     );
-
-    requestResponder.ok({ json: rawResponse, requestParams });
 
     const esqlSearchResponse = rawResponse as unknown as ESQLSearchResponse;
     const resultsCount = esqlSearchResponse.values.length;
