@@ -24,6 +24,27 @@ const chatModel = await inferenceStart.getChatModel({
 // just use it as another langchain chatModel
 ```
 
+The chat model can also target an inference feature instead of a connector, by passing a
+`featureId` instead of a `connectorId`. The feature's top endpoint is resolved once when the
+model is created, and every call then goes through `chatComplete({ featureId })`:
+
+```ts
+const chatModel = await inferenceStart.getChatModel({
+  request,
+  featureId: 'my_feature_id',
+  chatModelOptions: {
+    temperature: 0.2,
+  },
+});
+
+// the connector the feature resolved to is available for metadata
+const connector = chatModel.getConnector();
+```
+
+On that path the feature's model settings apply: the feature decides which connector is called
+and which `reasoning` is used, so the `reasoning` option (on the constructor or per call) is not
+forwarded. `temperature` remains a caller option, exactly as with a `connectorId`.
+
 But the chatModel can also be instantiated directly if needed:
 
 ```ts
