@@ -488,6 +488,18 @@ components:
             earlier run searched. The caller reads it to let this run's result
             replace an earlier finding, which a run that skipped techniques
             cannot do. Absent when Tier 2 did not run.
+        retryable_reasons:
+          type: array
+          maxItems: 100
+          description: >-
+            The distinct reasons of the coverage gaps that kept this run
+            `incomplete_retryable`, from the coordinator and both tiers,
+            judged in the same context as `completeness`. A reason that is
+            final for this run (a technique it gave up on, a gate nothing
+            could pass) is left out. Empty when the run is not retryable;
+            absent on paths that record nothing.
+          items:
+            $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteReason'
         incomplete:
           type: array
           description: >-
