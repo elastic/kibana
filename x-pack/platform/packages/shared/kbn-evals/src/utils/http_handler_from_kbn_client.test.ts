@@ -194,6 +194,33 @@ describe('httpHandlerFromKbnClient retries', () => {
     expect(result).toEqual({ value: 'ok' });
     expect(request).toHaveBeenCalledTimes(2);
   });
+
+  it('does not resend a POST outside the inference API after a 504', async () => {
+    const request = jest
+      .fn()
+      .mockRejectedValue(new KbnClientRequesterError('gateway timeout', { status: 504 }));
+
+    const result = await run(
+      createFetch(request)('/api/workflows/workflow/abc/run', { method: 'POST' })
+    );
+
+    expect(result).toHaveProperty('error');
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries an inference call after a 504', async () => {
+    const request = jest
+      .fn()
+      .mockRejectedValueOnce(new KbnClientRequesterError('gateway timeout', { status: 504 }))
+      .mockResolvedValueOnce(ok('ok'));
+
+    const result = await run(
+      createFetch(request)('/internal/inference/chat_complete', { method: 'POST' })
+    );
+
+    expect(result).toEqual({ value: 'ok' });
+    expect(request).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('isTransportError', () => {

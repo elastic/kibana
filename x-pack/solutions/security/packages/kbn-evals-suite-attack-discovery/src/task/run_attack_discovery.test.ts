@@ -153,7 +153,7 @@ describe('generateInsights', () => {
         prompt: 'Analyze the alerts.',
         alerts: ['alert one'],
       })
-    ).rejects.toThrow(/inference request failed on the wire: fetch failed/);
+    ).rejects.toThrow(/inference request failed before a model response: fetch failed/);
 
     // one attempt: a request that never produced a response is not retried
     // through the parse loop, which allows three attempts
@@ -178,7 +178,9 @@ describe('generateInsights', () => {
     // task-error path; this pins the message that path now carries
     expect(output.insights).toBeNull();
     expect(output.errors).toHaveLength(1);
-    expect(output.errors?.[0]).toContain('inference request failed on the wire: fetch failed');
+    expect(output.errors?.[0]).toContain(
+      'inference request failed before a model response: fetch failed'
+    );
     expect(output.errors?.[0]).not.toContain('Failed to parse insights');
   });
 });

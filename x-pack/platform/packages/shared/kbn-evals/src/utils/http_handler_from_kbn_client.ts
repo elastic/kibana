@@ -198,9 +198,14 @@ export function httpHandlerFromKbnClient({
 
         lastError = error;
 
-        const retryableStatus = typeof status === 'number' && retryStatuses.has(status);
-        const retryableTransport =
-          !signal?.aborted && isTransportError(error) && isSafeToResend(method, options.path);
+        const safeToResend = !signal?.aborted && isSafeToResend(method, options.path);
+        // 429 and 503 mean the request was refused. A 504 means a proxy gave up waiting, so the
+        // request may still have run and is only re-sent when that is harmless.
+        const retryableStatus =
+          typeof status === 'number' &&
+          retryStatuses.has(status) &&
+          (status !== 504 || safeToResend);
+        const retryableTransport = safeToResend && isTransportError(error);
 
         if (attempt >= maxRetries || !(retryableStatus || retryableTransport)) {
           throw error;

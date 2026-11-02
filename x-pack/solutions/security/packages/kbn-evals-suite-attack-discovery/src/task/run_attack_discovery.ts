@@ -102,12 +102,11 @@ export const generateInsights = async ({
     try {
       response = await inferenceClient.chatComplete({ messages });
     } catch (error) {
-      // The request never produced a model response. That is not a parse
-      // failure, so it is not retried through the parse loop below; label it so
-      // the recorded task error names the layer that failed instead of a bare
+      // No model response (transport failure or an HTTP/connector error), so not a parse
+      // failure: fail here rather than in the parse loop, naming the layer instead of a bare
       // `fetch failed`.
       throw new Error(
-        `Attack Discovery inference request failed on the wire: ${
+        `Attack Discovery inference request failed before a model response: ${
           error instanceof Error ? error.message : String(error)
         }`,
         { cause: error }
