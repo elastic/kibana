@@ -226,6 +226,25 @@ describe('createContinuousOnboardingWorkflowService', () => {
     expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 
+  it('can disable future schedules without draining executions', async () => {
+    getWorkflow.mockResolvedValue({ enabled: true });
+
+    await createService().ensureWorkflow({
+      enabled: false,
+      request,
+      spaceId,
+      skipExecutionDrain: true,
+    });
+
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      workflowDocumentId,
+      { enabled: false },
+      spaceId,
+      request
+    );
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
+  });
+
   it('leaves the legacy default-space document alone outside the default space', async () => {
     getWorkflow.mockResolvedValue({ enabled: false });
 
