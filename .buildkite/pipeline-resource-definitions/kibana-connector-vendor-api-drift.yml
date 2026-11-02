@@ -19,8 +19,6 @@ spec:
       description: Compares the connectors' vendor API artifacts with the vendors' latest specs, files an issue per drifting connector and refreshes the others in a PR
     spec:
       env:
-        # Set a channel and flip to 'true' once the check has an owning channel
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
         # Inputs of .buildkite/scripts/steps/connector_vendor_api_drift.sh.
         # Repository the drift issues are filed in: '' for a dry run against elastic/kibana that
         # writes nothing, a sandbox repository to try the issues out, or elastic/kibana to go live
