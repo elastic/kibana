@@ -24,6 +24,7 @@ import type { Action } from '@elastic/eui/src/components/basic_table/action_type
 
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
+import { AWS_ONBOARDING_PACKAGE_NAMES } from '../../../../../../../../common/constants';
 import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
@@ -71,6 +72,8 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   };
   /** Number of instances (onboarding sessions) per package name. */
   onboardingInstanceCounts?: ReadonlyMap<string, number>;
+  /** Whether the AWS onboarding flow is available: its packages then show the Collection badge. */
+  isOnboardingEnabled?: boolean;
 }> = ({
   installedPackages,
   total,
@@ -78,6 +81,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   pagination,
   selection,
   onboardingInstanceCounts = EMPTY_COUNTS,
+  isOnboardingEnabled = false,
 }) => {
   const authz = useAuthz();
   const { getHref } = useLink();
@@ -213,7 +217,8 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                           {integrationTitle}
                         </span>
                       </EuiFlexItem>
-                      {(onboardingInstanceCounts.get(item.name) ?? 0) > 0 && (
+                      {((isOnboardingEnabled && AWS_ONBOARDING_PACKAGE_NAMES.includes(item.name)) ||
+                        (onboardingInstanceCounts.get(item.name) ?? 0) > 0) && (
                         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
                           <EuiBadge
                             iconType="layers"
