@@ -10,7 +10,9 @@ import { getBuiltInEntityDefinition } from '../definitions/registry';
 import { hostEntityDefinition } from '../definitions/host';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
+  EUID_PAINLESS_PREAMBLE,
   createSourceExpressions,
+  docValuesExpressions,
   getEuidPainlessEvaluation,
   getEuidPainlessEvaluationForSearch,
   getEuidPainlessRuntimeMapping,
@@ -20,6 +22,9 @@ import {
 
 describe('conditionToPainless', () => {
   const nonEmpty = (field: string) =>
+    `doc.containsKey('${field}') && __euid_min(doc['${field}']) != null`;
+  // `includes` still reads the first value (#20578).
+  const firstNonEmpty = (field: string) =>
     `doc.containsKey('${field}') && doc['${field}'].size() > 0 && doc['${field}'].value != null && doc['${field}'].value != ""`;
 
   it('returns "false" when condition is null or undefined', () => {
@@ -43,14 +48,14 @@ describe('conditionToPainless', () => {
   it('translates field eq predicate', () => {
     const condition = { field: 'event.kind', eq: 'asset' };
     expect(conditionToPainless(condition)).toBe(
-      `(${nonEmpty('event.kind')} && doc['event.kind'].value == "asset")`
+      `(${nonEmpty('event.kind')} && __euid_min(doc['event.kind']) == "asset")`
     );
   });
 
   it('translates field neq predicate', () => {
     const condition = { field: 'event.outcome', neq: 'failure' };
     expect(conditionToPainless(condition)).toBe(
-      `(!(${nonEmpty('event.outcome')}) || doc['event.outcome'].value != "failure")`
+      `(!(${nonEmpty('event.outcome')}) || __euid_min(doc['event.outcome']) != "failure")`
     );
   });
 
@@ -67,7 +72,7 @@ describe('conditionToPainless', () => {
   it('translates field includes predicate', () => {
     const condition = { field: 'event.kind', includes: 'asset' };
     expect(conditionToPainless(condition)).toBe(
-      `(${nonEmpty('event.kind')} && doc['event.kind'].value.contains("asset"))`
+      `(${firstNonEmpty('event.kind')} && doc['event.kind'].value.contains("asset"))`
     );
   });
 
@@ -91,7 +96,7 @@ describe('conditionToPainless', () => {
       ],
     };
     expect(conditionToPainless(condition)).toBe(
-      `((${nonEmpty('event.kind')} && doc['event.kind'].value.contains("asset")) || ${nonEmpty(
+      `((${firstNonEmpty('event.kind')} && doc['event.kind'].value.contains("asset")) || ${nonEmpty(
         'entity.id'
       )})`
     );
@@ -99,7 +104,7 @@ describe('conditionToPainless', () => {
 
   it('translates not condition', () => {
     const condition = { not: { field: 'event.outcome', eq: 'failure' } };
-    const inner = `(${nonEmpty('event.outcome')} && doc['event.outcome'].value == "failure")`;
+    const inner = `(${nonEmpty('event.outcome')} && __euid_min(doc['event.outcome']) == "failure")`;
     expect(conditionToPainless(condition)).toBe(`!(${inner})`);
   });
 
@@ -130,7 +135,7 @@ describe('conditionToPainless', () => {
     };
     const result = conditionToPainless(condition);
     expect(result).toContain(nonEmpty('entity.id'));
-    expect(result).toContain(nonEmpty('event.category'));
+    expect(result).toContain(firstNonEmpty('event.category'));
     expect(result).toContain('doc[\'event.category\'].value.contains("iam")');
     expect(result).toContain('doc[\'event.type\'].value.contains("user")');
     expect(result).toContain('doc[\'event.type\'].value.contains("creation")');
@@ -166,7 +171,7 @@ describe('conditionToPainless', () => {
   it('should use doc access for eq when field is not in evaluatedVars', () => {
     expect(
       conditionToPainless({ field: 'user.name', eq: 'alice' }, { evaluatedVars: userEvaluatedVars })
-    ).toBe(`(${nonEmpty('user.name')} && doc['user.name'].value == "alice")`);
+    ).toBe(`(${nonEmpty('user.name')} && __euid_min(doc['user.name']) == "alice")`);
   });
 
   it('should mix evaluated var and doc fields in and conditions', () => {
@@ -182,7 +187,7 @@ describe('conditionToPainless', () => {
     expect(result).toBe(
       `(entity_namespace != null && entity_namespace == "${
         USER_ENTITY_NAMESPACE.Local
-      }" && (${nonEmpty('user.name')} && doc['user.name'].value == "x"))`
+      }" && (${nonEmpty('user.name')} && __euid_min(doc['user.name']) == "x"))`
     );
   });
 
@@ -360,6 +365,48 @@ describe('createSourceExpressions', () => {
   });
 });
 
+describe('docValuesExpressions', () => {
+  it('defines the helpers it calls in the preamble', () => {
+    expect(docValuesExpressions.preamble).toBe(EUID_PAINLESS_PREAMBLE);
+    expect(EUID_PAINLESS_PREAMBLE).toContain('String __euid_min(def values)');
+    expect(EUID_PAINLESS_PREAMBLE).toContain('int __euid_cmp(String a, String b)');
+  });
+
+  it('reduces a field to its lowest non-empty value for presence and value', () => {
+    expect(docValuesExpressions.isNotEmpty('host.id')).toBe(
+      "doc.containsKey('host.id') && __euid_min(doc['host.id']) != null"
+    );
+    expect(docValuesExpressions.value('host.id')).toBe("__euid_min(doc['host.id'])");
+  });
+
+  it('keeps reading the first value for includes (#20578)', () => {
+    expect(conditionToPainless({ field: 'event.type', includes: 'user' })).toBe(
+      `(doc.containsKey('event.type') && doc['event.type'].size() > 0 && doc['event.type'].value != null && doc['event.type'].value != "" && doc['event.type'].value.contains("user"))`
+    );
+  });
+
+  it('emits the preamble once at the root of a runtime mapping', () => {
+    const { source } = getEuidPainlessRuntimeMapping(
+      getBuiltInEntityDefinition(EntityType.enum.user)
+    ).script;
+
+    expect(source.startsWith(EUID_PAINLESS_PREAMBLE)).toBe(true);
+    expect(source.split('String __euid_min(').length - 1).toBe(1);
+  });
+});
+
+describe('createSourceExpressions first value', () => {
+  it('reads the first value for includes, the lowest for everything else', () => {
+    const expressions = createSourceExpressions('params._source');
+
+    expect(expressions.value('host.id')).toContain('__euid_src(');
+    expect(expressions.firstValue.value('host.id')).toBe(
+      "__euid_src_first(__euid_root,'host.id',['host','id'])"
+    );
+    expect(expressions.preamble).toContain('String __euid_src_first(');
+  });
+});
+
 describe('getEuidPainlessSourceUpdateScript', () => {
   const ALL_TYPES = Object.values(EntityType.enum);
   const ALL_DEFINITIONS = ALL_TYPES.map((entityType) => getBuiltInEntityDefinition(entityType));
@@ -376,7 +423,8 @@ describe('getEuidPainlessSourceUpdateScript', () => {
     const script = getEuidPainlessSourceUpdateScript(ALL_DEFINITIONS, onEuids);
 
     // Painless rejects a duplicate function definition, so this is a compile error, not waste.
-    expect(script.split('def __euid_src(').length - 1).toBe(1);
+    expect(script.split('String __euid_src(').length - 1).toBe(1);
+    expect(script.split('String __euid_min(').length - 1).toBe(1);
   });
 
   it('evaluates every entity type it is given, in one script', () => {
@@ -438,8 +486,9 @@ describe('getEuidPainlessRuntimeMapping with source expressions', () => {
     // Painless has no nested function definitions.
     const { source } = mapping.script;
 
-    expect(source.indexOf('def __euid_src(')).toBe(0);
-    expect(source.indexOf('def __euid_src(')).toBeLessThan(
+    expect(source.startsWith('int __euid_cmp(')).toBe(true);
+    expect(source.indexOf('String __euid_src(')).toBeGreaterThan(-1);
+    expect(source.indexOf('String __euid_src(')).toBeLessThan(
       source.indexOf('String ___euid_rt_eval')
     );
   });

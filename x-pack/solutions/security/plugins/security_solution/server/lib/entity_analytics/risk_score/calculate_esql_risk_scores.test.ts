@@ -17,6 +17,7 @@ import {
   getResolutionScoreESQLByIds,
   getResolutionScoreESQLByRange,
 } from './calculate_esql_risk_scores';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { RiskScoreBucket } from '../types';
 import { DEFAULT_ALERT_SAMPLE_SIZE, RIEMANN_ZETA_S_VALUE, getRiemannZetaValue } from './constants';
 
@@ -333,6 +334,19 @@ describe('Calculate risk scores with ESQL', () => {
         expect(source).toContain('emit(__id); return;');
         // The full Painless derivation remains as the fallback for alerts written before the stamp.
         expect(source).toContain('String ___euid = ___euid_rt_eval(doc);');
+      });
+
+      it('defines the EUID helper functions once, at the script root', () => {
+        const { source } = buildEuidRuntimeMappingWithStoredFieldFastPath(EntityType.host).script;
+
+        // The derivation calls `__euid_min`; Painless has no nested functions, so it must be
+        // defined before the wrapper, or the script fails to compile.
+        expect(source).toContain("__euid_min(doc['host.id'])");
+        expect(source.startsWith(euid.painless.preamble)).toBe(true);
+        expect(source.split('String __euid_min(').length - 1).toBe(1);
+        expect(source.indexOf('String __euid_min(')).toBeLessThan(
+          source.indexOf('String ___euid_rt_eval(def doc)')
+        );
       });
 
       it('guards the fast path with the entity type prefix for user', () => {

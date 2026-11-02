@@ -102,6 +102,12 @@ export const euid = {
     getEuidEvaluationForSearch: euidModule.getEuidPainlessEvaluationForSearch,
 
     /**
+     * Helper functions the evaluations above call. A hand-built script that embeds
+     * `getEuidEvaluation` or `getEuidEvaluationForSearch` must emit this once at its root.
+     */
+    preamble: euidModule.EUID_PAINLESS_PREAMBLE,
+
+    /**
      * Elasticsearch `runtime_mappings` entry that exposes the EUID as a `keyword` runtime field (`entity_id`).
      * Input: an entity definition. Output: mapping object suitable for the Search API `runtime_mappings` map.
      */

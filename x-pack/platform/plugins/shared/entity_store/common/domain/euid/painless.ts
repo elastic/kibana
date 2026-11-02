@@ -51,8 +51,17 @@ export interface PainlessFieldExpressions {
    * separate checks. Reading `_source` collapses the two, since an empty string reads as absent.
    */
   isPresent: (field: string) => string;
-  /** Painless expression yielding the field's value, or null. */
+  /** Painless expression yielding the field's identity value (its lowest non-empty value), or null. */
   value: (field: string) => string;
+  /**
+   * Painless boolean and value for the field's first value, as read before multi-valued fields were
+   * reduced to their lowest value. Only the `includes` leaf uses them, so its behavior stays as it is
+   * until #20578 changes it.
+   */
+  firstValue: {
+    isNotEmpty: (field: string) => string;
+    value: (field: string) => string;
+  };
   /** Emitted once at the top of the script, when reading a field needs a helper function. */
   preamble?: string;
   /**
@@ -66,19 +75,51 @@ export interface PainlessFieldExpressions {
   rootBinding: { param: string; expression: string };
 }
 
+/** The name of the helper that reduces a list of values to the lowest non-empty one. */
+const MIN_VALUE = '__euid_min';
+
+/**
+ * Helpers shared by both readers. Mirrors `getFieldValue` in commons.ts: a value that is null, empty,
+ * or not a scalar is skipped, and the rest are compared by code point (the order Elasticsearch sorts
+ * keywords in), so every path picks the same value from a multi-valued field.
+ *
+ * `__euid_cmp` compares code points without `Character`, which keeps it to the methods the Painless
+ * allowlist is known to have: at the first differing UTF-16 unit, `codePointAt` gives the code
+ * point, or the low surrogate when the high surrogates match, and both order like code points.
+ */
+const MIN_VALUE_PREAMBLE = [
+  `int __euid_cmp(String a, String b) { int n = Math.min(a.length(), b.length()); for (int i = 0; i < n; i++) { if (a.charAt(i) != b.charAt(i)) { return a.codePointAt(i) < b.codePointAt(i) ? -1 : 1; } } return a.length() - b.length(); }`,
+  `String __euid_scalar(def v) { if (v == null || v instanceof Map || v instanceof List) { return null; } String r = String.valueOf(v); return r == "" ? null : r; }`,
+  `String ${MIN_VALUE}(def values) { String m = null; for (def v : values) { String s = __euid_scalar(v); if (s != null && (m == null || __euid_cmp(s, m) < 0)) { m = s; } } return m; }`,
+].join(' ');
+
 /** The doc-values implementation of {@link PainlessFieldExpressions}, and the default. */
 export const docValuesExpressions: PainlessFieldExpressions = {
   isNotEmpty: (field) => {
     const escaped = escapePainlessField(field);
-    return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
+    return `doc.containsKey('${escaped}') && ${MIN_VALUE}(doc['${escaped}']) != null`;
   },
   isPresent: (field) => {
     const escaped = escapePainlessField(field);
     return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0`;
   },
-  value: (field) => `doc['${escapePainlessField(field)}'].value`,
+  value: (field) => `${MIN_VALUE}(doc['${escapePainlessField(field)}'])`,
+  firstValue: {
+    isNotEmpty: (field) => {
+      const escaped = escapePainlessField(field);
+      return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
+    },
+    value: (field) => `doc['${escapePainlessField(field)}'].value`,
+  },
+  preamble: MIN_VALUE_PREAMBLE,
   rootBinding: { param: 'doc', expression: 'doc' },
 };
+
+/**
+ * Helper functions a doc-values EUID script needs. Emit them once at the script root when
+ * embedding {@link getEuidPainlessEvaluation} in a hand-built script.
+ */
+export const EUID_PAINLESS_PREAMBLE = MIN_VALUE_PREAMBLE;
 
 /**
  * The name of the `_source` reader emitted as the preamble. Kept short because it appears once per
@@ -86,15 +127,23 @@ export const docValuesExpressions: PainlessFieldExpressions = {
  */
 const SOURCE_READER = '__euid_src';
 
+/** Reads the first element of a multi-valued field, for the `includes` leaf only (see `firstValue`). */
+const SOURCE_FIRST_READER = '__euid_src_first';
+
 /**
  * Mirrors `getFieldValue` in commons.ts, which is what the in-memory implementation uses: try the
- * flattened key first, then walk the nested path, collapse an array to its first element, and
- * treat an empty string as absent.
+ * flattened key first, then walk the nested path, reduce an array to its lowest non-empty value,
+ * and treat an empty string as absent.
  *
  * Path segments are passed in as a list rather than split at runtime, because Painless regex is
  * disabled by default and the field names are known when the script is generated.
  */
-const SOURCE_READER_PREAMBLE = `def ${SOURCE_READER}(def src, String flat, List path) { if (src == null) { return null; } def v = src.containsKey(flat) ? src[flat] : null; if (v == null) { def cur = src; for (int i = 0; i < path.size(); i++) { if (!(cur instanceof Map)) { return null; } cur = cur[path.get(i)]; if (cur == null) { return null; } } v = cur; } if (v instanceof List) { if (((List)v).isEmpty()) { return null; } v = ((List)v).get(0); } if (v == null || v instanceof Map || v instanceof List) { return null; } String r = String.valueOf(v); return r == "" ? null : r; }`;
+const SOURCE_READER_PREAMBLE = [
+  MIN_VALUE_PREAMBLE,
+  `def __euid_src_get(def src, String flat, List path) { if (src == null) { return null; } def v = src.containsKey(flat) ? src[flat] : null; if (v == null) { def cur = src; for (int i = 0; i < path.size(); i++) { if (!(cur instanceof Map)) { return null; } cur = cur[path.get(i)]; if (cur == null) { return null; } } v = cur; } return v; }`,
+  `String ${SOURCE_READER}(def src, String flat, List path) { def v = __euid_src_get(src, flat, path); return v instanceof List ? ${MIN_VALUE}(v) : __euid_scalar(v); }`,
+  `String ${SOURCE_FIRST_READER}(def src, String flat, List path) { def v = __euid_src_get(src, flat, path); if (v instanceof List) { if (((List)v).isEmpty()) { return null; } v = ((List)v).get(0); } return __euid_scalar(v); }`,
+].join(' ');
 
 /**
  * The `_source` implementation of {@link PainlessFieldExpressions}, for contexts with no
@@ -106,16 +155,19 @@ const SOURCE_READER_PREAMBLE = `def ${SOURCE_READER}(def src, String flat, List 
 export const createSourceExpressions = (rootExpression: string): PainlessFieldExpressions => {
   // Referenced by name so the expression can be passed into a wrapping function; see rootBinding.
   const param = '__euid_root';
-  const value = (field: string) => {
+  const read = (reader: string, field: string) => {
     const flat = escapePainlessField(field);
     const segments = field.split('.').map((segment) => `'${escapePainlessField(segment)}'`);
-    return `${SOURCE_READER}(${param},'${flat}',[${segments.join(',')}])`;
+    return `${reader}(${param},'${flat}',[${segments.join(',')}])`;
   };
+  const value = (field: string) => read(SOURCE_READER, field);
+  const firstValue = (field: string) => read(SOURCE_FIRST_READER, field);
 
   return {
     isNotEmpty: (field) => `${value(field)} != null`,
     isPresent: (field) => `${value(field)} != null`,
     value,
+    firstValue: { isNotEmpty: (field) => `${firstValue(field)} != null`, value: firstValue },
     preamble: SOURCE_READER_PREAMBLE,
     rootBinding: { param, expression: rootExpression },
   };
@@ -219,9 +271,8 @@ export function getEuidPainlessRuntimeMapping(
  * All the definitions are evaluated in one script so a document is rewritten once rather than once
  * per entity type, and so the resulting list reflects a single read of the source.
  *
- * Reads `_source` because update contexts have no doc-values. That also means it resolves fields
- * the way the in-memory implementation does, which is not always the way doc-values do — a
- * multi-valued field yields the first value written rather than the lowest.
+ * Reads `_source` because update contexts have no doc-values. A multi-valued field still resolves
+ * to its lowest non-empty value, the same as doc-values, ES|QL and the in-memory implementation.
  */
 export function getEuidPainlessSourceUpdateScript(
   entityDefinitions: EntityDefinitionWithoutId[],
@@ -254,6 +305,9 @@ export function getEuidPainlessSourceUpdateScript(
 /**
  * Constructs a Painless evaluation for the provided entity definition to generate the entity id.
  *
+ * The evaluation calls the helpers in `expressions.preamble` ({@link EUID_PAINLESS_PREAMBLE} for
+ * doc-values), so a script that embeds it must emit them once at its root.
+ *
  * Applies the creation gate: a document that may not put an entity in the store yields `null`.
  * For entities that already exist, use {@link getEuidPainlessEvaluationForSearch}.
  *
@@ -263,7 +317,7 @@ export function getEuidPainlessSourceUpdateScript(
  *
  * const evaluation = getEuidPainlessEvaluation(hostDefinition);
  * // evaluation may look like:
- * // 'if (doc.containsKey('host.name') && doc['host.name'].size() > 0 && doc['host.name'].value != null && doc['host.name'].value != "") { return "host:" + doc['host.name'].value; } return null;'
+ * // 'if (doc.containsKey('host.name') && __euid_min(doc['host.name']) != null) { return "host:" + __euid_min(doc['host.name']); } return null;'
  * ```
  *
  * @param entityDefinition - The entity definition whose identity rules compute the entity id
@@ -467,8 +521,11 @@ export function conditionToPainless(
       return c.exists ? nonEmpty : `!(${nonEmpty})`;
     }
     if ('includes' in c) {
+      // Reads the first value, not the identity value: #20578 changes `includes` separately.
       const val = escapePainlessString(String(c.includes));
-      return `(${nonEmpty} && ${valueExpr}.contains("${val}"))`;
+      return `(${expressions.firstValue.isNotEmpty(field)} && ${expressions.firstValue.value(
+        field
+      )}.contains("${val}"))`;
     }
   }
   return 'false';
