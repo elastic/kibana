@@ -25,6 +25,7 @@ import {
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
 import { useInvestigationDetails } from '../conversations/use_investigation_details';
+import { ESCALATIONS_READ_MORE_URL } from './constants';
 import { EscalationsPage } from './escalations_page';
 
 jest.mock('../../hooks/use_alertzero_investigations_capabilities');
@@ -250,7 +251,7 @@ describe('EscalationsPage', () => {
     expect(screen.getByTestId('escalationQueue-closed')).toBeInTheDocument();
   });
 
-  it('does not show the Alert Zero note in the Open section when there are open escalations', () => {
+  it('does not show the empty-state note in the Open section when there are open escalations', () => {
     mockBothQueues([openEscalation], [closedEscalation]);
     renderPage();
 
@@ -266,12 +267,12 @@ describe('EscalationsPage', () => {
     );
   });
 
-  it('links to the Alert Zero page from the Open section note', () => {
+  it('explains how escalations reach the Open section without naming where to escalate from', () => {
     mockBothQueues([], [closedEscalation]);
     renderPage();
 
-    expect(screen.getByTestId('alertZeroEscalationsOpenNoteLink')).toHaveTextContent(
-      'Alert Zero page'
+    expect(screen.getByTestId('alertZeroEscalationsOpenNote')).toHaveTextContent(
+      "When you escalate an investigation, the escalation appears here until it's closed."
     );
   });
 
@@ -294,9 +295,19 @@ describe('EscalationsPage', () => {
     renderPage();
 
     expect(screen.getByTestId('alertZeroEscalationsEmptyBanner')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'No escalations yet' })).toBeInTheDocument();
     expect(screen.queryByTestId('escalationsPageHeader')).not.toBeInTheDocument();
     expect(screen.queryByTestId('escalationQueue-open')).not.toBeInTheDocument();
     expect(screen.queryByTestId('escalationQueue-closed')).not.toBeInTheDocument();
+  });
+
+  it('links the explainer banner to the escalations docs page', () => {
+    mockBothQueues([], []);
+    renderPage();
+
+    const link = screen.getByTestId('alertZeroEscalationsEmptyBannerDocsLink');
+    expect(link).toHaveTextContent('Read more about escalations');
+    expect(link).toHaveAttribute('href', ESCALATIONS_READ_MORE_URL);
   });
 
   it('hides the explainer banner when any escalation exists', () => {
@@ -313,6 +324,15 @@ describe('EscalationsPage', () => {
     expect(screen.getByTestId('escalationsPageHeader')).toBeInTheDocument();
     // "1 open escalation" from the header count
     expect(screen.getByText(/1 open escalation/)).toBeInTheDocument();
+  });
+
+  it('says "No open escalations" in the hero header when only closed escalations exist', () => {
+    mockBothQueues([], [closedEscalation]);
+    renderPage();
+
+    expect(screen.getByTestId('escalationsPageHeader')).toHaveTextContent(
+      'On the board: No open escalations'
+    );
   });
 
   it('shows a loading spinner while queries are in flight', () => {
@@ -602,7 +622,7 @@ describe('EscalationsPage', () => {
       mockBothQueues([openEscalation], [closedEscalation]);
       renderPage();
 
-      expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+      expect(screen.queryByText('Impacted entities')).not.toBeInTheDocument();
     });
 
     it('asks both queues for the selected entity and restores them on a second click', () => {
