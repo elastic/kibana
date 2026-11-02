@@ -574,7 +574,7 @@ rule ${module}Check {
       }
     });
 
-    it('logs cache hits without rule source', async () => {
+    it('logs cache hits at trace level without rule source', async () => {
       const mockLogger = loggingSystemMock.createLogger();
       setYaraLogger(mockLogger);
 
@@ -585,13 +585,14 @@ rule ${module}Check {
       mockLogger.debug.mockClear();
       await validateYaraRule(source);
 
-      expect(mockLogger.debug).toHaveBeenCalled();
-      const debugArg = mockLogger.debug.mock.calls[0][0];
-      const debugMessage = typeof debugArg === 'function' ? debugArg() : String(debugArg);
+      expect(mockLogger.debug).not.toHaveBeenCalled();
+      expect(mockLogger.trace).toHaveBeenCalled();
+      const traceArg = mockLogger.trace.mock.calls[0][0];
+      const traceMessage = typeof traceArg === 'function' ? traceArg() : String(traceArg);
 
-      expect(debugMessage).toContain('YARA validate cache hit');
-      expect(debugMessage).toContain('sourceSha256=');
-      expect(debugMessage).not.toContain(uniqueMarker);
+      expect(traceMessage).toContain('YARA validate cache hit');
+      expect(traceMessage).toContain('sourceSha256=');
+      expect(traceMessage).not.toContain(uniqueMarker);
     });
 
     it('evicts the least recently used source when the cache is full', async () => {

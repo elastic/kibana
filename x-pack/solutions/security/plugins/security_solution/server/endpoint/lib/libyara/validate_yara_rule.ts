@@ -76,7 +76,7 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
   const cacheKey = hashYaraSource(source);
   const cached = validateResultCache.get(cacheKey);
   if (cached !== undefined) {
-    logger?.debug(
+    logger?.trace(
       () =>
         `YARA validate cache hit: sourceSha256=${cacheKey}, sourceByteLength=${Buffer.byteLength(
           source,
