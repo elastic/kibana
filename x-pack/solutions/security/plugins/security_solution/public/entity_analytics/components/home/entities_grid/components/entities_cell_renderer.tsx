@@ -20,6 +20,7 @@ import { DefaultCell } from './cells/default_cell';
 import { EntityNameCell } from './cells/entity_name_cell';
 import { EntityTypeCell } from './cells/entity_type_cell';
 import { GroupSizeCell } from './cells/group_size_cell';
+import { alignEndCss } from './cells/styles';
 import { RiskScoreChangeCell } from './cells/risk_score_change_cell';
 import { RiskScoreValueCell } from './cells/risk_score_value_cell';
 import { SourceCell } from './cells/source_cell';
@@ -104,7 +105,11 @@ const renderKnownEntityCell = (
     case 'entity.name':
       return <EntityNameCell value={value} row={row} onEntityNameClick={onEntityNameClick} />;
     case 'group_size':
-      return <GroupSizeCell value={value} row={row} onGroupSizeClick={onGroupSizeClick} />;
+      return (
+        <div css={alignEndCss}>
+          <GroupSizeCell value={value} row={row} onGroupSizeClick={onGroupSizeClick} />
+        </div>
+      );
     case 'last_seen_alert':
     case '@timestamp':
     case 'entity.lifecycle.first_seen':
@@ -132,14 +137,16 @@ const renderKnownEntityCell = (
       );
     case 'anomaly_count':
       return (
-        <AnomalyCountCell
-          value={value}
-          row={row}
-          onAnomalyCountClick={opensFor(onAnomalyCountClick, ANOMALIES_FLYOUT_TYPES, row)}
-        />
+        <div css={alignEndCss}>
+          <AnomalyCountCell
+            value={value}
+            row={row}
+            onAnomalyCountClick={opensFor(onAnomalyCountClick, ANOMALIES_FLYOUT_TYPES, row)}
+          />
+        </div>
       );
     case 'case_count':
-      return value == null || value === 0 ? <>{'—'}</> : <>{String(value)}</>;
+      return <div css={alignEndCss}>{value == null || value === 0 ? '—' : String(value)}</div>;
     case 'entity.attributes.watchlists':
       return <WatchlistsCell value={value} watchlistNames={watchlistNames} />;
     case 'asset.criticality':
