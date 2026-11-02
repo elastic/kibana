@@ -63,9 +63,9 @@ evaluate.describe(
               output: {
                 criteria: [
                   'Identifies the fraud-detection service as a slow consumer on the Kafka "orders" topic, attributing the slowness to the consumer side rather than blaming the Kafka broker itself',
-                  'Discovers the upstream producer: identifies checkout as the service producing messages to the Kafka "orders" topic, either through topology exploration of the broker resource or through log analysis',
-                  'Identifies a throughput mismatch: checkout produces messages at a much higher rate than fraud-detection can consume them, creating a growing backlog on the Kafka "orders" topic',
-                  'Discovers from checkout logs that the service is sending excessive Kafka messages per order, with log evidence such as "overloading queue now" or "Done with #100 messages for overload simulation"',
+                  'Discovers the upstream producer: identifies checkout as the service producing messages to the Kafka "orders" topic',
+                  'Identifies a producer/consumer imbalance on the Kafka "orders" topic — checkout sending too many messages while fraud-detection consumes too slowly — with evidence such as comparing throughput on the same topic across services in topology, checkout overload logs, or fraud-detection logs showing the same order consumed many times',
+                  'Discovers from checkout logs that the service is sending excessive Kafka messages per order, with log evidence such as "Done with #100 messages for overload simulation"',
                   'Suggests investigating both why checkout is sending excessive duplicate Kafka messages and why fraud-detection has a delay in its consumer loop',
                 ],
                 expectedTools: [
