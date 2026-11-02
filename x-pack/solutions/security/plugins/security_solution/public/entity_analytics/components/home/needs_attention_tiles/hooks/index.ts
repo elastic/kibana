@@ -21,3 +21,4 @@ export { useNewlyHighCriticalCount } from './use_newly_high_critical_count';
 export { useNewlyHighCriticalDelta, useRiskMoversDelta } from './use_risk_tiles_delta';
 export { useTilesLoadTelemetry } from './use_tiles_load_telemetry';
 export { useTilesTimeoutNotice } from './use_tiles_timeout_notice';
+export { useTilesErrorNotice } from './use_tiles_error_notice';

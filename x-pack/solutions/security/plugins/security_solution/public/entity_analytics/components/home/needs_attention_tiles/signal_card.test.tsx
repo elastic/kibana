@@ -370,6 +370,7 @@ describe('SignalCard', () => {
         value: 0,
         countIssue: {
           kind: 'issue',
+          cause: 'missing',
           icon: 'warning',
           text: 'Requires an alerts index',
           tooltip: 'This space has no alerts index yet.',
@@ -399,6 +400,7 @@ describe('SignalCard', () => {
       hasCount: false,
       countIssue: {
         kind: 'issue',
+        cause: 'failed',
         icon: 'error',
         text: "Couldn't load data",
         tooltip: "This metric couldn't load. Refresh the page to try again.",

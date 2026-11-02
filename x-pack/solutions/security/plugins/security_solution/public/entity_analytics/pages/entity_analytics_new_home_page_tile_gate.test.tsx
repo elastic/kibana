@@ -38,6 +38,7 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useRiskTilesSeries: jest.fn(),
   useSearchedTileEntityIds: jest.fn(),
   useTilesLoadTelemetry: jest.fn(),
+  useTilesErrorNotice: jest.fn(),
   useTilesTimeoutNotice: jest.fn(),
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
@@ -727,6 +728,53 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       mockTiles();
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
+    });
+  });
+
+  describe('when a count fails', () => {
+    const lastErrorNotice = () => {
+      const { calls } = hooks.useTilesErrorNotice.mock;
+      return calls[calls.length - 1];
+    };
+
+    it('names every tile that failed in one notice, once the counts have settled', () => {
+      mockTiles();
+      hooks.useAlertBasedTiles.mockReturnValue({
+        ...hooks.useAlertBasedTiles(),
+        hasCount: false,
+        error: new Error('boom'),
+      });
+      hooks.useNewEntityCount.mockReturnValue({
+        ...hooks.useNewEntityCount(),
+        hasCount: false,
+        error: new Error('boom'),
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      const [titles, isSettled] = lastErrorNotice();
+      expect(titles).toEqual(['Severely alerting', 'New & alerting', 'Watchlisted & alerting']);
+      expect(isSettled).toBe(true);
+    });
+
+    it('does not name a tile that timed out, which has its own notice', () => {
+      mockTiles();
+      hooks.useNewEntityCount.mockReturnValue({
+        ...hooks.useNewEntityCount(),
+        hasCount: false,
+        error: new Error('boom'),
+        isTimedOut: true,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastErrorNotice()[0]).toEqual([]);
+      expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
+    });
+
+    it('names nothing, and has not settled, while a count still loads', () => {
+      mockTiles({ alerts: { isCountPending: true } });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(lastErrorNotice()[0]).toEqual([]);
     });
   });
 

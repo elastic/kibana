@@ -29,7 +29,7 @@ export const useTilesTimeoutNotice = (isAnyCountTimedOut: boolean, runKey: strin
     isNotified.current = true;
     addWarning({
       title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.timedOutTitle', {
-        defaultMessage: 'Some tiles timed out',
+        defaultMessage: 'Some metrics timed out',
       }),
       text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.timedOutText', {
         defaultMessage:

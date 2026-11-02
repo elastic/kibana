@@ -117,6 +117,7 @@ import {
   useRiskTilesSeries,
   useSearchedTileEntityIds,
   useTilesLoadTelemetry,
+  useTilesErrorNotice,
   useTilesTimeoutNotice,
 } from '../components/home/needs_attention_tiles/hooks';
 import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
@@ -1357,6 +1358,22 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         : signalCards,
     [signalCards, tileSearchExpression, shownTileEntityIds, isTilesSearchPending]
   );
+
+  // One toast names every tile whose count failed, once all the counts have settled.
+  const failedTileTitles = useMemo(
+    () =>
+      signalCards
+        .filter(({ countIssue }) => countIssue?.kind === 'issue' && countIssue.cause === 'failed')
+        .map(({ title }) => title),
+    [signalCards]
+  );
+  const areCountsSettled =
+    !alertBasedLoading &&
+    !anomaliesLoading &&
+    !newEntityLoading &&
+    !riskMoversLoading &&
+    !newlyHCLoading;
+  useTilesErrorNotice(failedTileTitles, areCountsSettled, tilesRunKey);
 
   // Only the flat grid reports its loads; the grids of Group by don't. A load is what the user asked
   // for: its key leaves out the search overrides and the tile's entity ids that the page resolves

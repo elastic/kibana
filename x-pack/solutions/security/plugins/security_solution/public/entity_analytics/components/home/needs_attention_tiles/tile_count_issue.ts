@@ -28,6 +28,7 @@ const NO_ACCESS_TEXT: Record<TileNoAccess, string> = {
 const MISSING_PREREQUISITE: Record<TileMissingPrerequisite, TileCountIssue> = {
   alertsIndex: {
     kind: 'issue',
+    cause: 'missing',
     icon: 'warning',
     text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.noAlertsIndex', {
       defaultMessage: 'Requires an alerts index',
@@ -39,6 +40,7 @@ const MISSING_PREREQUISITE: Record<TileMissingPrerequisite, TileCountIssue> = {
   },
   anomalyJobs: {
     kind: 'issue',
+    cause: 'missing',
     icon: 'warning',
     text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.noAnomalyJobs', {
       defaultMessage: 'Requires anomaly detection jobs',
@@ -50,6 +52,7 @@ const MISSING_PREREQUISITE: Record<TileMissingPrerequisite, TileCountIssue> = {
   },
   riskData: {
     kind: 'issue',
+    cause: 'missing',
     icon: 'warning',
     text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.noRiskData', {
       defaultMessage: 'Requires risk score history data',
@@ -63,6 +66,7 @@ const MISSING_PREREQUISITE: Record<TileMissingPrerequisite, TileCountIssue> = {
 
 const TIMED_OUT: TileCountIssue = {
   kind: 'issue',
+  cause: 'timedOut',
   icon: 'error',
   text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.countTimedOut', {
     defaultMessage: 'Query timed out',
@@ -76,6 +80,7 @@ const TIMED_OUT: TileCountIssue = {
 
 const FAILED: TileCountIssue = {
   kind: 'issue',
+  cause: 'failed',
   icon: 'error',
   text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.countFailed', {
     defaultMessage: "Couldn't load data",

@@ -24,7 +24,14 @@ export const EMPTY_ENTITY_IDS: string[] = [];
  */
 export type TileCountIssue =
   | { kind: 'locked'; text: string }
-  | { kind: 'issue'; icon: 'warning' | 'error'; text: string; tooltip: string };
+  | {
+      kind: 'issue';
+      /** Why: a failure and a timeout each get one toast for the page. */
+      cause: 'failed' | 'timedOut' | 'missing';
+      icon: 'warning' | 'error';
+      text: string;
+      tooltip: string;
+    };
 
 /** Why a tile's change can't be shown even though history exists: the history check or the previous-period query failed. */
 export type TileDeltaFailure = 'history' | 'delta';
