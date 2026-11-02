@@ -15,6 +15,7 @@ import {
   getAtTokens,
   isJsonObject,
   localRefToPointer,
+  resolvePathItem,
   setAtTokens,
   toPointer,
   toTokens,
@@ -100,17 +101,6 @@ export const normalizeSpecNode = (value: unknown, isNameMap = false): unknown =>
     }
   }
   return result;
-};
-
-// A Path Item `$ref` to another path item in the document, whose fields the entry's own override.
-const resolvePathItem = (document: OpenApiDocument, item: unknown): unknown => {
-  if (!isJsonObject(item) || typeof item.$ref !== 'string') {
-    return item;
-  }
-  const { $ref: ref, ...own } = item;
-  const pointer = localRefToPointer(ref);
-  const referenced = pointer === undefined ? undefined : getAtTokens(document, toTokens(pointer));
-  return isJsonObject(referenced) ? { ...referenced, ...own } : item;
 };
 
 // AutoRest's `x-ms-paths` holds operations whose keys add fixed query parameters, such as Azure
