@@ -31,17 +31,23 @@ describe('registerAlertingV2UsageCollector', () => {
           dispatcher_alerts_count_by_outcome_24hr: {
             dispatched: {
               type: 'long',
-              _meta: { description: 'Sum of alerts in dispatched events over the last 24 hours.' },
+              _meta: {
+                description:
+                  'Sum of alerts in dispatched events over the last 24 hours. Summed per policy and per dispatcher tick, so an alert is counted again on every tick and for every policy it is dispatched to.',
+              },
             },
             throttled: {
               type: 'long',
-              _meta: { description: 'Sum of alerts in throttled events over the last 24 hours.' },
+              _meta: {
+                description:
+                  'Sum of alerts in throttled events over the last 24 hours. Summed per policy and per dispatcher tick, so an alert is counted again on every tick and for every policy that throttles it.',
+              },
             },
             unmatched: {
               type: 'long',
               _meta: {
                 description:
-                  'Sum of alerts that matched no action policy (unmatched events) over the last 24 hours.',
+                  'Sum of alerts that matched no action policy (unmatched events) over the last 24 hours. Summed per dispatcher tick, so an alert is counted again on every tick it stays unmatched.',
               },
             },
           },
@@ -49,13 +55,15 @@ describe('registerAlertingV2UsageCollector', () => {
             dispatched: {
               type: 'long',
               _meta: {
-                description: 'Sum of action groups in dispatched events over the last 24 hours.',
+                description:
+                  'Sum of action groups in dispatched events over the last 24 hours. Summed per policy and per dispatcher tick, so a group is counted again on every tick it is dispatched.',
               },
             },
             throttled: {
               type: 'long',
               _meta: {
-                description: 'Sum of action groups in throttled events over the last 24 hours.',
+                description:
+                  'Sum of action groups in throttled events over the last 24 hours. Summed per policy and per dispatcher tick, so a group is counted again on every tick it is throttled.',
               },
             },
           },
