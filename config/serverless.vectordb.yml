@@ -4,6 +4,7 @@
 plugins.allowlistPluginGroups: ['platform', 'vectordb']
 
 xpack.osquery.enabled: false
+xpack.alerting_v2.enabled: false
 
 ## Fine-tune the vectordb solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:

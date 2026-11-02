@@ -5,6 +5,7 @@ plugins.allowlistPluginGroups: ['platform', 'search']
 
 xpack.search.enabled: false
 xpack.osquery.enabled: false
+xpack.alerting_v2.enabled: false
 
 # Enable fleet on search projects for agentless features
 xpack.fleet.enabled: true
