@@ -23,6 +23,21 @@ export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
  */
 export const NIGHTSHIFT_ENABLED_FLAG = 'nightshift.enabled';
 
+/**
+ * Kill switch for online evals: when `true`, investigations start no scoring workflow. Read with a
+ * `false` fallback, so deployments that can't reach LaunchDarkly keep scoring. Defined in the
+ * elastic/kibana-feature-flags repository and never set in `feature_flags.overrides`.
+ */
+export const NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG = 'nightshift.onlineEvals.paused';
+
+/**
+ * When `true`, online eval score events include the judges' explanations, which may quote customer
+ * data. Read with a `false` fallback, so explanations are left out wherever LaunchDarkly is
+ * unreachable. Turning it on for a project needs legal approval.
+ */
+export const NIGHTSHIFT_ONLINE_EVALS_INCLUDE_EXPLANATIONS_FLAG =
+  'nightshift.onlineEvals.includeExplanations';
+
 /** Saved object type registered by `nightshiftSources` and granted by the Nightshift feature. */
 export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
 

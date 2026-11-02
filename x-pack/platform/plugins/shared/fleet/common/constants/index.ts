@@ -13,6 +13,7 @@ export {
   FLEET_SETUP_LOCK_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
 } from './saved_objects';
 export * from './routes';
 export * from './agent';
@@ -35,6 +36,7 @@ export * from './uninstall_token';
 export * from './space_awareness';
 export * from './security_search_ai_lake';
 export * from './cloud_connector';
+export * from './schema_field_limits';
 export * from './feature_flags';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates

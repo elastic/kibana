@@ -261,6 +261,27 @@ export const ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE: KibanaRole = {
     },
   ],
 };
+
+/**
+ * {@link ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE} plus `actions: ['read']`, which includes
+ * connector execute: the dispatched workflow runs a connector step as the policy owner.
+ */
+export const ALERTING_V2_ACTION_POLICY_CONNECTOR_DISPATCH_ROLE: KibanaRole = {
+  elasticsearch: WRITER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_action_policies: ['all'],
+        alerting_v2_rules: ['read'],
+        workflowsManagement: ['minimal_read', 'workflow_read', 'workflow_execute'],
+        discover: ['all'],
+        actions: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
 export const ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [

@@ -67,6 +67,8 @@ export function inboundEventsRoute({
         // External vendors cannot send Kibana session XSRF headers (`kbn-xsrf`).
         // Auth is the ingest token (Bearer, or `token` query if Authorization is
         // absent); missing or invalid tokens 404.
+        // Internal only, intentionally not in the public description: Relay may instead send a
+        // service-account bearer plus `x-client-authentication`. See `resolveServiceAccountBearer`.
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],
         availability: {
@@ -146,11 +148,7 @@ export function inboundEventsRoute({
           connectorTypeId,
           connectorId,
           spaceId: getSpaceId(request),
-          requestId: request.id,
-          headers: request.headers,
-          query: request.query,
-          body: request.body,
-          remoteAddress: request.socket.remoteAddress,
+          request,
         });
         return mapIngestResultToResponse(result, response);
       }

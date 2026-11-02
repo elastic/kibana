@@ -9,7 +9,10 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useInfiniteQuery, useQuery } from '@kbn/react-query';
 import { createChangeHistoryHookWrapper } from '../test_utils/create_change_history_hook_wrapper';
 import { useInvalidateChangeHistory } from './use_invalidate_change_history';
-import { TEST_CHANGE_HISTORY_SCOPE } from '../test_utils/change_history_test_fixtures';
+import {
+  TEST_CHANGE_HISTORY_SCOPE,
+  TEST_CHANGE_HISTORY_SUPPORTS,
+} from '../test_utils/change_history_test_fixtures';
 import {
   changeHistoryDetailQueryKey,
   changeHistoryListQueryKey,
@@ -38,7 +41,11 @@ describe('useInvalidateChangeHistory', () => {
     const { result: listResult } = renderHook(
       () =>
         useInfiniteQuery(
-          changeHistoryListQueryKey({ objectId: 'obj-1', scope: TEST_CHANGE_HISTORY_SCOPE }),
+          changeHistoryListQueryKey({
+            objectId: 'obj-1',
+            scope: TEST_CHANGE_HISTORY_SCOPE,
+            supports: TEST_CHANGE_HISTORY_SUPPORTS,
+          }),
           () => listChanges()
         ),
       { wrapper }
@@ -51,6 +58,7 @@ describe('useInvalidateChangeHistory', () => {
             objectId: 'obj-1',
             changeId: 'evt-1',
             scope: TEST_CHANGE_HISTORY_SCOPE,
+            supports: TEST_CHANGE_HISTORY_SUPPORTS,
           }),
           () => getChange()
         ),
@@ -74,7 +82,11 @@ describe('useInvalidateChangeHistory', () => {
     await invalidateResult.current('obj-1');
 
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: changeHistoryObjectQueryKeyPrefix('obj-1', TEST_CHANGE_HISTORY_SCOPE),
+      queryKey: changeHistoryObjectQueryKeyPrefix(
+        'obj-1',
+        TEST_CHANGE_HISTORY_SCOPE,
+        TEST_CHANGE_HISTORY_SUPPORTS
+      ),
       refetchType: 'active',
     });
 
@@ -104,7 +116,10 @@ describe('useInvalidateChangeHistory', () => {
     await invalidateResult.current();
 
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: changeHistoryScopeQueryKeyPrefix(TEST_CHANGE_HISTORY_SCOPE),
+      queryKey: changeHistoryScopeQueryKeyPrefix(
+        TEST_CHANGE_HISTORY_SCOPE,
+        TEST_CHANGE_HISTORY_SUPPORTS
+      ),
       refetchType: 'active',
     });
   });

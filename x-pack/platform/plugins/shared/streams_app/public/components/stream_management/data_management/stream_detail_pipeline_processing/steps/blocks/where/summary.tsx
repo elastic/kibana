@@ -21,9 +21,8 @@ import { CreateStepButton } from '../../../create_step_button';
 import { getPercentageFormatter } from '../../../../../../../util/formatters';
 import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
 import type { StepConfigurationProps } from '../../steps_list';
-import { BlockDisableOverlay } from '../block_disable_overlay';
+import { BlockDisableOverlay, DragHandle } from '../../../../../../draggable_steps';
 import { StepContextMenu } from '../context_menu';
-import { DragHandle } from '../../draggable_step_wrapper';
 import { MAX_INTERACTIVE_NESTING_LEVEL } from '.';
 import { isPipelineConditionStep } from '../../../types';
 

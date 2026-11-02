@@ -43,6 +43,8 @@ type QueryWithOccurrences = StreamQuery & {
     type: Partial<Record<ChangePointType, ChangePointsValue>>;
   };
   rule_backed: boolean;
+  /** Enabled state of the backing alerting rule, omitted when lookup fails. */
+  rule_enabled?: boolean;
 };
 
 interface QueryOccurrencesResponse {
@@ -84,8 +86,22 @@ interface LifecycleDetection {
   skip?: DetectionSkip;
 }
 
+/** An operator's deactivation of one episode of an event, from Alerting v2's action log. */
+interface EventDeactivation {
+  /** When the operator deactivated the episode. */
+  '@timestamp': string;
+  /** The episode that was deactivated: the `episode_id` of the version it produced. */
+  episode_id: string;
+  /** The operator's reason, trimmed; empty when none was given. */
+  reason: string;
+}
+
 interface EventLifecycleResponse {
   detections: LifecycleDetection[];
+  /**
+   * Event versions, oldest first. The version an operator deactivation produced carries the
+   * operator's reason as its `assessment_note` when one was given.
+   */
   events: SignificantEventResponse[];
   /** Set when the event has more skipped detections than the response carries. */
   skipped_truncated?: boolean;
@@ -98,4 +114,5 @@ export type {
   SignificantEventsQueriesGenerationResult,
   LifecycleDetection,
   EventLifecycleResponse,
+  EventDeactivation,
 };

@@ -8,10 +8,23 @@
  */
 
 export { createEmulatorFetch } from './src/fetch/create_emulator_fetch';
+export { createCertificateAuthority } from './src/server/certificate_authority';
+export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
+export { createEmulatorProxy } from './src/server/create_emulator_proxy';
+export type { EmulatorProxy, EmulatorProxyOptions } from './src/server/create_emulator_proxy';
 export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
-export type { ContractCall, Emulator, EmulatorOptions } from './src/fetch/create_emulator_fetch';
+export type {
+  ContractCall,
+  Emulator,
+  EmulatorOptions,
+  EmulatorSpec,
+} from './src/fetch/create_emulator_fetch';
+export { isGraphQLSpec } from './src/graphql/graphql_protocol';
+export type { GraphQLSpec } from './src/graphql/graphql_protocol';
+export { isMcpSpec } from './src/mcp/mcp_protocol';
+export type { McpSpec, McpTool } from './src/mcp/mcp_protocol';
 export type {
   CursorRequest,
   NextUrlRequest,
@@ -33,13 +46,30 @@ export type {
 } from './src/engine/response_engine';
 export type {
   ContractAdapter,
+  ContractProtocol,
   ContractRequest,
   ContractResponse,
+  NamedOperation,
+  NamedOperationRef,
+  ProtocolExchange,
   Responder,
   Violation,
 } from './src/contract/types';
+export {
+  convertMarkdownReference,
+  isMarkdownReferenceFormat,
+  MARKDOWN_REFERENCE_FORMATS,
+  readLlmsIndex,
+} from './src/markdown';
+export type {
+  MarkdownReferenceFormat,
+  MarkdownReferenceOptions,
+  MarkdownReferencePage,
+} from './src/markdown';
 export { applyOverlay, InvalidOverlayError, JsonPathError } from './src/overlay';
 export type { OverlayAction, OverlayDocument, OverlayFinding, OverlayResult } from './src/overlay';
+export { convertSmithy, isSmithyModel } from './src/smithy';
+export type { ConvertSmithyOptions, SmithyModel } from './src/smithy';
 export {
   convertDiscovery,
   convertSwagger2,
