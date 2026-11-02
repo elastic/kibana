@@ -39,6 +39,8 @@ export const useNewEntityDelta = ({
   count,
 }: NewEntityDeltaOptions): {
   delta: number | undefined;
+  /** The count over the previous period, which the sparkline starts from. */
+  previous: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
   /** True once the history check passed, so the sparkline can follow the same rule. */
@@ -64,11 +66,11 @@ export const useNewEntityDelta = ({
     previousQuery,
     enabled: !skip && isReady && count > 0 && !isIndexLoading && Boolean(index),
     parse: (raw) => readFirstNumber(raw, 'value'),
-    localOnly: true,
   });
 
   return {
     delta: previous !== undefined ? count - previous : undefined,
+    previous,
     isHistoryMissing,
     reachesBack,
     isDeltaLoading: isDeltaStillComing({

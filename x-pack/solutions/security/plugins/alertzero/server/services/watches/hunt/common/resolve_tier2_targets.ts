@@ -8,8 +8,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntForThreatResult } from '@kbn/alertzero-common';
+import { parseIndexScopeEntry, splitRemoteCluster } from '../../../../../common/remote_cluster';
 import { boundTargetPatterns, collapseIndexName } from './classify_actionable_indices';
 import type { DiscoveredDataset } from './discover_hunt_datasets';
+import { clusterCovers, exclusionReachesCluster, literalPrefix } from './index_glob';
 import { matchDatasetsWithModel } from './match_hunt_datasets';
 import type { HuntScopeReportContext } from './match_hunt_datasets';
 import type { ResolvedHuntScope } from './resolve_index_scope';
@@ -17,6 +19,12 @@ import { fitsRequestPath } from './scope_bounds';
 
 /** Which signal put a pattern in `tier2_targets`. */
 export type Tier2TargetSource = 'report_match' | 'tier1_hits' | 'model' | 'actionable';
+
+/** What the model dataset-match call did; absent on `Tier2Targets` when it was never asked. */
+export type Tier2DatasetMatch =
+  | { status: 'matched' }
+  | { status: 'empty' }
+  | { status: 'failed'; message?: string };
 
 export interface Tier2Targets {
   /** What Tier 2 may read, target, and count as a hit. Bounded to fit a request path. */
@@ -36,14 +44,15 @@ export interface Tier2Targets {
    * or dropped.
    */
   degraded: boolean;
+  /**
+   * The outcome of the model dataset-match call. Absent when the call was not made, which is
+   * not the same as `empty`: only a call that answered and found nothing means "no dataset".
+   * Internal to the coordinator; never copied onto the wire result.
+   */
+  dataset_match?: Tier2DatasetMatch;
 }
 
 const uniq = (values: string[]): string[] => Array.from(new Set(values));
-
-const isExclusion = (pattern: string): boolean => pattern.startsWith('-');
-
-/** The literal text before a pattern's first `*`; the whole pattern when it has none. */
-const literalPrefix = (pattern: string): string => pattern.split('*')[0];
 
 /**
  * True for a pattern this module can reason about by literal prefix alone: exact,
@@ -100,23 +109,38 @@ const indexDatasetsByPattern = (datasets: DiscoveredDataset[]): Map<string, Disc
  * prefix at all (`-*elastic-cloud-logs-*`) is not checked here; treating it as
  * reaching everywhere would narrow or drop every generalized pattern regardless of
  * dataset, which is tracked separately as a follow-up rather than folded in here.
+ *
+ * Cross-cluster entries are split first: positives must cover the target's cluster
+ * (`clusterCovers`), exclusions only need to reach it (`exclusionReachesCluster`), and every
+ * comparison above runs on the index parts. So a `*:logs-*` universe covers
+ * `infosec_zocalo:logs-aws.cloudtrail-*` while a local `logs-*` never does, and a
+ * whole-cluster exclusion (`-remote:*`) refuses every target on a cluster it reaches.
  */
 const staysInsideUniverse = (pattern: string, indexPatterns: string[]): boolean => {
-  const positives = indexPatterns.filter((p) => !isExclusion(p));
-  const exclusions = indexPatterns.filter(isExclusion).map((p) => p.slice(1));
-  const patternPrefix = literalPrefix(pattern);
+  const { cluster, index } = splitRemoteCluster(pattern);
+  const entries = indexPatterns
+    .map(parseIndexScopeEntry)
+    .filter((entry) =>
+      entry.exclude
+        ? exclusionReachesCluster(entry.cluster, cluster)
+        : clusterCovers(entry.cluster, cluster)
+    );
+  const patternPrefix = literalPrefix(index);
 
-  const covered = positives.some(
-    (positive) =>
-      isTrailingWildcardOrExact(positive) &&
-      (positive.includes('*')
-        ? patternPrefix.startsWith(literalPrefix(positive))
-        : patternPrefix === positive)
+  const covered = entries.some(
+    (entry) =>
+      !entry.exclude &&
+      isTrailingWildcardOrExact(entry.index) &&
+      (entry.index.includes('*')
+        ? patternPrefix.startsWith(literalPrefix(entry.index))
+        : patternPrefix === entry.index)
   );
   if (!covered) return false;
 
-  return !exclusions.some((exclusion) => {
-    const exclusionPrefix = literalPrefix(exclusion);
+  return !entries.some((entry) => {
+    if (!entry.exclude) return false;
+    if (entry.index === '*') return true;
+    const exclusionPrefix = literalPrefix(entry.index);
     return (
       exclusionPrefix !== '' &&
       (patternPrefix.startsWith(exclusionPrefix) || exclusionPrefix.startsWith(patternPrefix))
@@ -175,6 +199,7 @@ export const resolveTier2Targets = async ({
   tier1,
   report,
   model,
+  messagesFallback,
   logger,
 }: {
   scope: Pick<
@@ -184,21 +209,31 @@ export const resolveTier2Targets = async ({
   tier1: Pick<HuntForThreatResult, 'per_index'>;
   report?: HuntScopeReportContext;
   model?: ScopedModel;
+  /** Tier model used when the gateway rejects the dataset-match template. */
+  messagesFallback?: ScopedModel;
   logger?: Logger;
 }): Promise<Tier2Targets> => {
   const reportMatches = scope.report_matches;
   const tier1Hits = uniq(tier1.per_index.map(({ index }) => collapseIndexName(index)));
 
   let modelMatches: string[] = [];
+  let datasetMatch: Tier2DatasetMatch | undefined;
   if (model && report && needsModelDatasetMatch({ scope, tier1, report })) {
     const matched = await matchDatasetsWithModel({
       model,
+      ...(messagesFallback ? { messagesFallback } : {}),
       datasets: scope.discovered,
       report,
       logger,
     });
-    modelMatches = uniq(matched?.matches.flatMap((dataset) => dataset.search_patterns) ?? []);
-    if (matched) {
+    if (matched.status === 'matched') {
+      modelMatches = uniq(matched.matches.flatMap((dataset) => dataset.search_patterns));
+    }
+    datasetMatch =
+      matched.status === 'failed'
+        ? { status: 'failed', ...(matched.message ? { message: matched.message } : {}) }
+        : { status: matched.status };
+    if (matched.status === 'matched') {
       logger?.debug(
         `Hunt Tier 2 targets matched by the model: ${matched.scored
           .map(({ dataset, confidence }) => `${dataset} (${confidence})`)
@@ -265,6 +300,7 @@ export const resolveTier2Targets = async ({
       tier2_targets: [],
       tier2_target_sources: [],
       report_intent_targets: reportIntentTargets,
+      ...(datasetMatch ? { dataset_match: datasetMatch } : {}),
       degraded: universeNarrowed,
     };
   }
@@ -278,6 +314,7 @@ export const resolveTier2Targets = async ({
       tier2_targets: [],
       tier2_target_sources: [],
       report_intent_targets: reportIntentTargets,
+      ...(datasetMatch ? { dataset_match: datasetMatch } : {}),
       degraded: true,
     };
   }
@@ -310,6 +347,7 @@ export const resolveTier2Targets = async ({
       tier2_targets: [],
       tier2_target_sources: [],
       report_intent_targets: reportIntentTargets,
+      ...(datasetMatch ? { dataset_match: datasetMatch } : {}),
       degraded: true,
     };
   }
@@ -318,6 +356,7 @@ export const resolveTier2Targets = async ({
     tier2_targets: finalTargets,
     tier2_target_sources: contributing.map(([source]) => source),
     report_intent_targets: reportIntentTargets,
+    ...(datasetMatch ? { dataset_match: datasetMatch } : {}),
     degraded: modelMatches.length > 0 || bounded.collapsed || universeNarrowed,
   };
 };
