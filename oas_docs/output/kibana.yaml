@@ -175463,6 +175463,10 @@ components:
           description: Policy namespace. Defaults to the agent policy namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this managed integration. Set by Fleet, read-only.
+          maxLength: 255
+          type: string
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_managed_integration_package'
         updated_at:
