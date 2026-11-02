@@ -332,5 +332,29 @@ describe('getInputsWithIds', () => {
       );
       expect(inputs[0].id).toBe('../../../../tmp/report-proof');
     });
+
+    it('throws when input.config.id override contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { id: { value: '../../../../tmp/evil' } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when stream.config.id override contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].streams[0].config = { id: { value: 'a/../../../etc' } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when overrides.inputs[*].id contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.overrides = { inputs: { 'safe-input-id': { id: '../../../../tmp/evil' } } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('does not throw for a safe input.config.id override', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { id: { value: 'cloudbeat/cis_k8s-safe' } };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
   });
 });

@@ -18,7 +18,11 @@ import { FLEET_ENDPOINT_PACKAGE } from '../../../common/constants/epm';
  *
  * Client-supplied input and stream ids are used verbatim as filesystem path
  * segments by Elastic Agent for isolated-unit components, so `validateIds`
- * rejects path-traversal sequences here. Callers that operate on already-stored
+ * rejects path-traversal sequences here. This also covers the effective id
+ * overrides (`input.config.id`, `stream.config.id`, and `overrides.inputs`),
+ * which `storedPackagePolicyToAgentInputs` merges over the base id when
+ * generating the full agent policy — otherwise a safe base id plus a traversal
+ * override would bypass the check. Callers that operate on already-stored
  * package policies (e.g. the input-id backport setup task) pass `false` so a
  * pre-existing id cannot make them throw.
  */
@@ -31,6 +35,10 @@ export function getInputsWithIds(
 ): PackagePolicy['inputs'] {
   const packageName = packageInfo?.name ?? packagePolicy.package?.name;
   const isEndpointPackage = packageName === FLEET_ENDPOINT_PACKAGE;
+
+  if (validateIds) {
+    validateNoTraversalInIdOverrides(packagePolicy);
+  }
 
   return packagePolicy.inputs.map((input) => {
     const inputId =
@@ -67,4 +75,30 @@ export function getInputsWithIds(
       }),
     };
   });
+}
+
+/**
+ * Validates the id override values that `storedPackagePolicyToAgentInputs`
+ * merges over the base input/stream id when building the full agent policy:
+ * `input.config.id.value`, `stream.config.id.value`, and the `id` in
+ * `overrides.inputs[*]`. These replace the validated base id on the
+ * Agent-facing policy, so they must be checked on create/update too.
+ */
+function validateNoTraversalInIdOverrides(packagePolicy: NewPackagePolicy): void {
+  for (const input of packagePolicy.inputs) {
+    validateNoPathTraversalId(input.config?.id?.value);
+    for (const stream of input.streams ?? []) {
+      validateNoPathTraversalId(stream.config?.id?.value);
+    }
+  }
+
+  const overrideInputs = packagePolicy.overrides?.inputs;
+  if (overrideInputs) {
+    for (const override of Object.values(overrideInputs)) {
+      const overrideId = (override as { id?: unknown })?.id;
+      if (typeof overrideId === 'string') {
+        validateNoPathTraversalId(overrideId);
+      }
+    }
+  }
 }
