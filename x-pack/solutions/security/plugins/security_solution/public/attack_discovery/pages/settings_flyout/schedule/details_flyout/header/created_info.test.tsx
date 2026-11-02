@@ -5,24 +5,42 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaStyledComponentsThemeProvider } from '@kbn/react-kibana-context-styled';
 
 import { CreatedBy } from './created_info';
-import { TestProviders } from '../../../../../../common/mock';
+import { createKibanaContextProviderMock } from '../../../../../../common/lib/kibana/kibana_react.mock';
 
-const renderComponent = async (
+const MockKibanaContextProvider = createKibanaContextProviderMock();
+
+/**
+ * `CreatedBy` consumes only these four contexts, and unlike `TestProviders` this builds no redux
+ * store or query client per render, which the per-test budget cannot afford on a contended CI worker.
+ */
+const CreatedInfoTestProviders = ({ children }: PropsWithChildren<{}>) => (
+  <MockKibanaContextProvider>
+    <I18nProvider>
+      <KibanaStyledComponentsThemeProvider>
+        <EuiProvider highContrastMode={false}>{children}</EuiProvider>
+      </KibanaStyledComponentsThemeProvider>
+    </I18nProvider>
+  </MockKibanaContextProvider>
+);
+
+const renderComponent = (
   createdBy = 'test',
   createdAt = new Date().toISOString(),
   dataTestId = 'testComponent'
 ) => {
-  await act(() => {
-    render(
-      <TestProviders>
-        {<CreatedBy createdBy={createdBy} createdAt={createdAt} data-test-subj={dataTestId} />}
-      </TestProviders>
-    );
-  });
+  render(
+    <CreatedInfoTestProviders>
+      {<CreatedBy createdBy={createdBy} createdAt={createdAt} data-test-subj={dataTestId} />}
+    </CreatedInfoTestProviders>
+  );
 };
 
 describe('CreatedBy', () => {
@@ -30,14 +48,14 @@ describe('CreatedBy', () => {
     jest.clearAllMocks();
   });
 
-  it('should render component', async () => {
-    await renderComponent();
+  it('should render component', () => {
+    renderComponent();
 
     expect(screen.getByTestId('testComponent')).toBeInTheDocument();
   });
 
-  it('should render create by message', async () => {
-    await renderComponent('elastic', '2025-04-17T11:54:13.531Z', 'createByContainer');
+  it('should render create by message', () => {
+    renderComponent('elastic', '2025-04-17T11:54:13.531Z', 'createByContainer');
 
     expect(screen.getByTestId('createByContainer')).toHaveTextContent(
       'Created by: elastic on Apr 17, 2025 @ 11:54:13.531'
