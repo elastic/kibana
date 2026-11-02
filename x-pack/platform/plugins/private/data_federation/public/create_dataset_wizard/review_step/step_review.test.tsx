@@ -168,7 +168,7 @@ describe('StepReview', () => {
     });
 
     expect(getByTestId('createDatasetWizardReview-schema_mapping_mode')).toHaveTextContent(
-      'Use mapped fields onlyCustom'
+      'Manual schema definitionCustom'
     );
     expect(queryByTestId('createDatasetWizardReview-schema_resolution')).toBeNull();
     expect(getByTestId('createDatasetWizardReview-mapped_fields')).toHaveTextContent(

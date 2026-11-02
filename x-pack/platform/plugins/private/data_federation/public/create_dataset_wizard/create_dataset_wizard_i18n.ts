@@ -60,7 +60,8 @@ export const createDatasetWizardStrings = {
   defineSchemaRequiresFieldError: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.defineSchemaRequiresField',
     {
-      defaultMessage: 'When Use mapped fields only is selected, you must map at least one field.',
+      defaultMessage:
+        'When Manual schema definition is selected, you must define at least one field.',
     }
   ),
   configureSchemaResolutionOptional: i18n.translate(
@@ -148,7 +149,7 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'Auto schema discovery',
   }),
   defineSchemaLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaLabel', {
-    defaultMessage: 'Use mapped fields only',
+    defaultMessage: 'Manual schema definition',
   }),
   mappedFieldsLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappedFieldsLabel', {
     defaultMessage: 'Mapped fields',
