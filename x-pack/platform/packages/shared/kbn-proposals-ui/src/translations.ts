@@ -11,11 +11,11 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   approve: i18n.translate('xpack.proposals.approvalModal.approve', {
     defaultMessage: 'Approve',
   }),
-  /** The single decision a to-do proposal offers: the human confirms they carried it out. */
+  /** To-do primary: analyst confirms they carried it out. */
   markApplied: i18n.translate('xpack.proposals.approvalModal.markApplied', {
     defaultMessage: 'Mark as applied',
   }),
-  /** Takes back a to-do proposal's "Mark as applied", re-offering it. */
+  /** Re-offers a marked-applied to-do. */
   markNotApplied: i18n.translate('xpack.proposals.approvalModal.markNotApplied', {
     defaultMessage: 'Mark as not applied',
   }),
@@ -51,7 +51,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
     defaultMessage: 'Approved',
   }),
-  /** A to-do proposal the analyst marked as applied: they carried it out, nothing automated ran. */
+  /** To-do the analyst marked as applied (nothing automated ran). */
   markedAppliedBadge: i18n.translate('xpack.proposals.approvalModal.markedAppliedBadge', {
     defaultMessage: 'Applied',
   }),
@@ -92,7 +92,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     'xpack.proposals.approvalModal.outcome.markedAppliedTitle',
     { defaultMessage: 'Marked as applied' }
   ),
-  /** The caption's name for the to-do category (not sentence-cased "Todo"). */
+  /** Caption label for `todo` (avoids sentence-cased "Todo"). */
   todoCategory: i18n.translate('xpack.proposals.approvalModal.caption.todoCategory', {
     defaultMessage: 'Apply manually',
   }),

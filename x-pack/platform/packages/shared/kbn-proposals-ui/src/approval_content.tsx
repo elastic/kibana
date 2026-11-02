@@ -62,31 +62,23 @@ export interface ApprovalContentProps {
    */
   readOnly?: boolean;
   /**
-   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve" ("Mark as applied" for a
-   * to-do proposal, see `isTodoProposal`), disabled once the
-   * proposal has expired — both derived here rather than supplied by the caller, so every host's
-   * Approve button behaves and reads identically. Omit for a host that cannot record an approval,
-   * which hides the button entirely rather than leaving it inert.
+   * Approves the proposal. Label is "Approve", or "Mark as applied" for a to-do
+   * (`isTodoProposal`). Disabled when expired. Omit to hide the button.
    */
   onApprove?: () => void | Promise<void>;
-  /** Each entry rendered as an `EuiButtonEmpty`, alongside Approve/Decline. */
+  /** Extra empty buttons beside Approve/Decline. */
   secondaryActions?: ApprovalAction[];
   /**
-   * Enables the built-in decline flow. When set, a "Decline" trigger appears next to the Approve
-   * / "Mark as applied" button; clicking it swaps the body for `DeclineReasonForm` and the footer
-   * for Cancel/Decline, entirely within this component — so a host never renders
-   * `DeclineReasonForm` itself or tracks its own declining mode. The same flow renders identically
-   * whether this is placed inside a modal or an Agent Builder chat card. Disabled whenever the
-   * primary button is.
+   * Built-in Decline flow: shows Decline next to the primary, then swaps in
+   * `DeclineReasonForm` with Cancel/Decline. Disabled with the primary.
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
   /**
-   * Marks a to-do proposal that was marked as applied as not applied again. When set, such a
-   * proposal shows a "Mark as not applied" action in place of the footer it no longer has.
-   * Disabled with `readOnly`; a rejection is shown in the card like a failed decision.
+   * Re-offers a marked-applied to-do ("Mark as not applied").
+   * Disabled when `readOnly`.
    */
   onReopen?: () => Promise<void>;
-  /** Whether this proposal's `onReopen` is in flight, from the host's mutation cache. */
+  /** Whether this proposal's `onReopen` is in flight. */
   isReopening?: boolean;
   /**
    * `core.http.basePath`, so the comment's in-app links (`/app/security/...`) resolve with the
@@ -156,8 +148,6 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
-    // A to-do is the analyst's to carry out: primary is "Mark as applied" instead of Approve, and
-    // Decline still lets them dismiss it without carrying it out.
     const isTodo = isTodoProposal(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
@@ -264,7 +254,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const bannerSuffix = decision?.reason;
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    // Only a human's own "Mark as applied" can be taken back: nothing ran, so nothing is undone.
+    // Only a marked-applied to-do can reopen: nothing automated ran, so undoing is safe.
     const canReopen =
       Boolean(onReopen) && isTodo && !isReplaced && approvalPhase === 'marked_applied';
     const reopenAction: ApprovalAction | undefined =
