@@ -215,7 +215,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           options,
           validate: {
             request: validationObject,
-            response: responses,
+            ...(responses ? { response: responses } : {}),
           },
         },
         wrappedHandler

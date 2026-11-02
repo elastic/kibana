@@ -129,7 +129,7 @@ describe('registerRoutes', () => {
 
     const [versionedRoute] = postAddVersion.mock.calls[0];
     expect(versionedRoute.version).toEqual('version');
-    expect(versionedRoute.validate).toEqual({
+    expect(versionedRoute.validate).toStrictEqual({
       request: noParamsValidationObject,
     });
 
