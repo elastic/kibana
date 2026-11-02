@@ -29,7 +29,7 @@ import { useNotebook } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
 
 const REFRESH_TOOLTIP = i18n.translate('xpack.notebook.header.refreshTooltip', {
-  defaultMessage: 'Rerun time-dependent cells',
+  defaultMessage: 'Run all time-dependent cells',
 });
 
 const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
