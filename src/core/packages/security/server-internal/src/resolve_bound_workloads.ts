@@ -280,14 +280,19 @@ export const createBoundWorkloadResolver = ({
         try {
           details = await callResolver(resolver, workloads, timeoutMs, signal);
         } catch (error) {
-          recordFailure(getErrorType(error));
-          logger.warn(
-            `Unable to resolve ${
-              workloads.length
-            } workload(s) of type [${workloadType}] registered by plugin [${pluginId}]: ${getErrorMessage(
-              error
-            )}`
-          );
+          const errorType = getErrorType(error);
+          recordFailure(errorType);
+          const message = `Unable to resolve ${
+            workloads.length
+          } workload(s) of type [${workloadType}] registered by plugin [${pluginId}]: ${getErrorMessage(
+            error
+          )}`;
+          // The caller asked to stop, so this says nothing about the resolver.
+          if (errorType === 'aborted') {
+            logger.debug(message);
+          } else {
+            logger.warn(message);
+          }
           return;
         }
 

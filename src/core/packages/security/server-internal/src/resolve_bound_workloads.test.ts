@@ -524,6 +524,10 @@ describe('createBoundWorkloadResolver', () => {
         createResolver()([binding('w-1')], { signal: controller.signal })
       ).resolves.toEqual([{ status: 'unknown' }]);
       expect(resolveWorkloads).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Unable to resolve 1 workload(s) of type [workflow] registered by plugin [workflows]: Aborted before the call.'
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('aborts the resolver signal, answers unknown and ignores a late answer', async () => {
@@ -548,6 +552,10 @@ describe('createBoundWorkloadResolver', () => {
 
       expect(resolverSignal?.aborted).toBe(true);
       expect(result).toEqual([{ status: 'unknown' }]);
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Unable to resolve 1 workload(s) of type [workflow] registered by plugin [workflows]: Aborted by the caller.'
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
       expect(meterMock.recorded(UNKNOWN)).toEqual([
         [
           1,
