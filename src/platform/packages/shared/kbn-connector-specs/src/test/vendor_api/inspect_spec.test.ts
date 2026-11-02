@@ -117,6 +117,43 @@ const document: OpenApiDocument = {
   },
 };
 
+describe('a path item with a $ref', () => {
+  const responses = { '200': { description: 'ok' } };
+  const withSiblings = {
+    openapi: '3.1.0',
+    paths: {
+      '/mixed': { $ref: '#/components/pathItems/Alias', post: { responses } },
+    },
+    components: {
+      pathItems: {
+        Alias: { $ref: '#/components/pathItems/Shared' },
+        Shared: { get: { responses }, post: { deprecated: true, responses } },
+      },
+    },
+  };
+
+  it('lists the operations next to the $ref, through a chain of refs', () => {
+    expect(listOperations(withSiblings)).toEqual([
+      { method: 'get', path: '/mixed' },
+      { method: 'post', path: '/mixed' },
+    ]);
+  });
+
+  it('describes them', () => {
+    expect(describeOperation(withSiblings, { method: 'post', path: '/mixed' })).toMatchObject({
+      operation: 'POST /mixed',
+    });
+  });
+
+  it('stops at a cycle of refs', () => {
+    const cyclic = {
+      openapi: '3.1.0',
+      paths: { '/loop': { $ref: '#/paths/~1loop' } },
+    };
+    expect(listOperations(cyclic)).toEqual([]);
+  });
+});
+
 describe('listOperations', () => {
   it('lists every operation, following path item refs', () => {
     expect(listOperations(document)).toEqual([

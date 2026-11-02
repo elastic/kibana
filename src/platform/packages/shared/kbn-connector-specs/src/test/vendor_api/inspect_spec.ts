@@ -9,7 +9,13 @@
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
 import type { JsonObject } from './json_pointer';
-import { getAtTokens, isJsonObject, localRefToPointer, toTokens } from './json_pointer';
+import {
+  getAtTokens,
+  isJsonObject,
+  localRefToPointer,
+  resolvePathItem,
+  toTokens,
+} from './json_pointer';
 import { assessPagination } from './propose_pagination';
 
 const METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'] as const;
@@ -257,7 +263,7 @@ const pathItemEntries = (document: OpenApiDocument): Array<[string, unknown]> =>
 /** Lists every operation in an OpenAPI 3.x document, in document order. */
 export const listOperations = (document: OpenApiDocument): OperationSummary[] => {
   return pathItemEntries(document).flatMap(([path, value]) => {
-    const pathItem = resolveObject(document, value);
+    const pathItem = resolveObject(document, resolvePathItem(document, value));
     return METHODS.flatMap((method) => {
       const operation = pathItem[method];
       if (!isJsonObject(operation)) {
@@ -317,7 +323,7 @@ export const describeOperation = (
 ): JsonObject | undefined => {
   const pathItem = resolveObject(
     document,
-    pathItemEntries(document).find(([key]) => key === path)?.[1]
+    resolvePathItem(document, pathItemEntries(document).find(([key]) => key === path)?.[1])
   );
   const operation = pathItem[method];
   if (!isJsonObject(operation)) {
