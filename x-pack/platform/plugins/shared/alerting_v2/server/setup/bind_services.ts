@@ -137,19 +137,17 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClientOptionsToken).toConstantValue({});
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
-    .toDynamicValue(({ get }) => {
-      const request = get(Request);
-      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
-      return spaces.spacesService.getSpaceId(request);
-    })
+    .toResolvedValue(
+      (request, spaces) => spaces.spacesService.getSpaceId(request),
+      [Request, PluginStart<AlertingServerStartDependencies['spaces']>('spaces')]
+    )
     .inRequestScope();
   bind(ActionPolicyNamespaceToken)
-    .toDynamicValue(({ get }) => {
-      const request = get(Request);
-      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
-      const spaceId = spaces.spacesService.getSpaceId(request);
-      return spaces.spacesService.spaceIdToNamespace(spaceId);
-    })
+    .toResolvedValue(
+      (request, spaces) =>
+        spaces.spacesService.spaceIdToNamespace(spaces.spacesService.getSpaceId(request)),
+      [Request, PluginStart<AlertingServerStartDependencies['spaces']>('spaces')]
+    )
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
@@ -165,11 +163,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerServiceToken).toService(LoggerService);
 
   bind(ChangeHistoryClientToken)
-    .toDynamicValue(({ get }) => {
-      const logger = get(Logger).get('rule_changes_history');
-      const { version: kibanaVersion } = get(PluginInitializer('env')).packageInfo;
-      return createChangeHistoryClient({ logger, kibanaVersion });
-    })
+    .toResolvedValue(
+      (logger, env) =>
+        createChangeHistoryClient({
+          logger: logger.get('rule_changes_history'),
+          kibanaVersion: env.packageInfo.version,
+        }),
+      [Logger, PluginInitializer('env')]
+    )
     .inSingletonScope();
   bind(RuleChangesHistoryService).toSelf().inSingletonScope();
   bind(RuleChangesHistoryServiceToken).toService(RuleChangesHistoryService);
@@ -177,12 +178,11 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RuleChangesHistoryClientToken).toService(RuleChangesHistoryClient);
 
   bind(UiSettingsClientToken)
-    .toDynamicValue(({ get }) => {
-      const savedObjects = get(CoreStart('savedObjects'));
-      const uiSettings = get(CoreStart('uiSettings'));
-      const internalSoClient = savedObjects.createInternalRepository();
-      return uiSettings.globalAsScopedToClient(internalSoClient);
-    })
+    .toResolvedValue(
+      (savedObjects, uiSettings) =>
+        uiSettings.globalAsScopedToClient(savedObjects.createInternalRepository()),
+      [CoreStart('savedObjects'), CoreStart('uiSettings')]
+    )
     .inSingletonScope();
   bind(SettingsService).toSelf().inRequestScope();
   bind(SettingsServiceToken).toService(SettingsService);
@@ -206,28 +206,27 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
-    .toDynamicValue(({ get }) => {
-      const elasticsearch = get(CoreStart('elasticsearch'));
-      return elasticsearch.client.asInternalUser;
-    })
+    .toResolvedValue(
+      (elasticsearch) => elasticsearch.client.asInternalUser,
+      [CoreStart('elasticsearch')]
+    )
     .inSingletonScope();
 
   bind(EsServiceScopedToken)
-    .toDynamicValue(({ get }) => {
-      const request = get(Request);
-      const elasticsearch = get(CoreStart('elasticsearch'));
-      return elasticsearch.client.asScoped(request).asCurrentUser;
-    })
+    .toResolvedValue(
+      (request, elasticsearch) => elasticsearch.client.asScoped(request).asCurrentUser,
+      [Request, CoreStart('elasticsearch')]
+    )
     .inRequestScope();
 
   bind(EsServiceScopedSpaceRoutingToken)
-    .toDynamicValue(({ get }) => {
-      const request = get(Request);
-      const elasticsearch = get(CoreStart('elasticsearch'));
-      // `projectRouting: 'space'` scopes rule-execution queries to the originating space/project
-      // when CPS is enabled, matching alerting v1 behavior. Only `asCurrentUser` honors the option.
-      return elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
-    })
+    .toResolvedValue(
+      (request, elasticsearch) =>
+        // `projectRouting: 'space'` scopes rule-execution queries to the originating space/project
+        // when CPS is enabled, matching alerting v1 behavior. Only `asCurrentUser` honors the option.
+        elasticsearch.client.asScoped(request, { projectRouting: 'space' }).asCurrentUser,
+      [Request, CoreStart('elasticsearch')]
+    )
     .inRequestScope();
 
   // Task Manager is a dependency of this plugin, so it can begin polling and run
@@ -266,38 +265,40 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesSavedObjectService).toSelf().inRequestScope();
   bind(RulesSavedObjectServiceScopedToken).toService(RulesSavedObjectService);
   bind(RulesSavedObjectServiceInternalToken)
-    .toDynamicValue(({ get }) => {
-      const savedObjects = get(CoreStart('savedObjects'));
-      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
-      const internalClient = savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]);
-      return new RulesSavedObjectService(internalClient, spaces);
-    })
+    .toResolvedValue(
+      (savedObjects, spaces) =>
+        new RulesSavedObjectService(
+          savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]),
+          spaces
+        ),
+      [CoreStart('savedObjects'), PluginStart<AlertingServerStartDependencies['spaces']>('spaces')]
+    )
     .inSingletonScope();
 
   bind(MaintenanceWindowSavedObjectsClientToken)
-    .toDynamicValue(({ get }) => {
-      const savedObjects = get(CoreStart('savedObjects'));
-      return savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]);
-    })
+    .toResolvedValue(
+      (savedObjects) =>
+        savedObjects.createInternalRepository([MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE]),
+      [CoreStart('savedObjects')]
+    )
     .inSingletonScope();
 
   bind(MaintenanceWindowServiceInternalToken)
-    .toDynamicValue(({ get }) => {
-      const client = get(MaintenanceWindowSavedObjectsClientToken);
-      const logger = get(LoggerServiceToken);
-      return new MaintenanceWindowService(client, logger);
-    })
+    .toResolvedValue(
+      (client, logger) => new MaintenanceWindowService(client, logger),
+      [MaintenanceWindowSavedObjectsClientToken, LoggerServiceToken]
+    )
     .inSingletonScope();
 
   bind(EncryptedSavedObjectsClientToken)
-    .toDynamicValue(({ get }) => {
-      const eso = get(
+    .toResolvedValue(
+      (eso) => eso.getClient({ includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE] }),
+      [
         PluginStart<AlertingServerStartDependencies['encryptedSavedObjects']>(
           'encryptedSavedObjects'
-        )
-      );
-      return eso.getClient({ includedHiddenTypes: [ACTION_POLICY_SAVED_OBJECT_TYPE] });
-    })
+        ),
+      ]
+    )
     .inSingletonScope();
 
   bind(ActionPolicySavedObjectsClientToken)
@@ -313,22 +314,26 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(ActionPolicySavedObjectService).toSelf().inRequestScope();
   bind(ActionPolicySavedObjectServiceScopedToken).toService(ActionPolicySavedObjectService);
   bind(ActionPolicySavedObjectServiceInternalToken)
-    .toDynamicValue(({ get }) => {
-      const savedObjects = get(CoreStart('savedObjects'));
-      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
-      const internalClient = savedObjects.createInternalRepository([
-        ACTION_POLICY_SAVED_OBJECT_TYPE,
-      ]);
-      const esoClient = get(EncryptedSavedObjectsClientToken);
-      return new ActionPolicySavedObjectService(internalClient, spaces, esoClient);
-    })
+    .toResolvedValue(
+      (savedObjects, spaces, esoClient) =>
+        new ActionPolicySavedObjectService(
+          savedObjects.createInternalRepository([ACTION_POLICY_SAVED_OBJECT_TYPE]),
+          spaces,
+          esoClient
+        ),
+      [
+        CoreStart('savedObjects'),
+        PluginStart<AlertingServerStartDependencies['spaces']>('spaces'),
+        EncryptedSavedObjectsClientToken,
+      ]
+    )
     .inSingletonScope();
 
   bind(ApiKeyServiceSavedObjectsClientToken)
-    .toDynamicValue(({ get }) => {
-      const savedObjects = get(CoreStart('savedObjects'));
-      return savedObjects.createInternalRepository([API_KEY_PENDING_INVALIDATION_TYPE]);
-    })
+    .toResolvedValue(
+      (savedObjects) => savedObjects.createInternalRepository([API_KEY_PENDING_INVALIDATION_TYPE]),
+      [CoreStart('savedObjects')]
+    )
     .inSingletonScope();
 
   // Singleton so the feature flag is subscribed to once per process, and every
@@ -337,55 +342,51 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(EsqlResponseFormatServiceToken).toService(EsqlResponseFormatService);
 
   bind(QueryServiceScopedToken)
-    .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerServiceToken);
-      const esClient = get(EsServiceScopedToken);
-      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
-    })
+    .toResolvedValue(
+      (loggerService, esClient, format) => new QueryService(esClient, loggerService, format),
+      [LoggerServiceToken, EsServiceScopedToken, EsqlResponseFormatServiceToken]
+    )
     .inRequestScope();
 
+  // Rule-execution queries run against user data and must respect the space project routing.
   bind(QueryServiceScopedSpaceRoutingToken)
-    .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerServiceToken);
-      // Rule-execution queries run against user data and must respect the space project routing.
-      const esClient = get(EsServiceScopedSpaceRoutingToken);
-      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
-    })
+    .toResolvedValue(
+      (loggerService, esClient, format) => new QueryService(esClient, loggerService, format),
+      [LoggerServiceToken, EsServiceScopedSpaceRoutingToken, EsqlResponseFormatServiceToken]
+    )
     .inRequestScope();
 
   bind(QueryServiceInternalToken)
-    .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerServiceToken);
-      const esClient = get(EsServiceInternalToken);
-      return new QueryService(esClient, loggerService, get(EsqlResponseFormatServiceToken));
-    })
+    .toResolvedValue(
+      (loggerService, esClient, format) => new QueryService(esClient, loggerService, format),
+      [LoggerServiceToken, EsServiceInternalToken, EsqlResponseFormatServiceToken]
+    )
     .inSingletonScope();
 
   bind(StorageServiceScopedToken)
-    .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerServiceToken);
-      const esClient = get(EsServiceScopedToken);
-      return new StorageService(esClient, loggerService);
-    })
+    .toResolvedValue(
+      (loggerService, esClient) => new StorageService(esClient, loggerService),
+      [LoggerServiceToken, EsServiceScopedToken]
+    )
     .inRequestScope();
 
   bind(StorageServiceInternalToken)
-    .toDynamicValue(({ get }) => {
-      const loggerService = get(LoggerServiceToken);
-      const esClient = get(EsServiceInternalToken);
-      return new StorageService(esClient, loggerService);
-    })
+    .toResolvedValue(
+      (loggerService, esClient) => new StorageService(esClient, loggerService),
+      [LoggerServiceToken, EsServiceInternalToken]
+    )
     .inSingletonScope();
 
   bind(WorkflowsManagementApiToken)
-    .toDynamicValue(({ get }) => {
-      const wfm = get(
-        PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
-      );
-      return wfm.management;
-    })
+    .toResolvedValue(
+      (wfm) => wfm.management,
+      [PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')]
+    )
     .inSingletonScope();
 
+  // `cloud` is an optional plugin dependency. Expressing an optional single
+  // dependency is idiomatic with `get(token, { optional: true })`, so this
+  // binding intentionally stays on `toDynamicValue`.
   bind(KibanaBaseUrlToken)
     .toDynamicValue(({ get }) => {
       const http = get(CoreStart('http'));
