@@ -13,10 +13,10 @@ import {
   EuiMarkdownFormat,
   getDefaultEuiMarkdownProcessingPlugins,
   useEuiTheme,
-  type IconType,
 } from '@elastic/eui';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApprovalOutcomeBanner } from './approval_outcome';
+import { InlineCalloutTitle } from './inline_callout_title';
 import { createMarkdownLink } from './markdown_link';
 
 interface ApprovalContentBodyProps {
@@ -26,7 +26,7 @@ interface ApprovalContentBodyProps {
   comment?: string;
   /** `undefined` for a still-pending decision, which has no outcome to report yet. */
   banner?: ApprovalOutcomeBanner;
-  /** Appended to the banner title after a ` • `, e.g. a decline's reason. */
+  /** Appended to the banner title after a ` • `: who decided and when, then any reason. */
   bannerSuffix?: React.ReactNode;
   /** A rejected `primaryAction`/`onDismiss` call, surfaced here rather than thrown away. */
   actionError?: string;
@@ -48,9 +48,6 @@ const buildProcessingPluginList = (basePath?: IBasePath) => {
   return plugins;
 };
 
-const bannerIconFor = (color: 'success' | 'primary' | 'danger'): IconType =>
-  color === 'success' ? 'check' : color === 'danger' ? 'warning' : 'clock';
-
 /**
  * The scrollable middle of `ApprovalContent`: the proposal's comment, its outcome banner once
  * decided or deciding, and a transient action error. Grouped into one scrolling region so the
@@ -69,6 +66,13 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
   }) => {
     const { euiTheme } = useEuiTheme();
     const processingPluginList = useMemo(() => buildProcessingPluginList(basePath), [basePath]);
+
+    // Declining with no banner or error leaves nothing to show, so no empty padded box sits
+    // between the header and the reason form.
+    const hasContent = (mode === 'view' && comment !== undefined) || banner || actionError;
+    if (!hasContent) {
+      return null;
+    }
 
     return (
       <div
@@ -99,22 +103,9 @@ export const ApprovalContentBody = memo<ApprovalContentBodyProps>(
             announceOnMount
             size="s"
             color={banner.color}
-            iconType={banner.isLoading ? EuiLoadingSpinner : bannerIconFor(banner.color)}
-            title={
-              // The reason suffix reads as detail, not part of the state word itself — the
-              // callout's own title styling would otherwise bold all of it.
-              bannerSuffix ? (
-                <>
-                  {banner.title}
-                  <span css={css({ fontWeight: euiTheme.font.weight.regular })}>
-                    {' • '}
-                    {bannerSuffix}
-                  </span>
-                </>
-              ) : (
-                banner.title
-              )
-            }
+            // Undefined keeps EUI's own icon for the colour; only the loader is custom.
+            iconType={banner.isLoading ? EuiLoadingSpinner : undefined}
+            title={<InlineCalloutTitle title={banner.title} description={bannerSuffix} />}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-outcome` : undefined}
           />
         )}
