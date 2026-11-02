@@ -236,3 +236,28 @@ describe('getGeoJsonWithMeta', () => {
     expect(mockSearch.mock.calls[0][0].params.params).toEqual([{ _geotile_precision: 9 }]);
   });
 });
+
+describe('getSyncMeta', () => {
+  const createSource = (esql: string) =>
+    new ESQLSource({
+      esql,
+      geoField: 'geo.coordinates',
+      narrowByGlobalSearch: false,
+      narrowByMapBounds: false,
+      narrowByGlobalTime: false,
+    });
+  const GEOTILE_ESQL =
+    'FROM logs | STATS count = COUNT(*) BY ST_GEOTILE(geo.coordinates, ?_geotile_precision)';
+
+  test('should include geotilePrecision derived from zoom when the query uses ?_geotile_precision', () => {
+    const source = createSource(GEOTILE_ESQL);
+    expect(source.getSyncMeta({ zoom: 4.2 } as any).geotilePrecision).toBe(9);
+    expect(source.getSyncMeta({ zoom: 4.9 } as any).geotilePrecision).toBe(9);
+    expect(source.getSyncMeta({ zoom: 5.1 } as any).geotilePrecision).toBe(10);
+  });
+
+  test('should not include geotilePrecision when the query does not use ?_geotile_precision', () => {
+    const source = createSource('FROM logs');
+    expect(source.getSyncMeta({ zoom: 4.2 } as any)).not.toHaveProperty('geotilePrecision');
+  });
+});
