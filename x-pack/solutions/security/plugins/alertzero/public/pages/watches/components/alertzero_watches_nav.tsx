@@ -24,6 +24,8 @@ import {
 import { ALERTZERO_WATCHES_SUBNAV_WIDTH } from '../../../components/layout/constants';
 // Shared with the deep-link registry, which is page-load critical — see the note on their definition.
 import { useWatches } from '../../../hooks/use_watches_api';
+import { HUNT_LIBRARY_PATH, HUNT_LIBRARY_SECTION_ID } from '../../hunt_library/paths';
+import * as huntLibraryI18n from '../../hunt_library/translations';
 import * as i18n from '../translations';
 
 /**
@@ -112,6 +114,9 @@ export const AlertZeroWatchesNav: React.FC<AlertZeroWatchesNavProps> = ({ active
             ))}
           </EuiListGroup>
         )}
+        <EuiListGroup maxWidth={false}>
+          <HuntLibraryNavItem isActive={active === HUNT_LIBRARY_SECTION_ID} />
+        </EuiListGroup>
       </div>
     </aside>
   );
@@ -163,6 +168,20 @@ const WatchNavItem: React.FC<{ watch: Watch; isActive: boolean }> = ({ watch, is
       isActive={isActive}
       onClick={() => history.push(path)}
       data-test-subj={`alertZeroWatchesSubnav-${watch.id}`}
+      aria-current={isActive ? 'page' : undefined}
+    />
+  );
+};
+
+const HuntLibraryNavItem: React.FC<{ isActive: boolean }> = ({ isActive }) => {
+  const history = useHistory();
+  return (
+    <EuiListGroupItem
+      label={huntLibraryI18n.PAGE_TITLE}
+      iconType="crosshair"
+      isActive={isActive}
+      onClick={() => history.push(HUNT_LIBRARY_PATH)}
+      data-test-subj="alertZeroWatchesSubnav-huntLibrary"
       aria-current={isActive ? 'page' : undefined}
     />
   );

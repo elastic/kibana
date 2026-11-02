@@ -64,6 +64,13 @@ export const queryKeys = {
     all: ['alertzero', 'hunt-worker-index-coverage'] as const,
     coverage: () => [...queryKeys.huntWorkerIndexCoverage.all, 'coverage'] as const,
   },
+  /** Curated Hunt Library catalog and per-hunt detail, each with availability. */
+  huntLibrary: {
+    all: ['alertzero', 'hunt-library'] as const,
+    list: () => [...queryKeys.huntLibrary.all, 'list'] as const,
+    detail: (huntId: string | undefined) =>
+      [...queryKeys.huntLibrary.all, 'detail', huntId] as const,
+  },
   workerDependencies: {
     alertAnalysisSetting: (spaceBasePath: string, cachedValue: boolean) =>
       [

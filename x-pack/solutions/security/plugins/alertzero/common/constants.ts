@@ -26,6 +26,7 @@ export {
   FIND_OR_CREATE_INVESTIGATION_URL,
   WRITE_HUNT_EVIDENCE_URL,
 } from '@kbn/alertzero-common';
+import { HUNT_INTERNAL_ROUTE_BASE as HUNT_BASE } from '@kbn/alertzero-common';
 
 /** API privilege for read-only AlertZero internal routes. */
 export const ALERTZERO_API_PRIVILEGE_READ = 'alertzero_read' as const;
@@ -73,3 +74,6 @@ export const HUNT_INVESTIGATION_ID_NAMESPACE = 'hunt:report:' as const;
  * writes are always space-scoped to the caller's concrete space, never this sentinel.
  */
 export const HUNT_GLOBAL_SPACE_ID = '*' as const;
+
+/** Read API for the curated Hunt Library catalog: list, and detail at `/{id}`. */
+export const HUNT_LIBRARY_URL = `${HUNT_BASE}/library` as const;

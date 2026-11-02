@@ -27,6 +27,7 @@ import { registerListActionsRoute } from './actions/list_actions';
 import { registerGetInvestigationsCountRoute } from './investigations/get_investigations_count';
 import { registerGetScanFailuresRoute } from './scan_failures/get_scan_failures';
 import { registerHuntRoutes } from './hunt/register_hunt_routes';
+import { registerHuntLibraryRoutes } from './hunt_library/hunt_library_routes';
 
 export interface RouteDependencies {
   router: AlertZeroRouter;
@@ -60,4 +61,5 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerGetInvestigationsCountRoute(deps);
   registerGetScanFailuresRoute(deps);
   registerHuntRoutes(deps);
+  registerHuntLibraryRoutes(deps);
 };
