@@ -196,7 +196,16 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         access,
         summary: options.summary,
         description: options.description,
-        options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
+        operationId: options.operationId,
+        options: omit(
+          options,
+          'access',
+          'description',
+          'summary',
+          'operationId',
+          'deprecated',
+          'discontinued'
+        ),
         security,
       }).addVersion(
         {
