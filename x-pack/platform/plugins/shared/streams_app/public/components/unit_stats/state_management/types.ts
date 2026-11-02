@@ -43,7 +43,7 @@ export interface StatsComponents {
   processor: ComponentRecord<ProcessorStatsView>;
 }
 
-/** One request, for the window that was resolved at the flush. At most `MAX_STREAMS_UNIT_STATS_COMPONENTS`. */
+/** One request, for the window that was resolved at the flush. The stats client splits a large one. */
 export interface StatsBatch {
   window: StatsWindow;
   components: StreamsUnit.StatsComponentRef[];

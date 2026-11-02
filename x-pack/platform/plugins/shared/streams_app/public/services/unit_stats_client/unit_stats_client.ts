@@ -8,8 +8,9 @@
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { mapStatsResponse } from './map_stats_response';
-import type { StatsFetchRequest, UnitStatsClient } from './types';
+import { chunk } from 'lodash';
+import { mapFailedRequest, mapStatsResponse } from './map_stats_response';
+import type { MappedStatsResponse, StatsFetchRequest, UnitStatsClient } from './types';
 
 // `as const` keeps the literal type, which the route repository client uses to type the call.
 const UNIT_STATS_ENDPOINT = 'POST /internal/streams/unit/{id}/_stats' as const;
@@ -25,9 +26,18 @@ export const buildStatsRequestBody = ({
     : {}),
 });
 
+export const toFailureReason = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 /**
- * An HTTP error of the whole request is thrown as the repository client raises it. An abort
- * rejects too, so the caller decides from its own signal whether it is an error.
+ * Takes any number of components and sends them in requests of at most the limit of the route,
+ * one after another. The caller sees one response.
+ *
+ * - A group that fails gives its components an error, and the other groups still count.
+ * - It throws, as the repository client raises it, only when no group succeeded. With a single
+ *   group that is a failed request.
+ * - An abort rejects, and no further group is sent. The caller decides from its own signal whether
+ *   it is an error.
  */
 export const createUnitStatsClient = ({
   streamsRepositoryClient,
@@ -37,17 +47,40 @@ export const createUnitStatsClient = ({
   unitId: string;
 }): UnitStatsClient => ({
   fetchStats: async (request, { signal }) => {
-    if (request.components.length > MAX_STREAMS_UNIT_STATS_COMPONENTS) {
-      throw new Error(
-        `A stats request takes at most ${MAX_STREAMS_UNIT_STATS_COMPONENTS} components, got ${request.components.length}`
-      );
+    // An empty list is still one request, which gives the window of the response.
+    const groups = chunk(request.components, MAX_STREAMS_UNIT_STATS_COMPONENTS);
+    const responses: MappedStatsResponse[] = [];
+    const failures: Array<Pick<MappedStatsResponse, 'destinations' | 'processors'>> = [];
+    let firstError: unknown;
+
+    for (const components of groups.length > 0 ? groups : [[]]) {
+      signal.throwIfAborted();
+      try {
+        const response = await streamsRepositoryClient.fetch(UNIT_STATS_ENDPOINT, {
+          params: {
+            path: { id: unitId },
+            body: buildStatsRequestBody({ components, window: request.window }),
+          },
+          signal,
+        });
+        responses.push(mapStatsResponse(response, components));
+      } catch (error) {
+        if (signal.aborted) {
+          throw error;
+        }
+        firstError ??= error;
+        failures.push(mapFailedRequest(components, toFailureReason(error)));
+      }
     }
 
-    const response = await streamsRepositoryClient.fetch(UNIT_STATS_ENDPOINT, {
-      params: { path: { id: unitId }, body: buildStatsRequestBody(request) },
-      signal,
-    });
+    if (responses.length === 0) {
+      throw firstError;
+    }
 
-    return mapStatsResponse(response, request.components);
+    return {
+      destinations: Object.assign({}, ...[...responses, ...failures].map((r) => r.destinations)),
+      processors: Object.assign({}, ...[...responses, ...failures].map((r) => r.processors)),
+      window: responses[0].window,
+    };
   },
 });

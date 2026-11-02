@@ -11,6 +11,7 @@ import {
   streamsUnitStatsRequestSchema,
 } from '@kbn/streams-schema';
 import { STATS_FIXTURE_RESPONSES } from './fixture_unit_stats_client';
+import { STATS_REQUEST_FAILED_ERROR_CODE } from './map_stats_response';
 import { buildStatsRequestBody, createUnitStatsClient } from './unit_stats_client';
 
 const UNIT_ID = 'unit-under-test';
@@ -122,34 +123,96 @@ describe('createUnitStatsClient', () => {
     expect(controller.signal.aborted).toBe(true);
   });
 
-  it('rejects before a call when a request names more components than one request allows', async () => {
-    const fetch = jest.fn();
-    const tooMany: StreamsUnit.StatsComponentRef[] = Array.from(
-      { length: MAX_STREAMS_UNIT_STATS_COMPONENTS + 1 },
-      (_, index) => ({ kind: 'destination', id: `destination-${index}` })
-    );
+  describe('a request of many components', () => {
+    const destinations = (count: number): StreamsUnit.StatsComponentRef[] =>
+      Array.from({ length: count }, (_, index) => ({
+        kind: 'destination',
+        id: `destination-${index}`,
+      }));
 
-    await expect(
+    const fetchMany = (fetch: jest.Mock, count: number, signal = new AbortController().signal) =>
       createClient(fetch).fetchStats(
-        { components: tooMany, window: { kind: 'default' } },
-        { signal: new AbortController().signal }
-      )
-    ).rejects.toThrow(`at most ${MAX_STREAMS_UNIT_STATS_COMPONENTS} components`);
-    expect(fetch).not.toHaveBeenCalled();
-  });
+        { components: destinations(count), window: { kind: 'default' } },
+        { signal }
+      );
 
-  it('accepts a request of exactly the limit', async () => {
-    const fetch = jest.fn().mockResolvedValue(STATS_FIXTURE_RESPONSES.noData);
-    const atLimit: StreamsUnit.StatsComponentRef[] = Array.from(
-      { length: MAX_STREAMS_UNIT_STATS_COMPONENTS },
-      (_, index) => ({ kind: 'destination', id: `destination-${index}` })
-    );
+    const sizesOfCalls = (fetch: jest.Mock): number[] =>
+      fetch.mock.calls.map(([, { params }]) => params.body.components.length);
 
-    await createClient(fetch).fetchStats(
-      { components: atLimit, window: { kind: 'default' } },
-      { signal: new AbortController().signal }
-    );
+    it('sends exactly the limit as one request', async () => {
+      const fetch = jest.fn().mockResolvedValue(STATS_FIXTURE_RESPONSES.noData);
 
-    expect(fetch).toHaveBeenCalledTimes(1);
+      await fetchMany(fetch, MAX_STREAMS_UNIT_STATS_COMPONENTS);
+
+      expect(sizesOfCalls(fetch)).toEqual([MAX_STREAMS_UNIT_STATS_COMPONENTS]);
+    });
+
+    it('splits it into requests of at most the limit, one after another', async () => {
+      let inFlight = 0;
+      let mostInFlight = 0;
+      const fetch = jest.fn().mockImplementation(async () => {
+        inFlight += 1;
+        mostInFlight = Math.max(mostInFlight, inFlight);
+        await Promise.resolve();
+        inFlight -= 1;
+        return STATS_FIXTURE_RESPONSES.noData;
+      });
+
+      await fetchMany(fetch, 250);
+
+      expect(sizesOfCalls(fetch)).toEqual([100, 100, 50]);
+      expect(mostInFlight).toBe(1);
+    });
+
+    it('merges the requests into one response that holds every component', async () => {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(STATS_FIXTURE_RESPONSES.data)
+        .mockResolvedValue(STATS_FIXTURE_RESPONSES.noData);
+
+      const result = await fetchMany(fetch, 250);
+
+      expect(Object.keys(result.destinations)).toHaveLength(250);
+      expect(result.window).toEqual(STATS_FIXTURE_RESPONSES.data.meta.window);
+    });
+
+    it('keeps the other requests when one fails, and gives its components an error', async () => {
+      const fetch = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('Service Unavailable'))
+        .mockResolvedValue(STATS_FIXTURE_RESPONSES.noData);
+
+      const result = await fetchMany(fetch, 250);
+
+      expect(sizesOfCalls(fetch)).toEqual([100, 100, 50]);
+      expect(result.destinations['destination-0']).toMatchObject({
+        status: 'error',
+        error: { code: STATS_REQUEST_FAILED_ERROR_CODE, reason: 'Service Unavailable' },
+      });
+      expect(result.destinations['destination-99'].status).toBe('error');
+      expect(result.destinations['destination-100'].status).toBe('noData');
+      expect(result.destinations['destination-249'].status).toBe('noData');
+    });
+
+    it('throws the first error when no request succeeded', async () => {
+      const first = new Error('first');
+      const fetch = jest.fn().mockRejectedValueOnce(first).mockRejectedValue(new Error('later'));
+
+      await expect(fetchMany(fetch, 250)).rejects.toBe(first);
+      expect(fetch).toHaveBeenCalledTimes(3);
+    });
+
+    it('sends no further request after an abort, and rejects', async () => {
+      const controller = new AbortController();
+      const fetch = jest.fn().mockImplementation(async () => {
+        controller.abort();
+        throw new DOMException('The request was aborted', 'AbortError');
+      });
+
+      await expect(fetchMany(fetch, 250, controller.signal)).rejects.toMatchObject({
+        name: 'AbortError',
+      });
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
   });
 });

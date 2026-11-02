@@ -16,8 +16,9 @@ import type {
   StatsWindow,
   UnitStatsClient,
 } from '../../../services/unit_stats_client/types';
+import { toFailureReason } from '../../../services/unit_stats_client/unit_stats_client';
 import { STATS_BATCH_DEBOUNCE_MS, STATS_FRESHNESS_MS, STATS_POLL_INTERVAL_MS } from './constants';
-import { isBatchWanted, planBatches } from './stats_batching';
+import { isBatchWanted, planBatch } from './stats_batching';
 import {
   clearValues,
   dropRemovedComponents,
@@ -140,9 +141,6 @@ export interface FetchStatsInput {
   batch: StatsBatch;
 }
 
-export const toFailureReason = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
-
 /**
  * Runs one request. The machine invokes it from the `fetching` state, so leaving that state stops
  * the actor, which aborts the signal and cancels the HTTP call. An abort never reaches the
@@ -169,21 +167,18 @@ const isForcedBy = (event: StatsManagerEvent): boolean =>
   event.type === 'stats.refresh' || event.type === 'stats.poll';
 
 /**
- * The batch to request next, if anything is due. Only the first batch starts. What is left over,
- * such as components that registered while a request was running or the ones over the request
- * limit, stays due, and the machine plans again when the request in flight resolves.
+ * The batch to request next, if anything is due. Components that register while a request is
+ * running stay due, and the machine plans again when the request in flight resolves.
  */
 const planNextBatch = (
   { components, getWindow }: StatsManagerContext,
   event: StatsManagerEvent
-): StatsBatch | undefined => {
-  const [batch] = planBatches(components, getWindow(), {
+): StatsBatch | undefined =>
+  planBatch(components, getWindow(), {
     now: Date.now(),
     freshnessMs: STATS_FRESHNESS_MS,
     force: isForcedBy(event),
   });
-  return batch;
-};
 
 // Machine
 

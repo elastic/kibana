@@ -15,6 +15,9 @@ import type {
 
 const NOT_FOUND_ERROR_CODE = 'not_found';
 
+/** The code of an entry when its whole request failed. Component errors keep the server's code. */
+export const STATS_REQUEST_FAILED_ERROR_CODE = 'request_failed';
+
 const EMPTY_DESTINATION_STATS: DestinationStatsView = {
   eventsRate: null,
   eventsTotal: null,
@@ -93,6 +96,31 @@ const mapProcessorResult = (
 /** An id is user-defined, so `constructor` must not be read from `Object.prototype` as a result. */
 const getOwnResult = <TResult>(results: Record<string, TResult>, id: string): TResult | undefined =>
   Object.hasOwn(results, id) ? results[id] : undefined;
+
+/** What a request that failed gives to each component it asked for: an error with no numbers. */
+export const mapFailedRequest = (
+  requested: StreamsUnit.StatsComponentRef[],
+  reason: string
+): Pick<MappedStatsResponse, 'destinations' | 'processors'> => {
+  const error: StreamsUnit.StatsError = { code: STATS_REQUEST_FAILED_ERROR_CODE, reason };
+  const destinations: MappedStatsResponse['destinations'] = {};
+  const processors: MappedStatsResponse['processors'] = {};
+
+  for (const { kind, id } of requested) {
+    switch (kind) {
+      case 'destination':
+        destinations[id] = { status: 'error', stats: EMPTY_DESTINATION_STATS, error };
+        break;
+      case 'processor':
+        processors[id] = { status: 'error', stats: EMPTY_PROCESSOR_STATS, error };
+        break;
+      default:
+        break;
+    }
+  }
+
+  return { destinations, processors };
+};
 
 /**
  * Converts the response to the view types. Only the requested components are mapped, so a

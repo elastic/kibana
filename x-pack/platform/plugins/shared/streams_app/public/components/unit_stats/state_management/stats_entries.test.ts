@@ -8,9 +8,12 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { STATS_FIXTURE_RESPONSES } from '../../../services/unit_stats_client/fixture_unit_stats_client';
 import type { StatsFixtureScenario } from '../../../services/unit_stats_client/fixture_unit_stats_client';
-import { mapStatsResponse } from '../../../services/unit_stats_client/map_stats_response';
-import type { StatsWindow } from '../../../services/unit_stats_client/types';
-import { STATS_REQUEST_FAILED_ERROR_CODE } from './constants';
+import {
+  STATS_REQUEST_FAILED_ERROR_CODE,
+  mapFailedRequest,
+  mapStatsResponse,
+} from '../../../services/unit_stats_client/map_stats_response';
+import type { MappedStatsResponse, StatsWindow } from '../../../services/unit_stats_client/types';
 import {
   clearValues,
   dropRemovedComponents,
@@ -227,6 +230,69 @@ describe('mergeFetchedStats', () => {
     expect(components.destination['es-prod']).toMatchObject({
       registrants: [],
       entry: { status: 'ready' },
+    });
+  });
+});
+
+describe('mergeFetchedStats for a request that failed', () => {
+  const REASON = 'Service Unavailable';
+  const FAILED_AT = MERGED_AT + 30_000;
+
+  /** What the client gives when a request of the call failed: an error for each of its components. */
+  const failedResponse = (refs: StreamsUnit.StatsComponentRef[]): MappedStatsResponse => ({
+    ...mapFailedRequest(refs, REASON),
+    window: { start: 'start', end: 'end' },
+  });
+
+  it('keeps the value of a component, marked stale, and does not stamp a new time', () => {
+    const fetched = mergeFetchedStats(
+      registerAll(REFS),
+      batchOf(REFS),
+      responseFor('data', REFS),
+      MERGED_AT
+    );
+
+    const components = mergeFetchedStats(fetched, batchOf(REFS), failedResponse(REFS), FAILED_AT);
+
+    expect(components.destination['es-prod']).toEqual({
+      ...fetched.destination['es-prod'],
+      entry: { ...fetched.destination['es-prod'].entry, status: 'stale' },
+    });
+    expect(components.destination['es-prod'].fetchedAt).toBe(MERGED_AT);
+  });
+
+  it('shows an error for a component that has no value', () => {
+    const components = mergeFetchedStats(
+      registerAll(REFS),
+      batchOf(REFS),
+      failedResponse(REFS),
+      FAILED_AT
+    );
+
+    expect(components.destination['es-prod']).toEqual({
+      registrants: ['registrant-destination-es-prod'],
+      entry: { status: 'error', error: { code: STATS_REQUEST_FAILED_ERROR_CODE, reason: REASON } },
+    });
+  });
+
+  it('does not create a component that nobody shows', () => {
+    const components = mergeFetchedStats(EMPTY, batchOf(REFS), failedResponse(REFS), FAILED_AT);
+
+    expect(components).toEqual(EMPTY);
+  });
+
+  it('applies a result next to a failure of the same call', () => {
+    const response: MappedStatsResponse = {
+      ...failedResponse([destination('es-prod')]),
+      processors: responseFor('data', REFS).processors,
+    };
+
+    const components = mergeFetchedStats(registerAll(REFS), batchOf(REFS), response, FAILED_AT);
+
+    expect(components.destination['es-prod'].entry?.status).toBe('error');
+    expect(components.processor['uppercase-message']).toMatchObject({
+      entry: { status: 'ready' },
+      fetchedAt: FAILED_AT,
     });
   });
 });

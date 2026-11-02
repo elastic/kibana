@@ -52,7 +52,7 @@ export interface MappedStatsResponse {
 }
 
 export interface StatsFetchRequest {
-  /** At most `MAX_STREAMS_UNIT_STATS_COMPONENTS`, without duplicates. The manager chunks. */
+  /** Without duplicates. The client sends them in requests of at most the limit of the route. */
   components: StreamsUnit.StatsComponentRef[];
   window: StatsWindow;
 }

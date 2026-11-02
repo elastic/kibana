@@ -6,9 +6,8 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
 import type { DestinationStatsView, StatsWindow } from '../../../services/unit_stats_client/types';
-import { isBatchWanted, planBatches } from './stats_batching';
+import { isBatchWanted, planBatch } from './stats_batching';
 import type { DueOptions } from './stats_batching';
 import { registerComponent, unregisterComponent } from './stats_registration';
 import type { StatsComponents, StatsEntry } from './types';
@@ -25,8 +24,11 @@ const FRESHNESS_MS = 30_000;
 const NOW = 100_000;
 const DUE_OPTIONS: DueOptions = { now: NOW, freshnessMs: FRESHNESS_MS, force: false };
 
-const plan = (components: StatsComponents, options: DueOptions = DUE_OPTIONS) =>
-  planBatches(components, WINDOW, options);
+/** The planned batch as a list, so a test can say "nothing" as `[]` and "a batch" by what it holds. */
+const plan = (components: StatsComponents, options: DueOptions = DUE_OPTIONS) => {
+  const batch = planBatch(components, WINDOW, options);
+  return batch ? [batch] : [];
+};
 
 const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
 const processor = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'processor', id });
@@ -170,13 +172,9 @@ describe('planBatches', () => {
     });
   });
 
-  describe('the window and the request limit', () => {
-    it('gives every batch the window the caller resolved', () => {
-      const refs = Array.from({ length: 250 }, (_, index) => destination(`destination-${index}`));
-      const batches = plan(registerAll(refs));
-
-      expect(batches).toHaveLength(3);
-      expect(batches.every(({ window }) => window === WINDOW)).toBe(true);
+  describe('the window and a large view', () => {
+    it('gives the batch the window the caller resolved', () => {
+      expect(plan(registerAll([destination('es-prod')]))[0].window).toBe(WINDOW);
     });
 
     it('uses the window of each call, so every flush can resolve it again', () => {
@@ -187,36 +185,20 @@ describe('planBatches', () => {
         end: '2026-10-27T12:15:30.000Z',
       };
 
-      expect(planBatches(components, WINDOW, DUE_OPTIONS)[0].window).toBe(WINDOW);
-      expect(planBatches(components, slid, DUE_OPTIONS)[0].window).toBe(slid);
+      expect(planBatch(components, WINDOW, DUE_OPTIONS)?.window).toBe(WINDOW);
+      expect(planBatch(components, slid, DUE_OPTIONS)?.window).toBe(slid);
     });
 
-    it('splits 250 components into batches of at most 100', () => {
-      const refs = Array.from({ length: 250 }, (_, index) => destination(`destination-${index}`));
-      const batches = plan(registerAll(refs));
-
-      expect(batches.map(({ components }) => components.length)).toEqual([100, 100, 50]);
-      expect(Math.max(...batches.map(({ components }) => components.length))).toBe(
-        MAX_STREAMS_UNIT_STATS_COMPONENTS
-      );
-    });
-
-    it('counts destinations and processors together against the limit', () => {
+    it('plans a view of more components than one request takes as one batch', () => {
       const refs = [
         ...Array.from({ length: 150 }, (_, index) => destination(`destination-${index}`)),
         ...Array.from({ length: 150 }, (_, index) => processor(`processor-${index}`)),
       ];
 
-      expect(plan(registerAll(refs)).map(({ components }) => components.length)).toEqual([
-        100, 100, 100,
-      ]);
-    });
+      const batches = plan(registerAll(refs));
 
-    it('requests every component once across the chunks', () => {
-      const refs = Array.from({ length: 250 }, (_, index) => destination(`destination-${index}`));
-      const requested = plan(registerAll(refs)).flatMap(({ components }) => components);
-
-      expect(requested).toEqual(refs);
+      expect(batches).toHaveLength(1);
+      expect(batches[0].components).toEqual(refs);
     });
   });
 });

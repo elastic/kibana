@@ -12,6 +12,3 @@ export const STATS_POLL_INTERVAL_MS = 30_000;
 
 /** A value younger than this is not fetched again when a component registers. */
 export const STATS_FRESHNESS_MS = STATS_POLL_INTERVAL_MS;
-
-/** The code of an entry when the whole request failed. Component errors keep the server's code. */
-export const STATS_REQUEST_FAILED_ERROR_CODE = 'request_failed';

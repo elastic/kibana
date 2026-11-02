@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { MAX_STREAMS_UNIT_STATS_COMPONENTS } from '@kbn/streams-schema';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { chunk } from 'lodash';
 import type { StatsWindow } from '../../../services/unit_stats_client/types';
 import { hasRegistrants, isRegistered } from './stats_registration';
 import type { ComponentRecord, StatsBatch, StatsComponents, StatsComponentState } from './types';
@@ -44,22 +42,22 @@ const collectDueRefs = <TStats>(
     .map(([id]) => ({ kind, id }));
 
 /**
- * The due components, split in chunks of the request limit. Every batch is for the same window,
- * the one the caller resolved for this flush. A component shown by several consumers is one entry,
- * so a processor used in two slots is requested once.
+ * The due components as one batch, or nothing when none is due. The window is the one the caller
+ * resolved for this flush. A component shown by several consumers is one entry, so a processor
+ * used in two slots is requested once. The batch can name more components than one request of the
+ * route takes: the stats client splits it.
  */
-export const planBatches = (
+export const planBatch = (
   components: StatsComponents,
   window: StatsWindow,
   options: DueOptions
-): StatsBatch[] =>
-  chunk(
-    [
-      ...collectDueRefs(components.destination, 'destination', options),
-      ...collectDueRefs(components.processor, 'processor', options),
-    ],
-    MAX_STREAMS_UNIT_STATS_COMPONENTS
-  ).map((batchComponents) => ({ window, components: batchComponents }));
+): StatsBatch | undefined => {
+  const due = [
+    ...collectDueRefs(components.destination, 'destination', options),
+    ...collectDueRefs(components.processor, 'processor', options),
+  ];
+  return due.length > 0 ? { window, components: due } : undefined;
+};
 
 /**
  * A request is wanted while any of its components is still shown. The machine stops a request

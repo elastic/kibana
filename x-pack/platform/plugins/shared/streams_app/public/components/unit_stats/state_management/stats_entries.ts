@@ -11,9 +11,15 @@ import type {
   MappedComponentStats,
   MappedStatsResponse,
 } from '../../../services/unit_stats_client/types';
-import { STATS_REQUEST_FAILED_ERROR_CODE } from './constants';
+import { STATS_REQUEST_FAILED_ERROR_CODE } from '../../../services/unit_stats_client/map_stats_response';
 import { getComponentState, hasRegistrants, pruneUnusedComponents } from './stats_registration';
-import type { ComponentRecord, StatsBatch, StatsComponents, StatsEntry } from './types';
+import type {
+  ComponentRecord,
+  StatsBatch,
+  StatsComponents,
+  StatsComponentState,
+  StatsEntry,
+} from './types';
 
 const LOADING_ENTRY: StatsEntry<never> = { status: 'loading' };
 
@@ -84,6 +90,16 @@ const mergeResultsKind = <TStats>(
     const result = results[id];
     if (!result) continue;
 
+    // The client gives this to the components of a request that failed, while other requests of
+    // the same call worked. It is a failed refresh, not a value, so it is treated like one.
+    if (result.error?.code === STATS_REQUEST_FAILED_ERROR_CODE) {
+      const failed = getComponentState(record, id);
+      if (failed) {
+        next[id] = failedComponentState(failed, result.error.reason);
+      }
+      continue;
+    }
+
     const current = getComponentState(record, id) ?? { registrants: [] };
     const entry: StatsEntry<TStats> = {
       status: result.status,
@@ -120,6 +136,28 @@ export const mergeFetchedStats = (
   };
 };
 
+/**
+ * A component after a request for it failed. A value stays, marked stale. A component without a
+ * value, or with a placeholder, shows an error. A component error stays, because it is a better
+ * reason than a failed refresh, and a value that is already stale stays as it is.
+ */
+const failedComponentState = <TStats>(
+  current: StatsComponentState<TStats>,
+  reason: string
+): StatsComponentState<TStats> => {
+  const { entry } = current;
+  if (!entry || entry.status === 'loading') {
+    return {
+      ...current,
+      entry: { status: 'error', error: { code: STATS_REQUEST_FAILED_ERROR_CODE, reason } },
+    };
+  }
+  if (entry.status === 'ready' || entry.status === 'noData') {
+    return { ...current, entry: { ...entry, status: 'stale' } };
+  }
+  return current;
+};
+
 const markFailedKind = <TStats>(
   record: ComponentRecord<TStats>,
   ids: string[],
@@ -128,16 +166,8 @@ const markFailedKind = <TStats>(
   const next = { ...record };
   for (const id of ids) {
     const current = getComponentState(record, id);
-    if (!current) continue;
-
-    const { entry } = current;
-    if (!entry || entry.status === 'loading') {
-      next[id] = {
-        ...current,
-        entry: { status: 'error', error: { code: STATS_REQUEST_FAILED_ERROR_CODE, reason } },
-      };
-    } else if (entry.status === 'ready' || entry.status === 'noData') {
-      next[id] = { ...current, entry: { ...entry, status: 'stale' } };
+    if (current) {
+      next[id] = failedComponentState(current, reason);
     }
   }
   return next;
