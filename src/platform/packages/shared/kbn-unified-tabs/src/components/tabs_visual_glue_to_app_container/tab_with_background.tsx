@@ -49,7 +49,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           margin: ${euiTheme.size.xs};
           // overlap the container's bottom border so the active tab connects to the content below
           margin-bottom: -${euiTheme.border.width.thin};
-          padding-bottom: ${isDragging ? '0' : euiTheme.size.xs};
+          padding-bottom: ${
+            isDragging ? '0' : `calc(${euiTheme.size.xs} - ${euiTheme.border.width.thin})`
+          };
           // Reserve space for the selected tab's borders so it does not shift layout.
           border-top: ${euiTheme.border.width.thick} solid transparent;
           border-left: ${euiTheme.border.width.thin} solid transparent;

@@ -412,7 +412,7 @@ export function DiscoverLayout() {
       return mathWithUnits(euiTheme.size.xxl, (x) => x * 3);
     }
 
-    return `${TABS_BAR_HEIGHT + 1}px`;
+    return `${TABS_BAR_HEIGHT}px`;
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
   return (

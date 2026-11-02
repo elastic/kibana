@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
-import type { AppHeaderShareAction, AppHeaderTitle } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS, type AppHeaderShareAction, type AppHeaderTitle } from '@kbn/app-header';
 import { DiscoverAppHeader } from '@kbn/app-header/discover';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -115,6 +115,11 @@ export const ChromeAppHeader = ({ menu, share, tabsBar }: ChromeAppHeaderProps) 
     <div // Wrap needed to keep the header border visible when tabs not shown.
       css={css`
         position: relative;
+        height: 100%;
+
+        [data-test-subj='${APP_HEADER_TEST_SUBJECTS.root}'] {
+          height: 100%;
+        }
       `}
     >
       <DiscoverAppHeader
