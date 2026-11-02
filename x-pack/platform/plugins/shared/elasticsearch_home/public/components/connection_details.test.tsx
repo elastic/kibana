@@ -41,14 +41,15 @@ describe('ConnectionDetails', () => {
     expect(screen.getByTestId('elasticsearchHomeCopyEndpointUrl')).toBeInTheDocument();
   });
 
-  it('renders nothing when cloud reports no endpoint', () => {
+  // self-managed deployments have no cloud endpoint, but can still create API keys
+  it('keeps the API key and connection details buttons when cloud reports no endpoint', () => {
     mockUseElasticsearchUrl.mockReturnValue({ url: null, isLoading: false });
 
     renderWithHomeContext(<ConnectionDetails />);
 
-    expect(
-      screen.queryByTestId('elasticsearchHomeConnectionDetailsButton')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('elasticsearchHomeCopyEndpointUrl')).not.toBeInTheDocument();
+    expect(screen.getByTestId('elasticsearchHomeGenerateApiKeyButton')).toBeInTheDocument();
+    expect(screen.getByTestId('elasticsearchHomeConnectionDetailsButton')).toBeInTheDocument();
   });
 
   it('opens the connection details flyout on the API keys tab', async () => {
