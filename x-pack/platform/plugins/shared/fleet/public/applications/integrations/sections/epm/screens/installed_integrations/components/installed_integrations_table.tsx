@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiIconTip,
   EuiBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -176,72 +177,96 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 !isUpcomingDeprecated &&
                 (item.policy_templates || []).some((pt) => !!pt.deprecated);
 
+              const integrationTitle = wrapTitleWithDeprecated({
+                title: item.title,
+                deprecated: isDeprecated,
+              });
+
               return (
-                <EuiLink href={url}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <TableIcon
-                        size="m"
-                        icons={item.icons}
-                        packageName={item.name}
-                        version={item.version}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem
-                      data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
-                      grow={false}
-                    >
-                      {wrapTitleWithDeprecated({ title: item.title, deprecated: isDeprecated })}
-                    </EuiFlexItem>
-                    {(onboardingInstanceCounts.get(item.name) ?? 0) > 0 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge
-                          iconType="layers"
-                          color="hollow"
-                          data-test-subj={`installedIntegrationsTable.collectionBadge.${item.name}`}
-                        >
-                          {i18n.translate('xpack.fleet.epmInstalledIntegrations.collectionBadge', {
-                            defaultMessage: 'Collection',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    )}
-                    {(isDeprecated || isUpcomingDeprecated || hasDeprecatedPolicyTemplates) && (
-                      <EuiFlexItem grow={false}>
-                        <EuiIconTip
-                          type="warning"
-                          color="warning"
-                          content={
-                            isUpcomingDeprecated && item.deprecated?.since
-                              ? i18n.translate(
-                                  'xpack.fleet.installedIntegrations.upcomingDeprecationTooltip',
-                                  {
-                                    defaultMessage:
-                                      'This integration will be deprecated starting from version {version}',
-                                    values: { version: item.deprecated?.since },
-                                  }
-                                )
-                              : isDeprecated
-                              ? i18n.translate(
-                                  'xpack.fleet.installedIntegrations.deprecatedTooltip',
-                                  {
-                                    defaultMessage: 'This integration is deprecated',
-                                  }
-                                )
-                              : hasDeprecatedPolicyTemplates
-                              ? i18n.translate(
-                                  'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
-                                  {
-                                    defaultMessage: 'This integration contains deprecated features',
-                                  }
-                                )
-                              : undefined
-                          }
+                <EuiToolTip
+                  content={integrationTitle}
+                  anchorProps={{ css: { display: 'block', minWidth: 0, maxWidth: '100%' } }}
+                >
+                  <EuiLink href={url} css={{ display: 'block' }}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+                        <TableIcon
+                          size="m"
+                          icons={item.icons}
+                          packageName={item.name}
+                          version={item.version}
                         />
                       </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiLink>
+                      <EuiFlexItem
+                        data-test-subj={`installedIntegrationsTable.integrationNameColumn.${item.name}`}
+                        grow={false}
+                        css={{ minWidth: 0 }}
+                      >
+                        <span
+                          css={{
+                            display: 'block',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {integrationTitle}
+                        </span>
+                      </EuiFlexItem>
+                      {(onboardingInstanceCounts.get(item.name) ?? 0) > 0 && (
+                        <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+                          <EuiBadge
+                            iconType="layers"
+                            color="hollow"
+                            data-test-subj={`installedIntegrationsTable.collectionBadge.${item.name}`}
+                          >
+                            {i18n.translate(
+                              'xpack.fleet.epmInstalledIntegrations.collectionBadge',
+                              {
+                                defaultMessage: 'Collection',
+                              }
+                            )}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                      {(isDeprecated || isUpcomingDeprecated || hasDeprecatedPolicyTemplates) && (
+                        <EuiFlexItem grow={false}>
+                          <EuiIconTip
+                            type="warning"
+                            color="warning"
+                            content={
+                              isUpcomingDeprecated && item.deprecated?.since
+                                ? i18n.translate(
+                                    'xpack.fleet.installedIntegrations.upcomingDeprecationTooltip',
+                                    {
+                                      defaultMessage:
+                                        'This integration will be deprecated starting from version {version}',
+                                      values: { version: item.deprecated?.since },
+                                    }
+                                  )
+                                : isDeprecated
+                                ? i18n.translate(
+                                    'xpack.fleet.installedIntegrations.deprecatedTooltip',
+                                    {
+                                      defaultMessage: 'This integration is deprecated',
+                                    }
+                                  )
+                                : hasDeprecatedPolicyTemplates
+                                ? i18n.translate(
+                                    'xpack.fleet.installedIntegrations.deprecatedPolicyTemplatesTooltip',
+                                    {
+                                      defaultMessage:
+                                        'This integration contains deprecated features',
+                                    }
+                                  )
+                                : undefined
+                            }
+                          />
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiLink>
+                </EuiToolTip>
               );
             },
           },
