@@ -14,6 +14,7 @@ import { EXECUTION_IO_FALLBACK_INDEXES, WORKFLOWS_EXECUTIONS_IO_DATA_STREAM } fr
 import { executionIoId, parseExecutionIoId } from './execution_io_id';
 import type { ExecutionIoType } from './execution_io_id';
 import type { EsExecutionIo } from './types';
+import { WORKFLOWS_EXECUTIONS_INDEX } from '../../constants/execution_indexes';
 import type {
   BulkItemResponse,
   BulkItemResult,
@@ -22,10 +23,8 @@ import type {
 } from '../../types';
 import type { DataStreamMetadataManager } from '../data_stream/data_stream_metadata_manager';
 
-/** IO value submitted for create. The document id and timestamp are assigned by {@link ExecutionsIoDataClient.bulkCreate}. */
-export type ExecutionIoCreateDocument = Omit<EsExecutionIo, 'id' | '@timestamp'> & {
-  '@timestamp'?: string;
-};
+/** IO value submitted for create. The document id is assigned by {@link ExecutionsIoDataClient.bulkCreate}. */
+export type ExecutionIoCreateDocument = Omit<EsExecutionIo, 'id'>;
 
 export interface ExecutionsIoBulkCreateRequest {
   refresh?: boolean | 'wait_for';
@@ -47,12 +46,16 @@ export interface ExecutionsIoClient {
 interface LegacyExecutionIoSource {
   input?: EsExecutionIo['value'];
   output?: EsExecutionIo['value'];
+  context?: {
+    inputs?: EsExecutionIo['value'];
+    output?: EsExecutionIo['value'];
+  };
 }
 
 type IoHit = GetExecutionsByIdsResponse<EsExecutionIo>['items'][number];
 
 /**
- * Reads and writes step input and output on the executions IO data stream.
+ * Reads and writes workflow and step IO on the executions IO data stream.
  * `getByIds` checks the two newest backing indexes, searches the IO data stream
  * for anything older, then the legacy plain execution indexes. Each id is created once.
  */
@@ -84,7 +87,8 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
 
   /**
    * Creates an IO document on the data stream.
-   * An id is written once; a version conflict throws.
+   * An id is written once. Conflicts, including ids in older backing indexes, are reported
+   * per item with `errors: true`; the other documents are still written.
    */
   public async bulkCreate(request: ExecutionsIoBulkCreateRequest): Promise<BulkResponse> {
     if (request.documents.length === 0) {
@@ -97,31 +101,53 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       id: executionIoId(document.type, document.executionId),
       '@timestamp': document['@timestamp'] || timestamp,
     }));
-    const response = await this.deps.esClient.bulk<EsExecutionIo>({
-      refresh: request.refresh,
-      operations: documents.flatMap((document) => [
-        {
-          create: {
-            _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
-            _id: document.id,
-          },
-        },
-        document,
-      ]),
-    });
+    // A data stream only enforces `_id` uniqueness in the write index, so ids that already
+    // exist in older backing indexes are detected here and reported as conflicts.
+    const existingIds = await this.findExistingIds(documents.map(({ id }) => id));
+    const writable = documents.filter(({ id }) => !existingIds.has(id));
 
-    const items = documents.map((document, index) =>
-      toBulkItemResponse(document.id, response.items[index])
-    );
-    const conflict = items.find((item) => item.error?.type === 'version_conflict_engine_exception');
-    if (conflict) {
-      throw new Error(
-        `Failed to create execution IO ${conflict.id}: ${
-          conflict.error?.reason ?? 'document already exists'
-        }`
-      );
+    const writtenById = new Map<string, BulkItemResponse>();
+    if (writable.length > 0) {
+      const response = await this.deps.esClient.bulk<EsExecutionIo>({
+        refresh: request.refresh,
+        operations: writable.flatMap((document) => [
+          {
+            create: {
+              _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+              _id: document.id,
+            },
+          },
+          document,
+        ]),
+      });
+      writable.forEach((document, index) => {
+        writtenById.set(document.id, toBulkItemResponse(document.id, response.items[index]));
+      });
     }
+
+    const items = documents.map(
+      (document): BulkItemResponse =>
+        writtenById.get(document.id) ?? {
+          id: document.id,
+          index: '',
+          error: {
+            type: 'version_conflict_engine_exception',
+            reason: 'document already exists',
+          },
+        }
+    );
     return { items, errors: items.some((item) => item.error !== undefined) };
+  }
+
+  private async findExistingIds(ids: string[]): Promise<Set<string>> {
+    const response = await this.deps.esClient.search({
+      index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+      ignore_unavailable: true,
+      size: ids.length,
+      _source: false,
+      query: { ids: { values: ids } },
+    });
+    return new Set(response.hits.hits.flatMap((hit) => (hit._id ? [hit._id] : [])));
   }
 
   /** mget the two newest IO backing indexes, then search the data stream for the rest. */
@@ -232,7 +258,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       EXECUTION_IO_FALLBACK_INDEXES.map((index) => ({
         executionId,
         index,
-        sourceIncludes: sourceIncludesFor(types),
+        sourceIncludes: sourceIncludesFor(index, types),
       }))
     );
 
@@ -267,7 +293,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
 
     for (const entry of parsed) {
       const hit = (hitsByExecutionId.get(entry.executionId) ?? []).find(
-        (doc) => entry.type in doc._source
+        (doc) => readLegacyIo(doc._index, doc._source, entry.type) !== undefined
       );
       if (hit) {
         byId.set(entry.id, {
@@ -275,7 +301,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
             id: entry.id,
             executionId: entry.executionId,
             type: entry.type,
-            value: hit._source[entry.type],
+            value: readLegacyIo(hit._index, hit._source, entry.type),
             size: 0,
             '@timestamp': '',
           },
@@ -290,15 +316,30 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
   }
 }
 
-function sourceIncludesFor(types: Set<ExecutionIoType>): ExecutionIoType[] {
-  const includes: ExecutionIoType[] = [];
+const isWorkflowIndex = (index: string): boolean => index.includes(WORKFLOWS_EXECUTIONS_INDEX);
+
+// Step docs keep IO at the top level; workflow docs keep it under `context` (`inputs` is plural).
+function sourceIncludesFor(index: string, types: Set<ExecutionIoType>): string[] {
+  const workflow = isWorkflowIndex(index);
+  const includes: string[] = [];
   if (types.has('input')) {
-    includes.push('input');
+    includes.push(workflow ? 'context.inputs' : 'input');
   }
   if (types.has('output')) {
-    includes.push('output');
+    includes.push(workflow ? 'context.output' : 'output');
   }
   return includes;
+}
+
+function readLegacyIo(
+  index: string,
+  source: LegacyExecutionIoSource,
+  type: ExecutionIoType
+): EsExecutionIo['value'] | undefined {
+  if (isWorkflowIndex(index)) {
+    return type === 'input' ? source.context?.inputs : source.context?.output;
+  }
+  return source[type];
 }
 
 type FoundMgetDoc<TSource> = estypes.GetGetResult<TSource> & {

@@ -27,7 +27,11 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
     search: jest.fn().mockResolvedValue({ hits: { hits: [{ _id: 'report-1' }] } }),
   };
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
       elasticsearch: { client: { asInternalUser } },
       uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
@@ -159,5 +163,40 @@ describe('registerWriteHuntEvidenceRoute', () => {
       statusCode: 500,
       body: { message: 'Failed to write hunt evidence' },
     });
+  });
+  it('passes the searched technique ids through to the ledger', async () => {
+    const { handler, context, asInternalUser } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({ searchedTechniqueIds: ['T1001', 'T1002'] }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(asInternalUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          params: expect.objectContaining({ searched_technique_ids: ['T1001', 'T1002'] }),
+        }),
+      })
+    );
+  });
+
+  it('records a retryable run with no hit as ledger-only', async () => {
+    const { handler, context, asInternalUser } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({ completeness: 'incomplete_retryable', searchedTechniqueIds: ['T1001'] }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(asInternalUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        script: expect.objectContaining({
+          params: expect.objectContaining({ stamp: false, coverage_pending: true }),
+        }),
+      })
+    );
   });
 });

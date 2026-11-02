@@ -18,6 +18,7 @@ import rison from '@kbn/rison';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
 import type { RawNotification } from '@kbn/reporting-plugin/server/saved_objects/scheduled_report/schemas/latest';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
@@ -256,6 +257,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ jobParams, schedule: scheduleToUse, notification });
   };
   const generatePng = async (
@@ -287,6 +289,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/pngV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ jobParams, schedule: scheduleToUse });
   };
   const generateCsv = async (
@@ -318,6 +321,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ jobParams, schedule: scheduleToUse });
   };
 
@@ -337,6 +341,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .post(`/internal/reporting/schedule/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ jobParams, schedule: scheduleToUse, notification });
   };
 

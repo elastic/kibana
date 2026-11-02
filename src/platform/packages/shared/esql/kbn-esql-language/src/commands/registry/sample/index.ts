@@ -22,7 +22,7 @@ export const sampleCommand = {
   metadata: {
     docPreserving: true,
     preview: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.sampleDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.sampleDoc', {
       defaultMessage:
         'Samples a percentage of the results, optionally with a seed for reproducibility.',
     }),

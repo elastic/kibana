@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   EuiDataGrid,
   EuiProgress,
@@ -45,6 +45,7 @@ import { RISK_SCORE_NORM_FIELD } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 
 const gridContainerCss = css`
+  block-size: 100%;
   padding-block-start: 12px;
   position: relative;
 `;
@@ -76,7 +77,7 @@ const EntityGridActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) =
   const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat } = rowActions;
   return (
     <RowActionsCell
-      onInvestigateInTimeline={() => onInvestigateInTimeline(row)}
+      onInvestigateInTimeline={onInvestigateInTimeline && (() => onInvestigateInTimeline(row))}
       onOpenEntityGraph={() => onOpenEntityGraph(row)}
       onAddToChat={onAddToChat && (() => onAddToChat(row))}
     />
@@ -106,6 +107,7 @@ export interface EntitiesGridProps {
   onSortChange: (field: string, direction: SortDir) => void;
   searchExpression?: string;
   entityExpression?: string;
+  isSearchOverridesPending?: boolean;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
   /** Columns of a source the user can't read are left out, so their queries never run. */
@@ -125,6 +127,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   onSortChange,
   searchExpression,
   entityExpression,
+  isSearchOverridesPending,
   cellHandlers,
   rowActions,
   readAccess,
@@ -133,6 +136,8 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { dataView } = useContext(DataViewContext);
+  // EUI doesn't report leaving full screen when the grid unmounts (grouping, browser Back).
+  useEffect(() => () => onFullScreenChange?.(false), [onFullScreenChange]);
   const columns = useMemo(
     () => getReadableColumns(rowsColumns, readAccess),
     [rowsColumns, readAccess]
@@ -193,6 +198,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       pageSize: MAX_LOADED_ROWS,
       searchExpression,
       entityExpression,
+      isSearchOverridesPending,
       timeRange,
       rowsMode,
       keepFields,
@@ -216,6 +222,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     () => ({
       columns: [{ id: readableSortField, direction: readableSortDirection }],
       onSort: (cols: Array<{ id: string; direction: SortDir }>) => {
+        // Unsort removes the active column from EUI's list; fall back to the grid default.
+        if (cols.length === 0) {
+          onSortChange(RISK_SCORE_NORM_FIELD, 'desc');
+          return;
+        }
         // EUI passes every sorted column; the one the user just picked isn't the current sort.
         const col = cols.find((c) => c.id !== readableSortField) ?? cols[0];
         if (!col) return;

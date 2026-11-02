@@ -18,7 +18,7 @@ jest.mock('@elastic/charts', () => ({
   AreaSeries: () => null,
   Position: { Left: 'left' },
   ScaleType: { Linear: 'linear' },
-  CurveType: { CURVE_STEP_AFTER: 'curveStepAfter' },
+  CurveType: { CURVE_STEP: 'curveStep' },
 }));
 
 const CARD_IDS: SignalCardId[] = [
@@ -36,6 +36,7 @@ const cards: SignalCardData[] = CARD_IDS.map((id, index) => ({
   description: `Description ${id}`,
   filterLabel: id,
   value: index + 1,
+  hasCount: true,
   delta: 2,
   trend: [1, 2, 3],
 }));

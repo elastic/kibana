@@ -14,7 +14,7 @@ import type {
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
-} from '../locators';
+} from '../../common/locators';
 
 export type WithOptionalHost<P> = Omit<P, 'host'> & { host?: LocatorHost };
 

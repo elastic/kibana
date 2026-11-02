@@ -53,6 +53,7 @@ export type {
   GetRelatedAttachments,
   RelatedAttachmentIds,
   RelatedAttachmentsContext,
+  RelatedAttachmentsDefinition,
   AttachmentWorkflowDefinition,
   UnifiedAttachmentTypeSetup,
   WorkflowAttachmentResolverContext,

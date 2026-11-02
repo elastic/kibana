@@ -6,7 +6,6 @@
  */
 
 import { css } from '@emotion/react';
-import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,26 +18,21 @@ import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { DetectionStatusBadge } from './detection_status_badge';
-import { MetricCell } from './metric_cell';
+import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
-  ACTIVE_RULES_LABEL,
-  ACTIVE_RULES_TOOLTIP,
-  DETECTION_PROCESS_LABEL,
-  DETECTIONS_LABEL,
-  DETECTIONS_TOOLTIP,
-  KNOWLEDGE_INDICATORS_LABEL,
-  KNOWLEDGE_INDICATORS_TOOLTIP,
+  DETECTION_ENGINE_LABEL,
+  getKnowledgeIndicatorsLabel,
+  getRulesLabel,
+  getSignalsLabel,
+  getSignificantEventsLabel,
+  getEntitiesLabel,
   OVERVIEW_ERROR_MESSAGE,
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
-  SIGNIFICANT_EVENTS_LABEL,
-  SIGNIFICANT_EVENTS_TOOLTIP,
-  SOURCES_LABEL,
-  SOURCES_TOOLTIP,
 } from './translations';
 
 export interface DetectionOverviewCounts {
-  sources: number;
+  entities: number;
   knowledge_indicators: number;
   active_rules: number;
   detections: number;
@@ -53,6 +47,7 @@ export interface DetectionOverviewProps {
   isCountsLoading: boolean;
   isCountsError: boolean;
   onRetry: () => void;
+  compact?: boolean;
 }
 
 export const DetectionOverview = ({
@@ -63,58 +58,61 @@ export const DetectionOverview = ({
   isCountsLoading,
   isCountsError,
   onRetry,
+  compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
-  const metrics: Array<{
-    icon: IconType;
-    value: number | undefined;
-    label: string;
-    tooltip: string;
-    testSubject: string;
-  }> = [
+  const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
-      icon: 'database',
-      value: counts?.sources,
-      label: SOURCES_LABEL,
-      tooltip: SOURCES_TOOLTIP,
-      testSubject: 'nightshiftDetectionOverviewSources',
-    },
-    {
-      icon: 'documents',
+      icon: 'chartTagCloud',
+      tone: 'neutral',
       value: counts?.knowledge_indicators,
-      label: KNOWLEDGE_INDICATORS_LABEL,
-      tooltip: KNOWLEDGE_INDICATORS_TOOLTIP,
+      getLabel: getKnowledgeIndicatorsLabel,
       testSubject: 'nightshiftDetectionOverviewKnowledgeIndicators',
     },
     {
-      icon: 'bolt',
+      icon: 'cube',
+      tone: 'neutral',
+      value: counts?.entities,
+      getLabel: getEntitiesLabel,
+      testSubject: 'nightshiftDetectionOverviewEntities',
+    },
+    {
+      icon: 'radar',
+      tone: 'neutral',
       value: counts?.active_rules,
-      label: ACTIVE_RULES_LABEL,
-      tooltip: ACTIVE_RULES_TOOLTIP,
+      getLabel: getRulesLabel,
       testSubject: 'nightshiftDetectionOverviewActiveRules',
     },
     {
-      icon: 'visLine',
+      icon: 'moon',
+      tone: 'warning',
       value: counts?.detections,
-      label: DETECTIONS_LABEL,
-      tooltip: DETECTIONS_TOOLTIP,
-      testSubject: 'nightshiftDetectionOverviewDetections',
+      getLabel: getSignalsLabel,
+      testSubject: 'nightshiftDetectionOverviewSignals',
     },
     {
-      icon: 'bell',
+      icon: 'warning',
+      tone: 'danger',
       value: counts?.significant_events,
-      label: SIGNIFICANT_EVENTS_LABEL,
-      tooltip: SIGNIFICANT_EVENTS_TOOLTIP,
+      getLabel: getSignificantEventsLabel,
       testSubject: 'nightshiftDetectionOverviewSignificantEvents',
     },
   ];
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="l">
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      grow={false}
+      paddingSize="m"
+      data-test-subj={
+        compact ? 'nightshiftDetectionOverviewCompact' : 'nightshiftDetectionOverview'
+      }
+    >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h2>{DETECTION_PROCESS_LABEL}</h2>
+            <h2>{DETECTION_ENGINE_LABEL}</h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -122,49 +120,53 @@ export const DetectionOverview = ({
             status={status}
             isLoading={isStatusLoading}
             isError={isStatusError}
+            data-test-subj={compact ? 'nightshiftDetectionCompactStatus' : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      {isCountsError ? (
-        <KbnDangerCallout
-          announceOnMount
-          title={OVERVIEW_ERROR_TITLE}
-          text={OVERVIEW_ERROR_MESSAGE}
-          size="s"
-          data-test-subj="nightshiftDetectionOverviewError"
-          actionProps={{
-            primary: {
-              children: OVERVIEW_RETRY_LABEL,
-              iconType: 'refresh',
-              onClick: onRetry,
-              'data-test-subj': 'nightshiftDetectionOverviewRetryButton',
-            },
-          }}
-        />
-      ) : (
-        <EuiFlexGroup gutterSize="none" wrap>
-          {metrics.map((metric) => (
-            <EuiFlexItem
-              key={metric.testSubject}
-              grow={1}
-              css={css`
-                min-width: 9rem;
-                padding-inline: ${euiTheme.size.l};
+      {!compact && (
+        <>
+          <EuiSpacer size="m" />
+          {isCountsError ? (
+            <KbnDangerCallout
+              announceOnMount
+              title={OVERVIEW_ERROR_TITLE}
+              text={OVERVIEW_ERROR_MESSAGE}
+              size="s"
+              data-test-subj="nightshiftDetectionOverviewError"
+              actionProps={{
+                primary: {
+                  children: OVERVIEW_RETRY_LABEL,
+                  iconType: 'refresh',
+                  onClick: onRetry,
+                  'data-test-subj': 'nightshiftDetectionOverviewRetryButton',
+                },
+              }}
+            />
+          ) : (
+            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap>
+              {metrics.map((metric) => (
+                <EuiFlexItem
+                  key={metric.testSubject}
+                  grow={false}
+                  css={css`
+                    padding-inline: ${euiTheme.size.l};
 
-                &:first-of-type {
-                  padding-inline-start: 0;
-                }
+                    &:first-of-type {
+                      padding-inline-start: 0;
+                    }
 
-                &:not(:first-of-type) {
-                  border-inline-start: ${euiTheme.border.thin};
-                }
-              `}
-            >
-              <MetricCell {...metric} isLoading={isCountsLoading} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+                    &:not(:first-of-type) {
+                      border-inline-start: ${euiTheme.border.thin};
+                    }
+                  `}
+                >
+                  <MetricCell {...metric} isLoading={isCountsLoading} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          )}
+        </>
       )}
     </EuiPanel>
   );

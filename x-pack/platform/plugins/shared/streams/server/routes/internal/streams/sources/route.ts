@@ -9,7 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { notFound } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES, STREAMS_DEFAULT_UNIT_ID } from '../../../../../common/constants';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import {
@@ -54,12 +55,13 @@ const listSourceApiKeysRoute = createServerRoute({
   params: z.object({
     query: z.object({
       sourceId: sourceIdSchema,
+      unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {
-      query: { sourceId },
+      query: { sourceId, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
     const canList = await canListSourceApiKeys({ scopedClusterClient, isSecurityEnabled });
     if (!canList) {
@@ -72,6 +74,7 @@ const listSourceApiKeysRoute = createServerRoute({
           filter: [
             { term: { 'metadata.managed_by': STREAMS_SOURCES_MANAGED_BY } },
             { term: { 'metadata.source_resource': sourceResource } },
+            { term: { 'metadata.streams_unit_id': unitId } },
             { term: { invalidated: false } },
           ],
         },
@@ -141,12 +144,13 @@ const createSourceApiKeyRoute = createServerRoute({
     body: z.object({
       sourceTypeSlug: sourceTypeSlugSchema,
       sourceId: sourceIdSchema,
+      unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const {
-      body: { sourceId, sourceTypeSlug },
+      body: { sourceId, sourceTypeSlug, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
     const sourceResource = createSourceResource(sourceId);
     const privileges = await getSourceApiKeyPrivileges({
@@ -174,6 +178,7 @@ const createSourceApiKeyRoute = createServerRoute({
         source_id: sourceId,
         source_type: sourceTypeSlug,
         source_resource: sourceResource,
+        streams_unit_id: unitId,
       },
     });
 
@@ -203,12 +208,13 @@ const deleteSourceApiKeyRoute = createServerRoute({
     body: z.object({
       sourceId: sourceIdSchema,
       apiKeyId: apiKeyIdSchema,
+      unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
   handler: async ({ getScopedClients, request, params }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
     const {
-      body: { apiKeyId, sourceId },
+      body: { apiKeyId, sourceId, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
     const sourceResource = createSourceResource(sourceId);
     const { api_keys: apiKeys } = await scopedClusterClient.asCurrentUser.security.getApiKey({
@@ -221,6 +227,7 @@ const deleteSourceApiKeyRoute = createServerRoute({
       !isOwnedBySource({
         metadata: apiKey.metadata,
         sourceResource,
+        unitId,
       })
     ) {
       throw notFound(`API key ${apiKeyId} was not found for source ${sourceId}`);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
 import { css } from '@emotion/react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { isNoneGroup } from '@kbn/grouping';
 import { EntityType, useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -59,7 +60,10 @@ import {
 import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
 import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
 import { useEntityFilterOverrides } from '../components/home/entities_grid/hooks/use_entity_grid_data';
-import { isFilteringByGroupValue } from '../components/home/entities_grid/queries/resolved_entities';
+import {
+  applyResolvedEntityFilterOverridesToQuery,
+  isFilteringByGroupValue,
+} from '../components/home/entities_grid/queries/resolved_entities';
 import type {
   RowActions,
   CellHandlers,
@@ -80,6 +84,8 @@ import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
+import { usePinnedBarsHeight } from '../components/home/use_pinned_bars_height';
+import { GenerateAiBriefButton } from '../components/home/ai_brief/generate_ai_brief_button';
 import { useKibana } from '../../common/lib/kibana';
 import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
@@ -100,12 +106,14 @@ import {
   useRiskMoversCount,
   useRiskMoversDelta,
   useRiskTilesSeries,
+  useSearchedTileEntityIds,
   useTilesLoadTelemetry,
   useTilesTimeoutNotice,
   TILE_TIMEOUT_MESSAGE,
 } from '../components/home/needs_attention_tiles/hooks';
 import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
+import { getEntityAnalyticsNewHomeScopeId } from '../common/scope_time_ranges';
 import { HuntWithAiButton } from '../components/home/hunt_with_ai_button';
 import {
   ProductTour,
@@ -113,7 +121,6 @@ import {
   ROWS_MODE_SELECTOR_TEST_ID,
   useProductTour,
 } from '../components/home/product_tour';
-import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
 import {
   MAX_TILE_FILTER_ENTITY_IDS,
   getCappedTileEntityIds,
@@ -157,6 +164,19 @@ const getRowEntity = (row: Row) => {
 /** A resolved row stands for its whole group, so its flyouts show the group too. */
 const getEntityViewMode = (rowsMode: RowsMode): EntityViewMode =>
   rowsMode === 'resolved' ? 'resolved' : 'single';
+
+const MAIN_ENTITY_ONLY_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchMainEntityOnlyTitle',
+  { defaultMessage: 'This search matches main entities only' }
+);
+
+const MAIN_ENTITY_ONLY_TEXT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchMainEntityOnlyText',
+  {
+    defaultMessage:
+      "Resolved entities are matched by their main entity's own values. Switch to Individual records to search all of an entity's records.",
+  }
+);
 
 const ROWS_OPTIONS: ReadonlyArray<LabeledOption<RowsMode>> = [
   {
@@ -248,15 +268,26 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const anomalyPrivilegesQuery = useAnomalyPrivileges();
   const {
     detectionEnginePrivileges: { error: alertsPrivilegesError, result: alertsPrivilegesResult },
+    timelinePrivileges: { read: canReadTimeline },
   } = useUserPrivileges();
-  const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
-    useAlertsPrivileges();
+  // `hasAlertsRead` needs both the Security > Alerts feature privilege and read on the alerts
+  // index; `hasIndexRead` is null until the index privileges are known.
+  const {
+    hasIndexRead: hasAlertsIndexRead,
+    hasAlertsRead,
+    loading: isAlertsPrivilegesLoading,
+  } = useAlertsPrivileges();
   const { cases } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
+
+  // Index read without `hasAlertsRead` can only mean the Alerts feature privilege is missing. When
+  // the index privilege is missing too, the callout already lists the index.
+  const alertsFeatureMissing = hasAlertsIndexRead === true && hasAlertsRead === false;
 
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
     isError: alertsPrivilegesError != null,
-    canRead: hasAlertsIndexRead ?? undefined,
+    canRead: hasAlertsIndexRead == null ? undefined : hasAlertsRead,
   });
   const risk = getReadAccess({
     isLoading: riskEngineReadPrivileges.isLoading,
@@ -290,13 +321,24 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   return (
     <>
-      <EntityAnalyticsReadPrivilegesCallout
-        riskEngineReadPrivileges={riskEngineReadPrivileges}
-        entityEnginePrivileges={entityEnginePrivilegesQuery.data}
-        anomalyPrivileges={anomalyPrivilegesQuery.data}
-        alertsIndexPrivileges={alertsPrivilegesResult?.index}
-        id="entity-analytics-home"
-      />
+      <div
+        data-test-subj="entityAnalyticsPrivilegesCalloutWrapper"
+        css={css`
+          padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
+          &:empty {
+            display: none;
+          }
+        `}
+      >
+        <EntityAnalyticsReadPrivilegesCallout
+          riskEngineReadPrivileges={riskEngineReadPrivileges}
+          entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+          anomalyPrivileges={anomalyPrivilegesQuery.data}
+          alertsIndexPrivileges={alertsPrivilegesResult?.index}
+          alertsFeatureMissing={alertsFeatureMissing}
+          id="entity-analytics-home"
+        />
+      </div>
       {noPrivileges ? (
         <>
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsNewHomePage">
@@ -310,15 +352,19 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
         </>
       ) : (
-        <EntityAnalyticsNewHomePageContent readAccess={readAccess} />
+        <EntityAnalyticsNewHomePageContent
+          readAccess={readAccess}
+          canReadTimeline={canReadTimeline}
+        />
       )}
     </>
   );
 };
 
-const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = ({
-  readAccess,
-}) => {
+const EntityAnalyticsNewHomePageContent: React.FC<{
+  readAccess: ReadAccess;
+  canReadTimeline: boolean;
+}> = ({ readAccess, canReadTimeline }) => {
   const spaceId = useSpaceId();
   const {
     dataView,
@@ -344,6 +390,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     setTimeRange,
     entityFilters,
     setEntityFilters,
+    groupsSelected,
+    setGroupsSelected,
     rowsMode,
     setRowsMode,
     sortField,
@@ -353,10 +401,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     setActiveTile,
   } = useEntityAnalyticsUrlState();
   const productTour = useProductTour();
-  // Flyouts opened from the table query alerts over the range it shows.
+  // The scope pins every time-bounded section of the flyouts opened from here (alerts, observed
+  // data, anomalies, highlights, graph) to the selected range — see `SCOPE_FLYOUT_TIME_RANGES`.
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
+  const [pinnedBarsHeight, gridAreaRef] = usePinnedBarsHeight(isGridFullScreen);
 
   const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
@@ -406,6 +456,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           entityType,
           value: entity.entityName ?? '',
           entityId: entity.entityId,
+          scopeId,
           mode: getEntityViewMode(rowMode),
         });
       },
@@ -421,25 +472,27 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   const rowActions = useMemo<RowActions>(
     () => ({
-      onInvestigateInTimeline: (row) => {
-        const entity = getRowEntity(row);
-        if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
-        const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
-          euidApi.getBuiltInEntityDefinition(entity.entityType),
-          row
-        );
-        if (kqlFilter) {
-          investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
-          return;
-        }
-        const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
-        const dataProviders = createDataProviders({
-          contextId: scopeId,
-          field,
-          values: entity.entityName,
-        });
-        if (dataProviders?.length) investigateInTimeline({ dataProviders });
-      },
+      onInvestigateInTimeline: canReadTimeline
+        ? (row) => {
+            const entity = getRowEntity(row);
+            if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
+            const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
+              euidApi.getBuiltInEntityDefinition(entity.entityType),
+              row
+            );
+            if (kqlFilter) {
+              investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
+              return;
+            }
+            const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
+            const dataProviders = createDataProviders({
+              contextId: scopeId,
+              field,
+              values: entity.entityName,
+            });
+            if (dataProviders?.length) investigateInTimeline({ dataProviders });
+          }
+        : undefined,
       onOpenEntityGraph: (row) => {
         const entity = getRowEntity(row);
         if (!entity) return;
@@ -485,6 +538,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     }),
     [
       agentBuilder,
+      canReadTimeline,
       euidApi,
       investigateInTimeline,
       isAgentChatExperienceEnabled,
@@ -496,7 +550,25 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const searchExpression = useSearchBarExpression();
+  const { searchExpression, searchOverrides, isSearchOverridesPending, mainEntityOnlySearch } =
+    useSearchBarExpression(rowsMode);
+  useEffect(() => {
+    if (!mainEntityOnlySearch) return;
+
+    addWarning({ title: MAIN_ENTITY_ONLY_TITLE, text: MAIN_ENTITY_ONLY_TEXT });
+  }, [mainEntityOnlySearch, addWarning]);
+  // Group by and the dropdown counts use the patched search, as the grid does.
+  const searchDsl = useMemo(
+    () =>
+      esFilter && searchOverrides
+        ? {
+            bool: {
+              filter: applyResolvedEntityFilterOverridesToQuery([esFilter], searchOverrides),
+            },
+          }
+        : esFilter,
+    [esFilter, searchOverrides]
+  );
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
@@ -513,7 +585,6 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     return map;
   }, [watchlistsData]);
 
-  const [groupsSelected, setGroupsSelected] = useState<string[]>(['none']);
   const [groupingPageIndex, setGroupingPageIndex] = useState(0);
   const [groupingPageSize, setGroupingPageSize] = useState(25);
 
@@ -543,6 +614,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     severeAlertsEntityIds,
     watchlistedCount,
     watchlistedEntityIds,
+    hasCount: alertBasedHasCount,
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
     isTimedOut: alertBasedTimedOut,
@@ -556,6 +628,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
+    hasCount: anomaliesHasCount,
     isLoading: anomaliesLoading,
     isMissingJobs: anomaliesMissingJobs,
     isCountPending: anomaliesPending,
@@ -570,6 +643,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: newEntityCount,
     entityIds: newEntityEntityIds,
+    hasCount: newEntityHasCount,
     isLoading: newEntityLoading,
     isCountPending: newEntityPending,
     isTimedOut: newEntityTimedOut,
@@ -583,6 +657,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: riskMoversCount,
     entityIds: riskMoversEntityIds,
+    hasCount: riskMoversHasCount,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
     isCountPending: riskMoversPending,
@@ -597,6 +672,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     count: newlyHCCount,
     entityIds: newlyHCEntityIds,
+    hasCount: newlyHCHasCount,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
     isCountPending: newlyHCPending,
@@ -620,6 +696,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const {
     severeAlertsDelta: alertsDelta,
     watchlistedDelta,
+    severeAlertsPrevious,
+    watchlistedPrevious,
     isDeltaLoading,
     isHistoryMissing: alertBasedHistoryMissing,
     reachesBack: alertBasedReachesBack,
@@ -632,6 +710,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   });
   const {
     delta: anomaliesDelta,
+    previous: anomaliesPrevious,
     isDeltaLoading: anomaliesDeltaLoading,
     isHistoryMissing: anomaliesHistoryMissing,
     reachesBack: anomaliesReachesBack,
@@ -643,12 +722,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   });
   const {
     delta: newEntityDelta,
+    previous: newEntityPrevious,
     isDeltaLoading: newEntityDeltaLoading,
     isHistoryMissing: newEntityHistoryMissing,
     reachesBack: newEntityReachesBack,
   } = useNewEntityDelta({ ...deltaOptions, isReady: !newEntityPending, count: newEntityCount });
   const {
     delta: riskMoversDelta,
+    previous: riskMoversPrevious,
     isDeltaLoading: riskMoversDeltaLoading,
     isHistoryMissing: riskMoversHistoryMissing,
     reachesBack: riskMoversReachesBack,
@@ -660,6 +741,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   });
   const {
     delta: newlyHCDelta,
+    previous: newlyHCPrevious,
     isDeltaLoading: newlyHCDeltaLoading,
     isHistoryMissing: newlyHCHistoryMissing,
     reachesBack: newlyHCReachesBack,
@@ -683,6 +765,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     reachesBack: alertBasedReachesBack,
     severeAlertsCount,
     watchlistedCount,
+    severeAlertsBaseline: severeAlertsPrevious,
+    watchlistedBaseline: watchlistedPrevious,
   });
   const { trend: anomaliesTrend, isTrendLoading: anomaliesTrendLoading } =
     useEntitiesWithAnomaliesSeries({
@@ -691,12 +775,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       isReady: !anomaliesPending && !anomaliesDeltaLoading,
       reachesBack: anomaliesReachesBack,
       count: anomaliesCount,
+      deltaBaseline: anomaliesPrevious,
     });
   const { trend: newEntityTrend, isTrendLoading: newEntityTrendLoading } = useNewEntitySeries({
     ...deltaOptions,
     isReady: !newEntityPending && !newEntityDeltaLoading,
     reachesBack: newEntityReachesBack,
     count: newEntityCount,
+    deltaBaseline: newEntityPrevious,
   });
   // The two risk tiles read the same risk score history, so one query serves both sparklines: it
   // waits for both risk tiles.
@@ -713,6 +799,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     newlyHighCriticalReachesBack: newlyHCReachesBack,
     riskMoversCount,
     newlyHighCriticalCount: newlyHCCount,
+    riskMoversBaseline: riskMoversPrevious,
+    newlyHighCriticalBaseline: newlyHCPrevious,
   });
 
   // A new range or filter is a new page load for the timeout notice and the load telemetry.
@@ -789,35 +877,42 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     [activeTile, setActiveTile]
   );
 
-  const selectedEntityIds = useMemo(() => {
-    if (!activeTile) {
-      return EMPTY_ENTITY_IDS;
-    }
-    switch (activeTile) {
-      case 'entitiesWithAlerts':
-        return severeAlertsEntityIds;
-      case 'entitiesWithAnomalies':
-        return anomaliesEntityIds;
-      case 'riskMovers':
-        return riskMoversEntityIds;
-      case 'newlyHighCritical':
-        return newlyHCEntityIds;
-      case 'watchlisted':
-        return watchlistedEntityIds;
-      case 'newEntity':
-        return newEntityEntityIds;
-      default:
-        return EMPTY_ENTITY_IDS;
-    }
-  }, [
-    activeTile,
-    severeAlertsEntityIds,
-    anomaliesEntityIds,
-    riskMoversEntityIds,
-    newlyHCEntityIds,
-    watchlistedEntityIds,
-    newEntityEntityIds,
-  ]);
+  const tileEntityIds = useMemo(
+    () => ({
+      entitiesWithAlerts: severeAlertsEntityIds,
+      entitiesWithAnomalies: anomaliesEntityIds,
+      riskMovers: riskMoversEntityIds,
+      newlyHighCritical: newlyHCEntityIds,
+      watchlisted: watchlistedEntityIds,
+      newEntity: newEntityEntityIds,
+    }),
+    [
+      severeAlertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+    ]
+  );
+  // A tile stands for groups, and individual rows show their aliases, which the search matches on
+  // their own, so only resolved rows narrow the tiles.
+  const tileSearchExpression = rowsMode === 'resolved' ? searchExpression : undefined;
+  const { searchedTileEntityIds, isPending: isTilesSearchPending } = useSearchedTileEntityIds({
+    spaceId: resolvedSpaceId,
+    searchExpression: tileSearchExpression,
+    isReady:
+      !isSearchOverridesPending &&
+      !alertBasedPending &&
+      !anomaliesPending &&
+      !newEntityPending &&
+      !riskMoversPending &&
+      !newlyHCPending,
+    tileEntityIds,
+  });
+
+  const shownTileEntityIds = searchedTileEntityIds ?? tileEntityIds;
+  const selectedEntityIds = activeTile ? shownTileEntityIds[activeTile] : EMPTY_ENTITY_IDS;
 
   const cappedTileEntityIds = useMemo(
     () => (activeTile ? getCappedTileEntityIds(selectedEntityIds) : null),
@@ -826,12 +921,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   const activeFilters = useMemo(
     (): ActiveFilters => ({
-      search: { esql: searchExpression, dsl: esFilter },
+      search: { esql: searchExpression, dsl: searchDsl },
       entityFilters,
       tileEntityIds: cappedTileEntityIds,
       rowsMode,
     }),
-    [searchExpression, esFilter, entityFilters, cappedTileEntityIds, rowsMode]
+    [searchExpression, searchDsl, entityFilters, cappedTileEntityIds, rowsMode]
   );
   // Strings, so a tile refetch with the same entities doesn't reset the pages below.
   const { searchExpression: gridSearchExpression, entityExpression: gridEntityExpression } =
@@ -842,8 +937,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     entityExpression: gridEntityExpression,
   });
   const isGroupingQueryReady =
-    !isFilteringByGroupValue({ rowsMode, entityExpression: gridEntityExpression }) ||
-    entityFilterOverrides != null;
+    !isSearchOverridesPending &&
+    (!isFilteringByGroupValue({ rowsMode, entityExpression: gridEntityExpression }) ||
+      entityFilterOverrides != null);
   const groupingQuery = useMemo(
     () => toDsl(activeFilters, entityFilterOverrides),
     [activeFilters, entityFilterOverrides]
@@ -911,6 +1007,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        hasCount: alertBasedHasCount,
+        entityIds: severeAlertsEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
@@ -944,6 +1043,10 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        hasCount: anomaliesHasCount,
+        entityIds: anomaliesEntityIds,
+        // Without ML jobs the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
         noDataMessage: !canReadAnomalies
           ? NO_ANOMALIES_ACCESS_MESSAGE
           : anomaliesTimedOut
@@ -982,6 +1085,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
+        hasCount: riskMoversHasCount,
+        entityIds: riskMoversEntityIds,
+        isUnavailable: Boolean(riskMoversError),
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : riskMoversTimedOut
@@ -1019,6 +1125,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
+        hasCount: newlyHCHasCount,
+        entityIds: newlyHCEntityIds,
+        isUnavailable: Boolean(newlyHCError),
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : newlyHCTimedOut
@@ -1058,6 +1167,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        hasCount: alertBasedHasCount,
+        entityIds: watchlistedEntityIds,
+        isUnavailable: Boolean(alertBasedError),
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
@@ -1087,6 +1199,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        hasCount: newEntityHasCount,
+        entityIds: newEntityEntityIds,
+        isUnavailable: Boolean(newEntityError),
         noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -1104,6 +1219,17 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       },
     ],
     [
+      severeAlertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+      alertBasedError,
+      anomaliesError,
+      riskMoversError,
+      newlyHCError,
+      newEntityError,
       canReadAlerts,
       canReadAnomalies,
       canReadRisk,
@@ -1148,33 +1274,42 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       newEntityLoading,
       newEntityTimedOut,
       riskMoversMissingIndex,
+      alertBasedHasCount,
+      anomaliesHasCount,
+      riskMoversHasCount,
+      newlyHCHasCount,
+      newEntityHasCount,
       timeRange,
     ]
   );
 
-  const onGroupChange = useCallback((key: string) => {
-    setGroupsSelected((prev) => {
-      if (key === 'none') return ['none'];
-      const cleaned = prev.filter((g) => g !== 'none');
-      if (cleaned.includes(key)) {
-        const next = cleaned.filter((g) => g !== key);
-        return next.length ? next : ['none'];
-      }
-      return [...cleaned, key];
-    });
-  }, []);
+  // The search can't narrow a tile's delta and sparkline (counts over time), so a search hides them.
+  const shownSignalCards = useMemo(
+    (): SignalCardData[] =>
+      tileSearchExpression
+        ? signalCards.map((card) => ({
+            ...card,
+            value: shownTileEntityIds[card.id].length,
+            entityIds: shownTileEntityIds[card.id],
+            isLoading: card.isLoading || isTilesSearchPending,
+            delta: undefined,
+            isDeltaLoading: false,
+            isDeltaUnavailable: false,
+            trend: undefined,
+          }))
+        : signalCards,
+    [signalCards, tileSearchExpression, shownTileEntityIds, isTilesSearchPending]
+  );
 
-  const onRowsModeChange = useCallback(
-    (next: RowsMode) => {
-      setRowsMode(next);
-      if (next === 'resolved') {
-        setGroupsSelected((prev) => {
-          const filtered = prev.filter((g) => g !== ENTITY_GROUPING_OPTIONS.RESOLUTION);
-          return filtered.length ? filtered : ['none'];
-        });
-      }
+  const onGroupChange = useCallback(
+    (key: string) => {
+      if (key === 'none') return setGroupsSelected(['none']);
+      const cleaned = groupsSelected.filter((g) => g !== 'none');
+      setGroupsSelected(
+        cleaned.includes(key) ? cleaned.filter((g) => g !== key) : [...cleaned, key]
+      );
     },
-    [setRowsMode]
+    [groupsSelected, setGroupsSelected]
   );
 
   const groupByOptions = useMemo(() => {
@@ -1201,7 +1336,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             title={ROWS_SELECTOR_TITLE}
             options={ROWS_OPTIONS}
             selectedKey={rowsMode}
-            onChange={onRowsModeChange}
+            onChange={setRowsMode}
             data-test-subj={ROWS_MODE_SELECTOR_TEST_ID}
           />
         </EuiFlexItem>
@@ -1219,7 +1354,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [rowsMode, onRowsModeChange, groupsSelected, onGroupChange, groupByOptions, groupByFields]
+    [rowsMode, setRowsMode, groupsSelected, onGroupChange, groupByOptions, groupByFields]
   );
 
   const dataViewContextValue = useMemo(
@@ -1233,15 +1368,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   return (
     <>
-      <div className="entityAnalyticsPageHeader" css={isGridFullScreen ? hiddenCss : undefined}>
-        <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />
-      </div>
+      {/* Unwrapped: a wrapper would stop the header from sticking. */}
+      {!isGridFullScreen && <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />}
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           className="entityAnalyticsSearchSection"
           css={[
             css`
               padding-block-start: ${euiTheme.size.s};
+              padding-inline: ${euiTheme.size.base};
               display: flex;
               flex-direction: column;
               height: 100%;
@@ -1278,18 +1413,22 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             onFiltersChange={setEntityFilters}
             spaceId={spaceId}
             rowsMode={rowsMode}
-            esFilter={esFilter}
+            esFilter={searchDsl}
             watchlistNames={watchlistNames}
           />
 
           <EuiSpacer size="m" />
 
-          <div
-            css={css`
-              padding-inline: ${euiTheme.size.base};
-            `}
-          >
+          <div>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <GenerateAiBriefButton
+                  cards={shownSignalCards}
+                  timeRange={timeRange}
+                  entityFilters={entityFilters}
+                  focusTileId={activeTile ?? undefined}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <HuntWithAiButton />
               </EuiFlexItem>
@@ -1297,7 +1436,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             <EuiSpacer size="s" />
             <SignalCards
               activeTile={activeTile}
-              cards={signalCards}
+              cards={shownSignalCards}
               onFilterForCard={handleFilterForCard}
             />
           </div>
@@ -1306,10 +1445,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         <EuiSpacer size="m" />
 
         <div
-          css={css`
-            padding-inline: ${euiTheme.size.base};
-            padding-block-end: ${euiTheme.size.base};
-          `}
+          ref={gridAreaRef}
+          css={[
+            css`
+              padding-inline: ${euiTheme.size.base};
+            `,
+            // Scrolled to, the grid fills the view between the pinned bars; groups keep their
+            // natural height.
+            !isGroupSelected && kbnFullBodyHeightCss(`${pinnedBarsHeight}px`),
+          ]}
         >
           <DataViewContext.Provider value={dataViewContextValue}>
             {isGroupSelected ? (
@@ -1335,6 +1479,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
                 watchlistNames={watchlistNames}
                 searchExpression={gridSearchExpression}
                 entityExpression={gridEntityExpression}
+                isSearchOverridesPending={isSearchOverridesPending}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
                 readAccess={readAccess}
@@ -1348,12 +1493,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           </DataViewContext.Provider>
         </div>
       </SecuritySolutionPageWrapper>
-      <ProductTour
-        steps={productTour.steps}
-        currentStep={productTour.currentStep}
-        onNext={productTour.nextStep}
-        onEnd={productTour.endTour}
-      />
+      {/* Full screen hides the tour's anchors; the tour picks up at the same step on exit. */}
+      {!isGridFullScreen && (
+        <ProductTour
+          steps={productTour.steps}
+          currentStep={productTour.currentStep}
+          onNext={productTour.nextStep}
+          onEnd={productTour.endTour}
+        />
+      )}
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );

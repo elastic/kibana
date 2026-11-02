@@ -125,6 +125,22 @@ describe('judge_analysis', () => {
     ]);
   });
 
+  it('reads threat_report published_at from content.published_at rather than @timestamp', () => {
+    const artifacts = buildArtifacts({
+      reportDoc: {
+        '@timestamp': '2026-05-16T12:00:00.000Z',
+        content: {
+          title: 'Advisory',
+          published_at: '2026-05-01T00:00:00.000Z',
+        },
+      },
+    });
+    const reportCall = buildToolCallHistory(artifacts).find((c) => c.tool_id === 'threat_report');
+    expect(reportCall?.result).toMatchObject({
+      published_at: '2026-05-01T00:00:00.000Z',
+    });
+  });
+
   it('exposes Factuality, Relevance and Groundedness only', () => {
     expect(createJudgeEvaluators().map((e) => e.name)).toEqual([
       'Factuality',

@@ -166,6 +166,7 @@ describe('automation request', () => {
             kind: 'slack_message',
             channels: ['#oncall'],
             users: ['emily'],
+            bots: ['PagerDuty'],
             messageFilter: ' outage ',
           },
         }).trigger
@@ -176,6 +177,7 @@ describe('automation request', () => {
             event: 'message',
             channels: ['#oncall'],
             users: ['emily'],
+            bots: ['PagerDuty'],
             messageFilter: 'outage',
           },
         ],
@@ -329,6 +331,20 @@ describe('automation request', () => {
       expect(toAutomationUpdateBody(values, automation).runtime).toEqual({
         dailyDispatchLimit: 15,
       });
+    });
+
+    it('sends a null daily limit when the form is unlimited', () => {
+      const automation = buildAutomation({ runtime: { dailyDispatchLimit: 15 } });
+      const values = {
+        ...toAutomationFormValues(automation),
+        dailyDispatchLimit: 'unlimited',
+        trigger: toAutomationFormValues(automation).trigger,
+      } as Parameters<typeof toAutomationUpdateBody>[0];
+
+      expect(toAutomationUpdateBody(values, automation).runtime).toEqual({
+        dailyDispatchLimit: null,
+      });
+      expect(toAutomationRequestBody(values).runtime).toEqual({});
     });
 
     it('keeps the stored completion of a Slack-triggered automation on unrelated edits', () => {

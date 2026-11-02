@@ -269,6 +269,7 @@ export const Host: FC<HostProps> = memo(function Host({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedHost.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -335,6 +336,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             entityName: hostName,
             entityId: entityStoreEntityId,
+            scopeId,
             onShowEntity: onShowHost,
             title: hostName,
             subTab: path.subTab as RiskScoreLeftPanelSubTab | undefined,
@@ -349,6 +351,7 @@ export const Host: FC<HostProps> = memo(function Host({
             value: hostName,
             entityId: entityStoreEntityId,
             mode,
+            scopeId,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,

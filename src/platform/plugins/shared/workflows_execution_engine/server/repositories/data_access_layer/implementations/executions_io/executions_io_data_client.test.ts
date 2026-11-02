@@ -181,7 +181,7 @@ describe('ExecutionsIoDataClient', () => {
             _index: workflowIndex,
             _id: 'run-1',
             found: true,
-            _source: { input: { workflow: true } },
+            _source: { context: { inputs: { workflow: true } } },
           },
           { _index: stepIndex, _id: 'run-1', found: false },
         ],
@@ -191,9 +191,9 @@ describe('ExecutionsIoDataClient', () => {
 
     expect(esClient.mget).toHaveBeenNthCalledWith(2, {
       docs: [
-        { _index: workflowIndex, _id: 'step-1', _source: { includes: ['output'] } },
+        { _index: workflowIndex, _id: 'step-1', _source: { includes: ['context.output'] } },
         { _index: stepIndex, _id: 'step-1', _source: { includes: ['output'] } },
-        { _index: workflowIndex, _id: 'run-1', _source: { includes: ['input'] } },
+        { _index: workflowIndex, _id: 'run-1', _source: { includes: ['context.inputs'] } },
         { _index: stepIndex, _id: 'run-1', _source: { includes: ['input'] } },
       ],
     });
@@ -254,7 +254,7 @@ describe('ExecutionsIoDataClient', () => {
             _index: workflowIndex,
             _id: 'run-1',
             found: true,
-            _source: { output: { done: true } },
+            _source: { context: { output: { done: true } } },
           },
           { _index: stepIndex, _id: 'run-1', found: false },
         ],
@@ -267,10 +267,10 @@ describe('ExecutionsIoDataClient', () => {
         {
           _index: workflowIndex,
           _id: 'step-1',
-          _source: { includes: ['input', 'output'] },
+          _source: { includes: ['context.inputs', 'context.output'] },
         },
         { _index: stepIndex, _id: 'step-1', _source: { includes: ['input', 'output'] } },
-        { _index: workflowIndex, _id: 'run-1', _source: { includes: ['output'] } },
+        { _index: workflowIndex, _id: 'run-1', _source: { includes: ['context.output'] } },
         { _index: stepIndex, _id: 'run-1', _source: { includes: ['output'] } },
       ],
     });
@@ -390,7 +390,34 @@ describe('ExecutionsIoDataClient', () => {
     });
   });
 
-  it('throws when a create loses to an existing id', async () => {
+  it('reports a conflict for an id that exists in an older backing index without writing it', async () => {
+    esClient.search.mockResolvedValueOnce({
+      hits: { hits: [{ _id: 'output:step-1', _index: OLDER_INDEX }] },
+    } as never);
+
+    const result = await client.bulkCreate({
+      documents: [
+        {
+          executionId: 'step-1',
+          type: 'output',
+          value: { done: true },
+          size: 2,
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    expect(esClient.bulk).not.toHaveBeenCalled();
+    expect(result.errors).toBe(true);
+    expect(result.items[0]).toEqual(
+      expect.objectContaining({
+        id: 'output:step-1',
+        error: expect.objectContaining({ type: 'version_conflict_engine_exception' }),
+      })
+    );
+  });
+
+  it('reports a write-index conflict per item instead of throwing', async () => {
     esClient.bulk.mockResolvedValue({
       errors: true,
       items: [
@@ -408,19 +435,19 @@ describe('ExecutionsIoDataClient', () => {
       ],
     } as never);
 
-    await expect(
-      client.bulkCreate({
-        documents: [
-          {
-            executionId: 'step-1',
-            type: 'output',
-            value: { done: true },
-            size: 2,
-            '@timestamp': '2026-01-01T00:00:00.000Z',
-          },
-        ],
-      })
-    ).rejects.toThrow('Failed to create execution IO output:step-1: document already exists');
+    const result = await client.bulkCreate({
+      documents: [
+        {
+          executionId: 'step-1',
+          type: 'output',
+          value: { done: true },
+          size: 2,
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+    expect(result.errors).toBe(true);
+    expect(result.items[0].error?.type).toBe('version_conflict_engine_exception');
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
   });
 

@@ -19,7 +19,7 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import type { PerOsAttackSurfaceReductionCardProps } from './per_os_attack_surface_reduction_card';
 import {
-  LOCKED_CARD_ATTACK_SURFACE_REDUCTION,
+  ATTACK_SURFACE_REDUCTION_CARD_TITLE,
   PerOsAttackSurfaceReductionCard,
   SWITCH_LABEL,
 } from './per_os_attack_surface_reduction_card';
@@ -128,7 +128,7 @@ describe('PerOsAttackSurfaceReductionCard', () => {
       render();
 
       expect(renderResult.getByTestId(testSubj.lockedCardTitle)).toHaveTextContent(
-        LOCKED_CARD_ATTACK_SURFACE_REDUCTION
+        ATTACK_SURFACE_REDUCTION_CARD_TITLE
       );
     });
   });
@@ -170,6 +170,7 @@ describe('PerOsAttackSurfaceReductionCard', () => {
   });
 
   it('should not render the registry credential hardening switch when the experimental flag is off', () => {
+    mockedContext.setExperimentalFlag({ registryCredentialHardening: false });
     render();
 
     expect(
