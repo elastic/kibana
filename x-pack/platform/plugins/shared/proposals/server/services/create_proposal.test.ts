@@ -31,7 +31,11 @@ const input = {
   request,
   spaceId: 'default',
   conversationId: 'conv-1',
-  proposal: { title: 'Restore the secrets', comment: 'Re-create them.', origin: 'nightshift' },
+  proposal: {
+    title: 'Restore the secrets',
+    comment: 'Re-create them.',
+    origin: 'nightshift' as const,
+  },
 };
 
 describe('createProposalCreator', () => {

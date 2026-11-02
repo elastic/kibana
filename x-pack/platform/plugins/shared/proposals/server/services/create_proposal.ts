@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
-import type { Proposal } from '@kbn/proposals-common';
+import type { Proposal, ProposalOrigin } from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from './check_proposal_privileges';
 import type { ProposalsService } from './proposals_service';
 
@@ -19,7 +19,7 @@ export interface NewProposal {
   title: string;
   comment: string;
   /** The feature the proposal is for. It routes the proposal to that feature's queue. */
-  origin: string;
+  origin: ProposalOrigin;
   impact?: string;
   confidence?: string;
   category?: string;
