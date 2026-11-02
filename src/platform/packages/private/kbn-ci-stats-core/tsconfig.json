@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/some-dev-log"
+    "@kbn/some-dev-log",
+    "@kbn/tooling-log"
   ],
   "exclude": [
     "target/**/*",
