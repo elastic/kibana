@@ -61,7 +61,7 @@ describe('Discover inspector snapshot', () => {
     internalState.dispatch(
       internalStateActions.setDataGridUiState({
         tabId: sourceTab.id,
-        dataGridUiState: { columnWidths: { message: 120 } },
+        dataGridUiState: { pageIndex: 2, isFilterActive: true },
       })
     );
 
@@ -109,7 +109,7 @@ describe('Discover inspector snapshot', () => {
     expect(restoredTab.globalState.timeRange).toEqual(
       services.data.query.timefilter.timefilter.getAbsoluteTime()
     );
-    expect(restoredTab.uiState.dataGrid).toEqual({ columnWidths: { message: 120 } });
+    expect(restoredTab.uiState.dataGrid).toEqual({ pageIndex: 2, isFilterActive: true });
     expect(restoredTab.attributes.visContext).toEqual(sourceTab.attributes.visContext);
     expect(services.data.search.replay.activate).toHaveBeenCalledWith([recordedRequest], {
       passthrough: false,
