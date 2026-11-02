@@ -142,7 +142,8 @@ See "Vendor API artifacts" in the package README for the formats.
   adding it is better than an `unmatched` entry, as the contract test then checks the request too.
 - **Pagination** (`manifest.json` `pagination`): for each descriptor, check the vendor's docs for the page
   selector parameter, the page size parameter, where the next cursor or link sits and what marks the
-  last page. The contract mock pages according to the descriptor, so a wrong one hides a pagination bug.
+  last page. The contract test only checks that a descriptor is declared and doesn't page with it, so it
+  won't catch a wrong one; Tier A will rely on it (#295693).
   `"none"` needs the docs to say the operation returns everything at once. The `## Validated` section
   should say page 2 was fetched for each paging list action.
 - **Fixtures** (`fixtures.json`): every `queries` entry claims an operation changes no vendor state; check

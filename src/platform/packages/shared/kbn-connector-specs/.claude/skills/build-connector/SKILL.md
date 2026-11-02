@@ -220,8 +220,8 @@ explicitly through `_execute`: take the cursor, next link or page number from th
 it back, with a small page size so a second page exists. Then compare what the vendor did with the
 operation's `pagination` descriptor in `vendor_api/manifest.json`: the parameter that selects the page,
 the page size parameter, where the next cursor sits in the response and what marks the last page. The
-contract mock pages the connector according to that descriptor, so a wrong one passes the contract test
-while the real API pages differently. Correct the descriptor, rerun
+contract test only checks that a descriptor is declared and doesn't page with it, so a wrong one passes
+while the real API pages differently; Tier A will rely on it (#295693). Correct the descriptor, rerun
 `node scripts/connector_vendor_api --connector <id>`, and note the page-2 call in the action's row in
 Task 12.
 
@@ -316,7 +316,7 @@ Mark task 9 as `completed`.
 
 Mark task 10 as `in_progress`.
 
-Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. Rerun `node scripts/connector_vendor_api --connector <id> --check` and the vendor API contract test (`node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts`), as fixes made since Task 1 often leave the artifacts out of date. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
+Do one final review using the **review-connector** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. Rerun the vendor API contract test (`node scripts/jest src/platform/packages/shared/kbn-connector-specs/src/connector_spec_vendor_api_contract.test.ts`) and, if the connector has a `vendor_api/manifest.json`, `node scripts/connector_vendor_api --connector <id> --check`, as fixes made since Task 1 often leave the artifacts out of date. An exempt connector has no manifest, and `--check` fails without one. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
 
 Mark task 10 as `completed`.
 
