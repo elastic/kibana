@@ -21,9 +21,10 @@ describe('NumberRangeFormat', () => {
   test('formats a range with the default number pattern', () => {
     const formatter = new NumberRangeFormat({}, getConfig);
 
-    expect(formatter.convertToText('500.0..550.0')).toBe('500-550');
-    expect(formatter.convertToText('0.0..1000.0')).toBe('0-1,000');
-    expect(formatter.convertToText('0.35000000000000003..0.4')).toBe('0.35-0.4');
+    expect(formatter.convertToText('500.0..550.0')).toBe('500 – 550');
+    expect(formatter.convertToText('0.0..1000.0')).toBe('0 – 1,000');
+    expect(formatter.convertToText('0.35000000000000003..0.4')).toBe('0.35 – 0.4');
+    expect(formatter.convertToText('-10.0..-5.0')).toBe('-10 – -5');
   });
 
   test('returns values that are not ranges as they are', () => {

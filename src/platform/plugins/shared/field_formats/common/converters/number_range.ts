@@ -22,7 +22,7 @@ export class NumberRangeFormat extends FieldFormat {
   });
   static fieldType = KBN_FIELD_TYPES.NUMBER_RANGE;
 
-  // ES|QL returns ranges (e.g. double_range) as "500.0..550.0", shown as "500-550".
+  // ES|QL returns ranges (e.g. double_range) as "500.0..550.0", shown as "500 – 550".
   // Bounds use the default number format, which also caps float noise like 0.35000000000000003
   textConvert: TextContextTypeConvert = (val: unknown, options) => {
     const missing = this.checkForMissingValueText(val);
@@ -35,9 +35,12 @@ export class NumberRangeFormat extends FieldFormat {
     if (to === undefined) return val;
 
     const number = new NumberFormat({}, this.getConfig);
-    return `${number.convertToText(Number(from), options)}-${number.convertToText(
-      Number(to),
-      options
-    )}`;
+    return i18n.translate('fieldFormats.numberRange.rangeFormatMessage', {
+      defaultMessage: '{from} – {to}',
+      values: {
+        from: number.convertToText(Number(from), options),
+        to: number.convertToText(Number(to), options),
+      },
+    });
   };
 }
