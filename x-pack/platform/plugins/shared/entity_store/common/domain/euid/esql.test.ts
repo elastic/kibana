@@ -309,9 +309,7 @@ describe('getFieldEvaluationsEsql', () => {
 
       expect(result).toContain(`_src_entity_source0 = ${esqlIdentityValue('event.module')}`);
       expect(result).toContain(`_src_entity_source1 = ${esqlIdentityValue('event.dataset')}`);
-      expect(result).toContain(
-        `_src_entity_source2 = ${esqlIdentityValue('data_stream.dataset')}`
-      );
+      expect(result).toContain(`_src_entity_source2 = ${esqlIdentityValue('data_stream.dataset')}`);
       // Multi-source picker uses COALESCE of single-arm CaseEagerEvaluators
       expect(result).toContain('_src_entity_source = COALESCE(');
       // entity.source has no whenClauses -> 2-arm CASE (already CaseEagerEvaluator)

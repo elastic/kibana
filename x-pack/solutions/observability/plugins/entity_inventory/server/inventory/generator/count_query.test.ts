@@ -78,7 +78,9 @@ describe('buildCountQuery', () => {
     expect(esql).not.toContain('COUNT_DISTINCT');
     expect(esql.match(/\| EVAL /g)).toHaveLength(1);
     expect(esql).toContain(
-      `\n| EVAL ${resolveIdentityPlan(k8sNodeFixture).normalization}\n| STATS BY \`kubernetes.node.name\`\n`
+      `\n| EVAL ${
+        resolveIdentityPlan(k8sNodeFixture).normalization
+      }\n| STATS BY \`kubernetes.node.name\`\n`
     );
   });
 

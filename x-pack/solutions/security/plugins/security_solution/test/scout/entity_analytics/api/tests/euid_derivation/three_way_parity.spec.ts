@@ -213,7 +213,8 @@ apiTest.describe('EUID derivation parity', { tag: BACKFILL_TAGS }, () => {
   );
 
   apiTest('agrees when a multi-valued identity field repeats its value', async ({ esClient }) => {
-    // `logsdb_columnar` keeps duplicates, which ES|QL used to treat as a missing field.
+    // Keyword doc-values deduplicate, so on the alerts index this input never reaches ES|QL with a
+    // repeated value. The next two tests cover the duplicate-preserving case.
     await expectAgreementOn(
       esClient,
       EntityType.host,
@@ -221,6 +222,74 @@ apiTest.describe('EUID derivation parity', { tag: BACKFILL_TAGS }, () => {
       'host:hid-a'
     );
   });
+
+  /** Runs the ES|QL EUID evaluation of `entityType` over the rows `source` produces. */
+  const esqlEuidOver = async (esClient: EsClient, entityType: EntityType, source: string) => {
+    const response = await esClient.esql.query({
+      query: [
+        'SET unmapped_fields="nullify";',
+        source,
+        `| EVAL ${euid.esql.getEuidEvaluation(
+          getBuiltInEntityDefinition(entityType),
+          'euid_esql'
+        )}`,
+        '| KEEP euid_esql',
+      ].join('\n'),
+    });
+    const [[euidValue] = []] = response.values as Array<Array<string | null>>;
+    return euidValue ?? undefined;
+  };
+
+  apiTest('ES|QL derives one id from a repeated value in a row', async ({ esClient }) => {
+    // `ROW` keeps the duplicate, so ES|QL sees `["hid-a", "hid-a"]` whatever the storage does.
+    expect(
+      await esqlEuidOver(
+        esClient,
+        EntityType.host,
+        'ROW host.id = ["hid-a", "hid-a"], host.name = "host-1"'
+      )
+    ).toBe('host:hid-a');
+  });
+
+  apiTest(
+    'ES|QL derives one id from a repeated value stored by a duplicate-preserving index',
+    async ({ esClient }) => {
+      // `logsdb_columnar` stores arrays without deduplicating or sorting them, so ES|QL reads
+      // `["hid-a", "hid-a"]` back. The old not-empty check returned NULL for that, which dropped
+      // the host id and fell back to `host.name`.
+      const index = `euid-parity-duplicates-${Date.now()}`;
+      await esClient.indices.create({
+        index,
+        settings: { index: { mode: 'logsdb_columnar' } },
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            'host.id': { type: 'keyword' },
+            'host.name': { type: 'keyword' },
+          },
+        },
+      });
+      try {
+        await esClient.index({
+          index,
+          refresh: true,
+          document: {
+            '@timestamp': new Date().toISOString(),
+            'host.id': ['hid-a', 'hid-a'],
+            'host.name': 'host-1',
+          },
+        });
+        const stored = await esClient.esql.query({
+          query: `FROM ${index} | EVAL n = MV_COUNT(host.id) | KEEP n`,
+        });
+        // Guards the premise: the index kept both copies.
+        expect(stored.values).toStrictEqual([[2]]);
+        expect(await esqlEuidOver(esClient, EntityType.host, `FROM ${index}`)).toBe('host:hid-a');
+      } finally {
+        await esClient.indices.delete({ index, ignore_unavailable: true });
+      }
+    }
+  );
 
   apiTest('skips an empty value in a multi-valued identity field', async ({ esClient }) => {
     await expectAgreementOn(
@@ -249,6 +318,33 @@ apiTest.describe('EUID derivation parity', { tag: BACKFILL_TAGS }, () => {
         { 'host.id': [''], 'host.name': 'host-1' },
         'host:host-1'
       );
+    }
+  );
+
+  apiTest(
+    'reads the lowest non-empty value of a multi-valued namespace source',
+    async ({ esClient }) => {
+      // `event.module` is a field-evaluation source. A leading empty value must not hide `okta`, so
+      // every path derives the okta namespace instead of falling back to `unknown`.
+      const results = await deriveAllWays(esClient, EntityType.user, {
+        'user.email': 'alice@example.com',
+        'event.module': ['', 'okta'],
+        'event.kind': 'asset',
+      });
+      const [okta] = await deriveAllWays(esClient, EntityType.user, {
+        'user.email': 'alice@example.com',
+        'event.module': 'okta',
+        'event.kind': 'asset',
+      });
+      expect(okta.fromSource).toBeDefined();
+      expect(okta.fromSource).not.toContain('unknown');
+
+      for (const { fromSource, fromDocValues, fromPainlessSource, fromEsql } of results) {
+        expect(fromSource).toBe(okta.fromSource);
+        expect(fromDocValues).toBe(okta.fromSource);
+        expect(fromPainlessSource).toBe(okta.fromSource);
+        expect(fromEsql).toBe(okta.fromSource);
+      }
     }
   );
 
