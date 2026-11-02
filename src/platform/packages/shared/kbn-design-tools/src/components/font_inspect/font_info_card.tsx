@@ -9,60 +9,70 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiPanel, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiIcon,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEVTOOL_IGNORE_ATTR } from '../../lib/constants';
-import type { FontInfo } from '../../lib/dom/get_font_info';
-import { parsePx } from '../../lib/dom/round_px_value';
+import { useDesignTokenSections } from '../../hooks/use_design_token_sections';
+import type { TokenRow as TokenRowData } from '../../hooks/use_design_token_sections';
 
 interface Props {
-  fontInfo: FontInfo;
+  element: HTMLElement;
   isPinned: boolean;
   onClose?: () => void;
 }
 
-const shouldShowLetterSpacing = (letterSpacing: string): boolean => {
-  if (letterSpacing === 'normal' || letterSpacing === '0px' || letterSpacing === '0') {
-    return false;
-  }
-  return parsePx(letterSpacing) !== 0;
-};
-
-interface FontMetricRowProps {
-  label: string;
-  value: string;
+interface TokenRowProps extends TokenRowData {
   familyCode: string;
 }
 
-const FontMetricRow = ({ label, value, familyCode }: FontMetricRowProps) => (
+const TokenRow = ({ label, value, token, swatchColor, familyCode }: TokenRowProps) => (
   <div
     css={css({
       display: 'flex',
       gap: '8px',
       justifyContent: 'space-between',
+      alignItems: 'center',
     })}
   >
     <EuiText size="xs" color="subdued">
-      {label}
+      {token ?? label}
     </EuiText>
-    <EuiText
-      size="xs"
+    <div
       css={css({
-        fontFamily: familyCode,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
       })}
     >
-      {value}
-    </EuiText>
+      {swatchColor && (
+        <EuiIcon type="stopFill" color={swatchColor} size="s" aria-hidden css={css({ flexShrink: 0 })} />
+      )}
+      <EuiText
+        size="xs"
+        css={css({
+          fontFamily: familyCode,
+        })}
+      >
+        {value}
+      </EuiText>
+    </div>
   </div>
 );
 
 /**
- * Floating panel showing computed font metrics for the inspected element.
+ * Floating panel showing an inspected element's font family and metrics.
  */
-export const FontInfoCard = ({ fontInfo, isPinned, onClose }: Props) => {
+export const FontInfoCard = ({ element, isPinned, onClose }: Props) => {
   const { euiTheme } = useEuiTheme();
   const familyCode = euiTheme.font.familyCode ?? 'monospace';
-  const showLetterSpacing = shouldShowLetterSpacing(fontInfo.letterSpacing);
+  const { fontFamily, rows } = useDesignTokenSections(element);
   const closeAriaLabel = i18n.translate('kbnDesignTools.fontInspect.card.closeAriaLabel', {
     defaultMessage: 'Unpin font inspect',
   });
@@ -75,66 +85,44 @@ export const FontInfoCard = ({ fontInfo, isPinned, onClose }: Props) => {
             display: 'flex',
             alignItems: 'flex-start',
             gap: euiTheme.size.s,
-            marginBottom: euiTheme.size.xs,
           })}
         >
-          <div css={css({ flex: 1, minWidth: 0 })}>
-            <EuiText size="s">
-              <strong>{fontInfo.resolvedFamily}</strong>
-            </EuiText>
-            <EuiText size="xs" color="subdued">
-              {fontInfo.fontFamily}
-            </EuiText>
-          </div>
-          {isPinned && onClose && (
-            <EuiToolTip content={closeAriaLabel} disableScreenReaderOutput>
+          <EuiText size="s" css={css({ flex: 1, minWidth: 0 })}>
+            <strong>{fontFamily}</strong>
+          </EuiText>
+          <div css={css({ flexShrink: 0, lineHeight: 0 })}>
+            {isPinned && onClose ? (
+              <EuiToolTip content={closeAriaLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="cross"
+                  size="xs"
+                  aria-label={closeAriaLabel}
+                  onClick={onClose}
+                  data-test-subj="fontInfoCardClose"
+                />
+              </EuiToolTip>
+            ) : (
               <EuiButtonIcon
                 iconType="cross"
                 size="xs"
-                aria-label={closeAriaLabel}
-                onClick={onClose}
-                data-test-subj="fontInfoCardClose"
+                disabled
+                aria-hidden
+                css={css({ visibility: 'hidden' })}
               />
-            </EuiToolTip>
-          )}
+            )}
+          </div>
         </div>
         <div
           css={css({
             display: 'flex',
             flexDirection: 'column',
             gap: euiTheme.size.xxs,
+            marginTop: euiTheme.size.s,
           })}
         >
-          <FontMetricRow
-            label={i18n.translate('kbnDesignTools.fontInspect.card.size', {
-              defaultMessage: 'Size',
-            })}
-            value={fontInfo.fontSize}
-            familyCode={familyCode}
-          />
-          <FontMetricRow
-            label={i18n.translate('kbnDesignTools.fontInspect.card.weight', {
-              defaultMessage: 'Weight',
-            })}
-            value={fontInfo.fontWeight}
-            familyCode={familyCode}
-          />
-          <FontMetricRow
-            label={i18n.translate('kbnDesignTools.fontInspect.card.lineHeight', {
-              defaultMessage: 'Line height',
-            })}
-            value={fontInfo.lineHeight}
-            familyCode={familyCode}
-          />
-          {showLetterSpacing && (
-            <FontMetricRow
-              label={i18n.translate('kbnDesignTools.fontInspect.card.letterSpacing', {
-                defaultMessage: 'Letter spacing',
-              })}
-              value={fontInfo.letterSpacing}
-              familyCode={familyCode}
-            />
-          )}
+          {rows.map((row, index) => (
+            <TokenRow key={index} {...row} familyCode={familyCode} />
+          ))}
         </div>
       </EuiPanel>
     </div>

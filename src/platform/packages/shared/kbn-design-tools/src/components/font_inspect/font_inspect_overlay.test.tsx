@@ -36,6 +36,13 @@ describe('FontInspectOverlay', () => {
       fontWeight: '400',
       lineHeight: '24px',
       letterSpacing: 'normal',
+      color: 'rgb(29, 42, 62)',
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+      borderTopWidth: '0px',
+      borderTopColor: 'rgb(29, 42, 62)',
+      borderTopLeftRadius: '0px',
+      width: '100px',
+      height: '20px',
     });
     computedStylesByElement.set(elementB, {
       fontFamily: '"Roboto", sans-serif',
@@ -43,6 +50,13 @@ describe('FontInspectOverlay', () => {
       fontWeight: '400',
       lineHeight: '20px',
       letterSpacing: 'normal',
+      color: 'rgb(29, 42, 62)',
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+      borderTopWidth: '0px',
+      borderTopColor: 'rgb(29, 42, 62)',
+      borderTopLeftRadius: '0px',
+      width: '16px',
+      height: '16px',
     });
 
     jest.spyOn(window, 'getComputedStyle').mockImplementation((el, pseudoElt) => {
@@ -79,7 +93,7 @@ describe('FontInspectOverlay', () => {
 
     expect(screen.getByTestId('fontInfoCard')).toBeInTheDocument();
     expect(screen.getByTestId('fontInfoCardClose')).toBeInTheDocument();
-    expect(screen.getByText('Inter')).toBeInTheDocument();
+    expect(screen.getByText('"Inter", sans-serif')).toBeInTheDocument();
   });
 
   it('pins an element when the click lands on the overlay backdrop itself (defensive)', () => {
@@ -114,8 +128,8 @@ describe('FontInspectOverlay', () => {
     fireEvent.click(elementB);
 
     expect(screen.getAllByTestId('fontInfoCard')).toHaveLength(2);
-    expect(screen.getByText('Inter')).toBeInTheDocument();
-    expect(screen.getByText('Roboto')).toBeInTheDocument();
+    expect(screen.getByText('"Inter", sans-serif')).toBeInTheDocument();
+    expect(screen.getByText('"Roboto", sans-serif')).toBeInTheDocument();
   });
 
   it('unpins just the clicked element when it is already pinned, leaving other pins intact', () => {
@@ -133,8 +147,8 @@ describe('FontInspectOverlay', () => {
     fireEvent.click(elementA);
 
     expect(screen.getAllByTestId('fontInfoCard')).toHaveLength(1);
-    expect(screen.queryByText('Inter')).not.toBeInTheDocument();
-    expect(screen.getByText('Roboto')).toBeInTheDocument();
+    expect(screen.queryByText('"Inter", sans-serif')).not.toBeInTheDocument();
+    expect(screen.getByText('"Roboto", sans-serif')).toBeInTheDocument();
   });
 
   it('removes only the pinned card whose close button was clicked', () => {
@@ -146,14 +160,14 @@ describe('FontInspectOverlay', () => {
     fireEvent.click(elementB);
 
     const cards = screen.getAllByTestId('fontInfoCard');
-    const cardWithInter = cards.find((card) => within(card).queryByText('Inter'));
+    const cardWithInter = cards.find((card) => within(card).queryByText('"Inter", sans-serif'));
     expect(cardWithInter).toBeDefined();
 
     fireEvent.click(within(cardWithInter!).getByTestId('fontInfoCardClose'));
 
     expect(screen.getAllByTestId('fontInfoCard')).toHaveLength(1);
-    expect(screen.queryByText('Inter')).not.toBeInTheDocument();
-    expect(screen.getByText('Roboto')).toBeInTheDocument();
+    expect(screen.queryByText('"Inter", sans-serif')).not.toBeInTheDocument();
+    expect(screen.getByText('"Roboto", sans-serif')).toBeInTheDocument();
   });
 
   it('updates the hover preview even when the pointermove target is not the backdrop', () => {
@@ -169,7 +183,7 @@ describe('FontInspectOverlay', () => {
     mockHitTarget(elementB);
     fireEvent.pointerMove(unrelatedNode, { clientX: 5, clientY: 5 });
 
-    expect(screen.getByText('Roboto')).toBeInTheDocument();
+    expect(screen.getByText('"Roboto", sans-serif')).toBeInTheDocument();
 
     unrelatedNode.remove();
   });
@@ -183,7 +197,7 @@ describe('FontInspectOverlay', () => {
 
     mockHitTarget(elementB);
     fireEvent.pointerMove(elementB, { clientX: 1, clientY: 1 });
-    expect(screen.getByText('Roboto')).toBeInTheDocument();
+    expect(screen.getByText('"Roboto", sans-serif')).toBeInTheDocument();
 
     // Move the pointer onto the now-rendered pinned panel itself (not the
     // backdrop). Before the fix this pointermove was never observed, so the
@@ -198,7 +212,7 @@ describe('FontInspectOverlay', () => {
     expect(pinnedCard).toBeDefined();
     fireEvent.pointerMove(pinnedCard!, { clientX: 1, clientY: 1 });
 
-    expect(screen.queryByText('Roboto')).not.toBeInTheDocument();
+    expect(screen.queryByText('"Roboto", sans-serif')).not.toBeInTheDocument();
   });
 
   it('does not show a bogus hover preview for whatever element sits underneath a pinned panel', () => {
@@ -214,7 +228,7 @@ describe('FontInspectOverlay', () => {
     fireEvent.click(elementA);
 
     const pinnedCard = screen.getByTestId('fontInfoCard');
-    const cardInnerNode = within(pinnedCard).getByText('Inter');
+    const cardInnerNode = within(pinnedCard).getByText('"Inter", sans-serif');
 
     // Simulate real browser stacking: elementsFromPoint returns the card's
     // own elements first (topmost), followed by an unrelated real page
@@ -222,7 +236,7 @@ describe('FontInspectOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([cardInnerNode, elementB]);
     fireEvent.pointerMove(cardInnerNode, { clientX: 1, clientY: 1 });
 
-    expect(screen.queryByText('Roboto')).not.toBeInTheDocument();
+    expect(screen.queryByText('"Roboto", sans-serif')).not.toBeInTheDocument();
   });
 
   it('closes the overlay on Escape', () => {

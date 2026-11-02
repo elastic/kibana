@@ -11,7 +11,6 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { FontInfoCard } from './font_info_card';
-import { getFontInfo } from '../../lib/dom/get_font_info';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 import { useElementRect } from '../../hooks/use_element_rect';
@@ -31,7 +30,6 @@ interface Props {
 export const PinnedFontCard = ({ element, zIndex, onClose }: Props) => {
   const { euiTheme } = useEuiTheme();
   const rect = useElementRect(element);
-  const fontInfo = useMemo(() => getFontInfo(element), [element]);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,7 +59,7 @@ export const PinnedFontCard = ({ element, zIndex, onClose }: Props) => {
           zIndex: zIndex.label,
         })}
       >
-        <FontInfoCard fontInfo={fontInfo} isPinned onClose={onClose} />
+        <FontInfoCard element={element} isPinned onClose={onClose} />
       </div>
     </>
   );

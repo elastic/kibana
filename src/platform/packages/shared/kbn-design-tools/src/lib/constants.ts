@@ -10,7 +10,7 @@
 /** Root container for the measure (spacing inspection) overlay. */
 export const MEASURE_OVERLAY_ID = 'measureOverlay';
 
-/** Root container for the font inspect (WhatFont-style) overlay. */
+/** Root container for the font inspect overlay. */
 export const FONT_INSPECT_OVERLAY_ID = 'fontInspectOverlay';
 
 /** Root container for the edit (drag/resize) overlay. */

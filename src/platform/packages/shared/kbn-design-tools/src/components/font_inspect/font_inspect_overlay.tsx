@@ -16,8 +16,6 @@ import { PinnedFontCard } from './pinned_font_card';
 import { getElementFromPoint } from '../../lib/dom/get_element_from_point';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
-import { getFontInfo } from '../../lib/dom/get_font_info';
-import type { FontInfo } from '../../lib/dom/get_font_info';
 import { isIgnoredElement } from '../../lib/dom/is_ignored_element';
 import { FONT_INSPECT_OVERLAY_ID } from '../../lib/constants';
 import { useEscapeKey } from '../../hooks/use_escape_key';
@@ -46,7 +44,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
   const nextPinIdRef = useRef(0);
 
   const [hoverRect, setHoverRect] = useState<DOMRect | null>(null);
-  const [hoverFontInfo, setHoverFontInfo] = useState<FontInfo | null>(null);
+  const [hoverElement, setHoverElement] = useState<HTMLElement | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const overlayCss = useMemo(
@@ -73,7 +71,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
     const clamped = clampToViewport(desiredLeft, desiredTop, width, height);
     el.style.left = `${clamped.left}px`;
     el.style.top = `${clamped.top}px`;
-  }, [hoverRect, hoverFontInfo]);
+  }, [hoverRect, hoverElement]);
 
   const rafRef = useRef<number>(0);
 
@@ -102,7 +100,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
           isIgnoredElement(pointerTarget)
         ) {
           setHoverRect(null);
-          setHoverFontInfo(null);
+          setHoverElement(null);
           return;
         }
 
@@ -117,7 +115,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
 
         if (!target) {
           setHoverRect(null);
-          setHoverFontInfo(null);
+          setHoverElement(null);
           return;
         }
 
@@ -125,13 +123,13 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
         if (isTargetPinned) {
           // Avoid stacking a transient hover card on top of a pinned one.
           setHoverRect(null);
-          setHoverFontInfo(null);
+          setHoverElement(null);
           return;
         }
 
         const rect = target.getBoundingClientRect();
         setHoverRect(rect);
-        setHoverFontInfo(getFontInfo(target));
+        setHoverElement(target);
       });
     },
     [pinnedEntries]
@@ -163,7 +161,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
     // The click target is now (un)pinned; clear the transient hover preview
     // so it doesn't briefly double up with the pinned card.
     setHoverRect(null);
-    setHoverFontInfo(null);
+    setHoverElement(null);
   }, []);
 
   const handleMouseEvent = useCallback(
@@ -222,7 +220,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
         aria-hidden="true"
       />
       {hoverRect && <div className={hoverHighlightCss} data-test-subj="fontInspectHighlight" />}
-      {hoverFontInfo && hoverRect && (
+      {hoverElement && hoverRect && (
         <div
           ref={cardRef}
           css={css({
@@ -231,7 +229,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
             zIndex: zIndex.label,
           })}
         >
-          <FontInfoCard fontInfo={hoverFontInfo} isPinned={false} />
+          <FontInfoCard element={hoverElement} isPinned={false} />
         </div>
       )}
       {pinnedEntries.map((entry) => (
