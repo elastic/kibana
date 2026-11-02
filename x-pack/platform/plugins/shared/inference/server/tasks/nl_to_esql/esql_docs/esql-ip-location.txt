@@ -4,43 +4,45 @@ The `IP_LOCATION` processing command enriches rows with geographic information b
 
 The first `IP_LOCATION` query triggers a one-time download of IP location databases to all nodes in the cluster. These databases are periodically updated while the cluster is running.
 
-The command resolves geographic information for an IP address and adds the results as new columns prefixed with the specified `prefix` followed by a dot (`.`). This command is the query-time equivalent of the GeoIP ingest processor.
-
 ## Syntax
 
 `IP_LOCATION prefix = expression [WITH { option = value [, ...] }]`
 
 ### Parameters
 
-#### `prefix`
+#### prefix
 
 The prefix for the output columns. The resolved fields are available as `prefix.field_name`.
 
-For the default GeoLite2-City database, the default output columns are `prefix.country_iso_code`, `prefix.country_name`, `prefix.continent_name`, `prefix.region_iso_code`, `prefix.region_name`, `prefix.city_name`, and `prefix.location`.
-
-#### `expression`
+#### expression
 
 An expression that evaluates to an IP address of type `ip`, or a string containing an IP address.
 
-#### `database_file`
+#### database_file
 
 Optional.
 
-The name of the IP location database to use. Default: `GeoLite2-City.mmdb`. Supported databases include GeoLite2 and GeoIP2 variants, such as City, Country, and ASN databases, as well as IPinfo databases. To use a custom database, register it with the Create or update IP geolocation database configuration API first.
+The name of the IP location database to use. Default: `GeoLite2-City.mmdb`.
 
-#### `properties`
+Supported databases include GeoLite2 and GeoIP2 variants, such as City, Country, and ASN databases, as well as IPinfo databases. To use a custom database, register it with the Create or update IP geolocation database configuration API first.
+
+#### properties
 
 Optional.
 
-List of database property names to include in the output. Each value maps to one output column. Default: the database's default property set. For `GeoLite2-City`, the default property set is `country_iso_code`, `country_name`, `continent_name`, `region_iso_code`, `region_name`, `city_name`, and `location`.
+List of database property names to include in the output. Each value maps to one output column.
+
+For the default GeoLite2-City database, the default properties are `country_iso_code`, `country_name`, `continent_name`, `region_iso_code`, `region_name`, `city_name`, and `location`.
 
 Pass a subset to reduce the output schema. The list must contain at least one property; an empty list is not supported.
 
-#### `first_only`
+The available `properties` depend on the `database_file`. Custom databases registered with the IP geolocation database configuration API have properties determined by their database type metadata.
+
+#### first_only
 
 Optional.
 
-Controls multi-value input handling. When `true`, the first IP value is used and the rest are ignored. When `false`, multi-value input is rejected with a warning and the row produces `null` for all output columns. Default: `true`.
+Controls multi-value input handling. When `true`, which is the default, the first IP value is used and the rest are ignored. When `false`, multi-value input is rejected with a warning and the row produces `null` for all output columns.
 
 ## Examples
 
@@ -52,11 +54,10 @@ ROW ip = "2602:306:33d3:8000::3257:9652"
 | KEEP g.country_iso_code, g.country_name, g.continent_name, g.region_iso_code, g.region_name, g.city_name
 ```
 
-| g.country_iso_code:keyword | g.country_name:keyword | g.continent_name:keyword | g.region_iso_code:keyword | g.region_name:keyword | g.city_name:keyword |
-|---|---|---|---|---|---|
-| US | United States | North America | US-FL | Florida | Homestead |
+g.country_iso_code:keyword | g.country_name:keyword | g.continent_name:keyword | g.region_iso_code:keyword | g.region_name:keyword | g.city_name:keyword
+US | United States | North America | US-FL | Florida | Homestead
 
-Resolve only selected location properties for an IPv6 address:
+Resolve only selected GeoLite2-City properties:
 
 ```esql
 ROW ip = "2602:306:33d3:8000::3257:9652"
@@ -71,7 +72,7 @@ ROW ip = "82.170.213.79"
 | KEEP g.*
 ```
 
-Filter web logs by resolved country and count requests by city:
+Filter web logs by resolved country and count events by city:
 
 ```esql
 FROM web_logs
@@ -84,10 +85,8 @@ FROM web_logs
 
 If the IP address is not found in the database, all output columns are `null`.
 
-If the database is not yet available on the node, for example because it is still downloading, keyword output columns contain the sentinel value `_ip_location_database_unavailable_<database_file>` and non-keyword columns are `null`. A warning header indicates the unavailable database.
+If the database is not yet available on the node, for example because it is still downloading, keyword output columns contain the sentinel value `_ip_location_database_unavailable_<database_file>` and non-keyword columns are `null`.
 
 If the database has expired, keyword columns contain `_ip_location_expired_database` and non-keyword columns are `null`.
 
-The `properties` list must contain at least one property; an empty list is not supported.
-
-When `first_only` is `false`, multi-value input is rejected with a warning and the row produces `null` for all output columns.
+The `properties` list must contain at least one property. An empty list is not supported.

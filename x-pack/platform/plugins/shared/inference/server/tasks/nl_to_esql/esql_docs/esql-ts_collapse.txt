@@ -1,6 +1,13 @@
 # TS_COLLAPSE
 
-`TS_COLLAPSE` is a processing command that collapses the expanded, per-step output of a `PROMQL` command into one row per time series. The metric column and the `step` column become multi-valued fields; dimension columns remain single-valued.
+`TS_COLLAPSE` collapses the expanded, per-step output of a `PROMQL` command into one row per time series. The metric column and the `step` column become multi-valued fields; dimension columns remain single-valued.
+
+A `PROMQL` command produces one row per `(series, step)` pair, with dimension columns such as `host` or `cluster` repeated on every row. `TS_COLLAPSE` merges all rows that belong to the same series into a single row:
+- The metric column and the `step` column become multi-valued fields whose elements are ordered chronologically.
+- Dimension columns keep a single value per row because they are identical for all steps of a given series.
+- Missing or `null` samples are omitted from both multi-valued fields, so the result is sparse rather than null-filled.
+
+The multi-valued fields are positionally aligned: `step[i]` corresponds to the metric value at index `i`.
 
 ## Syntax
 
@@ -12,7 +19,7 @@ None.
 
 ## Examples
 
-Collapse a multi-step `PROMQL` result into one row per time series with aligned metric and `step` arrays.
+Collapse a multi-step `PROMQL` result into one row with aligned `cost` and `step` arrays.
 
 ```esql
 PROMQL index=k8s step=1m start="2024-05-10T00:11:00.000Z" end="2024-05-10T00:14:00.000Z" cost=(round(sum(avg_over_time(network.cost[1m])), 0.0001))
@@ -22,7 +29,7 @@ PROMQL index=k8s step=1m start="2024-05-10T00:11:00.000Z" end="2024-05-10T00:14:
 cost:double | step:datetime
 [13.25, 36.375, 37.9375, 39.5417] | [2024-05-10T00:11:00.000Z, 2024-05-10T00:12:00.000Z, 2024-05-10T00:13:00.000Z, 2024-05-10T00:14:00.000Z]
 
-Collapse a `PROMQL` result grouped by `cluster` into one row per dimension value.
+Collapse per-`cluster` `PROMQL` results into one row per cluster with aligned `clients` and `step` arrays.
 
 ```esql
 PROMQL index=k8s step=1m start="2024-05-10T00:02:00.000Z" end="2024-05-10T00:04:00.000Z" clients=(avg by (cluster) (last_over_time(network.eth0.currently_connected_clients[1m])))
@@ -35,7 +42,7 @@ clients:double | step:datetime | cluster:keyword
 [440.0, 565.0, 454.0] | [2024-05-10T00:02:00.000Z, 2024-05-10T00:03:00.000Z, 2024-05-10T00:04:00.000Z] | qa
 [205.0, 357.0] | [2024-05-10T00:03:00.000Z, 2024-05-10T00:04:00.000Z] | staging
 
-Compute per-series aggregate values from collapsed arrays with `EVAL` and `MV_AVG`.
+Use `EVAL` and `MV_AVG` to compute per-series average client counts over collapsed arrays.
 
 ```esql
 PROMQL index=k8s step=1m start="2024-05-10T00:02:00.000Z" end="2024-05-10T00:04:00.000Z" clients=(avg by (cluster) (last_over_time(network.eth0.currently_connected_clients[1m])))
@@ -54,6 +61,4 @@ clients:double | step:datetime | cluster:keyword | avg_clients:double
 
 `TS_COLLAPSE` can only appear immediately after a `PROMQL` command. Other processing commands can follow `TS_COLLAPSE`.
 
-The metric and `step` multi-valued fields are positionally aligned: `step[i]` corresponds to the metric value at index `i`. Applying MV functions independently to one of these columns, such as `MV_SORT`, will break this alignment.
-
-Missing or `null` samples are omitted from both multi-valued fields, so the result is sparse rather than null-filled.
+Applying multi-value functions independently to one of the aligned columns, such as `MV_SORT` on `step` or the metric column, will break the positional alignment between `step[i]` and the metric value at index `i`.

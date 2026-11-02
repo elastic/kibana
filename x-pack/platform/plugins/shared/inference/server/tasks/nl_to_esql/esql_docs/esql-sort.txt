@@ -1,20 +1,28 @@
 # SORT
 
-The SORT command arranges the rows of a table based on one or more columns. By default, sorting is in ascending order, but you can specify ascending (ASC) or descending (DESC) order. Additional sort expressions can be used as tie breakers. When sorting multivalued columns, the lowest value is used for ascending order and the highest for descending. Null values are treated as larger than any other value by default, appearing last in ascending order and first in descending order. You can override this behavior with NULLS FIRST or NULLS LAST.
+The `SORT` processing command sorts a table on one or more expressions. You can sort by column names, functions, or arithmetic expressions. The default sort order is ascending.
 
 ## Syntax
 
-`SORT column1 [ASC/DESC][NULLS FIRST/NULLS LAST][, ..., columnN [ASC/DESC][NULLS FIRST/NULLS LAST]]`
+`SORT expression1 [ASC/DESC][NULLS FIRST/NULLS LAST][, ..., expressionN [ASC/DESC][NULLS FIRST/NULLS LAST]]`
 
 ### Parameters
 
-#### columnX
+#### `expressionX`
 
-The column to sort on.
+The expression to sort on. Can be a column name, a function (for example, `length(field)`, `DATE_EXTRACT("year", date)`), or an arithmetic expression (for example, `salary * 2`). The expression is evaluated per row and the result is used for ordering.
+
+#### `ASC/DESC`
+
+Optional. Specifies the sort order. Use `ASC` for ascending order or `DESC` for descending order. If no sort order is specified, ascending order is used.
+
+#### `NULLS FIRST/NULLS LAST`
+
+Optional. Controls where `null` values are placed. By default, `null` values are treated as larger than any other value: they are sorted last in ascending order and first in descending order.
 
 ## Examples
 
-Sorts the employees by their height in ascending order.
+Sort employees by height in default ascending order.
 
 ```esql
 FROM employees
@@ -22,7 +30,7 @@ FROM employees
 | SORT height
 ```
 
-Sorts the employees by their height in descending order.
+Sort employees by height in descending order with `DESC`.
 
 ```esql
 FROM employees
@@ -30,7 +38,7 @@ FROM employees
 | SORT height DESC
 ```
 
-Sorts the employees by height in descending order, and uses first name in ascending order to break ties.
+Break height ties by sorting employees with the same height by first name in ascending order.
 
 ```esql
 FROM employees
@@ -38,10 +46,19 @@ FROM employees
 | SORT height DESC, first_name ASC
 ```
 
-Sorts the employees by first name in ascending order, placing any null values at the top of the list.
+Place `null` first names first while sorting names in ascending order.
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | SORT first_name ASC NULLS FIRST
+```
+
+Sort employees by the length of `first_name` in descending order and return the first five results.
+
+```esql
+FROM employees
+| KEEP first_name, last_name
+| SORT length(first_name) DESC
+| LIMIT 5
 ```

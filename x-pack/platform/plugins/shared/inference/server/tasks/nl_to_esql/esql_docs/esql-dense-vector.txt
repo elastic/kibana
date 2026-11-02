@@ -1,10 +1,6 @@
 # DENSE-VECTOR
 
-The `DENSE_VECTOR` command generates vector embeddings from one or more `text` or `keyword` columns. It embeds each row independently through an inference endpoint and appends the resulting `dense_vector` columns to the query output. You can embed indexed or computed text, or base64-encoded image data.
-
-`DENSE_VECTOR` adds one `dense_vector` output column for each input column and preserves the other columns in the result. Use the generated vectors with vector similarity functions such as `V_COSINE` or commands such as `MMR`.
-
-Use `DENSE_VECTOR` to embed values that vary between rows. To embed a single constant value, such as query text, use the `TEXT_EMBEDDING` function.
+The `DENSE_VECTOR` command generates vector embeddings from one or more `text` or `keyword` columns. It embeds each row independently through an inference endpoint and appends the resulting `dense_vector` columns to the query output.
 
 ## Syntax
 
@@ -16,27 +12,31 @@ Use `DENSE_VECTOR` to embed values that vary between rows. To embed a single con
 
 ### Parameters
 
-#### input_column
+#### `input_column`
 
 One or more comma-separated `text` or `keyword` columns to embed. For image input, the column must contain a base64-encoded image data URI. A non-string column is rejected before execution. If a value is `null`, the generated vector is also `null`.
 
-#### output_column
+#### `output_column`
 
 Optional. The name of the generated column. You can specify an output column name only when embedding one input column. If the name matches an existing column, the generated column replaces it.
 
-#### suffix
+#### `suffix`
 
 Optional. A quoted string appended to each input column name. For example, `DENSE_VECTOR suffix = "_dv" ON title, body` produces `title_dv` and `body_dv`. You can use a suffix with one or more input columns. Without a naming clause, output columns use the name `<input_column>_dense_vector`.
 
-#### inference_id
+#### `inference_id`
 
 Optional. The ID of the inference endpoint used to embed the input. If omitted, `DENSE_VECTOR` selects a default text embedding endpoint.
 
-#### type
+For text input, the endpoint must use the `text_embedding` or multimodal `embedding` task type. If `inference_id` is omitted, `DENSE_VECTOR` uses `esql.command.dense_vector.default_inference_id` when configured. Otherwise, it selects the first available built-in text embedding endpoint: `.jina-embeddings-v5-text-small`, then `.multilingual-e5-small-elasticsearch`.
 
-Optional. The input modality. Accepts `text` by default or `image`. An `image` input is a base64 data URI embedded through a multimodal endpoint.
+For image input, the endpoint must use the multimodal `embedding` task type. No default image endpoint is available, so you must specify `inference_id`.
 
-#### timeout
+#### `type`
+
+Optional. The input modality. Accepts `text` by default, or `image`. An `image` input is a base64 data URI embedded through a multimodal endpoint.
+
+#### `timeout`
 
 Optional. Timeout for the inference request, for example, `"30s"` or `"1m"`. If not specified, the default inference timeout applies.
 
@@ -84,7 +84,7 @@ book_no:keyword | title:text | book_vector:dense_vector
 7480 | The Hobbit | [50.0, 49.0, 48.0]
 8605 | Dead Souls | [45.0, 49.0, 53.0]
 
-Apply a custom suffix to output column names:
+Apply a custom suffix to generated vector column names:
 
 ```esql
 FROM books
@@ -98,7 +98,7 @@ book_no:keyword | title_vec:dense_vector | publisher_vec:dense_vector
 7480 | [50.0, 49.0, 48.0] | [45.0, 49.0, 53.0]
 8605 | [45.0, 49.0, 53.0] | [50.0, 49.0, 50.0]
 
-Embed a computed `text` or `keyword` column created earlier in the query:
+Embed a computed `description` column created with `EVAL`:
 
 ```esql
 FROM books
@@ -113,7 +113,7 @@ book_no:keyword | description:keyword | description_dense_vector:dense_vector
 7480 | The Hobbit (Mariner Books) | [45.0, 49.0, 49.0]
 8605 | Dead Souls (Vintage) | [53.0, 48.0, 53.0]
 
-Diversify generated vectors with `MMR` to remove near-duplicate rows:
+Generate title vectors and diversify results with `MMR`:
 
 ```esql
 FROM books
@@ -129,7 +129,7 @@ book_no:keyword | title:text
 1502 | Selected Passages from Correspondence with Friends
 1937 | The Best Short Stories of Dostoevsky (Modern Library)
 
-Embed base64-encoded image data through a multimodal endpoint:
+Embed a base64-encoded image data URI through a multimodal endpoint:
 
 ```esql
 ROW input = "data:image/jpeg;base64,V2hvIGlzIFZpY3RvciBIdWdvPw=="
@@ -143,6 +143,10 @@ data:image/jpeg;base64,V2hvIGlzIFZpY3RvciBIdWdvPw== | [-56.0, -50.0, -48.0]
 
 For a multivalued input column, `DENSE_VECTOR` embeds only the first value and reports a warning for the discarded values. The first value depends on how the column is loaded. To select the value explicitly, reduce the column first with a function such as `MV_FIRST`.
 
-`DENSE_VECTOR` uses an inference endpoint to embed its input. For text input, the endpoint must use the `text_embedding` or multimodal `embedding` task type. For image input, the endpoint must use the multimodal `embedding` task type, and no default image endpoint is available, so you must specify `inference_id`.
+If no inference endpoint resolves, the query fails with an error naming each candidate and why it was rejected. Specify `inference_id` to select an endpoint explicitly.
+
+Embeddings produced by different models generally do not share the same vector space. Specify `inference_id` when generated vectors must remain comparable across queries or deployments.
 
 In a cross-cluster query or a cross-project query, `DENSE_VECTOR` runs on the cluster or project that receives the query. The inference endpoint must exist there, even when the documents come from a remote cluster or a linked project.
+
+Resource usage and availability are controlled by dynamic cluster settings, including `esql.command.dense_vector.enabled`, `esql.command.dense_vector.limit`, `esql.command.dense_vector.batch_size`, and `esql.command.dense_vector.default_inference_id`.
