@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { consumeRunQuota } from './consume';
+export { consumeRunQuota, releaseRunQuota } from './consume';
 export { assertCanManageRunQuotas, canManageRunQuotas } from './privileges';
 export {
   createRunQuotaInternalRepository,
