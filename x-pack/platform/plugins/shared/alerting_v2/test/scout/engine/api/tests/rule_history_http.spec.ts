@@ -22,6 +22,8 @@ import {
 } from '../fixtures';
 
 const CHANGE_HISTORY_URL = testData.INTERNAL_CHANGE_HISTORY_RULES_API_PATH;
+const OTHER_SPACE_ID = 'rule-history-restore-other-space';
+const inOtherSpace = (path: string): string => `/s/${OTHER_SPACE_ID}${path}`;
 
 apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
   let readerHeaders: Record<string, string>;
@@ -29,6 +31,8 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
 
   apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
     await apiServices.alertingV2.rules.cleanUp();
+    await apiServices.spaces.delete(OTHER_SPACE_ID);
+    await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
 
     const readerCredentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
       ALERTING_V2_RULES_READ_ROLE
@@ -43,6 +47,7 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
+    await apiServices.spaces.delete(OTHER_SPACE_ID);
   });
 
   apiTest(
@@ -325,6 +330,84 @@ apiTest.describe('Rule change history API', { tag: testData.API_ENGINE_NON_MKI_T
       const unchanged = await apiServices.alertingV2.rules.get(created.id);
 
       expect(unchanged.version).toBe(created.version);
+    }
+  );
+
+  apiTest(
+    'restore: does not apply a change recorded in another space',
+    async ({ apiClient, apiServices }) => {
+      const otherSpaceRule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'change-history-http-restore-other-space-original' },
+          schedule: { every: '1d' },
+        }),
+        { spaceId: OTHER_SPACE_ID }
+      );
+
+      await apiServices.alertingV2.ruleChangesHistory.waitForAtLeast(1, {
+        ruleId: otherSpaceRule.id,
+        action: RuleChangesHistoryAction.ruleCreate,
+        spaceId: OTHER_SPACE_ID,
+      });
+
+      const otherSpaceRuleUrl = inOtherSpace(
+        `${testData.RULE_API_PATH}/${encodeURIComponent(otherSpaceRule.id)}`
+      );
+      const renamedResponse = await apiClient.put(otherSpaceRuleUrl, {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: 'change-history-http-restore-other-space-renamed' },
+          schedule: { every: '1d' },
+        }),
+      });
+
+      expect(renamedResponse).toHaveStatusCode(200);
+
+      const renamed: RuleResponse = renamedResponse.body;
+
+      const otherSpaceListResponse = await apiClient.get(
+        inOtherSpace(`${CHANGE_HISTORY_URL}?rule_id=${encodeURIComponent(otherSpaceRule.id)}`),
+        { headers: readerHeaders }
+      );
+
+      expect(otherSpaceListResponse).toHaveStatusCode(200);
+
+      const otherSpaceList: ListRuleChangeHistoryResponse = otherSpaceListResponse.body;
+      const otherSpaceCreateItem = otherSpaceList.items.find(
+        ({ action }) => action === RuleChangesHistoryAction.ruleCreate
+      );
+
+      expect(otherSpaceCreateItem).toBeDefined();
+
+      const restorePath = `${CHANGE_HISTORY_URL}/${encodeURIComponent(
+        otherSpaceCreateItem?.id ?? ''
+      )}/_restore`;
+
+      const crossSpaceResponse = await apiClient.post(restorePath, { headers: writerHeaders });
+
+      expect(crossSpaceResponse).toHaveStatusCode(404);
+      expect(crossSpaceResponse.body).toMatchObject({ code: 'RULE_CHANGE_NOT_FOUND' });
+
+      const otherSpaceRuleAfterResponse = await apiClient.get(otherSpaceRuleUrl, {
+        headers: readerHeaders,
+      });
+
+      expect(otherSpaceRuleAfterResponse).toHaveStatusCode(200);
+      expect(otherSpaceRuleAfterResponse.body).toStrictEqual(renamed);
+
+      // The same change restores from its own space, so the 404 above comes from space scoping.
+      const sameSpaceResponse = await apiClient.post(inOtherSpace(restorePath), {
+        headers: writerHeaders,
+      });
+
+      expect(sameSpaceResponse).toHaveStatusCode(200);
+      expect(sameSpaceResponse.body).toMatchObject({
+        id: otherSpaceRule.id,
+        version: renamed.version + 1,
+        metadata: expect.objectContaining({
+          name: 'change-history-http-restore-other-space-original',
+        }),
+      });
     }
   );
 });
