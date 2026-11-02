@@ -1,0 +1,14 @@
+env:
+  KBN_EVALS: '1'
+  KBN_EVALS_WEEKLY: '1'
+  NIGHTSHIFT_EVAL_TASK: 'all'
+  EVAL_MODEL_GROUPS: 'eis/anthropic-claude-4.6-sonnet,eis/openai-gpt-5.4'
+steps:
+  - label: ':clipboard: Plan Nightshift Evals (weekly)'
+    command: bash .buildkite/scripts/steps/nightshift_evals/plan_steps.sh
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

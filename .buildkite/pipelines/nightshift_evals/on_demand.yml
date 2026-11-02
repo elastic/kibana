@@ -1,0 +1,11 @@
+env:
+  KBN_EVALS: '1'
+steps:
+  - label: ':clipboard: Plan Nightshift Evals (on-demand)'
+    command: bash .buildkite/scripts/steps/nightshift_evals/plan_steps.sh
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
