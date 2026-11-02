@@ -20,10 +20,13 @@ import {
   getPlaceholderNamesFromElement,
   removePlaceholderByName as removePlaceholderByNameFromDom,
 } from './image_placeholder';
+import { getTextBeforeCursor } from './command_menu/utils/get_text_before_cursor';
+import { isAtWordBoundary } from './command_menu/command_matcher';
 import {
   createCommandRange,
   createTextFragment,
   ensureCaretTargetBeforeFirstBadge,
+  insertNodeAtCursor,
   insertSpaceAfter,
   placeCursorAfter,
   placeCursorAtEnd,
@@ -50,6 +53,7 @@ export interface MessageEditorController {
   getContent: () => string;
   setContent: (text: string) => void;
   clear: () => void;
+  insertText: (text: string) => void;
   isEmpty: boolean;
   getPlaceholderNames: () => string[];
   removePlaceholderByName: (name: string) => void;
@@ -203,10 +207,12 @@ const useMessageEditorInstance = ({
 const useMessageEditorController = ({
   ref,
   syncIsEmpty,
+  notifyInput,
   isEmpty,
 }: {
   ref: RefObject<HTMLDivElement>;
   syncIsEmpty: () => void;
+  notifyInput: () => void;
   isEmpty: boolean;
 }): MessageEditorController => {
   const controller = useMemo(
@@ -247,6 +253,22 @@ const useMessageEditorController = ({
           syncIsEmpty();
         }
       },
+      insertText: (text: string) => {
+        const editor = ref.current;
+        if (!editor) {
+          return;
+        }
+        // Checked before focus(), because focus() moves the caret to the start of the editor
+        const isCaretInside = editor.contains(window.getSelection()?.anchorNode ?? null);
+        editor.focus();
+        if (!isCaretInside) {
+          placeCursorAtEnd(editor);
+        }
+        const textBefore = getTextBeforeCursor(editor);
+        const needsSpace = !isAtWordBoundary(textBefore, textBefore.length);
+        insertNodeAtCursor(document.createTextNode(`${needsSpace ? ' ' : ''}${text}`));
+        notifyInput();
+      },
       getPlaceholderNames: () => (ref.current ? getPlaceholderNamesFromElement(ref.current) : []),
       removePlaceholderByName: (name: string) => {
         if (ref.current) {
@@ -256,7 +278,7 @@ const useMessageEditorController = ({
       },
       isEmpty,
     }),
-    [ref, isEmpty, syncIsEmpty]
+    [ref, isEmpty, syncIsEmpty, notifyInput]
   );
   return controller;
 };
@@ -306,7 +328,10 @@ export const useMessageEditor = (
   }, [maxLength]);
 
   const instance = useMessageEditorInstance({ ref, syncIsEmpty, onEditorFocus, onContentChange });
-  const controller = useMessageEditorController({ ref, syncIsEmpty, isEmpty });
+  const onChangeRef = useRef(instance.onChange);
+  onChangeRef.current = instance.onChange;
+  const notifyInput = useCallback(() => onChangeRef.current(), []);
+  const controller = useMessageEditorController({ ref, syncIsEmpty, notifyInput, isEmpty });
   const messageEditor = useMemo(
     () => ({
       messageEditor: instance,
