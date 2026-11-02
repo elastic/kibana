@@ -10,6 +10,7 @@ import React from 'react';
 import { ContextLandingPage } from './context_landing_page';
 import { AiIndexDetailPage } from './pages/ai_index_detail_page';
 import { KiPage } from './pages/ki_page';
+import { SessionMemoryPage } from './pages/session_memory_page';
 import { CONTEXT_ENGINE_PATHS } from './paths';
 
 export const ContextEngineRoutes = () => (
@@ -28,6 +29,7 @@ export const ContextEngineRoutes = () => (
       exact
       component={AiIndexDetailPage}
     />
+    <Route path={CONTEXT_ENGINE_PATHS.sessionMemory} exact component={SessionMemoryPage} />
     <Route path={CONTEXT_ENGINE_PATHS.landing} exact component={ContextLandingPage} />
   </Routes>
 );

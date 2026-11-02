@@ -46,6 +46,43 @@ export const MAX_SIGNAL_GROUPS = 100;
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
 
+/**
+ * Session memory and session events routes (internal): thin proxies to the Elasticsearch
+ * `_context_engine` APIs, run as the internal user.
+ */
+export const SESSION_MEMORY_PATH = `${INTERNAL_API_PATH}/session_memory`;
+export const SESSION_MEMORY_REMEMBER_PATH = `${SESSION_MEMORY_PATH}/_remember`;
+export const SESSION_MEMORY_SEARCH_PATH = `${SESSION_MEMORY_PATH}/_search`;
+export const SESSION_MEMORY_BY_SESSION_PATH = `${SESSION_MEMORY_PATH}/{sessionId}`;
+export const SESSION_EVENTS_PATH = `${INTERNAL_API_PATH}/session_events`;
+export const SESSION_EVENTS_SAVE_PATH = `${SESSION_EVENTS_PATH}/_save`;
+export const SESSION_EVENTS_BY_SESSION_PATH = `${SESSION_EVENTS_PATH}/{sessionId}`;
+
+/** Version of the internal session memory API, shared between route registration and the browser client. */
+export const SESSION_MEMORY_INTERNAL_API_VERSION = '1';
+
+/** Elasticsearch `_context_engine` endpoints the session memory routes proxy to. */
+export const ES_SESSION_MEMORY_PATH = '/_context_engine/session_memory';
+export const ES_SESSION_EVENTS_PATH = '/_context_engine/session_events';
+
+/** Default and maximum number of hits for a session memory search. */
+export const DEFAULT_SESSION_MEMORY_SEARCH_SIZE = 10;
+export const MAX_SESSION_MEMORY_SEARCH_SIZE = 100;
+/** Default and maximum page size when listing a session's memories or events. */
+export const DEFAULT_SESSION_LIST_SIZE = 100;
+export const MAX_SESSION_LIST_SIZE = 1000;
+
+export const MAX_SESSION_MEMORY_ID_LENGTH = 256;
+export const MAX_SESSION_MEMORY_CONTENT_LENGTH = 65536;
+export const MAX_SESSION_EVENT_TRANSCRIPT_LENGTH = 1024 * 1024;
+export const MAX_SESSION_MEMORY_AI_INDEX_IDS = 100;
+export const MAX_SESSION_MEMORY_MEDIA_ITEMS = 10;
+/** Decoded size cap on an uploaded media item; the inference endpoint rejects larger payloads. */
+export const MAX_SESSION_MEMORY_MEDIA_BYTES = 1024 * 1024;
+/** Base64 inflates by 4/3, plus the `data:<mime>;base64,` prefix. */
+export const MAX_SESSION_MEMORY_MEDIA_VALUE_LENGTH =
+  Math.ceil(MAX_SESSION_MEMORY_MEDIA_BYTES * (4 / 3)) + 256;
+
 /** Default and maximum page size when listing improvements (one entry per improvement lineage). */
 export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
 export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;

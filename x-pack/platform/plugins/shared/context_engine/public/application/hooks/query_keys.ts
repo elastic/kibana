@@ -56,4 +56,8 @@ export const contextEngineQueryKeys = {
     byTag: (tag: string, from: number, size: number) =>
       ['context_engine', 'signals', 'by_tag', tag, from, size] as const,
   },
+  sessionEvents: {
+    list: (sessionId: string, space: string | undefined, aiIndexId: string | undefined) =>
+      ['context_engine', 'session_events', sessionId, space ?? '', aiIndexId ?? ''] as const,
+  },
 };
