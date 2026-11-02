@@ -247,6 +247,10 @@ const NO_ALERTS_ACCESS_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsAccess',
   { defaultMessage: 'Requires read access to alerts' }
 );
+const NO_ALERTS_INDEX_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsIndex',
+  { defaultMessage: 'Requires detection alerts' }
+);
 const NO_ANOMALIES_ACCESS_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.tiles.noAnomaliesAccess',
   { defaultMessage: 'Requires read access to ML anomalies' }
@@ -659,6 +663,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
     isTimedOut: alertBasedTimedOut,
+    isMissingIndex: alertBasedMissingIndex,
     error: alertBasedError,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
@@ -1050,11 +1055,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isLoading: alertBasedLoading,
         hasCount: alertBasedHasCount,
         entityIds: severeAlertsEntityIds,
-        isUnavailable: Boolean(alertBasedError),
+        // Without an alerts index the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(alertBasedError) || alertBasedMissingIndex,
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
           ? TILE_TIMEOUT_MESSAGE
+          : alertBasedMissingIndex
+          ? NO_ALERTS_INDEX_MESSAGE
           : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -1210,11 +1218,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isLoading: alertBasedLoading,
         hasCount: alertBasedHasCount,
         entityIds: watchlistedEntityIds,
-        isUnavailable: Boolean(alertBasedError),
+        // Without an alerts index the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(alertBasedError) || alertBasedMissingIndex,
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
           ? TILE_TIMEOUT_MESSAGE
+          : alertBasedMissingIndex
+          ? NO_ALERTS_INDEX_MESSAGE
           : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -1279,6 +1290,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       alertsTrend,
       alertBasedLoading,
       alertBasedTimedOut,
+      alertBasedMissingIndex,
       isDeltaLoading,
       alertBasedHistoryMissing,
       anomaliesCount,
