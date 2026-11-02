@@ -97,6 +97,14 @@ export const decisionTreeReinforceStepDefinition = ({
         logger: context.logger,
         signal: context.abortSignal,
       });
+      // Reinforcing a tree from a conversation this caller cannot read would mean reinforcing it
+      // from the hook's partial view of the round, so the round is left alone instead.
+      if (loadedRound.source === 'conversation_unreadable') {
+        context.logger.info(
+          `Skipped decision tree reinforcement — conversation ${conversationId} is not readable by this caller`
+        );
+        return { output: { message: '', skipped: true } };
+      }
       const now = new Date().toISOString();
       const round = buildInvestigationRound({
         // Liquid renders an absent input as '', so empty strings count as unset.

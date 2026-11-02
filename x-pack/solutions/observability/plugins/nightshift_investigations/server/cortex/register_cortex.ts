@@ -177,6 +177,13 @@ export const runCortexOptimize = async ({
     signal,
   });
 
+  if (loadedRound.source === 'conversation_unreadable') {
+    logger.info(
+      `Cortex optimizer skipped — conversation ${conversationId} is not readable by this caller`
+    );
+    return;
+  }
+
   const sandboxToolCalls = loadedRound.toolCalls.filter(
     ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
   );

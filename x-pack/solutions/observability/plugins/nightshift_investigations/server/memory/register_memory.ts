@@ -110,7 +110,7 @@ export const loadRoundSteps = async ({
   logger: Logger;
   signal?: AbortSignal;
   retryDelaysMs?: readonly number[];
-}): Promise<TranscriptStep[] | undefined> => {
+}): Promise<{ steps?: TranscriptStep[]; unreadable: boolean }> => {
   const loaded = await loadInvestigationRound({
     agentBuilder,
     request,
@@ -121,9 +121,12 @@ export const loadRoundSteps = async ({
     signal,
     retryDelaysMs,
   });
-  return loaded.source === 'persisted_round'
-    ? stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0])
-    : undefined;
+  return {
+    unreadable: loaded.source === 'conversation_unreadable',
+    ...(loaded.source === 'persisted_round'
+      ? { steps: stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0]) }
+      : {}),
+  };
 };
 
 export const runMemoryOptimize = async ({
@@ -191,16 +194,24 @@ export const runMemoryOptimize = async ({
     return undefined;
   }
 
-  const investigation =
-    (await loadRoundSteps({
-      agentBuilder: getAgentBuilder(),
-      request,
-      conversationId,
-      roundId,
-      roundIndex,
-      logger,
-      signal,
-    })) ?? stepsFromToolCalls(toolCalls);
+  const { steps: roundSteps, unreadable } = await loadRoundSteps({
+    agentBuilder: getAgentBuilder(),
+    request,
+    conversationId,
+    roundId,
+    roundIndex,
+    logger,
+    signal,
+  });
+  // Learning from a conversation this caller cannot read would mean learning from the hook's
+  // partial view of it, so the round is left alone instead.
+  if (unreadable) {
+    logger.info(
+      `Memory optimize skipped — conversation ${conversationId} is not readable by this caller`
+    );
+    return undefined;
+  }
+  const investigation = roundSteps ?? stepsFromToolCalls(toolCalls);
 
   const store = createMemoryStore({ esClient, logger, spaceId, signal });
   return optimizeMemory({
