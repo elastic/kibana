@@ -88,7 +88,7 @@ describe('Alert Triage batch workflow', () => {
       expect(stepByName('load_alerts')).toEqual(
         expect.objectContaining({
           type: 'alertzero.triage.loadAlerts',
-          with: { alert_ids: '${{ inputs.alert_ids }}', space_id: '{{ workflow.spaceId }}' },
+          with: { alert_ids: '${{ inputs.alert_ids }}' },
         })
       );
       const names = batchSteps.map(({ name }) => name);

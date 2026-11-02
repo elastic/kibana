@@ -7,10 +7,7 @@
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import {
-  AlertDocumentsTooLargeError,
-  TooManyAlertDocumentsError,
-} from '@kbn/workflows-management-plugin/server';
+import { AlertDocumentsTooLargeError } from '@kbn/workflows-management-plugin/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import {
@@ -44,9 +41,10 @@ export interface AlertTriageStepDependencies {
 }
 
 export interface LoadAlertsStepDependencies {
-  getWorkflowsManagement: () =>
-    | Pick<WorkflowsServerPluginSetup['management'], 'loadAlertDocuments'>
-    | undefined;
+  getWorkflowsManagement: () => Pick<
+    WorkflowsServerPluginSetup['management'],
+    'loadAlertDocuments'
+  >;
 }
 
 const toApiError = (error: unknown, action: string): ExecutionError => {
@@ -173,32 +171,18 @@ export const getTriageLoadAlertsStepDefinition = ({
     ...triageLoadAlertsStepCommonDefinition,
     handler: async ({ input, contextManager }) => {
       try {
-        const management = getWorkflowsManagement();
-        if (management && input.space_id) {
-          // The loader reads the index as the user and checks no space access, so the space comes
-          // from the execution and an input naming another space (or a wildcard) is refused.
-          const { spaceId } = contextManager.getContext().workflow;
-          if (input.space_id !== spaceId) {
-            throw new ExecutionError({
-              type: 'InvalidInput',
-              message: `space_id must be the workflow's space "${spaceId}".`,
-            });
-          }
-          const { alerts, missingIds } = await management.loadAlertDocuments({
-            request: contextManager.getFakeRequest(),
-            alerts: { ids: input.alert_ids, index: `.alerts-security.alerts-${spaceId}` },
-            sourceIncludes: LOADED_ALERT_FIELDS,
-            maxBytes: MAX_LOADED_ALERT_BYTES,
-          });
-          return { output: { alerts, missing_alert_ids: missingIds } };
-        }
-        const { alerts, missingAlertIds } = await loadAlertsByIds(contextManager, input.alert_ids);
-        return { output: { alerts, missing_alert_ids: missingAlertIds } };
+        // The loader reads the index as the user and checks no space access, so the space is the
+        // execution's own and never comes from the input.
+        const { spaceId } = contextManager.getContext().workflow;
+        const { alerts, missingIds } = await getWorkflowsManagement().loadAlertDocuments({
+          request: contextManager.getFakeRequest(),
+          alerts: { ids: input.alert_ids, index: `.alerts-security.alerts-${spaceId}` },
+          sourceIncludes: LOADED_ALERT_FIELDS,
+          maxBytes: MAX_LOADED_ALERT_BYTES,
+        });
+        return { output: { alerts, missing_alert_ids: missingIds } };
       } catch (error) {
-        if (
-          error instanceof AlertDocumentsTooLargeError ||
-          error instanceof TooManyAlertDocumentsError
-        ) {
+        if (error instanceof AlertDocumentsTooLargeError) {
           throw new ExecutionError({ type: 'StepSizeLimitExceeded', message: error.message });
         }
         throw toApiError(error, 'load triage batch alerts');

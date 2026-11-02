@@ -128,14 +128,9 @@ export const triagePlanSweepStepCommonDefinition: CommonStepDefinition<
   outputSchema: planSweepOutputSchema,
 };
 
-const loadAlertsInputSchema = lazySchema(() =>
-  z.object({
-    alert_ids: z.array(idSchema).min(1).max(100).describe('Alerts of one triage batch.'),
-    space_id: idSchema
-      .optional()
-      .describe('Space of the alerts. Selects the alerts index to read.'),
-  })
-);
+const loadAlertsInputSchema = z.object({
+  alert_ids: z.array(idSchema).min(1).max(100).describe('Alerts of one triage batch.'),
+});
 
 const loadAlertsOutputSchema = lazySchema(() =>
   z.object({
