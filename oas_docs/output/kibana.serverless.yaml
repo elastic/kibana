@@ -158854,6 +158854,10 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding deployment that manages this package policy. Set by Fleet, read-only.
+          nullable: true
+          type: string
         output_id:
           nullable: true
           type: string
@@ -159287,6 +159291,10 @@ components:
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
+          type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding deployment that manages this package policy. Set by Fleet, read-only.
+          nullable: true
           type: string
         output_id:
           nullable: true
@@ -176476,6 +176484,10 @@ components:
         namespace:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
+          type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding deployment that manages this package policy. Set by Fleet, read-only.
+          nullable: true
           type: string
         output_id:
           nullable: true
