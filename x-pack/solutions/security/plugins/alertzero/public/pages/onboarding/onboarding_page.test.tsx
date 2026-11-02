@@ -84,6 +84,7 @@ const NO_MODEL_WORKERS_RESPONSE = {
 };
 
 const FEATURE_SETTINGS_URL = '/app/management/modelManagement/model_settings';
+const INFERENCE_ENDPOINTS_URL = '/app/management/modelManagement/inference_endpoints';
 
 const enabledWorkerBody = JSON.stringify({
   enabled: true,
@@ -117,11 +118,11 @@ const renderPage = ({
   // coreMock.createStart() does not populate feature capabilities; set the
   // alertzero.write capability so the component can branch on it.
   (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: canWrite };
-  coreStart.application.getUrlForApp.mockImplementation((appId, options) =>
-    options?.deepLinkId === 'model_settings'
-      ? FEATURE_SETTINGS_URL
-      : `/app/${appId}${options?.path ?? ''}`
-  );
+  coreStart.application.getUrlForApp.mockImplementation((appId, options) => {
+    if (options?.deepLinkId === 'model_settings') return FEATURE_SETTINGS_URL;
+    if (options?.deepLinkId === 'inference_endpoints') return INFERENCE_ENDPOINTS_URL;
+    return `/app/${appId}${options?.path ?? ''}`;
+  });
   // Mock http.get so useWorkers() always returns the configured server response
   // (including on background refetches), and http.patch so mutation calls are
   // interceptable per-test.
@@ -272,22 +273,21 @@ describe('OnboardingPage', () => {
   });
 
   describe('when the space has no AI model', () => {
-    it('explains the missing models, links to Feature settings and disables the controls', () => {
+    it('explains the missing models, links to inference endpoints and Feature settings, and disables the controls', () => {
       const httpPatch = jest.fn();
       renderPage({ httpPatch, serverWorkers: NO_MODEL_WORKERS_RESPONSE });
 
       const callout = screen.getByTestId('alertZeroOnboardingNoModelCallout');
       expect(callout).toHaveTextContent('Workers need an AI model');
       expect(callout).toHaveTextContent(
-        'Add an AI connector, or choose a model in Feature settings if you already have one. Then come back to finish setting up your Workers.'
+        'Add an AI model as an inference endpoint, then come back to finish setting up your Workers. To choose which model each tier uses, open Feature settings.'
       );
-      const addConnector = screen.getByTestId('alertZeroOnboardingNoModelAddConnectorButton');
-      expect(addConnector).toHaveTextContent('Add connector');
-      expect(addConnector).toHaveAttribute(
-        'href',
-        '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
+      const addEndpoint = screen.getByTestId(
+        'alertZeroOnboardingNoModelAddInferenceEndpointButton'
       );
-      expect(addConnector).toHaveAttribute('target', '_blank');
+      expect(addEndpoint).toHaveTextContent('Add inference endpoint');
+      expect(addEndpoint).toHaveAttribute('href', INFERENCE_ENDPOINTS_URL);
+      expect(addEndpoint).toHaveAttribute('target', '_blank');
       const action = screen.getByTestId('alertZeroOnboardingNoModelFeatureSettingsButton');
       expect(action).toHaveTextContent('Open Feature settings');
       expect(action).toHaveAttribute('href', FEATURE_SETTINGS_URL);

@@ -119,13 +119,13 @@ export const NO_MODEL_CALLOUT_TEXT = i18n.translate(
   'xpack.alertzero.onboarding.noModelCallout.text',
   {
     defaultMessage:
-      'Add an AI connector, or choose a model in Feature settings if you already have one. Then come back to finish setting up your Workers.',
+      'Add an AI model as an inference endpoint, then come back to finish setting up your Workers. To choose which model each tier uses, open Feature settings.',
   }
 );
 
-export const NO_MODEL_CALLOUT_ADD_CONNECTOR_ACTION = i18n.translate(
-  'xpack.alertzero.onboarding.noModelCallout.addConnectorAction',
-  { defaultMessage: 'Add connector' }
+export const NO_MODEL_CALLOUT_ADD_INFERENCE_ENDPOINT_ACTION = i18n.translate(
+  'xpack.alertzero.onboarding.noModelCallout.addInferenceEndpointAction',
+  { defaultMessage: 'Add inference endpoint' }
 );
 
 export const NO_MODEL_CALLOUT_ACTION = i18n.translate(
