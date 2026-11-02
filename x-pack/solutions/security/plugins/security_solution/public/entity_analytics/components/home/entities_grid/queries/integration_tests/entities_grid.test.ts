@@ -189,7 +189,7 @@ const FILTER_CASES: readonly FilterCase[] = [
     { entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Unknown] } },
     'entity.name',
     'asc',
-    ['host:h3', 'service:payments'],
+    ['service:payments', 'host:h3'],
   ],
   [
     'an unknown risk level filter with a risk level',
@@ -201,7 +201,7 @@ const FILTER_CASES: readonly FilterCase[] = [
     },
     'entity.name',
     'asc',
-    ['host:h1', 'host:h3', 'service:payments'],
+    ['service:payments', 'host:h1', 'host:h3'],
   ],
   [
     // host:h1 is high impact itself, and extreme through one of its aliases.
