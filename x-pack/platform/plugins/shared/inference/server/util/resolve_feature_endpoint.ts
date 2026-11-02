@@ -33,7 +33,7 @@ export const resolveFeatureEndpointOrThrow = async ({
 }): Promise<ResolvedFeatureEndpoint> => {
   if (!resolveFeatureEndpoint) {
     throw createInferenceInternalError(
-      `Cannot call chatComplete with featureId "${featureId}": no feature endpoint resolver is registered`
+      `Cannot resolve feature "${featureId}": no feature endpoint resolver is registered`
     );
   }
   // Skips the resolver call for an already-aborted request; callers handle later aborts.

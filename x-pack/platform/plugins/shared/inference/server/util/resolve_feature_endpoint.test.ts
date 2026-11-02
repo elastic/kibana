@@ -24,7 +24,7 @@ describe('resolveFeatureEndpointOrThrow', () => {
   it('throws an internal error when no resolver is registered', async () => {
     await expect(resolveFeatureEndpointOrThrow({ featureId: 'my_feature' })).rejects.toMatchObject({
       code: InferenceTaskErrorCode.internalError,
-      message: expect.stringContaining('no feature endpoint resolver is registered'),
+      message: 'Cannot resolve feature "my_feature": no feature endpoint resolver is registered',
     });
   });
 
