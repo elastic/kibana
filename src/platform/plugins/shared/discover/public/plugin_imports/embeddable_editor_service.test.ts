@@ -246,7 +246,7 @@ describe('EmbeddableEditorService', () => {
     );
   });
 
-  it('filters SaveByReference controls only when targeting the originating dashboard', () => {
+  it('sends SaveByReference controls only to the originating dashboard', () => {
     const controlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
       discoverHostPanel: {
         ...mockControlState.panel1,
@@ -309,24 +309,26 @@ describe('EmbeddableEditorService', () => {
       state: { savedObjectId: 'saved-search-1', controlGroupState },
     });
 
+    // Another dashboard's controls are unknown, so the panel adds the missing ones on arrival
     expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenLastCalledWith(
       'dashboard',
       {
         path: '#/view/dashboard-2',
         state: [
-          ...Object.values(controlGroupState).map((serializedState) => ({
-            type: ESQL_CONTROL,
-            serializedState,
-            embeddableId: undefined,
-          })),
-          expectedSearchPackage,
+          {
+            ...expectedSearchPackage,
+            serializedState: {
+              ...expectedSearchPackage.serializedState,
+              addMissingSessionControls: true,
+            },
+          },
         ],
       }
     );
   });
 
   it.each(['#/view/dashboard-1', '#/create'])(
-    'transfers standalone session controls to %s for destination reconciliation',
+    'lets the panel add the missing standalone session controls on arrival at %s',
     (path) => {
       const { service, embeddableStateTransfer } = createService();
 
@@ -342,13 +344,12 @@ describe('EmbeddableEditorService', () => {
           path,
           state: [
             {
-              type: ESQL_CONTROL,
-              serializedState: mockControlState.panel1,
-              embeddableId: undefined,
-            },
-            {
               type: SEARCH_EMBEDDABLE_TYPE,
-              serializedState: { ref_id: 'saved-search-1', overrides: {} },
+              serializedState: {
+                ref_id: 'saved-search-1',
+                overrides: {},
+                addMissingSessionControls: true,
+              },
               embeddableId: undefined,
             },
           ],
@@ -519,6 +520,7 @@ describe('EmbeddableEditorService', () => {
             serializedState: {
               ref_id: 'saved-search-1',
               overrides: {},
+              addMissingSessionControls: true,
             },
             embeddableId: undefined,
           },

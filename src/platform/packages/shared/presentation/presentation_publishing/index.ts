@@ -297,6 +297,10 @@ export {
   apiPublishesSettings,
   type PublishesSettings,
 } from './interfaces/containers/publishes_settings';
+export {
+  apiPublishesChildrenLoading,
+  type PublishesChildrenLoading,
+} from './interfaces/containers/publishes_children_loading';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
 

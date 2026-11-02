@@ -17,7 +17,7 @@ import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { SearchEmbeddableByReferenceState } from '../../common/embeddable/types';
-import type { SearchEmbeddablePanelApiState } from '../embeddable/types';
+import type { SearchEmbeddableInputState } from '../embeddable/types';
 
 /**
  * State the originating dashboard hands to the Discover editor. `discoverSessionTab` is only set
@@ -84,11 +84,11 @@ type CombinedTransferOptions =
 
 type DiscoverTransferSerializedState =
   | ControlPanelState<OptionsListESQLControlState>
-  | SearchEmbeddablePanelApiState
+  | SearchEmbeddableInputState
   | {};
 
 interface GetSerializedStateResult {
-  serializedState: SearchEmbeddablePanelApiState | {};
+  serializedState: SearchEmbeddableInputState | {};
   controlGroupState: ControlPanelsState<OptionsListESQLControlState>;
 }
 
@@ -214,6 +214,18 @@ export class EmbeddableEditorService {
 
     if (action === TransferAction.SaveByReference) {
       const { state } = options as ByReferenceTransferOptions;
+      if (!targetsOriginatingEditor) {
+        // The target dashboard's controls are unknown here, so the panel adds the session's
+        // missing controls itself once the dashboard has loaded, as add-from-library does
+        return {
+          serializedState: {
+            ref_id: state.savedObjectId,
+            overrides: {},
+            addMissingSessionControls: true,
+          },
+          controlGroupState: {},
+        };
+      }
       return {
         serializedState: { ref_id: state.savedObjectId, overrides: {} },
         controlGroupState: getControlsMissingFromDashboard({

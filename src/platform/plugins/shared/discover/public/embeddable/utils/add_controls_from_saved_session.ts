@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { CanAddNewPanel } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import { getAllEsqlControls } from '@kbn/esql-controls-utils';
 import { omit } from 'lodash';
 import { parseControlGroupJson } from '../../application/main/state_management/redux/utils';
 
@@ -18,14 +20,20 @@ export const addControlsFromSavedSession = async (
   uuid?: string | undefined
 ): Promise<void> => {
   const controlsState = parseControlGroupJson(controlGroupJson);
-  const esqlVariables$ = container.esqlVariables$;
-  const esqlVariables = esqlVariables$?.getValue();
+  const existingVariableNames = new Set(
+    (container.esqlVariables$?.getValue() ?? []).map(({ key }) => key)
+  );
+  // Published variables can lag behind the controls (e.g. with auto-apply off), so also check the
+  // controls themselves
+  if (apiIsPresentationContainer(container)) {
+    for (const { variable_name: variableName } of Object.values(getAllEsqlControls(container))) {
+      existingVariableNames.add(variableName);
+    }
+  }
 
-  // Only add controls whose variableName does not exist in current esqlVariables
+  // Only add controls whose variableName does not exist on the container yet
   for (const panel of Object.values(controlsState)) {
-    const variableName = panel.variable_name;
-    const variableExists = esqlVariables?.some((esqlVar) => esqlVar.key === variableName);
-    if (!variableExists) {
+    if (!existingVariableNames.has(panel.variable_name)) {
       await container.addNewPanel(
         {
           panelType: ESQL_CONTROL,

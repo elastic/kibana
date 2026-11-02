@@ -29,6 +29,7 @@ import type {
   HasType,
   HasUniqueId,
   PresentationContainer,
+  PublishesChildrenLoading,
   PublishesDataLoading,
   PublishesDataSources,
   PublishesDescription,
@@ -178,6 +179,7 @@ export type DashboardApi = CanExpandPanels &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasUniqueId &
   PresentationContainer &
+  PublishesChildrenLoading &
   PublishesDataLoading &
   PublishesDataSources &
   PublishesDescription &
