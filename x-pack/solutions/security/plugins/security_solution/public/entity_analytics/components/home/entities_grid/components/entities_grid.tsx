@@ -38,9 +38,10 @@ import { getEntityGridToolbarVisibility } from './entities_grid_toolbar';
 import { EntityGridBodyContext, useEntityGridView } from './entities_grid_view_context';
 import type { EntityGridView } from './entities_grid_view_context';
 import { DataViewContext } from '../../entities_table';
-import { getReadableColumns, isGridColumnId } from '../grid_columns';
+import { COLUMN_ACTIONS, getReadableColumns, isGridColumnId } from '../grid_columns';
 import type { ReadAccess } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
+import { useGridLoadTelemetry } from '../hooks/use_grid_load_telemetry';
 import { RISK_SCORE_NORM_FIELD } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 
@@ -115,6 +116,15 @@ export interface EntitiesGridProps {
   /** Without them the grid has no toolbar, as inside a group. */
   toolbarControls?: React.ReactNode;
   onFullScreenChange?: (isFullScreen: boolean) => void;
+  /** Only the page's own grid reports its loads; the grids inside groups don't pass it. */
+  loadTelemetry?: {
+    /** What the user asked for: a new key is a new load. */
+    runKey: string;
+    /** The search overrides or the tile's entity ids are still resolving for this load. */
+    isFilterPending: boolean;
+    hasTileFilter: boolean;
+    hasEntityFilters: boolean;
+  };
 }
 
 export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
@@ -133,6 +143,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   readAccess,
   toolbarControls,
   onFullScreenChange,
+  loadTelemetry,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { dataView } = useContext(DataViewContext);
@@ -189,6 +200,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     updatedAt,
     isFetching,
     isAtLoadLimit,
+    loadState,
     prefetch,
     onRowsInViewChange,
   } = useEntityGridData(
@@ -206,6 +218,22 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     },
     { enrichRowsInView: true }
   );
+
+  useGridLoadTelemetry({
+    skip: !loadTelemetry,
+    runKey: loadTelemetry?.runKey ?? '',
+    isFilterPending: !!loadTelemetry?.isFilterPending,
+    loadState,
+    isFetching,
+    meta: {
+      rowsMode,
+      sortField: readableSortField,
+      timeRange,
+      hasTileFilter: !!loadTelemetry?.hasTileFilter,
+      hasEntityFilters: !!loadTelemetry?.hasEntityFilters,
+      isAtLoadLimit,
+    },
+  });
 
   const onAddColumn = useCallback(
     (columnId: string) =>
@@ -244,6 +272,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       keepFields.map((id) => ({
         id,
         displayAsText: dataView?.getFieldByName(id)?.customLabel || id,
+        actions: COLUMN_ACTIONS,
         initialWidth: 160,
         isSortable: false,
         isExpandable: false,
@@ -355,6 +384,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         <EntityGridRowsContext.Provider value={rowsContext}>
           <EuiDataGrid
             aria-label={GRID_ARIA_LABEL}
+            data-test-subj="entityAnalyticsEntitiesGrid"
             leadingControlColumns={
               isIndividualRows
                 ? INDIVIDUAL_LEADING_CONTROL_COLUMNS

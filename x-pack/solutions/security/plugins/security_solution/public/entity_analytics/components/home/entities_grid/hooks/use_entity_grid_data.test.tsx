@@ -45,6 +45,8 @@ jest.mock('./use_entity_grid_rows_enrichment', () => ({
     isFetching: false,
     dataUpdatedAt: 0,
     error: null,
+    hasEnrichedRows: false,
+    hasFailedColumns: false,
   }),
 }));
 
@@ -355,6 +357,81 @@ describe('useEntityGridData', () => {
           expect.objectContaining({ message: 'Column unsortable is not sortable' })
         )
       );
+    });
+
+    it('does not toast when the only failure is a missing index', () => {
+      mockContext({
+        concreteEntityIndexName: null,
+        isEntitiesIndexLoading: false,
+        entitiesIndexError: new Error('no such index [.alerts-security.alerts-default]'),
+      });
+
+      renderGridData();
+
+      expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), undefined);
+    });
+
+    it('toasts a later query failure when an earlier error is a missing index', async () => {
+      const queryError = new Error('Found 2 problems');
+      mockContext({
+        entitiesIndexError: new Error('Unknown index [.alerts-security.alerts-default]'),
+      });
+      mockFetchSortPage.mockRejectedValue(queryError);
+
+      renderGridData();
+
+      await waitFor(() =>
+        expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), queryError)
+      );
+    });
+  });
+
+  describe('load state, for the load telemetry', () => {
+    it('has the rows and the count pending until they arrive', async () => {
+      const { result } = renderGridData();
+      expect(result.current.loadState).toMatchObject({ isRowsPending: true, isCountPending: true });
+
+      await waitFor(() =>
+        expect(result.current.loadState).toMatchObject({
+          isRowsPending: false,
+          isCountPending: false,
+          hasError: false,
+        })
+      );
+    });
+
+    it('keeps a query that cannot run yet pending', () => {
+      mockContext({ concreteEntityIndexName: null, isEntitiesIndexLoading: true });
+      const { result } = renderGridData();
+      expect(result.current.loadState).toMatchObject({ isRowsPending: true, isCountPending: true });
+    });
+
+    it('counts a failed query as settled, with an error', async () => {
+      mockFetchSortPage.mockRejectedValue(new Error('boom'));
+      const { result } = renderGridData();
+
+      await waitFor(() =>
+        expect(result.current.loadState).toMatchObject({ isRowsPending: false, hasError: true })
+      );
+    });
+
+    it("keeps the rows pending while the grid still shows the previous view's rows", async () => {
+      const { result, rerender } = renderHook(
+        ({ options }: { options: UseEntityGridDataOptions }) => useEntityGridData(options),
+        {
+          initialProps: { options: OPTIONS },
+          wrapper: ({ children }: PropsWithChildren) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          ),
+        }
+      );
+      await waitFor(() => expect(result.current.loadState.isRowsPending).toBe(false));
+
+      mockFetchSortPage.mockImplementation(() => new Promise(() => {}));
+      rerender({ options: { ...OPTIONS, sortDirection: 'desc' } });
+
+      expect(result.current.rows.length).toBeGreaterThan(0);
+      expect(result.current.loadState.isRowsPending).toBe(true);
     });
   });
 
