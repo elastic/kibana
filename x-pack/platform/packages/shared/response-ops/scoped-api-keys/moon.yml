@@ -24,6 +24,8 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/encrypted-saved-objects-shared'
   - '@kbn/security-plugin-types-server'
+  - '@kbn/core-spaces-common'
+  - '@kbn/core-http-server-mocks'
 tags:
   - shared-server
   - package

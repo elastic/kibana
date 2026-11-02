@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  isRequestApiKeyType,
-  getApiKeyFromRequest,
-  createApiKey,
-  getApiKeyAndUserScope,
-} from './api_key_utils';
+import { isRequestApiKeyType, createApiKey, getApiKeyAndUserScope } from './api_key_utils';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AuthenticatedUser, FakeRawRequest } from '@kbn/core/server';
@@ -34,38 +29,6 @@ describe('api_key_utils', () => {
     test('should return false if the request is made by a user', () => {
       const mockUser = { authentication_type: 'basic' } as AuthenticatedUser;
       expect(isRequestApiKeyType(mockUser)).toBeFalsy();
-    });
-  });
-
-  describe('getApiKeyFromRequest', () => {
-    test('should return the API key from a request', () => {
-      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
-
-      const request = httpServerMock.createKibanaRequest({
-        headers: {
-          authorization: `ApiKey: ${mockApiKey}`,
-        },
-      });
-
-      const result = getApiKeyFromRequest(request);
-      expect(result).toEqual({ id: 'apiKeyId', api_key: 'apiKey' });
-    });
-
-    test('should return null if request is missing the authorization header', () => {
-      const request = httpServerMock.createKibanaRequest();
-      const result = getApiKeyFromRequest(request);
-      expect(result).toBeNull();
-    });
-
-    test('should return a raw user-created UIAM API key without an id', () => {
-      const request = httpServerMock.createKibanaRequest({
-        headers: {
-          authorization: `ApiKey essu_user_created_key`,
-        },
-      });
-
-      const result = getApiKeyFromRequest(request);
-      expect(result).toEqual({ api_key: 'essu_user_created_key' });
     });
   });
 

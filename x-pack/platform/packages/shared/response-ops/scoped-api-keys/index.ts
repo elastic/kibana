@@ -6,6 +6,15 @@
  */
 
 export { decodeStoredApiKey, getUiamApiKeyId, getUiamApiKeySecret } from './stored_api_key';
+export { getApiKeyFromRequest } from './request_api_key';
+export type { RequestApiKeyCredentials } from './request_api_key';
+export { buildApiKeyFakeRequest } from './fake_request';
+export type { BuildApiKeyFakeRequestOpts } from './fake_request';
+export { getApiKeyInvalidationTargets } from './invalidation/get_api_key_invalidation_targets';
+export type {
+  ApiKeyInvalidationTarget,
+  GetApiKeyInvalidationTargetsOpts,
+} from './invalidation/get_api_key_invalidation_targets';
 export { runInvalidate } from './invalidation/run_invalidate';
 export type { RunInvalidateResult, SavedObjectTypesToQuery } from './invalidation/run_invalidate';
 export type {
