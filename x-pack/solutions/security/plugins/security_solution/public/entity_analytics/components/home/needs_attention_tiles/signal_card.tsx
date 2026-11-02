@@ -222,9 +222,18 @@ const DeltaLabel: React.FC<{ text: string; testSubj?: string }> = ({
   );
 };
 
+/** Keeps Enter and Space on a note inside the tile from reaching the tile's own key handler. */
+const stopToggleKeys = (event: React.KeyboardEvent) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.stopPropagation();
+  }
+};
+
 /**
  * The delta row when there is something to say instead of a change: an icon, a short reason and a
- * tooltip. The whole note is the hover target, not just the small icon.
+ * tooltip. The whole note is the hover target, not just the small icon. EuiToolTip needs a focusable
+ * child, so the note takes focus; Enter and Space on it stay on the note and do not reach the
+ * tile's own key handler, which would toggle the table filter.
  */
 const DeltaNote: React.FC<{
   icon: 'warning' | 'error';
@@ -239,6 +248,7 @@ const DeltaNote: React.FC<{
       <span
         tabIndex={0}
         aria-label={`${text}. ${tooltip}`}
+        onKeyDown={stopToggleKeys}
         css={css`
           display: inline-flex;
           align-items: center;

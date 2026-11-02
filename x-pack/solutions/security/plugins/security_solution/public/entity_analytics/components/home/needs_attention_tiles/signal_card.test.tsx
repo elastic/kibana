@@ -219,6 +219,22 @@ describe('SignalCard', () => {
     }
   );
 
+  it('keeps Enter and Space on a note from toggling the table filter, while the tile still does', () => {
+    const onToggle = jest.fn();
+    renderCard({ isDeltaUnavailable: true }, { onToggle });
+    const note = screen.getByTestId('eaFaceliftSignalCardDeltaUnavailable');
+
+    fireEvent.keyDown(note, { key: 'Enter' });
+    fireEvent.keyDown(note, { key: ' ' });
+    expect(onToggle).not.toHaveBeenCalled();
+
+    // The tile itself still toggles on Enter and Space.
+    const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
+    fireEvent.keyDown(tile, { key: 'Enter' });
+    fireEvent.keyDown(tile, { key: ' ' });
+    expect(onToggle).toHaveBeenCalledTimes(2);
+  });
+
   it('says the comparison failed at a zero count that came back, but not without a count or while the delta loads', () => {
     const { unmount } = renderCard({ value: 0, deltaFailure: 'delta' });
     expect(screen.getByTestId('eaFaceliftSignalCardDeltaFailed')).toBeInTheDocument();
