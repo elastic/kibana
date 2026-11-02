@@ -361,7 +361,9 @@ export class TaskManagerPlugin
     // PoC seam: kill-test scaffolding. Default ON in serverless builds of
     // this branch (QAF smoke); TM_POC_TEST_TASK=false disables.
     if (isPocTestTaskEnabled(isServerless)) {
-      this.logger.warn('PoC test task scaffolding enabled (TM_POC_TEST_TASK=true)');
+      this.logger.warn(
+        'PoC test task scaffolding enabled (serverless default or TM_POC_TEST_TASK=true)'
+      );
       registerPocTestTaskDefinitions(this.definitions, this.logger);
       registerPocTestRoutes({
         router,

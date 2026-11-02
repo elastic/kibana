@@ -66,7 +66,11 @@ function readConfigFile(path: string): FlatConfig | undefined {
   }
 }
 
-/** Config file candidates: argv -c/--config occurrences, else KBN_PATH_CONF/kibana.yml. */
+/**
+ * Config file candidates, mirroring src/cli/serve/compile_config_stack.js:
+ * baked serverless defaults first (lowest precedence), then the user config
+ * layer "argv -c/--config, else KBN_CONFIG_PATHS, else KBN_PATH_CONF/kibana.yml".
+ */
 export function getConfigFileCandidates(argv: string[], env: NodeJS.ProcessEnv): string[] {
   const fromArgv: string[] = [];
   for (let i = 0; i < argv.length; i++) {
@@ -77,10 +81,23 @@ export function getConfigFileCandidates(argv: string[], env: NodeJS.ProcessEnv):
       fromArgv.push(arg.slice('--config='.length));
     }
   }
-  if (fromArgv.length > 0) return fromArgv;
+
+  const fromEnvPaths = (env.KBN_CONFIG_PATHS ?? '')
+    .split(',')
+    .map((path) => path.trim())
+    .filter((path) => path.length > 0);
 
   const confDir = env.KBN_PATH_CONF ?? Path.resolve(process.cwd(), 'config');
-  return [Path.resolve(confDir, 'kibana.yml')];
+  const userConfigs =
+    fromArgv.length > 0
+      ? fromArgv
+      : fromEnvPaths.length > 0
+      ? fromEnvPaths
+      : [Path.resolve(confDir, 'kibana.yml')];
+
+  // Baked serverless defaults (no connection secrets today, but mirror the
+  // real stack ordering: defaults first, user config overrides them).
+  return [Path.resolve(confDir, 'serverless.yml'), ...userConfigs];
 }
 
 /** CLI longopt overrides: --elasticsearch.hosts=… or --elasticsearch.hosts … */
