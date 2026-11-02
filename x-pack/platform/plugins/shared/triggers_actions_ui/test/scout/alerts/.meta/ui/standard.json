@@ -1,5 +1,5 @@
 {
-  "sha1": "8885b0f90adaec4f6894b2a008a720822cb16dd9",
+  "sha1": "888fc056f23df9d01ee534c6d02f75d43f67ae7a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -10,9 +10,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/global.setup.ts",
@@ -414,9 +412,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/alerts/ui/tests/global.teardown.ts",

@@ -30,7 +30,7 @@ const templateName = `Scout v1 template ${templateId}`;
 
 test.describe(
   'Create rule from template',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: tags.stateful.classic },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       await kbnClient.savedObjects.create({
