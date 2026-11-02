@@ -1397,13 +1397,16 @@ export class WorkflowCrudService {
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
   }
 
-  /** Disables a managed orphan without a request; the write may only turn `enabled` off. */
-  async disableManagedOrphan(
+  /**
+   * Disables a managed workflow without a request, even when it is bound to a service account.
+   * The write may only turn `enabled` off.
+   */
+  async disableManagedWorkflowWithoutRequest(
     id: string,
     spaceId: string,
     orphan: ManagedWorkflowOrphan
-  ): Promise<void> {
-    await this.runOccWrite(id, async () => {
+  ): Promise<WorkflowProperties> {
+    const { document } = await this.runOccWrite(id, async () => {
       const writer = this.getReadModifyWriteOccWriter(
         spaceId,
         undefined,
@@ -1411,12 +1414,13 @@ export class WorkflowCrudService {
         undefined,
         orphan
       );
-      await writer.readModifyWrite({
+      return writer.readModifyWrite({
         id,
         mutate: (existing) => applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing),
       });
     });
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
+    return document;
   }
 
   /**

@@ -4436,11 +4436,11 @@ describe('managed orphan cleanup without a request', () => {
     });
   });
 
-  describe('disableManagedOrphan', () => {
+  describe('disableManagedWorkflowWithoutRequest', () => {
     it('disables a bound orphan with OCC without a request or binding change', async () => {
       const { core, bindings, client, service } = setup();
 
-      await service.disableManagedOrphan('system-orphan', 'default', ORPHAN);
+      await service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN);
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -4465,7 +4465,7 @@ describe('managed orphan cleanup without a request', () => {
       source.managedBy = 'ownerPlugin';
 
       await expect(
-        service.disableManagedOrphan('system-orphan', 'default', ORPHAN)
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
       ).rejects.toThrow('observed');
       expect(client.index).not.toHaveBeenCalled();
     });

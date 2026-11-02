@@ -128,6 +128,10 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
     id: TId,
     options: ManagedWorkflowOperationOptions
   ) => Promise<void>;
+  disable: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: ManagedWorkflowOperationOptions
+  ) => Promise<boolean>;
   /**
    * Signal that the plugin has finished installing all its static managed workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
