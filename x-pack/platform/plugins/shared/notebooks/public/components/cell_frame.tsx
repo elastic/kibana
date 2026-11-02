@@ -162,11 +162,6 @@ export const CellFrame = ({
             onSave={rename}
           />
         </EuiFlexItem>
-        {runtime && (
-          <EuiFlexItem grow={false}>
-            <CellStatusBadge runtime={runtime} />
-          </EuiFlexItem>
-        )}
         <EuiFlexItem />
         {headerActions}
         {'runMode' in cell && (
@@ -201,6 +196,11 @@ export const CellFrame = ({
             >
               {RUN_LABEL}
             </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {runtime && (
+          <EuiFlexItem grow={false}>
+            <CellStatusBadge runtime={runtime} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
