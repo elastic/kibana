@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
@@ -181,6 +182,18 @@ describe.each([
     expect(result.isTimedOut).toBe(false);
     const toastCalls = (useErrorToast as jest.Mock).mock.calls;
     expect(toastCalls[toastCalls.length - 1][1]).toBe(error);
+  });
+
+  it('runs its query in the local project only', async () => {
+    const search = jest.fn().mockReturnValue(of({ rawResponse: { columns: [], values: [] } }));
+    (useKibana as jest.Mock).mockReturnValue({ services: { data: { search: { search } } } });
+    renderHook(() => useCount({ spaceId: 'default' }));
+    const [key, queryFn] = mockUseQuery.mock.calls[mockUseQuery.mock.calls.length - 1];
+    await queryFn({ signal: undefined });
+    expect(search).toHaveBeenCalledWith(
+      { params: { query: key[1] } },
+      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+    );
   });
 
   it('retries an error once but not a timeout', () => {

@@ -24,6 +24,7 @@ import {
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -31,7 +32,10 @@ const esqlSearch = async (
   signal: AbortSignal | undefined
 ): Promise<ESQLSearchResponse> => {
   const result = await lastValueFrom(
-    searchService.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
+    searchService.search(
+      { params: { query } },
+      { abortSignal: signal, strategy: 'esql_async', projectRouting: TILE_PROJECT_ROUTING }
+    )
   );
   return result.rawResponse as unknown as ESQLSearchResponse;
 };
