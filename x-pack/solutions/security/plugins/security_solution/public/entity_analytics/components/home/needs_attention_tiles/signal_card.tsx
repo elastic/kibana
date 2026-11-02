@@ -775,9 +775,12 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
                     text-align: end;
                     color: ${euiTheme.colors.textParagraph};
                   `}
-                  data-test-subj={countIssue ? 'eaFaceliftSignalCardUnavailable' : undefined}
                 >
-                  {countIssue ? NOT_AVAILABLE : renderValueRow(card, isZero)}
+                  {countIssue ? (
+                    <span data-test-subj="eaFaceliftSignalCardUnavailable">{NOT_AVAILABLE}</span>
+                  ) : (
+                    renderValueRow(card, isZero)
+                  )}
                 </EuiText>
               )}
               {countIssue?.kind === 'issue' ? (
