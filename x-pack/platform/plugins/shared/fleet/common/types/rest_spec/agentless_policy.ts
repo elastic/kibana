@@ -341,9 +341,6 @@ export type ListAgentlessPoliciesResponse = ListResult<AgentlessPolicy>;
  * endpoint) rather than the package-policy `packagePolicyIds` wording.
  */
 export const BulkUpgradeAgentlessPoliciesRequestSchema = {
-  query: schema.object({
-    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
-  }),
   body: schema.object(
     {
       policyIds: schema.arrayOf(schema.string({ maxLength: 256 }), {
@@ -513,7 +510,6 @@ export const AgentlessPolicyUpgradeDryRunResponseSchema = schema.arrayOf(
 );
 
 export interface BulkUpgradeAgentlessPoliciesRequest {
-  query?: TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.query>;
   body: TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.body>;
 }
 

@@ -225,9 +225,6 @@ export const DeleteOnePackagePolicyResponseSchema = schema.object(
 );
 
 export const UpgradePackagePoliciesRequestSchema = {
-  query: schema.object({
-    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
-  }),
   body: schema.object(
     {
       packagePolicyIds: schema.arrayOf(

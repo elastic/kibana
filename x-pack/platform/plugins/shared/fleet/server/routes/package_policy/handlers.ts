@@ -702,7 +702,7 @@ const throwIfTargetsAgentlessPolicies = async (
 
 export const upgradePackagePolicyHandler: RequestHandler<
   unknown,
-  TypeOf<typeof UpgradePackagePoliciesRequestSchema.query>,
+  unknown,
   TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -712,11 +712,6 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
-  await assertOnboardingAccessByIds(
-    soClient,
-    packagePolicyIds,
-    request.query.onboarding_deployment_id
-  );
 
   const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,

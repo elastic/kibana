@@ -1558,13 +1558,14 @@ export default function (providerContext: FtrProviderContext) {
           await supertest.get(`/api/fleet/package_policies/${packagePolicyIds[0]}`).expect(404);
         });
 
-        it('rejects upgrading the policy without the id of the deployment that manages it', async () => {
+        it('does not restrict upgrading the policy to the onboarding flow', async () => {
+          // The policy is already on the latest package version; the upgrade must not be refused
+          // because an onboarding instance manages it.
           const { body } = await supertest
             .post('/api/fleet/package_policies/upgrade')
             .set('kbn-xsrf', 'xxxx')
-            .send({ packagePolicyIds: [packagePolicyIds[0]] })
-            .expect(400);
-          expect(body.message).to.match(ONBOARDING_ONLY);
+            .send({ packagePolicyIds: [packagePolicyIds[0]] });
+          expect(JSON.stringify(body)).not.to.match(ONBOARDING_ONLY);
         });
       });
     });

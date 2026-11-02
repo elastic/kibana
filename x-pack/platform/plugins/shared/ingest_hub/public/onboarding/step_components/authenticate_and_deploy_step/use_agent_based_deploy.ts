@@ -287,7 +287,6 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           agentCredentials: credentials,
           integrationName,
           description,
-          onboardingDeploymentId,
         };
 
         // Cleaned instance IDs — excluded from packagePolicyIds in the SO update.
@@ -299,6 +298,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
           const cleanupOps = await cleanupAgentBasedPolicies({
+            onboardingDeploymentId,
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
             instances: serviceSettings?.instances ?? [],

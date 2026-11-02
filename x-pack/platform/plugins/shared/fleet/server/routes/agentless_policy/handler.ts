@@ -129,21 +129,13 @@ export const updateAgentlessPolicyHandler: FleetRequestHandler<
 
 export const bulkUpgradeAgentlessPoliciesHandler: FleetRequestHandler<
   undefined,
-  TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.query>,
+  undefined,
   TypeOf<typeof BulkUpgradeAgentlessPoliciesRequestSchema.body>
 > = async (context, request, response) => {
   const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
 
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-  // The whole batch is rejected rather than failing per policy: an onboarding-managed policy in
-  // the batch means the caller is not the onboarding flow.
-  await assertOnboardingAccessByIds(
-    soClient,
-    uniq(request.body.policyIds),
-    request.query.onboarding_deployment_id
-  );
 
   const logger = appContextService.getLogger().get('agentless');
 
