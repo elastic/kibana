@@ -55,11 +55,15 @@ const useRulesQuery = ({
   timeRange,
   perPage,
   queryIds,
+  entityIds,
+  unassignedEntities,
   enabled,
 }: {
   timeRange: TimeRange;
   perPage: number;
   queryIds?: string[];
+  entityIds?: string[];
+  unassignedEntities?: boolean;
   enabled?: boolean;
 }) => {
   const query = useFetchDiscoveryQueries({
@@ -67,6 +71,8 @@ const useRulesQuery = ({
     perPage,
     status: ['active'],
     queryIds,
+    entityIds,
+    unassignedEntities,
     timeRange,
     enabled,
   });
@@ -86,11 +92,19 @@ const useRulesQuery = ({
   return { query, rules, getSourceTitle };
 };
 
-/** Reads the complete first page of rules for the chart and in-memory table. */
-export const useDetectionRules = (timeRange: TimeRange) => {
+/**
+ * Reads the complete first page of rules for the chart and in-memory table. The server applies the
+ * entity selection before paging, so a selection never depends on which rules made the first page.
+ */
+export const useDetectionRules = (
+  timeRange: TimeRange,
+  { entities, unassigned }: { entities: string[]; unassigned: boolean }
+) => {
   const { query, rules, getSourceTitle } = useRulesQuery({
     timeRange,
     perPage: MAX_LOADED_RULES,
+    entityIds: entities,
+    unassignedEntities: unassigned,
   });
   const total = query.data?.total ?? 0;
   return {

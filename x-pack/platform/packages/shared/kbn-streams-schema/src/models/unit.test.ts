@@ -246,6 +246,34 @@ describe('streams unit stats response schema', () => {
     ).toBe(false);
   });
 
+  it('parses processor instances with a route position or none, and none when it has no data', () => {
+    const stats = {
+      processing_duration: { average: { value: null, unit: 's' } },
+      events: {
+        incoming: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+        failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+      },
+    };
+    const parse = (processor: object) =>
+      streamsUnitStatsResponseSchema.safeParse({
+        components: { destinations: {}, processors: { 'add-tags': processor } },
+        meta,
+      }).success;
+
+    expect(parse({ instances: [] })).toBe(true);
+    expect(
+      parse({
+        instances: [
+          { pipeline_id: 'main', route_index: null, ...stats },
+          { pipeline_id: 'main', route_index: 0, ...stats },
+        ],
+      })
+    ).toBe(true);
+    expect(parse({ instances: [{ pipeline_id: 'main', route_index: -1, ...stats }] })).toBe(false);
+    expect(parse({ instances: [{ pipeline_id: 'main', route_index: 1.5, ...stats }] })).toBe(false);
+    expect(parse({})).toBe(false);
+  });
+
   it('parses a component-level error with an unknown code', () => {
     expect(
       streamsUnitStatsResponseSchema.safeParse({

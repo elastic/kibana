@@ -28,6 +28,7 @@ export {
   streamsUnitStatsErrorSchema,
   streamsUnitStatsFilterSchema,
   streamsUnitStatsMetaSchema,
+  streamsUnitStatsProcessorInstanceSchema,
   streamsUnitStatsProcessorResultSchema,
   streamsUnitStatsRequestSchema,
   streamsUnitStatsResponseSchema,
@@ -36,6 +37,41 @@ export {
   streamsUnitUpsertRequestSchema,
 } from './src/models/unit';
 export type { StreamsUnit } from './src/models/unit';
+export type {
+  CatalogueArrayField,
+  CatalogueBooleanField,
+  CatalogueChoiceGroup,
+  CatalogueComparisonCondition,
+  CatalogueComponentDefinition,
+  CatalogueComponentKind,
+  CatalogueComponentReferenceField,
+  CatalogueComponentStatus,
+  CatalogueComponentSummary,
+  CatalogueCondition,
+  CatalogueEnumField,
+  CatalogueEnumOption,
+  CatalogueFieldDefinition,
+  CatalogueFieldGroup,
+  CatalogueFieldType,
+  CatalogueIntegerField,
+  CatalogueLiteralField,
+  CatalogueLiteralKind,
+  CatalogueLiteralValue,
+  CatalogueMapField,
+  CatalogueMetadata,
+  CatalogueNamedFieldDefinition,
+  CatalogueNumberField,
+  CatalogueObjectField,
+  CataloguePathField,
+  CataloguePathOption,
+  CatalogueSecretField,
+  CatalogueSignal,
+  CatalogueStringField,
+  CatalogueUiHints,
+  CatalogueUiWidth,
+  CatalogueValueKind,
+  ComponentCatalogue,
+} from './src/models/component_catalogue';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
 export {
@@ -118,7 +154,9 @@ export {
   extractReferencedColumns,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findNonColumnFullTextArguments,
   findOverBroadMatchPredicates,
+  renderNonColumnFullTextArgumentError,
   renderOverBroadMatchError,
   getFromSources,
   getStatsQueryHints,
@@ -238,6 +276,8 @@ export {
   type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
+  INVALID_STREAM_NAME_PREFIXES,
+  RESERVED_STREAM_NAMES,
 } from './src/helpers/stream_name_validation';
 
 export {
@@ -259,10 +299,6 @@ export type { StreamsOasDefinitions } from './src/oas_definitions';
 
 export { stripOtelAliases } from './src/helpers/strip_otel_aliases';
 export { mergeSourceIntoDocuments } from './src/helpers/merge_esql_source';
-
-export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
-export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
-export { parseIndexPatterns } from './src/helpers/parse_index_patterns';
 
 export {
   STREAMS_INFERENCE_PARENT_FEATURE_ID,

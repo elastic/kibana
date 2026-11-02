@@ -10,7 +10,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ConnectorTypes } from '../../../common/types/domain';
 import type { CasePostRequest } from '../../../common/types/api';
-import type { CaseConnectorWithoutName } from '../../../common/types/domain_zod/connector/v1';
+import type { CaseConnectorWithoutName } from '../../../common/types/domain/connector/v1';
 
 /**
  * Resolves a template connector's display `name` from its `id` (YAML stores connectors without a

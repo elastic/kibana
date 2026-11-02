@@ -22,7 +22,7 @@ import * as constants from '@kbn/discover-utils/src/data_types/logs/constants';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, MAX_RENDERED_FIELD_VALUE_LENGTH } from '@kbn/discover-utils';
 import {
   dataViewMock,
   createDataViewWithBytesField,
@@ -32,6 +32,7 @@ import {
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -62,6 +63,8 @@ const getSummaryProps = (
       .fn()
       .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
         ...fieldFormatsMock.getDefaultInstance(...params),
+        type: { id: FIELD_FORMAT_IDS.STRING },
+        param: jest.fn(),
         convertToText: jest.fn().mockImplementation((t: string) => String(t)),
       })),
   },
@@ -257,6 +260,17 @@ describe('SummaryColumn', () => {
       expect(document.querySelector('john')).toBeNull();
     });
 
+    it('should truncate a very long message', () => {
+      const message = 'z'.repeat(MAX_RENDERED_FIELD_VALUE_LENGTH + 100);
+      const record = getBaseRecord({ message });
+
+      renderSummary(record);
+
+      expect(screen.queryByTestId('discoverDataTableMessageValue')?.textContent).toBe(
+        `${'z'.repeat(MAX_RENDERED_FIELD_VALUE_LENGTH)}…`
+      );
+    });
+
     it(`should fallback to ${constants.ERROR_MESSAGE_FIELD} and ${constants.EVENT_ORIGINAL_FIELD} fields if message does not exist`, () => {
       const recordWithoutMessage = getBaseRecord({ message: undefined });
       renderSummary(recordWithoutMessage);
@@ -270,6 +284,12 @@ describe('SummaryColumn', () => {
 describe('SummaryCellPopover', () => {
   it('should render message value', async () => {
     const message = 'This is a message';
+    render(<SummaryCellPopover {...getSummaryProps(getBaseRecord({ message }))} />);
+    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(message);
+  });
+
+  it('should render a very long message value in full', async () => {
+    const message = 'z'.repeat(MAX_RENDERED_FIELD_VALUE_LENGTH + 100);
     render(<SummaryCellPopover {...getSummaryProps(getBaseRecord({ message }))} />);
     expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(message);
   });

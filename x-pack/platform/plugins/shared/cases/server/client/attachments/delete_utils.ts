@@ -16,13 +16,13 @@ import type {
   UnifiedReferenceAttachmentPayload,
 } from '../../../common/types/domain';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
-import { AttachmentRequestRtV2 } from '../../../common/types/api';
+import { AttachmentRequestSchemaV2 } from '../../../common/types/api';
 import {
   getIndexFromMetadata,
   isUnifiedReferenceAttachmentRequest,
   resolveUnifiedAttachmentType,
 } from '../../../common/utils/attachments';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import { getAlertInfoFromComments, getIDsAndIndicesAsArrays } from '../../common/utils';
 import { getCaseReferenceId } from '../../common/references';
 import type { SOWithErrors } from '../../common/types';
@@ -300,7 +300,7 @@ const toDecodedAttachment = (
       {
         ...attachment,
         attributes,
-        requestAttributes: decodeOrThrow(AttachmentRequestRtV2)(attributes),
+        requestAttributes: decodeOrThrowZod(AttachmentRequestSchemaV2)(attributes),
       },
     ];
   } catch (error) {

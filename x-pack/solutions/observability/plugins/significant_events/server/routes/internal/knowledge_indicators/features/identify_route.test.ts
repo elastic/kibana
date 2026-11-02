@@ -252,6 +252,7 @@ describe('feature identification route schemas', () => {
     const prepareParams = {
       path: { sourceId: 'logs.test' },
       body: {
+        sampleSize: 20,
         entityFilteredRatio: 0,
         diverseRatio: 1,
         samplingTimeoutMs: 1_000,
@@ -259,6 +260,18 @@ describe('feature identification route schemas', () => {
     };
 
     expect(prepareRoute.params.safeParse(prepareParams).success).toBe(true);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { entityFilteredRatio: 0 },
+      }).success
+    ).toBe(false);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, sampleSize: 101 },
+      }).success
+    ).toBe(false);
     expect(
       prepareRoute.params.safeParse({
         ...prepareParams,

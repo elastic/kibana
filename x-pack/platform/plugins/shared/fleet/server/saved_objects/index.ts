@@ -62,6 +62,9 @@ import {
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
   CloudOnboardingDeploymentSchemaV3,
+  CloudOnboardingDeploymentSchemaV4,
+  CloudOnboardingDeploymentSchemaV5,
+  CloudOnboardingDeploymentSchemaV6,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2158,6 +2161,8 @@ export const getSavedObjectTypes = (
         dynamic: false,
         properties: {
           connectorId: { type: 'keyword', ignore_above: 1024 },
+          provider: { type: 'keyword', ignore_above: 1024 },
+          packageNames: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -2194,6 +2199,49 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV3,
+          },
+        },
+        4: {
+          // Added namespace. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV4.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV4,
+          },
+        },
+        5: {
+          // Added instances. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV5.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV5,
+          },
+        },
+        6: {
+          // Added packageNames + serviceNames + updatedBy. packageNames and provider become queryable
+          // keywords so the list API can filter deployments per package. Existing documents have no
+          // packageNames and are treated as empty — no data_backfill.
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                provider: { type: 'keyword', ignore_above: 1024 },
+                packageNames: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV6.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV6,
           },
         },
       },

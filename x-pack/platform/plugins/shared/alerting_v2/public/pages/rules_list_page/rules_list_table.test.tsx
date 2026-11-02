@@ -10,6 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { RULE_KIND_TOOLTIPS } from '@kbn/alerting-v2-constants';
+import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
 import { RulesListTable, type RulesListTableProps } from './rules_list_table';
 
 const mockRules = [
@@ -110,11 +111,15 @@ const defaultProps: RulesListTableProps = {
 
 const renderTable = (overrides: Partial<RulesListTableProps> = {}) => {
   const props = { ...defaultProps, ...overrides };
-  return render(
+  const locators = createMockLocators();
+  const result = render(
     <I18nProvider>
-      <RulesListTable {...props} />
+      <MockLocatorProvider locators={locators}>
+        <RulesListTable {...props} />
+      </MockLocatorProvider>
     </I18nProvider>
   );
+  return { ...result, locators };
 };
 
 describe('RulesListTable', () => {
@@ -641,6 +646,33 @@ describe('RulesListTable', () => {
       expect(onOpenSummary).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
     });
 
+    it('links View details to the rule details page and navigates in-app on click', async () => {
+      const {
+        locators: { rulesLocators },
+      } = renderTable();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      const viewDetails = await screen.findByTestId('viewRuleDetails-rule-1');
+      expect(viewDetails).toHaveAttribute('href', '/mock-locator-url');
+      expect(rulesLocators.getRedirectUrl).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+
+      fireEvent.click(viewDetails);
+
+      expect(rulesLocators.navigateSync).toHaveBeenCalledWith({ ruleId: 'rule-1' });
+      await waitFor(() =>
+        expect(screen.queryByTestId('viewRuleDetails-rule-1')).not.toBeInTheDocument()
+      );
+    });
+
+    it('does not resolve the details URL until the actions menu is opened', () => {
+      const {
+        locators: { rulesLocators },
+      } = renderTable();
+
+      expect(rulesLocators.getRedirectUrl).not.toHaveBeenCalled();
+    });
+
     it('does not render an expand button', () => {
       renderTable();
 
@@ -657,11 +689,20 @@ describe('RulesListTable', () => {
       expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
     });
 
-    it('hides the quick edit and actions menu affordances', () => {
+    it('hides quick edit and keeps View details as a link to the rule details page', async () => {
       renderTable({ canWrite: false });
 
       expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      expect(await screen.findByTestId('viewRuleDetails-rule-1')).toHaveAttribute(
+        'href',
+        '/mock-locator-url'
+      );
+      expect(screen.queryByTestId('editRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('cloneRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('runRule-rule-1')).not.toBeInTheDocument();
     });
 
     it('still shows View change history (a read action) without write actions', async () => {
