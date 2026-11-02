@@ -160,7 +160,7 @@ describe('CasesWorkflowRunService', () => {
       undefined as never
     );
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([]);
-    clientArgs.services.alertsService.resolveAlertIndices.mockResolvedValue([]);
+    clientArgs.services.alertsService.confirmAlertIndices.mockResolvedValue([]);
     management.getWorkflow.mockResolvedValue({
       id: 'workflow-1',
       name: 'Investigate case',
@@ -803,9 +803,10 @@ describe('CasesWorkflowRunService', () => {
 
     beforeEach(() => {
       setCaseAlerts({ type: 'alert', alertId: 'alert-1', index: alertsAlias });
-      clientArgs.services.alertsService.resolveAlertIndices.mockResolvedValue([
-        { id: 'alert-1', index: backingIndex },
-      ]);
+      // The alias reaches the alert in its backing index only.
+      clientArgs.services.alertsService.confirmAlertIndices.mockImplementation(async ({ claims }) =>
+        claims.filter(({ index }) => index === backingIndex)
+      );
     });
 
     it('runs on the alert selected under its backing index', async () => {
@@ -817,13 +818,13 @@ describe('CasesWorkflowRunService', () => {
         })
       ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
 
-      expect(clientArgs.services.alertsService.resolveAlertIndices).toHaveBeenCalledWith({
-        alerts: [{ id: 'alert-1', index: alertsAlias }],
+      expect(clientArgs.services.alertsService.confirmAlertIndices).toHaveBeenCalledWith({
+        claims: [{ id: 'alert-1', index: backingIndex, attachedIndex: alertsAlias }],
       });
       expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledTimes(1);
     });
 
-    it('does not resolve an alert selected under the index the case stores', async () => {
+    it('does not confirm an alert selected under the index the case stores', async () => {
       await expect(
         run({
           caseIds: ['case-1'],
@@ -832,10 +833,10 @@ describe('CasesWorkflowRunService', () => {
         })
       ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
 
-      expect(clientArgs.services.alertsService.resolveAlertIndices).not.toHaveBeenCalled();
+      expect(clientArgs.services.alertsService.confirmAlertIndices).not.toHaveBeenCalled();
     });
 
-    it('rejects an index the alias does not resolve the alert to', async () => {
+    it('rejects an index the alias does not reach the alert in', async () => {
       await expect(
         run({
           caseIds: ['case-1'],

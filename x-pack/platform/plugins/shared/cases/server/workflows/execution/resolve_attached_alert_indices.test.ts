@@ -13,110 +13,145 @@ const ALIAS = '.alerts-security.alerts-default';
 const BACKING_INDEX = '.internal.alerts-security.alerts-default-000001';
 const ATTACHED_AT = '2026-08-26T00:00:00.000Z';
 
-const attachedAlert = (id: string, index: string): DocumentResponse[number] => ({
+const attachedAlert = (
+  id: string,
+  index: string,
+  attachedAt: string = ATTACHED_AT
+): DocumentResponse[number] => ({
   id,
   index,
-  attached_at: ATTACHED_AT,
+  attached_at: attachedAt,
 });
 
 describe('resolveAttachedAlertIndices', () => {
-  const resolveAlertIndices: jest.MockedFunction<CasesWorkflowOperations['resolveAlertIndices']> =
+  const confirmAlertIndices: jest.MockedFunction<CasesWorkflowOperations['confirmAlertIndices']> =
     jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resolveAlertIndices.mockResolvedValue([]);
+    confirmAlertIndices.mockResolvedValue([]);
   });
 
-  it('returns the attached alerts without resolving when every selection matches exactly', async () => {
+  it('returns the attached alerts without confirming when every selection matches exactly', async () => {
     const attached = [attachedAlert('alert-1', BACKING_INDEX)];
 
     await expect(
       resolveAttachedAlertIndices({
         selected: [{ _id: 'alert-1', _index: BACKING_INDEX }],
         attached,
-        resolveAlertIndices,
+        confirmAlertIndices,
       })
     ).resolves.toBe(attached);
-    expect(resolveAlertIndices).not.toHaveBeenCalled();
+    expect(confirmAlertIndices).not.toHaveBeenCalled();
   });
 
-  it('adds the concrete index an alias-stored alert resolves to', async () => {
-    resolveAlertIndices.mockResolvedValueOnce([{ id: 'alert-1', index: BACKING_INDEX }]);
+  it('adds the selected index an alias-stored alert is confirmed in', async () => {
+    confirmAlertIndices.mockResolvedValueOnce([
+      { id: 'alert-1', index: BACKING_INDEX, attachedIndex: ALIAS },
+    ]);
 
     await expect(
       resolveAttachedAlertIndices({
         selected: [{ _id: 'alert-1', _index: BACKING_INDEX }],
         attached: [attachedAlert('alert-1', ALIAS)],
-        resolveAlertIndices,
+        confirmAlertIndices,
       })
     ).resolves.toEqual([attachedAlert('alert-1', ALIAS), attachedAlert('alert-1', BACKING_INDEX)]);
-    expect(resolveAlertIndices).toHaveBeenCalledWith({
-      alerts: [{ id: 'alert-1', index: ALIAS }],
+    expect(confirmAlertIndices).toHaveBeenCalledWith({
+      claims: [{ id: 'alert-1', index: BACKING_INDEX, attachedIndex: ALIAS }],
     });
   });
 
-  it('resolves only the attachments of selections that do not match exactly', async () => {
+  it('claims only the selections that do not match exactly, through each of their attachments', async () => {
     const otherAlias = '.alerts-security.alerts-other';
+    const otherBackingIndex = '.internal.alerts-security.alerts-default-000002';
 
     await resolveAttachedAlertIndices({
       selected: [
         { _id: 'alert-1', _index: BACKING_INDEX },
         { _id: 'alert-2', _index: BACKING_INDEX },
-        { _id: 'alert-3', _index: BACKING_INDEX },
+        { _id: 'alert-3', _index: otherBackingIndex },
       ],
       attached: [
         attachedAlert('alert-1', BACKING_INDEX),
         attachedAlert('alert-2', ALIAS),
+        attachedAlert('alert-3', ALIAS),
         attachedAlert('alert-3', otherAlias),
         attachedAlert('alert-4', ALIAS),
       ],
-      resolveAlertIndices,
+      confirmAlertIndices,
     });
 
-    expect(resolveAlertIndices).toHaveBeenCalledTimes(1);
-    expect(resolveAlertIndices).toHaveBeenCalledWith({
-      alerts: [
-        { id: 'alert-2', index: ALIAS },
-        { id: 'alert-3', index: otherAlias },
+    expect(confirmAlertIndices).toHaveBeenCalledTimes(1);
+    expect(confirmAlertIndices).toHaveBeenCalledWith({
+      claims: [
+        { id: 'alert-2', index: BACKING_INDEX, attachedIndex: ALIAS },
+        { id: 'alert-3', index: otherBackingIndex, attachedIndex: ALIAS },
+        { id: 'alert-3', index: otherBackingIndex, attachedIndex: otherAlias },
       ],
     });
   });
 
-  it('ignores resolved alerts that are not attached', async () => {
-    resolveAlertIndices.mockResolvedValueOnce([{ id: 'alert-99', index: BACKING_INDEX }]);
+  it('adds a confirmed index through the attachment whose stored index reached it', async () => {
+    const otherAlias = '.alerts-security.alerts-other';
+    const otherAttachedAt = '2026-08-27T00:00:00.000Z';
+    confirmAlertIndices.mockResolvedValueOnce([
+      { id: 'alert-1', index: BACKING_INDEX, attachedIndex: otherAlias },
+    ]);
+
+    await expect(
+      resolveAttachedAlertIndices({
+        selected: [{ _id: 'alert-1', _index: BACKING_INDEX }],
+        attached: [
+          attachedAlert('alert-1', ALIAS),
+          attachedAlert('alert-1', otherAlias, otherAttachedAt),
+        ],
+        confirmAlertIndices,
+      })
+    ).resolves.toEqual([
+      attachedAlert('alert-1', ALIAS),
+      attachedAlert('alert-1', otherAlias, otherAttachedAt),
+      attachedAlert('alert-1', BACKING_INDEX, otherAttachedAt),
+    ]);
+  });
+
+  it('ignores confirmed claims that no attachment made', async () => {
+    confirmAlertIndices.mockResolvedValueOnce([
+      { id: 'alert-99', index: BACKING_INDEX, attachedIndex: ALIAS },
+      { id: 'alert-1', index: BACKING_INDEX, attachedIndex: '.alerts-security.alerts-other' },
+    ]);
     const attached = [attachedAlert('alert-1', ALIAS)];
 
     await expect(
       resolveAttachedAlertIndices({
         selected: [{ _id: 'alert-1', _index: BACKING_INDEX }],
         attached,
-        resolveAlertIndices,
+        confirmAlertIndices,
       })
     ).resolves.toEqual(attached);
   });
 
-  it('does not resolve a selection whose id is not attached to the case', async () => {
+  it('does not confirm a selection whose id is not attached to the case', async () => {
     const attached = [attachedAlert('alert-1', ALIAS)];
 
     await expect(
       resolveAttachedAlertIndices({
         selected: [{ _id: 'alert-99', _index: BACKING_INDEX }],
         attached,
-        resolveAlertIndices,
+        confirmAlertIndices,
       })
     ).resolves.toBe(attached);
-    expect(resolveAlertIndices).not.toHaveBeenCalled();
+    expect(confirmAlertIndices).not.toHaveBeenCalled();
   });
 
-  it('propagates resolution failures', async () => {
-    resolveAlertIndices.mockRejectedValueOnce(new Error('cluster unavailable'));
+  it('propagates confirmation failures', async () => {
+    confirmAlertIndices.mockRejectedValueOnce(new Error('cluster unavailable'));
 
     await expect(
       resolveAttachedAlertIndices({
         selected: [{ _id: 'alert-1', _index: BACKING_INDEX }],
         attached: [attachedAlert('alert-1', ALIAS)],
-        resolveAlertIndices,
+        confirmAlertIndices,
       })
     ).rejects.toThrow('cluster unavailable');
   });

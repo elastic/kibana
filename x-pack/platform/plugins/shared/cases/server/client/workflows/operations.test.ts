@@ -51,12 +51,17 @@ describe('createCasesWorkflowOperations', () => {
     expect(recordWorkflowExecution).toHaveBeenCalledWith(params, clientArgs);
   });
 
-  it('resolves alert indices through the request-scoped alerts service', async () => {
-    const resolved = [{ id: 'alert-1', index: '.internal.alerts-security.alerts-default-000001' }];
-    clientArgs.services.alertsService.resolveAlertIndices.mockResolvedValueOnce(resolved);
-    const params = { alerts: [{ id: 'alert-1', index: '.alerts-security.alerts-default' }] };
+  it('confirms alert indices through the request-scoped alerts service', async () => {
+    const claims = [
+      {
+        id: 'alert-1',
+        index: '.internal.alerts-security.alerts-default-000001',
+        attachedIndex: '.alerts-security.alerts-default',
+      },
+    ];
+    clientArgs.services.alertsService.confirmAlertIndices.mockResolvedValueOnce(claims);
 
-    await expect(operations.resolveAlertIndices(params)).resolves.toBe(resolved);
-    expect(clientArgs.services.alertsService.resolveAlertIndices).toHaveBeenCalledWith(params);
+    await expect(operations.confirmAlertIndices({ claims })).resolves.toBe(claims);
+    expect(clientArgs.services.alertsService.confirmAlertIndices).toHaveBeenCalledWith({ claims });
   });
 });

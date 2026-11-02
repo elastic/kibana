@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertInfo } from '../../common/types';
+import type { AlertIndexClaim } from '../../common/types';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import {
@@ -26,8 +26,8 @@ export interface CasesWorkflowOperations {
   preflightWorkflowExecution: (params: PreflightWorkflowExecutionArgs) => Promise<void>;
   /** `entities` must come from a prior `ensureAuthorizedToRunWorkflow` call. */
   recordWorkflowExecution: (params: RecordWorkflowExecutionArgs) => Promise<void>;
-  /** Reads as the caller, so alerts the caller cannot read are left out of the result. */
-  resolveAlertIndices: (params: { alerts: AlertInfo[] }) => Promise<AlertInfo[]>;
+  /** Reads as the caller, so claims on alerts the caller cannot read are left out of the result. */
+  confirmAlertIndices: (params: { claims: AlertIndexClaim[] }) => Promise<AlertIndexClaim[]>;
 }
 
 export interface CasesWorkflowRunContext {
@@ -42,5 +42,5 @@ export const createCasesWorkflowOperations = (
   ensureAuthorizedToRunWorkflow: (params) => ensureAuthorizedToRunWorkflow(params, clientArgs),
   preflightWorkflowExecution: (params) => preflightWorkflowExecution(params, clientArgs),
   recordWorkflowExecution: (params) => recordWorkflowExecution(params, clientArgs),
-  resolveAlertIndices: (params) => clientArgs.services.alertsService.resolveAlertIndices(params),
+  confirmAlertIndices: (params) => clientArgs.services.alertsService.confirmAlertIndices(params),
 });

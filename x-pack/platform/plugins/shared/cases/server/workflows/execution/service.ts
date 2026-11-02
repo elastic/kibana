@@ -245,7 +245,7 @@ export class CasesWorkflowRunService {
       const resolvedAttachedAlerts = await resolveAttachedAlertIndices({
         selected: selectedAlerts,
         attached: attachedAlerts,
-        resolveAlertIndices: workflowOperations.resolveAlertIndices,
+        confirmAlertIndices: workflowOperations.confirmAlertIndices,
       });
       resolvedAttachmentOrigin = validateOrigin({
         origin: body.origin,
