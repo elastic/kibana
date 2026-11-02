@@ -28,10 +28,7 @@ export const mountObservabilityAlertingApp = ({
 }: {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
-  triggersActionsUi: Pick<
-    TriggersAndActionsUIPublicPluginStart,
-    'getClassicRulesPage' | 'getAlertFormatter'
-  >;
+  triggersActionsUi: Pick<TriggersAndActionsUIPublicPluginStart, 'getClassicRulesPage'>;
   cases?: ObservabilityAlertingCases;
   observabilityShared: Pick<ObservabilitySharedPluginStart, 'navigation'>;
   params: AppMountParameters;

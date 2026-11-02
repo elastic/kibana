@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { Alert } from '@kbn/alerting-types';
-import { getAlertViewInAppUrl } from '@kbn/alerts-ui-shared';
+import { defaultAlertFormatterFormatters } from '@kbn/alerts-ui-shared';
 import type { AlertFormatter } from '@kbn/alerts-ui-shared';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
@@ -39,6 +39,24 @@ export const useViewInAppUrl = (
       return null;
     }
 
-    return getAlertViewInAppUrl({ alert, formatter, prepend });
+    try {
+      const fields: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(alert)) {
+        fields[key] = Array.isArray(value) ? value[0] : value;
+      }
+
+      const formattedAlert = formatter({
+        fields,
+        formatters: defaultAlertFormatterFormatters,
+      });
+
+      if (!formattedAlert?.link) {
+        return null;
+      }
+
+      return formattedAlert.hasBasePath ? formattedAlert.link : prepend(formattedAlert.link);
+    } catch {
+      return null;
+    }
   }, [alert, getAlertFormatter, prepend]);
 };
