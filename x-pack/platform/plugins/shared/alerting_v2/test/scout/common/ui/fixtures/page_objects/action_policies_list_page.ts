@@ -72,11 +72,6 @@ export class ActionPoliciesListPage {
     await this.searchBox.press('Enter');
   }
 
-  /** Item of the details flyout "Take action" menu, e.g. `edit` or `sendTestNotification`. */
-  detailsFlyoutMenuItem(action: string, policyId: string) {
-    return this.page.testSubj.locator(`${action}ActionPolicy-${policyId}`);
-  }
-
   async openDetailsFlyout(policyName: string) {
     await this.detailsLink(policyName).click();
   }
