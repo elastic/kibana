@@ -1,0 +1,4 @@
+# Local dev passwords only. Put real credentials in a *.local.yml file, which git ignores.
+project-a: { hosts: ['http://localhost:9200'], username: kibana_system, password: changeme-a }
+project-b: { hosts: ['http://localhost:9201'], username: kibana_system, password: changeme-b }
+project-c: { hosts: ['http://localhost:9202'], username: kibana_system, password: changeme-c }
