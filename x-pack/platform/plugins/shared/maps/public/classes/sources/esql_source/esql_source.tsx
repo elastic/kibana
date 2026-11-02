@@ -20,6 +20,7 @@ import {
   getGeotilePrecisionParams,
   getProjectRoutingFromEsqlQuery,
   getStartEndParams,
+  hasAggregatingCommand,
   hasGeotilePrecisionParam,
   hasStartEndParams,
 } from '@kbn/esql-utils';
@@ -324,7 +325,9 @@ export class ESQLSource
       meta: {
         approximationApplied: esqlSearchResponse.approximation_applied,
         resultsCount,
-        areResultsTrimmed: resultsCount >= limit,
+        // Aggregated results have one row per group, not one row per document,
+        // so hitting the limit is only reported when showing individual documents
+        areResultsTrimmed: !hasAggregatingCommand(this._descriptor.esql) && resultsCount >= limit,
       },
     };
   }
