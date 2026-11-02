@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -60,7 +60,10 @@ import {
 import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
 import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
 import { useEntityFilterOverrides } from '../components/home/entities_grid/hooks/use_entity_grid_data';
-import { isFilteringByGroupValue } from '../components/home/entities_grid/queries/resolved_entities';
+import {
+  applyResolvedEntityFilterOverridesToQuery,
+  isFilteringByGroupValue,
+} from '../components/home/entities_grid/queries/resolved_entities';
 import type {
   RowActions,
   CellHandlers,
@@ -103,6 +106,7 @@ import {
   useRiskMoversCount,
   useRiskMoversDelta,
   useRiskTilesSeries,
+  useSearchedTileEntityIds,
   useTilesLoadTelemetry,
   useTilesTimeoutNotice,
   TILE_TIMEOUT_MESSAGE,
@@ -160,6 +164,19 @@ const getRowEntity = (row: Row) => {
 /** A resolved row stands for its whole group, so its flyouts show the group too. */
 const getEntityViewMode = (rowsMode: RowsMode): EntityViewMode =>
   rowsMode === 'resolved' ? 'resolved' : 'single';
+
+const MAIN_ENTITY_ONLY_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchMainEntityOnlyTitle',
+  { defaultMessage: 'This search matches main entities only' }
+);
+
+const MAIN_ENTITY_ONLY_TEXT = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchMainEntityOnlyText',
+  {
+    defaultMessage:
+      "Resolved entities are matched by their main entity's own values. Switch to Individual records to search all of an entity's records.",
+  }
+);
 
 const ROWS_OPTIONS: ReadonlyArray<LabeledOption<RowsMode>> = [
   {
@@ -222,6 +239,10 @@ const ML_GET_JOBS_PRIVILEGE = 'ui:ml/canGetJobs';
 const NO_ALERTS_ACCESS_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsAccess',
   { defaultMessage: 'Requires read access to alerts' }
+);
+const NO_ALERTS_INDEX_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsIndex',
+  { defaultMessage: 'Requires detection alerts' }
 );
 const NO_ANOMALIES_ACCESS_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.tiles.noAnomaliesAccess',
@@ -533,7 +554,30 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const searchExpression = useSearchBarExpression();
+  const {
+    searchExpression,
+    searchOverrides,
+    isSearchOverridesPending,
+    mainEntityOnlySearch,
+    rawSearchExpression,
+  } = useSearchBarExpression(rowsMode);
+  useEffect(() => {
+    if (!mainEntityOnlySearch) return;
+
+    addWarning({ title: MAIN_ENTITY_ONLY_TITLE, text: MAIN_ENTITY_ONLY_TEXT });
+  }, [mainEntityOnlySearch, addWarning]);
+  // Group by and the dropdown counts use the patched search, as the grid does.
+  const searchDsl = useMemo(
+    () =>
+      esFilter && searchOverrides
+        ? {
+            bool: {
+              filter: applyResolvedEntityFilterOverridesToQuery([esFilter], searchOverrides),
+            },
+          }
+        : esFilter,
+    [esFilter, searchOverrides]
+  );
 
   const { data: watchlistsData, error: watchlistsError } = useGetWatchlists();
   useErrorToast(
@@ -583,6 +627,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
     isTimedOut: alertBasedTimedOut,
+    isMissingIndex: alertBasedMissingIndex,
     error: alertBasedError,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
@@ -842,35 +887,42 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     [activeTile, setActiveTile]
   );
 
-  const selectedEntityIds = useMemo(() => {
-    if (!activeTile) {
-      return EMPTY_ENTITY_IDS;
-    }
-    switch (activeTile) {
-      case 'entitiesWithAlerts':
-        return severeAlertsEntityIds;
-      case 'entitiesWithAnomalies':
-        return anomaliesEntityIds;
-      case 'riskMovers':
-        return riskMoversEntityIds;
-      case 'newlyHighCritical':
-        return newlyHCEntityIds;
-      case 'watchlisted':
-        return watchlistedEntityIds;
-      case 'newEntity':
-        return newEntityEntityIds;
-      default:
-        return EMPTY_ENTITY_IDS;
-    }
-  }, [
-    activeTile,
-    severeAlertsEntityIds,
-    anomaliesEntityIds,
-    riskMoversEntityIds,
-    newlyHCEntityIds,
-    watchlistedEntityIds,
-    newEntityEntityIds,
-  ]);
+  const tileEntityIds = useMemo(
+    () => ({
+      entitiesWithAlerts: severeAlertsEntityIds,
+      entitiesWithAnomalies: anomaliesEntityIds,
+      riskMovers: riskMoversEntityIds,
+      newlyHighCritical: newlyHCEntityIds,
+      watchlisted: watchlistedEntityIds,
+      newEntity: newEntityEntityIds,
+    }),
+    [
+      severeAlertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+    ]
+  );
+  // A tile stands for groups, and individual rows show their aliases, which the search matches on
+  // their own, so only resolved rows narrow the tiles.
+  const tileSearchExpression = rowsMode === 'resolved' ? searchExpression : undefined;
+  const { searchedTileEntityIds, isPending: isTilesSearchPending } = useSearchedTileEntityIds({
+    spaceId: resolvedSpaceId,
+    searchExpression: tileSearchExpression,
+    isReady:
+      !isSearchOverridesPending &&
+      !alertBasedPending &&
+      !anomaliesPending &&
+      !newEntityPending &&
+      !riskMoversPending &&
+      !newlyHCPending,
+    tileEntityIds,
+  });
+
+  const shownTileEntityIds = searchedTileEntityIds ?? tileEntityIds;
+  const selectedEntityIds = activeTile ? shownTileEntityIds[activeTile] : EMPTY_ENTITY_IDS;
 
   const cappedTileEntityIds = useMemo(
     () => (activeTile ? getCappedTileEntityIds(selectedEntityIds) : null),
@@ -879,12 +931,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
 
   const activeFilters = useMemo(
     (): ActiveFilters => ({
-      search: { esql: searchExpression, dsl: esFilter },
+      search: { esql: searchExpression, dsl: searchDsl },
       entityFilters,
       tileEntityIds: cappedTileEntityIds,
       rowsMode,
     }),
-    [searchExpression, esFilter, entityFilters, cappedTileEntityIds, rowsMode]
+    [searchExpression, searchDsl, entityFilters, cappedTileEntityIds, rowsMode]
   );
   // Strings, so a tile refetch with the same entities doesn't reset the pages below.
   const { searchExpression: gridSearchExpression, entityExpression: gridEntityExpression } =
@@ -895,8 +947,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     entityExpression: gridEntityExpression,
   });
   const isGroupingQueryReady =
-    !isFilteringByGroupValue({ rowsMode, entityExpression: gridEntityExpression }) ||
-    entityFilterOverrides != null;
+    !isSearchOverridesPending &&
+    (!isFilteringByGroupValue({ rowsMode, entityExpression: gridEntityExpression }) ||
+      entityFilterOverrides != null);
   const groupingQuery = useMemo(
     () => toDsl(activeFilters, entityFilterOverrides),
     [activeFilters, entityFilterOverrides]
@@ -966,11 +1019,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isLoading: alertBasedLoading,
         hasCount: alertBasedHasCount,
         entityIds: severeAlertsEntityIds,
-        isUnavailable: Boolean(alertBasedError),
+        // Without an alerts index the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(alertBasedError) || alertBasedMissingIndex,
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
           ? TILE_TIMEOUT_MESSAGE
+          : alertBasedMissingIndex
+          ? NO_ALERTS_INDEX_MESSAGE
           : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -1126,11 +1182,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isLoading: alertBasedLoading,
         hasCount: alertBasedHasCount,
         entityIds: watchlistedEntityIds,
-        isUnavailable: Boolean(alertBasedError),
+        // Without an alerts index the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(alertBasedError) || alertBasedMissingIndex,
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
           ? TILE_TIMEOUT_MESSAGE
+          : alertBasedMissingIndex
+          ? NO_ALERTS_INDEX_MESSAGE
           : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -1195,6 +1254,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       alertsTrend,
       alertBasedLoading,
       alertBasedTimedOut,
+      alertBasedMissingIndex,
       isDeltaLoading,
       alertBasedHistoryMissing,
       anomaliesCount,
@@ -1237,6 +1297,58 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       newlyHCHasCount,
       newEntityHasCount,
       timeRange,
+    ]
+  );
+
+  // The search can't narrow a tile's delta and sparkline (counts over time), so a search hides them.
+  const shownSignalCards = useMemo(
+    (): SignalCardData[] =>
+      tileSearchExpression
+        ? signalCards.map((card) => ({
+            ...card,
+            value: shownTileEntityIds[card.id].length,
+            entityIds: shownTileEntityIds[card.id],
+            isLoading: card.isLoading || isTilesSearchPending,
+            delta: undefined,
+            isDeltaLoading: false,
+            isDeltaUnavailable: false,
+            trend: undefined,
+          }))
+        : signalCards,
+    [signalCards, tileSearchExpression, shownTileEntityIds, isTilesSearchPending]
+  );
+
+  // Only the flat grid reports its loads; the grids of Group by don't. A load is what the user asked
+  // for: its key leaves out the search overrides and the tile's entity ids that the page resolves
+  // for it, and the load waits for them, so it is timed whole and reported once.
+  const isActiveTileLoading = Boolean(
+    activeTile && shownSignalCards.find(({ id }) => id === activeTile)?.isLoading
+  );
+  const gridLoadTelemetry = useMemo(
+    () => ({
+      runKey: JSON.stringify([
+        rowsMode,
+        sortField,
+        sortDirection,
+        rawSearchExpression,
+        entityFilters,
+        activeTile,
+        timeRange,
+      ]),
+      isFilterPending: isSearchOverridesPending || isActiveTileLoading,
+      hasTileFilter: Boolean(activeTile),
+      hasEntityFilters: Object.values(entityFilters).some((values) => values.length > 0),
+    }),
+    [
+      rowsMode,
+      sortField,
+      sortDirection,
+      rawSearchExpression,
+      entityFilters,
+      activeTile,
+      timeRange,
+      isSearchOverridesPending,
+      isActiveTileLoading,
     ]
   );
 
@@ -1352,7 +1464,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             onFiltersChange={setEntityFilters}
             spaceId={spaceId}
             rowsMode={rowsMode}
-            esFilter={esFilter}
+            esFilter={searchDsl}
             watchlistNames={watchlistNames}
           />
 
@@ -1362,7 +1474,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <GenerateAiBriefButton
-                  cards={signalCards}
+                  cards={shownSignalCards}
                   timeRange={timeRange}
                   entityFilters={entityFilters}
                   focusTileId={activeTile ?? undefined}
@@ -1375,7 +1487,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             <EuiSpacer size="s" />
             <SignalCards
               activeTile={activeTile}
-              cards={signalCards}
+              cards={shownSignalCards}
               onFilterForCard={handleFilterForCard}
             />
           </div>
@@ -1418,6 +1530,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 watchlistNames={watchlistNames}
                 searchExpression={gridSearchExpression}
                 entityExpression={gridEntityExpression}
+                isSearchOverridesPending={isSearchOverridesPending}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
                 readAccess={readAccess}
@@ -1426,6 +1539,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 sortDirection={sortDirection}
                 onSortChange={setSort}
                 onFullScreenChange={setIsGridFullScreen}
+                loadTelemetry={gridLoadTelemetry}
               />
             )}
           </DataViewContext.Provider>

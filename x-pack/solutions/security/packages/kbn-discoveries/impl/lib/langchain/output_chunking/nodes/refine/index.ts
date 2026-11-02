@@ -25,6 +25,7 @@ import { getMaxHallucinationFailuresReached } from '../../helpers/get_max_halluc
 import { getMaxRetriesReached } from '../../helpers/get_max_retries_reached';
 import { getUseUnrefinedResults } from './helpers/get_use_unrefined_results';
 import { parseCombinedOrThrow } from '../helpers/parse_combined_or_throw';
+import { handleModelRefusal } from '../helpers/handle_model_refusal';
 
 export const getRefineNode = <T extends GraphInsightTypes>({
   llm,
@@ -152,6 +153,8 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         refinements: [...refinements, partialResponse],
       };
     } catch (error) {
+      handleModelRefusal({ error, logger, nodeName: 'refine', state });
+
       const parsingError = `refine node is unable to parse (${llm._llmType()}) response from attempt ${generationAttempts}; (this may be an incomplete response from the model): ${error}`;
       logger?.debug(() => parsingError); // logged at debug level because the error is expected when the model returns an incomplete response
       logger?.debug(
