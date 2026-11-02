@@ -44,6 +44,17 @@ const createWorker = (overrides: Partial<Worker> = {}): Worker => ({
   ...overrides,
 });
 
+const httpErrorWith = (
+  status: number,
+  { statusText, body }: { statusText?: string; body?: unknown } = {}
+): Error =>
+  Object.assign(new Error(statusText ?? ''), {
+    name: 'Error',
+    request: {},
+    response: { status, statusText },
+    body,
+  });
+
 describe('notifyWorkerUpdateError', () => {
   const toasts = coreMock.createStart().notifications.toasts;
 
@@ -73,7 +84,10 @@ describe('notifyWorkerUpdateError', () => {
     const error = httpError(500);
     notifyWorkerUpdateError(toasts, error);
 
-    expect(toasts.addError).toHaveBeenCalledWith(error, { title: 'Unable to update the worker' });
+    expect(toasts.addError).toHaveBeenCalledWith(error, {
+      title: 'Unable to update the worker',
+      toastMessage: '500',
+    });
     expect(toasts.addWarning).not.toHaveBeenCalled();
     expect(toasts.addDanger).not.toHaveBeenCalled();
   });
@@ -90,6 +104,111 @@ describe('notifyWorkerUpdateError', () => {
     });
   });
 
+  describe('naming the Worker', () => {
+    it('puts the Worker name in the title', () => {
+      const error = httpErrorWith(500, { statusText: 'Internal Server Error' });
+      notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update Alert Triage',
+        toastMessage: '500 Internal Server Error',
+      });
+    });
+
+    it('passes a 400 body message through verbatim', () => {
+      const error = httpErrorWith(400, {
+        statusText: 'Bad Request',
+        body: { message: 'Attack Discovery needs an AI model.' },
+      });
+      notifyWorkerUpdateError(toasts, error, { workerName: 'Attack Discovery' });
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update Attack Discovery',
+        toastMessage: 'Attack Discovery needs an AI model.',
+      });
+    });
+
+    it('falls back to the status code when statusText is empty and there is no body', () => {
+      const error = httpErrorWith(500, { statusText: '' });
+      notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update Alert Triage',
+        toastMessage: '500',
+      });
+    });
+
+    it('ignores a blank body message', () => {
+      const error = httpErrorWith(502, { statusText: '', body: { message: '  ' } });
+      notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update Alert Triage',
+        toastMessage: '502',
+      });
+    });
+
+    it('keeps the generic title when no name is given', () => {
+      const error = httpErrorWith(500, { statusText: '' });
+      notifyWorkerUpdateError(toasts, error);
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update the worker',
+        toastMessage: '500',
+      });
+    });
+
+    it('does not invent a reason for a non-HTTP error', () => {
+      const error = new Error('boom');
+      notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update Alert Triage',
+      });
+    });
+
+    it('shows a generic reason when there is no response and the error message is empty', () => {
+      const error = Object.assign(new Error(''), { name: 'Error', request: {} });
+      notifyWorkerUpdateError(toasts, error, { workerName: 'Alert Triage' });
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update Alert Triage',
+        toastMessage: 'No response from the server',
+      });
+    });
+
+    it('shows a generic reason for a plain Error with an empty message', () => {
+      const error = new Error('');
+      notifyWorkerUpdateError(toasts, error);
+
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to update the worker',
+        toastMessage: 'No response from the server',
+      });
+    });
+
+    it('shows a generic reason for a thrown non-Error', () => {
+      notifyWorkerUpdateError(toasts, '');
+
+      expect(toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Unable to update the worker',
+        toastMessage: 'No response from the server',
+      });
+    });
+
+    it('names the Worker in the 409 and 403 messages', () => {
+      notifyWorkerUpdateError(toasts, httpError(409), { workerName: 'Alert Triage' });
+      expect(toasts.addWarning).toHaveBeenCalledWith(
+        'Alert Triage settings changed; reload and try again'
+      );
+
+      notifyWorkerUpdateError(toasts, httpError(403), { workerName: 'Alert Triage' });
+      expect(toasts.addDanger).toHaveBeenCalledWith(
+        'You do not have permission to update Alert Triage'
+      );
+    });
+  });
+
   it.each([
     [409, 'conflict'],
     [403, 'forbidden'],
@@ -97,7 +216,7 @@ describe('notifyWorkerUpdateError', () => {
   ] as const)('reports a %d toast once, as %s', (status, errorClass) => {
     const reportShown = jest.fn();
 
-    notifyWorkerUpdateError(toasts, httpError(status), reportShown);
+    notifyWorkerUpdateError(toasts, httpError(status), { reportShown });
 
     expect(reportShown.mock.calls).toEqual([[errorClass]]);
   });
@@ -264,6 +383,48 @@ describe('useUpdateWorker', () => {
 
     expect(invalidate).toHaveBeenCalledWith({
       queryKey: queryKeys.huntWorkerIndexCoverage.all,
+    });
+  });
+
+  it('names the cached Worker in the toast when the PATCH fails', async () => {
+    const patch = jest.fn().mockRejectedValue(
+      httpErrorWith(400, {
+        statusText: 'Bad Request',
+        body: { message: 'No AI model is available.' },
+      })
+    );
+    const { result, services } = renderUpdateWorker(
+      createWorker({ name: 'Triage (cached)' }),
+      patch
+    );
+
+    await act(async () => {
+      await expect(
+        result.current.mutateAsync({ workerId: TRIAGE, patch: { enabled: true } })
+      ).rejects.toThrow();
+    });
+
+    // The built-in name for a known Worker id wins over the cached one.
+    expect(services.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: 'Unable to update Alert Triage',
+      toastMessage: 'No AI model is available.',
+    });
+  });
+
+  it('falls back to the cached name for a Worker id without a built-in name', async () => {
+    const patch = jest.fn().mockRejectedValue(httpErrorWith(500, { statusText: '' }));
+    const custom = createWorker({ id: 'custom-worker', name: 'My Custom Worker' });
+    const { result, services } = renderUpdateWorker(custom, patch);
+
+    await act(async () => {
+      await expect(
+        result.current.mutateAsync({ workerId: 'custom-worker', patch: { enabled: true } })
+      ).rejects.toThrow();
+    });
+
+    expect(services.notifications.toasts.addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: 'Unable to update My Custom Worker',
+      toastMessage: '500',
     });
   });
 
