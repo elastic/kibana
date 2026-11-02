@@ -12,10 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import { ALERTZERO_APP_ID } from '@kbn/alertzero-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AlertZeroIcon } from '@kbn/security-solution-navigation';
 import { ESCALATIONS_OPEN_NOTE } from './translations';
 
-/** Centered explainer with the small Alert Zero icon, shown in the Open section. */
-export const EscalationsOpenNote: React.FC<{ isEmpty: boolean }> = ({ isEmpty }) => {
+/** Centered explainer with the small Alert Zero icon, shown in the Open section only when it is empty. */
+export const EscalationsOpenNote: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const {
     services: { application },
@@ -33,13 +34,11 @@ export const EscalationsOpenNote: React.FC<{ isEmpty: boolean }> = ({ isEmpty })
       data-test-subj="alertZeroEscalationsOpenNote"
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type="sun" size="m" color="subdued" aria-hidden={true} />
+        <EuiIcon type={AlertZeroIcon} size="m" color="subdued" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" textAlign="center">
-          <strong>
-            {isEmpty ? ESCALATIONS_OPEN_NOTE.emptyTitle : ESCALATIONS_OPEN_NOTE.title}
-          </strong>
+          <strong>{ESCALATIONS_OPEN_NOTE.emptyTitle}</strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

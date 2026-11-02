@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { RequestAdapter, apiHasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import { render, screen, act } from '@testing-library/react';
 import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
@@ -30,6 +31,7 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
 let capturedComponentProps:
   | {
       isGenerating?: boolean;
+      requestAdapter?: unknown;
       onGenerateWithChat?: () => void;
       onLoadingChange?: (isLoading: boolean) => void;
     }
@@ -43,6 +45,7 @@ jest.mock('@kbn/custom-content-renderer', () => ({
     timeRange: { from: string; to: string } | undefined;
     isGenerating?: boolean;
     isInteractive?: boolean;
+    requestAdapter?: unknown;
     onLoadingChange: (isLoading: boolean) => void;
     onGenerateWithChat?: () => void;
   }) => {
@@ -247,6 +250,38 @@ describe('customContentEmbeddableFactory', () => {
       expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
         'data-time-range',
         `${dashboardRange.from}/${dashboardRange.to}`
+      );
+    });
+  });
+
+  describe('inspector', () => {
+    it('exposes the standard Inspect API with a request adapter when the panel has a query', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+
+      expect(apiHasInspectorAdapters(embeddable.api)).toBe(true);
+      expect(embeddable.api.getInspectorAdapters()?.requests).toBeInstanceOf(RequestAdapter);
+    });
+
+    it('offers no Inspect entry for a static panel, which makes no request', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
+
+      expect(embeddable.api.getInspectorAdapters()).toBeUndefined();
+    });
+
+    it('starts offering Inspect once a query is added', async () => {
+      const { embeddable } = await buildEmbeddable({ ...baseState, esql_query: undefined });
+
+      embeddable.api.applySerializedState({ ...baseState, esql_query: ['FROM logs | LIMIT 1'] });
+
+      expect(embeddable.api.getInspectorAdapters()?.requests).toBeInstanceOf(RequestAdapter);
+    });
+
+    it('hands the same adapter to the renderer that the Inspect API returns', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      expect(capturedComponentProps?.requestAdapter).toBe(
+        embeddable.api.getInspectorAdapters()?.requests
       );
     });
   });

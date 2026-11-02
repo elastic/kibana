@@ -118,6 +118,9 @@ outputs:
     - verdict
     - summary_markdown
 consts:
+  # Temporary: service accounts have no display name, so the chat would show the raw account
+  # id. Remove once they carry one (elastic/security-team#20422).
+  author_name: "Attack Discovery worker"
   # Enforced by `require_supported_verdict`. `failed` is absent deliberately: it is
   # an execution state the review derives, not a classification.
   supported_verdicts:
@@ -140,6 +143,18 @@ steps:
     with:
       index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
       size: 1
+      # The template caps this document at 50k characters. Drop replacements and
+      # api_config; the checks only need the narrative and the cited alert ids.
+      _source:
+        - '@timestamp'
+        - kibana.alert.attack_discovery.alert_ids
+        - kibana.alert.attack_discovery.title
+        - kibana.alert.attack_discovery.summary_markdown
+        - kibana.alert.attack_discovery.details_markdown
+        - kibana.alert.attack_discovery.entity_summary_markdown
+        - kibana.alert.attack_discovery.mitre_attack_tactics
+        - host.name
+        - user.name
       query:
         ids:
           values:
@@ -178,9 +193,50 @@ steps:
     with:
       index: .alerts-security.alerts-{{ workflow.spaceId }}
       size: 100
+      # The template caps the whole cited-alerts string at 200k characters.
+      # Keep the fields the linkage and parent checks read. `original_time` is the
+      # anchor of the raw-event window.
+      _source:
+        - '@timestamp'
+        - kibana.alert.original_time
+        - kibana.alert.rule.name
+        - kibana.alert.severity
+        - kibana.alert.risk_score
+        - kibana.alert.reason
+        - host.name
+        - host.id
+        - user.name
+        - user.id
+        - source.ip
+        - destination.ip
+        - destination.domain
+        - process.name
+        - process.pid
+        - process.entity_id
+        - process.command_line
+        - process.parent.name
+        - process.parent.entity_id
+        - process.executable
+        - agent.id
+        - event.action
+        - event.category
+        - file.name
+        - file.hash.sha256
+        - dns.question.name
+        - network.direction
       query:
         ids:
           values: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
+      # Bounds for the raw-event window. `value_as_string` is absent when no cited
+      # alert has `kibana.alert.original_time`; `count_alerts` then uses the
+      # discovery timestamp, which is the previous window.
+      aggregations:
+        earliest_original_time:
+          min:
+            field: kibana.alert.original_time
+        latest_original_time:
+          max:
+            field: kibana.alert.original_time
 
   - name: count_alerts
     type: data.set
@@ -188,8 +244,13 @@ steps:
       cited: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | size }}"
       found: "${{ steps.load_alerts.output.hits.hits | size }}"
       host_ids: "${{ steps.load_alerts.output.hits.hits | map: '_source.host.id' | compact | uniq }}"
+      host_names: "${{ steps.load_alerts.output.hits.hits | map: '_source.host.name' | compact | uniq }}"
       user_names: "${{ steps.load_alerts.output.hits.hits | map: '_source.user.name' | compact | uniq }}"
-      attack_timestamp: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}"
+      # ±2h is applied by the raw-event range as Elasticsearch date math. The
+      # discovery timestamp is only the fallback when the alerts have no
+      # `kibana.alert.original_time`.
+      events_from: "{%- assign earliest = steps.load_alerts.output.aggregations.earliest_original_time.value_as_string | default: steps.load_alerts.output.aggregations.earliest_original_time.value -%}{%- if earliest != blank -%}{{ earliest }}{%- else -%}{{ steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}{%- endif -%}"
+      events_to: "{%- assign latest = steps.load_alerts.output.aggregations.latest_original_time.value_as_string | default: steps.load_alerts.output.aggregations.latest_original_time.value -%}{%- if latest != blank -%}{{ latest }}{%- else -%}{{ steps.load_attack_discovery.output.hits.hits[0]._source['@timestamp'] }}{%- endif -%}"
 
   - name: require_cited_alerts
     type: workflow.fail
@@ -210,6 +271,24 @@ steps:
     with:
       index: entities-latest-{{ workflow.spaceId }}
       size: 50
+      # The template caps this string at 200k characters.
+      # entity.sub_type, entity.name, and the asset fields are what entity_role
+      # uses to tell a management host from a workstation.
+      _source:
+        - entity.id
+        - entity.type
+        - entity.sub_type
+        - entity.name
+        - host.name
+        - host.id
+        - user.name
+        - user.id
+        - asset.criticality
+        - asset.environment
+        - asset.name
+        - asset.model
+        - asset.owner
+        - asset.vendor
       query:
         bool:
           minimum_should_match: 1
@@ -219,16 +298,41 @@ steps:
             - terms:
                 user.name: "${{ steps.count_alerts.output.user_names }}"
 
-  # Optional. Raw endpoint events on the cited hosts, within two hours of the
-  # discovery, one shared cap of 50. A truncated page does not fail the run;
-  # `block_truncated_clear` stops it from clearing the attack.
-  - name: load_events
+  # Optional. Raw endpoint events on the cited hosts, from 2 hours before the
+  # earliest cited alert's `kibana.alert.original_time` to 2 hours after the
+  # latest, one shared cap of 50. `host.id` is the host key. Alerts with no
+  # `host.id` (the list is empty) are matched on `host.name` instead, so a name
+  # is not added when an id exists and cannot pull in another host that happens
+  # to share it. A truncated page does not fail the run; `block_truncated_clear`
+  # stops it from clearing the attack.
+  - name: load_events_by_host_id
     type: elasticsearch.search
+    if: "${{ (steps.count_alerts.output.host_ids | size) > 0 }}"
     on-failure:
       continue: true
     with:
       index: logs-endpoint.events.*
       size: 50
+      # The template caps this string at 200k characters. Endpoint documents
+      # carry process and network trees the parent and destination checks do not use.
+      _source:
+        - '@timestamp'
+        - host.name
+        - host.id
+        - user.name
+        - process.name
+        - process.parent.name
+        - process.entity_id
+        - process.executable
+        - process.command_line
+        - source.ip
+        - destination.ip
+        - destination.domain
+        - event.action
+        - event.category
+        - agent.id
+        - dns.question.name
+        - network.direction
       sort:
         - "@timestamp": asc
       query:
@@ -238,20 +342,69 @@ steps:
                 host.id: "${{ steps.count_alerts.output.host_ids }}"
             - range:
                 "@timestamp":
-                  gte: "{{ steps.count_alerts.output.attack_timestamp }}||-2h"
-                  lte: "{{ steps.count_alerts.output.attack_timestamp }}||+2h"
+                  gte: "{{ steps.count_alerts.output.events_from }}||-2h"
+                  lte: "{{ steps.count_alerts.output.events_to }}||+2h"
+
+  - name: load_events_by_host_name
+    type: elasticsearch.search
+    if: "${{ (steps.count_alerts.output.host_ids | size) == 0 }}"
+    on-failure:
+      continue: true
+    with:
+      index: logs-endpoint.events.*
+      size: 50
+      _source:
+        - '@timestamp'
+        - host.name
+        - host.id
+        - user.name
+        - process.name
+        - process.parent.name
+        - process.entity_id
+        - process.executable
+        - process.command_line
+        - source.ip
+        - destination.ip
+        - destination.domain
+        - event.action
+        - event.category
+        - agent.id
+        - dns.question.name
+        - network.direction
+      sort:
+        - "@timestamp": asc
+      query:
+        bool:
+          filter:
+            - terms:
+                host.name: "${{ steps.count_alerts.output.host_names }}"
+            - range:
+                "@timestamp":
+                  gte: "{{ steps.count_alerts.output.events_from }}||-2h"
+                  lte: "{{ steps.count_alerts.output.events_to }}||+2h"
+
+  # One hit set for the rest of the workflow. Exactly one of the searches above
+  # runs. `default` takes the name search when the id search was skipped.
+  - name: load_events
+    type: data.set
+    with:
+      hits: "${{ steps.load_events_by_host_id.output.hits | default: steps.load_events_by_host_name.output.hits }}"
 
   - name: source_status
     type: data.set
     with:
       entities_failed: "${{ steps.load_entities.error != null }}"
-      events_failed: "${{ steps.load_events.error != null }}"
+      events_failed: "${{ steps.load_events_by_host_id.error != null or steps.load_events_by_host_name.error != null }}"
 
   - name: analyze
     type: ai.agent
     agent-id: alertzero-thin-agent
-    # Keep in sync with ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-    connector-id-by-feature: alertzero_frontier
+    # A model saved on alertzero_template_models replaces the frontier feature.
+    # An empty row does not. Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID
+    # and ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature:
+      - alertzero_template_models
+      - alertzero_frontier
     # plugin-id: per-run cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
     plugin-id: alertzero_fp_tp_analysis
     aggregate-by: alertzero_parent
@@ -260,10 +413,21 @@ steps:
     create-conversation: true
     timeout: "8m"
     with:
+      author_name: "{{ consts.author_name }}"
       configuration_overrides:
         enable_elastic_capabilities: false
         tools: []
         skill_ids: []
+      # Used only when the connector requires an EIS prompt template.
+      template_id: ".attack-discovery-fp-tp"
+      template_version: 1
+      template_variables:
+        discovery: "{{ steps.load_attack_discovery.output.hits.hits[0] | json }}"
+        cited_alerts: "{{ steps.load_alerts.output.hits.hits | json }}"
+        entities: "{{ steps.load_entities.output.hits.hits | default: consts.no_rows | json }}"
+        events: "{{ steps.load_events.output.hits.hits | default: consts.no_rows | json }}"
+        entities_failed: "${{ steps.source_status.output.entities_failed }}"
+        events_failed: "${{ steps.source_status.output.events_failed }}"
       message: |
         You judge ONE persisted Attack Discovery as a chain: do the world facts around its
         cited alerts support the attack story it tells? You do not generate a discovery,
@@ -328,8 +492,8 @@ steps:
         Claims:
         - claims.world: one entry for each world-check result the verdict relies on, with
           `check`, `result` (supports or contradicts), `source` (entity_store or
-          raw_event), and `id` — the `entity.id` of an entity store hit or the `_id` of a
-          raw event hit. Cite only ids that appear in the hits below.
+          raw_event), and `id` — the `entity.id` or the `_id` of an entity store hit, or the
+          `_id` of a raw event hit. Cite only ids that appear in the hits below.
         - claims.alert_link: when alert_linkage supports, the strongest pivot. `field`
           is one of user.name, user.id, host.id, host.name, process.entity_id,
           process.pid, agent.id, or source.ip. Include its `value` and the `_id`s of
@@ -353,7 +517,7 @@ steps:
         Entity store, showing at most 50 of {{ steps.load_entities.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.entities_failed }}):
         {{ steps.load_entities.output.hits.hits | default: consts.no_rows | json }}
 
-        Raw events within 2 hours of the discovery, showing at most 50 of {{ steps.load_events.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.events_failed }}):
+        Raw events from 2 hours before the earliest cited alert to 2 hours after the latest, showing at most 50 of {{ steps.load_events.output.hits.total.value | default: 0 }} that matched (query failed: {{ steps.source_status.output.events_failed }}):
         {{ steps.load_events.output.hits.hits | default: consts.no_rows | json }}
       schema:
         type: object
@@ -457,11 +621,13 @@ steps:
                     - result
                     - source
                     - id
+        # claims stays optional. The messages prompt still asks for them. The
+        # .attack-discovery-fp-tp template does not, and a required field would
+        # reject that reply.
         required:
           - verdict
           - summary_markdown
           - checks
-          - claims
 
   # The contract boundary: an unsupported verdict fails the run instead of
   # reaching the review's switch, whose default arm does nothing.
@@ -503,15 +669,41 @@ steps:
       verdict: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}inconclusive{% else %}{{ steps.analyze.output.structured_output.verdict }}{% endif %}"
       summary_markdown: "{% if (steps.load_events.output.hits.total.value > 50 or steps.load_entities.output.hits.total.value > 50) and steps.analyze.output.structured_output.verdict == 'false_positive' %}Evidence was truncated, so this cannot be cleared as a false positive.{% else %}{{ steps.analyze.output.structured_output.summary_markdown }}{% endif %}"
 
-  # The model's rationale, checks, and claims still argue `false_positive` after the
-  # verdict is rewritten. The review attaches the rationale, so a downgrade omits
-  # them. `where` plus `first` yields nothing when `keep` is false, and `${{ }}`
-  # leaves that absence absent instead of `""`.
+  # A world claim may only cite an id from the hits. An entity-store claim may
+  # cite `entity.id` or the hit `_id`; the prompt renders both. A raw-event claim
+  # must cite that hit's `_id`. `capture` records a miss without depending on
+  # `assign` inside `for`. No claims is not a miss: claims are optional. An
+  # already inconclusive verdict is left as the model wrote it. `downgraded` is
+  # the string "true" or "false" because the loop cannot live in a typed `${{ }}`
+  # expression.
+  - name: check_claim_grounding
+    type: data.set
+    with:
+      downgraded: |
+        {%- assign world = steps.analyze.output.structured_output.claims.world -%}
+        {%- assign event_ids = steps.load_events.output.hits.hits | default: consts.no_rows | map: '_id' -%}
+        {%- assign entity_ids = steps.load_entities.output.hits.hits | default: consts.no_rows | map: '_source.entity.id' -%}
+        {%- assign entity_doc_ids = steps.load_entities.output.hits.hits | default: consts.no_rows | map: '_id' -%}
+        {%- capture misses -%}{%- for claim in world -%}{%- if claim.source == 'raw_event' -%}{%- unless event_ids contains claim.id -%}x{%- endunless -%}{%- elsif claim.source == 'entity_store' -%}{%- unless entity_ids contains claim.id or entity_doc_ids contains claim.id -%}x{%- endunless -%}{%- else -%}x{%- endif -%}{%- endfor -%}{%- endcapture -%}
+        {%- if misses != blank and steps.block_truncated_clear.output.verdict != 'inconclusive' -%}true{%- else -%}false{%- endif -%}
+
+  # Same shape as `block_truncated_clear`: a verdict that cites evidence the
+  # search did not return becomes inconclusive, for a clear and for an escalation.
+  - name: block_ungrounded_claims
+    type: data.set
+    with:
+      verdict: "{% if steps.check_claim_grounding.output.downgraded == 'true' %}inconclusive{% else %}{{ steps.block_truncated_clear.output.verdict }}{% endif %}"
+      summary_markdown: "{% if steps.check_claim_grounding.output.downgraded == 'true' %}A cited world-check id is not in the evidence, so this cannot be classified.{% else %}{{ steps.block_truncated_clear.output.summary_markdown }}{% endif %}"
+
+  # The model's rationale, checks, and claims still argue the old verdict after it
+  # is rewritten. The review attaches the rationale, so a downgrade omits them.
+  # `where` plus `first` yields nothing when `keep` is false, and `${{ }}` leaves
+  # that absence absent instead of `""`.
   - name: keep_model_writeup
     type: data.set
     with:
       rows:
-        - keep: "${{ steps.block_truncated_clear.output.downgraded == false }}"
+        - keep: "${{ steps.block_truncated_clear.output.downgraded == false and steps.check_claim_grounding.output.downgraded != 'true' }}"
           rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
           checks: "${{ steps.analyze.output.structured_output.checks }}"
           claims: "${{ steps.analyze.output.structured_output.claims }}"
@@ -528,8 +720,8 @@ steps:
     type: workflow.output
     status: completed
     with:
-      verdict: "{{ steps.block_truncated_clear.output.verdict }}"
-      summary_markdown: "{{ steps.block_truncated_clear.output.summary_markdown }}"
+      verdict: "{{ steps.block_ungrounded_claims.output.verdict }}"
+      summary_markdown: "{{ steps.block_ungrounded_claims.output.summary_markdown }}"
       # `${{ }}`, not `{{ }}`: `{{ }}` stringifies undefined to `""`, and the
       # attachment null-checks the field, so an empty string would render an empty
       # `## Rationale` section. A downgrade matches no `keep` row, so this is absent.
@@ -555,8 +747,8 @@ steps:
           cap: 50
           truncated: "${{ steps.load_events.output.hits.total.value > 50 }}"
       payload:
-        verdict: "${{ steps.block_truncated_clear.output.verdict }}"
-        summary_markdown: "${{ steps.block_truncated_clear.output.summary_markdown }}"
+        verdict: "${{ steps.block_ungrounded_claims.output.verdict }}"
+        summary_markdown: "${{ steps.block_ungrounded_claims.output.summary_markdown }}"
         rationale_markdown: "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'rationale_markdown' | first }}"
       checks: "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'checks' | first }}"
       claims: "${{ steps.keep_model_writeup.output.rows | where: 'keep', true | map: 'claims' | first }}"

@@ -41,6 +41,12 @@ export const getRuleIdFromAttachment = (
 export const getSavedRuleId = (attachment: RuleAttachment): string | undefined =>
   parseRuleFromAttachment(attachment)?.id ?? getRuleIdFromAttachment(attachment);
 
+// Must match the attachment id `attach_draft` uses in rule_creation.yaml.
+export const RULE_DRAFT_ATTACHMENT_ID = 'rule-draft';
+
+export const isRuleDraftAttachment = (attachment: Pick<RuleAttachment, 'id'>): boolean =>
+  attachment.id === RULE_DRAFT_ATTACHMENT_ID;
+
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
 

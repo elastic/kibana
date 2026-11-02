@@ -9,3 +9,5 @@ export { TrialUsageBadge } from './src/trial_usage_badge';
 export { CloudLinks } from './src/cloud_links';
 export { EndpointUrl } from './src/endpoint_url';
 export type { EndpointUrlProps } from './src/endpoint_url';
+export { CliInstallModal } from './src/cli_install_modal';
+export type { CliInstallModalProps } from './src/cli_install_modal';

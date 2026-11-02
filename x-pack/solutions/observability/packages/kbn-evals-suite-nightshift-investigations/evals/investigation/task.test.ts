@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
-import { runInvestigation } from './task';
+import { INVESTIGATION_TIMEOUT_MS, UNPERSISTED_CONVERSATION_ERROR, runInvestigation } from './task';
 import { ungradedPlaceholder } from './placeholder';
 
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
@@ -32,7 +36,7 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
   ...overrides,
 });
 
-const notFound = () => Object.assign(new Error('Not Found'), { response: { status: 404 } });
+const notFound = () => Object.assign(new Error('Not Found'), { status: 404 });
 
 it('executes the manual investigation and reads what it recorded from the shared API', async () => {
   const conversation = {
@@ -213,6 +217,72 @@ it('reports an investigation that finished without a conclusion, keeping its evi
   expect(placeholder).toMatchObject({ score: 1, label: 'ungraded' });
 });
 
+it('flags a finished investigation whose conversation never finished persisting', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  const unfinished = {
+    rounds: [{ trace_id: 'partial-trace', status: ConversationRoundStatus.inProgress, steps: [] }],
+  };
+  try {
+    const fetch = jest
+      .fn()
+      .mockImplementation((path: string) =>
+        Promise.resolve(
+          path === '/internal/nightshift/investigations'
+            ? { investigation_id: 'unpersisted' }
+            : path.startsWith('/internal/investigations/')
+            ? investigation({ id: 'unpersisted' })
+            : unfinished
+        )
+      );
+
+    expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+      workflow_status: 'complete',
+      execution_error: UNPERSISTED_CONVERSATION_ERROR,
+      conversation_round_count: 1,
+      traceId: 'partial-trace',
+    });
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('keeps polling while a pending proposal ends in_progress before the round records its verdict', async () => {
+  const running = {
+    rounds: [{ trace_id: 'agent-trace', status: ConversationRoundStatus.inProgress, steps: [] }],
+  };
+  const finished = {
+    rounds: [{ trace_id: 'agent-trace', status: ConversationRoundStatus.completed, steps: [] }],
+  };
+  const noVerdictYet = investigation({
+    id: 'proposal-first',
+    metadata: { status: 'open' },
+    in_progress: false,
+  });
+  const recorded = investigation({ id: 'proposal-first' });
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'proposal-first' })
+    .mockResolvedValueOnce(noVerdictYet)
+    .mockResolvedValueOnce(running)
+    .mockResolvedValueOnce(noVerdictYet)
+    .mockResolvedValueOnce(finished)
+    .mockResolvedValueOnce(recorded);
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output).toMatchObject({
+    workflow_status: 'complete',
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
+    conversation_round_count: 1,
+    traceId: 'agent-trace',
+  });
+  expect(output.execution_error).toBeUndefined();
+  expect(fetch).toHaveBeenCalledTimes(6);
+});
+
 it('reports an investigation start failure as execution evidence', async () => {
   const output = await runInvestigation(
     jest.fn().mockRejectedValue(new Error('Service unavailable')),
@@ -261,7 +331,7 @@ it('bounds polling and retains partial conversation evidence when an investigati
   const clock = jest
     .spyOn(Date, 'now')
     .mockReturnValueOnce(0)
-    .mockReturnValue(21 * 60_000);
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
   try {
     const fetch = jest
       .fn()
@@ -273,7 +343,7 @@ it('bounds polling and retains partial conversation evidence when an investigati
       workflow_status: 'running',
       traceId: 'partial-trace',
       conversation_round_count: 1,
-      execution_error: 'Investigation was still in progress after 20 minutes',
+      execution_error: 'Investigation was still in progress after 30 minutes',
     });
   } finally {
     clock.mockRestore();
@@ -284,7 +354,7 @@ it('reports an investigation that never appeared', async () => {
   const clock = jest
     .spyOn(Date, 'now')
     .mockReturnValueOnce(0)
-    .mockReturnValue(21 * 60_000);
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
   try {
     const fetch = jest
       .fn()
@@ -292,9 +362,29 @@ it('reports an investigation that never appeared', async () => {
       .mockRejectedValue(notFound());
     expect(await runInvestigation(fetch, example, connector)).toMatchObject({
       investigation_id: 'missing',
-      execution_error: 'Investigation was not created within 20 minutes',
+      execution_error: 'Investigation was not created within 30 minutes',
     });
   } finally {
     clock.mockRestore();
   }
 });
+
+it.each(['c0', 'orca', 'none'])(
+  'passes telemetry target %s separately from the LLM connector',
+  async (target) => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce({ investigation_id: 'investigation' })
+      .mockResolvedValueOnce({ status: 'failed' })
+      .mockResolvedValueOnce({});
+    await runInvestigation(
+      fetch,
+      { ...example, input: { ...example.input, telemetry_target: target } },
+      connector
+    );
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+      connector_id: connector.id,
+      telemetry_target: target,
+    });
+  }
+);

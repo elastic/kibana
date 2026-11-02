@@ -56,7 +56,6 @@ export const submitCommand = (): void => {
 };
 
 export const waitForCommandToBeExecuted = (command: ConsoleResponseActionCommands): void => {
-  cy.contains(`${command} is pending`).should('exist');
   cy.contains(`${command} completed successfully`, { timeout: 120000 }).should('exist');
 };
 

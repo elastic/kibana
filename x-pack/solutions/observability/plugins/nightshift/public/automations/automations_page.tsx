@@ -7,11 +7,19 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { KbnDangerCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
+import { useRunQuotas } from '../data/run_quotas/use_significant_events_run_quotas';
 import { useKibana } from '../hooks/use_kibana';
+import { useInvestigatorServiceAccount } from '../service_account/use_investigator_service_account';
+import {
+  MANAGE_SECURITY_REQUIRED_BODY,
+  MANAGE_SECURITY_REQUIRED_REASON,
+  MANAGE_SECURITY_REQUIRED_TITLE,
+} from './utils/edit_permission';
 import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
 import { useAutomationFilters } from './hooks/use_automation_filters';
 import { useAutomationUsage, type TimeRange } from './hooks/use_automation_usage';
@@ -27,6 +35,7 @@ import {
 import { AutomationsEmptyPrompt, FilteredEmptyPrompt } from './list/automations_empty_prompt';
 import { AutomationsTable } from './list/automations_table';
 import { AutomationsToolbar } from './list/automations_toolbar';
+import { GlobalLimitCallout } from './list/global_limit_callout';
 import { RateLimitCallout } from './list/rate_limit_callout';
 import { getDeleteConfirmTitle, listLabels } from './list/translations';
 import { toCloneRequestBody } from './utils/clone_automation';
@@ -34,6 +43,7 @@ import { AutomationDetailFlyout } from './detail_flyout/automation_detail_flyout
 import {
   getAutomationFacets,
   isAutomationRateLimited,
+  isGlobalInvestigationLimitReached,
   isOnlyRateLimitedFilter,
   statusLabels,
 } from './utils/filter_automations';
@@ -44,9 +54,24 @@ export const AutomationsPage = (): React.ReactElement => {
   const history = useHistory();
   const { id } = useParams<{ id: string }>();
   const { services } = useKibana();
-  const canManage = getNightshiftCapabilities(
+  const hasManagePrivilege = getNightshiftCapabilities(
     services.application.capabilities.nightshift
   ).canManage;
+  // Automations run as the space's automations service account, and writing a workflow bound to
+  // a service account requires manage_security.
+  // Until the status is known, nothing is offered for editing, so no action flickers in and out.
+  const { data: serviceAccount } = useInvestigatorServiceAccount();
+  const needsManageSecurity = serviceAccount?.serviceAccountsEnabled === true;
+  const canManage =
+    hasManagePrivilege &&
+    serviceAccount !== undefined &&
+    (!needsManageSecurity || serviceAccount.canModifyBoundWorkflows === true);
+  // A Nightshift manager who is only missing manage_security sees the edit actions disabled, with
+  // that reason, rather than not at all.
+  const editDisabledReason =
+    hasManagePrivilege && needsManageSecurity && !canManage
+      ? MANAGE_SECURITY_REQUIRED_REASON
+      : undefined;
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
   const deleteAutomation = useDeleteAutomation();
   const refreshAutomations = useRefreshAutomations();
@@ -80,6 +105,11 @@ export const AutomationsPage = (): React.ReactElement => {
     visibleAutomations,
     options,
   } = useAutomationFilters(automations, getFacets);
+  const { data: quotas, refetch: refetchQuotas } = useRunQuotas();
+  const isGlobalLimitReached = isGlobalInvestigationLimitReached(quotas);
+  const globalLimitSettingsHref = quotas?.canManage
+    ? services.application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/investigations' })
+    : undefined;
   const rateLimitedCount = automations.filter(isRateLimited).length;
   const openCreateFlyout = canManage ? () => navigate('/automations/new') : undefined;
   const isEmpty = !isInitialLoading && !error && automations.length === 0;
@@ -120,13 +150,17 @@ export const AutomationsPage = (): React.ReactElement => {
       return hasActiveFilters ? (
         <FilteredEmptyPrompt onClearFilters={clearSearchAndFilters} />
       ) : (
-        <AutomationsEmptyPrompt onCreate={openCreateFlyout} />
+        <AutomationsEmptyPrompt
+          onCreate={openCreateFlyout}
+          createDisabledReason={editDisabledReason}
+        />
       );
     }
     return (
       <AutomationsTable
         automations={visibleAutomations}
         canManage={canManage}
+        editDisabledReason={editDisabledReason}
         runCounts={runCounts}
         usedToday={usedToday}
         getFacets={getFacets}
@@ -148,9 +182,30 @@ export const AutomationsPage = (): React.ReactElement => {
 
   return (
     <>
+      {editDisabledReason && (
+        <>
+          <KbnInfoCallout
+            size="s"
+            title={MANAGE_SECURITY_REQUIRED_TITLE}
+            data-test-subj="nightshiftAutomationsServiceAccountReadOnly"
+          >
+            {MANAGE_SECURITY_REQUIRED_BODY}
+          </KbnInfoCallout>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {!isEmpty && (
         <>
-          {rateLimitedCount > 0 && (
+          {isGlobalLimitReached && quotas && (
+            <>
+              <GlobalLimitCallout
+                limit={quotas.limits.investigation}
+                settingsHref={globalLimitSettingsHref}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
+          {!isGlobalLimitReached && rateLimitedCount > 0 && (
             <>
               <RateLimitCallout
                 count={rateLimitedCount}
@@ -182,8 +237,10 @@ export const AutomationsPage = (): React.ReactElement => {
             onRefresh={() => {
               setRefreshedAt(Date.now());
               refreshAutomations();
+              refetchQuotas();
             }}
             onCreate={openCreateFlyout}
+            createDisabledReason={editDisabledReason}
           />
         </>
       )}
@@ -201,6 +258,7 @@ export const AutomationsPage = (): React.ReactElement => {
           automations={orderedAutomations}
           automation={detailAutomation}
           canManage={canManage}
+          editDisabledReason={editDisabledReason}
           usedToday={usedToday.get(detailAutomation.id) ?? 0}
           runRange={runRange}
           rangeLabel={rangeLabel}

@@ -58,6 +58,22 @@ export function getTransactionsProfilingQuery({
   };
 }
 
+/**
+ * Profiling events matching a pre-built KQL string and time range.
+ * Used by the tiered scoping path where the kuery is already assembled per scope candidate.
+ */
+export function getProfilingEventsQueryFromKuery({
+  start,
+  end,
+  kuery,
+}: TimeRangeInSeconds & { kuery: string }): QueryDslQueryContainer {
+  return {
+    bool: {
+      filter: [...kqlQuery(kuery), timeRangeQuery({ start, end })],
+    },
+  };
+}
+
 /** Profiling events of the containers or, when it has none, of the hosts of a service */
 export function getHostsProfilingEventsQuery({
   start,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -46,6 +46,8 @@ import { useExecutionHistoryTableConfig } from '../hooks/use_execution_history_t
 import { useUnifiedDataTableServices } from '../hooks/use_unified_data_table_services';
 import { FilteredEmptyState, RulesEmptyState } from './empty_state';
 import { ExecutionHistoryErrorState } from './error_state';
+import { ExecutionHistorySearchField } from './execution_history_search_field';
+import { TruncatedCallout } from './truncated_callout';
 
 const DEFAULT_PER_PAGE = 10;
 const PAGE_SIZE_OPTIONS = [10, 50, 100];
@@ -204,13 +206,18 @@ interface Props {
 export const RulesTabContent = ({ onRuleClick }: Props) => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
+  const [search, setSearch] = useState('');
   const [outcomeFilter, setOutcomeFilter] = useState<RuleOutcomeFilter>('all');
   const [sortField, setSortField] = useState<RuleSortField>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+  const trimmedSearch = search.trim();
+  const searchParam = trimmedSearch.length > 0 ? trimmedSearch : undefined;
+
   const { data, isFetching, isError, refetch } = useFetchRuleExecutions({
     page: page + 1,
     perPage,
+    search: searchParam,
     outcomes: toOutcomesParam(outcomeFilter),
     sortField: sortField === RULE_EXECUTION_FIELDS.startedAt ? 'startedAt' : 'duration',
     sortOrder: sortDirection,
@@ -278,6 +285,11 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     }
   };
 
+  const onSearchChange = useCallback((value: string) => {
+    setSearch(value);
+    setPage(0);
+  }, []);
+
   const onOutcomeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setOutcomeFilter(e.target.value as RuleOutcomeFilter);
     setPage(0);
@@ -292,7 +304,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
   // Clamp the total to the API's max result window so pagination can't page past it.
   const total = Math.min(data?.total ?? 0, EXECUTION_HISTORY_MAX_RESULT_WINDOW);
   const pageCount = Math.ceil(total / perPage);
-  const isFiltered = outcomeFilter !== 'all';
+  const isFiltered = searchParam !== undefined || outcomeFilter !== 'all';
   const showEmptyState = !isFetching && items.length === 0;
 
   const renderContent = () => {
@@ -371,6 +383,28 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
   return (
     <div css={rootCss}>
       <EuiFlexGroup gutterSize="s" direction="row" responsive={false} css={noFlexGrowCss}>
+        <EuiFlexItem grow>
+          <ExecutionHistorySearchField
+            data-test-subj="ruleExecutionHistorySearch"
+            onSearchChange={onSearchChange}
+            placeholder={
+              canReadRules
+                ? i18n.translate('xpack.alertingV2.executionHistory.rulesTab.searchPlaceholder', {
+                    defaultMessage: 'Search by rule name or ID',
+                  })
+                : i18n.translate(
+                    'xpack.alertingV2.executionHistory.rulesTab.searchByIdPlaceholder',
+                    { defaultMessage: 'Search by rule ID' }
+                  )
+            }
+            ariaLabel={i18n.translate(
+              'xpack.alertingV2.executionHistory.rulesTab.searchAriaLabel',
+              {
+                defaultMessage: 'Search rule execution history',
+              }
+            )}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
             compressed
@@ -389,6 +423,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      <TruncatedCallout data={data} searchParam={searchParam} />
       {renderContent()}
     </div>
   );

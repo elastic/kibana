@@ -11,11 +11,13 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
+import { EMPTY_VALUE } from '../constants';
 import { ELASTIC_SOURCE_ICON } from '../source_labels';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import {
   EpisodeDurationCell,
+  EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -865,5 +867,33 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
     expect(screen.queryByRole('code')).not.toBeInTheDocument();
+  });
+});
+
+describe('EpisodeSuppressedCell', () => {
+  const renderCell = (maintenanceWindowIds: string[] | undefined) =>
+    renderWithI18n(
+      <EpisodeSuppressedCell
+        {...baseCellProps}
+        columnId="suppressed"
+        row={makeRow({ maintenance_window_ids: maintenanceWindowIds })}
+      />
+    );
+
+  it('shows that the alert was suppressed by a maintenance window, without listing any', () => {
+    renderCell(['mw-1', 'mw-2']);
+
+    expect(screen.getByText('Suppressed by maintenance window')).toBeInTheDocument();
+    expect(screen.queryByText('mw-1', { exact: false })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['the field is absent', undefined],
+    ['the field is empty', []],
+  ])('renders the empty value when %s', (_name, maintenanceWindowIds) => {
+    const { container } = renderCell(maintenanceWindowIds);
+
+    expect(container).toHaveTextContent(EMPTY_VALUE);
+    expect(screen.queryByText('Suppressed by maintenance window')).not.toBeInTheDocument();
   });
 });

@@ -204,6 +204,16 @@ describe('SourcesView routes', () => {
     expect(mockToasts.addWarning).toHaveBeenCalledWith({ title: 'Source not found' });
   });
 
+  it('shows a loading state instead of an empty list until the first source list arrives', () => {
+    mockSources = [];
+    mockIsSourcesLoading = true;
+    renderSources('/sources');
+
+    expect(screen.getByTestId('significantEventsAppSourcesLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeInTheDocument();
+    expect(screen.queryByText('0 sources')).not.toBeInTheDocument();
+  });
+
   it('waits for the source list before resolving a deep link', async () => {
     mockSources = [];
     mockIsSourcesLoading = true;

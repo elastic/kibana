@@ -24,9 +24,9 @@ import {
 import {
   convertFiltersToESQLExpression,
   convertQueryToESQLExpression,
-  getEsqlControls,
   injectWhereClauseAfterSourceCommand,
 } from '@kbn/esql-utils';
+import { getEsqlControls } from '@kbn/esql-controls-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 // TODO replace with DiscoverAppLocatorParams type from discover plugin

@@ -29,9 +29,13 @@ const SOURCE_INDEX = 'risk-resolution-inputs-source';
 const RISK_SCORE_INDEX = 'risk-score.risk-score-default';
 const TARGET_HOST = 'risk-resolution-target';
 const ALIAS_HOST = 'risk-resolution-alias';
+// In no resolution group, but its ID sorts inside the target's page range.
+const PLAIN_HOST = 'risk-resolution-plain';
 const TARGET_ID = `host:${TARGET_HOST}`;
 const ALIAS_ID = `host:${ALIAS_HOST}`;
+const PLAIN_ID = `host:${PLAIN_HOST}`;
 const RULE_NAME = 'Risk resolution inputs rule';
+const STAMP_FIELD = 'kibana.alert.entity.id';
 // Rule execution, alert polling and a synchronous maintainer run don't fit the 60s default.
 const TEST_TIMEOUT_MS = 180_000;
 
@@ -59,6 +63,25 @@ const seedAliasHostEntity = async (esClient: EsClient) => {
       '@timestamp': now,
     },
   });
+};
+
+/** The entity IDs stamped on the rule's alert for a host. */
+const getStampedEntityIds = async (esClient: EsClient, hostName: string) => {
+  const response = await esClient.search({
+    index: ALERTS_INDEX,
+    size: 1,
+    fields: [STAMP_FIELD],
+    _source: false,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'kibana.alert.rule.name': RULE_NAME } },
+          { term: { 'host.name': hostName } },
+        ],
+      },
+    },
+  });
+  return response.hits.hits[0]?.fields?.[STAMP_FIELD] ?? [];
 };
 
 const waitForAlerts = async (esClient: EsClient, expected: number, timeoutMs = 60_000) => {
@@ -142,7 +165,7 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
       index: RISK_SCORE_INDEX,
       refresh: true,
       ignore_unavailable: true,
-      query: { terms: { 'host.risk.id_value': [TARGET_ID, ALIAS_ID] } },
+      query: { terms: { 'host.risk.id_value': [TARGET_ID, ALIAS_ID, PLAIN_ID] } },
     });
     await esClient.indices.delete({ index: SOURCE_INDEX, ignore_unavailable: true });
     await apiClient
@@ -156,11 +179,12 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
   });
 
   apiTest(
-    "includes every group member's alerts, with their own timestamps",
+    "scores only the group's members, stamped or not, with each alert's own timestamp",
     async ({ apiClient, esClient }) => {
       await seedHostEntity(esClient, { entityId: TARGET_ID, hostName: TARGET_HOST });
+      await seedHostEntity(esClient, { entityId: PLAIN_ID, hostName: PLAIN_HOST });
       await seedAliasHostEntity(esClient);
-      for (const hostName of [TARGET_HOST, ALIAS_HOST]) {
+      for (const hostName of [TARGET_HOST, ALIAS_HOST, PLAIN_HOST]) {
         await esClient.index({
           index: SOURCE_INDEX,
           refresh: 'wait_for',
@@ -174,11 +198,11 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
         body: {
           type: 'query',
           name: RULE_NAME,
-          description: 'Raises one alert for each host in the resolution group',
+          description: 'Raises one alert for each host',
           risk_score: 50,
           severity: 'medium',
           index: [SOURCE_INDEX],
-          query: `host.name: ("${TARGET_HOST}" or "${ALIAS_HOST}")`,
+          query: `host.name: ("${TARGET_HOST}" or "${ALIAS_HOST}" or "${PLAIN_HOST}")`,
           from: 'now-1d',
           interval: '1h',
           enabled: true,
@@ -186,7 +210,35 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
       });
       expect(ruleResponse).toHaveStatusCode(200);
       ruleId = ruleResponse.body.id;
-      await waitForAlerts(esClient, 2);
+      await waitForAlerts(esClient, 3);
+
+      // Alerts carry their entity IDs, which resolution scoring uses to read only a page's members'
+      // alerts. Alerts from before the stamp have none and must still count, so the alias's alert
+      // loses its stamp here while the target's keeps it.
+      expect(await getStampedEntityIds(esClient, TARGET_HOST)).toContain(TARGET_ID);
+      await esClient.updateByQuery({
+        index: ALERTS_INDEX,
+        refresh: true,
+        conflicts: 'proceed',
+        query: {
+          bool: {
+            filter: [
+              { term: { 'kibana.alert.rule.name': RULE_NAME } },
+              { term: { 'host.name': ALIAS_HOST } },
+            ],
+          },
+        },
+        script: {
+          lang: 'painless',
+          // The stamp may be stored under a dotted key or as nested objects.
+          source: `ctx._source.remove('${STAMP_FIELD}');
+            def kibana = ctx._source.kibana;
+            if (kibana instanceof Map && kibana.alert instanceof Map && kibana.alert.entity instanceof Map) {
+              kibana.alert.entity.remove('id');
+            }`,
+        },
+      });
+      expect(await getStampedEntityIds(esClient, ALIAS_HOST)).toStrictEqual([]);
 
       await triggerMaintainerRun(apiClient, internalHeaders, 'risk-score', { sync: true });
 
@@ -224,6 +276,19 @@ apiTest.describe('Risk score maintainer resolution inputs', { tag: ENTITY_STORE_
         expect(alertTimestamps.has(input.id)).toBe(true);
         expect(input.timestamp).toBe(alertTimestamps.get(input.id));
       }
+
+      const plainResolutionScores = await esClient.count({
+        index: RISK_SCORE_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'host.risk.id_value': PLAIN_ID } },
+              { term: { 'host.risk.score_type': 'resolution' } },
+            ],
+          },
+        },
+      });
+      expect(plainResolutionScores.count).toBe(0);
     }
   );
 });

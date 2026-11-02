@@ -86,7 +86,7 @@ You have full read **and write** access to Elastic cases across Security, Observ
     }\` | Retrieves all comments, alerts, and events for a case |
 | \`${
       platformCoreCasesTools.manageAttachments
-    }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\` |
+    }\` | \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`delete_attachments\` |
 | \`${platformCoreCasesTools.observables}\` | \`add\`, \`update\`, \`delete\` (IOCs) |${
       isTemplatesEnabled ? FIND_TEMPLATES_ROW : ''
     }${isTemplatesEnabled ? FIND_TEMPLATES_SECTION : ''}${
@@ -164,7 +164,8 @@ When in doubt, render — a missing render loses information, a redundant one is
       platformCoreCasesTools.getAttachments
     }\` — returns the discriminated attachments array; summarize them.
 - \`${platformCoreCasesTools.manage}\` mode \`delete\` — case is gone.
-- \`${platformCoreCasesTools.observables}\` mode \`delete\` — only IDs returned.${
+- \`${platformCoreCasesTools.observables}\` mode \`delete\` — only IDs returned.
+- \`${platformCoreCasesTools.manageAttachments}\` mode \`delete_attachments\` — only IDs returned.${
       isTemplatesEnabled
         ? `\n- \`${platformCoreCasesTools.findTemplates}\` — returns template metadata, not a case.`
         : ''
@@ -183,6 +184,10 @@ Only fetch when the user explicitly asks for: a case summary that includes discu
 Use \`${
       platformCoreCasesTools.manageAttachments
     }\` for all write operations on attachments. Prefer the typed modes — \`add_comment\`, \`add_alerts\`, \`add_events\` — for those specific attachment types. Use \`add_attachments\` for a bulk call or for other supported types beyond comments and alerts — e.g. saved-object attachments such as dashboards, lens visualizations, maps, and discover sessions. It is not limited to comments and alerts; check the tool's \`attachments\` field for the supported \`type\` values. Each item is discriminated by \`type\` and \`owner\` is derived from the case.
+
+To remove attachments, use \`delete_attachments\` and pass each attachment's \`id\` from \`${
+      platformCoreCasesTools.getAttachments
+    }\` as \`ids\`, never its \`attachmentId\` or an alert or event ID. Deletion cannot be undone, so confirm with the user first.
 `,
 
     getRegistryTools: () => [

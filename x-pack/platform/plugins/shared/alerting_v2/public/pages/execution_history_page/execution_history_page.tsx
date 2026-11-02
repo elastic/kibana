@@ -115,6 +115,7 @@ const RulesTabCalloutBody = () => {
 
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
+  const { links } = useService(CoreStart('docLinks'));
 
   const [selectedTabId, setSelectedTabId] = useState<TabId>(RULES_TAB_ID);
   const [policyToViewId, setPolicyToViewId] = useState<string | null>(null);
@@ -149,6 +150,11 @@ export const ExecutionHistoryPage = () => {
         badges={[universalRulesOnlyBadge]}
         spacing="bleed"
         tabs={tabs}
+        docLink={
+          selectedTabId === RULES_TAB_ID
+            ? links.alerting.reviewRuleExecutionHistory
+            : links.alerting.reviewActionPolicyExecutionHistory
+        }
       />
       <EuiSpacer size="m" />
       <UniversalRulesOnlyCallout

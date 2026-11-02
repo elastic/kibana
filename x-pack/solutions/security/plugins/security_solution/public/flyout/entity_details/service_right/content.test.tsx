@@ -43,6 +43,13 @@ jest.mock('../../../flyout_v2/entity/shared/components/observed_entity', () => (
 jest.mock('./hooks/use_observed_service_items', () => ({
   useObservedServiceItems: () => [],
 }));
+const mockEntityHighlightsAccordion = jest.fn((_props: { mode?: string }) => null);
+jest.mock(
+  '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights',
+  () => ({
+    EntityHighlightsAccordion: (props: { mode?: string }) => mockEntityHighlightsAccordion(props),
+  })
+);
 
 const defaultProps = {
   serviceName: 'nginx',
@@ -151,6 +158,20 @@ describe('ServicePanelContent — group view', () => {
     });
     expect(mockFlyoutRiskSummary).toHaveBeenLastCalledWith(
       expect.objectContaining({ isGroupView: true })
+    );
+  });
+
+  it('forwards the view mode to the entity summary so it covers the whole group', () => {
+    render(<ServicePanelContent {...defaultProps} mode="resolved" />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: 'resolved' })
+    );
+  });
+
+  it('leaves the entity summary in single mode when no mode is given (legacy flyout)', () => {
+    render(<ServicePanelContent {...defaultProps} />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: undefined })
     );
   });
 });

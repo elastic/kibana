@@ -6,8 +6,7 @@
  */
 
 import React, { memo, useMemo, useState } from 'react';
-import { truncate } from 'lodash';
-import { EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiMarkdownFormat } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   FLYOUT_GROUPED_ATTACHMENTS_ORDER,
@@ -17,8 +16,7 @@ import {
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
-
-const SUMMARY_LIMIT = 120;
+import { firstParagraph } from '../../utils/to_plain_summary';
 
 export interface WhatsHappenedBlockProps {
   summary?: string;
@@ -38,14 +36,13 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
       [attachments, groupedAttachments]
     );
 
-    const isCondensed = summary != null && summary.length > SUMMARY_LIMIT;
-    const displayedSummary = useMemo(
-      () =>
-        isCondensed && !expanded
-          ? truncate(summary, { length: SUMMARY_LIMIT, separator: ' ', omission: '…' })
-          : summary,
-      [isCondensed, expanded, summary]
+    const trimmedSummary = summary?.trim();
+    const leadParagraph = useMemo(
+      () => (trimmedSummary ? firstParagraph(trimmedSummary) : undefined),
+      [trimmedSummary]
     );
+    const isCondensed = leadParagraph !== undefined && leadParagraph !== trimmedSummary;
+    const displayedSummary = isCondensed && !expanded ? leadParagraph : summary;
 
     if (!summary && !hasAttachments) {
       return null;
@@ -54,9 +51,9 @@ export const WhatsHappenedBlock = memo<WhatsHappenedBlockProps>(
     return (
       <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.overview}>
         {summary && (
-          <EuiText size="s" color="subdued">
-            <p>{displayedSummary}</p>
-          </EuiText>
+          <EuiMarkdownFormat textSize="s" color="subdued">
+            {displayedSummary ?? ''}
+          </EuiMarkdownFormat>
         )}
         {isCondensed && (
           <div>

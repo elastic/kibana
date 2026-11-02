@@ -78,6 +78,7 @@ export { EngineDescriptorTypeName } from './domain/saved_objects/engine_descript
 export { EntityStoreGlobalStateTypeName } from './domain/saved_objects/global_state/types';
 export { EntityStorePreferencesTypeName } from './domain/saved_objects/preferences/types';
 export { EntityResolutionRuleTypeName } from './domain/resolution/rules/saved_object/constants';
+export { CustomResolutionRuleTypeName } from './domain/resolution/rules/custom/constants';
 export { enterpriseLicenseMiddleware } from './routes/middleware/enterprise_license';
 export { checkEntityStoreIndexPrivileges } from './routes/apis/utils/check_and_format_privileges';
 export {

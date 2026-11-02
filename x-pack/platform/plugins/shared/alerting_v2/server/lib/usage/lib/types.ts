@@ -36,6 +36,12 @@ export interface ActionPolicyStatsAggregations {
   count_with_group_by: { doc_count: number };
   avg_group_by_fields_count: { value: number | null };
   count_with_matcher: { doc_count: number };
+  count_by_status: { buckets: TermsBucket[] };
+  count_by_grouping_mode: { buckets: TermsBucket[] };
+  count_by_throttle_strategy: { buckets: TermsBucket[] };
+  workflows_per_policy_percentiles: { values: Record<string, number | null> };
+  workflows_per_policy_avg: { value: number | null };
+  count_with_multiple_workflows: { doc_count: number };
 }
 export type ActionPolicyStatsResults = Pick<
   LatestTaskStateSchema,
@@ -45,6 +51,11 @@ export type ActionPolicyStatsResults = Pick<
   | 'action_policies_count_with_group_by'
   | 'action_policies_avg_group_by_fields_count'
   | 'action_policies_count_by_throttle_interval'
+  | 'action_policies_count_by_status'
+  | 'action_policies_count_by_grouping_mode'
+  | 'action_policies_count_by_throttle_strategy'
+  | 'action_policies_workflows_per_policy'
+  | 'action_policies_count_with_multiple_workflows'
 >;
 
 export interface ExecutionStatsAggregations {
@@ -64,7 +75,6 @@ export type ExecutionStatsResults = Pick<
 
 export interface RuleStatsAggregations {
   count_enabled: { doc_count: number };
-  count_agent_builder_assisted: { doc_count: number };
   count_by_kind: { buckets: TermsBucket[] };
   count_by_schedule: { buckets: TermsBucket[] };
   count_by_lookback: { buckets: TermsBucket[] };
@@ -82,7 +92,6 @@ export type RuleStatsResults = Pick<
   LatestTaskStateSchema,
   | 'count_total'
   | 'count_enabled'
-  | 'count_agent_builder_assisted'
   | 'count_by_kind'
   | 'count_by_schedule'
   | 'count_by_lookback'

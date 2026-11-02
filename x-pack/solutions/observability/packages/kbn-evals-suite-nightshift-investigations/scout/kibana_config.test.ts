@@ -45,10 +45,9 @@ it('resolves credentials from the environment and preserves other preconfigured 
       existing: { name: 'Existing connector' },
       'nightshift-evals-telemetry': {
         name: 'Remote Elasticsearch telemetry',
-        actionTypeId: '.webhook',
+        actionTypeId: '.http',
         config: {
           url: 'https://telemetry.example.com',
-          method: 'post',
           hasAuth: false,
           authType: null,
         },

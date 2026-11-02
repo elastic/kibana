@@ -8,23 +8,25 @@
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
-import { buildHuntProposalId } from '../common/hunt_proposal_id';
 import {
-  PackageReportIdentityError,
+  buildProposalId,
+  buildProposalSubjectKey,
   computeExpectedProposalCount,
-  runPackageReport,
-} from './run_package_report';
+  type LiveProposal,
+  type ProposalSlot,
+  type WantedProposal,
+} from '../../../proposals/dedup';
+import { PackageReportIdentityError, runPackageReport } from './run_package_report';
 import type { RunPackageReportDeps } from './run_package_report';
-import { buildProposalSubjectKey } from './decide_package_report';
-import type { LiveProposal, ProposalSlot, WantedProposal } from './resolve_proposal_slot';
 import type { CoverageSubject } from './types';
 
 const reportId = 'rpt-package-1';
-const conversationId = buildHuntInvestigationConversationId(reportId);
+const conversationId = buildHuntInvestigationConversationId({ spaceId: 'default', reportId });
 const runId = 'run-abc';
 
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   inputSchema: {
@@ -38,6 +40,7 @@ const isolateHost: ActionCatalogEntry = {
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   inputSchema: {
@@ -52,6 +55,7 @@ const killProcess: ActionCatalogEntry = {
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   inputSchema: {
@@ -67,6 +71,7 @@ const suspendProcess: ActionCatalogEntry = {
 // An installed catalog can still carry the retired action; packaging must never fill it.
 const staleSetAssetCriticality: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-set-asset-criticality',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Set asset criticality',
   category: 'respond',
   inputSchema: {
@@ -195,13 +200,18 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
     written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
     skipped: [],
   }),
-  resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1', capabilities: [] }),
+  resolveHostEnrollment: async () => ({
+    enrolled: true,
+    agentId: 'agent-1',
+    capabilities: [],
+    capabilitiesSource: 'reported',
+  }),
   rehydrateProcessSelectors: async () => [],
   countExistingProposals: async () => 0,
   // Every subject is free by default, at the first generation, as it is in an empty space.
   resolveProposalSlot: async ({ subjectKey }) => ({
     kind: 'mint',
-    proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
+    proposalId: buildProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
   }),
   appendAlsoRaisedBy: async () => 'revised',
   hasOpenProposal: async () => false,
@@ -552,7 +562,7 @@ describe('runPackageReport', () => {
     expect(result.converged).toEqual([]);
     // Created under the id derived from what it proposes, which is what lets a second run meet it.
     expect(result.proposals[0].proposalId).toBe(
-      buildHuntProposalId({
+      buildProposalId({
         spaceId: 'default',
         subjectKey: result.proposals[0].subjectKey,
         generation: 0,
@@ -761,7 +771,7 @@ describe('runPackageReport', () => {
       const resolveProposalSlot = jest.fn(
         async ({ subjectKey }: WantedProposal): Promise<ProposalSlot> => ({
           kind: 'mint',
-          proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
+          proposalId: buildProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
         })
       );
 
@@ -833,7 +843,7 @@ describe('runPackageReport', () => {
               ? { kind: 'converge', live }
               : {
                   kind: 'mint',
-                  proposalId: buildHuntProposalId({
+                  proposalId: buildProposalId({
                     spaceId: 'default',
                     subjectKey,
                     generation: 0,
@@ -923,7 +933,7 @@ describe('runPackageReport', () => {
               ? { kind: 'converge', live: liveProposal() }
               : {
                   kind: 'mint',
-                  proposalId: buildHuntProposalId({
+                  proposalId: buildProposalId({
                     spaceId: 'default',
                     subjectKey,
                     generation: 0,

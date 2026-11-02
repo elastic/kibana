@@ -142,6 +142,7 @@ export function createSharedServices(
       getDataViews,
       getAuditService,
       mlLicense,
+      enabledFeatures,
       serverless
     );
 
@@ -224,12 +225,16 @@ function getRequestItemsProvider(
   getDataViews: () => DataViewsPluginStart,
   getAuditService: () => CoreAuditService | null,
   mlLicense: MlLicense,
+  enabledFeatures: MlFeatures,
   serverless: ServerlessInfo
 ) {
   return (request: KibanaRequest) => {
     let hasMlCapabilities: HasMlCapabilities = hasMlCapabilitiesProvider(
       resolveMlCapabilities,
-      request
+      request,
+      authorization,
+      mlLicense,
+      enabledFeatures
     );
     let scopedClient: IScopedClusterClient;
     let mlClient: MlClient;
