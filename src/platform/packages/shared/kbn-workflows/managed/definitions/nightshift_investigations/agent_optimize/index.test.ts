@@ -171,9 +171,10 @@ describe('nightshift agent optimize workflow', () => {
 
   // Liquid `{{ }}` stringifies the array as "[object Object]…", the step's preprocess then
   // falls back to [], and extractAccessedTreeIds([]) makes every round distill from scratch.
-  it('forwards the investigator tool_calls into the prepare step', () => {
+  it('forwards the investigator tool_calls and conversation into the prepare step', () => {
     const prepare = workflow.steps.find((step) => step.name === 'prepare_turn');
     expect(prepare?.with?.tool_calls).toBe('${{ inputs.tool_calls }}');
+    expect(prepare?.with?.conversation_id).toBe('{{ inputs.conversation_id }}');
   });
 
   // Only the eligible investigator rounds may rewrite the trees, so the agent and the
@@ -204,6 +205,8 @@ describe('nightshift agent optimize workflow', () => {
       response: '{{ inputs.response }}',
       conversation_id: '{{ inputs.conversation_id }}',
       round_id: '{{ inputs.round_id }}',
+      background_trace_id:
+        '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}',
       message: '{{ steps.prepare_turn.output.message }}',
       turn_kind: '{{ steps.prepare_turn.output.turn_kind }}',
       connector_id: '{{ steps.resolve_model.output.connector_id }}',

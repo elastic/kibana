@@ -212,7 +212,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { delete: { id: uuidB } },
         ]);
 
-        expect(response).to.eql({ succeeded: 2, failed: 0, conflicts: 0, skipped: 0 });
+        expect(response).to.eql({
+          succeeded: 2,
+          failed: 0,
+          conflicts: 0,
+          skipped: 0,
+          failedIds: [],
+          conflictIds: [],
+        });
 
         const { features: streamAFeatures } = await listFeatures(apiClient, sourceId, {
           includeExcluded: true,
@@ -236,7 +243,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { delete: { id: uuid2 } },
         ]);
 
-        expect(response).to.eql({ succeeded: 2, failed: 0, conflicts: 0, skipped: 0 });
+        expect(response).to.eql({
+          succeeded: 2,
+          failed: 0,
+          conflicts: 0,
+          skipped: 0,
+          failedIds: [],
+          conflictIds: [],
+        });
 
         const { features } = await listFeatures(apiClient, sourceId, {
           includeExcluded: true,
@@ -258,7 +272,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { exclude: { id: uuid2 } },
         ]);
 
-        expect(excludeResponse).to.eql({ succeeded: 2, failed: 0, conflicts: 0, skipped: 0 });
+        expect(excludeResponse).to.eql({
+          succeeded: 2,
+          failed: 0,
+          conflicts: 0,
+          skipped: 0,
+          failedIds: [],
+          conflictIds: [],
+        });
 
         // Restore both in one request
         const restoreResponse = await bulkFeaturesAcrossSources(apiClient, [
@@ -266,7 +287,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { restore: { id: uuid2 } },
         ]);
 
-        expect(restoreResponse).to.eql({ succeeded: 2, failed: 0, conflicts: 0, skipped: 0 });
+        expect(restoreResponse).to.eql({
+          succeeded: 2,
+          failed: 0,
+          conflicts: 0,
+          skipped: 0,
+          failedIds: [],
+          conflictIds: [],
+        });
 
         // Cleanup
         await bulkFeatures(apiClient, sourceId, [
@@ -287,7 +315,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200)
           .then((res) => res.body);
 
-        expect(response).to.eql({ succeeded: 0, failed: 0, conflicts: 0, skipped: 1 });
+        expect(response).to.eql({
+          succeeded: 0,
+          failed: 0,
+          conflicts: 0,
+          skipped: 1,
+          failedIds: [],
+          conflictIds: [],
+        });
       });
     });
   });

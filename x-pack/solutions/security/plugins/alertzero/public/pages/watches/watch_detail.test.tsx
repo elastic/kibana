@@ -44,6 +44,9 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('../../hooks/hunt/use_hunt_worker_index_coverage', () => ({
+  useHuntWorkerIndexCoverage: jest.fn(() => ({ data: undefined })),
+}));
 jest.mock('../../hooks/hunt/use_hunt_threat_intel_supply', () => ({
   useHuntThreatIntelSupplyStatus: jest.fn(() => ({
     data: {
@@ -400,7 +403,7 @@ describe('WatchDetailPage', () => {
       within(attackDiscovery).getByTestId(
         `alertZeroWorkerScheduleBadge-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
       )
-    ).toHaveTextContent('Every 24 hours');
+    ).toHaveTextContent('Runs every 24 hours');
     expect(
       within(alertTriage).queryByTestId(
         `alertZeroWorkerScheduleBadge-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
