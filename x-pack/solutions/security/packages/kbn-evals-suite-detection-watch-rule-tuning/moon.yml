@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/workflows'
   - '@kbn/core'
+  - '@kbn/alertzero-common'
 tags:
   - functional-tests
   - package
@@ -33,6 +34,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
