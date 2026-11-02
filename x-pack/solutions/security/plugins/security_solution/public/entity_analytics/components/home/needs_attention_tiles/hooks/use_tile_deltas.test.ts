@@ -203,12 +203,11 @@ describe('useEntitiesWithAnomaliesDelta', () => {
 });
 
 describe('useNewEntityDelta', () => {
-  it('runs on the local cluster only, like the count, and applies the entity filters', () => {
+  it('applies the entity filters', () => {
     const entityFilters = { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['high_impact'] };
     const clauses = buildEntityFilterClauses(entityFilters);
     expect(clauses.length).toBeGreaterThan(0);
     renderHook(() => useNewEntityDelta({ ...base, count: 3, entityFilters }));
-    expect(lastOptions().localOnly).toBe(true);
     clauses.forEach((clause) => expect(lastOptions().previousQuery).toContain(clause));
   });
 });

@@ -16,7 +16,10 @@ import type {
   ProcessingSaveRequest,
   ProcessingStepPosition,
 } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
-import type { DestinationsActorRef } from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
+import type {
+  DestinationsActorRef,
+  DestinationsTimeDeps,
+} from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
 import type { SourcesActorRef } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
 import type { SourceApiKeyGenerationDeps } from '../../../../streams_layout/sources/source_api_keys';
 import type { SourceEnvironmentLoader } from '../../../../streams_layout/sources/source_environment';
@@ -33,7 +36,7 @@ export interface CanvasCreateHistoryRef {
   current: CanvasCreateHistoryHandlers;
 }
 
-export interface CanvasStateServiceDeps {
+export interface CanvasStateServiceDeps extends DestinationsTimeDeps {
   core: CoreStart;
   urlStateStorageContainer: IKbnUrlStateStorage;
   apiKeyGenerationDeps: SourceApiKeyGenerationDeps;
