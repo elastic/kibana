@@ -575,7 +575,9 @@ describe('buildHuntHeadline', () => {
           has_confirmed_hit: true,
         })
       )
-    ).toBe('confirmed hit: IOC Hunt matched 121 documents; Behavior Hunt confirmed 1 of 2 behaviors');
+    ).toBe(
+      'confirmed hit: IOC Hunt matched 121 documents; Behavior Hunt confirmed 1 of 2 behaviors'
+    );
   });
 
   it('summarizes a clean run with a skipped Behavior Hunt', () => {

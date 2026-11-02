@@ -654,7 +654,9 @@ describe('huntCoordinator', () => {
       tier2_when: 'on_hits',
     });
 
-    expect(result.headline).toBe('no confirmed hits: IOC Hunt found no matches; Behavior Hunt skipped');
+    expect(result.headline).toBe(
+      'no confirmed hits: IOC Hunt found no matches; Behavior Hunt skipped'
+    );
     expect(result.narrative).toContain(
       '### Hunt Watch found no confirmed hits\n\nHunt Watch found no confirmed hits for threat report **"CloudTrail retrospective"** (`rpt-1`).'
     );

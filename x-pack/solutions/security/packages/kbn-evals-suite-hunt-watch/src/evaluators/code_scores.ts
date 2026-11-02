@@ -261,7 +261,9 @@ export const scoreTier1Status = (expected: HuntExpected, artifacts: HuntArtifact
       if (!report.tier1Status) return notApplicable('IOC Hunt status not pinned');
       const status = resolveTier1Status(actual);
       if (!status) {
-        return missing(`could not determine IOC Hunt status (headline: "${actual.hunt?.headline}")`);
+        return missing(
+          `could not determine IOC Hunt status (headline: "${actual.hunt?.headline}")`
+        );
       }
       return status === report.tier1Status
         ? pass(`tier1 ${status}`)
@@ -445,7 +447,9 @@ export const scoreCanaryTripped = (expected: HuntExpected, artifacts: HuntArtifa
       if (report.tier1Status) {
         const status = resolveTier1Status(actual);
         if (!status) {
-          return missing(`could not determine IOC Hunt status (headline: "${actual.hunt.headline}")`);
+          return missing(
+            `could not determine IOC Hunt status (headline: "${actual.hunt.headline}")`
+          );
         }
         if (status !== report.tier1Status) {
           violations.push(`tier1 "${status}", report "${report.tier1Status}"`);

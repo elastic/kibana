@@ -736,7 +736,9 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
     }
   }
   if (lines.length === 0) return '';
-  return `\n\n--- ENVIRONMENT CONTEXT (IOC Hunt hits) ---\n${CONTEXT_PREAMBLE}\n${lines.join('\n')}`;
+  return `\n\n--- ENVIRONMENT CONTEXT (IOC Hunt hits) ---\n${CONTEXT_PREAMBLE}\n${lines.join(
+    '\n'
+  )}`;
 };
 
 export const huntBehavior = async (

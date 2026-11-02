@@ -174,11 +174,16 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
   const confirmed = behaviors.filter((b) => b.execution?.hit === true);
   const executed = behaviors.filter((b) => b.execution?.executed === true);
   lines.push(
-    `Behavior Hunt derived ${plural(behaviors.length, 'behavior')} from the report text and validated ${
+    `Behavior Hunt derived ${plural(
+      behaviors.length,
+      'behavior'
+    )} from the report text and validated ${
       behaviors.length === 1 ? 'it' : 'them'
     } against the ATT&CK catalog; ${
       executed.length
-    } executed as ES|QL against the Behavior Hunt targets and ${confirmed.length} matched live activity.`
+    } executed as ES|QL against the Behavior Hunt targets and ${
+      confirmed.length
+    } matched live activity.`
   );
   for (const behavior of behaviors.slice(0, MAX_BEHAVIORS_NARRATED)) {
     lines.push(describeBehavior(behavior));
@@ -208,7 +213,9 @@ const describeTier1 = (tier1: HuntForThreatResult, excludedIocCount = 0): string
     return lines;
   }
   if (tier1.counts.total_hits === 0) {
-    lines.push('IOC Hunt found no documents matching those indicators or techniques in the window.');
+    lines.push(
+      'IOC Hunt found no documents matching those indicators or techniques in the window.'
+    );
     return lines;
   }
 
