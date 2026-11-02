@@ -45,17 +45,17 @@ describe('RiskScoreChangeCell', () => {
 
   it.each([
     ['zero', 0],
-    ['a rise that rounds to zero', 0.4],
-    ['a drop that rounds to zero', -0.4],
-  ])('renders a neutral 0 without an arrow for %s', (_, value) => {
+    ['a rise that rounds to zero', 0.004],
+    ['a drop that rounds to zero', -0.004],
+  ])('renders a neutral 0.00 without an arrow for %s', (_, value) => {
     const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
-    expect(container.textContent).toBe('0');
+    expect(container.textContent).toBe('0.00');
     expect(container.querySelector('[data-euiicon-type]')).not.toBeInTheDocument();
   });
 
   it.each([
-    ['a rise as an up arrow, said as an increase', 12.6, 'Increased by 13', 'sortUp'],
-    ['a drop as a down arrow, said as a decrease', -7.2, 'Decreased by 7', 'sortDown'],
+    ['a rise as an up arrow, said as an increase', 12.6, 'Increased by 12.60', 'sortUp'],
+    ['a drop as a down arrow, said as a decrease', -7.2, 'Decreased by 7.20', 'sortDown'],
   ])('renders %s', (_, value, text, icon) => {
     const { container } = renderInProviders(<RiskScoreChangeCell value={value} />);
     expect(container.textContent).toBe(text);
