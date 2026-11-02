@@ -190,7 +190,7 @@ processors:
           ctx.event = [:];
         }
 
-        ctx.event.ingested = metadata().now.withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        ctx.event.ingested = metadata().now.truncatedTo(ChronoUnit.MILLIS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
   - remove:
       description: Remove any pre-existing untrusted values.
       field:
@@ -243,7 +243,7 @@ processors:
           ctx.event = [:];
         }
 
-        ctx.event.ingested = metadata().now.withNano(0).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        ctx.event.ingested = metadata().now.truncatedTo(ChronoUnit.MILLIS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
   - remove:
       description: Remove any pre-existing untrusted values.
       field:
