@@ -213,8 +213,8 @@ describe('StepExecutionRuntime', () => {
         error: { type: 'Error', message: 'Fake error' },
       } as Partial<EsWorkflowStepExecution>);
       // IO lives in the service now — seed it through the passthrough mock.
-      stepIoService.setStepInput(fakeStepExecutionId, {});
-      stepIoService.setStepOutput(fakeStepExecutionId, { success: true, data: {} });
+      stepIoService.write(fakeStepExecutionId, 'input', {});
+      stepIoService.write(fakeStepExecutionId, 'output', { success: true, data: {} });
 
       const stepResult = underTest.getCurrentStepResult();
       expect(workflowExecutionState.getStepExecution).toHaveBeenCalledWith(

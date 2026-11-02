@@ -144,8 +144,6 @@ async function resumeWorkflowWithRequest({
     node?.type !== 'enter-parallel' &&
     node?.stepId
   ) {
-    // Read persisted metadata before deciding whether this notification may advance the workflow.
-    await stepIoService.load();
     const stepExecution = workflowExecutionState.getLatestStepExecution(node.stepId);
     const deadline = getIdleTimeoutResumeDeadlineMs(
       { workflowExecutionGraph, workflowExecutionState },

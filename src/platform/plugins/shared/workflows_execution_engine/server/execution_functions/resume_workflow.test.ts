@@ -236,12 +236,7 @@ describe('resumeWorkflow', () => {
         const retryAt = new Date(startedAt.getTime() + 60_000);
         const expectedRetryAt = timeout ? new Date(startedAt.getTime() + 10_000) : retryAt;
         const resume = jest.fn();
-        let stepsLoaded = false;
-        const load = jest.fn(async () => {
-          stepsLoaded = true;
-        });
         mockSetupDependencies.mockResolvedValue({
-          stepIoService: { load },
           workflowRuntime: { resume, getCurrentNode: () => ({ type: 'wait', stepId: 'pause' }) },
           workflowExecutionGraph: { getWorkflowLevelTimeout: () => timeout },
           workflowExecutionCursor: { currentStackFrames: [] },
@@ -251,8 +246,7 @@ describe('resumeWorkflow', () => {
               currentNodeId: 'pause',
               startedAt: startedAt.toISOString(),
             }),
-            getLatestStepExecution: () =>
-              stepsLoaded ? { state: { resumeAt: retryAt.toISOString() } } : undefined,
+            getLatestStepExecution: () => ({ state: { resumeAt: retryAt.toISOString() } }),
           },
         } as never);
         const result = await resumeWorkflow({
@@ -274,7 +268,6 @@ describe('resumeWorkflow', () => {
           stepExecutionRepository: mockStepExecutionRepositoryForResume,
         });
         expect(result).toEqual({ retryAt: expectedRetryAt });
-        expect(load).toHaveBeenCalledTimes(1);
         expect(resume).not.toHaveBeenCalled();
         expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
       }
@@ -286,9 +279,7 @@ describe('resumeWorkflow', () => {
         jest.setSystemTime(new Date('2025-06-01T12:00:15.000Z'));
         const startedAt = '2025-06-01T12:00:00.000Z';
         const resume = jest.fn();
-        const load = jest.fn().mockResolvedValue(undefined);
         mockSetupDependencies.mockResolvedValue({
-          stepIoService: { load },
           workflowRuntime: {
             resume,
             getCurrentNode: () => ({
@@ -335,7 +326,6 @@ describe('resumeWorkflow', () => {
         });
 
         expect(result).toEqual({ retryAt: new Date('2025-06-01T12:00:30.000Z') });
-        expect(load).toHaveBeenCalledTimes(1);
         expect(resume).not.toHaveBeenCalled();
         expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
       } finally {

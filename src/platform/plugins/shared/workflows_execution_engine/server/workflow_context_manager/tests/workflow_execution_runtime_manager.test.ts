@@ -181,7 +181,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     underTest = new WorkflowExecutionRuntimeManager({
       workflowExecution,
-      workflowExecutionGraph,
       workflowExecutionCursor,
       workflowLogger,
       workflowExecutionState,
@@ -199,7 +198,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
-        workflowExecutionGraph,
         workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
@@ -243,7 +241,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
         });
         underTest = new WorkflowExecutionRuntimeManager({
           workflowExecution,
-          workflowExecutionGraph,
           workflowExecutionCursor,
           workflowLogger,
           workflowExecutionState,
@@ -505,7 +502,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
-        workflowExecutionGraph,
         workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
@@ -866,7 +862,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
       underTest = new WorkflowExecutionRuntimeManager({
         workflowExecution,
-        workflowExecutionGraph,
         workflowExecutionCursor,
         workflowLogger,
         workflowExecutionState,
@@ -1168,7 +1163,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
           telemetryClient: new WorkflowExecutionTelemetryClient(analytics, loggerMock.create()),
           workflowExecution: childWorkflowExecution,
           workflowExecutionCursor,
-          workflowExecutionGraph,
           workflowExecutionState,
           workflowLogger,
         });
@@ -1238,7 +1232,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
           telemetryClient: new WorkflowExecutionTelemetryClient(analytics, loggerMock.create()),
           workflowExecution: childWorkflowExecution,
           workflowExecutionCursor,
-          workflowExecutionGraph,
           workflowExecutionState,
           workflowLogger,
         });

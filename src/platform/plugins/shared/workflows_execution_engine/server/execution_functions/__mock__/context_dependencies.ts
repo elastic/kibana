@@ -29,6 +29,7 @@ export const mockContextDependencies = () => ({
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
     eviction: {
       minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
+      maxCacheSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb
     },
     collectQueueMetrics: false,
     hitlExternalResume: { enabled: true },
