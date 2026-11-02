@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import type { Dispatch, PointerEvent as ReactPointerEvent, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiPortal, transparentize, useEuiTheme } from '@elastic/eui';
 import { SpacingMeasurement } from './spacing_measurement';
@@ -49,7 +49,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
         inset: 0,
         position: 'fixed',
         zIndex: zIndex.overlay,
-        pointerEvents: 'auto',
+        pointerEvents: 'none',
       }),
     [euiTheme.colors.backgroundFilledText, zIndex.overlay]
   );
@@ -72,11 +72,11 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
   const rafRef = useRef<number>(0);
 
   const handlePointerMove = useCallback(
-    (event: ReactPointerEvent) => {
+    (event: PointerEvent) => {
       cancelAnimationFrame(rafRef.current);
       const { clientX, clientY } = event;
       rafRef.current = requestAnimationFrame(() => {
-        const synth = { clientX, clientY } as PointerEvent;
+        const synth = new MouseEvent('mousemove', { clientX, clientY });
         const target = getElementFromPoint(synth);
 
         if (!target) {
@@ -106,8 +106,12 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
   );
 
   useEffect(() => {
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
+    document.addEventListener('pointermove', handlePointerMove, true);
+    return () => {
+      document.removeEventListener('pointermove', handlePointerMove, true);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [handlePointerMove]);
 
   const handleClick = useCallback((event: MouseEvent) => {
     const target = getElementFromPoint(event);
@@ -164,7 +168,6 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
         css={overlayCss}
         id={MEASURE_OVERLAY_ID}
         data-test-subj="measureOverlayContainer"
-        onPointerMove={handlePointerMove}
         aria-hidden="true"
       />
       {anchorRect && (

@@ -13,18 +13,27 @@ import { css, Global } from '@emotion/react';
 interface Props {
   cursor: string;
   allowButtons?: boolean;
+  ignoredElementsCursor?: string;
 }
 
 /**
  * Renders a Global style that forces `cursor` on all elements.
- * When `allowButtons` is true, devtool-ignore buttons keep their pointer cursor.
+ * `ignoredElementsCursor`, when set, resets the cursor for devtool-ignore
+ * elements (e.g. a pinned panel) and their contents, since those aren't
+ * inspectable targets. `allowButtons` additionally keeps a pointer cursor
+ * on buttons inside them (takes precedence due to selector specificity).
  */
-export const GlobalCursorOverride = ({ cursor, allowButtons }: Props) => (
+export const GlobalCursorOverride = ({ cursor, allowButtons, ignoredElementsCursor }: Props) => (
   <Global
     styles={css({
       'body *': {
         cursor: `${cursor} !important`,
       },
+      ...(ignoredElementsCursor && {
+        '[data-devtool-ignore], [data-devtool-ignore] *': {
+          cursor: `${ignoredElementsCursor} !important`,
+        },
+      }),
       ...(allowButtons && {
         '[data-devtool-ignore] button, [data-devtool-ignore] [role="button"]': {
           cursor: 'pointer !important',

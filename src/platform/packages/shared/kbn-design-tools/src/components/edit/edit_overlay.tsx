@@ -25,7 +25,12 @@ import { useScrollSync } from '../../edit_engine/use_scroll_sync';
 import { useLockedTarget } from '../../hooks/use_locked_target';
 import { useEditChangeTracker } from '../../hooks/use_edit_change_tracker';
 import { useInteractionMachine } from '../../edit_engine/use_interaction_machine';
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import {
+  DEVTOOL_HIDDEN_ATTR,
+  DEVTOOL_MANAGED_ATTR,
+  FONT_INSPECT_OVERLAY_ID,
+  MEASURE_OVERLAY_ID,
+} from '../../lib/constants';
 import {
   isEscapeKey,
   isDeleteKey,
@@ -451,6 +456,7 @@ export const EditOverlay = ({
     (event: KeyboardEvent) => {
       if (isEscapeKey(event)) {
         if (document.getElementById(MEASURE_OVERLAY_ID)) return;
+        if (document.getElementById(FONT_INSPECT_OVERLAY_ID)) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         setIsEditMode(false);

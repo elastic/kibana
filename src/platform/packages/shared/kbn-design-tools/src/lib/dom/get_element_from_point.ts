@@ -8,7 +8,18 @@
  */
 
 import { isIgnoredElement } from './is_ignored_element';
-import { MEASURE_OVERLAY_ID } from '../constants';
+import { FONT_INSPECT_OVERLAY_ID, MEASURE_OVERLAY_ID } from '../constants';
+
+const PEEK_THROUGH_OVERLAY_IDS = [MEASURE_OVERLAY_ID, FONT_INSPECT_OVERLAY_ID] as const;
+
+const setOverlayPointerEvents = (pointerEvents: string): void => {
+  for (const id of PEEK_THROUGH_OVERLAY_IDS) {
+    const overlay = document.getElementById(id);
+    if (overlay) {
+      overlay.style.pointerEvents = pointerEvents;
+    }
+  }
+};
 
 /**
  * Get the deepest element at the given mouse event's coordinates.
@@ -17,22 +28,17 @@ import { MEASURE_OVERLAY_ID } from '../constants';
  * For SVG elements, the nearest ancestor HTMLElement is returned so
  * that callers can safely use HTMLElement-specific APIs.
  *
- * The measure overlay uses `pointer-events: auto` to block hover on
- * underlying elements. We temporarily hide it so `elementsFromPoint`
- * can see through to the page content.
+ * Measure and font-inspect overlays currently use `pointer-events: none`,
+ * but temporarily zeroing their `pointer-events` here keeps this safe even
+ * if an overlay's backdrop reverts to blocking hover in the future.
  *
  * @param event - The mouse event with coordinates.
  * @returns The deepest HTMLElement at the coordinates, or `null`.
  */
 export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
-  const overlay = document.getElementById(MEASURE_OVERLAY_ID);
-  if (overlay) {
-    overlay.style.pointerEvents = 'none';
-  }
+  setOverlayPointerEvents('none');
   const elements = document.elementsFromPoint(event.clientX, event.clientY);
-  if (overlay) {
-    overlay.style.pointerEvents = '';
-  }
+  setOverlayPointerEvents('');
 
   for (const el of elements) {
     if (isIgnoredElement(el)) continue;
