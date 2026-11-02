@@ -192,11 +192,14 @@ export const useEntityFilterBarCounts = ({
   rowsMode,
   filter,
   searchExpression,
+  isSearchOverridesPending,
 }: {
   spaceId: string | undefined;
   rowsMode: RowsMode;
   filter?: QueryDslQueryContainer;
   searchExpression?: string;
+  /** The search's overrides are still loading. */
+  isSearchOverridesPending?: boolean;
 }): UseEntityFilterBarCountsResult => {
   const { data: dataServices } = useKibana().services;
   const { data: resolvedIndex } = useResolvedLatestEntitiesIndexName(spaceId);
@@ -226,7 +229,7 @@ export const useEntityFilterBarCounts = ({
     error: changesError,
   } = useQuery({
     queryKey: ['entity-filter-value-changes', spaceId, concreteEntityIndexName, searchExpression],
-    enabled: isResolved && !!spaceId && !!concreteEntityIndexName,
+    enabled: isResolved && !!spaceId && !!concreteEntityIndexName && !isSearchOverridesPending,
     keepPreviousData: true,
     queryFn: ({ signal }) =>
       fetchResolvedEntityValueChanges(

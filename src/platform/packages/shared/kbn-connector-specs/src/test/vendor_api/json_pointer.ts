@@ -35,6 +35,22 @@ export const getAtTokens = (document: unknown, tokens: readonly string[]): unkno
     document
   );
 
+/** Follows a Path Item's `$ref`s to the item they reference, whose fields the referrer's own override. */
+export const resolvePathItem = (
+  document: unknown,
+  item: unknown,
+  seen: readonly string[] = []
+): unknown => {
+  if (!isJsonObject(item) || typeof item.$ref !== 'string' || seen.includes(item.$ref)) {
+    return item;
+  }
+  const { $ref: ref, ...own } = item;
+  const pointer = localRefToPointer(ref);
+  const referenced = pointer === undefined ? undefined : getAtTokens(document, toTokens(pointer));
+  const resolved = resolvePathItem(document, referenced, [...seen, ref]);
+  return isJsonObject(resolved) ? { ...resolved, ...own } : item;
+};
+
 /** Sets a value in an object tree, creating intermediate objects. */
 export const setAtTokens = (document: JsonObject, tokens: readonly string[], value: unknown) => {
   let node = document;

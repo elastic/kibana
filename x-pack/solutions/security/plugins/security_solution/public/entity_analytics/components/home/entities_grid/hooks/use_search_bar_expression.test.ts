@@ -26,6 +26,11 @@ jest.mock('../../../../../common/store/inputs', () => ({
   },
 }));
 
+jest.mock('./use_entity_grid_context', () => ({ useGridContext: () => ({}) }));
+jest.mock('./use_entity_grid_data', () => ({
+  useResolvedEntityOverrides: () => ({ data: undefined, error: null }),
+}));
+
 const ENTITY_FIELDS: ReadonlySet<string> = new Set(['entity.id', 'entity.EngineMetadata.Type']);
 
 const phraseFilter = (field: string, value: string, negate = false): Filter => ({
@@ -181,7 +186,7 @@ describe('useSearchBarExpression', () => {
   });
 
   it('leaves out the filters on fields the entity data view lacks and reports them', () => {
-    const { result } = renderHook(() => useSearchBarExpression(entityDataView));
+    const { result } = renderHook(() => useSearchBarExpression('individual', entityDataView));
 
     expect(result.current.ignoredFields).toEqual(['kibana.alert.workflow_status']);
     expect(result.current.applicableFilters).toEqual([mockGlobalFilters[0]]);
@@ -191,7 +196,7 @@ describe('useSearchBarExpression', () => {
   });
 
   it('converts every filter and ignores none while there is no data view', () => {
-    const { result } = renderHook(() => useSearchBarExpression(undefined));
+    const { result } = renderHook(() => useSearchBarExpression('individual', undefined));
 
     expect(result.current.ignoredFields).toEqual([]);
     expect(result.current.applicableFilters).toEqual(mockGlobalFilters);
@@ -202,10 +207,13 @@ describe('useSearchBarExpression', () => {
     mockGlobalFilters = [];
     mockGlobalQuery = { query: '', language: 'kuery' };
 
-    const { result } = renderHook(() => useSearchBarExpression(entityDataView));
+    const { result } = renderHook(() => useSearchBarExpression('individual', entityDataView));
 
     expect(result.current).toEqual({
       searchExpression: undefined,
+      searchOverrides: undefined,
+      isSearchOverridesPending: false,
+      mainEntityOnlySearch: undefined,
       applicableFilters: [],
       ignoredFields: [],
     });

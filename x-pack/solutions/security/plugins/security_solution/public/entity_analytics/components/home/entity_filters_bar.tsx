@@ -122,6 +122,7 @@ interface Props {
   rowsMode: RowsMode;
   esFilter?: QueryDslQueryContainer;
   searchExpression?: string;
+  isSearchOverridesPending?: boolean;
   watchlistNames: Map<string, string>;
 }
 
@@ -132,6 +133,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
   rowsMode,
   esFilter,
   searchExpression,
+  isSearchOverridesPending,
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -140,6 +142,7 @@ export const EntityFiltersBar: React.FC<Props> = ({
     rowsMode,
     filter: esFilter,
     searchExpression,
+    isSearchOverridesPending,
   });
 
   // static options
