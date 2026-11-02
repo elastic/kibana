@@ -151,7 +151,9 @@ needed beyond the prototype. The replay ends on "Go live", tab close, or app unm
   - inspector: all 68 tests pass.
   - discover `tabs`, `use_inspector`, `aggregate_request_adapter`, `resolve_data_view`,
     `discover_layout`: 27 pass.
-- `node scripts/type_check` for `inspector`, `data` and `discover`: see the commit message / final
-  summary for the exact result.
+- `node scripts/type_check --project src/platform/plugins/shared/{inspector,data,discover}/tsconfig.json`:
+  all three pass. The first discover run found 2 errors (the tab runtime state mock was missing
+  `replay$`, and the test used a grid UI state field that doesn't exist); both are fixed and the
+  rerun is clean.
 - ESLint: no errors. Warnings remain for `EuiCallOut` content props and `KbnCallout` preferences;
   they were left as is for the prototype.
