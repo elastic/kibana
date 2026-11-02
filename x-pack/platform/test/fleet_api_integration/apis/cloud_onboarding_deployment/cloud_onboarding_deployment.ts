@@ -1557,15 +1557,87 @@ export default function (providerContext: FtrProviderContext) {
 
           await supertest.get(`/api/fleet/package_policies/${packagePolicyIds[0]}`).expect(404);
         });
+      });
 
-        it('does not restrict upgrading the policy to the onboarding flow', async () => {
-          // The policy is already on the latest package version; the upgrade must not be refused
-          // because an onboarding instance manages it.
+      describe('package upgrades', () => {
+        const UPGRADE_PACKAGE = 'package_policy_upgrade';
+        const INSTALLED_VERSION = '0.2.5-non-breaking-change';
+        let upgradablePolicyId: string;
+        let deploymentId: string;
+
+        before(async () => {
+          await supertest
+            .post(`/api/fleet/epm/packages/${UPGRADE_PACKAGE}/${INSTALLED_VERSION}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ force: true })
+            .expect(200);
+        });
+
+        after(async () => {
+          await supertest
+            .delete(`/api/fleet/epm/packages/${UPGRADE_PACKAGE}/${INSTALLED_VERSION}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ force: true })
+            .catch(() => {});
+        });
+
+        beforeEach(async () => {
+          // A policy on an older version than the installed one, so it can be upgraded.
+          const { body } = await supertest
+            .post('/api/fleet/package_policies')
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `ownership-test-upgrade-${Date.now()}`,
+              namespace: 'default',
+              policy_ids: [agentPolicyId],
+              enabled: true,
+              inputs: [
+                {
+                  policy_template: 'package_policy_upgrade',
+                  type: 'test_input',
+                  enabled: true,
+                  streams: [
+                    {
+                      id: 'test-package_policy_upgrade-xxxx',
+                      enabled: true,
+                      data_stream: {
+                        type: 'test_stream',
+                        dataset: 'package_policy_upgrade.test_stream',
+                      },
+                      vars: { test_var: { value: 'My custom test value' } },
+                    },
+                  ],
+                },
+              ],
+              package: {
+                name: UPGRADE_PACKAGE,
+                title: 'This is a test package for upgrading package policies',
+                version: '0.2.0-add-non-required-test-var',
+              },
+            })
+            .expect(200);
+          upgradablePolicyId = body.item.id;
+          // Deleted by the suite's afterEach.
+          packagePolicyIds.push(upgradablePolicyId);
+          deploymentId = await createDeployment({ cloudtrail: upgradablePolicyId });
+        });
+
+        it('upgrades a managed policy without the id of the onboarding instance and keeps the stamp', async () => {
           const { body } = await supertest
             .post('/api/fleet/package_policies/upgrade')
             .set('kbn-xsrf', 'xxxx')
-            .send({ packagePolicyIds: [packagePolicyIds[0]] });
-          expect(JSON.stringify(body)).not.to.match(ONBOARDING_ONLY);
+            .send({ packagePolicyIds: [upgradablePolicyId] })
+            .expect(200);
+
+          expect(body).to.have.length(1);
+          expect(body[0]).to.have.property('id', upgradablePolicyId);
+          expect(body[0]).to.have.property('success', true);
+
+          const { body: upgraded } = await supertest
+            .get(`/api/fleet/package_policies/${upgradablePolicyId}`)
+            .expect(200);
+          expect(upgraded.item.package.version).to.equal(INSTALLED_VERSION);
+          expect(upgraded.item.onboarding_deployment_id).to.equal(deploymentId);
         });
       });
     });
