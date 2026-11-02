@@ -20,6 +20,8 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  */
 export class WorkflowExecutionPage {
   public executionPanel: Locator;
+  /** Step detail overlay, or the legacy inline panel when the executions view is off. */
+  public readonly stepDetail: Locator;
   public readonly serviceAccountIdentity: Locator;
   public readonly serviceAccountBadges: Locator;
   public readonly copyServiceAccountId: Locator;
@@ -27,6 +29,9 @@ export class WorkflowExecutionPage {
   constructor(private readonly page: ScoutPage) {
     this.executionPanel = this.page.testSubj
       .locator('workflowExecutionFlyout')
+      .or(this.page.testSubj.locator('workflowExecutionPanel'));
+    this.stepDetail = this.page.testSubj
+      .locator('workflowExecutionStepFlyout')
       .or(this.page.testSubj.locator('workflowExecutionPanel'));
     this.serviceAccountIdentity = this.page.testSubj.locator('workflowServiceAccountName');
     this.serviceAccountBadges = this.page.testSubj
@@ -192,7 +197,7 @@ export class WorkflowExecutionPage {
    * Input, output, or error section in the open step detail.
    */
   getStepResultSection(type: 'input' | 'output' | 'error'): Locator {
-    return this.executionPanel.locator(`[data-test-subj="workflowStepDataSection_${type}"]`);
+    return this.stepDetail.locator(`[data-test-subj="workflowStepDataSection_${type}"]`);
   }
 
   /**
@@ -211,7 +216,12 @@ export class WorkflowExecutionPage {
     return usesFlyoutTree ? this.getFlyoutStep(path) : this.getLegacyStep(path);
   }
 
-  private async getFlyoutStep(path: string): Promise<Locator> {
+  async toggleStepExpansion(path: string): Promise<void> {
+    const chevron = await this.getFlyoutStep(path, 'chevron');
+    await chevron.click();
+  }
+
+  private async getFlyoutStep(path: string, target: 'name' | 'chevron' = 'name'): Promise<Locator> {
     const nodes = path.split('>').map((substring) => substring.trim());
     let parentLocator = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
 
@@ -236,10 +246,14 @@ export class WorkflowExecutionPage {
           found = true;
           if (i === nodes.length - 1) {
             await this.dismissToasts();
-            const treeItem = listItem.locator(
-              '> [data-test-subj="step-execution-tree-item-label"] [role="treeitem"]'
-            );
-            return (await treeItem.count()) > 0 ? treeItem : nameLocator;
+            if (target === 'chevron') {
+              return listItem
+                .locator('> [data-test-subj="step-execution-tree-item-label"]')
+                .getByTestId('workflowStepTreeChevron');
+            }
+            // The row is the full width of the run. Its center sits under the step
+            // overlay, so a click there never reaches the tree. The name is on the left.
+            return nameLocator;
           }
 
           parentLocator = listItem.locator('> [data-test-subj="workflowStepTreeIndentGuide"]');

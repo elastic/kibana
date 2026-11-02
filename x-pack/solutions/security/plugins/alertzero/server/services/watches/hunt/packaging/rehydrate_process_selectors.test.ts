@@ -5,14 +5,30 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { makeRehydrateProcessSelectors } from './rehydrate_process_selectors';
 
 type MgetDoc = Record<string, unknown>;
 
-const esClientWith = (docs: MgetDoc[]): ElasticsearchClient =>
+const exitSearchResponse = (exitedAtByEntityId: Record<string, string>) => ({
+  _shards: { total: 1 },
+  aggregations: {
+    exited: {
+      buckets: Object.entries(exitedAtByEntityId).map(([key, exitedAt]) => ({
+        key,
+        exited_at: { value_as_string: exitedAt },
+      })),
+    },
+  },
+});
+
+const esClientWith = (
+  docs: MgetDoc[],
+  exitedAtByEntityId: Record<string, string> = {}
+): ElasticsearchClient =>
   ({
     mget: jest.fn().mockResolvedValue({ docs }),
+    search: jest.fn().mockResolvedValue(exitSearchResponse(exitedAtByEntityId)),
   } as unknown as ElasticsearchClient);
 
 const found = (index: string, id: string, source: Record<string, unknown>): MgetDoc => ({
@@ -499,5 +515,219 @@ describe('makeRehydrateProcessSelectors', () => {
     expect(selectors).toHaveLength(1);
     expect(selectors[0].pid).toBe(100);
     expect(logger.warn).toHaveBeenCalled();
+  });
+
+  describe('exited processes', () => {
+    const startDoc = (id: string, entityId: string, timestamp: string) =>
+      found('logs-endpoint.events-default', id, {
+        '@timestamp': timestamp,
+        host: { name: 'h1' },
+        process: { entity_id: entityId, name: `${entityId}.bin` },
+        event: { type: ['start'] },
+      });
+
+    it('marks a process exited when Defend recorded its end event, and leaves a live one unmarked', async () => {
+      const esClient = esClientWith(
+        [
+          startDoc('ev-1', 'ent-exited', '2026-09-26T10:00:00.000Z'),
+          startDoc('ev-2', 'ent-live', '2026-09-26T11:00:00.000Z'),
+        ],
+        { 'ent-exited': '2026-09-26T10:02:00.000Z' }
+      );
+      const selectors = await makeRehydrateProcessSelectors(esClient)({
+        alerts: [],
+        events: [
+          eventRef('logs-endpoint.events-default', 'ev-1'),
+          eventRef('logs-endpoint.events-default', 'ev-2'),
+        ],
+      });
+
+      expect(selectors.find((s) => s.entityId === 'ent-exited')?.exitedAt).toBe(
+        '2026-09-26T10:02:00.000Z'
+      );
+      expect(selectors.find((s) => s.entityId === 'ent-live')).not.toHaveProperty('exitedAt');
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['logs-endpoint.events.process-*'],
+          query: {
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': ['ent-exited', 'ent-live'] } },
+                { term: { 'event.category': 'process' } },
+                { term: { 'event.type': 'end' } },
+                // Seven days before the earliest observation.
+                { range: { '@timestamp': { gte: '2026-09-19T10:00:00.000Z' } } },
+              ],
+            },
+          },
+        })
+      );
+    });
+
+    it('also searches the plain Defend indices the hunt read, and no other index it read', async () => {
+      const packIndex = 'logs-endpoint.events.00e5ea78.2026.10.08';
+      const esClient = esClientWith(
+        Array.from({ length: 5 }, (_, i) =>
+          startDoc(`ev-${i}`, `ent-${i}`, '2026-10-08T10:00:00.000Z')
+        )
+      );
+      await makeRehydrateProcessSelectors(esClient)({
+        alerts: [{ alert_id: 'ev-4', index: '.internal.alerts-security.alerts-default-000001' }],
+        events: [
+          eventRef(packIndex, 'ev-0'),
+          eventRef(packIndex, 'ev-1'),
+          eventRef('.ds-logs-endpoint.events.network-default-2026.10.08-000001', 'ev-2'),
+          eventRef('winlogbeat-2026.10.08', 'ev-3'),
+        ],
+      });
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: ['logs-endpoint.events.process-*', packIndex],
+          ignore_unavailable: true,
+          size: 0,
+          track_total_hits: false,
+        })
+      );
+    });
+
+    it('leaves a candidate without @timestamp out of the lookup, so it cannot widen the search window', async () => {
+      const esClient = esClientWith([
+        found('logs-endpoint.events-default', 'ev-undated', {
+          host: { name: 'h1' },
+          process: { entity_id: 'ent-undated', name: 'undated.bin' },
+          event: { type: ['start'] },
+        }),
+        startDoc('ev-dated', 'ent-dated', '2026-09-26T10:00:00.000Z'),
+      ]);
+      const selectors = await makeRehydrateProcessSelectors(esClient)({
+        alerts: [],
+        events: [
+          eventRef('logs-endpoint.events-default', 'ev-undated'),
+          eventRef('logs-endpoint.events-default', 'ev-dated'),
+        ],
+      });
+
+      expect(selectors).toHaveLength(2);
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: expect.arrayContaining([
+                { terms: { 'process.entity_id': ['ent-dated'] } },
+                { range: { '@timestamp': { gte: '2026-09-19T10:00:00.000Z' } } },
+              ]),
+            },
+          },
+        })
+      );
+    });
+
+    it('leaves a candidate with an unparsable @timestamp out of the lookup instead of failing it for the rest', async () => {
+      const esClient = esClientWith(
+        [
+          found('logs-endpoint.events-default', 'ev-epoch-millis', {
+            '@timestamp': 1761648064974,
+            host: { name: 'h1' },
+            process: { entity_id: 'ent-epoch-millis', name: 'millis.bin' },
+            event: { type: ['start'] },
+          }),
+          startDoc('ev-exited', 'ent-exited', '2026-09-26T10:00:00.000Z'),
+        ],
+        { 'ent-exited': '2026-09-26T10:02:00.000Z' }
+      );
+      const logger = { warn: jest.fn() } as unknown as Logger;
+      const selectors = await makeRehydrateProcessSelectors(
+        esClient,
+        logger
+      )({
+        alerts: [],
+        events: [
+          eventRef('logs-endpoint.events-default', 'ev-epoch-millis'),
+          eventRef('logs-endpoint.events-default', 'ev-exited'),
+        ],
+      });
+
+      expect(selectors.find((s) => s.entityId === 'ent-exited')?.exitedAt).toBe(
+        '2026-09-26T10:02:00.000Z'
+      );
+      expect(selectors.find((s) => s.entityId === 'ent-epoch-millis')).not.toHaveProperty(
+        'exitedAt'
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('makes no exit lookup when no candidate has a usable timestamp', async () => {
+      const esClient = esClientWith([
+        found('logs-endpoint.events-default', 'ev-undated', {
+          host: { name: 'h1' },
+          process: { entity_id: 'ent-undated', name: 'undated.bin' },
+          event: { type: ['start'] },
+        }),
+      ]);
+      const selectors = await makeRehydrateProcessSelectors(esClient)({
+        alerts: [],
+        events: [eventRef('logs-endpoint.events-default', 'ev-undated')],
+      });
+
+      expect(selectors).toHaveLength(1);
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('keeps a live process inside the per-host cap ahead of newer exited ones', async () => {
+      const docs = [
+        startDoc('ev-live', 'ent-live', '2026-09-26T01:00:00.000Z'),
+        ...Array.from({ length: 5 }, (_, i) =>
+          startDoc(`ev-${i}`, `ent-${i}`, `2026-09-26T1${i}:00:00.000Z`)
+        ),
+      ];
+      const exited = Object.fromEntries(
+        Array.from({ length: 5 }, (_, i) => [`ent-${i}`, '2026-09-26T20:00:00.000Z'])
+      );
+      const selectors = await makeRehydrateProcessSelectors(esClientWith(docs, exited))({
+        alerts: [],
+        events: docs.map(({ _id }) => eventRef('logs-endpoint.events-default', String(_id))),
+      });
+
+      expect(selectors).toHaveLength(5);
+      expect(selectors.map((s) => s.entityId)).toContain('ent-live');
+    });
+
+    it('treats processes as live, with a warning, when the exit lookup fails', async () => {
+      const esClient = {
+        mget: jest
+          .fn()
+          .mockResolvedValue({ docs: [startDoc('ev-1', 'ent-1', '2026-09-26T10:00:00.000Z')] }),
+        search: jest.fn().mockRejectedValue(new Error('search_phase_execution_exception')),
+      } as unknown as ElasticsearchClient;
+      const logger = { warn: jest.fn() } as unknown as Logger;
+      const selectors = await makeRehydrateProcessSelectors(
+        esClient,
+        logger
+      )({ alerts: [], events: [eventRef('logs-endpoint.events-default', 'ev-1')] });
+
+      expect(selectors).toHaveLength(1);
+      expect(selectors[0]).not.toHaveProperty('exitedAt');
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('exit lookup failed'));
+    });
+
+    it('treats processes as live, with a warning, when no Defend process index is readable', async () => {
+      const esClient = {
+        mget: jest
+          .fn()
+          .mockResolvedValue({ docs: [startDoc('ev-1', 'ent-1', '2026-09-26T10:00:00.000Z')] }),
+        search: jest.fn().mockResolvedValue({ _shards: { total: 0 } }),
+      } as unknown as ElasticsearchClient;
+      const logger = { warn: jest.fn() } as unknown as Logger;
+      const selectors = await makeRehydrateProcessSelectors(
+        esClient,
+        logger
+      )({ alerts: [], events: [eventRef('logs-endpoint.events-default', 'ev-1')] });
+
+      expect(selectors[0]).not.toHaveProperty('exitedAt');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('no readable Defend process events index')
+      );
+    });
   });
 });
