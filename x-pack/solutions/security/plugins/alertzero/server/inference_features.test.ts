@@ -181,6 +181,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
     );
     expect(recommendedEndpoints).not.toContain(OPUS_5);
     expect(recommendedEndpoints).not.toContain(SONNET_5);
+    expect(recommendedEndpoints).not.toContain(SONNET_5_5);
   });
 
   it('is a no-op when the optional plugin is unavailable', () => {
