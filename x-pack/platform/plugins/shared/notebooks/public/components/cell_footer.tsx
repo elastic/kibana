@@ -19,6 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment';
 import useInterval from 'react-use/lib/useInterval';
+import type { CellRuntime } from '../model/types';
+import { CellStatusBadge } from './cell_status_badge';
 
 const RELATIVE_TIME_REFRESH_MS = 30_000;
 const JUST_NOW_MS = 60_000;
@@ -60,14 +62,14 @@ const LastRun = ({ lastRunAt, durationMs }: { lastRunAt: number; durationMs?: nu
 
 export const CellFooter = ({
   outputs = [],
-  lastRunAt,
-  durationMs,
+  runtime,
 }: {
   outputs?: readonly string[];
-  lastRunAt?: number;
-  durationMs?: number;
+  runtime?: CellRuntime;
 }) => {
-  if (outputs.length === 0 && lastRunAt === undefined) return null;
+  const lastRunAt = runtime?.lastRunAt;
+  const showStatus = runtime !== undefined && runtime.status !== 'done';
+  if (outputs.length === 0 && lastRunAt === undefined && !showStatus) return null;
 
   return (
     <>
@@ -105,11 +107,20 @@ export const CellFooter = ({
             </EuiFlexGroup>
           )}
         </EuiFlexItem>
-        {lastRunAt !== undefined && (
-          <EuiFlexItem grow={false}>
-            <LastRun lastRunAt={lastRunAt} durationMs={durationMs} />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {lastRunAt !== undefined && (
+              <EuiFlexItem grow={false}>
+                <LastRun lastRunAt={lastRunAt} durationMs={runtime?.durationMs} />
+              </EuiFlexItem>
+            )}
+            {runtime && showStatus && (
+              <EuiFlexItem grow={false}>
+                <CellStatusBadge runtime={runtime} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

@@ -28,7 +28,6 @@ import { CELL_NAME_PATTERN } from '../model/references';
 import { duplicateCell, type NewCellKind } from '../model/cell_factory';
 import type { CellRuntime } from '../model/types';
 import { CellFooter } from './cell_footer';
-import { CellStatusBadge } from './cell_status_badge';
 import { RunButton } from './run_button';
 import { useNotebook } from './notebook_context';
 
@@ -190,11 +189,6 @@ export const CellFrame = ({
               <EuiContextMenuPanel items={menuItems} />
             </EuiPopover>
           </EuiFlexItem>
-          {runtime && (
-            <EuiFlexItem grow={false}>
-              <CellStatusBadge runtime={runtime} />
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         {runtime?.status === 'error' && runtime.error && (
@@ -209,11 +203,7 @@ export const CellFrame = ({
           </>
         )}
         {children}
-        <CellFooter
-          outputs={outputs}
-          lastRunAt={runtime?.lastRunAt}
-          durationMs={runtime?.durationMs}
-        />
+        <CellFooter outputs={outputs} runtime={runtime} />
       </EuiPanel>
       {onRun && 'runMode' in cell && (
         <div
