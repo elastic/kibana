@@ -11,19 +11,21 @@ import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiButtonIcon,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiThemeProvider,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEVTOOL_IGNORE_ATTR } from '../../lib/constants';
+import { getPageColorMode } from '../../lib/dom/get_page_color_mode';
 import { useDesignTokenSections } from '../../hooks/use_design_token_sections';
-import type { TokenRow as TokenRowData } from '../../hooks/use_design_token_sections';
 
 interface Props {
   element: HTMLElement;
@@ -31,52 +33,40 @@ interface Props {
   onClose?: () => void;
 }
 
-interface TokenRowProps extends TokenRowData {
-  familyCode: string;
-}
+const NO_TOKEN = '—';
 
-const TokenRow = ({ label, value, token, swatchColor, familyCode }: TokenRowProps) => (
-  <EuiFlexGroup
-    gutterSize="s"
-    justifyContent="spaceBetween"
-    alignItems="center"
-    responsive={false}
-  >
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">
-        {token ?? label}
-      </EuiText>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        {swatchColor && <EuiIcon type="stopFill" color={swatchColor} size="s" aria-hidden />}
-        <EuiText
-          size="xs"
-          css={css({
-            fontFamily: familyCode,
-          })}
-        >
-          {value}
-        </EuiText>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-/**
- * Floating panel showing an inspected element's font family and metrics.
- */
-export const FontInfoCard = ({ element, isPinned, onClose }: Props) => {
+const FontInfoCardPanel = ({ element, isPinned, onClose }: Props) => {
   const { euiTheme } = useEuiTheme();
+  const isLightPage = getPageColorMode() === 'light';
   const familyCode = euiTheme.font.familyCode ?? 'monospace';
   const { fontFamily, rows } = useDesignTokenSections(element);
   const closeAriaLabel = i18n.translate('kbnDesignTools.fontInspect.card.closeAriaLabel', {
     defaultMessage: 'Unpin',
   });
+  const valueFontCss = css({ fontFamily: familyCode });
+  const tokenGridCss = css({
+    display: 'grid',
+    width: '100%',
+    gridTemplateColumns: 'auto auto 1fr',
+    columnGap: euiTheme.size.l,
+    rowGap: euiTheme.size.xxs,
+    alignItems: 'center',
+  });
+
+  const pinnedPanelCss = isPinned
+    ? css({
+        border: `2px solid ${euiTheme.colors.success}`,
+      })
+    : undefined;
 
   return (
     <div {...{ [DEVTOOL_IGNORE_ATTR]: '' }} data-test-subj="fontInfoCard">
-      <EuiPanel paddingSize="s" hasShadow>
+      <EuiPanel
+        paddingSize="s"
+        hasShadow
+        color={isLightPage ? 'plain' : undefined}
+        css={pinnedPanelCss}
+      >
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
           <EuiFlexItem>
             <EuiText size="s">
@@ -95,25 +85,53 @@ export const FontInfoCard = ({ element, isPinned, onClose }: Props) => {
                 />
               </EuiToolTip>
             ) : (
-              <EuiButtonIcon
-                iconType="cross"
-                size="xs"
-                disabled
-                aria-hidden
-                css={css({ visibility: 'hidden' })}
-              />
+              <EuiToolTip content={closeAriaLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="cross"
+                  size="xs"
+                  disabled
+                  aria-hidden
+                  aria-label={closeAriaLabel}
+                  css={css({ visibility: 'hidden' })}
+                />
+              </EuiToolTip>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiFlexGroup direction="column" gutterSize="xs">
+        <div css={tokenGridCss}>
           {rows.map((row, index) => (
-            <EuiFlexItem key={index}>
-              <TokenRow {...row} familyCode={familyCode} />
-            </EuiFlexItem>
+            <React.Fragment key={index}>
+              <EuiText size="xs" color="subdued">
+                {row.cssProperty}
+              </EuiText>
+              <EuiText size="xs" css={valueFontCss}>
+                {row.token ?? NO_TOKEN}
+              </EuiText>
+              <EuiFlexGroup
+                gutterSize="xs"
+                alignItems="center"
+                justifyContent="flexEnd"
+                responsive={false}
+              >
+                {row.swatchColor && (
+                  <EuiIcon type="stopFill" color={row.swatchColor} size="s" aria-hidden />
+                )}
+                <EuiCode>{row.value}</EuiCode>
+              </EuiFlexGroup>
+            </React.Fragment>
           ))}
-        </EuiFlexGroup>
+        </div>
       </EuiPanel>
     </div>
   );
 };
+
+/**
+ * Floating panel showing an inspected element's font family and metrics.
+ */
+export const FontInfoCard = (props: Props) => (
+  <EuiThemeProvider colorMode={getPageColorMode()}>
+    <FontInfoCardPanel {...props} />
+  </EuiThemeProvider>
+);

@@ -37,6 +37,11 @@ describe('FontInfoCard', () => {
     expect(screen.getByText('"Inter", sans-serif')).toBeInTheDocument();
     expect(screen.queryByText('Typography')).not.toBeInTheDocument();
     expect(screen.queryByText('Colors')).not.toBeInTheDocument();
+    expect(screen.getByText('font-size')).toBeInTheDocument();
+    expect(screen.getByText('font-weight')).toBeInTheDocument();
+    expect(screen.getByText('line-height')).toBeInTheDocument();
+    expect(screen.getByText('color')).toBeInTheDocument();
+    expect(screen.getByText('font.scale.s')).toBeInTheDocument();
     expect(screen.getByText('font.weight.regular')).toBeInTheDocument();
     expect(screen.getByText('#1d2a3e')).toBeInTheDocument();
   });

@@ -17,6 +17,7 @@ import { useEuiFontScaleLookup } from './use_eui_font_scale_lookup';
 
 export interface TokenRow {
   label: string;
+  cssProperty: string;
   value: string;
   token?: string;
   swatchColor?: string;
@@ -38,6 +39,7 @@ const textColorRow = (cssValue: string): TokenRow => {
     label: i18n.translate('kbnDesignTools.fontInspect.card.textColor', {
       defaultMessage: 'Text color',
     }),
+    cssProperty: 'color',
     value: hex ?? cssValue,
     token: colorToken(cssValue, 'color'),
     swatchColor: hex ?? undefined,
@@ -79,6 +81,7 @@ export const useDesignTokenSections = (element: HTMLElement): DesignTokenSection
         label: i18n.translate('kbnDesignTools.fontInspect.card.size', {
           defaultMessage: 'Size',
         }),
+        cssProperty: 'font-size',
         value: fontInfo.fontSize,
         token: mapToken(fontScaleLookup, fontInfo.fontSize, 'font.scale'),
       },
@@ -86,6 +89,7 @@ export const useDesignTokenSections = (element: HTMLElement): DesignTokenSection
         label: i18n.translate('kbnDesignTools.fontInspect.card.weight', {
           defaultMessage: 'Weight',
         }),
+        cssProperty: 'font-weight',
         value: fontInfo.fontWeight,
         token: mapToken(fontWeightLookup, fontInfo.fontWeight, 'font.weight'),
       },
@@ -93,6 +97,7 @@ export const useDesignTokenSections = (element: HTMLElement): DesignTokenSection
         label: i18n.translate('kbnDesignTools.fontInspect.card.lineHeight', {
           defaultMessage: 'Line height',
         }),
+        cssProperty: 'line-height',
         value: fontInfo.lineHeight,
       },
     ];
@@ -101,6 +106,7 @@ export const useDesignTokenSections = (element: HTMLElement): DesignTokenSection
         label: i18n.translate('kbnDesignTools.fontInspect.card.letterSpacing', {
           defaultMessage: 'Letter spacing',
         }),
+        cssProperty: 'letter-spacing',
         value: fontInfo.letterSpacing,
       });
     }
