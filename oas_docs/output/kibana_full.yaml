@@ -44745,13 +44745,6 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
-          in: query
-          name: onboarding_deployment_id
-          required: false
-          schema:
-            maxLength: 256
-            type: string
       requestBody:
         content:
           application/json:
@@ -60150,13 +60143,6 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
-          in: query
-          name: onboarding_deployment_id
-          required: false
-          schema:
-            maxLength: 256
-            type: string
       requestBody:
         content:
           application/json:
@@ -62642,13 +62628,6 @@ paths:
           required: true
           schema:
             example: 'true'
-            type: string
-        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it.
-          in: query
-          name: onboarding_deployment_id
-          required: false
-          schema:
-            maxLength: 256
             type: string
       requestBody:
         content:
