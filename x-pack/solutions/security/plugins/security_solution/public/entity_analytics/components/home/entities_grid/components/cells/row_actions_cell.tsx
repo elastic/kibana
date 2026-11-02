@@ -60,6 +60,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
   const moreActionsButton = (
     <EuiToolTip content={i18nStrings.moreActions} disableScreenReaderOutput>
       <EuiButtonIcon
+        data-test-subj="eaGridRowActionsButton"
         iconType="boxesVertical"
         aria-label={i18nStrings.moreActions}
         color="text"
@@ -75,6 +76,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={i18nStrings.investigateInTimeline} disableScreenReaderOutput>
             <EuiButtonIcon
+              data-test-subj="eaGridRowInvestigateInTimeline"
               iconType="timeline"
               aria-label={i18nStrings.investigateInTimeline}
               color="text"
@@ -87,6 +89,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={i18nStrings.openEntityGraph} disableScreenReaderOutput>
           <EuiButtonIcon
+            data-test-subj="eaGridRowOpenEntityGraph"
             iconType="cluster"
             aria-label={i18nStrings.openEntityGraph}
             color="text"
@@ -111,6 +114,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
                 items={[
                   <EuiContextMenuItem
                     key="addToChat"
+                    data-test-subj="eaGridRowAddToChat"
                     icon="addToChat"
                     onClick={() => {
                       setIsMoreActionsOpen(false);
