@@ -330,6 +330,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     isApproximate: boolean;
     onChange: (isApproximate: boolean) => void;
     additionalText?: string;
+    additionalDisabledText?: string;
     disabled?: boolean;
     disabledReason?: string;
   };
@@ -1284,6 +1285,7 @@ export const QueryBarTopRow = React.memo(
                   isApproximate={props.esqlApproximation.isApproximate}
                   onChange={props.esqlApproximation.onChange}
                   additionalText={props.esqlApproximation.additionalText}
+                  additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                   disabled={props.esqlApproximation.disabled}
                   disabledReason={props.esqlApproximation.disabledReason}
                 />
@@ -1547,6 +1549,7 @@ export const QueryBarTopRow = React.memo(
                     isApproximate={props.esqlApproximation.isApproximate}
                     onChange={props.esqlApproximation.onChange}
                     additionalText={props.esqlApproximation.additionalText}
+                    additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                     disabled={props.esqlApproximation.disabled}
                     disabledReason={props.esqlApproximation.disabledReason}
                   />

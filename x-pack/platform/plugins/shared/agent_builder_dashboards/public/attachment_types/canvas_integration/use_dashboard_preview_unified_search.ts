@@ -200,6 +200,13 @@ export const useDashboardPreviewUnifiedSearch = ({
               'Fast mode can only apply to panels based on an ES|QL query with a STATS command.',
           }
         ),
+        additionalDisabledText: i18n.translate(
+          'xpack.agentBuilderDashboards.esqlApproximationToggle.additionalDisabledText',
+          {
+            defaultMessage:
+              'Fast mode requires at least one panel based on an ES|QL query with a STATS command.',
+          }
+        ),
       },
     }),
     [

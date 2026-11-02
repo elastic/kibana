@@ -557,6 +557,13 @@ export function InternalDashboardTopNav({
               defaultMessage:
                 'Fast mode can only apply to panels based on an ES|QL query with a STATS command.',
             }),
+            additionalDisabledText: i18n.translate(
+              'dashboard.esqlApproximationToggle.additionalDisabledText',
+              {
+                defaultMessage:
+                  'Fast mode requires at least one panel based on an ES|QL query with a STATS command.',
+              }
+            ),
           }}
         />
       )}
