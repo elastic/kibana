@@ -54,24 +54,32 @@ if (process.env.HEAP_TRACK_FORCE === '1' || process.env.isDevCliChild === 'true'
 
   let tracking = false;
 
-  session.post('HeapProfiler.enable', (enableErr) => {
-    if (enableErr) {
-      console.error('[heap-track] HeapProfiler.enable failed:', enableErr);
-      return;
-    }
-    session.post(
-      'HeapProfiler.startTrackingHeapObjects',
-      { trackAllocations: true },
-      (trackErr) => {
-        if (trackErr) {
-          console.error('[heap-track] startTrackingHeapObjects failed:', trackErr);
-          return;
-        }
-        tracking = true;
-        console.error(`[heap-track] allocation tracking started (PID ${process.pid})`);
+  if (process.env.HEAP_TRACK_REQUIRE_ONLY === '1') {
+    // Require-only mode: skip V8 allocation tracking, which slows startup
+    // substantially. Only the require-edge graph and the SIGUSR1 dump are
+    // active (SIGUSR2 snapshots are ignored since tracking never starts).
+    // Used by scripts/check_server_module_graph.
+    console.error(`[heap-track] require-only mode (PID ${process.pid})`);
+  } else {
+    session.post('HeapProfiler.enable', (enableErr) => {
+      if (enableErr) {
+        console.error('[heap-track] HeapProfiler.enable failed:', enableErr);
+        return;
       }
-    );
-  });
+      session.post(
+        'HeapProfiler.startTrackingHeapObjects',
+        { trackAllocations: true },
+        (trackErr) => {
+          if (trackErr) {
+            console.error('[heap-track] startTrackingHeapObjects failed:', trackErr);
+            return;
+          }
+          tracking = true;
+          console.error(`[heap-track] allocation tracking started (PID ${process.pid})`);
+        }
+      );
+    });
+  }
 
   let snapshotInFlight = false;
 

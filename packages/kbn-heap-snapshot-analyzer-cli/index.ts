@@ -10,3 +10,4 @@
 export { runHeapSnapshotAnalyzerCli } from './src/run_cli';
 export { runRequireCacheAnalyzerCli } from './src/run_require_cache_cli';
 export { getHeapTrackPreloadPath } from './src/preload_path';
+export { runServerModuleGraphGateCli } from './src/run_module_graph_gate_cli';
