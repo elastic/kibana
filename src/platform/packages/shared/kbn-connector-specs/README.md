@@ -605,6 +605,15 @@ node scripts/connector_vendor_api --connector datadog --check
 NODE_OPTIONS=--max-old-space-size=8192 node scripts/connector_vendor_api --connector microsoft-teams --refresh
 ```
 
+Vendors that publish their API reference as Markdown pages with an [`llms.txt`](https://llmstxt.org) index, instead of a spec, are recorded from those pages. `--format` names the template the pages follow (`databricks-markdown` or `brave-markdown`, see the `@kbn/connector-emulate` README), and the source's URL is the index. `--pages` limits the pages fetched to URL prefixes, absolute or relative to the index, such as the folders of the API groups the connector calls; without it, every page the index links to on its own origin is fetched. Both are kept in `manifest.json`, so `--refresh` needs neither:
+
+```sh
+node scripts/connector_vendor_api --connector brave-search --source search=https://api-dashboard.search.brave.com/llms.txt --format search=brave-markdown --pages search=api-reference/web/search/
+node scripts/connector_vendor_api --connector databricks --source docs=https://docs.databricks.com/api/llms.txt --format docs=databricks-markdown --pages docs=jobs/v2/ --pages docs=clusters/v2/ --pages docs=warehouses/v1/ --pages docs=alerts/v1/
+```
+
+The pages are converted to OpenAPI with `convertMarkdownReference`, and recorded, projected and snapshotted like any other source. A prefix that selects no page fails the run, as the vendor may have moved the group.
+
 The folder holds:
 
 - `manifest.json`: the sources and the operations each action calls.
@@ -670,7 +679,7 @@ Other handler errors, auth types that can't be used against the contract mock, a
 }
 ```
 
-- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`). `apiVersion` is the spec's `info.version`. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
+- `sources`: one entry per vendor spec. `format` is what the vendor publishes (`openapi`, `swagger` or `discovery`, or the template of a Markdown reference, whose `url` is its `llms.txt` index and `pages` the URL prefixes fetched). `apiVersion` is the spec's `info.version`; Markdown references have none. `fetchedAt` only changes when the snapshot changes. An optional `note`, written by hand and kept on updates, explains an unusual source, such as a vendor test fixture.
 - `operations`: per action, the operations its runs matched, by source, lowercase method and path template, sorted.
 - `pagination`: how an operation pages, as the contract mock takes it (see the `@kbn/connector-emulate` README), or `"none"` for one that returns everything at once. Operations look like they return a collection when they take a cursor, offset or page parameter, a page size next to an array in the response, or return a bare array. For those without one, the script proposes a descriptor from `x-speakeasy-pagination`, `x-ms-pageable` or parameter and field names, and warns so it gets reviewed; when it can't, it fails until one is declared. Declared descriptors are kept on every run.
 - `unmatched`: per action, requests that match no operation in any source, with the reason that's expected. A `{name}` path segment matches any value, as the generated inputs vary. A request that matches nothing and isn't listed fails the script.
@@ -693,7 +702,7 @@ Keys are sorted at every depth (`serializeManifest`), so regenerating without ve
 
 Per action:
 
-- `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format.
+- `input`: merged into each generated input, for values the schema can't describe, such as cross-field rules or IDs with a vendor format. A list of inputs generates the inputs once per entry, for rules no single value satisfies in every input, such as two mutually exclusive options.
 - `config`: merged into the connector config for the action's runs. Recording samples only the required config fields, so use this to set an optional field the action needs, such as a second server URL.
 - `queries`: for a `read` action, operations that use another method but only query, such as a search sent as `POST`. Each entry states that the operation changes no vendor state, so reviewers should check it. A `source` restricts an entry to one spec. Requests that match no operation (those in `"unmatched"`, such as calls to a vendor's MCP server) are matched by their path, where a `{name}` segment matches any segment.
 - `responses`: served by the mock for the action's runs instead of sampled responses, so handlers that branch on a response take the intended path. A `source` restricts an override to one spec. Overrides that break the spec, or name an operation it lacks, are reported.

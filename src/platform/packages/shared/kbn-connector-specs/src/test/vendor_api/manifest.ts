@@ -11,11 +11,20 @@ import { z } from '@kbn/zod/v4';
 import type { PaginationDescriptor } from '@kbn/connector-emulate';
 import { toStableJson } from './stable_json';
 
+/** Markdown API references with an `llms.txt` index, by the template their pages follow. */
+export const markdownSourceFormatSchema = z.enum(['databricks-markdown', 'brave-markdown']);
+
 const sourceSchema = z
   .object({
     /** The format the vendor publishes; snapshots are always OpenAPI 3.x JSON. */
-    format: z.enum(['openapi', 'swagger', 'discovery']),
+    format: z.union([z.enum(['openapi', 'swagger', 'discovery']), markdownSourceFormatSchema]),
+    /** The spec, or for Markdown references, their `llms.txt` index. */
     url: z.url(),
+    /**
+     * Markdown references only: URL prefixes, absolute or relative to the index, of the pages
+     * to fetch, such as the folders of the API groups the connector calls.
+     */
+    pages: z.array(z.string().min(1)).min(1).optional(),
     /** The spec's `info.version`, when it has one. */
     apiVersion: z.string().optional(),
     /** When the snapshot last changed, as an ISO date-time. */
@@ -23,7 +32,12 @@ const sourceSchema = z
     /** Written by hand, e.g. to explain an unusual source such as a vendor test fixture. */
     note: z.string().min(1).optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    ({ format, pages }) =>
+      pages === undefined || markdownSourceFormatSchema.safeParse(format).success,
+    { message: '"pages" only applies to Markdown references', path: ['pages'] }
+  );
 
 const located = { in: z.enum(['query', 'body', 'header']).optional() };
 const size = { sizeParam: z.string().min(1).optional() };
@@ -138,6 +152,7 @@ export const vendorApiManifestSchema = z
 export type VendorApiManifest = z.infer<typeof vendorApiManifestSchema>;
 export type ManifestOperation = z.infer<typeof operationSchema>;
 export type ManifestSource = z.infer<typeof sourceSchema>;
+export type MarkdownSourceFormat = z.infer<typeof markdownSourceFormatSchema>;
 export type UnmatchedRequest = z.infer<typeof unmatchedSchema>;
 export type ManifestPagination = NonNullable<ManifestOperation['pagination']>;
 

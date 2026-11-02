@@ -21,14 +21,21 @@ import { bundleSpec } from './bundle_spec';
 import { forEachRef, isJsonObject } from './json_pointer';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
+import { loadMarkdownReference } from './load_markdown_reference';
 import type {
   ManifestOperation,
   ManifestPagination,
   ManifestSource,
+  MarkdownSourceFormat,
   UnmatchedRequest,
   VendorApiManifest,
 } from './manifest';
-import { matchesPathTemplate, parseManifest, serializeManifest } from './manifest';
+import {
+  markdownSourceFormatSchema,
+  matchesPathTemplate,
+  parseManifest,
+  serializeManifest,
+} from './manifest';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
@@ -47,6 +54,10 @@ export interface UpdateVendorApiOptions {
   readonly directory: string;
   /** Sources to add or point elsewhere, by name; the manifest's are kept otherwise. */
   readonly sources?: Readonly<Record<string, string>>;
+  /** Sources that are Markdown references, by name, with the template their pages follow. */
+  readonly formats?: Readonly<Record<string, MarkdownSourceFormat>>;
+  /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
+  readonly pages?: Readonly<Record<string, readonly string[]>>;
   /**
    * Fetches the full vendor specs. Without it, actions are recorded against the committed
    * snapshots, which only picks up changes on the connector's side.
@@ -81,6 +92,9 @@ const readOptional = async (file: string): Promise<string | undefined> => {
     throw error;
   }
 };
+
+const isMarkdownFormat = (format: string | undefined): format is MarkdownSourceFormat =>
+  markdownSourceFormatSchema.safeParse(format).success;
 
 const formatOf = (document: OpenApiDocument): ManifestSource['format'] =>
   document.swagger === '2.0' ? 'swagger' : 'openapi';
@@ -149,6 +163,8 @@ export const updateVendorApi = async ({
   connector,
   directory,
   sources: sourceFlags = {},
+  formats: formatFlags = {},
+  pages: pageFlags = {},
   refresh = false,
   check = false,
   fetchText,
@@ -178,13 +194,43 @@ export const updateVendorApi = async ({
       `${connector.metadata.id} has no ${MANIFEST} yet; pass its sources with --source`
     );
   }
-  const fetchAll = refresh || Object.keys(sourceFlags).length > 0;
+  // Naming a source, or how to read one, means fetching it again.
+  const fetchAll =
+    refresh || [sourceFlags, formatFlags, pageFlags].some((flags) => Object.keys(flags).length > 0);
+
+  for (const name of [...Object.keys(formatFlags), ...Object.keys(pageFlags)]) {
+    if (!(name in urls)) {
+      throw new Error(`--format and --pages name a source, but there is no source "${name}"`);
+    }
+  }
+  const markdownFormatOf = (name: string): MarkdownSourceFormat | undefined => {
+    const format = formatFlags[name] ?? previous?.sources[name]?.format;
+    return isMarkdownFormat(format) ? format : undefined;
+  };
+  const pagesOf = (name: string): readonly string[] | undefined =>
+    pageFlags[name] ?? previous?.sources[name]?.pages;
 
   const raw: Record<string, OpenApiDocument> = {};
   const formats: Record<string, ManifestSource['format']> = {};
   for (const [name, url] of Object.entries(urls)) {
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name));
-    if (snapshot === undefined) {
+    const markdownFormat = markdownFormatOf(name);
+    if (snapshot !== undefined) {
+      raw[name] = JSON.parse(snapshot);
+      formats[name] = previous?.sources[name]?.format ?? 'openapi';
+    } else if (markdownFormat) {
+      log.info(`Fetching ${name} from the pages ${url} links to`);
+      formats[name] = markdownFormat;
+      raw[name] = await loadMarkdownReference({
+        format: markdownFormat,
+        url,
+        pages: pagesOf(name),
+        fetchText,
+      });
+    } else {
+      if (pagesOf(name) !== undefined) {
+        throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
+      }
       log.info(`Fetching ${name} from ${url}`);
       const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
       // Discovery `$ref`s are schema names, which bundling would take for relative URLs.
@@ -194,9 +240,6 @@ export const updateVendorApi = async ({
       const bundled = await bundleSpec(document, { url, load });
       formats[name] = discovery ? 'discovery' : formatOf(bundled);
       raw[name] = formats[name] === 'swagger' ? convertSwagger2(bundled) : bundled;
-    } else {
-      raw[name] = JSON.parse(snapshot);
-      formats[name] = previous?.sources[name]?.format ?? 'openapi';
     }
   }
 
@@ -301,12 +344,20 @@ export const updateVendorApi = async ({
     const file = snapshotFile(name);
     files[file] = toStableJson(projectSpec(document, used, overlayRefs));
     const unchanged = (await read(file)) === files[file];
-    const apiVersion = fetchAll ? apiVersionOf(document) : previous?.sources[name]?.apiVersion;
+    const markdown = isMarkdownFormat(formats[name]);
+    // Markdown references carry no version of the reference as a whole.
+    const apiVersion = markdown
+      ? undefined
+      : fetchAll
+      ? apiVersionOf(document)
+      : previous?.sources[name]?.apiVersion;
+    const pages = markdown ? pagesOf(name) : undefined;
     const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;
     const note = previous?.sources[name]?.note;
     sources[name] = {
       format: formats[name],
       url: urls[name],
+      ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),
       ...(note === undefined ? {} : { note }),
