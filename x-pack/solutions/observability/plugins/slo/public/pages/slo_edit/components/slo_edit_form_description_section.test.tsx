@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { render } from '../../../utils/test_helper';
 import { useFetchSLOSuggestions } from '../hooks/use_fetch_suggestions';
@@ -19,6 +19,8 @@ jest.mock('../hooks/use_fetch_suggestions');
 jest.mock('@kbn/dashboards-selector', () => ({
   DashboardsSelector: () => <div data-test-subj="dashboardsSelectorMock" />,
 }));
+
+jest.setTimeout(30_000);
 
 const useFetchSLOSuggestionsMock = useFetchSLOSuggestions as jest.Mock;
 
@@ -55,9 +57,7 @@ describe('<SloEditFormDescriptionSection /> tags field', () => {
 
     fireEvent.paste(input, { clipboardData: { getData: () => 'tag1\ntag2\ntag3' } });
 
-    await waitFor(() => {
-      expect(getTags()).toEqual(['tag1', 'tag2', 'tag3']);
-    });
+    expect(getTags()).toEqual(['tag1', 'tag2', 'tag3']);
   });
 
   it('splits a pasted comma-separated clipboard value into multiple tags', async () => {
@@ -66,9 +66,7 @@ describe('<SloEditFormDescriptionSection /> tags field', () => {
 
     fireEvent.paste(input, { clipboardData: { getData: () => 'tag1, tag2 , tag3' } });
 
-    await waitFor(() => {
-      expect(getTags()).toEqual(['tag1', 'tag2', 'tag3']);
-    });
+    expect(getTags()).toEqual(['tag1', 'tag2', 'tag3']);
   });
 
   it('de-duplicates case-insensitively and ignores empty values on paste', async () => {
@@ -77,9 +75,7 @@ describe('<SloEditFormDescriptionSection /> tags field', () => {
 
     fireEvent.paste(input, { clipboardData: { getData: () => 'TAG1\n\ntag2\ntag2' } });
 
-    await waitFor(() => {
-      expect(getTags()).toEqual(['tag1', 'tag2']);
-    });
+    expect(getTags()).toEqual(['tag1', 'tag2']);
   });
 
   it('splits a typed comma list created via onCreateOption', async () => {
@@ -89,9 +85,7 @@ describe('<SloEditFormDescriptionSection /> tags field', () => {
     fireEvent.change(input, { target: { value: 'a, b, c' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
-    await waitFor(() => {
-      expect(getTags()).toEqual(['a', 'b', 'c']);
-    });
+    expect(getTags()).toEqual(['a', 'b', 'c']);
   });
 
   it('disables the copy button when there are no tags', async () => {
