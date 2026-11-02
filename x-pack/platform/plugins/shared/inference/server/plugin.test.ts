@@ -27,7 +27,7 @@ import { createChatModel, createClient } from './inference_client';
 import { getConnectorById } from './util/get_connector_by_id';
 
 jest.mock('./inference_client', () => ({
-  ...jest.requireActual('./inference_client'),
+  ...jest.requireActual<typeof import('./inference_client')>('./inference_client'),
   createClient: jest.fn(),
   createChatModel: jest.fn(),
 }));
@@ -223,14 +223,16 @@ describe('InferencePlugin.setup', () => {
   it('accepts one feature endpoint resolver', () => {
     const { registerFeatureEndpointResolver } = setupPlugin(true);
 
-    expect(() => registerFeatureEndpointResolver(jest.fn())).not.toThrow();
+    expect(() =>
+      registerFeatureEndpointResolver(createFeatureEndpointResolverMock())
+    ).not.toThrow();
   });
 
   it('throws when a second feature endpoint resolver is registered', () => {
     const { registerFeatureEndpointResolver } = setupPlugin(true);
-    registerFeatureEndpointResolver(jest.fn());
+    registerFeatureEndpointResolver(createFeatureEndpointResolverMock());
 
-    expect(() => registerFeatureEndpointResolver(jest.fn())).toThrow(
+    expect(() => registerFeatureEndpointResolver(createFeatureEndpointResolverMock())).toThrow(
       'A feature endpoint resolver is already registered'
     );
   });
@@ -239,7 +241,7 @@ describe('InferencePlugin.setup', () => {
 describe('InferencePlugin.start getClient', () => {
   const request = httpServerMock.createKibanaRequest();
 
-  const getClientOptions = async (resolver?: jest.Mock) => {
+  const getClientOptions = async (resolver?: FeatureEndpointResolverMock) => {
     const plugin = createPlugin(false);
     const { registerFeatureEndpointResolver } = plugin.setup(
       coreMock.createSetup(),
@@ -261,7 +263,7 @@ describe('InferencePlugin.start getClient', () => {
   });
 
   it('passes the registered feature endpoint resolver scoped to the request', async () => {
-    const resolver = jest.fn().mockResolvedValue({ connectorId: 'top' });
+    const resolver = createFeatureEndpointResolverMock().mockResolvedValue({ connectorId: 'top' });
     const { resolveFeatureEndpoint } = await getClientOptions(resolver);
 
     await expect(resolveFeatureEndpoint?.('my_feature')).resolves.toEqual({ connectorId: 'top' });
@@ -280,7 +282,7 @@ describe('InferencePlugin.start getChatModel', () => {
 
   const getChatModelOptions = async (
     target: { connectorId: string } | { featureId: string },
-    resolver?: jest.Mock
+    resolver?: FeatureEndpointResolverMock
   ) => {
     const plugin = createPlugin(false);
     const { registerFeatureEndpointResolver } = plugin.setup(
@@ -303,7 +305,7 @@ describe('InferencePlugin.start getChatModel', () => {
   });
 
   it('passes the registered feature endpoint resolver to getChatModel', async () => {
-    const resolver = jest.fn().mockResolvedValue({ connectorId: 'top' });
+    const resolver = createFeatureEndpointResolverMock().mockResolvedValue({ connectorId: 'top' });
     const { resolveFeatureEndpoint, featureId, connectorId } = await getChatModelOptions(
       { featureId: 'my_feature' },
       resolver
