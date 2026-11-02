@@ -18,13 +18,17 @@
  */
 
 import { parse } from 'yaml';
-import { coreMock } from '@kbn/core/server/mocks';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   getManagedWorkflowDefinition,
+  getNightshiftBoundHookWorkflowId,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
@@ -110,36 +114,53 @@ describe('combined workflows only reference registered step types', () => {
   });
 });
 
+/** The agents' hooks are the space's bound entry points, so their configuration resolves per space. */
+const baseFor = async (type: AgentTypeDefinition): Promise<AgentBaseConfiguration> => {
+  const { baseConfiguration } = type;
+  if (typeof baseConfiguration !== 'function') {
+    throw new Error('expected a per-space base configuration');
+  }
+  return baseConfiguration({ request: httpServerMock.createKibanaRequest(), spaceId: 'default' });
+};
+
 describe('agent hooks around the combined workflows', () => {
   // Two pre-hooks would hydrate the trees twice into two conversations; two post-hooks would
   // reinforce every round twice, at up to 900s each.
-  it('gives the investigator exactly one pre-hook and one post-hook', () => {
-    const base = getInvestigationAgentType({
-      sandboxEnabled: true,
-      cortexEnabled: true,
-      memoryEnabled: true,
-      decisionTreesEnabled: true,
-      investigationToolsEnabled: true,
-      proposalsEnabled: true,
-    }).baseConfiguration;
+  it('gives the investigator exactly one pre-hook and one post-hook', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        memoryEnabled: true,
+        decisionTreesEnabled: true,
+        investigationToolsEnabled: true,
+        proposalsEnabled: true,
+      })
+    );
 
-    expect(typeof base === 'function' ? [] : base.workflow_ids).toEqual([
-      NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+    expect(base.workflow_ids).toEqual([
+      getNightshiftBoundHookWorkflowId(
+        NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+        'default'
+      ),
     ]);
-    expect(typeof base === 'function' ? [] : base.post_execution_workflow_ids).toEqual([
-      NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+    expect(base.post_execution_workflow_ids).toEqual([
+      getNightshiftBoundHookWorkflowId(NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID, 'default'),
     ]);
   });
 
   // The reinforcement agent runs in its own conversation, whose workspace is namespaced
   // separately, so it keeps the dedicated hydrate workflow. It must not run the investigator's
   // post-execution hook: that hook would launch another reinforcement agent.
-  it('gives the reinforcement agent its own hydrate hook and no post-hook', () => {
-    const base = getDecisionTreeReinforcementAgentType().baseConfiguration;
+  it('gives the reinforcement agent its own hydrate hook and no post-hook', async () => {
+    const base = await baseFor(getDecisionTreeReinforcementAgentType());
 
-    expect(typeof base === 'function' ? [] : base.workflow_ids).toEqual([
-      NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+    expect(base.workflow_ids).toEqual([
+      getNightshiftBoundHookWorkflowId(
+        NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+        'default'
+      ),
     ]);
-    expect(typeof base === 'function' ? [] : base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 });

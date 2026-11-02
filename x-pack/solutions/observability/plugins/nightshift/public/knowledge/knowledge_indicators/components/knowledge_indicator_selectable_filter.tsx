@@ -16,6 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { castArray } from 'lodash';
 import { useBoolean } from '@kbn/react-hooks';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React, { useMemo } from 'react';
@@ -27,7 +28,7 @@ import {
 export interface KnowledgeIndicatorSelectableFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
   searchTerm: string;
-  getValue: (ki: KnowledgeIndicator) => string | undefined;
+  getValue: (ki: KnowledgeIndicator) => string | string[] | undefined;
   selected: string[];
   onSelectedChange: (values: string[]) => void;
   filterCriteria: KnowledgeIndicatorFilterCriteria;
@@ -61,8 +62,9 @@ export function KnowledgeIndicatorSelectableFilter({
     const values = new Set<string>();
     for (const ki of knowledgeIndicators) {
       if (!matchesKnowledgeIndicatorFilters(ki, filterCriteria)) continue;
-      const value = getValue(ki);
-      if (value) values.add(value);
+      for (const value of castArray(getValue(ki))) {
+        if (value) values.add(value);
+      }
     }
     // Sorted by what the user reads: source values are ids, whose order means nothing.
     return Array.from(values).sort((a, b) => getLabel(a).localeCompare(getLabel(b)));
@@ -73,8 +75,9 @@ export function KnowledgeIndicatorSelectableFilter({
     const criteriaWithSearch = searchTerm ? { ...filterCriteria, searchTerm } : filterCriteria;
     for (const ki of knowledgeIndicators) {
       if (!matchesKnowledgeIndicatorFilters(ki, criteriaWithSearch)) continue;
-      const value = getValue(ki);
-      if (value) counts[value] = (counts[value] ?? 0) + 1;
+      for (const value of castArray(getValue(ki))) {
+        if (value) counts[value] = (counts[value] ?? 0) + 1;
+      }
     }
     return counts;
   }, [knowledgeIndicators, filterCriteria, searchTerm, getValue]);

@@ -21,7 +21,11 @@ import type {
   InferenceAnonymizationOptions,
   RegexWorkerService,
 } from '@kbn/ai-anonymization-server';
-import type { ActionsClientProvider } from '../types';
+import type {
+  ActionsClientProvider,
+  InferenceServerClient,
+  ScopedFeatureEndpointResolver,
+} from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
@@ -45,17 +49,18 @@ interface CreateClientOptions {
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
   shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+  resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
   bindTo: BoundOptions;
 }
 
-export function createClient(options: CreateClientOptions): InferenceClient;
+export function createClient(options: CreateClientOptions): InferenceServerClient;
 export function createClient(options: BoundCreateClientOptions): BoundInferenceClient;
 export function createClient(
   options: CreateClientOptions | BoundCreateClientOptions
-): BoundInferenceClient | InferenceClient {
+): BoundInferenceClient | InferenceServerClient {
   const {
     actions,
     request,
@@ -74,6 +79,7 @@ export function createClient(
     getDefaultConnectorId,
     resolveConnectorId,
     shouldStreamInferenceEndpoint,
+    resolveFeatureEndpoint,
   } = options;
   const client = createInferenceClient({
     request,
@@ -93,6 +99,7 @@ export function createClient(
     getDefaultConnectorId,
     resolveConnectorId,
     shouldStreamInferenceEndpoint,
+    resolveFeatureEndpoint,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);

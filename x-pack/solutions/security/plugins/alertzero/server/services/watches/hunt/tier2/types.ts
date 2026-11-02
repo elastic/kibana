@@ -9,6 +9,7 @@ import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
   HuntBehaviorStatus,
+  HostOrigin,
   HuntForThreatHit,
   HuntIncompleteness,
   HuntIncompleteReason,
@@ -39,6 +40,8 @@ export interface HuntBehaviorParams {
   report_id?: string;
   llm_confidence_threshold?: number;
   iocs?: HuntBehaviorIoc[];
+  /** Adjudicated-out IOCs the run must not search. */
+  excluded_iocs?: HuntBehaviorIoc[];
   article_context?: HuntBehaviorArticleContext;
   /**
    * Hunt window. When present (and dry-run passed), grounded queries execute
@@ -54,6 +57,18 @@ export interface HuntBehaviorParams {
    * and the hit bar. Empty allows nothing, so every generated query is refused.
    */
   allowed_indices?: string[];
+  /**
+   * Technique ids an earlier run on this report already searched. Candidates with these ids are
+   * dropped before the generation budget is spent, so a rerun covers what the earlier one did not
+   * rather than the same highest-confidence techniques again. They take no slot and leave no gap.
+   */
+  already_searched_technique_ids?: string[];
+  /**
+   * Technique ids earlier runs left for a later one. One this run's extraction does not return, and
+   * that nothing searched, is reported as a gap, so the run does not read as complete because the
+   * model happened to name different techniques. It gets this one run and no more.
+   */
+  pending_technique_ids?: string[];
 }
 
 /** A candidate behavior that passed ATT&CK catalog validation. */
@@ -75,6 +90,8 @@ export interface ValidatedBehavior {
   execution?: BehaviorExecution;
   affected_hosts?: string[];
   affected_users?: string[];
+  /** Where each `affected_hosts` entry was seen, from its rows' `_index`. */
+  affected_host_origins?: HostOrigin[];
   affected_hosts_truncated?: boolean;
   affected_users_truncated?: boolean;
   /** Required-index execute rows; same Discover-ref shape as Tier 1 `hits[]`. */

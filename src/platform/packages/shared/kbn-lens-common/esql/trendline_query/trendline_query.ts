@@ -23,6 +23,16 @@ import { resolveTrackedColumn, trackColumnAndEnsureKept } from './scope_walker';
 
 export { buildTrendlineBucketExpression } from './bucket';
 
+const getBucketResultColumnForAliases = (
+  command: ESQLCommand,
+  aliases: readonly string[]
+): string | undefined => {
+  for (let index = aliases.length - 1; index >= 0; index--) {
+    const column = getBucketResultColumnForField(command, aliases[index]);
+    if (column !== undefined) return column;
+  }
+};
+
 /**
  * Returns true when the ES|QL query contains at least one STATS command,
  * including STATS commands nested inside FORK branches.
@@ -115,25 +125,29 @@ const rewriteTrendlineAst = (
     (command): command is ESQLCommand<'stats'> => command.name === 'stats'
   );
   const bucketStatsCommand = statsCommands.find((command) => {
-    const sourceTimeField = resolveTrackedColumn(
+    const sourceTimeColumn = resolveTrackedColumn(
       root.commands.slice(0, root.commands.indexOf(command)),
       timeField
-    ).name;
-    return getBucketResultColumnForField(command, sourceTimeField) !== undefined;
+    );
+    return getBucketResultColumnForAliases(command, sourceTimeColumn.aliases) !== undefined;
   });
   const statsCmd = bucketStatsCommand ?? statsCommands[0];
 
   if (statsCmd) {
     const statsIndex = root.commands.indexOf(statsCmd);
-    const sourceTimeField = trackColumnAndEnsureKept(
+    const sourceTimeColumn = trackColumnAndEnsureKept(
       root.commands.slice(0, statsIndex),
       timeField,
       { containingCommands: root.commands }
-    ).name;
-    const bucketExpr = buildTrendlineBucketExpression(sourceTimeField);
+    );
+    const bucketExpr = buildTrendlineBucketExpression(sourceTimeColumn.name);
+    const existingBucketColumn = getBucketResultColumnForAliases(
+      statsCmd,
+      sourceTimeColumn.aliases
+    );
     const byOption = statsCmd.args.find(isOptionNode);
 
-    if (byOption && !getBucketResultColumnForField(statsCmd, sourceTimeField)) {
+    if (byOption && existingBucketColumn === undefined) {
       // STATS ... BY ... → append to existing BY
       byOption.args.push(parseBucketNode(bucketExpr));
     } else if (!byOption) {
@@ -146,7 +160,7 @@ const rewriteTrendlineAst = (
     // KEEP commands before STATS need the raw time field (input to BUCKET).
     // Downstream STATS commands must group by the BUCKET result so it remains
     // available to the trendline layer.
-    const timeResultColumn = getBucketResultColumnForField(statsCmd, sourceTimeField) ?? bucketExpr;
+    const timeResultColumn = existingBucketColumn ?? bucketExpr;
     const finalTimeColumn = trackColumnAndEnsureKept(
       root.commands.slice(root.commands.indexOf(statsCmd) + 1),
       timeResultColumn,

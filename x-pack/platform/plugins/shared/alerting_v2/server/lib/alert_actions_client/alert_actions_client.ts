@@ -132,6 +132,24 @@ const EXPECTED_BULK_ITEM_STATUS_CODES = new Set([400, 404, 409]);
  * episode of the series. The other episode actions are pure audit records
  * and may target any existing episode.
  */
+/**
+ * The action body fields as stored on the document: a snooze keeps its expiry
+ * under `expiry`, and a tag clear (`tags: null`) is stored as the empty set so
+ * the state projection reads it like any other replacement.
+ */
+const toStorageActionData = (action: CreateAlertActionBody) => {
+  if (action.action_type === ALERT_EPISODE_ACTION_TYPE.SNOOZE) {
+    return {
+      ...omit(action, ['series_id', 'alert_id', 'action_type', 'snoozed_until']),
+      expiry: action.snoozed_until,
+    };
+  }
+  if (action.action_type === ALERT_EPISODE_ACTION_TYPE.TAG) {
+    return { ...omit(action, ['series_id', 'alert_id', 'action_type']), tags: action.tags ?? [] };
+  }
+  return omit(action, ['series_id', 'alert_id', 'action_type']);
+};
+
 const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
   actionType === ALERT_EPISODE_ACTION_TYPE.ACTIVATE ||
   actionType === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
@@ -583,11 +601,7 @@ export class AlertActionsClient {
     docAlertId: string | null;
   }): AlertActionDocument {
     const { action, alertEvent, userProfileUid, docAlertId } = params;
-    const actionData = omit(action, ['series_id', 'alert_id', 'action_type']);
-    const storageActionData =
-      action.action_type === ALERT_EPISODE_ACTION_TYPE.SNOOZE
-        ? { ...omit(actionData, ['snoozed_until']), expiry: action.snoozed_until }
-        : actionData;
+    const storageActionData = toStorageActionData(action);
 
     return {
       actor: {

@@ -10,15 +10,16 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import type { QueryArgs, Row } from '../common';
-import { ANOMALY_COUNT_FIELD, getNumber } from '../common';
+import { ANOMALY_COUNT_FIELD, ENTITY_GRID_QUERY_KEY, getNumber } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
 import { buildEntitiesInViewCountQuery } from '../queries/entities_in_view';
 import { createEsqlRunner } from '../queries/esql';
 import {
   applyResolvedEntityFilterOverrides,
-  fetchResolvedEntityFilterOverrides,
+  fetchResolvedEntityOverrides,
   isFilteringByGroupValue,
 } from '../queries/resolved_entities';
+import type { ResolvedEntityConditions } from '../queries/resolved_entities';
 import { useEntityGridRowsEnrichment } from './use_entity_grid_rows_enrichment';
 import {
   buildQueryArgs,
@@ -42,7 +43,7 @@ const GRID_QUERY_ERROR_TITLE = i18n.translate(
 export const MAX_LOADED_ROWS = 1_000;
 
 /** Prefix of every query of expanded groups' records, e.g. for `useIsFetching`. */
-export const ENTITY_GRID_CHILDREN_QUERY_KEY = ['entity-grid', 'children'] as const;
+export const ENTITY_GRID_CHILDREN_QUERY_KEY = [ENTITY_GRID_QUERY_KEY, 'children'] as const;
 
 /**
  * How long loaded rows stay fresh. A group's records rarely change while it is expanded, so
@@ -58,7 +59,7 @@ const isAnomalySort = ({ sortField }: UseEntityGridDataOptions) =>
 
 const getRowsKey = (context: GridContext, options: UseEntityGridDataOptions) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'rows',
     {
@@ -81,24 +82,10 @@ const getCountKey = (
   countQuery: readonly string[]
 ) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'count',
     { spaceId: context.spaceId, countQuery: countQuery.join('\n') },
-  ] as const;
-
-const getFilterOverridesKey = (context: GridContext, options: OverridesOptions) =>
-  [
-    'entity-grid',
-    getKeyScope(options),
-    'resolved-entity-filter-overrides',
-    {
-      spaceId: context.spaceId,
-      concreteEntityIndexName: context.concreteEntityIndexName,
-      entityExpression: options.entityExpression,
-      // Individual rows never read overrides, so their key never holds the resolved rows' ones.
-      rowsMode: options.rowsMode,
-    },
   ] as const;
 
 const getQueryArgs = (context: GridContext, options: UseEntityGridDataOptions): QueryArgs => {
@@ -143,33 +130,50 @@ type OverridesOptions = Pick<
   'rowsMode' | 'entityExpression' | 'keyScope'
 >;
 
-const fetchFilterOverrides = (
-  context: GridContext,
-  { rowsMode, entityExpression }: OverridesOptions,
-  signal?: AbortSignal
-) => {
-  const ready = getReadyContext(context);
-  if (!ready) throw new Error('entities index not resolved');
-  return fetchResolvedEntityFilterOverrides(
-    {
-      namespace: ready.spaceId,
-      concreteEntityIndexName: ready.concreteEntityIndexName,
-      rowsMode,
-      entityExpression,
-    },
-    createEsqlRunner(context.searchService, signal)
-  );
-};
-
 const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
   options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
 
-/** The resolved entities the entity filters add or remove, read before any query uses them. */
+/** The overrides for `conditions`: `undefined` until fetched, or without conditions. */
+export const useResolvedEntityOverrides = (
+  context: GridContext,
+  conditions: ResolvedEntityConditions | undefined,
+  keyScope: EntityGridKeyScope = 'page'
+) => {
+  const ready = getReadyContext(context);
+  return useQuery(
+    [
+      ENTITY_GRID_QUERY_KEY,
+      keyScope,
+      'resolved-entity-overrides',
+      {
+        spaceId: context.spaceId,
+        concreteEntityIndexName: context.concreteEntityIndexName,
+        conditions,
+      },
+    ],
+    ({ signal }) => {
+      if (!ready || !conditions) throw new Error('entities index not resolved');
+      return fetchResolvedEntityOverrides(
+        {
+          namespace: ready.spaceId,
+          concreteEntityIndexName: ready.concreteEntityIndexName,
+          ...conditions,
+        },
+        createEsqlRunner(context.searchService, signal)
+      );
+    },
+    { enabled: !!conditions && ready != null }
+  );
+};
+
+/** The overrides for the entity filters, when they filter on a group value. */
 const useResolvedEntityFilterOverrides = (context: GridContext, options: OverridesOptions) =>
-  useQuery(
-    getFilterOverridesKey(context, options),
-    ({ signal }) => fetchFilterOverrides(context, options, signal),
-    { enabled: getReadyContext(context) != null && isFilteringByGroupValue(options) }
+  useResolvedEntityOverrides(
+    context,
+    options.entityExpression && isFilteringByGroupValue(options)
+      ? { own: options.entityExpression, group: options.entityExpression }
+      : undefined,
+    getKeyScope(options)
   );
 
 const useRowsQuery = (context: GridContext, options: UseEntityGridDataOptions, isReady: boolean) =>
@@ -226,7 +230,9 @@ export const useEntityGridData = (
   const context = useGridContext();
   const resolvedEntityFilterOverrides = useResolvedEntityFilterOverrides(context, options);
   // Every query of the view waits for the overrides of its filters.
-  const isReady = !isFilteringByGroupValue(options) || resolvedEntityFilterOverrides.data != null;
+  const isReady =
+    !options.isSearchOverridesPending &&
+    (!isFilteringByGroupValue(options) || resolvedEntityFilterOverrides.data != null);
   // The filters judge resolved entities by their group's values, so the overrides join the filter.
   const viewOptions = useMemo(
     () => ({
@@ -269,6 +275,7 @@ export const useEntityGridData = (
     updatedAt: Math.max(rowsQuery.dataUpdatedAt, enrichment.dataUpdatedAt) || null,
     isAtLoadLimit: !!rowsQuery.data?.isAtLoadLimit,
     isFetching:
+      !!options.isSearchOverridesPending ||
       resolvedEntityFilterOverrides.isFetching ||
       rowsQuery.isFetching ||
       countQuery.isFetching ||

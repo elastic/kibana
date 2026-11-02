@@ -142,7 +142,7 @@ export const ESCALATION_MODAL_TRANSLATIONS = Object.freeze({
     ),
     notOwnerTooltip: i18n.translate(
       'xpack.agenticInvestigations.escalationModal.addToExistingForm.notOwnerTooltip',
-      { defaultMessage: 'You can only add to escalations you own.' }
+      { defaultMessage: 'You can only add to escalations you own or participate in.' }
     ),
     loadErrorTitle: i18n.translate(
       'xpack.agenticInvestigations.escalationModal.addToExistingForm.loadErrorTitle',
