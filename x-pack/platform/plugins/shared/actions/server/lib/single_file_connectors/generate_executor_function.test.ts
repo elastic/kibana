@@ -159,7 +159,11 @@ describe('generateExecutorFunction', () => {
     });
 
     it('passes the Relay client in the handler context for relay-authenticated executions', async () => {
-      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const relay = {
+        trigger: jest.fn(),
+        listBindings: jest.fn(),
+        readMessages: jest.fn(),
+      };
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
@@ -177,7 +181,11 @@ describe('generateExecutorFunction', () => {
     });
 
     it('leaves the Relay client undefined for non-relay auth types even when one is configured', async () => {
-      const relay = { trigger: jest.fn(), listBindings: jest.fn() };
+      const relay = {
+        trigger: jest.fn(),
+        listBindings: jest.fn(),
+        readMessages: jest.fn(),
+      };
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
