@@ -9,10 +9,8 @@ import { EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
-import {
-  IndicatorSectionValidityProvider,
-  useSectionFormValidation,
-} from '../hooks/use_section_form_validation';
+import { IndicatorSectionValidityProvider } from '../context/indicator_section_validity';
+import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
 
 interface Props {

@@ -6,11 +6,8 @@
  */
 
 import type {
-  APMTransactionDurationIndicator,
-  APMTransactionErrorRateIndicator,
   HistogramIndicator,
   Indicator,
-  KQLCustomIndicator,
   MetricCustomIndicator,
   SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
@@ -18,6 +15,11 @@ import type {
 import { renderHook } from '@testing-library/react';
 import type { FieldPath } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
+import {
+  buildApmAvailabilityIndicator,
+  buildApmLatencyIndicator,
+  buildCustomKqlIndicator,
+} from '../../../data/slo/indicator';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 import type { CreateSLOForm } from '../types';
 import {
@@ -50,19 +52,9 @@ const withParams = <T extends Indicator>(indicator: T, params: Partial<T['params
   params: { ...indicator.params, ...params },
 });
 
-const onSide = <TDef>(side: 'good' | 'total', def: TDef): { good: TDef } | { total: TDef } =>
-  side === 'good' ? { good: def } : { total: def };
-
-const KQL: KQLCustomIndicator = {
-  type: 'sli.kql.custom',
-  params: {
-    index: 'logs-*',
-    filter: '',
-    good: 'status: 200',
-    total: '*',
-    timestampField: '@timestamp',
-  },
-};
+const KQL = buildCustomKqlIndicator();
+const APM_LATENCY = buildApmLatencyIndicator();
+const APM_AVAILABILITY = buildApmAvailabilityIndicator();
 
 const CUSTOM_METRIC: MetricCustomIndicator = {
   type: 'sli.metric.custom',
@@ -111,31 +103,6 @@ const HISTOGRAM: HistogramIndicator = {
   },
 };
 
-const APM_LATENCY: APMTransactionDurationIndicator = {
-  type: 'sli.apm.transactionDuration',
-  params: {
-    service: 'checkout',
-    environment: '*',
-    transactionType: '*',
-    transactionName: '*',
-    threshold: 250,
-    filter: '',
-    index: 'metrics-apm*',
-  },
-};
-
-const APM_AVAILABILITY: APMTransactionErrorRateIndicator = {
-  type: 'sli.apm.transactionErrorRate',
-  params: {
-    service: 'checkout',
-    environment: '*',
-    transactionType: '*',
-    transactionName: '*',
-    filter: '',
-    index: 'metrics-apm*',
-  },
-};
-
 const SYNTHETICS: SyntheticsAvailabilityIndicator = {
   type: 'sli.synthetics.availability',
   params: {
@@ -146,294 +113,192 @@ const SYNTHETICS: SyntheticsAvailabilityIndicator = {
   },
 };
 
+const withTimesliceMetrics = (
+  metrics: TimesliceMetricIndicator['params']['metric']['metrics']
+): TimesliceMetricIndicator =>
+  withParams(TIMESLICE_METRIC, { metric: { ...TIMESLICE_METRIC.params.metric, metrics } });
+
+const APM_FIELDS: Field[] = [
+  'indicator.params.service',
+  'indicator.params.environment',
+  'indicator.params.transactionType',
+  'indicator.params.transactionName',
+];
+
 describe('isIndicatorSectionComplete', () => {
-  describe('sli.kql.custom', () => {
+  describe.each<[string, Indicator, Field[]]>([
+    [
+      'sli.kql.custom',
+      KQL,
+      [
+        'indicator.params.index',
+        'indicator.params.filter',
+        'indicator.params.total',
+        'indicator.params.timestampField',
+      ],
+    ],
+    [
+      'sli.metric.custom',
+      CUSTOM_METRIC,
+      [
+        'indicator.params.index',
+        'indicator.params.filter',
+        'indicator.params.timestampField',
+        'indicator.params.good.equation',
+        'indicator.params.total.equation',
+      ],
+    ],
+    [
+      'sli.metric.timeslice',
+      TIMESLICE_METRIC,
+      [
+        'indicator.params.index',
+        'indicator.params.filter',
+        'indicator.params.timestampField',
+        'indicator.params.metric.equation',
+      ],
+    ],
+    [
+      'sli.histogram.custom',
+      HISTOGRAM,
+      [
+        'indicator.params.index',
+        'indicator.params.filter',
+        'indicator.params.timestampField',
+        'indicator.params.good.aggregation',
+        'indicator.params.total.aggregation',
+        'indicator.params.good.field',
+        'indicator.params.total.field',
+        'indicator.params.good.filter',
+        'indicator.params.total.filter',
+      ],
+    ],
+    [
+      'sli.apm.transactionDuration',
+      APM_LATENCY,
+      [...APM_FIELDS, 'indicator.params.threshold', 'indicator.params.index'],
+    ],
+    ['sli.apm.transactionErrorRate', APM_AVAILABILITY, [...APM_FIELDS, 'indicator.params.index']],
+    [
+      'sli.synthetics.availability',
+      SYNTHETICS,
+      [
+        'indicator.params.monitorIds',
+        'indicator.params.index',
+        'indicator.params.tags',
+        'indicator.params.projects',
+      ],
+    ],
+  ])('%s', (_, indicator, validatedFields) => {
     it('is complete when all fields are set and valid', () => {
-      expect(isComplete(KQL)).toBe(true);
+      expect(isComplete(indicator)).toBe(true);
     });
 
-    it.each<Field>([
-      'indicator.params.index',
-      'indicator.params.filter',
-      'indicator.params.total',
-      'indicator.params.timestampField',
-    ])('is incomplete when %s is invalid', (field) => {
-      expect(isComplete(KQL, [field])).toBe(false);
-    });
-
-    it.each<[string, Partial<KQLCustomIndicator['params']>]>([
-      ['good', { good: '' }],
-      ['index', { index: '' }],
-      ['timestampField', { timestampField: '' }],
-    ])('is incomplete when %s is empty', (_, params) => {
-      expect(isComplete(withParams(KQL, params))).toBe(false);
-    });
-
-    it('is complete when total is empty but not invalid', () => {
-      expect(isComplete(withParams(KQL, { total: '' }))).toBe(true);
+    it.each(validatedFields)('is incomplete when %s is invalid', (field) => {
+      expect(isComplete(indicator, [field])).toBe(false);
     });
   });
 
-  describe('sli.metric.custom', () => {
-    it('is complete when all fields are set and valid', () => {
-      expect(isComplete(CUSTOM_METRIC)).toBe(true);
-    });
-
-    it.each<Field>([
-      'indicator.params.index',
-      'indicator.params.filter',
-      'indicator.params.timestampField',
-      'indicator.params.good.equation',
-      'indicator.params.total.equation',
-    ])('is incomplete when %s is invalid', (field) => {
-      expect(isComplete(CUSTOM_METRIC, [field])).toBe(false);
-    });
-
-    it.each<[string, Partial<MetricCustomIndicator['params']>]>([
-      ['index', { index: '' }],
-      ['timestampField', { timestampField: '' }],
-    ])('is incomplete when %s is empty', (_, params) => {
-      expect(isComplete(withParams(CUSTOM_METRIC, params))).toBe(false);
-    });
-
-    it.each<'good' | 'total'>(['good', 'total'])(
-      'is incomplete when a %s sum metric has no field',
-      (side) => {
-        expect(
-          isComplete(
-            withParams(
-              CUSTOM_METRIC,
-              onSide<MetricCustomIndicator['params']['good']>(side, {
-                metrics: [{ name: 'A', aggregation: 'sum', field: '' }],
-                equation: 'A',
-              })
-            )
-          )
-        ).toBe(false);
-      }
-    );
-
-    it.each<'good' | 'total'>(['good', 'total'])(
-      'is complete when %s only has a doc_count metric',
-      (side) => {
-        expect(
-          isComplete(
-            withParams(
-              CUSTOM_METRIC,
-              onSide<MetricCustomIndicator['params']['good']>(side, {
-                metrics: [{ name: 'A', aggregation: 'doc_count' }],
-                equation: 'A',
-              })
-            )
-          )
-        ).toBe(true);
-      }
-    );
+  it.each<[string, Indicator]>([
+    ['kql: good is empty', buildCustomKqlIndicator({ good: '' })],
+    ['kql: index is empty', buildCustomKqlIndicator({ index: '' })],
+    ['kql: timestampField is empty', buildCustomKqlIndicator({ timestampField: '' })],
+    ['custom metric: index is empty', withParams(CUSTOM_METRIC, { index: '' })],
+    ['custom metric: timestampField is empty', withParams(CUSTOM_METRIC, { timestampField: '' })],
+    [
+      'custom metric: a good sum metric has no field',
+      withParams(CUSTOM_METRIC, {
+        good: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
+      }),
+    ],
+    [
+      'custom metric: a total sum metric has no field',
+      withParams(CUSTOM_METRIC, {
+        total: { metrics: [{ name: 'A', aggregation: 'sum', field: '' }], equation: 'A' },
+      }),
+    ],
+    ['timeslice: index is empty', withParams(TIMESLICE_METRIC, { index: '' })],
+    ['timeslice: timestampField is empty', withParams(TIMESLICE_METRIC, { timestampField: '' })],
+    [
+      'timeslice: a basic metric has no field',
+      withTimesliceMetrics([{ name: 'A', aggregation: 'avg', field: '' }]),
+    ],
+    [
+      'timeslice: a percentile metric has no percentile',
+      withTimesliceMetrics([
+        { name: 'A', aggregation: 'percentile', field: 'latency', percentile: 0 },
+      ]),
+    ],
+    ['histogram: index is empty', withParams(HISTOGRAM, { index: '' })],
+    ['histogram: timestampField is empty', withParams(HISTOGRAM, { timestampField: '' })],
+    [
+      'histogram: good.field is empty',
+      withParams(HISTOGRAM, { good: { aggregation: 'value_count', field: '' } }),
+    ],
+    [
+      'histogram: total.field is empty',
+      withParams(HISTOGRAM, { total: { aggregation: 'value_count', field: '' } }),
+    ],
+    [
+      'histogram: good range has from === to',
+      withParams(HISTOGRAM, { good: { aggregation: 'range', field: 'latency', from: 10, to: 10 } }),
+    ],
+    [
+      'histogram: total range has from > to',
+      withParams(HISTOGRAM, { total: { aggregation: 'range', field: 'latency', from: 10, to: 5 } }),
+    ],
+    ['apm latency: service is empty', buildApmLatencyIndicator({ service: '' })],
+    ['apm latency: environment is empty', buildApmLatencyIndicator({ environment: '' })],
+    ['apm latency: transactionType is empty', buildApmLatencyIndicator({ transactionType: '' })],
+    ['apm latency: transactionName is empty', buildApmLatencyIndicator({ transactionName: '' })],
+    ['apm availability: service is empty', buildApmAvailabilityIndicator({ service: '' })],
+    ['apm availability: environment is empty', buildApmAvailabilityIndicator({ environment: '' })],
+    [
+      'apm availability: transactionType is empty',
+      buildApmAvailabilityIndicator({ transactionType: '' }),
+    ],
+    [
+      'apm availability: transactionName is empty',
+      buildApmAvailabilityIndicator({ transactionName: '' }),
+    ],
+    ['synthetics: no monitor is selected', withParams(SYNTHETICS, { monitorIds: [] })],
+  ])('is incomplete when %s', (_, indicator) => {
+    expect(isComplete(indicator)).toBe(false);
   });
 
-  describe('sli.metric.timeslice', () => {
-    const withMetrics = (
-      metrics: TimesliceMetricIndicator['params']['metric']['metrics']
-    ): TimesliceMetricIndicator =>
-      withParams(TIMESLICE_METRIC, {
-        metric: { ...TIMESLICE_METRIC.params.metric, metrics },
-      });
-
-    it('is complete when all fields are set and valid', () => {
-      expect(isComplete(TIMESLICE_METRIC)).toBe(true);
-    });
-
-    it.each<Field>([
-      'indicator.params.index',
-      'indicator.params.filter',
-      'indicator.params.timestampField',
-      'indicator.params.metric.equation',
-    ])('is incomplete when %s is invalid', (field) => {
-      expect(isComplete(TIMESLICE_METRIC, [field])).toBe(false);
-    });
-
-    it.each<[string, Partial<TimesliceMetricIndicator['params']>]>([
-      ['index', { index: '' }],
-      ['timestampField', { timestampField: '' }],
-    ])('is incomplete when %s is empty', (_, params) => {
-      expect(isComplete(withParams(TIMESLICE_METRIC, params))).toBe(false);
-    });
-
-    it('is incomplete when a basic metric has no field', () => {
-      expect(isComplete(withMetrics([{ name: 'A', aggregation: 'avg', field: '' }]))).toBe(false);
-    });
-
-    it('is incomplete when a percentile metric has no percentile', () => {
-      expect(
-        isComplete(
-          withMetrics([{ name: 'A', aggregation: 'percentile', field: 'latency', percentile: 0 }])
-        )
-      ).toBe(false);
-    });
-
-    it('is complete with only a doc_count metric', () => {
-      expect(isComplete(withMetrics([{ name: 'A', aggregation: 'doc_count' }]))).toBe(true);
-    });
-  });
-
-  describe('sli.histogram.custom', () => {
-    it('is complete when all fields are set and valid', () => {
-      expect(isComplete(HISTOGRAM)).toBe(true);
-    });
-
-    it.each<Field>([
-      'indicator.params.index',
-      'indicator.params.filter',
-      'indicator.params.timestampField',
-      'indicator.params.good.aggregation',
-      'indicator.params.total.aggregation',
-      'indicator.params.good.field',
-      'indicator.params.total.field',
-      'indicator.params.good.filter',
-      'indicator.params.total.filter',
-    ])('is incomplete when %s is invalid', (field) => {
-      expect(isComplete(HISTOGRAM, [field])).toBe(false);
-    });
-
-    it.each<[string, Partial<HistogramIndicator['params']>]>([
-      ['index', { index: '' }],
-      ['timestampField', { timestampField: '' }],
-      ['good.field', { good: { aggregation: 'value_count', field: '' } }],
-      ['total.field', { total: { aggregation: 'value_count', field: '' } }],
-    ])('is incomplete when %s is empty', (_, params) => {
-      expect(isComplete(withParams(HISTOGRAM, params))).toBe(false);
-    });
-
-    it.each<'good' | 'total'>(['good', 'total'])(
-      'is incomplete when %s range has from === to',
-      (side) => {
-        expect(
-          isComplete(
-            withParams(
-              HISTOGRAM,
-              onSide<HistogramIndicator['params']['good']>(side, {
-                aggregation: 'range',
-                field: 'latency',
-                from: 10,
-                to: 10,
-              })
-            )
-          )
-        ).toBe(false);
-      }
-    );
-
-    it.each<'good' | 'total'>(['good', 'total'])(
-      'is incomplete when %s range has from > to',
-      (side) => {
-        expect(
-          isComplete(
-            withParams(
-              HISTOGRAM,
-              onSide<HistogramIndicator['params']['good']>(side, {
-                aggregation: 'range',
-                field: 'latency',
-                from: 10,
-                to: 5,
-              })
-            )
-          )
-        ).toBe(false);
-      }
-    );
-
-    it('is complete when both sides use value_count without a range', () => {
-      expect(
-        isComplete(
-          withParams(HISTOGRAM, {
-            good: { aggregation: 'value_count', field: 'latency' },
-            total: { aggregation: 'value_count', field: 'latency' },
-          })
-        )
-      ).toBe(true);
-    });
-  });
-
-  describe('sli.apm.transactionDuration', () => {
-    it('is complete when all fields are set and valid', () => {
-      expect(isComplete(APM_LATENCY)).toBe(true);
-    });
-
-    it.each<Field>([
-      'indicator.params.service',
-      'indicator.params.environment',
-      'indicator.params.transactionType',
-      'indicator.params.transactionName',
-      'indicator.params.threshold',
-      'indicator.params.index',
-    ])('is incomplete when %s is invalid', (field) => {
-      expect(isComplete(APM_LATENCY, [field])).toBe(false);
-    });
-
-    it.each<[string, Partial<APMTransactionDurationIndicator['params']>]>([
-      ['service', { service: '' }],
-      ['environment', { environment: '' }],
-      ['transactionType', { transactionType: '' }],
-      ['transactionName', { transactionName: '' }],
-    ])('is incomplete when %s is an empty string', (_, params) => {
-      expect(isComplete(withParams(APM_LATENCY, params))).toBe(false);
-    });
-
-    it('is complete when transactionName is undefined', () => {
-      expect(isComplete(withParams(APM_LATENCY, { transactionName: undefined }))).toBe(true);
-    });
-
-    it('is complete when the threshold is 0', () => {
-      expect(isComplete(withParams(APM_LATENCY, { threshold: 0 }))).toBe(true);
-    });
-
-    it('is complete when the index is empty but not invalid', () => {
-      expect(isComplete(withParams(APM_LATENCY, { index: '' }))).toBe(true);
-    });
-  });
-
-  describe('sli.apm.transactionErrorRate', () => {
-    it('is complete when all fields are set and valid', () => {
-      expect(isComplete(APM_AVAILABILITY)).toBe(true);
-    });
-
-    it.each<Field>([
-      'indicator.params.service',
-      'indicator.params.environment',
-      'indicator.params.transactionType',
-      'indicator.params.transactionName',
-      'indicator.params.index',
-    ])('is incomplete when %s is invalid', (field) => {
-      expect(isComplete(APM_AVAILABILITY, [field])).toBe(false);
-    });
-
-    it.each<[string, Partial<APMTransactionErrorRateIndicator['params']>]>([
-      ['service', { service: '' }],
-      ['environment', { environment: '' }],
-      ['transactionType', { transactionType: '' }],
-      ['transactionName', { transactionName: '' }],
-    ])('is incomplete when %s is an empty string', (_, params) => {
-      expect(isComplete(withParams(APM_AVAILABILITY, params))).toBe(false);
-    });
-  });
-
-  describe('sli.synthetics.availability', () => {
-    it('is complete when all fields are set and valid', () => {
-      expect(isComplete(SYNTHETICS)).toBe(true);
-    });
-
-    it.each<Field>([
-      'indicator.params.monitorIds',
-      'indicator.params.index',
-      'indicator.params.tags',
-      'indicator.params.projects',
-    ])('is incomplete when %s is invalid', (field) => {
-      expect(isComplete(SYNTHETICS, [field])).toBe(false);
-    });
-
-    it('is incomplete when no monitor is selected', () => {
-      expect(isComplete(withParams(SYNTHETICS, { monitorIds: [] }))).toBe(false);
-    });
+  it.each<[string, Indicator]>([
+    ['kql: total is empty but not invalid', buildCustomKqlIndicator({ total: '' })],
+    [
+      'custom metric: good only has a doc_count metric',
+      withParams(CUSTOM_METRIC, {
+        good: { metrics: [{ name: 'A', aggregation: 'doc_count' }], equation: 'A' },
+      }),
+    ],
+    [
+      'custom metric: total only has a doc_count metric',
+      withParams(CUSTOM_METRIC, {
+        total: { metrics: [{ name: 'A', aggregation: 'doc_count' }], equation: 'A' },
+      }),
+    ],
+    [
+      'timeslice: only has a doc_count metric',
+      withTimesliceMetrics([{ name: 'A', aggregation: 'doc_count' }]),
+    ],
+    [
+      'histogram: both sides use value_count without a range',
+      withParams(HISTOGRAM, {
+        good: { aggregation: 'value_count', field: 'latency' },
+        total: { aggregation: 'value_count', field: 'latency' },
+      }),
+    ],
+    [
+      'apm latency: transactionName is undefined',
+      buildApmLatencyIndicator({ transactionName: undefined }),
+    ],
+    ['apm latency: threshold is 0', buildApmLatencyIndicator({ threshold: 0 })],
+    ['apm latency: index is empty but not invalid', buildApmLatencyIndicator({ index: '' })],
+  ])('is complete when %s', (_, indicator) => {
+    expect(isComplete(indicator)).toBe(true);
   });
 });
 

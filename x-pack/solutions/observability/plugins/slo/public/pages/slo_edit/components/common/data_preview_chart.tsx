@@ -39,7 +39,7 @@ import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useFormValues } from '../../hooks/use_form_values';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
-import { useIndicatorSectionValidity } from '../../hooks/use_section_form_validation';
+import { useIndicatorSectionValidity } from '../../context/indicator_section_validity';
 
 interface DataPreviewChartProps {
   formatPattern?: string;

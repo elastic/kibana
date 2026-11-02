@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { createContext, useContext } from 'react';
 import { useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 import type { IsInvalid } from '../helpers/section_validation';
@@ -14,19 +13,6 @@ import {
   isIndicatorSectionComplete,
   isObjectiveSectionComplete,
 } from '../helpers/section_validation';
-
-const IndicatorSectionValidityContext = createContext<boolean>(false);
-
-/**
- * Provides the indicator section validity computed by `SloEditFormSteps` to the indicator section children.
- */
-export const IndicatorSectionValidityProvider = IndicatorSectionValidityContext.Provider;
-
-/**
- * Validity of the indicator section, as computed once by `SloEditFormSteps`; `false` outside the provider.
- */
-export const useIndicatorSectionValidity = (): boolean =>
-  useContext(IndicatorSectionValidityContext);
 
 export function useSectionFormValidation() {
   const { control, getFieldState, getValues } = useFormContext<CreateSLOForm>();

@@ -25,21 +25,13 @@ export type IsInvalid = (field: FieldPath<CreateSLOForm>) => boolean;
 
 type GetValues = UseFormGetValues<CreateSLOForm>;
 
-type Presence = 'truthy' | 'nonEmptyString' | 'nonEmptyArray';
-
-type RequiredFields = ReadonlyArray<readonly [FieldPath<CreateSLOForm>, Presence]>;
+type Fields = ReadonlyArray<FieldPath<CreateSLOForm>>;
 
 interface IndicatorSectionRules {
-  readonly validated: ReadonlyArray<FieldPath<CreateSLOForm>>;
-  readonly required: RequiredFields;
+  readonly validated: Fields;
+  readonly required?: Fields;
   readonly isComplete?: (getValues: GetValues) => boolean;
 }
-
-const PRESENCE_CHECKS: Readonly<Record<Presence, <TValue>(value: TValue) => boolean>> = {
-  truthy: (value) => Boolean(value),
-  nonEmptyString: (value) => value !== '',
-  nonEmptyArray: (value) => Array.isArray(value) && value.length > 0,
-};
 
 const isCustomMetricComplete = (
   metric: MetricCustomIndicator['params']['good']['metrics'][number]
@@ -49,11 +41,9 @@ const isCustomMetricComplete = (
 
 const areCustomMetricsComplete = (getValues: GetValues, side: 'good' | 'total'): boolean => {
   const data = getValues(`indicator.params.${side}`);
-  if (!isObject(data)) {
-    return false;
-  }
-  const metrics = 'metrics' in data ? data.metrics : [];
-  return (metrics ?? []).every(isCustomMetricComplete);
+  return (
+    isObject(data) && ('metrics' in data ? data.metrics ?? [] : []).every(isCustomMetricComplete)
+  );
 };
 
 const isTimesliceMetricComplete = (
@@ -82,12 +72,17 @@ const isHistogramRangeComplete = (getValues: GetValues, side: 'good' | 'total'):
   return from != null && to != null && from < to;
 };
 
-const APM_REQUIRED_FIELDS: RequiredFields = [
-  ['indicator.params.service', 'nonEmptyString'],
-  ['indicator.params.environment', 'nonEmptyString'],
-  ['indicator.params.transactionType', 'nonEmptyString'],
-  ['indicator.params.transactionName', 'nonEmptyString'],
+const APM_FIELDS: Fields = [
+  'indicator.params.service',
+  'indicator.params.environment',
+  'indicator.params.transactionType',
+  'indicator.params.transactionName',
 ];
+
+const areNonEmptyStrings =
+  (fields: Fields) =>
+  (getValues: GetValues): boolean =>
+    fields.every((field) => getValues(field) !== '');
 
 const INDICATOR_SECTION_RULES: Readonly<Record<IndicatorType, IndicatorSectionRules>> = {
   'sli.kql.custom': {
@@ -98,9 +93,9 @@ const INDICATOR_SECTION_RULES: Readonly<Record<IndicatorType, IndicatorSectionRu
       'indicator.params.timestampField',
     ],
     required: [
-      ['indicator.params.good', 'truthy'],
-      ['indicator.params.index', 'truthy'],
-      ['indicator.params.timestampField', 'truthy'],
+      'indicator.params.good',
+      'indicator.params.index',
+      'indicator.params.timestampField',
     ],
   },
   'sli.metric.custom': {
@@ -111,10 +106,7 @@ const INDICATOR_SECTION_RULES: Readonly<Record<IndicatorType, IndicatorSectionRu
       'indicator.params.good.equation',
       'indicator.params.total.equation',
     ],
-    required: [
-      ['indicator.params.index', 'truthy'],
-      ['indicator.params.timestampField', 'truthy'],
-    ],
+    required: ['indicator.params.index', 'indicator.params.timestampField'],
     isComplete: (getValues) =>
       areCustomMetricsComplete(getValues, 'good') && areCustomMetricsComplete(getValues, 'total'),
   },
@@ -125,10 +117,7 @@ const INDICATOR_SECTION_RULES: Readonly<Record<IndicatorType, IndicatorSectionRu
       'indicator.params.timestampField',
       'indicator.params.metric.equation',
     ],
-    required: [
-      ['indicator.params.index', 'truthy'],
-      ['indicator.params.timestampField', 'truthy'],
-    ],
+    required: ['indicator.params.index', 'indicator.params.timestampField'],
     isComplete: areTimesliceMetricsComplete,
   },
   'sli.histogram.custom': {
@@ -144,36 +133,23 @@ const INDICATOR_SECTION_RULES: Readonly<Record<IndicatorType, IndicatorSectionRu
       'indicator.params.total.filter',
     ],
     required: [
-      ['indicator.params.good.aggregation', 'truthy'],
-      ['indicator.params.total.aggregation', 'truthy'],
-      ['indicator.params.good.field', 'truthy'],
-      ['indicator.params.total.field', 'truthy'],
-      ['indicator.params.index', 'truthy'],
-      ['indicator.params.timestampField', 'truthy'],
+      'indicator.params.good.aggregation',
+      'indicator.params.total.aggregation',
+      'indicator.params.good.field',
+      'indicator.params.total.field',
+      'indicator.params.index',
+      'indicator.params.timestampField',
     ],
     isComplete: (getValues) =>
       isHistogramRangeComplete(getValues, 'good') && isHistogramRangeComplete(getValues, 'total'),
   },
   'sli.apm.transactionDuration': {
-    validated: [
-      'indicator.params.service',
-      'indicator.params.environment',
-      'indicator.params.transactionType',
-      'indicator.params.transactionName',
-      'indicator.params.threshold',
-      'indicator.params.index',
-    ],
-    required: [...APM_REQUIRED_FIELDS, ['indicator.params.threshold', 'nonEmptyString']],
+    validated: [...APM_FIELDS, 'indicator.params.threshold', 'indicator.params.index'],
+    isComplete: areNonEmptyStrings([...APM_FIELDS, 'indicator.params.threshold']),
   },
   'sli.apm.transactionErrorRate': {
-    validated: [
-      'indicator.params.service',
-      'indicator.params.environment',
-      'indicator.params.transactionType',
-      'indicator.params.transactionName',
-      'indicator.params.index',
-    ],
-    required: APM_REQUIRED_FIELDS,
+    validated: [...APM_FIELDS, 'indicator.params.index'],
+    isComplete: areNonEmptyStrings(APM_FIELDS),
   },
   'sli.synthetics.availability': {
     validated: [
@@ -182,11 +158,11 @@ const INDICATOR_SECTION_RULES: Readonly<Record<IndicatorType, IndicatorSectionRu
       'indicator.params.tags',
       'indicator.params.projects',
     ],
-    required: [['indicator.params.monitorIds', 'nonEmptyArray']],
+    isComplete: (getValues) => Boolean(getValues('indicator.params.monitorIds')?.length),
   },
 };
 
-const OBJECTIVE_SECTION_FIELDS: ReadonlyArray<FieldPath<CreateSLOForm>> = [
+const OBJECTIVE_SECTION_FIELDS: Fields = [
   'budgetingMethod',
   'timeWindow.duration',
   'objective.target',
@@ -204,10 +180,10 @@ export const isIndicatorSectionComplete = (
   getValues: GetValues,
   isInvalid: IsInvalid
 ): boolean => {
-  const { validated, required, isComplete } = INDICATOR_SECTION_RULES[indicatorType];
+  const { validated, required = [], isComplete } = INDICATOR_SECTION_RULES[indicatorType];
   return (
     validated.every((field) => !isInvalid(field)) &&
-    required.every(([field, presence]) => PRESENCE_CHECKS[presence](getValues(field))) &&
+    required.every((field) => Boolean(getValues(field))) &&
     (isComplete?.(getValues) ?? true)
   );
 };
