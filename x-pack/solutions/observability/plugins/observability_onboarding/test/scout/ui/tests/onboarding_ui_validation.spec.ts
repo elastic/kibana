@@ -9,15 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-const V2_FF_ID = 'observability.addDataPageV2Enabled';
-
 test.describe('Onboarding UI Validation', () => {
-  test.beforeAll(async ({ apiServices }) => {
-    await apiServices.core.settings({
-      'feature_flags.overrides': { [V2_FF_ID]: true },
-    });
-  });
-
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.onboarding.goto();

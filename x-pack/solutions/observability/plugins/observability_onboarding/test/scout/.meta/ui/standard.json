@@ -1,9 +1,27 @@
 {
-  "sha1": "8724db5c3ab6f1c195d70512d34b1ae090411fb6",
+  "sha1": "3ea8d4de5d9895ed2153240810298a2c05b7fac8",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "e2b6b86fe6bf44b-3f801f462d50e16",
+      "title": "Enable the Add Data page V2 feature flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "fbc74590a1185af-3e73699777c3b59",
       "title": "Host Onboarding Linux tile navigates to /host/linux with OTel as the selected collection method",
@@ -16,8 +34,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 24,
-        "column": 30
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -32,8 +50,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 32,
-        "column": 25
+        "line": 27,
+        "column": 13
       }
     },
     {
@@ -48,8 +66,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 45,
-        "column": 18
+        "line": 39,
+        "column": 11
       }
     },
     {
@@ -64,7 +82,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 54,
+        "line": 48,
         "column": 7
       }
     },
@@ -80,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 63,
+        "line": 57,
         "column": 13
       }
     },
@@ -96,8 +114,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 76,
-        "column": 25
+        "line": 71,
+        "column": 13
       }
     },
     {
@@ -112,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/host_flow.spec.ts",
-        "line": 97,
-        "column": 25
+        "line": 91,
+        "column": 13
       }
     },
     {
@@ -128,8 +146,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 27,
-        "column": 30
+        "line": 21,
+        "column": 25
       }
     },
     {
@@ -144,8 +162,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 34,
-        "column": 11
+        "line": 29,
+        "column": 25
       }
     },
     {
@@ -160,8 +178,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/kubernetes_flow.spec.ts",
-        "line": 45,
-        "column": 7
+        "line": 40,
+        "column": 25
       }
     },
     {
@@ -176,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 19,
-        "column": 5
+        "line": 13,
+        "column": 39
       }
     },
     {
@@ -191,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 37,
+        "line": 31,
         "column": 15
       }
     },
@@ -206,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 55,
-        "column": 20
+        "line": 48,
+        "column": 25
       }
     },
     {
@@ -221,8 +239,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 73,
-        "column": 13
+        "line": 67,
+        "column": 15
       }
     },
     {
@@ -234,8 +252,26 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 94,
-        "column": 18
+        "line": 86,
+        "column": 38
+      }
+    },
+    {
+      "id": "9abdc12b336c6f5-e1658272e81ed61",
+      "title": "Revert the Add Data page V2 feature flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]
