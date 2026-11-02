@@ -31,6 +31,14 @@ jest.mock('../../../kibana_services', () => ({
 const mockGetGeoPrecisionParams = jest.fn().mockReturnValue([]);
 
 jest.mock('@kbn/esql-utils', () => ({
+  getGeotileLevelDelta: jest.requireActual('@kbn/esql-utils/src/utils/geo_precision')
+    .getGeotileLevelDelta,
+  getGeotilePrecision: jest.requireActual('@kbn/esql-utils/src/utils/geo_precision')
+    .getGeotilePrecision,
+  getGeohexPrecision: jest.requireActual('@kbn/esql-utils/src/utils/geo_precision')
+    .getGeohexPrecision,
+  getGeohashPrecision: jest.requireActual('@kbn/esql-utils/src/utils/geo_precision')
+    .getGeohashPrecision,
   getESQLQueryColumnsRaw: () => mockGetESQLQueryColumnsRaw(),
   getLimitFromESQLQuery: (...args: any[]) => mockGetLimitFromESQLQuery(...args),
   getStartEndParams: () => [],

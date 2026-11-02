@@ -70,6 +70,8 @@ export class VegaBaseView {
     this._enableExternalUrls = getEnableExternalUrls();
     this._showWarnings = opts.showWarnings;
     this._vegaStateRestorer = opts.vegaStateRestorer;
+    this._mapView = opts.mapView;
+    this._onMapViewChange = opts.onMapViewChange;
   }
 
   async init() {

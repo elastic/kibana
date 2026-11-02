@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type {
   Map,
@@ -26,7 +27,7 @@ import { getThemeService } from '../../services';
 import { defaultMapConfig, defaultMabBoxStyle, vegaLayerId } from './constants';
 import { validateZoomSettings, injectMapPropsIntoSpec } from './utils';
 import { TMS_IN_YML_ID } from './service_settings/service_settings_types';
-import type { VegaConfig } from '../../data_model/types';
+import type { Data, VegaConfig, VegaRenderDescriptor } from '../../data_model/types';
 
 async function updateVegaView(mapBoxInstance: Map, vegaView: View) {
   const mapCanvas = mapBoxInstance.getCanvas();
@@ -99,8 +100,11 @@ export class VegaMapView extends VegaBaseView {
     return {
       maxZoom,
       minZoom,
-      zoom: signals?.zoom ?? zoom,
-      center: [signals?.longitude ?? longitude, signals?.latitude ?? latitude],
+      zoom: signals?.zoom ?? this._mapView?.zoom ?? zoom,
+      center:
+        signals?.longitude !== undefined || signals?.latitude !== undefined
+          ? [signals?.longitude ?? longitude, signals?.latitude ?? latitude]
+          : this._mapView?.center ?? [longitude, latitude],
       scrollZoom: scrollWheelZoom,
     };
   }
@@ -114,6 +118,20 @@ export class VegaMapView extends VegaBaseView {
         ? emsTileServiceId
         : await this._serviceSettings.getDefaultTmsLayer(darkMode, name);
     }
+  }
+
+  /**
+   * Replaces the data of the live Vega view without recreating the map, so the base map is not
+   * redrawn. Only valid when `canUpdateDataInPlace` is true for the descriptor.
+   */
+  async updateData(descriptor: VegaRenderDescriptor) {
+    const view = this._view;
+    if (!view) return;
+    for (const { name, values } of (descriptor.spec.data as Array<Data> | undefined) ?? []) {
+      if (name && values) view.data(name, values);
+    }
+    this._descriptor = descriptor;
+    await view.runAsync();
   }
 
   private async initMapContainer(vegaView: View) {
@@ -176,6 +194,10 @@ export class VegaMapView extends VegaBaseView {
       };
 
       mapBoxInstance.once('load', initMapComponents);
+      mapBoxInstance.on('moveend', () => {
+        const { lng, lat } = mapBoxInstance.getCenter();
+        this._onMapViewChange?.({ zoom: mapBoxInstance.getZoom(), center: [lng, lat] });
+      });
       this.mapBoxInstance = mapBoxInstance;
     });
   }
@@ -225,7 +247,8 @@ export class VegaMapView extends VegaBaseView {
 
   protected async _initViewCustomizations() {
     const vegaView = new View(
-      parse(injectMapPropsIntoSpec(this._descriptor.spec), undefined, { ast: true }),
+      // Inject into a copy: the descriptor's spec must stay as parsed to compare it with the next one
+      parse(injectMapPropsIntoSpec(cloneDeep(this._descriptor.spec)), undefined, { ast: true }),
       this._vegaViewConfig
     );
 

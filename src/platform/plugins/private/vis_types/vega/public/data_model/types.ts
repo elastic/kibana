@@ -226,6 +226,12 @@ export interface DstObj {
   delayRepaint?: boolean;
 }
 
+/** Map position, reported by the map view and used to restore it when the data is refetched. */
+export interface VegaMapPosition {
+  zoom: number;
+  center: [number, number];
+}
+
 export type ControlsLocation = 'row' | 'column' | 'row-reverse' | 'column-reverse';
 
 export type ControlsDirection = 'horizontal' | 'vertical';

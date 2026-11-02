@@ -12,6 +12,7 @@ import type { View } from 'vega';
 import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
 import type { VegaRenderDescriptor } from '../data_model/types';
 import type { VegaFilterActionHandler } from '../types';
+import type { VegaMapPosition } from '../data_model/types';
 import type { createVegaStateRestorer } from '../lib/vega_state_restorer';
 
 interface VegaViewParams {
@@ -26,6 +27,10 @@ interface VegaViewParams {
   vegaStateRestorer: ReturnType<typeof createVegaStateRestorer>;
   externalUrl: IExternalUrl;
   showWarnings: boolean;
+  /** Map position to start from, takes precedence over the spec's `config.kibana` position. */
+  mapView?: VegaMapPosition;
+  /** Called when the user finishes moving the map (map specs only). */
+  onMapViewChange?: (mapView: VegaMapPosition) => void;
 }
 
 export class VegaBaseView {
@@ -39,6 +44,7 @@ export class VegaBaseView {
   destroy(): Promise<void>;
   resize(dimensions?: { height: number; width: number }): Promise<void>;
 
+  _view: View | null;
   _container: HTMLDivElement;
   _controls: HTMLDivElement;
   _descriptor: VegaRenderDescriptor;
@@ -46,4 +52,6 @@ export class VegaBaseView {
   _vegaViewConfig: any;
   _serviceSettings: VegaViewParams['serviceSettings'];
   _vegaStateRestorer: VegaViewParams['vegaStateRestorer'];
+  _mapView: VegaViewParams['mapView'];
+  _onMapViewChange: VegaViewParams['onMapViewChange'];
 }

@@ -95,6 +95,15 @@ export {
   getEsqlSearchParams,
 } from './utils/run_query';
 export {
+  getGeoPrecisionsForZoom,
+  getGeotileLevelDelta,
+  getGeotilePrecision,
+  getGeohexPrecision,
+  getGeohashPrecision,
+  DEFAULT_GEO_PRECISION_RESOLUTION,
+  type GeoPrecisionResolution,
+} from './utils/geo_precision';
+export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,

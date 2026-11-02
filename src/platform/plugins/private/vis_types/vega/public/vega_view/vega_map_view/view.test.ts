@@ -37,18 +37,21 @@ jest.mock('@kbn/mapbox-gl', () => {
   const zoomTo = jest.fn();
   const setCenter = jest.fn();
   const fitBounds = jest.fn();
+  const on = jest.fn();
   return {
     maplibregl: {
       mocks: {
         zoomTo,
         setCenter,
         fitBounds,
+        on,
       },
       setRTLTextPlugin: jest.fn(),
       Map: jest.fn().mockImplementation(() => ({
         getLayer: () => '',
         removeLayer: jest.fn(),
         once: (eventName: string, handler: Function) => handler(),
+        on,
         remove: () => jest.fn(),
         getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
         getCenter: () => ({ lat: 20, lng: 20 }),
@@ -125,7 +128,7 @@ describe('vega_map_view/view', () => {
     setNotifications(coreStart.notifications);
     setThemeService(coreStart.theme);
 
-    async function createVegaMapView() {
+    async function createVegaMapView(extraParams: Partial<VegaViewParams> = {}) {
       await vegaParser.parseAsync();
       return new VegaMapView({
         serviceSettings: await mockGetServiceSettings(),
@@ -139,6 +142,7 @@ describe('vega_map_view/view', () => {
           restore: jest.fn(),
           clear: jest.fn(),
         },
+        ...extraParams,
       } as unknown as VegaViewParams);
     }
 
@@ -164,6 +168,26 @@ describe('vega_map_view/view', () => {
     afterEach(() => {
       jest.clearAllMocks();
       mockedConsoleLog.mockRestore();
+    });
+
+    test('should not modify the spec of the descriptor, so it can be compared with the next one', async () => {
+      const vegaMapView = await createVegaMapView();
+      const specBefore = JSON.stringify(vegaMapView._descriptor.spec);
+      await vegaMapView.init();
+
+      expect(JSON.stringify(vegaMapView._descriptor.spec)).toBe(specBefore);
+    });
+
+    test('should report the map view when the map stops moving', async () => {
+      const onMapViewChange = jest.fn();
+      const vegaMapView = await createVegaMapView({ onMapViewChange });
+      await vegaMapView.init();
+
+      const [eventName, handler] = (maplibregl as any).mocks.on.mock.calls[0];
+      expect(eventName).toBe('moveend');
+      handler();
+
+      expect(onMapViewChange).toHaveBeenCalledWith({ zoom: 3, center: [20, 20] });
     });
 
     test('should be added TmsRasterLayer and do not use tmsService if mapStyle is "user_configured"', async () => {

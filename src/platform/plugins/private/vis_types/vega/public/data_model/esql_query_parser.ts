@@ -12,7 +12,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { getTime } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { getESQLTimeField, getNamedParams } from '@kbn/esql-utils';
+import { getESQLTimeField, getNamedParams, type GeoPrecisions } from '@kbn/esql-utils';
 import { getHttp } from '../services';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
@@ -85,6 +85,7 @@ export class EsqlQueryParser {
   readonly _filters: Bool;
   readonly _onWarning: (...args: string[]) => void;
   readonly _esqlVariables?: ESQLControlVariable[];
+  readonly _geoPrecisions?: GeoPrecisions;
   approximationApplied: boolean | undefined = undefined;
 
   constructor(
@@ -92,13 +93,15 @@ export class EsqlQueryParser {
     searchAPI: SearchAPI,
     filters: Bool,
     onWarning: (...args: string[]) => void,
-    esqlVariables?: ESQLControlVariable[]
+    esqlVariables?: ESQLControlVariable[],
+    geoPrecisions?: GeoPrecisions
   ) {
     this._timeCache = timeCache;
     this._searchAPI = searchAPI;
     this._filters = filters;
     this._onWarning = onWarning;
     this._esqlVariables = esqlVariables;
+    this._geoPrecisions = geoPrecisions;
   }
 
   /**
@@ -238,11 +241,11 @@ export class EsqlQueryParser {
   }
 
   /**
-   * Bind dashboard ES|QL variables and time params, then leftover spec `url.params`.
+   * Bind dashboard ES|QL variables, time params and geo precision params, then leftover spec `url.params`.
    */
   private _injectNamedParams(query: string, url: InternalEsqlUrlObject): InjectedParams {
     const params: Record<string, unknown>[] = [
-      ...getNamedParams(query, this._getTimeRange(), this._esqlVariables),
+      ...getNamedParams(query, this._getTimeRange(), this._esqlVariables, this._geoPrecisions),
     ];
     const boundKeys = new Set(params.flatMap((param) => Object.keys(param)));
 
