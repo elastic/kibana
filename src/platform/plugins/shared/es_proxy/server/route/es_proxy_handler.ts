@@ -37,7 +37,7 @@ const params = schema.object({
   path: schema.maybe(schema.string({ maxLength: MAX_PATH_LENGTH })),
 });
 
-const bodyOptions = { output: 'stream', parse: false } as const;
+const bodyOptions = { output: 'data', parse: false } as const;
 
 /**
  * Registers the Elasticsearch proxy route for every supported method. HEAD is served by the GET route.
@@ -64,7 +64,7 @@ export const registerProxyRoute = (deps: RouteDependencies): void => {
     }).addVersion(
       {
         version: ES_PROXY_API_VERSION,
-        validate: { request: { params, body: schema.maybe(schema.stream()) } },
+        validate: { request: { params, body: schema.maybe(schema.buffer()) } },
       },
       handler
     );

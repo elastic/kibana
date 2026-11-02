@@ -68,7 +68,7 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     const [, options] = transportRequest.mock.calls[0];
     expect(options).toEqual(
       expect.objectContaining({
-        asStream: true,
+        asStream: { retryOn401: true },
         meta: true,
         requestTimeout: 120_000,
         signal: expect.any(AbortSignal),
@@ -96,30 +96,52 @@ describe('WHEN proxying a request to Elasticsearch', () => {
       const [, options] = transportRequest.mock.calls[0];
       expect(options?.maxRetries).toBe(0);
     });
+
+    it('SHOULD retry once after refreshing credentials WHEN Elasticsearch answers 401', async () => {
+      const { run, transportRequest } = setup({ method });
+
+      await run();
+
+      const [, options] = transportRequest.mock.calls[0];
+      expect(options?.asStream).toEqual({ retryOn401: true });
+    });
   });
 
-  it('SHOULD forward the request body stream with chunked framing', async () => {
-    const body = Readable.from(['{"query":{"match_all":{}}}']);
+  it('SHOULD forward the request body as a buffer', async () => {
+    const body = Buffer.from('{"query":{"match_all":{}}}');
     const { run, transportRequest } = setup({
       method: 'delete',
       body,
-      validation: { body: schema.maybe(schema.stream()) },
+      validation: { body: schema.maybe(schema.buffer()) },
     });
 
     await run();
 
     const [params, options] = transportRequest.mock.calls[0];
-    expect(params.body).toBe(body);
-    expect(options?.headers?.['transfer-encoding']).toBe('chunked');
+    expect(params.body).toEqual(body);
+    expect(options?.headers).not.toHaveProperty('transfer-encoding');
+  });
+
+  it('SHOULD send no body WHEN the request body is empty', async () => {
+    const { run, transportRequest } = setup({
+      method: 'post',
+      body: Buffer.alloc(0),
+      validation: { body: schema.maybe(schema.buffer()) },
+    });
+
+    await run();
+
+    const [params] = transportRequest.mock.calls[0];
+    expect(params.body).toBeUndefined();
   });
 
   it('SHOULD forward the content encoding of a compressed body without compressing it again', async () => {
-    const body = Readable.from([Buffer.from([0x1f, 0x8b])]);
+    const body = Buffer.from([0x1f, 0x8b]);
     const { run, transportRequest } = setup({
       method: 'post',
       body,
       headers: { 'content-type': 'application/x-ndjson', 'content-encoding': 'gzip' },
-      validation: { body: schema.maybe(schema.stream()) },
+      validation: { body: schema.maybe(schema.buffer()) },
     });
 
     await run();
@@ -130,11 +152,11 @@ describe('WHEN proxying a request to Elasticsearch', () => {
   });
 
   it('SHOULD leave transport compression alone WHEN the body is not encoded', async () => {
-    const body = Readable.from(['{}']);
+    const body = Buffer.from('{}');
     const { run, transportRequest } = setup({
       method: 'post',
       body,
-      validation: { body: schema.maybe(schema.stream()) },
+      validation: { body: schema.maybe(schema.buffer()) },
     });
 
     await run();

@@ -8,9 +8,9 @@
  */
 
 import type { IncomingHttpHeaders } from 'http';
-import { Readable } from 'stream';
-import type { Stream } from 'stream';
+import type { Readable } from 'stream';
 import { errors } from '@elastic/elasticsearch';
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { Headers, KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { ES_PROXY_BASE_PATH } from '../../common';
@@ -21,7 +21,7 @@ export interface ProxyParams {
   path?: string;
 }
 
-export type ProxyBody = Stream | undefined;
+export type ProxyBody = Buffer | undefined;
 
 const FORWARDED_RESPONSE_HEADERS = [
   'content-type',
@@ -31,6 +31,10 @@ const FORWARDED_RESPONSE_HEADERS = [
 ] as const;
 const EVENT_STREAM_TYPE = 'text/event-stream';
 const RETRYABLE_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD']);
+// Kibana's transport accepts `{ retryOn401 }` here, but the client typings only declare a boolean.
+const STREAM_WITH_401_RETRY = {
+  retryOn401: true,
+} as unknown as TransportRequestOptions['asStream'];
 
 export const ES_REQUEST_TIMEOUT_MS = 120_000;
 
@@ -55,10 +59,8 @@ export const getProxyHeaders = (request: KibanaRequest, hasBody: boolean): Incom
     proxyHeaders.accept = accept;
   }
 
-  // Node's http client drops unframed GET/DELETE bodies, so streamed bodies are always chunked.
+  // The body is forwarded still encoded (the route does not decompress it), so its encoding must travel with it.
   if (hasBody) {
-    proxyHeaders['transfer-encoding'] = 'chunked';
-    // The body is forwarded still encoded (the route does not decompress it), so its encoding must travel with it.
     const contentEncoding = getHeader(request.headers, 'content-encoding');
     if (contentEncoding) {
       proxyHeaders['content-encoding'] = contentEncoding;
@@ -115,7 +117,8 @@ export const createProxyHandler =
   ({ log, basePath }: RouteDependencies): RequestHandler<ProxyParams, unknown, ProxyBody> =>
   async (ctx, request, response) => {
     const method = request.route.method.toUpperCase();
-    const body = request.body instanceof Readable ? request.body : undefined;
+    const body =
+      Buffer.isBuffer(request.body) && request.body.length > 0 ? request.body : undefined;
     const path = getEsPath(request.url);
     const proxyBasePath = `${basePath.get(request)}${ES_PROXY_BASE_PATH}`;
     const proxyHeaders = getProxyHeaders(request, body !== undefined);
@@ -130,7 +133,8 @@ export const createProxyHandler =
           body,
         },
         {
-          asStream: true,
+          // Elasticsearch rejects a 401 before running the request, so replaying it after a token refresh is safe for writes too.
+          asStream: STREAM_WITH_401_RETRY,
           meta: true,
           // Writes are never retried so they cannot be applied twice; reads use the client's retry settings.
           ...(RETRYABLE_METHODS.has(method) ? {} : { maxRetries: 0 }),

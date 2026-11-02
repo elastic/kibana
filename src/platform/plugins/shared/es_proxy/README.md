@@ -1,6 +1,6 @@
 # ES Proxy
 
-Generic, streaming Elasticsearch proxy exposed as the internal Kibana API `/internal/es_proxy/{path*}`.
+Generic Elasticsearch proxy exposed as the internal Kibana API `/internal/es_proxy/{path*}`.
 
 A request to `/internal/es_proxy/<es path>?<query>` is sent to `/<es path>?<query>` on Elasticsearch as the current user. The response status, body, `content-type`, `content-encoding`, `warning` and `retry-after` headers come back unchanged. A `location` header is rewritten to point back through the proxy.
 
@@ -18,7 +18,7 @@ Requests use API version `1` (`elastic-api-version` header). Internal APIs carry
 
 ## Behavior
 
-- **Streaming.** Request and response bodies are streamed in both directions; Kibana never parses or buffers them.
+- **Bodies.** Request bodies are read into memory (up to Kibana's `server.maxPayload`) and forwarded unparsed. Response bodies are streamed back without being parsed or buffered.
 - **Cancellation.** If the client disconnects, the Elasticsearch request is aborted.
 - **Retries for reads only.** GET and HEAD requests use the Elasticsearch client's retry settings, so a connection failure or a 502/503/504 is retried on another node. POST, PUT and DELETE requests are never replayed, so writes are not duplicated. Timeouts are not retried.
 - **Timeouts.** Elasticsearch requests time out after 120 seconds and return `504`. A connection failure returns `502`.
@@ -61,4 +61,4 @@ const response = await plugins.esProxy.stream({
 const reader = response.body?.getReader();
 ```
 
-A `401` from Elasticsearch is returned as-is. In the browser, Kibana's session handling treats any `401` as an expired session and logs the user out.
+When Elasticsearch answers `401`, for example because the user's access token expired, Kibana refreshes the credentials and retries the request once, for every method. If the retry still fails, the `401` is returned; in the browser, Kibana's session handling treats it as an expired session and logs the user out.
