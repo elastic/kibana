@@ -41,7 +41,7 @@ describe('useTilesErrorNotice', () => {
     expect(addDanger).toHaveBeenCalledTimes(1);
     expect(addDanger).toHaveBeenCalledWith({
       title: "Some metrics couldn't load",
-      text: "Severely alerting, Watchlisted & alerting, and New & alerting didn't load. Refresh the page to try again.",
+      text: "Severely alerting, Watchlisted & alerting and New & alerting didn't load. Refresh the page to try again.",
     });
   });
 

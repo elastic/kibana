@@ -39,7 +39,9 @@ export const useTilesErrorNotice = (
       text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.countFailedText', {
         defaultMessage: "{tiles} didn't load. Refresh the page to try again.",
         values: {
-          tiles: new Intl.ListFormat(i18n.getLocale(), {
+          // The design's copy has no comma before "and" (A, B and C). Plain `en` adds one, the
+          // British list style does not; other languages keep their own.
+          tiles: new Intl.ListFormat(i18n.getLocale() === 'en' ? 'en-GB' : i18n.getLocale(), {
             style: 'long',
             type: 'conjunction',
           }).format(failedTitles),
