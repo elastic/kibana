@@ -11,11 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import {
-  useRememberSessionMemory,
-  useSaveSessionEvent,
-  useSearchSessionMemory,
-} from './use_session_memory_mutations';
+import { useRememberSessionMemory, useSearchSessionMemory } from './use_session_memory_mutations';
 
 const scope = { session_id: 's-1', user_id: 'u-1', agent_id: 'a-1' };
 
@@ -89,27 +85,5 @@ describe('useSearchSessionMemory', () => {
       expect.objectContaining({ body: JSON.stringify({ query: 'dark mode', user_id: 'u-1' }) })
     );
     expect(result.current.data).toEqual(hits);
-  });
-});
-
-describe('useSaveSessionEvent', () => {
-  it('POSTs the event and invalidates the session’s event list', async () => {
-    const core = coreMock.createStart();
-    core.http.post.mockResolvedValue({ ...scope, id: 'e-1', transcript: 'hi' });
-
-    const { result, queryClient } = renderWithQueryClient(core, () => useSaveSessionEvent());
-
-    await act(async () => {
-      result.current.mutate({ ...scope, transcript: 'hi' });
-    });
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(core.http.post).toHaveBeenCalledWith(
-      '/internal/context_engine/session_events/_save',
-      expect.objectContaining({ body: JSON.stringify({ ...scope, transcript: 'hi' }) })
-    );
-    expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
-      queryKey: ['context_engine', 'session_events', 's-1'],
-    });
   });
 });

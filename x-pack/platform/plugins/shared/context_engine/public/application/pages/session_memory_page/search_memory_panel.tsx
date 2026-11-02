@@ -8,6 +8,7 @@
 import {
   EuiButton,
   EuiButtonGroup,
+  EuiCheckboxGroup,
   EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldText,
@@ -18,7 +19,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,11 +34,23 @@ import type {
 import { useSearchSessionMemory } from '../../hooks/use_session_memory_mutations';
 import { IMAGE_FILE_ACCEPT } from './media_file';
 import { MediaFilePicker } from './media_file_picker';
-import { SessionMemoryResult } from './session_memory_result';
-import { EMPTY_SESSION_SCOPE, SessionScopeFields } from './session_scope_fields';
-import type { SessionScope } from './session_scope_fields';
+import { useSessionContext } from './session_context';
+import type { SessionContextValue } from './session_context';
+import { PanelHeader } from './panel_header';
+import { SessionMemoryCard } from './session_memory_card';
 
 type QueryMode = 'text' | 'image';
+
+/** Which parts of the session context narrow the search. */
+export type SearchFilterKey = 'user' | 'session' | 'agent' | 'aiIndex';
+export type SearchFilters = Record<SearchFilterKey, boolean>;
+
+export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
+  user: true,
+  session: false,
+  agent: false,
+  aiIndex: false,
+};
 
 const labels = {
   queryMode: i18n.translate('xpack.contextEngine.sessionMemory.search.queryMode', {
@@ -62,6 +74,24 @@ const labels = {
   imageHelp: i18n.translate('xpack.contextEngine.sessionMemory.search.imageHelp', {
     defaultMessage: 'PNG, JPEG, WebP, or GIF under 1 MB.',
   }),
+  filters: i18n.translate('xpack.contextEngine.sessionMemory.search.filters', {
+    defaultMessage: 'Only memories from',
+  }),
+  filterUser: i18n.translate('xpack.contextEngine.sessionMemory.search.filterUser', {
+    defaultMessage: 'this user',
+  }),
+  filterSession: i18n.translate('xpack.contextEngine.sessionMemory.search.filterSession', {
+    defaultMessage: 'this session',
+  }),
+  filterAgent: i18n.translate('xpack.contextEngine.sessionMemory.search.filterAgent', {
+    defaultMessage: 'this agent',
+  }),
+  filterAiIndex: i18n.translate('xpack.contextEngine.sessionMemory.search.filterAiIndex', {
+    defaultMessage: 'this AI index',
+  }),
+  filterAiIndexMany: i18n.translate('xpack.contextEngine.sessionMemory.search.filterAiIndexMany', {
+    defaultMessage: 'this AI index (select a single index to filter)',
+  }),
   size: i18n.translate('xpack.contextEngine.sessionMemory.search.size', {
     defaultMessage: 'Size',
   }),
@@ -71,28 +101,32 @@ const labels = {
 };
 
 export const buildSearchBody = (
-  scope: SessionScope,
+  { sessionId, userId, agentId, spaceId, aiIndexIds }: SessionContextValue,
+  filters: SearchFilters,
   query: string | SessionMemoryMediaItem,
   size: number
 ): SearchSessionMemoryBody => ({
   query,
-  ...(scope.sessionId.trim() ? { session_id: scope.sessionId.trim() } : {}),
-  ...(scope.userId.trim() ? { user_id: scope.userId.trim() } : {}),
-  ...(scope.agentId.trim() ? { agent_id: scope.agentId.trim() } : {}),
-  ...(scope.space.trim() ? { space: scope.space.trim() } : {}),
-  ...(scope.aiIndexIds[0] ? { ai_index_id: scope.aiIndexIds[0] } : {}),
+  ...(filters.session && sessionId.trim() ? { session_id: sessionId.trim() } : {}),
+  ...(filters.user && userId ? { user_id: userId } : {}),
+  ...(filters.agent && agentId.trim() ? { agent_id: agentId.trim() } : {}),
+  ...(spaceId ? { space: spaceId } : {}),
+  // The search API filters on a single AI index, so the filter only applies to a lone selection.
+  ...(filters.aiIndex && aiIndexIds.length === 1 ? { ai_index_id: aiIndexIds[0] } : {}),
   size,
 });
 
 export const SearchMemoryPanel = () => {
-  const [scope, setScope] = useState<SessionScope>(EMPTY_SESSION_SCOPE);
+  const session = useSessionContext();
   const [mode, setMode] = useState<QueryMode>('text');
   const [text, setText] = useState('');
   const [image, setImage] = useState<SessionMemoryMediaItem | undefined>();
+  const [filters, setFilters] = useState<SearchFilters>(DEFAULT_SEARCH_FILTERS);
   const [size, setSize] = useState(DEFAULT_SESSION_MEMORY_SEARCH_SIZE);
   const { mutate, isLoading, data } = useSearchSessionMemory();
 
   const query = mode === 'text' ? text.trim() : image;
+  const maxScore = data ? Math.max(0, ...data.results.map((hit) => hit._score)) : 0;
   const canSubmit = Boolean(query) && size >= 1 && size <= MAX_SESSION_MEMORY_SEARCH_SIZE;
 
   const submit = (event: React.FormEvent) => {
@@ -100,29 +134,50 @@ export const SearchMemoryPanel = () => {
     if (!query || !canSubmit) {
       return;
     }
-    mutate(buildSearchBody(scope, query, size));
+    mutate(buildSearchBody(session, filters, query, size));
   };
+
+  const filterOptions = [
+    {
+      id: 'user',
+      label: labels.filterUser,
+      'data-test-subj': 'contextSessionMemorySearch-filter-user',
+    },
+    {
+      id: 'session',
+      label: labels.filterSession,
+      'data-test-subj': 'contextSessionMemorySearch-filter-session',
+    },
+    {
+      id: 'agent',
+      label: labels.filterAgent,
+      'data-test-subj': 'contextSessionMemorySearch-filter-agent',
+    },
+    {
+      id: 'aiIndex',
+      label: session.aiIndexIds.length > 1 ? labels.filterAiIndexMany : labels.filterAiIndex,
+      disabled: session.aiIndexIds.length !== 1,
+      'data-test-subj': 'contextSessionMemorySearch-filter-aiIndex',
+    },
+  ];
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSessionMemorySearchPanel">
-      <EuiTitle size="s">
-        <h2>
+      <PanelHeader
+        iconType="magnify"
+        title={
           <FormattedMessage
             id="xpack.contextEngine.sessionMemory.search.title"
             defaultMessage="Search"
           />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>
+        }
+        description={
           <FormattedMessage
             id="xpack.contextEngine.sessionMemory.search.description"
             defaultMessage="Find memories by meaning with free text or an image. Filters narrow the candidates before the vector search."
           />
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
+        }
+      />
       <EuiForm component="form" onSubmit={submit}>
         <EuiFormRow label={labels.queryMode} fullWidth>
           <EuiButtonGroup
@@ -168,14 +223,20 @@ export const SearchMemoryPanel = () => {
             data-test-subj="contextSessionMemorySearch-image"
           />
         )}
-        <SessionScopeFields
-          value={scope}
-          onChange={setScope}
-          required={false}
-          singleAiIndexId
-          isDisabled={isLoading}
-          data-test-subj="contextSessionMemorySearch"
-        />
+        <EuiFormRow label={labels.filters} fullWidth>
+          <EuiCheckboxGroup
+            compressed
+            options={filterOptions}
+            idToSelectedMap={filters}
+            onChange={(id) =>
+              setFilters((current) => ({
+                ...current,
+                [id]: !current[id as SearchFilterKey],
+              }))
+            }
+            disabled={isLoading}
+          />
+        </EuiFormRow>
         <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiFormRow label={labels.size}>
@@ -211,6 +272,7 @@ export const SearchMemoryPanel = () => {
           <EuiSpacer size="m" />
           {data.results.length === 0 ? (
             <EuiEmptyPrompt
+              iconType="magnify"
               titleSize="xs"
               title={
                 <h3>
@@ -223,17 +285,32 @@ export const SearchMemoryPanel = () => {
               data-test-subj="contextSessionMemorySearch-empty"
             />
           ) : (
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="s"
-              data-test-subj="contextSessionMemorySearch-results"
-            >
-              {data.results.map((hit) => (
-                <EuiFlexItem key={hit.memory.id}>
-                  <SessionMemoryResult hit={hit} />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
+            <>
+              <EuiText size="s" color="subdued" data-test-subj="contextSessionMemorySearch-count">
+                <FormattedMessage
+                  id="xpack.contextEngine.sessionMemory.search.resultCount"
+                  defaultMessage="{count, plural, one {# match} other {# matches}}, best first"
+                  values={{ count: data.results.length }}
+                />
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="s"
+                data-test-subj="contextSessionMemorySearch-results"
+              >
+                {data.results.map((hit) => (
+                  <EuiFlexItem key={hit.memory.id}>
+                    <SessionMemoryCard
+                      memory={hit.memory}
+                      score={hit._score}
+                      maxScore={maxScore}
+                      data-test-subj="contextSessionMemoryResult"
+                    />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </>
           )}
         </>
       )}

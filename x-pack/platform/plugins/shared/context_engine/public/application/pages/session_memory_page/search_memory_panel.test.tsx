@@ -9,7 +9,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 import { useSearchSessionMemory } from '../../hooks/use_session_memory_mutations';
 import { SearchMemoryPanel } from './search_memory_panel';
-import { pngFile, renderWithProviders } from './test_helpers';
+import { buildSessionContext, pngFile, renderWithProviders } from './test_helpers';
 
 jest.mock('../../hooks/use_session_memory_mutations', () => ({
   useSearchSessionMemory: jest.fn(),
@@ -37,7 +37,7 @@ describe('SearchMemoryPanel', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('searches by text with the set filters and size', () => {
+  it('searches by text, scoped to the current user and space by default', () => {
     const mutate = jest.fn();
     mockUseSearchSessionMemory.mockReturnValue(mutationResult({ mutate }));
     renderWithProviders(<SearchMemoryPanel />);
@@ -46,15 +46,55 @@ describe('SearchMemoryPanel', () => {
     fireEvent.change(screen.getByTestId('contextSessionMemorySearch-text'), {
       target: { value: 'dark mode' },
     });
-    fireEvent.change(screen.getByTestId('contextSessionMemorySearch-userId'), {
-      target: { value: 'u-1' },
-    });
     fireEvent.change(screen.getByTestId('contextSessionMemorySearch-size'), {
       target: { value: '5' },
     });
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-submit'));
 
-    expect(mutate).toHaveBeenCalledWith({ query: 'dark mode', user_id: 'u-1', size: 5 });
+    expect(mutate).toHaveBeenCalledWith({
+      query: 'dark mode',
+      user_id: 'kathleen',
+      space: 'default',
+      size: 5,
+    });
+  });
+
+  it('applies the session, agent, and AI index filters when checked', () => {
+    const mutate = jest.fn();
+    mockUseSearchSessionMemory.mockReturnValue(mutationResult({ mutate }));
+    renderWithProviders(<SearchMemoryPanel />, {
+      session: buildSessionContext({ aiIndexIds: ['support'] }),
+    });
+
+    fireEvent.change(screen.getByTestId('contextSessionMemorySearch-text'), {
+      target: { value: 'dark mode' },
+    });
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-user'));
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-session'));
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-agent'));
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-aiIndex'));
+    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-submit'));
+
+    expect(mutate).toHaveBeenCalledWith({
+      query: 'dark mode',
+      session_id: 'session-1',
+      agent_id: 'elastic-agent',
+      space: 'default',
+      ai_index_id: 'support',
+      size: 10,
+    });
+  });
+
+  it('disables the AI index filter unless exactly one AI index is selected', () => {
+    const { unmount } = renderWithProviders(<SearchMemoryPanel />);
+    expect(screen.getByTestId('contextSessionMemorySearch-filter-aiIndex')).toBeDisabled();
+    unmount();
+
+    renderWithProviders(<SearchMemoryPanel />, {
+      session: buildSessionContext({ aiIndexIds: ['support', 'sales'] }),
+    });
+    expect(screen.getByTestId('contextSessionMemorySearch-filter-aiIndex')).toBeDisabled();
+    expect(screen.getByText(/select a single index to filter/)).toBeInTheDocument();
   });
 
   it('searches by an uploaded image', async () => {
@@ -71,6 +111,8 @@ describe('SearchMemoryPanel', () => {
 
     expect(mutate).toHaveBeenCalledWith({
       query: { type: 'image', value: 'data:image/png;base64,iVBORw==', format: 'base64' },
+      user_id: 'kathleen',
+      space: 'default',
       size: 10,
     });
   });
@@ -96,8 +138,7 @@ describe('SearchMemoryPanel', () => {
     );
     renderWithProviders(<SearchMemoryPanel />);
 
-    const results = screen.getAllByTestId('contextSessionMemoryResult');
-    expect(results).toHaveLength(2);
+    expect(screen.getAllByTestId('contextSessionMemoryResult')).toHaveLength(2);
     expect(screen.getAllByTestId('contextSessionMemoryResult-score')[0]).toHaveTextContent('0.912');
     expect(screen.getByTestId('contextSessionMemoryResult-content')).toHaveTextContent(
       'Prefers dark mode'

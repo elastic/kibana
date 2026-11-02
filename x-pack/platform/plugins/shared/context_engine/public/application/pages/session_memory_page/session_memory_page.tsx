@@ -20,7 +20,8 @@ import {
 } from '../../layout/context_engine_page_template';
 import { RememberMemoryPanel } from './remember_memory_panel';
 import { SearchMemoryPanel } from './search_memory_panel';
-import { SessionEventsPanel } from './session_events_panel';
+import { SessionContextProvider } from './session_context';
+import { SessionContextBar } from './session_context_bar';
 
 const pageTitle = i18n.translate('xpack.contextEngine.sessionMemory.title', {
   defaultMessage: 'Session memory',
@@ -28,7 +29,7 @@ const pageTitle = i18n.translate('xpack.contextEngine.sessionMemory.title', {
 
 const pageDescription = i18n.translate('xpack.contextEngine.sessionMemory.descriptionText', {
   defaultMessage:
-    'Multimodal memory and raw events for agent sessions, stored in Context Engine system data streams.',
+    'Multimodal memory for agent sessions, stored in a Context Engine system data stream.',
 });
 
 /**
@@ -51,7 +52,9 @@ export const SessionMemoryPage = () => {
       />
       <ContextEnginePageSection>
         {isMemoryEnabled ? (
-          <>
+          <SessionContextProvider>
+            <SessionContextBar />
+            <EuiSpacer size="l" />
             <EuiFlexGroup gutterSize="l" alignItems="flexStart">
               <EuiFlexItem>
                 <RememberMemoryPanel />
@@ -60,9 +63,7 @@ export const SessionMemoryPage = () => {
                 <SearchMemoryPanel />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="l" />
-            <SessionEventsPanel />
-          </>
+          </SessionContextProvider>
         ) : (
           <EuiEmptyPrompt
             iconType="lock"

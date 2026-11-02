@@ -7,14 +7,12 @@
 
 import {
   EuiButton,
-  EuiFieldText,
+  EuiComboBox,
   EuiForm,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTextArea,
-  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,15 +25,31 @@ import type {
 import { useRememberSessionMemory } from '../../hooks/use_session_memory_mutations';
 import { MEDIA_FILE_ACCEPT } from './media_file';
 import { MediaFilePicker } from './media_file_picker';
-import { EMPTY_SESSION_SCOPE, SessionScopeFields, hasRequiredScope } from './session_scope_fields';
-import type { SessionScope } from './session_scope_fields';
+import { PanelHeader } from './panel_header';
+import { SessionMemoryCard } from './session_memory_card';
+import { hasWriteIdentity, useSessionContext } from './session_context';
+import type { SessionContextValue } from './session_context';
+
+/** Suggested memory categories; free text is accepted too. */
+export const MEMORY_TYPE_SUGGESTIONS = [
+  'preference',
+  'fact',
+  'statement',
+  'summary',
+  'goal',
+  'decision',
+  'task',
+  'feedback',
+  'instruction',
+  'observation',
+] as const;
 
 const labels = {
   type: i18n.translate('xpack.contextEngine.sessionMemory.remember.type', {
     defaultMessage: 'Type',
   }),
   typePlaceholder: i18n.translate('xpack.contextEngine.sessionMemory.remember.typePlaceholder', {
-    defaultMessage: 'e.g. preference',
+    defaultMessage: 'Select or type a category',
   }),
   content: i18n.translate('xpack.contextEngine.sessionMemory.remember.content', {
     defaultMessage: 'Content',
@@ -58,72 +72,67 @@ const labels = {
 };
 
 export const buildRememberBody = (
-  scope: SessionScope,
+  { sessionId, userId, agentId, spaceId, aiIndexIds }: SessionContextValue,
   { type, content, media }: { type: string; content: string; media?: SessionMemoryMediaItem }
 ): RememberSessionMemoryBody => ({
-  session_id: scope.sessionId.trim(),
-  user_id: scope.userId.trim(),
-  agent_id: scope.agentId.trim(),
-  ...(scope.space.trim() ? { space: scope.space.trim() } : {}),
-  ...(scope.aiIndexIds.length ? { ai_index_id: scope.aiIndexIds } : {}),
+  session_id: sessionId.trim(),
+  user_id: userId ?? '',
+  agent_id: agentId.trim(),
+  ...(spaceId ? { space: spaceId } : {}),
+  ...(aiIndexIds.length ? { ai_index_id: aiIndexIds } : {}),
   ...(type.trim() ? { type: type.trim() } : {}),
   ...(content.trim() ? { content: content.trim() } : {}),
   ...(media ? { media: [media] } : {}),
 });
 
+const typeOptions = MEMORY_TYPE_SUGGESTIONS.map((label) => ({ label }));
+
 export const RememberMemoryPanel = () => {
-  const [scope, setScope] = useState<SessionScope>(EMPTY_SESSION_SCOPE);
+  const session = useSessionContext();
   const [type, setType] = useState('');
   const [content, setContent] = useState('');
   const [media, setMedia] = useState<SessionMemoryMediaItem | undefined>();
   const { mutate, isLoading, data } = useRememberSessionMemory();
 
-  const canSubmit = hasRequiredScope(scope) && (content.trim().length > 0 || media !== undefined);
+  const canSubmit = hasWriteIdentity(session) && (content.trim().length > 0 || media !== undefined);
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     if (!canSubmit) {
       return;
     }
-    mutate(buildRememberBody(scope, { type, content, media }));
+    mutate(buildRememberBody(session, { type, content, media }));
   };
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="contextSessionMemoryRememberPanel">
-      <EuiTitle size="s">
-        <h2>
+      <PanelHeader
+        iconType="save"
+        title={
           <FormattedMessage
             id="xpack.contextEngine.sessionMemory.remember.title"
             defaultMessage="Remember"
           />
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>
+        }
+        description={
           <FormattedMessage
             id="xpack.contextEngine.sessionMemory.remember.description"
             defaultMessage="Store a text memory, an image or PDF, or both. Media and text share one multimodal embedding, so a text search can find an image memory and vice versa."
           />
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
+        }
+      />
       <EuiForm component="form" onSubmit={submit}>
-        <SessionScopeFields
-          value={scope}
-          onChange={setScope}
-          required
-          isDisabled={isLoading}
-          data-test-subj="contextSessionMemoryRemember"
-        />
         <EuiFormRow label={labels.type} labelAppend={labels.optional} fullWidth>
-          <EuiFieldText
+          <EuiComboBox
             fullWidth
             compressed
-            value={type}
-            onChange={(event) => setType(event.target.value)}
+            singleSelection={{ asPlainText: true }}
+            options={typeOptions}
+            selectedOptions={type ? [{ label: type }] : []}
+            onChange={(selected) => setType(selected[0]?.label ?? '')}
+            onCreateOption={(created) => setType(created.trim())}
             placeholder={labels.typePlaceholder}
-            disabled={isLoading}
+            isDisabled={isLoading}
             data-test-subj="contextSessionMemoryRemember-type"
             aria-label={labels.type}
           />
@@ -170,6 +179,8 @@ export const RememberMemoryPanel = () => {
             })}
             data-test-subj="contextSessionMemoryRemember-success"
           />
+          <EuiSpacer size="s" />
+          <SessionMemoryCard memory={data} data-test-subj="contextSessionMemoryRemember-stored" />
         </>
       )}
     </EuiPanel>

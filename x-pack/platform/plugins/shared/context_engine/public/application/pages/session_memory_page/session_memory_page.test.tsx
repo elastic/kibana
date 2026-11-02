@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from '@kbn/shared-ux-router';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
@@ -23,16 +23,26 @@ jest.mock('../../hooks/use_memory_enabled', () => ({ useMemoryEnabled: jest.fn()
 jest.mock('../../hooks/use_session_memory_mutations', () => ({
   useRememberSessionMemory: () => ({ mutate: jest.fn(), isLoading: false }),
   useSearchSessionMemory: () => ({ mutate: jest.fn(), isLoading: false }),
-  useSaveSessionEvent: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
-jest.mock('../../hooks/use_session_events', () => ({
-  useSessionEvents: () => ({ events: [], count: 0, isLoading: false, error: undefined }),
+jest.mock('../../hooks/use_agent_builder_agents', () => ({
+  useAgentBuilderAgents: () => ({
+    agents: [{ id: 'elastic-agent', name: 'Elastic' }],
+    isLoading: false,
+    error: undefined,
+  }),
+}));
+jest.mock('./use_ai_index_options', () => ({
+  useAiIndexOptions: () => ({
+    options: [{ label: 'support', value: 'support' }],
+    isLoading: false,
+  }),
 }));
 
 const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 
 const renderPage = () => {
   const core = coreMock.createStart();
+  core.security.authc.getCurrentUser.mockResolvedValue({ username: 'kathleen' } as never);
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <MockAppHeaderProvider>
@@ -61,15 +71,27 @@ const renderPage = () => {
 describe('SessionMemoryPage', () => {
   afterEach(() => jest.clearAllMocks());
 
-  it('renders the three panels and the nav tabs when memory is enabled', () => {
+  it('renders the context bar, panels, and nav tabs when memory is enabled', () => {
     mockUseMemoryEnabled.mockReturnValue(true);
     renderPage();
 
+    expect(screen.getByTestId('contextSessionContextBar')).toBeInTheDocument();
     expect(screen.getByTestId('contextSessionMemoryRememberPanel')).toBeInTheDocument();
     expect(screen.getByTestId('contextSessionMemorySearchPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('contextSessionEventsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('contextLandingTab-session_memory')).toBeInTheDocument();
     expect(screen.queryByTestId('contextSessionMemoryDisabled')).not.toBeInTheDocument();
+  });
+
+  it('infers the user from the Kibana session and generates a session id', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    renderPage();
+
+    await waitFor(() =>
+      expect(screen.getByTestId('contextSessionContextUser')).toHaveTextContent('kathleen')
+    );
+    expect(
+      (screen.getByTestId('contextSessionContextSessionId') as HTMLInputElement).value
+    ).toMatch(/^session-[0-9a-f]{8}$/);
   });
 
   it('navigates back to the AI indices tab', () => {

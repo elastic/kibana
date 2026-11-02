@@ -8,20 +8,15 @@
 import { buildPath } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import {
-  SESSION_EVENTS_BY_SESSION_PATH,
-  SESSION_EVENTS_SAVE_PATH,
   SESSION_MEMORY_BY_SESSION_PATH,
   SESSION_MEMORY_INTERNAL_API_VERSION,
   SESSION_MEMORY_REMEMBER_PATH,
   SESSION_MEMORY_SEARCH_PATH,
 } from '../../../common/constants';
 import type {
-  ListSessionEventsResponse,
   ListSessionMemoryResponse,
   RememberSessionMemoryBody,
   RememberSessionMemoryResponse,
-  SaveSessionEventBody,
-  SaveSessionEventResponse,
   SearchSessionMemoryBody,
   SearchSessionMemoryResponse,
   SessionScopeQuery,
@@ -62,26 +57,6 @@ export const listSessionMemory = (
   { sessionId, signal, ...query }: { sessionId: string } & SessionScopeQuery & WithSignal
 ): Promise<ListSessionMemoryResponse> =>
   http.get<ListSessionMemoryResponse>(buildPath(SESSION_MEMORY_BY_SESSION_PATH, { sessionId }), {
-    version: SESSION_MEMORY_INTERNAL_API_VERSION,
-    query: toScopeQuery(query),
-    ...(signal ? { signal } : {}),
-  });
-
-export const saveSessionEvent = (
-  http: HttpStart,
-  { body, signal }: { body: SaveSessionEventBody } & WithSignal
-): Promise<SaveSessionEventResponse> =>
-  http.post<SaveSessionEventResponse>(SESSION_EVENTS_SAVE_PATH, {
-    version: SESSION_MEMORY_INTERNAL_API_VERSION,
-    body: JSON.stringify(body),
-    ...(signal ? { signal } : {}),
-  });
-
-export const listSessionEvents = (
-  http: HttpStart,
-  { sessionId, signal, ...query }: { sessionId: string } & SessionScopeQuery & WithSignal
-): Promise<ListSessionEventsResponse> =>
-  http.get<ListSessionEventsResponse>(buildPath(SESSION_EVENTS_BY_SESSION_PATH, { sessionId }), {
     version: SESSION_MEMORY_INTERNAL_API_VERSION,
     query: toScopeQuery(query),
     ...(signal ? { signal } : {}),

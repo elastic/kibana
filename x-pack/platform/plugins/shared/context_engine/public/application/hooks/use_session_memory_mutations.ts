@@ -6,20 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type {
   RememberSessionMemoryBody,
   RememberSessionMemoryResponse,
-  SaveSessionEventBody,
-  SaveSessionEventResponse,
   SearchSessionMemoryBody,
   SearchSessionMemoryResponse,
 } from '../../../common/http_api/session_memory';
-import {
-  rememberSessionMemory,
-  saveSessionEvent,
-  searchSessionMemory,
-} from '../api/session_memory';
+import { rememberSessionMemory, searchSessionMemory } from '../api/session_memory';
 import { getErrorMessage } from '../utils/get_error_message';
 import { useKibana } from './use_kibana';
 
@@ -60,29 +54,6 @@ export const useSearchSessionMemory = () => {
 
   return useMutation<SearchSessionMemoryResponse, Error, SearchSessionMemoryBody>({
     mutationFn: (body) => searchSessionMemory(http, { body }),
-    onError,
-  });
-};
-
-export const useSaveSessionEvent = () => {
-  const {
-    services: { http },
-  } = useKibana();
-  const queryClient = useQueryClient();
-  const onError = useErrorToast(
-    i18n.translate('xpack.contextEngine.sessionMemory.saveEvent.errorTitle', {
-      defaultMessage: 'Unable to save session event',
-    })
-  );
-
-  return useMutation<SaveSessionEventResponse, Error, SaveSessionEventBody>({
-    mutationFn: async (body) => {
-      const response = await saveSessionEvent(http, { body });
-      await queryClient.invalidateQueries({
-        queryKey: ['context_engine', 'session_events', body.session_id],
-      });
-      return response;
-    },
     onError,
   });
 };

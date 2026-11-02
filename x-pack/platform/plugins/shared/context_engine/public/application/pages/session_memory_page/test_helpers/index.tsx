@@ -10,30 +10,45 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
+import { SessionContext } from '../session_context';
+import type { SessionContextValue } from '../session_context';
+
+export const buildSessionContext = (
+  overrides: Partial<SessionContextValue> = {}
+): SessionContextValue => ({
+  userId: 'kathleen',
+  spaceId: 'default',
+  sessionId: 'session-1',
+  setSessionId: jest.fn(),
+  newSession: jest.fn(),
+  agentId: 'elastic-agent',
+  setAgentId: jest.fn(),
+  aiIndexIds: [],
+  setAiIndexIds: jest.fn(),
+  ...overrides,
+});
 
 export const renderWithProviders = (
   ui: React.ReactElement,
-  core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
+  {
+    core = coreMock.createStart(),
+    session = buildSessionContext(),
+  }: { core?: ReturnType<typeof coreMock.createStart>; session?: SessionContextValue } = {}
 ) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={core}>
-          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+          <QueryClientProvider client={queryClient}>
+            <SessionContext.Provider value={session}>{ui}</SessionContext.Provider>
+          </QueryClientProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
-};
-
-/** Fills the session, user, and agent id inputs rendered by `SessionScopeFields`. */
-export const fillScope = (prefix: string) => {
-  fireEvent.change(screen.getByTestId(`${prefix}-sessionId`), { target: { value: 's-1' } });
-  fireEvent.change(screen.getByTestId(`${prefix}-userId`), { target: { value: 'u-1' } });
-  fireEvent.change(screen.getByTestId(`${prefix}-agentId`), { target: { value: 'a-1' } });
 };
 
 export const pngFile = () =>
