@@ -46,7 +46,7 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { ConnectorSigningKey, CredentialAccessor } from '@kbn/connector-specs';
+import type { ConnectorSigningKey, ConnectorSpec, CredentialAccessor } from '@kbn/connector-specs';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
@@ -134,7 +134,7 @@ import { OAuthRateLimiter } from './lib/oauth_rate_limiter';
 import type { GetAxiosInstanceWithAuthFnOpts, GetCredentialFnOpts } from './lib/get_axios_instance';
 import { getAxiosInstanceWithAuth, getCredentialWithAuth } from './lib/get_axios_instance';
 import { RelayClient, type RelayClientContract } from './lib/relay';
-import type { ConnectorTypeConversionServices } from './lib/single_file_connectors/create_connector_from_spec';
+import { createConnectorTypeFromSpec } from './lib/single_file_connectors/create_connector_from_spec';
 
 export interface PluginSetupContract {
   registerType<
@@ -299,17 +299,21 @@ const includedHiddenTypes = [
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
+type CreateDynamicConnectorTypeFromSpec = (
+  spec: ConnectorSpec
+) => ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>;
+
 export class ActionsPlugin
   implements
     Plugin<PluginSetupContract, PluginStartContract, ActionsPluginsSetup, ActionsPluginsStart>
 {
-  private connectorTypeConversionServices?: ConnectorTypeConversionServices;
+  private createDynamicConnectorTypeFromSpec?: CreateDynamicConnectorTypeFromSpec;
 
-  private getConnectorTypeConversionServices(): ConnectorTypeConversionServices {
-    if (!this.connectorTypeConversionServices) {
-      throw new Error('Connector type conversion services are not ready.');
+  private getCreateDynamicConnectorTypeFromSpec(): CreateDynamicConnectorTypeFromSpec {
+    if (!this.createDynamicConnectorTypeFromSpec) {
+      throw new Error('Connector type creation is not ready.');
     }
-    return this.connectorTypeConversionServices;
+    return this.createDynamicConnectorTypeFromSpec;
   }
 
   private registerDynamicConnectorType(
@@ -641,14 +645,8 @@ export class ActionsPlugin
         this.connectorEventEmitter = emitter;
       },
     };
-    this.connectorTypeConversionServices = {
-      getActionsConfigurationUtilities: setupContract.getActionsConfigurationUtilities,
-      getAxiosInstanceWithAuth: setupContract.getAxiosInstanceWithAuth,
-      getCredential: setupContract.getCredential,
-      getClientLeasePool: setupContract.getClientLeasePool,
-      getRelayClient: setupContract.getRelayClient,
-      getConnectorJwtSigner: setupContract.getConnectorJwtSigner,
-    };
+    this.createDynamicConnectorTypeFromSpec = (spec) =>
+      createConnectorTypeFromSpec(spec, setupContract);
     return setupContract;
   }
 
@@ -709,7 +707,7 @@ export class ActionsPlugin
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
         connectorTypeRegistration: {
-          conversionServices: this.getConnectorTypeConversionServices(),
+          createTypeFromSpec: this.getCreateDynamicConnectorTypeFromSpec(),
           registerType: (actionType) => this.registerDynamicConnectorType(actionType),
         },
         authTypeRegistry: this.authTypeRegistry!,
@@ -1147,7 +1145,8 @@ export class ActionsPlugin
     const evictClientPool = async (connectorId: string): Promise<void> => {
       await this.clientLeasePool.evict(connectorId);
     };
-    const getConnectorTypeConversionServices = () => this.getConnectorTypeConversionServices();
+    const getCreateDynamicConnectorTypeFromSpec = () =>
+      this.getCreateDynamicConnectorTypeFromSpec();
     const registerDynamicConnectorType = (
       actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>
     ) => this.registerDynamicConnectorType(actionType);
@@ -1181,7 +1180,7 @@ export class ActionsPlugin
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
             connectorTypeRegistration: {
-              conversionServices: getConnectorTypeConversionServices(),
+              createTypeFromSpec: getCreateDynamicConnectorTypeFromSpec(),
               registerType: registerDynamicConnectorType,
             },
             authTypeRegistry: authTypeRegistry!,

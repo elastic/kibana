@@ -15,8 +15,6 @@ import type {
   ActionTypeParams,
   ActionTypeSecrets,
 } from '../../../../types';
-import type { ConnectorTypeConversionServices } from '../../../../lib/single_file_connectors/create_connector_from_spec';
-import { createConnectorTypeFromSpec } from '../../../../lib';
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 
 const fieldToZodSchema = (field: CreateConnectorTypeRequest['config'][number]) => {
@@ -37,21 +35,21 @@ const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
       const inputShape = Object.fromEntries(
         action.input.map((field) => [field.name, fieldToZodSchema(field)])
       );
-      const input = z.object(inputShape);
+      const inputSchema = z.object(inputShape);
       return [
         name,
         {
           description: action.description,
           scope: action.scope,
-          input,
+          input: inputSchema,
           handler: async (
             ctx: Parameters<ConnectorSpec['actions'][string]['handler']>[0],
-            params: Record<string, unknown>
+            input: Record<string, unknown>
           ) => {
-            const values = { config: ctx.config ?? {}, params, secrets: ctx.secrets ?? {} };
+            const values = { config: ctx.config ?? {}, input, secrets: ctx.secrets ?? {} };
             const render = (template: string) =>
               template.replace(
-                /{{\s*(config|params|secrets)\.([A-Za-z][A-Za-z0-9_]*)\s*}}/g,
+                /{{\s*(config|input|secrets)\.([A-Za-z][A-Za-z0-9_]*)\s*}}/g,
                 (_match, source: keyof typeof values, key: string) => {
                   const value = values[source][key];
                   if (value === undefined || value === null) {
@@ -110,7 +108,7 @@ const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
       displayName: request.displayName,
       description: request.description,
       minimumLicense: 'enterprise',
-      supportedFeatureIds: ['alerting'],
+      supportedFeatureIds: ['alerting', 'workflows'],
     },
     auth,
     schema: z.object(configShape),
@@ -121,22 +119,27 @@ const toSpec = (request: CreateConnectorTypeRequest): ConnectorSpec => {
 
 export const createConnectorType = ({
   actionTypeRegistry,
-  conversionServices,
+  createTypeFromSpec,
   registerType,
   request,
 }: {
   actionTypeRegistry: ActionTypeRegistry;
-  conversionServices: ConnectorTypeConversionServices;
+  createTypeFromSpec: (
+    spec: ConnectorSpec
+  ) => ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>;
   registerType: (
     actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>
   ) => void;
   request: CreateConnectorTypeRequest;
 }): { id: string } => {
-  const spec = toSpec(request);
+  const spec = toSpec({
+    ...request,
+    id: `.${request.id}`,
+  });
   if (actionTypeRegistry.has(spec.metadata.id)) {
     throw Boom.conflict(`Connector type "${spec.metadata.id}" is already registered.`);
   }
-  const actionType = createConnectorTypeFromSpec(spec, conversionServices);
+  const actionType = createTypeFromSpec(spec);
   registerType(actionType);
   return { id: spec.metadata.id };
 };

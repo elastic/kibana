@@ -12,7 +12,7 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ensureSufficientLicense } from '../../../../lib/ensure_sufficient_license';
 import { getMeta } from '@kbn/connector-specs';
-import type { ConnectorTypeConversionServices } from '../../../../lib/single_file_connectors/create_connector_from_spec';
+import { createConnectorTypeFromSpec } from '../../../../lib/single_file_connectors/create_connector_from_spec';
 import { createConnectorType } from './create_type';
 
 describe('createConnectorType with real spec conversion', () => {
@@ -37,15 +37,17 @@ describe('createConnectorType with real spec conversion', () => {
       getClientLeasePool: jest.fn(),
       getRelayClient: jest.fn(),
       getConnectorJwtSigner: jest.fn(),
-    } as unknown as ConnectorTypeConversionServices;
+    } as never;
+    const createTypeFromSpec = (spec: Parameters<typeof createConnectorTypeFromSpec>[0]) =>
+      createConnectorTypeFromSpec(spec, conversionServices);
 
     expect(
       createConnectorType({
         actionTypeRegistry,
-        conversionServices,
+        createTypeFromSpec,
         registerType,
         request: {
-          id: '.acme',
+          id: 'acme',
           displayName: 'Acme',
           description: 'Acme connector',
           config: [{ name: 'baseUrl', type: 'string', required: true, label: 'Base URL' }],

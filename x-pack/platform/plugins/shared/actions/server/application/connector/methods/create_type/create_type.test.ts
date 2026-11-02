@@ -6,16 +6,10 @@
  */
 
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
-import { createConnectorTypeFromSpec } from '../../../../lib';
 import { createConnectorType } from './create_type';
 
-jest.mock('../../../../lib', () => ({
-  ...jest.requireActual('../../../../lib'),
-  createConnectorTypeFromSpec: jest.fn(() => ({ id: '.dynamic_type' })),
-}));
-
 const request = {
-  id: '.dynamic_type',
+  id: 'dynamic_type',
   displayName: 'Dynamic type',
   description: 'A connector type created at runtime.',
   config: [],
@@ -34,38 +28,35 @@ describe('createConnectorType', () => {
   it('converts and registers the requested connector type', () => {
     const actionTypeRegistry = { has: jest.fn(() => false) } as unknown as ActionTypeRegistry;
     const registerType = jest.fn();
-    const conversionServices = {
-      getActionsConfigurationUtilities: jest.fn(),
-      getAxiosInstanceWithAuth: jest.fn(),
-      getCredential: jest.fn(),
-      getClientLeasePool: jest.fn(),
-      getRelayClient: jest.fn(),
-      getConnectorJwtSigner: jest.fn(),
-    } as never;
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
 
     expect(
-      createConnectorType({ actionTypeRegistry, conversionServices, registerType, request })
+      createConnectorType({ actionTypeRegistry, createTypeFromSpec, registerType, request })
     ).toEqual({
       id: '.dynamic_type',
     });
-    expect(createConnectorTypeFromSpec).toHaveBeenCalledWith(
+    expect(createTypeFromSpec).toHaveBeenCalledWith(
       expect.objectContaining({
-        metadata: expect.objectContaining({ id: '.dynamic_type' }),
+        metadata: expect.objectContaining({
+          id: '.dynamic_type',
+          supportedFeatureIds: ['alerting', 'workflows'],
+        }),
         actions: expect.objectContaining({ getItem: expect.any(Object) }),
-      }),
-      conversionServices
+      })
     );
     expect(registerType).toHaveBeenCalledWith({ id: '.dynamic_type' });
   });
 
   it('rejects duplicate connector type ids', () => {
-    const actionTypeRegistry = { has: jest.fn(() => true) } as unknown as ActionTypeRegistry;
+    const has = jest.fn((id: string) => id === '.dynamic_type');
+    const actionTypeRegistry = { has } as unknown as ActionTypeRegistry;
     const registerType = jest.fn();
-    const conversionServices = {} as never;
+    const createTypeFromSpec = jest.fn() as never;
 
     expect(() =>
-      createConnectorType({ actionTypeRegistry, conversionServices, registerType, request })
+      createConnectorType({ actionTypeRegistry, createTypeFromSpec, registerType, request })
     ).toThrow('Connector type ".dynamic_type" is already registered.');
+    expect(has).toHaveBeenCalledWith('.dynamic_type');
     expect(registerType).not.toHaveBeenCalled();
   });
 });

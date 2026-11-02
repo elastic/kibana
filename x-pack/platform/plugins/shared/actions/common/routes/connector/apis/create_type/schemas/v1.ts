@@ -20,8 +20,8 @@ const RESERVED_IDENTIFIERS = new Set(['__proto__', 'constructor', 'prototype']);
 export const connectorTypeIdSchema = lazySchema(() =>
   z
     .string()
-    .max(128)
-    .regex(/^\.[a-z0-9_-]+$/, 'Must start with "." and use only a-z, 0-9, "_" and "-".')
+    .max(127)
+    .regex(/^[a-z0-9_-]+$/, 'Use only a-z, 0-9, "_" and "-".')
 );
 
 export const identifierSchema = lazySchema(() =>
@@ -84,13 +84,12 @@ const templateSchema = (maxLength: number, allowSecret: boolean) =>
       while ((match = token.exec(value)) !== null) {
         const reference = match[1].trim();
         const valid =
-          /^(config|params)\.[A-Za-z][A-Za-z0-9_]*$/.test(reference) ||
+          /^(config|input)\.[A-Za-z][A-Za-z0-9_]*$/.test(reference) ||
           (allowSecret && /^secrets\.[A-Za-z][A-Za-z0-9_]*$/.test(reference));
         if (!valid)
           context.addIssue({
             code: 'custom',
-            message:
-              'Template references must use a declared config, params, or secret identifier.',
+            message: 'Template references must use a declared config, input, or secret identifier.',
           });
       }
       const stripped = value.replace(token, '');
@@ -223,7 +222,7 @@ export const createConnectorTypeRequestSchema = lazySchema(() =>
             const declared =
               root === 'config'
                 ? configNames.has(name)
-                : root === 'params'
+                : root === 'input'
                 ? inputNames.has(name)
                 : root === 'secrets'
                 ? authSecrets.has(name)
@@ -244,5 +243,10 @@ export const createConnectorTypeRequestSchema = lazySchema(() =>
 export type CreateConnectorTypeRequest = z.infer<typeof createConnectorTypeRequestSchema>;
 
 export const createConnectorTypeResponseSchema = lazySchema(() =>
-  z.object({ id: connectorTypeIdSchema })
+  z.object({
+    id: z
+      .string()
+      .max(128)
+      .regex(/^\.[a-z0-9_-]+$/),
+  })
 );

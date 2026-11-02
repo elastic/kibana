@@ -25,6 +25,7 @@ import type { AxiosInstance } from 'axios';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AuthMode } from '@kbn/connector-specs';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { Connector, ConnectorWithExtraFindData } from '../application/connector/types';
 import type { RotateInboundIngressResult } from '../application/connector/methods/rotate_inbound_ingress/types';
 import type { ConnectorType } from '../application/connector/types';
@@ -39,7 +40,6 @@ import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
 import { createConnectorType } from '../application/connector/methods/create_type';
 import type { CreateConnectorTypeRequest } from '../../common/routes/connector/apis/create_type';
-import type { ConnectorTypeConversionServices } from '../lib/single_file_connectors/create_connector_from_spec';
 import { execute } from '../application/connector/methods/execute';
 import type {
   GetGlobalExecutionKPIParams,
@@ -122,7 +122,9 @@ export interface ConstructorOptions {
     registerType: (
       actionType: ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>
     ) => void;
-    conversionServices: ConnectorTypeConversionServices;
+    createTypeFromSpec: (
+      spec: ConnectorSpec
+    ) => ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>;
   };
   authTypeRegistry: AuthTypeRegistry;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -263,7 +265,7 @@ export class ActionsClient {
 
     return createConnectorType({
       actionTypeRegistry: this.context.actionTypeRegistry,
-      conversionServices: registration.conversionServices,
+      createTypeFromSpec: registration.createTypeFromSpec,
       registerType: registration.registerType,
       request,
     });

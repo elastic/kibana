@@ -11,14 +11,17 @@ import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { createConnectorTypeRoute } from './create_connector_type';
-import { createConnectorTypeRequestSchemaV1 } from '../../../../common/routes/connector/apis/create_type';
+import {
+  createConnectorTypeRequestSchemaV1,
+  createConnectorTypeResponseSchemaV1,
+} from '../../../../common/routes/connector/apis/create_type';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
 const validBody = {
-  id: '.dynamic_type',
+  id: 'dynamic_type',
   displayName: 'Dynamic type',
   description: 'A connector type created at runtime.',
   config: [],
@@ -50,9 +53,10 @@ describe('createConnectorTypeRoute', () => {
     });
     const validation = config.validate as unknown as {
       request: { body: typeof createConnectorTypeRequestSchemaV1 };
-      response: { 200: { body: () => typeof createConnectorTypeRequestSchemaV1 } };
+      response: { 200: { body: () => typeof createConnectorTypeResponseSchemaV1 } };
     };
     expect(validation.request.body).toBe(createConnectorTypeRequestSchemaV1);
+    expect(validation.response[200].body()).toBe(createConnectorTypeResponseSchemaV1);
     expect(validation.request.body.safeParse(validBody).success).toBe(true);
     expect(validation.request.body.safeParse({}).success).toBe(false);
   });

@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { createConnectorTypeRequestSchema } from './schemas/latest';
+import {
+  createConnectorTypeRequestSchema,
+  createConnectorTypeResponseSchema,
+} from './schemas/latest';
 
 const validRequest = {
-  id: '.acme_orders',
+  id: 'acme_orders',
   displayName: 'Acme Orders',
   description: 'Order API',
   config: [{ name: 'baseUrl', type: 'string' as const, required: true }],
@@ -19,7 +22,7 @@ const validRequest = {
       input: [{ name: 'orderId', type: 'string' as const, required: true }],
       request: {
         method: 'GET' as const,
-        url: '{{config.baseUrl}}/orders/{{params.orderId}}',
+        url: '{{config.baseUrl}}/orders/{{input.orderId}}',
         headers: { Accept: 'application/json', 'X-API-Key': '{{secrets.apiKey}}' },
       },
     },
@@ -42,12 +45,28 @@ describe('createConnectorTypeRequestSchema', () => {
     ).toBe(false);
   });
 
-  it.each(['.Uppercase', '.bad.name', 'acme', '.'])('rejects an unsafe connector id: %s', (id) => {
+  it.each(['.acme', '.Uppercase', 'bad.name', ''])('rejects an unsafe connector id: %s', (id) => {
     expect(createConnectorTypeRequestSchema.safeParse({ ...validRequest, id }).success).toBe(false);
   });
 
+  it('rejects ids that would exceed the final dotted id limit', () => {
+    expect(
+      createConnectorTypeRequestSchema.safeParse({ ...validRequest, id: 'a'.repeat(128) }).success
+    ).toBe(false);
+  });
+
+  it('requires the response id to include the dot prefix', () => {
+    expect(createConnectorTypeResponseSchema.parse({ id: '.acme_orders' }).id).toBe('.acme_orders');
+    expect(createConnectorTypeResponseSchema.safeParse({ id: 'acme_orders' }).success).toBe(false);
+  });
+
   it('rejects unknown template roots and malformed template braces', () => {
-    for (const url of ['{{env.secret}}', '{{config.bad-name}}', '{{config.baseUrl']) {
+    for (const url of [
+      '{{env.secret}}',
+      '{{config.bad-name}}',
+      '{{config.baseUrl',
+      '{{params.orderId}}',
+    ]) {
       const result = createConnectorTypeRequestSchema.safeParse({
         ...validRequest,
         actions: {
@@ -63,8 +82,8 @@ describe('createConnectorTypeRequestSchema', () => {
 
   it('checks template names against fields and the selected auth type', () => {
     const invalidTemplates = [
-      '{{config.missing}}/orders/{{params.orderId}}',
-      '{{config.baseUrl}}/orders/{{params.missing}}',
+      '{{config.missing}}/orders/{{input.orderId}}',
+      '{{config.baseUrl}}/orders/{{input.missing}}',
     ];
     for (const url of invalidTemplates) {
       const result = createConnectorTypeRequestSchema.safeParse({
