@@ -19,7 +19,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
-  EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -226,9 +225,14 @@ export const CellFrame = ({
               data-test-subj="notebookCellOutputs"
             >
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {OUTPUTS_LABEL}
-                </EuiText>
+                <EuiIconTip
+                  type="inputOutput"
+                  content={OUTPUTS_LABEL}
+                  aria-label={OUTPUTS_LABEL}
+                  color="subdued"
+                  size="s"
+                  position="left"
+                />
               </EuiFlexItem>
               {outputs.map((output) => (
                 <EuiFlexItem grow={false} key={output}>
