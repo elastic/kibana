@@ -30,9 +30,11 @@ import {
   getTransformedQuery,
   checkMissingIdFieldWarning,
   getReservedMetadataColumns,
+  omitReservedMetadataColumns,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
@@ -56,7 +58,7 @@ import {
   alertSuppressionTypeGuard,
   getIsAlertSuppressionActive,
 } from '../utils/get_is_alert_suppression_active';
-import { bulkCreate } from '../factories';
+import { bulkCreate, wrapHits } from '../factories';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
@@ -259,6 +261,21 @@ export const esqlExecutor = async ({
               expandedFields,
             });
 
+          // events that miss a suppression field are not wrapped by the ES|QL wrappers, therefore the
+          // reserved metadata columns have to be removed before they are wrapped as regular alerts
+          const wrapUnsuppressedHits = (
+            events: Array<estypes.SearchHit<SignalSource>>,
+            buildReasonMessage: BuildReasonMessage
+          ) =>
+            wrapHits(
+              sharedParams,
+              events.map((event) => ({
+                ...event,
+                _source: omitReservedMetadataColumns(event._source),
+              })),
+              buildReasonMessage
+            );
+
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
             sharedParams,
             enrichedEvents: syntheticHits,
@@ -266,6 +283,7 @@ export const esqlExecutor = async ({
             services,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
+            wrapUnsuppressedHits,
             buildReasonMessage: buildReasonMessageForEsqlAlert,
             mergeSourceAndFields: true,
             // passing 1 here since ES|QL does not support pagination

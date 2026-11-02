@@ -30,6 +30,7 @@ import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_templat
 import { getEsqlRuleParams } from '../../rule_schema/mocks';
 import { esqlExecutor } from './esql';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
@@ -38,6 +39,10 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+jest.mock('../utils/get_is_alert_suppression_active', () => ({
+  ...jest.requireActual('../utils/get_is_alert_suppression_active'),
+  getIsAlertSuppressionActive: jest.fn(),
+}));
 jest.mock('./utils/validate_esql_query', () => ({
   validateEsqlQuery: jest.fn().mockResolvedValue(true),
 }));
@@ -47,6 +52,7 @@ jest.mock('@kbn/securitysolution-utils', () => ({
 }));
 
 const getDataTierFilterMock = getDataTierFilter as jest.Mock;
+const getIsAlertSuppressionActiveMock = getIsAlertSuppressionActive as jest.Mock;
 
 describe('esqlExecutor', () => {
   let ruleServices: PersistenceExecutorOptionsMock;
@@ -409,6 +415,34 @@ describe('esqlExecutor', () => {
       alertDocuments.forEach((alertDocument) =>
         expect(alertDocument._source).not.toHaveProperty('_ignored')
       );
+    });
+
+    it('should not store reserved metadata columns in alerts created without suppression for events missing a suppression field', async () => {
+      getIsAlertSuppressionActiveMock.mockResolvedValueOnce(true);
+      mockedArguments.sharedParams = getSharedParamsMock({
+        ruleParams: getEsqlRuleParams({
+          alertSuppression: { groupBy: ['host.name'], missingFieldsStrategy: 'doNotSuppress' },
+        }),
+      });
+      mockEsqlResult(
+        [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: '_source' },
+          { name: 'agent.name', type: 'keyword' },
+        ],
+        [['doc-1', '{"agent":{"name":"test-1"}}', 'test-1']]
+      );
+
+      const result = await esqlExecutor(mockedArguments);
+
+      // only the suppression branch of the executor logs the number of suppressed alerts
+      expect(mockedArguments.sharedParams.ruleExecutionLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Alerts suppressed')
+      );
+      const [alertDocument] = ruleServices.alertWithPersistence.mock.calls[0][0];
+      expect(alertDocument._source).not.toHaveProperty('_source');
+      expect(alertDocument._source).toMatchObject({ 'agent.name': 'test-1' });
+      expect(result.warningMessages).toEqual([expect.stringContaining('metadata column _source')]);
     });
 
     describe('when the search needs more than one iteration', () => {
