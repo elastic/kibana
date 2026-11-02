@@ -491,6 +491,13 @@ export function getSharedModuleRules(
       sideEffects: true,
       generator: { filename: 'maplibre-gl/[name][ext]' },
     },
+    // MapLibre 6 imports .mjs plugins, but evaluates .js plugins, which Kibana's CSP blocks.
+    {
+      test: /[\\/]@mapbox[\\/]mapbox-gl-rtl-text[\\/]mapbox-gl-rtl-text\.min\.js$/,
+      resourceQuery: /asUrl/,
+      type: 'asset/resource',
+      generator: { filename: 'maplibre-gl/[name].[contenthash].mjs' },
+    },
     getRawQueryLoaderRule(),
     getPeggyLoaderRule(),
   ];
