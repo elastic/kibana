@@ -61,6 +61,7 @@ it('caches compiled code and parsed source maps on misses', () => {
   expect(getNodeRegisterSwcConfigMock).toHaveBeenCalledWith('/repo/foo.ts', {
     inlineSourceMaps: false,
     inlineSourcesContent: false,
+    source: 'const value: number = 1;',
   });
   expect(cache.update).toHaveBeenCalledWith('cache-key', {
     code: 'const value = 1;',
@@ -79,6 +80,7 @@ it('uses inline source maps when no persistent cache is available', () => {
   expect(getNodeRegisterSwcConfigMock).toHaveBeenCalledWith('/repo/foo.ts', {
     inlineSourceMaps: true,
     inlineSourcesContent: true,
+    source: 'const value: number = 1;',
   });
 });
 

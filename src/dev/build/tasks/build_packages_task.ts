@@ -230,7 +230,7 @@ export const BuildPackages: Task = {
                 const source = await Fsp.readFile(rec.source.abs, 'utf8');
                 const result = await transform(
                   source,
-                  getNodeSwcConfig(rec.source.abs, { production: true })
+                  getNodeSwcConfig(rec.source.abs, { production: true, source })
                 );
                 return {
                   ...rec,
