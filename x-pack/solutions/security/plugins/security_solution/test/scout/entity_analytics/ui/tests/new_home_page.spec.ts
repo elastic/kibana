@@ -98,6 +98,15 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
       await expect(entityAnalyticsHomePage.gridRow(NEW_RISKY_HOST)).toBeVisible();
     });
 
+    await test.step('the grid holds as many entities as the tile counts', async () => {
+      const tileValue = entityAnalyticsHomePage.tileValue('newEntity');
+      await expect(tileValue).toHaveText(/^\d/);
+      // Compared with each other, not with a fixed number: other suites' data may count too.
+      await expect(entityAnalyticsHomePage.gridTotal).toHaveText(
+        (await tileValue.innerText()).trim()
+      );
+    });
+
     await test.step('selecting it again brings every entity back', async () => {
       await entityAnalyticsHomePage.toggleTile('newEntity', { selected: false });
       await expect(entityAnalyticsHomePage.gridRow(OTHER_HOST)).toBeVisible();
