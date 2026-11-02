@@ -511,9 +511,10 @@ const ESQLEditorInternal = function ESQLEditor({
         onKeyDownResizeHandler={(keyDownEvent) =>
           onKeyDownResize(keyDownEvent, editorHeight, setEditorHeight, undefined, undefined)
         }
+        hasOutline={Boolean(hasOutline)}
       />
     );
-  }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight]);
+  }, [onMouseDownResize, editorHeight, onKeyDownResize, setEditorHeight, hasOutline]);
 
   const {
     esqlFieldsCache,
@@ -1066,6 +1067,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 setResizableContainerHeight
               )
             }
+            hasOutline={Boolean(hasOutline)}
           />
         )}
         <EditorFooter
