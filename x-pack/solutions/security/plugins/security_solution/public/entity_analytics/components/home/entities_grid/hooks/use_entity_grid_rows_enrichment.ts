@@ -238,5 +238,8 @@ export const useEntityGridRowsEnrichment = (
     isFetching: enrichQueries.some((q) => q.isFetching),
     dataUpdatedAt: Math.max(0, ...enrichQueries.map((q) => q.dataUpdatedAt)),
     error: enrichQueries.find((q) => q.error)?.error,
+    // For the load telemetry: whether the rows asked for so far have their computed columns.
+    hasEnrichedRows: enrichQueries.some(({ data, error }) => data != null || error != null),
+    hasFailedColumns: enrichQueries.some(({ data }) => !!data?.errors.length),
   };
 };

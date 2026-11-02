@@ -17,7 +17,6 @@ export type DestinationType = 'elasticsearch' | 's3' | 'view';
 
 export interface ElasticsearchDestinationConfig {
   index: string;
-  index_patterns?: NonEmptyArray<string>;
 }
 
 export interface S3DestinationConfig {

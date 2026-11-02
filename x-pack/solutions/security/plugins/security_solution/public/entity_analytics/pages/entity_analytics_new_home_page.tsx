@@ -557,6 +557,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     mainEntityOnlySearch,
     applicableFilters,
     ignoredFields: ignoredFilterFields,
+    rawSearchExpression,
   } = useSearchBarExpression(rowsMode, isDataViewLoading ? undefined : dataView);
   // The DSL query takes the same filters as the ES|QL one: a filter on a field the entity docs lack
   // matches nothing in DSL, which would empty the counts and the grouped views.
@@ -1313,6 +1314,40 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     [signalCards, tileSearchExpression, shownTileEntityIds, isTilesSearchPending]
   );
 
+  // Only the flat grid reports its loads; the grids of Group by don't. A load is what the user asked
+  // for: its key leaves out the search overrides and the tile's entity ids that the page resolves
+  // for it, and the load waits for them, so it is timed whole and reported once.
+  const isActiveTileLoading = Boolean(
+    activeTile && shownSignalCards.find(({ id }) => id === activeTile)?.isLoading
+  );
+  const gridLoadTelemetry = useMemo(
+    () => ({
+      runKey: JSON.stringify([
+        rowsMode,
+        sortField,
+        sortDirection,
+        rawSearchExpression,
+        entityFilters,
+        activeTile,
+        timeRange,
+      ]),
+      isFilterPending: isSearchOverridesPending || isActiveTileLoading,
+      hasTileFilter: Boolean(activeTile),
+      hasEntityFilters: Object.values(entityFilters).some((values) => values.length > 0),
+    }),
+    [
+      rowsMode,
+      sortField,
+      sortDirection,
+      rawSearchExpression,
+      entityFilters,
+      activeTile,
+      timeRange,
+      isSearchOverridesPending,
+      isActiveTileLoading,
+    ]
+  );
+
   const onGroupChange = useCallback(
     (key: string) => {
       if (key === 'none') return setGroupsSelected(['none']);
@@ -1522,6 +1557,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 sortDirection={sortDirection}
                 onSortChange={setSort}
                 onFullScreenChange={setIsGridFullScreen}
+                loadTelemetry={gridLoadTelemetry}
               />
             )}
           </DataViewContext.Provider>
