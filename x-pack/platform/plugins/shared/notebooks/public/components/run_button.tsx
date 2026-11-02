@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -39,14 +39,17 @@ const RUN_MODE_ORDER: readonly RunMode[] = ['auto', 'manual'];
 
 export const RunButton = ({
   runMode,
+  isMenuOpen: isOpen,
+  onMenuOpenChange: setIsOpen,
   onRun,
   onRunModeChange,
 }: {
   runMode: RunMode;
+  isMenuOpen: boolean;
+  onMenuOpenChange: (isOpen: boolean) => void;
   onRun: () => void;
   onRunModeChange: (runMode: RunMode) => void;
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const { title, description } = MODES[runMode];
 
   return (
@@ -64,7 +67,7 @@ export const RunButton = ({
         aria-label={i18n.translate('xpack.notebook.runButton.modeAriaLabel', {
           defaultMessage: 'Run mode',
         })}
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => setIsOpen(!isOpen)}
         data-test-subj="notebookCellRunMode"
         popoverProps={{
           isOpen,

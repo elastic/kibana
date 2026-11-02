@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { CellDefinition, CellType } from '../../common/types';
@@ -60,6 +61,8 @@ const getTypeLabel = (cell: CellDefinition): string => {
   return TYPE_LABELS[kind];
 };
 
+const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
+
 const OUTPUTS_LABEL = i18n.translate('xpack.notebook.cell.outputs', {
   defaultMessage: 'Outputs',
 });
@@ -88,6 +91,7 @@ export const CellFrame = ({
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
 
   const rename = (name: string): boolean => {
@@ -141,99 +145,116 @@ export const CellFrame = ({
   ];
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-      <EuiFlexItem css={{ minWidth: 0 }}>
-        <EuiPanel hasBorder paddingSize="s" data-test-subj={`notebookCell-${cell.name}`}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <div
+      css={css`
+        position: relative;
+        &:hover > .${RUN_GUTTER_CLASS}, &:focus-within > .${RUN_GUTTER_CLASS} {
+          opacity: 1;
+        }
+      `}
+    >
+      <EuiPanel hasBorder paddingSize="s" data-test-subj={`notebookCell-${cell.name}`}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type={TYPE_ICONS[cell.type]}
+              content={getTypeLabel(cell)}
+              aria-label={getTypeLabel(cell)}
+              color="text"
+              position="left"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
+            <EuiInlineEditText
+              size="s"
+              inputAriaLabel={i18n.translate('xpack.notebook.cell.nameAriaLabel', {
+                defaultMessage: 'Cell name',
+              })}
+              defaultValue={cell.name}
+              onSave={rename}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem />
+          {headerActions}
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              isOpen={isMenuOpen}
+              closePopover={closeMenu}
+              panelPaddingSize="none"
+              anchorPosition="downRight"
+              aria-label={ACTIONS_LABEL}
+              button={
+                <EuiToolTip content={ACTIONS_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="ellipsis"
+                    aria-label={ACTIONS_LABEL}
+                    onClick={() => setIsMenuOpen((open) => !open)}
+                  />
+                </EuiToolTip>
+              }
+            >
+              <EuiContextMenuPanel items={menuItems} />
+            </EuiPopover>
+          </EuiFlexItem>
+          {runtime && (
             <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type={TYPE_ICONS[cell.type]}
-                content={getTypeLabel(cell)}
-                aria-label={getTypeLabel(cell)}
-                color="text"
-                position="left"
-              />
+              <CellStatusBadge runtime={runtime} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
-              <EuiInlineEditText
-                size="s"
-                inputAriaLabel={i18n.translate('xpack.notebook.cell.nameAriaLabel', {
-                  defaultMessage: 'Cell name',
-                })}
-                defaultValue={cell.name}
-                onSave={rename}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem />
-            {headerActions}
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                isOpen={isMenuOpen}
-                closePopover={closeMenu}
-                panelPaddingSize="none"
-                anchorPosition="downRight"
-                aria-label={ACTIONS_LABEL}
-                button={
-                  <EuiToolTip content={ACTIONS_LABEL} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="ellipsis"
-                      aria-label={ACTIONS_LABEL}
-                      onClick={() => setIsMenuOpen((open) => !open)}
-                    />
-                  </EuiToolTip>
-                }
-              >
-                <EuiContextMenuPanel items={menuItems} />
-              </EuiPopover>
-            </EuiFlexItem>
-            {runtime && (
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        {runtime?.status === 'error' && runtime.error && (
+          <>
+            <KbnDangerCallout
+              announceOnMount
+              size="s"
+              title={runtime.error}
+              data-test-subj="notebookCellError"
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {children}
+        {outputs && outputs.length > 0 && (
+          <>
+            <EuiHorizontalRule margin="s" />
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              wrap
+              responsive={false}
+              data-test-subj="notebookCellOutputs"
+            >
               <EuiFlexItem grow={false}>
-                <CellStatusBadge runtime={runtime} />
+                <EuiText size="xs" color="subdued">
+                  {OUTPUTS_LABEL}
+                </EuiText>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          {runtime?.status === 'error' && runtime.error && (
-            <>
-              <KbnDangerCallout
-                announceOnMount
-                size="s"
-                title={runtime.error}
-                data-test-subj="notebookCellError"
-              />
-              <EuiSpacer size="s" />
-            </>
-          )}
-          {children}
-          {outputs && outputs.length > 0 && (
-            <>
-              <EuiHorizontalRule margin="s" />
-              <EuiFlexGroup
-                gutterSize="xs"
-                alignItems="center"
-                wrap
-                responsive={false}
-                data-test-subj="notebookCellOutputs"
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {OUTPUTS_LABEL}
-                  </EuiText>
+              {outputs.map((output) => (
+                <EuiFlexItem grow={false} key={output}>
+                  <EuiCode>{output}</EuiCode>
                 </EuiFlexItem>
-                {outputs.map((output) => (
-                  <EuiFlexItem grow={false} key={output}>
-                    <EuiCode>{output}</EuiCode>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </>
-          )}
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ width: euiTheme.size.xxxxl, paddingTop: euiTheme.size.xs }}>
-        {onRun && 'runMode' in cell && (
+              ))}
+            </EuiFlexGroup>
+          </>
+        )}
+      </EuiPanel>
+      {onRun && 'runMode' in cell && (
+        <div
+          className={RUN_GUTTER_CLASS}
+          css={css`
+            position: absolute;
+            top: 0;
+            left: 100%;
+            padding: ${euiTheme.size.xs} 0 0 ${euiTheme.size.s};
+            opacity: ${isRunMenuOpen ? 1 : 0};
+            transition: opacity ${euiTheme.animation.fast};
+          `}
+        >
           <RunButton
             runMode={cell.runMode}
+            isMenuOpen={isRunMenuOpen}
+            onMenuOpenChange={setIsRunMenuOpen}
             onRun={onRun}
             onRunModeChange={(runMode) =>
               store.updateCell(cell.id, (current) =>
@@ -241,8 +262,8 @@ export const CellFrame = ({
               )
             }
           />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </div>
+      )}
+    </div>
   );
 };
