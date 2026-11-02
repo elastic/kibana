@@ -23,6 +23,7 @@ const createPlugin = (memoryEnabled = false) =>
       cortex: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
+      findings_recorder: { enabled: true },
     })
   );
 
@@ -32,7 +33,7 @@ const createSetupDeps = () =>
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
-  it('keeps the assistant connector while registering named investigation targets', async () => {
+  it('registers every telemetry target for both the investigator and the assistant', async () => {
     const agentBuilder = agentBuilderMocks.createSetup();
     const plugin = new NightshiftInvestigationsPlugin(
       coreMock.createPluginInitializerContext({
@@ -72,7 +73,13 @@ describe('NightshiftInvestigationsPlugin setup', () => {
       'c0',
       'orca',
     ]);
-    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual(['legacy']);
+    // Before start there is no Agent Builder to read the investigator from, so the assistant
+    // lists the telemetry connectors only.
+    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual([
+      'legacy',
+      'c0',
+      'orca',
+    ]);
   });
 
   it('registers the investigation locator on the server', async () => {
@@ -124,6 +131,23 @@ describe('NightshiftInvestigationsPlugin setup', () => {
 
     expect(() => setup.registerInvestigationQuota(callback)).toThrow(
       'Investigation quota callback is already registered'
+    );
+  });
+
+  it('registers the reference-free judges with the evals plugin', () => {
+    const registerEvaluator = jest.fn();
+
+    createPlugin().setup(coreMock.createSetup(), {
+      ...createSetupDeps(),
+      evals: { enabled: true, mode: 'runtime', registerTaskProvider: jest.fn(), registerEvaluator },
+    });
+
+    expect(registerEvaluator.mock.calls.map(([{ name, version }]) => `${name}@${version}`)).toEqual(
+      [
+        'nightshift_rca_reward@1.0.0',
+        'nightshift_investigation_process@1.0.0',
+        'nightshift_conclusion_quality@1.0.0',
+      ]
     );
   });
 

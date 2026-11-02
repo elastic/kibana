@@ -231,6 +231,16 @@ export const HuntCoordinatorResult = lazySchema(() =>
       .optional(),
     tier2_skipped_reason: z.string().optional(),
     /**
+     * Why Tier 2 was skipped, when the reason alone is ambiguous. Set when no_inference means the dataset-match model call failed rather than that no model was configured. Capped to match the producer clamp on the failure message.
+     */
+    tier2_skip_detail: z
+      .string()
+      .max(200)
+      .optional()
+      .describe(
+        'Why Tier 2 was skipped, when the reason alone is ambiguous. Set when no_inference means the dataset-match model call failed rather than that no model was configured. Capped to match the producer clamp on the failure message.'
+      ),
+    /**
      * Model tiers that had no usable model on this run, in tier order. Absent when every tier resolved. A missing balanced or frontier model is what makes Tier 2 report no_inference; a missing efficient model quietly degrades dataset matching and recommendations without skipping anything.
      */
     unavailable_model_tiers: z
@@ -291,6 +301,16 @@ export const HuntCoordinatorResult = lazySchema(() =>
       .optional()
       .describe(
         "True when this was a manual run over the report's own text, so Tier 2 searched the whole report without skipping anything an earlier run searched. The caller reads it to let this run's result replace an earlier finding, which a run that skipped techniques cannot do. Absent when Tier 2 did not run."
+      ),
+    /**
+     * The distinct reasons of the coverage gaps that kept this run `incomplete_retryable`, from the coordinator and both tiers, judged in the same context as `completeness`. A reason that is final for this run (a technique it gave up on, a gate nothing could pass) is left out. Empty when the run is not retryable; absent on paths that record nothing.
+     */
+    retryable_reasons: z
+      .array(HuntIncompleteReason)
+      .max(100)
+      .optional()
+      .describe(
+        'The distinct reasons of the coverage gaps that kept this run `incomplete_retryable`, from the coordinator and both tiers, judged in the same context as `completeness`. A reason that is final for this run (a technique it gave up on, a gate nothing could pass) is left out. Empty when the run is not retryable; absent on paths that record nothing.'
       ),
     /**
      * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here.
