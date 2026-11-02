@@ -5480,6 +5480,9 @@ importers:
       '@kbn/developer-toolbar-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/developer_toolbar
+      '@kbn/developer-toolbar-profilers-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/private/developer_toolbar_profilers
       '@kbn/docs-utils':
         specifier: workspace:*
         version: link:packages/kbn-docs-utils
@@ -8619,6 +8622,8 @@ importers:
   src/platform/plugins/private/advanced_settings: {}
 
   src/platform/plugins/private/dev_comments: {}
+
+  src/platform/plugins/private/developer_toolbar_profilers: {}
 
   src/platform/plugins/private/event_annotation: {}
 

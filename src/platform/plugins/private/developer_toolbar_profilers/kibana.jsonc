@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/developer-toolbar-profilers-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "description": "Development-only developer toolbar buttons to capture CPU and memory sampling profiles of the Kibana server.",
+  "visibility": "private",
+  "devOnly": true,
+  "plugin": {
+    "id": "developerToolbarProfilers",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["developerToolbar"],
+    "requiredBundles": [],
+    "optionalPlugins": []
+  }
+}
