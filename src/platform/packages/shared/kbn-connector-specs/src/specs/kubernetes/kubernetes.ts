@@ -61,7 +61,7 @@ import type {
 const STRATEGIC_MERGE_PATCH = 'application/strategic-merge-patch+json';
 const MERGE_PATCH = 'application/merge-patch+json';
 const JSON_PATCH = 'application/json-patch+json';
-const APPLY_PATCH = 'application/apply-patch+json';
+const APPLY_PATCH = 'application/apply-patch+yaml';
 
 /** Cap pod log output so it stays within an agent-safe context size. */
 const MAX_LOG_CHARS = 20000;
@@ -235,7 +235,7 @@ const k8sRequest = async (ctx: ActionContext, options: K8sRequestOptions): Promi
   try {
     const response = await client.request({
       method: options.method,
-      url: `${apiUrl}${options.path}`,
+      url: `${apiUrl.replace(/\/+$/, '')}${options.path}`,
       ...(options.params ? { params: options.params } : {}),
       ...(options.data !== undefined ? { data: options.data } : {}),
       ...(options.contentType ? { headers: { 'Content-Type': options.contentType } } : {}),

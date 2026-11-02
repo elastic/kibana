@@ -38,9 +38,10 @@ import { getEntityGridToolbarVisibility } from './entities_grid_toolbar';
 import { EntityGridBodyContext, useEntityGridView } from './entities_grid_view_context';
 import type { EntityGridView } from './entities_grid_view_context';
 import { DataViewContext } from '../../entities_table';
-import { getReadableColumns, isGridColumnId } from '../grid_columns';
+import { COLUMN_ACTIONS, getReadableColumns, isGridColumnId } from '../grid_columns';
 import type { ReadAccess } from '../grid_columns';
 import { useEntityAnalyticsUrlState } from '../hooks/use_entity_analytics_url_state';
+import { useGridLoadTelemetry } from '../hooks/use_grid_load_telemetry';
 import { RISK_SCORE_NORM_FIELD } from '../common';
 import type { RowsMode, SortDir, TimeRange } from '../common';
 
@@ -74,12 +75,13 @@ const EntityGridActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) =
   const { rows, rowActions } = useEntityGridView();
   const row = rows[rowIndex];
   if (!row || !rowActions) return null;
-  const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat } = rowActions;
+  const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat, onAddToCase } = rowActions;
   return (
     <RowActionsCell
       onInvestigateInTimeline={onInvestigateInTimeline && (() => onInvestigateInTimeline(row))}
       onOpenEntityGraph={() => onOpenEntityGraph(row)}
       onAddToChat={onAddToChat && (() => onAddToChat(row))}
+      onAddToCase={onAddToCase && (() => onAddToCase(row))}
     />
   );
 };
@@ -107,6 +109,7 @@ export interface EntitiesGridProps {
   onSortChange: (field: string, direction: SortDir) => void;
   searchExpression?: string;
   entityExpression?: string;
+  isSearchOverridesPending?: boolean;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
   /** Columns of a source the user can't read are left out, so their queries never run. */
@@ -114,6 +117,15 @@ export interface EntitiesGridProps {
   /** Without them the grid has no toolbar, as inside a group. */
   toolbarControls?: React.ReactNode;
   onFullScreenChange?: (isFullScreen: boolean) => void;
+  /** Only the page's own grid reports its loads; the grids inside groups don't pass it. */
+  loadTelemetry?: {
+    /** What the user asked for: a new key is a new load. */
+    runKey: string;
+    /** The search overrides or the tile's entity ids are still resolving for this load. */
+    isFilterPending: boolean;
+    hasTileFilter: boolean;
+    hasEntityFilters: boolean;
+  };
 }
 
 export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
@@ -126,11 +138,13 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   onSortChange,
   searchExpression,
   entityExpression,
+  isSearchOverridesPending,
   cellHandlers,
   rowActions,
   readAccess,
   toolbarControls,
   onFullScreenChange,
+  loadTelemetry,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { dataView } = useContext(DataViewContext);
@@ -187,6 +201,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     updatedAt,
     isFetching,
     isAtLoadLimit,
+    loadState,
     prefetch,
     onRowsInViewChange,
   } = useEntityGridData(
@@ -196,6 +211,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       pageSize: MAX_LOADED_ROWS,
       searchExpression,
       entityExpression,
+      isSearchOverridesPending,
       timeRange,
       rowsMode,
       keepFields,
@@ -203,6 +219,22 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     },
     { enrichRowsInView: true }
   );
+
+  useGridLoadTelemetry({
+    skip: !loadTelemetry,
+    runKey: loadTelemetry?.runKey ?? '',
+    isFilterPending: !!loadTelemetry?.isFilterPending,
+    loadState,
+    isFetching,
+    meta: {
+      rowsMode,
+      sortField: readableSortField,
+      timeRange,
+      hasTileFilter: !!loadTelemetry?.hasTileFilter,
+      hasEntityFilters: !!loadTelemetry?.hasEntityFilters,
+      isAtLoadLimit,
+    },
+  });
 
   const onAddColumn = useCallback(
     (columnId: string) =>
@@ -219,6 +251,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
     () => ({
       columns: [{ id: readableSortField, direction: readableSortDirection }],
       onSort: (cols: Array<{ id: string; direction: SortDir }>) => {
+        // Unsort removes the active column from EUI's list; fall back to the grid default.
+        if (cols.length === 0) {
+          onSortChange(RISK_SCORE_NORM_FIELD, 'desc');
+          return;
+        }
         // EUI passes every sorted column; the one the user just picked isn't the current sort.
         const col = cols.find((c) => c.id !== readableSortField) ?? cols[0];
         if (!col) return;
@@ -236,6 +273,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
       keepFields.map((id) => ({
         id,
         displayAsText: dataView?.getFieldByName(id)?.customLabel || id,
+        actions: COLUMN_ACTIONS,
         initialWidth: 160,
         isSortable: false,
         isExpandable: false,
@@ -347,6 +385,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         <EntityGridRowsContext.Provider value={rowsContext}>
           <EuiDataGrid
             aria-label={GRID_ARIA_LABEL}
+            data-test-subj="entityAnalyticsEntitiesGrid"
             leadingControlColumns={
               isIndividualRows
                 ? INDIVIDUAL_LEADING_CONTROL_COLUMNS
