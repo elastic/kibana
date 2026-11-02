@@ -121,6 +121,7 @@ describe('buildConfiguredDestinationNode', () => {
       const node = buildConfiguredDestinationNode(s3Destination, true, []);
 
       expect(Object.keys(node.data).sort()).toEqual([
+        'bucket',
         'destinationId',
         'destinationType',
         'signals',
