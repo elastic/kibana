@@ -426,11 +426,17 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
 describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrivileges();
     (useEntityStoreStatus as jest.Mock).mockReturnValue({
       data: { status: 'running' },
       isLoading: false,
     });
     mockTiles();
+  });
+
+  afterEach(() => {
+    mockUrlStateOverrides = {};
+    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
   });
 
   it('skips the alert tiles and says why when Alerts is None but the alerts index is readable', () => {
@@ -524,10 +530,6 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       return runKey;
     };
 
-    afterEach(() => {
-      mockUrlStateOverrides = {};
-    });
-
     it('is stable for the same request', () => {
       expect(runKeyWith({})).toBe(runKeyWith({}));
     });
@@ -553,7 +555,6 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       };
       const keyWithoutSearch = keyOfSearch(undefined);
       expect(keyOfSearch('entity.name == "a"')).not.toBe(keyWithoutSearch);
-      (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
     });
   });
 
@@ -579,7 +580,6 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
     hooks.useNewEntityCount.mockReturnValue({ ...loadingTile, isLoading: false });
     rerender(<EntityAnalyticsNewHomePage />);
     expect(loadTelemetry()).toMatchObject({ runKey, isFilterPending: false });
-    mockUrlStateOverrides = {};
   });
 });
 
