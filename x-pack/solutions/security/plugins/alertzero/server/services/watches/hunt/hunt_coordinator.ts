@@ -997,9 +997,9 @@ const huntCoordinatorCore = async (
       const failure = targets.dataset_match.message ?? 'the model call failed';
       return tier1Only({
         reason: 'no_inference',
-        message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (the dataset-match model call failed: ${failure}).`,
+        message: `IOC Hunt: ${tier1Raw.status}. Behavior Hunt skipped (the dataset-match model call failed: ${failure}).`,
         nextStep:
-          'Tier 2 could not choose where to hunt because the dataset-match model call failed. Check the connector for the model that tier uses; the next sweep retries.',
+          'Behavior Hunt could not choose where to hunt because the dataset-match model call failed. Check the connector for the model that tier uses; the next sweep retries.',
         skipDetail: failure,
         surfaceSkipDetail: true,
       });
