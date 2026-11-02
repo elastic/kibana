@@ -325,6 +325,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     // showing the form alongside a banner that says the decision is already in flight would be
     // confusing.
     const showDeclineForm = displayMode === 'declining' && isSubmitting !== 'declining';
+    const contentMode = showDeclineForm ? 'declining' : 'view';
 
     return (
       <>
@@ -337,7 +338,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         />
 
         <ApprovalContentBody
-          mode={displayMode}
+          mode={contentMode}
           comment={proposal.comment}
           banner={banner}
           bannerSuffix={bannerSuffix}
@@ -346,7 +347,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           data-test-subj={dataTestSubj}
         />
 
-        {displayMode === 'view' && alwaysAllow && (
+        {contentMode === 'view' && alwaysAllow && (
           <AlwaysAllowCheckbox
             option={alwaysAllow}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-always-allow` : undefined}
