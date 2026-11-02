@@ -25,7 +25,7 @@ import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { useViewPolicies } from '../hooks/use_url_filters';
+import { useViewOnboardingInstances, useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
@@ -44,6 +44,8 @@ import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
+
+const EMPTY_COUNTS: ReadonlyMap<string, number> = new Map();
 
 function wrapActionWithDisabledTooltip(
   action: Action<InstalledPackageUIPackageListItem>,
@@ -65,11 +67,22 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     selectedItems: InstalledPackageUIPackageListItem[];
     setSelectedItems: React.Dispatch<React.SetStateAction<InstalledPackageUIPackageListItem[]>>;
   };
-}> = ({ installedPackages, total, isLoading, pagination, selection }) => {
+  /** Number of instances (onboarding sessions) per package name. */
+  onboardingInstanceCounts?: ReadonlyMap<string, number>;
+}> = ({
+  installedPackages,
+  total,
+  isLoading,
+  pagination,
+  selection,
+  onboardingInstanceCounts = EMPTY_COUNTS,
+}) => {
   const authz = useAuthz();
   const { getHref } = useLink();
   const { selectedItems, setSelectedItems } = selection;
   const { addViewPolicies } = useViewPolicies();
+  const { addViewOnboardingInstances } = useViewOnboardingInstances();
+  const hasOnboardingInstances = [...onboardingInstanceCounts.values()].some((count) => count > 0);
   const {
     actions: {
       bulkUninstallIntegrationsWithConfirmModal,
@@ -144,6 +157,8 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                 defaultMessage: 'Integration name',
               }
             ),
+            // Room for long names next to the Instances column, which only shows with instances.
+            ...(hasOnboardingInstances ? { width: '340px' } : {}),
             render: (item: PackageListItem) => {
               const url = getHref('integration_details_overview', {
                 pkgkey: `${item.name}-${item.installationInfo!.version}`,
@@ -307,6 +322,30 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
               return policiesLink;
             },
           },
+          ...(hasOnboardingInstances
+            ? [
+                {
+                  name: i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.instancesColumnTitle',
+                    {
+                      defaultMessage: 'Instances',
+                    }
+                  ),
+                  width: '160px',
+                  render: (item: InstalledPackageUIPackageListItem) => {
+                    const count = onboardingInstanceCounts.get(item.name) ?? 0;
+                    return count > 0 ? (
+                      <EuiLink
+                        onClick={() => addViewOnboardingInstances(item.name)}
+                        data-test-subj={`installedIntegrationsTable.instancesLink.${item.name}`}
+                      >
+                        {count}
+                      </EuiLink>
+                    ) : null;
+                  },
+                },
+              ]
+            : []),
           {
             actions: [
               wrapActionWithDisabledTooltip(
