@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters } from '@kbn/core/public';
 import { DiscoverRouter } from './discover_router';
 import type { DiscoverServices } from '../build_services';
@@ -29,17 +29,19 @@ export const renderApp = ({
 }: RenderAppProps) => {
   const { data, core } = services;
 
-  const unmount = toMountPoint(
-    <DiscoverRouter
-      onAppLeave={onAppLeave}
-      services={services}
-      customizationContext={customizationContext}
-    />,
-    core
-  )(element);
+  const root = createRoot(element);
+  root.render(
+    core.rendering.addContext(
+      <DiscoverRouter
+        onAppLeave={onAppLeave}
+        services={services}
+        customizationContext={customizationContext}
+      />
+    )
+  );
 
   return () => {
-    unmount();
+    root.unmount();
     data.search.session.clear();
   };
 };
