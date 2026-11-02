@@ -58,10 +58,16 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
         `${name} port ${port} is used${usedBy}, Scout servers are already running (PID ${scoutServerPids.join(
           ', '
         )})`,
-        'Reuse them with run-tests, or stop them before starting new ones'
+        {
+          hint: 'Reuse them with run-tests, or stop them before starting new ones',
+          fix: { command: `kill ${scoutServerPids.join(' ')}`, destructive: true },
+        }
       );
     }
-    return fail(`${name} port ${port} is used${usedBy}`, owner ? `kill ${owner.pid}` : undefined);
+    return fail(
+      `${name} port ${port} is used${usedBy}`,
+      owner ? { fix: { command: `kill ${owner.pid}`, destructive: true } } : undefined
+    );
   },
 });
 

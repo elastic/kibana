@@ -28,13 +28,14 @@ export const environmentChecks: DoctorCheckGroup = {
           )
         );
         if (!installed) {
-          return fail('Dependencies are not installed', 'node scripts/kbn bootstrap');
+          return fail('Dependencies are not installed', {
+            fix: { command: 'node scripts/kbn bootstrap' },
+          });
         }
         if (lockfile && lockfile.mtimeMs > installed.mtimeMs) {
-          return warn(
-            'pnpm-lock.yaml changed since the last bootstrap',
-            'node scripts/kbn bootstrap'
-          );
+          return warn('pnpm-lock.yaml changed since the last bootstrap', {
+            fix: { command: 'node scripts/kbn bootstrap' },
+          });
         }
         return pass(`Dependencies installed ${formatAge(installed.mtime)}`);
       },

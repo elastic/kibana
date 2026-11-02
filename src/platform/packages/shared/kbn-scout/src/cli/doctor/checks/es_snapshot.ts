@@ -13,7 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getSnapshotCacheFilename } from '@kbn/es';
 import type { DoctorCheckGroup } from '../types';
 import { pass, warn } from '../types';
-import { formatAge, formatBytes } from '../utils';
+import { braces, formatAge, formatBytes, removePaths } from '../utils';
 
 const CACHE_DIR = Path.resolve(REPO_ROOT, '.es/cache');
 
@@ -36,10 +36,10 @@ export const esSnapshotChecks: DoctorCheckGroup = {
         const path = Path.join(CACHE_DIR, filename);
         const stats = await Fs.promises.stat(path).catch(() => undefined);
         if (!stats) {
-          return warn(
-            `Elasticsearch ${version}-SNAPSHOT is not cached`,
-            'start-server downloads it on the first run (~600 MB)'
-          );
+          return warn(`Elasticsearch ${version}-SNAPSHOT is not cached`, {
+            hint: 'start-server also downloads it on the first run (~600 MB)',
+            fix: { command: 'node scripts/es snapshot --download-only' },
+          });
         }
 
         // kbn-es stores the download time next to the archive
@@ -71,7 +71,19 @@ export const esSnapshotChecks: DoctorCheckGroup = {
           `Snapshots for ${versions.join(', ')} use ${formatBytes(
             sizes.reduce((a, b) => a + b, 0)
           )}`,
-          `Remove them from ${CACHE_DIR} if no other branch needs them`
+          {
+            hint: 'Other branches may still need them',
+            fix: {
+              command: `rm -f .es/cache/elasticsearch-${braces(versions)}-SNAPSHOT-*`,
+              destructive: true,
+              run: () =>
+                removePaths(
+                  others
+                    .flatMap((file) => [file, `${file}.meta`])
+                    .map((file) => Path.join(CACHE_DIR, file))
+                ),
+            },
+          }
         );
       },
     },

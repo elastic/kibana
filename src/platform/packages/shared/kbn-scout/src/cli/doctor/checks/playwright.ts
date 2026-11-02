@@ -13,7 +13,7 @@ import { chromium } from '@playwright/test';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { CheckResult, DoctorCheckGroup } from '../types';
 import { fail, pass, warn } from '../types';
-import { formatBytes, getSize } from '../utils';
+import { braces, formatBytes, getSize, removePaths, tildify } from '../utils';
 
 const CHROMIUM_DIR_REGEX = /^(chromium|chromium_headless_shell)-(\d+)$/;
 
@@ -58,7 +58,7 @@ export const playwrightChecks: DoctorCheckGroup = {
               `${missing.join(
                 ' and '
               )} ${revision} for Playwright ${playwrightVersion} is not installed`,
-              'npx playwright install chromium'
+              { fix: { command: 'npx playwright install chromium' } }
             )
           : pass(`Chromium ${browserVersion} (${revision}) for Playwright ${playwrightVersion}`);
       },
@@ -80,10 +80,16 @@ export const playwrightChecks: DoctorCheckGroup = {
         ).reduce((total, dirSize) => total + dirSize, 0);
         const revisions = [...new Set(oldDirs.map((oldDir) => oldDir.revision))];
 
-        return warn(
-          `Old Chromium revisions ${revisions.join(', ')} use ${formatBytes(size)}`,
-          `Remove them from ${cacheDir} if no other branch needs them`
-        );
+        return warn(`Old Chromium revisions ${revisions.join(', ')} use ${formatBytes(size)}`, {
+          hint: 'Other branches may still need them',
+          fix: {
+            command: `rm -rf ${tildify(cacheDir)}/${braces([
+              ...new Set(oldDirs.map(({ dir }) => dir.replace(/-\d+$/, ''))),
+            ])}-${braces(revisions)}`,
+            destructive: true,
+            run: () => removePaths(oldDirs.map(({ dir }) => Path.join(cacheDir, dir))),
+          },
+        });
       },
     },
   ],

@@ -9,10 +9,21 @@
 
 export type CheckStatus = 'pass' | 'warn' | 'fail';
 
+export interface Fix {
+  /** Exact command shown to the user and run by --fix */
+  command: string;
+  /** Asks for confirmation before running, e.g. when it deletes files or kills processes */
+  destructive?: boolean;
+  /** Overrides running `command`, e.g. to wait until Docker is ready */
+  run?: () => Promise<void>;
+}
+
 export interface CheckResult {
   status: CheckStatus;
   message: string;
+  /** Shown when there is no command to fix it */
   hint?: string;
+  fix?: Fix;
 }
 
 export interface DoctorCheck {
@@ -27,14 +38,16 @@ export interface DoctorCheckGroup {
   stopOnFailure?: boolean;
 }
 
+type Remedy = Pick<CheckResult, 'hint' | 'fix'>;
+
 export const pass = (message: string): CheckResult => ({ status: 'pass', message });
-export const warn = (message: string, hint?: string): CheckResult => ({
+export const warn = (message: string, remedy?: Remedy): CheckResult => ({
   status: 'warn',
   message,
-  hint,
+  ...remedy,
 });
-export const fail = (message: string, hint?: string): CheckResult => ({
+export const fail = (message: string, remedy?: Remedy): CheckResult => ({
   status: 'fail',
   message,
-  hint,
+  ...remedy,
 });

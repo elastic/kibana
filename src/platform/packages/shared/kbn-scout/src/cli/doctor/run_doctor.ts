@@ -8,6 +8,8 @@
  */
 
 import chalk from 'chalk';
+import execa from 'execa';
+import inquirer from 'inquirer';
 import type {
   ListrDefaultRenderer,
   ListrSimpleRenderer,
@@ -33,16 +35,17 @@ const runCheck = async (
 ) => {
   const result = await check.run().catch((error: Error) => fail(error.message));
   results.push(result);
-  const hint = result.hint ? chalk.dim(` → ${result.hint}`) : '';
+  const remedy = result.fix?.command ?? result.hint;
+  const message = remedy ? `${result.message}${chalk.dim(` → ${remedy}`)}` : result.message;
 
   // listr2 has no warning state, so warnings are rendered as skipped tasks with a ⚠ icon
   if (result.status === 'warn') {
-    task.skip(`${result.message}${hint}`);
+    task.skip(message);
   } else if (result.status === 'fail') {
-    task.title = `${result.message}${hint}`;
+    task.title = message;
     throw new Error(result.message);
   } else {
-    task.title = result.message;
+    task.title = message;
   }
 };
 
@@ -75,12 +78,9 @@ const getGroups = (arch?: DoctorArch): DoctorCheckGroup[] => [
   ...(arch !== 'stateful' ? [dockerChecks] : []),
 ];
 
-export const runDoctor = async (log: ToolingLog, arch?: DoctorArch) => {
+const runChecks = async (log: ToolingLog, arch?: DoctorArch): Promise<CheckResult[]> => {
   const startTime = Date.now();
   const results: CheckResult[] = [];
-  const target = `local · ${arch ?? 'stateful + serverless'}`;
-
-  log.write(`\n ${chalk.bold.inverse(' Scout doctor ')}  ${target}\n`);
 
   await new Listr(
     getGroups(arch).map((group) => ({
@@ -114,19 +114,83 @@ export const runDoctor = async (log: ToolingLog, arch?: DoctorArch) => {
 
   const count = (status: CheckResult['status']) =>
     results.filter((result) => result.status === status).length;
-  const [failed, warnings, passed] = [count('fail'), count('warn'), count('pass')];
+  const warnings = count('warn');
   const seconds = ((Date.now() - startTime) / 1000).toFixed(1);
-
   log.write(
-    `\n ${chalk.red(`${failed} failed`)} · ${chalk.yellow(`${warnings} warnings`)} · ${chalk.green(
-      `${passed} passed`
-    )}  ${chalk.dim(`(${seconds}s)`)}`
-  );
-  log.write(
-    failed
-      ? chalk.red.bold(` ✖ Not ready to run Scout (${target}), fix the failed checks above\n`)
-      : chalk.green.bold(` ✔ Ready to run Scout (${target})\n`)
+    `\n ${chalk.red(`${count('fail')} failed`)} · ${chalk.yellow(
+      `${warnings} warning${warnings === 1 ? '' : 's'}`
+    )} · ${chalk.green(`${count('pass')} passed`)}  ${chalk.dim(`(${seconds}s)`)}`
   );
 
-  return failed === 0;
+  return results;
+};
+
+const confirm = async (result: CheckResult) => {
+  // destructive fixes need someone to say yes
+  if (!process.stdin.isTTY) {
+    return false;
+  }
+
+  const { confirmed } = await inquirer.prompt<{ confirmed: boolean }>({
+    type: 'confirm',
+    name: 'confirmed',
+    default: false,
+    message: `${result.message}${result.hint ? ` (${result.hint})` : ''}\n  Run ${chalk.cyan(
+      result.fix?.command
+    )}?`,
+  });
+  return confirmed;
+};
+
+const applyFixes = async (log: ToolingLog, results: CheckResult[]) => {
+  for (const result of results) {
+    const { fix } = result;
+    if (!fix || (fix.destructive && !(await confirm(result)))) {
+      continue;
+    }
+
+    log.write(`\n ${chalk.cyan('▶')} ${fix.command}`);
+    try {
+      await (fix.run ? fix.run() : execa.command(fix.command, { stdio: 'inherit' }));
+    } catch (error) {
+      log.write(chalk.red(` ✖ ${error.message}`));
+    }
+  }
+};
+
+const printFixCommands = (log: ToolingLog, results: CheckResult[]) => {
+  const commands = results.flatMap(({ fix }) => (fix ? [fix.command] : []));
+  if (!commands.length) {
+    return;
+  }
+
+  log.write(`\n To fix, run:`);
+  commands.forEach((command) => log.write(`   ${chalk.cyan(command)}`));
+  log.write(chalk.dim(`\n Or let doctor run them: node scripts/scout doctor --fix`));
+};
+
+export const runDoctor = async (
+  log: ToolingLog,
+  { arch, fix }: { arch?: DoctorArch; fix: boolean }
+) => {
+  const target = `local · ${arch ?? 'stateful + serverless'}`;
+  log.write(`\n ${chalk.bold.inverse(' Scout doctor ')}  ${target}\n`);
+
+  let results = await runChecks(log, arch);
+  if (fix && results.some((result) => result.fix)) {
+    await applyFixes(log, results);
+    log.write(`\n ${chalk.bold('Checking again')}\n`);
+    results = await runChecks(log, arch);
+  }
+  if (!fix) {
+    printFixCommands(log, results);
+  }
+
+  const ready = !results.some(({ status }) => status === 'fail');
+  log.write(
+    ready
+      ? chalk.green.bold(`\n ✔ Ready to run Scout (${target})\n`)
+      : chalk.red.bold(`\n ✖ Not ready to run Scout (${target})\n`)
+  );
+  return ready;
 };

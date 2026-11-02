@@ -18,13 +18,15 @@ export const doctorCmd: Command<void> = {
   description: 'Check that your local setup is ready to run Scout tests',
   flags: {
     string: ['arch'],
+    boolean: ['fix'],
     help: `
     --arch              Server architecture to check (one of: stateful, serverless) [default: both]
+    --fix               Run the commands that fix failed checks and warnings, asking first for destructive ones
     `,
   },
   run: async ({ flagsReader, log }) => {
     const arch = flagsReader.enum('arch', ['stateful', 'serverless']);
-    if (!(await runDoctor(log, arch))) {
+    if (!(await runDoctor(log, { arch, fix: flagsReader.boolean('fix') }))) {
       process.exitCode = 1;
     }
   },
