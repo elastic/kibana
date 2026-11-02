@@ -25,6 +25,7 @@ import {
   moveRouteConnection,
   moveUnitConnection,
   removeComponentFromPipelines,
+  withPublishedTelemetry,
   type RouteTarget,
 } from './unit_connections';
 
@@ -936,6 +937,32 @@ describe('routing rule connections', () => {
       expect(reconnected).toEqual(routed);
     }
   );
+
+  it('narrows a routing pipeline to the signals its routes still export when published', () => {
+    const routed = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'traces'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ destinations: ['es-logs', 'es-traces'] }] },
+        ],
+      },
+    ]);
+    routed.unit.destinations = [
+      { id: 'es-logs', type: 'elasticsearch', supported_telemetry: ['logs'] },
+      { id: 'es-traces', type: 'elasticsearch', supported_telemetry: ['traces'] },
+    ];
+    const rule = { pipelineId: 'main', ruleIndex: 0 };
+
+    expect(withPublishedTelemetry(routed)).toEqual(routed);
+
+    const dropped = disconnectRouteFromTarget(routed, rule, destination('es-traces'));
+    expect(dropped.unit.pipelines[0]?.supported_telemetry).toEqual(['logs', 'traces']);
+    expect(withPublishedTelemetry(dropped).unit.pipelines[0]?.supported_telemetry).toEqual([
+      'logs',
+    ]);
+  });
 
   it('refuses destinations on a rule that forwards to pipelines', () => {
     const routed = unitWith([

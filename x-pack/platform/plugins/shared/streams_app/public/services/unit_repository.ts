@@ -16,6 +16,7 @@ import {
   PIPELINE_ENTRY,
   withoutUnconnectedRoutes,
 } from './unit_pipeline';
+import { withPublishedTelemetry } from './unit_connections';
 
 export type Unit = StreamsUnit.GetResponse;
 
@@ -90,8 +91,9 @@ export const createUnitRepository = ({
     }
   },
   persist: async (stagedUnit, secrets) => {
-    // Rules the canvas left unconnected cannot be stored, so they are dropped on save.
-    const unit = withoutUnconnectedRoutes(stagedUnit);
+    // Rules the canvas left unconnected cannot be stored, so they are dropped on save,
+    // and routing pipelines are narrowed to the signals their remaining routes export.
+    const unit = withPublishedTelemetry(withoutUnconnectedRoutes(stagedUnit));
     const response = await streamsRepositoryClient.fetch('PUT /internal/streams/unit/{id}', {
       params: {
         path: { id: unitId },

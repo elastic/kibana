@@ -222,15 +222,17 @@ const componentSignals = (
  * and rejects one with no receiver or exporter, which a line leaving a widened
  * pipeline would otherwise cause. Routing pipelines and unknown components are
  * left as they are, so a dropped rule line can come back to any destination the
- * pipeline supports, and a pipeline never ends up with no signal.
+ * pipeline supports, and a pipeline never ends up with no signal. Pass
+ * `keepRoutingSignals: false` to narrow routing pipelines too, as publishing does.
  */
 const fitSignals = (
   unit: Unit,
   telemetry: UnitPipeline['supported_telemetry'],
-  config: PipelineConfig
+  config: PipelineConfig,
+  keepRoutingSignals = true
 ): UnitPipeline['supported_telemetry'] => {
   const routes = readRoutes(config);
-  if (routes.length > 0) {
+  if (routes.some(isDelegatingRoute) || (keepRoutingSignals && routes.length > 0)) {
     return [...telemetry];
   }
   const sent = componentSignals(unit.unit.sources, readEntryIds(config, PIPELINE_ENTRY.sources));
@@ -253,6 +255,28 @@ const replacePipelineConfig = (unit: Unit, pipelineIndex: number, config: Pipeli
             ...pipeline,
             config,
             supported_telemetry: fitSignals(unit, pipeline.supported_telemetry, config),
+          }
+        : pipeline
+    )
+  );
+
+/**
+ * The unit as it is published: routing pipelines keep every signal while staged,
+ * so a dropped rule line can reconnect, and are narrowed to their routes' destinations here.
+ */
+export const withPublishedTelemetry = (unit: Unit): Unit =>
+  replacePipelines(
+    unit,
+    unit.unit.pipelines.map((pipeline) =>
+      pipelineUsesRoutes(pipeline)
+        ? {
+            ...pipeline,
+            supported_telemetry: fitSignals(
+              unit,
+              pipeline.supported_telemetry,
+              pipeline.config,
+              false
+            ),
           }
         : pipeline
     )
