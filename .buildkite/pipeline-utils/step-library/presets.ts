@@ -63,8 +63,6 @@ export const usZones = [
 ] as const satisfies readonly Zone[];
 
 export const spotZones = {
-  centralFCA: ['us-central1-f', 'us-central1-c', 'us-central1-a'],
-  centralFCBA: ['us-central1-f', 'us-central1-c', 'us-central1-b', 'us-central1-a'],
   allUS: usZones,
   n2: [
     'asia-south2-a',

@@ -35,7 +35,7 @@ export const aiInfraGenAiSteps = (): readonly Step[] => [
         key: 'ai-infra-gen-ai-inference-api',
         timeout_in_minutes: 120,
         parallelism: 1,
-        agents: spotAgent('n2-standard-4', spotZones.centralFCA),
+        agents: spotAgent('n2-standard-4', spotZones.n2),
         artifact_paths: ['target/llm_smoke_judgements.jsonl'],
         retry: retry.agentLossOrAnyOnce,
       }),
