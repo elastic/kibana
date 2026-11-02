@@ -966,6 +966,20 @@ export const PackagePolicySchemaV26 = PackagePolicySchemaV25.extends(
   { unknowns: 'ignore' }
 );
 
+/**
+ * Query parameter of the routes that change package policies. Package policies managed by a cloud
+ * onboarding deployment can only be changed when it matches their `onboarding_deployment_id`.
+ */
+export const OnboardingDeploymentIdQuerySchema = schema.maybe(
+  schema.string({
+    maxLength: 256,
+    meta: {
+      description:
+        'ID of the cloud onboarding deployment that manages the package policies. Required to change package policies managed by a cloud onboarding deployment; only the onboarding flow is expected to set it.',
+    },
+  })
+);
+
 export const PackagePolicyResponseSchema = PackagePolicySchema.extends(
   {
     vars: schema.maybe(

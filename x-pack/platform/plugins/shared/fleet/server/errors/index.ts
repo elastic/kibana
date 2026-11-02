@@ -264,6 +264,7 @@ export class PackagePolicyRestrictionRelatedError extends FleetError {
     );
   }
 }
+export class PackagePolicyManagedByOnboardingError extends FleetError {}
 export class FleetEncryptedSavedObjectEncryptionKeyRequired extends FleetError {}
 export class FleetSetupError extends FleetError {}
 export class GenerateServiceTokenError extends FleetError {}

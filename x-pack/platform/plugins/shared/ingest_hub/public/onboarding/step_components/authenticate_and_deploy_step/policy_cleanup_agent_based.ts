@@ -23,7 +23,11 @@ import {
 import type { ExistingSecretRefs } from './secret_refs';
 import { runWithSharedSecrets } from './shared_secrets';
 import type { AgentCredentialVars } from './package_inputs';
-import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
+import {
+  computePolicyCleanupOps,
+  resolveSurvivingMembers,
+  toOnboardingDeploymentQuery,
+} from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 
 export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
@@ -58,6 +62,7 @@ export async function cleanupAgentBasedPolicies(
     currentPolicyIdsByInstance,
     hasTypedSecrets,
     addedInstanceIdsByPolicy,
+    onboardingDeploymentId,
   } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
@@ -66,8 +71,18 @@ export async function cleanupAgentBasedPolicies(
 
   const deletes = Promise.allSettled(
     planned.toDelete.map((policyId) =>
-      sendDeletePackagePolicy({ packagePolicyIds: [policyId] })
-        .then(() => {
+      sendDeletePackagePolicy(
+        { packagePolicyIds: [policyId] },
+        toOnboardingDeploymentQuery(onboardingDeploymentId)
+      )
+        .then(({ data, error }) => {
+          // Resolves with { error } on HTTP failure, and reports a failed delete in the body. A
+          // policy that is already gone counts as deleted.
+          if (error) throw error;
+          const result = data?.find(({ id }) => id === policyId);
+          if (result && !result.success && result.statusCode !== 404) {
+            throw new Error(result.body?.message ?? 'Delete failed');
+          }
           succeededDeletes.push(policyId);
         })
         .catch((err) => {
@@ -250,18 +265,22 @@ export async function updateAgentBasedPolicy(
   // Use simplified consistently — `enabled` is intentionally omitted.
   // sendUpdatePackagePolicy resolves with { error } on HTTP failure rather than rejecting.
   // Throw explicitly so Promise.allSettled callers can detect the failure.
-  const updateResult = await sendUpdatePackagePolicy(policyId, {
-    name: policyName,
-    namespace: policyNamespace,
-    package: { name: packageName, version: pkgVersion },
-    ...(vars ? { vars } : {}),
-    inputs,
-    // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
-    // otherwise keep the policy's current policy_ids so agent policies attached outside the
-    // wizard are not detached.
-    policy_ids:
-      selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
-  } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1]);
+  const updateResult = await sendUpdatePackagePolicy(
+    policyId,
+    {
+      name: policyName,
+      namespace: policyNamespace,
+      package: { name: packageName, version: pkgVersion },
+      ...(vars ? { vars } : {}),
+      inputs,
+      // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
+      // otherwise keep the policy's current policy_ids so agent policies attached outside the
+      // wizard are not detached.
+      policy_ids:
+        selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
+    } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1],
+    { query: toOnboardingDeploymentQuery(opts.onboardingDeploymentId) }
+  );
   if (updateResult.error) {
     throw updateResult.error;
   }

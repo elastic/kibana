@@ -1201,7 +1201,7 @@ describe('When calling package policy', () => {
       });
     });
 
-    it('should not look up target policies when disableAgentlessLegacyAPI is disabled', async () => {
+    it('should look up target policies only for the onboarding check when disableAgentlessLegacyAPI is disabled', async () => {
       packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
@@ -1212,7 +1212,23 @@ describe('When calling package policy', () => {
       expect(response.ok).toHaveBeenCalledWith({
         body: responseBody,
       });
-      expect(packagePolicyServiceMock.getByIDs).not.toHaveBeenCalled();
+      expect(packagePolicyServiceMock.getByIDs).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reject upgrading package policies managed by a cloud onboarding deployment', async () => {
+      packagePolicyServiceMock.getByIDs.mockResolvedValue([
+        { id: '1', policy_ids: [], onboarding_deployment_id: 'deploy-1' },
+      ] as unknown as PackagePolicy[]);
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          packagePolicyIds: ['1'],
+        },
+      });
+
+      await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
+        /can only be changed from the onboarding flow/
+      );
+      expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
     });
 
     describe('when disableAgentlessLegacyAPI is enabled', () => {

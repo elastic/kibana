@@ -1381,11 +1381,19 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .catch(() => {});
         }
-        await supertest
-          .post('/api/fleet/package_policies/delete')
-          .set('kbn-xsrf', 'xxxx')
-          .send({ packagePolicyIds, force: true })
-          .catch(() => {});
+        // Stamped policies can only be deleted with the id of the deployment that manages them.
+        for (const packagePolicyId of packagePolicyIds) {
+          const onboardingDeploymentId = await getOnboardingDeploymentId(packagePolicyId).catch(
+            () => null
+          );
+          await supertest
+            .delete(`/api/fleet/package_policies/${packagePolicyId}`)
+            .query(
+              onboardingDeploymentId ? { onboarding_deployment_id: onboardingDeploymentId } : {}
+            )
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        }
       });
 
       after(async () => {
@@ -1437,6 +1445,7 @@ export default function (providerContext: FtrProviderContext) {
         // Partial update
         await supertest
           .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+          .query({ onboarding_deployment_id: deploymentId })
           .set('kbn-xsrf', 'xxxx')
           .send({ description: 'updated description' })
           .expect(200);
@@ -1445,6 +1454,7 @@ export default function (providerContext: FtrProviderContext) {
         // Full update
         await supertest
           .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+          .query({ onboarding_deployment_id: deploymentId })
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `ownership-test-renamed-${Date.now()}`,
@@ -1479,6 +1489,83 @@ export default function (providerContext: FtrProviderContext) {
           .send({ onboarding_deployment_id: 'some-deployment' })
           .expect(400);
         expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(null);
+      });
+
+      describe('changes from outside the onboarding flow', () => {
+        const ONBOARDING_ONLY = /can only be changed from the onboarding flow/;
+        let deploymentId: string;
+
+        beforeEach(async () => {
+          deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+        });
+
+        it('rejects an update without the id of the deployment that manages the policy', async () => {
+          for (const query of [{}, { onboarding_deployment_id: 'another-deployment' }]) {
+            const { body } = await supertest
+              .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+              .query(query)
+              .set('kbn-xsrf', 'xxxx')
+              .send({ description: 'updated outside onboarding' })
+              .expect(400);
+            expect(body.message).to.match(ONBOARDING_ONLY);
+          }
+        });
+
+        it('accepts an update with the id of the deployment that manages the policy', async () => {
+          await supertest
+            .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+            .query({ onboarding_deployment_id: deploymentId })
+            .set('kbn-xsrf', 'xxxx')
+            .send({ description: 'updated by onboarding' })
+            .expect(200);
+        });
+
+        it('does not restrict policies the deployment does not manage', async () => {
+          await supertest
+            .put(`/api/fleet/package_policies/${packagePolicyIds[1]}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ description: 'updated outside onboarding' })
+            .expect(200);
+        });
+
+        it('rejects deleting the policy without the id of the deployment that manages it', async () => {
+          const { body: deleteOneBody } = await supertest
+            .delete(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+          expect(deleteOneBody.message).to.match(ONBOARDING_ONLY);
+
+          // The whole batch is rejected, including the policy the deployment does not manage.
+          const { body: bulkDeleteBody } = await supertest
+            .post('/api/fleet/package_policies/delete')
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds, force: true })
+            .expect(400);
+          expect(bulkDeleteBody.message).to.match(ONBOARDING_ONLY);
+
+          expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+          expect(await getOnboardingDeploymentId(packagePolicyIds[1])).to.equal(null);
+        });
+
+        it('deletes the policy with the id of the deployment that manages it', async () => {
+          await supertest
+            .post('/api/fleet/package_policies/delete')
+            .query({ onboarding_deployment_id: deploymentId })
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [packagePolicyIds[0]] })
+            .expect(200);
+
+          await supertest.get(`/api/fleet/package_policies/${packagePolicyIds[0]}`).expect(404);
+        });
+
+        it('rejects upgrading the policy without the id of the deployment that manages it', async () => {
+          const { body } = await supertest
+            .post('/api/fleet/package_policies/upgrade')
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [packagePolicyIds[0]] })
+            .expect(400);
+          expect(body.message).to.match(ONBOARDING_ONLY);
+        });
       });
     });
   });

@@ -287,6 +287,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           agentCredentials: credentials,
           integrationName,
           description,
+          onboardingDeploymentId,
         };
 
         // Cleaned instance IDs — excluded from packagePolicyIds in the SO update.
@@ -344,6 +345,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           shared: ExistingSecretRefs | undefined
         ) =>
           updateAgentBasedPolicy(policyId, ids, {
+            onboardingDeploymentId,
             instances: serviceSettings?.instances ?? [],
             storedServiceVars,
             globalRegion,
