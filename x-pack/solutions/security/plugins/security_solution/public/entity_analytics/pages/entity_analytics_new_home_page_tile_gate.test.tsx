@@ -39,7 +39,6 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useSearchedTileEntityIds: jest.fn(),
   useTilesLoadTelemetry: jest.fn(),
   useTilesTimeoutNotice: jest.fn(),
-  TILE_TIMEOUT_MESSAGE: 'Timed out',
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -426,7 +425,10 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
         expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(isSkipped);
       });
       cardIds.forEach((id) => {
-        expect(getCard(id)?.noDataMessage).toMatch(/^Requires read access to /);
+        expect(getCard(id)?.countIssue).toEqual({
+          kind: 'locked',
+          text: expect.stringMatching(/^Requires read access to /),
+        });
       });
     }
   );
@@ -456,9 +458,10 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       expect(lastOptions(hook).skip).toBe(true);
     });
     ['entitiesWithAlerts', 'watchlisted'].forEach((id) => {
-      expect(getCard(id as SignalCardData['id'])?.noDataMessage).toBe(
-        'Requires read access to alerts'
-      );
+      expect(getCard(id as SignalCardData['id'])?.countIssue).toEqual({
+        kind: 'locked',
+        text: 'Requires read access to alerts',
+      });
     });
     // The grid drops the Alerts columns (and so their count and click path) for this role.
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
@@ -479,7 +482,7 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
     expect(lastOptions(COUNT_HOOKS.alerts).skip).toBe(false);
-    expect(getCard('entitiesWithAlerts')?.noDataMessage).toBeUndefined();
+    expect(getCard('entitiesWithAlerts')?.countIssue).toBeUndefined();
     const gridCalls = (EntitiesGrid as unknown as jest.Mock).mock.calls;
     expect(gridCalls[gridCalls.length - 1][0].readAccess.alerts).toBe(true);
   });
@@ -684,10 +687,14 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
     });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
-    expect(getCard('entitiesWithAlerts')?.noDataMessage).toBe('Requires detection alerts');
-    expect(getCard('watchlisted')?.noDataMessage).toBe('Requires detection alerts');
+    expect(getCard('entitiesWithAlerts')?.countIssue).toEqual(
+      expect.objectContaining({ kind: 'issue', text: 'Requires an alerts index' })
+    );
+    expect(getCard('watchlisted')?.countIssue).toEqual(
+      expect.objectContaining({ kind: 'issue', text: 'Requires an alerts index' })
+    );
     expect(getCard('entitiesWithAlerts')?.isUnavailable).toBe(true);
-    expect(getCard('newEntity')?.noDataMessage).toBeUndefined();
+    expect(getCard('newEntity')?.countIssue).toBeUndefined();
   });
 
   describe('when a count times out', () => {
@@ -704,10 +711,14 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       });
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
-      const messageOf = (id: SignalCardData['id']) => getCard(id)?.noDataMessage;
-      expect(messageOf('entitiesWithAlerts')).toBe('Timed out');
-      expect(messageOf('watchlisted')).toBe('Timed out');
-      expect(messageOf('newEntity')).toBeUndefined();
+      const issueOf = (id: SignalCardData['id']) => getCard(id)?.countIssue;
+      expect(issueOf('entitiesWithAlerts')).toEqual(
+        expect.objectContaining({ kind: 'issue', icon: 'error', text: 'Query timed out' })
+      );
+      expect(issueOf('watchlisted')).toEqual(
+        expect.objectContaining({ kind: 'issue', icon: 'error', text: 'Query timed out' })
+      );
+      expect(issueOf('newEntity')).toBeUndefined();
       expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
       expect(lastOptions('useTilesLoadTelemetry').tiles.alerts.isTimedOut).toBe(true);
     });
@@ -741,15 +752,18 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
   });
 
   it('tells the anomalies tile that it needs jobs only when no security ML job is installed', () => {
-    const anomaliesNoDataMessage = () => getCard('entitiesWithAnomalies')?.noDataMessage;
+    const anomaliesIssueText = () => {
+      const issue = getCard('entitiesWithAnomalies')?.countIssue;
+      return issue?.kind === 'issue' ? issue.text : undefined;
+    };
     mockTiles({}, { anomaliesMissingJobs: true });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
-    expect(anomaliesNoDataMessage()).toBe('Requires anomaly detection jobs');
+    expect(anomaliesIssueText()).toBe('Requires anomaly detection jobs');
 
     jest.clearAllMocks();
     mockTiles({}, { anomaliesMissingJobs: false });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
-    expect(anomaliesNoDataMessage()).toBeUndefined();
+    expect(anomaliesIssueText()).toBeUndefined();
   });
 });
 

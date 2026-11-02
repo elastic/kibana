@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiText,
   EuiToolTip,
@@ -56,8 +57,34 @@ const TREND_DOWNWARD = '\u{2193}';
 
 const notEnoughHistory = i18n.translate(
   'xpack.securitySolution.entityAnalytics.facelift.signalCard.deltaNoHistory',
+  { defaultMessage: 'Not enough history' }
+);
+
+/** What a screen reader hears for the same note: the visible text is shorter. */
+const notEnoughHistoryDescription = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.deltaNoHistoryDescription',
   { defaultMessage: 'Not enough history to compare' }
 );
+
+/** How much history the comparison needs: this period and the one before it. */
+const HISTORY_NEEDED: Record<TimeRange, string> = {
+  '24h': i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.history24h', {
+    defaultMessage: '48 hours',
+  }),
+  '7d': i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.history7d', {
+    defaultMessage: '14 days',
+  }),
+  '30d': i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.history30d', {
+    defaultMessage: '60 days',
+  }),
+};
+
+const getNotEnoughHistoryTooltip = (timeRange: TimeRange) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.deltaNoHistoryTip', {
+    defaultMessage:
+      'Comparing needs twice the selected range of history: this period and the one before it. The comparison will be available after {duration} of data.',
+    values: { duration: HISTORY_NEEDED[timeRange] },
+  });
 
 const getVsPreviousPeriod = (timeRange: TimeRange) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.vsPreviousWindow', {
@@ -123,7 +150,7 @@ const getDeltaDescription = (
   shownDelta: number | undefined,
   showNoHistory: boolean
 ): string | undefined => {
-  if (shownDelta === undefined) return showNoHistory ? notEnoughHistory : undefined;
+  if (shownDelta === undefined) return showNoHistory ? notEnoughHistoryDescription : undefined;
   // Exact, even where the badge shortens it.
   const amount = Math.abs(shownDelta).toLocaleString();
   return shownDelta > 0
@@ -158,6 +185,62 @@ const DeltaLabel: React.FC<{ text: string; testSubj?: string }> = ({
       data-test-subj={testSubj}
     >
       {text}
+    </span>
+  );
+};
+
+/** A warning or error icon whose tooltip explains the note next to it. */
+const IssueIconTip: React.FC<{ icon: 'warning' | 'error'; tooltip: string; label: string }> = ({
+  icon,
+  tooltip,
+  label,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiIconTip
+      type={icon}
+      color={icon === 'error' ? euiTheme.colors.textDanger : 'warning'}
+      size="s"
+      content={tooltip}
+      aria-label={tooltip || label}
+      iconProps={{ 'data-test-subj': `eaFaceliftSignalCardIssueIcon-${icon}` }}
+    />
+  );
+};
+
+/** The delta row when there is something to say instead of a change: an icon, a short reason, a tooltip. */
+const DeltaNote: React.FC<{
+  icon: 'warning' | 'error';
+  text: string;
+  tooltip: string;
+  testSubj: string;
+}> = ({ icon, text, tooltip, testSubj }) => {
+  const { euiTheme } = useEuiTheme();
+  const { fontSize } = useEuiFontSize('xs');
+  return (
+    <span
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: ${euiTheme.size.xs};
+        max-inline-size: 100%;
+        min-block-size: ${BADGE_HEIGHT}px;
+        text-align: end;
+      `}
+      data-test-subj={testSubj}
+    >
+      <IssueIconTip icon={icon} tooltip={tooltip} label={text} />
+      <span
+        css={css`
+          min-inline-size: 0;
+          font-size: ${fontSize};
+          line-height: ${METRIC_LINE_HEIGHT};
+          color: ${euiTheme.colors.textSubdued};
+        `}
+      >
+        {text}
+      </span>
     </span>
   );
 };
@@ -350,6 +433,11 @@ const unfilterTableTooltip = (title: string) =>
     values: { title },
   });
 
+const NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.signalCard.notAvailable',
+  { defaultMessage: 'N/A' }
+);
+
 const renderValueRow = (card: SignalCardData, isLoading: boolean, isZero: boolean) => {
   if (isLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="eaFaceliftSignalCardLoading" />;
@@ -375,10 +463,11 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
 
   const isLoading = card.isLoading ?? false;
   const isZero = card.value === 0;
-  const interactive = !isZero && !isLoading;
+  // A tile without a count has nothing to filter the table by.
+  const countIssue = isLoading ? undefined : card.countIssue;
+  const interactive = !isZero && !isLoading && !countIssue;
   // A selected tile stays clickable at 0, so the filter it applies can still be cleared.
-  const canToggle = (!isZero || selected) && !isLoading;
-  const noDataMessage = isZero && !isLoading ? card.noDataMessage : undefined;
+  const canToggle = (interactive || selected) && !isLoading;
   // Hover only: mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
 
@@ -561,9 +650,18 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
                 gap: ${DELTA_VALUE_GAP}px;
               `}
             >
-              {noDataMessage ? (
-                <EuiText size="xs" color="subdued">
-                  {noDataMessage}
+              {countIssue?.kind === 'locked' ? (
+                <EuiText size="xs" color="subdued" data-test-subj="eaFaceliftSignalCardLocked">
+                  <EuiIcon
+                    type="lock"
+                    size="s"
+                    aria-hidden
+                    css={css`
+                      margin-inline-end: ${euiTheme.size.xs};
+                      vertical-align: -1px;
+                    `}
+                  />
+                  {countIssue.text}
                 </EuiText>
               ) : (
                 <EuiText
@@ -576,10 +674,19 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
                     text-align: end;
                     color: ${euiTheme.colors.textParagraph};
                   `}
+                  data-test-subj={countIssue ? 'eaFaceliftSignalCardUnavailable' : undefined}
                 >
-                  {renderValueRow(card, isLoading, isZero)}
+                  {countIssue ? NOT_AVAILABLE : renderValueRow(card, isLoading, isZero)}
                 </EuiText>
               )}
+              {countIssue?.kind === 'issue' ? (
+                <DeltaNote
+                  icon={countIssue.icon}
+                  text={countIssue.text}
+                  tooltip={countIssue.tooltip}
+                  testSubj="eaFaceliftSignalCardCountIssue"
+                />
+              ) : null}
               {interactive && card.isDeltaLoading ? (
                 <span>
                   <EuiLoadingSpinner size="s" /> <DeltaLabel text={vsPreviousPeriod} />
@@ -589,8 +696,10 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, timeRang
                 <MetricTrendBadge delta={shownDelta} label={vsPreviousPeriod} />
               ) : null}
               {showNoHistory ? (
-                <DeltaLabel
+                <DeltaNote
+                  icon="warning"
                   text={notEnoughHistory}
+                  tooltip={getNotEnoughHistoryTooltip(timeRange)}
                   testSubj="eaFaceliftSignalCardDeltaUnavailable"
                 />
               ) : null}

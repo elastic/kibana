@@ -118,10 +118,10 @@ import {
   useSearchedTileEntityIds,
   useTilesLoadTelemetry,
   useTilesTimeoutNotice,
-  TILE_TIMEOUT_MESSAGE,
 } from '../components/home/needs_attention_tiles/hooks';
 import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
+import { getCountIssue } from '../components/home/needs_attention_tiles/tile_count_issue';
 import { getEntityAnalyticsNewHomeScopeId } from '../common/scope_time_ranges';
 import { HuntWithAiButton } from '../components/home/hunt_with_ai_button';
 import {
@@ -249,23 +249,6 @@ const NEEDS_ATTENTION_TITLE = i18n.translate(
 );
 
 const ML_GET_JOBS_PRIVILEGE = 'ui:ml/canGetJobs';
-
-const NO_ALERTS_ACCESS_MESSAGE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsAccess',
-  { defaultMessage: 'Requires read access to alerts' }
-);
-const NO_ALERTS_INDEX_MESSAGE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsIndex',
-  { defaultMessage: 'Requires detection alerts' }
-);
-const NO_ANOMALIES_ACCESS_MESSAGE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.tiles.noAnomaliesAccess',
-  { defaultMessage: 'Requires read access to ML anomalies' }
-);
-const NO_RISK_ACCESS_MESSAGE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.tiles.noRiskAccess',
-  { defaultMessage: 'Requires read access to risk scores' }
-);
 
 const getReadAccess = ({
   isLoading,
@@ -1064,13 +1047,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         entityIds: severeAlertsEntityIds,
         // Without an alerts index the tile shows 0, which isn't a real count.
         isUnavailable: Boolean(alertBasedError) || alertBasedMissingIndex,
-        noDataMessage: !canReadAlerts
-          ? NO_ALERTS_ACCESS_MESSAGE
-          : alertBasedTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : alertBasedMissingIndex
-          ? NO_ALERTS_INDEX_MESSAGE
-          : undefined,
+        countIssue: getCountIssue({
+          noAccess: canReadAlerts ? undefined : 'alerts',
+          timedOut: alertBasedTimedOut,
+          missing: alertBasedMissingIndex ? 'alertsIndex' : undefined,
+          hasError: Boolean(alertBasedError),
+        }),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
@@ -1102,18 +1084,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         hasCount: newlyHCHasCount,
         entityIds: newlyHCEntityIds,
         isUnavailable: Boolean(newlyHCError),
-        noDataMessage: !canReadRisk
-          ? NO_RISK_ACCESS_MESSAGE
-          : newlyHCTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : newlyHCMissingIndex
-          ? i18n.translate(
-              'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
-              {
-                defaultMessage: 'Requires risk score history data',
-              }
-            )
-          : undefined,
+        countIssue: getCountIssue({
+          noAccess: canReadRisk ? undefined : 'risk',
+          timedOut: newlyHCTimedOut,
+          missing: newlyHCMissingIndex ? 'riskData' : undefined,
+          hasError: Boolean(newlyHCError),
+        }),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
           {
@@ -1144,15 +1120,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         hasCount: riskMoversHasCount,
         entityIds: riskMoversEntityIds,
         isUnavailable: Boolean(riskMoversError),
-        noDataMessage: !canReadRisk
-          ? NO_RISK_ACCESS_MESSAGE
-          : riskMoversTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : riskMoversMissingIndex
-          ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
-              defaultMessage: 'Requires risk score history data',
-            })
-          : undefined,
+        countIssue: getCountIssue({
+          noAccess: canReadRisk ? undefined : 'risk',
+          timedOut: riskMoversTimedOut,
+          missing: riskMoversMissingIndex ? 'riskData' : undefined,
+          hasError: Boolean(riskMoversError),
+        }),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
           {
@@ -1181,7 +1154,10 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         hasCount: newEntityHasCount,
         entityIds: newEntityEntityIds,
         isUnavailable: Boolean(newEntityError),
-        noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
+        countIssue: getCountIssue({
+          timedOut: newEntityTimedOut,
+          hasError: Boolean(newEntityError),
+        }),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
@@ -1214,16 +1190,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         entityIds: anomaliesEntityIds,
         // Without ML jobs the tile shows 0, which isn't a real count.
         isUnavailable: Boolean(anomaliesError) || anomaliesMissingJobs,
-        noDataMessage: !canReadAnomalies
-          ? NO_ANOMALIES_ACCESS_MESSAGE
-          : anomaliesTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : anomaliesMissingJobs
-          ? i18n.translate(
-              'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
-              { defaultMessage: 'Requires anomaly detection jobs' }
-            )
-          : undefined,
+        countIssue: getCountIssue({
+          noAccess: canReadAnomalies ? undefined : 'anomalies',
+          timedOut: anomaliesTimedOut,
+          missing: anomaliesMissingJobs ? 'anomalyJobs' : undefined,
+          hasError: Boolean(anomaliesError),
+        }),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
@@ -1256,13 +1228,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         entityIds: watchlistedEntityIds,
         // Without an alerts index the tile shows 0, which isn't a real count.
         isUnavailable: Boolean(alertBasedError) || alertBasedMissingIndex,
-        noDataMessage: !canReadAlerts
-          ? NO_ALERTS_ACCESS_MESSAGE
-          : alertBasedTimedOut
-          ? TILE_TIMEOUT_MESSAGE
-          : alertBasedMissingIndex
-          ? NO_ALERTS_INDEX_MESSAGE
-          : undefined,
+        countIssue: getCountIssue({
+          noAccess: canReadAlerts ? undefined : 'alerts',
+          timedOut: alertBasedTimedOut,
+          missing: alertBasedMissingIndex ? 'alertsIndex' : undefined,
+          hasError: Boolean(alertBasedError),
+        }),
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {

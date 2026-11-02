@@ -146,7 +146,7 @@ describe('SignalCard', () => {
   it('says there is not enough history to compare, in place of the delta', () => {
     renderCard({ isDeltaUnavailable: true });
     expect(screen.getByTestId('eaFaceliftSignalCardDeltaUnavailable')).toHaveTextContent(
-      'Not enough history to compare'
+      'Not enough history'
     );
     expect(screen.queryByTestId('eaFaceliftSignalCardDeltaBadge')).not.toBeInTheDocument();
     expect(screen.queryByTestId('eaFaceliftSignalCardDeltaLabel')).not.toBeInTheDocument();
@@ -318,19 +318,64 @@ describe('SignalCard', () => {
     expect(onToggle).not.toHaveBeenCalled();
   });
 
-  it('shows the no-data message instead of the dash at 0, with no delta, no sparkline and no click', () => {
+  it('shows N/A and the reason instead of the count, with no delta, no sparkline and no click', () => {
     const onToggle = jest.fn();
     renderCard(
-      { value: 0, noDataMessage: 'No risk scores yet', delta: 5, trend: [1, 2, 3] },
+      {
+        value: 0,
+        countIssue: {
+          kind: 'issue',
+          icon: 'warning',
+          text: 'Requires an alerts index',
+          tooltip: 'This space has no alerts index yet.',
+        },
+        delta: 5,
+        trend: [1, 2, 3],
+      },
       { onToggle }
     );
     const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
 
+    expect(screen.getByTestId('eaFaceliftSignalCardUnavailable')).toHaveTextContent('N/A');
     expect(tile).not.toHaveTextContent('—');
-    expect(tile).toHaveTextContent('No risk scores yet');
+    expect(screen.getByTestId('eaFaceliftSignalCardCountIssue')).toHaveTextContent(
+      'Requires an alerts index'
+    );
+    expect(screen.getByTestId('eaFaceliftSignalCardIssueIcon-warning')).toBeInTheDocument();
     expect(screen.queryByTestId('eaFaceliftSignalCardDelta')).not.toBeInTheDocument();
     expect(mockSeriesData).toBeUndefined();
     fireEvent.click(tile);
+    expect(onToggle).not.toHaveBeenCalled();
+  });
+
+  it('uses an error icon when the count failed', () => {
+    renderCard({
+      value: 0,
+      hasCount: false,
+      countIssue: {
+        kind: 'issue',
+        icon: 'error',
+        text: "Couldn't load data",
+        tooltip: "This metric couldn't load. Refresh the page to try again.",
+      },
+    });
+
+    expect(screen.getByTestId('eaFaceliftSignalCardUnavailable')).toHaveTextContent('N/A');
+    expect(screen.getByTestId('eaFaceliftSignalCardIssueIcon-error')).toBeInTheDocument();
+  });
+
+  it('says which access is missing, with a lock instead of N/A, and does not filter on click', () => {
+    const onToggle = jest.fn();
+    renderCard(
+      { value: 0, countIssue: { kind: 'locked', text: 'Requires read access to alerts' } },
+      { onToggle }
+    );
+
+    expect(screen.getByTestId('eaFaceliftSignalCardLocked')).toHaveTextContent(
+      'Requires read access to alerts'
+    );
+    expect(screen.queryByTestId('eaFaceliftSignalCardUnavailable')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('eaFaceliftSignalCard-newEntity'));
     expect(onToggle).not.toHaveBeenCalled();
   });
 });

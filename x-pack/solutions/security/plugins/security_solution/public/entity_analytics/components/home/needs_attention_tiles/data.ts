@@ -18,6 +18,14 @@ export const isSignalCardId = (v: string | null): v is SignalCardId => isOneOf(S
 /** Shared empty list so hooks do not allocate a new `[]` on every render. */
 export const EMPTY_ENTITY_IDS: string[] = [];
 
+/**
+ * Why a tile can't show its count. `locked` says which read access is missing; `issue` shows "N/A"
+ * and gives the reason in the row below it, with the explanation in a tooltip.
+ */
+export type TileCountIssue =
+  | { kind: 'locked'; text: string }
+  | { kind: 'issue'; icon: 'warning' | 'error'; text: string; tooltip: string };
+
 export interface SignalCardData {
   id: SignalCardId;
   title: string;
@@ -28,8 +36,8 @@ export interface SignalCardData {
    * is false, so the tile shows a dash for it and "0" only for a genuine 0.
    */
   hasCount: boolean;
-  /** Short hint shown in place of the value when value is 0, e.g. which index needs data. */
-  noDataMessage?: string;
+  /** Set when the count can't be shown; the tile says why in place of the value. */
+  countIssue?: TileCountIssue;
   description: string;
   delta?: number;
   /** True while the delta query is in flight, to show a spinner in place of the badge number. */
