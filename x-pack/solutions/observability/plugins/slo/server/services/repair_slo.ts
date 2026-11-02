@@ -32,7 +32,8 @@ export class RepairSLO {
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
-    private summaryTransformManager: TransformManager
+    private summaryTransformManager: TransformManager,
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   public async execute(params: RepairParams): Promise<RepairActionsGroupResult[]> {
@@ -146,23 +147,23 @@ export class RepairSLO {
         this.logger.debug(
           `Recreating ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
-        await manager.install(slo);
+        await manager.install(slo, { signal: this.signal });
         if (!slo.enabled) {
-          return manager.stop(transformId);
+          return manager.stop(transformId, { signal: this.signal });
         }
 
-        return manager.start(transformId);
+        return manager.start(transformId, { signal: this.signal });
       case 'start-transform':
         this.logger.debug(
           `Starting ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
-        return manager.start(transformId);
+        return manager.start(transformId, { signal: this.signal });
 
       case 'stop-transform':
         this.logger.debug(
           `Stopping ${action.transformType} transform [${transformId}] for SLO [${slo.id}]`
         );
-        return manager.stop(transformId);
+        return manager.stop(transformId, { signal: this.signal });
     }
   }
 }

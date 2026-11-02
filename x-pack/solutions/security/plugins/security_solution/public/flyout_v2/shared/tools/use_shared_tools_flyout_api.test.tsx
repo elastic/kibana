@@ -8,12 +8,18 @@
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { ALERT_RULE_TYPE_ID, EVENT_KIND } from '@kbn/rule-data-utils';
+import {
+  ALERT_ATTACK_DISCOVERY_TITLE,
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+} from '@kbn/elastic-assistant-common';
 import { useSharedToolsFlyoutApi } from './use_shared_tools_flyout_api';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { flyoutProviders } from '../components/flyout_provider';
 import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
+import { FlyoutV2EventTypes, FLYOUT_TOOL, FLYOUT_TYPE } from '../../../common/lib/telemetry';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -34,14 +40,17 @@ jest.mock('../hooks/use_default_flyout_properties', () => ({
 
 const mockWriteOnOpen = jest.fn();
 const mockBuildOnClose = jest.fn(() => jest.fn());
+const mockReadRootDescriptor = jest.fn((): unknown => null);
 jest.mock('../url_state/flyout_v2_url_writer', () => ({
   useFlyoutV2UrlWriter: jest.fn(() => ({
     writeOnOpen: mockWriteOnOpen,
     buildOnClose: mockBuildOnClose,
+    readRootDescriptor: mockReadRootDescriptor,
   })),
 }));
 
 const mockOpenSystemFlyout = jest.fn();
+const mockReportEvent = jest.fn();
 const hit = {
   id: '1',
   raw: { _id: 'doc-id', _index: 'doc-index' },
@@ -56,7 +65,7 @@ describe('useSharedToolsFlyoutApi', () => {
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
         storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
-        telemetry: { reportEvent: jest.fn() },
+        telemetry: { reportEvent: mockReportEvent },
       },
     });
     (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
@@ -85,6 +94,25 @@ describe('useSharedToolsFlyoutApi', () => {
     // a title is always set (never undefined → never "Unknown Flyout").
     expect(getProperties().title).toBeDefined();
     expect(typeof getProperties().title).toBe('string');
+  });
+
+  it('openNotes titles and reports an attack as an attack', () => {
+    const attackHit = {
+      ...hit,
+      flattened: {
+        [EVENT_KIND]: 'signal',
+        [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+        [ALERT_ATTACK_DISCOVERY_TITLE]: 'Suspicious activity',
+      },
+    } as unknown as DataTableRecord;
+    const { result } = renderHook(() => useSharedToolsFlyoutApi());
+    result.current.openNotes({ hit: attackHit });
+
+    expect(getProperties().title).toBe('Notes: Suspicious activity');
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      FlyoutV2EventTypes.FlyoutOpened,
+      expect.objectContaining({ flyoutType: FLYOUT_TYPE.ATTACK, tool: FLYOUT_TOOL.NOTES })
+    );
   });
 
   it('uses the doc-viewer history key when outside the security app', () => {

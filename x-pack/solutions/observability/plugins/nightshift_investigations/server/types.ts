@@ -30,12 +30,15 @@ import type {
   AgenticInvestigationsPluginStart,
 } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import type { EvalsPluginSetup, EvalsPluginStart } from '@kbn/evals-plugin/server';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 import type { TriggerEmitter } from './workflows/triggers/emit';
 
 export interface InvestigationQuotaResult {
   allowed: boolean;
+  /** Gives back the slot an allowed start took, when the start does not open a new investigation. */
+  release?: () => Promise<void>;
 }
 
 export type InvestigationQuotaCallback = () => Promise<InvestigationQuotaResult>;
@@ -68,6 +71,8 @@ export interface NightshiftInvestigationsSetupDeps {
   proposals?: ProposalsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
+  /** Holds the judges online evals score investigations with. */
+  evals?: EvalsPluginSetup;
   sandbox?: SandboxPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -80,6 +85,8 @@ export interface NightshiftInvestigationsStartDeps {
   alertingVTwo?: AlertingV2ServerStart;
   proposals?: ProposalsPluginStart;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
+  /** Scores investigations online. Without it no round is scored. */
+  evals?: EvalsPluginStart;
   inference?: InferenceServerStart;
   ruleRegistry?: RuleRegistryPluginStartContract;
   sandbox?: SandboxPluginStart;

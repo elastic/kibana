@@ -8,18 +8,20 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { deleteAutomationRoute } from './delete_automation';
-import { createRouteContext } from './test_helpers';
+import { createRouteContext, createServiceAccountService } from './test_helpers';
 
 const { handler } = deleteAutomationRoute['DELETE /internal/nightshift/automations/{id}'];
 const soClient = savedObjectsClientMock.create();
 const deleteWorkflows = jest.fn();
 const getWorkflow = jest.fn();
+const serviceAccountService = createServiceAccountService();
 const call = () =>
   handler({
     request: httpServerMock.createKibanaRequest(),
     params: { path: { id: 'auto-1' } },
     getAutomationsSoClient: () => soClient,
     getWorkflowsManagement: () => ({ management: { deleteWorkflows, getWorkflow } }),
+    getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
   } as never);
 
@@ -66,6 +68,19 @@ it('keeps the automation when deleting its workflow bound to a service account f
   });
   deleteWorkflows.mockRejectedValueOnce(error);
   await expect(call()).rejects.toBe(error);
+  expect(soClient.delete).not.toHaveBeenCalled();
+});
+
+it('refuses to delete an automation bound to a service account without manage_security', async () => {
+  getWorkflow.mockResolvedValue({
+    id: 'wf-1',
+    definition: { settings: { run_as: 'kibana/nightshift_automations' } },
+  });
+  serviceAccountService.assertCanModifyBoundAutomations.mockRejectedValueOnce(
+    new Error('manage_security')
+  );
+  await expect(call()).rejects.toThrow('manage_security');
+  expect(deleteWorkflows).not.toHaveBeenCalled();
   expect(soClient.delete).not.toHaveBeenCalled();
 });
 

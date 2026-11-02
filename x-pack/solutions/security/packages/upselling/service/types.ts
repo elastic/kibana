@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import type { AppHeaderProps } from '@kbn/app-header';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
 
-export type PageUpsellings = Partial<Record<SecurityPageName, React.ComponentType>>;
+export interface UpsellingPageProps {
+  /** Header the host page renders above the upsell; defaults to the core `AppHeader`. */
+  appHeader?: React.ComponentType<AppHeaderProps>;
+}
+export type UpsellingPageComponent = React.ComponentType<UpsellingPageProps>;
+
+export type PageUpsellings = Partial<Record<SecurityPageName, UpsellingPageComponent>>;
 export type MessageUpsellings = Partial<Record<UpsellingMessageId, string>>;
 export type SectionUpsellings = Partial<Record<UpsellingSectionId, React.ComponentType>>;
 
