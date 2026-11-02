@@ -133,8 +133,9 @@ export const getOrCreateInvestigationConversation = async ({
    */
   workflowExecutionId?: string;
   /**
-   * Latest inclusive `@timestamp` this investigation's telemetry queries may return. Stored on
-   * the conversation and not shown to the agent. Patched onto a conversation that already exists.
+   * Latest inclusive `@timestamp` this investigation's telemetry queries may return. Immutable once
+   * stored, so the agent cannot move it. A conversation that already exists must hold this value:
+   * the patch throws rather than leave a different bound in place.
    */
   telemetryNotAfter?: string;
   beforeCreate?: () => Promise<void>;

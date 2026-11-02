@@ -651,9 +651,9 @@ export const OrcaFlagsJudgePrompt = createPrompt({
     'Extracts the feature flags and other causes an ORCA report names. Scoring is applied in code.',
   input: lazySchema(() =>
     z.object({
-      plausibleFlags: z.string().max(4_000),
-      reference: z.string().max(20_000),
-      answer: z.string().max(20_000),
+      plausibleFlags: z.string(),
+      reference: z.string(),
+      answer: z.string(),
     })
   ),
 })
@@ -707,8 +707,8 @@ export const OrcaControlJudgePrompt = createPrompt({
   input: lazySchema(() =>
     z.object({
       quietWindow: z.string().max(4_000),
-      reference: z.string().max(20_000),
-      answer: z.string().max(20_000),
+      reference: z.string(),
+      answer: z.string(),
     })
   ),
 })

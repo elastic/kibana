@@ -75,9 +75,10 @@ export const investigationTemplate: ConversationTemplate = {
     telemetry_not_after: {
       input_type: 'TEXT',
       required: false,
+      immutable: true,
       max_length: 40,
       description:
-        'Latest inclusive @timestamp sandbox telemetry queries for this investigation may return. Not part of the prompt.',
+        'Latest inclusive @timestamp sandbox telemetry queries for this investigation may return.',
     },
   },
 };

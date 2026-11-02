@@ -19,6 +19,7 @@ import {
   ORCA_HALLUCINATION_EVALUATOR,
   ORCA_RCA_ACCURACY_EVALUATOR,
 } from '.';
+import { OrcaControlJudgePrompt, OrcaFlagsJudgePrompt } from './prompts';
 import { normalizeGoalScore, normalizeTruthfulnessScore } from './scoring';
 
 jest.mock('@kbn/inference-tracing', () => ({
@@ -157,6 +158,56 @@ describe('ORCA scores', () => {
     });
     expect(prompt).toHaveBeenCalledTimes(1);
     expect(result).toMatchObject({ score: 0, label: 'fail' });
+  });
+
+  it('scores accuracy and hallucination from one judge call for a run', async () => {
+    const { deps, prompt } = judgeReturning({
+      named_flags: ['productCatalogFailure'],
+      named_causes: ['productCatalogFailure'],
+      reasoning: 'One flag.',
+    });
+    const evaluators = createOrcaEvaluators(deps);
+    const metadata = { case_id: 'checkout', plausible_flags: ['productCatalogFailure'] };
+    const taskOutput = output();
+    const score = (name: string) => {
+      const found = evaluators.find((candidate) => candidate.name === name);
+      // The runner spreads a new output object for each evaluator.
+      return found?.evaluate({ ...example, metadata, output: { ...taskOutput, traceId: 'trace' } });
+    };
+
+    const [accuracy, hallucination] = await Promise.all([
+      score(ORCA_RCA_ACCURACY_EVALUATOR),
+      score(ORCA_HALLUCINATION_EVALUATOR),
+    ]);
+
+    expect(prompt).toHaveBeenCalledTimes(1);
+    expect(accuracy).toMatchObject({ score: 1, label: 'pass' });
+    expect(hallucination).toMatchObject({ score: 0, label: 'pass' });
+  });
+
+  it('judges each run separately', async () => {
+    const { deps, prompt } = judgeReturning({
+      named_flags: [],
+      named_causes: [],
+      reasoning: 'None.',
+    });
+    const accuracy = evaluator(deps, ORCA_RCA_ACCURACY_EVALUATOR);
+    const metadata = { case_id: 'checkout', plausible_flags: ['productCatalogFailure'] };
+
+    await accuracy.evaluate({ ...example, metadata, output: output() });
+    await accuracy.evaluate({ ...example, metadata, output: output() });
+
+    expect(prompt).toHaveBeenCalledTimes(2);
+  });
+
+  it('accepts a report and reference longer than any fixed limit', () => {
+    const long = 'x'.repeat(100_000);
+    expect(() =>
+      OrcaFlagsJudgePrompt.input.parse({ plausibleFlags: 'a', reference: long, answer: long })
+    ).not.toThrow();
+    expect(() =>
+      OrcaControlJudgePrompt.input.parse({ quietWindow: '{}', reference: long, answer: long })
+    ).not.toThrow();
   });
 
   it('passes an empty control report without calling the judge', async () => {

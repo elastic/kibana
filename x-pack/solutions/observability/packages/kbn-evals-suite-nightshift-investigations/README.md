@@ -637,11 +637,15 @@ of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 4
 as a benchmark result again only after its windows end at detection time.
 
 Each example records `metadata.current_time`. The eval sends `telemetry_not_after`, five minutes
-later, on the investigation. That value is stored on the conversation and is not part of the
-agent prompt. While it is set, sandbox commands that call the telemetry connector go through a
-proxy in that investigation's sandbox: a query whose `@timestamp` lower bounds are all after the
-cutoff returns no rows, and an in-window ES|QL query is forwarded with `@timestamp <=` that
-instant. Customer-0 and smoke never set the field, so their telemetry reads are unchanged. Eight
+later, on the investigation. That value is stored on the conversation as an immutable field. The
+agent can see it in its conversation metadata but cannot change it. While it is set, sandbox
+commands that call the telemetry connector go through a proxy in that investigation's sandbox:
+`_search`, `_count`, and ES|QL `_query` reads are forwarded with an `@timestamp <=` bound at that
+instant, read-only metadata endpoints pass through, and any other read gets a 403 that names the
+reason. If the cluster cannot be reached, the proxy returns a 502, so a failed read does not look
+like no data. The proxy bounds ordinary commands and is not a security boundary, because everything
+in the sandbox runs as one user. Customer-0 and smoke never set the field, so their telemetry reads
+are unchanged. Eight
 investigations run at once and each has its own cutoff, so the bound is not a cluster setting.
 
 ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
