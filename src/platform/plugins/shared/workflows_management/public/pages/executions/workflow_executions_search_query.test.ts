@@ -11,6 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import {
   filtersToKql,
   getWorkflowExecutionsFetchErrorMessage,
+  isUnsupportedFilter,
   isWorkflowExecutionsIndexNotFoundError,
 } from './workflow_executions_search_query';
 
@@ -23,6 +24,25 @@ const phraseFilter = (
 });
 
 describe('workflow_executions_search_query', () => {
+  describe('isUnsupportedFilter', () => {
+    it('flags active custom filters', () => {
+      const filter = {
+        meta: { type: 'custom', key: 'startedAt', negate: false, disabled: false },
+        query: { bool: { filter: [] } },
+      } as Filter;
+      expect(isUnsupportedFilter(filter)).toBe(true);
+    });
+
+    it('does not flag disabled custom filters', () => {
+      const filter = { meta: { type: 'custom', disabled: true } } as Filter;
+      expect(isUnsupportedFilter(filter)).toBe(false);
+    });
+
+    it('does not flag translatable filters', () => {
+      expect(isUnsupportedFilter(phraseFilter('workflowId', 'abc'))).toBe(false);
+    });
+  });
+
   describe('filtersToKql', () => {
     it('reads the phrase value from meta.params.query when meta.value is not set', () => {
       expect(filtersToKql([phraseFilter('workflowId', 'abc')])).toBe('(workflowId: abc)');
@@ -58,6 +78,35 @@ describe('workflow_executions_search_query', () => {
     it('converts exists filters', () => {
       const filter: Filter = { meta: { type: 'exists', key: 'executedBy', negate: true } };
       expect(filtersToKql([filter])).toBe('(NOT executedBy: *)');
+    });
+
+    it('converts range filters', () => {
+      const filter: Filter = {
+        meta: {
+          type: 'range',
+          key: 'startedAt',
+          negate: false,
+          params: { gte: '2020-01-01T00:00:00.000Z', lt: '2020-01-02T00:00:00.000Z' },
+        },
+      };
+      expect(filtersToKql([filter])).toBe(
+        '(startedAt >= "2020-01-01T00:00:00.000Z" and startedAt < "2020-01-02T00:00:00.000Z")'
+      );
+    });
+
+    it('converts half-open and negated range filters', () => {
+      const filter: Filter = {
+        meta: { type: 'range', key: 'startedAt', negate: true, params: { gte: '2020-01-01' } },
+      };
+      expect(filtersToKql([filter])).toBe('(NOT (startedAt >= 2020-01-01))');
+    });
+
+    it('drops custom filters that cannot be translated', () => {
+      const filter = {
+        meta: { type: 'custom', key: 'startedAt', negate: false },
+        query: { bool: { filter: [] } },
+      } as Filter;
+      expect(filtersToKql([filter])).toBe('');
     });
 
     it('falls back to query.match_phrase for filters without meta.type', () => {
