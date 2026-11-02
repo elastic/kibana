@@ -23,8 +23,8 @@ import {
   type EscalationQueueItem,
 } from '@kbn/agentic-investigations-common';
 import { css } from '@emotion/react';
-import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documentation_link';
 import { PREVIEW_SLIDES } from '../onboarding/translations';
+import { ESCALATIONS_READ_MORE_URL } from './constants';
 import { ESCALATIONS_EMPTY_BANNER } from './translations';
 
 // The onboarding "Respond" slide is the queue of items that need a human decision, i.e. escalations;
@@ -64,7 +64,6 @@ const renderExampleAssignees = (): React.ReactNode => (
  */
 export const EscalationsEmptyBanner: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const documentationLink = useAlertZeroDocumentationLink();
   const exampleEscalation = useMemo<EscalationQueueItem>(() => {
     const createdAt = new Date(Date.now() - EXAMPLE_AGE_MS).toISOString();
     return {
@@ -102,18 +101,16 @@ export const EscalationsEmptyBanner: React.FC = () => {
         titleSize="xs"
         body={<p>{ESCALATIONS_EMPTY_BANNER.body}</p>}
         actions={
-          documentationLink ? (
-            <EuiButtonEmpty
-              size="s"
-              href={documentationLink}
-              target="_blank"
-              iconType="external"
-              iconSide="right"
-              data-test-subj="alertZeroEscalationsEmptyBannerDocsLink"
-            >
-              {ESCALATIONS_EMPTY_BANNER.docsLink}
-            </EuiButtonEmpty>
-          ) : undefined
+          <EuiButtonEmpty
+            size="s"
+            href={ESCALATIONS_READ_MORE_URL}
+            target="_blank"
+            iconType="external"
+            iconSide="right"
+            data-test-subj="alertZeroEscalationsEmptyBannerDocsLink"
+          >
+            {ESCALATIONS_EMPTY_BANNER.docsLink}
+          </EuiButtonEmpty>
         }
       />
       <EuiSpacer size="xl" />
