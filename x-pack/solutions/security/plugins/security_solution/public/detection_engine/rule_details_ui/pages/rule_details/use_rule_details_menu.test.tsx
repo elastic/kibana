@@ -6,16 +6,21 @@
  */
 
 import React from 'react';
+import { mapValues } from 'lodash';
 import { act, render, renderHook, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import moment from 'moment';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import type { ExternalRuleSource } from '../../../../../common/api/detection_engine';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
 import { APP_UI_ID } from '../../../../../common/constants';
+import { emptyMlCapabilities } from '../../../../../common/machine_learning/empty_ml_capabilities';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import type { Rule } from '../../../rule_management/logic';
 import { SecurityPageName } from '../../../../app/types';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -54,6 +59,7 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 jest.mock('../../../../common/components/link_to', () => ({
   useGetSecuritySolutionUrl: () => () => '/app/security/rules',
 }));
@@ -78,7 +84,7 @@ const reportEvent = jest.fn();
 const openCustomizationsRevertFlyout = jest.fn();
 
 const getMenuProps = (
-  rule: ReturnType<typeof mockRule> | null = mockRule('rule-id'),
+  rule: Rule | null = mockRule('rule-id'),
   ruleLoading = false,
   overrides: Partial<Parameters<typeof useRuleDetailsMenu>[0]> = {}
 ) => ({
@@ -106,14 +112,14 @@ const RuleMenu = ({
   rule = mockRule('rule-id'),
   ruleLoading = false,
 }: {
-  rule?: ReturnType<typeof mockRule>;
+  rule?: Rule;
   ruleLoading?: boolean;
 }) => {
   const menu = useRuleDetailsMenu(getMenuProps(rule, ruleLoading));
   return <SecurityAppHeader title="Rule" menu={menu} />;
 };
 
-const renderHeader = (rule?: ReturnType<typeof mockRule>, ruleLoading?: boolean) =>
+const renderHeader = (rule?: Rule, ruleLoading?: boolean) =>
   render(
     <TestProviders>
       <MemoryRouter>
@@ -155,6 +161,20 @@ const mockPrivileges = (overrides: Record<string, { read: boolean; edit: boolean
     },
   });
 
+const mockMlAdminPermissions = (hasMlAdmin: boolean) =>
+  (useMlCapabilities as jest.Mock).mockReturnValue({
+    ...emptyMlCapabilities,
+    isPlatinumOrTrialLicense: true,
+    capabilities: mapValues(emptyMlCapabilities.capabilities, () => hasMlAdmin),
+  } satisfies MlCapabilitiesResponse);
+
+const mlRule = (): Rule => ({
+  ...mockRule('rule-id'),
+  type: 'machine_learning',
+  anomaly_threshold: 50,
+  machine_learning_job_id: ['ml-job-id'],
+});
+
 const customizedPrebuiltRule = () => ({
   ...mockRule('rule-id'),
   rule_source: { type: 'external', is_customized: true } as ExternalRuleSource,
@@ -173,6 +193,7 @@ describe('rule details app menu', () => {
         enableDisable: { read: true, edit: true },
       },
     });
+    mockMlAdminPermissions(true);
     (useRuleCustomizationsContext as jest.Mock).mockReturnValue({
       actions: { openCustomizationsRevertFlyout },
       state: { doesBaseVersionExist: true },
@@ -228,6 +249,19 @@ describe('rule details app menu', () => {
     expect(screen.getByTestId('rules-details-manual-rule-run')).toBeDisabled();
     expect(screen.getByTestId('rules-details-delete-rule')).toBeDisabled();
     expect(screen.getByTestId('rules-details-export-rule')).toBeEnabled();
+  });
+
+  it('disables editing an ML rule without ML admin permissions', async () => {
+    mockMlAdminPermissions(false);
+    renderHeader(mlRule());
+
+    expect(await screen.findByTestId('editRuleSettingsLink')).toBeDisabled();
+  });
+
+  it('allows editing an ML rule with ML admin permissions', async () => {
+    renderHeader(mlRule());
+
+    expect(await screen.findByTestId('editRuleSettingsLink')).toBeEnabled();
   });
 
   it('refreshes the rule status from the app menu', async () => {

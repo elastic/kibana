@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
+import { mapValues } from 'lodash';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { MemoryRouter } from 'react-router-dom';
 import type { AppHeaderBadge } from '@kbn/app-header';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { SecurityAppHeader } from '../../../../common/components/app_header';
 import { TestProviders } from '../../../../common/mock';
@@ -20,6 +22,9 @@ import { useRuleCustomizationsContext } from '../../../rule_management/component
 import { useExecuteBulkAction } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { mockRule } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
+import { emptyMlCapabilities } from '../../../../../common/machine_learning/empty_ml_capabilities';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import type { Rule } from '../../../rule_management/logic';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 import * as actionI18n from '../../../common/translations';
@@ -31,6 +36,7 @@ jest.mock(
 );
 jest.mock('../../../rule_management/logic/bulk_actions/use_execute_bulk_action');
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 jest.mock('../../../../common/lib/kibana', () => ({
   ...jest.requireActual('../../../../common/lib/kibana'),
   useUiSetting$: jest.fn(),
@@ -47,7 +53,7 @@ const startMlJobsIfNeeded = jest.fn(async () => {});
 const executeBulkAction = jest.fn();
 
 interface RuleBadgesProps {
-  rule: ReturnType<typeof mockRule> | null;
+  rule: Rule | null;
   isExistingRule?: boolean;
   ruleLoading?: boolean;
   snoozeBadge?: AppHeaderBadge;
@@ -93,6 +99,20 @@ const mockEnableDisablePrivilege = (canEnableDisable: boolean) =>
     },
   });
 
+const mockMlAdminPermissions = (hasMlAdmin: boolean) =>
+  (useMlCapabilities as jest.Mock).mockReturnValue({
+    ...emptyMlCapabilities,
+    isPlatinumOrTrialLicense: true,
+    capabilities: mapValues(emptyMlCapabilities.capabilities, () => hasMlAdmin),
+  } satisfies MlCapabilitiesResponse);
+
+const mlRule = (): Rule => ({
+  ...mockRule('rule-id'),
+  type: 'machine_learning',
+  anomaly_threshold: 50,
+  machine_learning_job_id: ['ml-job-id'],
+});
+
 const mockRuleChangesHistory = (enabled: boolean) => {
   (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(enabled);
   (useUiSetting$ as jest.Mock).mockReturnValue([enabled]);
@@ -102,6 +122,7 @@ describe('useRuleDetailsBadges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockEnableDisablePrivilege(true);
+    mockMlAdminPermissions(true);
     (useRuleCustomizationsContext as jest.Mock).mockReturnValue({
       actions: { openCustomizationsPreviewFlyout: jest.fn() },
       state: { doesBaseVersionExist: true },
@@ -197,6 +218,24 @@ describe('useRuleDetailsBadges', () => {
       expect(
         await screen.findByText(actionI18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES)
       ).toBeInTheDocument();
+    });
+
+    it('is disabled with an explanation for an ML rule without ML admin permissions', async () => {
+      mockMlAdminPermissions(false);
+      renderHeader({ rule: mlRule() });
+      await openBadgeMenu();
+
+      const item = await screen.findByTestId('ruleDetailsDisableRule');
+      expect(item).toBeDisabled();
+      fireEvent.mouseOver(item);
+      expect(await screen.findByText(actionI18n.ML_RULES_DISABLED_MESSAGE)).toBeInTheDocument();
+    });
+
+    it('is enabled for an ML rule with ML admin permissions', async () => {
+      renderHeader({ rule: mlRule() });
+      await openBadgeMenu();
+
+      expect(await screen.findByTestId('ruleDetailsDisableRule')).toBeEnabled();
     });
 
     it('is enabled for a rule without actions even without the actions privilege', async () => {
