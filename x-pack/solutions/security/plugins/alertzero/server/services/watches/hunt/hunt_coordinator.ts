@@ -323,7 +323,9 @@ const sampleTier2TargetEvents = async ({
     );
   } catch (err) {
     logger.warn(
-      `hunt_coordinator: could not sample Tier 2 targets for grounding — ${(err as Error).message}`
+      `hunt_coordinator: could not sample Behavior Hunt targets for grounding — ${
+        (err as Error).message
+      }`
     );
     return [];
   }
