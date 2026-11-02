@@ -923,6 +923,39 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     mockTiles();
   });
 
+  it('also drops a failed comparison and a loading sparkline for the searched tiles', () => {
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      searchExpression: 'KQL("host.name: a")',
+      isSearchOverridesPending: false,
+    });
+    hooks.useSearchedTileEntityIds.mockReturnValue({
+      searchedTileEntityIds: {
+        entitiesWithAlerts: ['host:a'],
+        entitiesWithAnomalies: [],
+        riskMovers: [],
+        newlyHighCritical: [],
+        watchlisted: [],
+        newEntity: [],
+      },
+      isPending: false,
+    });
+    // The unfiltered comparison failed and its sparkline is still loading: neither applies to a
+    // tile that now counts only the searched entities.
+    hooks.useAlertBasedTilesDelta.mockReturnValue({
+      ...hooks.useAlertBasedTilesDelta(),
+      failure: 'delta',
+    });
+    hooks.useAlertBasedTilesSeries.mockReturnValue({
+      alertsTrend: undefined,
+      watchlistedTrend: undefined,
+      isTrendLoading: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(getCard('entitiesWithAlerts')?.deltaFailure).toBeUndefined();
+    expect(getCard('entitiesWithAlerts')?.isTrendLoading).toBe(false);
+  });
+
   it("shows each tile's searched entities, without its delta and sparkline", () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',

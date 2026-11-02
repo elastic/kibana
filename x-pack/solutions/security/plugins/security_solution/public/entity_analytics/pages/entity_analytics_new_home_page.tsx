@@ -1380,7 +1380,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             delta: undefined,
             isDeltaLoading: false,
             isDeltaUnavailable: false,
+            deltaFailure: undefined,
             trend: undefined,
+            isTrendLoading: false,
           }))
         : signalCards,
     [signalCards, tileSearchExpression, shownTileEntityIds, isTilesSearchPending]
