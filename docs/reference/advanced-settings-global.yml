@@ -48,6 +48,7 @@ groups:
           serverless:
             elasticsearch: ga
             observability: ga
+            security: ga
             vectordb: ga
 
   - group: Universal Alerting
