@@ -12,6 +12,7 @@ import Os from 'os';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { PROJECT_DEFAULT_ROLES } from '../../../common/constants';
+import { ScoutTestConfigSchema } from '../../../types/test_config.schema';
 import type { CheckResult, DoctorCheck, DoctorCheckGroup } from '../types';
 import { fail, pass, warn } from '../types';
 import type { DoctorArch } from '../run_doctor';
@@ -96,6 +97,40 @@ const apiKeyCheck: DoctorCheck = {
   },
 };
 
+/** Validates a direct Scout run config with the schema Scout uses when it loads it */
+const scoutConfigCheck = (arch: DoctorArch): DoctorCheck => ({
+  title: SCOUT_CLOUD_CONFIGS[arch],
+  run: async () => {
+    const configFile = SCOUT_CLOUD_CONFIGS[arch];
+    let raw: unknown;
+    try {
+      raw = await readJson(Path.resolve(REPO_ROOT, configFile));
+    } catch (error) {
+      return fail(`${configFile} is not valid JSON: ${error.message}`);
+    }
+
+    const result = ScoutTestConfigSchema.safeParse(raw);
+    if (!result.success) {
+      const issues = result.error.issues.map(
+        ({ path, message }) => `${path.join('.') || '<root>'} ${message}`
+      );
+      return fail(`${configFile} is invalid: ${issues.join('; ')}`);
+    }
+
+    const config = result.data;
+    // the schema can't tell which file it reads
+    const serverless = arch === 'serverless';
+    if (!config.isCloud || Boolean(config.serverless) !== serverless) {
+      return fail(`${configFile} must set "isCloud": true and "serverless": ${serverless}`);
+    }
+
+    const target = serverless
+      ? `${[config.projectType, config.productTier].filter(Boolean).join(' ')} project`
+      : 'deployment';
+    return pass(`${configFile} is valid: ${target} at ${new URL(config.hosts.kibana).host}`);
+  },
+});
+
 /** Checks the users file a direct Scout run reads, as set by cloudUsersFilePath */
 const scoutUsersCheck = (arch: DoctorArch): DoctorCheck => ({
   title: `Scout Cloud users for ${SCOUT_CLOUD_CONFIGS[arch]}`,
@@ -107,7 +142,6 @@ const scoutUsersCheck = (arch: DoctorArch): DoctorCheck => ({
     if (!config?.cloudUsersFilePath) {
       return fail(`${configFile} has no cloudUsersFilePath`);
     }
-
     // Scout resolves it against the working directory, which is the repo root
     const usersFile = Path.resolve(REPO_ROOT, config.cloudUsersFilePath);
     const users = await readJson<Users>(usersFile);
@@ -145,6 +179,14 @@ const qafRunFilesCheck = (arch?: DoctorArch): DoctorCheck => ({
   },
 });
 
+const readConfigSync = (arch: DoctorArch): { cloudUsersFilePath?: unknown } | undefined => {
+  try {
+    return JSON.parse(Fs.readFileSync(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[arch]), 'utf8'));
+  } catch {
+    return undefined;
+  }
+};
+
 export const getElasticCloudChecks = (arch?: DoctorArch): DoctorCheckGroup => ({
   title: 'Elastic Cloud',
   checks: [
@@ -152,7 +194,11 @@ export const getElasticCloudChecks = (arch?: DoctorArch): DoctorCheckGroup => ({
     apiKeyCheck,
     ...archsOf(arch)
       .filter((target) => Fs.existsSync(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[target])))
-      .map(scoutUsersCheck),
+      .flatMap((target) => [
+        scoutConfigCheck(target),
+        // a config without cloudUsersFilePath is already reported as invalid
+        ...(readConfigSync(target)?.cloudUsersFilePath ? [scoutUsersCheck(target)] : []),
+      ]),
     qafRunFilesCheck(arch),
   ],
 });
