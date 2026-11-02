@@ -18,6 +18,7 @@ import type {
 } from 'listr2';
 import { Listr, ListrDefaultRendererLogLevels } from 'listr2';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { testTargets } from '@kbn/scout-info';
 import type { CheckResult, DoctorCheck, DoctorCheckGroup } from './types';
 import { fail } from './types';
 import { environmentChecks } from './checks/environment';
@@ -28,13 +29,18 @@ import { dockerChecks } from './checks/docker';
 
 export type DoctorArch = 'stateful' | 'serverless';
 
+interface ReportedResult extends CheckResult {
+  group: DoctorCheckGroup;
+}
+
 const runCheck = async (
   check: DoctorCheck,
   task: ListrTaskWrapper<unknown, ListrDefaultRenderer, ListrSimpleRenderer>,
-  results: CheckResult[]
+  group: DoctorCheckGroup,
+  results: ReportedResult[]
 ) => {
   const result = await check.run().catch((error: Error) => fail(error.message));
-  results.push(result);
+  results.push({ ...result, group });
   const remedy = result.fix?.command ?? result.hint;
   const message = remedy ? `${result.message}${chalk.dim(` → ${remedy}`)}` : result.message;
 
@@ -49,26 +55,25 @@ const runCheck = async (
   }
 };
 
-const toListrTasks = (
-  { checks, stopOnFailure }: DoctorCheckGroup,
-  results: CheckResult[]
-): ListrTask[] => {
+const toListrTasks = (group: DoctorCheckGroup, results: ReportedResult[]): ListrTask[] => {
   let failed = false;
 
-  return checks.map((check) => ({
+  return group.checks.map((check) => ({
     title: check.title,
     // e.g. image checks are hidden when Docker is not running
     enabled: () => !failed,
     task: async (_, task) => {
       try {
-        await runCheck(check, task, results);
+        await runCheck(check, task, group, results);
       } catch (error) {
-        failed = Boolean(stopOnFailure);
+        failed = Boolean(group.stopOnFailure);
         throw error;
       }
     },
   }));
 };
+
+const ARCHS: DoctorArch[] = ['stateful', 'serverless'];
 
 const getGroups = (arch?: DoctorArch): DoctorCheckGroup[] => [
   environmentChecks,
@@ -78,9 +83,9 @@ const getGroups = (arch?: DoctorArch): DoctorCheckGroup[] => [
   ...(arch !== 'stateful' ? [dockerChecks] : []),
 ];
 
-const runChecks = async (log: ToolingLog, arch?: DoctorArch): Promise<CheckResult[]> => {
+const runChecks = async (log: ToolingLog, arch?: DoctorArch): Promise<ReportedResult[]> => {
   const startTime = Date.now();
-  const results: CheckResult[] = [];
+  const results: ReportedResult[] = [];
 
   await new Listr(
     getGroups(arch).map((group) => ({
@@ -169,6 +174,39 @@ const printFixCommands = (log: ToolingLog, results: CheckResult[]) => {
   log.write(chalk.dim(`\n Or let doctor run them: node scripts/scout doctor --fix`));
 };
 
+const printNextSteps = (log: ToolingLog, archs: DoctorArch[], readyArchs: DoctorArch[]) => {
+  log.write('');
+  for (const arch of archs) {
+    if (!readyArchs.includes(arch)) {
+      log.write(chalk.red.bold(` ✖ Not ready for ${arch}, fix the failed checks above`));
+      continue;
+    }
+
+    const [domain, ...otherDomains] = testTargets.local
+      .filter((target) => target.arch === arch)
+      .map((target) => target.domain);
+    log.write(chalk.green.bold(` ✔ Ready for ${arch}, start the servers and run tests with:`));
+    log.write(
+      `   ${chalk.cyan(
+        `node scripts/scout run-tests --arch ${arch} --domain ${domain} --config <playwright_config_path>`
+      )}`
+    );
+    log.write(chalk.dim(`   other domains: ${otherDomains.join(', ')}`));
+  }
+
+  if (readyArchs.length) {
+    log.write(`\n To keep the servers running between test runs:`);
+    log.write(
+      `   ${chalk.cyan('node scripts/scout start-server --arch <arch> --domain <domain>')}`
+    );
+    log.write(
+      `   ${chalk.cyan(
+        'node scripts/playwright test --config <playwright_config_path> --project local'
+      )}\n`
+    );
+  }
+};
+
 export const runDoctor = async (
   log: ToolingLog,
   { arch, fix }: { arch?: DoctorArch; fix: boolean }
@@ -186,11 +224,12 @@ export const runDoctor = async (
     printFixCommands(log, results);
   }
 
-  const ready = !results.some(({ status }) => status === 'fail');
-  log.write(
-    ready
-      ? chalk.green.bold(`\n ✔ Ready to run Scout (${target})\n`)
-      : chalk.red.bold(`\n ✖ Not ready to run Scout (${target})\n`)
+  const archs = arch ? [arch] : ARCHS;
+  const readyArchs = archs.filter((checkedArch) =>
+    results.every(
+      ({ status, group }) => status !== 'fail' || !getGroups(checkedArch).includes(group)
+    )
   );
-  return ready;
+  printNextSteps(log, archs, readyArchs);
+  return readyArchs.length === archs.length;
 };
