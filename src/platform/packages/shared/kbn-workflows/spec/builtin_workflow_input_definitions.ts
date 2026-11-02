@@ -147,7 +147,7 @@ const alertingV2NotificationGroup: JsonSchema = {
               'Fields the rule groups its alerts by (the rule `grouping.fields`). Empty when the rule has no grouping. Dotted names are nested under `alert.data` (`host.name` is `alert.data.host.name`).',
           },
         },
-        required: ['name'],
+        required: ['name', 'grouping_fields'],
         additionalProperties: false,
       },
     },

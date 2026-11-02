@@ -240,7 +240,8 @@ the dispatch payload schema. Without it, invalid field paths are only caught at 
           }
         },
         \\"required\\": [
-          \\"name\\"
+          \\"name\\",
+          \\"grouping_fields\\"
         ],
         \\"additionalProperties\\": false
       }
