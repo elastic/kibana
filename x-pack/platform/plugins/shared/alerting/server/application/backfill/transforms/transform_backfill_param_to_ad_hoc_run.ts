@@ -6,7 +6,7 @@
  */
 
 import { isString } from 'lodash';
-import { decodeStoredApiKey, getUiamApiKeyId } from '@kbn/task-manager-plugin/server';
+import { decodeStoredApiKey, getUiamApiKeyId } from '@kbn/response-ops-scoped-api-keys';
 import type { DenormalizedAction } from '../../../rules_client';
 import type { AdHocRunSO } from '../../../data/ad_hoc_run/types';
 import { calculateSchedule } from '../../../backfill_client/lib';

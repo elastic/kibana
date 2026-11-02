@@ -14,12 +14,8 @@ import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
 import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
-import {
-  createApiKey,
-  hasApiKey,
-  getApiKeyFromRequest,
-  shouldCloneApiKeyFromRequest,
-} from '../lib/api_key_utils';
+import { getApiKeyFromRequest } from '@kbn/response-ops-scoped-api-keys';
+import { createApiKey, hasApiKey, shouldCloneApiKeyFromRequest } from '../lib/api_key_utils';
 
 // `getUiamApiKeySecret` is a pure format helper the assertions below rely on, so it keeps its real
 // implementation while the credential-minting helpers are stubbed.
@@ -27,8 +23,11 @@ jest.mock('../lib/api_key_utils', () => ({
   ...jest.requireActual('../lib/api_key_utils'),
   createApiKey: jest.fn(),
   hasApiKey: jest.fn(),
-  getApiKeyFromRequest: jest.fn(),
   shouldCloneApiKeyFromRequest: jest.fn(),
+}));
+jest.mock('@kbn/response-ops-scoped-api-keys', () => ({
+  ...jest.requireActual('@kbn/response-ops-scoped-api-keys'),
+  getApiKeyFromRequest: jest.fn(),
 }));
 const createApiKeyMock = createApiKey as jest.MockedFunction<typeof createApiKey>;
 const hasApiKeyMock = hasApiKey as jest.MockedFunction<typeof hasApiKey>;

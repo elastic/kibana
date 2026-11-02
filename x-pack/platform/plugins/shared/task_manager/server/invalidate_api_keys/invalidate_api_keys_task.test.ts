@@ -9,10 +9,12 @@ import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TaskManagerPluginsStart, TaskManagerStartContract } from '../plugin';
 import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
-import { runInvalidate } from './lib';
+import { runInvalidate } from '@kbn/response-ops-scoped-api-keys';
 import { taskRunner } from './invalidate_api_keys_task';
+import { getSOIdsUsedByRunningTasks } from './get_so_ids_used_by_running_tasks';
 
-jest.mock('./lib', () => ({
+jest.mock('@kbn/response-ops-scoped-api-keys', () => ({
+  ...jest.requireActual('@kbn/response-ops-scoped-api-keys'),
   runInvalidate: jest.fn(),
 }));
 
@@ -94,6 +96,33 @@ describe('invalidate api keys task runner', () => {
           },
         ],
       })
+    );
+  });
+
+  it('protects keys still used by an in-progress task run', async () => {
+    const coreStart = coreMock.createStart();
+    const coreStartServices = jest
+      .fn()
+      .mockResolvedValue([
+        coreStart as CoreStart,
+        {} as TaskManagerPluginsStart,
+        {} as TaskManagerStartContract,
+      ]);
+
+    const runner = taskRunner({
+      logger: loggingSystemMock.createLogger(),
+      configInterval: '5m',
+      coreStartServices,
+      getEncryptedSavedObjectsClient: () => undefined,
+      invalidateApiKeyFn: jest.fn(),
+      invalidateUiamApiKeyFn: () => undefined,
+      removalDelay: '1h',
+    })({ taskInstance: { state: {} } });
+
+    await runner.run();
+
+    expect(runInvalidateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ getSOIdsUsedByRunningTasks })
     );
   });
 });

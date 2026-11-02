@@ -1096,6 +1096,7 @@
     "@kbn/response-ops-rules-apis": "workspace:*",
     "@kbn/response-ops-schedule-schema": "workspace:*",
     "@kbn/response-ops-scheduling-types": "workspace:*",
+    "@kbn/response-ops-scoped-api-keys": "workspace:*",
     "@kbn/response-stream-plugin": "workspace:*",
     "@kbn/restorable-state": "workspace:*",
     "@kbn/rison": "workspace:*",

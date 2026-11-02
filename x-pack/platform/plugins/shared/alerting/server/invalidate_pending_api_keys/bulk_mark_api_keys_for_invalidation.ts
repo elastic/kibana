@@ -8,7 +8,7 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { isUiamCredential } from '@kbn/core-security-server';
-import { decodeStoredApiKey } from '@kbn/task-manager-plugin/server';
+import { decodeStoredApiKey } from '@kbn/response-ops-scoped-api-keys';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 
 export const bulkMarkApiKeysForInvalidation = async (

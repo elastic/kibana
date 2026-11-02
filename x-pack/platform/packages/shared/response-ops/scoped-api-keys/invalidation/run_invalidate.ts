@@ -7,12 +7,16 @@
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';
 import { getFindFilter } from './get_find_filter';
 import { getApiKeyIdsToInvalidate } from './get_api_key_ids_to_invalidate';
 import { PAGE_SIZE } from './constants';
 import { invalidateApiKeysAndDeletePendingApiKeySavedObject } from './invalidate_api_keys_and_delete_so';
-import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+import type {
+  ApiKeyInvalidationFn,
+  ApiKeyPendingInvalidation,
+  GetSOIdsUsedByRunningTasksFn,
+  UiamApiKeyInvalidationFn,
+} from './types';
 
 export interface SavedObjectTypesToQuery {
   type: string;
@@ -21,6 +25,7 @@ export interface SavedObjectTypesToQuery {
 
 interface RunInvalidateOpts {
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
+  getSOIdsUsedByRunningTasks?: GetSOIdsUsedByRunningTasksFn;
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
   invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   logger: Logger;
@@ -39,6 +44,7 @@ export interface RunInvalidateResult {
 export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalidateResult> {
   const {
     encryptedSavedObjectsClient,
+    getSOIdsUsedByRunningTasks,
     invalidateApiKeyFn,
     invalidateUiamApiKeyFn,
     logger,
@@ -59,7 +65,7 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
       excludedSOIds: [...excludedSOIds],
       savedObjectType,
     });
-    const apiKeysToInvalidate = await savedObjectsClient.find<ApiKeyToInvalidate>({
+    const apiKeysToInvalidate = await savedObjectsClient.find<ApiKeyPendingInvalidation>({
       type: savedObjectType,
       page: 1,
       sortField: 'createdAt',
@@ -73,6 +79,7 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
         await getApiKeyIdsToInvalidate({
           apiKeySOsPendingInvalidation: apiKeysToInvalidate,
           encryptedSavedObjectsClient,
+          getSOIdsUsedByRunningTasks,
           savedObjectsClient,
           savedObjectType,
           savedObjectTypesToQuery: opts.savedObjectTypesToQuery,

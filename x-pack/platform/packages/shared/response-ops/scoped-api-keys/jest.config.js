@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { runInvalidate } from './run_invalidate';
+module.exports = {
+  preset: '@kbn/jest',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/response-ops/scoped-api-keys'],
+};

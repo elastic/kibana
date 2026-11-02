@@ -12,7 +12,8 @@ import { Logger as PluginLogger } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import { isUiamCredential } from '@kbn/core-security-server';
+import { decodeStoredApiKey, getApiKeyFromRequest } from '@kbn/response-ops-scoped-api-keys';
 import { inject, injectable } from 'inversify';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import { getActionPolicyCloudApiKeyNotSupportedMessage } from '../../errors/action_policy_error_messages';
@@ -114,8 +115,8 @@ export class ApiKeyService implements ApiKeyServiceContract {
   }
 
   private decodeApiKey(key: string): { apiKeyId: string; apiKeyValue?: string } {
-    const [id, apiKey] = Buffer.from(key, 'base64').toString().split(':');
-    return { apiKeyId: id, apiKeyValue: apiKey };
+    const { id, secret } = decodeStoredApiKey(key);
+    return { apiKeyId: id, apiKeyValue: secret };
   }
 
   private isAuthenticationTypeAPIKey(): boolean {
@@ -124,20 +125,21 @@ export class ApiKeyService implements ApiKeyServiceContract {
   }
 
   private getAuthenticationAPIKeyAttributes(name: string, username: string): ApiKeyAttributes {
-    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(this.request);
-    if (!authorizationHeader?.credentials) {
+    const credentials = getApiKeyFromRequest(this.request);
+    if (!credentials) {
       throw new Error(
         `Failed to extract API key from authorization header for action policy: ${name}`
       );
     }
 
-    if (isUiamCredential(authorizationHeader)) {
+    const { id: apiKeyId, api_key: apiKeyValue } = credentials;
+
+    // A raw `essu_` Cloud API key carries no key id.
+    if (apiKeyId === undefined) {
       throw Boom.badRequest(getActionPolicyCloudApiKeyNotSupportedMessage(name), {
         code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED,
       });
     }
-
-    const { apiKeyId, apiKeyValue } = this.decodeApiKey(authorizationHeader.credentials);
 
     if (!apiKeyId || !apiKeyValue) {
       throw new Error(

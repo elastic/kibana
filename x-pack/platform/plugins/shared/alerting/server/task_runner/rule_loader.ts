@@ -5,16 +5,13 @@
  * 2.0.
  */
 
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
-  createTaskRunError,
+  buildApiKeyFakeRequest,
   getUiamApiKeyId,
   getUiamApiKeySecret,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
-import { type FakeRawRequest, type Headers, type KibanaRequest } from '@kbn/core-http-server';
-import { markExternalUiamCredential } from '@kbn/core-security-server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+} from '@kbn/response-ops-scoped-api-keys';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -213,7 +210,6 @@ export function getFakeKibanaRequest(
   credentialType: CredentialType;
 } {
   const { uiamApiKey, uiamApiKeyExternal, apiKeyCreatedByUser, apiKeyOwner, ruleId } = options;
-  const requestHeaders: Headers = {};
   let effectiveApiKey: string | null = null;
   let credentialType: CredentialType = 'none';
   let credentialReason: CredentialReason = 'not_set';
@@ -228,7 +224,6 @@ export function getFakeKibanaRequest(
   if (shouldUseUiamApiKey) {
     if (!uiamApiKey) {
       if (apiKey) {
-        requestHeaders.authorization = `ApiKey ${apiKey}`;
         effectiveApiKey = apiKey;
         credentialType = 'es_api_key';
         // Refined to a more specific reason in the branches below.
@@ -272,15 +267,12 @@ export function getFakeKibanaRequest(
         );
       }
     } else {
-      const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
-      requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
-      effectiveApiKey = uiamApiKeyValue;
+      effectiveApiKey = getUiamApiKeySecret(uiamApiKey);
       credentialType = 'uiam_api_key';
       credentialReason = apiKeyCreatedByUser ? 'user_created_key' : 'provisioned';
       isExternalCredential = uiamApiKeyExternal === true;
     }
   } else if (apiKey) {
-    requestHeaders.authorization = `ApiKey ${apiKey}`;
     effectiveApiKey = apiKey;
     credentialType = 'es_api_key';
     credentialReason = 'config';
@@ -296,9 +288,7 @@ export function getFakeKibanaRequest(
         tags: UIAM_LOGS_USAGE_TAGS,
       }
     );
-    const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
-    requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
-    effectiveApiKey = uiamApiKeyValue;
+    effectiveApiKey = getUiamApiKeySecret(uiamApiKey);
     credentialType = 'uiam_api_key';
     credentialReason = apiKeyCreatedByUser ? 'user_created_key' : 'provisioned';
     isExternalCredential = uiamApiKeyExternal === true;
@@ -306,18 +296,11 @@ export function getFakeKibanaRequest(
 
   alertingUiamTelemetry.recordRuleRun(credentialType, credentialReason);
 
-  const fakeRawRequest: FakeRawRequest = {
-    headers: requestHeaders,
-    spaceId: brandSpaceId(spaceId),
-  };
-
-  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-
-  // The Elasticsearch cluster client must not attach the UIAM shared secret to a user-created
-  // (external) Cloud API key: UIAM rejects external keys presented with client authentication.
-  if (isExternalCredential) {
-    markExternalUiamCredential(fakeRequest);
-  }
+  const fakeRequest = buildApiKeyFakeRequest({
+    apiKey: effectiveApiKey ?? undefined,
+    spaceId,
+    uiamApiKeyExternal: isExternalCredential,
+  });
 
   return { fakeRequest, effectiveApiKey, credentialType };
 }

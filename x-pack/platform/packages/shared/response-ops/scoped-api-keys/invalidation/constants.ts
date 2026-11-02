@@ -6,3 +6,10 @@
  */
 
 export const PAGE_SIZE = 100;
+
+export const UIAM_LOGS_INVALIDATE_TAGS = [
+  'serverless',
+  'task-manager',
+  'uiam',
+  'uiam-api-key-invalidate',
+];

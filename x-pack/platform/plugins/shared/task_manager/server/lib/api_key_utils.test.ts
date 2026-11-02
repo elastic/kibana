@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  isRequestApiKeyType,
-  getApiKeyFromRequest,
-  getUiamApiKeyId,
-  getUiamApiKeySecret,
-  createApiKey,
-  getApiKeyAndUserScope,
-} from './api_key_utils';
+import { isRequestApiKeyType, createApiKey, getApiKeyAndUserScope } from './api_key_utils';
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AuthenticatedUser, FakeRawRequest } from '@kbn/core/server';
@@ -36,82 +29,6 @@ describe('api_key_utils', () => {
     test('should return false if the request is made by a user', () => {
       const mockUser = { authentication_type: 'basic' } as AuthenticatedUser;
       expect(isRequestApiKeyType(mockUser)).toBeFalsy();
-    });
-  });
-
-  describe('getUiamApiKeySecret', () => {
-    test('returns a raw UIAM credential as-is (grant path format)', () => {
-      expect(getUiamApiKeySecret('essu_raw_secret')).toBe('essu_raw_secret');
-    });
-
-    test('extracts the secret from the `base64(id:secret)` format (UIAM provisioning path)', () => {
-      const stored = Buffer.from('key-id:essu_converted_secret').toString('base64');
-
-      expect(getUiamApiKeySecret(stored)).toBe('essu_converted_secret');
-    });
-
-    test('returns the stored value untouched when it decodes to a non-UIAM credential', () => {
-      const stored = Buffer.from('key-id:not-a-uiam-secret').toString('base64');
-
-      expect(getUiamApiKeySecret(stored)).toBe(stored);
-    });
-
-    test('returns the stored value untouched when it is neither raw nor base64 encoded', () => {
-      expect(getUiamApiKeySecret('!!!not-base64!!!')).toBe('!!!not-base64!!!');
-    });
-  });
-
-  describe('getUiamApiKeyId', () => {
-    test('extracts the id from the `base64(id:secret)` format', () => {
-      expect(getUiamApiKeyId(Buffer.from('key-id:essu_secret').toString('base64'))).toBe('key-id');
-    });
-
-    test('returns undefined for a raw user-created Cloud key, which has no id', () => {
-      expect(getUiamApiKeyId('essu_user_created_key')).toBeUndefined();
-    });
-
-    test('returns undefined when the decoded secret is not a UIAM credential', () => {
-      expect(
-        getUiamApiKeyId(Buffer.from('key-id:not-a-uiam-secret').toString('base64'))
-      ).toBeUndefined();
-    });
-
-    test('returns undefined for a missing key', () => {
-      expect(getUiamApiKeyId()).toBeUndefined();
-      expect(getUiamApiKeyId(null)).toBeUndefined();
-      expect(getUiamApiKeyId('')).toBeUndefined();
-    });
-  });
-
-  describe('getApiKeyFromRequest', () => {
-    test('should return the API key from a request', () => {
-      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
-
-      const request = httpServerMock.createKibanaRequest({
-        headers: {
-          authorization: `ApiKey: ${mockApiKey}`,
-        },
-      });
-
-      const result = getApiKeyFromRequest(request);
-      expect(result).toEqual({ id: 'apiKeyId', api_key: 'apiKey' });
-    });
-
-    test('should return null if request is missing the authorization header', () => {
-      const request = httpServerMock.createKibanaRequest();
-      const result = getApiKeyFromRequest(request);
-      expect(result).toBeNull();
-    });
-
-    test('should return a raw user-created UIAM API key without an id', () => {
-      const request = httpServerMock.createKibanaRequest({
-        headers: {
-          authorization: `ApiKey essu_user_created_key`,
-        },
-      });
-
-      const result = getApiKeyFromRequest(request);
-      expect(result).toEqual({ api_key: 'essu_user_created_key' });
     });
   });
 

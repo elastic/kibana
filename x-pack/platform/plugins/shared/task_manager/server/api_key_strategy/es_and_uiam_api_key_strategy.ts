@@ -13,16 +13,15 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  getApiKeyFromRequest,
+  getApiKeyInvalidationTargets,
+  getUiamApiKeySecret,
+} from '@kbn/response-ops-scoped-api-keys';
 import { truncate } from 'lodash';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
-import {
-  createApiKey,
-  getApiKeyFromRequest,
-  getUiamApiKeySecret,
-  hasApiKey,
-  shouldCloneApiKeyFromRequest,
-} from '../lib/api_key_utils';
+import { createApiKey, hasApiKey, shouldCloneApiKeyFromRequest } from '../lib/api_key_utils';
 import type {
   ApiKeyInvalidationSource,
   ApiKeySOFields,
@@ -369,26 +368,21 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     // See the invariant documented in `grantApiKeys`: both credentials are
     // currently persisted with the same ownership, so a single flag is
     // sufficient. Revisit if ES and UIAM credentials ever diverge in ownership.
-    if (!userScope || userScope.apiKeyCreatedByUser) {
+    if (!userScope) {
       return [];
     }
 
-    const targets: InvalidationTarget[] = [];
-
-    // Skip the ES invalidation target when no ES key material (`apiKey`) was persisted.
-    // UIAM-only tasks have only a UIAM key; their `userScope.apiKeyId` actually holds the
-    // UIAM key id (mirrored for the in-use guard query), so a bare `{ apiKeyId }` target
-    // would be sent to ES-native invalidation, which cannot revoke a UIAM key. The UIAM
-    // key is invalidated below via the `uiamApiKeyId` + `uiamApiKey` target.
-    if (apiKey) {
-      targets.push({ apiKeyId: userScope.apiKeyId });
-    }
-
-    if (userScope.uiamApiKeyId && uiamApiKey) {
-      targets.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });
-    }
-
-    return targets;
+    return getApiKeyInvalidationTargets({
+      createdByUser: userScope.apiKeyCreatedByUser,
+      // Skip the ES invalidation target when no ES key material (`apiKey`) was persisted.
+      // UIAM-only tasks have only a UIAM key; their `userScope.apiKeyId` actually holds the
+      // UIAM key id (mirrored for the in-use guard query), so a bare `{ apiKeyId }` target
+      // would be sent to ES-native invalidation, which cannot revoke a UIAM key. The UIAM
+      // key is invalidated via the `uiamApiKeyId` + `uiamApiKey` target.
+      esApiKeyId: apiKey ? userScope.apiKeyId : undefined,
+      uiamApiKeyId: userScope.uiamApiKeyId,
+      uiamApiKey,
+    });
   }
 
   async markForInvalidation(

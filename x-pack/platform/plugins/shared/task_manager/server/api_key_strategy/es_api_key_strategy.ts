@@ -11,6 +11,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { getApiKeyInvalidationTargets } from '@kbn/response-ops-scoped-api-keys';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { getApiKeyAndUserScope } from '../lib/api_key_utils';
@@ -48,11 +49,9 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
 
   getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[] {
     const { userScope, uiamApiKey } = source;
-    if (!userScope || userScope.apiKeyCreatedByUser) {
+    if (!userScope) {
       return [];
     }
-
-    const targets: InvalidationTarget[] = [{ apiKeyId: userScope.apiKeyId }];
 
     // Defense-in-depth for rollbacks / config changes: a deployment may have
     // previously run with `EsAndUiamApiKeyStrategy` and persisted a UIAM key
@@ -62,11 +61,12 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
     // never be invalidated. Still emit an invalidation target for them so the
     // invalidation task can clean them up. Invalidation is best-effort and
     // idempotent, so it is safe to always emit when both values are present.
-    if (userScope.uiamApiKeyId && uiamApiKey) {
-      targets.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });
-    }
-
-    return targets;
+    return getApiKeyInvalidationTargets({
+      createdByUser: userScope.apiKeyCreatedByUser,
+      esApiKeyId: userScope.apiKeyId,
+      uiamApiKeyId: userScope.uiamApiKeyId,
+      uiamApiKey,
+    });
   }
 
   async markForInvalidation(

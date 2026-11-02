@@ -30,6 +30,7 @@ import {
   isUiamCredential,
 } from '@kbn/core-security-server';
 import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
+import { getApiKeyFromRequest } from '@kbn/response-ops-scoped-api-keys';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SpaceId } from '@kbn/core-spaces-common';
@@ -548,8 +549,9 @@ export class RulesClientFactory {
         return authorizationHeader?.scheme.toLowerCase() === 'apikey';
       },
       getAuthenticationAPIKey(name: string) {
-        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-        if (authorizationHeader && authorizationHeader.credentials) {
+        const credentials = getApiKeyFromRequest(request);
+        if (credentials) {
+          const { id: apiKeyId, api_key: apiKey } = credentials;
           // UIAM's authoritative verdict on whether the authenticated API key is an external
           // (user-created Cloud) key, reported by the UIAM authentication provider on the
           // current user. `internal === false` is the only trustworthy "external" signal: the
@@ -564,7 +566,7 @@ export class RulesClientFactory {
           // so it is stored on the rule as-is and never invalidated by alerting — lifecycle
           // management (rotation, deletion) remains the user's responsibility, and
           // `apiKeyCreatedByUser` gates every invalidation path.
-          if (isUiamCredential(authorizationHeader)) {
+          if (apiKeyId === undefined && apiKey) {
             if (!this.shouldGrantUiam) {
               // A client error, not a server one: keep it a 4xx with an actionable message
               // instead of surfacing an opaque 500.
@@ -578,15 +580,11 @@ export class RulesClientFactory {
               apiKeysEnabled: true,
               uiamResult: {
                 name: `uiam-${name}`,
-                api_key: authorizationHeader.credentials,
+                api_key: apiKey,
                 ...(isExternalApiKey ? { external: true } : {}),
               },
             };
           }
-
-          const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
-            .toString()
-            .split(':');
 
           if (!apiKeyId || !apiKey) {
             throw new Error(
