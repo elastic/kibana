@@ -7,7 +7,6 @@
 
 import { readFile } from 'fs/promises';
 
-import * as openpgp from 'openpgp';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 const mockLoggerFactory = loggingSystemMock.create();
@@ -49,6 +48,35 @@ qPDlGRlOgVTd9xUfHFkzB52c70E=
 -----END PGP PUBLIC KEY BLOCK-----
 `;
 const testGpgKeyFileContent = Buffer.from(testGpgKey);
+
+// RSA keys shorter than 2047 bits are rejected by openpgp's default config
+const weakGpgKey = `
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+xo0EauPeAAEEALkukURtOwM52q+w1v/u5xusufo6cOAjf26XspT+gVyblTuQ
+7hjv1r6HquZ8uQl1S2N+MdSQdUgNRAFkvt7QAzkhRBPCtnocrXYPpQ+Zlk9i
+DKb28AB/sz/4bjGso79HpbOhilJ2VgTfn0RivlRIvX69LalB0yDXEhBaaoKo
+PjElABEBAAHNCFdlYWsgS2V5wsBRBBMBCgCFBYJq494AAwsJBwkQ0K5DshL1
+dVZFFAAAAAAAHAAgc2FsdEBub3RhdGlvbnMub3BlbnBncGpzLm9yZ6z+nghp
+xHYV0UVX4ZO/340vikb0+E73rnOa9OKdvFXfBRUKCA4MBBYAAgECGQECmwMC
+HgEWIQSLfWvxJsP/u9GJu23QrkOyEvV1VgAAGjgEALY2JMBw8N/uA7j/Ttfh
+UeGfdJGIimq7LqCHw84RSVSwe71Hvjaj44jQ1ltxU5l9oWgPoIcgYMYQ30T/
+KG2Q3DYOgWCNDI5Dg3lEPRaXAiYk/KZG/0IAnKfL+1I6jYUBt1j96d2rCJ/F
+n0nGmD5X/Jj6HkjLKYkK4azGq5Xo78GLzo0EauPeAAEEAKiGnCXqB7qcmyBb
+MCY8FtUsd8d2Q5SYey810KwnjkFRuPHAczx7pWltyqikExGPR2Eei5dcaK2f
+1oAx1L0wm1VALUrSfDKUVFkG6HRtZbtFLcDNkYtutgN2KoCJyL7GVrxp3/SX
+5zokQAof7kLo0fjQcShOU4fVaxt5HShKEVtlABEBAAHCwDwEGAEKAHAFgmrj
+3gAJENCuQ7IS9XVWRRQAAAAAABwAIHNhbHRAbm90YXRpb25zLm9wZW5wZ3Bq
+cy5vcmctFG1JEm9KBIvBBBIGxirzBUurX4No8LDkBVeTAYku/wKbDBYhBIt9
+a/Emw/+70Ym7bdCuQ7IS9XVWAABO0gQAttLHIdWd0eVoravDVYcrOWAn4/g2
+4O+0wopo8EROYCv7xLPEokP++6G387MCz7Y7llleifPHppuOroXIVJZRVTl9
+cBcgVgBeYCqDehQbk+4xrnRkUXa0q3KzRlt9+uQ/i7yQMEDevGe1S9dkCg3O
+0vldKmYTlu2Z2K9idPE/KvY=
+=WR+/
+-----END PGP PUBLIC KEY BLOCK-----
+`;
+const weakGpgKeyFileContent = Buffer.from(weakGpgKey);
+
 const mockGetConfig = jest.fn();
 jest.mock('../../app_context', () => ({
   appContextService: {
@@ -102,14 +130,7 @@ describe('_readGpgKey', () => {
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
   it('should return the key and warn if it cannot be used for verification', async () => {
-    // RSA keys shorter than 2047 bits are rejected by openpgp's default config
-    const { publicKey: weakKey } = await openpgp.generateKey({
-      type: 'rsa',
-      rsaBits: 1024,
-      userIDs: [{ name: 'Weak Key' }],
-      config: { minRSABits: 1024 },
-    });
-    mockedReadFile.mockResolvedValue(Buffer.from(weakKey));
+    mockedReadFile.mockResolvedValue(weakGpgKeyFileContent);
     mockGetConfig.mockReturnValue({ packageVerification: { gpgKeyPath: 'somePath' } });
 
     const key = await _readGpgKey();
