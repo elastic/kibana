@@ -74,14 +74,23 @@ export const fetchInChunks = <T, R>(
   fetchChunk: (itemsChunk: T[]) => Promise<R>
 ): Promise<R[]> => pMap(chunk(items, chunkSize), fetchChunk, { concurrency: MAX_PARALLEL_QUERIES });
 
+/** The longest id, as `ID_LIST_CHUNK_SIZE` assumes. */
+const ID_LENGTH = 100;
+
 export const fetchPerIdChunk = async (
   runQuery: EsqlRunner,
   ids: readonly string[],
   buildQuery: (ids: readonly string[]) => string[]
-): Promise<Row[]> =>
-  (
-    await fetchInChunks(ids, ID_LIST_CHUNK_SIZE, (idsChunk) => runQuery(buildQuery(idsChunk)))
+): Promise<Row[]> => {
+  // A chunk takes the length the rest of the query leaves, such as the search's id lists.
+  const room = Math.floor((ESQL_MAX_QUERY_LENGTH - buildQuery([]).join('\n').length) / ID_LENGTH);
+  if (room < 1) throw new Error('The query is too long to list any ids in it');
+  return (
+    await fetchInChunks(ids, Math.min(ID_LIST_CHUNK_SIZE, room), (idsChunk) =>
+      runQuery(buildQuery(idsChunk))
+    )
   ).flat();
+};
 
 const IDENTITY_SOURCE_FIELDS = [
   ...new Set(
