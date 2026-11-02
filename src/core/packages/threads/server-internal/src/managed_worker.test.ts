@@ -353,19 +353,34 @@ describe('createManagedWorker', () => {
       await handle.stop();
     });
 
-    it('caps the delay at 5 minutes by default', async () => {
-      const handle = createManagedWorker(
-        options({ restart: { maxAttempts: Infinity, initialDelayMs: 100_000 } })
-      );
+    it('caps the delay at 1 minute by default', async () => {
+      const handle = createManagedWorker(options({ restart: { initialDelayMs: 20_000 } }));
       MockWorker.failNextConstruction = 4;
       handle.start();
-      advance(100_000, 200_000, 300_000);
+      advance(20_000, 40_000, 60_000);
       expect(warnings().map((message) => message.split('; ')[1])).toEqual([
-        'restart 1 in 100000ms',
-        'restart 2 in 200000ms',
-        'restart 3 in 300000ms',
-        'restart 4 in 300000ms',
+        'restart 1 in 20000ms',
+        'restart 2 in 40000ms',
+        'restart 3 in 60000ms',
+        'restart 4 in 60000ms',
       ]);
+      await handle.stop();
+    });
+
+    it('never exhausts by default', async () => {
+      const opts = options({ restart: undefined });
+      const handle = createManagedWorker(opts);
+      MockWorker.failNextConstruction = 10;
+      handle.start();
+      advance(1_000, 2_000, 4_000, 8_000, 16_000, 32_000, 60_000);
+      expect(handle.status()).toMatchObject({ state: 'restarting', restarts: 8 });
+      expect(
+        warnings()
+          .map((message) => message.split('; ')[1])
+          .slice(-2)
+      ).toEqual(['restart 7 in 60000ms', 'restart 8 in 60000ms']);
+      expect(opts.onExhausted).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
       await handle.stop();
     });
 

@@ -82,7 +82,7 @@ export class EventLoopWatchdog {
       },
       logger,
       unref: true,
-      // Never stays off while the flag is on: restarts back off to ManagedWorker's 5 minute cap.
+      // Never stays off while the flag is on: restarts back off to ManagedWorker's 1 minute cap.
       restart: { maxAttempts: Infinity },
       // Can't fire with unlimited restarts; keeps the heartbeat from outliving a future limit.
       onExhausted: () => this.clearHeartbeat(),

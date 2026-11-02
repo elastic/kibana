@@ -168,7 +168,7 @@ describe('event loop watchdog in a child process', () => {
     });
   });
 
-  it('keeps restarting a failing worker past the default restart limit', async () => {
+  it('keeps restarting a failing worker past three failures in a row', async () => {
     const result = await runHarness('restarts');
     expectCleanExit(result);
     expect(result.mainLogLines).toContainEqual({

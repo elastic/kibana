@@ -19,9 +19,9 @@ import type {
 
 const BOOTSTRAP_PATH = require.resolve('./worker_bootstrap');
 
-const DEFAULT_MAX_ATTEMPTS = 3;
+const DEFAULT_MAX_ATTEMPTS = Infinity;
 const DEFAULT_INITIAL_DELAY_MS = 1_000;
-const DEFAULT_MAX_DELAY_MS = 5 * 60 * 1_000;
+const DEFAULT_MAX_DELAY_MS = 60 * 1_000;
 const DEFAULT_STABLE_UPTIME_MS = 10 * 60 * 1_000;
 const DEFAULT_READY_TIMEOUT_MS = 30_000;
 const DEFAULT_HEALTH_INTERVAL_MS = 60_000;
