@@ -8,7 +8,6 @@
 export {
   type EsqlQuery,
   type QueriesGetResponse,
-  type QueriesOccurrencesGetResponse,
   type QueryFeature,
   type QueryLink,
   type QueryType,
@@ -75,6 +74,8 @@ export {
   normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from './src/feature';
+
+export { type AggregatedFeature, groupFeaturesAcrossSources } from './src/feature_aggregation';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
 

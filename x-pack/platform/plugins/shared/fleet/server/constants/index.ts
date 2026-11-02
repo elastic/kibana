@@ -146,4 +146,5 @@ export {
 export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
 export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';
 export * from '../../common/constants/mappings';
+export * from '../../common/constants/schema_field_limits';
 export * from './max_concurrency_constants';
