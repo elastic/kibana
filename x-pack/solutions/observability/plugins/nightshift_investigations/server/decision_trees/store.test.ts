@@ -242,15 +242,17 @@ describe('commit', () => {
 });
 
 describe('listTreeIdsForInvestigation', () => {
-  it("returns each tree the investigation's versions belong to once", async () => {
+  it("buckets the investigation's versions by tree instead of reading version hits", async () => {
     const esClient = createEsClient();
     esClient.search.mockResolvedValue({
-      hits: {
-        hits: [
-          { _source: { attributes: { tree_id: 'symptom:checkout-high-latency' } } },
-          { _source: { attributes: { tree_id: 'symptom:checkout-high-latency' } } },
-          { _source: { attributes: { tree_id: 'symptom:payment-errors' } } },
-        ],
+      hits: { hits: [] },
+      aggregations: {
+        tree_ids: {
+          buckets: [
+            { key: 'symptom:checkout-high-latency', doc_count: 600 },
+            { key: 'symptom:payment-errors', doc_count: 1 },
+          ],
+        },
       },
     });
 
@@ -259,6 +261,8 @@ describe('listTreeIdsForInvestigation', () => {
     expect(treeIds).toEqual(['symptom:checkout-high-latency', 'symptom:payment-errors']);
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
+        size: 0,
+        aggs: { tree_ids: { terms: { field: 'attributes.tree_id', size: 500 } } },
         query: {
           bool: {
             filter: [
@@ -271,6 +275,12 @@ describe('listTreeIdsForInvestigation', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('returns no trees when the index does not exist yet', async () => {
+    const esClient = createEsClient();
+
+    expect(await createStore(esClient).listTreeIdsForInvestigation('inv-1')).toEqual([]);
   });
 });
 

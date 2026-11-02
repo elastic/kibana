@@ -388,14 +388,18 @@ export const createDecisionTreeStore = ({
     },
 
     listTreeIdsForInvestigation: async (investigationId) => {
-      const response = await esClient.search<DecisionTreeVersionSource>(
+      // Buckets by tree rather than reading version hits, so a tree with many versions cannot
+      // push the investigation's other trees out of the response.
+      const response = await esClient.search<
+        DecisionTreeVersionSource,
+        { tree_ids: { buckets: Array<{ key: string }> } }
+      >(
         {
           index: DECISION_TREE_AI_INDEX_DEST,
           ignore_unavailable: true,
           allow_no_indices: true,
-          size: MAX_VERSIONS,
+          size: 0,
           track_total_hits: false,
-          _source: ['attributes.tree_id'],
           query: {
             bool: {
               filter: [
@@ -407,14 +411,12 @@ export const createDecisionTreeStore = ({
               ],
             },
           },
+          aggs: { tree_ids: { terms: { field: 'attributes.tree_id', size: MAX_TREES } } },
         },
         { signal }
       );
 
-      const treeIds = response.hits.hits.flatMap((hit) =>
-        hit._source?.attributes?.tree_id ? [hit._source.attributes.tree_id] : []
-      );
-      return [...new Set(treeIds)];
+      return (response.aggregations?.tree_ids.buckets ?? []).map((bucket) => bucket.key);
     },
 
     listVersions: async (treeId) => {
