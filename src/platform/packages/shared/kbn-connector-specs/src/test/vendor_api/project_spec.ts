@@ -113,11 +113,16 @@ const resolvePathItem = (document: OpenApiDocument, item: unknown): unknown => {
   return isJsonObject(referenced) ? { ...referenced, ...own } : item;
 };
 
+// AutoRest's `x-ms-paths` holds operations whose keys add fixed query parameters, such as Azure
+// Blob Storage's `/?comp=list`; the emulator routes them like `paths`.
+const PATH_MAPS = ['paths', 'x-ms-paths'] as const;
+
 const pickPaths = (
   document: OpenApiDocument,
-  operations: readonly ProjectedOperation[]
+  operations: readonly ProjectedOperation[],
+  pathMap: (typeof PATH_MAPS)[number]
 ): JsonObject => {
-  const { paths } = document;
+  const paths = document[pathMap];
   const picked: JsonObject = {};
   for (const { method, path } of operations) {
     const item = resolvePathItem(document, isJsonObject(paths) ? paths[path] : undefined);
@@ -161,8 +166,13 @@ export const projectSpec = (
     info: { title: isJsonObject(info) ? info.title : undefined },
     ...(servers === undefined ? {} : { servers }),
     ...(security === undefined ? {} : { security }),
-    paths: pickPaths(document, operations),
+    paths: pickPaths(document, operations, 'paths'),
   }) as JsonObject;
+  // Added after normalizing, which drops `x-` keys; left out when empty, as in most specs.
+  const msPaths = pickPaths(document, operations, 'x-ms-paths');
+  if (Object.keys(msPaths).length > 0) {
+    projected['x-ms-paths'] = normalizeSpecNode(msPaths, true);
+  }
 
   const kept = new Set<string>();
   const queue: unknown[] = [projected];
@@ -179,7 +189,11 @@ export const projectSpec = (
   };
 
   const schemeNames = new Set(securitySchemeNames(security));
-  for (const item of Object.values(projected.paths as JsonObject)) {
+  const pathItems = PATH_MAPS.flatMap((pathMap) => {
+    const items = projected[pathMap];
+    return isJsonObject(items) ? Object.values(items) : [];
+  });
+  for (const item of pathItems) {
     for (const operation of Object.values(item as JsonObject)) {
       if (isJsonObject(operation)) {
         securitySchemeNames(operation.security).forEach((name) => schemeNames.add(name));

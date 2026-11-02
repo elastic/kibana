@@ -238,4 +238,40 @@ describe('projectSpec', () => {
     expect(projected.components).toEqual({ schemas: { Thing: { type: 'object' } } });
     expect(loadContractOperations(projected)).toHaveLength(1);
   });
+
+  it('keeps operations under x-ms-paths, with what they reference', () => {
+    const azure = {
+      openapi: '3.0.3',
+      info: { title: 'Blobs', version: '1' },
+      paths: {},
+      'x-ms-paths': {
+        '/?comp=list': {
+          get: {
+            'x-ms-pageable': { nextLinkName: 'NextMarker' },
+            responses: { '200': ok({ $ref: '#/components/schemas/List' }) },
+          },
+        },
+        '/?comp=properties': { get: { responses: { '200': ok({ type: 'object' }) } } },
+      },
+      components: { schemas: { List: { type: 'object' } } },
+    };
+
+    const projected = projectSpec(azure, [{ method: 'get', path: '/?comp=list' }]);
+
+    expect(projected.paths).toEqual({});
+    expect(projected['x-ms-paths']).toEqual({
+      '/?comp=list': {
+        get: {
+          'x-ms-pageable': { nextLinkName: 'NextMarker' },
+          responses: { '200': okProjected({ $ref: '#/components/schemas/List' }) },
+        },
+      },
+    });
+    expect(projected.components).toEqual({ schemas: { List: { type: 'object' } } });
+    expect(loadContractOperations(projected)).toHaveLength(1);
+  });
+
+  it('leaves out x-ms-paths when no operation is under it', () => {
+    expect(projectSpec(document, operations)).not.toHaveProperty(['x-ms-paths']);
+  });
 });
