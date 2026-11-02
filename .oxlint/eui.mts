@@ -18,6 +18,7 @@ export const euiRules: DummyRuleMap = {
   '@elastic/eui/no-deprecated-icon-aliases': 'warn',
   '@elastic/eui/no-nested-copy-tooltip': 'warn',
   '@elastic/eui/no-nested-interactive-element': 'warn',
+  '@elastic/eui/no-removed-icons': 'error',
   '@elastic/eui/no-static-z-index': 'warn',
   '@elastic/eui/prefer-tooltip-trigger-focus-test-utility': 'warn',
   '@elastic/eui/require-href-for-link': 'warn',
