@@ -11,13 +11,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditTitle,
+  EuiSpacer,
   EuiSuperDatePicker,
+  EuiTextArea,
 } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/app-menu';
 import { AppMenu } from '@kbn/core-chrome-app-menu';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import useObservable from 'react-use/lib/useObservable';
+import { MAX_DESCRIPTION_LENGTH } from '../../common/constants';
 import type { InputCellDefinition } from '../../common/types';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { useNotebookServices } from '../services';
@@ -55,6 +58,7 @@ export const NotebookHeader = ({
   const { store, scheduler } = useNotebook();
   const { core } = useNotebookServices();
   const title = useStateFromPublishingSubject(store.title$);
+  const description = useStateFromPublishingSubject(store.description$);
   const cells = useStateFromPublishingSubject(store.cells$);
   const isDirty = useObservable(store.isDirty$, false);
   const pinnedTime = findPinnedTimeCell(cells);
@@ -98,35 +102,54 @@ export const NotebookHeader = ({
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
+    <>
       <AppMenu setAppMenu={core.chrome.setAppMenu} config={appMenu} />
       {isSettingsOpen && <NotebookSettingsFlyout onClose={() => setIsSettingsOpen(false)} />}
-      <EuiFlexItem grow css={{ minWidth: 240 }}>
-        <EuiInlineEditTitle
-          heading="h1"
-          size="m"
-          inputAriaLabel={i18n.translate('xpack.notebook.header.titleAriaLabel', {
-            defaultMessage: 'Notebook title',
-          })}
-          defaultValue={title}
-          onSave={(next) => store.setTitle(next)}
-          data-test-subj="notebookTitle"
-        />
-      </EuiFlexItem>
-      {isDirty && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="warning" data-test-subj="notebookDirty">
-            {i18n.translate('xpack.notebook.header.unsaved', {
-              defaultMessage: 'Unsaved changes',
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
+        <EuiFlexItem grow css={{ minWidth: 240 }}>
+          <EuiInlineEditTitle
+            heading="h1"
+            size="m"
+            inputAriaLabel={i18n.translate('xpack.notebook.header.titleAriaLabel', {
+              defaultMessage: 'Notebook title',
             })}
-          </EuiBadge>
+            defaultValue={title}
+            onSave={(next) => store.setTitle(next)}
+            data-test-subj="notebookTitle"
+          />
         </EuiFlexItem>
-      )}
-      {pinnedTime && (
-        <EuiFlexItem grow={false}>
-          <PinnedTimePicker cell={pinnedTime} />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        {isDirty && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning" data-test-subj="notebookDirty">
+              {i18n.translate('xpack.notebook.header.unsaved', {
+                defaultMessage: 'Unsaved changes',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+        {pinnedTime && (
+          <EuiFlexItem grow={false}>
+            <PinnedTimePicker cell={pinnedTime} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiTextArea
+        fullWidth
+        compressed
+        rows={2}
+        resize="vertical"
+        maxLength={MAX_DESCRIPTION_LENGTH}
+        placeholder={i18n.translate('xpack.notebook.header.descriptionPlaceholder', {
+          defaultMessage: 'Add a description',
+        })}
+        aria-label={i18n.translate('xpack.notebook.header.descriptionAriaLabel', {
+          defaultMessage: 'Notebook description',
+        })}
+        value={description ?? ''}
+        onChange={(event) => store.setDescription(event.target.value)}
+        data-test-subj="notebookDescription"
+      />
+    </>
   );
 };

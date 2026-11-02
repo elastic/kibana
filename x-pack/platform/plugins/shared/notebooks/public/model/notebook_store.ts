@@ -88,6 +88,10 @@ export class NotebookStore {
     this.title$.next(title);
   }
 
+  setDescription(description: string): void {
+    this.description$.next(description);
+  }
+
   updateCell(id: string, update: (cell: CellDefinition) => CellDefinition): void {
     const cells = this.cells$.getValue();
     const cell = cells[id];

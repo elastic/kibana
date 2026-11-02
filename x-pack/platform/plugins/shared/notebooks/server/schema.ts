@@ -6,10 +6,10 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
+import { MAX_DESCRIPTION_LENGTH } from '../common/constants';
 
 export const MAX_CELLS = 200;
 export const MAX_TITLE_LENGTH = 1024;
-export const MAX_DESCRIPTION_LENGTH = 10_000;
 export const MAX_QUERY_LENGTH = 20_000;
 export const MAX_MARKDOWN_LENGTH = 100_000;
 export const MAX_LENS_ATTRIBUTES_LENGTH = 200_000;
