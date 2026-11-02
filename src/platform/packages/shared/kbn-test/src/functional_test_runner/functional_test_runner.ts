@@ -8,6 +8,7 @@
  */
 
 import { writeFileSync, mkdirSync } from 'fs';
+import { createHash } from 'crypto';
 import Path, { dirname } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withTimeout } from '@kbn/std';
@@ -29,6 +30,8 @@ import {
   ftrTimingEnabled,
   activateTiming,
 } from './lib';
+import { WaitRecorder } from './lib/wait_recorder';
+import { BrowserVideoRecorder } from './lib/browser_video_recorder';
 import { createEsClientForFtrConfig } from '../ftr_es_client';
 import { reconcileRetryJunitReports } from '../mocha';
 
@@ -108,6 +111,52 @@ export class FunctionalTestRunner {
 
     return await this.runHarness({ realServices }, async (lifecycle, coreProviders) => {
       SuiteTracker.startTracking(lifecycle, this.config.path);
+      const recordVideo =
+        process.env.FTR_RECORD_VIDEO === '1' || this.config.get('waitRecording.video.enabled');
+      if (
+        realServices &&
+        !this.config.get('mochaOpts.dryRun') &&
+        (recordVideo ||
+          process.env.FTR_RECORD_WAITS === '1' ||
+          this.config.get('waitRecording.enabled'))
+      ) {
+        lifecycle.waitRecorder = new WaitRecorder(this.config.path);
+        const relativeConfigPath = Path.relative(REPO_ROOT, this.config.path);
+        const configDirectory =
+          relativeConfigPath.startsWith(`..${Path.sep}`) || Path.isAbsolute(relativeConfigPath)
+            ? Path.join('external', createHash('sha256').update(this.config.path).digest('hex'))
+            : relativeConfigPath;
+        const directory = Path.resolve(
+          process.env.FTR_WAIT_RECORDING_DIRECTORY || this.config.get('waitRecording.directory'),
+          configDirectory,
+          `${Date.now()}-${process.pid}`
+        );
+        if (recordVideo) {
+          lifecycle.browserVideoRecorder = new BrowserVideoRecorder(
+            lifecycle.waitRecorder,
+            directory,
+            {
+              frameRate: this.config.get('waitRecording.video.frameRate'),
+              noise: this.config.get('waitRecording.video.noise'),
+              minimumFreezeSeconds: this.config.get('waitRecording.video.minimumFreezeSeconds'),
+              ffmpegPath:
+                process.env.FTR_FFMPEG_PATH || this.config.get('waitRecording.video.ffmpegPath'),
+            },
+            this.log
+          );
+        }
+        lifecycle.cleanup.add(async () => {
+          try {
+            await lifecycle.browserVideoRecorder?.finish();
+          } finally {
+            const reportPath = lifecycle.waitRecorder?.write(
+              directory,
+              lifecycle.browserVideoRecorder?.unchangedIntervals
+            );
+            if (reportPath) this.log.info(`FTR wait recording written to ${reportPath}`);
+          }
+        });
+      }
 
       const providers = realServices
         ? new ProviderCollection(this.log, [
@@ -204,16 +253,21 @@ export class FunctionalTestRunner {
       }
 
       this.log.info('Starting tests');
+      await lifecycle.browserVideoRecorder?.prepare();
       if (ftrTimingEnabled) {
         activateTiming();
       }
-      return await runTests(
-        lifecycle,
-        mocha,
-        this.log,
-        { abortOnTimeout: this.config.get('mochaOpts.abortOnTimeout') },
-        abortSignal
-      );
+      try {
+        return await runTests(
+          lifecycle,
+          mocha,
+          this.log,
+          { abortOnTimeout: this.config.get('mochaOpts.abortOnTimeout') },
+          abortSignal
+        );
+      } finally {
+        await lifecycle.browserVideoRecorder?.finish();
+      }
     });
   }
 

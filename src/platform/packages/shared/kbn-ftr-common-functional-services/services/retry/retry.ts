@@ -47,6 +47,7 @@ export class RetryService extends FtrService {
     return await retryForSuccess<T>(this.log, {
       ...getRetryOptions(optionsOrOnFailureBlock, retryDelay),
       timeout,
+      lifecycle: this.ctx.getService('lifecycle'),
       methodName: 'retry.tryForTime',
       block,
     });
@@ -64,6 +65,7 @@ export class RetryService extends FtrService {
     return await retryForSuccess(this.log, {
       ...options,
       timeout,
+      lifecycle: this.ctx.getService('lifecycle'),
       methodName: 'retry.try',
       block,
     });
@@ -84,6 +86,7 @@ export class RetryService extends FtrService {
   ) {
     await retryForTruthy(this.log, {
       timeout,
+      lifecycle: this.ctx.getService('lifecycle'),
       methodName: 'retry.waitForWithTimeout',
       description,
       block,
@@ -98,6 +101,7 @@ export class RetryService extends FtrService {
   ) {
     await retryForTruthy(this.log, {
       timeout: this.config.get('timeouts.waitFor'),
+      lifecycle: this.ctx.getService('lifecycle'),
       methodName: 'retry.waitFor',
       description,
       block,
