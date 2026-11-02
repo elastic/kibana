@@ -75,12 +75,13 @@ const EntityGridActionsCell = ({ rowIndex }: EuiDataGridCellValueElementProps) =
   const { rows, rowActions } = useEntityGridView();
   const row = rows[rowIndex];
   if (!row || !rowActions) return null;
-  const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat } = rowActions;
+  const { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat, onAddToCase } = rowActions;
   return (
     <RowActionsCell
       onInvestigateInTimeline={onInvestigateInTimeline && (() => onInvestigateInTimeline(row))}
       onOpenEntityGraph={() => onOpenEntityGraph(row)}
       onAddToChat={onAddToChat && (() => onAddToChat(row))}
+      onAddToCase={onAddToCase && (() => onAddToCase(row))}
     />
   );
 };
@@ -384,6 +385,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
         <EntityGridRowsContext.Provider value={rowsContext}>
           <EuiDataGrid
             aria-label={GRID_ARIA_LABEL}
+            data-test-subj="entityAnalyticsEntitiesGrid"
             leadingControlColumns={
               isIndividualRows
                 ? INDIVIDUAL_LEADING_CONTROL_COLUMNS

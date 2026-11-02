@@ -54,8 +54,10 @@ import {
   INDIVIDUAL_ROWS_COLUMNS,
   RESOLVED_ROWS_COLUMNS,
   getEntityId,
+  getNumber,
   getString,
   ENTITY_TYPE_FIELD,
+  RISK_SCORE_NORM_FIELD,
 } from '../components/home/entities_grid';
 import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
 import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
@@ -87,6 +89,11 @@ import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 import { usePinnedBarsHeight } from '../components/home/use_pinned_bars_height';
 import { GenerateAiBriefButton } from '../components/home/ai_brief/generate_ai_brief_button';
 import { useKibana } from '../../common/lib/kibana';
+import { getRiskLevel } from '../../../common/entity_analytics/risk_engine/risk_levels';
+import { useInvalidateEntityGrid } from '../components/home/entities_grid/hooks/use_invalidate_entity_grid';
+import { useCanAttachToCase } from '../../cases/attachments/hooks/use_can_attach_to_case';
+import { generateEntityAttachmentsWithoutOwner } from '../../cases/attachments/entity';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
@@ -240,6 +247,10 @@ const NO_ALERTS_ACCESS_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsAccess',
   { defaultMessage: 'Requires read access to alerts' }
 );
+const NO_ALERTS_INDEX_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsIndex',
+  { defaultMessage: 'Requires detection alerts' }
+);
 const NO_ANOMALIES_ACCESS_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.tiles.noAnomaliesAccess',
   { defaultMessage: 'Requires read access to ML anomalies' }
@@ -382,7 +393,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   } = useFlyoutApi();
   const { investigateInTimeline } = useInvestigateInTimeline();
   const euidApi = useEntityStoreEuidApi();
-  const { agentBuilder } = useKibana().services;
+  const { agentBuilder, cases } = useKibana().services;
+  const invalidateEntityGrid = useInvalidateEntityGrid();
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
+    onSuccess: invalidateEntityGrid,
+  });
+  const entityAttachmentsEnabled = useIsExperimentalFeatureEnabled('entityAttachmentsEnabled');
+  const canAttachToCase = useCanAttachToCase();
+  const canAddToCase =
+    entityAttachmentsEnabled && cases.config.attachmentsEnabled && canAttachToCase;
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const reportAddToChat = useReportAddToChat();
   const {
@@ -535,9 +554,30 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             });
           }
         : undefined,
+      onAddToCase: canAddToCase
+        ? (row) => {
+            const entity = getRowEntity(row);
+            if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
+            const { entityId, entityName, entityType } = entity;
+            // The same payload the entity flyouts attach, risk included.
+            const riskScore = getNumber(row, RISK_SCORE_NORM_FIELD);
+            selectCaseModal.open({
+              getAttachments: () =>
+                generateEntityAttachmentsWithoutOwner({
+                  id: entityId,
+                  name: entityName,
+                  type: entityType,
+                  riskScore,
+                  riskLevel: riskScore != null ? getRiskLevel(riskScore) : undefined,
+                }),
+            });
+          }
+        : undefined,
     }),
     [
       agentBuilder,
+      canAddToCase,
+      selectCaseModal,
       canReadTimeline,
       euidApi,
       investigateInTimeline,
@@ -623,6 +663,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
     isTimedOut: alertBasedTimedOut,
+    isMissingIndex: alertBasedMissingIndex,
     error: alertBasedError,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
@@ -1014,11 +1055,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isLoading: alertBasedLoading,
         hasCount: alertBasedHasCount,
         entityIds: severeAlertsEntityIds,
-        isUnavailable: Boolean(alertBasedError),
+        // Without an alerts index the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(alertBasedError) || alertBasedMissingIndex,
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
           ? TILE_TIMEOUT_MESSAGE
+          : alertBasedMissingIndex
+          ? NO_ALERTS_INDEX_MESSAGE
           : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -1174,11 +1218,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
         isLoading: alertBasedLoading,
         hasCount: alertBasedHasCount,
         entityIds: watchlistedEntityIds,
-        isUnavailable: Boolean(alertBasedError),
+        // Without an alerts index the tile shows 0, which isn't a real count.
+        isUnavailable: Boolean(alertBasedError) || alertBasedMissingIndex,
         noDataMessage: !canReadAlerts
           ? NO_ALERTS_ACCESS_MESSAGE
           : alertBasedTimedOut
           ? TILE_TIMEOUT_MESSAGE
+          : alertBasedMissingIndex
+          ? NO_ALERTS_INDEX_MESSAGE
           : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -1243,6 +1290,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       alertsTrend,
       alertBasedLoading,
       alertBasedTimedOut,
+      alertBasedMissingIndex,
       isDeltaLoading,
       alertBasedHistoryMissing,
       anomaliesCount,
