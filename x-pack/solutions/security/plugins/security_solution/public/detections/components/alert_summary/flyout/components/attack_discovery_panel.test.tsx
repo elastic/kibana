@@ -14,20 +14,20 @@ import {
   AttackDiscoveryPanel,
 } from './attack_discovery_panel';
 import { useNavigateTo } from '@kbn/security-solution-navigation';
-import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
-import { useIdsFromUrl } from '../../../attack_discovery/pages/results/history/use_ids_from_url';
-import { useAttackDiscoveryHistoryTimerange } from '../../../attack_discovery/pages/use_attack_discovery_history_timerange';
+import { useFindAttackDiscoveries } from '../../../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useIdsFromUrl } from '../../../../../attack_discovery/pages/results/history/use_ids_from_url';
+import { useAttackDiscoveryHistoryTimerange } from '../../../../../attack_discovery/pages/use_attack_discovery_history_timerange';
 import { ATTACK_DISCOVERY_DETAILS_ALERTS_BADGE_TEST_ID } from './attack_discovery_details';
 
-jest.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
+jest.mock('../../../../../attack_discovery/pages/use_find_attack_discoveries', () => ({
   useFindAttackDiscoveries: jest.fn(),
 }));
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useLocation: jest.fn().mockReturnValue({ pathname: '/test' }),
 }));
-jest.mock('../../../attack_discovery/pages/results/history/use_ids_from_url');
-jest.mock('../../../attack_discovery/pages/use_attack_discovery_history_timerange');
+jest.mock('../../../../../attack_discovery/pages/results/history/use_ids_from_url');
+jest.mock('../../../../../attack_discovery/pages/use_attack_discovery_history_timerange');
 jest.mock('@kbn/security-solution-navigation');
 
 const mockSetIdsUrl = jest.fn();

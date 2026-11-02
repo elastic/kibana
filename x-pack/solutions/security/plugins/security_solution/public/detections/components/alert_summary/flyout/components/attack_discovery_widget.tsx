@@ -19,8 +19,8 @@ import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { AttackDiscoveryPanel } from './attack_discovery_panel';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useFindAttackDiscoveries } from '../../../../../attack_discovery/pages/use_find_attack_discoveries';
 
 export const ATTACK_DISCOVERY_NO_RESULTS_TEST_ID = 'ease-alert-flyout-attack-discovery-no-results';
 export const ATTACK_DISCOVERY_ACCORDION_TEST_ID = 'ease-alert-flyout-attack-discovery-accordion';

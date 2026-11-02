@@ -6,29 +6,18 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { EasePanel, FLYOUT_BODY_TEST_ID } from '.';
-import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import { TestProviders } from '../../common/mock';
-import { mockDataFormattedForFieldBrowser } from '../document_details/shared/mocks/mock_data_formatted_for_field_browser';
-import { type FlyoutPanelHistory, useExpandableFlyoutHistory } from '@kbn/expandable-flyout';
-import {
-  COLLAPSE_DETAILS_BUTTON_TEST_ID,
-  EXPAND_DETAILS_BUTTON_TEST_ID,
-  FLYOUT_HISTORY_BUTTON_TEST_ID,
-} from '../shared/components/test_ids';
+import { fireEvent, render } from '@testing-library/react';
+import { EaseFlyout } from './ease_flyout';
+import { FLYOUT_BODY_TEST_ID, FLYOUT_TEST_ID } from './test_ids';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { TestProviders } from '../../../../common/mock';
+import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { useEaseDetailsContext } from './context';
 import { TAKE_ACTION_BUTTON_TEST_ID } from './components/take_action_button';
-import { mockDataAsNestedObject } from '../document_details/shared/mocks/mock_data_as_nested_object';
-import { mockSearchHit } from '../document_details/shared/mocks/mock_search_hit';
+import { mockDataAsNestedObject } from '../../../../flyout/document_details/shared/mocks/mock_data_as_nested_object';
+import { mockSearchHit } from '../../../../flyout/document_details/shared/mocks/mock_search_hit';
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn().mockReturnValue({ closeLeftPanel: jest.fn() }),
-  useExpandableFlyoutHistory: jest.fn(),
-  useExpandableFlyoutState: jest.fn().mockReturnValue({ left: {} }),
-}));
-
-jest.mock('../../common/hooks/use_ai_connectors', () => ({
+jest.mock('../../../../common/hooks/use_ai_connectors', () => ({
   useAIConnectors: jest.fn().mockReturnValue({
     aiConnectors: [
       {
@@ -42,7 +31,10 @@ jest.mock('../../common/hooks/use_ai_connectors', () => ({
   }),
 }));
 
-jest.mock('./context');
+jest.mock('./context', () => ({
+  EaseDetailsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useEaseDetailsContext: jest.fn(),
+}));
 jest.mock('./components/attack_discovery_widget', () => ({
   AttackDiscoveryWidget: jest.fn(),
 }));
@@ -66,24 +58,16 @@ const mockedUseKibana = {
     },
   },
 };
-jest.mock('../../common/lib/kibana', () => {
+jest.mock('../../../../common/lib/kibana', () => {
   return {
-    ...jest.requireActual('../../common/lib/kibana'),
+    ...jest.requireActual('../../../../common/lib/kibana'),
     useKibana: () => mockedUseKibana,
   };
 });
 
-describe('EasePanel', () => {
+describe('EaseFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    const flyoutHistory: FlyoutPanelHistory[] = [
-      { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
-    ];
-    (useExpandableFlyoutHistory as jest.Mock).mockReturnValue(flyoutHistory);
-  });
-
-  it('renders the EasePanel component', () => {
     (useEaseDetailsContext as jest.Mock).mockReturnValue({
       dataAsNestedObject: mockDataAsNestedObject,
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
@@ -91,17 +75,16 @@ describe('EasePanel', () => {
       investigationFields: [],
       searchHit: mockSearchHit,
     });
+  });
 
-    const { getByTestId, queryByTestId } = render(
+  it('renders the EASE flyout content', () => {
+    const { getByTestId } = render(
       <TestProviders>
-        <EasePanel />
+        <EaseFlyout documentId="alert-id" onClose={jest.fn()} />
       </TestProviders>
     );
 
-    expect(queryByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
-
-    expect(getByTestId(FLYOUT_HISTORY_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_TEST_ID)).toBeInTheDocument();
 
     expect(getByTestId(FLYOUT_BODY_TEST_ID)).toHaveTextContent('AI summary');
     expect(getByTestId(FLYOUT_BODY_TEST_ID)).toHaveTextContent('Attack Discovery');
@@ -109,5 +92,18 @@ describe('EasePanel', () => {
     expect(getByTestId(FLYOUT_BODY_TEST_ID)).toHaveTextContent('Suggested prompts');
 
     expect(getByTestId(TAKE_ACTION_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('calls onClose when the flyout is closed', () => {
+    const onClose = jest.fn();
+    const { getByTestId } = render(
+      <TestProviders>
+        <EaseFlyout documentId="alert-id" onClose={onClose} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('euiFlyoutCloseButton'));
+
+    expect(onClose).toHaveBeenCalled();
   });
 });
