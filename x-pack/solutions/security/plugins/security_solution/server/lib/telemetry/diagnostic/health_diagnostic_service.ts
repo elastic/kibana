@@ -435,7 +435,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
           return true;
         }
         const { name, scheduleCron, enabled, expiresAt, stackVersions } = query;
-        if (expiresAt !== undefined && toDateOnly(now) > expiresAt) {
+        if (expiresAt !== undefined && moment.utc(now).isAfter(moment.utc(expiresAt), 'day')) {
           this.logger.debug('Skipping expired health diagnostic query', {
             queryId: (query as { id?: string }).id,
             name,
