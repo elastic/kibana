@@ -6,7 +6,8 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import type { NightshiftSource, RecommendedSource } from '@kbn/nightshift-shared';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
+import type { RecommendedSource } from '@kbn/nightshift-sources-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';

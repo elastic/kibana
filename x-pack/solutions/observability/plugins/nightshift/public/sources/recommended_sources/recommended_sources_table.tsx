@@ -21,7 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { RecommendedSource } from '@kbn/nightshift-shared';
+import type { RecommendedSource } from '@kbn/nightshift-sources-plugin/public';
 import React, { useEffect, useRef, useState } from 'react';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useCreateSources } from '../../data/sources/use_create_sources';
@@ -75,7 +75,7 @@ const toRecommendedDraft = ({
 }: RecommendedSource): SourceDraft => ({
   draftId: getRecommendedDraftId(id),
   title,
-  description,
+  description: description ?? '',
   tags,
   esql,
   origin: 'recommended',

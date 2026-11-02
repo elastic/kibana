@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RecommendedSource } from '@kbn/nightshift-shared';
+import type { RecommendedSource } from '@kbn/nightshift-sources-plugin/public';
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
@@ -21,7 +21,7 @@ export const useRecommendedSources = () => {
     queryFn: async ({ signal }: QueryFunctionContext) => {
       const client = await nightshiftSources.getClient();
       const { recommendations } = await client.fetch(
-        'GET /internal/nightshift/sources/_recommended',
+        'GET /internal/nightshift/sources/_recommendations',
         { signal: signal ?? null }
       );
       return recommendations;
