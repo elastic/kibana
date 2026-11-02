@@ -74,7 +74,7 @@ function bindTaskRuntimeOnStart({ bind }: ContainerModuleLoadOptions) {
 /**
  * Everything needed to run this plugin's tasks, and nothing that serves requests, schedules tasks
  * or registers with Kibana-only services. Kibana loads it as part of the plugin module and a task
- * pod loads it on its own (`server/task_pod.ts`), so a task runs the same code in both places.
+ * pod loads it on its own (`server/tasks`), so a task runs the same code in both places.
  */
 export function bindTaskRuntime(options: ContainerModuleLoadOptions) {
   bindServices(options);

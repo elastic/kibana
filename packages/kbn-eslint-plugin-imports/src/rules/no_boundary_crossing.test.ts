@@ -9,11 +9,16 @@
 
 import { RuleTester } from 'eslint';
 import { rules } from '../..';
-import type { ModuleType } from '@kbn/repo-source-classifier';
 import dedent from 'dedent';
 import { formatSuggestions } from '../helpers/report';
 
-const make = (from: ModuleType, to: ModuleType, imp = 'import') => ({
+// `type|pkgId` stands for a plugin package's file of that type.
+const parse = (spec: string) => {
+  const [type, pkgId] = spec.split('|');
+  return pkgId ? { type, pkgInfo: { pkgId }, manifest: { type: 'plugin' } } : { type };
+};
+
+const make = (from: string, to: string, imp = 'import') => ({
   filename: `${from}.ts`,
   code: dedent`
     ${imp} '${to}'
@@ -27,9 +32,7 @@ jest.mock('../get_import_resolver', () => {
         resolve(req: string) {
           return {
             type: 'file',
-            absolute: {
-              type: req,
-            },
+            absolute: parse(req),
           };
         },
       };
@@ -42,9 +45,7 @@ jest.mock('../helpers/repo_source_classifier', () => {
     getRepoSourceClassifier() {
       return {
         classify(r: string | { type: string }) {
-          return {
-            type: typeof r === 'string' ? (r.endsWith('.ts') ? r.slice(0, -3) : r) : r.type,
-          };
+          return typeof r === 'string' ? parse(r.endsWith('.ts') ? r.slice(0, -3) : r) : r;
         },
       };
     },
@@ -99,6 +100,11 @@ for (const [name, tester] of [tsTester, babelTester]) {
         make('browser package', 'server package', 'import type { Foo } from'),
         make('server package', 'browser package', 'import type { Foo } from'),
         make('common package', 'browser package', 'import type { Foo } from'),
+        make('server package', 'tasks package'),
+        make('tasks package|a', 'common package'),
+        make('tasks package|a', 'server package|a'),
+        make('tasks package|a', 'tasks package|b'),
+        make('tasks package|a', 'server package|b', 'import type { Foo } from'),
       ],
 
       invalid: [
@@ -145,6 +151,24 @@ for (const [name, tester] of [tsTester, babelTester]) {
             {
               line: 1,
               messageId: 'TYPE_MISMATCH',
+            },
+          ],
+        },
+        {
+          ...make('tasks package|a', 'browser package'),
+          errors: [{ line: 1, messageId: 'TYPE_MISMATCH' }],
+        },
+        {
+          ...make('common package', 'tasks package|a'),
+          errors: [{ line: 1, messageId: 'TYPE_MISMATCH' }],
+        },
+        {
+          ...make('tasks package|a', 'server package|b'),
+          errors: [
+            {
+              line: 1,
+              messageId: 'CROSS_PLUGIN_TASKS',
+              data: { importedType: 'server package', pkgId: 'b' },
             },
           ],
         },

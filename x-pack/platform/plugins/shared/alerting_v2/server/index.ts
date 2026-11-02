@@ -14,7 +14,7 @@ import { bindContract } from './setup/bind_contract';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
-import { bindTaskRuntime } from './setup/bind_task_runtime';
+import { bindTaskRuntime } from './tasks';
 
 export const config: PluginConfigDescriptor<PluginConfig> = {
   schema: configSchema,
