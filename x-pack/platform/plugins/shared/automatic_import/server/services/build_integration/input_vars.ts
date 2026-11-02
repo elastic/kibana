@@ -1604,6 +1604,16 @@ const TCP_VARS: DataStreamManifestVar[] = [
     required: false,
     show_user: false,
   },
+  {
+    name: 'ssl',
+    type: 'yaml',
+    title: 'SSL Configuration',
+    description:
+      'SSL configuration options. See [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/configuration-ssl.html#ssl-common-config) for details.',
+    multi: false,
+    required: false,
+    show_user: false,
+  },
 ];
 
 const UDP_VARS: DataStreamManifestVar[] = [
