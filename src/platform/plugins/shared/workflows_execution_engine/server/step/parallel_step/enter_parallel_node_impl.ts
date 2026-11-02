@@ -755,6 +755,15 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
 
   private computeResumeAt(state: ParallelStepState): Date {
     const now = Date.now();
+
+    // Timeout deadlines may only cap a park taken because every in-flight branch
+    // is parked in a durable wait. When any branch would advance on the next tick
+    // (e.g. queued behind the concurrency window with a free slot), the step must
+    // re-tick at the floor — parking until a far-off timeout would strand it.
+    if (this.hasRunnableBranch(state)) {
+      return new Date(now + RETICK_FLOOR_MS);
+    }
+
     let earliest: number | undefined;
     const consider = (ts: number | undefined) => {
       if (ts === undefined || Number.isNaN(ts)) {
@@ -795,6 +804,38 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       return new Date(earliest);
     }
     return new Date(now + RETICK_FLOOR_MS);
+  }
+
+  /**
+   * Whether the next tick would advance at least one branch, mirroring the
+   * tick's scheduling gate: a started non-terminal branch that is not parked in
+   * a durable wait, or a pending branch that is not blocked by fail-fast and has
+   * a free concurrency slot.
+   */
+  private hasRunnableBranch(state: ParallelStepState): boolean {
+    const { max, countWaiting } = this.resolveConcurrency();
+    const failFast = this.resolveMode() === 'fail-fast';
+    const hasFailure = state.branches.some(
+      (b) => b.status === 'failed' || b.status === 'timed_out'
+    );
+    const slotsInUse = state.branches.filter((b) => {
+      if (TERMINAL_BRANCH_STATUSES.has(b.status)) return false;
+      if (b.status !== 'running') return false;
+      if (countWaiting) return true;
+      return !b.waiting;
+    }).length;
+    return state.branches.some((branch) => {
+      if (TERMINAL_BRANCH_STATUSES.has(branch.status)) {
+        return false;
+      }
+      if (branch.started) {
+        return !branch.waiting;
+      }
+      if (failFast && hasFailure) {
+        return false;
+      }
+      return slotsInUse < max;
+    });
   }
 
   /** Earliest idle deadline enclosing a branch: workflow timeout, step-timeout zones, and HITL. */
