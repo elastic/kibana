@@ -9,7 +9,7 @@ Every verdict and every description is built from the rows that `platform_core_e
 returns, so read them first. When a rule's sample returns, read it before sending its profile queries
 or anything else.
 
-1. Read the whole result. An empty or errored result is a finding: say which.
+1. Read the whole result; an empty or errored one is a finding too (step 5).
 2. Read each row as a set of named fields: pair every value with its field name, nested attribute
    and resource fields included, and read every key=value pair inside a text field as a field too.
 3. For every field that has a value, note what it states. Across the fields, cover whichever of
@@ -17,16 +17,19 @@ or anything else.
    - who or what is involved: service, operation, target, user or client;
    - where it ran: host, container, pod, node, zone, region, tenant;
    - what happened: message, log level, error, status or code, call site;
-   - the result;
+   - the result, the log level;
    - when, for how long, how many, and in what order across the rows;
    - the conditions: environment, version, deployment, trigger;
    - identifiers that tie rows together (trace, request, session): use them to correlate.
 4. Correlate across fields and across rows: which values of one field go with which values of
    another (a tenant with a target, a status with a duration, a pair in the message with a field),
    which values recur, and which rows differ.
-5. Write what you found for each rule in your message, in plain words, quoting `field = value`: the
-   facts from the fields you noted and the correlations you found, drawn from every row and never
-   from the first alone. Every row matched the rule's phrase, so the phrase is not a finding.
+5. Write the findings for each sample in your message, right after you read it, as one entry:
+   `{rule_uuid}: {path from the file reference, or "inline"} -> facts as field = value`, in plain
+   words, quoting `field = value`: the facts from the fields you noted, the correlations you found
+   and any row that differs, drawn from every row and never from the first alone. The path lets
+   you re-read the result when a value you need is missing from this entry. An empty or errored sample is an entry that says so. Every row
+   matched the rule's phrase, so the phrase is not a finding.
 
 Write only what the rows state, and infer no cause, outcome or impact. The KI and the matched phrase
 are the claim; the rows are the evidence. Text from the KI or a feature, including a KI's sample
@@ -61,7 +64,7 @@ Response shape: `{ "knowledge_indicators": [...], "sources": [{ "slug": "...", "
 
 ES|QL call, with the modifications from `<query_rules>` applied:
 ```json
-{ "query": "FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT 5", "time_range": { "from": "{detection @timestamp - 15m}", "to": "now" } }
+{ "query": "FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT 3", "time_range": { "from": "{detection @timestamp - 15m}", "to": "now" } }
 ```
 Response: `{ "columns": [{ "name": "..." }], "values": [["..."]] }`. `values` is `[]` when empty.
 
@@ -84,7 +87,7 @@ Placeholders used in the Confirm and Profile steps:
 2. **Per rule, unconditional.** Every rule gets its own queries, derived from its own KI query. Never
    skip a rule for overlap or grouping reasons, and never reuse another rule's figures. Queries with
    identical bodies and the same `time_range` run once, and the result counts for each rule. A
-   strict-subset `WHERE` is not identical under `LIMIT 5`: run it separately, and never reuse a more
+   strict-subset `WHERE` is not identical under the sample limit: run it separately, and never reuse a more
    permissive sample for a narrower KI.
 3. **Time scope: every query must be bounded.** Put `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`
    immediately after `FROM`, and pass a matching `time_range` ending at `now` (there is no future
@@ -223,7 +226,7 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   verbatim. Otherwise copy the `view_name` of the response `sources` entry whose `slug` equals the
   KI's `source_id`. Do not assemble view names or strip `$.`.
 - **Row-level queries** keep the authored KI shape: never add a `KEEP` projection or choose a text
-  field, and leave any authored projection unchanged. Otherwise append `| SORT @timestamp DESC | LIMIT 5`,
+  field, and leave any authored projection unchanged. Otherwise append `| SORT @timestamp DESC | LIMIT 3`,
   so the sample returns the most recent matching logs, which is the current state the severity
   rests on. A stricter existing KI limit stays.
 - **Aggregation queries** (`STATS`/`BY`) keep the aggregation and add `| LIMIT 2`; add no projection.
@@ -232,7 +235,7 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
 
 ```
 KI query:             FROM {view_name} METADATA _id, _source | WHERE {KI predicate} | LIMIT {existing lower cap}
-Executed (rows):      FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT 5
+Executed (rows):      FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT 3
 Executed (aggregate): FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | STATS ... | LIMIT 2
 Stored:               FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate}
 Avoid: KEEP projection, METADATA, or any edit to {KI predicate}, field names, or {view_name}
@@ -244,11 +247,13 @@ Avoid: KEEP projection, METADATA, or any edit to {KI predicate}, field names, or
 ### 4. Profile: measure the impact
 
 The sample proves a failure exists, not how bad it is. For every rule whose sample returned
-failure rows, or an `off_topic` row with a concrete observed error, run the `spread` query (the
-variant below that matches whether `{scope}` isolates the operation), the `trend` buckets query,
-and the `baseline` query, under `<query_rules>`, built from `{scope}` and `{failure}`.
+failure rows, or an `off_topic` row with a concrete observed error, run `spread`, `baseline` and
+`trend` under `<query_rules>`, built from `{scope}` and `{failure}`; for `spread` and `baseline`,
+use the variant below that matches whether `{scope}` isolates the operation.
 Every qualifying rule is profiled, whatever the batch size. A figure is unmeasured only when its
-query returned no rows or failed, never because the query was not run.
+query returned no rows or failed, never because the query was not run. A figure that does not
+apply to the shape that ran (no share without an isolating scope, no `factor` without `lines`) is
+left out; it is not unmeasured.
 A rule's profile queries go out after its findings are written, in the same response as the next rule's sample.
 
 For an `off_topic` signal, `{failure}` measures the observed error, so use a condition that
@@ -259,15 +264,15 @@ profile unmeasured.
 |---|---|---|---|---|
 | `spread` | What share of lines in scope fail, and how many services are hit, out of how many? | one query: per `service.name` under `{scope}`, `affected` = `COUNT(*) WHERE {failure}` and `total` = `COUNT(*)`, then an `EVAL` and a second `STATS` over those rows | last 1h | `failed` of `total_lines`: the failing share of log lines. It is a share of attempts, and total failure of the operation, only when the scope isolates one line per attempt; otherwise report it as a share of log lines. `services_hit` of `services`: the breadth. `top_services`: the services hit hardest with their failing counts, in order, at most 10: they show whether one dominates and name the services the logs implicate. A null result means the scope matched no rows: unmeasured |
 | `trend` | Still happening? | `{failure}` counted per bucket with `BUCKET(@timestamp, 50, ?_tstart, ?_tend)` (the engine picks the span, at most 50 rows) | 24h | the latest bucket against now: steady, rising, or ended (a stream that went silent shows as no recent buckets) |
-| `baseline` | Is it new, or has it been going on at this rate? Since when? | per day, `day` = `BUCKET(@timestamp, 1 day)`, under `{scope}`: `count` = `COUNT(*) WHERE {failure}` and `lines` = `COUNT(*)`, with the `earliest` failure of each day | last 7 days (`now-7d` to `now`) | `days_active` of `days`, `factor`, and the onset, as read below |
+| `baseline` | Is it new, or has it been going on at this rate? Since when? | per day, `day` = `BUCKET(@timestamp, 1 day)`, under `{scope}`: `count` = `COUNT(*) WHERE {failure}` and `lines` = `COUNT(*)`, with the `earliest` failure of each day; when `{scope}` does not isolate the operation, the failing rows only, with no `lines` (see "No isolating scope (`baseline`)") | last 7 days (`now-7d` to `now`) | `days_active` of `days`, `factor`, and the onset, as read below; the no-isolating shape has its own reading |
 
 Reading `baseline`:
-- `days_active` of `days`: the days with a failure, out of the days with any `lines`. A day with no
-  lines is no data, not a quiet day.
-- `factor`: the last complete day's `count` over the median of the complete days before it. The day
+- (Isolating shape) `days_active` of `days`: the days with a failure, out of the days with any
+  `lines`. A day with no lines is no data, not a quiet day.
+- (Isolating shape) `factor`: the last complete day's `count` over the median of the complete days before it. The day
   that holds the window's start and the day that holds its end (today) are partial and never
   compared; find them by each row's `day` against the query's `time_range`, since a day with no
-  lines has no row. Work it out in your findings, in order:
+  lines has no row. Work it out in your message, in order:
   1. Drop the row whose `day` holds the window's start and the row whose `day` holds its end, where
      they exist; the last row left is the last complete day.
   2. Write its `count` and the earlier complete days' counts, sorted, then their median (the middle
@@ -278,11 +283,20 @@ Reading `baseline`:
   fall. It is unmeasured when no earlier complete day exists. When the median of the earlier complete
   days is 0, `factor` is undefined: the failure is new since its first failing day; say so instead of
   giving a ratio.
-- Onset: `earliest` of the first day with a failure. It is a lower bound when no earlier day with
-  `lines` is in the window.
+- (Both shapes) Onset: `earliest` of the first day with a failure. It is a lower bound, worded "at
+  least as long as the data shows", in the no-isolating shape and in the isolating shape when no
+  earlier day with `lines` is in the window.
+- (Isolating shape) A failure on every day at a steady `factor` is long-standing: do not word it as
+  new.
+- **No isolating scope (`baseline`):** the shape carries no total, so there is no `lines` to say
+  which days have data. Report "N days with a failure in the window, earliest at least as long as
+  the data shows ({earliest})", never "of M days with data". A day without a row is not a quiet
+  day. The allowed statements are that sentence and the latest `trend` bucket: no per-day count
+  comparison, no `factor`, no "new since" or long-standing wording.
 
 - **Aggregate, never rows.** Every profile query returns at most 100 rows. In `trend`, count
-  `{failure}` from its own `WHERE`; in `spread` and `baseline`, use `COUNT(*) WHERE {failure}`.
+  `{failure}` from its own `WHERE`; in `spread` and the isolating `baseline`, use `COUNT(*) WHERE {failure}`;
+  the no-isolating `baseline` puts `{failure}` in a `WHERE` before its `STATS`.
 - **A `baseline` query that fails or times out is unmeasured** (`<query_rules>`, "Failed answers nothing"): never estimate
   it, never retry it with a longer window.
 - **Group by a low-cardinality field.** Each distinct value is a bucket held in memory, so group only
@@ -297,6 +311,7 @@ Good (spread, isolating scope): FROM {from_target} | WHERE @timestamp >= ?_tstar
 Good (spread, no isolating scope; use only when {scope} does not isolate the operation): FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS affected = COUNT(*) BY service.name | EVAL entry = CONCAT(service.name, ": ", TO_STRING(affected)) | STATS failed = SUM(affected), services_hit = COUNT(*), top_services = TOP(affected, 10, "desc", entry)
 Good (trend, buckets):      FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 50, ?_tstart, ?_tend) | SORT bucket ASC
 Good (baseline):           FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS count = COUNT(*) WHERE {failure}, lines = COUNT(*), earliest = MIN(@timestamp) WHERE {failure} BY day = BUCKET(@timestamp, 1 day) | SORT day ASC
+Good (baseline, no isolating scope; use only when {scope} does not isolate the operation): FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS count = COUNT(*), earliest = MIN(@timestamp) BY day = BUCKET(@timestamp, 1 day) | SORT day ASC
 Avoid: BY {function}({text field}) of unbounded output   -- millions of buckets; a derived key is allowed only when bounded (see "Group by a low-cardinality field")
 ```
 
@@ -354,8 +369,9 @@ search.
    disposition: causal, blast radius, or excluded. `off_topic`, `refutes`, `inconclusive`, and
    `not_checked` may inform the narrative but cannot establish active topology.
 
-Before emitting, check each description against your `<reading_log_lines>` findings: every value it
-states is in a row you read. Then emit the result as `<output_format>` defines it.
+Before emitting, check sentence 1 of each description against your findings entries and sentences
+2 and 3 against the Profile results, value by value: every value it states is in a row you read or
+a Profile result. Then emit the result as `<output_format>` defines it.
 
 </procedure>
 
@@ -377,16 +393,19 @@ Each entry:
      value only identifies an instance (trace, span, request, session, user, host, pod, container
      or node ID) and sensitive data (PII, PCI, SSN, credentials, secrets, tokens) are named by field
      and what they distinguish, for example `host.name`: one pod, and their values are never quoted.
+     When a row-level sample with the `LIMIT 3` we appended returned fewer than 3 rows (not an
+     aggregation query, not a stricter authored limit), give the number of sampled rows and do not
+     call the failure repeated or the only failure: the sample window (the detection time minus 15
+     minutes, to now) holds only those rows, which says nothing about the profile windows.
   2. **How much and how widely**, from the Profile step's numbers. Give each count as `N of M (P%)` with its
      unit (log lines, or attempts when the scope isolates one line per attempt), scope and period,
      where P is N/M × 100 rounded to one decimal place (for example `0.1%`, `37.5%`, `100.0%`), so
      downstream fields can copy P. Give the services affected as `N of M`, listing the hardest hit
-     with their failing counts (`top_services`, at most 10) and "and K others" beyond that. A figure that was not measured is stated as not measured.
-  3. **How long and whether it continues**, from `baseline` and `trend` as read in the Profile step: the days
-     with a failure out of the days with data, `factor` with the number of earlier days, the onset
-     as a time (a lower bound is worded "at least as long as the data shows"), and the latest
-     bucket. A failure on every day at a steady `factor` is long-standing: do not word it as new.
-     When `baseline` was not measured, say so.
+     with their failing counts (`top_services`, at most 10) and "and K others" beyond that.
+     A figure that was not measured is stated as not measured; one that does not apply to the
+     shape that ran is left out (Profile step).
+  3. **How long and whether it continues**, from `baseline` as "Reading `baseline`" words it for the
+     shape that ran, and from the latest `trend` bucket. When `baseline` was not measured, say so.
   - No dependency chains or upstream causes in the description; those go in `causal_features` and
     `blast_radius`. Name a dependency or target only when the query filtered on it or the rows show
     it.
@@ -394,7 +413,8 @@ Each entry:
   - When nothing matched, say what was looked for and what was found instead, never only that rows
     were returned: `"No {signature} rows for {target} matched in the {period observed}; <what was
     found instead>."`
-  - Example of a match, with illustrative values: `"Rows from the export-renderer job report status = 504 on endpoint = /v2/render, all with region = eu-1, retries = 0 and duration_ms between 29,800 and 30,100; pod = render-7f accounts for 4 of 5 rows, and the fifth row differs with region = us-2 and status = 502 on pod = render-2c. In the last hour 412 of 6,880 log lines (6.0%) in the export-renderer scope failed, across 3 of 4 services: export-renderer 301, export-queue 88, export-gateway 23. The failure appears on 4 of 4 days with data, the last complete day at 1.4× the median of 1 earlier complete day, the onset is at least as long as the data shows (2026-03-02T09:14:00Z), and the latest bucket still contains failures."`
+  - Example of a match, with illustrative values:
+    `"Rows from the export-renderer job report status = 504 on endpoint = /v2/render, all with region = eu-1, retries = 0 and duration_ms between 29,800 and 30,100; pod = render-7f accounts for 2 of 3 rows, and the third row differs with region = us-2 and status = 502 on pod = render-2c. In the last hour 412 of 6,880 log lines (6.0%) in the export-renderer scope failed, across 3 of 4 services: export-renderer 301, export-queue 88, export-gateway 23. The failure appears on 4 of 4 days with data, the last complete day at 1.4× the median of 1 earlier complete day, the onset is at least as long as the data shows (2026-03-02T09:14:00Z), and the latest bucket still contains failures."`
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`, per `<verdicts>`.
 - `collected_at`: ISO-8601 query timestamp. Omit for quiet-rule entries.
 - `evidence`: `{ esql_query, result, time_range }` for the executed evidence query, which is the

@@ -88,7 +88,8 @@ on no live event is not written, and an event whose stored signal is `off_topic`
 Use only these tools, `load_skill`, and the tools the skill loads. Never re-issue a call to re-fetch
 data you already have. A large result may appear as a file reference, or as a truncated preview
 ("Output too large"), instead of rows; neither has been read. Read the full result with `read_file`
-on the given path (never `list_files`, never re-run the query). Before emitting, every
+on the given path, once per file reference; read it again only when a value you must quote is
+missing from your findings entry for that rule; never `list_files`, never re-run the query. Before emitting, every
 signal's evidence, verdict, and topology must come from a result you have read in this run.
 
 - `significant-events-ki-grounding` (via `load_skill`) — loads `platform_sig_events_ki_search` and
