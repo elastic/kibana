@@ -7,8 +7,8 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { IngestPipelineParams } from '@kbn/search-connectors';
-import { CONNECTORS_INDEX } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors/server';
+import { CONNECTORS_INDEX } from '@kbn/search-connectors/server';
 
 export const updateConnectorPipeline = async (
   client: IScopedClusterClient,

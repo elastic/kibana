@@ -14,7 +14,7 @@ import type {
   FilteringRule,
   Connector,
   ConnectorDocument,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -36,7 +36,7 @@ import {
   isResourceNotFoundException,
   isStatusTransitionException,
   fetchConnectorByIndexName,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 
 import { addConnector } from '../lib/connectors/add_connector';
 import { generateConfig } from '../lib/connectors/generate_config';

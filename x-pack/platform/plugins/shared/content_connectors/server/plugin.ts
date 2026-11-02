@@ -12,7 +12,7 @@ import type {
   CoreStart,
   LoggerFactory,
 } from '@kbn/core/server';
-import type { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+import type { ConnectorServerSideDefinition } from '@kbn/search-connectors/server';
 import { isAgentlessEnabled } from '@kbn/fleet-plugin/server/services/utils/agentless';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
