@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
+import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import { FlyoutSessionContextProvider } from '../../session_context';
 import { useOpenFlyout } from './use_open_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
@@ -122,6 +125,77 @@ describe('useOpenFlyout', () => {
       'FLYOUT_CONTENT',
       expect.objectContaining({ size: 720, defaultSize: 's', onResize: expect.any(Function) })
     );
+  });
+
+  it('opens at a pinned session size instead of the persisted Security width', () => {
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout(), {
+      wrapper: ({ children }: PropsWithChildren) => (
+        <FlyoutSessionContextProvider value={{ session: 'start', size: 640 }}>
+          {children}
+        </FlyoutSessionContextProvider>
+      ),
+    });
+    result.current(<div />, { size: 's', session: 'start', maxWidth: 1200 });
+
+    const properties = mockOpenSystemFlyout.mock.calls[0][1];
+    expect(properties.size).toBe(640);
+    expect(properties.maxWidth).toBe(false);
+    expect(properties.defaultSize).toBe(640);
+    expect(properties.onResize).toBeUndefined();
+    expect(mockStorage.set).not.toHaveBeenCalled();
+
+    const openedSession = (flyoutProviders as jest.Mock).mock.calls[0][0].children.props.value;
+    expect(openedSession.size).toBeUndefined();
+    expect(openedSession.type).toBeUndefined();
+  });
+
+  it('accepts a named EUI size as the pinned session size', () => {
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+    const size: OverlaySystemFlyoutOpenOptions['size'] = 'm';
+
+    const { result } = renderHook(() => useOpenFlyout(), {
+      wrapper: ({ children }: PropsWithChildren) => (
+        <FlyoutSessionContextProvider value={{ session: 'start', size }}>
+          {children}
+        </FlyoutSessionContextProvider>
+      ),
+    });
+    result.current(<div />, { size: 's', session: 'start' });
+
+    const properties = mockOpenSystemFlyout.mock.calls[0][1];
+    expect(properties.size).toBe('m');
+    expect(properties.defaultSize).toBe('m');
+    expect(properties.maxWidth).toBe(false);
+  });
+
+  it('ignores a pinned session size for a child flyout', () => {
+    mockStorage.get.mockImplementation((key: string) =>
+      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
+    );
+    mockOpenSystemFlyout.mockReturnValue(createOverlayRef().ref);
+
+    const { result } = renderHook(() => useOpenFlyout(), {
+      wrapper: ({ children }: PropsWithChildren) => (
+        <FlyoutSessionContextProvider value={{ session: 'start', size: 640 }}>
+          {children}
+        </FlyoutSessionContextProvider>
+      ),
+    });
+    result.current(<div />, { size: 's', session: 'inherit' });
+
+    const properties = mockOpenSystemFlyout.mock.calls[0][1];
+    expect(properties.size).toBe('s');
+    expect(properties.defaultSize).toBeUndefined();
+    expect(properties.onResize).toBeUndefined();
+    expect(properties.maxWidth).toBeUndefined();
   });
 
   it('keeps the caller size when width persistence is disabled', () => {

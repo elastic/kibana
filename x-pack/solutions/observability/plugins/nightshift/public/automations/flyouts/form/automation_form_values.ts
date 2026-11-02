@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import {
+  parsePresetSchedule,
+  type PresetSchedule,
+} from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../hooks/use_automations';
 
-export type AlertStatus = 'any' | 'active' | 'inactive';
 export type ScheduleUnit = 'hour' | 'day' | 'week';
 export type InstructionMode = 'ask' | 'investigate';
 export type SlackTarget = 'channel' | 'self' | 'thread';
@@ -29,8 +32,8 @@ export type TriggerFormValues =
   | {
       kind: 'alert';
       ruleNamePattern: string;
+      ruleNames: string[];
       ruleTags: string[];
-      alertStatus: AlertStatus;
     }
   | {
       kind: 'every';
@@ -42,8 +45,13 @@ export type TriggerFormValues =
       endTime: string;
       timezone: string;
     }
-  | { kind: 'cron'; cronExpression: string; timezone: string }
-  | { kind: SlackTriggerKind; channels: string[]; users: string[]; messageFilter: string };
+  | {
+      kind: SlackTriggerKind;
+      channels: string[];
+      users: string[];
+      bots: string[];
+      messageFilter: string;
+    };
 
 export type SlackTriggerFormValues = Extract<TriggerFormValues, { kind: SlackTriggerKind }>;
 
@@ -70,18 +78,14 @@ export interface AutomationFormValues {
 }
 
 export const DEFAULT_TIMEZONE = 'UTC';
-export const DEFAULT_CRON = '0 9 * * *';
 const WEEKDAYS = [1, 2, 3, 4, 5];
 
 export const createTriggerFormValues = (kind: TriggerFormValues['kind']): TriggerFormValues => {
   if (isSlackTriggerKind(kind)) {
-    return { kind, channels: [], users: [], messageFilter: '' };
+    return { kind, channels: [], users: [], bots: [], messageFilter: '' };
   }
   if (kind === 'alert') {
-    return { kind, ruleNamePattern: '', ruleTags: [], alertStatus: 'any' };
-  }
-  if (kind === 'cron') {
-    return { kind, cronExpression: DEFAULT_CRON, timezone: DEFAULT_TIMEZONE };
+    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [] };
   }
   return {
     kind,
@@ -107,53 +111,73 @@ export const createAutomationFormValues = (): AutomationFormValues => ({
   isEnabled: false,
 });
 
-const parseDaysOfWeek = (field: string): number[] =>
-  field.split(',').flatMap((part) => {
-    const [from, to = from] = part.split('-').map(Number);
-    return Array.from({ length: Math.max(to - from + 1, 0) }, (_, index) => from + index);
-  });
+export const toPresetSchedule = (
+  trigger: Extract<TriggerFormValues, { kind: 'every' }>
+): PresetSchedule => {
+  const { timezone, time } = trigger;
+  if (trigger.unit === 'hour') {
+    return {
+      schedulePreset: 'hourly',
+      timezone,
+      ...(trigger.betweenHours
+        ? {
+            hourWindow: {
+              start: Number(trigger.startTime.slice(0, 2)),
+              end: Number(trigger.endTime.slice(0, 2)),
+            },
+          }
+        : {}),
+    };
+  }
+  return trigger.unit === 'week'
+    ? { schedulePreset: 'weekly', time, daysOfWeek: trigger.daysOfWeek, timezone }
+    : { schedulePreset: 'daily', time, timezone };
+};
 
 export const toAutomationFormValues = (automation: Automation): AutomationFormValues => {
   const row = automation.trigger.rows[0];
+  const [completion] = automation.completions;
   const schedule = row?.kind === 'schedule' ? row : undefined;
-  const cronFields = schedule?.cronExpression?.split(' ') ?? [];
-  const isHourly = schedule?.schedulePreset === 'hourly';
-  const isWeekly = schedule?.schedulePreset === 'weekly';
+  const parsed = schedule ? parsePresetSchedule(schedule) : undefined;
+  const preset = parsed?.success ? parsed.schedule : undefined;
   const trigger: TriggerFormValues | undefined =
     row?.kind === 'alert'
       ? {
           kind: 'alert',
           ruleNamePattern: row.ruleNamePattern ?? '',
+          ruleNames: row.ruleNames ?? [],
           ruleTags: row.tags ?? [],
-          alertStatus: row.alertStatus ?? 'any',
         }
       : row?.kind === 'slack'
       ? {
           kind: SLACK_EVENT_TO_FORM_KIND[row.event],
           channels: row.channels ?? [],
           users: row.users ?? [],
+          bots: row.bots ?? [],
           messageFilter: row.messageFilter ?? '',
         }
-      : schedule
-      ? isHourly || schedule.schedulePreset === 'daily' || isWeekly
-        ? {
-            kind: 'every',
-            unit: isHourly ? 'hour' : isWeekly ? 'week' : 'day',
-            time: `${(cronFields[1] ?? '9').padStart(2, '0')}:${(cronFields[0] ?? '0').padStart(
-              2,
-              '0'
-            )}`,
-            daysOfWeek: parseDaysOfWeek(cronFields[4] ?? '1,2,3,4,5'),
-            betweenHours: isHourly && cronFields[1] !== '*',
-            startTime: `${(cronFields[1]?.split('-')[0] ?? '9').padStart(2, '0')}:00`,
-            endTime: `${(cronFields[1]?.split('-')[1] ?? '17').padStart(2, '0')}:00`,
-            timezone: schedule.timezone ?? DEFAULT_TIMEZONE,
-          }
-        : {
-            kind: 'cron',
-            cronExpression: schedule.cronExpression ?? DEFAULT_CRON,
-            timezone: schedule.timezone ?? DEFAULT_TIMEZONE,
-          }
+      : preset
+      ? {
+          kind: 'every',
+          unit:
+            preset.schedulePreset === 'hourly'
+              ? 'hour'
+              : preset.schedulePreset === 'weekly'
+              ? 'week'
+              : 'day',
+          time: preset.schedulePreset === 'hourly' ? '09:00' : preset.time,
+          daysOfWeek: preset.schedulePreset === 'weekly' ? preset.daysOfWeek : WEEKDAYS,
+          betweenHours: preset.schedulePreset === 'hourly' && preset.hourWindow !== undefined,
+          startTime:
+            preset.schedulePreset === 'hourly' && preset.hourWindow
+              ? `${String(preset.hourWindow.start).padStart(2, '0')}:00`
+              : '09:00',
+          endTime:
+            preset.schedulePreset === 'hourly' && preset.hourWindow
+              ? `${String(preset.hourWindow.end).padStart(2, '0')}:00`
+              : '17:00',
+          timezone: preset.timezone ?? DEFAULT_TIMEZONE,
+        }
       : undefined;
 
   return {
@@ -165,12 +189,10 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
     instructions: automation.execution.promptTemplate ?? '',
     mode: automation.execution.reasoningMode === 'investigate' ? 'investigate' : 'ask',
     slackAction:
-      automation.completion.action === 'post_to_slack'
+      completion?.action === 'post_to_slack'
         ? {
-            target:
-              SLACK_TARGETS.find((target) => target === automation.completion.targetMode) ??
-              'channel',
-            destination: automation.completion.destination ?? '',
+            target: SLACK_TARGETS.find((target) => target === completion.targetMode) ?? 'channel',
+            destination: completion.destination ?? '',
           }
         : undefined,
     isEnabled: automation.isEnabled,

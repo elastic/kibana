@@ -138,6 +138,7 @@ export const useChangePointLensProps = ({
       },
       layers: chartLayers,
       fittingFunction: 'Linear',
+      areaFill: 'solid',
     };
 
     // builder.build() compiles the high-level LensXYConfig into a full LensSavedObjectAttributes

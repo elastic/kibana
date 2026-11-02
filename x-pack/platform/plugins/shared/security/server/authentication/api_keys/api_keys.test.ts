@@ -1278,6 +1278,29 @@ describe('API Keys', () => {
       });
     });
 
+    it('forwards refresh when provided and omits it otherwise', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValue({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+      });
+
+      await apiKeys.cloneAsInternalUser(request, { name: 'cloned-key' });
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenLastCalledWith(
+        expect.not.objectContaining({ querystring: expect.anything() })
+      );
+
+      await apiKeys.cloneAsInternalUser(request, { name: 'cloned-key', refresh: false });
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenLastCalledWith(
+        expect.objectContaining({ querystring: { refresh: false } })
+      );
+    });
+
     it('throws when ES clone endpoint fails', async () => {
       const apiKeyCredentials = encodeToBase64('key-id:key-secret');
       mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(

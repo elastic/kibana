@@ -11,8 +11,10 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentBuilderPlatformPluginSetup } from '@kbn/agent-builder-platform-plugin/server';
+import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ImpactReadClient } from './impact/services/impact_client';
 import type { SubjectsClient } from './subjects/services/subjects_client';
 import type { EscalationsService } from './escalations/services/escalations_service';
@@ -36,6 +38,11 @@ export interface AgenticInvestigationsSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
   /** Registers Impact workflow steps. */
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /**
+   * Reads the status of an investigation's workflow executions, which decides whether it is in
+   * progress. Without it no investigation is in progress.
+   */
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface AgenticInvestigationsStartDependencies {
@@ -47,6 +54,11 @@ export interface AgenticInvestigationsStartDependencies {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   proposals?: ProposalsPluginStart;
+  /**
+   * Names pills with Entity Store `entity.name`, the same field the entity flyout titles with.
+   * Optional: without it, pills keep the name stored on the impact.
+   */
+  entityStore?: EntityStoreStartContract;
   agentBuilder: AgentBuilderPluginStart;
 }
 

@@ -803,3 +803,49 @@ export const waitForStoreNotInstalled = async (
       `(required ${consecutiveRequired} consecutive confirmations, got ${consecutive})`
   );
 };
+
+/**
+ * Waits until the dual-process feature flag override is in effect on every Kibana instance.
+ *
+ * A 200 from the config overrides API only means the instance that served it applied the value
+ * in memory; the others pick it up from the persisted override on core's 10s poll. The status
+ * API reports the `user` engine's `nonPriority` block only when the flag evaluates true on the
+ * instance that served the read, and `null` when it does not, so this polls that read and requires
+ * the expected shape to hold continuously for longer than one poll period: by then every instance
+ * has polled at least once since the write, whichever ones happened to serve the reads. A response
+ * without the `user` engine (a non-200, or a store that is not installed) resets the window.
+ */
+export const waitForDualProcessFlag = async (
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  enabled: boolean,
+  {
+    stableForMs = 12_000,
+    intervalMs = 1_000,
+    // Stays under Scout's 60s test timeout so this error surfaces instead of a bare timeout.
+    timeoutMs = 40_000,
+  }: { stableForMs?: number; intervalMs?: number; timeoutMs?: number } = {}
+): Promise<void> => {
+  let stableSince: number | null = null;
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const { statusCode, body } = await getStatus(apiClient, headers);
+    const engine =
+      statusCode === 200 ? body.engines.find(({ type }) => type === 'user') : undefined;
+
+    if (engine && (engine.nonPriority !== null) === enabled) {
+      stableSince ??= Date.now();
+      if (Date.now() - stableSince >= stableForMs) return;
+    } else {
+      stableSince = null;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+
+  throw new Error(
+    `Timed out waiting for the dual-process flag to be ${enabled ? 'enabled' : 'disabled'} ` +
+      `on every instance after ${timeoutMs}ms (required ${stableForMs}ms of stable reads)`
+  );
+};

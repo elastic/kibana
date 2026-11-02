@@ -1080,6 +1080,7 @@ export class LensAttributes {
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,
+      areaFill: 'solid',
       axisTitlesVisibilitySettings: {
         x: false,
         yLeft: !this.isMultiSeries,

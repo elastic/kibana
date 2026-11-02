@@ -20,16 +20,10 @@ import {
  */
 export function configToAnnotatedYaml(config: SignificantEventsTuningConfig): string {
   return [
-    '# Significant Events Tuning',
+    '# Significant events tuning',
     '# Changes take effect on the next feature identification run or query search.',
     '',
     '# ── Feature Discovery ──',
-    '',
-    '# Number of documents sampled from ES per iteration (1-100)',
-    `sample_size: ${config.sample_size}`,
-    '',
-    '# Maximum LLM iterations per extraction task (1-20)',
-    `max_iterations: ${config.max_iterations}`,
     '',
     '# Days before an identified feature expires (min 1)',
     `feature_ttl_days: ${config.feature_ttl_days}`,

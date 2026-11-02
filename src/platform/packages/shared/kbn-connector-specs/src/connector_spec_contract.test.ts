@@ -113,6 +113,13 @@ describe('connector spec contracts', () => {
     }
   });
 
+  it.each(allSpecs)('%s forwards only lowercase non-credential headers', (_exportName, spec) => {
+    for (const name of spec.events?.headers ?? []) {
+      expect(name).toBe(name.toLowerCase());
+      expect(['authorization', 'cookie']).not.toContain(name);
+    }
+  });
+
   it('uses unique eventIds across connector specs', () => {
     const eventIdOwners = new Map<string, string>();
     const duplicates: string[] = [];

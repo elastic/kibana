@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentErrorBoundary } from './attachment_error_boundary';
+import { GroupedAttachmentList } from './grouped_attachment_list';
 import { selectGroupedAttachments } from './select_grouped_attachments';
 import type { FlyoutGroupedAttachments, FlyoutGroupedAttachmentsRegistry } from './types';
 
@@ -34,25 +35,9 @@ export const GroupedAttachmentsSection = memo<GroupedAttachmentsSectionProps>(
     }
 
     return (
-      <ul
+      <GroupedAttachmentList
         data-test-subj="groupedAttachmentsSection"
-        css={css`
-          margin: ${euiTheme.size.s} 0 0;
-          padding: 0;
-          list-style: none;
-          border: ${euiTheme.border.thin};
-          border-radius: 12px;
-          background: ${euiTheme.colors.emptyShade};
-          overflow: hidden;
-
-          &:empty {
-            display: none;
-          }
-
-          & > li + li {
-            border-top: ${euiTheme.border.thin};
-          }
-        `}
+        css={css({ marginTop: euiTheme.size.s })}
       >
         {groups.map(({ group, renderer: Renderer, attachments: groupAttachments }) => (
           <AttachmentErrorBoundary key={group}>
@@ -67,7 +52,7 @@ export const GroupedAttachmentsSection = memo<GroupedAttachmentsSectionProps>(
             </Suspense>
           </AttachmentErrorBoundary>
         ))}
-      </ul>
+      </GroupedAttachmentList>
     );
   }
 );

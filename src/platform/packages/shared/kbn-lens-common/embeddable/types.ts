@@ -29,7 +29,7 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
-  PublishesDataViews,
+  PublishesDataSources,
   PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
@@ -340,6 +340,7 @@ type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
 export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 'time_range'> & {
   hidePanelTitles?: boolean;
   timeRange?: TimeRange;
+  parentApi?: unknown;
 };
 
 /**
@@ -352,6 +353,8 @@ export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 't
 export type LensRuntimeState = Simplify<
   Omit<ComponentSerializedProps, 'attributes' | 'references'> & {
     attributes: NonNullable<LensSerializedState['attributes']>;
+    /** Set when the by-reference document failed to load and empty attributes were used instead */
+    loadError?: Error;
   } & Pick<
       LensComponentForwardedProps,
       'viewMode' | 'abortController' | 'executionContext' | 'forceDSL'
@@ -378,12 +381,13 @@ export interface LensInspectorAdapters {
 // there's some overlapping between this and the LensApi but they are shared references
 export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
-    PublishesDataViews &
+    PublishesDataSources<DataView> &
     VisualizationContextHelper & {
       esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+      loadError$: PublishingSubject<Error | undefined>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
-      disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
+      disableTriggers$: PublishingSubject<boolean>;
       dataLoading$: PublishingSubject<boolean | undefined>;
       hasRenderCompleted$: PublishingSubject<boolean>;
       isNewlyCreated$: PublishingSubject<boolean>;
@@ -398,13 +402,13 @@ export type LensInternalApi = Simplify<
       updateAbortController: (newAbortController: AbortController) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
-      updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;
       messages$: PublishingSubject<UserMessage[]>;
       updateMessages: (newMessages: UserMessage[]) => void;
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       blockingError$: PublishingSubject<Error | undefined>;
       updateBlockingError: (newBlockingError: Error | undefined) => void;
+      updateLoadError: (newLoadError: Error | undefined) => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
       updateEditingState: (inProgress: boolean) => void;
       isEditingInProgress: () => boolean;

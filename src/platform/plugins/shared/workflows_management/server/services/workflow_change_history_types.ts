@@ -18,11 +18,13 @@ import type {
   CoreAuthenticationService,
   ElasticsearchClient,
   KibanaRequest,
+  UserProfileServiceStart,
 } from '@kbn/core/server';
 
 export interface WorkflowChangeHistoryServiceInitializeParams {
   elasticsearchClient: ElasticsearchClient;
   authService: CoreAuthenticationService;
+  userProfileService: UserProfileServiceStart;
 }
 
 export interface IWorkflowChangeHistoryService {

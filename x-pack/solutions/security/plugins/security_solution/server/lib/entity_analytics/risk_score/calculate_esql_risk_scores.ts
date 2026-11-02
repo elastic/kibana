@@ -20,7 +20,7 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_ENTITY_ID } from '../../../../common/field_maps/field_names';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
@@ -37,7 +37,13 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
-import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
+import {
+  DEFAULT_ALERT_SAMPLE_SIZE,
+  MAX_INPUTS_COUNT,
+  RIEMANN_ZETA_S_VALUE,
+  getRiemannZetaValue,
+} from './constants';
+
 import { filterFromRange } from './helpers';
 import { applyScoreModifiers } from './apply_score_modifiers';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
@@ -45,6 +51,10 @@ import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privi
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
 >;
+
+// Ranks risk inputs by their numeric score and returns the input strings. Ranking the
+// strings themselves sorts them as text, which puts a score of 100 below 21 and 9 above 80.
+const RISK_INPUTS_TOP = `TOP(risk_score, ${MAX_INPUTS_COUNT}, "desc", input)`;
 
 const escapeEsqlStringLiteral = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -197,10 +207,11 @@ export const calculateScoresWithESQL = async (
           upper: afterKey?.[(EntityTypeToIdentifierField as Record<string, string>)[entityType]],
         };
 
+        const sampleSize = params.alertSampleSizePerShard || DEFAULT_ALERT_SAMPLE_SIZE;
         const query = getESQL(
           entityType as EntityType,
           bounds,
-          params.alertSampleSizePerShard || 10000,
+          sampleSize,
           params.pageSize,
           params.index
         );
@@ -211,7 +222,9 @@ export const calculateScoresWithESQL = async (
             query,
             filter: { bool: { filter: entityFilter } },
           })
-          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
+          .then((rs) =>
+            rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index, sampleSize))
+          )
 
           .then(async (riskScoreBuckets) => {
             const results = await applyScoreModifiers({
@@ -394,9 +407,9 @@ export const getESQL = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
-        risk_inputs = TOP(input, 10, "desc")
+        risk_inputs = ${RISK_INPUTS_TOP}
     BY ${identifierField}
     | SORT scores DESC
     | LIMIT ${pageSize}
@@ -406,9 +419,10 @@ export const getESQL = (
 };
 
 export const buildRiskScoreBucket =
-  (entityType: EntityType, index: string) =>
+  (entityType: EntityType, index: string, sampleSize: number) =>
   (row: FieldValue[]): RiskScoreBucket => {
     const [count, score, _inputs, entity] = row as [number, number, string | string[], string];
+    const zetaValue = getRiemannZetaValue(sampleSize);
 
     const inputs = [_inputs].flat().map((input, i) => {
       let parsedRiskInputData = JSON.parse('{}');
@@ -449,7 +463,7 @@ export const buildRiskScoreBucket =
         rule_name: ruleName,
         category,
         score: value,
-        contribution: currentScore / RIEMANN_ZETA_VALUE,
+        contribution: currentScore / zetaValue,
         index,
       };
     });
@@ -462,7 +476,7 @@ export const buildRiskScoreBucket =
         risk_details: {
           value: {
             score,
-            normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
+            normalized_score: score / zetaValue, // normalize value to be between 0-100
             notes: [],
             category_1_score: score, // Don't normalize here - will be normalized in calculate_risk_scores.ts
             category_1_count: count,
@@ -491,7 +505,9 @@ export const buildEuidRuntimeMappingWithStoredFieldFastPath = (
   entityType: EntityType
 ): { type: 'keyword'; script: { source: string } } => {
   // Store membership is enforced separately, by `inStoreScores` in the maintainer's score_base_entities step.
-  const evalScript = euid.painless.getEuidEvaluationForSearch(entityType);
+  const evalScript = euid.painless.getEuidEvaluationForSearch(
+    getBuiltInEntityDefinition(entityType)
+  );
   const typePrefix = `${entityType}:`;
 
   const source = [
@@ -569,10 +585,11 @@ export const getBaseScoreESQL = (
   pageSize: number,
   index: string
 ): string => {
-  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
-  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
+  const definition = getBuiltInEntityDefinition(entityType);
+  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
+  const fieldEvals = euid.esql.getFieldEvaluations(definition);
   const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
-  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(entityType, 'entity_id', {
+  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(definition, 'entity_id', {
     withTypeId: true,
   })}`;
 
@@ -632,9 +649,9 @@ export const getBaseScoreESQL = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
-        risk_inputs = TOP(input, 10, "desc")
+        risk_inputs = ${RISK_INPUTS_TOP}
         BY entity_id
     | SORT scores DESC
     | LIMIT ${pageSize}
@@ -644,6 +661,7 @@ export const getBaseScoreESQL = (
 };
 
 export const getResolutionCompositeQuery = (
+  entityType: EntityType,
   index: string,
   pageSize: number,
   afterKey?: Record<string, string>,
@@ -653,7 +671,16 @@ export const getResolutionCompositeQuery = (
   size: 0,
   query: targetEntityIds
     ? { terms: { resolution_target_id: targetEntityIds } }
-    : { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+    : {
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            // The lookup index holds every entity type's targets. Without this, each type also
+            // pages through the others' targets, scoring alerts that can never match them.
+            { prefix: { resolution_target_id: `${entityType}:` } },
+          ],
+        },
+      },
   aggs: {
     by_resolution_target: {
       composite: {
@@ -683,13 +710,6 @@ export const getResolutionScoreESQLByIds = (
   alertsIndex: string,
   lookupIndex: string
 ): string => {
-  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
-  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
-  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
-  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(entityType, 'entity_id', {
-    withTypeId: true,
-  })}`;
-
   if (resolutionTargetIds.length === 0) {
     throw new Error('At least one resolution target ID must be provided for resolution scoring');
   }
@@ -697,6 +717,95 @@ export const getResolutionScoreESQLByIds = (
   assertEsqlInterpolatableIds(resolutionTargetIds);
 
   const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
+
+  return buildResolutionScoreESQL({
+    entityType,
+    membershipClause: [
+      '| EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),',
+      '       relationship_type = COALESCE(relationship_type, "self")',
+      `| WHERE resolution_target_id IN (${idsClause})`,
+    ].join('\n    '),
+    sampleSize,
+    pageSize,
+    alertsIndex,
+    lookupIndex,
+  });
+};
+
+/**
+ * Resolution scoring for one page of resolution targets, selected by the page's sorted bounds
+ * `(lower, upper]` instead of an ID list.
+ *
+ * ES|QL evaluates `IN (<literals>)` on a computed column by comparing every row against every
+ * literal, which at 10k targets and ~1M alerts takes minutes of CPU per page. A range costs the
+ * same per row whatever the page size. It relies on Phase 0 writing a lookup row for every
+ * resolution target as well as for every alias, so keeping only joined rows keeps exactly the
+ * group members and drops entities that are in no resolution group, even when their own ID falls
+ * inside the range.
+ *
+ * Only rows written by this run count. The lookup index is pruned after scoring, so the previous
+ * run's rows are still there: a target whose aliases have all moved elsewhere keeps its old row,
+ * and without the run filter it would be scored again as a group of one, taking a slot under the
+ * page's LIMIT from a current group.
+ */
+export const getResolutionScoreESQLByRange = (
+  entityType: EntityType,
+  bounds: { lower?: string; upper: string },
+  calculationRunId: string,
+  sampleSize: number,
+  pageSize: number,
+  alertsIndex: string,
+  lookupIndex: string
+): string => {
+  assertEsqlInterpolatableIds(
+    [bounds.lower, bounds.upper, calculationRunId].filter(
+      (value): value is string => value !== undefined
+    )
+  );
+
+  const rangeClause = [
+    bounds.lower ? `resolution_target_id > "${escapeEsqlStringLiteral(bounds.lower)}"` : undefined,
+    `resolution_target_id <= "${escapeEsqlStringLiteral(bounds.upper)}"`,
+  ]
+    .filter(Boolean)
+    .join(' AND ');
+
+  return buildResolutionScoreESQL({
+    entityType,
+    // Alerts with no lookup row have a null run ID after the join, so this also drops them.
+    membershipClause: `| WHERE calculation_run_id == "${escapeEsqlStringLiteral(
+      calculationRunId
+    )}" AND ${rangeClause}`,
+    sampleSize,
+    pageSize,
+    alertsIndex,
+    lookupIndex,
+  });
+};
+
+const buildResolutionScoreESQL = ({
+  entityType,
+  membershipClause,
+  sampleSize,
+  pageSize,
+  alertsIndex,
+  lookupIndex,
+}: {
+  entityType: EntityType;
+  /** Filters joined alert rows down to the page's resolution groups. */
+  membershipClause: string;
+  sampleSize: number;
+  pageSize: number;
+  alertsIndex: string;
+  lookupIndex: string;
+}): string => {
+  const definition = getBuiltInEntityDefinition(entityType);
+  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(definition);
+  const fieldEvals = euid.esql.getFieldEvaluations(definition);
+  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+  const euidEvalClause = `| EVAL ${euid.esql.getEuidEvaluation(definition, 'entity_id', {
+    withTypeId: true,
+  })}`;
 
   const f = ALERT_ENTITY_ID;
   const p = `"${entityType}:"`;
@@ -710,7 +819,9 @@ export const getResolutionScoreESQLByIds = (
   // Compute entity_id (cheap), then override with the pre-stamped field when present,
   // then LOOKUP JOIN to recover resolution_target_id, then filter on resolution_target_id
   // BEFORE the CONCAT/base64 builders run so per-row string-allocation work only
-  // happens for alerts that survive the IN-clause.
+  // happens for alerts that belong to the page's groups.
+  // The alert timestamp is renamed before the join because lookup rows have their own
+  // @timestamp, which would otherwise replace the alert's (and null it on unmatched rows).
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
@@ -718,16 +829,14 @@ export const getResolutionScoreESQLByIds = (
     ${fieldEvalsClause}
     ${euidEvalClause}
     ${storedEuidCoalesceClause}
+    | RENAME @timestamp as time
     | LOOKUP JOIN ${lookupIndex} ON entity_id
-    | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
-           relationship_type = COALESCE(relationship_type, "self")
-    | WHERE resolution_target_id IN (${idsClause})
+    ${membershipClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
-             event.kind as category,
-             @timestamp as time
+             event.kind as category
     | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
@@ -735,9 +844,9 @@ export const getResolutionScoreESQLByIds = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
-        risk_inputs = TOP(input, 10, "desc"),
+        risk_inputs = ${RISK_INPUTS_TOP},
         contributing_entities_raw = VALUES(entity_with_rel)
         BY resolution_target_id
     | SORT scores DESC

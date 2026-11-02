@@ -449,3 +449,13 @@ export const PREVIEW_SLIDES: readonly PreviewSlide[] = [
     ],
   },
 ];
+
+export const ONBOARDING_WORKER_TOGGLE_ON = i18n.translate(
+  'xpack.alertzero.onboarding.workerToggleOnLabel',
+  { defaultMessage: 'On' }
+);
+
+export const ONBOARDING_WORKER_TOGGLE_OFF = i18n.translate(
+  'xpack.alertzero.onboarding.workerToggleOffLabel',
+  { defaultMessage: 'Off' }
+);

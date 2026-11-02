@@ -74,6 +74,7 @@ describe('workflow service account execution', () => {
         workloadId: 'workflow',
         spaceId: 'space',
         expectedServiceAccountId: 'account-a',
+        executionId: 'parent-execution',
       },
       expect.any(Function)
     );

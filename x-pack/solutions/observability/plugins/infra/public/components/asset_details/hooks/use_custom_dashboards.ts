@@ -58,14 +58,17 @@ export const useUpdateCustomDashboard = () => {
         dashboardSavedObjectId,
         dashboardFilterAssetIdEnabled,
       }: InfraSavedCustomDashboard) => {
-        const rawResponse = await http.fetch(`/api/infra/${assetType}/custom-dashboards/${id}`, {
-          method: 'PUT',
-          body: JSON.stringify({
-            assetType,
-            dashboardSavedObjectId,
-            dashboardFilterAssetIdEnabled,
-          }),
-        });
+        const rawResponse = await http.fetch(
+          `/api/infra/${encodeURIComponent(assetType)}/custom-dashboards/${encodeURIComponent(id)}`,
+          {
+            method: 'PUT',
+            body: JSON.stringify({
+              assetType,
+              dashboardSavedObjectId,
+              dashboardFilterAssetIdEnabled,
+            }),
+          }
+        );
 
         return decodeOrThrow(InfraCustomDashboardRT)(rawResponse);
       },
@@ -113,9 +116,12 @@ export const useDeleteCustomDashboard = () => {
         assetType: InfraCustomDashboardAssetType;
         id: string;
       }) => {
-        const rawResponse = await http.fetch(`/api/infra/${assetType}/custom-dashboards/${id}`, {
-          method: 'DELETE',
-        });
+        const rawResponse = await http.fetch(
+          `/api/infra/${encodeURIComponent(assetType)}/custom-dashboards/${encodeURIComponent(id)}`,
+          {
+            method: 'DELETE',
+          }
+        );
 
         return decodeOrThrow(InfraDeleteCustomDashboardsResponseBodyRT)(rawResponse);
       },
@@ -161,13 +167,16 @@ export const useCreateCustomDashboard = () => {
         dashboardSavedObjectId,
         dashboardFilterAssetIdEnabled,
       }: InfraCustomDashboard) => {
-        const rawResponse = await http.fetch(`/api/infra/${assetType}/custom-dashboards`, {
-          method: 'POST',
-          body: JSON.stringify({
-            dashboardSavedObjectId,
-            dashboardFilterAssetIdEnabled,
-          }),
-        });
+        const rawResponse = await http.fetch(
+          `/api/infra/${encodeURIComponent(assetType)}/custom-dashboards`,
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              dashboardSavedObjectId,
+              dashboardFilterAssetIdEnabled,
+            }),
+          }
+        );
 
         return decodeOrThrow(InfraCustomDashboardRT)(rawResponse);
       },

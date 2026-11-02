@@ -37,6 +37,17 @@ export interface ProfilingESClient {
     stacktraceIdsField?: string;
     schema?: ProfilingSchema;
   }): Promise<StackTraceResponse>;
+  /** Collects the stacktrace IDs held by a random sample of the documents matching `query` */
+  sampleStacktraceIds(params: {
+    query: QueryDslQueryContainer;
+    indices: string[];
+    stacktraceIdsField: string;
+    /** Either 1 or at most 0.5, as the random sampler doesn't support values in between */
+    probability: number;
+    seed: number;
+    preference: string;
+    size: number;
+  }): Promise<string[]>;
   getEsClient(): ElasticsearchClient;
   profilingFlamegraph(params: {
     query: QueryDslQueryContainer;

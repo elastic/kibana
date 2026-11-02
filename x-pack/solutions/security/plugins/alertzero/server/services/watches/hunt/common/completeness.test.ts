@@ -24,6 +24,9 @@ describe('huntCompletenessOf', () => {
     'index_unavailable',
     'generation_failed',
     'execute_failed',
+    'generation_budget',
+    'catalog_unavailable',
+    'extraction_pending',
   ])('treats %s as retryable, so the report stays eligible', (reason) => {
     expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_retryable');
     expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(false);
@@ -40,7 +43,7 @@ describe('huntCompletenessOf', () => {
   );
 
   it.each<HuntIncompleteReason>([
-    'generation_budget',
+    'collapsed',
     'unknown_technique_id',
     'rows_unclassifiable',
     'refs_unavailable',
@@ -50,6 +53,20 @@ describe('huntCompletenessOf', () => {
     expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_final');
     // Retired, because re-running reproduces the same gap and re-spends the run.
     expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(true);
+  });
+
+  it('lets extraction_pending win over nothing_searched, so an unenriched report is not retired', () => {
+    const completeness = huntCompletenessOf([gap('nothing_searched'), gap('extraction_pending')]);
+    expect(completeness).toBe('incomplete_retryable');
+    expect(completedSuccessfully(completeness)).toBe(false);
+  });
+
+  it('lets a retryable gap win over a collapsed one', () => {
+    // The sibling that generation never ran for stays final on its own, but a report
+    // that also hit a retryable gap elsewhere still gains from a later run.
+    expect(huntCompletenessOf([gap('collapsed'), gap('execute_failed')])).toBe(
+      'incomplete_retryable'
+    );
   });
 
   it('treats an ungrounded query as final when the run had nothing searchable, so the report retires', () => {
@@ -69,10 +86,46 @@ describe('huntCompletenessOf', () => {
     ).toBe('incomplete_retryable');
   });
 
+  describe('techniques a run gave up on', () => {
+    const budgetGap = (technique_id: string): HuntIncompleteness => ({
+      reason: 'generation_budget',
+      technique_id,
+      detail: 'because',
+    });
+
+    it('treats a retryable gap on a technique the run gave up on as final, so the report settles', () => {
+      const completeness = huntCompletenessOf([budgetGap('T1059')], {
+        finalTechniqueIds: new Set(['T1059']),
+      });
+      expect(completeness).toBe('incomplete_final');
+      expect(completedSuccessfully(completeness)).toBe(true);
+    });
+
+    it('keeps the run retryable when another technique still has a retryable gap', () => {
+      expect(
+        huntCompletenessOf([budgetGap('T1059'), budgetGap('T1003')], {
+          finalTechniqueIds: new Set(['T1059']),
+        })
+      ).toBe('incomplete_retryable');
+    });
+
+    it('does not touch a gap that names no technique', () => {
+      expect(
+        huntCompletenessOf([gap('catalog_unavailable')], { finalTechniqueIds: new Set(['T1059']) })
+      ).toBe('incomplete_retryable');
+    });
+
+    it('behaves as before when no technique is given up on', () => {
+      expect(huntCompletenessOf([budgetGap('T1059')], { finalTechniqueIds: new Set() })).toBe(
+        'incomplete_retryable'
+      );
+    });
+  });
+
   it('lets a retryable gap win over a deterministic one', () => {
     // Retrying still gains something: the next run closes the transient half and
     // reports the rest as final, so the report settles instead of cycling forever.
-    expect(huntCompletenessOf([gap('generation_budget'), gap('execute_failed')])).toBe(
+    expect(huntCompletenessOf([gap('nothing_searched'), gap('execute_failed')])).toBe(
       'incomplete_retryable'
     );
   });

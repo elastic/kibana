@@ -8,18 +8,30 @@
 import type { JsonObject } from '@kbn/utility-types';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { investigationNotificationDestinationSchema } from '../../../common';
-import type {
-  GetInvestigationResponse,
-  InvestigationNotificationDestination,
-} from '../../../common';
+import type { InvestigationNotificationDestination, Severity } from '../../../common';
 import { InvalidNotificationDestinationError } from '../../client/errors';
 import type { NotificationPhase, NotificationOutcome } from './notification_routing';
 import { slackNotificationHandler } from './slack_notification';
 
-export type NotifiableInvestigation = Pick<
-  GetInvestigationResponse,
-  'title' | 'status' | 'severity' | 'summary' | 'impact' | 'recommendations' | 'error'
->;
+/** What a lifecycle message says about an investigation. */
+export interface NotifiableInvestigation {
+  investigation_id: string;
+  title: string;
+  severity?: Severity;
+  summary?: string;
+  /** The conclusion: what caused it. */
+  verdict?: string;
+  impact?: { summary?: string; entities?: ReadonlyArray<{ name: string }> };
+  hypotheses?: ReadonlyArray<{
+    candidate: string;
+    confidence: number;
+    status: string;
+    reason?: string;
+  }>;
+  /** Proposed actions; the message names the first. */
+  recommendations?: ReadonlyArray<{ title: string; impact?: string; confidence?: string }>;
+  error?: string;
+}
 
 export interface NotificationExecution {
   actionId: string;
@@ -42,6 +54,8 @@ export interface NotificationDeliveryContext {
   url: string;
   phase: NotificationPhase;
   reason?: string;
+  /** A message this run already posted, which the delivery edits instead of posting a new one. */
+  messageTs?: string;
 }
 
 export interface NotificationHandler {

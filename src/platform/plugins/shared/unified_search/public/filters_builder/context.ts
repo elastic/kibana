@@ -9,13 +9,13 @@
 
 import type { Dispatch } from 'react';
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { FiltersBuilderActions } from './reducer';
 
 interface FiltersBuilderContextType {
-  dataView: DataView;
+  dataView: FilterableSource;
   dispatch: Dispatch<FiltersBuilderActions>;
   globalParams: {
     maxDepth: number;

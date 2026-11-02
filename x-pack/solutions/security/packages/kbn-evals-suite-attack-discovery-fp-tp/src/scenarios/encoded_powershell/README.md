@@ -11,7 +11,7 @@ There is one authored discovery and one alert set. Two worlds sit around them:
 
 If an analyst (or the analysis workflow) sees only the alerts plus the discovery, both twins look like a real attack. The entity store and raw events are what flip the FP twin.
 
-`examples.ts` derives the eval's evidence-state examples (missing entities on either twin, missing events, mixed world, and both failure paths) from these two twins.
+`examples.ts` derives the eval's evidence-state examples (missing entities on either twin, missing events, mixed world, truncated events on the FP twin, and both failure paths) from these two twins.
 
 ## Layout
 
@@ -94,7 +94,7 @@ On the FP world, `entity.sub_type` is `mdm_management`. On the TP world it is `e
 
 ## Run from the Workflows UI
 
-Run the managed workflow `system-security-attack-discovery-fp-tp-analysis` in place (it ships with AlertZero; no workflow is installed by the suite) with `attack_discovery_id: ad-fp-tp-encoded-powershell-attack` and the id of any existing Agent Builder conversation as `investigation_id`. The `alertzero_reasoning` inference feature needs AlertZero enabled and a connector assigned.
+Run the managed workflow `system-security-attack-discovery-fp-tp-analysis` in place (it ships with AlertZero; no workflow is installed by the suite) with `attack_discovery_id: ad-fp-tp-encoded-powershell-attack` and the id of any existing Agent Builder conversation as `investigation_id`. The `alertzero_frontier` inference feature needs AlertZero enabled and a connector assigned.
 
 | Seeded variant | Expected `payload.verdict` | Why |
 | --- | --- | --- |

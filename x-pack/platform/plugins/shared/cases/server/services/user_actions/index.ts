@@ -15,7 +15,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
@@ -47,8 +47,8 @@ import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
 } from '../../common/types/user_actions';
-import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
-import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
+import { UserActionTransformedAttributesSchema } from '../../common/types/user_actions';
+import { CaseUserActionDeprecatedResponseSchema } from '../../../common/types/api';
 import { isCommentAttachmentType } from '../../../common/utils/attachments';
 
 export class CaseUserActionService {
@@ -221,7 +221,7 @@ export class CaseUserActionService {
 
         const res = transformToExternalModel(doc);
 
-        const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+        const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(res.attributes);
 
         const fieldsDoc = Object.assign(res, {
           attributes: decodeRes,
@@ -282,7 +282,7 @@ export class CaseUserActionService {
 
       const res = transformToExternalModel(userActions.saved_objects[0]);
 
-      const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(res.attributes);
 
       return {
         ...res,
@@ -362,7 +362,7 @@ export class CaseUserActionService {
 
         const res = transformToExternalModel(doc);
 
-        const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+        const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(res.attributes);
 
         fieldsDoc = { ...res, attributes: decodeRes };
       }
@@ -406,7 +406,7 @@ export class CaseUserActionService {
 
       const res = transformToExternalModel(doc);
 
-      const decodeRes = decodeOrThrow(UserActionTransformedAttributesRt)(res.attributes);
+      const decodeRes = decodeOrThrowZod(UserActionTransformedAttributesSchema)(res.attributes);
       return { ...res, attributes: decodeRes };
     }
   }
@@ -526,7 +526,7 @@ export class CaseUserActionService {
       const validatedUserActions: Array<SavedObjectsFindResult<CaseUserActionDeprecatedResponse>> =
         [];
       for (const so of transformedUserActions.saved_objects) {
-        const validatedAttributes = decodeOrThrow(CaseUserActionDeprecatedResponseRt)(
+        const validatedAttributes = decodeOrThrowZod(CaseUserActionDeprecatedResponseSchema)(
           so.attributes
         );
 

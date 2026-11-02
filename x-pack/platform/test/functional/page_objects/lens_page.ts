@@ -1201,6 +1201,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return paginationItems.length;
     },
 
+    /** Waits for the visible warnings in the config panel to settle on the expected count */
+    async assertWorkspaceErrorCount(expectedCount: number) {
+      await retry.waitForWithTimeout(
+        `workspace error count to be ${expectedCount}`,
+        10_000,
+        async () => {
+          const actualCount = await this.getWorkspaceErrorCount();
+          if (actualCount !== expectedCount) {
+            throw new Error(`Expected ${expectedCount} workspace errors, found ${actualCount}`);
+          }
+          return true;
+        }
+      );
+    },
+
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
       // Because the new chart switcher is now a virtualized list, the process needs some help
       // So either pass a search string or pick the last 3 letters from the id (3 because pie

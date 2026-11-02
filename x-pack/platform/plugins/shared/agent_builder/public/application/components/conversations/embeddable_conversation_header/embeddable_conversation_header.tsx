@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EmbeddableConversationRightActions } from './embeddable_conversation_actions';
 import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 import { EmbeddableMenuButton } from './embeddable_menu_button';
-import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useResolvedAgent } from '../../../hooks/agents/use_resolved_agent';
 import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
 import { useConversationTemplateDisplay } from '../../../hooks/use_conversation_template_display';
 
@@ -34,9 +34,8 @@ export const EmbeddableConversationHeader: React.FC<EmbeddableConversationHeader
 }) => {
   const { euiTheme } = useEuiTheme();
   const agentId = useAgentId();
-  const { agents } = useAgentBuilderAgents();
+  const { agent: currentAgent } = useResolvedAgent(agentId ?? undefined);
   const hasActiveConversation = useHasActiveConversation();
-  const currentAgent = agents.find((a) => a.id === agentId);
   const templateDisplay = useConversationTemplateDisplay();
   const templateName = templateDisplay?.name;
   const templateIcon = templateDisplay?.icon;

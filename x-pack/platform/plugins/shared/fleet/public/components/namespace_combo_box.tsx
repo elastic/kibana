@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiComboBox, EuiLink } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiIconTip, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -28,6 +28,12 @@ interface NamespaceFormRowProps {
   fullWidth?: boolean;
   labelId?: string;
   helpTextId?: string;
+  /** Shows the help text as a tooltip on an info icon next to the label, instead of under the field. */
+  helpTextAsTooltip?: boolean;
+  /** Replaces the default tooltip text, for a form where an empty namespace resolves differently. */
+  tooltipContent?: string;
+  /** Renders the field in the compact size. */
+  compressed?: boolean;
 }
 
 export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
@@ -40,6 +46,9 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
   onNamespaceChange,
   'data-test-subj': dataTestSubj = 'packagePolicyNamespaceInput',
   fullWidth = false,
+  helpTextAsTooltip = false,
+  tooltipContent,
+  compressed = false,
 }) => {
   const getHelpText = () => {
     if (isEditPage && packageType === 'input') {
@@ -77,22 +86,49 @@ export const NamespaceComboBox: React.FC<NamespaceFormRowProps> = ({
     );
   };
 
+  const label = (
+    <FormattedMessage
+      id={'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel'}
+      defaultMessage="Namespace"
+    />
+  );
+
   return (
     <EuiFormRow
       fullWidth={fullWidth}
+      display={compressed ? 'rowCompressed' : 'row'}
       isInvalid={!!validationError}
       error={validationError}
       label={
-        <FormattedMessage
-          id={'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel'}
-          defaultMessage="Namespace"
-        />
+        helpTextAsTooltip ? (
+          <>
+            {label}{' '}
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              content={
+                tooltipContent ??
+                i18n.translate(
+                  'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceTooltip',
+                  {
+                    defaultMessage:
+                      "Sets the namespace in the integration's data stream. Leave empty to use default or inherit the agent policy namespace.",
+                  }
+                )
+              }
+              anchorProps={{ 'data-test-subj': `${dataTestSubj}-helpTooltip` }}
+            />
+          </>
+        ) : (
+          label
+        )
       }
-      helpText={getHelpText()}
+      helpText={helpTextAsTooltip ? undefined : getHelpText()}
     >
       <EuiComboBox
         isInvalid={!!validationError}
         fullWidth={fullWidth}
+        compressed={compressed}
         data-test-subj={dataTestSubj}
         noSuggestions
         placeholder={placeholder}

@@ -8,10 +8,6 @@
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createPreExecutionSteps } from './round_steps';
 
-const relevantSkillsSelection = {
-  skills: [{ id: 'skill-1', name: 'Skill', path: '/skill', description: 'A skill' }],
-};
-
 describe('createPreExecutionSteps', () => {
   it('creates no workflow step when neither context field is present', () => {
     expect(createPreExecutionSteps({})).toEqual([]);
@@ -41,18 +37,6 @@ describe('createPreExecutionSteps', () => {
         type: ConversationRoundStepType.preExecutionWorkflow,
         ...preExecutionWorkflow,
       },
-    ]);
-  });
-
-  it('orders workflow context, then relevant skills', () => {
-    const steps = createPreExecutionSteps({
-      preExecutionWorkflow: { model_context: 'model context' },
-      relevantSkillsSelection,
-    });
-
-    expect(steps.map((step) => step.type)).toEqual([
-      ConversationRoundStepType.preExecutionWorkflow,
-      ConversationRoundStepType.relevantSkills,
     ]);
   });
 });

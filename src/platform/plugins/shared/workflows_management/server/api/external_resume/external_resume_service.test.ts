@@ -67,7 +67,12 @@ describe('external resume service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     workflowsService.getStepExecution.mockResolvedValue(createStepExecution());
-    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(true);
+    workflowsService.claimHitlStepForExternalResume.mockResolvedValue({
+      respondedBy: 'external_resume:step-exec-1',
+      respondedAt: '2026-04-29T10:00:00.000Z',
+      channel: 'external',
+      strippedToken: { hash: TOKEN_HASH, expiresAt: FUTURE_DATE },
+    });
     workflowsService.getWorkflowsExecutionEngine.mockResolvedValue({
       resumeWorkflowExecution: jest.fn().mockResolvedValue({
         resumedBy: 'external_resume:step-exec-1',
@@ -90,6 +95,7 @@ describe('external resume service', () => {
     );
     expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
       'step-exec-1',
+      'exec-1',
       'external_resume:step-exec-1',
       'default'
     );
@@ -194,6 +200,7 @@ describe('external resume service', () => {
     const engine = await workflowsService.getWorkflowsExecutionEngine();
     expect(workflowsService.claimHitlStepForExternalResume).toHaveBeenCalledWith(
       'step-exec-1',
+      'exec-1',
       'external_resume:step-exec-1',
       'default'
     );
@@ -310,7 +317,7 @@ describe('external resume service', () => {
   });
 
   it('rejects when the waiting step was already claimed', async () => {
-    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(false);
+    workflowsService.claimHitlStepForExternalResume.mockResolvedValue(null);
 
     await expect(
       resumeWorkflowExecutionExternallyWithInput(workflowsService, {

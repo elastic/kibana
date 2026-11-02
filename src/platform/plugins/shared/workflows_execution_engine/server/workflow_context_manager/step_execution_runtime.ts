@@ -24,7 +24,7 @@ import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
-import { extractConnectorId, extractTokenUsage, parseDuration } from '../utils';
+import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } from '../utils';
 
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
@@ -113,6 +113,25 @@ export class StepExecutionRuntime {
     this.node = stepExecutionRuntimeInit.node;
     this.stepExecutionId = stepExecutionRuntimeInit.stepExecutionId;
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
+  }
+
+  /** Returns the rendered step `timeout` in milliseconds, or undefined when the node has none. */
+  public getStepTimeoutMs(): number | undefined {
+    if (
+      !('configuration' in this.node) ||
+      this.node.configuration == null ||
+      typeof this.node.configuration !== 'object' ||
+      !('timeout' in this.node.configuration) ||
+      typeof this.node.configuration.timeout !== 'string'
+    ) {
+      return undefined;
+    }
+
+    return parseDuration(
+      renderDuration(this.node.configuration.timeout, (value) =>
+        this.contextManager.renderValueAccordingToContext(value)
+      )
+    );
   }
 
   public get error(): ExecutionError | undefined {

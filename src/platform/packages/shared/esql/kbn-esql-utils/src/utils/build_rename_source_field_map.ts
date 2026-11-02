@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, Parser } from '@elastic/esql';
+import { isColumn } from '@elastic/esql';
 import type { ESQLAstCommand, ESQLColumn } from '@elastic/esql/types';
 import type { ESQLCommandSummary } from '@kbn/esql-language/src/commands/registry/types';
 import { getSummaryPerCommand } from './get_query_summary';
+import { parseEsqlCached } from './parse_esql_cached';
 
 interface CommandWithSummary {
   cmd: ESQLAstCommand;
@@ -179,6 +180,6 @@ export function buildRenameSourceFieldMapFromCommands(
  * returned map; callers should fall back to the column name for absent entries.
  */
 export function buildRenameSourceFieldMap(query: string): Map<string, string> {
-  const { root } = Parser.parse(query);
+  const { root } = parseEsqlCached(query);
   return buildRenameSourceFieldMapFromCommands(root.commands, query);
 }

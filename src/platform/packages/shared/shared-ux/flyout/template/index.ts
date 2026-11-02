@@ -36,4 +36,6 @@ export type {
   FlyoutFooterPrimaryActionMenuProps,
   FlyoutFooterMenuPanel,
   FlyoutFooterMenuItem,
+  FlyoutFooterMenuCustomItem,
+  FlyoutFooterMenuItemRenderContext,
 } from './src/types';

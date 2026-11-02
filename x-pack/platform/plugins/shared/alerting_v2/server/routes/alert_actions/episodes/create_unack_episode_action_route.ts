@@ -16,10 +16,11 @@ import { createEpisodeActionRouteForType } from './create_episode_action_route_f
 export const CreateUnackEpisodeActionRoute = createEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.UNACK,
   pathSuffix: '_unack',
-  summary: 'Unacknowledge an alert episode',
+  summary: 'Unacknowledge an alert',
   bodySchema: createUnackEpisodeActionBodySchema,
   oasOperationObject: createUnackEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
   additionalResponses: {
     409: {
       body: () => errorResponseSchema,

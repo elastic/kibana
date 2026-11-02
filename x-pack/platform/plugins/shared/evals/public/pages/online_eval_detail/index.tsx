@@ -60,6 +60,7 @@ import {
   useUpdateOnlineEvalWorkflow,
 } from '../../hooks/use_online_eval_workflows';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
+import { useActiveSpaceId } from '../../hooks/use_active_space_id';
 import type { OnlineEvalWorkflowConfig } from '../../../common/online_evals/workflow_yaml';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 import {
@@ -131,18 +132,20 @@ const useOnlineEvalDraft = ({
   return { saved, draft, setDraft, hasChanged, reset, save, isSaving };
 };
 
-const getMonitorFilterExpression = (monitorId: string): string => {
-  const escaped = monitorId.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  return `monitor.id: "${escaped}"`;
-};
+interface ScoresFilter {
+  monitorId: string;
+  spaceId: string;
+}
+
+const escapeKqlValue = (value: string): string => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+const getScoresFilterExpression = ({ monitorId, spaceId }: ScoresFilter): string =>
+  `monitor.id: "${escapeKqlValue(monitorId)}" and space_ids: "${escapeKqlValue(spaceId)}"`;
 
 const buildAverageScoreByNameLensConfig = ({
   dataViewId,
-  monitorId,
-}: {
-  dataViewId: string;
-  monitorId: string;
-}) =>
+  ...scoresFilter
+}: ScoresFilter & { dataViewId: string }) =>
   ({
     type: 'xy',
     title: i18n.translate('xpack.evals.onlineEvaluations.detail.avgScoresPanelTitle', {
@@ -150,7 +153,7 @@ const buildAverageScoreByNameLensConfig = ({
     }),
     query: {
       language: 'kql',
-      expression: getMonitorFilterExpression(monitorId),
+      expression: getScoresFilterExpression(scoresFilter),
     },
     layers: [
       {
@@ -189,11 +192,8 @@ const buildAverageScoreByNameLensConfig = ({
 
 const buildScoreCountByLabelLensConfig = ({
   dataViewId,
-  monitorId,
-}: {
-  dataViewId: string;
-  monitorId: string;
-}) =>
+  ...scoresFilter
+}: ScoresFilter & { dataViewId: string }) =>
   ({
     type: 'xy',
     title: i18n.translate('xpack.evals.onlineEvaluations.detail.scoreLabelsPanelTitle', {
@@ -201,7 +201,7 @@ const buildScoreCountByLabelLensConfig = ({
     }),
     query: {
       language: 'kql',
-      expression: getMonitorFilterExpression(monitorId),
+      expression: getScoresFilterExpression(scoresFilter),
     },
     layers: [
       {
@@ -253,6 +253,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
   const [isDataViewLoading, setIsDataViewLoading] = useState(true);
   const [dataViewId, setDataViewId] = useState<string | null>(null);
   const [dataViewError, setDataViewError] = useState<Error | null>(null);
+  const { spaceId, isLoading: isSpaceIdLoading } = useActiveSpaceId();
   const {
     data: workflow,
     isLoading: isWorkflowLoading,
@@ -463,32 +464,34 @@ export const OnlineEvalDetailPage: React.FC = () => {
   const connectorMissing = hasLlmEvaluatorSelected && !draftState.draft?.connectorId;
 
   const averageScoreAttributes = useMemo(() => {
-    if (!dataViewId) {
+    if (!dataViewId || !spaceId) {
       return null;
     }
 
     try {
       return new LensConfigBuilder(services.dataViews).fromAPIFormat(
-        buildAverageScoreByNameLensConfig({ dataViewId, monitorId: workflowId })
+        buildAverageScoreByNameLensConfig({ dataViewId, monitorId: workflowId, spaceId })
       );
     } catch {
       return null;
     }
-  }, [dataViewId, services.dataViews, workflowId]);
+  }, [dataViewId, services.dataViews, workflowId, spaceId]);
 
   const scoreCountAttributes = useMemo(() => {
-    if (!dataViewId) {
+    if (!dataViewId || !spaceId) {
       return null;
     }
 
     try {
       return new LensConfigBuilder(services.dataViews).fromAPIFormat(
-        buildScoreCountByLabelLensConfig({ dataViewId, monitorId: workflowId })
+        buildScoreCountByLabelLensConfig({ dataViewId, monitorId: workflowId, spaceId })
       );
     } catch {
       return null;
     }
-  }, [dataViewId, services.dataViews, workflowId]);
+  }, [dataViewId, services.dataViews, workflowId, spaceId]);
+
+  const isPanelsLoading = isDataViewLoading || isSpaceIdLoading;
 
   const updateErrorMessage = updateWorkflow.error
     ? i18n.translate('xpack.evals.onlineEvaluations.detail.updateWorkflowError', {
@@ -1148,7 +1151,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem>
               <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-                {isDataViewLoading ? (
+                {isPanelsLoading ? (
                   <EuiText size="s">
                     <p>
                       {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelDataView', {
@@ -1185,7 +1188,7 @@ export const OnlineEvalDetailPage: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-                {isDataViewLoading ? (
+                {isPanelsLoading ? (
                   <EuiText size="s">
                     <p>
                       {i18n.translate('xpack.evals.onlineEvaluations.detail.loadingPanelLabels', {

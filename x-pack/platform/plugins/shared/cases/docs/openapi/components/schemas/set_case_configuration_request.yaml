@@ -20,7 +20,11 @@ properties:
       - type
   customFields:
     type: array
-    description: Custom fields case configuration.
+    deprecated: true
+    description: >
+      Custom fields case configuration.
+      Deprecated. Use the field library (`/api/cases/field_definitions`) to manage
+      field definitions and `extended_fields` on case create/update to set field values.
     minItems: 0
     maxItems: 10
     items:

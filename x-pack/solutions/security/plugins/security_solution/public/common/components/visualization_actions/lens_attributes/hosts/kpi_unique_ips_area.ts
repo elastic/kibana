@@ -103,6 +103,7 @@ export const getKpiUniqueIpsAreaLensAttributes: GetLensAttributes = ({ euiTheme 
         ],
         legend: { isVisible: false, position: 'right', showSingleSeries: false },
         preferredSeriesType: 'area',
+        areaFill: 'solid',
         tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
         valueLabels: 'hide',
         yLeftExtent: { mode: 'full' },

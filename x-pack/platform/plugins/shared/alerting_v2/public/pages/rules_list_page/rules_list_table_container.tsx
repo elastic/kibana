@@ -27,7 +27,6 @@ import { DeleteConfirmationModal } from '../../components/rule/modals/delete_con
 import { useRuleChangeHistoryModal } from '../../components/rule/modals/change_history';
 import { UpdateApiKeyConfirmationModal } from '../../components/rule/modals/update_api_key_confirmation_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
-import { useAlertingLocators } from '../../application/locator_context';
 import type { RuleContentListItem } from './rules_data_source';
 import { toRulesQueryParams } from './rules_query_params';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
@@ -59,7 +58,6 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   onCloneInFlyout,
 }) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
-  const { rulesLocators } = useAlertingLocators();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
   const { items: contentItems, totalItems, isLoading, hasActiveQuery } = useContentListItems();
@@ -232,8 +230,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
         onBulkUpdateApiKey={handleBulkUpdateApiKey}
-        onNavigateToDetails={(r) => rulesLocators.navigateSync({ ruleId: r.id })}
-        onExpand={(r) => setExpandedRuleId(r.id)}
+        onOpenSummary={(r) => setExpandedRuleId(r.id)}
         onQuickEdit={(r) => onEditInFlyout(r)}
         onEdit={(r) => onEditInFlyout(r)}
         onClone={(r) => onCloneInFlyout(r)}

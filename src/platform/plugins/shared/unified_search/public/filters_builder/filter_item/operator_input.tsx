@@ -9,7 +9,7 @@
 
 import React, { useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FilterableField } from '@kbn/data-source';
 import type { Operator } from '../../filter_bar/filter_editor';
 import { getOperatorOptions, GenericComboBox } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
@@ -22,7 +22,7 @@ export const strings = {
 };
 
 interface OperatorInputProps<TParams = unknown> {
-  field: DataViewField | undefined;
+  field: FilterableField | undefined;
   operator: Operator | undefined;
   params: TParams;
   onHandleOperator: (operator: Operator, params?: TParams) => void;

@@ -8,12 +8,50 @@
  */
 
 import Path from 'path';
-import { formatSize, IGNORED_WATCH_PATTERNS } from './run_build';
+import { KIBANA_COMPILER } from './config/create_multi_compile_config';
+import { formatSize, IGNORED_WATCH_PATTERNS, sharedCompilersChanged } from './run_build';
 
 const matchesIgnored = (filePath: string) => IGNORED_WATCH_PATTERNS.some((re) => re.test(filePath));
 
 // Build OS-correct absolute-style paths so the same test runs on POSIX and Win32.
 const p = (...segments: string[]) => Path.resolve(Path.sep, ...segments);
+
+describe('sharedCompilersChanged', () => {
+  it('ignores an unchanged shared compiler when only Kibana rebuilt', () => {
+    const previous = new Map<string, string>();
+    sharedCompilersChanged(
+      [
+        { name: 'shared-npm', hash: 'shared-1' },
+        { name: KIBANA_COMPILER, hash: 'kibana-1' },
+      ],
+      previous
+    );
+
+    expect(
+      sharedCompilersChanged(
+        [
+          { name: 'shared-npm', hash: 'shared-1' },
+          { name: KIBANA_COMPILER, hash: 'kibana-2' },
+        ],
+        previous
+      )
+    ).toBe(false);
+  });
+
+  it('reports a shared compiler whose output hash changed', () => {
+    const previous = new Map<string, string>([['shared-npm', 'shared-1']]);
+
+    expect(
+      sharedCompilersChanged(
+        [
+          { name: 'shared-npm', hash: 'shared-2' },
+          { name: KIBANA_COMPILER, hash: 'kibana-1' },
+        ],
+        previous
+      )
+    ).toBe(true);
+  });
+});
 
 describe('formatSize', () => {
   it('formats bytes below 1024 as B', () => {
@@ -79,6 +117,21 @@ describe('IGNORED_WATCH_PATTERNS', () => {
       ['jest.config.ts', p('repo', 'pkg', 'jest.config.ts')],
       ['jest.integration.config.js', p('repo', 'pkg', 'jest.integration.config.js')],
 
+      ['scout source directory', p('repo', 'pkg', 'test', 'scout')],
+      ['custom scout source directory', p('repo', 'pkg', 'test', 'scout_custom')],
+      ['scout fixture', p('repo', 'pkg', 'test', 'scout', 'ui', 'fixtures', 'index.ts')],
+      [
+        'scout page object',
+        p('repo', 'pkg', 'test', 'scout', 'ui', 'fixtures', 'page_objects', 'console_page.ts'),
+      ],
+      ['scout config', p('repo', 'pkg', 'test', 'scout', 'ui', 'playwright.config.ts')],
+      [
+        'custom scout fixture',
+        p('repo', 'pkg', 'test', 'scout_custom', 'api', 'fixtures', 'index.ts'),
+      ],
+      ['Windows scout fixture', 'C:\\repo\\pkg\\test\\scout\\ui\\fixtures\\index.ts'],
+      ['Windows custom scout source directory', 'C:\\repo\\pkg\\test\\scout_custom'],
+
       [
         'scout test artifacts',
         p('repo', 'pkg', 'test', 'scout', 'ui', '.scout', 'test-artifacts', 'failed.png'),
@@ -116,8 +169,11 @@ describe('IGNORED_WATCH_PATTERNS', () => {
       // the watcher seeing it is harmless and we don't want a too-greedy regex).
       ['storybook main.ts', p('repo', 'pkg', '.storybook', 'main.ts')],
 
-      // "scout" in a path is fine when it is not the `.scout` output dir
-      ['scout test source dir', p('repo', 'pkg', 'test', 'scout', 'ui', 'fixtures', 'index.ts')],
+      ['scout outside a test directory', p('repo', 'pkg', 'src', 'scout', 'index.ts')],
+      ['scout filename', p('repo', 'pkg', 'test', 'scout.ts')],
+      ['scouting directory', p('repo', 'pkg', 'test', 'scouting', 'index.ts')],
+      ['plugin public entry', p('repo', 'pkg', 'public', 'index.ts')],
+      ['plugin manifest', p('repo', 'pkg', 'kibana.jsonc')],
     ])('keeps %s', (_label, filePath) => {
       expect(matchesIgnored(filePath)).toBe(false);
     });

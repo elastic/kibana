@@ -50,6 +50,8 @@ export function createMockGraphStore({
     simpleSearch: jest.fn(),
     nodes: [],
     edges: [],
+    selectedNodes: [],
+    getEdgeSelection: jest.fn(() => []),
     options: {},
     blocklistedNodes: [],
   } as unknown as Workspace;

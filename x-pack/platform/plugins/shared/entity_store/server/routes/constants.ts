@@ -26,6 +26,16 @@ export const RESOLUTION_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ENTITY_ANALYTICS_KIBANA_FEATURE_PRIVILEGES,
 };
 
+// Security `all` grants `-manage`; `read` doesn't.
+export const ENTITY_ANALYTICS_MANAGE_KIBANA_FEATURE_PRIVILEGES = [
+  'securitySolution',
+  'securitySolution-entity-analytics-manage',
+];
+
+export const RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS: AuthzEnabled = {
+  requiredPrivileges: ENTITY_ANALYTICS_MANAGE_KIBANA_FEATURE_PRIVILEGES,
+};
+
 export type LogExtractionInstallParams = z.infer<typeof LogExtractionInstallParams>;
 // timeout: intentionally excluded — TODO: add once we have a way to set it as a task override param
 export const LogExtractionInstallParams = LogExtractionOverride;
