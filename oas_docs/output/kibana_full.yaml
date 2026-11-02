@@ -70576,6 +70576,7 @@ paths:
                       maxLength: 16
                       type: string
                     preventCrossProjectSearch:
+                      deprecated: true
                       description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
                       type: boolean
                     preventInitialBackfill:
@@ -72261,6 +72262,7 @@ paths:
                       maxLength: 16
                       type: string
                     preventCrossProjectSearch:
+                      deprecated: true
                       description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
                       type: boolean
                     preventInitialBackfill:
@@ -187487,9 +187489,15 @@ components:
       properties:
         target:
           description: the target objective between 0 and 1 excluded
+          exclusiveMaximum: true
+          exclusiveMinimum: true
+          maximum: 1
+          minimum: 0
           type: number
         timesliceTarget:
           description: the target objective for each slice when using a timeslices budgeting method
+          maximum: 1
+          minimum: 0
           type: number
         timesliceWindow:
           description: the duration of each slice when using a timeslices budgeting method, as {duraton}{unit}
@@ -187507,6 +187515,7 @@ components:
           maxLength: 16
           type: string
         preventCrossProjectSearch:
+          deprecated: true
           description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false, meaning rollup transforms target all linked projects.
           type: boolean
         preventInitialBackfill:

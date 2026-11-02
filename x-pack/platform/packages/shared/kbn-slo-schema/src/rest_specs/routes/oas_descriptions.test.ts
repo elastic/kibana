@@ -310,6 +310,22 @@ describe('SLO public route responses are documented', () => {
     expect(components.SLOSettings).toHaveProperty('additionalProperties', false);
   });
 
+  it('documents the objective bounds and the deprecated settings', async () => {
+    const { components } = await generateResponse(getSLOResponseSchema);
+    const { target, timesliceTarget } = components.SLOObjective.properties ?? {};
+    expect(target).toMatchObject({
+      minimum: 0,
+      maximum: 1,
+      exclusiveMinimum: true,
+      exclusiveMaximum: true,
+    });
+    expect(timesliceTarget).toMatchObject({ minimum: 0, maximum: 1 });
+    expect(components).toHaveProperty(
+      ['SLOSettings', 'properties', 'preventCrossProjectSearch', 'deprecated'],
+      true
+    );
+  });
+
   it('documents response dates as date-time', async () => {
     const { components } = await generateResponse(
       z.object({
