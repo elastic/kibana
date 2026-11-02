@@ -232,6 +232,11 @@ describe('isTransportError', () => {
     expect(isTransportError(new TypeError('fetch failed'))).toBe(true);
   });
 
+  it('detects a connection error code without a fetch failure', () => {
+    const reset = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+    expect(isTransportError(new KbnClientRequesterError('reset', { cause: reset }))).toBe(true);
+  });
+
   it('ignores caller aborts', () => {
     expect(isTransportError(abortError())).toBe(false);
   });
