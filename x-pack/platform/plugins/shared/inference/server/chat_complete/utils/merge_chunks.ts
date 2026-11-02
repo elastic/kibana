@@ -10,6 +10,7 @@ import type { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inferen
 interface UnvalidatedMessage {
   content: string;
   refusal?: string;
+  finish_reason?: string;
   tool_calls: UnvalidatedToolCall[];
 }
 
@@ -78,6 +79,9 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
       // Refusal is only set on the terminating chunk in practice, so latest-wins is enough.
       if (chunk.refusal) {
         prev.refusal = chunk.refusal;
+      }
+      if (chunk.finish_reason) {
+        prev.finish_reason = chunk.finish_reason;
       }
 
       return prev;

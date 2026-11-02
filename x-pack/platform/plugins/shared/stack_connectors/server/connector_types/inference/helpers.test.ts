@@ -6,9 +6,11 @@
  */
 
 import { Readable } from 'node:stream';
-import { toArray, firstValueFrom } from 'rxjs';
+import type { UnifiedChatCompleteResponse } from '@kbn/connector-schemas/inference';
+import { toArray, firstValueFrom, of } from 'rxjs';
 import {
   buildInferenceErrorMessage,
+  chunksIntoMessage,
   eventSourceStreamIntoObservable,
   truncateUpstreamBody,
 } from './helpers';
@@ -662,5 +664,34 @@ describe('redaction of JSON embedded in error strings', () => {
 
   it('still redacts string tokens', () => {
     expect(truncateUpstreamBody({ access_token: 'zzsecret9' })).not.toContain('zzsecret9');
+  });
+});
+
+describe('chunksIntoMessage', () => {
+  const chunk = (content: string, finishReason?: string) =>
+    ({
+      id: 'id-1',
+      model: 'model-1',
+      object: 'chat.completion.chunk',
+      choices: [
+        {
+          message: { role: 'assistant', content },
+          ...(finishReason ? { finish_reason: finishReason } : {}),
+          index: 0,
+        },
+      ],
+    } as unknown as UnifiedChatCompleteResponse);
+
+  it('keeps the finish_reason of the final chunk in the merged message', async () => {
+    const result = await chunksIntoMessage(of(chunk('par'), chunk('tial', 'content_filter')));
+
+    expect(result.choices[0].message.content).toEqual('partial');
+    expect(result.choices[0].finish_reason).toEqual('content_filter');
+  });
+
+  it('leaves finish_reason unset when no chunk carries one', async () => {
+    const result = await chunksIntoMessage(of(chunk('a'), chunk('b')));
+
+    expect(result.choices[0].finish_reason).toBeUndefined();
   });
 });

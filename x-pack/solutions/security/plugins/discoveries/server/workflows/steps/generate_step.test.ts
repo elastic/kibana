@@ -500,6 +500,17 @@ describe('GenerateStepDefinition', () => {
       expect(result.error?.message).toBe('Graph invocation failed');
     });
 
+    it('passes the content-filter guidance through as the step error message', async () => {
+      const guidance = new Error(
+        'The content filter of the model provider (openai, model: gpt-x) stopped the response. Select a different model or connector for Attack Discovery and try again.'
+      );
+      mockInvokeAttackDiscoveryGraphWithAlerts.mockRejectedValue(guidance);
+
+      const result = await stepDefinition.handler(mockContext as any);
+
+      expect(result.error?.message).toBe(guidance.message);
+    });
+
     it('logs error when graph invocation fails', async () => {
       const graphError = new Error('Graph invocation failed');
       mockInvokeAttackDiscoveryGraphWithAlerts.mockRejectedValue(graphError);

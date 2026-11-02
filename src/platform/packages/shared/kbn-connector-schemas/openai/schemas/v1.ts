@@ -207,6 +207,8 @@ export const InvokeAIActionParamsSchema = lazySchema(() =>
 export const InvokeAIActionResponseSchema = lazySchema(() =>
   z.object({
     message: z.string(),
+    /** Provider stop reason for the first choice, e.g. `content_filter`. */
+    finish_reason: z.string().optional(),
     usage: z.object({
       prompt_tokens: z.coerce.number(),
       completion_tokens: z.coerce.number(),

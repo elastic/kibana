@@ -6,7 +6,9 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { throwIfErrorCountsExceeded } from '.';
+import { ContentFilteredModelResponseError, EmptyModelResponseError } from '@kbn/langchain/server';
+import { getEmptyModelResponseError } from '../../../lib/langchain/output_chunking/nodes/helpers/empty_model_response';
+import { throwContentFilteredErrorWithGuidance, throwIfErrorCountsExceeded } from '.';
 
 const mockLogger = {
   debug: jest.fn(),
@@ -183,6 +185,65 @@ describe('throwIfErrorCountsExceeded', () => {
     });
   });
 
+  describe('when the errors are empty model responses', () => {
+    const emptyModelResponseError = getEmptyModelResponseError({
+      cause: new EmptyModelResponseError({
+        completionTokens: 0,
+        connectorId: 'test-connector-id',
+        contentLength: 0,
+        model: 'test-model',
+        promptTokens: 128390,
+        responseBody: '',
+      }),
+      generationAttempts: 9,
+      llmType: 'inference',
+      nodeName: 'generate',
+    });
+
+    const getMessage = () => {
+      try {
+        throwIfErrorCountsExceeded({
+          ...defaultParams,
+          errors: [emptyModelResponseError],
+          generationAttempts: 10,
+          maxGenerationAttempts: 10,
+        });
+      } catch (error) {
+        return (error as Error).message;
+      }
+
+      throw new Error('expected throwIfErrorCountsExceeded to throw');
+    };
+
+    it('does NOT tell the user to send fewer alerts', () => {
+      expect(getMessage()).not.toContain('Try sending fewer alerts');
+    });
+
+    it('names the empty model response as the cause', () => {
+      expect(getMessage()).toContain('The model returned an empty response');
+      expect(getMessage()).toContain('will not help');
+    });
+
+    it('keeps the connector, model and token counts in the thrown message', () => {
+      const message = getMessage();
+
+      expect(message).toContain('test-connector-id');
+      expect(message).toContain('test-model');
+      expect(message).toContain('prompt tokens: 128390');
+    });
+
+    it('keeps the existing remedy when the errors are not empty model responses', () => {
+      expect(() =>
+        throwIfErrorCountsExceeded({
+          ...defaultParams,
+          errors: ['generate node is unable to parse (fake) response from attempt 9'],
+          generationAttempts: 10,
+          maxGenerationAttempts: 10,
+        })
+      ).toThrow(/Try sending fewer alerts/);
+    });
+  });
+
   describe('when no logger is provided', () => {
     it('does not throw when calling without a logger and counts are under threshold', () => {
       expect(() =>
@@ -207,5 +268,54 @@ describe('throwIfErrorCountsExceeded', () => {
         })
       ).toThrow();
     });
+  });
+});
+
+describe('throwContentFilteredErrorWithGuidance', () => {
+  const contentFiltered = new ContentFilteredModelResponseError({
+    connectorId: 'connector-1',
+    contentLength: 0,
+    responseBody: '',
+    model: 'gpt-x',
+  });
+
+  it('names the provider and model and suggests a different model', () => {
+    let thrown: unknown;
+    try {
+      throwContentFilteredErrorWithGuidance({
+        error: contentFiltered,
+        logger: mockLogger,
+        model: 'gpt-x',
+        provider: 'openai',
+      });
+    } catch (e) {
+      thrown = e;
+    }
+
+    const { message } = thrown as Error;
+    expect(message).toContain('openai');
+    expect(message).toContain('gpt-x');
+    expect(message).toContain('content filter');
+    expect(message).toContain('Select a different model');
+  });
+
+  it('does NOT advise sending fewer alerts', () => {
+    let message = '';
+    try {
+      throwContentFilteredErrorWithGuidance({ error: contentFiltered, provider: 'openai' });
+    } catch (e) {
+      message = (e as Error).message;
+    }
+
+    expect(message).not.toMatch(/send(ing)? fewer alerts(?! to this model is unlikely)/i);
+    expect(message).toContain('unlikely to help');
+  });
+
+  it('rethrows any other error untouched', () => {
+    const other = new Error('Failed to generate a valid response');
+
+    expect(() =>
+      throwContentFilteredErrorWithGuidance({ error: other, provider: 'openai' })
+    ).toThrow(other);
   });
 });

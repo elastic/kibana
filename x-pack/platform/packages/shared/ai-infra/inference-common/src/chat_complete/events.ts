@@ -51,6 +51,8 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        * Tool calls from the LLM
        */
       toolCalls: ToolCallOfToolOptions<TToolOptions>[];
+      /** Provider-reported finish reason (e.g. `content_filter`); absent if not reported. */
+      finish_reason?: string;
     }
   >;
 /**
@@ -115,6 +117,8 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      * Optional metadata attached by inference runtime.
      */
     metadata?: AnonymizationResponseMetadata;
+    /** Provider-reported finish reason; only present on the final chunk of a stream. */
+    finish_reason?: string;
   }
 >;
 

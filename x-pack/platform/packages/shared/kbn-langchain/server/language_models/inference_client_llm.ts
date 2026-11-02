@@ -10,6 +10,11 @@ import type { BaseLanguageModelCallOptions } from '@langchain/core/language_mode
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
+import {
+  ContentFilteredModelResponseError,
+  isContentFilterFinishReason,
+} from './content_filtered_model_response_error';
+import { EmptyModelResponseError } from './empty_model_response_error';
 
 const LLM_TYPE = 'InferenceClientLlm';
 
@@ -91,8 +96,10 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
       () => `${LLM_TYPE}: calling chatComplete for connector ${this.#connectorId}`
     );
 
-    try {
-      const response = await this.#inferenceClient.chatComplete({
+    // The failure handler stays attached to the transport call itself: an empty *successful*
+    // completion is not a chatComplete error and must not be reported as one.
+    const response = await this.#inferenceClient
+      .chatComplete({
         connectorId: this.#connectorId,
         messages: [{ role: MessageRole.User, content: prompt }],
         temperature: this.#temperature,
@@ -100,17 +107,110 @@ export class InferenceClientLlm extends LLM<BaseLanguageModelCallOptions> {
         ...(this.#timeout ? { timeout: this.#timeout } : {}),
         ...(this.#systemPrompt ? { system: this.#systemPrompt } : {}),
         ...(this.#telemetryMetadata ? { metadata: this.#telemetryMetadata } : {}),
+      })
+      .catch((error: unknown) => {
+        const err = error as Error & { code?: string };
+        this.#logger.error(
+          `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${err.code} - ${
+            err.message
+          }`
+        );
+        throw error;
       });
 
-      return response.content;
-    } catch (error: unknown) {
-      const err = error as Error & { code?: string };
-      this.#logger.error(
-        `${LLM_TYPE}: chatComplete failed for connector ${this.#connectorId}: ${err.code} - ${
-          err.message
-        }`
-      );
-      throw error;
+    this.#throwIfContentFiltered({
+      completionTokens: response.tokens?.completion,
+      content: response.content,
+      finishReason: response.finish_reason,
+      model: response.model ?? this.#model,
+      promptTokens: response.tokens?.prompt,
+    });
+
+    this.#throwIfResponseIsEmpty({
+      completionTokens: response.tokens?.completion,
+      content: response.content,
+      model: response.model ?? this.#model,
+      promptTokens: response.tokens?.prompt,
+      toolCallCount: response.toolCalls?.length,
+    });
+
+    return response.content;
+  }
+
+  /**
+   * Throws (and logs at `error`) when the provider stopped the completion with
+   * `finish_reason: content_filter`, whether or not partial content was returned. The same prompt
+   * is filtered again on every retry, so the error is typed and non-retryable for callers.
+   */
+  #throwIfContentFiltered({
+    completionTokens,
+    content,
+    finishReason,
+    model,
+    promptTokens,
+  }: {
+    completionTokens?: number;
+    content: string;
+    finishReason?: unknown;
+    model?: string;
+    promptTokens?: number;
+  }): void {
+    if (!isContentFilterFinishReason(finishReason)) {
+      return;
     }
+
+    const error = new ContentFilteredModelResponseError({
+      completionTokens,
+      connectorId: this.#connectorId,
+      contentLength: content.length,
+      model,
+      promptTokens,
+      responseBody: content,
+    });
+
+    this.#logger.error(error);
+
+    throw error;
+  }
+
+  /**
+   * Throws (and logs at `error`, i.e. persisted) when a model returns a successful completion with no
+   * content. Returning the empty string instead would surface much later as an unrelated failure in
+   * whatever parses the completion (for the Attack Discovery evaluation that means a JSON parse
+   * error), which hides both the real cause and the connector that produced it. On serverless there
+   * is no log-level switch that would let support recover the response bytes afterwards.
+   */
+  #throwIfResponseIsEmpty({
+    completionTokens,
+    content,
+    model,
+    promptTokens,
+    toolCallCount,
+  }: {
+    completionTokens?: number;
+    content: string;
+    model?: string;
+    promptTokens?: number;
+    toolCallCount?: number;
+  }): void {
+    // a tool-call-only response is not empty; the guard must not trip for a future tool-using caller
+    if (content.trim().length > 0 || (toolCallCount ?? 0) > 0) {
+      return;
+    }
+
+    // NOTE: unlike ActionsClientLlm there is no trace id in scope here — this class has never had
+    // one and the caller does not pass one, so the error is narrowed to what is actually known.
+    const error = new EmptyModelResponseError({
+      completionTokens,
+      connectorId: this.#connectorId,
+      contentLength: content.length,
+      model,
+      promptTokens,
+      responseBody: content,
+    });
+
+    this.#logger.error(error);
+
+    throw error;
   }
 }

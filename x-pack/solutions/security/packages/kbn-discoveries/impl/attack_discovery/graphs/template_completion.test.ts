@@ -7,6 +7,7 @@
 
 import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
+import { isContentFilteredModelResponseError } from '@kbn/langchain/server';
 import {
   attackDiscoveryRefineTemplateRequest,
   createAttackDiscoveryTemplateCompletion,
@@ -52,6 +53,38 @@ describe('createAttackDiscoveryTemplateCompletion', () => {
     await complete({ alerts: ['alert'], phase: 'generate' });
 
     expect(chatComplete.mock.calls[0][0].timeout).toBe(600_000);
+  });
+
+  it.each([
+    ['empty', ''],
+    ['truncated non-empty', '{"insights": [{"title": "par'],
+  ])(
+    'throws a content-filtered error when the provider stops with content_filter (%s content)',
+    async (_, content) => {
+      chatComplete.mockResolvedValueOnce({
+        content,
+        finish_reason: 'content_filter',
+        model: 'gpt-x',
+      });
+      const complete = createAttackDiscoveryTemplateCompletion({
+        inferenceClient,
+        connectorId: 'daybreak',
+      });
+
+      const error = await complete({ alerts: ['alert'], phase: 'generate' }).catch((e) => e);
+
+      expect(isContentFilteredModelResponseError(error)).toBe(true);
+    }
+  );
+
+  it('does not throw for a normal stop', async () => {
+    chatComplete.mockResolvedValueOnce({ content: '{}', finish_reason: 'stop' });
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+    });
+
+    await expect(complete({ alerts: ['alert'], phase: 'generate' })).resolves.toBe('{}');
   });
 });
 

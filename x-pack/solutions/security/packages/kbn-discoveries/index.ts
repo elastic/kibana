@@ -102,6 +102,7 @@ export {
   capAttackDiscoveryTemplateCount,
   createAttackDiscoveryTemplateCompletion,
   resolveAttackDiscoveryTemplateCompletion,
+  throwContentFilteredErrorWithGuidance,
 } from './impl/attack_discovery/graphs';
 export {
   filterHallucinatedAlerts,

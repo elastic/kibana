@@ -16,6 +16,11 @@ import type { InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
+import {
+  ContentFilteredModelResponseError,
+  isContentFilterFinishReason,
+} from './content_filtered_model_response_error';
+import { EmptyModelResponseError } from './empty_model_response_error';
 import { getMessageContentAndRole } from './helpers';
 import type { TraceOptions } from './types';
 
@@ -149,6 +154,22 @@ export class ActionsClientLlm extends LLM {
             `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${result.content}`
         );
 
+        this.#throwIfContentFiltered({
+          completionTokens: result.tokens?.completion,
+          content: result.content,
+          finishReason: result.finish_reason,
+          model: result.model,
+          promptTokens: result.tokens?.prompt,
+        });
+
+        this.#throwIfResponseIsEmpty({
+          completionTokens: result.tokens?.completion,
+          content: result.content,
+          model: result.model,
+          promptTokens: result.tokens?.prompt,
+          toolCallCount: result.toolCalls?.length,
+        });
+
         return result.content;
       } catch (error) {
         // .inference/EIS failure: the thrown message carries the upstream error body. This is the ONLY
@@ -229,6 +250,22 @@ export class ActionsClientLlm extends LLM {
         () => `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${content}`
       );
 
+      this.#throwIfContentFiltered({
+        completionTokens: get('data.usage.completion_tokens', actionResult),
+        content,
+        finishReason: get('data.choices[0].finish_reason', actionResult),
+        model: get('data.model', actionResult) ?? this.model,
+        promptTokens: get('data.usage.prompt_tokens', actionResult),
+      });
+
+      this.#throwIfResponseIsEmpty({
+        content,
+        model: this.model,
+        toolCallCount: Array.isArray(get('data.choices[0].message.tool_calls', actionResult))
+          ? (get('data.choices[0].message.tool_calls', actionResult) as unknown[]).length
+          : undefined,
+      });
+
       return content; // per the contact of _call, return a string
     }
 
@@ -247,6 +284,101 @@ export class ActionsClientLlm extends LLM {
       () => `${LLM_TYPE}#_call response\ntraceId: ${this.#traceId}\nresponse:\n${content}`
     );
 
+    // only the `.gen-ai` (OpenAI) connector reports a stop reason here; see the known gaps for
+    // `.bedrock`/`.gemini`:
+    this.#throwIfContentFiltered({
+      completionTokens: get('data.usage.completion_tokens', actionResult),
+      content,
+      finishReason: get('data.finish_reason', actionResult),
+      model: this.model,
+      promptTokens: get('data.usage.prompt_tokens', actionResult),
+    });
+
+    // a tool-call-only response is not empty; the guard must not trip for a future tool-using caller:
+    this.#throwIfResponseIsEmpty({
+      content,
+      model: this.model,
+      toolCallCount: Array.isArray(get('data.toolCalls', actionResult))
+        ? (get('data.toolCalls', actionResult) as unknown[]).length
+        : undefined,
+    });
+
     return content; // per the contact of _call, return a string
+  }
+
+  /**
+   * Throws (and logs at `error`, i.e. persisted) when the provider stopped the completion with
+   * `finish_reason: content_filter`. Runs before the empty-response guard and regardless of whether
+   * the partial content is empty: truncated output would otherwise fail later as a parse error and
+   * be retried, but the same prompt is filtered again on every attempt.
+   */
+  #throwIfContentFiltered({
+    completionTokens,
+    content,
+    finishReason,
+    model,
+    promptTokens,
+  }: {
+    completionTokens?: number;
+    content: string;
+    finishReason?: unknown;
+    model?: string;
+    promptTokens?: number;
+  }): void {
+    if (!isContentFilterFinishReason(finishReason)) {
+      return;
+    }
+
+    const error = new ContentFilteredModelResponseError({
+      completionTokens,
+      connectorId: this.#connectorId,
+      contentLength: content.length,
+      model,
+      promptTokens,
+      responseBody: content,
+      traceId: this.#traceId,
+    });
+
+    this.#logger.error(error);
+
+    throw error;
+  }
+
+  /**
+   * Throws (and logs at `error`, i.e. persisted) when a model returns a successful completion with
+   * no content. Returning the empty string instead would surface later as an unrelated JSON parse
+   * error, and on serverless there is no log-level switch that would let support recover the
+   * response bytes afterwards.
+   */
+  #throwIfResponseIsEmpty({
+    completionTokens,
+    content,
+    model,
+    promptTokens,
+    toolCallCount,
+  }: {
+    completionTokens?: number;
+    content: string;
+    model?: string;
+    promptTokens?: number;
+    toolCallCount?: number;
+  }): void {
+    if (content.trim().length > 0 || (toolCallCount ?? 0) > 0) {
+      return;
+    }
+
+    const error = new EmptyModelResponseError({
+      completionTokens,
+      connectorId: this.#connectorId,
+      contentLength: content.length,
+      model,
+      promptTokens,
+      responseBody: content,
+      traceId: this.#traceId,
+    });
+
+    this.#logger.error(error);
+
+    throw error;
   }
 }

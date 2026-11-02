@@ -558,6 +558,59 @@ describe('OpenAIConnector', () => {
         expect(response.usage.total_tokens).toEqual(9);
       });
 
+      it('returns the content_filter finish_reason, even when the completion has no content', async () => {
+        mockRequest = jest.fn().mockResolvedValue({
+          ...mockResponse,
+          data: {
+            ...mockResponse.data,
+            choices: [
+              {
+                message: { role: 'assistant', content: null },
+                finish_reason: 'content_filter',
+                index: 0,
+              },
+            ],
+          },
+        });
+        // @ts-ignore
+        connector.request = mockRequest;
+
+        const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
+
+        expect(response.finish_reason).toEqual('content_filter');
+        expect(response.message).toEqual('');
+      });
+
+      it('keeps the partial content when the completion is cut off by the content filter', async () => {
+        mockRequest = jest.fn().mockResolvedValue({
+          ...mockResponse,
+          data: {
+            ...mockResponse.data,
+            choices: [
+              {
+                message: { role: 'assistant', content: ' partial ' },
+                finish_reason: 'content_filter',
+                index: 0,
+              },
+            ],
+          },
+        });
+        // @ts-ignore
+        connector.request = mockRequest;
+
+        const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
+
+        expect(response.finish_reason).toEqual('content_filter');
+        expect(response.message).toEqual('partial');
+      });
+
+      it('does not report a finish_reason for a normal stop', async () => {
+        const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
+
+        expect(response.finish_reason).toBeUndefined();
+        expect(response.message).toEqual(mockResponseString);
+      });
+
       it('signal is properly passed to runApi', async () => {
         const signal = jest.fn();
         await connector.invokeAI({ ...sampleOpenAiBody, signal }, connectorUsageCollector);
@@ -1233,6 +1286,59 @@ describe('OpenAIConnector', () => {
         );
         expect(response.message).toEqual(mockResponseString);
         expect(response.usage.total_tokens).toEqual(9);
+      });
+
+      it('returns the content_filter finish_reason, even when the completion has no content', async () => {
+        mockRequest = jest.fn().mockResolvedValue({
+          ...mockResponse,
+          data: {
+            ...mockResponse.data,
+            choices: [
+              {
+                message: { role: 'assistant', content: null },
+                finish_reason: 'content_filter',
+                index: 0,
+              },
+            ],
+          },
+        });
+        // @ts-ignore
+        connector.request = mockRequest;
+
+        const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
+
+        expect(response.finish_reason).toEqual('content_filter');
+        expect(response.message).toEqual('');
+      });
+
+      it('keeps the partial content when the completion is cut off by the content filter', async () => {
+        mockRequest = jest.fn().mockResolvedValue({
+          ...mockResponse,
+          data: {
+            ...mockResponse.data,
+            choices: [
+              {
+                message: { role: 'assistant', content: ' partial ' },
+                finish_reason: 'content_filter',
+                index: 0,
+              },
+            ],
+          },
+        });
+        // @ts-ignore
+        connector.request = mockRequest;
+
+        const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
+
+        expect(response.finish_reason).toEqual('content_filter');
+        expect(response.message).toEqual('partial');
+      });
+
+      it('does not report a finish_reason for a normal stop', async () => {
+        const response = await connector.invokeAI(sampleOpenAiBody, connectorUsageCollector);
+
+        expect(response.finish_reason).toBeUndefined();
+        expect(response.message).toEqual(mockResponseString);
       });
 
       it('signal is properly passed to runApi', async () => {
