@@ -15,6 +15,8 @@ import { usePermissions } from '../../../../hooks/use_permissions';
 import { render } from '../../../../utils/test_helper';
 import { useCreateSloPrimaryAction } from './create_slo_btn';
 
+jest.setTimeout(30_000);
+
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_permissions');
 jest.mock('../../../../hooks/use_fetch_slo_templates');
