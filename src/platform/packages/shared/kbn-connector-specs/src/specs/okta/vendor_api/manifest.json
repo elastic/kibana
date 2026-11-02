@@ -76,17 +76,7 @@
     "getUserGroups": [
       {
         "method": "get",
-        "pagination": {
-          "defaultSize": 200,
-          "request": {
-            "cursorParam": "after",
-            "sizeParam": "limit"
-          },
-          "response": {
-            "itemsPath": ""
-          },
-          "style": "link"
-        },
+        "pagination": "none",
         "path": "/api/v1/users/{id}/groups",
         "source": "management"
       }
