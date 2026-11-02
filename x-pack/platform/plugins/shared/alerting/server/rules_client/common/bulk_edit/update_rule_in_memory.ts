@@ -61,6 +61,7 @@ export interface UpdateRuleInMemoryOpts<Params extends RuleParams> {
   shouldInvalidateApiKeys: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  hasMigratedLegacyActions?: boolean;
 }
 
 export async function updateRuleInMemory<Params extends RuleParams>(
@@ -77,6 +78,7 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     profileUid,
     shouldInvalidateApiKeys,
     shouldIncrementRevision = () => true,
+    hasMigratedLegacyActions = false,
   }: UpdateRuleInMemoryOpts<Params>
 ): Promise<void> {
   context.logger.info(`Updating rule in memory for rule: ${rule.id}`);
@@ -139,7 +141,8 @@ export async function updateRuleInMemory<Params extends RuleParams>(
 
   // If neither attributes nor parameters were updated, mark
   // the rule as skipped and continue to the next rule.
-  if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
+  // A rule with migrated legacy actions is never skipped: it has to be saved to persist them.
+  if (isAttributesUpdateSkipped && isParamsUpdateSkipped && !hasMigratedLegacyActions) {
     skipped.push({
       id: rule.id,
       name: rule.attributes.name,
