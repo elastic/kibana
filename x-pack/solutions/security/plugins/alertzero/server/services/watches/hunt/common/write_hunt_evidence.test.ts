@@ -84,10 +84,6 @@ describe('countsTowardRetryBound', () => {
     ).toBe(false);
   });
 
-  it('ignores final gaps, which do not make the run retryable', () => {
-    expect(countsTowardRetryBound(['index_unavailable', 'input_truncated'])).toBe(false);
-  });
-
   it('counts a run that mixes an environment gap with one that can repeat', () => {
     expect(countsTowardRetryBound(['index_unavailable', 'generation_failed'])).toBe(true);
   });
@@ -423,7 +419,7 @@ describe('writeHuntEvidence', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('retired as incomplete'));
   });
 
-  it('names the last run gaps in the retirement warning', async () => {
+  it('names the last run retryable gaps in the retirement warning', async () => {
     const esClient = makeEsClient([
       { space_id: 'default', coverage_pending: false, hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS },
     ]);
@@ -436,11 +432,11 @@ describe('writeHuntEvidence', () => {
       completeness: 'incomplete_retryable',
       totalHits: 0,
       searchedTechniqueIds: ['T1001'],
-      incompleteReasons: ['query_ungrounded', 'index_unavailable'],
+      retryableReasons: ['query_ungrounded', 'index_unavailable'],
     });
 
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining("Last run's gaps: query_ungrounded, index_unavailable.")
+      expect.stringContaining("Last run's retryable gaps: query_ungrounded, index_unavailable.")
     );
   });
 

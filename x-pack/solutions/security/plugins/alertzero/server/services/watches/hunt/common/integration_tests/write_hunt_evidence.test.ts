@@ -366,7 +366,7 @@ describe('writeHuntEvidence against Elasticsearch', () => {
       for (let run = 0; run <= MAX_HUNT_RETRY_ATTEMPTS; run++) {
         await write(reportId, {
           ...retryableNoHit(`outage-${run}`),
-          incompleteReasons: ['index_unavailable', 'search_partial'],
+          retryableReasons: ['index_unavailable', 'search_partial'],
         });
       }
 
@@ -379,6 +379,29 @@ describe('writeHuntEvidence against Elasticsearch', () => {
       );
       expect(stored?.last_hunted_at).toBeUndefined();
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not use up an attempt on an outage run that searched something new', async () => {
+      const reportId = await newReport();
+
+      await write(reportId, {
+        ...retryableNoHit('outage-progress'),
+        retryableReasons: ['index_unavailable'],
+      });
+      expect((await element(reportId))?.hunt_retry_count).toBe(0);
+
+      for (let run = 1; run < MAX_HUNT_RETRY_ATTEMPTS; run++) {
+        await write(reportId, retryableNoHit(`rejected-${run}`));
+      }
+
+      const stored = await element(reportId);
+      expect(stored).toEqual(
+        expect.objectContaining({
+          hunt_retry_count: MAX_HUNT_RETRY_ATTEMPTS - 1,
+          coverage_pending: true,
+        })
+      );
+      expect(stored?.last_hunted_at).toBeUndefined();
     });
 
     it('counts a run that mixes an outage with a gap that can repeat', async () => {
@@ -394,7 +417,7 @@ describe('writeHuntEvidence against Elasticsearch', () => {
 
       await write(reportId, {
         ...retryableNoHit('run-mixed'),
-        incompleteReasons: ['index_unavailable', 'generation_failed'],
+        retryableReasons: ['index_unavailable', 'generation_failed'],
       });
 
       expect(await element(reportId)).toEqual(

@@ -228,7 +228,7 @@ describe('registerWriteHuntEvidenceRoute', () => {
       requestFor({
         completeness: 'incomplete_retryable',
         searchedTechniqueIds: ['T1001'],
-        incompleteReasons: ['index_unavailable'],
+        retryableReasons: ['index_unavailable'],
       }),
       httpServerMock.createResponseFactory()
     );
