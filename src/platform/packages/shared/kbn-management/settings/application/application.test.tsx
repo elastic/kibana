@@ -117,11 +117,11 @@ describe('Settings application', () => {
     jest.clearAllMocks();
   });
 
-  it('renders without errors', () => {
-    const { container, getByTestId } = render(wrap(<SettingsApplication />));
+  it('renders without errors', async () => {
+    const { container, findByTestId, getByTestId } = render(wrap(<SettingsApplication />));
 
     expect(container).toBeInTheDocument();
-    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_TITLE)).toBeInTheDocument();
+    expect(await findByTestId(DATA_TEST_SUBJ_SETTINGS_TITLE)).toBeInTheDocument();
     expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeInTheDocument();
     // Verify that all category panels are rendered
     for (const category of spaceCategories) {
@@ -192,9 +192,9 @@ describe('Settings application', () => {
   it('replaces history while typing so browser back does not step through each character', async () => {
     const history = scopedHistoryMock.create({ pathname: '', search: '' });
 
-    const { getByTestId } = renderWithKibanaProvider({ history });
+    const { findByTestId } = renderWithKibanaProvider({ history });
 
-    const searchBar = getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR);
+    const searchBar = await findByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR);
 
     // Simulate typing characters one at a time, as a user would.
     const valuesByKeystroke = ['t', 'te', 'tes', 'test'];
@@ -215,9 +215,9 @@ describe('Settings application', () => {
   });
 
   it('renders the empty state when no settings match the query', async () => {
-    const { getByTestId } = render(wrap(<SettingsApplication />));
+    const { findByTestId, getByTestId } = render(wrap(<SettingsApplication />));
 
-    const searchBar = getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR);
+    const searchBar = await findByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR);
     act(() => {
       fireEvent.change(searchBar, { target: { value: 'some-random-text' } });
     });
@@ -255,9 +255,10 @@ describe('Settings application', () => {
       'oblt'
     );
 
-    const { getByTestId } = render(wrap(<SettingsApplication />, services));
+    const { findByTestId, getByTestId } = render(wrap(<SettingsApplication />, services));
 
     // The form should be rendered
+    expect(await findByTestId(DATA_TEST_SUBJ_SETTINGS_TITLE)).toBeInTheDocument();
     for (const category of spaceCategories) {
       expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
     }
@@ -267,32 +268,37 @@ describe('Settings application', () => {
     const spaceSettingsTestSubj = `${DATA_TEST_SUBJ_PREFIX_TAB}-${SPACE_SETTINGS_TAB_ID}`;
     const globalSettingsTestSubj = `${DATA_TEST_SUBJ_PREFIX_TAB}-${GLOBAL_SETTINGS_TAB_ID}`;
 
-    it("doesn't render tabs when there are no global settings", () => {
+    it("doesn't render tabs when there are no global settings", async () => {
       const services: SettingsApplicationServices = createSettingsApplicationServicesMock(false);
 
-      const { container, queryByTestId } = render(wrap(<SettingsApplication />, services));
+      const { container, findByTestId, queryByTestId } = render(
+        wrap(<SettingsApplication />, services)
+      );
 
       expect(container).toBeInTheDocument();
+      expect(await findByTestId(DATA_TEST_SUBJ_SETTINGS_TITLE)).toBeInTheDocument();
       expect(queryByTestId(spaceSettingsTestSubj)).toBeNull();
       expect(queryByTestId(globalSettingsTestSubj)).toBeNull();
     });
 
-    it('renders tabs when global settings are enabled', () => {
+    it('renders tabs when global settings are enabled', async () => {
       const services: SettingsApplicationServices = createSettingsApplicationServicesMock(true);
 
-      const { container, getByTestId } = render(wrap(<SettingsApplication />, services));
+      const { container, findByTestId, getByTestId } = render(
+        wrap(<SettingsApplication />, services)
+      );
 
       expect(container).toBeInTheDocument();
-      expect(getByTestId(spaceSettingsTestSubj)).toBeInTheDocument();
+      expect(await findByTestId(spaceSettingsTestSubj)).toBeInTheDocument();
       expect(getByTestId(globalSettingsTestSubj)).toBeInTheDocument();
     });
 
-    it('can switch between tabs', () => {
+    it('can switch between tabs', async () => {
       const services: SettingsApplicationServices = createSettingsApplicationServicesMock(true);
 
-      const { getByTestId } = render(wrap(<SettingsApplication />, services));
+      const { findByTestId, getByTestId } = render(wrap(<SettingsApplication />, services));
 
-      const spaceTab = getByTestId(spaceSettingsTestSubj);
+      const spaceTab = await findByTestId(spaceSettingsTestSubj);
       const globalTab = getByTestId(globalSettingsTestSubj);
 
       // Initially the Space tab should be selected
