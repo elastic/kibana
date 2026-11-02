@@ -18,7 +18,7 @@ import {
   Query,
   EuiTabs,
 } from '@elastic/eui';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { Form } from '@kbn/management-settings-components-form';
 import type { SettingsTabs } from '@kbn/management-settings-types/tab';
@@ -32,6 +32,7 @@ import { QueryInput } from './query_input';
 import { useServices } from './services';
 
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
+export const DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR = 'managementSettingsLoadError';
 export const SPACE_SETTINGS_TAB_ID = 'space-settings';
 export const GLOBAL_SETTINGS_TAB_ID = 'global-settings';
 
@@ -75,13 +76,16 @@ export const SettingsApplication = () => {
     spaceFields: spaceAllFields,
     globalFields: globalAllFields,
     isLoading: allFieldsLoading,
+    error: allFieldsError,
   } = useScopeFields();
   const {
     spaceFields: spaceFilteredFields,
     globalFields: globalFilteredFields,
     isLoading: filteredFieldsLoading,
+    error: filteredFieldsError,
   } = useScopeFields(query);
   const isLoading = allFieldsLoading || filteredFieldsLoading;
+  const loadError = allFieldsError ?? filteredFieldsError;
 
   const [selectedTabId, setSelectedTabId] = useState(SPACE_SETTINGS_TAB_ID);
 
@@ -95,6 +99,16 @@ export const SettingsApplication = () => {
 
   if (isLoading) {
     return <EuiLoadingSpinner size="xl" />;
+  }
+
+  if (loadError) {
+    return (
+      <KbnDangerCallout
+        title={i18nTexts.loadErrorTitle}
+        text={loadError.message}
+        data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR}
+      />
+    );
   }
 
   // Only enabled the Global settings tab if there are any global settings

@@ -13,6 +13,7 @@ import { of } from 'rxjs';
 import {
   SettingsApplication,
   DATA_TEST_SUBJ_SETTINGS_TITLE,
+  DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR,
   SPACE_SETTINGS_TAB_ID,
   GLOBAL_SETTINGS_TAB_ID,
 } from './application';
@@ -69,6 +70,20 @@ describe('Settings application', () => {
     for (const category of spaceCategories) {
       expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
     }
+  });
+
+  it('shows an error instead of the form when the settings fail to load', async () => {
+    const services: SettingsApplicationServices = {
+      ...createSettingsApplicationServicesMock(),
+      getAllowlistedSettings: () => Promise.reject(new Error('Internal Server Error')),
+    };
+
+    const { findByTestId, queryByTestId } = render(wrap(<SettingsApplication />, services));
+
+    const loadError = await findByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR);
+    expect(loadError).toHaveTextContent('Unable to load advanced settings');
+    expect(loadError).toHaveTextContent('Internal Server Error');
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeNull();
   });
 
   it('replaces history while typing so browser back does not step through each character', async () => {
