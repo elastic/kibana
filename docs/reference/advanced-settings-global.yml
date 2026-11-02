@@ -91,7 +91,6 @@ groups:
           self: ga
           serverless: unavailable
         note: |
-          :applies_to: {stack: preview 9.6+}
           {{esql}} Data Federation requires an Enterprise [subscription](https://www.elastic.co/subscriptions).
 
   - group: Custom branding

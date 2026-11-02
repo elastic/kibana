@@ -768,7 +768,7 @@ groups:
         datatype: bool
         default: false
         applies_to:
-          stack: preview =9.4, experimental 9.5+
+          stack: experimental 9.4+
           ech: ga
           ece: ga
           eck: ga
@@ -1977,8 +1977,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          elasticsearch: preview 9.4
-          serverless: unavailable
+          serverless: ga
 
       - setting: "courier:ignoreFilterIfFieldNotInIndex"
         id: courier-ignorefilteriffieldnotinindex
