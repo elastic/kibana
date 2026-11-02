@@ -58,6 +58,24 @@ describe('automation validation', () => {
       expect(canSaveAutomation({ ...scheduled, instructions: 'x'.repeat(10001) })).toBe(false);
     });
 
+    it.each(['alert', 'slack_message', 'every'] as const)(
+      'enforces the exact instructions limit for %s',
+      (kind) => {
+        const trigger =
+          kind === 'slack_message'
+            ? { ...createTriggerFormValues(kind), channels: ['C1'] }
+            : createTriggerFormValues(kind);
+        expect(canSaveAutomation({ ...values, trigger, instructions: 'x'.repeat(5000) })).toBe(
+          true
+        );
+        expect(canSaveAutomation({ ...values, trigger, instructions: 'x'.repeat(5001) })).toBe(
+          false
+        );
+        if (kind !== 'every')
+          expect(canSaveAutomation({ ...values, trigger, instructions: '' })).toBe(true);
+      }
+    );
+
     it('blocks a Slack action without a destination', () => {
       const withTrigger = { ...values, trigger: createTriggerFormValues('alert') };
       expect(

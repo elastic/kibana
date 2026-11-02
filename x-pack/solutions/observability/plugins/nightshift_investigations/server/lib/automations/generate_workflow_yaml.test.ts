@@ -292,7 +292,7 @@ describe('generateWorkflowYaml', () => {
       const [active, recovered] = yaml.steps;
 
       expect(active.with).toMatchObject({
-        message: 'Check the checkout service',
+        instructions: 'Check the checkout service',
         timeout_seconds: 600,
         notificationDestinations: [expect.objectContaining({ params: { channel: 'C123' } })],
       });
@@ -408,7 +408,7 @@ describe('generateWorkflowYaml', () => {
           title: 'Test automation',
           summary: 'Test automation',
           trigger_type: 'automatic',
-          message: 'Assess checkout health in the last hour.',
+          message: 'Instructions:\nAssess checkout health in the last hour.',
           scope_query: 'service.name:checkout',
           timeout_seconds: 120,
         },
@@ -465,7 +465,8 @@ describe('generateWorkflowYaml', () => {
       });
       expect(slack.with).toMatchObject({ subject_type: 'slack_thread', timeout_seconds: 120 });
       expect(scheduled.with.message).not.toContain('event.text');
-      expect(alert.with.message).not.toContain('event.text');
+      expect(alert.with.instructions).not.toContain('event.text');
+      expect(alert.with.message).toBeUndefined();
       expect(slack.with.message).toContain('{{ event.text | truncate: 4000 }}');
       expect(scheduled.with.slack_thread).toBeUndefined();
       expect(alert.with.slack_thread).toBeUndefined();
@@ -760,12 +761,13 @@ describe('generateWorkflowYaml', () => {
         }
       );
 
-      it('puts the slack message in the prompt after the prompt template', () => {
+      it('separates the Slack evidence from operator instructions', () => {
         const automation = slackAutomation(slackRow());
         automation.execution.promptTemplate = 'Look for deploy problems.';
         const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+        expect(yaml.steps[0].with.instructions).toBe('Look for deploy problems.');
         expect(yaml.steps[0].with.message).toBe(
-          'Look for deploy problems.\n\nSlack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: 4000 }}'
+          'Slack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: 4000 }}'
         );
       });
 
@@ -776,6 +778,7 @@ describe('generateWorkflowYaml', () => {
             automation: slackAutomation(slackRow()),
           })
         );
+        expect(yaml.steps[0].with.instructions).toBe('');
         expect(yaml.steps[0].with.message).toContain('{{ event.text | truncate: 4000 }}');
       });
 
@@ -845,11 +848,12 @@ describe('generateWorkflowYaml', () => {
       expect(yaml.steps[0].with).not.toHaveProperty('concurrency_key');
     });
 
-    it('includes message when promptTemplate is set', () => {
+    it('includes instructions when promptTemplate is set', () => {
       const automation = baseAutomation();
       automation.execution.promptTemplate = 'Investigate this alert carefully.';
       const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
-      expect(yaml.steps[0].with.message).toBe('Investigate this alert carefully.');
+      expect(yaml.steps[0].with.instructions).toBe('Investigate this alert carefully.');
+      expect(yaml.steps[0].with.message).toBeUndefined();
     });
 
     it('omits message when promptTemplate is not set', () => {

@@ -20,9 +20,12 @@ import { triggerLabels } from './translations';
 import { TriggerPicker } from './trigger_picker';
 import { TriggerRow } from './trigger_row';
 import { SectionHeader } from '../section_header';
+import { AutomationInstructions } from '../instructions/automation_instructions';
 
 export const AutomationTriggerSection = ({
   trigger,
+  instructions,
+  onInstructionsChange,
   dailyDispatchLimit,
   onTriggerChange,
   onDailyDispatchLimitChange,
@@ -32,6 +35,8 @@ export const AutomationTriggerSection = ({
   readOnly = false,
 }: {
   trigger?: TriggerFormValues;
+  instructions: string;
+  onInstructionsChange: (instructions: string) => void;
   dailyDispatchLimit: string;
   onTriggerChange: (trigger?: TriggerFormValues) => void;
   onDailyDispatchLimitChange: (value: string) => void;
@@ -121,6 +126,18 @@ export const AutomationTriggerSection = ({
             onRaiseLimit={onRaiseLimit}
             readOnly={readOnly}
           />
+        )}
+        {trigger && (
+          <>
+            <EuiSpacer size="m" />
+            <AutomationInstructions
+              key={trigger.kind}
+              trigger={trigger}
+              instructions={instructions}
+              onInstructionsChange={onInstructionsChange}
+              readOnly={readOnly}
+            />
+          </>
         )}
       </EuiPanel>
     </>

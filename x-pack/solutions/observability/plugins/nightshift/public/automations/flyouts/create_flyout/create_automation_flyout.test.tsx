@@ -95,7 +95,7 @@ describe('CreateAutomationFlyout', () => {
           tags: ['oncall'],
           isEnabled: false,
           trigger: { rows: [{ kind: 'alert' }] },
-          execution: { promptTemplate: 'Find the root cause', reasoningMode: 'investigate' },
+          execution: { promptTemplate: 'Find the root cause' },
           completions: [],
           runtime: { dailyDispatchLimit: 20 },
         },

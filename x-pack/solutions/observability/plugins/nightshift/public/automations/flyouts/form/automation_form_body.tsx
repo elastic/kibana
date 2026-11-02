@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow, EuiSpacer, EuiText, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '@kbn/nightshift-investigations-plugin/common';
 import {
   isSlackTrigger,
   SLACK_THREAD_ACTION,
@@ -16,7 +15,6 @@ import {
   type TriggerFormValues,
 } from './automation_form_values';
 import { AutomationActionsSection } from './actions/automation_actions_section';
-import { AutomationInstructions } from './instructions/automation_instructions';
 import { AutomationTriggerSection } from './triggers/trigger_section';
 import { AutomationTagsField, tagLabels } from './tags_field';
 import { FormSection } from './section_header';
@@ -137,24 +135,14 @@ export const AutomationFormBody = ({
       <FormSection>
         <AutomationTriggerSection
           trigger={values.trigger}
+          instructions={values.instructions}
+          onInstructionsChange={(instructions) => onChange({ instructions })}
           dailyDispatchLimit={values.dailyDispatchLimit}
           onTriggerChange={(trigger) => onChange({ trigger, ...getActionForTrigger(trigger) })}
           onDailyDispatchLimitChange={(dailyDispatchLimit) => onChange({ dailyDispatchLimit })}
           usedToday={usedToday}
           savedLimit={savedLimit}
           onRaiseLimit={onRaiseLimit}
-          readOnly={readOnly}
-        />
-      </FormSection>
-      <FormSection>
-        <AutomationInstructions
-          maxLength={
-            values.trigger?.kind === 'every' ? MAX_AUTOMATION_INSTRUCTIONS_LENGTH : undefined
-          }
-          instructions={values.instructions}
-          mode={values.mode}
-          onInstructionsChange={(instructions) => onChange({ instructions })}
-          onModeChange={(mode) => onChange({ mode })}
           readOnly={readOnly}
         />
       </FormSection>

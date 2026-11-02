@@ -64,7 +64,6 @@ export const toAutomationRequestBody = (
     trigger: { rows: [toTriggerRow(values.trigger)] },
     execution: {
       ...(instructions ? { promptTemplate: instructions } : {}),
-      reasoningMode: values.mode === 'investigate' ? 'investigate' : 'observe',
     },
     completions: !values.slackAction
       ? []
