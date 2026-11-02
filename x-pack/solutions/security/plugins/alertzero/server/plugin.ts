@@ -15,6 +15,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import { chunk } from 'lodash';
+import type { Subscription } from 'rxjs';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -26,6 +27,7 @@ import {
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
+import { TRIAGE_GROUPING_FLAG } from './alert_triage/constants';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -63,6 +65,7 @@ import { ScanFailuresService } from './services/scan_failures/scan_failures_serv
 import { ActionsService } from './services/actions/actions_service';
 import type { HuntServices } from './services/watches/hunt';
 import { listActionsTool } from './agent_builder_tools/list_actions_tool';
+import { isSpaceSupported } from './lib/is_space_supported';
 import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertzero_access';
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
@@ -124,6 +127,8 @@ export class AlertZeroPlugin
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
   private coreStart?: CoreStart;
+  private triageGroupingEnabled = true;
+  private triageGroupingFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
@@ -217,8 +222,8 @@ export class AlertZeroPlugin
     });
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
-        const [core, { security }] = await coreSetup.getStartServices();
-        return { core, security };
+        const [core, { security, spaces }] = await coreSetup.getStartServices();
+        return { core, security, spaces, isServerless: this.isServerless };
       });
       registerAgentType(agentBuilder);
       registerAttachments(agentBuilder);
@@ -229,11 +234,15 @@ export class AlertZeroPlugin
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
       // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
-      // subscribes. Scoped per space, like the routes, so spaces without AlertZero stay quiet.
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and Classic
+      // spaces, stay quiet.
       agentBuilder.conversations.enableUpdatedTrigger({
         templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
         isEnabled: async (request) => {
-          const [{ savedObjects, uiSettings }] = await coreSetup.getStartServices();
+          const [{ savedObjects, uiSettings }, { spaces }] = await coreSetup.getStartServices();
+          if (!(await isSpaceSupported({ isServerless: this.isServerless, spaces, request }))) {
+            return false;
+          }
           return uiSettings
             .asScopedToClient(savedObjects.getScopedClient(request))
             .get<boolean>(ALERTZERO_ENABLED_SETTING_ID);
@@ -259,6 +268,11 @@ export class AlertZeroPlugin
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
+      grouping: {
+        getProposals: () => this.requireProposals(),
+        getWorkflowsManagement: () => this.workflowsManagementApi,
+        isGroupingEnabled: async () => this.triageGroupingEnabled,
+      },
       logger: stepsLogger,
     });
 
@@ -288,10 +302,15 @@ export class AlertZeroPlugin
 
     coreSetup.http.registerRouteHandlerContext<AlertZeroRequestHandlerContext, 'alertzero'>(
       'alertzero',
-      async (context) => ({
+      async (context, request) => ({
         hasRequiredDependencies: Boolean(
           agentBuilder && proposals && agenticInvestigations && this.serviceAccountsEnabled
         ),
+        isSpaceSupported: await isSpaceSupported({
+          isServerless: this.isServerless,
+          spaces: this.spaces,
+          request,
+        }),
         subscription: getSubscriptionAvailability({
           isServerless: this.isServerless,
           serverlessTierAvailable: this.serverlessTierAvailable,
@@ -314,6 +333,11 @@ export class AlertZeroPlugin
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
+      isServerless: this.isServerless,
+      getWorkflowsManagement: () =>
+        this.workflowsManagementApi
+          ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
+          : undefined,
       reportTelemetryEvent: createAlertZeroTelemetryReporter({
         analytics: coreSetup.analytics,
         logger: this.logger.get('telemetry'),
@@ -327,6 +351,12 @@ export class AlertZeroPlugin
     this.spaces = plugins.spaces;
     this.taskManager = plugins.taskManager;
     this.coreStart = core;
+    // The kill switch for Alert Triage grouping. It stays on where no flag provider exists.
+    this.triageGroupingFlagSubscription = core.featureFlags
+      .getBooleanValue$(TRIAGE_GROUPING_FLAG, true)
+      .subscribe((enabled) => {
+        this.triageGroupingEnabled = enabled;
+      });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
@@ -555,5 +585,7 @@ export class AlertZeroPlugin
     return this.spaces?.spacesService.getSpaceId(request) ?? 'default';
   }
 
-  stop() {}
+  stop() {
+    this.triageGroupingFlagSubscription?.unsubscribe();
+  }
 }

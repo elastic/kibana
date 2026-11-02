@@ -7,6 +7,7 @@
 
 import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condition_to_esql';
 import { castField } from '../../esql/cast';
+import type { CastFieldOptions } from '../../esql/cast';
 import type {
   EntityDefinitionWithoutId,
   EntityDefinitionType,
@@ -416,16 +417,21 @@ export function getFieldEvaluationsEsql(definition: EntityDefinitionWithoutId): 
  * ```
  *
  * @param definition - The entity definition
+ * @param options - `castFields: false` references the raw fields so ES|QL can push the filter down to
+ *   Lucene. Only for indices that map these fields the same way; the default casts them.
  * @returns An ESQL filter string that checks if the document contains an entity id.
  */
-export function getEuidEsqlDocumentsContainsIdFilter(definition: EntityDefinitionWithoutId) {
+export function getEuidEsqlDocumentsContainsIdFilter(
+  definition: EntityDefinitionWithoutId,
+  options?: CastFieldOptions
+) {
   const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
-    return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
+    return `(${esqlIsNotNullOrEmpty(identityField.singleField, options)})`;
   }
 
-  return conditionToESQL(identityField.documentsFilter);
+  return conditionToESQL(identityField.documentsFilter, options);
 }
 
 /**

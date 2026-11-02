@@ -120,6 +120,7 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
       ViewModeComponent,
       policyAssignmentInfoTooltip,
       CardDecorator,
+      showCommentsInViewFlyout,
       ...baseProps
     } = props;
 
@@ -139,6 +140,7 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
           {...sharedProps}
           showAsSimpleTable
           showEnabledColumn={showEnabledColumn}
+          showCommentsInViewFlyout={showCommentsInViewFlyout}
           ViewModeComponent={
             ViewModeComponent ??
             (({ item }: ArtifactViewModeComponentProps) => (

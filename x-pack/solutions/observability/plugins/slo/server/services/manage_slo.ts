@@ -16,7 +16,8 @@ export class ManageSLO {
     private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
-    private userId: string
+    private userId: string,
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   async enable(sloId: string) {
@@ -26,8 +27,12 @@ export class ManageSLO {
       return;
     }
 
-    await this.summaryTransformManager.start(getSLOSummaryTransformId(slo.id, slo.revision));
-    await this.transformManager.start(getSLOTransformId(slo.id, slo.revision));
+    await this.summaryTransformManager.start(getSLOSummaryTransformId(slo.id, slo.revision), {
+      signal: this.signal,
+    });
+    await this.transformManager.start(getSLOTransformId(slo.id, slo.revision), {
+      signal: this.signal,
+    });
     slo.enabled = true;
     slo.updatedBy = this.userId;
     slo.updatedAt = new Date();
@@ -41,8 +46,12 @@ export class ManageSLO {
       return;
     }
 
-    await this.summaryTransformManager.stop(getSLOSummaryTransformId(slo.id, slo.revision));
-    await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision));
+    await this.summaryTransformManager.stop(getSLOSummaryTransformId(slo.id, slo.revision), {
+      signal: this.signal,
+    });
+    await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision), {
+      signal: this.signal,
+    });
     slo.enabled = false;
     slo.updatedBy = this.userId;
     slo.updatedAt = new Date();

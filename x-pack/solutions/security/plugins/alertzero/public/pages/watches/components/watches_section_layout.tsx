@@ -12,7 +12,7 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTitle } from '@kbn/app-header';
 import type { AppMenuItemType, AppMenuPrimaryActionItem } from '@kbn/app-menu';
 import {
-  ALERTZERO_WATCH_SETTINGS_WIDTH,
+  ALERTZERO_PAGE_CONTENT_WIDTH,
   ALERTZERO_WATCHES_SUBNAV_WIDTH,
 } from '../../../components/layout/constants';
 import { useAlertZeroDocumentationLink } from '../../../hooks/use_alertzero_documentation_link';
@@ -109,7 +109,7 @@ export const WatchesSectionLayout: React.FC<WatchesSectionLayoutProps> = ({
         grow
         contentProps={{
           css: css`
-            width: ${ALERTZERO_WATCH_SETTINGS_WIDTH}px;
+            width: ${ALERTZERO_PAGE_CONTENT_WIDTH}px;
             max-width: 100%;
             margin-inline: auto;
           `,

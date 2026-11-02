@@ -198,6 +198,7 @@ describe('global header', () => {
     '/exceptions',
     '/exceptions/details/list-1',
     '/get_started',
+    '/manage',
   ])(
     'does not mount the header action menu on %s, where the page app header owns the actions',
     (pathname) => {
