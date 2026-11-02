@@ -59,6 +59,7 @@ export {
 } from './workers/update_worker_route.gen';
 export {
   AffectedAsset,
+  HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
   HuntForThreatResult,

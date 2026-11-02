@@ -681,6 +681,102 @@
       "prUrl": "https://github.com/elastic/kibana/pull/299837"
     },
     {
+      "path": "/s/{spaceId}/api/observability/slos",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/_bulk_delete",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/_bulk_purge_rollup",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/_bulk_snapshot",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/_delete_instances",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/{sloId}",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas, and the path parameter sloId is now id. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/{sloId}/_reset",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas, and the path parameter sloId is now id. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/{sloId}/_snapshot",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas, and the path parameter sloId is now id. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/{sloId}/disable",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas, and the path parameter sloId is now id. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/api/observability/slos/{sloId}/enable",
+      "method": "all",
+      "reason": "Published path key dropped the /s/{spaceId} prefix when the SLO spec moved from the hand-written bundle to generation from route schemas, and the path parameter sloId is now id. The space-aware URL stays in the operation description, and both URLs still work at runtime.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
+      "path": "/s/{spaceId}/internal/observability/slos/_definitions",
+      "method": "all",
+      "reason": "The hand-written spec documented GET /s/{spaceId}/internal/observability/slos/_definitions, which is not a real route. The operation is GET /api/observability/slos/_definitions.",
+      "approvedBy": "@elastic/obs-ux-management-team",
+      "oasdiffId": "api-path-removed-without-deprecation",
+      "prUrl": "https://github.com/elastic/kibana/pull/300516"
+    },
+    {
       "path": "/api/osquery/history",
       "method": "get",
       "reason": "Intentional: query parameters gain maximum lengths. kuery and userIds accept 65,536 characters, more than the longest URL Kibana accepts (Node's default 65,535-octet HTTP/2 header list; 16 KiB over HTTP/1), so no request that reaches the route today is rejected. nextPage (4,096) is a server-generated cursor of a few hundred characters, sourceFilters (64) fits every combination of its three allowed values, and startDate/endDate (64) fit ISO timestamps and date math.",

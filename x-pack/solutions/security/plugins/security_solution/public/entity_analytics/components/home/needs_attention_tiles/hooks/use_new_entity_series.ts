@@ -66,7 +66,6 @@ export const useNewEntitySeries = ({
     query,
     enabled: !skip && canRun && !isIndexLoading,
     parse: (raw) => readSeriesDots(raw, timeRange, newEntitySeriesColumn),
-    localOnly: true,
   });
 
   return getTileTrend({

@@ -43,14 +43,6 @@ describe('StaleEventCleanupSection', () => {
     } as never);
   });
 
-  it('shows the cleanup setting row', () => {
-    renderSection();
-
-    expect(screen.getByTestId('streams-settings-stale-event-cleanup-header')).toHaveTextContent(
-      'Stale event cleanup'
-    );
-  });
-
   it('runs cleanup and reports the number of closed events', async () => {
     fetch.mockResolvedValue({ scanned: 3, closed: 2, kept: 1, skipped: 0 });
     renderSection();

@@ -13,6 +13,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_critical_query';
@@ -23,6 +24,7 @@ import {
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 export const useNewlyHighCriticalCount = ({
   spaceId,
@@ -71,7 +73,11 @@ export const useNewlyHighCriticalCount = ({
         lastValueFrom(
           data.search.search(
             { params: { query } },
-            { abortSignal: tileSignal, strategy: 'esql_async' }
+            {
+              abortSignal: tileSignal,
+              strategy: 'esql_async',
+              projectRouting: TILE_PROJECT_ROUTING,
+            }
           )
         )
       );
@@ -97,9 +103,10 @@ export const useNewlyHighCriticalCount = ({
     }
   );
 
-  const isMissingIndex =
-    (error as SecurityAppError | undefined)?.message?.includes('Unknown index') ?? false;
-  const filteredError = isMissingIndex ? undefined : (error as SecurityAppError | undefined);
+  // Only this tile's own query says the risk score index is missing: a missing entity index from
+  // the group filter lookup is a real failure, not missing risk history.
+  const isMissingIndex = isMissingIndexError(error);
+  const filteredError = isMissingIndex ? undefined : error;
 
   // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
   // timed-out refetch does not leave the last count on show as if it were current.
@@ -116,6 +123,9 @@ export const useNewlyHighCriticalCount = ({
 
   return {
     count: shownResult?.count ?? 0,
+    // True only when the count query returned a result. A skipped, failed, timed-out or no-access
+    // count is not a genuine 0, so the tile must not show `count` (0) for it.
+    hasCount: shownResult !== undefined && !error && !indexError,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.

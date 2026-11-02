@@ -275,6 +275,32 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Clicks a row action on the row whose title matches `name` exactly. Addressing the
+   * row by title keeps the click on the intended item when a search leaves sibling rows
+   * mounted, which the index-based {@link clickActionButton} cannot.
+   */
+  public async clickRowActionButton(actionSelector: string, name: string) {
+    await this.retry.tryForTime(10000, async () => {
+      // The retry provides the wait; look up the rows without an implicit wait.
+      const rows = await this.find.allByCssSelector('.euiTableRow', 0);
+      for (const row of rows) {
+        // The title column is first, so the row's leading link carries its name.
+        const [titleLink] = await row.findAllByCssSelector('.euiLink', 0);
+        if (!titleLink || (await titleLink.getVisibleText()).trim() !== name) {
+          continue;
+        }
+        const [button] = await row.findAllByTestSubject(actionSelector, 0);
+        if (!button) {
+          throw new Error(`Action ${actionSelector} is not available on row "${name}".`);
+        }
+        await button.click();
+        return;
+      }
+      throw new Error(`No listing row found with name "${name}".`);
+    });
+  }
+
+  /**
    * Open the inspect flyout
    */
   public async inspectVisualization(index: number = 0) {

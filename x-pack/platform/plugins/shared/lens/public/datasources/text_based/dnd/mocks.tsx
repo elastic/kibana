@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import type { DatasourceDimensionDropHandlerProps, TextBasedPrivateState } from '@kbn/lens-common';
+import type {
+  DatasourceDimensionDropHandlerProps,
+  TextBasedLayerColumn,
+  TextBasedPrivateState,
+} from '@kbn/lens-common';
 
-export const column1 = {
+export const column1: TextBasedLayerColumn = {
   columnId: 'columnId1',
   fieldName: 'category',
   meta: {
     type: 'string',
   },
 };
-export const column2 = {
+export const column2: TextBasedLayerColumn = {
   columnId: 'columnId2',
   fieldName: 'day_of_week_i',
   meta: {
     type: 'number',
   },
 };
-export const column3 = {
+export const column3: TextBasedLayerColumn = {
   columnId: 'columnId3',
   fieldName: 'products.base_price',
   meta: {
