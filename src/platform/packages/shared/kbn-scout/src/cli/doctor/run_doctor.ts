@@ -197,30 +197,50 @@ const printFixCommands = (log: ToolingLog, results: CheckResult[]) => {
   log.write(chalk.dim(`\n Or let doctor run them: node scripts/scout doctor --fix`));
 };
 
-const QAF_PROJECT_NAME = 'my-scout-project';
-const QAF_DEPLOYMENT_NAME = 'my-scout-deployment';
+const QAF_NAME = 'scout-tests';
+const CONFIG_PLACEHOLDER = '--config <playwright_config_path>';
 
-const printQafCommands = (log: ToolingLog, arch: DoctorArch) => {
-  const [create, target] =
-    arch === 'serverless'
-      ? [
-          `qaf elastic-cloud projects create --project-type elasticsearch --project-name ${QAF_PROJECT_NAME}`,
-          `--ec-project-name ${QAF_PROJECT_NAME}`,
-        ]
-      : [
-          `qaf elastic-cloud deployments create --stack-version ${kibanaPackageJson.version}-SNAPSHOT --deployment-name ${QAF_DEPLOYMENT_NAME}`,
-          `--ec-deployment-name ${QAF_DEPLOYMENT_NAME}`,
-        ];
+const printLocalCommands = (log: ToolingLog, readyArchs: DoctorArch[]) => {
+  for (const arch of readyArchs) {
+    const domain = testTargets.local.find((target) => target.arch === arch)?.domain;
+    log.write(
+      `   ${chalk.cyan(
+        `node scripts/scout run-tests --arch ${arch} --domain ${domain} ${CONFIG_PLACEHOLDER}`
+      )}`
+    );
+  }
+  log.write(chalk.dim(`\n Other domains: node scripts/scout run-tests --help`));
+  log.write(
+    chalk.dim(
+      ` Keep servers running: node scripts/scout start-server, then node scripts/playwright test --project local`
+    )
+  );
+};
 
-  log.write(
-    `   Or let QAF create a ${arch === 'serverless' ? 'project' : 'deployment'} and run tests:`
-  );
-  log.write(`   ${chalk.cyan(create)}`);
-  log.write(
-    `   ${chalk.cyan(
-      `qaf kibana scout run-config ${target} --kibana-repo-root . --no-checkout --config <playwright_config_path>`
-    )}`
-  );
+// QAF has no single create-and-run command, so chain them with the same name
+const printCloudCommands = (log: ToolingLog, readyArchs: DoctorArch[]) => {
+  for (const arch of readyArchs) {
+    const [what, create, target] =
+      arch === 'serverless'
+        ? [
+            'a new Elasticsearch project',
+            `qaf elastic-cloud projects create --project-type elasticsearch --project-name ${QAF_NAME}`,
+            `--ec-project-name ${QAF_NAME}`,
+          ]
+        : [
+            `a new ${kibanaPackageJson.version}-SNAPSHOT deployment`,
+            `qaf elastic-cloud deployments create --stack-version ${kibanaPackageJson.version}-SNAPSHOT --deployment-name ${QAF_NAME}`,
+            `--ec-deployment-name ${QAF_NAME}`,
+          ];
+    log.write(`\n ${chalk.bold(arch)} ${chalk.dim(`on ${what}:`)}`);
+    log.write(`   ${chalk.cyan(`${create} && \\`)}`);
+    log.write(
+      `   ${chalk.cyan(
+        `qaf kibana scout run-config ${target} --kibana-repo-root . --no-checkout ${CONFIG_PLACEHOLDER}`
+      )}`
+    );
+  }
+  log.write(chalk.dim(`\n Next runs reuse it: run only the qaf kibana scout run-config line`));
 };
 
 const printNextSteps = (
@@ -233,36 +253,19 @@ const printNextSteps = (
   if (readyArchs.length < archs.length) {
     log.write(chalk.red.bold(' ✖ Fix the failed checks before using Scout'));
   }
-
-  const locationFlag = location === 'cloud' ? ' --location cloud' : '';
-  for (const arch of readyArchs) {
-    const [domain, ...otherDomains] = testTargets[location]
-      .filter((target) => target.arch === arch)
-      .map((target) => target.domain);
-    log.write(chalk.green.bold(` ✔ Ready for ${location} ${arch}, run tests with:`));
-    log.write(
-      `   ${chalk.cyan(
-        `node scripts/scout run-tests${locationFlag} --arch ${arch} --domain ${domain} --config <playwright_config_path>`
-      )}`
-    );
-    log.write(chalk.dim(`   other domains: ${otherDomains.join(', ')}`));
-    if (location === 'cloud') {
-      printQafCommands(log, arch);
-    }
-    log.write('');
+  if (!readyArchs.length) {
+    return;
   }
 
-  if (location === 'local' && readyArchs.length) {
-    log.write(` To keep the servers running between test runs:`);
-    log.write(
-      `   ${chalk.cyan('node scripts/scout start-server --arch <arch> --domain <domain>')}`
-    );
-    log.write(
-      `   ${chalk.cyan(
-        'node scripts/playwright test --config <playwright_config_path> --project local'
-      )}\n`
-    );
+  const where = location === 'cloud' ? 'on Elastic Cloud with QAF' : 'locally';
+  const scope = readyArchs.length < archs.length ? ` (${readyArchs.join(', ')})` : '';
+  log.write(chalk.green.bold(` ✔ Ready to run Scout ${where}${scope}`));
+  if (location === 'cloud') {
+    printCloudCommands(log, readyArchs);
+  } else {
+    printLocalCommands(log, readyArchs);
   }
+  log.write('');
 };
 
 export const runDoctor = async (
