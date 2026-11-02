@@ -6,12 +6,7 @@
  */
 
 import { chunk } from 'lodash';
-import type { ISavedObjectsRepository, KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type {
-  AggregationsStringTermsAggregate,
-  AggregationsStringTermsBucket,
-} from '@elastic/elasticsearch/lib/api/types';
 import { nodeBuilder } from '@kbn/es-query';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { isBoom } from '@hapi/boom';
