@@ -13,19 +13,16 @@ import type { RowsMode } from '../common';
 import { joinAnd } from '../queries/esql';
 import { translateSearch } from '../queries/kql_to_esql';
 import { applyResolvedEntityFilterOverrides } from '../queries/resolved_entities';
-import type {
-  ResolvedEntityConditions,
-  ResolvedEntityFilterOverrides,
-} from '../queries/resolved_entities';
+import type { ResolvedEntityFilterOverrides } from '../queries/resolved_entities';
 import { useResolvedEntityOverrides } from './use_entity_grid_data';
 import { useGridContext } from './use_entity_grid_context';
 
-/** A search on resolved rows that has no group conditions: it matches the main entities' own values only. */
+/** A search on resolved rows that is not judged on the groups: it matches the main entities' own values only. */
 const isMainEntityOnlySearch = (
   rowsMode: RowsMode,
   hasSearch: boolean,
-  conditions: ResolvedEntityConditions | undefined
-): boolean => rowsMode === 'resolved' && hasSearch && !conditions;
+  isJudgedOnGroups: boolean
+): boolean => rowsMode === 'resolved' && hasSearch && !isJudgedOnGroups;
 
 interface SearchBarExpression {
   /** The search bar's query and pills as one ES|QL expression, patched with the overrides; `undefined` when empty. */
@@ -33,7 +30,6 @@ interface SearchBarExpression {
   /** The same patch for DSL queries; absent when the search is not judged on groups. */
   searchOverrides?: ResolvedEntityFilterOverrides;
   isSearchPending: boolean;
-  searchOverridesError: unknown;
   /** The search text, when it matches the main entities' own values only; `undefined` otherwise. */
   mainEntityOnlySearch?: string;
 }
@@ -62,6 +58,8 @@ export const useSearchBarExpression = (rowsMode: RowsMode): SearchBarExpression 
   const conditions = rowsMode === 'resolved' && !globalFilters.length ? translation : undefined;
 
   const { data: searchOverrides, error } = useResolvedEntityOverrides(useGridContext(), conditions);
+  // A failed overrides query leaves the search on the main entities' own values, like an untranslated one.
+  const isJudgedOnGroups = !!conditions && !error;
 
   const searchExpression = useMemo(
     () =>
@@ -74,9 +72,8 @@ export const useSearchBarExpression = (rowsMode: RowsMode): SearchBarExpression 
   return {
     searchExpression,
     searchOverrides,
-    isSearchPending: !!conditions && searchOverrides === undefined && !error,
-    searchOverridesError: error,
-    mainEntityOnlySearch: isMainEntityOnlySearch(rowsMode, hasSearch, conditions)
+    isSearchPending: isJudgedOnGroups && searchOverrides === undefined,
+    mainEntityOnlySearch: isMainEntityOnlySearch(rowsMode, hasSearch, isJudgedOnGroups)
       ? expression
       : undefined,
   };

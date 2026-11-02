@@ -96,12 +96,14 @@ describe('useSearchBarExpression', () => {
       expect(result.current.mainEntityOnlySearch).toBeUndefined();
     });
 
-    it('returns the error when the overrides fail, and stops waiting', async () => {
+    it('falls back to the main entities, and names the search, when the overrides fail', async () => {
       mockFetchResolvedEntityOverrides.mockRejectedValue(new Error('too many'));
       const { result } = renderSearch();
 
-      await waitFor(() => expect(result.current.searchOverridesError).toBeInstanceOf(Error));
-      expect(result.current.isSearchPending).toBe(false);
+      await waitFor(() => expect(result.current.isSearchPending).toBe(false));
+      expect(result.current.searchOverrides).toBeUndefined();
+      expect(result.current.mainEntityOnlySearch).toBeDefined();
+      expect(result.current.mainEntityOnlySearch).toBe(result.current.searchExpression);
     });
 
     it('drops the overrides when the search is cleared', async () => {

@@ -165,11 +165,6 @@ const getRowEntity = (row: Row) => {
 const getEntityViewMode = (rowsMode: RowsMode): EntityViewMode =>
   rowsMode === 'resolved' ? 'resolved' : 'single';
 
-const SEARCH_OVERRIDES_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchOverridesError',
-  { defaultMessage: 'Error searching the values of resolved entities' }
-);
-
 const MAIN_ENTITY_ONLY_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.searchMainEntityOnlyTitle',
   { defaultMessage: 'This search matches main entities only' }
@@ -555,14 +550,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   );
 
   const { filterQuery: esFilter } = useGlobalFilterQuery({ dataView });
-  const {
-    searchExpression,
-    searchOverrides,
-    isSearchPending,
-    searchOverridesError,
-    mainEntityOnlySearch,
-  } = useSearchBarExpression(rowsMode);
-  useErrorToast(SEARCH_OVERRIDES_ERROR_TITLE, searchOverridesError);
+  const { searchExpression, searchOverrides, isSearchPending, mainEntityOnlySearch } =
+    useSearchBarExpression(rowsMode);
   useEffect(() => {
     if (!mainEntityOnlySearch) return;
 
