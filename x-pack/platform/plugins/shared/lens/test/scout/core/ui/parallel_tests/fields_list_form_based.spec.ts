@@ -1,0 +1,199 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { spaceTest, testData } from '../fixtures';
+
+spaceTest.describe(
+  'Lens fields list - form-based datasource',
+  { tag: tags.stateful.classic },
+  () => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      const { data: dataView } = await apiServices.dataViews.create({
+        title: testData.DATA_VIEW_ID.LOGSTASH,
+        name: testData.DATA_VIEW_ID.LOGSTASH,
+        timeFieldName: '@timestamp',
+        override: true,
+        spaceId: scoutSpace.id,
+        runtimeFieldMap: {
+          runtime_string: {
+            type: 'keyword',
+            script: {
+              source: "emit('abc')",
+            },
+          },
+        },
+      });
+
+      await scoutSpace.uiSettings.set({
+        defaultIndex: dataView.id,
+        'dateFormat:tz': 'UTC',
+      });
+      await scoutSpace.uiSettings.setDefaultTime({
+        from: testData.LOGSTASH_IN_RANGE_DATES.from,
+        to: testData.LOGSTASH_IN_RANGE_DATES.to,
+      });
+    });
+
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsPrivilegedUser();
+      await pageObjects.lens.workspace.openEmptyEditor();
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
+    spaceTest('should show all fields as available', async ({ pageObjects }) => {
+      const lensFieldsList = pageObjects.lens.fieldsList;
+      await expect(lensFieldsList.availableFieldsCount).toHaveText('50');
+    });
+
+    spaceTest(
+      'should show a histogram and top values popover for numeric field',
+      async ({ pageObjects }) => {
+        const lensFieldsList = pageObjects.lens.fieldsList;
+        const [fieldId] = await lensFieldsList.findFieldIdsByType('number');
+
+        await lensFieldsList.clickField(fieldId);
+        await expect(lensFieldsList.popoverTitle).toBeVisible();
+        await expect(lensFieldsList.topValuesChart).toBeVisible();
+        await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
+        const otherBucket = lensFieldsList.getOtherTopValuesBucket();
+        await expect(lensFieldsList.getBucketLabel(otherBucket)).toHaveText('Other');
+        await expect(lensFieldsList.getBucketPercentage(otherBucket)).toHaveText('96.7%');
+
+        await lensFieldsList.distributionButton.click();
+        await expect(lensFieldsList.getPopoverChart()).toBeVisible();
+      }
+    );
+
+    spaceTest('should show a top values popover for a keyword field', async ({ pageObjects }) => {
+      const lensFieldsList = pageObjects.lens.fieldsList;
+      const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
+
+      await lensFieldsList.clickField(fieldId);
+      await expect(lensFieldsList.popoverTitle).toBeVisible();
+      await expect(lensFieldsList.topValuesChart).toBeVisible();
+      await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
+      const otherBucket = lensFieldsList.getOtherTopValuesBucket();
+      await expect(lensFieldsList.getBucketLabel(otherBucket)).toHaveText('Other');
+      await expect(lensFieldsList.getBucketPercentage(otherBucket)).toHaveText('99.9%');
+      await expect(lensFieldsList.getPopoverChart()).toBeHidden();
+    });
+
+    spaceTest('should show a date histogram popover for a date field', async ({ pageObjects }) => {
+      const lensFieldsList = pageObjects.lens.fieldsList;
+      const [fieldId] = await lensFieldsList.findFieldIdsByType('date');
+
+      await lensFieldsList.clickField(fieldId);
+      await expect(lensFieldsList.popoverTitle).toBeVisible();
+      await expect(lensFieldsList.getPopoverChart()).toBeVisible();
+      await expect(lensFieldsList.topValuesButton).toBeHidden();
+    });
+
+    spaceTest('should show examples for geo points field', async ({ pageObjects }) => {
+      const lensFieldsList = pageObjects.lens.fieldsList;
+      const [fieldId] = await lensFieldsList.findFieldIdsByType('geo_point');
+
+      await lensFieldsList.clickField(fieldId);
+      await expect(lensFieldsList.topValuesChart).toBeVisible();
+      await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
+    });
+
+    spaceTest(
+      'should show stats for runtime fields and react to filter changes',
+      async ({ page, pageObjects }) => {
+        const lensFieldsList = pageObjects.lens.fieldsList;
+
+        await spaceTest.step('verify numeric runtime field stats', async () => {
+          await lensFieldsList.searchField('runtime');
+          await expect(lensFieldsList.availableFieldsCount).toHaveText('2');
+          const [fieldId] = await lensFieldsList.findFieldIdsByType('number');
+
+          await lensFieldsList.clickField(fieldId);
+          await expect(lensFieldsList.popoverTitle).toBeVisible();
+          await expect(lensFieldsList.topValuesChart).toBeVisible();
+          await expect(lensFieldsList.topValuesBuckets).toHaveCount(11);
+          const runtimeOtherBucket = lensFieldsList.getOtherTopValuesBucket();
+          await expect(lensFieldsList.getBucketLabel(runtimeOtherBucket)).toHaveText('Other');
+          await expect(lensFieldsList.getBucketPercentage(runtimeOtherBucket)).toHaveText('96.7%');
+          await lensFieldsList.distributionButton.click();
+          await expect(lensFieldsList.getPopoverChart()).toBeVisible();
+        });
+
+        await spaceTest.step('verify keyword runtime field stats', async () => {
+          await lensFieldsList.searchField('runtime');
+          await expect(lensFieldsList.availableFieldsCount).toHaveText('2');
+          await expect(lensFieldsList.getFieldLocator('runtime_string')).toBeVisible();
+          const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
+
+          await lensFieldsList.clickField(fieldId);
+          await expect(lensFieldsList.popoverTitle).toBeVisible();
+          await expect(lensFieldsList.topValuesChart).toBeVisible();
+          await expect(lensFieldsList.getPopoverChart()).toBeHidden();
+          // Close popover
+          await lensFieldsList.clickField(fieldId);
+          await lensFieldsList.searchField('');
+        });
+
+        await spaceTest.step(
+          'should change popover content if user defines a filter that affects field values',
+          async () => {
+            const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
+            await lensFieldsList.clickField(fieldId);
+            const initialCount = await lensFieldsList.getStatsFooterRecordCount();
+
+            await pageObjects.filterBar.addFilter({
+              field: 'geo.src',
+              operator: 'is',
+              value: 'CN',
+            });
+            await lensFieldsList.clickField(fieldId);
+
+            await expect
+              .poll(async () => {
+                return await lensFieldsList.getStatsFooterRecordCount();
+              })
+              .toBeLessThan(initialCount);
+
+            // Close popover
+            await lensFieldsList.clickField(fieldId);
+            await lensFieldsList.searchField('');
+          }
+        );
+
+        await spaceTest.step(
+          'should detect fields have no data in popup if filter excludes them',
+          async () => {
+            await page.testSubj.click('showQueryBarMenu');
+            await page.testSubj.click('filter-sets-removeAllFilters');
+            await pageObjects.filterBar.addFilter({ field: 'bytes', operator: 'is', value: '-1' });
+
+            const [fieldId] = await lensFieldsList.findFieldIdsByType('keyword');
+            await lensFieldsList.clickField(fieldId);
+            await expect
+              .poll(async () => {
+                return lensFieldsList.missingFieldStats.isVisible();
+              })
+              .toBe(true);
+          }
+        );
+
+        await spaceTest.step('verify time range affects field availability', async () => {
+          await page.testSubj.click('showQueryBarMenu');
+          await page.testSubj.click('filter-sets-removeAllFilters');
+          await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE);
+          await expect(lensFieldsList.emptyFieldsCount).toHaveText('52');
+          await expect(lensFieldsList.availableFieldsCount).toHaveText('1');
+        });
+      }
+    );
+  }
+);
