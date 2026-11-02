@@ -18,6 +18,7 @@ import {
   createNewAPIKeySet,
   scheduleTask,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -178,6 +179,9 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
     } catch (e) {
       throw e;
     }
+
+    // Legacy actions are deleted only once the rule carrying them is saved, so a conflict can be retried
+    await deleteLegacyActionsForRules(context, migratedIds);
   }
 
   let scheduledTaskIdToCreate: string | null = null;

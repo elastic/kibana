@@ -63,7 +63,7 @@ import type {
   NormalizedAlertActionWithGeneratedValues,
   NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
+import { bulkMigrateLegacyActions, deleteLegacyActionsForRules } from '../../../../rules_client/lib';
 import type {
   BulkEditFields,
   BulkEditOperation,
@@ -303,6 +303,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
   const prevInterval: string[] = [];
+  const migratedRuleIds = new Set<string>();
 
   for await (const response of rulesFinder.find()) {
     const intervals = response.saved_objects
@@ -312,7 +313,11 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
 
     prevInterval.concat(intervals);
 
-    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
+    const migratedIds = await bulkMigrateLegacyActions({
+      context,
+      rules: response.saved_objects,
+    });
+    migratedIds.forEach((id) => migratedRuleIds.add(id));
 
     await pMap(
       response.saved_objects,
@@ -327,6 +332,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
           skipped,
           errors,
           username,
+          hasMigratedLegacyActions: migratedRuleIds.has(rule.id),
           shouldIncrementRevision,
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
@@ -381,6 +387,14 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
           result: { saved_objects: [] },
           apiKeysToInvalidate: [],
         };
+
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  await deleteLegacyActionsForRules(
+    context,
+    result.saved_objects
+      .filter((rule) => rule.error === undefined && migratedRuleIds.has(rule.id))
+      .map(({ id }) => id)
+  );
 
   return {
     apiKeysToInvalidate,
@@ -437,6 +451,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
   skipped,
   errors,
   username,
+  hasMigratedLegacyActions = false,
   shouldIncrementRevision = () => true,
 }: {
   context: RulesClientContext;
@@ -448,6 +463,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
   skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
+  /** The rule had legacy actions migrated in memory, so it must be saved even when the edit changes nothing */
+  hasMigratedLegacyActions?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
 }): Promise<void> {
   try {
@@ -519,7 +536,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     // If neither attributes nor parameters were updated, mark
     // the rule as skipped and continue to the next rule.
-    if (isAttributesUpdateSkipped && isParamsUpdateSkipped) {
+    // A rule with migrated legacy actions is never skipped: it has to be saved to persist them.
+    if (isAttributesUpdateSkipped && isParamsUpdateSkipped && !hasMigratedLegacyActions) {
       skipped.push({
         id: rule.id,
         name: rule.attributes.name,
