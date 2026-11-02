@@ -10,6 +10,8 @@ import {
   AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   agentIdRegexp,
   agentIdMaxLength,
+  AGENT_NAME_MAX_LENGTH,
+  AGENT_DESCRIPTION_MAX_LENGTH,
 } from '@kbn/agent-builder-common/agents';
 import {
   isInProtectedNamespace,
@@ -86,16 +88,32 @@ export const agentFormSchema = z.object({
         });
       }
     }),
-  name: z.string().min(1, {
-    message: i18n.translate('xpack.agentBuilder.agents.form.nameRequired', {
-      defaultMessage: 'Agent name is required.',
+  name: z
+    .string()
+    .min(1, {
+      message: i18n.translate('xpack.agentBuilder.agents.form.nameRequired', {
+        defaultMessage: 'Agent name is required.',
+      }),
+    })
+    .max(AGENT_NAME_MAX_LENGTH, {
+      message: i18n.translate('xpack.agentBuilder.agents.form.nameTooLong', {
+        defaultMessage: 'Agent name must be {max} characters or less.',
+        values: { max: AGENT_NAME_MAX_LENGTH },
+      }),
     }),
-  }),
-  description: z.string().min(1, {
-    message: i18n.translate('xpack.agentBuilder.agents.form.descriptionRequired', {
-      defaultMessage: 'Agent description is required.',
+  description: z
+    .string()
+    .min(1, {
+      message: i18n.translate('xpack.agentBuilder.agents.form.descriptionRequired', {
+        defaultMessage: 'Agent description is required.',
+      }),
+    })
+    .max(AGENT_DESCRIPTION_MAX_LENGTH, {
+      message: i18n.translate('xpack.agentBuilder.agents.form.descriptionTooLong', {
+        defaultMessage: 'Agent description must be {max} characters or less.',
+        values: { max: AGENT_DESCRIPTION_MAX_LENGTH },
+      }),
     }),
-  }),
   access_control: z.object({
     access_mode: z.enum(['private', 'public', 'shared']),
     entries: z.array(
