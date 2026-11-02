@@ -13,6 +13,7 @@ import type {
   HuntCoordinatorStatus,
   HuntForThreatResult,
   HuntIncompleteness,
+  HuntIncompleteReason,
   HuntIoc,
 } from '@kbn/alertzero-common';
 import type { HuntScopeResolution } from '@kbn/alertzero-common';
@@ -20,6 +21,7 @@ import {
   completedSuccessfully,
   FINAL_WHEN_NOTHING_SEARCHABLE,
   huntCompletenessOf,
+  retryableReasonsOf,
 } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
 import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
@@ -180,6 +182,13 @@ export interface HuntCoordinatorCoreResult {
    * it; that is what `completeness` is for.
    */
   completed_successfully: boolean;
+  /**
+   * The distinct reasons of the gaps that kept this run `incomplete_retryable`, from the
+   * coordinator and both tiers, judged as `completeness` judged them. The caller recording the
+   * outcome reads these rather than reclassifying every gap by name, since a reason can be final
+   * in this run's context. Empty when the run is not retryable; absent on paths that record nothing.
+   */
+  retryable_reasons?: HuntIncompleteReason[];
   /**
    * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2
    * that was requested but could not run, or had nothing to run against. Not a copy of
@@ -885,7 +894,8 @@ const huntCoordinatorCore = async (
       skipReason: reason,
       skipDetail,
     });
-    const completeness = huntCompletenessOf([...runGaps(readReportText), ...skipGaps]);
+    const runAndSkipGaps = [...runGaps(readReportText), ...skipGaps];
+    const completeness = huntCompletenessOf(runAndSkipGaps);
     // The coordinator's own gaps, not a copy of `tier1.incomplete` (which the caller
     // already has): on this path it's the only place `nothing_searched` and a
     // requested-but-unavailable Tier 2 reach the wire at all, since `next_step` here
@@ -908,6 +918,7 @@ const huntCoordinatorCore = async (
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
       completed_successfully: completedSuccessfully(completeness),
+      retryable_reasons: retryableReasonsOf(runAndSkipGaps),
       ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
       ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
@@ -940,7 +951,8 @@ const huntCoordinatorCore = async (
       tier2Executed: false,
       skipReason: 'no_report_text',
     });
-    const completeness = huntCompletenessOf([...runGaps(false), ...skipGaps]);
+    const noTextGaps = [...runGaps(false), ...skipGaps];
+    const completeness = huntCompletenessOf(noTextGaps);
     const coordinatorOwnGaps = [...inputGaps(false), ...skipGaps];
     return {
       status: 'tier2_only_skipped',
@@ -959,6 +971,7 @@ const huntCoordinatorCore = async (
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
       completed_successfully: completedSuccessfully(completeness),
+      retryable_reasons: retryableReasonsOf(noTextGaps),
       ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
       ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     };
@@ -1125,10 +1138,11 @@ const huntCoordinatorCore = async (
         )
       : []
   );
-  const completeness = huntCompletenessOf(gaps, {
+  const completenessContext = {
     ...(nothingGroundable ? { treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE } : {}),
     finalTechniqueIds: droppedTechniqueIds,
-  });
+  };
+  const completeness = huntCompletenessOf(gaps, completenessContext);
 
   const coreResult: HuntCoordinatorCoreResult = {
     status: 'tier1_and_tier2',
@@ -1157,6 +1171,7 @@ const huntCoordinatorCore = async (
     has_confirmed_hit: hasConfirmedHit,
     completeness,
     completed_successfully: completedSuccessfully(completeness),
+    retryable_reasons: retryableReasonsOf(gaps, completenessContext),
     ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
     ...(excludedIocs ? { excluded_report_iocs: { count: excludedIocs.count } } : {}),
     searched_technique_ids: getSearchedTechniqueIds(tier2Raw),

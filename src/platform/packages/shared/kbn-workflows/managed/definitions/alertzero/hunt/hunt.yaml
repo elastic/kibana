@@ -1,4 +1,4 @@
-version: "1"
+version: '1'
 name: Hunt Watch - hunt
 description: >
   Runs the two-tier hunt for one report against the environment: searches for
@@ -88,7 +88,7 @@ outputs:
 consts:
   # Temporary: service accounts have no display name, so the chat would show the raw account
   # id. Remove once they carry one (elastic/security-team#20422).
-  author_name: "Continuous Threat Hunt worker"
+  author_name: 'Continuous Threat Hunt worker'
 
 steps:
   # Start + poll: POST returns `{ run_id, state: running, result_attachment_id }`
@@ -103,20 +103,20 @@ steps:
     # failed) means there is nothing useful this hunt can produce: skip the
     # real coordinator call (and its Tier 2 spend) rather than hunt for a
     # report that can never get a usable conclusion.
-    if: "${{ inputs.investigationConversationId != nil and inputs.investigationConversationId != empty }}"
+    if: '${{ inputs.investigationConversationId != nil and inputs.investigationConversationId != empty }}'
     with:
       method: POST
-      path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/hunt_coordinator"
+      path: '/s/{{ workflow.spaceId }}/internal/alertzero/hunt/hunt_coordinator'
       headers:
-        kbn-xsrf: "true"
-        elastic-api-version: "1"
+        kbn-xsrf: 'true'
+        elastic-api-version: '1'
         Content-Type: application/json
       body:
-        report_id: "{{ inputs.reportId }}"
-        run_id: "{{ inputs.runId }}"
-        trigger: "{{ inputs.trigger }}"
-        tier2_when: "{{ inputs.tier2_when }}"
-        conversation_id: "{{ inputs.investigationConversationId }}"
+        report_id: '{{ inputs.reportId }}'
+        run_id: '{{ inputs.runId }}'
+        trigger: '{{ inputs.trigger }}'
+        tier2_when: '{{ inputs.tier2_when }}'
+        conversation_id: '{{ inputs.investigationConversationId }}'
     on-failure:
       fallback:
         - name: emit_coordinator_failed
@@ -125,7 +125,7 @@ steps:
           with:
             status: failed
             stage: hunt_coordinator
-            reason: "{{ steps.run_hunt_coordinator.error.message }}"
+            reason: '{{ steps.run_hunt_coordinator.error.message }}'
 
   # Do-while poll: 60 reads 10s apart, so `on-limit: continue` is the exit that
   # runs; the 12m timeout only backstops slow reads. Never fails the child: Worker
@@ -133,7 +133,7 @@ steps:
   # skips the condition on the last iteration). Read by the start response id, not list.
   - name: poll_hunt_coordinator
     type: while
-    if: "${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}"
+    if: '${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}'
     condition: "${{ steps.read_hunt_result.output.data.state != 'completed' and steps.read_hunt_result.output.data.state != 'failed' }}"
     max-iterations:
       limit: 60
@@ -151,8 +151,8 @@ steps:
             delay: 5s
           continue: true
         with:
-          conversation_id: "{{ inputs.investigationConversationId }}"
-          attachment_id: "{{ steps.run_hunt_coordinator.output.result_attachment_id }}"
+          conversation_id: '{{ inputs.investigationConversationId }}'
+          attachment_id: '{{ steps.run_hunt_coordinator.output.result_attachment_id }}'
       - name: wait_if_running
         type: if
         condition: "${{ steps.read_hunt_result.output.data.state != 'completed' and steps.read_hunt_result.output.data.state != 'failed' }}"
@@ -169,16 +169,16 @@ steps:
   # what the coordinator returned.
   - name: attach_sse
     type: foreach
-    if: "${{ steps.read_hunt_result.output.data.result.sse != null }}"
-    foreach: "${{ steps.read_hunt_result.output.data.result.sse }}"
+    if: '${{ steps.read_hunt_result.output.data.result.sse != null }}'
+    foreach: '${{ steps.read_hunt_result.output.data.result.sse }}'
     steps:
       - name: add_sse_attachment
         type: ai.attachment.add
         with:
-          conversation_id: "{{ inputs.investigationConversationId }}"
-          id: "{{ foreach.item.attachment_id }}"
+          conversation_id: '{{ inputs.investigationConversationId }}'
+          id: '{{ foreach.item.attachment_id }}'
           type: security.significant_security_event
-          data: "${{ foreach.item.data }}"
+          data: '${{ foreach.item.data }}'
           description: Hunt Watch significant security event
           render_inline: true
         # Add-then-update, because `buildSseAttachmentId` is subject-stable by
@@ -214,9 +214,9 @@ steps:
             - name: update_sse_attachment
               type: ai.attachment.update
               with:
-                conversation_id: "{{ inputs.investigationConversationId }}"
-                attachment_id: "{{ foreach.item.attachment_id }}"
-                data: "${{ foreach.item.data }}"
+                conversation_id: '{{ inputs.investigationConversationId }}'
+                attachment_id: '{{ foreach.item.attachment_id }}'
+                data: '${{ foreach.item.data }}'
                 render_inline: true
               on-failure:
                 continue: true
@@ -238,17 +238,17 @@ steps:
   # whether impact was recorded, or why not.
   - name: attach_impact
     type: kibana.request
-    if: "${{ steps.read_hunt_result.output.data.result.impacted_entities != nil and steps.read_hunt_result.output.data.result.impacted_entities != empty }}"
+    if: '${{ steps.read_hunt_result.output.data.result.impacted_entities != nil and steps.read_hunt_result.output.data.result.impacted_entities != empty }}'
     with:
       method: POST
-      path: "/s/{{ workflow.spaceId }}/internal/investigations/impact"
+      path: '/s/{{ workflow.spaceId }}/internal/investigations/impact'
       headers:
-        kbn-xsrf: "true"
-        elastic-api-version: "1"
+        kbn-xsrf: 'true'
+        elastic-api-version: '1'
         Content-Type: application/json
       body:
-        conversationId: "{{ inputs.investigationConversationId }}"
-        entities: "${{ steps.read_hunt_result.output.data.result.impacted_entities }}"
+        conversationId: '{{ inputs.investigationConversationId }}'
+        entities: '${{ steps.read_hunt_result.output.data.result.impacted_entities }}'
     on-failure:
       continue: true
 
@@ -277,8 +277,8 @@ steps:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
       inputs:
-        author_name: "{{ consts.author_name }}"
-        conversation_id: "{{ inputs.investigationConversationId }}"
+        author_name: '{{ consts.author_name }}'
+        conversation_id: '{{ inputs.investigationConversationId }}'
         message: |-
           {% assign coordinator = steps.read_hunt_result.output.data.result -%}
           {{ coordinator.narrative }}
@@ -311,23 +311,26 @@ steps:
     if: "${{ steps.read_hunt_result.output.data.state == 'completed' }}"
     with:
       method: POST
-      path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/write_hunt_evidence"
+      path: '/s/{{ workflow.spaceId }}/internal/alertzero/hunt/write_hunt_evidence'
       headers:
-        kbn-xsrf: "true"
-        elastic-api-version: "1"
+        kbn-xsrf: 'true'
+        elastic-api-version: '1'
         Content-Type: application/json
       body:
-        reportId: "{{ inputs.reportId }}"
-        runId: "{{ inputs.runId }}"
-        hasConfirmedHit: "${{ steps.read_hunt_result.output.data.result.has_confirmed_hit }}"
-        completeness: "{{ steps.read_hunt_result.output.data.result.completeness }}"
-        totalHits: "${{ steps.read_hunt_result.output.data.result.tier1.counts.total_hits }}"
+        reportId: '{{ inputs.reportId }}'
+        runId: '{{ inputs.runId }}'
+        hasConfirmedHit: '${{ steps.read_hunt_result.output.data.result.has_confirmed_hit }}'
+        completeness: '{{ steps.read_hunt_result.output.data.result.completeness }}'
+        totalHits: '${{ steps.read_hunt_result.output.data.result.tier1.counts.total_hits }}'
         # `compact` turns a nil (Tier 2 never ran) into `[]`, which the route treats as no ledger update.
-        searchedTechniqueIds: "${{ steps.read_hunt_result.output.data.result.searched_technique_ids | compact }}"
+        searchedTechniqueIds: '${{ steps.read_hunt_result.output.data.result.searched_technique_ids | compact }}'
         # Deliberately not `compact`: a missing field renders as undefined, so the key is dropped from
         # the body and the report keeps its recorded pending list. `[]` says Tier 2 ran and left none.
-        pendingTechniqueIds: "${{ steps.read_hunt_result.output.data.result.pending_technique_ids }}"
-        replayedWholeReport: "${{ steps.read_hunt_result.output.data.result.replayed_whole_report }}"
+        pendingTechniqueIds: '${{ steps.read_hunt_result.output.data.result.pending_technique_ids }}'
+        replayedWholeReport: '${{ steps.read_hunt_result.output.data.result.replayed_whole_report }}'
+        # The coordinator's own classification: a reason can be final in this run's context, so the
+        # route must not reclassify the raw gaps by name.
+        retryableReasons: '${{ steps.read_hunt_result.output.data.result.retryable_reasons }}'
     on-failure:
       continue: true
 
@@ -400,14 +403,14 @@ steps:
         {%- else -%}
         hunt did not run
         {%- endif -%}
-      result_hit: "${{ steps.read_hunt_result.output.data.result.has_confirmed_hit == true }}"
+      result_hit: '${{ steps.read_hunt_result.output.data.result.has_confirmed_hit == true }}'
       # `size` of a nil `sse` is 0 in this engine, and the `${{ }}` form keeps the
       # native number; a `{% if %}` text block would render it as a string and
       # fail the `sse_count: number` output validation.
-      result_sse_count: "${{ steps.read_hunt_result.output.data.result.sse | size }}"
+      result_sse_count: '${{ steps.read_hunt_result.output.data.result.sse | size }}'
       # `compact` turns a nil (coordinator skipped, or Tier 2 never ran) into `[]` and leaves a
       # real array as is, so the declared array outputs never see a null.
-      result_report_intent_targets: "${{ steps.read_hunt_result.output.data.result.report_intent_targets | compact }}"
+      result_report_intent_targets: '${{ steps.read_hunt_result.output.data.result.report_intent_targets | compact }}'
       # Only behaviors that executed carry a query worth packaging, and Tier 2 executes at most 20
       # (it can validate more than it generates a query for). Filtering before the cap keeps an
       # executed behavior from being dropped behind an unexecuted one, and keeps the array inside
@@ -421,16 +424,16 @@ steps:
       # again after the concats so a nil tier list cannot leave a null. The bound mirrors
       # MAX_HUNT_TECHNIQUE_IDS (alertzero `common/hunt_technique_limit.ts`) and the packaging step's
       # `coverageGaps` max; packaging dedupes, since the narrative dedupes by reason and detail.
-      result_coverage_gaps: "${{ steps.read_hunt_result.output.data.result.incomplete | compact | concat: steps.read_hunt_result.output.data.result.tier1.incomplete | concat: steps.read_hunt_result.output.data.result.tier2.incomplete | compact | slice: 0, 100 }}"
+      result_coverage_gaps: '${{ steps.read_hunt_result.output.data.result.incomplete | compact | concat: steps.read_hunt_result.output.data.result.tier1.incomplete | concat: steps.read_hunt_result.output.data.result.tier2.incomplete | compact | slice: 0, 100 }}'
       result_tier2_invoked: "${{ steps.read_hunt_result.output.data.result.status == 'tier1_and_tier2' or steps.read_hunt_result.output.data.result.tier2_skipped_reason == 'tier2_failed' }}"
 
   # Permanent delete after outputs are set; continue on failure.
   - name: delete_hunt_result
     type: ai.attachment.delete
-    if: "${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}"
+    if: '${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}'
     with:
-      conversation_id: "{{ inputs.investigationConversationId }}"
-      attachment_id: "{{ steps.run_hunt_coordinator.output.result_attachment_id }}"
+      conversation_id: '{{ inputs.investigationConversationId }}'
+      attachment_id: '{{ steps.run_hunt_coordinator.output.result_attachment_id }}'
       permanent: true
     on-failure:
       continue: true
@@ -439,13 +442,13 @@ steps:
     type: workflow.output
     status: completed
     with:
-      status: "{{ variables.result_status }}"
+      status: '{{ variables.result_status }}'
       stage: hunt
-      reason: "{{ variables.result_reason }}"
-      headline: "{{ variables.result_headline }}"
-      hit: "${{ variables.result_hit }}"
-      sse_count: "${{ variables.result_sse_count }}"
-      report_intent_targets: "${{ variables.result_report_intent_targets }}"
-      behaviors: "${{ variables.result_behaviors }}"
-      tier2_invoked: "${{ variables.result_tier2_invoked }}"
-      coverage_gaps: "${{ variables.result_coverage_gaps }}"
+      reason: '{{ variables.result_reason }}'
+      headline: '{{ variables.result_headline }}'
+      hit: '${{ variables.result_hit }}'
+      sse_count: '${{ variables.result_sse_count }}'
+      report_intent_targets: '${{ variables.result_report_intent_targets }}'
+      behaviors: '${{ variables.result_behaviors }}'
+      tier2_invoked: '${{ variables.result_tier2_invoked }}'
+      coverage_gaps: '${{ variables.result_coverage_gaps }}'

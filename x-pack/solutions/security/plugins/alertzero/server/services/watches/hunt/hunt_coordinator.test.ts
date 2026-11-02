@@ -1615,8 +1615,29 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_final');
       expect(result.pending_technique_ids).toEqual([]);
+      expect(result.retryable_reasons).toEqual([]);
       // The gaps are still reported, so the narrative names what was not searched.
       expect(result.tier2?.incomplete).toEqual([budgetGap('T1059'), budgetGap('T1003')]);
+    });
+
+    it('reports only the gaps still retryable, not the budget gap of a technique it gave up on', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [{ technique_id: 'T1059', execution: { executed: false } }],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'search_partial', technique_id: 'T1059', detail: 'shards failed' },
+          budgetGap('T1003'),
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-partial-and-dropped');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.retryable_reasons).toEqual(['search_partial']);
     });
 
     it('keeps a pending technique the run extracted again but left over budget', async () => {
@@ -1654,6 +1675,7 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_retryable');
       expect(result.pending_technique_ids).toEqual(['T1059']);
+      expect(result.retryable_reasons).toEqual(['execute_failed']);
     });
 
     it('keeps a pending technique the model returned but whose quote did not ground', async () => {
