@@ -132,7 +132,28 @@ export function resolvePocEsConnection(
   argv: string[] = process.argv,
   env: NodeJS.ProcessEnv = process.env
 ): PocEsConnection {
+  // Hardened: resolution must never throw; unexpected input degrades to the
+  // local-dev defaults (which will fail loudly but harmlessly at claim time).
+  try {
+    return doResolvePocEsConnection(argv, env);
+  } catch (error) {
+    return {
+      node: 'http://localhost:9200',
+      username: 'kibana_system',
+      password: 'changeme',
+      caPaths: [],
+      rejectUnauthorized: true,
+      sources: [`resolver-error:${error.message}`, 'default:node', 'default:basic-auth'],
+    };
+  }
+}
+
+function doResolvePocEsConnection(argv: string[], env: NodeJS.ProcessEnv): PocEsConnection {
   const sources: string[] = [];
+
+  if (env.TM_POC_SIMULATE_FAILURE === 'resolver') {
+    throw new Error('simulated resolver failure (TM_POC_SIMULATE_FAILURE=resolver)');
+  }
 
   // Layer 3: config files (in order; later files win).
   const merged: FlatConfig = new Map();

@@ -78,7 +78,19 @@ export interface WorkerCoordinatorBridgeOpts {
   context: CoordinatorContext;
   getCapacitySnapshot: () => CapacitySnapshot;
   getExecutionReport: () => ExecutionReport;
+  /**
+   * Invoked at most once when the worker coordinator is deemed unusable
+   * (spawn failure, worker fatal/exit, startup timeout, or persistent claim
+   * failures). The executor side must fall back to stock in-process polling
+   * so the PoC can never degrade Task Manager below default behaviour.
+   */
+  onFailure: (reason: string) => void;
 }
+
+/** No 'started' within this window counts as a failed worker boot. */
+const STARTUP_TIMEOUT_MS = 30_000;
+/** Consecutive failed claim cycles before the worker is deemed unusable. */
+const MAX_CONSECUTIVE_CLAIM_FAILURES = 5;
 
 export class WorkerCoordinatorBridge {
   public readonly claimedBatches$: Observable<ClaimedTaskBatch>;
@@ -88,7 +100,10 @@ export class WorkerCoordinatorBridge {
   private readonly opts: WorkerCoordinatorBridgeOpts;
   private worker?: Worker;
   private snapshotTimer?: NodeJS.Timeout;
+  private startupTimer?: NodeJS.Timeout;
   private stopped = false;
+  private failed = false;
+  private consecutiveClaimFailures = 0;
 
   constructor(opts: WorkerCoordinatorBridgeOpts) {
     this.opts = opts;
@@ -96,8 +111,25 @@ export class WorkerCoordinatorBridge {
     this.claimedBatches$ = this.claimedBatchesSubject.asObservable();
   }
 
+  /**
+   * Spawns the coordinator worker. Never throws: any synchronous failure is
+   * reported through onFailure so the caller can fall back to the in-process
+   * poller.
+   */
   public start() {
+    try {
+      this.doStart();
+    } catch (error) {
+      this.fail(`failed to start the coordinator worker: ${error.message}`);
+    }
+  }
+
+  private doStart() {
     const { config, context } = this.opts;
+
+    if (process.env.TM_POC_SIMULATE_FAILURE === 'bridge-start') {
+      throw new Error('simulated bridge start failure (TM_POC_SIMULATE_FAILURE=bridge-start)');
+    }
 
     // Re-derive the ES connection from env/argv/config files (core does not
     // expose its resolved credentials to plugins). Secrets never logged.
@@ -141,44 +173,81 @@ export class WorkerCoordinatorBridge {
       switch (message.kind) {
         case 'started':
           this.logger.info('PoC coordinator worker reported started');
+          if (this.startupTimer) {
+            clearTimeout(this.startupTimer);
+            this.startupTimer = undefined;
+          }
           break;
         case 'claimed-batch':
+          this.consecutiveClaimFailures = 0;
           this.claimedBatchesSubject.next(message.batch);
           break;
         case 'claim-cycle-failed':
-          this.logger.error(`PoC coordinator worker claim cycle failed: ${message.error}`);
+          this.consecutiveClaimFailures++;
+          this.logger.error(
+            `PoC coordinator worker claim cycle failed (${this.consecutiveClaimFailures} in a row): ${message.error}`
+          );
+          if (this.consecutiveClaimFailures >= MAX_CONSECUTIVE_CLAIM_FAILURES) {
+            this.fail(
+              `${this.consecutiveClaimFailures} consecutive claim cycle failures (e.g. unusable ES connection)`
+            );
+          }
           break;
         case 'fatal':
-          this.logger.error(`PoC coordinator worker fatal error: ${message.error}`);
+          this.fail(`worker reported a fatal error: ${message.error}`);
           break;
       }
     });
     this.worker.on('error', (error) => {
-      this.logger.error(`PoC coordinator worker error: ${error.message}`);
+      this.fail(`worker thread error: ${error.message}`);
     });
     this.worker.on('exit', (code) => {
       if (!this.stopped) {
-        this.logger.error(
-          `PoC coordinator worker exited unexpectedly with code ${code}; no claiming will happen on this node`
-        );
+        this.fail(`worker exited unexpectedly with code ${code}`);
       }
     });
 
     this.send({ kind: 'start' });
 
+    // A worker that never reports started (hung boot) also counts as failed.
+    this.startupTimer = setTimeout(() => {
+      this.fail(`worker did not report started within ${STARTUP_TIMEOUT_MS}ms`);
+    }, STARTUP_TIMEOUT_MS);
+    this.startupTimer.unref();
+
     // Channels 1 and 3 on a fixed cadence. When the main thread is blocked,
     // these stop flowing and the coordinator continues on stale data — that is
     // the point (advisory capacity, over-claim tolerated).
     this.snapshotTimer = setInterval(() => {
-      this.send({ kind: 'capacity', snapshot: this.opts.getCapacitySnapshot() });
-      this.send({ kind: 'execution-report', report: this.opts.getExecutionReport() });
+      try {
+        this.send({ kind: 'capacity', snapshot: this.opts.getCapacitySnapshot() });
+        this.send({ kind: 'execution-report', report: this.opts.getExecutionReport() });
+      } catch (error) {
+        // Never let a snapshot failure escape a timer callback; the
+        // coordinator just keeps using its last snapshot.
+        this.logger.error(`Failed to push a capacity snapshot to the worker: ${error.message}`);
+      }
     }, SNAPSHOT_INTERVAL_MS);
     this.snapshotTimer.unref();
+  }
+
+  /** Report failure once and hand control back to the executor side. */
+  private fail(reason: string) {
+    if (this.failed || this.stopped) return;
+    this.failed = true;
+    this.logger.error(`PoC worker coordinator is unusable: ${reason}`);
+    void this.stop();
+    try {
+      this.opts.onFailure(reason);
+    } catch (error) {
+      this.logger.error(`PoC worker coordinator onFailure handler threw: ${error.message}`);
+    }
   }
 
   public async stop() {
     this.stopped = true;
     if (this.snapshotTimer) clearInterval(this.snapshotTimer);
+    if (this.startupTimer) clearTimeout(this.startupTimer);
     this.send({ kind: 'shutdown' });
     if (this.worker) {
       const worker = this.worker;

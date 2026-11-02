@@ -157,15 +157,34 @@ const createEsClient = (): ElasticsearchClient => {
 const capacity$ = new Subject<CapacitySnapshot>();
 const executionReport$ = new Subject<ExecutionReport>();
 
-const coordinator = new TaskCoordinator({
-  esClient: createEsClient(),
-  logger,
-  config: data.config,
-  serializer: createSerializer(),
-  context: data.context,
-  capacity$,
-  executionReport$,
-});
+// Hardened: a construction failure must surface as a 'fatal' message (which
+// makes the executor fall back to in-process polling), never as a silent or
+// crashing worker.
+const createCoordinator = (): TaskCoordinator => {
+  if (process.env.TM_POC_SIMULATE_FAILURE === 'worker-boot') {
+    throw new Error('simulated worker boot failure (TM_POC_SIMULATE_FAILURE=worker-boot)');
+  }
+  return new TaskCoordinator({
+    esClient: createEsClient(),
+    logger,
+    config: data.config,
+    serializer: createSerializer(),
+    context: data.context,
+    capacity$,
+    executionReport$,
+  });
+};
+
+let coordinator: TaskCoordinator;
+try {
+  coordinator = createCoordinator();
+} catch (error) {
+  logger.error(`Coordinator worker failed to construct: ${error.message}`);
+  post({ kind: 'fatal', error: `${error.message}` });
+  // Give the message a tick to flush, then exit; the bridge falls back.
+  setTimeout(() => process.exit(1), 100);
+  throw error;
+}
 
 coordinator.claimedBatches$.subscribe((batch) => {
   post({ kind: 'claimed-batch', batch });

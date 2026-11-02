@@ -109,7 +109,12 @@ export interface TaskPollingLifecycleOpts {
   /** Requests extra claim cycles; ignored during Elasticsearch backpressure and its recovery. */
   claimNudgeService?: TaskManagerClaimNudgeService;
   /** PoC seam: run coordination (polling/claiming/discovery/nudge) in a worker thread. */
-  pocWorkerCoordinator?: { enabled: boolean; isServerless: boolean };
+  pocWorkerCoordinator?: {
+    enabled: boolean;
+    isServerless: boolean;
+    /** Called once if the worker coordinator fails and in-process polling takes over. */
+    onFallback?: () => void;
+  };
 }
 
 export type TaskLifecycleEvent =
@@ -136,9 +141,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private logger: Logger;
   private poller?: TaskPoller<string, TimedFillPoolResult>;
   // PoC seam: when the worker coordinator is enabled, claiming happens in a
-  // worker thread and these replace the in-process poller.
+  // worker thread; the in-process poller stays dormant as the fallback.
   private workerBridge?: WorkerCoordinatorBridge;
   private workerCycleEvents$?: Subject<Result<TimedFillPoolResult, PollingError<string>>>;
+  private pocFallbackHandler?: () => void;
+  private pocFallbackActivated = false;
   private started = false;
   private stopped = false;
   private readonly executionControlService: TaskExecutionControlService;
@@ -330,64 +337,77 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       .pipe(pairwise())
       .subscribe(([previous, current]) => this.handleExecutionControlTransition(previous, current));
 
+    // The stock in-process poller is ALWAYS constructed (construction has no
+    // side effects; timers start only on poller.start()). In PoC worker mode
+    // it stays dormant as the fallback: if anything about the worker
+    // coordinator fails \u2014 spawn, boot, fatal, exit, persistent claim errors \u2014
+    // the lifecycle reverts to it, so the PoC can never degrade Task Manager
+    // below default behaviour.
+    this.poller = createTaskPoller<string, TimedFillPoolResult>({
+      logger,
+      initialPollInterval: pollInterval,
+      pollInterval$: this.pollIntervalConfiguration$,
+      claimNudge$: claimNudgeService?.claimNudge$,
+      backpressure$: claimNudgeSuppressed$,
+      getCapacity: () => {
+        const capacity = this.pool.availableCapacity();
+        if (!capacity) {
+          const usedCapacityPercentage = this.pool.usedCapacityPercentage;
+
+          // if there isn't capacity, emit a load event so that we can expose how often
+          // high load causes the poller to skip work (work isn't called when there is no capacity)
+          this.emitEvent(asTaskManagerStatEvent('load', asOk(usedCapacityPercentage)));
+
+          // Emit event indicating task manager utilization
+          this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(usedCapacityPercentage)));
+        }
+        return capacity;
+      },
+      work: this.pollForWork,
+    });
+    this.subscribeToPoller(this.poller.events$);
+
     if (pocWorkerCoordinator?.enabled) {
       // PoC seam: coordination (polling, claiming, discovery, claim-nudge
       // watching) runs in a worker thread. The executor side keeps the pool,
       // hydrates claimed refs and re-emits lifecycle events for monitoring.
-      this.logger.info(
-        'PoC worker coordinator enabled: polling/claiming moves to a worker thread; in-process poller disabled'
-      );
-      this.workerCycleEvents$ = new Subject<Result<TimedFillPoolResult, PollingError<string>>>();
-      this.workerBridge = new WorkerCoordinatorBridge({
-        logger,
-        config,
-        context: {
-          taskManagerId: taskStore.taskManagerId,
-          podName: taskPartitioner.getPodName(),
-          taskIndex: taskStore.index,
-          claimNudgeIndex: TASK_MANAGER_CLAIM_NUDGE_INDEX,
-          isServerless: pocWorkerCoordinator.isServerless,
-          definitions: serializeTaskDefinitions(definitions),
-          startingCapacity,
-          excludedTaskTypes: config.unsafe.exclude_task_types,
-        },
-        getCapacitySnapshot: () => this.buildCapacitySnapshot(),
-        getExecutionReport: () => ({
-          tmUtilization: this.currentTmUtilization$.getValue(),
-          takenAt: Date.now(),
-        }),
-      });
-      this.workerBridge.claimedBatches$.subscribe((batch) => {
-        void this.runClaimedBatch(batch);
-      });
-      this.subscribeToPoller(this.workerCycleEvents$);
-    } else {
-      this.poller = createTaskPoller<string, TimedFillPoolResult>({
-        logger,
-        initialPollInterval: pollInterval,
-        pollInterval$: this.pollIntervalConfiguration$,
-        claimNudge$: claimNudgeService?.claimNudge$,
-        backpressure$: claimNudgeSuppressed$,
-        getCapacity: () => {
-          const capacity = this.pool.availableCapacity();
-          if (!capacity) {
-            const usedCapacityPercentage = this.pool.usedCapacityPercentage;
-
-            // if there isn't capacity, emit a load event so that we can expose how often
-            // high load causes the poller to skip work (work isn't called when there is no capacity)
-            this.emitEvent(asTaskManagerStatEvent('load', asOk(usedCapacityPercentage)));
-
-            // Emit event indicating task manager utilization
-            this.emitEvent(
-              asTaskManagerStatEvent('workerUtilization', asOk(usedCapacityPercentage))
-            );
-          }
-          return capacity;
-        },
-        work: this.pollForWork,
-      });
-
-      this.subscribeToPoller(this.poller.events$);
+      // Wrapped so no PoC failure can ever prevent Task Manager from starting.
+      try {
+        this.logger.info(
+          'PoC worker coordinator enabled: polling/claiming moves to a worker thread; in-process poller dormant (fallback)'
+        );
+        this.pocFallbackHandler = pocWorkerCoordinator.onFallback;
+        this.workerCycleEvents$ = new Subject<Result<TimedFillPoolResult, PollingError<string>>>();
+        this.workerBridge = new WorkerCoordinatorBridge({
+          logger,
+          config,
+          context: {
+            taskManagerId: taskStore.taskManagerId,
+            podName: taskPartitioner.getPodName(),
+            taskIndex: taskStore.index,
+            claimNudgeIndex: TASK_MANAGER_CLAIM_NUDGE_INDEX,
+            isServerless: pocWorkerCoordinator.isServerless,
+            definitions: serializeTaskDefinitions(definitions),
+            startingCapacity,
+            excludedTaskTypes: config.unsafe.exclude_task_types,
+          },
+          getCapacitySnapshot: () => this.buildCapacitySnapshot(),
+          getExecutionReport: () => ({
+            tmUtilization: this.currentTmUtilization$.getValue(),
+            takenAt: Date.now(),
+          }),
+          onFailure: (reason: string) => this.activateInProcessFallback(reason),
+        });
+        this.workerBridge.claimedBatches$.subscribe((batch) => {
+          void this.runClaimedBatch(batch);
+        });
+        this.subscribeToPoller(this.workerCycleEvents$);
+      } catch (error) {
+        this.workerBridge = undefined;
+        this.activateInProcessFallback(
+          `failed to construct the worker coordinator bridge: ${error.message}`
+        );
+      }
     }
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
@@ -447,9 +467,40 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       );
     } finally {
       if (!this.stopped) {
-        this.poller?.start();
-        this.workerBridge?.start();
+        if (this.workerBridge && !this.pocFallbackActivated) {
+          // PoC worker mode: the bridge never throws; any failure (now or
+          // later) triggers activateInProcessFallback, which starts the
+          // dormant stock poller.
+          this.workerBridge.start();
+        } else {
+          this.poller?.start();
+        }
       }
+    }
+  }
+
+  /**
+   * PoC seam safety net: give up on the worker coordinator and revert to the
+   * stock in-process poller (plus main-thread discovery/nudge watcher via the
+   * plugin's onFallback). Idempotent; the worst case of any PoC failure is
+   * default Task Manager behaviour.
+   */
+  private activateInProcessFallback(reason: string) {
+    if (this.pocFallbackActivated) return;
+    this.pocFallbackActivated = true;
+    this.logger.error(
+      `PoC worker coordinator disabled (${reason}); falling back to stock in-process polling`
+    );
+    const bridge = this.workerBridge;
+    this.workerBridge = undefined;
+    if (bridge) void bridge.stop();
+    try {
+      this.pocFallbackHandler?.();
+    } catch (error) {
+      this.logger.error(`PoC fallback handler failed: ${error.message}`);
+    }
+    if (this.started && !this.stopped) {
+      this.poller?.start();
     }
   }
 

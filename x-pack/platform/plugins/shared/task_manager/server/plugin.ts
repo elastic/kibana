@@ -359,17 +359,24 @@ export class TaskManagerPlugin
     this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
     // PoC seam: kill-test scaffolding. Default ON in serverless builds of
-    // this branch (QAF smoke); TM_POC_TEST_TASK=false disables.
-    if (isPocTestTaskEnabled(isServerless)) {
-      this.logger.warn(
-        'PoC test task scaffolding enabled (serverless default or TM_POC_TEST_TASK=true)'
+    // this branch (QAF smoke); TM_POC_TEST_TASK=false disables. Hardened: a
+    // failure here must never take down plugin setup on any pod.
+    try {
+      if (isPocTestTaskEnabled(isServerless)) {
+        this.logger.warn(
+          'PoC test task scaffolding enabled (serverless default or TM_POC_TEST_TASK=true)'
+        );
+        registerPocTestTaskDefinitions(this.definitions, this.logger);
+        registerPocTestRoutes({
+          router,
+          logger: this.logger,
+          getStartContract: () => core.getStartServices().then(([, , contract]) => contract),
+        });
+      }
+    } catch (error) {
+      this.logger.error(
+        `PoC test task scaffolding failed to register and is disabled: ${error.message}`
       );
-      registerPocTestTaskDefinitions(this.definitions, this.logger);
-      registerPocTestRoutes({
-        router,
-        logger: this.logger,
-        getStartContract: () => core.getStartServices().then(([, , contract]) => contract),
-      });
     }
 
     return {
@@ -398,8 +405,22 @@ export class TaskManagerPlugin
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
     // PoC seam: worker coordinator defaults ON for serverless builds of this
-    // branch; TM_POC_WORKER_COORDINATOR=false is the kill switch.
-    const pocWorkerCoordinatorEnabled = isPocWorkerCoordinatorEnabled(isServerless);
+    // branch; TM_POC_WORKER_COORDINATOR=false is the kill switch. Hardened:
+    // any failure evaluating the gate disables the PoC rather than breaking
+    // plugin start.
+    let pocWorkerCoordinatorEnabled = false;
+    try {
+      pocWorkerCoordinatorEnabled = isPocWorkerCoordinatorEnabled(isServerless);
+    } catch (error) {
+      this.logger.error(`PoC worker coordinator gate check failed, PoC disabled: ${error.message}`);
+    }
+    // If the worker coordinator fails at any point, restore the main-thread
+    // coordination it had taken ownership of (discovery heartbeat and the
+    // claim-nudge watcher) alongside the lifecycle's in-process poller.
+    const onPocWorkerCoordinatorFallback = () => {
+      this.kibanaDiscoveryService?.start().catch(() => {});
+      this.claimNudgeService?.start();
+    };
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -536,7 +557,11 @@ export class TaskManagerPlugin
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
         claimNudgeService: this.claimNudgeService,
-        pocWorkerCoordinator: { enabled: pocWorkerCoordinatorEnabled, isServerless },
+        pocWorkerCoordinator: {
+          enabled: pocWorkerCoordinatorEnabled,
+          isServerless,
+          onFallback: onPocWorkerCoordinatorFallback,
+        },
       });
     }
 
