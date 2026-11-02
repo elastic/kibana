@@ -40,11 +40,17 @@ const AGREEING_CASES: Array<{ name: string; field: string; document: Record<stri
   { name: 'an empty array', field: 'host.id', document: { 'host.id': [] } },
   { name: 'an array of one', field: 'host.id', document: { 'host.id': ['only'] } },
   {
-    // First written, not lowest sorted — the difference from doc-values the backfill accepts.
+    // The lowest value, not the first written, the same as doc-values.
     name: 'a multi-valued field',
     field: 'host.id',
     document: { 'host.id': ['zzz-host', 'aaa-host'] },
   },
+  {
+    name: 'a multi-valued field with an empty and a null value',
+    field: 'host.id',
+    document: { 'host.id': ['', null, 'bbb-host'] },
+  },
+  { name: 'an array of empty values', field: 'host.id', document: { 'host.id': ['', null] } },
   {
     // The mapping makes identity fields keywords, but `_source` keeps whatever JSON arrived, so a
     // non-string value is reachable. Both readers stringify it, matching what ES would index.
@@ -133,6 +139,12 @@ apiTest.describe('EUID source reader parity', { tag: BACKFILL_TAGS }, () => {
       );
     });
   }
+
+  apiTest('reads the lowest value of a multi-valued field, not the first', async ({ esClient }) => {
+    expect(
+      await readWithPainless(esClient, 'host.id', { 'host.id': ['zzz-host', 'aaa-host'] })
+    ).toBe('aaa-host');
+  });
 
   apiTest('declines a value that is not a single scalar', async ({ esClient }) => {
     // Elasticsearch flattens `[['a','b']]` for a keyword field, so this shape does reach the alerts
