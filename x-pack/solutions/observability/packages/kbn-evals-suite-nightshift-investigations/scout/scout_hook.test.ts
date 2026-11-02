@@ -345,10 +345,8 @@ describe('nightshift-investigations scout hook', () => {
           config: { url: 'https://remote.example.com' },
           secrets: { secretHeaders: { Authorization: 'ApiKey remote-key' } },
         });
-        expect(xpack.nightshift_investigations.sandbox).toEqual({
-          telemetry_connector_id: 'nightshift-evals-telemetry',
-          telemetry_readable_indices: 'remote:logs-*',
-        });
+        // Telemetry is a plain connector the eval assigns to the investigator, not a plugin setting.
+        expect(xpack.nightshift_investigations).toBeUndefined();
       } finally {
         process.env = originalEnv;
       }
@@ -449,40 +447,6 @@ describe('ORCA CI shard', () => {
     );
     expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).not.toMatch(/2026|April/);
   });
-  it.each(['c0', 'none'])(
-    'uses ORCA telemetry despite a profile default of %s',
-    (defaultTarget) => {
-      const { output, status } = runHook(
-        {
-          ...existing,
-          nightshiftOrcaEs: orca,
-          nightshift: {
-            ...existing.nightshift,
-            defaultTelemetryTarget: defaultTarget,
-            telemetryTargets: { c0: existing.nightshift.telemetry },
-          },
-        },
-        { EVAL_SHARD_ID: 'orcabench' }
-      );
-      expect(status).toBe(0);
-      const originalEnv = process.env;
-      process.env = { ...originalEnv, ...output.env };
-      try {
-        const { xpack } = getConfigFromFiles([output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG]);
-        expect(xpack.nightshift_investigations.sandbox.default_telemetry_target).toBeUndefined();
-        expect(xpack.nightshift_investigations.sandbox.telemetry_connector_id).toBe(
-          'nightshift-evals-telemetry'
-        );
-        expect(xpack.actions.preconfigured['nightshift-evals-telemetry']).toMatchObject({
-          actionTypeId: '.http',
-          config: { url: orca.url },
-          secrets: { secretHeaders: { Authorization: `ApiKey ${orca.apiKey}` } },
-        });
-      } finally {
-        process.env = originalEnv;
-      }
-    }
-  );
   it('ignores a shared evals config, so the suite secret is the only source of the ORCA key', () => {
     const { status, stderr } = runHook(existing, {
       EVAL_SHARD_ID: 'orcabench',
@@ -527,143 +491,4 @@ describe('ORCA CI shard', () => {
       expect(stderr).not.toContain('customer0-key');
     }
   );
-});
-
-describe('named telemetry targets', () => {
-  const telemetryTargets = {
-    c0: { url: 'https://c0.example.com', apiKey: 'c0-key', readableIndices: 'remote:logs-*' },
-    orca: {
-      url: 'https://orca.example.com',
-      apiKey: 'orca-key',
-      readableIndices: 'logs-orcabench.*',
-    },
-  };
-  const profile = {
-    sandbox: SANDBOX,
-    nightshift: { telemetryTargets, defaultTelemetryTarget: 'c0' },
-  };
-
-  it('loads both sources on one stack and preserves unrelated connectors', () => {
-    const { status, output } = runHook(profile);
-    expect(status).toBe(0);
-    expect(runHook(profile).output).toEqual(output);
-    const generated = readFileSync(output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG, 'utf8');
-    expect(generated).not.toContain('c0-key');
-    expect(generated).not.toContain('orca-key');
-    expect(generated).not.toContain(telemetryTargets.c0.url);
-    expect(generated).not.toContain(telemetryTargets.orca.readableIndices);
-    const originalEnv = process.env;
-    const directory = mkdtempSync(Path.join(tmpdir(), 'named-telemetry-'));
-    const existing = Path.join(directory, 'existing.yml');
-    writeFileSync(existing, 'xpack.actions.preconfigured.existing.name: Existing');
-    process.env = { ...originalEnv, ...output.env };
-    try {
-      const { xpack } = getConfigFromFiles([
-        existing,
-        output.env.SANDBOX_KIBANA_CONFIG,
-        output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG,
-      ]);
-      expect(xpack.actions.preconfigured).toMatchObject({
-        existing: { name: 'Existing' },
-        'nightshift-evals-telemetry-c0': {
-          actionTypeId: '.http',
-          config: { url: telemetryTargets.c0.url },
-          secrets: { secretHeaders: { Authorization: 'ApiKey c0-key' } },
-        },
-        'nightshift-evals-telemetry-orca': {
-          actionTypeId: '.http',
-          config: { url: telemetryTargets.orca.url },
-          secrets: { secretHeaders: { Authorization: 'ApiKey orca-key' } },
-        },
-      });
-      expect(xpack.nightshift_investigations.sandbox).toEqual({
-        default_telemetry_target: 'c0',
-        telemetry_targets: {
-          c0: { connector_id: 'nightshift-evals-telemetry-c0', readable_indices: 'remote:logs-*' },
-          orca: {
-            connector_id: 'nightshift-evals-telemetry-orca',
-            readable_indices: 'logs-orcabench.*',
-          },
-        },
-      });
-    } finally {
-      process.env = originalEnv;
-      rmSync(directory, { recursive: true, force: true });
-    }
-  });
-
-  it('keeps legacy telemetry available alongside named targets', () => {
-    const { output, status } = runHook({
-      ...profile,
-      nightshift: {
-        ...profile.nightshift,
-        telemetry: { url: 'https://legacy.example.com', apiKey: 'legacy-key' },
-      },
-    });
-    expect(status).toBe(0);
-    const generated = readFileSync(output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG, 'utf8');
-    expect(generated).toContain('nightshift-evals-telemetry');
-    expect(generated).not.toContain('legacy-key');
-    expect(generated).not.toContain('https://legacy.example.com');
-  });
-
-  it('changes the Scout fingerprint when any named credential changes', () => {
-    const { output } = runHook(profile);
-    expect(
-      runHook({
-        ...profile,
-        nightshift: {
-          ...profile.nightshift,
-          telemetryTargets: {
-            ...telemetryTargets,
-            orca: { ...telemetryTargets.orca, apiKey: 'rotated' },
-          },
-        },
-      }).output
-    ).not.toEqual(output);
-  });
-
-  it.each([
-    { c0: { url: 'https://c0.example.com' } },
-    { c0: { apiKey: 'SECRET_KEY' } },
-    { none: telemetryTargets.c0 },
-    { INVALID: telemetryTargets.c0 },
-  ])('rejects invalid named blocks without echoing secrets', (targets) => {
-    const { status, stderr } = runHook({
-      sandbox: SANDBOX,
-      nightshift: { telemetryTargets: targets },
-    });
-    expect(status).toBe(1);
-    expect(stderr).not.toContain('SECRET_KEY');
-  });
-
-  it('rejects embedded credentials, unknown defaults, and missing sandbox credentials', () => {
-    expect(
-      runHook({
-        sandbox: SANDBOX,
-        nightshift: {
-          telemetryTargets: {
-            c0: { ...telemetryTargets.c0, url: 'https://user:SECRET_PASSWORD@c0.example.com' },
-          },
-        },
-      }).stderr
-    ).not.toContain('SECRET_PASSWORD');
-    expect(
-      runHook({
-        sandbox: SANDBOX,
-        nightshift: {
-          telemetryTargets: {
-            c0: { ...telemetryTargets.c0, url: 'https://user:password@c0.example.com' },
-          },
-        },
-      }).status
-    ).toBe(1);
-    expect(
-      runHook({
-        ...profile,
-        nightshift: { ...profile.nightshift, defaultTelemetryTarget: 'missing' },
-      }).status
-    ).toBe(1);
-    expect(runHook({ nightshift: profile.nightshift }).status).toBe(1);
-  });
 });

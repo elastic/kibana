@@ -113,14 +113,17 @@ describe('writeConnectorManifest', () => {
       expect(session.mkdirs).toHaveBeenCalledWith(['/workspace/.connector-docs']);
       expect(files.map(({ path }) => path)).toEqual([
         '/workspace/connectors.md',
+        '/workspace/.connector-docs/elastic.md',
         '/workspace/.connector-docs/github.md',
         '/workspace/.connector-docs/newrelic.md',
       ]);
-      expect(files[1].content.toString('utf8')).toContain('# GitHub');
-      expect(files[2].content.toString('utf8')).toContain('CONNECTOR_HEADER_API_KEY');
+      expect(files[1].content.toString('utf8')).toContain('# Elasticsearch');
+      expect(files[1].content.toString('utf8')).toContain('CONNECTOR_CONFIG_URL');
+      expect(files[2].content.toString('utf8')).toContain('# GitHub');
+      expect(files[3].content.toString('utf8')).toContain('CONNECTOR_HEADER_API_KEY');
     });
 
-    it('lists every service guide, including the Elasticsearch manifest', async () => {
+    it('lists every service guide, including Elasticsearch', async () => {
       const { content } = await renderManifest();
 
       expect(content).toContain('# Service guides');

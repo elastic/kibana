@@ -12,6 +12,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
+import { EVALS_TELEMETRY_CONNECTOR_ID } from './investigator_connectors';
 import { investigationExampleSchema } from './types';
 import type { InvestigationExample } from './types';
 
@@ -136,7 +137,7 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
     .some(
       ({ tool_id: toolId, params, results }) =>
         toolId === 'nightshift_sandbox_bash' &&
-        params.connector_id === 'nightshift-evals-telemetry' &&
+        params.connector_id === EVALS_TELEMETRY_CONNECTOR_ID &&
         results.some(
           ({ type, data }) =>
             type === ToolResultType.other &&
