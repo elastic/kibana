@@ -18,9 +18,8 @@ export interface NightshiftBoundSlackThreadTemplateValues extends ManagedWorkflo
 }
 
 /**
- * Renders the Slack thread YAML with `settings.run_as`. Nothing installs it yet: the switch to
- * service accounts also makes its call to the global investigation inherit this binding, and stops
- * installing the unbound global copy.
+ * Renders the Slack thread YAML with `settings.run_as`. Its call to the global investigation
+ * workflow inherits this binding, so the investigation runs as the same account.
  */
 export const renderBoundSlackThreadYaml = ({
   serviceAccountId,
@@ -31,7 +30,8 @@ export const renderBoundSlackThreadYaml = ({
 export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 1,
+  // 2: the investigation call inherits the space's agent account (`run-as-mode: inherit`).
+  version: 2,
   billable: false,
   yamlTemplate: renderBoundSlackThreadYaml,
   management: {

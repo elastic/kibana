@@ -7,12 +7,14 @@
 
 import type { PanelOpenerChildDefinition } from '@kbn/core-chrome-browser';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppSetupDependencies {}
 
 export interface EntityInventoryAppStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
+  share: SharePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

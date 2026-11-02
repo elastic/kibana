@@ -8,6 +8,7 @@
  */
 
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import type { DataSourceKind } from './types';
 
 /**
  * The part of a field that filtering reads. A `DataViewField` satisfies it, and so does a field of
@@ -30,9 +31,17 @@ export type FilterableField = DataViewFieldBase & {
  * read them (`'getFormatterForField' in indexPattern`).
  */
 export interface FilterableSource extends DataViewBase {
+  /**
+   * Set by sources that are not data views: `'esql'` for the dataset of an ES|QL query. A `DataView`
+   * has none, so its absence means the source can be loaded as a data view by its id.
+   */
+  readonly kind?: DataSourceKind;
   readonly fields: FilterableField[];
   readonly name?: string;
   readonly timeFieldName?: string;
   getName?(): string;
   isTimeBased(): boolean;
 }
+
+/** Whether the source is the dataset of an ES|QL query, whose id is not the id of a data view. */
+export const isEsqlFilterableSource = (source: FilterableSource): boolean => source.kind === 'esql';

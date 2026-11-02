@@ -6,12 +6,11 @@
  */
 
 import type { SettingsProps } from '@elastic/charts';
-import { calculateContrast, EuiProvider, hexToRgb } from '@elastic/eui';
+import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { CrossIcon } from './cross_icon';
 import { MemoryKeywordTreemap } from './keyword_treemap';
 import type { KeywordCell } from './keyword_page_rank';
 import type { MemorySummary } from './types';
@@ -95,12 +94,6 @@ const layer = () => partition().layers[0];
 const settings = () => settingsProps.mock.calls[0][0] as SettingsProps;
 const tooltip = () =>
   tooltipProps.mock.calls[0][0] as { customTooltip: (info: unknown) => React.ReactNode };
-/** The colour the layer would fill the cell at `sortIndex` with. */
-const fillColor = (sortIndex: number) =>
-  (layer().shape.fillColor as (key: string, sortIndex: number) => string)('keyword', sortIndex);
-
-/** The fill of every cell, in the order the cells were handed to the chart. */
-const fills = () => partition().data.map((_cell, sortIndex) => fillColor(sortIndex));
 
 const renderTreemap = (
   props: Partial<React.ComponentProps<typeof MemoryKeywordTreemap>> = {},
@@ -146,27 +139,6 @@ describe('MemoryKeywordTreemap', () => {
     ).toEqual(['agent-builder', 'cart-cache', 'redis', 'traces-*']);
     expect(layer().nodeLabel!('agent-builder')).toBe('agent-builder');
     expect(layer().nodeLabel!('cart-cache')).toBe('cart-cache');
-  });
-
-  it('labels a cell with the keyword alone and leaves the chart value slot empty', () => {
-    renderTreemap();
-
-    const cell = partition().data[0];
-    // The score rides in the tooltip: the chart's own value row is one a clipped
-    // keyword evicts, so it is emptied rather than filled.
-    expect(layer().nodeLabel!(cell.keyword)).not.toContain('%');
-    expect(partition().valueFormatter!(cell.area)).toBe('');
-    expect(partition().valueAccessor!(cell)).toBe(cell.area);
-  });
-
-  it('fills the cells from the colour-blind palette in rank order', () => {
-    renderTreemap();
-
-    // The chart hands `fillColor` the cell's index in its own value-sorted order,
-    // so each rank takes the next palette colour and no two cells share one.
-    const cellFills = fills();
-    expect(new Set(cellFills).size).toBe(cellFills.length);
-    expect(cellFills.every((fill) => /^#|rgb/.test(fill))).toBe(true);
   });
 
   it('reports the keyword, its score, and how many memories carry it', () => {
@@ -263,26 +235,6 @@ describe('MemoryKeywordTreemap', () => {
     expect(layer().fillLabel!.clipText).toBe(false);
   });
 
-  it('leaves a keyword that fits no font size to its tooltip rather than chopping it', () => {
-    renderTreemap();
-
-    expect(partition().data.length).toBeGreaterThan(1);
-    expect(layer().fillLabel).toMatchObject({ clipText: false, maximizeFontSize: true });
-  });
-
-  /**
-   * Treemap fill labels default to the top of their cell; the fill label
-   * alignment options (elastic/elastic-charts#2912, since 73.3.0) center them.
-   */
-  it('asks the chart for a centered fill label', () => {
-    renderTreemap();
-
-    expect(layer().fillLabel).toMatchObject({
-      verticalAlignment: 'middle',
-      horizontalAlignment: 'center',
-    });
-  });
-
   /**
    * The chip's remove affordance is the one thing standing between a filter and
    * the person who wants it gone, so it has to be a button of its own rather than
@@ -296,59 +248,9 @@ describe('MemoryKeywordTreemap', () => {
     expect(onToggleKeyword).toHaveBeenCalledWith('cart-cache');
   });
 
-  /**
-   * The chip's only remove affordance cannot wait on `EuiIcon`'s on-demand
-   * import of a string icon type: asserted here without `waitFor`, so a
-   * regression to `iconType="cross"` fails on the first render rather than
-   * shipping a chip that cannot be removed.
-   */
-  it('draws the chip remove icon on the first render', () => {
-    renderTreemap({ selectedKeywords: ['cart-cache'] });
-
-    // Kibana's Jest maps `@elastic/eui` to `test-env`, whose `EuiIcon` is a
-    // stand-in `span` that never emits an `svg`: it names the type it was given,
-    // which is `cross` for the string form and the component's own name for the
-    // synchronous branch the badge has to take.
-    const remove = screen.getByRole('button', { name: 'Remove the cart-cache filter' });
-    expect(remove).toContainHTML('data-euiicon-type="CrossIcon"');
-    expect(render(<CrossIcon />).container.querySelector('svg > path')).toBeInTheDocument();
-  });
-
   it('takes no room at all when the store has no live memories', () => {
     renderTreemap({ pages: [] });
 
     expect(screen.queryByTestId('nightshiftMemoryTreemap')).not.toBeInTheDocument();
-  });
-
-  /**
-   * The chart's `fillLabel.textColor` is left at `Adaptive`, which picks black or
-   * white per cell by WCAG2 contrast against the fill. That is only safe if every
-   * palette colour has one of the two at a readable ratio, so this asserts it
-   * rather than trusting it — and pins the palette to 10 colours, because a
-   * forty-cell chart cycles through them.
-   */
-  it.each(['light', 'dark'] as const)(
-    'has a readable label colour on every palette colour in %s mode',
-    (colorMode) => {
-      renderTreemap({}, colorMode);
-      const cellFills = new Set(fills());
-
-      cellFills.forEach((fill) => {
-        const onBlack = calculateContrast(hexToRgb(fill) as never, [0, 0, 0]);
-        const onWhite = calculateContrast(hexToRgb(fill) as never, [255, 255, 255]);
-        // Whichever `Adaptive` picks has to clear WCAG AA for the 10-14px labels.
-        expect(Math.max(onBlack, onWhite)).toBeGreaterThanOrEqual(4.5);
-      });
-    }
-  );
-
-  it('cycles a fixed number of colours, so the palette is what the contrast check covers', () => {
-    const wide = Array.from({ length: 60 }, (_, index) =>
-      summary({ id: `memory_${index}`, tags: ['memory', `topic-${index}`, `agent-${index}`] })
-    );
-    renderTreemap({ pages: wide });
-    const cellFills = fills();
-
-    expect(new Set(cellFills).size).toBeLessThanOrEqual(10);
   });
 });

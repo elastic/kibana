@@ -90,6 +90,32 @@ describe('collectAlerts', () => {
     expect(descriptors.size).toBe(0);
   });
 
+  it('collects the tags of every batch once, ignoring values that are not strings', () => {
+    const { tags } = collectAlerts([
+      {
+        id: 'tagged-1',
+        type: SecurityAgentBuilderAttachments.alerts,
+        data: { tags: ['az:proposal:p1'] },
+      },
+      {
+        id: 'tagged-2',
+        type: SecurityAgentBuilderAttachments.alerts,
+        data: { alertIds: ['a'], tags: ['az:proposal:p1', 'other', 3] },
+      },
+    ]);
+
+    expect(tags).toEqual(['az:proposal:p1', 'other']);
+  });
+
+  it('keeps a batch that references its alerts only by tag', () => {
+    const { ids, tags } = collectAlerts([
+      { id: 'tagged', type: SecurityAgentBuilderAttachments.alerts, data: { tags: ['t1'] } },
+    ]);
+
+    expect(ids).toEqual([]);
+    expect(tags).toEqual(['t1']);
+  });
+
   it('reports the earliest creation time', () => {
     const { createdAt } = collectAlerts([
       alertBatch(['a'], '2026-09-02T00:00:00.000Z'),
