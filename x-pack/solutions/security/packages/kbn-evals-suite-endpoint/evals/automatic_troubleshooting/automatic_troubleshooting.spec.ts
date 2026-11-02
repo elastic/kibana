@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Evaluator } from '@kbn/evals';
+import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { evaluate } from '../../src/evaluate';
@@ -198,7 +198,16 @@ const P0_EVALS = [
 /** Signature-only questions name no endpoint, so the agent must answer without generate_insight. */
 const CUSTOM_YARA_SIGNATURE_MAX_TOOL_CALLS = 12;
 
-const TOOL_USAGE_EVALUATORS = [createTroubleshootingToolUsageEvaluator()] as Evaluator[];
+const getTroubleshootingEvaluators = ({
+  traceBasedEvaluators: { toolCalls, latency, inputTokens, outputTokens, cachedTokens },
+}: DefaultEvaluators): Evaluator[] => [
+  createTroubleshootingToolUsageEvaluator() as Evaluator,
+  toolCalls,
+  latency,
+  inputTokens,
+  outputTokens,
+  cachedTokens,
+];
 
 const CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA = [
   `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
@@ -256,7 +265,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     });
   });
 
-  evaluate('incompatible antivirus detection', async ({ evaluateDataset }) => {
+  evaluate('incompatible antivirus detection', async ({ evaluateDataset, evaluators }) => {
     await evaluateDataset({
       dataset: {
         name: 'endpoint: incompatible antivirus detection',
@@ -279,11 +288,11 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
           },
         ],
       },
-      extraEvaluators: TOOL_USAGE_EVALUATORS,
+      extraEvaluators: getTroubleshootingEvaluators(evaluators),
     });
   });
 
-  evaluate('policy response failure', async ({ evaluateDataset }) => {
+  evaluate('policy response failure', async ({ evaluateDataset, evaluators }) => {
     await evaluateDataset({
       dataset: {
         name: 'endpoint: policy response failure',
@@ -305,12 +314,12 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
           },
         ],
       },
-      extraEvaluators: TOOL_USAGE_EVALUATORS,
+      extraEvaluators: getTroubleshootingEvaluators(evaluators),
     });
   });
 
   for (const evalDefinition of P0_EVALS) {
-    evaluate(evalDefinition.name, async ({ evaluateDataset }) => {
+    evaluate(evalDefinition.name, async ({ evaluateDataset, evaluators }) => {
       await evaluateDataset({
         dataset: {
           name: `endpoint: ${evalDefinition.name}`,
@@ -326,7 +335,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
             },
           ],
         },
-        extraEvaluators: TOOL_USAGE_EVALUATORS,
+        extraEvaluators: getTroubleshootingEvaluators(evaluators),
       });
     });
   }
@@ -338,7 +347,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
     });
 
     for (const evalDefinition of CUSTOM_YARA_SIGNATURE_EVALS) {
-      evaluate(evalDefinition.name, async ({ evaluateDataset }) => {
+      evaluate(evalDefinition.name, async ({ evaluateDataset, evaluators }) => {
         await evaluateDataset({
           dataset: {
             name: `endpoint: ${evalDefinition.name}`,
@@ -356,7 +365,7 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
               },
             ],
           },
-          extraEvaluators: TOOL_USAGE_EVALUATORS,
+          extraEvaluators: getTroubleshootingEvaluators(evaluators),
         });
       });
     }
@@ -374,32 +383,36 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
       });
     });
 
-    evaluate('missing_endpoint_list_stopped_united_transform', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'endpoint: missing_endpoint_list_stopped_united_transform',
-          description:
-            'Validates that the agent detects a stopped united metadata transform and recommends restarting it.',
-          examples: [
-            {
-              input: {
-                question: 'I am missing endpoints on the endpoint list page. Can you troubleshoot?',
+    evaluate(
+      'missing_endpoint_list_stopped_united_transform',
+      async ({ evaluateDataset, evaluators }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'endpoint: missing_endpoint_list_stopped_united_transform',
+            description:
+              'Validates that the agent detects a stopped united metadata transform and recommends restarting it.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'I am missing endpoints on the endpoint list page. Can you troubleshoot?',
+                },
+                output: {
+                  criteria: [
+                    `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+                    'Called get_package_configurations to inspect transform settings and stats',
+                    'Identified that the endpoint.metadata_united transform is stopped',
+                    'Recommended restarting the stopped transform as a remediation step',
+                    'Called generate_insight to persist structured findings',
+                  ],
+                },
               },
-              output: {
-                criteria: [
-                  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
-                  'Called get_package_configurations to inspect transform settings and stats',
-                  'Identified that the endpoint.metadata_united transform is stopped',
-                  'Recommended restarting the stopped transform as a remediation step',
-                  'Called generate_insight to persist structured findings',
-                ],
-              },
-            },
-          ],
-        },
-        extraEvaluators: TOOL_USAGE_EVALUATORS,
-      });
-    });
+            ],
+          },
+          extraEvaluators: getTroubleshootingEvaluators(evaluators),
+        });
+      }
+    );
 
     evaluate.afterAll(async ({ esClient, log }) => {
       try {
