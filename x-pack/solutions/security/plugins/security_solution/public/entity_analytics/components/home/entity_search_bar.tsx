@@ -47,13 +47,17 @@ interface Props {
 export const EntitySearchBar: React.FC<Props> = ({ dataView, timeRange, onTimeRangeChange }) => (
   <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
     <EuiFlexItem>
-      <SiemSearchBar dataView={dataView} id={InputsModelId.global} hideDatePicker />
+      <SiemSearchBar
+        dataView={dataView}
+        id={InputsModelId.global}
+        displayStyle="inPage"
+        hideDatePicker
+      />
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
       css={css`
         align-self: flex-start;
-        margin-top: 8px;
       `}
     >
       <EuiButtonGroup

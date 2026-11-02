@@ -400,6 +400,15 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
     expect(screen.getByTestId('entityAnalyticsPrivilegesCalloutWrapper')).toBeEmptyDOMElement();
   });
 
+  it('titles the tiles section', () => {
+    mockPrivileges();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('eaFaceliftNeedsAttentionTitle')).toHaveTextContent(
+      'Entities that need your attention'
+    );
+  });
+
   it.each([
     ['alerts', ['alerts'], ['entitiesWithAlerts', 'watchlisted']],
     ['anomalies', ['anomalies'], ['entitiesWithAnomalies']],

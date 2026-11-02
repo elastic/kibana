@@ -11,9 +11,11 @@ import {
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useEuiTheme,
   type EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
@@ -240,6 +242,11 @@ const ROWS_SELECTOR_TITLE = i18n.translate(
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
 });
+
+const NEEDS_ATTENTION_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.needsAttentionTitle',
+  { defaultMessage: 'Entities that need your attention' }
+);
 
 const ML_GET_JOBS_PRIVILEGE = 'ui:ml/canGetJobs';
 
@@ -1444,6 +1451,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     [rowsMode, setRowsMode, groupsSelected, onGroupChange, groupByOptions, groupByFields]
   );
 
+  const headerActionCss = css`
+    block-size: ${euiTheme.size.l};
+    overflow: visible;
+    justify-content: center;
+  `;
+
   const dataViewContextValue = useMemo(
     () => ({ dataView, dataViewIsLoading: isDataViewLoading }),
     [dataView, isDataViewLoading]
@@ -1462,7 +1475,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
           className="entityAnalyticsSearchSection"
           css={[
             css`
-              padding-block-start: ${euiTheme.size.s};
+              padding-block-start: ${euiTheme.size.base};
               padding-inline: ${euiTheme.size.base};
               display: flex;
               flex-direction: column;
@@ -1472,26 +1485,22 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
           ]}
         >
           {productTour.isBannerVisible && (
-            <>
+            <div
+              css={css`
+                margin-block-end: ${euiTheme.size.base};
+              `}
+            >
               <ProductTourBanner
                 onStartTour={productTour.startTour}
                 onDismiss={productTour.dismissBanner}
               />
-              <EuiSpacer size="m" />
-            </>
+            </div>
           )}
-          {/* SiemSearchBar has internal left padding; pull it left so its content aligns with the page edge */}
-          <div
-            css={css`
-              margin-inline-start: -${euiTheme.size.s};
-            `}
-          >
-            <EntitySearchBar
-              dataView={dataView}
-              timeRange={timeRange}
-              onTimeRangeChange={setTimeRange}
-            />
-          </div>
+          <EntitySearchBar
+            dataView={dataView}
+            timeRange={timeRange}
+            onTimeRangeChange={setTimeRange}
+          />
 
           <EuiSpacer size="s" />
 
@@ -1504,11 +1513,44 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             watchlistNames={watchlistNames}
           />
 
-          <EuiSpacer size="m" />
+          {/*
+            Design spacing: 16px above the divider, 16px below it (its 12px margin plus 4px on the
+            header row) and 16px from the header row to the tiles. The divider spans the page
+            edges, so it cancels the page's 16px side padding.
+          */}
+          <EuiHorizontalRule
+            margin="s"
+            css={css`
+              margin-block-start: ${euiTheme.size.base};
+              margin-inline: -${euiTheme.size.base};
+              inline-size: calc(100% + ${euiTheme.size.base} * 2);
+            `}
+          />
 
           <div>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              css={css`
+                padding-block-start: ${euiTheme.size.xs};
+                margin-block-end: ${euiTheme.size.base};
+              `}
+            >
+              <EuiFlexItem grow>
+                <EuiTitle size="xs">
+                  <h4
+                    data-test-subj="eaFaceliftNeedsAttentionTitle"
+                    css={css`
+                      padding-inline-start: ${euiTheme.size.xs};
+                    `}
+                  >
+                    {NEEDS_ATTENTION_TITLE}
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              {/* The buttons are taller than the heading; keep the row as tall as the heading. */}
+              <EuiFlexItem grow={false} css={headerActionCss}>
                 <GenerateAiBriefButton
                   cards={shownSignalCards}
                   timeRange={timeRange}
@@ -1516,11 +1558,10 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                   focusTileId={activeTile ?? undefined}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} css={headerActionCss}>
                 <HuntWithAiButton />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
             <SignalCards
               activeTile={activeTile}
               cards={shownSignalCards}
