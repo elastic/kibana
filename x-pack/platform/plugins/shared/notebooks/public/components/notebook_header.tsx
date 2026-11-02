@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -13,6 +13,7 @@ import {
   EuiInlineEditTitle,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 import type { AppMenuConfig } from '@kbn/app-menu';
@@ -48,6 +49,63 @@ const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
   );
 };
 
+const DESCRIPTION_PLACEHOLDER = i18n.translate('xpack.notebook.header.descriptionPlaceholder', {
+  defaultMessage: 'Add a description',
+});
+
+const NotebookDescription = () => {
+  const { store } = useNotebook();
+  const description = useStateFromPublishingSubject(store.description$);
+  const [draft, setDraft] = useState<string | null>(null);
+  const isCancelled = useRef(false);
+
+  if (draft === null) {
+    const startEditing = () => setDraft(description ?? '');
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={startEditing}
+        onKeyDown={(event) => event.key === 'Enter' && startEditing()}
+        css={{ cursor: 'text', whiteSpace: 'pre-wrap' }}
+        data-test-subj="notebookDescription"
+      >
+        <EuiText size="s" color="subdued">
+          {description || DESCRIPTION_PLACEHOLDER}
+        </EuiText>
+      </div>
+    );
+  }
+
+  return (
+    <EuiTextArea
+      autoFocus
+      fullWidth
+      compressed
+      rows={3}
+      resize="vertical"
+      maxLength={MAX_DESCRIPTION_LENGTH}
+      placeholder={DESCRIPTION_PLACEHOLDER}
+      aria-label={i18n.translate('xpack.notebook.header.descriptionAriaLabel', {
+        defaultMessage: 'Notebook description',
+      })}
+      value={draft}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={() => {
+        if (!isCancelled.current) store.setDescription(draft.trim());
+        isCancelled.current = false;
+        setDraft(null);
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape') return;
+        isCancelled.current = true;
+        event.currentTarget.blur();
+      }}
+      data-test-subj="notebookDescriptionInput"
+    />
+  );
+};
+
 export const NotebookHeader = ({
   onSave,
   isSaving,
@@ -58,7 +116,6 @@ export const NotebookHeader = ({
   const { store, scheduler } = useNotebook();
   const { core } = useNotebookServices();
   const title = useStateFromPublishingSubject(store.title$);
-  const description = useStateFromPublishingSubject(store.description$);
   const cells = useStateFromPublishingSubject(store.cells$);
   const isDirty = useObservable(store.isDirty$, false);
   const pinnedTime = findPinnedTimeCell(cells);
@@ -134,22 +191,7 @@ export const NotebookHeader = ({
         )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiTextArea
-        fullWidth
-        compressed
-        rows={2}
-        resize="vertical"
-        maxLength={MAX_DESCRIPTION_LENGTH}
-        placeholder={i18n.translate('xpack.notebook.header.descriptionPlaceholder', {
-          defaultMessage: 'Add a description',
-        })}
-        aria-label={i18n.translate('xpack.notebook.header.descriptionAriaLabel', {
-          defaultMessage: 'Notebook description',
-        })}
-        value={description ?? ''}
-        onChange={(event) => store.setDescription(event.target.value)}
-        data-test-subj="notebookDescription"
-      />
+      <NotebookDescription />
     </>
   );
 };
