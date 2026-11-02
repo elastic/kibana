@@ -1,0 +1,5 @@
+worker-mode boot:
+[2026-11-02T10:52:35.503Z][INFO][task-coordinator-worker:1] Coordinator worker booted (threadId=1, pid=30067); waiting for start
+[2026-11-02T10:52:35.506Z][INFO][task-coordinator-worker:1] TaskCoordinator starting for node "5b2de169-2785-441b-ae8c-186a1936b17d" (claiming as "kibana:5b2de169-2785-441b-ae8c-186a1936b17d") with 302 task types
+[2026-11-02T10:52:35.515Z][INFO][task-coordinator-worker:1] Starting the task poller
+[2026-11-02T10:52:35.523Z][DEBUG][task-coordinator-worker:1] Task poller now using interval of 500ms
