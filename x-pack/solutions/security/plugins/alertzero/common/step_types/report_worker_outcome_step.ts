@@ -320,7 +320,7 @@ const huntReportCompletedInputSchema = lazySchema(() =>
     package_status: oneOf(HUNT_REPORT_PACKAGE_STATUSES, "Packaging's own status"),
     proposals_dispatch_failed: count('Proposal gates that failed to launch'),
     proposals_prepared: count('Proposals packaging prepared and launched a gate for'),
-    tier2_invoked: optionalFlag('Whether the hunt ran Tier 2'),
+    tier2_invoked: optionalFlag('Whether the hunt ran Behavior Hunt'),
   })
 );
 
