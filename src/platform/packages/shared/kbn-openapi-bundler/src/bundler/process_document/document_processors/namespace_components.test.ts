@@ -103,7 +103,7 @@ describe('namespaceComponentsProcessor', () => {
       parentKey: '',
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     expect(node).toMatchObject({ security: [{ Something_SomeSecurityRequirement: [] }] });
   });
 
@@ -139,7 +139,7 @@ describe('namespaceComponentsProcessor', () => {
     });
 
     expect(document.components.securitySchemes).toMatchObject({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       Something_BasicAuth: {
         scheme: 'basic',
         type: 'http',

@@ -667,7 +667,7 @@ describe('healthRoute', () => {
     const serviceStatus = firstValueFrom(serviceStatus$);
     await sleep(0);
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const last_successful_poll = new Date(Date.now() - 3001).toISOString();
     stats$.next(
       mockHealthStats({
