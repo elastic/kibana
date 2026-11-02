@@ -28,6 +28,7 @@ import { localServerChecks } from './checks/local_servers';
 import { esSnapshotChecks } from './checks/es_snapshot';
 import { dockerChecks } from './checks/docker';
 import { qafChecks } from './checks/qaf';
+import { getElasticCloudChecks } from './checks/elastic_cloud';
 
 export type DoctorArch = 'stateful' | 'serverless';
 export type DoctorLocation = 'local' | 'cloud';
@@ -80,7 +81,7 @@ const ARCHS: DoctorArch[] = ['stateful', 'serverless'];
 
 const getGroups = (location: DoctorLocation, arch?: DoctorArch): DoctorCheckGroup[] =>
   location === 'cloud'
-    ? [environmentChecks, playwrightChecks, qafChecks]
+    ? [environmentChecks, playwrightChecks, qafChecks, getElasticCloudChecks(arch)]
     : [
         environmentChecks,
         playwrightChecks,
@@ -289,7 +290,10 @@ export const runDoctor = async (
   const archs = arch ? [arch] : ARCHS;
   const readyArchs = archs.filter((checkedArch) =>
     results.every(
-      ({ status, group }) => status !== 'fail' || !getGroups(location, checkedArch).includes(group)
+      // compared by title, as some groups are created per architecture
+      ({ status, group }) =>
+        status !== 'fail' ||
+        !getGroups(location, checkedArch).some(({ title }) => title === group.title)
     )
   );
   printNextSteps(log, location, archs, readyArchs);
