@@ -279,9 +279,9 @@ export class InspectorService extends FtrService {
 
   public async getTableDataWithId(tableTestSubj: string): Promise<string[][]> {
     const chooserDataTestId = 'inspectorTableChooser';
-    if (!(await this.testSubjects.exists(chooserDataTestId))) {
-      return [];
-    }
+    // open() only waits for the panel, not its data table, so require the chooser the caller
+    // asked to pick from rather than reporting an empty table while it is still rendering.
+    await this.testSubjects.existOrFail(chooserDataTestId, { timeout: 20_000 });
 
     return await this.retry.try(async () => {
       await this.testSubjects.click(chooserDataTestId);
