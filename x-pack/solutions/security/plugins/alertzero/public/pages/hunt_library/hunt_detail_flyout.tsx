@@ -26,6 +26,8 @@ import {
 import type { HuntLibraryDetail } from '../../../common/hunt_library';
 import { useHuntLibraryDetail } from '../../hooks/use_hunt_library_api';
 import { HuntAvailabilityPanel } from './hunt_availability_panel';
+import { HuntHistorySection } from './hunt_history_section';
+import { RunInDiscoverButton } from './run_in_discover_button';
 import * as i18n from './translations';
 
 interface HuntDetailFlyoutProps {
@@ -67,6 +69,9 @@ const FlyoutContent: React.FC<{ hunt: HuntLibraryDetail }> = ({ hunt }) => (
       <p data-test-subj="alertZeroHuntFlyoutHypothesis">{hunt.hypothesis}</p>
     </EuiText>
 
+    <EuiSpacer size="m" />
+    <RunInDiscoverButton hunt={hunt} />
+
     <EuiSpacer size="l" />
     <HuntAvailabilityPanel
       title={i18n.FLYOUT_YOUR_AVAILABILITY}
@@ -80,6 +85,9 @@ const FlyoutContent: React.FC<{ hunt: HuntLibraryDetail }> = ({ hunt }) => (
       note={i18n.FLYOUT_WORKER_NOTE}
       data-test-subj="alertZeroHuntFlyoutWorkerAvailability"
     />
+
+    <EuiSpacer size="l" />
+    <HuntHistorySection huntId={hunt.id} />
 
     <NoteList
       title={i18n.FLYOUT_NOTES}

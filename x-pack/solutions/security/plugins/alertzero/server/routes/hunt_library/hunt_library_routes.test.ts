@@ -17,14 +17,25 @@ const makeDeps = ({
   userName = 'analyst',
 }: { universe?: string[]; isServerless?: boolean; userName?: string } = {}) => {
   const get = jest.fn();
+  const post = jest.fn();
   const addVersion = jest.fn();
   get.mockReturnValue({ addVersion });
-  const router = { versioned: { get } };
+  post.mockReturnValue({ addVersion });
+  const router = { versioned: { get, post } };
+  const management = {
+    findExecutionsByLabel: jest.fn().mockResolvedValue([]),
+    executeLabeledWorkflow: jest
+      .fn()
+      .mockResolvedValue({ workflowExecutionId: 'x', reusedExisting: false }),
+    updateExecutionLabels: jest.fn().mockResolvedValue({}),
+  };
+  const managementRef: { current: typeof management | undefined } = { current: management };
 
   registerHuntLibraryRoutes({
     router: router as unknown as RouteDependencies['router'],
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
+    getWorkflowsManagement: () => managementRef.current,
     isServerless,
   } as unknown as RouteDependencies);
 
@@ -79,16 +90,23 @@ const makeDeps = ({
     list: addVersion.mock.calls[0][1],
     detail: addVersion.mock.calls[1][1],
     detailValidate: addVersion.mock.calls[1][0].validate,
+    historyRoute: get.mock.calls[2][0],
+    history: addVersion.mock.calls[2][1],
+    launchRoute: post.mock.calls[0][0],
+    launch: addVersion.mock.calls[3][1],
+    launchValidate: addVersion.mock.calls[3][0].validate,
+    management,
+    managementRef,
     context,
     asCurrentUser,
   };
 };
 
 describe('registerHuntLibraryRoutes', () => {
-  it('requires only AlertZero Read and is internal, for both routes', () => {
-    const { listRoute, detailRoute } = makeDeps();
+  it('requires only AlertZero Read and is internal, for every read route', () => {
+    const { listRoute, detailRoute, historyRoute } = makeDeps();
 
-    for (const route of [listRoute, detailRoute]) {
+    for (const route of [listRoute, detailRoute, historyRoute]) {
       expect(route.access).toBe('internal');
       expect(route.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
     }
@@ -240,5 +258,211 @@ describe('registerHuntLibraryRoutes', () => {
       hunts.every(({ availability }) => availability.firstFailure === 'unavailable_index')
     ).toBe(true);
     expect(JSON.stringify(hunts)).not.toContain('secret detail');
+  });
+});
+
+describe('hunt launch route', () => {
+  const SESSION = '0b7c1a3e-5d2f-4c8a-9e61-3f4b8a7d2c10';
+  const launchRequest = (id = 'rare_lsass_process_access', sessionId = SESSION) =>
+    httpServerMock.createKibanaRequest({ params: { id }, body: { session_id: sessionId } });
+
+  it('requires only AlertZero Read and is internal', () => {
+    const { launchRoute } = makeDeps();
+
+    expect(launchRoute.access).toBe('internal');
+    expect(launchRoute.security.authz.requiredPrivileges).toEqual(['alertzero_read']);
+  });
+
+  it('bounds the body to one UUID session id', () => {
+    const { launchValidate } = makeDeps();
+    const body = launchValidate.request.body;
+
+    expect(body.validate({ session_id: SESSION })).toEqual({ session_id: SESSION });
+    expect(() => body.validate({ session_id: 'not-a-uuid' })).toThrow();
+    expect(() => body.validate({ session_id: 'a'.repeat(37) })).toThrow();
+    expect(() => body.validate({})).toThrow();
+    expect(() => body.validate({ session_id: SESSION, space_id: 'other' })).toThrow();
+  });
+
+  it('records an exploratory session for an available hunt and creates no Investigation', async () => {
+    const { launch, context, management } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await launch(context, launchRequest(), response);
+
+    expect(management.executeLabeledWorkflow).toHaveBeenCalledTimes(1);
+    const body = response.ok.mock.calls[0][0]!.body as {
+      session_id: string;
+      execution_id: string;
+      reused_existing: boolean;
+    };
+    expect(body.session_id).toBe(SESSION);
+    expect(body.execution_id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(body.reused_existing).toBe(false);
+  });
+
+  it('refuses to launch a hunt that is not available to the caller, and writes nothing', async () => {
+    const { launch, context, management } = makeDeps({ universe: ['filebeat-*'] });
+    const response = httpServerMock.createResponseFactory();
+
+    await launch(context, launchRequest(), response);
+
+    expect(response.conflict).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ attributes: { reason: 'unavailable_scope' } }),
+      })
+    );
+    expect(management.executeLabeledWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 for an unknown hunt without touching Workflows', async () => {
+    const { launch, context, management } = makeDeps();
+    const response = httpServerMock.createResponseFactory();
+
+    await launch(context, launchRequest('nope'), response);
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(management.findExecutionsByLabel).not.toHaveBeenCalled();
+  });
+
+  it('returns 409 when the session id belongs to a different hunt', async () => {
+    const { launch, context, management } = makeDeps();
+    management.findExecutionsByLabel.mockResolvedValue([
+      { labels: { 'hunt.definition_id': 'okta_password_spraying_repeat_source' } },
+    ]);
+    const response = httpServerMock.createResponseFactory();
+
+    await launch(context, launchRequest(), response);
+
+    expect(response.conflict).toHaveBeenCalled();
+    expect(management.executeLabeledWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('returns 503 when Workflows management is unavailable', async () => {
+    const { launch, context, managementRef } = makeDeps();
+    managementRef.current = undefined;
+    const response = httpServerMock.createResponseFactory();
+
+    await launch(context, launchRequest(), response);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
+  });
+
+  it('returns a generic 500 when the workflow cannot start', async () => {
+    const { launch, context, management } = makeDeps();
+    management.executeLabeledWorkflow.mockRejectedValue(new Error('secret detail'));
+    const response = httpServerMock.createResponseFactory();
+
+    await launch(context, launchRequest(), response);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 500,
+      body: { message: 'Failed to launch Hunt Library session' },
+    });
+  });
+
+  describe('history', () => {
+    const historyRequest = (id = 'rare_lsass_process_access') =>
+      httpServerMock.createKibanaRequest({ params: { id } });
+
+    it('returns the hunt sessions grouped by session, newest first', async () => {
+      const { history, context, management } = makeDeps();
+      const labels = (sessionId: string, outcome?: string) => ({
+        'hunt.kind': 'manual_session',
+        'hunt.definition_id': 'rare_lsass_process_access',
+        'hunt.definition_version': '1',
+        'hunt.session_id': sessionId,
+        ...(outcome ? { 'hunt.outcome': outcome } : {}),
+      });
+      management.findExecutionsByLabel.mockResolvedValue([
+        {
+          id: 'e2',
+          startedAt: '2026-11-03T10:00:00.000Z',
+          executedBy: 'analyst',
+          labels: labels('s2'),
+        },
+        { id: 'e1', startedAt: '2026-11-02T10:00:00.000Z', labels: labels('s1', 'exploratory') },
+        { id: 'e1b', startedAt: '2026-11-02T09:00:00.000Z', labels: labels('s1') },
+      ]);
+      const response = httpServerMock.createResponseFactory();
+
+      await history(context, historyRequest(), response);
+
+      expect(management.findExecutionsByLabel).toHaveBeenCalledWith(
+        expect.objectContaining({ key: 'hunt.definition_id', value: 'rare_lsass_process_access' })
+      );
+      expect(response.ok.mock.calls[0][0]!.body).toEqual({
+        history: [
+          {
+            kind: 'manual_session',
+            sessionId: 's2',
+            executionId: 'e2',
+            definitionVersion: 1,
+            outcome: 'exploratory',
+            startedAt: '2026-11-03T10:00:00.000Z',
+            startedBy: 'analyst',
+          },
+          {
+            kind: 'manual_session',
+            sessionId: 's1',
+            executionId: 'e1',
+            definitionVersion: 1,
+            outcome: 'exploratory',
+            startedAt: '2026-11-02T10:00:00.000Z',
+          },
+        ],
+      });
+    });
+
+    it('skips executions that are not manual sessions', async () => {
+      const { history, context, management } = makeDeps();
+      management.findExecutionsByLabel.mockResolvedValue([
+        {
+          id: 'e1',
+          startedAt: '2026-11-03T10:00:00.000Z',
+          labels: { 'hunt.kind': 'library_child', 'hunt.session_id': 's1' },
+        },
+      ]);
+      const response = httpServerMock.createResponseFactory();
+
+      await history(context, historyRequest(), response);
+
+      expect(response.ok.mock.calls[0][0]!.body).toEqual({ history: [] });
+    });
+
+    it('returns 404 for an unknown hunt without touching Workflows', async () => {
+      const { history, context, management } = makeDeps();
+      const response = httpServerMock.createResponseFactory();
+
+      await history(context, historyRequest('nope'), response);
+
+      expect(response.notFound).toHaveBeenCalled();
+      expect(management.findExecutionsByLabel).not.toHaveBeenCalled();
+    });
+
+    it('returns 503 when Workflows management is unavailable', async () => {
+      const { history, context, managementRef } = makeDeps();
+      managementRef.current = undefined;
+      const response = httpServerMock.createResponseFactory();
+
+      await history(context, historyRequest(), response);
+
+      expect(response.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 503 })
+      );
+    });
+
+    it('returns a generic 500 without leaking the failure', async () => {
+      const { history, context, management } = makeDeps();
+      management.findExecutionsByLabel.mockRejectedValue(new Error('secret detail'));
+      const response = httpServerMock.createResponseFactory();
+
+      await history(context, historyRequest(), response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Failed to read Hunt Library history' },
+      });
+    });
   });
 });

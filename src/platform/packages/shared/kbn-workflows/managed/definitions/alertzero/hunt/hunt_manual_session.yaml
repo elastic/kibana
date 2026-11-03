@@ -1,0 +1,27 @@
+version: "1"
+name: Hunt Library - manual session
+description: >
+  Records one analyst hunt session started from the Hunt Library. It does nothing
+  but finish: the execution exists so the session shows up in run history, and its
+  labels carry the definition, session and outcome. Starting a session never
+  creates an Investigation.
+enabled: true
+tags: []
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        definitionId:
+          type: string
+          description: Hunt Library definition id the session was started from.
+        definitionVersion:
+          type: number
+          description: Definition version the session was started from.
+        sessionId:
+          type: string
+          description: Browser-generated session id, reused when a launch is retried.
+steps:
+  - name: record_session
+    type: console
+    with:
+      message: "Hunt Library session {{ inputs.sessionId }} started for {{ inputs.definitionId }} v{{ inputs.definitionVersion }}"

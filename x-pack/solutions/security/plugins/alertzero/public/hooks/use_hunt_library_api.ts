@@ -9,7 +9,11 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { API_VERSIONS } from '@kbn/alertzero-common';
 import { HUNT_LIBRARY_URL } from '../../common/constants';
-import type { HuntLibraryDetail, HuntLibraryListResponse } from '../../common/hunt_library';
+import type {
+  HuntHistoryResponse,
+  HuntLibraryDetail,
+  HuntLibraryListResponse,
+} from '../../common/hunt_library';
 import { queryKeys } from '../query_keys';
 import { retryOnTransientError } from './retry_on_transient_error';
 
@@ -46,6 +50,26 @@ export const useHuntLibraryDetail = (huntId: string | undefined) => {
     },
     enabled: Boolean(huntId),
     staleTime: STALE_TIME_MS,
+    retry: retryOnTransientError,
+  });
+};
+
+/** One hunt's manual run history. A launch invalidates it, so a new session appears at once. */
+export const useHuntHistory = (huntId: string | undefined) => {
+  const { services } = useKibana();
+
+  return useQuery({
+    queryKey: queryKeys.huntLibrary.history(huntId),
+    queryFn: async (): Promise<HuntHistoryResponse> => {
+      if (!huntId) {
+        throw new Error('huntId is required');
+      }
+      return services.http!.get<HuntHistoryResponse>(
+        `${HUNT_LIBRARY_URL}/${encodeURIComponent(huntId)}/history`,
+        { version: API_VERSIONS.internal.v1 }
+      );
+    },
+    enabled: Boolean(huntId),
     retry: retryOnTransientError,
   });
 };

@@ -403,7 +403,7 @@ describe('AlertZeroPublicPlugin UI telemetry registration', () => {
     expect(registeredEventTypes()).toEqual([]);
   });
 
-  it('registers the four AlertZero UI events when the app first mounts', async () => {
+  it('registers the AlertZero UI events when the app first mounts', async () => {
     const { mount, registeredEventTypes } = setupPlugin(true);
 
     await mount();
@@ -413,6 +413,9 @@ describe('AlertZeroPublicPlugin UI telemetry registration', () => {
       'alertzero_ui_queue_filtered',
       'alertzero_ui_brief_card_clicked',
       'alertzero_ui_error_shown',
+      'alertzero_ui_hunt_library_opened',
+      'alertzero_ui_hunt_library_filtered',
+      'alertzero_ui_hunt_launched',
     ]);
   });
 
@@ -422,7 +425,7 @@ describe('AlertZeroPublicPlugin UI telemetry registration', () => {
     await mount();
     await mount();
 
-    expect(registeredEventTypes()).toHaveLength(4);
+    expect(registeredEventTypes()).toHaveLength(7);
   });
 
   it('registers no UI event when the deployment kill switch is off', () => {

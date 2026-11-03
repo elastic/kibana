@@ -244,3 +244,66 @@ export const flyoutSourceLine = (path: string, revision: string) =>
 export const CLEAR_FILTERS = i18n.translate('xpack.alertzero.huntLibrary.clearFilters', {
   defaultMessage: 'Clear filters',
 });
+
+export const RUN_IN_DISCOVER = i18n.translate('xpack.alertzero.huntLibrary.runInDiscover', {
+  defaultMessage: 'Run in Discover',
+});
+
+export const RUN_DISABLED_UNAVAILABLE = i18n.translate(
+  'xpack.alertzero.huntLibrary.runDisabledUnavailable',
+  { defaultMessage: 'This hunt is not available for you. See the availability details below.' }
+);
+
+export const RUN_DISABLED_NO_DISCOVER = i18n.translate(
+  'xpack.alertzero.huntLibrary.runDisabledNoDiscover',
+  { defaultMessage: 'Discover is not available in this space.' }
+);
+
+export const RUN_ERROR_TITLE = i18n.translate('xpack.alertzero.huntLibrary.runError', {
+  defaultMessage: 'Unable to start the hunt',
+});
+
+export const HISTORY_TITLE = i18n.translate('xpack.alertzero.huntLibrary.history.title', {
+  defaultMessage: 'Run history',
+});
+
+export const HISTORY_EMPTY = i18n.translate('xpack.alertzero.huntLibrary.history.empty', {
+  defaultMessage: 'Nobody has run this hunt in this space yet.',
+});
+
+export const HISTORY_ERROR = i18n.translate('xpack.alertzero.huntLibrary.history.error', {
+  defaultMessage: 'Unable to load the run history.',
+});
+
+export const HISTORY_CAPTION = i18n.translate('xpack.alertzero.huntLibrary.history.caption', {
+  defaultMessage: 'Run history for this hunt',
+});
+
+export const HISTORY_COLUMN_STARTED = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.columnStarted',
+  { defaultMessage: 'Started' }
+);
+
+export const HISTORY_COLUMN_BY = i18n.translate('xpack.alertzero.huntLibrary.history.columnBy', {
+  defaultMessage: 'Started by',
+});
+
+export const HISTORY_COLUMN_TYPE = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.columnType',
+  { defaultMessage: 'Type' }
+);
+
+export const HISTORY_COLUMN_OUTCOME = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.columnOutcome',
+  { defaultMessage: 'Outcome' }
+);
+
+export const HISTORY_TYPE_MANUAL = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.typeManual',
+  { defaultMessage: 'Manual session' }
+);
+
+export const HISTORY_OUTCOME_EXPLORATORY = i18n.translate(
+  'xpack.alertzero.huntLibrary.history.outcomeExploratory',
+  { defaultMessage: 'Exploratory' }
+);

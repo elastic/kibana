@@ -15,6 +15,7 @@ import {
   getWorkerRoleName,
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_READ, HUNT_LIBRARY_URL } from '../../../common/constants';
+import type { HuntHistoryResponse, HuntLaunchResponse } from '../../../common/hunt_library';
 import type {
   HuntAvailability,
   HuntLibraryDetail,
@@ -27,7 +28,9 @@ import {
   HuntAvailabilityCache,
   uncoveredByScope,
 } from '../../hunt_library/availability';
+import { listHuntHistory } from '../../hunt_library/history';
 import type { HuntDefinition } from '../../hunt_library/hunt_definition';
+import { HuntSessionConflictError, launchManualSession } from '../../hunt_library/manual_session';
 import { getHuntDefinition, HUNT_DEFINITIONS } from '../../hunt_library/seed';
 import {
   readWorkerRole,
@@ -38,6 +41,7 @@ import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 const MAX_DEFINITION_ID_LENGTH = 128;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const toListFields = (definition: HuntDefinition) => ({
   id: definition.id,
@@ -86,6 +90,7 @@ export const registerHuntLibraryRoutes = ({
   router,
   logger,
   getSpaceId,
+  getWorkflowsManagement,
   isServerless,
 }: RouteDependencies) => {
   const cache = new HuntAvailabilityCache();
@@ -234,6 +239,142 @@ export const registerHuntLibraryRoutes = ({
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to read Hunt Library hunt' },
+          });
+        }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: `${HUNT_LIBRARY_URL}/{id}/history`,
+      access: INTERNAL_API_ACCESS,
+      security: { authz: { requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ] } },
+      summary: 'List the manual run history of one Hunt Library hunt in this space',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string({ minLength: 1, maxLength: MAX_DEFINITION_ID_LENGTH }),
+            }),
+          },
+        },
+      },
+      withAlertZeroEnabled(async (context, request, response) => {
+        const definition = getHuntDefinition(request.params.id);
+        if (!definition) {
+          return response.notFound({ body: { message: 'Hunt not found' } });
+        }
+        const management = getWorkflowsManagement();
+        if (!management) {
+          return response.customError({
+            statusCode: 503,
+            body: { message: 'Workflows are not available' },
+          });
+        }
+        try {
+          const history = await listHuntHistory({
+            client: management,
+            request,
+            spaceId: getSpaceId(request),
+            definitionId: definition.id,
+          });
+          const body: HuntHistoryResponse = { history };
+          return response.ok({ body });
+        } catch (err) {
+          logger.error(`Failed to read Hunt Library history: ${(err as Error).message}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to read Hunt Library history' },
+          });
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: `${HUNT_LIBRARY_URL}/{id}/launch`,
+      access: INTERNAL_API_ACCESS,
+      security: { authz: { requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ] } },
+      summary: 'Record a manual Hunt Library session as exploratory run history',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: schema.object({
+              id: schema.string({ minLength: 1, maxLength: MAX_DEFINITION_ID_LENGTH }),
+            }),
+            body: schema.object({
+              session_id: schema.string({
+                minLength: 36,
+                maxLength: 36,
+                validate: (value) => (UUID_PATTERN.test(value) ? undefined : 'must be a UUID'),
+              }),
+            }),
+          },
+        },
+      },
+      withAlertZeroEnabled(async (context, request, response) => {
+        const definition = getHuntDefinition(request.params.id);
+        if (!definition) {
+          return response.notFound({ body: { message: 'Hunt not found' } });
+        }
+        const management = getWorkflowsManagement();
+        if (!management) {
+          return response.customError({
+            statusCode: 503,
+            body: { message: 'Workflows are not available' },
+          });
+        }
+        try {
+          const spaceId = getSpaceId(request);
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const universe = await resolveHuntUniverse(context, logger);
+          const userKey = await readUserKey(context);
+
+          // A hunt the caller cannot run is not launched, so history never records a dead start.
+          const availability = await callerAvailability({
+            esClient,
+            spaceId,
+            userKey,
+            universe,
+            definition,
+          });
+          if (!availability.available) {
+            return response.conflict({
+              body: {
+                message: 'This hunt is not available for you',
+                attributes: { reason: availability.firstFailure },
+              },
+            });
+          }
+
+          const result = await launchManualSession({
+            client: management,
+            request,
+            spaceId,
+            definition,
+            sessionId: request.body.session_id,
+            logger,
+          });
+          const body: HuntLaunchResponse = {
+            session_id: result.sessionId,
+            execution_id: result.executionId,
+            reused_existing: result.reusedExisting,
+          };
+          return response.ok({ body });
+        } catch (err) {
+          if (err instanceof HuntSessionConflictError) {
+            return response.conflict({ body: { message: err.message } });
+          }
+          logger.error(`Failed to launch Hunt Library session: ${(err as Error).message}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to launch Hunt Library session' },
           });
         }
       })

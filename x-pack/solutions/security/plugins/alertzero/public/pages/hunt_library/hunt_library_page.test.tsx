@@ -19,6 +19,10 @@ import { makeDetail, makeHunt, unavailable } from './test_fixtures';
 
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_hunt_library_api');
+jest.mock('./hunt_history_section', () => ({
+  HuntHistorySection: () => <div data-test-subj="alertZeroHuntFlyoutHistory" />,
+}));
+jest.mock('./run_in_discover_button', () => ({ RunInDiscoverButton: () => null }));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
 jest.mock('@kbn/app-header', () => ({
   AppHeader: ({ title }: { title: string }) => (
@@ -28,6 +32,7 @@ jest.mock('@kbn/app-header', () => ({
   ),
 }));
 
+const reportEvent = jest.fn();
 const lsass = makeHunt();
 const okta = makeHunt({
   id: 'okta_spray',
@@ -49,12 +54,16 @@ const renderPage = (initialPath: string = HUNT_LIBRARY_PATH) => {
 
 describe('Hunt library page', () => {
   beforeEach(() => {
+    reportEvent.mockClear();
     jest.mocked(useWatches).mockReturnValue({
       data: { watches: SYSTEM_SECURITY_WATCH_IDS.map((id) => createCatalogWatchPlaceholder(id)) },
       isLoading: false,
     } as never);
     jest.mocked(useKibana).mockReturnValue({
-      services: { docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } } },
+      services: {
+        analytics: { reportEvent },
+        docLinks: { links: { siem: { guide: 'https://www.elastic.co/guide' } } },
+      },
     } as never);
     jest.mocked(useHuntLibrary).mockReturnValue({
       data: { hunts: [lsass, okta] },
@@ -162,5 +171,36 @@ describe('Hunt library page', () => {
       'href',
       expect.stringContaining('hunt=okta_spray')
     );
+  });
+
+  it('reports the catalog opened once, with the hunt and available counts', () => {
+    renderPage();
+
+    expect(reportEvent.mock.calls).toEqual([
+      ['alertzero_ui_hunt_library_opened', { hunt_count: 2, available_hunt_count: 1 }],
+    ]);
+  });
+
+  it('reports each filter when it is set, search once, and nothing when filters are cleared', () => {
+    renderPage();
+    reportEvent.mockClear();
+
+    fireEvent.change(screen.getByTestId('alertZeroHuntLibrarySearch'), { target: { value: 's' } });
+    fireEvent.change(screen.getByTestId('alertZeroHuntLibrarySearch'), {
+      target: { value: 'spraying' },
+    });
+    fireEvent.change(screen.getByTestId('alertZeroHuntLibraryPlatformFilter'), {
+      target: { value: 'identity' },
+    });
+    fireEvent.change(screen.getByTestId('alertZeroHuntLibraryAvailabilityFilter'), {
+      target: { value: 'available' },
+    });
+    fireEvent.click(screen.getByTestId('alertZeroHuntLibraryClearFilters'));
+
+    expect(reportEvent.mock.calls.map(([, payload]) => payload)).toEqual([
+      { filter_type: 'search' },
+      { filter_type: 'platform' },
+      { filter_type: 'availability' },
+    ]);
   });
 });

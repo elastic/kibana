@@ -70,6 +70,8 @@ export const queryKeys = {
     list: () => [...queryKeys.huntLibrary.all, 'list'] as const,
     detail: (huntId: string | undefined) =>
       [...queryKeys.huntLibrary.all, 'detail', huntId] as const,
+    history: (huntId: string | undefined) =>
+      [...queryKeys.huntLibrary.all, 'history', huntId] as const,
   },
   workerDependencies: {
     alertAnalysisSetting: (spaceBasePath: string, cachedValue: boolean) =>

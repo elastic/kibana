@@ -19,6 +19,11 @@ import {
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useHuntLibrary } from '../../hooks/use_hunt_library_api';
+import {
+  ALERTZERO_UI_EVENTS,
+  useAlertZeroTelemetry,
+  useReportHuntLibraryOpened,
+} from '../../telemetry';
 import { WatchesSectionLayout } from '../watches/components/watches_section_layout';
 import {
   ALL_PLATFORMS,
@@ -41,6 +46,25 @@ export const HuntLibraryPage: React.FC = () => {
   const { search: locationSearch } = useLocation();
   const { data, isLoading, isError, refetch } = useHuntLibrary();
   const [filters, setFilters] = useState<HuntFilters>(DEFAULT_FILTERS);
+  const { reportEvent } = useAlertZeroTelemetry();
+
+  // A filter is reported when it is set, not when it is cleared; search reports when text first
+  // appears, so typing a phrase is one event.
+  const updateFilters = useCallback(
+    (next: HuntFilters) => {
+      const filterEvent = (filterType: 'search' | 'platform' | 'availability') =>
+        reportEvent(ALERTZERO_UI_EVENTS.HuntLibraryFiltered, { filter_type: filterType });
+      if (filters.search.trim() === '' && next.search.trim() !== '') filterEvent('search');
+      if (next.platform !== filters.platform && next.platform !== ALL_PLATFORMS) {
+        filterEvent('platform');
+      }
+      if (next.availability !== filters.availability && next.availability !== 'all') {
+        filterEvent('availability');
+      }
+      setFilters(next);
+    },
+    [filters, reportEvent]
+  );
 
   // The open hunt lives in the URL so a flyout can be linked and survives a reload.
   const selectedHuntId = new URLSearchParams(locationSearch).get(HUNT_QUERY_PARAM) ?? undefined;
@@ -56,6 +80,10 @@ export const HuntLibraryPage: React.FC = () => {
   );
 
   const hunts = useMemo(() => data?.hunts ?? [], [data]);
+  useReportHuntLibraryOpened({
+    huntCount: data ? hunts.length : undefined,
+    availableHuntCount: hunts.filter(({ availability }) => availability.available).length,
+  });
   const platforms = useMemo(() => platformsOf(hunts), [hunts]);
   const visible = useMemo(() => filterHunts(hunts, filters), [hunts, filters]);
 
@@ -134,7 +162,7 @@ export const HuntLibraryPage: React.FC = () => {
               placeholder={i18n.SEARCH_PLACEHOLDER}
               aria-label={i18n.SEARCH_ARIA_LABEL}
               value={filters.search}
-              onChange={(event) => setFilters({ ...filters, search: event.target.value })}
+              onChange={(event) => updateFilters({ ...filters, search: event.target.value })}
               data-test-subj="alertZeroHuntLibrarySearch"
             />
           </EuiFlexItem>
@@ -148,7 +176,7 @@ export const HuntLibraryPage: React.FC = () => {
                 { value: ALL_PLATFORMS, text: i18n.FILTER_ALL },
                 ...platforms.map((platform) => ({ value: platform, text: platform })),
               ]}
-              onChange={(event) => setFilters({ ...filters, platform: event.target.value })}
+              onChange={(event) => updateFilters({ ...filters, platform: event.target.value })}
               data-test-subj="alertZeroHuntLibraryPlatformFilter"
             />
           </EuiFlexItem>
@@ -164,7 +192,10 @@ export const HuntLibraryPage: React.FC = () => {
                 { value: 'unavailable', text: i18n.FILTER_UNAVAILABLE },
               ]}
               onChange={(event) =>
-                setFilters({ ...filters, availability: event.target.value as AvailabilityFilter })
+                updateFilters({
+                  ...filters,
+                  availability: event.target.value as AvailabilityFilter,
+                })
               }
               data-test-subj="alertZeroHuntLibraryAvailabilityFilter"
             />

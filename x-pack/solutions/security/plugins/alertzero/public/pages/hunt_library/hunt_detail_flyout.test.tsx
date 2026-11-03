@@ -12,6 +12,12 @@ import { HuntDetailFlyout } from './hunt_detail_flyout';
 import { available, makeDetail, unavailable } from './test_fixtures';
 
 jest.mock('../../hooks/use_hunt_library_api');
+jest.mock('./hunt_history_section', () => ({
+  HuntHistorySection: () => <div data-test-subj="alertZeroHuntFlyoutHistory" />,
+}));
+jest.mock('./run_in_discover_button', () => ({
+  RunInDiscoverButton: () => <button data-test-subj="alertZeroHuntRunInDiscover" />,
+}));
 
 const mockDetail = (state: Record<string, unknown>) =>
   jest.mocked(useHuntLibraryDetail).mockReturnValue(state as never);
@@ -23,6 +29,7 @@ describe('HuntDetailFlyout', () => {
 
     expect(screen.getByRole('heading', { name: 'Rare LSASS Process Access' })).toBeInTheDocument();
     expect(screen.getByTestId('alertZeroHuntFlyoutHypothesis')).toHaveTextContent('LSASS');
+    expect(screen.getByTestId('alertZeroHuntRunInDiscover')).toBeInTheDocument();
     expect(screen.getByTestId('alertZeroHuntFlyoutNotes')).toHaveTextContent('Pivot on');
     expect(screen.getByTestId('alertZeroHuntFlyoutFalsePositives')).toHaveTextContent('Backup');
     expect(screen.getByTestId('alertZeroHuntFlyoutPivots')).toHaveTextContent('parent process');

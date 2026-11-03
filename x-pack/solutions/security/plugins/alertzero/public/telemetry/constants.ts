@@ -11,6 +11,9 @@ export const ALERTZERO_UI_EVENTS = {
   QueueFiltered: 'alertzero_ui_queue_filtered',
   BriefCardClicked: 'alertzero_ui_brief_card_clicked',
   ErrorShown: 'alertzero_ui_error_shown',
+  HuntLibraryOpened: 'alertzero_ui_hunt_library_opened',
+  HuntLibraryFiltered: 'alertzero_ui_hunt_library_filtered',
+  HuntLaunched: 'alertzero_ui_hunt_launched',
 } as const;
 
 export type AlertZeroUiEventType = (typeof ALERTZERO_UI_EVENTS)[keyof typeof ALERTZERO_UI_EVENTS];
@@ -70,3 +73,8 @@ export const UI_ERROR_SURFACES = [
 ] as const;
 
 export type UiErrorSurface = (typeof UI_ERROR_SURFACES)[number];
+
+/** The Hunt library catalog controls that report a filter; clearing one reports nothing. */
+export const HUNT_FILTER_TYPES = ['search', 'platform', 'availability'] as const;
+
+export type HuntFilterType = (typeof HUNT_FILTER_TYPES)[number];

@@ -69,3 +69,26 @@ export interface HuntLibraryDetail extends Omit<HuntLibraryListItem, 'availabili
   callerAvailability: HuntAvailability;
   workerAvailability: HuntAvailability;
 }
+
+/** One manual session in a hunt's run history. Metadata only: no query, filters or rows. */
+export interface HuntHistoryEntry {
+  kind: 'manual_session';
+  sessionId: string;
+  executionId: string;
+  definitionVersion: number;
+  /** `exploratory` until a later phase records a preserved or other outcome. */
+  outcome: string;
+  startedAt: string;
+  startedBy?: string;
+}
+
+export interface HuntHistoryResponse {
+  history: HuntHistoryEntry[];
+}
+
+export interface HuntLaunchResponse {
+  session_id: string;
+  execution_id: string;
+  /** True when this call was a retry of a launch that already recorded the session. */
+  reused_existing: boolean;
+}
