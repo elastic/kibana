@@ -44,6 +44,7 @@ export function createESQLQuery({
   metricItem,
   splitAccessors = [],
   whereStatements = [],
+  metadataFields = [],
   originalSource,
   gridSettings,
 }: CreateESQLQueryParams): string {
@@ -69,7 +70,7 @@ export function createESQLQuery({
 
   // The metric field is mapped on this stream. NULLIFY is only needed when inherited
   // WHERE text or a breakdown field can name a column this stream may not map.
-  const query = esql.ts(index);
+  const query = esql.ts([index], metadataFields);
   if (needsUnmappedFieldsNullify({ whereStatements, splitAccessors })) {
     query.addSetCommand('unmapped_fields', 'NULLIFY');
   }
