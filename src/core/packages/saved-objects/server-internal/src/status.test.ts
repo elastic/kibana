@@ -87,7 +87,7 @@ describe('calculateStatus$', () => {
             status: 'completed',
             result: [
               { status: 'skipped' },
-              { status: 'patched', destIndex: '.kibana', elapsedMs: 28 },
+              { status: 'patched', destIndex: '.kibana_1', alias: '.kibana', elapsedMs: 28 },
             ],
           }),
           esStatus$

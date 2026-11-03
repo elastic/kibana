@@ -28,6 +28,7 @@ const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   {
     sourceIndex: '.my_index_pre8.2.3_001',
     destIndex: '.my_index_8.2.3_001',
+    alias: '.my_index',
     elapsedMs: 14,
     status: 'migrated',
   },
@@ -37,11 +38,13 @@ const ZDT_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   {
     sourceIndex: '.my_index_8.8.0_001',
     destIndex: '.my_index_8.8.1_001',
+    alias: '.my_index',
     elapsedMs: 14,
     status: 'migrated',
   },
   {
     destIndex: '.other_index_8.8.0_001',
+    alias: '.other_index',
     elapsedMs: 128,
     status: 'patched',
   },

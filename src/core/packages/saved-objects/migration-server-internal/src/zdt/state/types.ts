@@ -197,6 +197,8 @@ export interface UpdateDocumentModelVersionsWaitForInstancesState extends PostIn
 /** Migration completed successfully */
 export interface DoneState extends BaseState {
   readonly controlState: 'DONE';
+  /** The concrete index that the migration updated. */
+  readonly currentIndex: string;
 }
 
 /** Migration terminated with a failure */

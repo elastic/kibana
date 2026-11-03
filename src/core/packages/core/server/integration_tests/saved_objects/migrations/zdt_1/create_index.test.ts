@@ -43,7 +43,8 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
 
     expect(result).toEqual([
       {
-        destIndex: '.kibana',
+        destIndex: '.kibana_1',
+        alias: '.kibana',
         elapsedMs: expect.any(Number),
         status: 'patched',
       },

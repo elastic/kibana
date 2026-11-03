@@ -70,7 +70,8 @@ describe('ZDT with v2 compat - basic mapping update', () => {
 
     expect(result).toEqual([
       {
-        destIndex: '.kibana',
+        destIndex: '.kibana_1',
+        alias: '.kibana',
         elapsedMs: expect.any(Number),
         status: 'patched',
       },

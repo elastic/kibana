@@ -93,7 +93,8 @@ export async function migrationStateActionMachine({
       logger.info(logMessagePrefix + `Migration completed after ${Math.round(elapsedMs)}ms`);
       return {
         status: 'patched' as const,
-        destIndex: context.indexPrefix,
+        destIndex: finalState.currentIndex,
+        alias: context.indexPrefix,
         elapsedMs,
       };
     } else if (finalState.controlState === 'FATAL') {

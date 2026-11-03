@@ -89,10 +89,12 @@ describe('v2 migration', () => {
       expect(migrationResults.map((result) => omit(result, 'elapsedMs'))).toEqual([
         {
           destIndex: `${defaultKibanaIndex}_${currentVersion}_001`,
+          alias: defaultKibanaIndex,
           status: 'patched',
         },
         {
           destIndex: `${defaultKibanaTaskIndex}_${currentVersion}_001`,
+          alias: defaultKibanaTaskIndex,
           status: 'patched',
         },
       ]);

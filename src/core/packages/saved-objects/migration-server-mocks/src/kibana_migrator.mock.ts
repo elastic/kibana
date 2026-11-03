@@ -55,6 +55,7 @@ const createMigrator = (
             {
               status: 'migrated',
               destIndex: '.test-kibana_2',
+              alias: '.test-kibana',
               sourceIndex: '.test-kibana_1',
               elapsedMs: 10,
             },

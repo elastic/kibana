@@ -63,17 +63,20 @@ const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
   {
     sourceIndex: '.my_index_pre8.2.3_001',
     destIndex: '.my_index_8.2.3_001',
+    alias: '.my_index',
     elapsedMs: 16,
     status: 'migrated',
   },
   {
     sourceIndex: '.other_index_pre8.2.3_001',
     destIndex: '.other_index_8.2.3_001',
+    alias: '.other_index',
     elapsedMs: 8,
     status: 'migrated',
   },
   {
     destIndex: '.task_index_8.2.3_001',
+    alias: '.task_index',
     elapsedMs: 4,
     status: 'patched',
   },

@@ -106,12 +106,18 @@ export type MigrationResult =
   | { status: 'skipped' }
   | {
       status: 'patched';
+      /** The concrete index that was updated in place. */
       destIndex: string;
+      /** The alias pointing to `destIndex`. */
+      alias: string;
       elapsedMs: number;
     }
   | {
       status: 'migrated';
+      /** The concrete index the documents were reindexed into. */
       destIndex: string;
+      /** The alias pointing to `destIndex`. */
+      alias: string;
       sourceIndex: string;
       elapsedMs: number;
     };

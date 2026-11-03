@@ -100,6 +100,7 @@ export async function migrationStateActionMachine({
         return {
           status: 'migrated' as const,
           destIndex: finalState.targetIndex,
+          alias: finalState.currentAlias,
           sourceIndex: finalState.sourceIndex.value,
           elapsedMs,
         };
@@ -107,6 +108,7 @@ export async function migrationStateActionMachine({
         return {
           status: 'patched' as const,
           destIndex: finalState.targetIndex,
+          alias: finalState.currentAlias,
           elapsedMs,
         };
       }

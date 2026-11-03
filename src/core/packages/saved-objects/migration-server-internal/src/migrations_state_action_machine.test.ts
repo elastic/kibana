@@ -197,7 +197,11 @@ describe('migrationsStateActionMachine', () => {
   it('resolves with migrated status if some sourceIndex in the DONE state', async () => {
     await expect(
       migrationStateActionMachine({
-        initialState: { ...initialState, ...{ sourceIndex: Option.some('source-index') } },
+        initialState: {
+          ...initialState,
+          sourceIndex: Option.some('source-index'),
+          targetIndex: '.my-so-index_7.11.0_001',
+        } as State,
         logger: mockLogger.get(),
         model: transitionModel([
           'WAIT_FOR_YELLOW_SOURCE',
@@ -208,13 +212,24 @@ describe('migrationsStateActionMachine', () => {
         next,
         abort,
       })
-    ).resolves.toEqual(expect.objectContaining({ status: 'migrated' }));
+    ).resolves.toEqual(
+      expect.objectContaining({
+        status: 'migrated',
+        destIndex: '.my-so-index_7.11.0_001',
+        alias: '.my-so-index',
+        sourceIndex: 'source-index',
+      })
+    );
   });
 
   it('resolves with patched status if none sourceIndex in the DONE state', async () => {
     await expect(
       migrationStateActionMachine({
-        initialState: { ...initialState, ...{ sourceIndex: Option.none } },
+        initialState: {
+          ...initialState,
+          sourceIndex: Option.none,
+          targetIndex: '.my-so-index_7.11.0_001',
+        } as State,
         logger: mockLogger.get(),
         model: transitionModel([
           'WAIT_FOR_YELLOW_SOURCE',
@@ -225,7 +240,13 @@ describe('migrationsStateActionMachine', () => {
         next,
         abort,
       })
-    ).resolves.toEqual(expect.objectContaining({ status: 'patched' }));
+    ).resolves.toEqual(
+      expect.objectContaining({
+        status: 'patched',
+        destIndex: '.my-so-index_7.11.0_001',
+        alias: '.my-so-index',
+      })
+    );
   });
 
   it('rejects with error message when reaching the FATAL state', async () => {

@@ -28,6 +28,7 @@ import type { Next } from './state_action_machine';
 const SOME_MIGRATION_RESULT: MigrationResult = {
   sourceIndex: '.my_index_pre8.2.3_001',
   destIndex: '.my_index_8.2.3_001',
+  alias: '.my_index',
   elapsedMs: 16,
   status: 'migrated',
 };
