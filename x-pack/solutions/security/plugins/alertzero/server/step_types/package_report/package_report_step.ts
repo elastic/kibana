@@ -173,6 +173,7 @@ export const getPackageReportStepDefinition = ({
           coordinator: {
             reportIntentTargets: input.reportIntentTargets,
             behaviors: input.behaviors,
+            coverageGaps: input.coverageGaps,
           },
           attachments: conversation.attachments,
           deps: {

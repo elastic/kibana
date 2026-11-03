@@ -762,8 +762,8 @@ describe('RuleInlineContent integration', () => {
     });
 
     expect(screen.getAllByTestId('mitreFrameworkGroupTitle').map((el) => el.textContent)).toEqual([
-      'MITRE ATT&CK',
-      'MITRE ATLAS',
+      'MITRE ATT&CK®',
+      'MITRE ATLAS™',
     ]);
   });
 

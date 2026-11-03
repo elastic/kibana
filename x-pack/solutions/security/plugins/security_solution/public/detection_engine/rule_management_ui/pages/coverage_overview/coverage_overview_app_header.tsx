@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { AppHeaderTab } from '@kbn/app-header';
-import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_DISPLAY_NAME } from '@kbn/security-mitre-attack-common';
 import { SecurityAppHeader } from '../../../../common/components/app_header';
 import { useAvailableMitreFrameworks } from '../../../../common/hooks/mitre/use_available_mitre_frameworks';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -28,7 +28,7 @@ export const CoverageOverviewAppHeader = React.memo(() => {
 
   const description = useMemo(
     () => ({
-      text: i18n.CoverageOverviewDashboardInformation(THREAT_FRAMEWORK_NAME[framework]),
+      text: i18n.CoverageOverviewDashboardInformation(THREAT_FRAMEWORK_DISPLAY_NAME[framework]),
       learnMoreUrl: docLinks.links.siem.mitreCoverage,
     }),
     [docLinks.links.siem.mitreCoverage, framework]
@@ -41,7 +41,7 @@ export const CoverageOverviewAppHeader = React.memo(() => {
 
     return availableFrameworks.map((tabFramework) => ({
       id: tabFramework,
-      label: THREAT_FRAMEWORK_NAME[tabFramework],
+      label: THREAT_FRAMEWORK_DISPLAY_NAME[tabFramework],
       isSelected: framework === tabFramework,
       onClick: () => setFramework(tabFramework),
       'data-test-subj': `coverageOverviewFrameworkTab-${tabFramework}`,

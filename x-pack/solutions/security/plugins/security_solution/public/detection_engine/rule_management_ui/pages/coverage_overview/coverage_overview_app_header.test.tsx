@@ -71,8 +71,8 @@ describe('CoverageOverviewAppHeader', () => {
   });
 
   it.each([
-    ['enterprise', 'MITRE ATT&CK'],
-    ['atlas', 'MITRE ATLAS'],
+    ['enterprise', 'MITRE ATT&CK®'],
+    ['atlas', 'MITRE ATLAS™'],
   ])('describes the coverage of the selected %s framework', (framework, frameworkLabel) => {
     mockContext(framework);
     renderHeader();
@@ -99,14 +99,14 @@ describe('CoverageOverviewAppHeader', () => {
     renderHeader();
 
     expect(screen.getByTestId('coverageOverviewFrameworkTab-enterprise')).toHaveTextContent(
-      'MITRE ATT&CK'
+      'MITRE ATT&CK®'
     );
     expect(screen.getByTestId('coverageOverviewFrameworkTab-enterprise')).toHaveAttribute(
       'aria-selected',
       'false'
     );
     expect(screen.getByTestId('coverageOverviewFrameworkTab-atlas')).toHaveTextContent(
-      'MITRE ATLAS'
+      'MITRE ATLAS™'
     );
     expect(screen.getByTestId('coverageOverviewFrameworkTab-atlas')).toHaveAttribute(
       'aria-selected',

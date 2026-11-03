@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_DISPLAY_NAME } from '@kbn/security-mitre-attack-common';
 
 import * as i18n from './translations';
 import { CoverageOverviewMatrix } from './coverage_overview_matrix';
@@ -24,7 +24,7 @@ const CoverageOverviewDashboardComponent = () => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
-  const frameworkLabel = THREAT_FRAMEWORK_NAME[framework];
+  const frameworkLabel = THREAT_FRAMEWORK_DISPLAY_NAME[framework];
 
   return (
     <>
