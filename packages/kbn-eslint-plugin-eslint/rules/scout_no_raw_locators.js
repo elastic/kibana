@@ -48,7 +48,7 @@ module.exports = {
     },
   },
 
-  create(context) {
+  createOnce(context) {
     return {
       CallExpression(node) {
         const { callee } = node;
