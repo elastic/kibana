@@ -149,6 +149,34 @@ it('bounds telemetry reads at current_time plus five minutes', async () => {
   });
 });
 
+it('bounds telemetry reads at the ORCA snapshot time when the example records one', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    .mockResolvedValueOnce(investigation())
+    .mockResolvedValueOnce({
+      rounds: [{ status: ConversationRoundStatus.completed, steps: [] }],
+    });
+
+  await runInvestigation(
+    fetch,
+    {
+      ...example,
+      metadata: {
+        case_id: 'timeouts',
+        current_time: '2026-04-25T01:30:06.626864+00:00',
+        // The last snapshot ORCA has, earlier than current_time.
+        telemetry_snapshot_time: '2026-04-24T19:25:42Z',
+      },
+    },
+    connector
+  );
+
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+    telemetry_not_after: '2026-04-24T19:25:42.000Z',
+  });
+});
+
 it('keeps multi-megabyte conversation evidence out of the persisted score output', async () => {
   const conversation = {
     rounds: [

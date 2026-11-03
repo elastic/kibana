@@ -161,8 +161,17 @@ export const toInvestigationReport = ({
 /** Paper grace: sandbox reads may include telemetry up to five minutes after current_time. */
 const TELEMETRY_CUTOFF_GRACE_MS = 5 * 60 * 1000;
 
-/** UTC instant five minutes after a parseable current_time. */
-const telemetryNotAfter = (currentTime: unknown): string | undefined => {
+/**
+ * The last instant a sandbox read may return. ORCA serves each task the first telemetry snapshot
+ * after current_time plus five minutes, so a recorded snapshot time is the paper's own bound;
+ * otherwise it is five minutes after a parseable current_time.
+ */
+const telemetryNotAfter = ({
+  current_time: currentTime,
+  telemetry_snapshot_time: snapshotTime,
+}: InvestigationExample['metadata']): string | undefined => {
+  const snapshot = orcaCurrentTimeMs(snapshotTime);
+  if (snapshot !== undefined) return new Date(snapshot).toISOString();
   const parsed = orcaCurrentTimeMs(currentTime);
   if (parsed === undefined) return undefined;
   return new Date(parsed + TELEMETRY_CUTOFF_GRACE_MS).toISOString();
@@ -180,7 +189,7 @@ export const runInvestigation = async (
     query: example.input.question,
   };
   let investigation: Investigation | undefined;
-  const notAfter = telemetryNotAfter(example.metadata.current_time);
+  const notAfter = telemetryNotAfter(example.metadata);
   let conversation: { rounds: ConversationRound[] } | undefined;
   try {
     const { investigation_id: investigationId } = await fetch<StartInvestigationResponse>(

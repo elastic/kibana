@@ -636,8 +636,14 @@ one cluster. The Golden release `nightshift/orca-ech-full-20261019` is an alert-
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
 as a benchmark result again only after its windows end at detection time.
 
-Each example records `metadata.current_time`. The eval sends `telemetry_not_after`, five minutes
-later, on the investigation. That value is stored on the conversation as an immutable field. The
+Each example records `metadata.current_time`. The eval sends `telemetry_not_after` on the
+investigation: `metadata.telemetry_snapshot_time` when the example records it, otherwise five
+minutes after `current_time`. ORCA serves each task the first telemetry snapshot taken after
+`current_time` plus five minutes, a median of 1.7 and at most 5 minutes later, so the snapshot time
+is the paper's own bound. On 91 of the 755 public tasks that is ORCA's last snapshot, 2026-04-24
+19:25:42 UTC, which is earlier than `current_time`; the ORCA cluster's data ends there too. The
+sampled 50 do not record a snapshot time and keep the five-minute bound, which can be up to five
+minutes stricter than the paper. That value is stored on the conversation as an immutable field. The
 agent can see it in its conversation metadata but cannot change it. While it is set, sandbox
 commands that call the telemetry connector go through a proxy in that investigation's sandbox:
 `_search`, `_count`, and ES|QL `_query` reads are forwarded with an `@timestamp <=` bound at that
@@ -655,7 +661,15 @@ evaluation connector. `goal_pass` is unchanged: it scores the single best hypoth
 does not fail accuracy. Hallucination is 1 when the report names at least one cause and none of
 them is in that set, and its direction is minimize. An empty incident report scores 0 on both.
 Control passes an empty report and fails when a report places an incident inside
-`metadata.quiet_window`. A control is `metadata.control`, `metadata.task_type === "control"`,
+`metadata.quiet_window`. Its judge prompt is ORCA's `JUDGE_PROMPT_CONTROL` from the Harbor tasks'
+`check_prediction.py`, word for word except that it answers through the `score` tool. It gets
+`current_time` and the quiet window moved ten minutes inward on each defined side, with an
+open-ended bound shown as `null`, as ORCA does. Past incidents and timeline lines that only record
+when the issue was reported are not false positives. A run that crashed, timed out, or ended without recording anything has
+no answer, so all three scores are `unscored` (null) instead of reading it as an empty report,
+as ORCA leaves unscored trials out. `execution_success` still counts those runs, so quote it next
+to any ORCA rate. A run that ended without a verdict but recorded hypotheses is scored on them.
+A control is `metadata.control`, `metadata.task_type === "control"`,
 `metadata.no_incident === true`, or `metadata.section === "control"`. Accuracy and hallucination
 stay `n/a` on a control, including when its flag set is empty. Golden drops an empty metadata
 array on write, so the ten controls keep those markers and do not store `plausible_flags: []`.
@@ -700,13 +714,47 @@ against 30.9% for the same model with code. The 40 matched tasks above are the V
 a later writeup may quote Verified only for those 40, still with this tool-surface caveat. The
 paper's 25.3% and 10.0% are not like-for-like.
 
-The public 755 is a periodic run, not this CI shard. The `orcabench` shard budgets 240 minutes
-for 50 tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30
-minutes. Report that periodic run per tier. The 10 medium tasks in this 50 are their own line and
-are not a paper tier. Quote the other 40 against Verified only with the task-by-task match above.
-Executing the 755 is a later issue, after this judge is stable. Flag ablation, removing flag
-documents from the same agent and scoring with RCA accuracy, is also a later issue. The headline
-run keeps flag telemetry visible.
+### Public 755
+
+`nightshift/orca-bench-public755-v1` (`342ac04a-b9f7-59a1-9462-3503b3bd52a6`, 755 examples, sha256
+`5b09b95d3f192f43086a5653572e3d8480c97412e14a79c0e48411d519555ecb`) holds every task of the public
+Harbor dataset above: 617 incident tasks and 138 controls, with tiers easy 245, hard 264 and
+universal 246. It has no medium tasks. Each example is built from its Harbor task:
+
+- `case_id` is the name whose `sha256` prefix is the task's package name, and `harbor_task` is
+  the package. Every one of the 755 resolves to exactly one name.
+- The question uses the task's stated current time, `reported_styled` and `user_facing_issue`,
+  in the same wording as `nightshift/orca-sampled50-v3`. On the 40 tasks both releases hold, the
+  questions, flag sets and current times are identical.
+- `plausible_flags` is the set of `events[].root_cause` keys. On 77 incident tasks it does not
+  contain the flag the `qid` names, for example `d1-n1-loadGeneratorFloodHomepage-on-00-hard`,
+  whose answer is `imageSlowLoad`. That set is ORCA's answer.
+- The reference answer is the rubric description and mechanism of the task's first event, so
+  `goal_pass` and RCA accuracy read the same cause. Four v3 incidents describe the `qid` flag
+  instead.
+- `difficulty` is the tier (easy, hard or universal), as in v3, and `orca_difficulty` is the
+  task's own difficulty label. Controls carry `quiet_window` from the task. Ten of them have no
+  start.
+- `telemetry_snapshot_time` is the snapshot named in the task's environment.
+
+Every root-cause event of the 755 falls inside the ORCA cluster's data. Its logs, traces and
+metrics each cover every hour from 2026-04-19T03:00Z through the 2026-04-24T19:00Z hour, which
+holds ORCA's last snapshot.
+
+The 755 is a periodic baseline, not a CI shard. The `orcabench` shard budgets 240 minutes for 50
+tasks, and release-gate issue elastic/nightshift-program#1893 wants gates under 30 minutes. At
+eight investigations at a time the 755 needs tens of hours, so run it in slices.
+`NIGHTSHIFT_ORCA_RELEASE=public755` selects the release, and `NIGHTSHIFT_ORCA_SLICE=<index>/<count>`
+runs one contiguous part of it in `case_id` order. Each run validates the whole release before
+slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v1/slice-<index>-of-<count>`,
+because the eval client upserts the dataset it runs, and under the release name a slice would
+remove the other tasks. Keep one `<count>` for a baseline and join the slices on `case_id`.
+
+Report the 755 per tier, with `execution_success` next to each rate. Quote the 40 sampled tasks
+against Verified only with the task-by-task match above. The 10 medium tasks in the sampled 50
+are their own line and are not a paper tier. Flag ablation, removing flag documents from the same
+agent and scoring with RCA accuracy, is a later issue. The headline run keeps flag telemetry
+visible.
 
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and
@@ -730,6 +778,10 @@ Locally, start a fresh Scout server for ORCA; a reused server keeps its connecto
 ```bash
 NIGHTSHIFT_DATASETS=orcabench node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault
+
+# One slice of the public 755
+NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_RELEASE=public755 NIGHTSHIFT_ORCA_SLICE=1/8 \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault
 ```
 
 The ORCA telemetry is CC BY 4.0; keep the dataset's attribution when sharing results.

@@ -12,6 +12,10 @@ import {
   hasOrcaTelemetryQuery,
   getOrcaDatasetHash,
   loadOrcaDataset,
+  ORCA_PUBLIC_RELEASE,
+  ORCA_RELEASE,
+  resolveOrcaRun,
+  sliceOrcaDataset,
   validateOrcaDataset,
 } from './orca_dataset';
 
@@ -71,6 +75,60 @@ describe('pinned ORCA release', () => {
     await expect(
       loadOrcaDataset({ getDatasetByName: jest.fn().mockResolvedValue(null) })
     ).rejects.toThrow('missing from Golden');
+  });
+});
+
+describe('ORCA release selection', () => {
+  it('runs the sampled 50 unless another release is named', () => {
+    expect(resolveOrcaRun({})).toEqual({ release: ORCA_RELEASE });
+    expect(resolveOrcaRun({ NIGHTSHIFT_ORCA_RELEASE: 'public755' })).toEqual({
+      release: ORCA_PUBLIC_RELEASE,
+    });
+  });
+  it('reads a slice of the chosen release', () => {
+    expect(
+      resolveOrcaRun({ NIGHTSHIFT_ORCA_RELEASE: 'public755', NIGHTSHIFT_ORCA_SLICE: '3/8' })
+    ).toEqual({ release: ORCA_PUBLIC_RELEASE, slice: { index: 3, count: 8 } });
+  });
+  it.each([
+    { NIGHTSHIFT_ORCA_RELEASE: 'orca-ech-full-20261019' },
+    { NIGHTSHIFT_ORCA_SLICE: '0/8' },
+    { NIGHTSHIFT_ORCA_SLICE: '9/8' },
+    { NIGHTSHIFT_ORCA_SLICE: '3' },
+    { NIGHTSHIFT_ORCA_SLICE: '1/51' },
+  ])('rejects %j', (env) => {
+    expect(() => resolveOrcaRun(env)).toThrow(/NIGHTSHIFT_ORCA_/);
+  });
+});
+
+describe('ORCA release slices', () => {
+  const many = {
+    name: 'nightshift/release',
+    description: 'A release',
+    examples: Array.from({ length: 10 }, (_, index) => ({
+      input: { question: `Question ${index}` },
+      metadata: { case_id: `case-${String(9 - index).padStart(2, '0')}` },
+    })),
+  };
+  it('splits the release into contiguous case_id ranges that cover it exactly once', () => {
+    const slices = [1, 2, 3].map((index) => sliceOrcaDataset(many, { index, count: 3 }));
+    const caseIds = slices.flatMap(({ examples }) =>
+      examples.map(({ metadata }) => metadata.case_id)
+    );
+    expect(caseIds).toEqual([...caseIds].sort());
+    expect(new Set(caseIds).size).toBe(10);
+    expect(slices.map(({ examples }) => examples.length)).toEqual([3, 3, 4]);
+  });
+  it('names each slice apart from the release, so running it never upserts over the release', () => {
+    const slice = sliceOrcaDataset(many, { index: 2, count: 3 });
+    expect(slice.name).toBe('nightshift/release/slice-2-of-3');
+    expect(slice.description).toContain('nightshift/release');
+  });
+  it('validates the whole release before slicing it', async () => {
+    const run = { release: { ...release, examples: 2 }, slice: { index: 1, count: 2 } };
+    await expect(
+      loadOrcaDataset({ getDatasetByName: jest.fn().mockResolvedValue(dataset) }, run)
+    ).rejects.toThrow('every pinned incident');
   });
 });
 

@@ -15,12 +15,67 @@ import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
 import { investigationExampleSchema } from './types';
 import type { InvestigationExample } from './types';
 
+export interface OrcaRelease {
+  id: string;
+  name: string;
+  examples: number;
+  sha256: string;
+}
+
+/** ORCA's 50 sampled tasks, the CI shard. */
 export const ORCA_RELEASE = {
   id: 'eeffbc6e-664b-50d1-9c5f-c195a39ed235',
   name: 'nightshift/orca-sampled50-v3',
   examples: 50,
   sha256: '6e47ae50da1fa0ce60f8de5dcbb90e887b74bd937711c6bc23fa997369000803',
 } as const;
+
+/** Every task of the public Harbor dataset `orca-bench/orca-bench`, the periodic baseline. */
+export const ORCA_PUBLIC_RELEASE = {
+  id: '342ac04a-b9f7-59a1-9462-3503b3bd52a6',
+  name: 'nightshift/orca-bench-public755-v1',
+  examples: 755,
+  sha256: '5b09b95d3f192f43086a5653572e3d8480c97412e14a79c0e48411d519555ecb',
+} as const;
+
+const ORCA_RELEASES: Readonly<Record<string, OrcaRelease>> = {
+  sampled50: ORCA_RELEASE,
+  public755: ORCA_PUBLIC_RELEASE,
+};
+
+/** One contiguous part of a release, in `case_id` order, numbered from 1. */
+export interface OrcaSlice {
+  index: number;
+  count: number;
+}
+
+export interface OrcaRun {
+  release: OrcaRelease;
+  slice?: OrcaSlice;
+}
+
+/**
+ * Which release and slice to run, from `NIGHTSHIFT_ORCA_RELEASE` (`sampled50` by default, or
+ * `public755`) and `NIGHTSHIFT_ORCA_SLICE` (`<index>/<count>`, for example `3/8`).
+ */
+export const resolveOrcaRun = (env: Record<string, string | undefined> = process.env): OrcaRun => {
+  const releaseKey = env.NIGHTSHIFT_ORCA_RELEASE?.trim() || 'sampled50';
+  const release = ORCA_RELEASES[releaseKey];
+  assert(
+    release,
+    `NIGHTSHIFT_ORCA_RELEASE=${releaseKey} is not one of ${Object.keys(ORCA_RELEASES).join(', ')}`
+  );
+  const sliceValue = env.NIGHTSHIFT_ORCA_SLICE?.trim();
+  if (!sliceValue) return { release };
+  const match = /^(\d+)\/(\d+)$/.exec(sliceValue);
+  const index = match ? Number(match[1]) : Number.NaN;
+  const count = match ? Number(match[2]) : Number.NaN;
+  assert(
+    index >= 1 && index <= count && count <= release.examples,
+    `NIGHTSHIFT_ORCA_SLICE=${sliceValue} must be <index>/<count> with 1 <= index <= count <= ${release.examples}`
+  );
+  return { release, slice: { index, count } };
+};
 
 const examplesSchema = lazySchema(() =>
   z
@@ -57,7 +112,7 @@ export const orcaCurrentTimeMs = (value: unknown): number | undefined => {
 /** Validates the Golden release before any investigation is started. */
 export const validateOrcaDataset = (
   dataset: NonNullable<Awaited<ReturnType<EvalsClient['getDatasetByName']>>>,
-  release: { id: string; name: string; examples: number; sha256: string } = ORCA_RELEASE
+  release: OrcaRelease = ORCA_RELEASE
 ): EvaluationDataset<InvestigationExample> => {
   assert(
     dataset.id === release.id && dataset.name === release.name,
@@ -86,13 +141,40 @@ export const validateOrcaDataset = (
   };
 };
 
-/** Fetches the pinned Golden dataset without a file or synthetic fallback. */
+/**
+ * Keeps one contiguous part of a validated release. The part gets its own dataset name, because
+ * the eval client upserts the dataset it runs: under the release name it would drop the rest.
+ */
+export const sliceOrcaDataset = (
+  dataset: EvaluationDataset<InvestigationExample>,
+  { index, count }: OrcaSlice
+): EvaluationDataset<InvestigationExample> => {
+  const ordered = [...dataset.examples].sort((left, right) =>
+    left.metadata.case_id < right.metadata.case_id
+      ? -1
+      : left.metadata.case_id > right.metadata.case_id
+      ? 1
+      : 0
+  );
+  const start = Math.floor(((index - 1) * ordered.length) / count);
+  const end = Math.floor((index * ordered.length) / count);
+  return {
+    ...dataset,
+    name: `${dataset.name}/slice-${index}-of-${count}`,
+    description: `Slice ${index} of ${count} of ${dataset.name}, in case_id order. ${dataset.description}`,
+    examples: ordered.slice(start, end),
+  };
+};
+
+/** Fetches a pinned Golden release, optionally one slice of it, without a file or synthetic fallback. */
 export const loadOrcaDataset = async (
-  client: Pick<EvalsClient, 'getDatasetByName'>
+  client: Pick<EvalsClient, 'getDatasetByName'>,
+  { release, slice }: OrcaRun = { release: ORCA_RELEASE }
 ): Promise<EvaluationDataset<InvestigationExample>> => {
-  const dataset = await client.getDatasetByName(ORCA_RELEASE.name);
+  const dataset = await client.getDatasetByName(release.name);
   assert(dataset, 'Pinned ORCA dataset is missing from Golden');
-  return validateOrcaDataset(dataset);
+  const validated = validateOrcaDataset(dataset, release);
+  return slice ? sliceOrcaDataset(validated, slice) : validated;
 };
 
 const hasRows = (stdout: string): boolean => {
