@@ -177,8 +177,7 @@ export const DetectionPage = ({
     >
       <NightshiftAppHeader
         {...headerProps}
-        onSourcesClick={view.type === 'workspace' ? headerProps.onSourcesClick : undefined}
-        sourcesHref={view.type === 'workspace' ? headerProps.sourcesHref : undefined}
+        hideMenu={view.type !== 'workspace'}
         page="detection"
         back={{
           href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
