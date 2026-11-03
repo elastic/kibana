@@ -329,6 +329,41 @@ describe('deleteLegacyActionsForRules', () => {
     expect(bulkDeleteRules).toHaveBeenCalledWith(context, { ids: ['notification-rule-1'] });
   });
 
+  it('looks the rules up in chunks and deletes the objects found for every chunk', async () => {
+    const ruleIds = Array.from({ length: 250 }, (_, index) => `rule-${index}`);
+    const sidecarIdsByCall = [['sidecar-a'], ['sidecar-b'], ['sidecar-c']];
+    const notificationRuleIdsByCall = [['notification-a'], ['notification-b'], ['notification-c']];
+    sidecarIdsByCall.forEach((ids) =>
+      savedObjectsClient.find.mockResolvedValueOnce({
+        saved_objects: ids.map((id) => ({ ...buildSidecar('1h'), id, score: 1 })),
+        total: ids.length,
+        per_page: 1000,
+        page: 1,
+      })
+    );
+    notificationRuleIdsByCall.forEach((ids) =>
+      (findRules as jest.Mock).mockResolvedValueOnce({ data: ids.map((id) => ({ id })) })
+    );
+
+    await deleteLegacyActionsForRules(context, ruleIds);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(3);
+    expect(findRules).toHaveBeenCalledTimes(3);
+    const referenceCounts = savedObjectsClient.find.mock.calls.map(
+      ([{ hasReference }]) => (hasReference as unknown[]).length
+    );
+    expect(referenceCounts).toEqual([100, 100, 50]);
+    savedObjectsClient.find.mock.calls.forEach(([{ perPage }]) => expect(perPage).toBe(1000));
+    expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+      { type: legacyRuleActionsSavedObjectType, id: 'sidecar-a' },
+      { type: legacyRuleActionsSavedObjectType, id: 'sidecar-b' },
+      { type: legacyRuleActionsSavedObjectType, id: 'sidecar-c' },
+    ]);
+    expect(bulkDeleteRules).toHaveBeenCalledWith(context, {
+      ids: ['notification-a', 'notification-b', 'notification-c'],
+    });
+  });
+
   it('does not query anything for an empty list of rules', async () => {
     await deleteLegacyActionsForRules(context, []);
 
