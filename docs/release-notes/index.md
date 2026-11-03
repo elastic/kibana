@@ -284,7 +284,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Stop Agent Builder from offering Cases tools and skills in Serverless project types and {{es}} solution spaces where Cases isn't available. Agents there no longer hit authorization errors when they try to use them [#291268]({{kib-pull}}291268), [#287633]({{kib-pull}}287633).
 * Fix the **Tool Success Rate** panel in the Agent Builder overview dashboard showing 0.0% as soon as one tool call fails. The rate was rounded down to a whole number [#282026]({{kib-pull}}282026).
 * Fix attaching an image in the Agent Builder chat failing with a 403 error unless you're a superuser [#299455]({{kib-pull}}299455).
-* Fix chat completion requests that kept running after you cancelled them. Requests now also stop with a timeout error after 10 minutes [#285119]({{kib-pull}}285119).
+* Fix chat completion requests that kept running after you cancelled them. Requests now also stop with a timeout error after 5 minutes [#285119]({{kib-pull}}285119).
 * Fix chat errors when the connection drops while the agent is still running, for example because of a proxy timeout. The chat now reconnects and keeps streaming the response [#293095]({{kib-pull}}293095).
 * Fix the **Abort chat request?** confirmation appearing when you leave a chat that is still running. The run continues in the background, so the prompt no longer appears [#292572]({{kib-pull}}292572).
 * Prevent a request that creates a conversation automatically from overwriting an existing conversation with the same ID [#280189]({{kib-pull}}280189).
