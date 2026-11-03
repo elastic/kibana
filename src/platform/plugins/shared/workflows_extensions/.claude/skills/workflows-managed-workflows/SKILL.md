@@ -71,7 +71,7 @@ See [MANAGED_WORKFLOWS.md](../../dev_docs/MANAGED_WORKFLOWS.md) for rationale an
 | Raw request paths       | `kibana.request`, `with.request`, `with.form_data` all skip prefixing. Add `/s/<executing space>/` (usually `{{ workflow.spaceId }}`) |
 | Multi-instance          | Use `workflowIdSuffix` or full `workflowId` — bare id overwrites                        |
 | `execute`               | Real request + requesting user's space in options (not `'*'`)                           |
-| `disable`               | Requestless switch-off of the plugin's own workflow, bound ones included; enabling still needs a `manage_security` user |
+| `disable`               | Requestless switch-off of the plugin's own workflow, bound ones included; enabling still needs a `manage_security` user. With `enablement: 'enforced'` the next managed update switches it back on — use `restorable` to keep it off |
 | Templates               | Add representative `values` to `templateRepresentativeValuesById` in registry tests     |
 
 ## Space scoping
