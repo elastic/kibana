@@ -166,6 +166,32 @@ describe('alertRetrievalBuilderSkill', () => {
     });
   });
 
+  describe('term matching', () => {
+    const { content } = alertRetrievalBuilderSkill;
+
+    it('searches a user-supplied term across all fields with QSTR when no field is named', () => {
+      expect(content).toContain('### Matching a term the user supplies');
+      expect(content).toContain('| WHERE QSTR("<term>")');
+      expect(content).toMatch(/without naming the field it is in, do not guess one field/);
+    });
+
+    it('lists the alert fields a term can sit in besides message', () => {
+      for (const field of ['tags', 'kibana.alert.workflow_tags', 'kibana.alert.reason']) {
+        expect(content).toContain(`\`${field}\``);
+      }
+    });
+
+    it('retries a zero-row single-field term filter once with QSTR before abstaining', () => {
+      const zeroRows = content
+        .slice(content.indexOf('- **Zero rows**'), content.indexOf('- **Error**'))
+        .replace(/\s+/g, ' ');
+
+      expect(zeroRows).toContain('**Matching a term the user supplies**');
+      expect(zeroRows).toContain('execute it once more');
+      expect(zeroRows).toContain('If it still returns zero rows, do not hand it on');
+    });
+  });
+
   describe('referencedContent', () => {
     it('includes example ES|QL queries', () => {
       expect(alertRetrievalBuilderSkill.referencedContent).toHaveLength(1);

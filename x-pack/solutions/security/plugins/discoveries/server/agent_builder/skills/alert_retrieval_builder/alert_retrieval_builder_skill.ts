@@ -42,8 +42,10 @@ query leaves this skill — to the ES|QL editor via \`update_esql_query\`, or to
 \`platform.core.execute_esql\` and read the row count.
 
 - **Rows returned**: hand the query on unchanged.
-- **Zero rows**: do not hand it on. Tell the user no alerts matched, show the query you ran, and
-  ask whether to widen the time window or change the filter. Never call
+- **Zero rows**: if the query matched a user-supplied term against one field the user did not
+  name, rewrite that filter as described in **Matching a term the user supplies** and execute
+  it once more. If it still returns zero rows, do not hand it on. Tell the user no alerts matched,
+  show the query you ran, and ask whether to widen the time window or change the filter. Never call
   \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` with a query you have not executed, or with one that returned
   zero rows.
 - **Error**: fix the query and execute it again before handing it on.
@@ -90,6 +92,22 @@ When the user already has an ES|QL query and wants to modify it:
   \`\`\`esql
   | WHERE kibana.alert.building_block_type IS NULL
   \`\`\`
+
+### Matching a term the user supplies
+
+When the user asks for alerts that carry a term (a marker, tag, campaign name, hostname fragment
+or any other string) without naming the field it is in, do not guess one field. A term can sit in
+\`tags\`, \`kibana.alert.workflow_tags\`, \`kibana.alert.reason\`, \`kibana.alert.rule.name\` or
+\`message\`, and a filter on the wrong one parses, runs and returns zero rows. Search every field
+with \`QSTR\`:
+
+\`\`\`esql
+| WHERE QSTR("<term>")
+\`\`\`
+
+Filter on a single field (\`MATCH(field, "<term>")\`, \`field == "<term>"\`) only when the user
+names the field or the term is a value of a known keyword field, such as a rule name or a host
+name.
 
 ### Sorting
 
