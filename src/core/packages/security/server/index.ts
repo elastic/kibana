@@ -36,6 +36,7 @@ export {
   SERVICE_ACCOUNT_WORKLOAD_TYPE_NAME_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
 } from './src/service_account_workloads';
+export { SERVICE_ACCOUNT_ID_MAX_LENGTH } from '@kbn/core-security-common';
 export type {
   AuthenticatedPrincipal,
   ServiceAccount,
