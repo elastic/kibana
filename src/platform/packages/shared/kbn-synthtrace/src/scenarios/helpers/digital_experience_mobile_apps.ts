@@ -257,7 +257,7 @@ export const DIGITAL_EXPERIENCE_MOBILE_APPS: readonly DigitalExperienceMobileApp
       ],
       errorLogs: ['Biometric authentication failed', 'Session token refresh failed'],
       crashes: {
-        ios: [{ type: 'SIGTRAP', message: '#0' }],
+        ios: [{ type: 'SIGTRAP', message: 'TRAP_BRKPT' }],
       },
     },
   },
