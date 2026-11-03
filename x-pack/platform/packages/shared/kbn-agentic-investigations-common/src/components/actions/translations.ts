@@ -8,52 +8,55 @@ import { i18n } from '@kbn/i18n';
 
 export const ACTIONS_TRANSLATIONS = Object.freeze({
   popover: {
-    ariaLabel: i18n.translate('xpack.alertzero.baseActions.popover.ariaLabel', {
+    ariaLabel: i18n.translate('xpack.agenticInvestigations.baseActions.popover.ariaLabel', {
       defaultMessage: 'Actions menu',
     }),
   },
   buttons: {
-    actions: i18n.translate('xpack.alertzero.baseActions.actions', {
+    actions: i18n.translate('xpack.agenticInvestigations.baseActions.actions', {
       defaultMessage: 'Actions',
     }),
-    openInChat: i18n.translate('xpack.alertzero.baseActions.openInChat', {
+    openInChat: i18n.translate('xpack.agenticInvestigations.baseActions.openInChat', {
       defaultMessage: 'Open in chat',
     }),
-    openEscalation: i18n.translate('xpack.alertzero.baseActions.openEscalation', {
+    openEscalation: i18n.translate('xpack.agenticInvestigations.baseActions.openEscalation', {
       defaultMessage: 'Open an escalation',
     }),
-    attachToEscalation: i18n.translate('xpack.alertzero.baseActions.attachToEscalation', {
-      defaultMessage: 'Attach to an escalation',
-    }),
-    copyLink: i18n.translate('xpack.alertzero.baseActions.copyLink', {
+    attachToEscalation: i18n.translate(
+      'xpack.agenticInvestigations.baseActions.attachToEscalation',
+      {
+        defaultMessage: 'Attach to an escalation',
+      }
+    ),
+    copyLink: i18n.translate('xpack.agenticInvestigations.baseActions.copyLink', {
       defaultMessage: 'Copy link',
     }),
-    close: i18n.translate('xpack.alertzero.baseActions.closeInvestigation', {
+    close: i18n.translate('xpack.agenticInvestigations.baseActions.closeInvestigation', {
       defaultMessage: 'Close investigation',
     }),
-    reopen: i18n.translate('xpack.alertzero.baseActions.reopenInvestigation', {
+    reopen: i18n.translate('xpack.agenticInvestigations.baseActions.reopenInvestigation', {
       defaultMessage: 'Open investigation',
     }),
   },
   tooltips: {
-    linkCopied: i18n.translate('xpack.alertzero.baseActions.tooltips.linkCopied', {
+    linkCopied: i18n.translate('xpack.agenticInvestigations.baseActions.tooltips.linkCopied', {
       defaultMessage: 'Link copied',
     }),
-    openMenu: i18n.translate('xpack.alertzero.baseActions.openMenu', {
+    openMenu: i18n.translate('xpack.agenticInvestigations.baseActions.openMenu', {
       defaultMessage: 'Open actions menu',
     }),
-    openInChat: i18n.translate('xpack.alertzero.baseActions.tooltips.openInChat', {
+    openInChat: i18n.translate('xpack.agenticInvestigations.baseActions.tooltips.openInChat', {
       defaultMessage: 'Open in chat',
     }),
     proposalsAgentBuilderPrivilegeRequired: i18n.translate(
-      'xpack.alertzero.baseActions.tooltips.proposalsAgentBuilderPrivilegeRequired',
+      'xpack.agenticInvestigations.baseActions.tooltips.proposalsAgentBuilderPrivilegeRequired',
       {
         defaultMessage:
           'You need the Agent Builder Kibana privilege to execute actions and view investigations or chats.',
       }
     ),
     escalationsAgentBuilderPrivilegeRequired: i18n.translate(
-      'xpack.alertzero.baseActions.tooltips.escalationsAgentBuilderPrivilegeRequired',
+      'xpack.agenticInvestigations.baseActions.tooltips.escalationsAgentBuilderPrivilegeRequired',
       {
         defaultMessage:
           'You need the Agent Builder Kibana privilege to view linked investigations.',

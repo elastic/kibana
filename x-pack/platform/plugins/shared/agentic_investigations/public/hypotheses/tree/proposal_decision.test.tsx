@@ -49,7 +49,10 @@ const setup = ({
   data = proposal as Record<string, unknown>,
 } = {}) => {
   (useKibana as jest.Mock).mockReturnValue({
-    services: { application: { capabilities: { proposals: { decideProposals: canDecide } } } },
+    services: {
+      application: { capabilities: { proposals: { decideProposals: canDecide } } },
+      http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
+    },
   });
   (useProposal as jest.Mock).mockReturnValue({
     data: isMissing ? undefined : data,
@@ -101,15 +104,15 @@ describe('ProposalDecision', () => {
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')).toBeEnabled();
   });
 
-  it("offers only I've applied for a to-do proposal", () => {
+  it('offers Mark as applied and Decline for a to-do proposal', () => {
     setup({ data: { ...proposal, category: 'todo' } });
 
     expect(screen.getByTestId('investigationHypothesisTreeProposal-p-1-confirm')).toHaveTextContent(
-      "I've applied"
+      'Mark as applied'
     );
     expect(
-      screen.queryByTestId('investigationHypothesisTreeProposal-p-1-dismiss')
-    ).not.toBeInTheDocument();
+      screen.getByTestId('investigationHypothesisTreeProposal-p-1-dismiss')
+    ).toBeInTheDocument();
   });
 
   it('marks a to-do proposal marked as applied as not applied, and reads the investigation again', async () => {
