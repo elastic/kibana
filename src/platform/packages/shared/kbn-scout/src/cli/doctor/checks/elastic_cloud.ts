@@ -66,11 +66,14 @@ const checkUsers = (
   const remedy = copyFix
     ? { fix: copyFix, hint: `copy them only if they are ${getEnvironment()} users` }
     : { hint: `tests that log in as ${missing.join(' or ')} will fail` };
+  const missingMessage = `Missing ${source} for roles: ${missing
+    .map((role) => `"${role}"`)
+    .join(', ')}`;
   if (missing.includes('admin')) {
-    return fail(`${source} have no admin`, remedy);
+    return fail(missingMessage, remedy);
   }
   return missing.length
-    ? warn(`${source} have no ${missing.join(', ')}`, remedy)
+    ? warn(missingMessage, remedy)
     : pass(`${source} have ${[...new Set(expected)].join(', ')}`);
 };
 
