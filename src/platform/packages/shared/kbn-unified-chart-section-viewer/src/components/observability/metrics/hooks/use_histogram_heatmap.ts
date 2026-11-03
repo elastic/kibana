@@ -28,6 +28,7 @@ export interface UseHistogramHeatmapParams {
   histogramBounds: HistogramBoundsByMetricKey;
   histogramBoundsLoading: boolean;
   whereStatements?: readonly string[];
+  metadataFields?: readonly string[];
   originalSource?: string;
   histogramVisualization: HistogramVisualization;
   description?: string;
@@ -49,6 +50,7 @@ export const useHistogramHeatmap = ({
   histogramBounds,
   histogramBoundsLoading,
   whereStatements,
+  metadataFields,
   originalSource,
   histogramVisualization,
   description,
@@ -87,9 +89,10 @@ export const useHistogramHeatmap = ({
       metricItem,
       bounds,
       whereStatements,
+      metadataFields,
       originalSource,
     });
-  }, [shouldRenderHistogram, bounds, metricItem, whereStatements, originalSource]);
+  }, [shouldRenderHistogram, bounds, metricItem, whereStatements, metadataFields, originalSource]);
 
   const heatmapConfig = useMemo(
     () =>

@@ -33,6 +33,7 @@ interface UseWorkflowExecutionsParams {
   executionTypes?: ExecutionType[];
   /** Filter by the user who triggered the execution. */
   executedBy?: string[];
+  runName?: string;
   /** Number of results per page. */
   size?: number;
   /** Whether to omit single-step runs from the results. */
@@ -73,6 +74,7 @@ export function useWorkflowExecutions(
 ) {
   const api = useWorkflowsApi();
   const currentSize = params.size ?? DEFAULT_PAGE_SIZE;
+  const runName = params.runName?.trim() || undefined;
 
   const queryFn = useCallback(
     async ({ pageParam }: { pageParam?: ExecutionsPageParam }) => {
@@ -83,6 +85,7 @@ export function useWorkflowExecutions(
       return api.getWorkflowExecutions(params.workflowId, {
         statuses: params.statuses,
         executionTypes: params.executionTypes,
+        ...(runName ? { runName } : {}),
         ...(params.executedBy && params.executedBy.length > 0
           ? { executedBy: params.executedBy }
           : {}),
@@ -109,6 +112,7 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
+      runName,
       params.omitStepRuns,
       params.startedAfter,
       params.startedBefore,
@@ -149,6 +153,7 @@ export function useWorkflowExecutions(
       params.statuses,
       params.executionTypes,
       params.executedBy,
+      runName,
       params.omitStepRuns,
       params.startedAfter,
       params.startedBefore,
