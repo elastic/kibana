@@ -95,7 +95,6 @@ import {
   RISK_ENGINE_CONFIGURE_SO_URL,
   RISK_ENGINE_PRIVILEGES_URL,
   RISK_ENGINE_SETTINGS_URL,
-  RISK_SCORE_ENTITY_CALCULATION_URL,
   RISK_SCORE_ENTITY_CALCULATION_V2_URL,
   RISK_SCORE_PREVIEW_URL,
   ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL,
@@ -367,14 +366,6 @@ export const useEntityAnalyticsRoutes = () => {
     /**
      * Calculate and stores risk score for an entity
      */
-    const calculateEntityRiskScore = (params: RiskScoresEntityCalculationRequest) => {
-      return http.fetch<RiskScoresEntityCalculationResponse>(RISK_SCORE_ENTITY_CALCULATION_URL, {
-        version: '1',
-        method: 'POST',
-        body: JSON.stringify(params),
-      });
-    };
-
     const calculateEntityRiskScoreV2 = (params: RiskScoresEntityCalculationRequest) => {
       return http.fetch<RiskScoresEntityCalculationResponse>(RISK_SCORE_ENTITY_CALCULATION_V2_URL, {
         version: '1',
@@ -1115,7 +1106,6 @@ export const useEntityAnalyticsRoutes = () => {
       searchWatchlistIndices,
       uploadWatchlistCsv,
       fetchRiskEngineSettings,
-      calculateEntityRiskScore,
       calculateEntityRiskScoreV2,
       cleanUpRiskEngine,
       fetchEntitiesList,
