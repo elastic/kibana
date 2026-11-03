@@ -45,5 +45,12 @@ describe('User actions', () => {
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });
+
+    it('accepts a source with an unknown type', () => {
+      const withSource = [{ ...defaultRequest[0], source: { type: 'futuristic', id: 'x1' } }];
+      const result = UserActionsSchema.safeParse(withSource);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(withSource);
+    });
   });
 });
