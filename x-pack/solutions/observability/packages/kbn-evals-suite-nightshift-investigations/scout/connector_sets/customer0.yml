@@ -1,16 +1,17 @@
-# Customer0 connectors, matching the investigator on nightshift-customer0. The eval assigns these
-# ids in evals/investigation/investigator_connectors.ts. Credentials stay in the hook environment.
+# The `customer0` connector set: the connectors saved on the investigator in the nightshift-customer0
+# deployment, with the same ids and names. evals/investigation/connector_sets.ts lists these ids and
+# saves them on the investigator. Credentials stay in the hook environment.
 # `.http` is required because sandbox credential injection does not support `.webhook`.
 xpack.actions.preconfigured.c0-es:
   name: c0_es
   actionTypeId: .http
   config:
-    url: ${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL}
+    url: ${NIGHTSHIFT_C0_ES_URL}
     hasAuth: false
     authType: null
   secrets:
     secretHeaders:
-      Authorization: "ApiKey ${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY}"
+      Authorization: "ApiKey ${NIGHTSHIFT_C0_ES_API_KEY}"
 
 xpack.actions.preconfigured.gh:
   name: gh

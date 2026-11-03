@@ -183,7 +183,7 @@ exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
 and sandbox, disables Cortex, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
-destination. Trace-exporter headers and remote telemetry credentials reach Kibana through
+destination. Trace-exporter headers and connector credentials reach Kibana through
 environment references in committed YAML, without generated secret files or credential arguments.
 Full payloads have the destination's access controls; use synthetic questions or data
 you are allowed to export there. Existing sandbox connector authorization remains unchanged.
@@ -253,8 +253,8 @@ It reads the dataset from the results profile's Kibana, in the first `--space-id
 and example IDs, labels, tags and metadata through `trustUpstreamDataset`. The existing runner
 upserts the fetched dataset before running; skipping that write is a separate framework follow-up. Its examples
 must satisfy the same question and distinct `case_id` requirements as a file. Do not combine it
-with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's telemetry source still needs the sandbox and remote
-telemetry settings below; selecting a dataset does not provision its source data.
+with `NIGHTSHIFT_EXAMPLES_FILE`. The dataset's data source still needs the sandbox credentials and
+a [connector set](#connector-sets); selecting a dataset does not provision its source data.
 
 The investigation spec sets the existing `runExperiment` concurrency option to **16**. Its
 Scout config reserves **21 normal-task slots** (42 raw cost units): sixteen for investigation
@@ -269,51 +269,57 @@ selection alone does not restart Scout. `run` and `start --skip-server` use your
 whose Task Manager capacity you must configure yourself. Wait for any active eval to finish before
 restarting a shared local stack.
 
-## Remote telemetry investigations
+## Connector sets
 
-Use the same `trace-only` selection, dataset loader, investigation task, placeholder evaluator and
-trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry
-source is independent of the evaluations profile: the sandbox queries the remote cluster, while
-the profile still selects where experiment results and agent traces are persisted.
+Evals start the investigator the way production does: with a set of saved connectors, listed for
+the agent in `connectors.md`. There is no eval-only telemetry setting, start parameter or index
+hint; the agent finds the data through the connectors, as it must for a customer. A connector set
+is the group of preconfigured connectors one Scout stack starts with:
 
-Configure a dedicated API key restricted to `read` and `view_index_metadata` on the telemetry
-patterns the example needs, with only the cluster privileges required for discovery. For
-cross-cluster search, verify that the key can read the intended remote and index pattern. Keep
-endpoints, keys and readable-index hints in Vault (or a private local profile JSON), and customer
-example files private and uncommitted.
+| Set         | Kibana config                                                                | Connectors                                                    | Credentials (Vault / profile JSON)                  |
+| ----------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------- |
+| `customer0` | [`scout/connector_sets/customer0.yml`](scout/connector_sets/customer0.yml) | `c0-es` (`.http`), `gh` and `github-elastic-org` (`.github`)  | `nightshift.telemetry.{url,apiKey}`, `nightshift.github.{gh,org}` |
+| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.http`)                                      | `nightshiftOrcaEs.{url,apiKey}`                     |
 
-Add a `nightshift.telemetry` block beside `sandbox` in this suite's Vault secret (see
-[rotating Nightshift secrets](#rotating-nightshift-secrets)) or local profile JSON. The suite hook
-reads it without adding Nightshift fields to the shared CLI or global config schema:
+`customer0` has the same ids and names as the investigator on the nightshift-customer0 deployment
+(`gh2` there is not assigned). The hook selects `orcabench` on the ORCA shard (or
+`NIGHTSHIFT_DATASETS=orcabench`), and `customer0` whenever c0-es credentials are configured. It
+exports `NIGHTSHIFT_CONNECTOR_SET` and points the Scout config set at the set's YAML; the eval then
+saves every connector in the set on the investigator through the Agent Builder agents API
+(`saveConnectorSetOnInvestigator` in
+[`connector_sets.ts`](evals/investigation/connector_sets.ts)), as a user would in the agent's
+settings. Without a connector set, nothing is saved. One stack runs one set; the eval does not
+switch connectors per example.
+
+The c0-es credentials keep the Vault field name `nightshift.telemetry`:
 
 ```json
 "nightshift": {
-  "telemetry": {
-    "url": "https://telemetry.example.com",
-    "apiKey": "...",
-    "readableIndices": "Read remote-a:logs-service-*"
-  },
-  "github": {
-    "gh": "...",
-    "org": "..."
-  }
+  "telemetry": { "url": "https://c0.example.com", "apiKey": "..." },
+  "github": { "gh": "...", "org": "..." }
 }
 ```
 
-`url` and `apiKey` are required together; `readableIndices` is optional. Profile values take
-precedence over the following shell fallbacks. The hook selects the telemetry YAML only when the
-URL and key are configured, and requires sandbox credentials for remote investigations.
+`url` and `apiKey` are required together, and the set refuses to start without both GitHub tokens
+or without sandbox credentials. Profile values take precedence over these shell fallbacks:
 
-| Variable                                   | Purpose                                                                                                        |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL`     | Remote Elasticsearch endpoint. Requires the API key below.                                                     |
-| `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.                               |
-| `NIGHTSHIFT_SANDBOX_READABLE_INDICES`      | Optional note naming readable index patterns and explicit remote names. The eval adds it to the space's custom context, except for customer0 datasets, whose production space has no index hint. |
-| `NIGHTSHIFT_GITHUB_GH_TOKEN`               | Bearer token for the customer0 `gh` connector. Required with remote telemetry outside the ORCA shard.                    |
-| `NIGHTSHIFT_GITHUB_ORG_TOKEN`              | Bearer token for the customer0 `github-elastic-org` connector. Required with that same telemetry.                        |
-| `NIGHTSHIFT_EXAMPLES_FILE`                 | The same file format documented above; only questions and stable case IDs are required.                        |
+| Variable                      | Purpose                                                                                 |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| `NIGHTSHIFT_C0_ES_URL`        | c0-es Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
+| `NIGHTSHIFT_C0_ES_API_KEY`    | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.        |
+| `NIGHTSHIFT_GITHUB_GH_TOKEN`  | Bearer token for the `gh` connector.                                                    |
+| `NIGHTSHIFT_GITHUB_ORG_TOKEN` | Bearer token for the `github-elastic-org` connector.                                    |
 
-With those variables and the sandbox credentials configured:
+The former `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL`, `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` and
+`NIGHTSHIFT_SANDBOX_READABLE_INDICES` make the hook fail, so a stale shell does not silently start
+without connectors. A `readableIndices` field left in Vault is ignored.
+
+Restrict each Elasticsearch API key to `read` and `view_index_metadata` on the patterns the
+examples need, with only the cluster privileges required for discovery. Keep endpoints and keys in
+Vault (or a private local profile JSON), and customer example files private and uncommitted. The
+existing credential resolver authorizes connector access and execution, checks the agent's
+allow-list, and exposes the API key only to the requesting sandbox command.
+`/workspace/.connector-docs/elastic.md` is the same Elasticsearch guide every investigation gets.
 
 ```bash
 NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
@@ -321,38 +327,14 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.j
   --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
-Telemetry is an ordinary connector, set up the way a user would. Outside the ORCA shard,
-[`scout/kibana.customer0.yml`](scout/kibana.customer0.yml) creates the same sandbox connectors the
-customer0 investigator has: `c0-es` (`.http`, named `c0_es`), `gh`, and `github-elastic-org` (both
-`.github` Copilot MCP connectors). The hook reads `nightshift.github.gh` and `nightshift.github.org`
-and refuses to start customer0 telemetry when either token is missing. A customer0 dataset then
-saves those three ids on the investigator (`assignInvestigatorConnectors`). Other remote datasets
-on that stack save only `c0-es`. The ORCA shard keeps
-[`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml), which creates
-`nightshift-evals-telemetry`, and does not assign the customer0 GitHub connectors. There
-is no Nightshift-specific telemetry setting in `kibana.yml`. The existing credential resolver
-authorizes connector access and execution, checks the agent's allow-list, and exposes the API key
-only to the requesting sandbox command. Remote telemetry and sandbox credentials are supplied
-through the hook environment.
-`/workspace/.connector-docs/elastic.md` is the same Elasticsearch guide every investigation gets. It
-contains variable names and query guidance, never credential values. Its examples bound requests by
-time and advise using explicit remote names and narrow index patterns. These are instructions for
-the agent; the API key's privileges enforce the read restrictions. Run one dataset per Scout stack
-(one shard per telemetry cluster); the eval does not switch telemetry sources per example.
+For connectivity acceptance, inspect the persisted agent trace's command and actual Elasticsearch
+response: confirm it queried the intended connector and returned data from the intended
+remote/index and time range without query or remote failures. A `connector_id`, exit code zero,
+completed investigation or placeholder score alone does not prove connectivity.
 
-Choose an example whose required telemetry is still retained and verify a bounded query with the
-restricted key first. For connectivity acceptance, inspect the persisted agent trace's command and
-actual Elasticsearch response: confirm it queried the configured endpoint through the telemetry
-connector and returned data from the intended remote/index and time range without query or remote
-failures. Record the tested commit, experiment and trace links, plus sanitized query evidence. A
-`connector_id`, exit code zero, completed investigation or placeholder score alone does not prove
-connectivity. This workflow remains ungraded and requires no reference answer or quality threshold.
-
-Leave the remote settings unset for the bundled synthetic examples;
-synthetic execution continues to need no telemetry connector, and without remote settings no
-connector is assigned. The former `remote` selection and
-`NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file workflow. Grading, snapshot
-provisioning and micro-evals are separate follow-ups.
+Leave the c0-es settings unset for the bundled synthetic examples; they need no connector. The
+former `remote` selection and `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file
+workflow.
 
 ## Connector probes
 
@@ -364,8 +346,9 @@ so a probe takes a few model turns instead of a full investigation. Use it to it
 how the agent queries Elasticsearch. Cortex and memory optimize still run after each reply, so
 probes update the space's wiki and memories like investigations do.
 
-It is opt-in: unset and `all` never select it, because it needs the
-[remote telemetry](#remote-telemetry-investigations) settings as well as sandbox credentials.
+It is opt-in: unset and `all` never select it, because it needs a
+[connector set](#connector-sets) as well as sandbox credentials. The probe saves the set on the
+investigator too, since the assistant uses the investigator's connectors.
 
 ```bash
 NIGHTSHIFT_DATASETS=connector-probe NIGHTSHIFT_PROBE_EXAMPLES_FILE=/path/to/probes.json \
@@ -574,13 +557,14 @@ time and the user-facing symptom, without the incident onset or an analysis wind
 holds all six days, so an agent can still read telemetry after the stated current time; each
 example records it as `metadata.current_time`. CI runs it as its own shard under the
 `evals:nightshift-investigations` label, next to the `customer0` shard that runs the smoke and
-trace-only evals, so each Scout server's telemetry connector points at one cluster.
+trace-only evals, so each Scout server runs one [connector set](#connector-sets). The ORCA shard
+runs the `orcabench` set: one Elasticsearch connector, `orcabench-es`, and no index hint, so the
+agent discovers the ORCA indices the way it would on any cluster.
 
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
 [`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and
 `view_index_metadata` on `logs-orcabench.otel-*`, `traces-orcabench.otel-*` and
-`metrics-orcabench.otel-*`. An optional `readableIndices` in that block replaces the index hint
-the agent's manifest gets.
+`metrics-orcabench.otel-*`.
 
 - The dataset's ID, case count and content digest are pinned in
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any

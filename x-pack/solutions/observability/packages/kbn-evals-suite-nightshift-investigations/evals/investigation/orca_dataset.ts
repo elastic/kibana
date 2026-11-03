@@ -12,7 +12,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
-import { EVALS_TELEMETRY_CONNECTOR_ID } from './investigator_connectors';
+import { ORCABENCH_ES_CONNECTOR_ID, getConnectorSet } from './connector_sets';
 import { investigationExampleSchema } from './types';
 import type { InvestigationExample } from './types';
 
@@ -137,7 +137,7 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
     .some(
       ({ tool_id: toolId, params, results }) =>
         toolId === 'nightshift_sandbox_bash' &&
-        params.connector_id === EVALS_TELEMETRY_CONNECTOR_ID &&
+        params.connector_id === ORCABENCH_ES_CONNECTOR_ID &&
         results.some(
           ({ type, data }) =>
             type === ToolResultType.other &&
@@ -157,11 +157,11 @@ export const assertOrcaSource = async (
   request: typeof globalThis.fetch = globalThis.fetch,
   env: NodeJS.ProcessEnv = process.env
 ): Promise<void> => {
-  const url = env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL;
-  const apiKey = env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY;
+  const url = env.NIGHTSHIFT_ORCABENCH_ES_URL;
+  const apiKey = env.NIGHTSHIFT_ORCABENCH_ES_API_KEY;
   assert(
-    url && apiKey && env.NIGHTSHIFT_ORCA_TELEMETRY,
-    'ORCA requires its configured telemetry source'
+    url && apiKey && getConnectorSet(env) === 'orcabench',
+    'ORCA requires a Scout server started with the orcabench connector set'
   );
   await Promise.all(
     Object.entries({ logs: 14268, traces: 11864, metrics: 117594 }).map(

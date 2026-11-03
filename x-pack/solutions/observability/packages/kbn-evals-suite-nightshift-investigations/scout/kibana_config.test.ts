@@ -11,6 +11,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigFromFiles } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
+import { CONNECTOR_SETS } from '../evals/investigation/connector_sets';
 
 it('resolves credentials from the environment and preserves other preconfigured connectors', () => {
   const originalEnv = process.env;
@@ -27,9 +28,8 @@ it('resolves credentials from the environment and preserves other preconfigured 
     SANDBOX_CLIENT_KEY_PATH: '/certs/tls.key',
     SANDBOX_CA_CERT_PATH: '',
     NIGHTSHIFT_TRACING_EXPORTERS: JSON.stringify(exporters),
-    NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://telemetry.example.com',
-    NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
-    NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
+    NIGHTSHIFT_ORCABENCH_ES_URL: 'https://orca.example.com',
+    NIGHTSHIFT_ORCABENCH_ES_API_KEY: 'remote-key',
   };
   try {
     const config = getConfigFromFiles([
@@ -39,15 +39,15 @@ it('resolves credentials from the environment and preserves other preconfigured 
         'src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations/kibana.tracing.yml'
       ),
       Path.join(__dirname, 'kibana.sandbox.yml'),
-      Path.join(__dirname, 'kibana.telemetry.yml'),
+      Path.join(__dirname, 'connector_sets/orcabench.yml'),
     ]);
     expect(config.xpack.actions.preconfigured).toEqual({
       existing: { name: 'Existing connector' },
-      'nightshift-evals-telemetry': {
-        name: 'Remote Elasticsearch telemetry',
+      'orcabench-es': {
+        name: 'orcabench_es',
         actionTypeId: '.http',
         config: {
-          url: 'https://telemetry.example.com',
+          url: 'https://orca.example.com',
           hasAuth: false,
           authType: null,
         },
@@ -60,7 +60,7 @@ it('resolves credentials from the environment and preserves other preconfigured 
       key: '/certs/tls.key',
       certificate_authorities: '',
     });
-    // Telemetry is a plain connector the eval assigns to the investigator, not a plugin setting.
+    // Connectors are saved on the investigator by the eval, not configured on the plugin.
     expect(config.xpack.nightshift_investigations).toBeUndefined();
     expect(
       schema
@@ -79,3 +79,29 @@ it('resolves credentials from the environment and preserves other preconfigured 
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+it.each(Object.entries(CONNECTOR_SETS))(
+  'connector set %s preconfigures exactly the connectors the eval saves',
+  (connectorSet, connectorIds) => {
+    const originalEnv = process.env;
+    process.env = {
+      ...originalEnv,
+      NIGHTSHIFT_C0_ES_URL: 'https://c0.example.com',
+      NIGHTSHIFT_C0_ES_API_KEY: 'c0-key',
+      NIGHTSHIFT_GITHUB_GH_TOKEN: 'gh-token',
+      NIGHTSHIFT_GITHUB_ORG_TOKEN: 'org-token',
+      NIGHTSHIFT_ORCABENCH_ES_URL: 'https://orca.example.com',
+      NIGHTSHIFT_ORCABENCH_ES_API_KEY: 'orca-key',
+    };
+    try {
+      const config = getConfigFromFiles([
+        Path.join(__dirname, `connector_sets/${connectorSet}.yml`),
+      ]);
+      expect(Object.keys(config.xpack.actions.preconfigured).sort()).toEqual(
+        [...connectorIds].sort()
+      );
+    } finally {
+      process.env = originalEnv;
+    }
+  }
+);

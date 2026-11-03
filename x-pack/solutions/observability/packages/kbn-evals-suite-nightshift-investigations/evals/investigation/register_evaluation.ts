@@ -18,8 +18,8 @@ import {
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
-import { customContextForDataset, replaceCustomContext } from './custom_context';
-import { assignInvestigatorConnectors } from './investigator_connectors';
+import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
+import { saveConnectorSetOnInvestigator } from './connector_sets';
 import { createInvestigationJudges } from './judges';
 import { efficiencyEvaluators } from './efficiency_evaluators';
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
@@ -153,8 +153,8 @@ export const registerInvestigationEvaluation = ({
             { timeout: 60_000 }
           )
           .toBe(true);
-        await assignInvestigatorConnectors(fetch, { orca, dataset });
-        await replaceCustomContext(fetch, customContextForDataset(dataset));
+        await saveConnectorSetOnInvestigator(fetch);
+        await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const [experiment] = await executorClient.runExperiment(
           {
             name: orca

@@ -41,30 +41,6 @@ export const isCustomer0Dataset = ({ name, tags = [] }: InvestigationDatasetIden
 export const getDatasetCustomContext = (dataset: InvestigationDatasetIdentity): readonly string[] =>
   isCustomer0Dataset(dataset) ? [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT] : [];
 
-/**
- * The operator's note on which indices the telemetry connector can read, as the space's custom
- * context: the place a user tells the agent about their data, and where the elastic.md guide
- * points for it.
- */
-export const getReadableIndicesContext = (
-  env: NodeJS.ProcessEnv = process.env
-): readonly string[] => {
-  const readableIndices = env.NIGHTSHIFT_SANDBOX_READABLE_INDICES?.trim();
-  return readableIndices ? [readableIndices] : [];
-};
-
-/**
- * Custom context for one investigation dataset. Customer0 keeps the production snippet and the
- * retrospective guardrail, and does not get the readable-indices hint production does not have.
- */
-export const customContextForDataset = (
-  dataset: InvestigationDatasetIdentity,
-  env: NodeJS.ProcessEnv = process.env
-): readonly string[] => [
-  ...getDatasetCustomContext(dataset),
-  ...(isCustomer0Dataset(dataset) ? [] : getReadableIndicesContext(env)),
-];
-
 /** Replaces the space's custom context with exactly these snippets. */
 export const replaceCustomContext = async (
   fetch: HttpHandler,

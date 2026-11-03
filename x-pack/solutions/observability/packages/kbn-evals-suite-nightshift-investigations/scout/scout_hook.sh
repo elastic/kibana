@@ -86,80 +86,76 @@ certificate="$(pem_path SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
 key="$(pem_path SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
 ca="$(pem_path SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 
-orca=false
+# A connector set is the group of preconfigured connectors one Scout stack starts with,
+# scout/connector_sets/<set>.yml. The eval saves every connector in the set on the investigator, as
+# a user would, and the agent finds them in connectors.md like in production. The ORCA shard uses
+# `orcabench`; any other run with customer0 Elasticsearch credentials uses `customer0`.
+
+# These configured the former eval-only telemetry connector. Fail rather than start a stack
+# without the connectors they were meant to provide.
+for name in NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY \
+  NIGHTSHIFT_SANDBOX_READABLE_INDICES; do
+  if [[ -n "${!name:-}" ]]; then
+    echo "nightshift-investigations scout hook: $name was removed; set NIGHTSHIFT_C0_ES_URL and" \
+      "NIGHTSHIFT_C0_ES_API_KEY for the customer0 connector set (there is no index hint)" >&2
+    exit 1
+  fi
+done
+
+connector_set=''
+es_url=''
+es_key=''
+github_gh=''
+github_org=''
 if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcabench ]]; then
-  orca=true
   # Only the suite's own config holds the ORCA key. CI forwards this same input when the native
   # CLI invokes the hook again.
-  orca_config="$(printf '%s' "$config" | jq -c '.nightshiftOrcaEs // null')"
-  if ! printf '%s' "$orca_config" | jq -e '
+  if ! printf '%s' "$config" | jq -e '.nightshiftOrcaEs |
     type == "object" and (.url | type == "string" and startswith("https://") and (contains("@") | not))
     and (.apiKey | type == "string" and length > 0 and (contains("REPLACE_ME") | not))
-    and (.readableIndices == null or (.readableIndices | type == "string" and length > 0))
   ' >/dev/null 2>&1; then
-    echo "nightshift-investigations scout hook: ORCA requires nightshiftOrcaEs.url and apiKey (and a nonempty readableIndices, if set) in the Nightshift evals config" >&2
+    echo "nightshift-investigations scout hook: ORCA requires nightshiftOrcaEs.url and apiKey in the Nightshift evals config" >&2
     exit 1
   fi
-  # Replace only this process's target; the existing Nightshift secret is never modified. The
-  # hint lands in the agent's manifest, so it comes from config (where a change shows up as a
-  # benchmark change) and the fallback names the indices without hinting at an incident window.
-  config="$(printf '%s' "$config" | HOOK_ORCA_CONFIG="$orca_config" jq '
-    .nightshift.telemetry = ({
-      readableIndices: "Read logs-orcabench.otel-*, traces-orcabench.otel-* and metrics-orcabench.otel-*."
-    } + ($ENV.HOOK_ORCA_CONFIG | fromjson | with_entries(select(.value != null))))')"
-fi
-
-# The telemetry URL and key come from one source, so a partial profile block is never completed
-# from the shell. The optional readable-indices hint falls back independently.
-telemetry_url="$(config_value '.nightshift.telemetry.url')"
-telemetry_key="$(config_value '.nightshift.telemetry.apiKey')"
-if [[ -z "$telemetry_url$telemetry_key" ]]; then
-  telemetry_url="${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL:-}"
-  telemetry_key="${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY:-}"
-fi
-readable_indices="$(resolve NIGHTSHIFT_SANDBOX_READABLE_INDICES '.nightshift.telemetry.readableIndices')"
-# Customer0's investigator also has two GitHub Copilot MCP connectors. Tokens come from the profile
-# block, or from the shell when the block has neither. ORCA does not use them.
-github_gh="$(config_value '.nightshift.github.gh')"
-github_org="$(config_value '.nightshift.github.org')"
-if [[ -z "$github_gh" ]]; then
-  github_gh="${NIGHTSHIFT_GITHUB_GH_TOKEN:-}"
-fi
-if [[ -z "$github_org" ]]; then
-  github_org="${NIGHTSHIFT_GITHUB_ORG_TOKEN:-}"
-fi
-telemetry_config=''
-if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
-  if [[ -z "$telemetry_url" || -z "$telemetry_key" ]]; then
-    echo "nightshift-investigations scout hook: remote telemetry requires both URL and API key" \
-      "from one source (nightshift.telemetry or NIGHTSHIFT_SANDBOX_*)" >&2
-    exit 1
+  connector_set=orcabench
+  es_url="$(config_value '.nightshiftOrcaEs.url')"
+  es_key="$(config_value '.nightshiftOrcaEs.apiKey')"
+else
+  # The c0-es URL and key come from one source, so a partial profile block is never completed from
+  # the shell. The Vault field keeps its original name, `nightshift.telemetry`.
+  es_url="$(config_value '.nightshift.telemetry.url')"
+  es_key="$(config_value '.nightshift.telemetry.apiKey')"
+  if [[ -z "$es_url$es_key" ]]; then
+    es_url="${NIGHTSHIFT_C0_ES_URL:-}"
+    es_key="${NIGHTSHIFT_C0_ES_API_KEY:-}"
   fi
-  # The URL becomes unredacted connector config, so credentials belong in the API key alone.
-  if [[ "$telemetry_url" == *@* ]]; then
-    echo "nightshift-investigations scout hook: telemetry URL must not embed credentials" >&2
-    exit 1
-  fi
-  if [[ -z "$api_key" ]]; then
-    echo "nightshift-investigations scout hook: remote telemetry requires sandbox credentials" >&2
-    exit 1
-  fi
-  if [[ "$orca" == true ]]; then
-    telemetry_config="$script_dir/kibana.telemetry.yml"
-    github_gh=''
-    github_org=''
-  else
+  if [[ -n "$es_url$es_key" ]]; then
+    if [[ -z "$es_url" || -z "$es_key" ]]; then
+      echo "nightshift-investigations scout hook: the customer0 connector set requires both the" \
+        "c0-es URL and API key from one source (nightshift.telemetry or NIGHTSHIFT_C0_ES_*)" >&2
+      exit 1
+    fi
+    # The URL becomes unredacted connector config, so credentials belong in the API key alone.
+    if [[ "$es_url" == *@* ]]; then
+      echo "nightshift-investigations scout hook: the c0-es URL must not embed credentials" >&2
+      exit 1
+    fi
+    # Tokens come from the profile block, or from the shell when the block has neither.
+    github_gh="$(config_value '.nightshift.github.gh')"
+    github_org="$(config_value '.nightshift.github.org')"
+    github_gh="${github_gh:-${NIGHTSHIFT_GITHUB_GH_TOKEN:-}}"
+    github_org="${github_org:-${NIGHTSHIFT_GITHUB_ORG_TOKEN:-}}"
     if [[ -z "$github_gh" || -z "$github_org" ]]; then
-      echo "nightshift-investigations scout hook: customer0 telemetry requires" \
+      echo "nightshift-investigations scout hook: the customer0 connector set requires" \
         "nightshift.github.gh and nightshift.github.org" >&2
       exit 1
     fi
-    telemetry_config="$script_dir/kibana.customer0.yml"
+    connector_set=customer0
   fi
 fi
-if [[ -z "$telemetry_config" ]]; then
-  github_gh=''
-  github_org=''
+if [[ -n "$connector_set" && -z "$api_key" ]]; then
+  echo "nightshift-investigations scout hook: the $connector_set connector set requires sandbox credentials" >&2
+  exit 1
 fi
 
 if [[ -z "$api_key" ]]; then
@@ -193,24 +189,21 @@ done
 
 # Values reach jq through its environment, not `--arg`: argv is visible to any process listing,
 # while a process's environment is readable only by its owner.
-HOOK_ORCA="$orca" \
 HOOK_HOST="$host" \
   HOOK_PORT="$port" \
   HOOK_API_KEY="$api_key" \
   HOOK_CERTIFICATE="$certificate" \
   HOOK_KEY="$key" \
   HOOK_CA="$ca" \
-  HOOK_TELEMETRY_URL="$telemetry_url" \
-  HOOK_TELEMETRY_KEY="$telemetry_key" \
-  HOOK_READABLE_INDICES="$readable_indices" \
-  HOOK_TELEMETRY_CONFIG="$telemetry_config" \
+  HOOK_CONNECTOR_SET="$connector_set" \
+  HOOK_CONNECTORS_CONFIG="${connector_set:+$script_dir/connector_sets/$connector_set.yml}" \
+  HOOK_ES_URL="$es_url" \
+  HOOK_ES_KEY="$es_key" \
   HOOK_GITHUB_GH="$github_gh" \
   HOOK_GITHUB_ORG="$github_org" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
   jq -n '{
-    env: ((if $ENV.HOOK_ORCA == "true" then {
-      NIGHTSHIFT_DATASETS: "orcabench", NIGHTSHIFT_ORCA_TELEMETRY: "1"
-    } else {} end) + ({
+    env: (({
       SANDBOX_API_HOST: $ENV.HOOK_HOST,
       SANDBOX_API_PORT: $ENV.HOOK_PORT,
       SANDBOX_API_KEY: $ENV.HOOK_API_KEY
@@ -220,12 +213,16 @@ HOOK_HOST="$host" \
       SANDBOX_CLIENT_KEY_PATH: $ENV.HOOK_KEY,
       SANDBOX_CA_CERT_PATH: $ENV.HOOK_CA,
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
-    } + (if $ENV.HOOK_TELEMETRY_CONFIG != "" then {
-      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: $ENV.HOOK_TELEMETRY_URL,
-      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: $ENV.HOOK_TELEMETRY_KEY,
-      NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES,
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: $ENV.HOOK_TELEMETRY_CONFIG
-    } else {} end) + (if $ENV.HOOK_GITHUB_GH != "" then {
+    } + (if $ENV.HOOK_CONNECTOR_SET == "" then {} else {
+      NIGHTSHIFT_CONNECTOR_SET: $ENV.HOOK_CONNECTOR_SET,
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: $ENV.HOOK_CONNECTORS_CONFIG
+    } end) + (if $ENV.HOOK_CONNECTOR_SET == "orcabench" then {
+      NIGHTSHIFT_DATASETS: "orcabench",
+      NIGHTSHIFT_ORCABENCH_ES_URL: $ENV.HOOK_ES_URL,
+      NIGHTSHIFT_ORCABENCH_ES_API_KEY: $ENV.HOOK_ES_KEY
+    } elif $ENV.HOOK_CONNECTOR_SET == "customer0" then {
+      NIGHTSHIFT_C0_ES_URL: $ENV.HOOK_ES_URL,
+      NIGHTSHIFT_C0_ES_API_KEY: $ENV.HOOK_ES_KEY,
       NIGHTSHIFT_GITHUB_GH_TOKEN: $ENV.HOOK_GITHUB_GH,
       NIGHTSHIFT_GITHUB_ORG_TOKEN: $ENV.HOOK_GITHUB_ORG
     } else {} end))

@@ -233,7 +233,7 @@ describe('nightshift-investigations scout hook', () => {
       const { status } = runHook(
         {
           nightshift: {
-            telemetry: { url: 'https://remote.example.com', apiKey: 'SECRET_TELEMETRY_KEY' },
+            telemetry: { url: 'https://remote.example.com', apiKey: 'SECRET_C0_ES_KEY' },
             github: { gh: 'SECRET_GH_TOKEN', org: 'SECRET_ORG_TOKEN' },
           },
           sandbox: { ...SANDBOX, apiKey: 'SECRET_API_KEY' },
@@ -243,7 +243,7 @@ describe('nightshift-investigations scout hook', () => {
       expect(status).toBe(0);
       const argv = readFileSync(argvLog, 'utf8');
       expect(argv).not.toContain('SECRET_API_KEY');
-      expect(argv).not.toContain('SECRET_TELEMETRY_KEY');
+      expect(argv).not.toContain('SECRET_C0_ES_KEY');
       expect(argv).not.toContain('SECRET_GH_TOKEN');
       expect(argv).not.toContain('SECRET_ORG_TOKEN');
     } finally {
@@ -268,80 +268,84 @@ describe('nightshift-investigations scout hook', () => {
     expect(result.output).toEqual({});
   });
 
-  it('exports telemetry from the profile, with shell fallback and an optional index hint', () => {
+  it('exports the customer0 connector set from the profile, with shell fallback', () => {
     const shell = {
-      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://shell.example.com',
-      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'shell-key',
+      NIGHTSHIFT_C0_ES_URL: 'https://shell.example.com',
+      NIGHTSHIFT_C0_ES_API_KEY: 'shell-key',
       NIGHTSHIFT_GITHUB_GH_TOKEN: 'shell-gh',
       NIGHTSHIFT_GITHUB_ORG_TOKEN: 'shell-org',
     };
     expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
       ...shell,
-      NIGHTSHIFT_SANDBOX_READABLE_INDICES: '',
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.customer0.yml'),
+      NIGHTSHIFT_CONNECTOR_SET: 'customer0',
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/customer0.yml'),
     });
     expect(
       runHook(
         {
           sandbox: SANDBOX,
           nightshift: {
-            telemetry: {
-              url: 'https://profile.example.com',
-              apiKey: 'profile-key',
-              readableIndices: 'remote:logs-*',
-            },
+            telemetry: { url: 'https://profile.example.com', apiKey: 'profile-key' },
             github: { gh: 'profile-gh', org: 'profile-org' },
           },
         },
         shell
       ).output.env
     ).toMatchObject({
-      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://profile.example.com',
-      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'profile-key',
-      NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
+      NIGHTSHIFT_C0_ES_URL: 'https://profile.example.com',
+      NIGHTSHIFT_C0_ES_API_KEY: 'profile-key',
       NIGHTSHIFT_GITHUB_GH_TOKEN: 'profile-gh',
       NIGHTSHIFT_GITHUB_ORG_TOKEN: 'profile-org',
     });
   });
 
-  it.each([
-    { url: 'https://remote.example.com' },
-    { apiKey: 'key' },
-    { readableIndices: 'logs-*' },
-  ])('rejects incomplete telemetry settings %j', (telemetry) => {
-    const result = runHook({ sandbox: SANDBOX, nightshift: { telemetry } });
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain('requires both URL and API key');
-  });
+  it.each([{ url: 'https://remote.example.com' }, { apiKey: 'key' }])(
+    'rejects incomplete c0-es settings %j',
+    (telemetry) => {
+      const result = runHook({ sandbox: SANDBOX, nightshift: { telemetry } });
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain('requires both the c0-es URL and API key');
+    }
+  );
 
-  it('requires sandbox credentials when telemetry is configured', () => {
+  it('requires sandbox credentials for a connector set', () => {
     const result = runHook({
-      nightshift: { telemetry: { url: 'https://remote.example.com', apiKey: 'key' } },
+      nightshift: {
+        telemetry: { url: 'https://remote.example.com', apiKey: 'key' },
+        github: { gh: 'gh-token', org: 'org-token' },
+      },
     });
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain('requires sandbox credentials');
+    expect(result.stderr).toContain('customer0 connector set requires sandbox credentials');
   });
 
-  describe('telemetry configuration', () => {
-    const TELEMETRY = {
-      url: 'https://remote.example.com',
-      apiKey: 'remote-key',
-      readableIndices: 'remote:logs-*',
-    };
-    const GITHUB = { gh: 'gh-token', org: 'org-token' };
-    const PROFILE = { sandbox: SANDBOX, nightshift: { telemetry: TELEMETRY, github: GITHUB } };
+  it.each([
+    'NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL',
+    'NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY',
+    'NIGHTSHIFT_SANDBOX_READABLE_INDICES',
+  ])('rejects the removed %s instead of starting without its connector', (name) => {
+    const { status, stderr } = runHook({ sandbox: SANDBOX }, { [name]: 'SECRET_VALUE' });
+    expect(status).toBe(1);
+    expect(stderr).toContain(`${name} was removed`);
+    expect(stderr).not.toContain('SECRET_VALUE');
+  });
 
-    it('resolves a profile block through the connector and manifest configuration', () => {
+  describe('customer0 connector set', () => {
+    const C0_ES = { url: 'https://remote.example.com', apiKey: 'remote-key' };
+    const GITHUB = { gh: 'gh-token', org: 'org-token' };
+    const PROFILE = { sandbox: SANDBOX, nightshift: { telemetry: C0_ES, github: GITHUB } };
+
+    it('preconfigures the connectors the customer0 investigator has', () => {
       const { output } = runHook(PROFILE);
       expect(output).toEqual({
         env: {
           ...runHook({ sandbox: SANDBOX }).output.env,
-          NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://remote.example.com',
-          NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
-          NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
+          NIGHTSHIFT_CONNECTOR_SET: 'customer0',
+          NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/customer0.yml'),
+          NIGHTSHIFT_C0_ES_URL: 'https://remote.example.com',
+          NIGHTSHIFT_C0_ES_API_KEY: 'remote-key',
           NIGHTSHIFT_GITHUB_GH_TOKEN: 'gh-token',
           NIGHTSHIFT_GITHUB_ORG_TOKEN: 'org-token',
-          NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.customer0.yml'),
         },
       });
 
@@ -350,7 +354,7 @@ describe('nightshift-investigations scout hook', () => {
       try {
         const { xpack } = getConfigFromFiles([
           output.env.SANDBOX_KIBANA_CONFIG,
-          output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG,
+          output.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG,
         ]);
         expect(xpack.actions.preconfigured['c0-es']).toMatchObject({
           name: 'c0_es',
@@ -367,57 +371,63 @@ describe('nightshift-investigations scout hook', () => {
           actionTypeId: '.github',
           secrets: { token: 'org-token' },
         });
-        // Telemetry is a plain connector the eval assigns to the investigator, not a plugin setting.
+        // Connectors are saved on the investigator by the eval, not configured on the plugin.
         expect(xpack.nightshift_investigations).toBeUndefined();
       } finally {
         process.env = originalEnv;
       }
     });
 
-    it.each([
-      { url: 'https://other.example.com' },
-      { apiKey: 'rotated-key' },
-      { readableIndices: 'remote:metrics-*' },
-    ])('changes the Scout fingerprint when telemetry settings change: %j', (settings) => {
-      // The evals CLI restarts a reused Scout whenever the hook's env output changes.
-      const configured = runHook(PROFILE).output;
+    it('ignores a readable-indices hint left in the profile', () => {
       expect(
-        runHook({ sandbox: SANDBOX, nightshift: { telemetry: { ...TELEMETRY, ...settings } } })
-          .output
-      ).not.toEqual(configured);
-      expect(runHook({ sandbox: SANDBOX }).output).not.toEqual(configured);
+        runHook({
+          ...PROFILE,
+          nightshift: { ...PROFILE.nightshift, telemetry: { ...C0_ES, readableIndices: 'logs-*' } },
+        }).output
+      ).toEqual(runHook(PROFILE).output);
     });
 
-    it.each([
-      [{ url: 'https://profile.example.com' }, { NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'k' }],
-      [
-        { apiKey: 'profile-key' },
-        { NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://shell.example.com' },
-      ],
-    ])(
-      'rejects profile telemetry %j with env %j: URL and key need one source',
-      (telemetry, env) => {
-        const { status, stderr } = runHook({ sandbox: SANDBOX, nightshift: { telemetry } }, env);
-        expect(status).toBe(1);
-        expect(stderr).toContain('requires both URL and API key from one source');
+    it.each([{ url: 'https://other.example.com' }, { apiKey: 'rotated-key' }])(
+      'changes the Scout fingerprint when c0-es settings change: %j',
+      (settings) => {
+        // The evals CLI restarts a reused Scout whenever the hook's env output changes.
+        const configured = runHook(PROFILE).output;
+        expect(
+          runHook({
+            ...PROFILE,
+            nightshift: { ...PROFILE.nightshift, telemetry: { ...C0_ES, ...settings } },
+          }).output
+        ).not.toEqual(configured);
+        expect(runHook({ sandbox: SANDBOX }).output).not.toEqual(configured);
       }
     );
 
+    it.each([
+      [{ url: 'https://profile.example.com' }, { NIGHTSHIFT_C0_ES_API_KEY: 'k' }],
+      [{ apiKey: 'profile-key' }, { NIGHTSHIFT_C0_ES_URL: 'https://shell.example.com' }],
+    ])('rejects profile c0-es %j with env %j: URL and key need one source', (telemetry, env) => {
+      const { status, stderr } = runHook(
+        { sandbox: SANDBOX, nightshift: { telemetry, github: GITHUB } },
+        env
+      );
+      expect(status).toBe(1);
+      expect(stderr).toContain('requires both the c0-es URL and API key from one source');
+    });
+
     it.each<Record<string, string>>([
-      { NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://shell.example.com' },
-      { NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'SECRET_SHELL_KEY' },
-      { NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'logs-*' },
-    ])('rejects incomplete shell telemetry %j without echoing credentials', (env) => {
+      { NIGHTSHIFT_C0_ES_URL: 'https://shell.example.com' },
+      { NIGHTSHIFT_C0_ES_API_KEY: 'SECRET_SHELL_KEY' },
+    ])('rejects incomplete shell c0-es settings %j without echoing credentials', (env) => {
       const { status, stderr } = runHook({ sandbox: SANDBOX }, env);
       expect(status).toBe(1);
-      expect(stderr).toContain('requires both URL and API key from one source');
+      expect(stderr).toContain('requires both the c0-es URL and API key from one source');
       expect(stderr).not.toContain('SECRET_SHELL_KEY');
     });
 
-    it('rejects customer0 telemetry without both GitHub tokens and does not echo the one it has', () => {
+    it('rejects the set without both GitHub tokens and does not echo the one it has', () => {
       const { status, stderr } = runHook({
         sandbox: SANDBOX,
-        nightshift: { telemetry: TELEMETRY, github: { gh: 'SECRET_GH_TOKEN' } },
+        nightshift: { telemetry: C0_ES, github: { gh: 'SECRET_GH_TOKEN' } },
       });
       expect(status).toBe(1);
       expect(stderr).toContain('nightshift.github.gh and nightshift.github.org');
@@ -426,19 +436,19 @@ describe('nightshift-investigations scout hook', () => {
     });
 
     it.each(['profile', 'shell'])('rejects embedded URL credentials from %s', (source) => {
-      const url = 'https://elastic:SECRET_PASSWORD@telemetry.example.com';
+      const url = 'https://elastic:SECRET_PASSWORD@c0.example.com';
       const { status, stderr } =
         source === 'profile'
-          ? runHook({ sandbox: SANDBOX, nightshift: { telemetry: { ...TELEMETRY, url } } })
+          ? runHook({
+              ...PROFILE,
+              nightshift: { ...PROFILE.nightshift, telemetry: { ...C0_ES, url } },
+            })
           : runHook(
-              { sandbox: SANDBOX },
-              {
-                NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: url,
-                NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'remote-key',
-              }
+              { sandbox: SANDBOX, nightshift: { github: GITHUB } },
+              { NIGHTSHIFT_C0_ES_URL: url, NIGHTSHIFT_C0_ES_API_KEY: 'remote-key' }
             );
       expect(status).toBe(1);
-      expect(stderr).toContain('telemetry URL must not embed credentials');
+      expect(stderr).toContain('c0-es URL must not embed credentials');
       expect(stderr).not.toContain('SECRET_PASSWORD');
     });
   });
@@ -448,39 +458,36 @@ describe('ORCA CI shard', () => {
   const orca = { url: 'https://orca.example:443', apiKey: 'orca-key' };
   const existing = {
     sandbox: SANDBOX,
-    nightshift: { telemetry: { url: 'https://customer0.example', apiKey: 'customer0-key' } },
+    nightshift: {
+      telemetry: { url: 'https://customer0.example', apiKey: 'customer0-key' },
+      github: { gh: 'gh-token', org: 'org-token' },
+    },
   };
-  it('replaces only the telemetry target and preserves sandbox authentication', () => {
+  it('starts the orcabench connector set and preserves sandbox authentication', () => {
     const { status, output, stderr } = runHook(
       { ...existing, nightshiftOrcaEs: orca },
       { EVAL_SHARD_ID: 'orcabench' }
     );
     expect(status).toBe(0);
     expect(stderr).not.toContain(orca.apiKey);
-    expect(output.env).toMatchObject({
-      SANDBOX_API_KEY: SANDBOX.apiKey,
-      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: orca.url,
-      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: orca.apiKey,
+    expect(output.env).toEqual({
+      ...runHook({ sandbox: SANDBOX }).output.env,
       NIGHTSHIFT_DATASETS: 'orcabench',
-      NIGHTSHIFT_ORCA_TELEMETRY: '1',
-      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.telemetry.yml'),
+      NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/orcabench.yml'),
+      NIGHTSHIFT_ORCABENCH_ES_URL: orca.url,
+      NIGHTSHIFT_ORCABENCH_ES_API_KEY: orca.apiKey,
     });
-    expect(output.env).not.toHaveProperty('NIGHTSHIFT_GITHUB_GH_TOKEN');
   });
-  it('takes the manifest hint from config, falling back to one that names no incident window', () => {
-    const configured = runHook(
-      { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: 'Read orca indices.' } },
-      { EVAL_SHARD_ID: 'orcabench' }
+  it('ignores a readable-indices hint left in the ORCA block', () => {
+    expect(
+      runHook(
+        { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: 'Read orca indices.' } },
+        { EVAL_SHARD_ID: 'orcabench' }
+      ).output
+    ).toEqual(
+      runHook({ ...existing, nightshiftOrcaEs: orca }, { EVAL_SHARD_ID: 'orcabench' }).output
     );
-    expect(configured.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).toBe('Read orca indices.');
-    const fallback = runHook(
-      { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: null } },
-      { EVAL_SHARD_ID: 'orcabench' }
-    );
-    expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).toContain(
-      'logs-orcabench.otel-*'
-    );
-    expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).not.toMatch(/2026|April/);
   });
   it('ignores a shared evals config, so the suite secret is the only source of the ORCA key', () => {
     const { status, stderr } = runHook(existing, {
@@ -492,21 +499,18 @@ describe('ORCA CI shard', () => {
     expect(status).toBe(1);
     expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
   });
-  it('keeps Customer-0 telemetry unchanged in the customer0 shard', () => {
+  it('keeps the customer0 connector set in the customer0 shard', () => {
     const { output } = runHook(
-      {
-        ...existing,
-        nightshift: { ...existing.nightshift, github: { gh: 'gh-token', org: 'org-token' } },
-        nightshiftOrcaEs: orca,
-      },
+      { ...existing, nightshiftOrcaEs: orca },
       { EVAL_SHARD_ID: 'customer0' }
     );
-    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL).toBe(existing.nightshift.telemetry.url);
-    expect(output.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG).toBe(
-      Path.join(__dirname, 'kibana.customer0.yml')
-    );
-    expect(output.env.NIGHTSHIFT_GITHUB_GH_TOKEN).toBe('gh-token');
-    expect(output.env).not.toHaveProperty('NIGHTSHIFT_ORCA_TELEMETRY');
+    expect(output.env).toMatchObject({
+      NIGHTSHIFT_CONNECTOR_SET: 'customer0',
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/customer0.yml'),
+      NIGHTSHIFT_C0_ES_URL: existing.nightshift.telemetry.url,
+      NIGHTSHIFT_GITHUB_GH_TOKEN: 'gh-token',
+    });
+    expect(output.env).not.toHaveProperty('NIGHTSHIFT_ORCABENCH_ES_API_KEY');
   });
   it('selects ORCA from NIGHTSHIFT_DATASETS for local runs outside CI', () => {
     const { output, status } = runHook(
@@ -514,16 +518,17 @@ describe('ORCA CI shard', () => {
       { NIGHTSHIFT_DATASETS: 'orcabench' }
     );
     expect(status).toBe(0);
-    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY).toBe(orca.apiKey);
+    expect(output.env.NIGHTSHIFT_ORCABENCH_ES_API_KEY).toBe(orca.apiKey);
+    expect(output.env).not.toHaveProperty('NIGHTSHIFT_C0_ES_API_KEY');
+    expect(output.env).not.toHaveProperty('NIGHTSHIFT_GITHUB_GH_TOKEN');
   });
   it.each([
     undefined,
     { url: orca.url },
     { apiKey: orca.apiKey },
     { ...orca, url: 'https://user:password@orca.example' },
-    { ...orca, readableIndices: '' },
   ])(
-    'fails without a complete ORCA credential instead of using Customer-0 telemetry: %j',
+    'fails without a complete ORCA credential instead of using the customer0 set: %j',
     (nightshiftOrcaEs) => {
       const { status, stderr } = runHook(
         { ...existing, nightshiftOrcaEs },
