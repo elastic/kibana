@@ -34,6 +34,12 @@ const renderModal = () => {
   return { createDestination };
 };
 
+// Typing long values key by key times out on CI.
+const pasteInto = async (testSubject: string, value: string) => {
+  await userEvent.click(screen.getByTestId(testSubject));
+  await userEvent.paste(value);
+};
+
 describe('CreateDestinationModal', () => {
   it('only shows the errors of fields the user has left', async () => {
     renderModal();
@@ -92,16 +98,13 @@ describe('CreateDestinationModal', () => {
       const { createDestination } = renderModal();
       await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
       await userEvent.click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
-      await userEvent.type(screen.getByTestId('streamsCreateDestinationIndex'), 'shared-idx');
-      await userEvent.type(
-        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchEndpoint'),
+      await pasteInto('streamsCreateDestinationIndex', 'shared-idx');
+      await pasteInto(
+        'streamsCreateDestinationRemoteElasticsearchEndpoint',
         'https://es.example.com:443'
       );
-      await userEvent.type(
-        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchApiKey'),
-        'remote-key'
-      );
-      await userEvent.type(screen.getByTestId('streamsCreateDestinationName'), 'Central');
+      await pasteInto('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
+      await pasteInto('streamsCreateDestinationName', 'Central');
       await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
 
       await waitFor(() =>
