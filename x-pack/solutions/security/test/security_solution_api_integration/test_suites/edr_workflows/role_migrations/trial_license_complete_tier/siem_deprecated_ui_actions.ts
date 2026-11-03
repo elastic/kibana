@@ -39,29 +39,59 @@ const CAPABILITIES_WITHOUT_CURRENT_COUNTERPART: string[] = [ALERTS_UI_UPDATE_DEP
 const GLOBAL_ARTIFACT_CAPABILITY = 'writeGlobalArtifacts';
 
 /**
- * The reverse direction has one exception. Before `siemV3` moved global artifact management into
- * its own sub-feature, each artifact privilege carried the capability directly — see the
- * `v1_features` and `v2_features` `product_feature_config.ts`. The forward mapping preserves that
- * reach, so on those two versions these privileges grant the current `writeGlobalArtifacts` action
- * without holding a deprecated counterpart of their own.
+ * The reverse direction has two sanctioned widenings, both of which exist to preserve what a
+ * deprecated privilege already reached. Each is deliberately narrow: a capability is tolerated
+ * only on the exact versions and privileges the mapping targets.
+ *
+ * Global artifact management. Before `siemV3` gave it a sub-feature of its own, each artifact
+ * privilege carried the capability directly (`v1_features` and `v2_features`
+ * `product_feature_config.ts`), and on ESS `addGlobalArtifactManagementToMinimalAll` extends the
+ * same reach to `minimal_all`.
  */
-const PRIVILEGES_WITH_IMPLICIT_GLOBAL_ARTIFACTS: Record<string, string[]> = {
-  [SECURITY_FEATURE_ID_V1]: [
-    'all',
-    'blocklist_all',
-    'endpoint_exceptions_all',
-    'event_filters_all',
-    'host_isolation_exceptions_all',
-    'trusted_applications_all',
-  ],
-  [SECURITY_FEATURE_ID_V2]: [
-    'all',
-    'blocklist_all',
-    'endpoint_exceptions_all',
-    'event_filters_all',
-    'host_isolation_exceptions_all',
-    'trusted_applications_all',
-  ],
+const GLOBAL_ARTIFACT_FEATURE_IDS: string[] = [SECURITY_FEATURE_ID_V1, SECURITY_FEATURE_ID_V2];
+const GLOBAL_ARTIFACT_PRIVILEGES: string[] = [
+  'all',
+  'minimal_all',
+  'blocklist_all',
+  'endpoint_exceptions_all',
+  'event_filters_all',
+  'host_isolation_exceptions_all',
+  'trusted_applications_all',
+];
+
+/**
+ * Endpoint exceptions. ESS never shipped an Endpoint Exceptions sub-feature privilege before
+ * `siemV4`; the capability lived in the top-level `read` and `all` and their `minimal_` variants.
+ * `security_solution_ess` `product_features_extensions.ts` maps those privileges onto the current
+ * sub-feature so the reach survives, leaving the deprecated side without a `ui:` counterpart of
+ * its own. Serverless has the sub-feature, so these entries never match there.
+ */
+const ENDPOINT_EXCEPTION_FEATURE_IDS: string[] = [
+  SECURITY_FEATURE_ID_V1,
+  SECURITY_FEATURE_ID_V2,
+  SECURITY_FEATURE_ID_V3,
+];
+const ENDPOINT_EXCEPTION_PRIVILEGES: Record<string, string[]> = {
+  showEndpointExceptions: ['all', 'read', 'minimal_all', 'minimal_read'],
+  crudEndpointExceptions: ['all', 'minimal_all'],
+};
+
+const isSanctionedWidening = (
+  featureId: string,
+  privilegeId: string,
+  capability: string
+): boolean => {
+  if (capability === GLOBAL_ARTIFACT_CAPABILITY) {
+    return (
+      GLOBAL_ARTIFACT_FEATURE_IDS.includes(featureId) &&
+      GLOBAL_ARTIFACT_PRIVILEGES.includes(privilegeId)
+    );
+  }
+
+  return (
+    ENDPOINT_EXCEPTION_FEATURE_IDS.includes(featureId) &&
+    (ENDPOINT_EXCEPTION_PRIVILEGES[capability] ?? []).includes(privilegeId)
+  );
 };
 
 type FeaturePrivileges = Record<string, Record<string, string[]>>;
@@ -94,8 +124,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         const deprecatedPrefix = `ui:${featureId}/`;
         const currentPrefix = `ui:${SECURITY_FEATURE_ID_V5}/`;
-        const implicitGlobalArtifacts = PRIVILEGES_WITH_IMPLICIT_GLOBAL_ARTIFACTS[featureId] ?? [];
-
         const missing: string[] = [];
         const unexpected: string[] = [];
         let checked = 0;
@@ -118,11 +146,10 @@ export default function ({ getService }: FtrProviderContext) {
           // A privilege granting a current action it never held on the deprecated version widens
           // what that version reaches, which the navigation specs asserted through the UI.
           for (const capability of current) {
-            const isImplicitGlobalArtifactGrant =
-              capability === GLOBAL_ARTIFACT_CAPABILITY &&
-              implicitGlobalArtifacts.includes(privilegeId);
-
-            if (deprecated.includes(capability) || isImplicitGlobalArtifactGrant) {
+            if (
+              deprecated.includes(capability) ||
+              isSanctionedWidening(featureId, privilegeId, capability)
+            ) {
               continue;
             }
 
