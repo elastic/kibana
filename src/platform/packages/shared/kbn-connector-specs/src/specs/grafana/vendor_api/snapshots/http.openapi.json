@@ -1,0 +1,1534 @@
+{
+  "components": {
+    "responses": {
+      "badRequestError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBody"
+            }
+          }
+        }
+      },
+      "dashboardResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/DashboardFullWithMeta"
+            }
+          }
+        }
+      },
+      "forbiddenError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBody"
+            }
+          }
+        }
+      },
+      "getAnnotationsResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "items": {
+                "$ref": "#/components/schemas/Annotation"
+              },
+              "type": "array"
+            }
+          }
+        }
+      },
+      "internalServerError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBody"
+            }
+          }
+        }
+      },
+      "notAcceptableError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBody"
+            }
+          }
+        }
+      },
+      "notFoundError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBody"
+            }
+          }
+        }
+      },
+      "okResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SuccessResponseBody"
+            }
+          }
+        }
+      },
+      "postAnnotationResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "id": {
+                  "format": "int64",
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "message"
+              ],
+              "type": "object"
+            }
+          }
+        }
+      },
+      "searchResponse": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/HitList"
+            }
+          }
+        }
+      },
+      "unauthorisedError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBody"
+            }
+          }
+        }
+      },
+      "unprocessableEntityError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponseBody"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AlertQuery": {
+        "properties": {
+          "datasourceUid": {
+            "type": "string"
+          },
+          "model": {
+            "type": "object"
+          },
+          "queryType": {
+            "type": "string"
+          },
+          "refId": {
+            "type": "string"
+          },
+          "relativeTimeRange": {
+            "$ref": "#/components/schemas/RelativeTimeRange"
+          }
+        },
+        "title": "AlertQuery represents a single query associated with an alert definition.",
+        "type": "object"
+      },
+      "AlertRuleNotificationSettings": {
+        "properties": {
+          "active_time_intervals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "group_by": {
+            "default": [
+              "alertname",
+              "grafana_folder"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "group_interval": {
+            "type": "string"
+          },
+          "group_wait": {
+            "type": "string"
+          },
+          "mute_time_intervals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "policy": {
+            "type": "string"
+          },
+          "receiver": {
+            "type": "string"
+          },
+          "repeat_interval": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "receiver"
+        ],
+        "type": "object"
+      },
+      "Annotation": {
+        "properties": {
+          "alertId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "alertName": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "created": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dashboardId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dashboardUID": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Json"
+          },
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "login": {
+            "type": "string"
+          },
+          "newState": {
+            "type": "string"
+          },
+          "panelId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "prevState": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "text": {
+            "type": "string"
+          },
+          "time": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeEnd": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "userId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "userUID": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AnnotationActions": {
+        "properties": {
+          "canAdd": {
+            "type": "boolean"
+          },
+          "canDelete": {
+            "type": "boolean"
+          },
+          "canEdit": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "AnnotationPermission": {
+        "properties": {
+          "dashboard": {
+            "$ref": "#/components/schemas/AnnotationActions"
+          }
+        },
+        "type": "object"
+      },
+      "ContactPoints": {
+        "items": {
+          "$ref": "#/components/schemas/EmbeddedContactPoint"
+        },
+        "type": "array"
+      },
+      "DashboardFullWithMeta": {
+        "properties": {
+          "dashboard": {
+            "$ref": "#/components/schemas/Json"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/DashboardMeta"
+          }
+        },
+        "type": "object"
+      },
+      "DashboardMeta": {
+        "properties": {
+          "annotationsPermissions": {
+            "$ref": "#/components/schemas/AnnotationPermission"
+          },
+          "apiVersion": {
+            "type": "string"
+          },
+          "canAdmin": {
+            "type": "boolean"
+          },
+          "canDelete": {
+            "type": "boolean"
+          },
+          "canEdit": {
+            "type": "boolean"
+          },
+          "canSave": {
+            "type": "boolean"
+          },
+          "canStar": {
+            "type": "boolean"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "expires": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "folderId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "folderTitle": {
+            "type": "string"
+          },
+          "folderUid": {
+            "type": "string"
+          },
+          "folderUrl": {
+            "type": "string"
+          },
+          "hasAcl": {
+            "type": "boolean"
+          },
+          "isFolder": {
+            "type": "boolean"
+          },
+          "isSnapshot": {
+            "type": "boolean"
+          },
+          "provisioned": {
+            "type": "boolean"
+          },
+          "provisionedExternalId": {
+            "type": "string"
+          },
+          "publicDashboardEnabled": {
+            "type": "boolean"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedBy": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Duration": {
+        "format": "int64",
+        "type": "integer"
+      },
+      "EmbeddedContactPoint": {
+        "properties": {
+          "disableResolveMessage": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "provenance": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/Json"
+          },
+          "type": {
+            "enum": [
+              "alertmanager",
+              "dingding",
+              "discord",
+              "email",
+              "googlechat",
+              "kafka",
+              "line",
+              "opsgenie",
+              "pagerduty",
+              "pushover",
+              "sensugo",
+              "slack",
+              "teams",
+              "telegram",
+              "threema",
+              "victorops",
+              "webhook",
+              "wecom"
+            ],
+            "type": "string"
+          },
+          "uid": {
+            "maxLength": 40,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9\\-\\_]+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "settings"
+        ],
+        "type": "object"
+      },
+      "ErrorResponseBody": {
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "ForbiddenError": {
+        "properties": {
+          "body": {
+            "$ref": "#/components/schemas/PublicError"
+          }
+        },
+        "type": "object"
+      },
+      "Hit": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "folderId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "folderTitle": {
+            "type": "string"
+          },
+          "folderUid": {
+            "type": "string"
+          },
+          "folderUrl": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isDeleted": {
+            "type": "boolean"
+          },
+          "isStarred": {
+            "type": "boolean"
+          },
+          "orgId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "permanentlyDeleteDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "sortMeta": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sortMetaName": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/HitType"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "uri": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HitList": {
+        "items": {
+          "$ref": "#/components/schemas/Hit"
+        },
+        "type": "array"
+      },
+      "HitType": {
+        "type": "string"
+      },
+      "Json": {
+        "type": "object"
+      },
+      "MatchRegexps": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "title": "MatchRegexps represents a map of Regexp.",
+        "type": "object"
+      },
+      "MatchType": {
+        "format": "int64",
+        "title": "MatchType is an enum for label matching types.",
+        "type": "integer"
+      },
+      "Matcher": {
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/MatchType"
+          },
+          "Value": {
+            "type": "string"
+          }
+        },
+        "title": "Matcher models the matching of a label.",
+        "type": "object"
+      },
+      "Matchers": {
+        "items": {
+          "$ref": "#/components/schemas/Matcher"
+        },
+        "type": "array"
+      },
+      "MuteTimeInterval": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "time_intervals": {
+            "items": {
+              "$ref": "#/components/schemas/TimeInterval"
+            },
+            "type": "array"
+          }
+        },
+        "title": "MuteTimeInterval represents a named set of time intervals for which a route should be muted.",
+        "type": "object"
+      },
+      "MuteTimings": {
+        "items": {
+          "$ref": "#/components/schemas/MuteTimeInterval"
+        },
+        "type": "array"
+      },
+      "ObjectMatcher": {
+        "items": {
+          "type": "string"
+        },
+        "title": "ObjectMatcher is a matcher that can be used to filter alerts.",
+        "type": "array"
+      },
+      "ObjectMatchers": {
+        "items": {
+          "$ref": "#/components/schemas/ObjectMatcher"
+        },
+        "title": "ObjectMatchers is a list of matchers that can be used to filter alerts.",
+        "type": "array"
+      },
+      "PatchAnnotationsCmd": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Json"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "text": {
+            "type": "string"
+          },
+          "time": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeEnd": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PostAnnotationsCmd": {
+        "properties": {
+          "dashboardId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dashboardUID": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Json"
+          },
+          "panelId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "text": {
+            "type": "string"
+          },
+          "time": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeEnd": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
+      "Provenance": {
+        "type": "string"
+      },
+      "ProvisionedAlertRule": {
+        "properties": {
+          "annotations": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AlertQuery"
+            },
+            "type": "array"
+          },
+          "execErrState": {
+            "enum": [
+              "OK",
+              "Alerting",
+              "Error"
+            ],
+            "type": "string"
+          },
+          "folderUID": {
+            "type": "string"
+          },
+          "for": {
+            "format": "duration",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isPaused": {
+            "type": "boolean"
+          },
+          "keep_firing_for": {
+            "format": "duration",
+            "type": "string"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "missingSeriesEvalsToResolve": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "noDataState": {
+            "enum": [
+              "Alerting",
+              "NoData",
+              "OK"
+            ],
+            "type": "string"
+          },
+          "notification_settings": {
+            "$ref": "#/components/schemas/AlertRuleNotificationSettings"
+          },
+          "orgID": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "record": {
+            "$ref": "#/components/schemas/Record"
+          },
+          "ruleGroup": {
+            "maxLength": 190,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 190,
+            "minLength": 1,
+            "type": "string"
+          },
+          "uid": {
+            "maxLength": 40,
+            "minLength": 1,
+            "pattern": "^[a-zA-Z0-9-_]+$",
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "orgID",
+          "folderUID",
+          "ruleGroup",
+          "title",
+          "condition",
+          "data",
+          "noDataState",
+          "execErrState",
+          "for"
+        ],
+        "type": "object"
+      },
+      "ProvisionedAlertRules": {
+        "items": {
+          "$ref": "#/components/schemas/ProvisionedAlertRule"
+        },
+        "type": "array"
+      },
+      "PublicError": {
+        "properties": {
+          "extra": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          },
+          "messageId": {
+            "type": "string"
+          },
+          "statusCode": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Record": {
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "metric": {
+            "type": "string"
+          },
+          "target_datasource_uid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "metric",
+          "from"
+        ],
+        "type": "object"
+      },
+      "RelativeTimeRange": {
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/Duration"
+          },
+          "to": {
+            "$ref": "#/components/schemas/Duration"
+          }
+        },
+        "type": "object"
+      },
+      "Route": {
+        "properties": {
+          "active_time_intervals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "continue": {
+            "type": "boolean"
+          },
+          "group_by": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "group_interval": {
+            "type": "string"
+          },
+          "group_wait": {
+            "type": "string"
+          },
+          "match": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "match_re": {
+            "$ref": "#/components/schemas/MatchRegexps"
+          },
+          "matchers": {
+            "$ref": "#/components/schemas/Matchers"
+          },
+          "mute_time_intervals": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "object_matchers": {
+            "$ref": "#/components/schemas/ObjectMatchers"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "receiver": {
+            "type": "string"
+          },
+          "repeat_interval": {
+            "type": "string"
+          },
+          "routes": {
+            "items": {
+              "$ref": "#/components/schemas/Route"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SuccessResponseBody": {
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimeInterval": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "time_intervals": {
+            "items": {
+              "$ref": "#/components/schemas/TimeInterval"
+            },
+            "type": "array"
+          }
+        },
+        "title": "TimeInterval represents a named set of time intervals for which a route should be muted.",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "api_key": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "basic": {
+        "scheme": "basic",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Grafana HTTP API."
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/annotations": {
+      "get": {
+        "operationId": "getAnnotations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dashboardId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dashboardUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "panelId",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "enum": [
+                "alert",
+                "annotation"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "matchAny",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/getAnnotationsResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorisedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/internalServerError"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postAnnotation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostAnnotationsCmd"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/postAnnotationResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/badRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorisedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/forbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/internalServerError"
+          }
+        }
+      }
+    },
+    "/annotations/{annotation_id}": {
+      "delete": {
+        "operationId": "deleteAnnotationByID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "annotation_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/okResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorisedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/forbiddenError"
+          },
+          "500": {
+            "$ref": "#/components/responses/internalServerError"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchAnnotation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "annotation_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchAnnotationsCmd"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/okResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorisedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/forbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/notFoundError"
+          },
+          "500": {
+            "$ref": "#/components/responses/internalServerError"
+          }
+        }
+      }
+    },
+    "/dashboards/uid/{uid}": {
+      "get": {
+        "deprecated": true,
+        "operationId": "getDashboardByUID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "uid",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/dashboardResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorisedError"
+          },
+          "403": {
+            "$ref": "#/components/responses/forbiddenError"
+          },
+          "404": {
+            "$ref": "#/components/responses/notFoundError"
+          },
+          "406": {
+            "$ref": "#/components/responses/notAcceptableError"
+          },
+          "500": {
+            "$ref": "#/components/responses/internalServerError"
+          }
+        }
+      }
+    },
+    "/search": {
+      "get": {
+        "operationId": "search",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tag",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "enum": [
+                "dash-folder",
+                "dash-db"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dashboardIds",
+            "schema": {
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dashboardUIDs",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "folderIds",
+            "schema": {
+              "items": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "folderUIDs",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "starred",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "permission",
+            "schema": {
+              "default": "View",
+              "enum": [
+                "Edit",
+                "View"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "alpha-asc",
+              "enum": [
+                "alpha-asc",
+                "alpha-desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "deleted",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/searchResponse"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorisedError"
+          },
+          "422": {
+            "$ref": "#/components/responses/unprocessableEntityError"
+          },
+          "500": {
+            "$ref": "#/components/responses/internalServerError"
+          }
+        }
+      }
+    },
+    "/v1/provisioning/alert-rules": {
+      "get": {
+        "deprecated": true,
+        "operationId": "RouteGetAlertRules",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisionedAlertRules"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/provisioning/alert-rules/{UID}": {
+      "get": {
+        "deprecated": true,
+        "operationId": "RouteGetAlertRule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "UID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisionedAlertRule"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          },
+          "404": {}
+        }
+      }
+    },
+    "/v1/provisioning/contact-points": {
+      "get": {
+        "deprecated": true,
+        "operationId": "RouteGetContactpoints",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactPoints"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/provisioning/mute-timings": {
+      "get": {
+        "deprecated": true,
+        "operationId": "RouteGetMuteTimings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MuteTimings"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/provisioning/policies": {
+      "get": {
+        "deprecated": true,
+        "operationId": "RouteGetPolicyTree",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Route"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "basic": []
+    },
+    {
+      "api_key": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ]
+}

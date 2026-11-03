@@ -452,7 +452,7 @@ describe('buildSseData', () => {
     expect(secondEntry.data.corroborated_technique_id).toBe('T1552.001');
   });
 
-  it('returns a single report-scoped entry when Tier 2 produced no behaviors', async () => {
+  it('returns a single report-scoped entry when Behavior Hunt produced no behaviors', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(HIT_TIER1_RESULT);
@@ -484,7 +484,7 @@ describe('buildSseData', () => {
     expect(huntResultOf(entries[0]).tier2?.status).toBe('no_behaviors_found');
   });
 
-  it('emits a Tier 2-only hit with tier2 hit_sources and Tier 2 entities', async () => {
+  it('emits a Behavior Hunt-only hit with tier2 hit_sources and Behavior Hunt entities', async () => {
     const { huntForThreat } = jest.requireMock('../tier1/hunt_for_threat');
     const { huntBehavior } = jest.requireMock('../tier2/hunt_behavior');
     huntForThreat.mockResolvedValue(CLEAN_TIER1_RESULT);
@@ -663,7 +663,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     ]);
   });
 
-  it('falls back to one report-scoped entry when Tier 1 hit and no technique did', async () => {
+  it('falls back to one report-scoped entry when IOC Hunt hit and no technique did', async () => {
     // `HIT_TIER1_RESULT`'s hits carry no `matched.technique_id`, so they are shared
     // context for the report rather than corroboration of either proposal.
     const result = await run(HIT_TIER1_RESULT, [
@@ -692,7 +692,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
       'T1552.001',
     ]);
     expect(entries[0].data.evidence_against).toEqual([
-      'Tier 2 executed 2 proposed technique(s) with no required-index rows: T1078.004, T1552.001.',
+      'Behavior Hunt executed 2 proposed technique(s) with no required-index rows: T1078.004, T1552.001.',
     ]);
     // Neither proposed technique was corroborated, so this report-scoped entry must not
     // claim either one by name -- packaging relies on this to avoid crediting a technique
@@ -703,7 +703,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     );
   });
 
-  it('does not let a Tier 1 hit attributed to another technique corroborate this one', async () => {
+  it('does not let an IOC Hunt hit attributed to another technique corroborate this one', async () => {
     const result = await run(
       {
         ...HIT_TIER1_RESULT,
@@ -739,7 +739,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     expect(entries[0].attachment_id).toEqual(idFor());
   });
 
-  it('publishes a technique entry for a technique a Tier 1 hit was attributed to', async () => {
+  it('publishes a technique entry for a technique an IOC Hunt hit was attributed to', async () => {
     const result = await run(
       {
         ...HIT_TIER1_RESULT,
@@ -778,7 +778,7 @@ describe('buildSseData publishes an entry only for a corroborated technique', ()
     // sentence says whose count it is, that it is a match count rather than a
     // confirmed one, and how much of it this entry carries.
     expect(entries[0].data.evidence_for).toContain(
-      'Tier 1 matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
+      'IOC Hunt matched 1 event(s) for this report in the hunt window, at least one in a required index; 1 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
     expect(entries[0].data.corroborated_technique_id).toBe('T1552.001');
   });
@@ -959,7 +959,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     ).toThrow(/time_range/);
   });
 
-  it('keeps Tier 1 per_index order when the list overflows the schema cap', () => {
+  it('keeps IOC Hunt per_index order when the list overflows the schema cap', () => {
     // Tier 1 aggregates up to 500 `_index` buckets; the schema accepts 20. The mapper
     // no longer reorders confirming-first: it keeps Tier 1's order and truncates.
     const perIndex = Array.from({ length: 25 }, (_, i) => ({
@@ -1122,7 +1122,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     const [entry] = buildSseData(result, 'tr-1', { spaceId: 'default' });
 
     expect(entry.data.evidence_against).toEqual([
-      'Tier 2 executed 1 proposed technique(s) with no required-index rows: T1078.004.',
+      'Behavior Hunt executed 1 proposed technique(s) with no required-index rows: T1078.004.',
     ]);
     // The reason survives in the structured payload, so the distinction is recoverable
     // rather than asserted in prose the schema cannot check.
@@ -1134,7 +1134,7 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     });
   });
 
-  it('shares the event cap between the tiers instead of letting Tier 1 fill it', () => {
+  it('shares the event cap between the tiers instead of letting IOC Hunt fill it', () => {
     // Tier 1 returns up to the coordinator's `size: 100`, and `events` caps at 50, so
     // appending Tier 2 after Tier 1 drops every ref to the behavior that confirmed
     // the technique — the SSE keeps the report's sample and loses its own evidence.
@@ -1177,11 +1177,11 @@ describe('buildSseData holds coordinator output to the SSE schema bounds', () =>
     // The Tier 1 count quoted to the reader is the refs the entry carries, not the
     // ones it was offered.
     expect(entry.data.evidence_for).toContain(
-      'Tier 1 matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
+      'IOC Hunt matched 50 event(s) for this report in the hunt window, at least one in a required index; 49 are referenced here (see hunt_result.tier1.per_index for the required/optional split).'
     );
   });
 
-  it('shares the entity cap between the tiers instead of letting Tier 1 fill it', () => {
+  it('shares the entity cap between the tiers instead of letting IOC Hunt fill it', () => {
     // 50 Tier 1 affected hosts are within the default `maxAssets`, and `entities` caps
     // at 50, so the technique's own host and user are the ones that fall off.
     const hosts = Array.from({ length: 50 }, (_, i) => ({
