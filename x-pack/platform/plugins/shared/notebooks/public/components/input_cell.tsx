@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, type PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiComboBox,
   EuiDualRange,
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiPopover,
   EuiSuperDatePicker,
-  EuiTextArea,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -27,118 +21,42 @@ import type { InputCellDefinition, InputDefinition } from '../../common/types';
 import { getExposedParamNames } from '../model/references';
 import type { InputValue } from '../model/types';
 import { CellFrame } from './cell_frame';
+import { InputSettingsFlyout } from './input_settings_flyout';
 import { useNotebook } from './notebook_context';
 
 const RANGE_DEBOUNCE_MS = 300;
 
-const CONFIGURE_LABEL = i18n.translate('xpack.notebook.inputCell.configure', {
-  defaultMessage: 'Configure input',
-});
-
-const RANGE_FIELD_LABELS = {
-  min: i18n.translate('xpack.notebook.inputCell.rangeMin', { defaultMessage: 'Min' }),
-  max: i18n.translate('xpack.notebook.inputCell.rangeMax', { defaultMessage: 'Max' }),
-  step: i18n.translate('xpack.notebook.inputCell.rangeStep', { defaultMessage: 'Step' }),
-} as const;
-
-const ConfigPopover = ({
-  isOpen,
-  setIsOpen,
-  children,
-}: PropsWithChildren<{ isOpen: boolean; setIsOpen: (isOpen: boolean) => void }>) => (
-  <EuiPopover
-    isOpen={isOpen}
-    closePopover={() => setIsOpen(false)}
-    aria-label={CONFIGURE_LABEL}
-    button={
-      <EuiToolTip content={CONFIGURE_LABEL} disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="gear"
-          aria-label={CONFIGURE_LABEL}
-          onClick={() => setIsOpen(!isOpen)}
-        />
-      </EuiToolTip>
-    }
-  >
-    {children}
-  </EuiPopover>
-);
-
 const useInputCell = (cell: InputCellDefinition) => {
   const { store } = useNotebook();
   const inputValues = useStateFromPublishingSubject(store.inputValues$);
-  const updateInput = (input: InputDefinition) =>
-    store.updateCell(cell.id, (current) =>
-      current.type === 'input' ? { ...current, input } : current
-    );
   return {
     value: inputValues[cell.id],
     setValue: (value: InputValue) => store.setInputValue(cell.id, value),
-    updateInput,
   };
 };
 
-const DropdownControl = ({
-  cell,
-  input,
-}: {
-  cell: InputCellDefinition;
-  input: Extract<InputDefinition, { kind: 'dropdown' }>;
-}) => {
+const DropdownControl = ({ cell }: { cell: InputCellDefinition }) => {
   const { store } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
-  const { value, setValue, updateInput } = useInputCell(cell);
-  const [isConfigOpen, setIsConfigOpen] = useState(!input.optionsQuery);
-  const [optionsQuery, setOptionsQuery] = useState(input.optionsQuery);
+  const { value, setValue } = useInputCell(cell);
   const options = runtime.output?.kind === 'input' ? runtime.output.options ?? [] : [];
   const selected = value?.kind === 'dropdown' ? value.value : null;
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem css={{ maxWidth: 400 }}>
-        <EuiComboBox
-          compressed
-          singleSelection={{ asPlainText: true }}
-          placeholder={i18n.translate('xpack.notebook.inputCell.dropdownPlaceholder', {
-            defaultMessage: 'Any (binds null)',
-          })}
-          isLoading={runtime.status === 'running'}
-          options={options.map((option) => ({ label: option }))}
-          selectedOptions={selected === null ? [] : [{ label: selected }]}
-          onChange={([choice]) => setValue({ kind: 'dropdown', value: choice?.label ?? null })}
-          aria-label={cell.name}
-          data-test-subj={`notebookDropdown-${cell.name}`}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ConfigPopover isOpen={isConfigOpen} setIsOpen={setIsConfigOpen}>
-          <EuiFormRow
-            label={i18n.translate('xpack.notebook.inputCell.optionsQuery', {
-              defaultMessage: 'Options query (first column)',
-            })}
-            helpText={i18n.translate('xpack.notebook.inputCell.optionsQueryHelp', {
-              defaultMessage: 'ES|QL; may reference ?_tstart and ?_tend.',
-            })}
-          >
-            <EuiTextArea
-              rows={4}
-              value={optionsQuery}
-              onChange={(event) => setOptionsQuery(event.target.value)}
-              css={{ minWidth: 420, fontFamily: 'monospace' }}
-            />
-          </EuiFormRow>
-          <EuiButtonEmpty
-            size="s"
-            onClick={() => {
-              updateInput({ ...input, optionsQuery });
-              setIsConfigOpen(false);
-            }}
-          >
-            {i18n.translate('xpack.notebook.inputCell.apply', { defaultMessage: 'Apply' })}
-          </EuiButtonEmpty>
-        </ConfigPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiComboBox
+      compressed
+      singleSelection={{ asPlainText: true }}
+      placeholder={i18n.translate('xpack.notebook.inputCell.dropdownPlaceholder', {
+        defaultMessage: 'Any (binds null)',
+      })}
+      isLoading={runtime.status === 'running'}
+      options={options.map((option) => ({ label: option }))}
+      selectedOptions={selected === null ? [] : [{ label: selected }]}
+      onChange={([choice]) => setValue({ kind: 'dropdown', value: choice?.label ?? null })}
+      aria-label={cell.name}
+      css={{ maxWidth: 400 }}
+      data-test-subj={`notebookDropdown-${cell.name}`}
+    />
   );
 };
 
@@ -150,10 +68,9 @@ const RangeControl = ({
   input: Extract<InputDefinition, { kind: 'range' }>;
 }) => {
   const { store } = useNotebook();
-  const { value, setValue, updateInput } = useInputCell(cell);
+  const { value, setValue } = useInputCell(cell);
   const committed = value?.kind === 'range' ? value.value : null;
   const [local, setLocal] = useState<[number, number]>(committed ?? [input.min, input.max]);
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
   const commit = useMemo(
     () =>
       debounce(
@@ -197,25 +114,6 @@ const RangeControl = ({
           {i18n.translate('xpack.notebook.inputCell.clear', { defaultMessage: 'Clear' })}
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ConfigPopover isOpen={isConfigOpen} setIsOpen={setIsConfigOpen}>
-          <EuiFlexGroup gutterSize="s">
-            {(['min', 'max', 'step'] as const).map((key) => (
-              <EuiFlexItem key={key}>
-                <EuiFormRow label={RANGE_FIELD_LABELS[key]}>
-                  <EuiFieldNumber
-                    compressed
-                    value={input[key] ?? ''}
-                    onChange={(event) =>
-                      updateInput({ ...input, [key]: Number(event.target.value) })
-                    }
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </ConfigPopover>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -245,12 +143,44 @@ const TimeControl = ({ cell }: { cell: InputCellDefinition }) => {
 export const InputCell = ({ cell }: { cell: InputCellDefinition }) => {
   const { store } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
+  const [isEditing, setIsEditing] = useState(false);
   const { input } = cell;
   const outputs = getExposedParamNames(cell).map((name) => `?${name}`);
+  const configurable = input.kind === 'dropdown' || input.kind === 'range' ? input : undefined;
 
   return (
-    <CellFrame cell={cell} runtime={runtime} outputs={outputs}>
-      {input.kind === 'dropdown' && <DropdownControl cell={cell} input={input} />}
+    <CellFrame
+      cell={cell}
+      runtime={runtime}
+      outputs={outputs}
+      headerActions={
+        configurable && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconType="pencil"
+              onClick={() => setIsEditing(true)}
+              data-test-subj="notebookInputEdit"
+            >
+              {i18n.translate('xpack.notebook.inputCell.edit', { defaultMessage: 'Edit' })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )
+      }
+    >
+      {isEditing && configurable && (
+        <InputSettingsFlyout
+          name={cell.name}
+          input={configurable}
+          onApply={(next) =>
+            store.updateCell(cell.id, (current) =>
+              current.type === 'input' ? { ...current, input: next } : current
+            )
+          }
+          onClose={() => setIsEditing(false)}
+        />
+      )}
+      {input.kind === 'dropdown' && <DropdownControl cell={cell} />}
       {input.kind === 'range' && <RangeControl cell={cell} input={input} />}
       {input.kind === 'time' && <TimeControl cell={cell} />}
     </CellFrame>
