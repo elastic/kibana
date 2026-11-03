@@ -21,6 +21,7 @@ import {
 } from '@kbn/synthtrace-client';
 import {
   generatePerMinute,
+  getDefaultSeed,
   getTimestamp,
   parseBooleanOption,
   parseScale,
@@ -62,7 +63,10 @@ export interface DigitalExperienceMobileScenarioOpts {
    * time, so a scale below 1 thins out every app in proportion.
    */
   scale: number;
-  /** Makes the data reproducible. Random when unset. */
+  /**
+   * Makes the data reproducible. Derived from the run's `from` when unset, see
+   * {@link getDefaultSeed}.
+   */
   seed?: string;
   /** Generates sessions of one platform only. Apps without devices of that platform write nothing. */
   platform: MobilePlatformOpt;
@@ -455,7 +459,7 @@ export const generateEdotReactNativeSessions = (
     environment,
     from,
     scale,
-    seed = String(Math.random()),
+    seed = getDefaultSeed(from),
     platform,
     withManualSpans,
   }: DigitalExperienceMobileScenarioOpts & { environment: string; from: number }

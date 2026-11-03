@@ -36,7 +36,8 @@
  * - withManualSpans (boolean, default: true): set to false to drop the `app.launch` and screen
  *   spans the apps create themselves, which leaves only what the SDKs record on their own
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
- * - seed (string or number, default: random): makes the data reproducible
+ * - seed (string or number, default: the run's `from` in milliseconds): makes the data
+ *   reproducible
  *
  * Run:
  *   node scripts/synthtrace digital_experience_mobile --from=now-30m --to=now
@@ -47,6 +48,7 @@ import type { Scenario } from '../cli/scenario';
 import type { OtelDocument } from '../lib/otel/otel_synthtrace_es_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { getDefaultSeed } from './helpers/digital_experience_apps';
 import {
   generateEdotReactNativeSessions,
   parseDigitalExperienceMobileScenarioOpts,
@@ -55,7 +57,8 @@ import {
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger, from }) => {
-  const opts = parseDigitalExperienceMobileScenarioOpts(scenarioOpts);
+  const parsedOpts = parseDigitalExperienceMobileScenarioOpts(scenarioOpts);
+  const opts = { ...parsedOpts, seed: parsedOpts.seed ?? getDefaultSeed(from) };
   logger.info(`Generating EDOT React Native data with ${JSON.stringify(opts)}`);
 
   return {

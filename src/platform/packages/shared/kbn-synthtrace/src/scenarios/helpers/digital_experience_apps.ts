@@ -50,7 +50,8 @@ export interface DigitalExperienceScenarioOpts {
   scale: number;
   /**
    * Makes the data reproducible: every session, with its IDs, browser, page views and events, is
-   * derived from the seed, its app and its number since the epoch. Random when unset.
+   * derived from the seed, its app and its number since the epoch. Derived from the run's `from`
+   * when unset, see {@link getDefaultSeed}.
    */
   seed?: string;
 }
@@ -416,6 +417,13 @@ export const parseSeed = (value: unknown, defaultValue?: string): string | undef
   throw new Error('seed must be a non-empty string or a finite number');
 };
 
+/**
+ * The seed of a run without the `seed` option: the run's `from` in milliseconds. Synthtrace evaluates
+ * the scenario again in every worker and for every live batch, so a random default would differ
+ * between them, while `from` is the same for the whole run.
+ */
+export const getDefaultSeed = (from: number): string => String(from);
+
 /** Parses `--scenarioOpts` for the digital experience scenarios, rejecting unknown keys and values. */
 export const parseDigitalExperienceScenarioOpts = (
   opts: Record<string, unknown> | undefined
@@ -520,7 +528,7 @@ export const generateEdotBrowserSessions = (
     withSessionId,
     includeRawAttribution,
     scale,
-    seed = String(Math.random()),
+    seed = getDefaultSeed(from),
   }: DigitalExperienceScenarioOpts & { environment: string; from: number }
 ): Array<SynthtraceGenerator<EdotBrowserDocument>> =>
   DIGITAL_EXPERIENCE_APPS.map(

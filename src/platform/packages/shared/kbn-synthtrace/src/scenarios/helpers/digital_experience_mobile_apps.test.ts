@@ -29,7 +29,7 @@ const range = timerange(
 );
 
 const collect = (
-  opts: Partial<DigitalExperienceMobileScenarioOpts> = {},
+  opts: Partial<DigitalExperienceMobileScenarioOpts & { from: number }> = {},
   timeRange: Timerange = range
 ): EdotReactNativeDocument[] =>
   generateEdotReactNativeSessions(timeRange, {
@@ -191,9 +191,9 @@ describe('digital experience mobile apps', () => {
       const resourceOf = (doc: EdotReactNativeDocument) =>
         (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes) ?? {};
 
-      const sessionsByInstallation = (serviceName: string) => {
+      const sessionsByInstallation = (serviceName: string, runDocs = longDocs) => {
         const sessions = new Map<string, Map<string, { start: number; end: number }>>();
-        longDocs
+        runDocs
           .filter((doc) => serviceOf(doc) === serviceName && doc.attributes?.['session.id'])
           .forEach((doc) => {
             const installationId = String(resourceOf(doc)['app.installation.id']);
@@ -222,6 +222,25 @@ describe('digital experience mobile apps', () => {
               expect(start - sorted[i].end).toBeGreaterThan(30 * 60_000);
             });
           });
+        });
+      });
+
+      it('brings installations back across the workers of a run without a seed', () => {
+        // Synthtrace evaluates the scenario again in each worker, one per hour of a long run
+        const from = longRange.from.getTime();
+        const hours = [0, 1, 2, 3].map((hour) => new Date(from + hour * 60 * 60_000));
+        const workerDocs = hours
+          .slice(1)
+          .flatMap((end, i) =>
+            collect(
+              { seed: undefined, scale: 0.2, from },
+              timerange(hours[i], end, {} as ToolingLog)
+            )
+          );
+        DIGITAL_EXPERIENCE_MOBILE_APPS.forEach(({ serviceName }) => {
+          const sessions = sessionsByInstallation(serviceName, workerDocs);
+          const sessionCount = [...sessions.values()].reduce((sum, { size }) => sum + size, 0);
+          expect(sessions.size).toBeLessThan(sessionCount * 0.75);
         });
       });
 

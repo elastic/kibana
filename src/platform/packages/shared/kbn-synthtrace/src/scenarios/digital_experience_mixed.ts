@@ -25,7 +25,8 @@
  * - withSessionId (boolean, default: true): write `attributes.session.id` on EDOT Browser data
  * - includeRawAttribution (boolean, default: false): write web vital attribution JSON bodies
  * - scale (number, default: 1): multiplies the number of sessions/page loads per minute
- * - seed (string or number, default: random): makes the data reproducible
+ * - seed (string or number, default: the run's `from` in milliseconds): makes the data
+ *   reproducible
  *
  * Run:
  *   node scripts/synthtrace digital_experience_mixed --from=now-30m --to=now
@@ -38,6 +39,7 @@ import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environmen
 import { withClient } from '../lib/utils/with_client';
 import {
   generateEdotBrowserSessions,
+  getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
 } from './helpers/digital_experience_apps';
 import { generateClassicRumPageLoads } from './helpers/classic_rum_page_loads';
@@ -48,7 +50,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logger, from }) => {
   const parsedOpts = parseDigitalExperienceScenarioOpts(scenarioOpts);
   // The EDOT Browser, EDOT React Native and classic RUM data derive from the same seed
-  const opts = { ...parsedOpts, seed: parsedOpts.seed ?? String(Math.random()) };
+  const opts = { ...parsedOpts, seed: parsedOpts.seed ?? getDefaultSeed(from) };
   logger.info(
     `Generating EDOT Browser, EDOT React Native and classic RUM data with ${JSON.stringify(opts)}`
   );

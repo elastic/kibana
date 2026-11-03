@@ -18,6 +18,7 @@ import {
   DIGITAL_EXPERIENCE_APPS,
   generateEdotBrowserSessions,
   generatePerMinute,
+  getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
 } from './digital_experience_apps';
 
@@ -203,7 +204,21 @@ describe('digital experience apps', () => {
         expect(docs.length).toBeGreaterThan(0);
         expect(generate('seed-a')).toEqual(docs);
         expect(generate('seed-b')).not.toEqual(docs);
-        expect(generate(undefined)).not.toEqual(generate(undefined));
+      });
+
+      it('derives the default seed from the start of the run, which all its batches share', () => {
+        const from = range.from.getTime();
+        // Synthtrace evaluates the scenario again in every worker and for every live batch
+        const batches = [0, 61.5, 120].map((seconds) => at(seconds));
+        const batched = batches
+          .slice(1)
+          .flatMap((end, i) =>
+            generate(undefined, { timeRange: timerange(batches[i], end, {} as ToolingLog), from })
+          );
+
+        expect(sorted(batched)).toEqual(sorted(generate(undefined)));
+        expect(generate(undefined)).toEqual(generate(getDefaultSeed(from)));
+        expect(generate(undefined, { from: from - 1 })).not.toEqual(generate(undefined));
       });
 
       it('generates the same data when the run is split into batches', () => {
