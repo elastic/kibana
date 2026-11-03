@@ -332,15 +332,17 @@ const identifyComputedFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z.object({
-      start: z.number().optional(),
-      end: z.number().optional(),
-      runId: z.string().max(MAX_ID_LENGTH).optional(),
-      computedFeaturesTimeoutMs: z.number().int().min(1_000).max(240_000),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
+        start: z.number().optional(),
+        end: z.number().optional(),
+        runId: z.string().max(MAX_ID_LENGTH).optional(),
+        computedFeaturesTimeoutMs: z.number().int().min(1_000).max(240_000),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
     const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
