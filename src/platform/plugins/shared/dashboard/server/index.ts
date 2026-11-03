@@ -45,6 +45,8 @@ export { DashboardValidationError } from './dashboard_validation_error';
 export type {
   DashboardSanitizeResponseBody,
   DashboardTerraformResponseBody,
+  LiteralDataView,
+  LiteralTag,
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
   DashboardSearchRequestParams,

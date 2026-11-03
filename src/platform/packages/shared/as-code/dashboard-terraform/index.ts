@@ -29,5 +29,12 @@ export type {
   SkippedPanel,
 } from './src/convert_dashboard';
 export { loadDashboardOas } from './src/dashboard_oas';
-export { DASHBOARD_RESOURCE_TYPE, TAG_RESOURCE, TERRAFORM_PROVIDER } from './src/provider';
+export { toDataViewResourceBody } from './src/data_view_resource';
+export type { SavedDataView } from './src/data_view_resource';
+export {
+  DASHBOARD_RESOURCE_TYPE,
+  DATA_VIEW_RESOURCE_TYPE,
+  TAG_RESOURCE,
+  TERRAFORM_PROVIDER,
+} from './src/provider';
 export { toResourceName } from './src/resource_name';

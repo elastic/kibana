@@ -23,9 +23,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
 import type { PanelSummary } from '@kbn/as-code-dashboard-terraform';
-import type { DashboardTerraformResponseBody } from '../../../../../server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
+import type {
+  DashboardTerraformResponseBody,
+  LiteralDataView,
+  LiteralTag,
+} from '../../../../../server';
 import type { ExportMode } from './module_files';
-import { exportedTags } from './module_files';
+import { exportedDataViews, exportedTags } from './module_files';
 import type { SanitizeDetails } from './use_terraform_export';
 
 export interface ProblemsInput {
@@ -81,6 +86,52 @@ const countByKind = (items: readonly AsCodeRelatedItem[]): Array<[string, number
   return [...counts];
 };
 
+const literalTagDescription = (tag: LiteralTag): string => {
+  const { id } = tag;
+  switch (tag.reason) {
+    case 'managed':
+      return i18n.translate('dashboard.exportTerraform.problems.managedTagDescription', {
+        defaultMessage:
+          'Tag “{name}” stays the literal ID {id}: Kibana manages it, so Terraform cannot.',
+        values: { name: tag.name, id },
+      });
+    case 'unreadable':
+      return i18n.translate('dashboard.exportTerraform.problems.unreadableTagDescription', {
+        defaultMessage: 'Tag {id} stays a literal ID: you cannot read it, or it does not exist.',
+        values: { id },
+      });
+    case 'unlinkable':
+      return i18n.translate('dashboard.exportTerraform.problems.unlinkableTagDescription', {
+        defaultMessage:
+          'Tag “{name}” stays the literal ID {id}: the export cannot point every use of it at a tag resource.',
+        values: { name: tag.name, id },
+      });
+  }
+};
+
+const literalDataViewDescription = (dataView: LiteralDataView): string => {
+  const { id } = dataView;
+  switch (dataView.reason) {
+    case 'not_found':
+      return i18n.translate('dashboard.exportTerraform.problems.notFoundDataViewDescription', {
+        defaultMessage:
+          'Data view {id} stays a literal ID: it is not found as a saved data view in this space.',
+        values: { id },
+      });
+    case 'unreadable':
+      return i18n.translate('dashboard.exportTerraform.problems.unreadableDataViewDescription', {
+        defaultMessage: 'Data view {id} stays a literal ID: you cannot read it.',
+        values: { id },
+      });
+    case 'unlinkable':
+      return i18n.translate('dashboard.exportTerraform.problems.unlinkableDataViewDescription', {
+        defaultMessage:
+          'Data view “{name}” stays the literal ID {id}: the export cannot point every use of it at a data view resource.',
+        values: { name: dataView.name, id },
+      });
+  }
+};
+
 /** What did not export cleanly, most severe first; empty when everything is exported. */
 export const listProblems = ({
   conversion,
@@ -99,15 +150,19 @@ export const listProblems = ({
   } = conversion;
   const { warnings = [] } = sanitized;
   const tags = exportedTags(conversion);
-  // Exported tags and the tags named below are not counted among the objects the module only refers to.
-  const namedTagIds = new Set([...tags, ...literalTags].map(({ id }) => id));
+  const dataViews = exportedDataViews(conversion, mode);
+  // Adopting keeps data views literal IDs, counted with the other objects the module only refers to.
+  const literalDataViews = mode.kind === 'copy' ? conversion.literal_data_views : [];
+  // Exported tags and data views, and the ones named below, are not counted among the objects the module only
+  // refers to.
+  const namedIds: Record<string, ReadonlySet<string>> = {
+    tag: new Set([...tags, ...literalTags].map(({ id }) => id)),
+    [DATA_VIEW_SAVED_OBJECT_TYPE]: new Set([...dataViews, ...literalDataViews].map(({ id }) => id)),
+  };
   const allRelatedItems = sanitized.related_items ?? [];
-  const relatedItems = allRelatedItems.filter(
-    ({ type, id }) => type !== 'tag' || !namedTagIds.has(id)
-  );
-  const namedTagCount = allRelatedItems.length - relatedItems.length;
-  const relatedItemsCount =
-    (sanitized.related_items_count ?? allRelatedItems.length) - namedTagCount;
+  const relatedItems = allRelatedItems.filter(({ type, id }) => !namedIds[type]?.has(id));
+  const namedCount = allRelatedItems.length - relatedItems.length;
+  const relatedItemsCount = (sanitized.related_items_count ?? allRelatedItems.length) - namedCount;
   const droppedInPanels = new Set(partialPanels.flatMap((panel) => panel.dropped_fields));
 
   // The sanitize step leaves out panels the Dashboards API has no schema for, before conversion.
@@ -190,18 +245,12 @@ export const listProblems = ({
     ...literalTags.map((tag) => ({
       key: `literal-tag:${tag.id}`,
       severity: 'warning' as const,
-      content:
-        tag.reason === 'managed'
-          ? i18n.translate('dashboard.exportTerraform.problems.managedTagDescription', {
-              defaultMessage:
-                'Tag “{name}” stays the literal ID {id}: Kibana manages it, so Terraform cannot.',
-              values: { name: tag.name, id: tag.id },
-            })
-          : i18n.translate('dashboard.exportTerraform.problems.unreadableTagDescription', {
-              defaultMessage:
-                'Tag {id} stays a literal ID: you cannot read it, or it does not exist.',
-              values: { id: tag.id },
-            }),
+      content: literalTagDescription(tag),
+    })),
+    ...literalDataViews.map((dataView) => ({
+      key: `literal-data-view:${dataView.id}`,
+      severity: 'warning' as const,
+      content: literalDataViewDescription(dataView),
     })),
     ...(mode.kind === 'copy' && tags.length
       ? [

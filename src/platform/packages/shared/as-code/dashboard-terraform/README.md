@@ -25,12 +25,19 @@ published OpenAPI file. This package reads only that document.
   (`config_json`) falls back to that when its typed conversion fails, and is reported as a JSON-string panel. Every string is escaped (`${` → `$${`, `%{` → `%%{`) so Terraform
   does not evaluate user text as a template. The dashboard plugin's Export → Terraform route calls it.
 - `tfRef()` (`x-tf-ref`) marks a string, or a list of strings, as IDs of resources of another type (the dashboard's
-  `tags` are `elasticstack_kibana_tag` IDs). The converter reports each such ID as a reference and keeps it as a
-  literal in the body; `linkReferences` then writes one resource (pinning no ID; adopting pins it in the flyout) per
-  referenced object it is given and points the body at it with `${<type>.<name>.<id attribute>}`. Generated
-  references are not escaped; the objects' text is. The route reads the tags with the user's own saved objects client
-  and gives `linkReferences` only those the user can read and Kibana does not manage, so the rest stay literal IDs.
-  `TAG_RESOURCE` holds the oldest target Kibana the tag resource supports, updated with the provider version.
+  `tags` are `elasticstack_kibana_tag` IDs; `tfDataViewRef()` marks the shared data view IDs: the data view
+  reference's `ref_id`, filters, control fields, the AIOps panels and the field statistics table). The converter
+  reports each such ID as a reference and keeps it as a literal in the body, also where the ID ends up inside a JSON
+  leaf (ADR 0003): the compiler keeps, for each JSON leaf, where references sit in its schema. `linkReferences` then
+  writes one resource (pinning no ID; adopting pins it in the flyout) per referenced object it is given and points the
+  body at it with `${<type>.<name>.<id attribute>}`, inside a JSON leaf's text too. Generated references are not
+  escaped; the objects' text, and the rest of the leaf, are. An ID that also occurs where no reference reaches (the
+  converter counts every string it writes, JSON leaves included; for example the deprecated Lens by-value
+  `references`) is reported in `unlinkableIds` and stays literal everywhere, so a dashboard is never half-linked. The
+  route reads the tags and data views with the user's own saved objects client and gives `linkReferences` only those
+  the user can read (and, for tags, that Kibana does not manage), so the rest stay literal IDs. A data view resource is
+  mapped by hand from the saved data view (`toDataViewResourceBody`), not from annotations. `TAG_RESOURCE` holds the
+  oldest target Kibana the tag resource supports, updated with the provider version.
 - At runtime the converter reads `src/dashboard_schemas.oas.json`, the dashboard schemas of the published OpenAPI
   file (the whole file is not shipped with Kibana). `TERRAFORM_PROVIDER` is the provider version the mapping was
   verified against; exports require `>=` it.

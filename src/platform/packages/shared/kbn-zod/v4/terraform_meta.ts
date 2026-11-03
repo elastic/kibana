@@ -83,5 +83,9 @@ export interface TfRefMeta {
 /** Marks a string, or a list of strings, as IDs of resources the export can write and reference. */
 export const tfRef = (meta: TfRefMeta): { 'x-tf-ref': TfRefMeta } => ({ 'x-tf-ref': meta });
 
+/** Marks a string as the ID of a data view; the schemas that hold one share this so they cannot disagree. */
+export const tfDataViewRef = (): { 'x-tf-ref': TfRefMeta } =>
+  tfRef({ resource_type: 'elasticstack_kibana_data_view', id_attribute: 'data_view.id' });
+
 /** API-only; not a Terraform attribute. */
 export const tfOmit = (): { 'x-tf-omit': true } => ({ 'x-tf-omit': true });

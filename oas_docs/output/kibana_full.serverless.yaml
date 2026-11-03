@@ -155196,6 +155196,9 @@ components:
           maxLength: 10000
           minLength: 1
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         description:
           description: A short description of the panel.
           type: string
@@ -155257,6 +155260,9 @@ components:
           maxLength: 1000
           minLength: 1
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         description:
           description: A short description of the panel.
           type: string
@@ -155283,6 +155289,9 @@ components:
           maxLength: 1000
           minLength: 1
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         description:
           description: A short description of the panel.
           type: string
@@ -160461,6 +160470,9 @@ components:
               maxLength: 1000
               minLength: 1
               type: string
+              x-tf-ref:
+                id_attribute: data_view.id
+                resource_type: elasticstack_kibana_data_view
             description:
               description: A short description of the panel.
               type: string
@@ -165356,6 +165368,9 @@ components:
         data_view_id:
           description: Identifier of the data view used as context for this filter.
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         disabled:
           description: When `true`, the filter is inactive and does not affect query results. Defaults to `false`.
           type: boolean
@@ -165387,6 +165402,9 @@ components:
         data_view_id:
           description: Identifier of the data view used as context for this filter.
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         disabled:
           description: When `true`, the filter is inactive and does not affect query results. Defaults to `false`.
           type: boolean
@@ -165443,6 +165461,9 @@ components:
         data_view_id:
           description: Identifier of the data view used as context for this filter.
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         disabled:
           description: When `true`, the filter is inactive and does not affect query results. Defaults to `false`.
           type: boolean
@@ -165476,6 +165497,9 @@ components:
         data_view_id:
           description: Identifier of the data view used as context for this filter.
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         disabled:
           description: When `true`, the filter is inactive and does not affect query results. Defaults to `false`.
           type: boolean
@@ -166059,6 +166083,9 @@ components:
           description: The ID of the data view that provides field options for this control.
           minLength: 1
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         display_settings:
           additionalProperties: false
           type: object
@@ -166364,6 +166391,9 @@ components:
           description: The ID of the data view that provides field options for this control.
           minLength: 1
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         field_name:
           description: The name of the field in the data view that this control filters on.
           minLength: 1
@@ -168851,6 +168881,9 @@ components:
         ref_id:
           description: 'The id of the Kibana data view to use as the data source. Example: "my-data-view".'
           type: string
+          x-tf-ref:
+            id_attribute: data_view.id
+            resource_type: elasticstack_kibana_data_view
         type:
           enum:
             - data_view_reference

@@ -30,6 +30,7 @@ export interface OasSchema {
   title?: string;
   enum?: ReadonlyArray<string | number | boolean | null>;
   properties?: Record<string, OasSchema>;
+  additionalProperties?: boolean | OasSchema;
   required?: string[];
   items?: OasSchema;
   anyOf?: OasSchema[];
@@ -48,7 +49,21 @@ export interface OasSchema {
   dropProperty?: string;
   /** Compiler-internal: a JSON leaf no annotation asked for (merged variants define this property differently). */
   implicitLeaf?: true;
+  /** Compiler-internal: the definitions an implicit leaf merged, where references inside it are found. */
+  leafOf?: OasSchema[];
 }
+
+/**
+ * Where `x-tf-ref` IDs sit inside a value the model keeps as a JSON string: only the parts that can hold one. An object
+ * applies only to a value whose single-value properties (discriminators) match; `lazy` closes a recursive schema.
+ */
+export type RefFinder =
+  | { k: 'ref'; ref: TfRefMeta }
+  | { k: 'object'; props: Record<string, RefFinder>; consts: Record<string, string> }
+  | { k: 'list'; items: RefFinder }
+  | { k: 'map'; values: RefFinder }
+  | { k: 'any'; branches: RefFinder[] }
+  | { k: 'lazy'; get: () => RefFinder | undefined };
 
 export interface OasDocument {
   components: { schemas: Record<string, OasSchema> };
@@ -71,11 +86,13 @@ export interface Variant {
   match?: TfVariantMeta['match'];
   /** The discriminator stays in the variant body. */
   keepDiscriminator: boolean;
+  /** References inside the variant body when it is written whole as the union's extra JSON-string variant. */
+  jsonRefs?: RefFinder;
 }
 
 export type TNode =
   | { k: 'prim'; type: 'string' | 'number' | 'bool'; ref?: TfRefMeta }
-  | { k: 'json'; attribute?: string }
+  | { k: 'json'; attribute?: string; refs?: RefFinder }
   | { k: 'object'; props: Prop[] }
   | { k: 'list'; items: TNode }
   | {
@@ -99,9 +116,53 @@ export class Compiler {
    * (`.prop`, `[]` for array items, `|key` for an inline branch).
    */
   readonly implicitJsonLeaves = new Set<string>();
+  // Reference finders by component; null when the component holds no reference.
+  private readonly finders = new Map<string, RefFinder | null>();
 
   constructor(doc: OasDocument) {
     this.schemas = doc.components.schemas;
+  }
+
+  /** Where references sit inside values of this schema, for a value kept as a JSON string; undefined when nowhere. */
+  refFinder(raw: OasSchema, stack: string[] = []): RefFinder | undefined {
+    // Use-site siblings of a `$ref` may change it, so only a bare `$ref` is cached.
+    const name = Object.keys(raw).length === 1 ? refName(raw) : undefined;
+    if (name) {
+      const cached = this.finders.get(name);
+      if (cached !== undefined) return cached ?? undefined;
+      if (stack.includes(name))
+        return { k: 'lazy', get: () => this.finders.get(name) ?? undefined };
+    }
+    const finder = this.findRefs(this.normalize(raw), name ? [...stack, name] : stack);
+    if (name) this.finders.set(name, finder ?? null);
+    return finder;
+  }
+
+  private findRefs(s: OasSchema, stack: string[]): RefFinder | undefined {
+    const ref = s['x-tf-ref'];
+    if (ref)
+      return s.type === 'array' ? { k: 'list', items: { k: 'ref', ref } } : { k: 'ref', ref };
+    const branches = s.leafOf ?? this.unionBranches(s);
+    if (branches) {
+      const found = branches.flatMap((b) => this.refFinder(b, stack) ?? []);
+      return found.length ? { k: 'any', branches: found } : undefined;
+    }
+    if (s.type === 'array') {
+      const items = s.items && this.refFinder(s.items, stack);
+      return items && { k: 'list', items };
+    }
+    const props: Record<string, RefFinder> = {};
+    const consts: Record<string, string> = {};
+    for (const [propName, prop] of Object.entries(s.properties ?? {})) {
+      const { enum: values } = this.resolve(prop);
+      if (values?.length === 1 && typeof values[0] === 'string') consts[propName] = values[0];
+      const found = this.refFinder(prop, stack);
+      if (found) props[propName] = found;
+    }
+    if (Object.keys(props).length) return { k: 'object', props, consts };
+    const values =
+      typeof s.additionalProperties === 'object' && this.refFinder(s.additionalProperties, stack);
+    return values ? { k: 'map', values } : undefined;
   }
 
   /** Follow `$ref`s; siblings of a `$ref` (use-site metadata) override the target's. */
@@ -198,7 +259,7 @@ export class Compiler {
     }
     if (mode === 'all') throw new Error(`allOf parts disagree on property ${name}`);
     // `compile` records it at its location.
-    return { 'x-tf-json-leaf': true, implicitLeaf: true };
+    return { 'x-tf-json-leaf': true, implicitLeaf: true, leafOf: [a, b] };
   }
 
   isPrimitive(s: OasSchema): boolean {
@@ -296,14 +357,14 @@ export class Compiler {
     location = ''
   ): TNode {
     const name = refName(raw);
-    if (name && stack.includes(name)) return { k: 'json' };
+    if (name && stack.includes(name)) return this.jsonNode(raw);
     const nextStack = name ? [...stack, name] : stack;
     const at = name ?? location;
     const s = this.normalize(raw);
     const leaf = s['x-tf-json-leaf'];
     if (leaf) {
       if (s.implicitLeaf) this.implicitJsonLeaves.add(at);
-      return { k: 'json', attribute: typeof leaf === 'object' ? leaf.attribute : undefined };
+      return this.jsonNode(s, typeof leaf === 'object' ? leaf.attribute : undefined);
     }
 
     const branches = this.unionBranches(s);
@@ -318,7 +379,7 @@ export class Compiler {
       if (!unionMeta) {
         // Convention: unmapped union of objects -> JSON leaf.
         this.implicitJsonLeaves.add(at);
-        return { k: 'json' };
+        return this.jsonNode(s);
       }
       const m: TfUnionMeta = { ...unionMeta, ...override };
       if (m.merge) {
@@ -369,6 +430,16 @@ export class Compiler {
     if (s.type === 'object') return { k: 'json' }; // free-form object
     const prim: TNode = { k: 'prim', type: this.primType(s) };
     return ref ? this.withRef(prim, ref, at) : prim;
+  }
+
+  /** A value kept as a JSON string, with where references sit inside it. */
+  jsonNode(raw: OasSchema, attribute?: string): TNode {
+    const refs = this.refFinder(raw);
+    return {
+      k: 'json',
+      ...(attribute !== undefined && { attribute }),
+      ...(refs && { refs }),
+    };
   }
 
   /** A string that holds the ID of another resource; a reference anywhere else is a mapping mistake. */
@@ -450,12 +521,14 @@ export class Compiler {
           raws.length > 1
             ? raws.map((r) => this.normalize(r)).reduce((a, b) => this.mergeObjects(a, b, 'any'))
             : raws[0];
+        const jsonRefs = m.extra_json_variant && this.refFinder(raw);
         return {
           key,
           values: [...new Set(values)],
           content: this.compile(raw, undefined, stack, variantAt),
           match,
           keepDiscriminator,
+          ...(jsonRefs && { jsonRefs }),
         };
       }
     );

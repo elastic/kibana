@@ -32,13 +32,17 @@ jest.mock('@kbn/share-plugin/public', () => ({
 }));
 
 const sanitized = { title: 'Web logs', panels: [] };
+const body = { title: 'Web logs', description: 'Costs $${var.env}' };
 const conversion: DashboardTerraformResponseBody = {
   resource_type: 'elasticstack_kibana_dashboard',
   resource_name: 'web_logs',
-  body: { title: 'Web logs', description: 'Costs $${var.env}' },
+  body,
+  adopt_body: body,
   resources: [],
   tag_resource: { type: 'elasticstack_kibana_tag', min_kibana_version: '9.5.0' },
   literal_tags: [],
+  data_view_resource: { type: 'elasticstack_kibana_data_view' },
+  literal_data_views: [],
   dropped_fields: [],
   skipped_panels: [],
   partial_panels: [],
@@ -433,17 +437,19 @@ describe('TerraformExportFlyout', () => {
 
   describe('tags', () => {
     const tagType = 'elasticstack_kibana_tag';
+    const taggedBody = {
+      ...conversion.body,
+      tags: [
+        '${elasticstack_kibana_tag.production.tag_id}',
+        '${elasticstack_kibana_tag.team_a.tag_id}',
+        'managed-tag',
+        'unreadable-tag',
+      ],
+    };
     const tagged: DashboardTerraformResponseBody = {
       ...conversion,
-      body: {
-        ...conversion.body,
-        tags: [
-          '${elasticstack_kibana_tag.production.tag_id}',
-          '${elasticstack_kibana_tag.team_a.tag_id}',
-          'managed-tag',
-          'unreadable-tag',
-        ],
-      },
+      body: taggedBody,
+      adopt_body: taggedBody,
       literal_tags: [
         { id: 'managed-tag', reason: 'managed', name: 'Security' },
         { id: 'unreadable-tag', reason: 'unreadable' },
@@ -591,6 +597,115 @@ describe('TerraformExportFlyout', () => {
         'Tag unreadable-tag stays a literal ID: you cannot read it, or it does not exist.',
         'The tags file needs Kibana 9.5.0 or later where Terraform applies it.',
         'The dashboard refers to 1 object that is not exported. They must exist where Terraform runs.Visualization: 1',
+      ]);
+    });
+  });
+
+  describe('data views', () => {
+    const dataViewType = 'elasticstack_kibana_data_view';
+    const linked = '${elasticstack_kibana_data_view.web_logs.data_view.id}';
+    const filterJson = (dataViewId: string) =>
+      JSON.stringify({ type: 'condition', data_view_id: dataViewId, value: '$${x}' });
+    const withDataViews: DashboardTerraformResponseBody = {
+      ...conversion,
+      body: { ...conversion.body, filters: [{ filter_json: filterJson(linked) }] },
+      adopt_body: { ...conversion.body, filters: [{ filter_json: filterJson('logs-dv') }] },
+      resources: [
+        {
+          type: dataViewType,
+          name: 'web_logs',
+          id: 'logs-dv',
+          label: 'Web logs',
+          body: { data_view: { title: 'logs-*', name: 'Web logs' } },
+        },
+      ],
+      literal_data_views: [
+        { id: 'adhoc-dv', reason: 'not_found' },
+        { id: 'hidden-dv', reason: 'unreadable' },
+        { id: 'metrics-dv', reason: 'unlinkable', name: 'Metrics' },
+      ],
+    };
+    const relatedItems = {
+      related_items: [
+        { type: 'index-pattern', type_label: 'Data view', id: 'logs-dv' },
+        { type: 'index-pattern', type_label: 'Data view', id: 'hidden-dv' },
+        { type: 'index-pattern', type_label: 'Data view', id: 'metrics-dv' },
+        { type: 'lens', type_label: 'Visualization', id: 'v1' },
+      ],
+      related_items_count: 4,
+    };
+
+    it('writes the data views of a new copy as resources pinning no ID, which the dashboard references', async () => {
+      respondWith(async () => withDataViews);
+      renderFlyout();
+
+      await screen.findByRole('list', { name: 'Module files' });
+      expect(fileNames()).toEqual([
+        'versions.tf.json',
+        'main.tf.json',
+        'data_views.tf.json',
+        'README.md',
+      ]);
+      expect(JSON.parse(await showFile('data_views.tf.json'))).toEqual({
+        resource: {
+          elasticstack_kibana_data_view: {
+            web_logs: { data_view: { title: 'logs-*', name: 'Web logs' } },
+          },
+        },
+      });
+      const main = JSON.parse(await showFile('main.tf.json'));
+      expect(main.resource.elasticstack_kibana_dashboard.web_logs.filters).toEqual([
+        { filter_json: filterJson(linked) },
+      ]);
+      const readme = await showFile('README.md');
+      expect(readme).toContain('2 to add, 0 to change, 0 to destroy');
+      expect(readme).toContain("`data_views.tf.json` creates the dashboard's data views (1)");
+
+      const { entries } = await downloadZip();
+      expect(entries).toEqual(await shownFiles('web_logs'));
+    });
+
+    it('leaves adopting as it was: data views stay literal IDs, with no data views file or import', async () => {
+      mockGetActiveSpace.mockResolvedValue({ id: 'marketing' });
+      respondWith(async () => withDataViews);
+      renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+      await screen.findByRole('list', { name: 'Module files' });
+      expect(fileNames()).toEqual([
+        'versions.tf.json',
+        'main.tf.json',
+        'imports.tf.json',
+        'README.md',
+      ]);
+      const main = JSON.parse(await showFile('main.tf.json'));
+      expect(main.resource.elasticstack_kibana_dashboard.web_logs.filters).toEqual([
+        { filter_json: filterJson('logs-dv') },
+      ]);
+      expect(JSON.parse(await showFile('imports.tf.json'))).toEqual({
+        import: [{ to: 'elasticstack_kibana_dashboard.web_logs', id: 'marketing/abc-123' }],
+      });
+      expect(await showFile('README.md')).toContain('1 to import, 0 to add');
+    });
+
+    it('names the data views a new copy keeps as literal IDs, and counts only the rest as not exported', async () => {
+      respondWith(async () => withDataViews, relatedItems);
+      renderFlyout();
+
+      expect(await problemDetails()).toEqual([
+        'Data view adhoc-dv stays a literal ID: it is not found as a saved data view in this space.',
+        'Data view hidden-dv stays a literal ID: you cannot read it.',
+        'Data view “Metrics” stays the literal ID metrics-dv: the export cannot point every use of it at a data view resource.',
+        'This export includes unsaved changes. This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.',
+        'The dashboard refers to 1 object that is not exported. They must exist where Terraform runs.Visualization: 1',
+      ]);
+    });
+
+    it('counts the data views of an adopted dashboard as objects it refers to, as before', async () => {
+      respondWith(async () => withDataViews, relatedItems);
+      renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+      expect(await problemDetails()).toEqual([
+        'The dashboard refers to 4 objects that are not exported. They must exist where Terraform runs.Data view: 3Visualization: 1',
       ]);
     });
   });

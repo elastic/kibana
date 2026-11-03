@@ -238,6 +238,7 @@ describe('createDashboardConverter', () => {
     const tag = (id: string, name: string, extra: JsonObject = {}) => ({
       resourceType: 'elasticstack_kibana_tag',
       id,
+      name,
       attributes: { name, color: '#772299', description: '', ...extra },
     });
 
@@ -328,6 +329,102 @@ describe('createDashboardConverter', () => {
         ['tag-production', 'production'],
         ['tag-team-a', 'team_a'],
       ]);
+    });
+  });
+
+  describe('data views', () => {
+    const DATA_VIEW = 'elasticstack_kibana_data_view';
+    const dataView = (id: string, name: string, title = 'logs-*') => ({
+      resourceType: DATA_VIEW,
+      id,
+      name,
+      attributes: { data_view: { title, name, time_field_name: '@timestamp' } },
+    });
+    const reference = '${elasticstack_kibana_data_view.web_logs.data_view.id}';
+    const lensDataSource = ['panels', 0, 'vis_config', 'by_value', 'metric_chart_config'];
+    const parsed = (value: JsonValue | undefined): JsonValue =>
+      typeof value === 'string' ? JSON.parse(value) : null;
+
+    it('points every use of a data view at one resource, inside JSON strings too', () => {
+      const conversion = convert(fixture('data_views'));
+      const { body, resources } = linkReferences(conversion, [dataView('logs-dv', 'Web logs')]);
+
+      expect(conversion.unlinkableIds).toEqual([]);
+      expect(at(parsed(at(body, ...lensDataSource, 'data_source_json')), 'ref_id')).toBe(reference);
+      expect(at(parsed(at(body, 'filters', 0, 'filter_json')), 'data_view_id')).toBe(reference);
+      expect(
+        at(body, 'pinned_panels', 0, 'options_list_control_config', 'by_field', 'data_view_id')
+      ).toBe(reference);
+      expect(at(body, 'panels', 1, 'field_stats_table_config', 'by_dataview', 'data_view_id')).toBe(
+        reference
+      );
+      expect(resources).toEqual([
+        {
+          type: DATA_VIEW,
+          name: 'web_logs',
+          id: 'logs-dv',
+          label: 'Web logs',
+          body: { data_view: { title: 'logs-*', name: 'Web logs', time_field_name: '@timestamp' } },
+        },
+      ]);
+    });
+
+    it('writes a reference inside a JSON string unescaped while user text in the same string stays escaped', () => {
+      const { body } = linkReferences(convert(fixture('data_views')), [
+        dataView('logs-dv', 'Web logs'),
+      ]);
+      const filterJson = at(body, 'filters', 0, 'filter_json');
+
+      expect(filterJson).toContain(`"data_view_id":"${reference}"`);
+      expect(filterJson).toContain('"value":"$${not_a_reference}"');
+    });
+
+    it('reports a data view inside a JSON string as a reference into that string', () => {
+      const { references } = convert(fixture('data_views'));
+
+      expect(references).toContainEqual({
+        path: ['filters', 0, 'filter_json'],
+        jsonPath: ['data_view_id'],
+        resourceType: DATA_VIEW,
+        idAttribute: 'data_view.id',
+        id: 'logs-dv',
+      });
+      expect(references.filter(({ id }) => id === 'logs-dv')).toHaveLength(4);
+    });
+
+    it('keeps a data view literal everywhere when one of its uses cannot be linked', () => {
+      const dashboard = fixture('data_views');
+      const [lens] = dashboard.panels as JsonObject[];
+      // The deprecated by-value Lens `references` carry data view IDs no annotation reaches.
+      (lens.config as JsonObject).references = [
+        { type: 'index-pattern', id: 'logs-dv', name: 'indexpattern-datasource-layer-1' },
+      ];
+      const conversion = convert(dashboard);
+      const { body, resources } = linkReferences(conversion, [dataView('logs-dv', 'Web logs')]);
+
+      expect(conversion.unlinkableIds).toEqual(['logs-dv']);
+      expect(resources).toEqual([]);
+      expect(JSON.stringify(body)).not.toContain('elasticstack_kibana_data_view');
+      expect(at(parsed(at(body, ...lensDataSource, 'data_source_json')), 'ref_id')).toBe('logs-dv');
+    });
+
+    it('leaves a data view it was not given as its literal ID', () => {
+      const { body, resources } = linkReferences(convert(fixture('data_views')), []);
+
+      expect(resources).toEqual([]);
+      expect(at(parsed(at(body, 'filters', 0, 'filter_json')), 'data_view_id')).toBe('logs-dv');
+      expect(at(body, 'panels', 1, 'field_stats_table_config', 'by_dataview', 'data_view_id')).toBe(
+        'logs-dv'
+      );
+    });
+
+    it('names a data view resource `data_view` when its name yields no identifier', () => {
+      const { title, pinned_panels: pinnedPanels } = fixture('data_views');
+      const { resources } = linkReferences(convert({ title, pinned_panels: pinnedPanels }), [
+        dataView('logs-dv', '***'),
+      ]);
+
+      expect(resources.map(({ name, label }) => [name, label])).toEqual([['data_view', '***']]);
     });
   });
 

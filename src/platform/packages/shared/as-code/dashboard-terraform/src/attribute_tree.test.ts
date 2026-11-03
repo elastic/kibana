@@ -109,4 +109,34 @@ describe('published OpenAPI document', () => {
       'x-tf-variant',
     ]);
   });
+
+  // Data view IDs sit in shared definitions; each must carry the reference so every use of a data view is linked.
+  it('marks the dashboard tags and every shared data view ID as references', () => {
+    const found: string[] = [];
+    const collectRefs = (node: unknown, path: string): void => {
+      if (!node || typeof node !== 'object') return;
+      for (const [key, child] of Object.entries(node)) {
+        if (key === 'x-tf-ref') {
+          const { resource_type: resourceType } = child as { resource_type: string };
+          found.push(`${path} -> ${resourceType}`);
+        } else collectRefs(child, `${path}/${key}`);
+      }
+    };
+    collectRefs(publishedOas.components.schemas, '');
+
+    expect(found.sort()).toEqual([
+      '/Kibana_HTTP_APIs_aiops_change_point_chart/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_aiops_log_rate_analysis/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_aiops_pattern_analysis/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_data_visualizer_field_stats/oneOf/0/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeConditionFilterSchema/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeDSLFilterSchema/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeGroupFilterSchema/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeSpatialFilterSchema/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-dsl-control-schema-field/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_kbn-controls-schemas-range-slider-control-schema-field/properties/data_view_id -> elasticstack_kibana_data_view',
+      '/Kibana_HTTP_APIs_kbn-dashboard-data/properties/tags -> elasticstack_kibana_tag',
+      '/Kibana_HTTP_APIs_kbn-data-view-reference-schema/properties/ref_id -> elasticstack_kibana_data_view',
+    ]);
+  });
 });

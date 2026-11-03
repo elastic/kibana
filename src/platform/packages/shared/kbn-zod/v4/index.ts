@@ -25,6 +25,7 @@ export {
   tfFlatten,
   tfOmit,
   tfRef,
+  tfDataViewRef,
 } from './terraform_meta';
 export type { TfRefMeta, TfUnionMeta, TfVariantMeta } from './terraform_meta';
 

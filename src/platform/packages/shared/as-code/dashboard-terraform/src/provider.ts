@@ -17,3 +17,6 @@ export const DASHBOARD_RESOURCE_TYPE = 'elasticstack_kibana_dashboard';
 
 /** The tag resource type and the oldest Kibana Terraform can apply it to; update with `TERRAFORM_PROVIDER`. */
 export const TAG_RESOURCE = { type: 'elasticstack_kibana_tag', minKibanaVersion: '9.5.0' } as const;
+
+/** The data view resource type; the schemas' `tfDataViewRef()` names the same one. */
+export const DATA_VIEW_RESOURCE_TYPE = 'elasticstack_kibana_data_view';

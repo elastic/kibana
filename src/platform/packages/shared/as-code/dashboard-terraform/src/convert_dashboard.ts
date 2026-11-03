@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KeyedNode, OasDocument, TNode, Variant } from './oas_model';
+import type { KeyedNode, OasDocument, RefFinder, TNode, Variant } from './oas_model';
 import { compileDashboardRoot } from './oas_model';
 import { toResourceName } from './resource_name';
 
@@ -44,6 +44,8 @@ export type TerraformPath = Array<string | number>;
 /** An ID in the body that the mapping (`x-tf-ref`) says belongs to a resource of another type. */
 export interface Reference {
   path: TerraformPath;
+  /** Set when `path` is a JSON string: where the ID sits inside the JSON value it holds. */
+  jsonPath?: TerraformPath;
   resourceType: string;
   /** The attribute of that resource holding the ID. */
   idAttribute: string;
@@ -64,6 +66,11 @@ export interface DashboardConversion {
   jsonPanels: JsonStringPanel[];
   /** IDs in `body` that point at resources of other types, still as literal IDs. */
   references: Reference[];
+  /**
+   * IDs in `references` that also occur in `body` where no reference reaches (for example the deprecated Lens
+   * by-value `references`). Linking only the reachable ones would half-link the dashboard, so they stay literal.
+   */
+  unlinkableIds: string[];
 }
 
 /** The dashboard itself (not one of its panels) cannot be converted. */
@@ -107,20 +114,111 @@ const recognize = (node: KeyedNode, value: JsonObject, path: string): Variant | 
   return node.variants.find(({ values }) => values.includes(discriminatorValue));
 };
 
-// What a conversion lost, which values it wrote under their union's extra JSON-string variant key (and why), and
-// the IDs it found that point at other resources.
+// What a conversion lost, which values it wrote under their union's extra JSON-string variant key (and why), the
+// IDs it found that point at other resources, and how often each string value it wrote occurs (JSON strings
+// included), so an ID that also occurs where no reference reaches can be told apart.
 interface ConversionLog {
   dropped: string[];
   jsonVariants: Array<{ path: string; reason: string }>;
   references: Reference[];
+  strings: Map<string, number>;
 }
 
-const emptyLog = (): ConversionLog => ({ dropped: [], jsonVariants: [], references: [] });
+const emptyLog = (): ConversionLog => ({
+  dropped: [],
+  jsonVariants: [],
+  references: [],
+  strings: new Map(),
+});
+
+const increment = (counts: Map<string, number>, key: string, by = 1) =>
+  counts.set(key, (counts.get(key) ?? 0) + by);
 
 const mergeLog = (into: ConversionLog, from: ConversionLog) => {
   into.dropped.push(...from.dropped);
   into.jsonVariants.push(...from.jsonVariants);
   into.references.push(...from.references);
+  for (const [text, count] of from.strings) increment(into.strings, text, count);
+};
+
+const countStrings = (value: JsonValue, strings: Map<string, number>): void => {
+  if (typeof value === 'string') increment(strings, value);
+  else if (Array.isArray(value)) value.forEach((item) => countStrings(item, strings));
+  else if (isObject(value)) Object.values(value).forEach((item) => countStrings(item, strings));
+};
+
+// The references `finder` locates in a value written as a JSON string at `leafPath`; a place several union branches
+// share is reported once.
+const leafReferences = (
+  finder: RefFinder | undefined,
+  value: JsonValue,
+  leafPath: TerraformPath
+): Reference[] => {
+  const found = new Map<string, Reference>();
+  const visit = (
+    node: RefFinder | undefined,
+    current: JsonValue | undefined,
+    jsonPath: TerraformPath
+  ) => {
+    if (!node || current === undefined) return;
+    switch (node.k) {
+      case 'ref':
+        if (typeof current === 'string') {
+          const { resource_type: resourceType, id_attribute: idAttribute } = node.ref;
+          found.set(JSON.stringify(jsonPath), {
+            path: leafPath,
+            jsonPath,
+            resourceType,
+            idAttribute,
+            id: current,
+          });
+        }
+        return;
+      case 'object': {
+        if (!isObject(current)) return;
+        const { consts, props } = node;
+        const otherBranch = Object.entries(consts).some(
+          ([key, constant]) => key in current && current[key] !== constant
+        );
+        if (otherBranch) return;
+        for (const [key, child] of Object.entries(props)) {
+          visit(child, current[key], [...jsonPath, key]);
+        }
+        return;
+      }
+      case 'list':
+        if (Array.isArray(current)) {
+          current.forEach((item, i) => visit(node.items, item, [...jsonPath, i]));
+        }
+        return;
+      case 'map':
+        if (isObject(current)) {
+          for (const [key, item] of Object.entries(current)) {
+            visit(node.values, item, [...jsonPath, key]);
+          }
+        }
+        return;
+      case 'any':
+        node.branches.forEach((branch) => visit(branch, current, jsonPath));
+        return;
+      case 'lazy':
+        visit(node.get(), current, jsonPath);
+    }
+  };
+  visit(finder, value, []);
+  return [...found.values()];
+};
+
+// A value written as a JSON string at `leafPath`: its strings are counted and its references reported.
+const writeJson = (
+  value: JsonValue,
+  finder: RefFinder | undefined,
+  leafPath: TerraformPath,
+  log: ConversionLog
+): string => {
+  countStrings(value, log.strings);
+  log.references.push(...leafReferences(finder, value, leafPath));
+  return JSON.stringify(value);
 };
 
 // `path` is the API path reports name; `tfPath` is where the value lands in the Terraform body.
@@ -133,15 +231,16 @@ const convertValue = (
 ): JsonValue => {
   switch (node.k) {
     case 'prim':
+      countStrings(value, log.strings);
       if (node.ref && typeof value === 'string') {
         const { resource_type: resourceType, id_attribute: idAttribute } = node.ref;
         log.references.push({ path: tfPath, resourceType, idAttribute, id: value });
       }
       return value;
-    case 'json': {
-      const json = JSON.stringify(value);
-      return node.attribute ? { [node.attribute]: json } : json;
-    }
+    case 'json':
+      return node.attribute
+        ? { [node.attribute]: writeJson(value, node.refs, [...tfPath, node.attribute], log) }
+        : writeJson(value, node.refs, tfPath, log);
     case 'list':
       if (!Array.isArray(value)) throw new Error(`${path}: expected a list, got ${preview(value)}`);
       return value.map((item, i) =>
@@ -197,7 +296,10 @@ const convertKeyed = (
     delete rest[prop.apiName];
   }
   const variant = recognize(node, value, path);
-  if (disc && discOutside && value[disc] !== undefined) out[disc] = value[disc];
+  if (disc && discOutside && value[disc] !== undefined) {
+    out[disc] = value[disc];
+    countStrings(value[disc], log.strings);
+  }
   if (disc && !variant?.keepDiscriminator) delete rest[disc];
 
   const contentPath = m.content ? childPath(path, m.content) : path;
@@ -216,7 +318,7 @@ const convertKeyed = (
       ? m.extra_json_variant.key
       : undefined;
   const asJson = (key: string, reason: string): JsonObject => {
-    out[key] = JSON.stringify(content);
+    out[key] = writeJson(content, variant?.jsonRefs, [...tfPath, key], log);
     log.jsonVariants.push({ path, reason });
     return out;
   };
@@ -284,11 +386,11 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
   const sectionPanelNode = listItems(propNode(sectionNode, 'panels'), 'section panels');
 
   return (dashboard) => {
-    const droppedFields: string[] = [];
+    // What the body holds: the logs of the parts that were converted, not of the panels skipped.
+    const kept = emptyLog();
     const skippedPanels: SkippedPanel[] = [];
     const partialPanels: PartialPanel[] = [];
     const jsonPanels: JsonStringPanel[] = [];
-    const references: Reference[] = [];
     const { panels = [], pinned_panels: pinnedPanels = [], ...envelope } = dashboard;
 
     const convertPanel = (
@@ -300,8 +402,7 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
       const log = emptyLog();
       try {
         const converted = convertValue(node, panel, path, tfPath, log);
-        droppedFields.push(...log.dropped);
-        references.push(...log.references);
+        mergeLog(kept, log);
         if (log.dropped.length) {
           partialPanels.push({ ...summarize(panel, path), droppedFields: log.dropped });
         }
@@ -340,8 +441,7 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
       const log = emptyLog();
       try {
         const converted = expectObject(convertValue(node, value, path, tfPath, log), path);
-        droppedFields.push(...log.dropped);
-        references.push(...log.references);
+        mergeLog(kept, log);
         return converted;
       } catch (e) {
         throw new DashboardConversionError(messageOf(e));
@@ -377,6 +477,13 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
     if (tfSections.length) body.sections = tfSections;
     if (tfPinnedPanels.length) body.pinned_panels = tfPinnedPanels;
 
+    const { dropped: droppedFields, references, strings } = kept;
+    const referenceCounts = new Map<string, number>();
+    for (const { id } of references) increment(referenceCounts, id);
+    const unlinkableIds = [...referenceCounts]
+      .filter(([id, count]) => (strings.get(id) ?? 0) > count)
+      .map(([id]) => id);
+
     // Everything in the body is user content; references generated later must not go through this.
     return {
       body: escapeObject(body),
@@ -385,6 +492,7 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
       partialPanels,
       jsonPanels,
       references,
+      unlinkableIds,
     };
   };
 };
@@ -393,6 +501,8 @@ export const createDashboardConverter = (doc: OasDocument): DashboardConverter =
 export interface ReferencedObject {
   resourceType: string;
   id: string;
+  /** The name the user knows it by, which names its resource (a data view's name, else its title). */
+  name?: string;
   /** The body of its resource, e.g. a tag's `name`, `color` and `description`. */
   attributes: JsonObject;
 }
@@ -414,20 +524,40 @@ export interface LinkedConversion {
   resources: LinkedResource[];
 }
 
-const setAt = (value: JsonValue, [step, ...rest]: TerraformPath, leaf: JsonValue): JsonValue => {
-  if (step === undefined) return leaf;
-  if (Array.isArray(value) && typeof step === 'number') {
-    return value.map((item, i) => (i === step ? setAt(item, rest, leaf) : item));
+const updateAt = (
+  value: JsonValue,
+  [step, ...rest]: TerraformPath,
+  update: (current: JsonValue) => JsonValue
+): JsonValue => {
+  if (step === undefined) return update(value);
+  if (Array.isArray(value) && typeof step === 'number' && step < value.length) {
+    return value.map((item, i) => (i === step ? updateAt(item, rest, update) : item));
   }
   if (isObject(value) && typeof step === 'string' && step in value) {
-    return { ...value, [step]: setAt(value[step], rest, leaf) };
+    return { ...value, [step]: updateAt(value[step], rest, update) };
   }
   throw new Error(`No value at ${JSON.stringify([step, ...rest])}`);
 };
 
-/** Writes a resource per given object and points references at it unescaped; references to other objects stay literal IDs. */
+// The body's JSON strings are escaped as a whole, which leaves them valid JSON whose strings are escaped, so the
+// reference is set in the parsed value and the rest of the string stays as it was.
+const linkAt = (body: JsonValue, { path, jsonPath }: Reference, link: string): JsonValue =>
+  updateAt(body, path, (current) => {
+    if (!jsonPath) return link;
+    if (typeof current !== 'string') throw new Error(`No JSON string at ${JSON.stringify(path)}`);
+    return JSON.stringify(updateAt(JSON.parse(current), jsonPath, () => link));
+  });
+
+/**
+ * Writes a resource per given object and points references at it unescaped, inside JSON strings too. References to
+ * other objects, and to objects that also occur where no reference reaches, stay literal IDs.
+ */
 export const linkReferences = (
-  { body, references }: Pick<DashboardConversion, 'body' | 'references'>,
+  {
+    body,
+    references,
+    unlinkableIds,
+  }: Pick<DashboardConversion, 'body' | 'references' | 'unlinkableIds'>,
   objects: readonly ReferencedObject[]
 ): LinkedConversion => {
   const resources: LinkedResource[] = [];
@@ -438,25 +568,27 @@ export const linkReferences = (
     taken.add(`${type}.${name}`);
     return name;
   };
+  const unlinkable = new Set(unlinkableIds);
   let linked: JsonValue = body;
-  for (const { path, resourceType, idAttribute, id } of references) {
+  for (const reference of references) {
+    const { resourceType, idAttribute, id } = reference;
+    if (unlinkable.has(id)) continue;
     let resource = resources.find((r) => r.type === resourceType && r.id === id);
     if (!resource) {
       const object = objects.find((o) => o.resourceType === resourceType && o.id === id);
       if (!object) continue;
-      // `elasticstack_kibana_tag` → `tag` names a resource whose own name yields no identifier.
-      const fallback = resourceType.split('_').pop() ?? 'resource';
-      const displayName = stringAt(object.attributes, 'name');
+      // `elasticstack_kibana_data_view` → `data_view` names a resource whose own name yields no identifier.
+      const fallback = resourceType.replace(/^elasticstack_kibana_/, '');
       resource = {
         type: resourceType,
-        name: uniqueName(resourceType, toResourceName(displayName ?? '', fallback)),
+        name: uniqueName(resourceType, toResourceName(object.name ?? '', fallback)),
         id,
-        label: displayName ?? id,
+        label: object.name || id,
         body: escapeObject(object.attributes),
       };
       resources.push(resource);
     }
-    linked = setAt(linked, path, `\${${resourceType}.${resource.name}.${idAttribute}}`);
+    linked = linkAt(linked, reference, `\${${resourceType}.${resource.name}.${idAttribute}}`);
   }
   return { body: expectObject(linked, 'body'), resources };
 };

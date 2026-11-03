@@ -16,10 +16,21 @@ import type {
   SkippedPanel,
 } from '@kbn/as-code-dashboard-terraform';
 
-/** A tag the dashboard keeps as its literal ID: Kibana manages it, or the user cannot read it (or it is missing). */
+/**
+ * A tag the dashboard keeps as its literal ID: Kibana manages it, the user cannot read it (or it is missing), or it is
+ * also used where the export cannot point at a resource.
+ */
 export type LiteralTag =
-  | { id: string; reason: 'managed'; name: string }
+  | { id: string; reason: 'managed' | 'unlinkable'; name: string }
   | { id: string; reason: 'unreadable' };
+
+/**
+ * A data view the dashboard keeps as its literal ID: it is not a saved data view in the space (missing or ad hoc),
+ * the user cannot read it, or it is also used where the export cannot point at a resource.
+ */
+export type LiteralDataView =
+  | { id: string; reason: 'not_found' | 'unreadable' }
+  | { id: string; reason: 'unlinkable'; name: string };
 
 /** The response body of the route converting a dashboard to Terraform. */
 export interface DashboardTerraformResponseBody {
@@ -29,12 +40,21 @@ export interface DashboardTerraformResponseBody {
   resource_name: string;
   /** The resource body, in Terraform JSON syntax: user text escaped, references to `resources` not. */
   body: JsonObject;
-  /** Resources written for the objects the dashboard refers to (its readable, unmanaged tags); they pin no ID. */
+  /** `body` for adopting, with every data view a literal ID, until adopting writes data view resources. */
+  adopt_body: JsonObject;
+  /**
+   * Resources written for the objects the dashboard refers to (its readable, unmanaged tags, and its saved data
+   * views); they pin no ID.
+   */
   resources: LinkedResource[];
   /** The tag resource type, and the oldest Kibana Terraform can apply it to. */
   tag_resource: { type: string; min_kibana_version: string };
   /** The dashboard's tags that stay literal IDs, with no resource. */
   literal_tags: LiteralTag[];
+  /** The data view resource type. */
+  data_view_resource: { type: string };
+  /** The dashboard's data views that stay literal IDs, with no resource. */
+  literal_data_views: LiteralDataView[];
   /** API paths of the fields the resource has no attribute for. */
   dropped_fields: string[];
   /** Panels left out of `body` because they could not be converted. */

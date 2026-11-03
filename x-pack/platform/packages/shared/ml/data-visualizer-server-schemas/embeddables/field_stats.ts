@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, tfUnion } from '@kbn/zod';
+import { z, tfUnion, tfDataViewRef } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -27,7 +27,7 @@ const fieldStatsDataViewSchema = z
       .string()
       .min(1)
       .max(1000)
-      .meta({ description: 'Data view ID (stored as a panel reference).' }),
+      .meta({ description: 'Data view ID (stored as a panel reference).', ...tfDataViewRef() }),
   })
   .strict();
 

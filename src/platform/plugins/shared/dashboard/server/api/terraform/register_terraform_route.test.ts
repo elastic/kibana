@@ -169,6 +169,30 @@ describe('POST /internal/dashboards/_terraform', () => {
     ]);
   });
 
+  it('keeps a tag also used where no reference reaches as a literal ID and names it', async () => {
+    await convertForReal();
+    (handlerContext.savedObjects.client.bulkGet as jest.Mock).mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'tag-1',
+          type: 'tag',
+          attributes: { name: 'Production', color: '#772299', description: '' },
+          references: [],
+        },
+      ],
+    });
+
+    const result = await post({
+      dashboard: { title: 'Web logs', description: 'tag-1', panels: [], tags: ['tag-1'] },
+    });
+
+    expect(result.body.body.tags).toEqual(['tag-1']);
+    expect(result.body.resources).toEqual([]);
+    expect(result.body.literal_tags).toEqual([
+      { id: 'tag-1', reason: 'unlinkable', name: 'Production' },
+    ]);
+  });
+
   it('keeps every tag a literal ID when the user may not read tags at all', async () => {
     await convertForReal();
     (handlerContext.savedObjects.client.bulkGet as jest.Mock).mockRejectedValueOnce(
@@ -186,6 +210,167 @@ describe('POST /internal/dashboards/_terraform', () => {
       { id: 'tag-1', reason: 'unreadable' },
       { id: 'tag-2', reason: 'unreadable' },
     ]);
+  });
+
+  describe('data views', () => {
+    const control = (dataViewId: string) => ({
+      type: 'options_list_control',
+      width: 'medium',
+      grow: true,
+      config: { data_view_id: dataViewId, field_name: 'host.keyword' },
+    });
+    const dashboard = {
+      title: 'Web logs',
+      tags: ['tag-1'],
+      filters: [
+        {
+          type: 'condition',
+          data_view_id: 'logs-dv',
+          condition: { field: 'host.name', operator: 'is', value: 'web-01' },
+        },
+      ],
+      panels: [],
+      pinned_panels: [control('logs-dv'), control('metrics-dv'), control('adhoc-dv')],
+    };
+    const savedDataView = (id: string, attributes: object) => ({
+      id,
+      type: 'index-pattern',
+      attributes,
+      references: [],
+    });
+    type SavedObjectsResponse = Array<{
+      id: string;
+      type: string;
+      error?: { statusCode: number; message: string };
+    }>;
+    // Answers tags and data views from separate lists, as the route reads each type on its own.
+    const mockBulkGet = (tags: SavedObjectsResponse, dataViews: SavedObjectsResponse | Error) =>
+      (handlerContext.savedObjects.client.bulkGet as jest.Mock).mockImplementation(
+        async (objects: Array<{ type: string }>) => {
+          if (objects[0]?.type === 'tag') return { saved_objects: tags };
+          if (dataViews instanceof Error) throw dataViews;
+          return { saved_objects: dataViews };
+        }
+      );
+    const tag = {
+      id: 'tag-1',
+      type: 'tag',
+      attributes: { name: 'Production', color: '#772299', description: '' },
+      references: [],
+    };
+    const controlDataViews = (body: { pinned_panels: Array<Record<string, unknown>> }) =>
+      body.pinned_panels.map(
+        (panel) =>
+          (panel.options_list_control_config as { by_field: { data_view_id: string } }).by_field
+            .data_view_id
+      );
+
+    it('reads the data views with the user’s client and points every use of a readable one at its resource', async () => {
+      await convertForReal();
+      mockBulkGet(
+        [tag],
+        [
+          savedDataView('logs-dv', {
+            title: 'logs-*',
+            name: 'Web logs',
+            timeFieldName: '@timestamp',
+          }),
+          savedDataView('metrics-dv', { title: 'metrics-${env}-*' }),
+          { id: 'adhoc-dv', type: 'index-pattern', error: { statusCode: 404, message: '' } },
+        ]
+      );
+
+      const result = await post({ dashboard });
+
+      expect(result.status).toBe(200);
+      expect(handlerContext.savedObjects.client.bulkGet).toHaveBeenCalledWith([
+        { type: 'index-pattern', id: 'logs-dv' },
+        { type: 'index-pattern', id: 'metrics-dv' },
+        { type: 'index-pattern', id: 'adhoc-dv' },
+      ]);
+      const reference = '${elasticstack_kibana_data_view.web_logs.data_view.id}';
+      expect(JSON.parse(result.body.body.filters[0].filter_json).data_view_id).toBe(reference);
+      expect(controlDataViews(result.body.body)).toEqual([
+        reference,
+        '${elasticstack_kibana_data_view.metrics_env.data_view.id}',
+        'adhoc-dv',
+      ]);
+      expect(result.body.resources).toEqual([
+        expect.objectContaining({ type: 'elasticstack_kibana_tag', name: 'production' }),
+        {
+          type: 'elasticstack_kibana_data_view',
+          name: 'web_logs',
+          id: 'logs-dv',
+          label: 'Web logs',
+          body: {
+            data_view: { title: 'logs-*', name: 'Web logs', time_field_name: '@timestamp' },
+          },
+        },
+        {
+          type: 'elasticstack_kibana_data_view',
+          name: 'metrics_env',
+          id: 'metrics-dv',
+          label: 'metrics-${env}-*',
+          body: { data_view: { title: 'metrics-$${env}-*' } },
+        },
+      ]);
+      expect(result.body.data_view_resource).toEqual({ type: 'elasticstack_kibana_data_view' });
+      expect(result.body.literal_data_views).toEqual([{ id: 'adhoc-dv', reason: 'not_found' }]);
+    });
+
+    it('returns a body for adopting that keeps every data view a literal ID and still links the tags', async () => {
+      await convertForReal();
+      mockBulkGet([tag], [savedDataView('logs-dv', { title: 'logs-*' })]);
+
+      const result = await post({ dashboard });
+
+      const { adopt_body: adoptBody } = result.body;
+      expect(adoptBody.tags).toEqual(['${elasticstack_kibana_tag.production.tag_id}']);
+      expect(JSON.parse(adoptBody.filters[0].filter_json).data_view_id).toBe('logs-dv');
+      expect(controlDataViews(adoptBody)).toEqual(['logs-dv', 'metrics-dv', 'adhoc-dv']);
+    });
+
+    it('keeps a data view literal everywhere when one of its uses cannot be linked, and says why', async () => {
+      await convertForReal();
+      mockBulkGet([tag], [savedDataView('logs-dv', { title: 'logs-*', name: 'Web logs' })]);
+
+      const result = await post({
+        dashboard: {
+          ...dashboard,
+          pinned_panels: [control('logs-dv')],
+          // An ID where no reference annotation reaches.
+          description: 'logs-dv',
+        },
+      });
+
+      expect(JSON.parse(result.body.body.filters[0].filter_json).data_view_id).toBe('logs-dv');
+      expect(result.body.resources.map(({ type }: { type: string }) => type)).toEqual([
+        'elasticstack_kibana_tag',
+      ]);
+      expect(result.body.literal_data_views).toEqual([
+        { id: 'logs-dv', reason: 'unlinkable', name: 'Web logs' },
+      ]);
+    });
+
+    it('keeps every data view a literal ID when the user may not read data views at all', async () => {
+      await convertForReal();
+      mockBulkGet(
+        [tag],
+        SavedObjectsErrorHelpers.decorateForbiddenError(
+          new Error('Unable to bulk_get index-pattern')
+        )
+      );
+
+      const result = await post({ dashboard });
+
+      expect(result.status).toBe(200);
+      expect(controlDataViews(result.body.body)).toEqual(['logs-dv', 'metrics-dv', 'adhoc-dv']);
+      expect(result.body.literal_data_views).toEqual([
+        { id: 'logs-dv', reason: 'unreadable' },
+        { id: 'metrics-dv', reason: 'unreadable' },
+        { id: 'adhoc-dv', reason: 'unreadable' },
+      ]);
+    });
   });
 
   it.each([

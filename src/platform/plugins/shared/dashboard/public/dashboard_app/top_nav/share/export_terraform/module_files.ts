@@ -22,6 +22,7 @@ export type ExportMode = { kind: 'adopt'; spaceId: string; dashboardId: string }
 
 export const MAIN_FILE = 'main.tf.json';
 const TAGS_FILE = 'tags.tf.json';
+const DATA_VIEWS_FILE = 'data_views.tf.json';
 const IMPORTS_FILE = 'imports.tf.json';
 
 /** The zip's file name: the dashboard title without characters file systems reject. */
@@ -48,11 +49,21 @@ export const exportedTags = ({
 }: DashboardTerraformResponseBody): LinkedResource[] =>
   resources.filter(({ type }) => type === tagResource.type);
 
+/**
+ * The data view resources the module writes: the dashboard's saved data views, in a new copy only. Adopting keeps
+ * them literal IDs until it can pin and import them.
+ */
+export const exportedDataViews = (
+  { resources, data_view_resource: dataViewResource }: DashboardTerraformResponseBody,
+  mode: ExportMode
+): LinkedResource[] =>
+  mode.kind === 'copy' ? resources.filter(({ type }) => type === dataViewResource.type) : [];
+
 // Adopting pins each tag's ID and space, as it does the dashboard's; a new copy pins nothing.
 const tagResourceBody = ({ id, body }: LinkedResource, mode: ExportMode): JsonObject =>
   mode.kind === 'adopt' ? { space_id: mode.spaceId, tag_id: escapeTemplate(id), ...body } : body;
 
-const firstPlan = (mode: ExportMode, tagCount: number) =>
+const firstPlan = (mode: ExportMode, tagCount: number, dataViewCount: number) =>
   mode.kind === 'adopt'
     ? `This module adopts the existing dashboard \`${mode.dashboardId}\` in space \`${
         mode.spaceId
@@ -68,7 +79,16 @@ first apply.`
     : `This module creates a new copy of the dashboard; the original is not changed. The first plan
 should show
 
-    Plan: ${1 + tagCount} to add, 0 to change, 0 to destroy.`;
+    Plan: ${1 + tagCount + dataViewCount} to add, 0 to change, 0 to destroy.`;
+
+const dataViewsSection = (count: number): string =>
+  count
+    ? `
+\`${DATA_VIEWS_FILE}\` creates the dashboard's data views (${count}) as new data views, and every place the
+dashboard uses one refers to it. The data views are created in the dashboard's space; if you set a
+\`space_id\` on the dashboard, set the same on each data view.
+`
+    : '';
 
 const tagsSection = (mode: ExportMode, count: number, minKibanaVersion: string): string => {
   if (!count) return '';
@@ -93,11 +113,12 @@ const readme = (
   { source, version }: DashboardTerraformResponseBody['provider'],
   mode: ExportMode,
   tagCount: number,
+  dataViewCount: number,
   minKibanaVersion: string
 ) => `# Dashboard exported from Kibana
 
-${firstPlan(mode, tagCount)}
-${tagsSection(mode, tagCount, minKibanaVersion)}
+${firstPlan(mode, tagCount, dataViewCount)}
+${tagsSection(mode, tagCount, minKibanaVersion)}${dataViewsSection(dataViewCount)}
 It was generated for the ${source} provider; \`versions.tf.json\` requires version
 ${version} or later. This export is a technical preview.
 
@@ -122,9 +143,11 @@ export const buildModuleFiles = (
     resource_type: resourceType,
     resource_name: resourceName,
     tag_resource: tagResource,
-    body,
+    data_view_resource: dataViewResource,
   } = conversion;
+  const body = mode.kind === 'adopt' ? conversion.adopt_body : conversion.body;
   const tags = exportedTags(conversion);
+  const dataViews = exportedDataViews(conversion, mode);
   return [
     {
       name: 'versions.tf.json',
@@ -171,6 +194,21 @@ export const buildModuleFiles = (
           },
         ]
       : []),
+    ...(dataViews.length
+      ? [
+          {
+            name: DATA_VIEWS_FILE,
+            language: 'json' as const,
+            content: json({
+              resource: {
+                [dataViewResource.type]: Object.fromEntries(
+                  dataViews.map(({ name, body: dataViewBody }) => [name, dataViewBody])
+                ),
+              },
+            }),
+          },
+        ]
+      : []),
     ...(mode.kind === 'adopt'
       ? [
           {
@@ -194,7 +232,13 @@ export const buildModuleFiles = (
     {
       name: 'README.md',
       language: 'markdown',
-      content: readme(provider, mode, tags.length, tagResource.min_kibana_version),
+      content: readme(
+        provider,
+        mode,
+        tags.length,
+        dataViews.length,
+        tagResource.min_kibana_version
+      ),
     },
   ];
 };

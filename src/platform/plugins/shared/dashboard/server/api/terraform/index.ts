@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardTerraformResponseBody } from './types';
+export type { DashboardTerraformResponseBody, LiteralDataView, LiteralTag } from './types';
 export { registerTerraformRoute } from './register_terraform_route';

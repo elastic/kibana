@@ -92,6 +92,17 @@
       "covers": [
         "envelope.tags"
       ]
+    },
+    {
+      "file": "data_views.json",
+      "source": "Hand-written: one saved data view (`logs-dv`) used by a root filter, a pinned options list control, a by-value Lens metric's data source and a field statistics table; the filter value holds user text with `${`",
+      "covers": [
+        "envelope.filters",
+        "panel_type.field_stats_table",
+        "panel_type.vis",
+        "pinned_panels.options_list_control",
+        "vis.metric.no_esql"
+      ]
     }
   ],
   "variants": {
@@ -159,6 +170,12 @@
     ],
     "envelope.tags": [
       "several_tags.json"
+    ],
+    "envelope.filters": [
+      "data_views.json"
+    ],
+    "panel_type.field_stats_table": [
+      "data_views.json"
     ]
   }
 }
