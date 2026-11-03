@@ -10,6 +10,7 @@ import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agen
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
@@ -65,6 +66,7 @@ export interface NightshiftInvestigationsSetupDeps {
    * Stores investigations as conversations. Without it investigations are unavailable.
    */
   agenticInvestigations?: AgenticInvestigationsPluginSetup;
+  cloud?: CloudSetup;
   /** Provides the `proposals.create` tool the investigation agent proposes actions with. */
   proposals?: ProposalsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;

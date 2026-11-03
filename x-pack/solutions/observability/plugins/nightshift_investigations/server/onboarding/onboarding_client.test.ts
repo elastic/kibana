@@ -6,10 +6,15 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchServiceStart } from '@kbn/core/server';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { createOnboardingClient, OnboardingUnavailableError } from './onboarding_client';
+
+const ES_URL = 'https://es.example.com:9243';
 
 const suggestion = {
   title: 'checkout 5xx spike',
@@ -23,13 +28,18 @@ const setup = ({
   execution,
   workflow = { id: NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, definition: {} },
   agentInstalled = true,
+  connectors = [],
   withAgentBuilder = true,
+  withActions = true,
 }: {
   executions?: Array<{ id: string }>;
   execution?: Record<string, unknown>;
   workflow?: Record<string, unknown> | null;
   agentInstalled?: boolean;
+  /** The space's connectors, as `{ id, actionTypeId, config }`. */
+  connectors?: Array<{ id: string; actionTypeId: string; config?: Record<string, unknown> }>;
   withAgentBuilder?: boolean;
+  withActions?: boolean;
 } = {}) => {
   const management = {
     getWorkflowExecutions: jest.fn().mockResolvedValue({ results: executions }),
@@ -42,6 +52,23 @@ const setup = ({
     ensure: jest.fn().mockResolvedValue(undefined),
   };
   const agentAvailability = { kind: 'always' } as never;
+  const actionsClient = actionsClientMock.create();
+  actionsClient.getAll.mockResolvedValue(connectors as never);
+  actionsClient.create.mockResolvedValue({ id: 'local-es' } as never);
+  const actions = {
+    getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+  } as unknown as ActionsPluginStart;
+  const esClient = {
+    security: {
+      createApiKey: jest.fn().mockResolvedValue({ id: 'key-1', api_key: 'raw', encoded: 'ZW5j' }),
+      invalidateApiKey: jest.fn().mockResolvedValue({}),
+    },
+  };
+  const elasticsearch = {
+    publicBaseUrl: ES_URL,
+    client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: esClient }) },
+  } as unknown as ElasticsearchServiceStart;
+  const logger = loggingSystemMock.createLogger();
   const client = createOnboardingClient({
     getDeps: () => ({
       workflowsManagement: { management } as unknown as WorkflowsServerPluginSetup,
@@ -49,11 +76,24 @@ const setup = ({
         ? ({ agents } as unknown as AgentBuilderPluginStart)
         : undefined,
       agentAvailability,
+      actions: withActions ? actions : undefined,
+      elasticsearch,
     }),
-    logger: loggingSystemMock.createLogger(),
+    logger,
   });
-  return { client, management, agents, request: httpServerMock.createKibanaRequest() };
+  return {
+    client,
+    management,
+    agents,
+    actionsClient,
+    esClient,
+    logger,
+    request: httpServerMock.createKibanaRequest(),
+  };
 };
+
+const ensuredConnectorIds = (agents: { ensure: jest.Mock }) =>
+  agents.ensure.mock.calls[0][0].agent.configuration.connector_ids;
 
 describe('createOnboardingClient', () => {
   it('returns no execution before onboarding started', async () => {
@@ -73,21 +113,97 @@ describe('createOnboardingClient', () => {
     expect(await client.get(request)).toEqual({ agent_installed: false });
   });
 
-  it('enables Nightshift by installing the investigation agent in the space', async () => {
-    const { client, agents, request } = setup({ agentInstalled: false });
+  it('enables Nightshift by creating the local connector and installing the agent with it', async () => {
+    const { client, agents, actionsClient, esClient, request } = setup({
+      agentInstalled: false,
+      connectors: [
+        { id: 'slack', actionTypeId: '.slack' },
+        { id: 'remote', actionTypeId: '.elasticsearch', config: { url: 'https://other:9243' } },
+      ],
+    });
 
     expect(await client.enable(request)).toEqual({ agent_installed: true });
+    expect(esClient.security.createApiKey).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'nightshift-local-elasticsearch-default' })
+    );
+    expect(actionsClient.create).toHaveBeenCalledWith({
+      action: expect.objectContaining({
+        actionTypeId: '.elasticsearch',
+        config: { url: ES_URL },
+        secrets: { authType: 'api_key_header', Authorization: 'ApiKey ZW5j' },
+      }),
+    });
     expect(agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
         spaceId: 'default',
         agent: expect.objectContaining({ id: 'nightshift.investigation' }),
       })
     );
+    expect(ensuredConnectorIds(agents)).toEqual(['local-es']);
+  });
+
+  it("installs the agent with the space's existing connector for the local cluster", async () => {
+    const { client, agents, actionsClient, esClient, request } = setup({
+      agentInstalled: false,
+      connectors: [{ id: 'mine', actionTypeId: '.elasticsearch', config: { url: `${ES_URL}/` } }],
+    });
+
+    expect(await client.enable(request)).toEqual({ agent_installed: true });
+    expect(esClient.security.createApiKey).not.toHaveBeenCalled();
+    expect(actionsClient.create).not.toHaveBeenCalled();
+    expect(ensuredConnectorIds(agents)).toEqual(['mine']);
+  });
+
+  it('still installs the agent, without a connector, when the API key cannot be created', async () => {
+    const { client, agents, actionsClient, esClient, logger, request } = setup({
+      agentInstalled: false,
+    });
+    esClient.security.createApiKey.mockRejectedValue(new Error('security disabled'));
+
+    expect(await client.enable(request)).toEqual({ agent_installed: true });
+    expect(actionsClient.create).not.toHaveBeenCalled();
+    expect(ensuredConnectorIds(agents)).toEqual([]);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('security disabled'));
+  });
+
+  it('still installs the agent, without a connector, when the connector cannot be created', async () => {
+    const { client, agents, actionsClient, esClient, logger, request } = setup({
+      agentInstalled: false,
+    });
+    actionsClient.create.mockRejectedValue(new Error('license'));
+
+    expect(await client.enable(request)).toEqual({ agent_installed: true });
+    expect(esClient.security.invalidateApiKey).toHaveBeenCalledWith({ ids: ['key-1'] });
+    expect(ensuredConnectorIds(agents)).toEqual([]);
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('license'));
+  });
+
+  it('fails when the agent cannot be installed, keeping the connector for the next enable', async () => {
+    const { client, agents, actionsClient, esClient, request } = setup({ agentInstalled: false });
+    agents.ensure.mockRejectedValue(new Error('agent type missing'));
+
+    await expect(client.enable(request)).rejects.toThrow('agent type missing');
+    expect(actionsClient.create).toHaveBeenCalled();
+    expect(actionsClient.delete).not.toHaveBeenCalled();
+    expect(esClient.security.invalidateApiKey).not.toHaveBeenCalled();
   });
 
   it('cannot enable Nightshift without Agent Builder', async () => {
     const { client, request } = setup({ withAgentBuilder: false });
     await expect(client.enable(request)).rejects.toBeInstanceOf(OnboardingUnavailableError);
+  });
+
+  it('still installs the agent, without a connector, when connectors are not available', async () => {
+    const { client, agents, logger, request } = setup({
+      agentInstalled: false,
+      withActions: false,
+    });
+
+    expect(await client.enable(request)).toEqual({ agent_installed: true });
+    expect(ensuredConnectorIds(agents)).toEqual([]);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Connectors are not available')
+    );
   });
 
   it("maps the space's latest execution and its suggestions", async () => {

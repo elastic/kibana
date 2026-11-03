@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ElasticsearchServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -23,6 +25,10 @@ import type {
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { OnboardingUnavailableError } from './errors';
+import {
+  ensureLocalElasticsearchConnector,
+  resolveLocalElasticsearchUrl,
+} from './local_elasticsearch_connector';
 import { parseSuggestions } from './parse_suggestions';
 
 export { OnboardingUnavailableError };
@@ -32,6 +38,10 @@ export interface OnboardingClientDeps {
   spaces?: SpacesPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   agentAvailability?: AgentAvailabilityConfig;
+  actions?: ActionsPluginStart;
+  elasticsearch?: ElasticsearchServiceStart;
+  cloud?: CloudSetup;
+  esHosts?: string[];
 }
 
 /**
@@ -136,17 +146,43 @@ export const createOnboardingClient = ({
     },
 
     enable: async (request) => {
-      const { agentBuilder, agentAvailability } = getDeps();
+      const { agentBuilder, agentAvailability, actions, elasticsearch, cloud, esHosts } = getDeps();
       if (!agentBuilder || !agentAvailability) {
         throw new OnboardingUnavailableError('Agent Builder is not available');
       }
+
       const spaceId = getSpaceId(request);
+
+      let connectorId: string | undefined;
+      try {
+        if (!actions || !elasticsearch) {
+          throw new OnboardingUnavailableError('Connectors are not available');
+        }
+        const url = resolveLocalElasticsearchUrl({ cloud, elasticsearch, esHosts });
+        connectorId = await ensureLocalElasticsearchConnector({
+          esClient: elasticsearch.client.asScoped(request).asCurrentUser,
+          actionsClient: await actions.getActionsClientWithRequest(request),
+          spaceId,
+          url,
+          logger,
+        });
+      } catch (error) {
+        logger.error(
+          `Could not prepare a local Elasticsearch connector for the investigation agent in ` +
+            `space "${spaceId}": ${(error as Error).message}`
+        );
+      }
+
       await installInvestigationAgent({
         agentBuilder,
         spaceId,
         availability: agentAvailability,
+        connectorIds: connectorId ? [connectorId] : [],
       });
-      logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);
+      logger.info(
+        `Enabled Nightshift in space "${spaceId}": investigation agent installed` +
+          (connectorId ? ` with local Elasticsearch connector "${connectorId}"` : '')
+      );
       return { agent_installed: true };
     },
 

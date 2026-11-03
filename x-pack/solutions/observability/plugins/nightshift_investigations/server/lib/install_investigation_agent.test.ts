@@ -40,4 +40,24 @@ describe('installInvestigationAgent', () => {
       },
     });
   });
+
+  it('starts the agent with the given connectors', async () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+
+    await installInvestigationAgent({
+      agentBuilder,
+      spaceId: 'space-1',
+      availability,
+      connectorIds: ['local-es'],
+    });
+
+    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agent: expect.objectContaining({
+          configuration: { tools: [], skill_ids: [], connector_ids: ['local-es'] },
+        }),
+      })
+    );
+  });
 });
