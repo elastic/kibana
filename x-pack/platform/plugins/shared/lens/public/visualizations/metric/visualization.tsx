@@ -748,13 +748,7 @@ export const getMetricVisualization = ({
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
-        layers: allSuggestions.reduce(
-          (acc, s) => ({
-            ...acc,
-            ...s.datasourceState?.layers,
-          }),
-          {}
-        ),
+        layers: Object.assign({}, ...allSuggestions.map((s) => s.datasourceState?.layers)),
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,

@@ -56,12 +56,8 @@ export const useCurrentAttributes = ({
     const allReferences = visualization.state
       ? extractReferencesFromState({
           activeDatasourceId,
-          activeDatasources: Object.keys(datasourceStates).reduce(
-            (acc, id) => ({
-              ...acc,
-              [id]: datasourceMap[id],
-            }),
-            {}
+          activeDatasources: Object.fromEntries(
+            Object.keys(datasourceStates).map((id) => [id, datasourceMap[id]])
           ),
           datasourceStates,
           visualizationState: visualization.state,

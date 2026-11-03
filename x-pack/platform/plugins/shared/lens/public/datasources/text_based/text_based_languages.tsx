@@ -140,7 +140,10 @@ const getSuggestionsByRules = (
         (col) => !acc.some((c) => c.columnId === col.columnId)
       );
     }
-    return column ? [...acc, column] : acc;
+    if (column) {
+      acc.push(column);
+    }
+    return acc;
   }, []);
 
   if (!columnsToKeep.length || columnsToKeep.length !== rules.length) {
@@ -271,7 +274,8 @@ export function getTextBasedDatasource({
           if (acc.find(({ table }) => isEqual(table.columns, cur.table.columns))) {
             return acc;
           }
-          return [...acc, cur];
+          acc.push(cur);
+          return acc;
         }, []);
     });
   };

@@ -272,13 +272,16 @@ export async function loadIndexPatterns({
     ))
   );
 
-  const indexPatternsObject = indexPatterns.reduce(
-    (acc, indexPattern) => ({
-      [indexPattern.id!]: convertDataViewIntoLensIndexPattern(indexPattern, onRestrictionMapping),
-      ...acc,
-    }),
-    { ...cache }
-  );
+  // earlier entries (including the cache) take precedence over later ones
+  const indexPatternsObject = { ...cache };
+  indexPatterns.forEach((indexPattern) => {
+    if (!(indexPattern.id! in indexPatternsObject)) {
+      indexPatternsObject[indexPattern.id!] = convertDataViewIntoLensIndexPattern(
+        indexPattern,
+        onRestrictionMapping
+      );
+    }
+  });
 
   return indexPatternsObject;
 }

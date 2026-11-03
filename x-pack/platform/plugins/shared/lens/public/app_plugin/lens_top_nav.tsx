@@ -487,12 +487,11 @@ export const LensTopNavMenu = ({
     const indexPatternIds = new Set(
       getIndexPatternsIds({
         activeDatasourceId,
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: datasourceMap[datasourceId],
-          }),
-          {}
+        activeDatasources: Object.fromEntries(
+          Object.keys(datasourceStates).map((datasourceId) => [
+            datasourceId,
+            datasourceMap[datasourceId],
+          ])
         ),
         datasourceStates,
         visualizationState: visualization.state,
@@ -508,15 +507,10 @@ export const LensTopNavMenu = ({
         indexPatternIds.add(indexPattern.id);
       });
 
+    const loadedIds = new Set([...indexPatterns.map((ip) => ip.id), ...rejectedIndexPatterns]);
     const hasIndexPatternsChanged =
       indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.size ||
-      [...indexPatternIds].some(
-        (id) =>
-          !indexPatterns
-            .map((ip) => ip.id)
-            .concat(rejectedIndexPatterns)
-            .some((loadedId) => loadedId === id)
-      );
+      [...indexPatternIds].some((id) => !loadedIds.has(id));
 
     // Update the cached index patterns if the user made a change to any of them
     if (hasIndexPatternsChanged) {
@@ -1154,12 +1148,11 @@ export const LensTopNavMenu = ({
   const refreshFieldList = useCallback(async () => {
     if (currentIndexPattern?.id) {
       refreshIndexPatternsList({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, datasourceId) => ({
-            ...acc,
-            [datasourceId]: datasourceMap[datasourceId],
-          }),
-          {}
+        activeDatasources: Object.fromEntries(
+          Object.keys(datasourceStates).map((datasourceId) => [
+            datasourceId,
+            datasourceMap[datasourceId],
+          ])
         ),
         indexPatternId: currentIndexPattern.id,
         indexPatternService,
