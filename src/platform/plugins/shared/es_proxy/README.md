@@ -61,4 +61,22 @@ const response = await plugins.esProxy.stream({
 const reader = response.body?.getReader();
 ```
 
+### elasticsearch-js client
+
+`getClient()` resolves with the [elasticsearch-js](https://github.com/elastic/elasticsearch-js) API surface, sending every call through the proxy. The client code is loaded on first use and the same instance is returned afterwards.
+
+```ts
+const client = await plugins.esProxy.getClient();
+const { hits } = await client.search({ index: 'my-index', query: { match_all: {} } });
+const exists = await client.indices.exists({ index: 'my-index' });
+await client.bulk({ index: 'my-index', operations: [{ index: {} }, { message: 'hello' }] });
+```
+
+It is built from the client's generated API modules, not its `Client` class, which depends on Node. Compared with the Node client:
+
+- Errors reject with Kibana's `HttpFetchError` (status on `error.response.status`, Elasticsearch body on `error.body`) instead of `ResponseError`. `exists`-style APIs resolve `false` for `404`, and the `ignore` option resolves with the error body.
+- Supported request options are `headers`, `signal`, `querystring` and `ignore`. `meta` and `asStream` throw; use `stream()` for streamed or binary responses.
+- `helpers`, `child()`, `close()` and diagnostics are not available, and `transport` only implements `request`.
+- `bulk` is reimplemented in this plugin because the generated module loads the Node transport.
+
 When Elasticsearch answers `401`, for example because the user's access token expired, Kibana refreshes the credentials and retries the request once, for every method. If the retry still fails, the `401` is returned; in the browser, Kibana's session handling treats it as an expired session and logs the user out.

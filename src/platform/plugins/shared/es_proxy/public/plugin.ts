@@ -9,6 +9,7 @@
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { EsProxyRequestParams } from '../common/types';
+import type { EsProxyClient } from './es_client/types';
 import { proxyService } from './proxy_service';
 
 export interface EsProxyPluginSetup {
@@ -19,6 +20,11 @@ export interface EsProxyPluginSetup {
    * server-sent events or `_query?format=arrow`.
    */
   stream: (params: EsProxyRequestParams) => Promise<Readonly<Response>>;
+  /**
+   * Resolves with an elasticsearch-js API client that sends every call through the proxy. The
+   * client code is loaded on first use.
+   */
+  getClient: () => Promise<EsProxyClient>;
 }
 
 export type EsProxyPluginStart = EsProxyPluginSetup;

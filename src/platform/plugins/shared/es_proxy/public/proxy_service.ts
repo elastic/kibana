@@ -9,24 +9,38 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { EsProxyRequestParams } from '../common/types';
+import type { EsProxyClient } from './es_client/types';
 import type { EsProxyPluginSetup } from './plugin';
 import { proxyArgsToEsArgs } from './proxy_args_to_es_args';
 
 /**
  * Creates the browser client that sends requests through the Elasticsearch proxy.
  */
-export const proxyService = (http: HttpSetup): EsProxyPluginSetup => ({
-  request: <T>(params: EsProxyRequestParams) => http.fetch<T>(...proxyArgsToEsArgs(params)),
-  stream: async (params) => {
-    const [path, options] = proxyArgsToEsArgs(params);
-    const { response } = await http.fetch(path, {
-      ...options,
-      asResponse: true,
-      rawResponse: true,
-    });
-    if (!response) {
-      throw new Error(`No response received for ${params.method} ${path}`);
-    }
-    return response;
-  },
-});
+export const proxyService = (http: HttpSetup): EsProxyPluginSetup => {
+  const request = <T>(params: EsProxyRequestParams) => http.fetch<T>(...proxyArgsToEsArgs(params));
+  const loadClient = async (): Promise<EsProxyClient> => {
+    const { createEsClient } = await import('./es_client');
+    return createEsClient(request);
+  };
+  let client: Promise<EsProxyClient> | undefined;
+
+  return {
+    request,
+    stream: async (params) => {
+      const [path, options] = proxyArgsToEsArgs(params);
+      const { response } = await http.fetch(path, {
+        ...options,
+        asResponse: true,
+        rawResponse: true,
+      });
+      if (!response) {
+        throw new Error(`No response received for ${params.method} ${path}`);
+      }
+      return response;
+    },
+    getClient: () => {
+      client ??= loadClient();
+      return client;
+    },
+  };
+};
