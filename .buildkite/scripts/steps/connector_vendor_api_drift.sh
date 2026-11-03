@@ -27,6 +27,7 @@ SUMMARY_PATH="$REPORT_DIR/drift_summary.json"
 SPECS_DIR="src/platform/packages/shared/kbn-connector-specs/src/specs"
 REFRESH_BRANCH="connector-vendor-api-refresh"
 REFRESH_TITLE="[Connector validation] Refresh vendor API artifacts"
+ISSUE_LABEL="connector-validation"
 
 if [[ -z "$TARGET_REPO" ]]; then
   MODE="dry run"
@@ -61,6 +62,13 @@ if [[ -n "$CONNECTOR" ]]; then
 fi
 node scripts/connector_vendor_api "${drift_args[@]}"
 buildkite-agent artifact upload "$REPORT_PATH"
+
+if [[ "$MODE" != "dry run" ]]; then
+  # Later runs find their issues by this label (DRIFT_ISSUE_LABEL in surface_drift.ts)
+  if ! gh api "repos/$GITHUB_REPO/labels/$ISSUE_LABEL" > /dev/null 2>&1; then
+    gh label create "$ISSUE_LABEL" --repo "$GITHUB_REPO" --description "Filed by the connector vendor API drift pipeline"
+  fi
+fi
 
 echo "+++ Surface drift in $GITHUB_REPO ($MODE)"
 surface_args=(--surface --report "$REPORT_PATH" --summary "$SUMMARY_PATH" --github-repo "$GITHUB_REPO")
@@ -98,6 +106,10 @@ if [[ ${#refresh_connectors[@]} -gt 0 ]]; then
   elif [[ "$MODE" != "live" ]]; then
     echo "Not opening the refresh PR in a $MODE; it would change:"
     git diff --cached --stat -- "$SPECS_DIR"
+  elif [[ -n "$CONNECTOR" ]]; then
+    # The PR covers every connector; rebuilding it from one would drop the others
+    echo "Not updating the refresh PR from a run of only $CONNECTOR; it would change:"
+    git diff --cached --stat -- "$SPECS_DIR"
   else
     git config --global user.name kibanamachine
     git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
@@ -121,6 +133,16 @@ if [[ ${#refresh_connectors[@]} -gt 0 ]]; then
         --label 'release_note:skip' \
         --label 'backport:skip')"
     fi
+  fi
+fi
+
+# With nothing to refresh, an earlier PR's artifacts are outdated and shouldn't be merged. A run of
+# one connector or a run with failures doesn't know that about every connector.
+if [[ "$MODE" == "live" && -z "$CONNECTOR" && "$exit_code" == "0" && -z "$refresh_pr" ]]; then
+  stale_pr="$(gh pr list --repo "$GITHUB_REPO" --head "$REFRESH_BRANCH" --state open --json url -q '.[0].url')"
+  if [[ -n "$stale_pr" ]]; then
+    echo "Closing the outdated refresh PR $stale_pr"
+    gh pr close "$stale_pr" --comment "The drift check found nothing left to refresh: $BUILDKITE_BUILD_URL"
   fi
 fi
 

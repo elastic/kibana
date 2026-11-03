@@ -101,11 +101,9 @@ run(
       const reportPath = path.resolve(flagsReader.string('report') ?? DRIFT_REPORT);
       const report: DriftReportEntry[] = JSON.parse(await fs.readFile(reportPath, 'utf8'));
       const repo = flagsReader.requiredString('github-repo');
+      const connectors = await listConnectors();
       const directories = new Map(
-        (await listConnectors()).map(({ connector, directory }) => [
-          connector.metadata.id,
-          directory,
-        ])
+        connectors.map(({ connector, directory }) => [connector.metadata.id, directory])
       );
       const codeOwners = getCodeOwnersEntries();
       const summary = await surfaceDrift({
@@ -115,8 +113,14 @@ run(
         dryRun: flagsReader.boolean('dry-run'),
         ownersOf: (connector) => {
           const directory = directories.get(connector);
-          return directory ? getOwningTeamsForPath(path.dirname(directory), codeOwners) : [];
+          // A path inside the connector's folder: `specs/<connector>/**` doesn't match the folder.
+          return directory ? getOwningTeamsForPath(directory, codeOwners) : [];
         },
+        knownConnectors: new Set(
+          connectors
+            .filter(({ directory }) => existsSync(path.join(directory, 'manifest.json')))
+            .map(({ connector }) => connector.metadata.id)
+        ),
         buildUrl: process.env.BUILDKITE_BUILD_URL,
         log,
       });

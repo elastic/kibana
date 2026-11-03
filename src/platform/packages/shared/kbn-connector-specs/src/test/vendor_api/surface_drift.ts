@@ -72,14 +72,20 @@ export interface SurfaceDriftOptions {
   readonly repo: string;
   /** Reads the issues, but logs what it would write instead of writing it. */
   readonly dryRun: boolean;
-  /** The teams owning a connector's folder, mentioned in its issue. */
+  /** The teams owning a connector's folder, without the `@`, mentioned in its issue. */
   readonly ownersOf: (connector: string) => readonly string[];
+  /** The connectors with vendor API artifacts; open issues of any other are closed. */
+  readonly knownConnectors: ReadonlySet<string>;
   /** The build that ran the check, linked from comments. */
   readonly buildUrl?: string;
   readonly log: VendorApiLog;
 }
 
 const markerOf = (connector: string): string => `<!-- ${DRIFT_ISSUE_LABEL}:${connector} -->`;
+
+const MARKER_PATTERN = new RegExp(`<!-- ${DRIFT_ISSUE_LABEL}:(\\S+) -->`);
+
+const connectorOf = ({ body }: DriftIssue): string | undefined => body.match(MARKER_PATTERN)?.[1];
 
 const isFailed = (entry: DriftReportEntry): entry is FailedDrift => 'error' in entry;
 
@@ -160,8 +166,8 @@ export const renderDriftIssue = (
     '',
     `- Reproduce: \`node scripts/connector_vendor_api --drift --connector ${id}\``,
     `- Once the connector handles the change, refresh its artifacts: \`node scripts/connector_vendor_api --connector ${id} --refresh\``,
-    '- This issue is updated by later runs, and closed once the check finds the connector healthy.',
-    ...(owners.length > 0 ? ['', `cc ${owners.join(' ')}`] : []),
+    '- This issue is updated by later runs, and closed once the check finds nothing here that needs attention.',
+    ...(owners.length > 0 ? ['', `cc ${owners.map((owner) => `@${owner}`).join(' ')}`] : []),
   ].join('\n');
   return {
     title: `[Connector validation] Vendor API drift in ${drift.connector}`,
@@ -203,7 +209,8 @@ const message = (error: unknown): string =>
 /**
  * Turns a drift report into GitHub issues: one per connector that needs one, found again by the
  * marker in its body, updated or reopened when the findings change, and closed once the
- * connector is healthy. Connectors that only need a refresh are listed for the refresh PR.
+ * connector no longer needs one or is gone. Connectors that only need a refresh are listed for
+ * the refresh PR.
  */
 export const surfaceDrift = async ({
   report,
@@ -211,6 +218,7 @@ export const surfaceDrift = async ({
   repo,
   dryRun,
   ownersOf,
+  knownConnectors,
   buildUrl,
   log,
 }: SurfaceDriftOptions): Promise<DriftSummary> => {
@@ -244,10 +252,14 @@ export const surfaceDrift = async ({
           refreshed.push(entry);
         }
         if (existing?.state === 'open') {
-          await write(`close #${existing.number} (${connector} is healthy)`, async () => {
+          const finding =
+            outcome === 'refresh'
+              ? `only changes for \`${connector}\` that the refresh PR picks up`
+              : `\`${connector}\` healthy`;
+          await write(`close #${existing.number} (found ${finding})`, async () => {
             await tracker.comment(
               existing.number,
-              `The drift check found \`${connector}\` healthy${build}; closing.`
+              `The drift check found ${finding}${build}; closing.`
             );
             await tracker.update(existing.number, { state: 'closed' });
           });
@@ -286,6 +298,27 @@ export const surfaceDrift = async ({
       } else {
         actions.push({ connector, action: 'unchanged', issue: existing });
       }
+    } catch (error) {
+      log.warning(`${connector}: ${message(error)}`);
+      actions.push({ connector, action: 'failed', error: message(error) });
+    }
+  }
+
+  // A removed connector is in no report, so nothing above would ever close its issue.
+  for (const issue of issues) {
+    const connector = connectorOf(issue);
+    if (issue.state !== 'open' || connector === undefined || knownConnectors.has(connector)) {
+      continue;
+    }
+    try {
+      await write(`close #${issue.number} (${connector} no longer exists)`, async () => {
+        await tracker.comment(
+          issue.number,
+          `The drift check no longer covers \`${connector}\`${build}; closing.`
+        );
+        await tracker.update(issue.number, { state: 'closed' });
+      });
+      actions.push({ connector, action: 'closed', issue });
     } catch (error) {
       log.warning(`${connector}: ${message(error)}`);
       actions.push({ connector, action: 'failed', error: message(error) });

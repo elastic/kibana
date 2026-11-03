@@ -93,7 +93,8 @@ const surface = (
     tracker,
     repo: 'elastic/kibana',
     dryRun: false,
-    ownersOf: () => ['@elastic/response-ops'],
+    ownersOf: () => ['elastic/response-ops'],
+    knownConnectors: new Set(['.acme', '.other']),
     buildUrl: 'https://buildkite.com/build/1',
     log: { info: () => {}, warning: () => {} },
     ...options,
@@ -102,7 +103,7 @@ const surface = (
 const issueOf = (drift: ConnectorDrift, number: number, state: 'open' | 'closed'): DriftIssue => ({
   number,
   state,
-  body: renderDriftIssue(drift, ['@elastic/response-ops']).body,
+  body: renderDriftIssue(drift, ['elastic/response-ops']).body,
   url: `url/${number}`,
 });
 
@@ -166,6 +167,44 @@ describe('surfaceDrift', () => {
     expect(actions[0]).toMatchObject({ action: 'closed', issue: { number: 7 } });
     expect(issues[0].state).toBe('closed');
     expect(comments[0][1]).toContain('healthy');
+  });
+
+  it('closes the issue of a connector that only needs a refresh, without calling it healthy', async () => {
+    const { tracker, issues, comments } = createTracker([
+      issueOf({ ...drifted, connector: '.other' }, 7, 'open'),
+    ]);
+    const { actions } = await surface([refreshable], tracker);
+
+    expect(actions[0]).toMatchObject({ action: 'closed', issue: { number: 7 } });
+    expect(issues[0].state).toBe('closed');
+    expect(comments[0][1]).toContain('refresh PR');
+    expect(comments[0][1]).not.toContain('healthy');
+  });
+
+  it('closes the open issue of a connector that no longer exists', async () => {
+    const { tracker, issues, comments } = createTracker([
+      issueOf({ ...drifted, connector: '.removed' }, 7, 'open'),
+    ]);
+    const { actions } = await surface([healthy], tracker);
+
+    expect(actions[1]).toMatchObject({
+      connector: '.removed',
+      action: 'closed',
+      issue: { number: 7 },
+    });
+    expect(issues[0].state).toBe('closed');
+    expect(comments[0][1]).toContain('.removed');
+  });
+
+  it('ignores labelled issues without a marker and closed issues of removed connectors', async () => {
+    const { tracker } = createTracker([
+      { number: 3, state: 'open', body: 'Filed by hand', url: 'url' },
+      issueOf({ ...drifted, connector: '.removed' }, 7, 'closed'),
+    ]);
+    const { actions } = await surface([], tracker);
+
+    expect(actions).toEqual([]);
+    expect(tracker.update).not.toHaveBeenCalled();
   });
 
   it('leaves the issues of other connectors alone', async () => {
