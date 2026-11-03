@@ -103,7 +103,7 @@ import type {
   ResolvedSandboxCredentials,
 } from '../application/connector/methods/get_sandbox_credentials';
 import type { GetAxiosInstanceWithAuthFnOpts } from '../lib/get_axios_instance';
-import { invalidateInboundConnectorEventIdentity } from '../inbound/event_identity';
+import { invalidateInboundConnectorEventIdentity } from '../api_keys/event_identity';
 import { deleteIngressCredentialForConnector } from '../inbound/ingress_credential';
 import { deleteConnectorSigningKey } from '../lib/connector_signing_keys';
 

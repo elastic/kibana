@@ -27,7 +27,7 @@ import {
   loadPreviousConnectorEventIdentity,
   mintInboundEventIdentityAttributes,
   toRawActionIdentityAttributes,
-} from '../../../../inbound/event_identity';
+} from '../../../../api_keys/event_identity';
 import { deleteIngressCredentialForConnector } from '../../../../inbound/ingress_credential';
 import {
   assertInboundEventsToggleAllowed,

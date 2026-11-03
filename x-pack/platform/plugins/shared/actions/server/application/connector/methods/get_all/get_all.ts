@@ -26,7 +26,7 @@ import {
 } from '../../lib';
 import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
-import { hasInboundEventIdentityAttributes } from '../../../../inbound/event_identity';
+import { hasInboundEventIdentityAttributes } from '../../../../api_keys/event_identity';
 import { attachInboundEventsEnabled } from '../../../../inbound/inbound_events_enabled';
 import type { GetAllUnsecuredParams } from './types/params';
 

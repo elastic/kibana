@@ -23,7 +23,7 @@ import {
 
 import type { IngestEventsRequestQuery } from '../../common/routes/events/apis/ingest';
 import type { InMemoryConnector, RawAction } from '../types';
-import { resolveConnectorEventScheduleRequest } from './event_identity';
+import { resolveConnectorEventScheduleRequest } from '../api_keys/event_identity';
 import {
   INBOUND_EVENTS_DISABLED_MESSAGE,
   INBOUND_EVENTS_UNEXPECTED_ERROR_MESSAGE,
