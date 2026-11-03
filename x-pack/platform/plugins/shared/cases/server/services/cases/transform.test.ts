@@ -324,7 +324,6 @@ describe('case transforms', () => {
               "username": "elastic",
             },
           },
-          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.external_service).not.toHaveProperty('connector_id');
@@ -384,7 +383,6 @@ describe('case transforms', () => {
             "name": ".jira",
             "type": ".jira",
           },
-          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
@@ -411,7 +409,6 @@ describe('case transforms', () => {
             "name": "none",
             "type": ".none",
           },
-          "total_observables": 0,
         }
       `);
       expect(transformedAttributes.attributes.connector).not.toHaveProperty('id');
@@ -473,7 +470,6 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ total_alerts: 10 }).attributes).toMatchInlineSnapshot(`
         Object {
           "total_alerts": 10,
-          "total_observables": 0,
         }
       `);
     });
@@ -482,9 +478,46 @@ describe('case transforms', () => {
       expect(transformAttributesToESModel({ total_comments: 5 }).attributes).toMatchInlineSnapshot(`
         Object {
           "total_comments": 5,
-          "total_observables": 0,
         }
       `);
+    });
+
+    describe('total_observables', () => {
+      it('does not reset total_observables when the update does not touch observables', () => {
+        // An update such as a title or status change must leave the stored count alone.
+        expect(transformAttributesToESModel({ title: 'new title' }).attributes).not.toHaveProperty(
+          'total_observables'
+        );
+      });
+
+      it('derives total_observables from the observables of the update', () => {
+        const observables = ['1.1.1.1', '2.2.2.2', '3.3.3.3'].map((value, index) => ({
+          id: `id-${index}`,
+          typeKey: 'typeKey',
+          value,
+          description: null,
+          createdAt: '2024-12-05',
+          updatedAt: null,
+        }));
+
+        expect(transformAttributesToESModel({ observables }).attributes.total_observables).toBe(3);
+      });
+
+      it('sets total_observables to 0 when the update empties the observables', () => {
+        expect(transformAttributesToESModel({ observables: [] }).attributes.total_observables).toBe(
+          0
+        );
+      });
+
+      it('ignores a total_observables supplied by the caller', () => {
+        expect(
+          transformAttributesToESModel({ observables: [], total_observables: 42 }).attributes
+            .total_observables
+        ).toBe(0);
+        expect(
+          transformAttributesToESModel({ total_observables: 42 }).attributes
+        ).not.toHaveProperty('total_observables');
+      });
     });
   });
 
