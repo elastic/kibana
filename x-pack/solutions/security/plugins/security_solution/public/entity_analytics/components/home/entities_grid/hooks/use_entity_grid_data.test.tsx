@@ -19,7 +19,7 @@ import { useGridContext } from './use_entity_grid_context';
 
 const mockFetchSortPage = jest.fn();
 const mockRunQuery = jest.fn();
-const mockFetchResolvedEntityFilterOverrides = jest.fn();
+const mockFetchResolvedEntityOverrides = jest.fn();
 
 jest.mock('../../../../../common/hooks/use_error_toast');
 jest.mock('./use_entity_grid_context', () => ({
@@ -36,8 +36,7 @@ jest.mock('../queries/esql', () => ({
 }));
 jest.mock('../queries/resolved_entities', () => ({
   ...jest.requireActual('../queries/resolved_entities'),
-  fetchResolvedEntityFilterOverrides: (...args: unknown[]) =>
-    mockFetchResolvedEntityFilterOverrides(...args),
+  fetchResolvedEntityOverrides: (...args: unknown[]) => mockFetchResolvedEntityOverrides(...args),
 }));
 jest.mock('./use_entity_grid_rows_enrichment', () => ({
   useEntityGridRowsEnrichment: (_context: unknown, _options: unknown, rows: Row[] = []) => ({
@@ -46,6 +45,8 @@ jest.mock('./use_entity_grid_rows_enrichment', () => ({
     isFetching: false,
     dataUpdatedAt: 0,
     error: null,
+    hasEnrichedRows: false,
+    hasFailedColumns: false,
   }),
 }));
 
@@ -96,7 +97,7 @@ describe('useEntityGridData', () => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     mockContext();
     mockRunQuery.mockResolvedValue([{ total: 40 }]);
-    mockFetchResolvedEntityFilterOverrides.mockResolvedValue({ include: ['e9'], exclude: [] });
+    mockFetchResolvedEntityOverrides.mockResolvedValue({ include: ['e9'], exclude: [] });
     mockSortQueryOver(5);
   });
 
@@ -151,16 +152,17 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledTimes(1);
-      expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledWith(
+      expect(mockFetchResolvedEntityOverrides).toHaveBeenCalledTimes(1);
+      expect(mockFetchResolvedEntityOverrides).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityExpression: FILTERED_OPTIONS.entityExpression,
+          own: FILTERED_OPTIONS.entityExpression,
+          group: FILTERED_OPTIONS.entityExpression,
         }),
         expect.any(Function)
       );
       expect(mockFetchSortPage).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityExpression: `(${FILTERED_OPTIONS.entityExpression}) OR entity.id IN ("e9")`,
+          entityExpression: `((${FILTERED_OPTIONS.entityExpression}) OR entity.id IN ("e9"))`,
         }),
         expect.anything()
       );
@@ -172,14 +174,14 @@ describe('useEntityGridData', () => {
         include: string[];
         exclude: string[];
       }) => void = () => {};
-      mockFetchResolvedEntityFilterOverrides.mockReturnValue(
+      mockFetchResolvedEntityOverrides.mockReturnValue(
         new Promise((resolve) => {
           resolveOverrides = resolve;
         })
       );
 
       const { result } = renderGridData(FILTERED_OPTIONS);
-      await waitFor(() => expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalled());
+      await waitFor(() => expect(mockFetchResolvedEntityOverrides).toHaveBeenCalled());
 
       expect(mockFetchSortPage).not.toHaveBeenCalled();
       expect(mockRunQuery).not.toHaveBeenCalled();
@@ -191,7 +193,7 @@ describe('useEntityGridData', () => {
 
     it('reports the overrides it cannot read, and reads no rows', async () => {
       const error = new Error('too many resolved entities');
-      mockFetchResolvedEntityFilterOverrides.mockRejectedValue(error);
+      mockFetchResolvedEntityOverrides.mockRejectedValue(error);
 
       renderGridData(FILTERED_OPTIONS);
 
@@ -206,7 +208,7 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+      expect(mockFetchResolvedEntityOverrides).not.toHaveBeenCalled();
     });
 
     it('does not read the overrides for filters on other columns', async () => {
@@ -217,7 +219,7 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+      expect(mockFetchResolvedEntityOverrides).not.toHaveBeenCalled();
     });
 
     it('does not read the overrides for individual rows', async () => {
@@ -225,7 +227,7 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+      expect(mockFetchResolvedEntityOverrides).not.toHaveBeenCalled();
     });
 
     it('does not apply the overrides of resolved rows to individual rows', async () => {
@@ -263,6 +265,26 @@ describe('useEntityGridData', () => {
       expect(result.current.isFetching).toBe(true);
       expect(mockFetchSortPage).not.toHaveBeenCalled();
       expect(mockRunQuery).not.toHaveBeenCalled();
+    });
+
+    it('keeps loading, and does not query, while the search overrides are pending', async () => {
+      const { result, rerender } = renderHook(
+        ({ options }: { options: UseEntityGridDataOptions }) => useEntityGridData(options),
+        {
+          initialProps: { options: { ...OPTIONS, isSearchOverridesPending: true } },
+          wrapper: ({ children }: PropsWithChildren) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          ),
+        }
+      );
+
+      expect(result.current.isFetching).toBe(true);
+      expect(mockFetchSortPage).not.toHaveBeenCalled();
+      expect(mockRunQuery).not.toHaveBeenCalled();
+
+      rerender({ options: { ...OPTIONS, isSearchOverridesPending: false } });
+
+      await waitFor(() => expect(mockFetchSortPage).toHaveBeenCalled());
     });
 
     it('does not query until the space resolves', async () => {
@@ -335,6 +357,81 @@ describe('useEntityGridData', () => {
           expect.objectContaining({ message: 'Column unsortable is not sortable' })
         )
       );
+    });
+
+    it('does not toast when the only failure is a missing index', () => {
+      mockContext({
+        concreteEntityIndexName: null,
+        isEntitiesIndexLoading: false,
+        entitiesIndexError: new Error('no such index [.alerts-security.alerts-default]'),
+      });
+
+      renderGridData();
+
+      expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), undefined);
+    });
+
+    it('toasts a later query failure when an earlier error is a missing index', async () => {
+      const queryError = new Error('Found 2 problems');
+      mockContext({
+        entitiesIndexError: new Error('Unknown index [.alerts-security.alerts-default]'),
+      });
+      mockFetchSortPage.mockRejectedValue(queryError);
+
+      renderGridData();
+
+      await waitFor(() =>
+        expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), queryError)
+      );
+    });
+  });
+
+  describe('load state, for the load telemetry', () => {
+    it('has the rows and the count pending until they arrive', async () => {
+      const { result } = renderGridData();
+      expect(result.current.loadState).toMatchObject({ isRowsPending: true, isCountPending: true });
+
+      await waitFor(() =>
+        expect(result.current.loadState).toMatchObject({
+          isRowsPending: false,
+          isCountPending: false,
+          hasError: false,
+        })
+      );
+    });
+
+    it('keeps a query that cannot run yet pending', () => {
+      mockContext({ concreteEntityIndexName: null, isEntitiesIndexLoading: true });
+      const { result } = renderGridData();
+      expect(result.current.loadState).toMatchObject({ isRowsPending: true, isCountPending: true });
+    });
+
+    it('counts a failed query as settled, with an error', async () => {
+      mockFetchSortPage.mockRejectedValue(new Error('boom'));
+      const { result } = renderGridData();
+
+      await waitFor(() =>
+        expect(result.current.loadState).toMatchObject({ isRowsPending: false, hasError: true })
+      );
+    });
+
+    it("keeps the rows pending while the grid still shows the previous view's rows", async () => {
+      const { result, rerender } = renderHook(
+        ({ options }: { options: UseEntityGridDataOptions }) => useEntityGridData(options),
+        {
+          initialProps: { options: OPTIONS },
+          wrapper: ({ children }: PropsWithChildren) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          ),
+        }
+      );
+      await waitFor(() => expect(result.current.loadState.isRowsPending).toBe(false));
+
+      mockFetchSortPage.mockImplementation(() => new Promise(() => {}));
+      rerender({ options: { ...OPTIONS, sortDirection: 'desc' } });
+
+      expect(result.current.rows.length).toBeGreaterThan(0);
+      expect(result.current.loadState.isRowsPending).toBe(true);
     });
   });
 

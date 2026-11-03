@@ -255,7 +255,7 @@ Map and the collector pick up the new graph.
 Keep `__API_KEY__` on any `elasticsearch` destination that needs a key. The
 document still needs `sources`, `destinations`, and `pipelines`. The
 transpiler currently wants a static `index` (no templates, no
-`index_patterns`).
+`write_patterns`).
 
 The motel demo traffic is OTLP logs with `resource.attributes.env` of `dev` or
 `prod`. `wait`, Discover examples, and `reset` data-stream deletes still assume

@@ -23,19 +23,24 @@ const mockFields: DataViewField[] = [
   createMockField({ name: 'entity.type', customLabel: 'Type', visualizable: true }),
   createMockField({ name: 'host.ip', customLabel: '', visualizable: true }),
   createMockField({ name: '_index', customLabel: '', visualizable: true }),
+  createMockField({ name: '_ignored', customLabel: '', visualizable: true }),
+  createMockField({ name: '_id', customLabel: '', visualizable: true }),
+  createMockField({ name: '_source', customLabel: '', visualizable: true }),
   createMockField({ name: 'hidden.field', customLabel: '', visualizable: false }),
 ];
 
 describe('filterFieldsBySearch', () => {
-  it('returns all visualizable fields excluding _index', () => {
+  it('returns all visualizable fields excluding metadata fields', () => {
     const result = filterFieldsBySearch(mockFields);
     const names = result.map((f) => f.name);
 
-    expect(names).toContain('entity.name');
-    expect(names).toContain('entity.type');
-    expect(names).toContain('host.ip');
-    expect(names).not.toContain('_index');
-    expect(names).not.toContain('hidden.field');
+    expect(names).toEqual(['entity.name', 'entity.type', 'host.ip']);
+  });
+
+  it('excludes metadata fields even when they are selected', () => {
+    const result = filterFieldsBySearch(mockFields, ['_ignored', 'host.ip'], undefined, true);
+
+    expect(result.map((f) => f.name)).toEqual(['host.ip']);
   });
 
   it('uses customLabel as displayName', () => {
