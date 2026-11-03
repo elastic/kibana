@@ -277,7 +277,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await testSubjects.click('editable-save-markdown');
+        // Keep the button clear of the fixed timeline bottom bar
+        await testSubjects.click('editable-save-markdown', undefined, { bottomOffset: 100 });
 
         await header.waitUntilLoadingHasFinished();
 
