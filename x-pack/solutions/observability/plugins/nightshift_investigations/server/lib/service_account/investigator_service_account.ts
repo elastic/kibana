@@ -32,9 +32,7 @@ import {
 } from '../../../common';
 import type { NightshiftInvestigationsStartDeps } from '../../types';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
-import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../../agents/decision_tree_reinforcement';
 import { installInvestigationAgent } from '../install_investigation_agent';
-import { installDecisionTreeReinforcementAgent } from '../install_decision_tree_reinforcement_agent';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import { BOUND_WORKFLOW_IDS, type BoundWorkflowId } from './bound_workflows';
 import {
@@ -57,24 +55,16 @@ interface Deps {
   /** Reads the template values a bound workflow was installed with. */
   getInstalledWorkflowState?: PluginScopedManagedWorkflows['getInstalledWorkflowState'];
   spaces?: SpacesPluginStart;
-  /** Binds the Nightshift agents to the space's agent account; Agent Builder starts after us. */
+  /** Binds the investigation agent to the space's agent account; Agent Builder starts after us. */
   getAgentBuilder?: () => NightshiftInvestigationsStartDeps['agentBuilder'] | undefined;
-  /** Where the agents are available when setup has to install them. */
+  /** Where the investigation agent is available when setup has to install it. */
   getAgentAvailability: () => AgentAvailabilityConfig;
-  /** The decision-tree reinforcement agent only exists while decision trees are on. */
-  isDecisionTreesEnabled: () => boolean;
   /** Automations are hidden saved objects; this client can read and write them. */
   getAutomationsSoClient?: (request: KibanaRequest, spaceId: string) => SavedObjectsClientContract;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
   logger: Logger;
 }
-
-/** The Nightshift agents setup pins to the agent account, with how to install each. */
-const AGENT_INSTALLERS = [
-  [NIGHTSHIFT_INVESTIGATION_AGENT_ID, installInvestigationAgent],
-  [NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID, installDecisionTreeReinforcementAgent],
-] as const;
 
 /** Matches the wait `nightshift.ensureInvestigationAgent` uses for a just-installed agent. */
 const AGENT_VISIBILITY_RETRY_OPTIONS = { retries: 9, factor: 1, minTimeout: 300 } as const;
@@ -113,7 +103,6 @@ export const createInvestigatorServiceAccountService = ({
   spaces,
   getAgentBuilder,
   getAgentAvailability,
-  isDecisionTreesEnabled,
   getAutomationsSoClient,
   isServerless,
   logger,
@@ -421,40 +410,61 @@ export const createInvestigatorServiceAccountService = ({
   };
 
   /**
-   * Pins the Nightshift agents to the space's agent account, so every run of them - a workflow's,
+   * Pins the investigation agent to the space's agent account, so every run of it - a workflow's,
    * a hook's or a user's chat - executes as that account. Core only binds for an authenticated
    * caller with `manage_security`, which `runEnable` has already checked.
+   *
+   * The decision-tree reinforcement agent stays unbound: only `nightshift.decisionTreeReinforce`
+   * runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a
+   * binding. The bound agent optimize workflow already runs as the account, and a direct chat with
+   * the reinforcement agent keeps running as its caller.
    */
-  const bindAgents = async (
+  const bindAgent = async (
     request: KibanaRequest,
     spaceId: string,
     agentServiceAccountId: string
   ): Promise<void> => {
     const agentBuilder = getAgentBuilder?.();
     if (!agentBuilder) {
-      throw Boom.serverUnavailable('Agent Builder is not available; cannot bind the agents.');
+      throw Boom.serverUnavailable('Agent Builder is not available; cannot bind the agent.');
     }
     const registry = await agentBuilder.agents.getRegistry({ request });
-    const agents = AGENT_INSTALLERS.filter(
-      ([agentId]) =>
-        agentId !== NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID || isDecisionTreesEnabled()
-    );
-    for (const [agentId, install] of agents) {
-      // The agents are installed lazily, by the onboarding and by the workflows that need them, so
-      // a space being set up for the first time may not have them yet.
-      await install({ agentBuilder, spaceId, availability: getAgentAvailability() });
-      // A just-installed agent is found by a search that may not see it until the next refresh.
-      await pRetry(async () => {
-        try {
-          await registry.setServiceAccount(agentId, agentServiceAccountId);
-        } catch (error) {
-          throw isAgentNotFoundError(error) ? error : new AbortError(error);
-        }
-      }, AGENT_VISIBILITY_RETRY_OPTIONS);
-    }
+    // The agent is installed lazily, by the onboarding and by the workflows that need it, so a
+    // space being set up for the first time may not have it yet.
+    await installInvestigationAgent({
+      agentBuilder,
+      spaceId,
+      availability: getAgentAvailability(),
+    });
+    // A just-installed agent is found by a search that may not see it until the next refresh.
+    await pRetry(async () => {
+      try {
+        await registry.setServiceAccount(NIGHTSHIFT_INVESTIGATION_AGENT_ID, agentServiceAccountId);
+      } catch (error) {
+        throw isAgentNotFoundError(error) ? error : new AbortError(error);
+      }
+    }, AGENT_VISIBILITY_RETRY_OPTIONS);
     logger.info(
-      `Nightshift agents in space [${spaceId}] run as service account [${agentServiceAccountId}]`
+      `Nightshift agent in space [${spaceId}] runs as service account [${agentServiceAccountId}]`
     );
+  };
+
+  /** Lets the investigation agent run as its callers again; a missing or unbound agent is done. */
+  const unbindAgent = async (request: KibanaRequest, spaceId: string): Promise<void> => {
+    const agentBuilder = getAgentBuilder?.();
+    if (!agentBuilder) {
+      throw Boom.serverUnavailable('Agent Builder is not available; cannot unbind the agent.');
+    }
+    const registry = await agentBuilder.agents.getRegistry({ request });
+    try {
+      const agent = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+      if (!agent.service_account_id) return;
+    } catch (error) {
+      if (isAgentNotFoundError(error)) return;
+      throw error;
+    }
+    await registry.setServiceAccount(NIGHTSHIFT_INVESTIGATION_AGENT_ID, null);
+    logger.info(`Nightshift agent in space [${spaceId}] runs as its callers again`);
   };
 
   const runEnable = async (
@@ -474,8 +484,10 @@ export const createInvestigatorServiceAccountService = ({
     }
     await assertSpaceExists(request, spaceId);
 
+    // The agent is bound before the entry point is installed, since installing the entry point is
+    // what makes the space read as set up: a failed binding cannot leave a setup that looks done.
+    await bindAgent(request, spaceId, serviceAccountIds.agent);
     await installBoundWorkflows(request, spaceId, serviceAccountIds);
-    await bindAgents(request, spaceId, serviceAccountIds.agent);
     const unboundAutomations = await bindAutomations(
       request,
       spaceId,
@@ -527,8 +539,8 @@ export const createInvestigatorServiceAccountService = ({
   };
 
   /**
-   * Uninstalls the space's bound workflows. The accounts are shared by every space and are kept,
-   * so `_enable` restores the space with the same identities.
+   * Unbinds the investigation agent and uninstalls the space's bound workflows. The accounts are
+   * shared by every space and are kept, so `_enable` restores the space with the same identities.
    */
   const disable = async (
     request: KibanaRequest,
@@ -542,6 +554,9 @@ export const createInvestigatorServiceAccountService = ({
         'Removing the Nightshift service account setup requires the manage_security cluster privilege.'
       );
     }
+    // The agent goes first: a failure after it leaves the space reading as not set up, never a
+    // space reading as removed whose agent still runs as the account.
+    await unbindAgent(request, spaceId);
     const client = await workflowsExtensions.getClient(request);
     // The entry point goes first, so the space stops reading as set up before anything else goes.
     for (const id of [...BOUND_WORKFLOW_IDS].reverse()) {
