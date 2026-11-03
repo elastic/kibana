@@ -17,7 +17,7 @@ const workflow = parse(NIGHTSHIFT_ONLINE_EVALS_WORKFLOW.yaml) as {
 };
 
 describe('nightshift online evals workflow', () => {
-  it('is started only by the investigation workflow and is not billed', () => {
+  it('is manually triggered and not billed', () => {
     expect(workflow.triggers).toEqual([expect.objectContaining({ type: 'manual' })]);
     expect(NIGHTSHIFT_ONLINE_EVALS_WORKFLOW.billable).toBe(false);
   });
