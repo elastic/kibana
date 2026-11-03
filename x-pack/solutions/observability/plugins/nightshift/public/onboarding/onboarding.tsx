@@ -140,7 +140,6 @@ export function NightshiftOnboarding({
   const hasAdditionalConnector = groupHasConnector(connectorGroups, 'additional');
   // Null until the user moves; then Proceed / Skip own the step.
   const [activeStep, setActiveStep] = useState<NavigableStep | null>(null);
-  const [skippedInvestigate, setSkippedInvestigate] = useState(false);
   // Filled the moment Investigate succeeds, so step 5 shows the trial card before the list refetches.
   const [startedInvestigation, setStartedInvestigation] = useState<InvestigationSummary>();
 
@@ -153,7 +152,8 @@ export function NightshiftOnboarding({
     startedInvestigation && latestInvestigation?.id !== startedInvestigation.id
       ? startedInvestigation
       : latestInvestigation ?? startedInvestigation;
-  const reachedAutomate = trialInvestigation != null || skippedInvestigate;
+  // Automate only after the user starts an investigation — no skip.
+  const reachedAutomate = trialInvestigation != null;
 
   const defaultStep: NavigableStep = !execution
     ? 'connect'
@@ -248,7 +248,7 @@ export function NightshiftOnboarding({
       ? 'disabled'
       : step === 'investigate'
       ? 'current'
-      : trialInvestigation != null || skippedInvestigate
+      : trialInvestigation != null
       ? 'complete'
       : 'disabled';
   const automateStatus: OnboardingStepState['status'] =
@@ -273,12 +273,10 @@ export function NightshiftOnboarding({
     investigate: {
       status: investigateStatus,
       hint:
-        step === 'investigate'
-          ? !execution || execution.status === 'running'
-            ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
-                defaultMessage: 'Analyzing your data…',
-              })
-            : OPTIONAL_HINT
+        step === 'investigate' && (!execution || execution.status === 'running')
+          ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
+              defaultMessage: 'Analyzing your data…',
+            })
           : undefined,
       onClick: investigateStatus === 'complete' ? () => goTo('investigate') : undefined,
     },
@@ -331,21 +329,6 @@ export function NightshiftOnboarding({
           {SKIP_STEP_LABEL}
         </EuiButton>
       )
-    ) : step === 'investigate' ? (
-      <EuiButton
-        fill
-        fullWidth
-        size="s"
-        iconType="sortRight"
-        iconSide="right"
-        onClick={() => {
-          setSkippedInvestigate(true);
-          goTo('automate');
-        }}
-        data-test-subj="nightshiftOnboardingSkipInvestigationButton"
-      >
-        {SKIP_STEP_LABEL}
-      </EuiButton>
     ) : step === 'automate' ? (
       <EuiButton
         fullWidth
