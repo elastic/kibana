@@ -173,6 +173,88 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     expect(reportOnlineEvalScore.mock.calls[0][0].scores[0]).not.toHaveProperty('explanation');
   });
 
+  describe('an alert recovery round', () => {
+    const RECOVERY = {
+      ...ROUND,
+      id: 'round-recovery',
+      trace_id: 'trace-round-recovery',
+      input: { message: 'An alert in this investigation has recovered.' },
+      response: { message: 'Confirmed: rolling back the payments deploy cleared the alert.' },
+      steps: [],
+    };
+    const RECOVERY_INPUT = {
+      round_id: 'round-recovery',
+      round_kind: 'alert_recovery',
+      evaluator_set: 'reference_based',
+      entry_point: 'alert_recovery',
+    };
+
+    it('grades the first round against the recovery conclusion', async () => {
+      const evaluate = jest
+        .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+        .mockResolvedValue([okResult('conclusion_quality'), okResult('rca_reward')]);
+      const { run, reportOnlineEvalScore } = setup({
+        evaluate,
+        rounds: [ROUND, { ...ROUND, id: 'round-follow-up' }, RECOVERY],
+      });
+
+      await run(RECOVERY_INPUT);
+
+      expect(evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          evidence: {
+            round: {
+              input: { message: 'Why did the checkout alert fire?' },
+              steps: [expect.objectContaining({ tool_call_id: 'call-1' })],
+              response: { message: 'A bad deploy of the payments service.' },
+            },
+            reference_data: {
+              alert_outcome: 'Confirmed: rolling back the payments deploy cleared the alert.',
+            },
+          },
+        })
+      );
+      expect(reportOnlineEvalScore).toHaveBeenCalledWith(
+        expect.objectContaining({
+          round_id: 'round-recovery',
+          round_trace_id: 'trace-round-recovery',
+          round_kind: 'alert_recovery',
+          graded_report: 'first_round',
+          evaluator_set: 'reference_based',
+        })
+      );
+    });
+
+    it.each(['current', 'pre_recovery'])(
+      'never grades the recovery itself: rejects the %s report as invalid input',
+      async (gradedReport) => {
+        const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup({
+          rounds: [ROUND, RECOVERY],
+        });
+
+        await expect(run({ ...RECOVERY_INPUT, graded_report: gradedReport })).resolves.toEqual({
+          output: { scored: false, skip_reason: 'scoring_failed' },
+        });
+        expect(evaluate).not.toHaveBeenCalled();
+        expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+        expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+          expect.objectContaining({ step: 'score', code: 'invalid_input' })
+        );
+      }
+    );
+  });
+
+  it('passes no ground truth for an initial round', async () => {
+    const evaluate = jest
+      .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+      .mockResolvedValue([okResult('conclusion_quality')]);
+    const { run } = setup({ evaluate });
+
+    await run({ evaluators: [{ name: 'conclusion_quality' }] });
+
+    expect(evaluate.mock.calls[0][0].evidence).not.toHaveProperty('reference_data');
+  });
+
   it('includes explanations when the flag is on', async () => {
     const evaluate = jest
       .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()

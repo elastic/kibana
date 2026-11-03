@@ -20,6 +20,11 @@ import {
 } from '../lib/timeline';
 import { isElasticConsoleEnabled } from './is_enabled';
 
+// Identifier-like fields (conversation ids, agent ids, conversation round keys).
+export const MAX_IDENTIFIER_LENGTH = 1_024;
+// Conversation titles are short, user-facing labels.
+export const MAX_TITLE_LENGTH = 1_024;
+
 const getSpace = (basePath: string): string => {
   const spaceMatch = basePath.match(/(?:^|\/)s\/([^/]+)/);
   return spaceMatch ? spaceMatch[1] : 'default';
@@ -58,7 +63,7 @@ export const registerConversationRoutes = ({
       options: { access: 'internal' },
       validate: {
         query: schema.object({
-          agent_id: schema.maybe(schema.string()),
+          agent_id: schema.maybe(schema.string({ maxLength: MAX_IDENTIFIER_LENGTH })),
         }),
       },
     },
@@ -129,7 +134,7 @@ export const registerConversationRoutes = ({
       options: { access: 'internal' },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
         }),
       },
     },
@@ -195,12 +200,15 @@ export const registerConversationRoutes = ({
       options: { access: 'internal' },
       validate: {
         body: schema.object({
-          agent_id: schema.string(),
-          title: schema.string(),
-          conversation_rounds: schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
-            defaultValue: [],
-            maxSize: 1000,
-          }),
+          agent_id: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
+          title: schema.string({ maxLength: MAX_TITLE_LENGTH }),
+          conversation_rounds: schema.arrayOf(
+            schema.recordOf(schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }), schema.any()),
+            {
+              defaultValue: [],
+              maxSize: 1000,
+            }
+          ),
         }),
       },
     },
@@ -277,12 +285,15 @@ export const registerConversationRoutes = ({
       options: { access: 'internal' },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
         }),
         body: schema.object({
-          title: schema.maybe(schema.string()),
+          title: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
           conversation_rounds: schema.maybe(
-            schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+            schema.arrayOf(
+              schema.recordOf(schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }), schema.any()),
+              { maxSize: 1000 }
+            )
           ),
         }),
       },
