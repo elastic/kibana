@@ -102,9 +102,6 @@ const QueryOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) => 
     label={i18n.translate('xpack.notebook.inputSettings.optionsQuery', {
       defaultMessage: 'Options query',
     })}
-    helpText={i18n.translate('xpack.notebook.inputSettings.optionsQueryHelp', {
-      defaultMessage: 'ES|QL; may reference ?_tstart and ?_tend.',
-    })}
   >
     <EuiTextArea
       fullWidth
@@ -153,10 +150,9 @@ const StaticOptionsFields = ({ draft, onChange }: FieldsProps<DropdownInput>) =>
 
 const ColumnSelect = ({
   columns,
-  emptyHelp,
   draft,
   onChange,
-}: FieldsProps<DropdownInput> & { columns: readonly string[]; emptyHelp: string }) => {
+}: FieldsProps<DropdownInput> & { columns: readonly string[] }) => {
   const { optionsColumn = null } = draft;
   const choices =
     optionsColumn && !columns.includes(optionsColumn) ? [optionsColumn, ...columns] : columns;
@@ -167,13 +163,6 @@ const ColumnSelect = ({
       label={i18n.translate('xpack.notebook.inputSettings.optionsColumn', {
         defaultMessage: 'Column',
       })}
-      helpText={
-        columns.length === 0
-          ? emptyHelp
-          : i18n.translate('xpack.notebook.inputSettings.optionsColumnHelp', {
-              defaultMessage: 'Its distinct values become the options.',
-            })
-      }
     >
       <EuiSelect
         fullWidth
@@ -191,22 +180,12 @@ const ColumnSelect = ({
 /** Columns of an ES|QL cell's latest results; keyed by cell id so it subscribes to the right runtime. */
 const CellColumnSelect = ({
   cellId,
-  cellName,
   ...props
-}: FieldsProps<DropdownInput> & { cellId: string; cellName: string }) => {
+}: FieldsProps<DropdownInput> & { cellId: string }) => {
   const { store } = useNotebook();
   const { output } = useStateFromPublishingSubject(store.getRuntime$(cellId));
   const columns = output?.kind === 'table' ? output.table.columns.map(({ name }) => name) : [];
-  return (
-    <ColumnSelect
-      {...props}
-      columns={columns}
-      emptyHelp={i18n.translate('xpack.notebook.inputSettings.optionsColumnEmpty', {
-        defaultMessage: 'Run {cell} to list its columns.',
-        values: { cell: cellName },
-      })}
-    />
-  );
+  return <ColumnSelect {...props} columns={columns} />;
 };
 
 /** Columns from the dropdown's own last options query run. */
@@ -216,15 +195,7 @@ const QueryColumnSelect = ({
 }: FieldsProps<DropdownInput> & { cellId: string }) => {
   const { store } = useNotebook();
   const { output } = useStateFromPublishingSubject(store.getRuntime$(cellId));
-  return (
-    <ColumnSelect
-      {...props}
-      columns={output?.kind === 'input' ? output.columns ?? [] : []}
-      emptyHelp={i18n.translate('xpack.notebook.inputSettings.optionsQueryColumnEmpty', {
-        defaultMessage: 'Apply a query to list its columns.',
-      })}
-    />
-  );
+  return <ColumnSelect {...props} columns={output?.kind === 'input' ? output.columns ?? [] : []} />;
 };
 
 const DynamicOptionsFields = ({
@@ -276,13 +247,7 @@ const DynamicOptionsFields = ({
       </EuiFormRow>
       {!isCell && <QueryOptionsFields draft={draft} onChange={onChange} />}
       {source ? (
-        <CellColumnSelect
-          key={source.id}
-          cellId={source.id}
-          cellName={source.name}
-          draft={draft}
-          onChange={onChange}
-        />
+        <CellColumnSelect key={source.id} cellId={source.id} draft={draft} onChange={onChange} />
       ) : (
         <QueryColumnSelect cellId={cellId} draft={draft} onChange={onChange} />
       )}
