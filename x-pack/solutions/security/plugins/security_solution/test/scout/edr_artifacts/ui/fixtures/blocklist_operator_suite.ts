@@ -45,10 +45,15 @@ const signatureEntries = (type: 'match' | 'match_any') => [
  * deletes only the items this test created.
  */
 export const describeBlocklistOperatorField = (artifact: ArtifactTabCase): void => {
-  const { pagePrefix, listId, urlPath, entries, osTypes } = artifact;
+  const { pagePrefix, listId, listType, urlPath, entries, osTypes } = artifact;
   const condition = `${pagePrefix}-card-criteriaConditions-condition`;
 
   spaceTest.describe('Blocklist signature operator field', { tag: ARTIFACT_LIST_PAGE_TAGS }, () => {
+    spaceTest.beforeAll(async ({ apiServices }) => {
+      // Items cannot be created through the API until the list exists.
+      await apiServices.endpointArtifacts.ensureList({ listId, type: listType });
+    });
+
     spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsEndpointPolicyManager();
     });

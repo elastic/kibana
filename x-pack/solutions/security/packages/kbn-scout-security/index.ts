@@ -10,6 +10,11 @@ export { test, spaceTest } from './src/playwright';
 
 // Security-specific test constants
 export { getEndpointArtifactsApiService } from './src/playwright/fixtures/worker/apis/endpoint_artifacts';
+export type {
+  CreateEndpointArtifactItemInput,
+  CreateEndpointArtifactListInput,
+  EndpointArtifactsApiService,
+} from './src/playwright/fixtures/worker/apis/endpoint_artifacts';
 export {
   CUSTOM_QUERY_RULE,
   DEFAULT_SECURITY_SOLUTION_INDEXES,

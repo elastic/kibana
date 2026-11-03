@@ -45,13 +45,18 @@ const MATCH_CASES: ReadonlyArray<{
  * deletes only the items this test created.
  */
 export const describeBlocklistMatchOperator = (artifact: ArtifactTabCase): void => {
-  const { pagePrefix, listId, urlPath, entries, osTypes } = artifact;
+  const { pagePrefix, listId, listType, urlPath, entries, osTypes } = artifact;
   const condition = `${pagePrefix}-card-criteriaConditions-condition`;
 
   spaceTest.describe(
     'Blocklist Match (wildcard) operator',
     { tag: ARTIFACT_LIST_PAGE_TAGS },
     () => {
+      spaceTest.beforeAll(async ({ apiServices }) => {
+        // Items cannot be created through the API until the list exists.
+        await apiServices.endpointArtifacts.ensureList({ listId, type: listType });
+      });
+
       spaceTest.beforeEach(async ({ browserAuth }) => {
         await browserAuth.loginAsEndpointPolicyManager();
       });

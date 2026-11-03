@@ -50,6 +50,8 @@ export const describeArtifactListPageItemScoped = (
         if (artifact.kind === 'endpointExceptions') {
           await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
         }
+        // Items cannot be created through the API until the list exists.
+        await apiServices.endpointArtifacts.ensureList({ listId, type: artifact.listType });
       });
 
       spaceTest(

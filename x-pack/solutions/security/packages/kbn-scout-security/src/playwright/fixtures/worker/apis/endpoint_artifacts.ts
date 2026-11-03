@@ -42,7 +42,15 @@ export interface FindEndpointArtifactItemIdsInput {
 }
 
 export interface EndpointArtifactsApiService {
+  /** Wipes the list (see `deleteList`) and then creates it. */
   createList: (input: CreateEndpointArtifactListInput) => Promise<void>;
+  /**
+   * Creates the list if it does not exist and leaves its items alone.
+   * `POST /api/exception_lists/items` 404s until the list exists, and only
+   * opening the UI or `createList` created it before; suites that share an
+   * agnostic list across spec files call this instead of `createList`.
+   */
+  ensureList: (input: CreateEndpointArtifactListInput) => Promise<void>;
   createItem: (input: CreateEndpointArtifactItemInput) => Promise<CreatedEndpointArtifactItem>;
   /**
    * Deletes one agnostic item by `item_id`. Unlike `deleteList`, it never
@@ -102,27 +110,37 @@ export const getEndpointArtifactsApiService = ({
     });
   };
 
+  // Opening an artifact tab/list page also ensure-creates the list, so the
+  // POST may 409 — same as FTR ensureListExists.
+  const ensureList = async ({ listId, type, name }: CreateEndpointArtifactListInput) => {
+    await kbnClient.request({
+      method: 'POST',
+      path: `${basePath}${EXCEPTION_LIST_URL}`,
+      headers: PUBLIC_API_HEADERS,
+      ignoreErrors: [409],
+      retries: 0,
+      body: {
+        name: name ?? listId,
+        description: 'Scout endpoint artifact list',
+        list_id: listId,
+        type,
+        namespace_type: 'agnostic',
+      },
+    });
+  };
+
   return {
-    createList: async ({ listId, type, name }) => {
+    createList: async (input) => {
       await measurePerformanceAsync(log, 'security.endpointArtifacts.createList', async () => {
-        // Wipe items first. Opening an artifact tab/list page also
-        // ensure-creates the list, so the following POST may 409 —
-        // same as FTR ensureListExists.
-        await deleteList(listId);
-        await kbnClient.request({
-          method: 'POST',
-          path: `${basePath}${EXCEPTION_LIST_URL}`,
-          headers: PUBLIC_API_HEADERS,
-          ignoreErrors: [409],
-          retries: 0,
-          body: {
-            name: name ?? listId,
-            description: 'Scout endpoint artifact list',
-            list_id: listId,
-            type,
-            namespace_type: 'agnostic',
-          },
-        });
+        // Wipe items first.
+        await deleteList(input.listId);
+        await ensureList(input);
+      });
+    },
+
+    ensureList: async (input) => {
+      await measurePerformanceAsync(log, 'security.endpointArtifacts.ensureList', async () => {
+        await ensureList(input);
       });
     },
 
