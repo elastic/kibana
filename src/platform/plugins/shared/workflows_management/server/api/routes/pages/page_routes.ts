@@ -92,7 +92,7 @@ export function registerPageFormRoute(deps: RouteDependencies) {
         });
         return htmlOk(response, renderPageForm({ page, basePath: request.basePath }));
       } catch (error) {
-        return handleExternalResumeError(response, error, logger);
+        return handleExternalResumeError(response, error, logger, 404);
       }
     })
   );
@@ -138,7 +138,7 @@ export function registerPageSubmitRoute(deps: RouteDependencies) {
         if (workflowId) {
           audit.logWorkflowRun(request, { workflowId, error });
         }
-        return handleExternalResumeError(response, error, logger);
+        return handleExternalResumeError(response, error, logger, 404);
       }
     })
   );
