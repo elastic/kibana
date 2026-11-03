@@ -1096,6 +1096,7 @@ export const InstallPackageFromRegistryRequestSchema = {
           defaultValue: false,
           meta: {
             description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+            availability: { since: '9.5.0', stability: 'stable' },
           },
         }),
       },
@@ -1168,6 +1169,7 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
         defaultValue: false,
         meta: {
           description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
         },
       }),
     },
@@ -1207,6 +1209,7 @@ export const BulkUpgradePackagesRequestSchema = {
         defaultValue: false,
         meta: {
           description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
         },
       }),
     },

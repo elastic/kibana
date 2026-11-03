@@ -232,6 +232,7 @@ export const UpgradePackagePoliciesRequestSchema = {
         defaultValue: false,
         meta: {
           description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
         },
       }),
     },
