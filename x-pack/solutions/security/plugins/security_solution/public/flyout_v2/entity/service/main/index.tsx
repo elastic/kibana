@@ -288,6 +288,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: entityFromStoreResult.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (

@@ -203,6 +203,11 @@ export class LensDimensions {
     await this.page.components.comboBox('indexPattern-dimension-field').clear();
   }
 
+  /** Selects the minimum interval for the current date histogram dimension. */
+  async setDateHistogramInterval(interval: string): Promise<void> {
+    await this.page.components.comboBox('lensDateHistogramInterval').setSelectedOptions([interval]);
+  }
+
   /** Enables empty rows for the current date histogram dimension. */
   async enableIncludeEmptyRows() {
     const toggle = this.page.testSubj.locator('indexPattern-include-empty-rows');

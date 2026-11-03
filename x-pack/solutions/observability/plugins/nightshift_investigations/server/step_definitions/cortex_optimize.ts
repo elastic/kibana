@@ -14,10 +14,8 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runCortexOptimize } from '../cortex/register_cortex';
-import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
+import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
 import { withTimeout } from './with_timeout';
-
-const MAX_ROUND_TEXT_LENGTH = 65_536;
 
 /**
  * Bounds the post-round optimizer. It runs non-blocking, so a stall does not hold up an
@@ -25,22 +23,7 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
  */
 const OPTIMIZE_TIMEOUT_MS = 120_000;
 
-/** Attaches each call's results, matched on `tool_call_id`, so the optimizer sees what it returned. */
-export const withToolResults = (
-  toolCalls: InvestigationToolCall[],
-  toolResults: Array<{ tool_call_id: string; results: unknown[] }>
-): InvestigationToolCall[] => {
-  if (toolResults.length === 0) {
-    return toolCalls;
-  }
-  const resultsById = new Map(
-    toolResults.map(({ tool_call_id: toolCallId, results }) => [toolCallId, results])
-  );
-  return toolCalls.map((call) => {
-    const results = call.tool_call_id ? resultsById.get(call.tool_call_id) : undefined;
-    return results ? { ...call, results } : call;
-  });
-};
+export { withToolResults };
 
 export const cortexOptimizeStepDefinition = ({
   getAgentBuilder,
@@ -68,30 +51,13 @@ export const cortexOptimizeStepDefinition = ({
       'to the Context Engine AI index. sandbox_id identifies the workspace this round used; ' +
       'the optimizer currently reads the transcript, not the sandbox files.',
     inputSchema: z.object({
-      prompt: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe('The user message that started the round.'),
-      response: z
-        .string()
-        .max(MAX_ROUND_TEXT_LENGTH)
-        .describe("The assistant's final response for the round."),
+      ...investigationRoundInputsSchema,
       agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
       sandbox_id: z
         .string()
         .max(1024)
         .optional()
         .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
-      conversation_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Conversation the round belongs to. Recorded on the edit telemetry events.'),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe('Id of the completed round. Recorded on the edit telemetry events.'),
       connector_id: z
         .string()
         .max(MAX_KEYWORD_LENGTH)
@@ -102,12 +68,6 @@ export const cortexOptimizeStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
-      tool_calls: toolCallsSchema.describe(
-        'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
-      ),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id. Shows the optimizer what each query returned.'
-      ),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
@@ -141,6 +101,7 @@ export const cortexOptimizeStepDefinition = ({
             analytics,
             conversationId: context.input.conversation_id,
             roundId: context.input.round_id,
+            roundIndex: context.input.round_index,
             requestedConnectorId: context.input.connector_id,
             roundConnectorId: context.input.round_connector_id,
             logger,

@@ -13,6 +13,7 @@ import type {
   UiSettingsServiceStart,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type {
   AgentAvailabilityConfig,
@@ -66,6 +67,7 @@ export class AgentsService {
   private aiIndexResolver?: AiIndexResolver;
 
   private setupDeps?: AgentsServiceSetupDeps;
+  private settingsDeps?: Pick<AgentsServiceStartDeps, 'uiSettings' | 'savedObjects'>;
 
   constructor() {
     this.builtinRegistry = createBuiltinAgentRegistry();
@@ -77,7 +79,11 @@ export class AgentsService {
 
     this.typeRegistry.register({
       id: chatAgentTypeId,
-      baseConfiguration: { ai_indices: Object.keys(defaultAiIndices) },
+      baseConfiguration: async ({ request }) => ({
+        ai_indices: (await this.isExperimentalEnabled(request))
+          ? Object.keys(defaultAiIndices)
+          : [],
+      }),
     });
 
     return {
@@ -100,6 +106,17 @@ export class AgentsService {
     };
   }
 
+  private async isExperimentalEnabled(request: KibanaRequest): Promise<boolean> {
+    if (!this.settingsDeps) {
+      throw new Error('Agent type base configuration resolved before #start');
+    }
+    const { uiSettings, savedObjects } = this.settingsDeps;
+    return uiSettings
+      .asScopedToClient(savedObjects.getScopedClient(request))
+      .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .catch(() => false);
+  }
+
   private validateAgentTypes() {
     for (const agent of this.builtinRegistry.list()) {
       if (agent.type !== undefined && !this.typeRegistry.has(agent.type)) {
@@ -117,6 +134,7 @@ export class AgentsService {
 
     const { logger } = this.setupDeps;
     const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
+    this.settingsDeps = { uiSettings, savedObjects };
 
     this.validateAgentTypes();
 

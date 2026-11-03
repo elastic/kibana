@@ -9,11 +9,11 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { AttachmentV2, Case } from '../../../common/types/domain';
 import {
-  UnifiedAttachmentPayloadRt,
+  UnifiedAttachmentPayloadSchema,
   type UnifiedAttachmentPayload,
 } from '../../../common/types/domain/attachment/v2';
 import type { AttachmentRequestV2 } from '../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { getIDsAndIndicesAsArrays } from '../../common/utils';
@@ -84,7 +84,7 @@ export const addComment = async (addArgs: AddArgs, clientArgs: CasesClientArgs):
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(UnifiedAttachmentPayloadRt)(comment);
+    const query = decodeWithExcessOrThrowZod(UnifiedAttachmentPayloadSchema)(comment);
 
     await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 

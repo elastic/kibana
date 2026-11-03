@@ -12,7 +12,11 @@ import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inferen
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
-import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from './types';
+import type {
+  GetForFeatureOptions,
+  RecommendedEndpoint,
+  ResolvedInferenceEndpoints,
+} from './types';
 
 /**
  * Returns the resolved inference endpoints for a feature.
@@ -35,14 +39,14 @@ export const getForFeature = async (
   opts?: GetForFeatureOptions
 ): Promise<ResolvedInferenceEndpoints> => {
   const {
-    ids,
+    endpoints: resolvedEndpoints,
     warnings: resolveWarnings,
     soEntryFound,
-  } = await resolveEndpointIds(registry, soClient, featureId, logger, opts);
-  if (ids.length === 0) {
+  } = await resolveEndpoints(registry, soClient, featureId, logger, opts);
+  if (resolvedEndpoints.length === 0) {
     return { endpoints: [], warnings: resolveWarnings, soEntryFound };
   }
-  const result = await fetchConnectorsByIds(getConnectorById, ids);
+  const result = await fetchConnectors(getConnectorById, resolvedEndpoints);
   return {
     endpoints: result.endpoints,
     warnings: [...resolveWarnings, ...result.warnings],
@@ -51,20 +55,22 @@ export const getForFeature = async (
 };
 
 /**
- * Fetches connectors by their IDs using getConnectorById.
+ * Fetches the connector for each endpoint using getConnectorById and attaches its parameters.
  * Returns warnings for any IDs that were not found.
  */
-const fetchConnectorsByIds = async (
+const fetchConnectors = async (
   getConnectorById: (id: string) => Promise<InferenceConnector>,
-  ids: string[]
+  resolvedEndpoints: RecommendedEndpoint[]
 ): Promise<Omit<ResolvedInferenceEndpoints, 'soEntryFound'>> => {
-  const endpoints: InferenceConnector[] = [];
+  const endpoints: ResolvedInferenceEndpoints['endpoints'] = [];
   const warnings: string[] = [];
 
-  for (const id of ids) {
+  for (const { id, parameters } of resolvedEndpoints) {
     try {
       const connector = await getConnectorById(id);
-      endpoints.push(connector);
+      endpoints.push(
+        parameters ? { ...connector, parameters: structuredClone(parameters) } : connector
+      );
     } catch (e) {
       warnings.push(
         i18n.translate('xpack.searchInferenceEndpoints.endpoints.endpointNotFound', {
@@ -78,8 +84,8 @@ const fetchConnectorsByIds = async (
   return { endpoints, warnings };
 };
 
-interface ResolvedEndpointIds {
-  ids: string[];
+interface ResolvedFeatureEndpoints {
+  endpoints: RecommendedEndpoint[];
   warnings: string[];
   /** True when an SO entry was found for the feature (even if it had an empty endpoints list). */
   soEntryFound: boolean;
@@ -95,14 +101,16 @@ interface ResolvedEndpointIds {
  * 2. Walk parentFeatureId chain, checking SO overrides at each level
  * 3. First non-empty recommendedEndpoints found in the chain
  * 4. Kibana default chat-completion endpoint
+ *
+ * Only recommendedEndpoints carry parameters; SO override endpoints are returned without them.
  */
-export const resolveFeatureEndpointIds = (
+export const resolveFeatureEndpoints = (
   registry: InferenceFeatureRegistry,
   soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
   featureId: string,
   logger: Logger,
   opts?: GetForFeatureOptions
-): ResolvedEndpointIds => {
+): ResolvedFeatureEndpoints => {
   let current = registry.get(featureId);
   if (!current) {
     logger.warn(
@@ -111,7 +119,7 @@ export const resolveFeatureEndpointIds = (
         values: { featureId },
       })
     );
-    return { ids: [], warnings: [], soEntryFound: false };
+    return { endpoints: [], warnings: [], soEntryFound: false };
   }
   let recEntry = current.recommendedEndpoints?.length
     ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
@@ -128,13 +136,13 @@ export const resolveFeatureEndpointIds = (
   const initialSoEntry = soFeaturesMap.get(currentId);
   if (initialSoEntry && initialSoEntry.endpoints.length > 0) {
     return {
-      ids: initialSoEntry.endpoints.map((e) => e.id),
+      endpoints: initialSoEntry.endpoints.map(({ id }) => ({ id })),
       warnings: [],
       soEntryFound: true,
     };
   }
   if (initialSoEntry && initialSoEntry.endpoints.length === 0) {
-    return { ids: [], warnings: [], soEntryFound: true };
+    return { endpoints: [], warnings: [], soEntryFound: true };
   }
 
   visited.add(currentId);
@@ -144,7 +152,7 @@ export const resolveFeatureEndpointIds = (
     while (true) {
       if (visited.has(currentId)) {
         return {
-          ids: [],
+          endpoints: [],
           warnings: [
             i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
               defaultMessage:
@@ -171,13 +179,13 @@ export const resolveFeatureEndpointIds = (
       const soEntry = soFeaturesMap.get(currentId);
       if (soEntry && soEntry.endpoints.length > 0) {
         return {
-          ids: soEntry.endpoints.map((e) => e.id),
+          endpoints: soEntry.endpoints.map(({ id }) => ({ id })),
           warnings: [],
           soEntryFound: true,
         };
       }
       if (soEntry && soEntry.endpoints.length === 0) {
-        return { ids: [], warnings: [], soEntryFound: true };
+        return { endpoints: [], warnings: [], soEntryFound: true };
       }
 
       if (current.parentFeatureId) {
@@ -189,26 +197,26 @@ export const resolveFeatureEndpointIds = (
   }
 
   return {
-    ids:
+    endpoints:
       recEntry?.recommendedEndpoints ??
       (opts?.onlyReturnConfigured
         ? []
-        : [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION]),
+        : [{ id: defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION }]),
     warnings: [],
     soEntryFound: false,
   };
 };
 
-const resolveEndpointIds = async (
+const resolveEndpoints = async (
   registry: InferenceFeatureRegistry,
   soClient: SavedObjectsClientContract,
   featureId: string,
   logger: Logger,
   opts?: GetForFeatureOptions
-): Promise<ResolvedEndpointIds> => {
+): Promise<ResolvedFeatureEndpoints> => {
   const soFeatures = await readSettingsFeatures(soClient, logger);
   const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
-  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger, opts);
+  return resolveFeatureEndpoints(registry, soFeaturesMap, featureId, logger, opts);
 };
 
 const readSettingsFeatures = async (

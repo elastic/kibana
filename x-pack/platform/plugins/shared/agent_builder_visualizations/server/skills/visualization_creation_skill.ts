@@ -87,8 +87,8 @@ Do **not** use this skill when:
      - \`target\` (required) — one of:
        - \`{ "type": "lens", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
        - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <ES|QL from generate_esql or the user> }\` for a custom Vega-Lite visualization
-       - \`{ "type": "custom_content", "esql"?: <ES|QL from generate_esql or the user>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
-       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"? }\` to update an existing visualization
+       - \`{ "type": "custom_content", "has_data": <true|false>, "esql"?: <ES|QL the user supplied> }\` for an HTML layout — always set \`has_data\`: \`true\` has a query generated (unless you pass \`esql\`), \`false\` is for a panel that genuinely has no data
+       - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"?, "regenerate_esql"? }\` to update an existing visualization
        \`esql\` is optional everywhere it appears: pass it only when the query came from ${
          platformCoreTools.generateEsql
        } or the user pasted it, otherwise it is generated for you.
@@ -153,15 +153,13 @@ ${
 
 Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Do not write HTML, and never pass a template: the markup is generated server-side.
 
-You decide whether the panel has data:
-- Omit \`target.esql\` and a query is generated from \`query\` (the common case), or pass a query from ${
+You always decide whether the panel has data and say so in \`target.has_data\`; there is no default:
+- Pass \`target.has_data: true\` and a query is generated from \`query\` (the common case), or also pass a query from ${
     platformCoreTools.generateEsql
-  } or the user.
+  } or the user as \`target.esql\`.
 - Pass \`target.has_data: false\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`has_data: false\` to get past a failed query generation; fix the index or fields and retry instead. Do not pass \`esql: null\` to mean "no data" — that is treated as omitting the query so one is generated.
 
-To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass an \`esql\` from ${
-    platformCoreTools.generateEsql
-  } or the user to add or replace data, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
+To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass \`regenerate_esql: true\` when the edit changes what the panel shows (the stored query is regenerated from \`query\`, keeping what the request does not change; layout, copy and style edits keep the stored query), an \`esql\` only when the user supplied one, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
     platformCoreTools.generateEsql
   }) and retry; do not fall back to writing markup yourself.
 
@@ -239,7 +237,7 @@ For every new Lens visualization, choose and pass \`target.chartType\`; it is re
 {
   "query": "A status board with one card per host showing its log count and a colored badge",
   "index": "logs-*",
-  "target": { "type": "custom_content" }
+  "target": { "type": "custom_content", "has_data": true }
 }
 \`\`\`
 

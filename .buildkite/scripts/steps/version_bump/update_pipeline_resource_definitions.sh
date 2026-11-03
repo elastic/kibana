@@ -100,5 +100,6 @@ if [ "${DRY_RUN:-}" = "true" ]; then
 else
   gh pr merge --repo elastic/kibana --auto --squash "$prUrl"
 
-  wait_for_pr_merge "$prUrl"
+  # main goes through the merge queue, which can take well over the default 60 minutes.
+  wait_for_pr_merge "$prUrl" 7200
 fi

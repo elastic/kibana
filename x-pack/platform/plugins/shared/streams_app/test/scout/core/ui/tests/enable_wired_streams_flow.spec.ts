@@ -15,6 +15,10 @@ const DISABLE_MODAL = 'streamsWiredDisableModal';
 const DISABLE_CHECKBOX = 'streamsWiredDisableConfirmCheckbox';
 const DISABLE_BUTTON = 'streamsWiredDisableConfirmButton';
 
+// `_enable` and `_disable` create and delete the logs.otel and logs.ecs data streams; both were
+// measured above the 10s default expect timeout on Cloud (6.8s and 10.2s respectively).
+const WIRED_TOGGLE_TIMEOUT = 30_000;
+
 test.describe(
   'Enable Wired Streams - Success flow',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -72,7 +76,7 @@ test.describe(
 
       await page.getByTestId(WIRED_SWITCH).click();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({
-        timeout: 60_000,
+        timeout: WIRED_TOGGLE_TIMEOUT,
       });
 
       // Close flyout with Escape key
@@ -108,7 +112,7 @@ test.describe(
       await expect(settingsFlyoutTitle).toBeVisible();
       await page.getByTestId(WIRED_SWITCH).click();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({
-        timeout: 60_000,
+        timeout: WIRED_TOGGLE_TIMEOUT,
       });
 
       // Close flyout with Escape key
@@ -123,24 +127,16 @@ test.describe(
       await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
     });
 
-    test('should disable wired streams and show empty state', async ({ page, pageObjects }) => {
+    test('should disable wired streams and show empty state', async ({
+      page,
+      pageObjects,
+      apiServices,
+    }) => {
       const settingsFlyoutTitle = page.locator('#streamsSettingsFlyoutTitle');
 
       // First enable wired streams
-      await pageObjects.streams.openStreamsSettings();
-      await expect(settingsFlyoutTitle).toBeVisible();
-      await page.getByTestId(WIRED_SWITCH).click();
-      await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({
-        timeout: 60_000,
-      });
-      // Close flyout with Escape key
-      await page.keyboard.press('Escape');
-      await expect(settingsFlyoutTitle).toBeHidden();
-
-      // Verify logs.otel and logs.ecs streams are visible
+      await apiServices.streams.enable();
       await pageObjects.streams.goto();
-      await pageObjects.streams.expectStreamsTableVisible();
-      await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Now disable wired streams
       await pageObjects.streams.openStreamsSettings();
@@ -157,7 +153,9 @@ test.describe(
 
       // Confirm disable
       await page.getByTestId(DISABLE_BUTTON).click();
-      await expect(page.getByTestId(DISABLE_MODAL)).toBeHidden();
+      await expect(page.getByTestId(DISABLE_MODAL)).toBeHidden({
+        timeout: WIRED_TOGGLE_TIMEOUT,
+      });
       await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
 
       // Close flyout with Escape key

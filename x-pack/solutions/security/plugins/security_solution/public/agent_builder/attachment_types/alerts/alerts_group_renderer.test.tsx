@@ -53,6 +53,9 @@ describe('createAlertsGroupRenderer', () => {
 
     const link = await screen.findByRole('link');
     expect(screen.getByText('5 alerts')).toBeInTheDocument();
+    expect(getUrlForApp).toHaveBeenCalledWith('securitySolutionUI', {
+      path: expect.stringMatching(/^\/alerts\?/),
+    });
     expect(link).toHaveAttribute('href', '/app/security/alerts?filters=x');
     expect(link).toHaveAttribute('target', '_blank');
   });

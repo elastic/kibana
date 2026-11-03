@@ -321,6 +321,15 @@ components:
                       rows, capped at 20.
                     items:
                       type: string
+                  affected_host_origins:
+                    type: array
+                    maxItems: 20
+                    description: >-
+                      Where each `affected_hosts` entry was seen (local
+                      cluster, remote clusters, or both), from the same rows'
+                      `_index`.
+                    items:
+                      $ref: '../components/hunt.schema.yaml#/components/schemas/HostOrigin'
                   affected_hosts_truncated:
                     type: boolean
                     description: >-
@@ -446,6 +455,14 @@ components:
             coordinator itself found nothing to report here.
           items:
             $ref: '../components/hunt.schema.yaml#/components/schemas/HuntIncompleteness'
+        excluded_report_iocs:
+          type: object
+          description: Report IOCs excluded by adjudication, not searched by this run.
+          required: [count]
+          properties:
+            count:
+              type: integer
+              minimum: 1
         recommendations:
           type: array
           maxItems: 8

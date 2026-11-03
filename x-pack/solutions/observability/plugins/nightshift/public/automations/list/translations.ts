@@ -117,6 +117,19 @@ export const getRateLimitTitle = (count: number) =>
     values: { count },
   });
 
+export const globalLimitLabels = {
+  title: i18n.translate('xpack.nightshift.automations.globalLimitBannerTitle', {
+    defaultMessage: 'You reached automations daily limit for this deployment',
+  }),
+  body: i18n.translate('xpack.nightshift.automations.globalLimitBannerBody', {
+    defaultMessage:
+      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually.',
+  }),
+  goToSettings: i18n.translate('xpack.nightshift.automations.globalLimitBannerGoToSettings', {
+    defaultMessage: 'Open settings',
+  }),
+};
+
 export const runCountColumns = [
   {
     status: 'succeeded',

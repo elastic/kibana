@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { AppHeaderTab } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
 import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router } from '@kbn/shared-ux-router';
@@ -18,8 +18,11 @@ import { SettingsPage } from './page';
 jest.mock('../hooks/use_kibana');
 jest.mock('./hooks/use_apps_enabled');
 jest.mock('../app/app_header', () => ({
-  NightshiftAppHeader: ({ tabs }: { tabs: AppHeaderTab[] }) => (
+  NightshiftAppHeader: ({ back, tabs }: { back: AppHeaderBack; tabs: AppHeaderTab[] }) => (
     <div>
+      <a href={back.href} data-test-subj="nightshiftSettingsBackLink">
+        {back.label}
+      </a>
       {tabs.map((tab) => (
         <a
           key={tab.id}
@@ -47,10 +50,7 @@ jest.mock('./detections_settings_tab', () => ({
 const mockUseAppsEnabled = useAppsEnabled as jest.MockedFunction<typeof useAppsEnabled>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const headerProps = {
-  onManagementClick: jest.fn(),
-  managementHref: '/app/significant_events/streams',
-};
+const headerProps = {};
 
 const renderPage = (path: string) => {
   const history = createMemoryHistory({ initialEntries: [path] });
@@ -134,4 +134,28 @@ describe('SettingsPage', () => {
 
     expect(history.location.pathname).toBe('/settings/investigations');
   });
+
+  it.each([
+    {
+      path: '/settings/detections?origin=detections',
+      expectedHref: '/app/nightshift/detections/events',
+      expectedLabel: 'Detections',
+    },
+    {
+      path: '/settings/detections',
+      expectedHref: '/app/nightshift/',
+      expectedLabel: 'Nightshift',
+    },
+  ])(
+    'links back to $expectedLabel from Detections settings for the matching origin',
+    ({ path, expectedHref, expectedLabel }) => {
+      renderPage(path);
+
+      expect(screen.getByTestId('nightshiftSettingsBackLink')).toHaveAttribute(
+        'href',
+        expectedHref
+      );
+      expect(screen.getByTestId('nightshiftSettingsBackLink')).toHaveTextContent(expectedLabel);
+    }
+  );
 });

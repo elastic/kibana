@@ -26,6 +26,7 @@ import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import type { SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
+import { allSettledOrThrow } from '../utils/all_settled_or_throw';
 import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -157,7 +158,7 @@ export class ResetSLO {
       const tempDocPromise = this.createTempSummaryDocument(slo);
       rollbackOperations.push(() => this.deleteTempSummaryDocument(slo));
 
-      await Promise.all([
+      await allSettledOrThrow([
         sloPipelinePromise,
         rollupTransformPromise,
         summaryPipelinePromise,
@@ -166,7 +167,7 @@ export class ResetSLO {
       ]);
 
       // transforms can only be started after the pipelines are created
-      await Promise.all([
+      await allSettledOrThrow([
         this.transformManager.start(rollupTransformId),
         this.summaryTransformManager.start(summaryTransformId),
       ]);
@@ -228,11 +229,14 @@ export class ResetSLO {
   async deleteTempSummaryDocument(slo: SLODefinition) {
     return retryTransientEsErrors(
       () =>
-        this.scopedClusterClient.asCurrentUser.delete({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          refresh: true,
-        }),
+        this.scopedClusterClient.asCurrentUser.delete(
+          {
+            index: SUMMARY_TEMP_INDEX_NAME,
+            id: `slo-${slo.id}`,
+            refresh: true,
+          },
+          { ignore: [404] }
+        ),
       { logger: this.logger }
     );
   }

@@ -37,6 +37,17 @@ const requireStep = (name: string): WorkflowStep => {
 };
 
 describe('Nightshift Slack thread workflow', () => {
+  // A direct run takes its event from the caller, so it could continue any thread with made-up text.
+  it('fails every run its Slack trigger did not start', () => {
+    const [guard] = workflow.steps;
+    expect(guard).toEqual({
+      name: 'refuse_direct_runs',
+      type: 'if',
+      condition: `not execution.triggeredBy : "${workflow.triggers[0].type}"`,
+      steps: [expect.objectContaining({ name: 'refuse', type: 'workflow.fail' })],
+    });
+  });
+
   it('continues an existing investigation on human thread replies with text only', () => {
     expect(workflow.triggers).toEqual([
       {

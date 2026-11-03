@@ -642,7 +642,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
         ingest_pipelines_user: {
           elasticsearch: {
-            cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+            cluster: ['manage_pipeline'],
           },
           kibana: [
             {

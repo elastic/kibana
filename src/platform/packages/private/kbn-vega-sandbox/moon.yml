@@ -33,8 +33,6 @@ fileGroups:
     - '!**/*.config.js'
     - '!target/**/*'
     - '!target_vega_sandbox/**/*'
-  jest-config:
-    - jest.config.js
 tasks:
   build-webpack:
     command: pnpm

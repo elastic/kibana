@@ -9,6 +9,7 @@ import type {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
   HuntBehaviorStatus,
+  HostOrigin,
   HuntForThreatHit,
   HuntIncompleteness,
   HuntIncompleteReason,
@@ -39,6 +40,8 @@ export interface HuntBehaviorParams {
   report_id?: string;
   llm_confidence_threshold?: number;
   iocs?: HuntBehaviorIoc[];
+  /** Adjudicated-out IOCs the run must not search. */
+  excluded_iocs?: HuntBehaviorIoc[];
   article_context?: HuntBehaviorArticleContext;
   /**
    * Hunt window. When present (and dry-run passed), grounded queries execute
@@ -75,6 +78,8 @@ export interface ValidatedBehavior {
   execution?: BehaviorExecution;
   affected_hosts?: string[];
   affected_users?: string[];
+  /** Where each `affected_hosts` entry was seen, from its rows' `_index`. */
+  affected_host_origins?: HostOrigin[];
   affected_hosts_truncated?: boolean;
   affected_users_truncated?: boolean;
   /** Required-index execute rows; same Discover-ref shape as Tier 1 `hits[]`. */

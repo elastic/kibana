@@ -27,7 +27,6 @@ import {
   SavedObjectSaveModalDashboard,
   type SaveModalDashboardProps,
 } from '@kbn/presentation-util-plugin/public';
-import { toSearchEmbeddableByValueState } from '../../common/agent_builder/to_search_embeddable_by_value_state';
 import type { DiscoverAppLocator } from '../../common';
 import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from '../embeddable/types';
 import { SearchEmbeddableToolbarProvider } from '../embeddable/components/search_embeddable_toolbar_context';
@@ -105,9 +104,9 @@ export const DiscoverSessionInline = ({
   const visibleColumnsRef = useRef<string[] | undefined>(undefined);
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
 
-  const mappedState = useMemo(() => toSearchEmbeddableByValueState(data), [data]);
   const seedTimeRange = getDiscoverSessionSeedTimeRange({
-    mappedTimeRange: mappedState.time_range,
+    // The inline embeddable renders the first session tab, so seed the picker from that tab.
+    mappedTimeRange: data.tabs[0].time_range,
     screenContextTimeRange,
   });
   const { searchBarProps, effectiveTimeRange } = useDiscoverSessionUnifiedSearch({

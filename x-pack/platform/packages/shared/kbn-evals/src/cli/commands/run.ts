@@ -70,7 +70,12 @@ export const runSuiteCmd: Command<void> = {
 
     const { suite, resolvedConfigPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
-    const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
+    const evaluationConnectorId = await resolveEvaluationConnectorId(
+      repoRoot,
+      log,
+      flagsReader,
+      suite
+    );
 
     const envOverrides: Record<string, string> = {
       EVAL_CONNECTOR_ID: evaluationConnectorId,

@@ -1,0 +1,141 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export type OpenApiDocument = Record<string, unknown>;
+
+export type JsonSchema = Record<string, unknown>;
+
+/** OpenAPI 3.0 schemas are an extended subset of draft-04; 3.1 and later use draft 2020-12. */
+export type SchemaDialect = 'openapi-3.0' | 'draft-2020-12';
+
+/** A loaded spec. Operations share it, and their schemas stay in place in its document. */
+export interface ContractSpec {
+  readonly document: OpenApiDocument;
+  readonly dialect: SchemaDialect;
+  /** The spec's name, when the mock was given named specs. */
+  readonly source?: string;
+}
+
+/**
+ * A schema with its JSON pointer into the spec document, so refs resolve where they are.
+ * OpenAPI 3.1 and later also allow the boolean schemas `true` and `false`.
+ */
+export interface SpecSchema {
+  readonly pointer: string;
+  readonly schema: JsonSchema | boolean;
+}
+
+/** A schema of an operation, with a human-readable location such as `query.limit`. */
+export interface LocatedSchema {
+  readonly kind: 'parameter' | 'request' | 'response';
+  readonly location: string;
+  readonly schema: SpecSchema;
+}
+
+/** A way a request or response breaks the contract, e.g. `query.limit` failing `maximum`. */
+export interface Violation {
+  readonly path: readonly string[];
+  readonly code: string;
+  readonly message: string;
+}
+
+/** `querystring` (OpenAPI 3.2) describes the whole query string as one `content` value. */
+export type ParameterLocation = 'path' | 'query' | 'querystring' | 'header' | 'cookie';
+
+export interface OperationParameter {
+  readonly name: string;
+  readonly in: ParameterLocation;
+  readonly required: boolean;
+  /** `style` and `explode` only apply to parameters described by a `schema`, not `content`. */
+  readonly style: string;
+  readonly explode: boolean;
+  readonly schema?: SpecSchema;
+  /** The single media type of a parameter described by `content` instead of `schema`. */
+  readonly content?: MediaTypeContent;
+  /** A path parameter whose value may span segments, as Azure's `x-ms-skip-url-encoding` marks. */
+  readonly multiSegment?: true;
+}
+
+export interface MediaTypeContent {
+  readonly mediaType: string;
+  readonly schema?: SpecSchema;
+  /** The media type's `example`, then the values of its `examples`. */
+  readonly examples: readonly unknown[];
+}
+
+export interface OperationHeader {
+  readonly name: string;
+  readonly required: boolean;
+  readonly schema?: SpecSchema;
+}
+
+export interface OperationRequestBody {
+  readonly required: boolean;
+  readonly contents: readonly MediaTypeContent[];
+}
+
+export interface OperationResponse {
+  /** A status code, a range such as `2XX`, or `default`. */
+  readonly code: string;
+  readonly contents: readonly MediaTypeContent[];
+  readonly headers: readonly OperationHeader[];
+}
+
+export interface ServerVariable {
+  readonly default: string;
+  readonly enum?: readonly string[];
+}
+
+export interface OperationServer {
+  readonly url: string;
+  readonly variables: Readonly<Record<string, ServerVariable>>;
+}
+
+/** Where a security scheme expects its credential. */
+export type Credential =
+  | { readonly in: 'header' | 'query' | 'cookie'; readonly name: string }
+  /** An `Authorization` header with this scheme, such as `basic` or `bearer` (lowercase). */
+  | { readonly in: 'authorization'; readonly scheme: string };
+
+export interface SecurityScheme {
+  readonly name: string;
+  /** Undefined for schemes that can't be checked on a request, such as `mutualTLS`. */
+  readonly credential?: Credential;
+  /** For OAuth 2 and OpenID Connect schemes: the scopes the requirement lists, if any. */
+  readonly scopes?: readonly string[];
+}
+
+/** Schemes that must all be satisfied; an empty list allows anonymous requests. */
+export type SecurityRequirement = readonly SecurityScheme[];
+
+export interface FixedQueryParameter {
+  readonly name: string;
+  readonly value: string;
+}
+
+export interface ContractOperation {
+  /** The `operationId`, or `METHOD /path` when the spec declares none. */
+  readonly id: string;
+  /** Lowercase HTTP method. */
+  readonly method: string;
+  /** The key in `paths`, or in `x-ms-paths` including its query part, such as `/?comp=list`. */
+  readonly path: string;
+  /**
+   * The query parameters an `x-ms-paths` key fixes (its `name=value` pairs), which tell
+   * operations on the same path apart.
+   */
+  readonly fixedQuery?: readonly FixedQueryParameter[];
+  readonly servers: readonly OperationServer[];
+  readonly parameters: readonly OperationParameter[];
+  readonly requestBody?: OperationRequestBody;
+  readonly responses: readonly OperationResponse[];
+  /** Alternative requirements, one of which a request must satisfy; empty when there are none. */
+  readonly security: readonly SecurityRequirement[];
+  readonly spec: ContractSpec;
+}

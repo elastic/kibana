@@ -271,6 +271,7 @@ export const User: FC<UserProps> = memo(function User({
 
   const { tabs, selectedTabId, setSelectedTabId } = useEntityPanelTabs({
     entityRecord: observedUser.entityRecord ?? null,
+    isGroupView,
   });
 
   const tabsNode = tabs ? (
@@ -351,6 +352,7 @@ export const User: FC<UserProps> = memo(function User({
             value: userName,
             entityId: entityStoreEntityId,
             mode,
+            scopeId,
             onOpenEntity: onOpenUser,
             title: userName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,

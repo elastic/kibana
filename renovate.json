@@ -164,10 +164,8 @@
         "playwright",
         "pngjs",
         "rxjs-marbles",
-        "sharp",
         "superagent",
-        "supertest",
-        "xmlbuilder"
+        "supertest"
       ],
       "reviewers": ["team:appex-qa"],
       "matchBaseBranches": ["main"],
@@ -326,7 +324,8 @@
         "@types/react",
         "@types/react-dom",
         "@types/react-test-renderer",
-        "csstype"
+        "csstype",
+        "react-element-to-jsx-string"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -343,14 +342,6 @@
     },
     {
       "matchDepNames": ["react-fast-compare"],
-      "reviewers": ["team:appex-sharedux"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:SharedUX"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
-    },
-    {
-      "matchDepNames": ["react-element-to-jsx-string"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -506,13 +497,11 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "js-search",
         "openpgp",
         "remark-gfm",
         "rehype-raw",
         "rehype-sanitize",
-        "yaml",
-        "@types/js-search"
+        "yaml"
       ],
       "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
@@ -1359,17 +1348,8 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/pnpm-lock.yaml utils",
-      "matchDepNames": ["sort-package-json"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "borc",
-      "matchDepNames": ["borc"],
+      "groupName": "cbor2",
+      "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1860,7 +1840,7 @@
         "team:streams-ui",
         "team:nightshift-sre-agent-team",
         "team:security-defend-workflows",
-        "team:security-genai-research-and-development"
+        "team:security-generative-ai"
       ],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
@@ -2575,15 +2555,6 @@
     {
       "groupName": "lightningcss",
       "matchDepNames": ["lightningcss"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "tar-fs",
-      "matchDepNames": ["tar-fs"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

@@ -22,10 +22,10 @@ export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
  * the per-space Endpoint analysis worker, which is the only scheduler authority.
  */
 export const ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 11,
+  version: 16,
   yaml: FORENSICS_RUN_ENDPOINT_ANALYSIS_YAML,
 } as const satisfies ManagedWorkflowDefinition;

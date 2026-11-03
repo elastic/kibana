@@ -7,6 +7,7 @@
 
 import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import dedent from 'dedent';
+import { i18n } from '@kbn/i18n';
 import { MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH, MAX_TITLE_LENGTH } from '../constants';
 
 /**
@@ -37,10 +38,31 @@ export type ProbeStatus = (typeof PROBE_STATUSES)[number];
 const BASELINE_DECISIONS = ['above_normal', 'background', 'warming_up'] as const;
 export type BaselineDecision = (typeof BASELINE_DECISIONS)[number];
 
-/** Why a detection is skipped: nothing changed since the stored verdict. */
-export const SKIP_REASONS = ['still_breaching', 'still_healthy'] as const;
+/**
+ * Why a detection is skipped: nothing changed since the stored verdict, or since the agent's last
+ * review of the rule (`already_reviewed`).
+ */
+export const SKIP_REASONS = ['still_breaching', 'still_healthy', 'already_reviewed'] as const;
+
+/**
+ * Why a detection reaches the agent. `state_changed`: the probe contradicts a stored verdict.
+ * `probe_unavailable`: the probe could not run; `probe_status` says why.
+ */
+export const NEEDS_AGENT_REASONS = [
+  'state_changed',
+  'probe_unavailable',
+  'unjudged_member',
+  'not_live_member',
+  'member_joining',
+  'series_too_old',
+  'above_normal',
+  'below_judged',
+  'flaky_probe',
+  'over_cap',
+] as const;
 
 export type SkipReason = (typeof SKIP_REASONS)[number];
+export type NeedsAgentReason = (typeof NEEDS_AGENT_REASONS)[number];
 
 export const baselineObservationSchema = lazySchema(() =>
   z.object({
@@ -73,17 +95,25 @@ export const detectionSkipSchema = lazySchema(() =>
     event_id: z.string().max(MAX_ID_LENGTH).optional(),
     event_title: z.string().max(MAX_TITLE_LENGTH).optional(),
     stored_verdict: z.string().max(32).optional(),
+    /** For `already_reviewed`: when the agent last reviewed the rule, and what the review absorbed. */
+    reviewed_at: isoDateTime({ offset: true }).optional(),
+    absorbed_reason: z.string().max(64).optional(),
     checked_at: isoDateTime({ offset: true }).optional(),
   })
 );
 
 export type DetectionSkip = z.infer<typeof detectionSkipSchema>;
 
-/** A skip as it is written to a processed marker: a known reason, and the event it rests on. */
+/**
+ * A skip as it is written to a processed marker: a known reason, and the event it rests on. Every
+ * skip marker must carry `event_id`: the discovery workflow tells a classifier skip from an agent
+ * review by it (`COUNT(skip.event_id)`), so a skip without it would count as a review.
+ */
 export const skipMarkerSchema = lazySchema(() =>
   detectionSkipSchema.omit({ checked_at: true }).extend({
     reason: z.enum(SKIP_REASONS),
     event_id: z.string().min(1).max(MAX_ID_LENGTH),
+    absorbed_reason: z.enum(NEEDS_AGENT_REASONS).optional(),
   })
 );
 
@@ -146,3 +176,104 @@ export const detectionSchema = lazySchema(() =>
 );
 
 export type Detection = z.infer<typeof detectionSchema>;
+
+const VERDICT_STATES: Readonly<Record<string, string>> = {
+  confirms: i18n.translate('xpack.significantEvents.detectionSkip.state.breaching', {
+    defaultMessage: 'breaching',
+  }),
+  refutes: i18n.translate('xpack.significantEvents.detectionSkip.state.healthy', {
+    defaultMessage: 'healthy',
+  }),
+};
+
+const REASON_STATES: Readonly<Record<string, string>> = {
+  still_breaching: VERDICT_STATES.confirms,
+  still_healthy: VERDICT_STATES.refutes,
+};
+
+const probeSentence = ({
+  hasRows,
+  minutes,
+}: {
+  hasRows: boolean;
+  minutes: number | undefined;
+}): string => {
+  if (minutes === undefined) {
+    return hasRows
+      ? i18n.translate('xpack.significantEvents.detectionSkip.probe.rows', {
+          defaultMessage: 'The rule still matches.',
+        })
+      : i18n.translate('xpack.significantEvents.detectionSkip.probe.noRows', {
+          defaultMessage: 'The rule matches nothing.',
+        });
+  }
+  return hasRows
+    ? i18n.translate('xpack.significantEvents.detectionSkip.probe.rowsInWindow', {
+        defaultMessage: 'The rule still matches (last {minutes} min).',
+        values: { minutes },
+      })
+    : i18n.translate('xpack.significantEvents.detectionSkip.probe.noRowsInWindow', {
+        defaultMessage: 'The rule matches nothing (last {minutes} min).',
+        values: { minutes },
+      });
+};
+
+/**
+ * Why the classifier skipped a detection, in at most two short lines: what the rule's query
+ * returned, and what the live event already records for the rule. A marker written before that
+ * context was stored gets the lines it has the fields for; an unknown reason is returned as stored.
+ */
+export const describeSkip = (
+  skip: DetectionSkip,
+  formatTime: (isoTime: string) => string
+): string[] => {
+  const reasonState = REASON_STATES[skip.reason];
+  // The stored verdict only refines a reason this knows; an unknown reason is shown as stored.
+  const state =
+    reasonState === undefined
+      ? undefined
+      : (skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ?? reasonState;
+  const lines: string[] = [];
+  if (skip.reason === 'already_reviewed') {
+    lines.push(
+      skip.reviewed_at
+        ? i18n.translate('xpack.significantEvents.detectionSkip.alreadyReviewedAt', {
+            defaultMessage:
+              'The agent reviewed this rule {time}; its match count has not changed since.',
+            values: { time: formatTime(skip.reviewed_at) },
+          })
+        : i18n.translate('xpack.significantEvents.detectionSkip.alreadyReviewed', {
+            defaultMessage:
+              'The agent reviewed this rule recently; its match count has not changed since.',
+          })
+    );
+  } else if (state === undefined) {
+    lines.push(skip.reason);
+  } else {
+    if (skip.probe_has_rows !== undefined) {
+      lines.push(
+        probeSentence({ hasRows: skip.probe_has_rows, minutes: skip.probe_window_minutes })
+      );
+    }
+    lines.push(
+      skip.event_title
+        ? i18n.translate('xpack.significantEvents.detectionSkip.eventRecords', {
+            defaultMessage: '"{title}" already records it as {state}, so nothing changed.',
+            values: { title: skip.event_title, state },
+          })
+        : i18n.translate('xpack.significantEvents.detectionSkip.liveEventRecords', {
+            defaultMessage: 'A live event already records it as {state}, so nothing changed.',
+            values: { state },
+          })
+    );
+  }
+  if (skip.checked_at) {
+    lines.push(
+      i18n.translate('xpack.significantEvents.detectionSkip.checkedAt', {
+        defaultMessage: 'Checked {time}',
+        values: { time: formatTime(skip.checked_at) },
+      })
+    );
+  }
+  return lines;
+};

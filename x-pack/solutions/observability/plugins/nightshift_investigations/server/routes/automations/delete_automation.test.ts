@@ -13,12 +13,13 @@ import { createRouteContext } from './test_helpers';
 const { handler } = deleteAutomationRoute['DELETE /internal/nightshift/automations/{id}'];
 const soClient = savedObjectsClientMock.create();
 const deleteWorkflows = jest.fn();
+const getWorkflow = jest.fn();
 const call = () =>
   handler({
     request: httpServerMock.createKibanaRequest(),
     params: { path: { id: 'auto-1' } },
     getAutomationsSoClient: () => soClient,
-    getWorkflowsManagement: () => ({ management: { deleteWorkflows } }),
+    getWorkflowsManagement: () => ({ management: { deleteWorkflows, getWorkflow } }),
     context: createRouteContext(),
   } as never);
 
@@ -31,6 +32,7 @@ beforeEach(() => {
     attributes: { workflowId: 'wf-1' },
   });
   soClient.delete.mockResolvedValue({});
+  getWorkflow.mockResolvedValue({ id: 'wf-1', definition: { settings: {} } });
 });
 
 it('deletes the backing workflow and daily budget with the automation', async () => {
@@ -48,6 +50,34 @@ it('also deletes automations which have never dispatched', async () => {
   );
   await expect(call()).resolves.toEqual({});
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'auto-1');
+});
+
+it('still deletes the automation when deleting its unbound workflow fails', async () => {
+  deleteWorkflows.mockRejectedValueOnce(new Error('Workflow unavailable'));
+  await expect(call()).resolves.toEqual({});
+  expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'auto-1');
+});
+
+it('keeps the automation when deleting its workflow bound to a service account fails', async () => {
+  const error = new Error('Forbidden');
+  getWorkflow.mockResolvedValue({
+    id: 'wf-1',
+    definition: { settings: { run_as: 'kibana/nightshift_automations' } },
+  });
+  deleteWorkflows.mockRejectedValueOnce(error);
+  await expect(call()).rejects.toBe(error);
+  expect(soClient.delete).not.toHaveBeenCalled();
+});
+
+it.each([
+  ['the workflow lookup fails', () => getWorkflow.mockRejectedValue(new Error('unavailable'))],
+  ['the workflow cannot be read', () => getWorkflow.mockResolvedValue(null)],
+])('keeps the automation when deleting its workflow fails and %s', async (_, arrangeLookup) => {
+  arrangeLookup();
+  const error = new Error('Forbidden');
+  deleteWorkflows.mockRejectedValueOnce(error);
+  await expect(call()).rejects.toBe(error);
+  expect(soClient.delete).not.toHaveBeenCalled();
 });
 
 it('propagates budget cleanup failures', async () => {

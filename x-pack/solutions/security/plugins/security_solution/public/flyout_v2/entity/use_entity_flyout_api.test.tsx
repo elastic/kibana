@@ -523,6 +523,20 @@ describe('useEntityFlyoutApi', () => {
     );
   });
 
+  it('openEntityAnomalyInsights persists the originating scope in the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      scopeId: 'entity-analytics-new-entities-table-7d',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ scopeId: 'entity-analytics-new-entities-table-7d' })
+    );
+  });
+
   it('openEntityAnomalyInsights omits the mode from the descriptor in single mode', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAnomalyInsights({

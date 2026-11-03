@@ -288,9 +288,6 @@ export function UnifiedDocViewerFlyout({
             maxWidth={maxWidth}
             resizable={true}
             onResize={setFlyoutWidth}
-            css={{
-              maxWidth: `${isXlScreen ? `calc(100vw - ${DEFAULT_WIDTH}px)` : '90vw'} !important`,
-            }}
             paddingSize="m"
             aria-label={currentFlyoutTitle}
             {...a11yProps}

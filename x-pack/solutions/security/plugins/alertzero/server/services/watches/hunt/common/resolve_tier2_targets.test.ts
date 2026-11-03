@@ -382,6 +382,89 @@ describe('resolveTier2Targets', () => {
     });
   });
 
+  describe('constraining cross-cluster targets against the universe', () => {
+    const remoteCloudtrail: DiscoveredDataset = {
+      index_pattern: 'infosec_zocalo:logs-aws.cloudtrail-*',
+      dataset: 'aws.cloudtrail',
+      vendor: 'aws',
+      data_streams: ['infosec_zocalo:logs-aws.cloudtrail-default'],
+      search_patterns: ['infosec_zocalo:logs-aws.cloudtrail-*'],
+    };
+    const remoteScope = (indexPatterns: string[]) => ({
+      ...emptyScope,
+      discovered: [remoteCloudtrail],
+      report_matches: ['infosec_zocalo:logs-aws.cloudtrail-*'],
+      index_patterns: indexPatterns,
+    });
+
+    it.each([
+      ['a wildcard cluster', ['*:logs-*']],
+      ['a wildcard cluster prefix', ['infosec_*:logs-*']],
+      ['the named cluster', ['infosec_zocalo:logs-*']],
+    ])('keeps a remote report match under %s', async (_label, indexPatterns) => {
+      const result = await resolveTier2Targets({
+        scope: remoteScope(indexPatterns),
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['infosec_zocalo:logs-aws.cloudtrail-*']);
+      expect(result.degraded).toBe(false);
+    });
+
+    it.each([
+      ['a local-only universe', ['logs-*']],
+      ['another cluster', ['other:logs-*']],
+      ['a whole-cluster exclusion', ['*:logs-*', '-infosec_zocalo:*']],
+    ])('drops a remote report match under %s', async (_label, indexPatterns) => {
+      const result = await resolveTier2Targets({
+        scope: remoteScope(indexPatterns),
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual([]);
+      expect(result.degraded).toBe(true);
+    });
+
+    it('narrows a remote report match past a remote index exclusion', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...remoteScope(['*:logs-*', 'infosec_zocalo:-logs-aws.cloudtrail-prod*']),
+          discovered: [
+            {
+              ...remoteCloudtrail,
+              data_streams: [
+                'infosec_zocalo:logs-aws.cloudtrail-default',
+                'infosec_zocalo:logs-aws.cloudtrail-prod',
+              ],
+            },
+          ],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual(['infosec_zocalo:logs-aws.cloudtrail-default*']);
+      expect(result.degraded).toBe(true);
+    });
+
+    it('rejects a local report match under a remote-only universe', async () => {
+      const result = await resolveTier2Targets({
+        scope: {
+          ...emptyScope,
+          report_matches: ['logs-okta.system-*'],
+          index_patterns: ['*:logs-*'],
+        },
+        tier1: hits(),
+        logger,
+      });
+
+      expect(result.tier2_targets).toEqual([]);
+      expect(result.degraded).toBe(true);
+    });
+  });
+
   describe('re-checking after the request-path bound', () => {
     it('narrows a dataset-collapsed pattern that the bound re-widened past an exclusion', async () => {
       const vendorDatasetCount = MAX_SCOPE_TARGETS / 2;

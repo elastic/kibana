@@ -20,6 +20,7 @@ import {
   HuntIoc,
   HuntForThreatResult,
   HuntIncompleteReason,
+  HostOrigin,
   HuntForThreatHit,
   HuntIncompleteness,
   HuntCompleteness,
@@ -160,6 +161,16 @@ export const HuntCoordinatorResult = lazySchema(() =>
               .optional()
               .describe('Distinct user.name values from required-index rows, capped at 20.'),
             /**
+             * Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`.
+             */
+            affected_host_origins: z
+              .array(HostOrigin)
+              .max(20)
+              .optional()
+              .describe(
+                "Where each `affected_hosts` entry was seen (local cluster, remote clusters, or both), from the same rows' `_index`."
+              ),
+            /**
              * True when more than 20 distinct hosts were seen.
              */
             affected_hosts_truncated: z
@@ -261,6 +272,15 @@ export const HuntCoordinatorResult = lazySchema(() =>
       .describe(
         "The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2 that was requested but could not run, or had nothing to run against. Not a copy of `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the part of `completeness` that would otherwise reach the caller only as an enum, or on the Tier-1-only paths, not even that. Absent or empty means the coordinator itself found nothing to report here."
       ),
+    /**
+     * Report IOCs excluded by adjudication, not searched by this run.
+     */
+    excluded_report_iocs: z
+      .object({
+        count: z.number().int().min(1),
+      })
+      .optional()
+      .describe('Report IOCs excluded by adjudication, not searched by this run.'),
     /**
      * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
      */

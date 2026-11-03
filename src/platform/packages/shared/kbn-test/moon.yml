@@ -44,6 +44,7 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
@@ -51,6 +52,4 @@ fileGroups:
     - '!types/**/*'
     - '!**/__fixtures__/**/*'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

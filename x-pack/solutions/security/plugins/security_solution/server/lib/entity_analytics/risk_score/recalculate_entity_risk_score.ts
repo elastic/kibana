@@ -100,6 +100,13 @@ export const recalculateEntityRiskScore = async ({
   const calculationRunId = uuidv4();
   const now = new Date().toISOString();
 
+  // The alerts index is created lazily, so a space without alerts has none. Skip recalculation.
+  const alertsIndexExists = await esClient.indices.exists({ index: alertsIndex });
+  if (!alertsIndexExists) {
+    logger.warn(`Alerts index "${alertsIndex}" does not exist yet, skipping recalculation`);
+    return { baseScore: undefined, resolutionScore: undefined };
+  }
+
   const { scores: baseScores, scoresCalculated } = await scoreBaseEntities({
     esClient,
     crudClient,

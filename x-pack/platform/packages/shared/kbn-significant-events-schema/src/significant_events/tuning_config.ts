@@ -19,7 +19,6 @@ export interface TuningConfigFieldBounds {
 // validateSignificantEventsTuningConfig to avoid drift between two sources.
 export const significantEventsTuningConfigSchema = lazySchema(() =>
   z.object({
-    sample_size: z.number(),
     max_iterations: z.number(),
     feature_ttl_days: z.number(),
     entity_filtered_ratio: z.number(),
@@ -40,7 +39,6 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
   keyof SignificantEventsTuningConfig,
   TuningConfigFieldBounds
 > = {
-  sample_size: { min: 1, max: 100, integer: true },
   max_iterations: { min: 1, max: 20, integer: true },
   feature_ttl_days: { min: 1, integer: true },
   entity_filtered_ratio: { min: 0, max: 1 },
@@ -55,7 +53,6 @@ export const SIGNIFICANT_EVENTS_TUNING_FIELD_BOUNDS: Record<
 };
 
 export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningConfig = {
-  sample_size: 20,
   max_iterations: 5,
   feature_ttl_days: 30,
   entity_filtered_ratio: 0.4,

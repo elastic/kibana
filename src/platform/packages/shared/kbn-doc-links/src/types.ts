@@ -330,6 +330,9 @@ export interface DocLinks {
     readonly attacksPage: string;
     readonly dashboardsPage: string;
     readonly detectionResponsePage: string;
+    readonly dataQualityPage: string;
+    readonly indicatorsPage: string;
+    readonly alertSummaryPage: string;
     readonly notesPage: string;
     readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
@@ -352,6 +355,7 @@ export interface DocLinks {
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
+    readonly cloudNativeVulnerabilityManagement: string;
     readonly cspmGcpAgentless: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;

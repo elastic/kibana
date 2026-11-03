@@ -1160,6 +1160,46 @@ describe('ConversationClient', () => {
 
       expect(createClientForUser(serviceAccount).getAuthor()).toEqual(serviceAccount);
     });
+
+    describe('author decoration', () => {
+      const serviceAccount = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+      const decoration = { full_name: 'Attack Discovery Review' };
+
+      it('names a service account from the decoration', () => {
+        expect(createClientForUser(serviceAccount).getAuthor(undefined, decoration)).toEqual({
+          ...serviceAccount,
+          full_name: 'Attack Discovery Review',
+        });
+      });
+
+      it('drops the decoration for an interactive user', () => {
+        expect(client.getAuthor(undefined, decoration)).toEqual({
+          id: 'user-1',
+          username: 'test-user',
+        });
+      });
+
+      it('still prefers the origin author over the decoration', () => {
+        const originAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
+
+        expect(createClientForUser(serviceAccount).getAuthor(originAuthor, decoration)).toEqual(
+          originAuthor
+        );
+      });
+
+      it('assigns no author when the user has no profile id, decoration or not', () => {
+        expect(
+          createClientForUser({ username: 'kibana/automation', type: 'service_account' }).getAuthor(
+            undefined,
+            decoration
+          )
+        ).toBeUndefined();
+      });
+    });
   });
 
   describe('space isolation for reads-by-id', () => {
@@ -2285,6 +2325,125 @@ describe('ConversationClient', () => {
       ).rejects.toMatchObject({
         message: expect.stringContaining('conversation-1'),
       });
+    });
+  });
+
+  describe('immutable metadata', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      getTemplateMock.mockReturnValue(
+        makeTemplate('investigation', {
+          telemetry_target: { input_type: 'TEXT', immutable: true },
+          summary: { input_type: 'TEXT' },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'investigation',
+          metadata: { telemetry_target: 'orca' },
+        })
+      );
+    });
+
+    it.each(['c0', 'none', ''])('rejects changing the target to %p', async (target) => {
+      await expect(
+        client.patchMetadata(
+          'conversation-1',
+          { telemetry_target: target, summary: 'must not be written' },
+          { source: 'http_api' }
+        )
+      ).rejects.toThrow('field "telemetry_target" is immutable');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects assigning a target to a legacy investigation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({ templateId: 'investigation' })
+      );
+      await expect(
+        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'workflow' })
+      ).rejects.toThrow('field "telemetry_target" is immutable');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows trusted writers to replace metadata without template validation', async () => {
+      await client.update(
+        { id: 'conversation-1', metadata: { telemetry_target: 'c0' } },
+        { source: 'workflow' }
+      );
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+        telemetry_target: 'c0',
+      });
+    });
+
+    it('revalidates against stored metadata after an OCC conflict', async () => {
+      mockGetDocumentResponseOnce(
+        createConversationDocumentWithTemplate({
+          templateId: 'investigation',
+          metadata: { telemetry_target: 'orca' },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'investigation',
+          metadata: { telemetry_target: 'c0' },
+        })
+      );
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+
+      await expect(
+        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'http_api' })
+      ).rejects.toThrow('field "telemetry_target" is immutable');
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows the same target alongside unrelated metadata updates', async () => {
+      const { changedFields } = await client.patchMetadata(
+        'conversation-1',
+        { telemetry_target: 'orca', summary: 'Updated summary' },
+        { source: 'http_api' }
+      );
+      expect(changedFields).toEqual(['summary']);
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+        telemetry_target: 'orca',
+        summary: 'Updated summary',
+      });
+    });
+
+    it.each<Record<string, SerializedMetadataValue>>([{ telemetry_target: 'orca' }, {}])(
+      'preserves the target binding when reapplying the template: %p',
+      async (metadata) => {
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({ templateId: 'investigation', metadata })
+        );
+        await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
+        expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual(metadata);
+      }
+    );
+
+    it('allows template migrations to add an immutable field with a default', async () => {
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({ templateId: 'investigation' })
+      );
+      getTemplateMock.mockReturnValue(
+        makeTemplate('investigation', {
+          telemetry_target: { input_type: 'TEXT', immutable: true, default_value: 'orca' },
+        })
+      );
+      await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+        telemetry_target: 'orca',
+      });
+    });
+
+    it('allows template migrations to remove an immutable field', async () => {
+      getTemplateMock.mockReturnValue(
+        makeTemplate('investigation', { summary: { input_type: 'TEXT', default_value: 'Summary' } })
+      );
+
+      await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({ summary: 'Summary' });
     });
   });
 
@@ -3949,6 +4108,25 @@ describe('ConversationClient', () => {
       expect(emitAttachmentEvents).toHaveBeenCalledWith({
         conversationId: 'conversation-1',
         events: [added],
+      });
+    });
+
+    it('appendEvents does not publish hidden attachment events', async () => {
+      mockGetDocumentResponse(createConversationDocument({ schemaVersion: 1, events: [] }));
+      const visible = attachmentAddedEvent('evt-att-1');
+      const hidden = {
+        ...attachmentAddedEvent('evt-att-2'),
+        data: { ...(attachmentAddedEvent('evt-att-2').data as object), hidden: true },
+      } as TimelineEvent;
+
+      await clientWithCb.appendEvents(
+        { id: 'conversation-1', events: [visible, hidden] },
+        { source: 'http_api' }
+      );
+
+      expect(emitAttachmentEvents).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        events: [visible],
       });
     });
 

@@ -109,7 +109,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         isSidebar: canvasState.isSidebar,
         agentId,
         updateOrigin,
-        openSidebarConversation: canvasState.isSidebar ? undefined : openSidebarConversation,
+        openSidebarConversation,
         isCanvas: true,
         closeCanvas,
       }) ?? [];
@@ -183,7 +183,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
               {
                 attachment,
                 isSidebar,
-                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+                openSidebarConversation,
               },
               {
                 registerActionButtons,

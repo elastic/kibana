@@ -102,6 +102,8 @@ export const importPluginOverrides: OxlintOverride[] = [
       '**/playwright.v2.config.ts',
       '**/*.playwright.config.ts',
       '**/parallel.playwright.config.ts',
+      'x-pack/platform/packages/shared/isomer/isomer-components/isomer_studio.config.ts',
+      'x-pack/platform/packages/shared/isomer/isomer-components/isomer_studio_fonts.ts',
     ],
     rules: {
       'import/no-default-export': 'off',
@@ -239,7 +241,12 @@ export const importPluginOverrides: OxlintOverride[] = [
     },
   },
   {
-    files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
+    // Node-only dev tooling, not reachable from the package entry points
+    files: [
+      'src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}',
+      'src/platform/packages/shared/kbn-connector-specs/scripts/**/*.ts',
+      'src/platform/packages/shared/kbn-connector-specs/src/test/vendor_api/**/*.ts',
+    ],
     rules: {
       'import/no-nodejs-modules': 'off',
     },

@@ -14,7 +14,14 @@ import {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
+import {
+  DISCOVERY_SEVERITY_APPLICATION_RULE,
+  SEVERITY_CONTRACT_RULE,
+  severitySchema,
+  signalInputEntrySchema,
+  significantEventSchema,
+  MAX_ARRAY_LENGTH,
+} from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -24,9 +31,10 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
-import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
+  BulkWriteError,
+  createBulkWriteValidationError,
   getBulkWriteToolErrorCode,
   MAX_BULK_WRITE_ITEMS,
   trackTelemetryBestEffort,
@@ -35,6 +43,8 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '../../agents/discovery/di
 import { eventsWriteBulkHandler, type EventsWriteInput } from './handler';
 import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
 import { assignStoredSourceIds } from '../../utils/stored_source_fields';
+import { fillDetectionMetadata } from './detection_metadata';
+import { hasEventWorthySignal } from './event_facts';
 
 export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEventsTools.eventsWrite;
 
@@ -55,6 +65,17 @@ export const eventsWriteItemSchema = lazySchema(() =>
       conversation_id: true,
     })
     .extend({
+      // The shared contract, then how discovery applies it: read at the call site where the tier is set.
+      severity: severitySchema.describe(
+        `${SEVERITY_CONTRACT_RULE}\n\n${DISCOVERY_SEVERITY_APPLICATION_RULE}`
+      ),
+      signals: z
+        .array(signalInputEntrySchema)
+        .max(MAX_ARRAY_LENGTH)
+        .optional()
+        .describe(
+          'Evidence signals associated with this incident record. Each entry represents one alerting rule associated with this event. '
+        ),
       slugs: nightshiftSourceSlugsField(
         'This event covers these sources. Nested signal, causal feature, and blast radius `source_id` values are slugs too. Disabled sources are accepted.'
       ),
@@ -63,7 +84,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
       status: z
         .never({
           error:
-            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member start recovering, and only an operator or a close workflow closes it.',
+            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member of an active event move it to recovering, and only an operator or a close workflow closes a live event. An event is never born from healthy evidence.',
         })
         .optional(),
       event_id: z
@@ -91,31 +112,38 @@ export const eventsWriteItemSchema = lazySchema(() =>
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
       const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
-      const hasBreachMember = signals.some(isBreachMemberSignal);
-      const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
-      if (hasConfirms && hasNotChecked) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            'A confirms item cannot include not_checked signals; leave each not_checked detection out of the write.',
+      // One issue per offending signal, so a retry knows exactly which entries to remove.
+      if (hasConfirms) {
+        signals.forEach((signal, index) => {
+          if (signal.verdict !== 'not_checked') return;
+          const ruleUuid = signal.metadata?.rule_uuid ?? 'unknown';
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['signals', index],
+            message: `A confirms item cannot include not_checked signals; remove the signal of rule ${ruleUuid} from this item, leave that detection out of the write, and add its rule_uuid to written_rule_uuids.`,
+          });
         });
       }
-      // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
-      // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
-      // must be written, never dropped.
-      if (item.event_id === undefined && !hasBreachMember) {
+      // An event is born only from evidence that points to an error: a confirming signal or an
+      // off-topic row. Healthy, empty, errored or unchecked evidence is not an event; it can only
+      // join a live one.
+      if (signals.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message:
-            'A new event must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach: do not create an event for refutes, inconclusive, or not_checked detections alone. To record that a rule of an existing event is healthy, continue that event with its event_id and the refutes signal.',
+          message: `A ${
+            item.event_id === undefined ? 'new event' : 'continuation'
+          } must carry at least one signal.`,
         });
-      }
-      if (item.event_id !== undefined && signals.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'A continuation must carry at least one signal.',
-        });
+      } else if (item.event_id === undefined) {
+        if (!hasEventWorthySignal(signals)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['signals'],
+            message:
+              'A new event needs evidence that points to an error: a confirms signal or an off_topic row with a concrete error. Leave these detections out of the write and add their rule_uuid to written_rule_uuids.',
+          });
+        }
       }
     })
 );
@@ -127,25 +155,32 @@ const eventsWriteItemsSchema = lazySchema(() =>
     .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
     .min(1, { error: ITEMS_REQUIRED_MESSAGE })
     .max(MAX_BULK_WRITE_ITEMS)
-    .refine(
-      (items) => {
-        const ruleUuids = items.flatMap((item) =>
-          (item.signals ?? [])
-            .filter((signal) => signal.type === 'detection')
-            .map((signal) => signal.metadata?.rule_uuid)
-            .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
-        );
-        return new Set(ruleUuids).size === ruleUuids.length;
-      },
-      {
-        message:
-          'Each detection rule UUID may appear exactly once in the complete write, including within a single event item. Correct ownership before the single write; never retry with an empty placeholder.',
-      }
-    )
+    .superRefine((items, ctx) => {
+      const owners = new Map<string, number>();
+      items.forEach((item, itemIndex) => {
+        (item.signals ?? []).forEach((signal) => {
+          const ruleUuid = signal.type === 'detection' ? signal.metadata?.rule_uuid : undefined;
+          if (!ruleUuid) return;
+          const firstIndex = owners.get(ruleUuid);
+          if (firstIndex === undefined) {
+            owners.set(ruleUuid, itemIndex);
+            return;
+          }
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [itemIndex],
+            message:
+              firstIndex === itemIndex
+                ? `Rule UUID ${ruleUuid} appears twice in item ${itemIndex}. List each rule once per item, then call again with the complete request.`
+                : `Rule UUID ${ruleUuid} is in items ${firstIndex} and ${itemIndex}. A rule belongs to exactly one item: merge those items into one (a rule shared by two groups joins them), then call again with the complete request. Never retry with an empty placeholder.`,
+          });
+        });
+      });
+    })
     .describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
         defaultMessage:
-          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
+          'Non-empty array of event objects. One call assigns every written batch detection; a detection that is not written belongs in no item. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
       })
     )
 );
@@ -222,15 +257,47 @@ const enrichCausalFeatures = async (
       itemSourceIds: string[]
     ) => {
       if (explicitSourceId !== undefined) {
-        return featuresByReference.get(`${explicitSourceId}:${featureId}`);
+        const explicit = featuresByReference.get(`${explicitSourceId}:${featureId}`);
+        if (explicit) return explicit;
       }
-      // Without an explicit source: an unambiguous match wins; otherwise restrict to the
-      // event's own sources so a shared slug on another source cannot stamp the wrong
+      // Without an explicit source, or when it names a source that does not hold the id (a
+      // duplicate source the agent copied from): an unambiguous match wins; otherwise restrict to
+      // the event's own sources so a shared slug on another source cannot stamp the wrong
       // classification.
       const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
       const scoped = matches.filter(({ source_id: sourceId }) => itemSourceIds.includes(sourceId));
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
+
+    // A feature_id that names no Knowledge Indicator of a source that has some cannot be matched by
+    // a later topology search, so it is refused rather than written.
+    const unresolved = [
+      ...new Set(
+        items.flatMap((item) =>
+          [...(item.causal_features ?? []), ...(item.blast_radius ?? [])].flatMap((reference) =>
+            resolveFeature(reference.feature_id, reference.source_id, item.source_ids)
+              ? []
+              : [reference.feature_id]
+          )
+        )
+      ),
+    ];
+    if (unresolved.length > 0) {
+      const { hits: anyFeature } = await kiClient.getFeatures(sourceIds, {
+        limit: 1,
+        includeExcluded: true,
+        includeExpired: true,
+      });
+      if (anyFeature.length > 0) {
+        throw createBulkWriteValidationError(
+          `feature_id ${unresolved
+            .map((id) => JSON.stringify(id))
+            .join(
+              ', '
+            )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`
+        );
+      }
+    }
 
     return items.map((item) => ({
       ...item,
@@ -263,6 +330,7 @@ const enrichCausalFeatures = async (
       }),
     }));
   } catch (error) {
+    if (error instanceof BulkWriteError) throw error;
     const message = error instanceof Error ? error.message : 'Unknown error';
     logger.warn(`Failed to enrich causal features; writing them unenriched: ${message}`);
     return items;
@@ -287,8 +355,9 @@ export function createEventsWriteTool({
        Write a batch of significant events. Always pass the completed object
       \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
       \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
-      already-completed object once. Do not retry a populated payload rejected for
-      ownership or field validation. If a completed item returns \`unknown_event_id\`,
+      already-completed object once. Retry a populated payload rejected with
+      \`tool_validation_error\` once, correcting only the listed fields; do not retry any other
+      rejection. If a completed item returns \`unknown_event_id\`,
       do not retry that item in this run. Do not rerun routing, choose another event, reuse the
       rejected ID, or omit the ID to turn it into a new event. Discovery must leave its rules
       unprocessed so the next cycle routes them again from fresh search results.
@@ -297,7 +366,9 @@ export function createEventsWriteTool({
 
       **With event_id**: append a version to an existing event. Its status follows the merged
       members' verdicts: a breaching member returns a recovering event to active, while healthy or
-      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too.
+      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too. A new event
+      is born only from evidence that points to an error (a confirms signal or an off_topic row);
+      healthy or empty evidence is not written.
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
       its field contract, decided from the merged confirming signals; the writer stores it as given
       (an inactive event is low) and returns the stored tier. No-op if the stored severity and
@@ -328,14 +399,24 @@ export function createEventsWriteTool({
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
       try {
-        const { getEventSearchClient, getKnowledgeIndicatorClient, licensing, sourcesClient } =
-          await getScopedClients({
-            request,
-          });
+        const {
+          getEventSearchClient,
+          getDetectionClient,
+          getKnowledgeIndicatorClient,
+          licensing,
+          sourcesClient,
+        } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
-        const resolvedItems = toolParams.items.map((item) => assignStoredSourceIds(catalog, item));
+        const detectionClient = await getDetectionClient();
+        const identifiedItems = await fillDetectionMetadata({
+          items: toolParams.items,
+          findDetections: (detectionIds) => detectionClient.findByIds(detectionIds),
+        });
+        const resolvedItems = identifiedItems.map((item) => assignStoredSourceIds(catalog, item));
         storedItems = resolvedItems;
         const items = await enrichCausalFeatures(
           resolvedItems,

@@ -92,7 +92,7 @@ describe('Alert Triage batch workflow', () => {
         })
       );
       const names = batchSteps.map(({ name }) => name);
-      expect(names.indexOf('load_alerts')).toBeLessThan(names.indexOf('create_investigation'));
+      expect(names.indexOf('load_alerts')).toBeLessThan(names.indexOf('classify_alerts'));
     });
   });
 
