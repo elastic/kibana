@@ -134,8 +134,7 @@ export const sameDisplayNameCrossAccountScenario: AuditScenario = {
     'The same user.name (deploy-bot) raises identical alerts in two AWS accounts; one account is a routine pipeline and the other a chain of defense evasion, persistence and exfiltration.',
   provenance: 'authored',
   alerts,
-  operatorContext:
-    'The organisation runs separate prod and sandbox AWS accounts; service users with the same name exist in both.',
+  operatorContext: 'The organisation runs separate prod and sandbox AWS accounts.',
   gold: {
     alertGroups,
     forbiddenCoCitation: [['sandbox-deploy-bot', 'prod-deploy-bot']],

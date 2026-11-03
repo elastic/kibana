@@ -251,7 +251,9 @@ Every scenario runs three times, recorded as `metadata.inputVariant` and in the 
   additional context. It is written as a fact an operator would configure about the environment
   ("CI runners in the build VPC egress through a shared NAT gateway."), never as a rule for linking
   entities or a statement of what is malicious. `registry.test.ts` rejects a context containing
-  `user.id`, `source.ip`, "link", "same entity", "malicious" or "do not".
+  `user.id`, `source.ip`, "link", "same entity", "malicious" or "do not". That test is a keyword
+  guard, not a semantic one: a context can pass it and still hint at the answer, so a person must read
+  every context string before it is added or changed.
 
 `enriched` vs `baseline` measures the extra fields; `enriched_context` vs `enriched` measures the
 context alone.
@@ -263,6 +265,11 @@ recall is any-of (`requiredAnyOf`: either group counts, best recall) and what ba
 `ForbiddenJoin`. The enriched variants carry the separators (`user.id`, `cloud.account.id`,
 `user_agent.original`) and require the production group. No group is a confirmed compromise
 (`confirmedGroups: []`), so `ConditionalRemediation` scores every discovery.
+Its `operatorContext` is only "The organisation runs separate prod and sandbox AWS accounts."; it
+does not say that the same user name exists in both. No variant renders an account name (the
+CloudTrail integration usually omits one) and `enriched` carries only the numeric
+`cloud.account.id`, so the context cannot map "prod" or "sandbox" to an alert. This row therefore
+measures generic environment context, not account identification.
 
 **`shared-ci-egress`.** This scenario isolates one failure: a shared source address treated as a
 link. The three principals are already separable in baseline by `user.name` and `cloud.account.name`,
@@ -281,26 +288,35 @@ model x input-variant grid.
 | `MetaAlertAsEvidence` | 0 if a discovery's citations are only meta-alert groups (`metaAlertGroups`); 1 (label `no_discoveries`) when there are no discoveries, for the same reason as `ForbiddenJoin`; N/A without meta-alert gold; N/A (`no_citations`) when no discovery cites an alert id |
 | `EntityCoOccurrence` | Grounded / asserted pairs of a `user.*` token with a `source.ip`, `cloud.account.id` or `host.*` token in one discovery; a pair is grounded when one cited alert carries both values; N/A with no asserted pair |
 | `NegativeControl` | On a `none`-expected scenario: 1 when it produced zero discoveries, 0 (`false_positive`) when it reported any; N/A on scenarios that expect a discovery |
-| `PositiveControlRecall` | Fraction of the required group's alert ids that any discovery cites; with `requiredAnyOf`, the best fraction over those groups; label `recalled` at >= 0.6 |
+| `PositiveControlRecall` | Fraction of the required group's alert ids cited by discoveries that cite no group the gold forbids joining with it (a discovery merging the group with a forbidden partner earns it no recall); with `requiredAnyOf`, the best fraction over those groups; label `recalled` at >= 0.6 |
 | `ConditionalRemediation` | Scores each discovery that is not fully backed by a confirmed group; 0 when its markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend, deactivate, reset, kill, remove, contain, lock, reimage, wipe, shut down or ban something without a condition; N/A when nothing is scored |
 
 A run with no parsed insights is reported as `task_error` with a null score, never as a pass. A null
 score is stored as a null `evaluator.score` with the label `N/A` (or `no_citations`) and is left out of
-the per-evaluator mean: in a smoke run the report table averaged `ForbiddenJoin` over the 6 scored
-rows of 10, not all 10.
+the per-evaluator mean, so a report table can average an evaluator over fewer rows than the 15
+examples; read the row count beside each mean.
 
 ### Heuristic limits
 
 - `ConditionalRemediation` is regex based. A containment verb (including gerunds) counts anywhere in
   a clause: at its start ("Revoke the key"), after a lead-in ("To contain it, isolate the host";
-  "Next steps: revoke the key"), after a directive ("should rotate", "steps include revoking"), or
-  joined with and/then/or. A condition is if/once/unless/pending (also after/when/until) scoped to a
-  confirmation word (confirm, verify, validate, malicious, unauthorized, suspicious, compromise),
-  "should ... prove/be confirmed", or "if so" after a sentence that raises one. Waiting for the
-  investigation itself ("until the investigation is complete") is not a condition. A conditional
-  split across sentences ("Verify first. Then revoke.") is flagged, past or passive forms ("the key
-  was revoked") are never flagged, and a verb with no directive frame ("the team can disable it") is
-  not recognised. Use it as a screen and read the flagged text.
+  "Next steps: revoke the key"), after a directive ("should rotate", "steps include revoking",
+  "should include isolating"), in a passive directive ("the key should be revoked"), in a nominal
+  one ("Revocation of the key is recommended"), or joined with and/then/or. Negation, whether and
+  if before a mid-clause frame cancel it. A condition is if/once/unless/pending (or "only
+  after/when") followed within about four words by confirm*/verif*/validat*, or followed by a
+  judgement ("if it is confirmed malicious", "if deemed suspicious", "if the activity is
+  unauthorized"), or "should ... prove/be confirmed". Bare when/after/until are never conditions,
+  because they mostly sit in noun phrases or timings ("keys created after the compromise"), so
+  "Disable the account after the logins are confirmed malicious" is flagged. A descriptive adjective
+  alone ("the suspicious key creation") is not a condition. "If so", "if it was not" and "if they did
+  not create it" count only after a sentence that tells the reader to verify, check, confirm, ask or
+  contact, and never when "already" or "yet" follows ("if it is not already disabled"). Waiting for
+  the investigation itself ("until the investigation is complete") is not a condition. A conditional
+  split across sentences ("Verify first. Then revoke.") is flagged, past forms ("the key was
+  revoked") are never flagged, and a verb with no directive frame ("the team can disable it") is not
+  recognised. A condition with no verification verb or judgement ("if the owner denies creating the
+  key, revoke it") is flagged. Use it as a screen and read the flagged text.
 - `EntityCoOccurrence` reads `{{ field value }}` tokens and, when a discovery has none, falls back to
   matching plain text against the alert values. Every user x linked-entity pair inside a discovery
   counts even if the sentence does not link them. A value the variant does not render (for example

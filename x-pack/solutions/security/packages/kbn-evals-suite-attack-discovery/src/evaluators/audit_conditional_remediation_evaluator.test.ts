@@ -112,6 +112,67 @@ describe('findUnconditionalContainment', () => {
     expect(findUnconditionalContainment(text)).toEqual([]);
   });
 
+  describe('follow-up cues ("if not", "if they did not")', () => {
+    it.each([
+      'The deploy-bot account is compromised. If it is not already disabled, disable it now.',
+      'Activity confirmed malicious by the chain. If not already done, isolate the host.',
+      'This is malicious. If it is not isolated yet, isolate the host.',
+      'The login was malicious. If not, reset the password.',
+      'Verify the login first. If it is not already blocked, block the IP.',
+    ])('flags an action the cue does not govern: %s', (text) => {
+      expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
+    });
+
+    it.each([
+      'Contact the owner to verify the key creation; if they did not create it, disable the user.',
+      'Verify with the owner that the login was legitimate. If it was not, reset the password.',
+      'Ask the owner whether they created the key. If the owner did not, disable the user.',
+      'Investigate whether the host is compromised; if so, isolate it.',
+    ])('honours a cue that follows a verification instruction: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
+  });
+
+  describe('descriptive adjectives and timing words are not conditions', () => {
+    it.each([
+      'Disable the user after the suspicious key creation at 02:14.',
+      'Revoke all keys created after the compromise.',
+      'Rotate every credential used when the account was compromised.',
+      'Block the IP after reviewing the suspicious traffic.',
+      'Terminate the instance until it is verified clean.',
+    ])('flags: %s', (text) => {
+      expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
+    });
+
+    it.each([
+      'If it is confirmed malicious, isolate the host.',
+      'Should the activity prove malicious, revoke the key.',
+      'If deemed suspicious, isolate the host.',
+      'Once confirmed, revoke the key.',
+      'If confirmed unauthorized:\n- Revoke the key',
+    ])('passes: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
+  });
+
+  describe('passive and nominal directives', () => {
+    it.each([
+      'The prod access key should be revoked immediately.',
+      'Access keys for deploy-bot should be rotated and the user disabled.',
+      'Revocation of the access key is recommended.',
+      'Containment should include isolating the host.',
+    ])('flags: %s', (text) => {
+      expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
+    });
+
+    it.each([
+      'The key should not be revoked until the owner confirms.',
+      'If confirmed, the key should be revoked.',
+    ])('passes: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
+  });
+
   it('does not flag a verb that only appears inside an entity token', () => {
     expect(
       findUnconditionalContainment('Seen {{ rule.name Block Public Access Disabled }}')

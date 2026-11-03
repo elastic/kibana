@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AUDIT_SCENARIOS } from '../audit_failure_classes/registry';
 import { createAuditPositiveControlRecallEvaluator } from './audit_positive_control_recall_evaluator';
 import {
   emptyInput,
@@ -87,6 +88,60 @@ describe('PositiveControlRecall evaluator', () => {
 
     it('scores 0 when neither group is cited', async () => {
       expect(await run([[]], anyOf)).toMatchObject({ score: 0, label: 'missed' });
+    });
+  });
+
+  describe('forbidden merges', () => {
+    const forbiddenPair = [['prod', 'sandbox']] as const;
+    const anyOf = makeGold({
+      alertGroups: { prod: ['p1', 'p2', 'p3'], sandbox: ['s1', 's2', 's3'] },
+      requiredAnyOf: ['prod', 'sandbox'],
+      forbiddenCoCitation: forbiddenPair,
+    });
+    const merged = ['p1', 'p2', 'p3', 's1', 's2', 's3'];
+
+    it('scores 0 for one discovery merging both groups under requiredAnyOf', async () => {
+      expect(await run([merged], anyOf)).toMatchObject({ score: 0, label: 'missed' });
+    });
+
+    it('scores 0 for requiredGroup cited together with a forbidden partner', async () => {
+      const required = makeGold({
+        alertGroups: { prod: ['p1', 'p2', 'p3'], sandbox: ['s1', 's2', 's3'] },
+        requiredGroup: 'prod',
+        forbiddenCoCitation: forbiddenPair,
+      });
+      expect(await run([merged], required)).toMatchObject({ score: 0, label: 'missed' });
+    });
+
+    it('still scores 1 for a correct discovery next to an unrelated one', async () => {
+      expect(await run([['p1', 'p2', 'p3'], ['x1']], anyOf)).toMatchObject({
+        score: 1,
+        label: 'recalled',
+      });
+    });
+
+    it('credits the clean discovery when a merged one is reported beside it', async () => {
+      expect(await run([['p1', 'p2', 'p3'], merged], anyOf)).toMatchObject({ score: 1 });
+    });
+
+    it('counts only the discoveries that stay clear of the partner', async () => {
+      expect(await run([['p1'], ['p2', 's1']], anyOf)).toMatchObject({ score: 1 / 3 });
+    });
+
+    it('does not count a discovery joining the positive chain with the cloud noise', async () => {
+      const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+      if (!scenario) throw new Error('positive-chain-with-noise scenario missing');
+      const { alertGroups, forbiddenCoCitation } = scenario.gold;
+      const chain = alertGroups['clickfix-chain'];
+      expect(chain.length).toBeGreaterThan(0);
+      expect(forbiddenCoCitation.length).toBeGreaterThan(0);
+
+      for (const [, noiseGroup] of forbiddenCoCitation) {
+        const joined = await run([[...chain, ...alertGroups[noiseGroup]]], scenario.gold);
+        expect(joined).toMatchObject({ score: 0, label: 'missed' });
+      }
+      const clean = await run([[...chain]], scenario.gold);
+      expect(clean).toMatchObject({ score: 1, label: 'recalled' });
     });
   });
 });

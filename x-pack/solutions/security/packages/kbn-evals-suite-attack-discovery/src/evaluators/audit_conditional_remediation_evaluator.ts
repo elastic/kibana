@@ -67,10 +67,11 @@ const IMPERATIVE_AT_START = new RegExp(
 
 /**
  * The verb follows a directive, as in "should rotate", "must disable", "recommend blocking",
- * "prioritize revoking", "start by isolating". Gerunds count: "We recommend blocking the IP."
+ * "prioritize revoking", "start by isolating". Gerunds count: "We recommend blocking the IP." So does
+ * "should include <gerund>": "Containment should include isolating the host."
  */
 const DIRECTIVE_BEFORE_VERB = new RegExp(
-  `\\b(?:should|must|need to|needs to|have to|ought to|recommend(?:ed|s)?(?: that)?(?: you)?(?: to)?|advise[sd]?(?: that)?(?: you)?(?: to)?|prioriti[sz]e|start by|begin by|make sure to|ensure (?:that )?(?:you )?)\\s+${FILLER}(?:the\\s+)?(?:${ANY_FORM})\\b`,
+  `\\b(?:should|must|need to|needs to|have to|ought to|recommend(?:ed|s)?(?: that)?(?: you)?(?: to)?|advise[sd]?(?: that)?(?: you)?(?: to)?|prioriti[sz]e|start by|begin by|make sure to|ensure (?:that )?(?:you )?)\\s+${FILLER}(?:include\\s+)?(?:the\\s+)?(?:${ANY_FORM})\\b`,
   'i'
 );
 
@@ -112,6 +113,38 @@ const CONSIDER_DIRECTIVE = new RegExp(
   'i'
 );
 
+const PAST_PARTICIPLES = [
+  'revoked',
+  'rotated',
+  'disabled',
+  'deleted',
+  'isolated',
+  'terminated',
+  'quarantined',
+  'deactivated',
+  'blocked',
+  'suspended',
+  'reset',
+  'killed',
+  'removed',
+  'contained',
+  'locked',
+  'reimaged',
+  'wiped',
+  'shut down',
+  'banned',
+].join('|');
+
+/** "The key should be revoked immediately", "must be rotated". */
+const PASSIVE_DIRECTIVE = new RegExp(
+  `\\b(?:should|must|needs? to|has to|ought to)\\s+be\\s+${FILLER}(?:${PAST_PARTICIPLES})\\b`,
+  'i'
+);
+
+/** "Revocation of the access key is recommended." */
+const NOMINAL_DIRECTIVE =
+  /\b(?:revocation|rotation|isolation|termination|quarantine|suspension|deactivation|disabling|blocking)\s+of\b[^.]*?\b(?:is|are)\s+(?:strongly\s+)?(?:recommended|advised|required)\b/i;
+
 /** Negation before the verb in the same clause turns advice into a caution. */
 const NEGATION = /\b(?:not|never|avoid|without|nor|no need)\b|n't\b/i;
 
@@ -121,29 +154,54 @@ const MID_CLAUSE_FRAMES: readonly RegExp[] = [
   LIST_INTRODUCER,
   IMPORTANCE_FRAME,
   CONSIDER_DIRECTIVE,
+  PASSIVE_DIRECTIVE,
+  NOMINAL_DIRECTIVE,
 ];
 
 /**
- * The confirmation words a condition must be scoped to. "until the investigation is complete"
- * and "after the incident is investigated" wait for a process to finish, not for the finding to
- * be confirmed, so `investigat*` is deliberately absent.
+ * Before a mid-clause frame, negation or whether/if turns advice into a caution or a question:
+ * "The key should not be revoked", "Verify whether the key should be revoked."
  */
-const CONFIRMATION_WORDS =
-  '(?:confirm\\w*|verif\\w+|validat\\w+|malicious|unauthori[sz]ed|suspicious|compromis\\w*)';
-const CONDITION_CUE = new RegExp(
-  `\\b(?:if|once|unless|pending|after|when|until)\\b.*\\b${CONFIRMATION_WORDS}`,
+const MID_CLAUSE_CANCEL = new RegExp(`${NEGATION.source}|\\b(?:whether|if)\\b`, 'i');
+
+const VERIFY_VERB = '(?:confirm\\w*|verif\\w+|validat\\w+)';
+const SUSPECT_ADJECTIVE = '(?:malicious|unauthori[sz]ed|suspicious|compromised)';
+/**
+ * A condition word counts only with a finding it waits on. Only if/once/unless/pending open a
+ * condition (and "should" in SHOULD_PROVE_CUE, "only after/when" as an explicit gate); bare
+ * when/after/until never do, because they usually sit in a noun phrase or a timing ("keys created
+ * after the compromise", "used when the account was compromised"). The finding is either a verification verb within about four words of the
+ * condition word ("once you have verified", "pending validation"), or a judgement stated with a
+ * copula after it ("if it is confirmed malicious", "if deemed suspicious", "if the activity is
+ * unauthorized"), or the adjective right after it ("if malicious activity continues").
+ * Waiting on the investigation itself ("until the investigation is complete") is not a condition.
+ */
+const VERIFICATION_CUE = new RegExp(
+  `\\b(?:if|once|unless|pending|only (?:after|when))\\b(?:\\s+\\S+){0,4}?\\s+${VERIFY_VERB}`,
   'i'
 );
+const JUDGEMENT_CUE = new RegExp(
+  `\\b(?:if|once|unless|pending|only (?:after|when))\\b.*\\b(?:is|are|was|were|be|been|proves?|turns? out|deemed|found|determined)\\s+(?:to be\\s+)?(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`,
+  'i'
+);
+const ADJECTIVE_CUE = new RegExp(`\\b(?:if|once|unless)\\s+(?:\\w+\\s+)?${SUSPECT_ADJECTIVE}`, 'i');
 /** "should the activity prove malicious", "should it be confirmed". */
 const SHOULD_PROVE_CUE = new RegExp(
-  `\\bshould\\b.*\\b(?:prove|turn out|be (?:confirmed|verified|validated))\\b`,
+  `\\bshould\\b(?:\\s+\\S+){0,4}?\\s+(?:prove|turn out|be (?:confirmed|verified|validated|deemed|found|determined))\\b`,
   'i'
 );
-/** "if so", "if it is" and "if it was not" point back at the previous sentence, which must raise a confirmation. */
+/**
+ * "if so", "if it is", "if it was not", "if they did not create it" point back at the previous
+ * sentence, which must be an instruction to verify something. "If not already done" and "if it is
+ * not isolated yet" ask about the state of the action itself, so they never count.
+ */
 const ANAPHORIC_CUE =
-  /\b(?:if|once)\s+(?:so|yes|not|it (?:is|was)(?: not)?|they (?:are|were)(?: not)?|that is the case)\b/i;
+  /\b(?:if|once)\s+(?:so|yes|not|that is the case|(?:it|they|he|she|this|that|the \w+(?: \w+)?)\s+(?:is|are|was|were|did|does|do|has|have|had)(?:\s+not|n't)?)\b/i;
+const ALREADY_DONE = /\b(?:already|yet)\b/i;
+const VERIFICATION_INSTRUCTION =
+  /\b(?:verify|confirm|check|determine|validate|ask|contact|investigate|assess)\b/i;
 /** A trailing condition ("..., unless the owner confirms") also governs the clauses before it. */
-const STARTS_WITH_CUE = /^(?:only\s+)?(?:if|unless|once|pending|should|after|when|until)\b/i;
+const STARTS_WITH_CUE = /^(?:only\s+)?(?:if|unless|once|pending|should)\b/i;
 
 const TOKEN_PATTERN = /\{\{.*?\}\}/g;
 
@@ -167,10 +225,21 @@ const splitClauses = (sentence: string): string[] =>
     .map((clause) => clause.trim())
     .filter((clause) => clause.length > 0);
 
+const isAnaphoricCue = (clause: string, previousSentence: string): boolean => {
+  const match = ANAPHORIC_CUE.exec(clause);
+  return (
+    match !== null &&
+    VERIFICATION_INSTRUCTION.test(previousSentence) &&
+    !ALREADY_DONE.test(clause.slice(match.index + match[0].length))
+  );
+};
+
 const isCue = (clause: string, previousSentence: string): boolean =>
-  CONDITION_CUE.test(clause) ||
+  VERIFICATION_CUE.test(clause) ||
+  JUDGEMENT_CUE.test(clause) ||
+  ADJECTIVE_CUE.test(clause) ||
   SHOULD_PROVE_CUE.test(clause) ||
-  (ANAPHORIC_CUE.test(clause) && new RegExp(CONFIRMATION_WORDS, 'i').test(previousSentence));
+  isAnaphoricCue(clause, previousSentence);
 
 const isSentenceConditional = (sentence: string, previousSentence: string): boolean =>
   splitClauses(sentence).some((clause) => isCue(clause, previousSentence));
@@ -179,7 +248,7 @@ const isInstructionClause = (clause: string): boolean => {
   if (IMPERATIVE_AT_START.test(clause) || GERUND_SUBJECT.test(clause)) return true;
   const midClause = MID_CLAUSE_FRAMES.some((frame) => {
     const match = frame.exec(clause);
-    return match !== null && !NEGATION.test(clause.slice(0, match.index));
+    return match !== null && !MID_CLAUSE_CANCEL.test(clause.slice(0, match.index));
   });
   if (midClause) return true;
   const coordinated = COORDINATED.exec(clause);
@@ -246,20 +315,23 @@ export const findUnconditionalContainment = (markdown: string): string[] => {
  * Heuristic, regex based; it does not parse grammar. Each sentence is split into clauses at
  * commas and colons. A clause is an instruction when a containment verb opens it ("Revoke the
  * key", "Next steps: revoke the key", "To contain it, isolate the host"), follows a directive
- * (should, must, recommend, prioritize, "critical to", "steps include revoking"), is joined to
- * an earlier instruction with and/then/or, is a gerund under a directive ("Revoking the key
- * should be prioritized"), or follows "consider" that is not followed by whether/if. Negation
- * before the verb ("do not block") cancels the mid-clause frames.
+ * (should, must, recommend, prioritize, "critical to", "steps include revoking", "should include
+ * isolating"), is joined to an earlier instruction with and/then/or, is a gerund under a
+ * directive ("Revoking the key should be prioritized"), follows "consider" that is not followed
+ * by whether/if, or is a passive or nominal directive ("the key should be revoked", "Revocation
+ * of the key is recommended"). Negation, whether and if before a mid-clause frame cancel it.
  *
- * A condition is if/once/unless/pending (and after/when/until) followed in the same clause by a
- * confirmation word (confirm, verify, validate, malicious, unauthorized, suspicious,
- * compromise), "should ... prove/be confirmed", or "if so" after a sentence that raises one.
- * Waiting on the investigation itself ("until the investigation is complete", "after the
- * incident is investigated") is not a condition. A condition governs its own clause and the
- * clauses after it, and the clauses before it when it opens with the cue.
+ * A condition is if/once/unless/pending (or "only after/when") followed within about four words
+ * by confirm*, verif* or validat*, or followed by a judgement ("if it is confirmed malicious",
+ * "if deemed suspicious"), "should ... prove/be confirmed", or "if so" / "if it was not" / "if
+ * they did not" after a sentence that tells the reader to verify something and with no
+ * "already"/"yet" after the cue. Bare when/after/until are never conditions, and neither is a
+ * descriptive adjective ("the suspicious key creation"). Waiting on the investigation itself
+ * ("until the investigation is complete") is not a condition. A condition governs its own clause
+ * and the clauses after it, and the clauses before it when it opens with the cue.
  *
  * Known misses: a conditional split across sentences ("Verify first. Then revoke.") is flagged;
- * past or passive forms ("the key was revoked") are never flagged; a verb used mid-clause with no
+ * past forms ("the key was revoked") are never flagged; a verb used mid-clause with no
  * directive frame ("the team can disable it") is not flagged; a gerund after before/after
  * ("before revoking it") is never an instruction. Treat it as a screen for review, not a verdict.
  */

@@ -22,9 +22,6 @@ import { deanonymize, getVariantFields, renderAlert } from './render_alert';
 import { NON_IDENTIFYING_BASELINE_FIELDS } from './scenarios/same_display_name_cross_account';
 import type { AuditInputVariant, AuditScenario } from './types';
 
-const allGroupedIds = (scenario: (typeof AUDIT_SCENARIOS)[number]): string[] =>
-  Object.values(scenario.gold.alertGroups).flat();
-
 const findScenario = (id: string): AuditScenario => {
   const scenario = AUDIT_SCENARIOS.find((candidate) => candidate.id === id);
   if (!scenario) throw new Error(`unknown scenario ${id}`);
@@ -105,45 +102,6 @@ describe('audit failure class registry', () => {
     ).toBeUndefined();
     expect(resolveAuditReference(undefined)).toBeUndefined();
   });
-
-  describe.each(AUDIT_SCENARIOS.map((scenario) => [scenario.id, scenario] as const))(
-    'gold validation: %s',
-    (_id, scenario) => {
-      const alertIds = new Set(scenario.alerts.map(({ id }) => id));
-      const groups = Object.keys(scenario.gold.alertGroups);
-
-      it('declares each forbidden pair as a tuple of two distinct existing group ids', () => {
-        for (const pair of scenario.gold.forbiddenCoCitation) {
-          expect(Array.isArray(pair)).toBe(true);
-          expect(pair).toHaveLength(2);
-          for (const group of pair) {
-            expect(groups).toContain(group);
-          }
-          expect(pair[0]).not.toBe(pair[1]);
-        }
-      });
-
-      it('cites only alert ids that exist in the scenario alerts', () => {
-        for (const group of groups) {
-          expect(scenario.gold.alertGroups[group].length).toBeGreaterThan(0);
-          for (const id of scenario.gold.alertGroups[group]) {
-            expect(alertIds).toContain(id);
-          }
-        }
-      });
-
-      it('references only existing groups from requiredGroup, confirmedGroups and metaAlertGroups', () => {
-        const referenced = [
-          ...(scenario.gold.requiredGroup ? [scenario.gold.requiredGroup] : []),
-          ...scenario.gold.confirmedGroups,
-          ...(scenario.gold.metaAlertGroups ?? []),
-        ];
-        for (const group of referenced) {
-          expect(groups).toContain(group);
-        }
-      });
-    }
-  );
 
   describe('validateGold', () => {
     const base = findScenario('same-display-name-cross-account');
@@ -233,44 +191,6 @@ describe('audit failure class registry', () => {
     ]);
     expect(AUDIT_SCENARIOS.every(({ provenance }) => provenance === 'authored')).toBe(true);
   });
-
-  it.each(AUDIT_SCENARIOS.map((scenario) => [scenario.id, scenario] as const))(
-    '%s: alert ids are unique and every gold group references existing alerts',
-    (_id, scenario) => {
-      const alertIds = scenario.alerts.map(({ id }) => id);
-      expect(new Set(alertIds).size).toBe(alertIds.length);
-      const grouped = allGroupedIds(scenario);
-      expect(grouped.length).toBeGreaterThan(0);
-      for (const id of grouped) {
-        expect(alertIds).toContain(id);
-      }
-    }
-  );
-
-  it.each(AUDIT_SCENARIOS.map((scenario) => [scenario.id, scenario] as const))(
-    '%s: gold groups partition the alerts and reference declared groups',
-    (_id, scenario) => {
-      const grouped = allGroupedIds(scenario);
-      expect(new Set(grouped).size).toBe(grouped.length);
-      expect(grouped.length).toBe(scenario.alerts.length);
-
-      const groups = Object.keys(scenario.gold.alertGroups);
-      for (const [left, right] of scenario.gold.forbiddenCoCitation) {
-        expect(groups).toContain(left);
-        expect(groups).toContain(right);
-        expect(left).not.toBe(right);
-      }
-      for (const group of [
-        ...scenario.gold.confirmedGroups,
-        ...(scenario.gold.metaAlertGroups ?? []),
-      ]) {
-        expect(groups).toContain(group);
-      }
-      if (scenario.gold.requiredGroup) {
-        expect(groups).toContain(scenario.gold.requiredGroup);
-      }
-    }
-  );
 
   it('declares a recall target in every variant exactly when discoveries are expected, and has a positive control', () => {
     for (const scenario of AUDIT_SCENARIOS) {

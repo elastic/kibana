@@ -15,9 +15,11 @@ export const AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME = 'PositiveControlReca
 export const POSITIVE_CONTROL_RECALL_THRESHOLD = 0.6;
 
 /**
- * Fraction of the required group's alert ids cited by any discovery. When the gold sets
- * `requiredAnyOf` (input that cannot tell the groups apart), the score is the best recall over
- * those groups.
+ * Fraction of the required group's alert ids cited by discoveries that keep it apart from the
+ * groups the gold forbids joining it with: a discovery that also cites a forbidden partner of the
+ * group (`forbiddenCoCitation`) earns that group no recall, so one merged discovery cannot score
+ * full recall. When the gold sets `requiredAnyOf` (input that cannot tell the groups apart), the
+ * score is the best recall over those groups, each judged against its own partners.
  */
 export const createAuditPositiveControlRecallEvaluator = (
   resolveReference?: AuditReferenceResolver
@@ -35,8 +37,18 @@ export const createAuditPositiveControlRecallEvaluator = (
       return notApplicable('Scenario declares no required group.');
     }
 
-    const cited = new Set(discoveries.flatMap(({ alertIds }) => alertIds));
+    const idsOf = (group: string): ReadonlySet<string> => new Set(gold.alertGroups[group] ?? []);
     const results = candidates.map((group) => {
+      const partners = gold.forbiddenCoCitation.flatMap(([left, right]) => {
+        if (left === group) return [right];
+        return right === group ? [left] : [];
+      });
+      const partnerIds = partners.map(idsOf);
+      const cited = new Set(
+        discoveries
+          .filter(({ alertIds }) => !partnerIds.some((ids) => alertIds.some((id) => ids.has(id))))
+          .flatMap(({ alertIds }) => alertIds)
+      );
       const required = gold.alertGroups[group] ?? [];
       const found = required.filter((id) => cited.has(id)).length;
       return {
