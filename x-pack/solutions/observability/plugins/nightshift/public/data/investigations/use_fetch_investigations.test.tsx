@@ -66,15 +66,15 @@ describe('useFetchInvestigations', () => {
     });
   });
 
-  it('keeps only the running investigations among the newest open ones', async () => {
+  it('asks for the newest running investigations only', async () => {
     const { result } = renderHook(() => useFetchInvestigations({ inProgress: true }), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() =>
-      expect(result.current.investigations.map(({ id }) => id)).toEqual(['running'])
+      expect(result.current.investigations.map(({ id }) => id)).toEqual(['running', 'done'])
     );
-    expect(result.current.total).toBe(1);
+    expect(result.current.total).toBe(2);
     expect(result.current.hasMore).toBe(false);
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations',
@@ -82,6 +82,7 @@ describe('useFetchInvestigations', () => {
         query: {
           sort_field: 'created_at',
           sort_order: 'desc',
+          in_progress: true,
           page: 1,
           per_page: 20,
           status: 'open',
@@ -90,7 +91,7 @@ describe('useFetchInvestigations', () => {
     );
   });
 
-  it('keeps running investigations in the other sections, so none becomes unreachable', async () => {
+  it('leaves running investigations out of the severity sections', async () => {
     const { result } = renderHook(
       () => useFetchInvestigations({ inProgress: false, severities: ['high'] }),
       { wrapper: createWrapper() }
@@ -106,6 +107,7 @@ describe('useFetchInvestigations', () => {
         query: {
           sort_field: 'created_at',
           sort_order: 'desc',
+          in_progress: false,
           page: 1,
           per_page: 10,
           severity: ['high'],
