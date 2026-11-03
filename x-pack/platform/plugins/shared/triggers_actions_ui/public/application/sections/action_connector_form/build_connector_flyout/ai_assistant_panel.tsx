@@ -153,10 +153,14 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
             data-test-subj="build-connector-flyout-ai-error"
             title={generateConnectorTypeError.title}
             text={
-              <>
-                <p>{generateConnectorTypeError.message}</p>
-                {guidance ? <p>{guidance}</p> : null}
-              </>
+              generateConnectorTypeError.reason === 'no_model' && guidance ? (
+                guidance
+              ) : (
+                <>
+                  <p>{generateConnectorTypeError.message}</p>
+                  {guidance ? <p>{guidance}</p> : null}
+                </>
+              )
             }
           />
         </>

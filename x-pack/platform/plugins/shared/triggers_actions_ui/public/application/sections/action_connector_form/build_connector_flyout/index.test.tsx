@@ -665,9 +665,11 @@ describe('BuildConnectorFlyout', () => {
       );
       await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
 
-      expect(await screen.findByTestId('build-connector-flyout-ai-error')).toHaveTextContent(
+      const callout = await screen.findByTestId('build-connector-flyout-ai-error');
+      expect(callout).toHaveTextContent(
         'Set a default AI connector, or pick a model for Connector builder in Feature Settings.'
       );
+      expect(callout).not.toHaveTextContent('No AI model is available.');
     });
 
     it('shows try another page guidance when the model output is invalid', async () => {
