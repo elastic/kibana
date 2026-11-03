@@ -19,7 +19,7 @@ export {
 } from './src/stored_keys';
 export type { InvalidationTarget, StoredApiKeys } from './src/stored_keys';
 
-export { toFakeRequest } from './src/fake_request';
+export { buildFakeRequest, toFakeRequest } from './src/fake_request';
 export type { CredentialType, FakeRequestResult } from './src/fake_request';
 
 export { queueInvalidationTargets } from './src/queue';

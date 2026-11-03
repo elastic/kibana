@@ -29,7 +29,7 @@ const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): Concre
 });
 
 describe('EsApiKeyStrategy', () => {
-  const strategy = new EsApiKeyStrategy();
+  const strategy = new EsApiKeyStrategy(loggingSystemMock.createLogger());
 
   test('shouldGrantUiam is false', () => {
     expect(strategy.shouldGrantUiam).toBe(false);

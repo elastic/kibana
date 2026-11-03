@@ -147,6 +147,64 @@ describe('ApiKeysClient', () => {
         `Failed to create UIAM API key for ${SUBJECT}: UIAM is not enabled`
       );
     });
+
+    test('uses the UIAM name override', async () => {
+      const { client, uiam, request } = setup({ authorization: 'Bearer essu_token' });
+
+      await client.grant(request, { ...options, uiamName: 'custom-uiam-name' });
+      expect(uiam.grant).toHaveBeenCalledWith(request, { name: 'custom-uiam-name' });
+    });
+
+    test('omits refresh from the ES grant when it is not set', async () => {
+      const { client, security, request } = setup({ authorization: 'Basic abc' });
+
+      await client.grant(request, options);
+      expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+        request,
+        { name: 'key', role_descriptors: {}, metadata: METADATA },
+        {}
+      );
+    });
+
+    test('logs a request without UIAM credentials at the requested level', async () => {
+      const { client, logger, request } = setup({ authorization: 'Basic abc' });
+
+      await client.grant(request, { ...options, missingUiamCredentialsLogLevel: 'debug' });
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Failed to create UIAM API key for ${SUBJECT}: Invalid or missing UIAM credentials`,
+        { tags: UIAM_TAGS('uiam-api-key-invalid-credentials') }
+      );
+    });
+
+    describe('uiamOnly', () => {
+      test('grants only a UIAM key when UIAM is enabled', async () => {
+        const { client, security, request } = setup({ authorization: 'Bearer essu_token' });
+
+        await expect(client.grant(request, { ...options, uiamOnly: true })).resolves.toEqual({
+          uiam: UIAM_GRANT,
+        });
+        expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+      });
+
+      test('throws when the request has no UIAM credentials', async () => {
+        const { client, security, request } = setup({ authorization: 'Basic abc' });
+
+        await expect(client.grant(request, { ...options, uiamOnly: true })).rejects.toThrow(
+          UiamUnavailableError
+        );
+        expect(security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+      });
+
+      test('grants only an ES key when UIAM is disabled', async () => {
+        const { client, uiam, request } = setup({ authorization: 'Basic abc', uiamEnabled: false });
+
+        await expect(client.grant(request, { ...options, uiamOnly: true })).resolves.toEqual({
+          es: ES_GRANT,
+        });
+        expect(uiam.grant).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('clone', () => {
@@ -159,6 +217,19 @@ describe('ApiKeysClient', () => {
       expect(security.authc.apiKeys.cloneAsInternalUser).toHaveBeenCalledWith(request, {
         name: 'key',
         metadata: METADATA,
+      });
+    });
+
+    test('passes refresh to the clone', async () => {
+      const { client, security, request } = setup({
+        authorization: `ApiKey ${encodeApiKey('id', 'secret')}`,
+      });
+
+      await client.clone(request, { ...options, refresh: false });
+      expect(security.authc.apiKeys.cloneAsInternalUser).toHaveBeenCalledWith(request, {
+        name: 'key',
+        metadata: METADATA,
+        refresh: false,
       });
     });
 

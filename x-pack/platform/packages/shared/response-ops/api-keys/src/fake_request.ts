@@ -7,7 +7,7 @@
 
 import type { FakeRawRequest, Headers, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { markExternalUiamCredential } from '@kbn/core-security-server';
+import { isUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { getUiamApiKeySecret, type StoredApiKeys } from './stored_keys';
 
@@ -42,24 +42,34 @@ const pickCredential = (
 };
 
 /**
- * Builds the fake request a background run executes under, from the plugin's stored keys.
- * An external (user-created Cloud) UIAM key is marked so Elasticsearch doesn't attach the UIAM
- * shared secret, which UIAM rejects for external keys.
+ * Builds a fake request that authenticates with `credential`, sent as-is after `ApiKey `. When
+ * `external` is set and the credential is a UIAM key, the request is marked so Elasticsearch
+ * doesn't attach the UIAM shared secret, which UIAM rejects for external keys.
  */
+export const buildFakeRequest = (
+  credential: string | null | undefined,
+  { spaceId, external }: { spaceId: string; external?: boolean | null }
+): KibanaRequest => {
+  const headers: Headers = credential ? { authorization: `ApiKey ${credential}` } : {};
+  const fakeRawRequest: FakeRawRequest = { headers, spaceId: brandSpaceId(spaceId) };
+  const request = kibanaRequestFactory(fakeRawRequest);
+
+  if (external === true && credential && isUiamCredential(getUiamApiKeySecret(credential))) {
+    markExternalUiamCredential(request);
+  }
+
+  return request;
+};
+
+/** Builds the fake request a background run executes under, from the plugin's stored keys. */
 export const toFakeRequest = (
   stored: StoredApiKeys,
   { spaceId, prefer }: { spaceId: string; prefer: 'uiam' | 'es' }
 ): FakeRequestResult => {
   const credential = pickCredential(stored, prefer);
-  const headers: Headers = credential.apiKey
-    ? { authorization: `ApiKey ${credential.apiKey}` }
-    : {};
-  const fakeRawRequest: FakeRawRequest = { headers, spaceId: brandSpaceId(spaceId) };
-  const request = kibanaRequestFactory(fakeRawRequest);
-
-  if (credential.credentialType === 'uiam_api_key' && stored.uiamApiKeyExternal === true) {
-    markExternalUiamCredential(request);
-  }
-
+  const request = buildFakeRequest(credential.apiKey, {
+    spaceId,
+    external: stored.uiamApiKeyExternal,
+  });
   return { request, ...credential };
 };

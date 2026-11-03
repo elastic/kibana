@@ -23,7 +23,7 @@ import type {
   SavedObjectReference,
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { getFakeRequest } from '../api_keys/fake_request';
+import { buildFakeRequest } from '@kbn/response-ops-api-keys';
 import type { ActionExecutorContract } from './action_executor';
 import type {
   ActionTaskExecutorParams,
@@ -109,7 +109,7 @@ export class TaskRunnerFactory {
         );
 
         const { spaceId } = actionTaskExecutorParams;
-        const request = getFakeRequest(apiKey, spaceId, uiamApiKeyExternal);
+        const request = buildFakeRequest(apiKey, { spaceId, external: uiamApiKeyExternal });
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
@@ -194,7 +194,7 @@ export class TaskRunnerFactory {
           logger
         );
 
-        const request = getFakeRequest(apiKey, spaceId, uiamApiKeyExternal);
+        const request = buildFakeRequest(apiKey, { spaceId, external: uiamApiKeyExternal });
 
         await actionExecutor.logCancellation({
           actionId,

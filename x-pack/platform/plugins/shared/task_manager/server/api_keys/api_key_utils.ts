@@ -5,43 +5,30 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, SecurityServiceStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
-import { isUiamCredential } from '@kbn/core-security-server';
-import { decodeApiKey, encodeApiKey } from '@kbn/response-ops-api-keys';
+import type { ApiKeys, CreateOptions, RequestApiKey } from '@kbn/response-ops-api-keys';
+import { ApiKeysClient, encodeApiKey } from '@kbn/response-ops-api-keys';
 import { truncate } from 'lodash';
-import type { TaskInstance, TaskUserScope } from '../task';
-import type { GrantApiKeysOpts } from './strategy/api_key_strategy';
+import type { TaskInstance } from '../task';
+import type { ApiKeySOFields, GrantApiKeysOpts } from './strategy/api_key_strategy';
 
-export interface APIKeyResult {
-  id: string;
-  api_key: string;
-}
-
-export interface EncodedApiKeyResult {
-  apiKey: string;
+interface TaskApiKeys {
+  /** `base64(id:secret)` Elasticsearch API key. */
+  apiKey?: string;
   apiKeyId: string;
+  /** Raw `essu_` UIAM API key. */
+  uiamApiKey?: string;
+  uiamApiKeyId?: string;
 }
 
-export interface ApiKeyAndUserScope {
-  apiKey: string;
-  userScope: TaskUserScope;
+export interface GrantTaskApiKeysOptions {
+  logger: Logger;
+  /** Also grant (or reuse) a UIAM key. */
+  uiamEnabled: boolean;
+  /** Fail instead of logging when a UIAM key can't be granted. */
+  uiamRequired: boolean;
 }
-
-export interface RequestApiKeyCredentials {
-  /** Key id; absent for user-created Cloud (UIAM) API keys, which are raw `essu_` secrets. */
-  id?: string;
-  api_key?: string;
-}
-
-const getCredentialsFromRequest = (request: KibanaRequest) => {
-  const authorizationHeaderValue = request.headers.authorization;
-  if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
-    return null;
-  }
-  const [scheme] = authorizationHeaderValue.split(/\s+/);
-  return authorizationHeaderValue.substring(scheme.length + 1);
-};
 
 export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
   return user?.authentication_type === 'api_key';
@@ -49,31 +36,6 @@ export const isRequestApiKeyType = (user: AuthenticatedUser | null) => {
 
 export const hasApiKey = (user: AuthenticatedUser | null, request: KibanaRequest) => {
   return request.isFakeRequest || (user != null && isRequestApiKeyType(user));
-};
-
-export const requestHasApiKey = (security: SecurityServiceStart, request: KibanaRequest) => {
-  const user = security.authc.getCurrentUser(request);
-  return hasApiKey(user, request);
-};
-
-export const getApiKeyFromRequest = (request: KibanaRequest): RequestApiKeyCredentials | null => {
-  const credentials = getCredentialsFromRequest(request);
-  if (credentials) {
-    // A user-created Cloud API key (obtained from the Elastic Cloud UI) is a raw `essu_`
-    // secret with no key id and no base64 encoding, unlike framework-granted UIAM keys
-    // and Elasticsearch API keys, which are encoded as `base64(id:key)`.
-    if (isUiamCredential(credentials)) {
-      return { api_key: credentials };
-    }
-
-    const { id, secret } = decodeApiKey(credentials);
-
-    return {
-      id,
-      api_key: secret,
-    };
-  }
-  return null;
 };
 
 export const shouldCloneApiKeyFromRequest = (
@@ -87,171 +49,142 @@ export const shouldCloneApiKeyFromRequest = (
   return requestCarriesApiKey && (options?.cloneApiKey === true || request.isFakeRequest);
 };
 
-const grantApiKeysForTaskTypes = async ({
-  taskInstances,
-  user,
-  createKey,
-  onApiKeyCreated,
-}: {
-  taskInstances: TaskInstance[];
-  user: AuthenticatedUser | null;
-  createKey: (params: { name: string }) => Promise<{ id: string; api_key: string } | null>;
-  onApiKeyCreated?: GrantApiKeysOpts['onApiKeyCreated'];
-}) => {
-  const taskTypes = [...new Set(taskInstances.map((task) => task.taskType))];
-  const apiKeyByTaskTypeMap = new Map<string, EncodedApiKeyResult>();
+const keyName = (prefix: string, user: AuthenticatedUser | null) =>
+  truncate(user ? `${prefix} - ${user.username}` : prefix, { length: 256 });
 
-  for (const taskType of taskTypes) {
-    const apiKeyNamePrefix = `TaskManager: ${taskType}`;
-    const apiKeyName = user ? `${apiKeyNamePrefix} - ${user.username}` : apiKeyNamePrefix;
-    const apiKeyCreateResult = await createKey({
-      name: truncate(apiKeyName, { length: 256 }),
-    });
-
-    if (!apiKeyCreateResult) {
-      throw Error('Could not create API key.');
-    }
-
-    const { id, api_key: apiKey } = apiKeyCreateResult;
-    onApiKeyCreated?.({ apiKeyId: id });
-
-    apiKeyByTaskTypeMap.set(taskType, {
-      apiKey: encodeApiKey(id, apiKey),
-      apiKeyId: apiKeyCreateResult.id,
-    });
+/** The caller passed in their own API key, so the task reuses it as-is. */
+const reuseRequestApiKey = (
+  requestKey: RequestApiKey | null,
+  uiamEnabled: boolean
+): TaskApiKeys => {
+  if (!requestKey || requestKey.type === 'invalid') {
+    throw Error('Could not extract API key from user request header.');
   }
 
-  const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
-
-  taskInstances.forEach((task) => {
-    const encodedApiKeyResult = apiKeyByTaskTypeMap.get(task.taskType);
-    if (encodedApiKeyResult) {
-      apiKeyByTaskIdMap.set(task.id!, encodedApiKeyResult);
-    }
-  });
-
-  return apiKeyByTaskIdMap;
-};
-
-export const createApiKey = async (
-  taskInstances: TaskInstance[],
-  request: KibanaRequest,
-  security: SecurityServiceStart,
-  options?: GrantApiKeysOpts,
-  preResolved?: {
-    user: AuthenticatedUser | null;
-    apiKeyCreatedByUser: boolean;
-  }
-) => {
-  if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
-    throw Error('API keys are not enabled, cannot create API key.');
-  }
-
-  const user = preResolved?.user ?? security.authc.getCurrentUser(request);
-  const apiKeyCreatedByUser = preResolved?.apiKeyCreatedByUser ?? hasApiKey(user, request);
-
-  const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
-  const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, options, user);
-  const refreshOptions = options?.refreshApiKey === false ? { refresh: false } : {};
-
-  if (cloneApiKey) {
-    return grantApiKeysForTaskTypes({
-      taskInstances,
-      user,
-      onApiKeyCreated: options?.onApiKeyCreated,
-      createKey: ({ name }) =>
-        security.authc.apiKeys.cloneAsInternalUser(request, {
-          name,
-          metadata: { managed: true },
-          ...refreshOptions,
-        }),
-    });
-  }
-
-  // The user passed in their own API key, so reuse it directly (fake requests always clone above).
-  if (apiKeyCreatedByUser) {
-    const apiKeyCreateResult = getApiKeyFromRequest(request);
-
-    if (!apiKeyCreateResult) {
-      throw Error('Could not extract API key from user request header.');
-    }
-
-    const { id, api_key: apiKey } = apiKeyCreateResult;
-
-    // A raw user-created Cloud (UIAM) API key has no key id and no Elasticsearch counterpart,
-    // so it cannot be persisted as an ES API key. In serverless deployments
-    // `EsAndUiamApiKeyStrategy` persists it UIAM-only before reaching this path.
-    if (!id) {
+  const { id, secret } = requestKey;
+  // A user-created Cloud API key is a raw `essu_` secret with no key id and no Elasticsearch
+  // counterpart. Invalidation is skipped for user-created keys, so the empty id is never used.
+  if (!id) {
+    if (!uiamEnabled) {
       throw Error(
         'Cannot use a user-provided Cloud (UIAM) API key to schedule tasks in this environment; an Elasticsearch API key is required.'
       );
     }
-
-    taskInstances.forEach((task) => {
-      apiKeyByTaskIdMap.set(task.id!, {
-        apiKey: Buffer.from(`${id}:${apiKey}`).toString('base64'),
-        apiKeyId: id,
-      });
-    });
-
-    return apiKeyByTaskIdMap;
+    return { apiKeyId: '', uiamApiKey: secret };
   }
-  // If the user did not pass in their own API key, we need to create 1 key per task
-  // type (due to naming requirements).
-  return grantApiKeysForTaskTypes({
-    taskInstances,
-    user,
-    onApiKeyCreated: options?.onApiKeyCreated,
-    createKey: async ({ name }) =>
-      security.authc.apiKeys.grantAsInternalUser(
-        request,
-        {
-          name,
-          role_descriptors: {},
-          metadata: { managed: true },
-        },
-        refreshOptions
-      ),
-  });
+
+  const apiKey = encodeApiKey(id, secret);
+  return requestKey.type === 'uiam' && uiamEnabled
+    ? { apiKey, apiKeyId: id, uiamApiKey: secret, uiamApiKeyId: id }
+    : { apiKey, apiKeyId: id };
 };
 
+const grantForTaskType = async (
+  client: ApiKeysClient,
+  request: KibanaRequest,
+  createOptions: CreateOptions,
+  clone: boolean
+): Promise<ApiKeys> => {
+  const keys = clone
+    ? await client.clone(request, createOptions)
+    : await client.grant(request, createOptions);
+  if (!keys) {
+    throw Error('Could not create API key.');
+  }
+  return keys;
+};
+
+/**
+ * Grants, clones, or reuses the API keys each task runs with, and builds the task's `userScope`.
+ * Granted and cloned keys are created once per task type, since key names include the type.
+ */
 export const getApiKeyAndUserScope = async (
   taskInstances: TaskInstance[],
   request: KibanaRequest,
   security: SecurityServiceStart,
+  { logger, uiamEnabled, uiamRequired }: GrantTaskApiKeysOptions,
   options?: GrantApiKeysOpts
-): Promise<Map<string, ApiKeyAndUserScope>> => {
+): Promise<Map<string, ApiKeySOFields>> => {
+  if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
+    throw Error('API keys are not enabled, cannot create API key.');
+  }
+
   const user = security.authc.getCurrentUser(request);
   const cloneApiKey = shouldCloneApiKeyFromRequest(security, request, options, user);
-  // When cloning, the resulting key is owned by Task Manager (not the caller), so it must not be
-  // treated as user-created and must be invalidated on task removal.
+  // `apiKeyCreatedByUser` gates invalidation of both the ES and UIAM keys, so both must share
+  // ownership: reused together from the request, or freshly created together by Task Manager.
   const apiKeyCreatedByUser = hasApiKey(user, request) && !cloneApiKey;
+  // `internal === false` is UIAM's verdict that the request's key is a user-created Cloud key.
+  // Task runs withhold the UIAM shared secret for these keys, which UIAM rejects otherwise.
+  const uiamApiKeyExternal =
+    apiKeyCreatedByUser && user?.api_key?.internal === false ? true : undefined;
+  const client = new ApiKeysClient({ security, logger, pluginTag: 'task-manager', uiamEnabled });
 
-  const apiKeyByTaskIdMap = await createApiKey(taskInstances, request, security, options, {
-    user,
-    apiKeyCreatedByUser,
-  });
+  const keysByTaskType = new Map<string, TaskApiKeys>();
+  if (apiKeyCreatedByUser) {
+    const keys = reuseRequestApiKey(client.fromRequest(request), uiamEnabled);
+    taskInstances.forEach((task) => keysByTaskType.set(task.taskType, keys));
+  } else {
+    // A UIAM service account can't be cloned by Elasticsearch; `grant` gives it a UIAM key only.
+    const principal = security.authc.getPrincipal(request);
+    const clone =
+      cloneApiKey && !(principal?.type === 'service_account' && principal.variant === 'uiam');
 
-  const apiKeyAndUserScopeByTaskId = new Map<string, ApiKeyAndUserScope>();
-
-  taskInstances.forEach((task) => {
-    const encodedApiKeyResult = apiKeyByTaskIdMap.get(task.id!);
-    if (encodedApiKeyResult) {
-      apiKeyAndUserScopeByTaskId.set(task.id!, {
-        apiKey: encodedApiKeyResult.apiKey,
-        userScope: {
-          apiKeyId: encodedApiKeyResult.apiKeyId,
-          spaceId: request.spaceId,
-          // Set apiKeyCreatedByUser to true if the request includes its own API key, since we do
-          // not want to invalidate a specific API key that was not created by the task manager.
-          // Cloned and granted keys are owned by Task Manager and invalidated on task removal.
-          apiKeyCreatedByUser,
-          userProfileId: user?.profile_uid,
-          userName: user?.username,
+    for (const taskType of new Set(taskInstances.map((task) => task.taskType))) {
+      const { es, uiam } = await grantForTaskType(
+        client,
+        request,
+        {
+          name: keyName(`TaskManager: ${taskType}`, user),
+          uiamName: keyName(`TaskManager-UIAM: ${taskType}`, user),
+          metadata: { managed: true },
+          subject: `task type: ${taskType}`,
+          uiam: uiamRequired ? 'required' : 'optional',
+          missingUiamCredentialsLogLevel: 'debug',
+          ...(options?.refreshApiKey === false ? { refresh: false } : {}),
         },
-      });
+        clone
+      );
+      if (uiam) {
+        options?.onApiKeyCreated?.({ apiKeyId: uiam.id, uiamApiKey: uiam.api_key });
+      }
+      if (es) {
+        options?.onApiKeyCreated?.({ apiKeyId: es.id });
+      }
+
+      const apiKeyId = es?.id ?? uiam?.id;
+      if (apiKeyId) {
+        keysByTaskType.set(taskType, {
+          apiKeyId,
+          ...(es ? { apiKey: encodeApiKey(es.id, es.api_key) } : {}),
+          ...(uiam ? { uiamApiKey: uiam.api_key, uiamApiKeyId: uiam.id } : {}),
+        });
+      }
     }
+  }
+
+  const result = new Map<string, ApiKeySOFields>();
+  taskInstances.forEach((task) => {
+    const keys = keysByTaskType.get(task.taskType);
+    // Without any key the task could never authenticate at run time.
+    if (!keys) {
+      throw new Error(`Failed to grant UIAM API key for task "${task.id}"`);
+    }
+    const { apiKey, apiKeyId, uiamApiKey, uiamApiKeyId } = keys;
+    result.set(task.id!, {
+      ...(apiKey ? { apiKey } : {}),
+      ...(uiamApiKey ? { uiamApiKey } : {}),
+      userScope: {
+        apiKeyId,
+        ...(uiamApiKeyId ? { uiamApiKeyId } : {}),
+        spaceId: request.spaceId,
+        apiKeyCreatedByUser,
+        ...(uiamApiKeyExternal ? { uiamApiKeyExternal } : {}),
+        userProfileId: user?.profile_uid,
+        userName: user?.username,
+      },
+    });
   });
 
-  return apiKeyAndUserScopeByTaskId;
+  return result;
 };

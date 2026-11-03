@@ -6,7 +6,7 @@
  */
 
 import { isExternalUiamCredential } from '@kbn/core-security-server';
-import { toFakeRequest } from './fake_request';
+import { buildFakeRequest, toFakeRequest } from './fake_request';
 import { encodeApiKey } from './stored_keys';
 
 const ES_KEY = encodeApiKey('es-id', 'es-secret');
@@ -48,6 +48,38 @@ describe('toFakeRequest', () => {
       { spaceId: 'default', prefer: 'es' }
     );
 
+    expect(isExternalUiamCredential(request)).toBe(false);
+  });
+
+  test('marks an external UIAM key stored in the ES slot', () => {
+    const { request } = toFakeRequest(
+      { apiKey: UIAM_KEY, uiamApiKeyExternal: true },
+      { spaceId: 'default', prefer: 'es' }
+    );
+
+    expect(request.headers.authorization).toBe(`ApiKey ${UIAM_KEY}`);
+    expect(isExternalUiamCredential(request)).toBe(true);
+  });
+});
+
+describe('buildFakeRequest', () => {
+  test.each([
+    ['a raw UIAM key', 'essu_raw', true, true],
+    ['an encoded UIAM key', UIAM_KEY, true, true],
+    ['an ES key', ES_KEY, true, false],
+    ['a UIAM key without the external flag', 'essu_raw', undefined, false],
+  ])('marks %s as external: %s -> %s', (_title, credential, external, marked) => {
+    const request = buildFakeRequest(credential, { spaceId: 'space-a', external });
+
+    expect(request.headers.authorization).toBe(`ApiKey ${credential}`);
+    expect(request.spaceId).toBe('space-a');
+    expect(isExternalUiamCredential(request)).toBe(marked);
+  });
+
+  test('has no authorization header without a credential', () => {
+    const request = buildFakeRequest(undefined, { spaceId: 'default', external: true });
+
+    expect(request.headers.authorization).toBeUndefined();
     expect(isExternalUiamCredential(request)).toBe(false);
   });
 });

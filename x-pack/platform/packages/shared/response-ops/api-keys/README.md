@@ -5,7 +5,7 @@ The API key lifecycle shared by Task Manager, alerting, alerting v2 and actions:
 ```mermaid
 flowchart LR
   create["Create<br/>grant / clone / fromRequest"] --> store["Plugin stores the keys<br/>(StoredApiKeys)"]
-  store --> use["Use<br/>toFakeRequest"]
+  store --> use["Use<br/>toFakeRequest / buildFakeRequest"]
   store --> invNow["Invalidate now<br/>invalidateNow"]
   store --> queue["Queue<br/>getInvalidationTargets + queueInvalidationTargets"]
   invNow -. "ES key not found yet" .-> queue
@@ -21,13 +21,15 @@ Plugins persist keys in the alerting rule attribute shape, `StoredApiKeys`:
 - `uiamApiKey`: `base64(id:essu_…)` for keys Kibana granted, or a raw `essu_…` secret for user-created Cloud keys.
 - `uiamApiKeyId`: only needed when `uiamApiKey` is a raw secret Kibana owns.
 - `apiKeyCreatedByUser`: user-created keys are never invalidated.
-- `uiamApiKeyExternal`: UIAM's verdict that the key is external. The fake request is then marked so Elasticsearch doesn't attach the UIAM shared secret.
+- `uiamApiKeyExternal`: UIAM's verdict that the key is external. When the credential a run uses is a UIAM key (by content, whichever field it came from), the fake request is marked so Elasticsearch doesn't attach the UIAM shared secret.
+
+Plugins that already know which credential to use (Task Manager, actions) call `buildFakeRequest` directly instead of `toFakeRequest`.
 
 ## To change X, edit Y
 
 | To change | Edit |
 | --- | --- |
-| How keys are granted or cloned, or which UIAM failures are fatal | `src/create.ts` |
+| How keys are granted or cloned, or which UIAM failures are fatal (including the `uiamName`, `uiamOnly` and `missingUiamCredentialsLogLevel` options) | `src/create.ts` |
 | How a request's own key is parsed | `fromRequest` in `src/create.ts` |
 | How stored keys are encoded, decoded, or turned into invalidation targets | `src/stored_keys.ts` |
 | Which credential a background run uses, and external UIAM marking | `src/fake_request.ts` |

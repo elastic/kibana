@@ -217,12 +217,12 @@ describe('rule_loader API key characterization', () => {
   });
 
   describe('getFakeKibanaRequest() when rules run on UIAM keys and the rule has a UIAM key', () => {
-    // [stored uiamApiKey, presented secret]
-    const shapes: Array<[string, string]> = [
-      [ENCODED_UIAM_API_KEY, 'essu_uiam_secret'],
-      [RAW_UIAM_API_KEY, RAW_UIAM_API_KEY],
-      [ENCODED_NON_UIAM_API_KEY, ENCODED_NON_UIAM_API_KEY],
-      ['not-base64-garbage', 'not-base64-garbage'],
+    // [stored uiamApiKey, presented secret, marked external when flagged]
+    const shapes: Array<[string, string, boolean]> = [
+      [ENCODED_UIAM_API_KEY, 'essu_uiam_secret', true],
+      [RAW_UIAM_API_KEY, RAW_UIAM_API_KEY, true],
+      [ENCODED_NON_UIAM_API_KEY, ENCODED_NON_UIAM_API_KEY, false],
+      ['not-base64-garbage', 'not-base64-garbage', false],
     ];
     const createdByUser: Array<[boolean | null | undefined, CredentialReason]> = [
       [true, 'user_created_key'],
@@ -230,23 +230,24 @@ describe('rule_loader API key characterization', () => {
       [null, 'provisioned'],
       [undefined, 'provisioned'],
     ];
-    const table = shapes.flatMap(([stored, presented]) =>
+    const table = shapes.flatMap(([stored, presented, markedWhenExternal]) =>
       createdByUser.map(
         ([apiKeyCreatedByUser, reason]): [
           string,
           string,
           boolean | null | undefined,
-          CredentialReason
-        ] => [stored, presented, apiKeyCreatedByUser, reason]
+          CredentialReason,
+          boolean
+        ] => [stored, presented, apiKeyCreatedByUser, reason, markedWhenExternal]
       )
     );
 
     it.each(table)(
       'uiamApiKey=%s presents %s; apiKeyCreatedByUser=%j -> %s (current behavior)',
-      (uiamApiKey, presented, apiKeyCreatedByUser, credentialReason) => {
+      (uiamApiKey, presented, apiKeyCreatedByUser, credentialReason, markedWhenExternal) => {
         for (const apiKey of [ES_API_KEY, null]) {
           for (const [uiamApiKeyExternal, external] of [
-            [true, true],
+            [true, markedWhenExternal],
             [false, false],
             [null, false],
             [undefined, false],
@@ -435,7 +436,7 @@ describe('rule_loader API key characterization', () => {
     > = [
       ['uiamRun', ES_API_KEY, ENCODED_UIAM_API_KEY, 'essu_uiam_secret', 'uiam-id', true],
       ['uiamRun', null, RAW_UIAM_API_KEY, RAW_UIAM_API_KEY, undefined, true],
-      ['uiamRun', null, ENCODED_NON_UIAM_API_KEY, ENCODED_NON_UIAM_API_KEY, undefined, true],
+      ['uiamRun', null, ENCODED_NON_UIAM_API_KEY, ENCODED_NON_UIAM_API_KEY, undefined, false],
       ['uiamRun', ES_API_KEY, null, ES_API_KEY, undefined, false],
       ['uiamGrantEsRun', ES_API_KEY, ENCODED_UIAM_API_KEY, ES_API_KEY, undefined, false],
       ['esOnly', null, ENCODED_UIAM_API_KEY, 'essu_uiam_secret', 'uiam-id', true],

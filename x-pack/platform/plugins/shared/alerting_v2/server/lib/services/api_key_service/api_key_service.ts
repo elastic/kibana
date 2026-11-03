@@ -42,9 +42,6 @@ export interface ApiKeyServiceContract {
   markApiKeysForInvalidation(apiKeys: string[]): Promise<ApiKeyInvalidationResult[]>;
 }
 
-const encodeGrantedApiKey = (id?: string, key?: string): string | null =>
-  id && key ? encodeApiKey(id, key) : null;
-
 @injectable()
 export class ApiKeyService implements ApiKeyServiceContract {
   private readonly apiKeys: ApiKeysClient;
@@ -135,34 +132,22 @@ export class ApiKeyService implements ApiKeyServiceContract {
   }
 
   private async grantAPIKeyAttributes(name: string, username: string): Promise<ApiKeyAttributes> {
-    if (this.shouldGrantUiam()) {
-      const uiamResult = await this.securityService.authc.apiKeys.uiam?.grant(this.request, {
-        name: `uiam-${name}`,
-      });
-
-      if (!uiamResult) {
-        throw new Error(`Failed to create UIAM API key for action policy: ${name}`);
-      }
-
-      return {
-        apiKey: encodeGrantedApiKey(uiamResult.id, uiamResult.api_key)!,
-        owner: username,
-        createdByUser: false,
-      };
-    }
-
-    const esResult = await this.securityService.authc.apiKeys.grantAsInternalUser(this.request, {
+    const keys = await this.apiKeys.grant(this.request, {
       name,
-      role_descriptors: {},
       metadata: { managed: true, kibana: { type: 'action_policy' } },
+      subject: `action policy: ${name}`,
+      uiam: 'required',
+      uiamOnly: true,
     });
 
-    if (!esResult) {
-      throw new Error(`Failed to create ES API key for action policy: ${name}`);
+    const key = keys?.uiam ?? keys?.es;
+    if (!key?.id || !key.api_key) {
+      const keyType = keys?.uiam ? 'UIAM' : 'ES';
+      throw new Error(`Failed to create ${keyType} API key for action policy: ${name}`);
     }
 
     return {
-      apiKey: encodeGrantedApiKey(esResult.id, esResult.api_key)!,
+      apiKey: encodeApiKey(key.id, key.api_key),
       owner: username,
       createdByUser: false,
     };

@@ -33,7 +33,7 @@ const setup = ({
   username = 'test-user',
   authenticationType = 'token',
   uiam = false,
-  authorization,
+  authorization = uiam ? 'Bearer essu_session-token' : undefined,
 }: SetupOptions = {}) => {
   const grantAsInternalUser = jest.fn().mockResolvedValue(ES_GRANT);
   const uiamGrant = jest.fn().mockResolvedValue(UIAM_GRANT);
@@ -44,6 +44,7 @@ const setup = ({
         .mockReturnValue(
           username === null ? null : { username, authentication_type: authenticationType }
         ),
+      getPrincipal: jest.fn().mockReturnValue(null),
       apiKeys: {
         grantAsInternalUser,
         uiam: uiam ? { grant: uiamGrant } : null,
@@ -105,11 +106,15 @@ describe('ApiKeyService characterization', () => {
           createdByUser: false,
         });
         expect(grantAsInternalUser).toHaveBeenCalledTimes(1);
-        expect(grantAsInternalUser).toHaveBeenCalledWith(request, {
-          name: POLICY_NAME,
-          role_descriptors: {},
-          metadata: { managed: true, kibana: { type: 'action_policy' } },
-        });
+        expect(grantAsInternalUser).toHaveBeenCalledWith(
+          request,
+          {
+            name: POLICY_NAME,
+            role_descriptors: {},
+            metadata: { managed: true, kibana: { type: 'action_policy' } },
+          },
+          {}
+        );
       }
     );
 
@@ -146,7 +151,7 @@ describe('ApiKeyService characterization', () => {
 
       const error = await captureError(service.create(POLICY_NAME));
 
-      expectPlainError(error, `Failed to create UIAM API key for action policy: ${POLICY_NAME}`);
+      expectPlainError(error, `Failed to create a Cloud API key for action policy: ${POLICY_NAME}`);
       expect(grantAsInternalUser).not.toHaveBeenCalled();
     });
 
@@ -176,26 +181,38 @@ describe('ApiKeyService characterization', () => {
       await expect(service.create(POLICY_NAME)).rejects.toBe(failure);
     });
 
-    it('returns apiKey null when the UIAM grant result lacks an api_key (current behavior)', async () => {
+    it('throws a plain Error when the UIAM grant result lacks an api_key', async () => {
       const { service, uiamGrant } = setup({ uiam: true });
       uiamGrant.mockResolvedValueOnce({ id: 'uiam-key-id', name: 'n', api_key: '' });
 
-      await expect(service.create(POLICY_NAME)).resolves.toEqual({
-        apiKey: null,
-        owner: 'test-user',
-        createdByUser: false,
-      });
+      const error = await captureError(service.create(POLICY_NAME));
+
+      expectPlainError(error, `Failed to create UIAM API key for action policy: ${POLICY_NAME}`);
     });
 
-    it('returns apiKey null when the ES grant result lacks an id (current behavior)', async () => {
+    it('throws a plain Error when the ES grant result lacks an id', async () => {
       const { service, grantAsInternalUser } = setup();
       grantAsInternalUser.mockResolvedValueOnce({ id: '', name: 'n', api_key: 'es-key-secret' });
 
-      await expect(service.create(POLICY_NAME)).resolves.toEqual({
-        apiKey: null,
-        owner: 'test-user',
-        createdByUser: false,
+      const error = await captureError(service.create(POLICY_NAME));
+
+      expectPlainError(error, `Failed to create ES API key for action policy: ${POLICY_NAME}`);
+    });
+
+    it('throws a plain Error without granting when UIAM is present but the request has no UIAM credentials', async () => {
+      const { service, grantAsInternalUser, uiamGrant } = setup({
+        uiam: true,
+        authorization: 'Basic dXNlcjpwYXNz',
       });
+
+      const error = await captureError(service.create(POLICY_NAME));
+
+      expectPlainError(
+        error,
+        `Failed to create UIAM API key for action policy: ${POLICY_NAME}: Invalid or missing UIAM credentials`
+      );
+      expect(uiamGrant).not.toHaveBeenCalled();
+      expect(grantAsInternalUser).not.toHaveBeenCalled();
     });
   });
 

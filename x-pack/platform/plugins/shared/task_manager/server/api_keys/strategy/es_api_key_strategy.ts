@@ -27,13 +27,21 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
   public readonly shouldGrantUiam = false;
   public readonly typeToUse = ApiKeyType.ES;
 
+  constructor(private readonly logger: Logger) {}
+
   async grantApiKeys(
     taskInstances: TaskInstance[],
     request: KibanaRequest,
     security: SecurityServiceStart,
     opts?: GrantApiKeysOpts
   ): Promise<Map<string, ApiKeySOFields>> {
-    return getApiKeyAndUserScope(taskInstances, request, security, opts);
+    return getApiKeyAndUserScope(
+      taskInstances,
+      request,
+      security,
+      { logger: this.logger, uiamEnabled: false, uiamRequired: false },
+      opts
+    );
   }
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined {

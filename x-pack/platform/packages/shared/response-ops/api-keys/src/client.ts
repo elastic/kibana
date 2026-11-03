@@ -35,10 +35,7 @@ export class ApiKeysClient {
     };
   }
 
-  public grant(
-    request: KibanaRequest,
-    options: CreateOptions & { refresh?: boolean | 'wait_for' }
-  ): Promise<ApiKeys | null> {
+  public grant(request: KibanaRequest, options: CreateOptions): Promise<ApiKeys | null> {
     return grant(this.context, request, options);
   }
 

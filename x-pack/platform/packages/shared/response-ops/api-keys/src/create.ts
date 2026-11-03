@@ -36,6 +36,13 @@ export interface CreateOptions {
    * Requests without UIAM credentials never get a UIAM key, in either mode.
    */
   uiam: 'optional' | 'required';
+  /** Name of the UIAM key. Defaults to `uiam-<name>`. */
+  uiamName?: string;
+  /** When UIAM is enabled, grant only a UIAM key (failing if it can't be granted). */
+  uiamOnly?: boolean;
+  /** Log level for a request without UIAM credentials. Defaults to `error`. */
+  missingUiamCredentialsLogLevel?: 'error' | 'debug';
+  refresh?: boolean | 'wait_for';
 }
 
 /** The API key the caller authenticated with. */
@@ -52,7 +59,7 @@ const isUiamRequest = (request: KibanaRequest): boolean => {
 const grantUiam = async (
   context: ClientContext,
   request: KibanaRequest,
-  { name, subject, uiam }: CreateOptions,
+  { name, subject, uiam, uiamName, missingUiamCredentialsLogLevel = 'error' }: CreateOptions,
   { only }: { only: boolean }
 ): Promise<GrantAPIKeyResult | undefined> => {
   const { security, logger, tags, uiamEnabled } = context;
@@ -70,12 +77,14 @@ const grantUiam = async (
     if (only) {
       throw new UiamUnavailableError(message);
     }
-    logger.error(message, { tags: tags.credentials });
+    logger[missingUiamCredentialsLogLevel](message, { tags: tags.credentials });
     return;
   }
 
   try {
-    const result = await security.authc.apiKeys.uiam?.grant(request, { name: `uiam-${name}` });
+    const result = await security.authc.apiKeys.uiam?.grant(request, {
+      name: uiamName ?? `uiam-${name}`,
+    });
     if (!result) {
       throw new Error(`Failed to create a Cloud API key for ${subject}`);
     }
@@ -110,21 +119,26 @@ export const invalidateUiamApiKey = async (
   }
 };
 
+const refreshOption = (refresh: CreateOptions['refresh']) =>
+  refresh !== undefined ? { refresh } : {};
+
 /**
  * Grants an ES key and, when the request carries UIAM credentials, a UIAM key. A UIAM service
- * account only gets a UIAM key, since Elasticsearch can't grant one for it. Returns `null` when
+ * account, or a `uiamOnly` call while UIAM is enabled, only gets a UIAM key. Returns `null` when
  * API keys are disabled.
  */
 export const grant = async (
   context: ClientContext,
   request: KibanaRequest,
-  options: CreateOptions & { refresh?: boolean | 'wait_for' }
+  options: CreateOptions
 ): Promise<ApiKeys | null> => {
-  const { security } = context;
-  const { name, metadata, subject, refresh } = options;
+  const { security, uiamEnabled } = context;
+  const { name, metadata, subject, refresh, uiamOnly } = options;
 
   const principal = security.authc.getPrincipal(request);
-  if (principal?.type === 'service_account' && principal.variant === 'uiam') {
+  const isUiamServiceAccount =
+    principal?.type === 'service_account' && principal.variant === 'uiam';
+  if (isUiamServiceAccount || (uiamOnly && uiamEnabled)) {
     return { uiam: await grantUiam(context, request, options, { only: true }) };
   }
 
@@ -135,7 +149,7 @@ export const grant = async (
     es = await security.authc.apiKeys.grantAsInternalUser(
       request,
       { name, role_descriptors: {}, metadata },
-      { refresh }
+      refreshOption(refresh)
     );
   } catch (err) {
     if (uiam?.id) {
@@ -168,8 +182,12 @@ export const clone = async (
     return uiam ? { uiam } : {};
   }
 
-  const { name, metadata } = options;
-  const es = await context.security.authc.apiKeys.cloneAsInternalUser(request, { name, metadata });
+  const { name, metadata, refresh } = options;
+  const es = await context.security.authc.apiKeys.cloneAsInternalUser(request, {
+    name,
+    metadata,
+    ...refreshOption(refresh),
+  });
   if (!es) {
     throw new Error('API key clone returned null (security feature may be disabled)');
   }
