@@ -29,6 +29,7 @@ export type {
   ServiceAccountWorkloadTypeRegistration,
 } from './src/service_account_workloads';
 export {
+  SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX,
   SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH,
   SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
@@ -42,6 +43,9 @@ export type {
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
   BindServiceAccountWorkloadParams,
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeError,
+  ServiceAccountWorkloadBindingChangeResult,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
