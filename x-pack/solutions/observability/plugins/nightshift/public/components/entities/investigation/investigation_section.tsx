@@ -31,6 +31,7 @@ import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common
 import { RETRY_BUTTON_LABEL } from '../../../common/messages';
 import type { SeverityDotColor } from '../../../common/severity';
 import { SEVERITY_DOT_COLOR } from '../../../common/severity';
+import { INVESTIGATIONS_PAGE_SIZE } from '../../../data/investigations/use_fetch_investigations';
 import type {
   InvestigationSectionId,
   InvestigationSectionState,
@@ -361,8 +362,8 @@ const ShowMoreButton = ({
         data-test-subj={`nightshiftInvestigationSectionShowMore-${id}`}
         // Six sections each render a "Show more", so the accessible name has to say which one.
         aria-label={i18n.translate('xpack.nightshift.investigations.sectionShowMoreAriaLabel', {
-          defaultMessage: 'Show more {sectionTitle} investigations',
-          values: { sectionTitle: title },
+          defaultMessage: 'Show {count} more {sectionTitle} investigations',
+          values: { count: INVESTIGATIONS_PAGE_SIZE, sectionTitle: title },
         })}
         isLoading={isLoadingMore}
         size="s"
@@ -373,7 +374,8 @@ const ShowMoreButton = ({
         })}
       >
         {i18n.translate('xpack.nightshift.investigations.showMoreButtonLabel', {
-          defaultMessage: 'Show more',
+          defaultMessage: 'Show {count} more',
+          values: { count: INVESTIGATIONS_PAGE_SIZE },
         })}
       </EuiButtonEmpty>
     </EuiFlexItem>

@@ -22,7 +22,8 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export const NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY = ['nightshift.investigations'] as const;
 
-const INVESTIGATIONS_PAGE_SIZE = 10;
+/** First load and each "Show more" click for non-in-progress home sections. */
+export const INVESTIGATIONS_PAGE_SIZE = 3;
 
 /**
  * The shared list API cannot filter on `in_progress`, so the in-progress section reads this many

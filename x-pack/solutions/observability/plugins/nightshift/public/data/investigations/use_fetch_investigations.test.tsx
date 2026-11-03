@@ -9,7 +9,11 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { getInvestigationsNextPageParam, useFetchInvestigations } from './use_fetch_investigations';
+import {
+  getInvestigationsNextPageParam,
+  INVESTIGATIONS_PAGE_SIZE,
+  useFetchInvestigations,
+} from './use_fetch_investigations';
 import { useKibana } from '../../hooks/use_kibana';
 
 jest.mock('../../hooks/use_kibana');
@@ -19,7 +23,7 @@ const httpGet = jest.fn();
 
 const page = (pageNumber: number, total: number) => ({
   results: [],
-  pagination: { page: pageNumber, per_page: 10, total },
+  pagination: { page: pageNumber, per_page: INVESTIGATIONS_PAGE_SIZE, total },
 });
 
 const investigation = (id: string, inProgress: boolean): InvestigationSummary => ({
@@ -45,12 +49,13 @@ const createWrapper = () => {
 describe('getInvestigationsNextPageParam', () => {
   it('asks for the next page while the list has more', () => {
     expect(getInvestigationsNextPageParam(page(1, 25))).toBe(2);
-    expect(getInvestigationsNextPageParam(page(3, 25))).toBeUndefined();
+    expect(getInvestigationsNextPageParam(page(9, 25))).toBeUndefined();
   });
 
   it('stops at the furthest page the shared list API reaches', () => {
-    expect(getInvestigationsNextPageParam(page(99, 1000))).toBe(100);
-    expect(getInvestigationsNextPageParam(page(100, 1000))).toBeUndefined();
+    // Cap is MAX_SHARED_INVESTIGATIONS (1000); with page size 3 that is page 332 → 333.
+    expect(getInvestigationsNextPageParam(page(332, 1000))).toBe(333);
+    expect(getInvestigationsNextPageParam(page(333, 1000))).toBeUndefined();
   });
 });
 
@@ -62,7 +67,7 @@ describe('useFetchInvestigations', () => {
     });
     httpGet.mockResolvedValue({
       results: [investigation('running', true), investigation('done', false)],
-      pagination: { page: 1, per_page: 10, total: 12 },
+      pagination: { page: 1, per_page: INVESTIGATIONS_PAGE_SIZE, total: 12 },
     });
   });
 
@@ -107,7 +112,7 @@ describe('useFetchInvestigations', () => {
           sort_field: 'created_at',
           sort_order: 'desc',
           page: 1,
-          per_page: 10,
+          per_page: INVESTIGATIONS_PAGE_SIZE,
           severity: ['high'],
         },
       })

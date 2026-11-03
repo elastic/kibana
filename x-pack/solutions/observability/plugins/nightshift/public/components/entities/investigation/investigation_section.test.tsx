@@ -116,9 +116,9 @@ describe('InvestigationSection', () => {
       </I18nProvider>
     );
 
-    expect(
-      screen.getByTestId('nightshiftInvestigationSectionShowMore-critical')
-    ).toBeInTheDocument();
+    const showMore = screen.getByTestId('nightshiftInvestigationSectionShowMore-critical');
+    expect(showMore).toBeInTheDocument();
+    expect(showMore).toHaveTextContent('Show 3 more');
   });
 
   it('loads more investigations for this section only', () => {
