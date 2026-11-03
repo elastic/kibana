@@ -579,7 +579,7 @@ describe('RulesClientFactory API key characterization', () => {
       await expect(context.createAPIKey('test')).rejects.toBe(esError);
       expect(logger.error.mock.calls).toEqual([
         [
-          'Failed to invalidate UIAM API key for alerting rule : test: reason a, reason b  ',
+          'Failed to invalidate UIAM API key for alerting rule : test: reason a, reason b',
           { tags: UIAM_LOGS_INVALIDATE_TAGS },
         ],
       ]);

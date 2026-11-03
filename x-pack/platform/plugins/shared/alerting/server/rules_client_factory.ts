@@ -279,7 +279,7 @@ export class RulesClientFactory {
       this.logger.error(
         `Failed to invalidate UIAM API key for alerting rule : ${ruleName}: ${result.error_details
           ?.map((error) => error.reason)
-          .join(', ')}  `,
+          .join(', ')}`,
         {
           tags: UIAM_LOGS_INVALIDATE_TAGS,
         }
