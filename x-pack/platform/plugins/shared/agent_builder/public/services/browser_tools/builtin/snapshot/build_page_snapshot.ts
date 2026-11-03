@@ -13,7 +13,7 @@ import {
   VALUE_MAX_CHARS,
 } from './constants';
 import type { RefStore } from './ref_store';
-import { implicitRole, isInteractiveRole, isNameFromContentRole } from './roles';
+import { implicitRole, isInteractiveRole, isLeafContentRole } from './roles';
 
 export interface SnapshotApp {
   id: string;
@@ -163,7 +163,7 @@ const walkTree = (root: Element, refStore: RefStore): string[] => {
   const lines: string[] = [];
   const indent = (depth: number) => '  '.repeat(depth);
 
-  // `inNamedContent`: an ancestor took its name from its text content, so that text is not repeated.
+  // `inNamedContent`: an ancestor is a leaf content role (button, link, cell, …), so its text is not printed.
   const walkChildren = (parent: Element, depth: number, inNamedContent: boolean) => {
     for (const child of Array.from(parent.childNodes)) {
       if (child.nodeType === Node.TEXT_NODE) {
@@ -186,10 +186,8 @@ const walkTree = (root: Element, refStore: RefStore): string[] => {
     if (isSvg && !role) {
       return;
     }
-    const explicitName = accessibleName(el, { fromContent: false });
-    const contentName =
-      !explicitName && role !== undefined && isNameFromContentRole(role) ? accessibleName(el) : '';
-    const name = explicitName || contentName;
+    const isLeaf = role !== undefined && isLeafContentRole(role);
+    const name = accessibleName(el, { fromContent: isLeaf });
     if (!role && !name) {
       walkChildren(el, depth, inNamedContent);
       return;
@@ -199,7 +197,7 @@ const walkTree = (root: Element, refStore: RefStore): string[] => {
     if (el instanceof HTMLSelectElement) {
       lines.push(...optionLines(el).map((line) => indent(depth + 1) + line));
     } else if (!isSvg && !LEAF_CONTROL_TAGS.has(el.tagName.toLowerCase())) {
-      walkChildren(el, depth + 1, inNamedContent || contentName !== '');
+      walkChildren(el, depth + 1, inNamedContent || isLeaf);
     }
   };
 

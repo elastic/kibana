@@ -97,14 +97,13 @@ describe('buildPageSnapshot', () => {
   it('prefers aria-label over text content and caps names at 80 chars', () => {
     const long = 'x'.repeat(200);
     const root = render(`
-      <button aria-label="Close flyout">X</button>
+      <button aria-label="Close flyout"><span>X</span></button>
       <button>${long}</button>
     `);
     const lines = treeLines(snapshot(root));
     expect(lines).toEqual([
+      // Leaf roles never print their inner text, whatever their name came from.
       '- button "Close flyout" [ref=s1e1]',
-      // The name did not come from the content, so the content is still shown.
-      '  - text "X"',
       `- button "${'x'.repeat(79)}…" [ref=s1e2]`,
     ]);
   });
@@ -156,8 +155,7 @@ describe('buildPageSnapshot', () => {
       '    - text "details"',
       '- table',
       '  - row',
-      '    - cell',
-      '      - text "42"',
+      '    - cell "42"',
     ]);
   });
 

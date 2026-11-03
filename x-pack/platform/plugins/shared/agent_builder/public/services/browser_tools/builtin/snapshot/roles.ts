@@ -83,9 +83,9 @@ const INTERACTIVE_ROLES = new Set([
 /** Whether elements with this role get a ref the model can act on. */
 export const isInteractiveRole = (role: string): boolean => INTERACTIVE_ROLES.has(role);
 
-// Leaf roles only: containers (list, listitem, table, row, cell, …) are never named from their
-// content, so their descendants' text stays readable in the snapshot.
-const NAME_FROM_CONTENT_ROLES = new Set([
+// Roles the model sees as leaves. Containers (list, listitem, table, row, landmarks, …) are not
+// here: they are never named from their content and their descendants' text stays readable.
+const LEAF_CONTENT_ROLES = new Set([
   'button',
   'link',
   'checkbox',
@@ -97,10 +97,12 @@ const NAME_FROM_CONTENT_ROLES = new Set([
   'menuitemradio',
   'tab',
   'heading',
+  'cell',
+  'columnheader',
 ]);
 
 /**
- * Whether elements with this role take their name from their text content when nothing else names
- * them. Text below an element named that way is not repeated in the snapshot.
+ * Whether elements with this role are leaves to the model: they take their name from their text
+ * content when nothing else names them, and the text below them is never printed separately.
  */
-export const isNameFromContentRole = (role: string): boolean => NAME_FROM_CONTENT_ROLES.has(role);
+export const isLeafContentRole = (role: string): boolean => LEAF_CONTENT_ROLES.has(role);
