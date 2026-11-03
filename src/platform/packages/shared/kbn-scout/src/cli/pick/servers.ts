@@ -21,6 +21,8 @@ const getFlag = (args: string[], name: string) => {
   return index === -1 ? undefined : args[index].split('=')[1] ?? args[index + 1];
 };
 
+const STOP_TIMEOUT_MS = 120_000;
+
 /** `node scripts/scout start-server` processes with the target they were started for */
 export const getRunningServers = async (): Promise<RunningServers[]> => {
   const { stdout } = await execa('ps', ['-ax', '-o', 'pid=,command=']);
@@ -38,4 +40,30 @@ export const getRunningServers = async (): Promise<RunningServers[]> => {
       },
     ];
   });
+};
+
+const isGroupRunning = async (pgid: string) =>
+  (await execa('pgrep', ['-g', pgid], { reject: false })).exitCode === 0;
+
+/** Stops start-server with ES and Kibana, and waits until they have exited */
+export const stopServers = async (servers: RunningServers[]) => {
+  const groups = await Promise.all(
+    servers.map(async ({ pid }) => {
+      const { stdout } = await execa('ps', ['-o', 'pgid=', '-p', pid], { reject: false });
+      // ES and Kibana outlive start-server on SIGTERM, so stop its whole process group when it leads one
+      const pgid = stdout.trim();
+      process.kill(pgid === pid ? -Number(pid) : Number(pid), 'SIGTERM');
+      return pgid;
+    })
+  );
+
+  const deadline = Date.now() + STOP_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    const running = await Promise.all(groups.map(isGroupRunning));
+    if (!running.some(Boolean)) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error(`Scout servers did not stop within ${STOP_TIMEOUT_MS / 1000}s`);
 };

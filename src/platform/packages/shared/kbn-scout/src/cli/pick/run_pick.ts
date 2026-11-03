@@ -19,7 +19,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { PickableConfig } from './configs';
 import { getChangedSpecs, getConfigs, getSpecs } from './configs';
 import { readPins, writePins } from './pins';
-import { getRunningServers } from './servers';
+import type { RunningServers } from './servers';
+import { getRunningServers, stopServers } from './servers';
 import { multiSelect, select } from './prompt';
 
 const LOG_FILE = '.scout/logs/scout_pick.log';
@@ -32,6 +33,17 @@ interface Selection {
 }
 
 type ServersMode = 'running' | 'with-run';
+
+const describeTarget = (arch?: string, domain?: string, configSet = 'default') =>
+  `${arch} · ${domain}${configSet === 'default' ? '' : ` (${configSet} servers)`}`;
+
+const describeServers = (servers: RunningServers[]) =>
+  servers
+    .map(
+      ({ pid, arch, domain, configSet }) =>
+        `${describeTarget(arch, domain, configSet)} (PID ${pid})`
+    )
+    .join(', ');
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
 
@@ -177,14 +189,25 @@ const prepareServers = async (
     log.write(chalk.dim(`Using the Scout servers running for this target (PID ${matching.pid})`));
     return 'running';
   }
+  const { config, target } = selection;
   if (servers.length) {
-    // starting servers for this target would fail on the ports they hold
-    log.error(
-      `Scout servers for another target are running (PID ${servers
-        .map(({ pid }) => pid)
-        .join(', ')}), stop them or pick their target`
+    // servers for this target would fail to start on the ports they hold
+    log.write(
+      chalk.yellow(
+        `Scout servers are running for ${describeServers(
+          servers
+        )}, these tests need ${describeTarget(target.arch, target.domain, config.configSet)}`
+      )
     );
-    return undefined;
+    const stop = await select('Stop them?', [
+      { label: 'Yes, stop them', value: true },
+      { label: 'Cancel', value: false },
+    ]);
+    if (!stop) {
+      return undefined;
+    }
+    log.write(chalk.dim('Stopping Scout servers…'));
+    await stopServers(servers);
   }
 
   const mode = await select<ServersMode | 'other-terminal'>('Servers', [
@@ -195,7 +218,6 @@ const prepareServers = async (
     return mode;
   }
 
-  const { config, target } = selection;
   const startServer = [
     'node scripts/scout start-server',
     `--arch ${target.arch} --domain ${target.domain}`,
@@ -222,7 +244,7 @@ const prepareServers = async (
   }
 };
 
-const getCommand = ({ config, specs, target }: Selection, mode: ServersMode): string[] =>
+const getCommand = ({ config, specs, target, verbose }: Selection, mode: ServersMode): string[] =>
   mode === 'running'
     ? [
         'node',
@@ -237,6 +259,7 @@ const getCommand = ({ config, specs, target }: Selection, mode: ServersMode): st
         'node',
         'scripts/scout',
         'run-tests',
+        ...(verbose ? [] : ['--quiet']),
         `--arch=${target.arch}`,
         `--domain=${target.domain}`,
         specs.length ? `--testFiles=${specs.join(',')}` : `--config=${config.path}`,
@@ -283,7 +306,7 @@ const runTests = async (log: ToolingLog, selection: Selection, mode: ServersMode
     ({ exitCode } = await execa(command[0], command.slice(1), {
       stdio: 'inherit',
       reject: false,
-      env: selection.verbose ? { SCOUT_LOG_LEVEL: 'debug' } : {},
+      env: { SCOUT_LOG_LEVEL: selection.verbose ? 'debug' : 'quiet' },
     }));
   }
 
