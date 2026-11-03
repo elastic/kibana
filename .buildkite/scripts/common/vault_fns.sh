@@ -36,6 +36,52 @@ vault_get() {
   fi
 }
 
+# Queues `vault_get <key_path> <field>` to be read into <var_name> by vault_await_all.
+vault_get_async() {
+  VAULT_ASYNC_READS+=("$1" "$2" "$3")
+}
+
+# Reads the queued values 6 at a time, exports them, and stops after a batch with a failure.
+vault_await_all() {
+  local dir n status failed=0 pids names value
+  set -- "${VAULT_ASYNC_READS[@]}"
+  unset VAULT_ASYNC_READS
+
+  # /dev/shm is in memory, so the values don't touch disk. Without it, read them one at a time.
+  if ! dir="$(mktemp -d -p /dev/shm 2>/dev/null)"; then
+    while [[ $# -gt 0 ]]; do
+      value="$(vault_get "$2" "$3")" || return
+      declare -gx "$1=$value"
+      shift 3
+    done
+    return 0
+  fi
+
+  while [[ $# -gt 0 && "$failed" == 0 ]]; do
+    pids=()
+    names=()
+    while [[ $# -gt 0 && ${#pids[@]} -lt 6 ]]; do
+      vault_get "$2" "$3" >"$dir/${#pids[@]}" &
+      pids+=("$!")
+      names+=("$1")
+      shift 3
+    done
+
+    for n in "${!pids[@]}"; do
+      if wait "${pids[n]}"; then
+        declare -gx "${names[n]}=$(<"$dir/$n")"
+      else
+        status=$?
+        echo "Failed to read ${names[n]} from Vault" >&2
+        [[ "$failed" != 0 ]] || failed=$status
+      fi
+    done
+  done
+
+  rm -rf "$dir"
+  return "$failed"
+}
+
 vault_set() {
   key_path=$1
   shift

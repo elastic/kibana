@@ -10,10 +10,11 @@ fi
 
 source .buildkite/scripts/common/util.sh
 
-# Set up general-purpose tokens and credentials
+# Read this job's Vault secrets in parallel. Each read is a round trip to Vault, which is about
+# a second away from agents in some regions (e.g. asia-south2), so reading them one at a time
+# added up to ~20 s per job.
 {
-  BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
-  export BUILDKITE_TOKEN
+  vault_get_async BUILDKITE_TOKEN buildkite-ci buildkite_token_all_jobs
 
   case "$BUILDKITE_PIPELINE_SLUG" in
     kibana-deploy-cloud-from-pr | \
@@ -31,12 +32,50 @@ source .buildkite/scripts/common/util.sh
     kibana-tests | \
     kibana-tests-emergency)
       GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
+      export GITHUB_TOKEN
       ;;
     *)
-      GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+      vault_get_async GITHUB_TOKEN kibanamachine github_token
       ;;
   esac
-  export GITHUB_TOKEN
+
+  vault_get_async CI_STATS_TOKEN kibana_ci_stats api_token
+  vault_get_async CI_STATS_HOST kibana_ci_stats api_host
+
+  vault_get_async EC_API_KEY kibana-ci-cloud-deploy pr_deploy_api_key
+  vault_get_async PROJECT_API_KEY kibana-ci-project-deploy pr_deploy_api_key
+  vault_get_async PROJECT_API_DOMAIN kibana-ci-project-deploy pr_deploy_domain
+
+  if [[ -z "${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-}" ]]; then
+    vault_get_async DEPLOY_TAGGER_SLACK_WEBHOOK_URL kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL
+  fi
+
+  # unset APM creds to ensure APM data gets sent to preconfigured APM cluster (kibana-cloud-apm)
+  if ! is_pr_with_label "ci:collect-apm"; then
+    vault_get_async ELASTIC_APM_SERVER_URL project-kibana-ci-apm apm_server_url
+    vault_get_async ELASTIC_APM_API_KEY project-kibana-ci-apm apm_server_api_key
+  fi
+
+  # GCS Service Account for CDN
+  vault_get_async GCS_SA_CDN_EMAIL gcs-sa-cdn-prod email
+  vault_get_async GCS_SA_CDN_BUCKET gcs-sa-cdn-prod bucket
+  vault_get_async GCS_SA_CDN_URL gcs-sa-cdn-prod cdn
+  vault_get_async GCS_SA_CDN_AUDIENCE gcs-sa-cdn-prod audience
+
+  # Failed Test Reporter Elasticsearch credentials
+  vault_get_async TEST_FAILURES_ES_CLOUD_ID failed_tests_reporter_es cloud_id
+  vault_get_async TEST_FAILURES_ES_USERNAME failed_tests_reporter_es username
+  vault_get_async TEST_FAILURES_ES_PASSWORD failed_tests_reporter_es password
+
+  # Scout reporter cluster
+  vault_get_async SCOUT_REPORTER_ES_URL scout/reporter/cluster-credentials es-url
+  vault_get_async SCOUT_REPORTER_ES_API_KEY scout/reporter/cluster-credentials es-api-key
+
+  # Credentials for legacy vault, used for the EIS CCM key below and by later scripts
+  vault_get_async VAULT_ROLE_ID kibana-buildkite-vault-credentials role-id
+  vault_get_async VAULT_SECRET_ID kibana-buildkite-vault-credentials secret-id
+
+  vault_await_all
 
   retry 5 15 docker_login_for_pipeline
 }
@@ -81,12 +120,6 @@ EOF
   CI_STATS_BUILD_ID="$(buildkite-agent meta-data get ci_stats_build_id --default '')"
   export CI_STATS_BUILD_ID
 
-  CI_STATS_TOKEN="$(vault_get kibana_ci_stats api_token)"
-  export CI_STATS_TOKEN
-
-  CI_STATS_HOST="$(vault_get kibana_ci_stats api_host)"
-  export CI_STATS_HOST
-
   if [[ "$CI_STATS_BUILD_ID" ]]; then
     echo "CI Stats Build ID: $CI_STATS_BUILD_ID"
 
@@ -97,30 +130,6 @@ EOF
       '{buildId: $buildId, apiUrl: $apiUrl, apiToken: $apiToken}' \
     )
     export KIBANA_CI_STATS_CONFIG
-  fi
-}
-
-# Set up misc keys
-{
-  EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
-  export EC_API_KEY
-
-  PROJECT_API_KEY="$(vault_get kibana-ci-project-deploy pr_deploy_api_key)"
-  export PROJECT_API_KEY
-
-  PROJECT_API_DOMAIN="$(vault_get kibana-ci-project-deploy pr_deploy_domain)"
-  export PROJECT_API_DOMAIN
-
-  DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
-  export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
-
-  # unset APM creds to ensure APM data gets sent to preconfigured APM cluster (kibana-cloud-apm)
-  if ! is_pr_with_label "ci:collect-apm"; then
-    ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
-    export ELASTIC_APM_SERVER_URL
-
-    ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
-    export ELASTIC_APM_API_KEY
   fi
 }
 
@@ -185,21 +194,6 @@ EOF
   fi
 }
 
-# Set up GCS Service Account for CDN
-{
-  GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
-  export GCS_SA_CDN_EMAIL
-
-  GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
-  export GCS_SA_CDN_BUCKET
-
-  GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
-  export GCS_SA_CDN_URL
-
-  GCS_SA_CDN_AUDIENCE="$(vault_get gcs-sa-cdn-prod audience)"
-  export GCS_SA_CDN_AUDIENCE
-}
-
 # Set up the workflow step-schema CDN publisher key.
 {
   if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-artifacts-container-image" && "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
@@ -213,27 +207,9 @@ EOF
   fi
 }
 
-# Setup Failed Test Reporter Elasticsearch credentials
-{
-  TEST_FAILURES_ES_CLOUD_ID=$(vault_get failed_tests_reporter_es cloud_id)
-  export TEST_FAILURES_ES_CLOUD_ID
-
-  TEST_FAILURES_ES_USERNAME=$(vault_get failed_tests_reporter_es username)
-  export TEST_FAILURES_ES_USERNAME
-
-  TEST_FAILURES_ES_PASSWORD=$(vault_get failed_tests_reporter_es password)
-  export TEST_FAILURES_ES_PASSWORD
-}
-
 # Scout reporter settings
 {
   export SCOUT_REPORTER_ENABLED="${SCOUT_REPORTER_ENABLED:-false}"
-
-  SCOUT_REPORTER_ES_URL="$(vault_get scout/reporter/cluster-credentials es-url)"
-  export SCOUT_REPORTER_ES_URL
-
-  SCOUT_REPORTER_ES_API_KEY="$(vault_get scout/reporter/cluster-credentials es-api-key)"
-  export SCOUT_REPORTER_ES_API_KEY
 }
 
 # Setup GCS Service Account Proxy for CI
@@ -241,14 +217,6 @@ EOF
   KIBANA_WIF_CREDENTIALS_DIR="$(mktemp -d)"
   export KIBANA_WIF_CREDENTIALS_DIR
   export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1
-}
-
-# Acquire credentials for legacy vault if needed
-{
-  VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
-  export VAULT_ROLE_ID
-  VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
-  export VAULT_SECRET_ID
 }
 
 # Set up EIS Cloud Connected Mode (CCM) API key
