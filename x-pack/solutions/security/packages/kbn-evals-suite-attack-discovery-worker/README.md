@@ -101,6 +101,11 @@ AD_WORKER_EVAL_COHORT=review AD_WORKER_EVAL_REFERENCE_MODEL=<reference-id> \
   10 min overhead) per test (350 min for 5 rows), so the suite's own timeouts fire first. Wall time
   per row is dominated by one generation batch plus one review per unmatched attack (review
   concurrency 2).
+- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 395
+  min, the 350 min Playwright timeout plus 45 min for bootstrap, Scout boot and report upload.
+  Without it the step falls back to the 120 min default and Buildkite kills it before the suite's own
+  timeouts fire, losing every score. `src/ci_step_timeout.test.ts` fails if the step timeout drops
+  below the Playwright timeout (for example when a dataset row is added).
 
 This suite has no entry in the weekly CI pipeline; it is cohort-driven and run on demand
 (`evals:security-attack-discovery-worker` label).

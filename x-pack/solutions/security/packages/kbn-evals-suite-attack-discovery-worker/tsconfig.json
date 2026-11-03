@@ -12,6 +12,7 @@
     "@kbn/workflows",
     "@kbn/core",
     "@kbn/alertzero-common",
-    "@kbn/elastic-assistant-common"
+    "@kbn/elastic-assistant-common",
+    "@kbn/repo-info"
   ]
 }
