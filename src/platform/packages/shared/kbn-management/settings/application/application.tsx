@@ -21,6 +21,7 @@ import {
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { Form } from '@kbn/management-settings-components-form';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { SettingsTabs } from '@kbn/management-settings-types/tab';
 import { EmptyState } from './empty_state';
 import { i18nTexts } from './i18n_texts';
@@ -55,6 +56,68 @@ function getQueryParam(url: string) {
   }
   return '';
 }
+
+const SettingsBody = ({
+  isLoading,
+  selectedTab,
+  selectedTabId,
+  query,
+  onClearQuery,
+  getToastsService,
+  canSaveGlobalSettings,
+  canSaveSpaceSettings,
+}: {
+  isLoading: boolean;
+  selectedTab: SettingsTabs[string];
+  selectedTabId: string;
+  query: Query;
+  onClearQuery: () => void;
+  getToastsService: () => ToastsStart;
+  canSaveGlobalSettings: boolean;
+  canSaveSpaceSettings: boolean;
+}) => {
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOADING} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (!selectedTab.fields.length) {
+    return <EmptyState queryText={query?.text} onClearQuery={onClearQuery} />;
+  }
+
+  return (
+    <>
+      <Form
+        fields={selectedTab.fields}
+        categoryCounts={selectedTab.categoryCounts}
+        isSavingEnabled={selectedTab.isSavingEnabled}
+        onClearQuery={onClearQuery}
+        scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
+      />
+      <EuiSpacer size="l" />
+      {selectedTab.sections.length > 0 &&
+        selectedTab.sections.map(({ Component, queryMatch }, index) => {
+          if (queryMatch(query.text)) {
+            return (
+              <Component
+                key={`component-${index}`}
+                toasts={getToastsService()}
+                enableSaving={{
+                  global: canSaveGlobalSettings,
+                  namespace: canSaveSpaceSettings,
+                }}
+              />
+            );
+          }
+        })}
+    </>
+  );
+};
 
 /**
  * Component for displaying the {@link SettingsApplication} component.
@@ -181,41 +244,16 @@ export const SettingsApplication = () => {
         </>
       )}
       <EuiSpacer size="xl" />
-      {isLoading ? (
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOADING} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : selectedTab.fields.length ? (
-        <>
-          <Form
-            fields={selectedTab.fields}
-            categoryCounts={selectedTab.categoryCounts}
-            isSavingEnabled={selectedTab.isSavingEnabled}
-            onClearQuery={() => onQueryChange()}
-            scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
-          />
-          <EuiSpacer size="l" />
-          {selectedTab.sections.length > 0 &&
-            selectedTab.sections.map(({ Component, queryMatch }, index) => {
-              if (queryMatch(query.text)) {
-                return (
-                  <Component
-                    key={`component-${index}`}
-                    toasts={getToastsService()}
-                    enableSaving={{
-                      global: canSaveGlobalSettings,
-                      namespace: canSaveSpaceSettings,
-                    }}
-                  />
-                );
-              }
-            })}
-        </>
-      ) : (
-        <EmptyState {...{ queryText: query?.text, onClearQuery: () => onQueryChange() }} />
-      )}
+      <SettingsBody
+        isLoading={isLoading}
+        selectedTab={selectedTab}
+        selectedTabId={selectedTabId}
+        query={query}
+        onClearQuery={() => onQueryChange()}
+        getToastsService={getToastsService}
+        canSaveGlobalSettings={canSaveGlobalSettings}
+        canSaveSpaceSettings={canSaveSpaceSettings}
+      />
     </div>
   );
 };

@@ -279,13 +279,25 @@ function renderTestCases(
           type: 'string' as const,
           readonly: true,
           readonlyMode: 'ui' as const,
+          sensitive: true,
           description: 'The title of the page',
           category: ['general'],
           options: ['Kibana', 'Elastic'],
           requiresPageReload: true,
         };
-        uiSettings.client.getRegistered.mockReturnValue({ 'page:title': definition });
-        uiSettings.globalClient.getRegistered.mockReturnValue({ 'global:title': definition });
+        const noValueDefinition = {
+          name: 'Empty',
+          description: 'A setting with no default value',
+          category: ['general'],
+        };
+        uiSettings.client.getRegistered.mockReturnValue({
+          'page:title': definition,
+          'page:empty': noValueDefinition,
+        });
+        uiSettings.globalClient.getRegistered.mockReturnValue({
+          'global:title': definition,
+          'global:empty': noValueDefinition,
+        });
 
         const [render] = await getRender();
         const { body: content } = await render(createKibanaRequest(), uiSettings, {
@@ -300,10 +312,16 @@ function renderTestCases(
           type: 'string',
           readonly: true,
           readonlyMode: 'ui',
+          sensitive: true,
         };
-        expect(data.legacyMetadata.uiSettings.defaults).toEqual({ 'page:title': runtimeEntry });
+        const noValueEntry = { name: 'Empty' };
+        expect(data.legacyMetadata.uiSettings.defaults).toEqual({
+          'page:title': runtimeEntry,
+          'page:empty': noValueEntry,
+        });
         expect(data.legacyMetadata.globalUiSettings.defaults).toEqual({
           'global:title': runtimeEntry,
+          'global:empty': noValueEntry,
         });
       }
     );
