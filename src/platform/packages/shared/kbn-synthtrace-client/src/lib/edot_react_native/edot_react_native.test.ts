@@ -279,7 +279,7 @@ describe('edotReactNative', () => {
       expect(span.attributes).not.toHaveProperty('error.type');
     });
 
-    it('redacts user info of OkHttp spans and names them after what precedes the path', () => {
+    it('sanitizes the URL of OkHttp spans and names them after what precedes its path', () => {
       const spanOf = (url: string) =>
         (
           android()
@@ -294,6 +294,18 @@ describe('edotReactNative', () => {
       expect(withCredentials.name).toBe('GET REDACTED:REDACTED@api.example.com:8443');
       expect(spanOf('https://user@api.example.com/').attributes['url.full']).toBe(
         'https://REDACTED:REDACTED@api.example.com/'
+      );
+
+      const signed = spanOf(
+        'https://bucket.s3.amazonaws.com/a.jpg?X-Amz-Credential=AKIA&X-Amz-Signature=abc&x-amz-signature=def&sig=&size=large'
+      );
+      expect(signed.attributes['url.full']).toBe(
+        'https://bucket.s3.amazonaws.com/a.jpg?X-Amz-Credential=REDACTED&X-Amz-Signature=REDACTED&x-amz-signature=def&sig=REDACTED&size=large'
+      );
+      expect(signed.name).toBe('GET bucket.s3.amazonaws.com');
+      // Like OkHttp, the URL always has a path
+      expect(spanOf('https://api.example.com?Signature=abc').attributes['url.full']).toBe(
+        'https://api.example.com/?Signature=REDACTED'
       );
     });
 

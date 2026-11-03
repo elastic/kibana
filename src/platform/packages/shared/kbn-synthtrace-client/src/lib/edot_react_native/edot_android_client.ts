@@ -30,14 +30,50 @@ const DEFAULT_PORTS: Readonly<Record<string, number>> = {
 };
 
 const REDACTED = 'REDACTED';
+// The query parameters whose values the instrumentation redacts, matched by their exact name
+const SENSITIVE_QUERY_PARAMETERS: ReadonlySet<string> = new Set([
+  'AWSAccessKeyId',
+  'Signature',
+  'X-Amz-Signature',
+  'X-Amz-Credential',
+  'X-Amz-Security-Token',
+  'sig',
+  'X-Goog-Signature',
+]);
 // How EDOT Android's HttpSpanNameInterceptor finds the host in `url.full`
 const HTTP_SPAN_NAME_PATTERN = /^https?:\/\/([^/]+).*$/;
 
-/** `url.full` as the OkHttp instrumentation sanitizes it: any user info becomes `REDACTED:REDACTED`. */
-const sanitizeUrl = (url: URL): string =>
-  url.username || url.password
-    ? `${url.protocol}//${REDACTED}:${REDACTED}@${url.host}${url.pathname}${url.search}${url.hash}`
-    : url.href;
+const redactQuery = (url: string): string => {
+  const queryStart = url.indexOf('?');
+  if (queryStart === -1) {
+    return url;
+  }
+  const fragmentStart = url.indexOf('#', queryStart);
+  const queryEnd = fragmentStart === -1 ? url.length : fragmentStart;
+  const query = url
+    .slice(queryStart + 1, queryEnd)
+    .split('&')
+    .map((parameter) => {
+      const nameEnd = parameter.indexOf('=');
+      return nameEnd !== -1 && SENSITIVE_QUERY_PARAMETERS.has(parameter.slice(0, nameEnd))
+        ? `${parameter.slice(0, nameEnd)}=${REDACTED}`
+        : parameter;
+    })
+    .join('&');
+  return `${url.slice(0, queryStart + 1)}${query}${url.slice(queryEnd)}`;
+};
+
+/**
+ * `url.full` as the OkHttp instrumentation sanitizes it: any user info becomes
+ * `REDACTED:REDACTED`, and the values of sensitive query parameters `REDACTED`.
+ */
+const sanitizeUrl = (url: URL): string => {
+  const withoutUserInfo =
+    url.username || url.password
+      ? `${url.protocol}//${REDACTED}:${REDACTED}@${url.host}${url.pathname}${url.search}${url.hash}`
+      : url.href;
+  return redactQuery(withoutUserInfo);
+};
 
 /** A stable address from the documentation range for each host. */
 const peerAddressOf = (hostname: string): string => {
