@@ -27,6 +27,7 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          signal_reason: none
           limit: 2
 
   - label: '🧑‍🏭 Build Kibana Distribution'
@@ -73,6 +74,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Agent Builder Dashboards'
@@ -98,6 +100,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Agent Builder Visualizations'
@@ -122,6 +125,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Alerting V2'
@@ -145,6 +149,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: ES|QL Generation Evaluations'
@@ -167,6 +172,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Streams'
@@ -189,6 +195,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Nightshift Investigations'
@@ -215,6 +222,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: LLM Tasks'
@@ -237,6 +245,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
       - label: 'Evals: Security AI Rules'
         key: kbn-evals-weekly-security-ai-rules
@@ -258,6 +267,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Detection Watch Rule Creation'
@@ -281,6 +291,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Hunt Watch'
@@ -304,6 +315,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Endpoint'
@@ -327,6 +339,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: PCI Compliance'
@@ -350,6 +363,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Entity Analytics'
@@ -373,6 +387,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Attack Discovery'
@@ -395,6 +410,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Attack Discovery Agent Builder'
@@ -425,6 +441,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Security ES|QL Generation Regression'
@@ -447,6 +464,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Workflows Authoring'
@@ -470,6 +488,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Security Alerts RAG Regression'
@@ -492,6 +511,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Security Alert Triage'
@@ -514,6 +534,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Alert Analysis Workflow'
@@ -536,6 +557,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: SIEM Readiness'
@@ -559,6 +581,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
 
       - label: 'Evals: Skill Selection Benchmark'
@@ -581,6 +604,7 @@ steps:
         retry:
           automatic:
             - exit_status: '-1'
+              signal_reason: none
               limit: 3
   - wait: ~
     continue_on_failure: true
