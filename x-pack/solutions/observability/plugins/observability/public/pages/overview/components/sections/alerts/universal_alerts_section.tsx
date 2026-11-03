@@ -116,7 +116,7 @@ export function UniversalAlertsSection({ alertingVTwo }: { alertingVTwo: Alertin
   const createActions = useCallback(
     (deps: EpisodeActionsDeps) =>
       createObservabilityEpisodeActions(
-        { cases: cases && { service: cases, kibanaServices: coreStart }, getAlertFormatter },
+        { cases: cases && { service: cases, kibanaServices: { ...coreStart } }, getAlertFormatter },
         deps
       ),
     [cases, getAlertFormatter, coreStart]
