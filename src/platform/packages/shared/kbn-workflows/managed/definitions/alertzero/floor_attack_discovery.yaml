@@ -49,6 +49,9 @@ consts:
     # Computed from the interval at render time: Liquid cannot parse `24h` into
     # minutes, and the runner reads this number rather than the interval string.
     maxAlerts: __WORKER_MAX_ALERTS__
+    # Rendered only when an admin has set additional context. Without it the const
+    # does not exist, so the runner input below is omitted rather than sent empty.
+    __WORKER_ADDITIONAL_CONTEXT_LINE__:
 steps:
   # Synchronous on purpose: #19276 requires that when generation fails after its
   # built-in retries, this worker run remains failed and hands off nothing.
@@ -78,4 +81,7 @@ steps:
         settings_version: "${{ consts.worker_settings.settingsVersion }}"
         schedule_interval: "${{ consts.worker_settings.scheduleInterval }}"
         max_alerts: "${{ consts.worker_settings.maxAlerts }}"
+        # Omitted when no additional context is set. `${{ }}` drops the key where
+        # `{{ }}` would stringify it to an empty string.
+        additional_context: "${{ consts.worker_settings.additionalContext }}"
         parent_run_id: "{{ execution.id }}"

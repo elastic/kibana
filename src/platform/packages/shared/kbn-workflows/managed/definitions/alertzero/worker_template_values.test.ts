@@ -135,6 +135,51 @@ describe('Attack Discovery alert cap', () => {
   });
 });
 
+describe('Attack Discovery additional context rendering', () => {
+  const render = (additionalContext?: string) =>
+    renderAttackDiscoveryWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, {
+      ...shared,
+      scheduleInterval: '1h',
+      extras: additionalContext === undefined ? {} : { additionalContext },
+    });
+
+  const workerSettings = (yaml: string) =>
+    (parse(yaml) as { consts: { worker_settings: Record<string, unknown> } }).consts
+      .worker_settings;
+
+  it.each([
+    ['carries quotes, newlines and backslashes', 'say "hi"\nline two \\ end'],
+    ['keeps $ sequences literal', "price $& $$ $' $1"],
+    ['keeps YAML syntax inert', 'key: value\n- item # comment\n---'],
+    ['escapes line and paragraph separators', 'a\u2028b\u2029c'],
+  ])('%s through the YAML round trip', (_name, text) => {
+    const rendered = render(text);
+
+    expect(rendered).not.toMatch(/__WORKER_[A-Z0-9_]+__/);
+    expect(workerSettings(rendered).additionalContext).toBe(text);
+  });
+
+  it.each([
+    ['absent', undefined],
+    ['empty', ''],
+    ['blank', '  \n\t '],
+  ])('omits the key when the value is %s', (_name, text) => {
+    const rendered = render(text);
+
+    expect(rendered).not.toMatch(/__WORKER_[A-Z0-9_]+__/);
+    expect(workerSettings(rendered)).not.toHaveProperty('additionalContext');
+  });
+
+  it('renders when the settings carry no extras at all', () => {
+    const rendered = renderAttackDiscoveryWorkerYaml(FLOOR_ATTACK_DISCOVERY_YAML, {
+      ...shared,
+      scheduleInterval: '1h',
+    });
+
+    expect(workerSettings(rendered)).not.toHaveProperty('additionalContext');
+  });
+});
+
 describe('Alert Triage sweep rendering', () => {
   const render = (scheduleInterval: string, excludedRuleTags: string[] = []) =>
     renderAlertTriageWorkerYaml(FLOOR_ALERT_TRIAGE_YAML, {

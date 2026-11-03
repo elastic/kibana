@@ -6,7 +6,9 @@
  */
 
 import { WorkflowSchema } from '@kbn/workflows';
+import { getWorkflowZodSchema } from '@kbn/workflows-management-plugin/common/schema';
 import { validateWorkflowYaml } from '@kbn/workflows-management-plugin/common/lib/validate_workflow_yaml';
+import { prepareWorkflowDocumentFromYaml } from '@kbn/workflows-management-plugin/server/api/lib/workflow_prepare';
 
 /**
  * Errors from validating rendered YAML against the generic `WorkflowSchema`, or undefined. Install
@@ -28,4 +30,22 @@ export const workflowSchemaFailure = async (yaml: string): Promise<string | unde
     })
     .join('; ');
   return details.length > 0 ? details : 'workflow is not valid';
+};
+
+/**
+ * Whether install would store `yaml` as a valid workflow. Runs the document preparation a managed
+ * install runs (`prepareWorkflowDocumentForStorage` with lightweight validation), which validates
+ * Liquid in every YAML string and stores a failing workflow with `valid: false, definition: null`
+ * rather than throwing.
+ */
+export const isStoredValidAtInstall = async (yaml: string): Promise<boolean> => {
+  const { workflowData } = await prepareWorkflowDocumentFromYaml({
+    id: 'install-validation-probe',
+    yaml,
+    zodSchema: getWorkflowZodSchema({}, [], { lightweight: true }),
+    authenticatedUser: 'managed-workflow-test',
+    now: new Date('2026-01-01T00:00:00.000Z'),
+    spaceId: 'default',
+  });
+  return workflowData.valid && workflowData.definition !== null;
 };

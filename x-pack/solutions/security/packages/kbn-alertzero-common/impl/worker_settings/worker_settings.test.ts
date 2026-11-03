@@ -88,7 +88,13 @@ describe('Worker settings declarations', () => {
         excludedRuleTags: [],
       },
     });
-    expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
+    // Every Attack Discovery setting is optional and absent by default.
+    expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).toEqual({
+      workerId: ATTACK_DISCOVERY,
+      autonomy: 'manual',
+      scheduleInterval: '24h',
+      extras: {},
+    });
   });
 
   // The settings page enforces these two limits itself, so they have to match the schema it

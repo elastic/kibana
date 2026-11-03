@@ -253,6 +253,22 @@ describe('Attack Discovery worker chain', () => {
       expect(dispatch?.['on-failure']).toBeUndefined();
     });
 
+    it('forwards additional_context from the Worker settings to the runner', () => {
+      expect(asInputs(dispatch).additional_context).toBe(
+        '${{ consts.worker_settings.additionalContext }}'
+      );
+    });
+
+    it('declares additional_context on the runner and passes it to the batched child', () => {
+      const manual = worker.triggers?.find((trigger) => trigger.type === 'manual');
+
+      expect(manual?.inputs?.properties).toHaveProperty('additional_context');
+      expect(manual?.inputs?.required ?? []).not.toContain('additional_context');
+      expect(asInputs(stepIn(workerSteps, 'run_generation')).additional_context).toBe(
+        '${{ inputs.additional_context }}'
+      );
+    });
+
     // #19276 names autonomy, settings version and the schedule interval. The interval
     // string is traceability on the runner; the alert cap derived from it is forwarded
     // separately. Dropping either would be easy and would silently break the contract.
@@ -3848,12 +3864,12 @@ describe('Attack Discovery worker chain', () => {
 
     describe('managed versions', () => {
       // Fixed `yaml` definitions roll out through the hash; the bump is the signal.
-      it('bumps the runner to version 22 so a failed read does not retarget the fingerprint', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(22);
+      it('bumps the runner to version 24 so the additional_context input rolls out', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(24);
       });
 
-      it('bumps batched generation to version 13 so the worker passes generation_source', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(13);
+      it('bumps batched generation to version 15 so run_batch receives additional_context', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.version).toBe(15);
       });
 
       it('continues when fingerprint matching fails', () => {

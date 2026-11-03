@@ -90,6 +90,13 @@ triggers:
             How many alerts generation may retrieve. The per-space worker renders
             this from its schedule interval (10,000 per 24h, at least 100, at most
             10,000). Omit on a standalone run to retrieve a full day.
+        additional_context:
+          type: string
+          maxLength: 4000
+          description: >-
+            Operator guidance appended to the generation prompt. The per-space worker
+            sets it from its Additional context setting and omits it when that is
+            empty. Omit on a standalone run to add nothing.
         parent_run_id:
           type: string
           maxLength: 128
@@ -171,6 +178,9 @@ steps:
         connector_id: "{{ inputs.connector_id }}"
         max_alerts: "${{ inputs.max_alerts | default: 10000 }}"
         lookback: "{{ inputs.schedule_interval }}"
+        # `${{ }}` keeps an omitted value undefined, so the child gets no key
+        # rather than an empty string.
+        additional_context: "${{ inputs.additional_context }}"
 
   # The fan-out list, resolved once so the batches, the parallel step, and the
   # summary agree on it. `| default: consts.no_discoveries` normalizes the three

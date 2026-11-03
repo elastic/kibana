@@ -432,9 +432,7 @@ export const WatchDetailPage: React.FC = () => {
                 canWrite={canWrite}
                 onEnabledChange={(enabled) => handleEnabledChange(worker, enabled)}
                 onSettingsChange={(patch) => updateSettings(worker, patch)}
-                onTriggerValidityChange={(isValid) =>
-                  handleTriggerValidityChange(worker.id, isValid)
-                }
+                onTriggerValidityChange={handleTriggerValidityChange}
                 draftResetKey={draftResetKey}
               />
             </section>
