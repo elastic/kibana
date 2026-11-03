@@ -33,7 +33,7 @@ export const RunQuotaExhaustionCallout = ({
     nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
   const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/automations' });
   const exhaustedGroups = groups.filter((group) =>
-    isRunQuotaReached({ enabled, limit: limits[group], count: counts[group] })
+    isRunQuotaReached({ group, enabled, limit: limits[group], count: counts[group] })
   );
 
   if (exhaustedGroups.length === 0) {
