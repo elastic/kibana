@@ -187,11 +187,14 @@ _nightshift_detection:
     _reserved: true
   cluster:
     - 'monitor_inference'
+    - 'read_project_routing'
   indices:
     - names:
-        - '*'
+        - '/~(([.]|ilm-history-).*)/'
       privileges:
         - 'read'
+        - 'view_index_metadata'
+        - 'read_view_metadata'
       allow_restricted_indices: false
   applications:
     - application: 'kibana-.kibana'

@@ -73,16 +73,24 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
   nightshift_detection: {
     description:
       'Privileges for the service account the Nightshift detection engine runs as. Assigned by Kibana; do not assign to users.',
-    // Calls the LLM through an inference endpoint (feature identification, query generation).
-    cluster: ['monitor_inference'],
+    cluster: [
+      // Calls the LLM through an inference endpoint (feature identification, query generation).
+      'monitor_inference',
+      // Source data is read across every linked project.
+      'read_project_routing',
+    ],
     indices: [
       {
-        // Source data. A source is any ES|QL query, read through the source's view, which checks
-        // the caller's read on the indices behind it (without it the view returns no documents,
-        // and no error). Saving a source checks that its author can read the indices, but the
-        // query can name any of them, so the account reads every non-system index.
-        names: ['*'],
-        privileges: ['read'],
+        // Source data. A source is any ES|QL query, read through the source's view, and the
+        // caller needs read on the indices behind it: an explicit index it cannot read fails the
+        // query with a 403, while a wildcard silently skips what it cannot read. Saving a source
+        // checks that its author can read the indices, but the query can name any of them, so the
+        // account reads every index except system ones, the pattern the `viewer` role uses.
+        // `.rule-events` and `.alert-actions` need no grant: the `nightshift` feature privilege
+        // below carries implicit read on them, and the Alerting v2 client writes as the internal
+        // user.
+        names: ['/~(([.]|ilm-history-).*)/'],
+        privileges: ['read', 'view_index_metadata', 'read_view_metadata'],
         allow_restricted_indices: false,
       },
     ],
