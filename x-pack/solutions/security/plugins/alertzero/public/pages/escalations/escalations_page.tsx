@@ -29,6 +29,7 @@ import {
   useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
 
+import { AgentBuilderPrivilegeCallout } from '../../components/agent_builder_privilege_callout/agent_builder_privilege_callout';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
@@ -49,7 +50,8 @@ export const EscalationsPage: React.FC = () => {
   useQueuePolling(POLLED_QUERY_KEYS, POLLED_ALL_PAGES_QUERY_KEYS);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
-  const { manageEscalations: canManage } = useAlertZeroInvestigationsCapabilities();
+  const { manageEscalations: canManage, canAccessAgentBuilder } =
+    useAlertZeroInvestigationsCapabilities();
 
   // Clicking a row navigates to Agent Builder with the conversation details flyout open.
   // getChatHref is also forwarded so cards render as real links (Cmd-click, URL on hover).
@@ -210,6 +212,12 @@ export const EscalationsPage: React.FC = () => {
           />
         </EuiFlexItem>
 
+        {!canAccessAgentBuilder && (
+          <EuiFlexItem grow={false}>
+            <AgentBuilderPrivilegeCallout />
+          </EuiFlexItem>
+        )}
+
         {isLoading ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="center" style={{ minHeight: 200 }}>
@@ -248,6 +256,7 @@ export const EscalationsPage: React.FC = () => {
                 renderAssignees={renderAssignees}
                 onClickCard={(item) => openChat(item.id, item.agentId)}
                 getHref={(item) => getChatHref(item.id, item.agentId)}
+                canOpenInvestigationDetails={canAccessAgentBuilder}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -263,6 +272,7 @@ export const EscalationsPage: React.FC = () => {
                 renderAssignees={renderAssignees}
                 onClickCard={(item) => openChat(item.id, item.agentId)}
                 getHref={(item) => getChatHref(item.id, item.agentId)}
+                canOpenInvestigationDetails={canAccessAgentBuilder}
               />
             </EuiFlexItem>
           </>

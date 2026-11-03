@@ -44,7 +44,7 @@ export const handleInvestigationFailureStepDefinition = (
         workflow: { spaceId },
       } = context.contextManager.getContext();
       const client = deps.getInvestigationsClient(request, spaceId);
-      await client.ensureForFailure(investigationId, executionId);
+      await client.ensureForFailure(investigationId, executionId, reason);
       const output = await sendInvestigationNotifications(deps, context, {
         investigationId,
         phase: 'failed',

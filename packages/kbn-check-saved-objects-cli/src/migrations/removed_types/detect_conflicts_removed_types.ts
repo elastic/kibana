@@ -41,7 +41,6 @@ export async function detectConflictsWithRemovedTypes(
     typeName: type,
     message: `Cannot re-register previously removed type '${type}'. Please use a different name.`,
     fixHint: `Pick a different name for the SO type. Once removed, a name cannot be reused.`,
-    docsAnchor: '#defining-model-versions',
   }));
 
   throw new SavedObjectsCheckError(findings);

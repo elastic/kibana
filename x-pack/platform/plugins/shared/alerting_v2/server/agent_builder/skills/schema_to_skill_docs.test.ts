@@ -65,6 +65,7 @@ const alertKeyGuard: Record<keyof ActionPolicyWorkflowPayloadAlert, true> = {
   space_id: true,
   group_hash: true,
   alert_id: true,
+  alert_url: true,
   alert_status: true,
   severity: true,
   data: true,

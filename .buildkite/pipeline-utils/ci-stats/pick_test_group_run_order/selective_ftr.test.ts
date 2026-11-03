@@ -12,7 +12,11 @@ import * as path from 'path';
 import * as JSON5 from 'json5';
 import { getKibanaDir } from '../../utils.ts';
 import { getModuleLookup } from '../../affected-packages/module_lookup.ts';
-import { FTR_EXCLUDED_MODULES, shouldSkipFtrTests } from './selective_ftr.ts';
+import {
+  FTR_EXCLUDED_MODULES,
+  getFtrRelevantModules,
+  shouldSkipFtrTests,
+} from './selective_ftr.ts';
 
 /**
  * Instead of asserting specific IDs in/out of the list (which just mirrors the
@@ -197,6 +201,43 @@ describe('shouldSkipFtrTests', () => {
       shouldSkipFtrTests(new Set(['@kbn/discover-plugin']), [
         'src/platform/plugins/shared/discover/test/scout/core/ui/tests/foo.spec.ts',
         'src/platform/plugins/shared/discover/public/application/main.tsx',
+      ])
+    ).toBe(false);
+  });
+});
+
+describe('getFtrRelevantModules + shouldSkipFtrTests', () => {
+  const skipFor = async (changedFiles: string[]) => {
+    const modules = await getFtrRelevantModules(changedFiles);
+    return modules !== null && shouldSkipFtrTests(modules, changedFiles);
+  };
+
+  it('ignores plugin Scout trees when resolving modules', async () => {
+    const modules = await getFtrRelevantModules([
+      'src/platform/packages/shared/kbn-scout/src/playwright/index.ts',
+      'src/platform/plugins/shared/console/test/scout/ui/fixtures/page_objects/console_page.ts',
+      'x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/fixtures/page_objects/gen_ai_settings_page.ts',
+    ]);
+    expect(modules && [...modules]).toEqual(['@kbn/scout']);
+  });
+
+  it('skips FTR for a kbn-scout + plugin Scout page objects + docs diff', async () => {
+    expect(
+      await skipFor([
+        '.agents/skills/scout-ui-testing/SKILL.md',
+        'docs/extend/testing/page-objects.md',
+        'src/platform/packages/shared/kbn-scout/src/playwright/index.ts',
+        'src/platform/plugins/shared/console/test/scout/ui/fixtures/page_objects/console_page.ts',
+        'x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/fixtures/page_objects/gen_ai_settings_page.ts',
+      ])
+    ).toBe(true);
+  });
+
+  it('keeps FTR when plugin source changes alongside its Scout tree', async () => {
+    expect(
+      await skipFor([
+        'src/platform/plugins/shared/console/test/scout/ui/fixtures/page_objects/console_page.ts',
+        'src/platform/plugins/shared/console/public/plugin.ts',
       ])
     ).toBe(false);
   });

@@ -137,6 +137,9 @@ import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService, type CdnConfig } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
+import { indexFieldsProvider } from './lib/timelines_server/search_strategy/index_fields';
+import { timelineSearchStrategyProvider } from './lib/timelines_server/search_strategy/timeline';
+import { timelineEqlSearchStrategyProvider } from './lib/timelines_server/search_strategy/timeline/eql';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
@@ -183,6 +186,7 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { setFingerprintCreateAllowed } from './workflows/step_types/match_attack_fingerprints/match_attack_fingerprints';
 import {
   registerSecurityManagedWorkflowOwner,
   initSecurityManagedWorkflowsClient,
@@ -331,6 +335,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       },
       this.isServerless,
       this.pluginContext.env.packageInfo.version,
+      {
+        profile: this.config.entityAnalytics.riskEngine.esqlProfiling,
+        profileInterval: this.config.entityAnalytics.riskEngine.esqlProfilingInterval,
+      },
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
     registerAttachments(
@@ -832,6 +840,20 @@ export class Plugin implements ISecuritySolutionPlugin {
           threatIntelligenceSearchStrategy
         );
 
+        // Timeline search strategies (previously registered by the timelines plugin)
+        plugins.data.search.registerSearchStrategy(
+          'indexFields',
+          indexFieldsProvider(core.getStartServices)
+        );
+        plugins.data.search.registerSearchStrategy(
+          'timelineSearchStrategy',
+          timelineSearchStrategyProvider(depsStart.data, this.logger)
+        );
+        plugins.data.search.registerSearchStrategy(
+          'timelineEqlSearchStrategy',
+          timelineEqlSearchStrategyProvider(depsStart.data)
+        );
+
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
@@ -929,6 +951,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
+    if (plugins.alertzero) {
+      const alertzero = plugins.alertzero;
+      setFingerprintCreateAllowed(() => alertzero.attackFingerprintWritesAllowed);
+    }
+
     const { config, logger, productFeaturesService } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(

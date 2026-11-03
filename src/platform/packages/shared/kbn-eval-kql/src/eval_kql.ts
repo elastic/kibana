@@ -18,8 +18,8 @@ import type {
 import { KQL_NODE_TYPE_WILDCARD, nodeTypes } from '@kbn/es-query/src/kuery/node_types';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 
-export function evaluateKql(kql: string, context: Record<string, any>): boolean {
-  const kqlAst = fromKueryExpression(kql);
+export function evaluateKql(kql: string | KueryNode, context: Record<string, any>): boolean {
+  const kqlAst = typeof kql === 'string' ? fromKueryExpression(kql) : kql;
   return evaluateRecursive(kqlAst, context);
 }
 

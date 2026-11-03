@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Run AlertZero Hunt Tier 2 behavioral corroboration API endpoint
+  title: Run AlertZero Behavior Hunt API endpoint
   version: '1'
 paths:
   /internal/alertzero/hunt/hunt_behavior:
@@ -9,10 +9,10 @@ paths:
       x-labels: [ess, serverless]
       operationId: HuntBehavior
       description: >-
-        Runs Tier 2's LLM-backed behavioral extraction against a threat report's
+        Runs Behavior Hunt's LLM-backed behavioral extraction against a threat report's
         text. Requires the inference plugin (503 when absent) and a GenAI
         connector (400 when none is configured).
-      summary: Run Tier 2 behavioral corroboration
+      summary: Run Behavior Hunt
       tags:
         - AlertZero API
       requestBody:
@@ -38,6 +38,12 @@ paths:
                   maximum: 1
                 iocs:
                   type: array
+                  maxItems: 100
+                  items:
+                    $ref: '#/components/schemas/HuntBehaviorIoc'
+                excluded_iocs:
+                  type: array
+                  description: Adjudicated-out IOCs the run must not search.
                   maxItems: 100
                   items:
                     $ref: '#/components/schemas/HuntBehaviorIoc'
@@ -94,7 +100,7 @@ paths:
                         validated_esql:
                           type: string
                           description: >-
-                            The query Tier 2 generated and validated (and, when grounded,
+                            The query Behavior Hunt generated and validated (and, when grounded,
                             executed) to hunt this technique.
                         title:
                           type: string
@@ -147,6 +153,15 @@ paths:
                             capped at 20.
                           items:
                             type: string
+                        affected_host_origins:
+                          type: array
+                          maxItems: 20
+                          description: >-
+                            Where each `affected_hosts` entry was seen (local
+                            cluster, remote clusters, or both), from the same
+                            rows' `_index`.
+                          items:
+                            $ref: '../components/hunt.schema.yaml#/components/schemas/HostOrigin'
                         affected_hosts_truncated:
                           type: boolean
                           description: >-
@@ -162,7 +177,7 @@ paths:
                             Required-index execute rows as Discover refs
                             (`id` + `index` + optional `timestamp`). Empty when
                             METADATA `_id`/`_index` were not projected (e.g.
-                            aggregating pipelines). Same shape as Tier 1
+                            aggregating pipelines). Same shape as IOC Hunt
                             `hits[]`. Consumed by the SSE mapper into
                             `events[]` / `alerts[]`.
                           items:
@@ -195,12 +210,12 @@ paths:
                   incomplete:
                     type: array
                     description: >-
-                      Every technique Tier 2 was asked about but could not corroborate,
+                      Every technique Behavior Hunt was asked about but could not corroborate,
                       each with why: an id absent from the ATT&CK catalog, a quote that
                       is not in the report, a query that could not be generated,
                       published or executed, or a technique the per-run generation
                       budget never reached. Absent or empty means nothing went wrong
-                      that Tier 2 could name — not that the environment was searched:
+                      that Behavior Hunt could name — not that the environment was searched:
                       a proposed behavior whose query was never executed queried
                       nothing, and that is reported per behavior in `execution`, not
                       here. A caller reading a run with no hits as a statement about
@@ -216,7 +231,7 @@ paths:
                     type: boolean
                     description: >-
                       True when any behavior's execute path found at least one
-                      row in a required index. Independent of Tier 1.
+                      row in a required index. Independent of IOC Hunt.
         '400':
           description: No GenAI connector configured
         '503':
@@ -243,7 +258,7 @@ components:
     HuntBehaviorArticleContext:
       type: object
       description: >-
-        Tier 1 context steering. Best-effort hints from Tier 1's environment hit
+        IOC Hunt context steering. Best-effort hints from IOC Hunt's environment hit
         surface; missing or empty falls back to text-only extraction.
       properties:
         matched_indices:

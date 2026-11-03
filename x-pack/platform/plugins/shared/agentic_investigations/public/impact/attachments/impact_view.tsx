@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { truncate } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -28,6 +28,7 @@ import {
   type ImpactEntityTarget,
 } from '@kbn/agentic-investigations-common';
 import type { Impact } from '../../../common/impact/impact';
+import { unionEntities } from '../../../common/impact/union_entities';
 import type { InvestigationEvidence } from '../../../common/evidence';
 import { EvidenceView } from '../../evidence/evidence_view';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
@@ -210,6 +211,28 @@ const ImpactSummary = ({ summary }: { summary: string }) => {
   );
 };
 
+/** Evidence chart and summary of one impact document, as flex items for a column group. */
+const ImpactNarrative = ({
+  summary,
+  evidence,
+}: {
+  summary?: string;
+  evidence?: InvestigationEvidence;
+}) => (
+  <>
+    {evidence && (
+      <EuiFlexItem grow={false} data-test-subj="investigationImpactEvidence">
+        <EvidenceView evidence={evidence} />
+      </EuiFlexItem>
+    )}
+    {summary?.trim() && (
+      <EuiFlexItem grow={false}>
+        <ImpactSummary summary={summary} />
+      </EuiFlexItem>
+    )}
+  </>
+);
+
 /**
  * Impact of an investigation: evidence, the summary, and the affected entities. The details
  * flyout matches Nightshift's impact section. A host, user, or service opens the entity flyout;
@@ -252,16 +275,7 @@ export const ImpactContent: React.FC<ImpactContentProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="investigationImpact">
-      {evidence && (
-        <EuiFlexItem grow={false} data-test-subj="investigationImpactEvidence">
-          <EvidenceView evidence={evidence} />
-        </EuiFlexItem>
-      )}
-      {hasSummary && (
-        <EuiFlexItem grow={false}>
-          <ImpactSummary summary={summary ?? ''} />
-        </EuiFlexItem>
-      )}
+      <ImpactNarrative summary={summary} evidence={evidence} />
       {entities.length > 0 && (
         <EuiFlexItem grow={false}>
           <EntityList entities={entities} onOpenEntity={onOpenEntity} />
@@ -282,3 +296,35 @@ export const ImpactView: React.FC<
     onOpenEntity={onOpenEntity}
   />
 );
+
+/**
+ * Impact of every investigation linked to an escalation, as one block: each document's evidence
+ * and summary in turn, then a single entity list deduped across documents.
+ */
+export const ImpactDetailsView: React.FC<{
+  documents: Impact[];
+  onOpenEntity?: ImpactContentProps['onOpenEntity'];
+}> = ({ documents, onOpenEntity }) => {
+  const entities = useMemo(
+    () => unionEntities(documents.flatMap((document) => document.entities ?? [])),
+    [documents]
+  );
+  const hasNarrative = documents.some(({ summary, evidence }) => summary?.trim() || evidence);
+
+  if (!hasNarrative && entities.length === 0) {
+    return <ImpactContent variant="details" />;
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="investigationImpact">
+      {documents.map(({ id, summary, evidence }) => (
+        <ImpactNarrative key={id} summary={summary} evidence={evidence} />
+      ))}
+      {entities.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EntityList entities={entities} onOpenEntity={onOpenEntity} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+};

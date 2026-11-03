@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import type React from 'react';
+import type { PanelOpenerChildDefinition } from '@kbn/core-chrome-browser';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+
+export type EntityInventoryEntityCategory = 'all' | 'hosts' | 'kubernetes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppSetupDependencies {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EntityInventoryAppStartDependencies {}
+export interface EntityInventoryAppStartDependencies {
+  observabilityShared: ObservabilitySharedPluginStart;
+  share: SharePluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EntityInventoryAppPublicSetup {}
 
 export interface EntityInventoryAppPublicStart {
-  getAppComponent: () => React.ComponentType;
+  navTreeGroup: PanelOpenerChildDefinition;
 }

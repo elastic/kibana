@@ -7,7 +7,7 @@
 
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 import { decodeFileAttachmentMetadata, fileAttachmentType } from './file';
-import { FileAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/file/v2';
+import { FileAttachmentPayloadSchema } from '../../../common/types/domain/attachment/file/v2';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 
 const validFile = {
