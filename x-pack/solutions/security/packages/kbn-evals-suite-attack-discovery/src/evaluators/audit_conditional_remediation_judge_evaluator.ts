@@ -13,6 +13,7 @@ import { getDiscoveryMarkdown } from '../audit_failure_classes/discovery_text';
 import type { AuditReferenceResolver } from '../audit_failure_classes/registry';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import { resolveScoredDiscoveries } from './audit_evaluator_helpers';
+import { findUnconditionalContainment } from './audit_conditional_remediation_evaluator';
 import { AuditConditionalRemediationJudgePrompt } from './audit_conditional_remediation_judge_prompt';
 
 export const AUDIT_CONDITIONAL_REMEDIATION_JUDGE_EVALUATOR_NAME = 'ConditionalRemediationJudge';
@@ -29,6 +30,8 @@ interface JudgeEntry {
 /** A quote shorter than this cannot identify a sentence, so it cannot be grounded. */
 const MIN_QUOTE_WORDS = 3;
 const MIN_QUOTE_CHARS = 15;
+
+const MAX_DISAGREEMENT_NOTE_CHARS = 500;
 
 const normalize = (text: string): string => text.replace(/\s+/g, ' ').trim().toLowerCase();
 
@@ -65,6 +68,8 @@ const isGroundedQuote = (quote: string, markdown: string): boolean => {
  * null, `judge_ungrounded`), so an invented quote never decides a score. `no_containment` carries
  * no quote. A thrown judge call is null, `judge_error`. 0 when any discovery is unconditional,
  * else 1. A wrong verdict can still pass a discovery; the regex screen stays the lower bound.
+ * When the judge clears a discovery that the regex screen flags, a `regex_disagrees` note is
+ * appended to the explanation (and `metadata.regexDisagreements` set); the score is unaffected.
  */
 export const createAuditConditionalRemediationJudgeEvaluator = ({
   inferenceClient,
@@ -159,15 +164,38 @@ export const createAuditConditionalRemediationJudgeEvaluator = ({
       };
     }
 
+    // Calibration aid only: never changes the score or the label.
+    const disagreeing = verdicts
+      .filter(
+        ({ index, verdict }) =>
+          verdict !== 'unconditional' &&
+          findUnconditionalContainment(entries[index].markdown).length > 0
+      )
+      .map(({ index }) => entries[index].title);
+    const note =
+      disagreeing.length > 0
+        ? `regex_disagrees: ${disagreeing.length} (${disagreeing.join(', ')})`.slice(
+            0,
+            MAX_DISAGREEMENT_NOTE_CHARS
+          )
+        : undefined;
+    const calibration = note
+      ? { explanation: note, metadata: { regexDisagreements: disagreeing.length } }
+      : {};
+
     const unconditional = verdicts.filter(({ verdict }) => verdict === 'unconditional');
     return unconditional.length === 0
-      ? { score: 1, label: 'conditional_or_none' }
+      ? { score: 1, label: 'conditional_or_none', ...calibration }
       : {
           score: 0,
           label: 'unconditional_containment',
-          explanation: unconditional
-            .map(({ index, quote }) => `"${entries[index].title}": ${quote}`)
-            .join(' | '),
+          explanation: [
+            unconditional
+              .map(({ index, quote }) => `"${entries[index].title}": ${quote}`)
+              .join(' | '),
+            ...(note ? [note] : []),
+          ].join(' | '),
+          ...(note ? { metadata: calibration.metadata } : {}),
         };
   },
 });
