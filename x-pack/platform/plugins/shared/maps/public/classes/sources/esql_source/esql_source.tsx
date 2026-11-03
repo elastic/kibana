@@ -35,9 +35,13 @@ import { getTime } from '@kbn/data-plugin/public';
 import type { GeoJsonProperties } from 'geojson';
 import { asyncMap } from '@kbn/std';
 import {
+  getGeohashPrecision,
+  getGeohexPrecision,
+  DEFAULT_GRID_RESOLUTION,
+} from '@kbn/geo-precision';
+import {
   FIELD_ORIGIN,
   GEOJSON_FEATURE_ID_PROPERTY_NAME,
-  GRID_RESOLUTION,
   RENDER_AS,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
@@ -56,18 +60,12 @@ import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_sou
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { getData, getHttp, getIndexPatternService, getUiSettings } from '../../../kibana_services';
-import {
-  getGeoGridPrecision,
-  getGeoHashPrecision,
-  getGeoHexPrecision,
-} from '../es_geo_grid_source/get_geo_grid_precision';
+import { getGeoGridPrecision } from '../es_geo_grid_source/get_geo_grid_precision';
 import { convertToGeoJson } from './convert_to_geojson';
 import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ESQLField } from '../../fields/esql_field';
-
-const DEFAULT_GEO_PRECISION_RESOLUTION = GRID_RESOLUTION.MOST_FINE;
 
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
@@ -410,7 +408,7 @@ export class ESQLSource
    * the source's grid resolution (same calculation as hex layers rendered with vector tiles).
    */
   getGeohexPrecision(zoom: number): number {
-    return getGeoHexPrecision(zoom, this._getResolution());
+    return getGeohexPrecision(zoom, this._getResolution());
   }
 
   /**
@@ -418,11 +416,11 @@ export class ESQLSource
    * the source's grid resolution so geohash cells have a similar size to geotile cells.
    */
   getGeohashPrecision(zoom: number): number {
-    return getGeoHashPrecision(zoom, this._getResolution());
+    return getGeohashPrecision(zoom, this._getResolution());
   }
 
   private _getResolution() {
-    return this._descriptor.resolution ?? DEFAULT_GEO_PRECISION_RESOLUTION;
+    return this._descriptor.resolution ?? DEFAULT_GRID_RESOLUTION;
   }
 
   getSyncMeta(dataFilters?: DataFilters): ESQLSourceSyncMeta {

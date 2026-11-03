@@ -17,6 +17,7 @@ import { getTimeZoneFromSettings } from '@kbn/es-query';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
+import type { GeoPrecisions } from '@kbn/geo-precision';
 import {
   type ESQLControlVariable,
   GEOHASH_PRECISION_PARAM,
@@ -49,15 +50,6 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
 
 /** Columns are resolved with `LIMIT 0`, so any valid precision works. */
 const SCHEMA_ONLY_GEO_PRECISIONS: GeoPrecisions = { geotile: 0, geohex: 0, geohash: 1 };
-
-export interface GeoPrecisions {
-  /** Value for `?_geotile_precision` */
-  geotile?: number;
-  /** Value for `?_geohex_precision` */
-  geohex?: number;
-  /** Value for `?_geohash_precision` */
-  geohash?: number;
-}
 
 const hasNamedParam = (query: string, name: string) => new RegExp(`\\?${name}\\b`, 'i').test(query);
 

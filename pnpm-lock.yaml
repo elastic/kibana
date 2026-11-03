@@ -2350,6 +2350,9 @@ importers:
       '@kbn/generate-csv':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-generate-csv
+      '@kbn/geo-precision':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/geo/kbn-geo-precision
       '@kbn/global-redirect-app-links':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-global-redirect-app-links
@@ -7669,6 +7672,8 @@ importers:
   src/platform/packages/private/dashboard/dashboard-navigation-options-components: {}
 
   src/platform/packages/private/dashboard/dashboard-navigation-options-schema: {}
+
+  src/platform/packages/private/geo/kbn-geo-precision: {}
 
   src/platform/packages/private/kbn-ambient-common-types: {}
 

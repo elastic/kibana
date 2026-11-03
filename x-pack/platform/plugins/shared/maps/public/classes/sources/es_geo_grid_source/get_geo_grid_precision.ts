@@ -6,24 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  getGeohashPrecision,
-  getGeohexPrecision,
-  getGeotileLevelDelta,
-  getGeotilePrecision,
-  type GeoPrecisionResolution,
-} from '@kbn/esql-utils';
-import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
+import { getGeotileLevelDelta, getGeotilePrecision } from '@kbn/geo-precision';
+import type { GRID_RESOLUTION } from '../../../../common/constants';
+import { RENDER_AS } from '../../../../common/constants';
 
 export function getGeoGridPrecisionResolutionDelta(
   resolution: GRID_RESOLUTION,
   renderAs: RENDER_AS
 ): number {
   try {
-    return getGeotileLevelDelta(
-      resolution as unknown as GeoPrecisionResolution,
-      renderAs === RENDER_AS.HEX
-    );
+    return getGeotileLevelDelta(resolution, renderAs === RENDER_AS.HEX);
   } catch (e) {
     throw new Error(
       i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
@@ -45,25 +37,5 @@ export function getGeoGridPrecision(
   renderAs: RENDER_AS
 ): number {
   getGeoGridPrecisionResolutionDelta(resolution, renderAs); // validates resolution
-  return getGeotilePrecision(
-    zoom,
-    resolution as unknown as GeoPrecisionResolution,
-    renderAs === RENDER_AS.HEX
-  );
-}
-
-/**
- * H3 resolution (geohex precision) for the given map zoom and resolution.
- * Same calculation Elasticsearch performs for hex layers rendered with vector tiles.
- */
-export function getGeoHexPrecision(zoom: number, resolution: GRID_RESOLUTION): number {
-  return getGeohexPrecision(zoom, resolution as unknown as GeoPrecisionResolution);
-}
-
-/**
- * Geohash precision (1-12) for the given map zoom and resolution.
- * Elasticsearch has no vector tile rule for geohash grids, see `getGeohashPrecision`.
- */
-export function getGeoHashPrecision(zoom: number, resolution: GRID_RESOLUTION): number {
-  return getGeohashPrecision(zoom, resolution as unknown as GeoPrecisionResolution);
+  return getGeotilePrecision(zoom, resolution, renderAs === RENDER_AS.HEX);
 }

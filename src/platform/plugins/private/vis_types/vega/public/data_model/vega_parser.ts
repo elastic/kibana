@@ -21,8 +21,8 @@ import { compile, version as vegaLiteVersion } from 'vega-lite';
 
 import type { CoreTheme } from '@kbn/core/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import { getGeoPrecisionsForZoom } from './geo_precisions';
 import { EsQueryParser } from './es_query_parser';
-import { getGeoPrecisionsForZoom } from '@kbn/esql-utils';
 import { EsqlQueryParser } from './esql_query_parser';
 import { Utils, getDefaultAreaGradientFill, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';

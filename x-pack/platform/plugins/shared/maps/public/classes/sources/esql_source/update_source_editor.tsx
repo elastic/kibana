@@ -23,7 +23,6 @@ import { GRID_RESOLUTION } from '../../../../common/constants';
 import { ESQLEditor } from './esql_editor';
 import { GeoPrecisionResolutionEditor } from './geo_precision_resolution_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
-import { hasGeoPrecisionParam } from './esql_utils';
 import type { getFields } from './esql_utils';
 import type { NormalizedESQLSourceDescriptor } from './esql_source';
 
