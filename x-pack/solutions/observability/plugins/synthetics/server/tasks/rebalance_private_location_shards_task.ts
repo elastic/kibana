@@ -283,7 +283,7 @@ export class RebalancePrivateLocationShardsTask {
             browserAgentIds,
             capacities,
             // Healthy, not enrolled: offline leftovers of re-enrolled agents stay enrolled for days.
-            pinUnpinned: healthyAgentIds.length > 1,
+            allowFirstPins: healthyAgentIds.length > 1,
             signal,
           });
           this.debugLog(

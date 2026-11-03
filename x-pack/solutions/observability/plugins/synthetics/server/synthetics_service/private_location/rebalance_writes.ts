@@ -178,11 +178,11 @@ export const toConditionUpdate = (
  * updated (they map to the same config id); only the cost accounting in
  * {@link toMonitorPlacements} dedupes them.
  *
- * With `pinUnpinned` false (a single-agent location) monitors without an agent
- * pin get none: it adds nothing there, and pinning running monitors can stop
- * them (elastic/elastic-agent#17714). Parking is not a pin (Fleet Server strips
- * the unassigned condition from every agent), so a browser monitor is still
- * parked without a browser-capable agent and unparked once one exists.
+ * With `pinUnpinned` false (a location with a single agent and no pins yet)
+ * monitors without an agent pin get none, so the location runs like 9.5.
+ * Parking is not a pin (Fleet Server strips the unassigned condition from every
+ * agent), so a browser monitor is still parked without a browser-capable agent
+ * and unparked once one exists.
  */
 export const toConditionUpdates = (
   pkgPolicies: ShardedPackagePolicy[],

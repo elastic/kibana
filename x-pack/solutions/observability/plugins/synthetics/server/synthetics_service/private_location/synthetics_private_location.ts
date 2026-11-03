@@ -268,9 +268,9 @@ export class SyntheticsPrivateLocation {
         // only run on elastic-agent-complete, so they must not use that fallback.
         const eligibleAgentIds = isBrowser ? conditionHosts?.completeAgentIds ?? [] : agentIds;
         const existingAgentId = agentIdFromCondition(existingCondition);
-        // One agent that can run the monitor runs it anyway, so it gets no pin
-        // (see toConditionUpdates). A browser monitor whose only agent is not
-        // browser-capable still needs one.
+        // A location with one agent that can run the monitor stays unpinned, like
+        // 9.5 (see toConditionUpdates). A browser monitor whose only agent is not
+        // browser-capable still needs a pin, and a pinned monitor stays pinned.
         const checkedInAgentIds = conditionHosts?.checkedInAgentIds ?? agentIds;
         const isSingleAgent =
           checkedInAgentIds.length <= 1 &&
@@ -285,7 +285,7 @@ export class SyntheticsPrivateLocation {
             newPolicy.condition = UNASSIGNED_CONDITION;
           }
           // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
-        } else if (!isSingleAgent) {
+        } else if (!isSingleAgent || existingAgentId) {
           const assigned = assignAgentById(config.id, eligibleAgentIds);
           if (assigned) {
             newPolicy.condition = assigned.condition;
@@ -961,7 +961,7 @@ export class SyntheticsPrivateLocation {
     recoveryAgentIds,
     browserAgentIds,
     capacities,
-    pinUnpinned = true,
+    allowFirstPins = true,
     signal,
   }: {
     location: { id: string; label?: string; agentPolicyId: string };
@@ -969,8 +969,11 @@ export class SyntheticsPrivateLocation {
     recoveryAgentIds?: string[];
     browserAgentIds: string[];
     capacities?: ReadonlyMap<string, number>;
-    /** False for a single-agent location: see {@link toConditionUpdates}. */
-    pinUnpinned?: boolean;
+    /**
+     * False while the location has a single agent. A location that already has
+     * pins keeps pinning anyway, so it never goes back to unpinned.
+     */
+    allowFirstPins?: boolean;
     signal: AbortSignal;
   }): Promise<RebalanceShardsResult> {
     if (healthyAgentIds.length === 0) {
@@ -994,7 +997,13 @@ export class SyntheticsPrivateLocation {
       recoveryAgentIds,
       browserAgentIds,
     });
-    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id, pinUnpinned);
+    const hasPins = pkgPolicies.some(({ condition }) => agentIdFromCondition(condition));
+    const updatesBySpace = toConditionUpdates(
+      pkgPolicies,
+      assignment,
+      location.id,
+      allowFirstPins || hasPins
+    );
     const unpinnedIds = new Set(
       pkgPolicies.filter(({ condition }) => typeof condition !== 'string').map(({ id }) => id)
     );

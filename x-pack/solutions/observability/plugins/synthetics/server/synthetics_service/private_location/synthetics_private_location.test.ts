@@ -26,7 +26,12 @@ import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { agentIdCondition, assignAgentById, UNASSIGNED_CONDITION } from './assign_by_condition';
+import {
+  agentIdCondition,
+  agentIdFromCondition,
+  assignAgentById,
+  UNASSIGNED_CONDITION,
+} from './assign_by_condition';
 import { PackagePolicyService } from './package_policy_service';
 import * as getPrivateLocationsModule from '../get_private_locations';
 import * as getSecretConnectionModule from '../get_secret_connection';
@@ -514,6 +519,14 @@ describe('SyntheticsPrivateLocation', () => {
         [],
         undefined,
         UNASSIGNED_CONDITION,
+      ],
+      [
+        'a pinned monitor whose agent left stays pinned',
+        'http',
+        ['survivor'],
+        [],
+        'gone',
+        agentIdCondition('survivor'),
       ],
     ])(
       'with a single enrolled agent, %s',
@@ -1622,6 +1635,129 @@ describe('SyntheticsPrivateLocation', () => {
       });
       expect(result.cleared).toBe(1);
       expect(result.failed).toBe(0);
+    });
+  });
+
+  describe('single-agent locations', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    // In-memory package policies, so consecutive rebalance runs see their own writes.
+    const fakeLocation = (conditions: Record<string, string | undefined>) => {
+      const byId = new Map(
+        Object.entries(conditions).map(([id, condition]) => [
+          id,
+          {
+            id,
+            condition,
+            spaceIds: ['default'],
+            version: 'WzAsMV0=',
+            revision: 1,
+            name: id,
+            policy_ids: ['ap-1'],
+            inputs: [{ type: 'synthetics/http', enabled: true }],
+          },
+        ])
+      );
+      jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockImplementation(async () => [...byId.values()].map((policy) => ({ ...policy })));
+      jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockImplementation(async ({ policiesToUpdate }) => {
+          for (const { update } of policiesToUpdate) {
+            const policy = byId.get(update.id);
+            if (policy) {
+              byId.set(update.id, {
+                ...policy,
+                condition: update.attributes.condition ?? undefined,
+              });
+            }
+          }
+          return [];
+        });
+      return () =>
+        Object.fromEntries(
+          [...byId].map(([id, { condition }]) => [id, agentIdFromCondition(condition)])
+        );
+    };
+
+    const rebalance = (healthyAgentIds: string[]) =>
+      new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds,
+        browserAgentIds: [],
+        // What the rebalance task passes: first pins only with 2+ healthy agents.
+        allowFirstPins: healthyAgentIds.length > 1,
+        signal: new AbortController().signal,
+      });
+
+    it('leaves a location with one agent unpinned', async () => {
+      const pins = fakeLocation({ 'm1-loc-1': undefined, 'm2-loc-1': undefined });
+
+      const result = await rebalance(['agent-a']);
+
+      expect(pins()).toEqual({ 'm1-loc-1': undefined, 'm2-loc-1': undefined });
+      expect(result.newlyPinned).toBe(0);
+    });
+
+    it('pins the location once a second agent is healthy', async () => {
+      const pins = fakeLocation({ 'm1-loc-1': undefined, 'm2-loc-1': undefined });
+
+      const result = await rebalance(['agent-a', 'agent-b']);
+
+      expect(Object.values(pins())).not.toContain(undefined);
+      expect(result.newlyPinned).toBe(2);
+    });
+
+    it('moves every pin to the survivor after failover to one agent, unpinning nothing', async () => {
+      const pins = fakeLocation({
+        'm1-loc-1': agentIdCondition('agent-a'),
+        'm2-loc-1': agentIdCondition('agent-b'),
+        // Created while only one agent was checked in, so left unpinned.
+        'm3-loc-1': undefined,
+      });
+
+      await rebalance(['agent-a']);
+
+      expect(pins()).toEqual({
+        'm1-loc-1': 'agent-a',
+        'm2-loc-1': 'agent-a',
+        'm3-loc-1': 'agent-a',
+      });
+    });
+
+    it('goes from unpinned to pinned at most once with a flapping second agent', async () => {
+      const pins = fakeLocation({ 'm1-loc-1': undefined, 'm2-loc-1': undefined });
+
+      const newlyPinned: number[] = [];
+      for (const healthy of [['agent-a', 'agent-b'], ['agent-a'], ['agent-a', 'agent-b']]) {
+        newlyPinned.push((await rebalance(healthy)).newlyPinned);
+        expect(Object.values(pins())).not.toContain(undefined);
+      }
+
+      expect(newlyPinned).toEqual([2, 0, 0]);
+    });
+
+    it('keeps a never-pinned location unpinned when its only agent is recreated', async () => {
+      // The old agent is offline, so the new one is the only healthy agent.
+      const pins = fakeLocation({ 'm1-loc-1': undefined, 'm2-loc-1': undefined });
+
+      await rebalance(['new-agent']);
+
+      expect(pins()).toEqual({ 'm1-loc-1': undefined, 'm2-loc-1': undefined });
+    });
+
+    it('moves every pin to the recreated agent on a pinned location', async () => {
+      const pins = fakeLocation({
+        'm1-loc-1': agentIdCondition('old-agent'),
+        'm2-loc-1': agentIdCondition('old-agent'),
+      });
+
+      await rebalance(['new-agent']);
+
+      expect(pins()).toEqual({ 'm1-loc-1': 'new-agent', 'm2-loc-1': 'new-agent' });
     });
   });
 

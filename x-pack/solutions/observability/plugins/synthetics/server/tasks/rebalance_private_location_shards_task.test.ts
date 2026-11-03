@@ -388,7 +388,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         recoveryAgentIds: ['agent-1'],
         browserAgentIds: ['agent-1'],
         capacities: new Map([['agent-1', 2048]]),
-        pinUnpinned: true,
+        allowFirstPins: true,
         signal: expect.any(AbortSignal),
       });
       // healthy streaks are persisted into the returned state for the next run
@@ -585,7 +585,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         false,
       ],
       ['two healthy agents', [agentInfo(NOW), agentInfo(NOW)], true],
-    ])('pins unpinned monitors with %s: %s', async (_, infos, pinUnpinned) => {
+    ])('allows first pins with %s: %s', async (_, infos, allowFirstPins) => {
       jest
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map(infos.map((info, i) => [`agent-${i}`, info])));
@@ -593,7 +593,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       await run();
 
-      expect(mockRebalanceShards).toHaveBeenCalledWith(expect.objectContaining({ pinUnpinned }));
+      expect(mockRebalanceShards).toHaveBeenCalledWith(expect.objectContaining({ allowFirstPins }));
     });
 
     const agentsAt = (revision: number | null) =>
