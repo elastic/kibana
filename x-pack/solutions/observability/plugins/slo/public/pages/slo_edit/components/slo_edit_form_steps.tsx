@@ -9,6 +9,7 @@ import { EuiSteps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
+import { IndicatorSectionValidityProvider } from '../context/indicator_section_validity';
 import { useSectionFormValidation } from '../hooks/use_section_form_validation';
 import { useShowSections } from '../hooks/use_show_sections';
 
@@ -45,30 +46,32 @@ export function SloEditFormSteps({
   );
 
   return (
-    <EuiSteps
-      steps={[
-        {
-          title: i18n.translate('xpack.slo.sloEdit.definition.title', {
-            defaultMessage: 'Define SLI',
-          }),
-          children: indicatorSection,
-          status: isIndicatorSectionValid ? 'complete' : 'incomplete',
-        },
-        {
-          title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
-            defaultMessage: 'Set objectives',
-          }),
-          children: showObjectiveSection ? objectiveSection : null,
-          status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
-        },
-        {
-          title: i18n.translate('xpack.slo.sloEdit.description.title', {
-            defaultMessage: 'Describe SLO',
-          }),
-          children: showDescriptionSection ? descriptionSection : null,
-          status: showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
-        },
-      ]}
-    />
+    <IndicatorSectionValidityProvider value={isIndicatorSectionValid}>
+      <EuiSteps
+        steps={[
+          {
+            title: i18n.translate('xpack.slo.sloEdit.definition.title', {
+              defaultMessage: 'Define SLI',
+            }),
+            children: indicatorSection,
+            status: isIndicatorSectionValid ? 'complete' : 'incomplete',
+          },
+          {
+            title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
+              defaultMessage: 'Set objectives',
+            }),
+            children: showObjectiveSection ? objectiveSection : null,
+            status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
+          },
+          {
+            title: i18n.translate('xpack.slo.sloEdit.description.title', {
+              defaultMessage: 'Describe SLO',
+            }),
+            children: showDescriptionSection ? descriptionSection : null,
+            status: showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
+          },
+        ]}
+      />
+    </IndicatorSectionValidityProvider>
   );
 }

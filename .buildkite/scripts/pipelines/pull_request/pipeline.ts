@@ -24,19 +24,18 @@ import {
   getAffectedPackages,
   getAgentImageConfig,
   emitPipeline,
-  getPipeline,
   getPrChangesCached,
   isScoutTestPath,
   isScoutTestsOnlyDiff,
   registerCancelKeys,
   flushCancelOnGateFailureMetadata,
-  type GetPipelineOptions,
   prHasFIPSLabel,
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 import {
   agentBuilderSmokeTestsSteps,
+  apiContracts,
   aiInfraGenAiSteps,
   buildFipsImage,
   buildCloudFipsImageSteps,
@@ -45,6 +44,7 @@ import {
   checkNextDocs,
   checkOasSnapshot,
   checkSavedObjects,
+  codeQuality,
   cpsTests,
   deployCloudSteps,
   deployProjectSteps,
@@ -52,9 +52,11 @@ import {
   fleetCypressSteps,
   ftrBenchSteps,
   jestBenchSteps,
+  kbnHandlebars,
   localCheck,
   pageLoadBenchSteps,
   postBuildSteps,
+  promptChanges,
   prBaseEnv,
   prBaseSteps,
   renderSteps,
@@ -63,6 +65,7 @@ import {
   responseOpsSteps,
   scoutFleetRealAgentSteps,
   storybooks,
+  syncModelLabels,
   verifyFipsEnabled,
   warmStartMemoryBenchSteps,
   workflowsOomTestingSteps,
@@ -88,7 +91,6 @@ const prConfigs =
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
-const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
 const cancelOnGate = { cancelOnGateFailure: true } as const;
 
 if (!prConfig) {
@@ -199,7 +201,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     // Gated together: check_api_contracts depends_on check_oas_snapshot.
     if (!scoutTestsOnly) {
       pipeline.push(renderSteps(checkOasSnapshot(), cancelOnGate));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
+      pipeline.push(renderSteps(apiContracts(), cancelOnGate));
     }
 
     // Register steps from the base steps that should still be canceled on gate failure.
@@ -221,12 +223,10 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     if (
       await doAnySuiteRelevantChangesMatch([
         /^src\/platform\/packages\/private\/kbn-handlebars/,
-        /^\.buildkite\/pipelines\/pull_request\/kbn_handlebars\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/kbn_handlebars\.ts/,
       ])
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml', cancelable)
-      );
+      pipeline.push(renderSteps(kbnHandlebars(), cancelOnGate));
     }
 
     if (
@@ -695,9 +695,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/sync_model_labels.yml', cancelable)
-      );
+      pipeline.push(renderSteps(syncModelLabels(), cancelOnGate));
     }
 
     if (
@@ -719,12 +717,10 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/prompts\.ts$/,
-        /^\.buildkite\/pipelines\/pull_request\/prompt_changes\.yml/,
+        /^\.buildkite\/pipeline-utils\/step-library\/steps\/prompt_changes\.ts/,
       ])
     ) {
-      pipeline.push(
-        getPipeline('.buildkite/pipelines/pull_request/prompt_changes.yml', cancelable)
-      );
+      pipeline.push(renderSteps(promptChanges(), cancelOnGate));
     }
 
     // Run Saved Objects checks systematically
@@ -769,7 +765,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (GITHUB_PR_LABELS.includes('ci:run-code-quality')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/code_quality.yml', cancelable));
+      pipeline.push(renderSteps(codeQuality(), cancelOnGate));
     }
 
     // post_build is not cancelable — cleanup/reporting should always run

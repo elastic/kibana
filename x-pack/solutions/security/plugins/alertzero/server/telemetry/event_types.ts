@@ -747,7 +747,7 @@ export const ALERTZERO_HUNT_REPORT_COMPLETED_EVENT: EventTypeOpts<AlertZeroHuntR
         type: 'boolean',
         _meta: {
           description:
-            'Whether the hunt ran Tier 2 (behavioral queries); absent when the Worker did not pass it',
+            'Whether the hunt ran Behavior Hunt (behavioral queries); absent when the Worker did not pass it',
           optional: true,
         },
       },

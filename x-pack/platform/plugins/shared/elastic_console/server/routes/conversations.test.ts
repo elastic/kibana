@@ -6,7 +6,13 @@
  */
 
 import { of } from 'rxjs';
-import type { CoreSetup, IRouter, KibanaRequest, RequestHandler } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  IRouter,
+  KibanaRequest,
+  RequestHandler,
+  RouteConfig,
+} from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ConversationRoundStatus,
@@ -19,7 +25,11 @@ import {
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import type { ConversationDocument } from '../lib/conversation_storage';
 import { eventsFromRounds, roundsFromEvents, serializeConversationRounds } from '../lib/timeline';
-import { registerConversationRoutes } from './conversations';
+import {
+  MAX_IDENTIFIER_LENGTH,
+  MAX_TITLE_LENGTH,
+  registerConversationRoutes,
+} from './conversations';
 
 const ctx = { agentId: 'agent-1', username: 'elastic', userId: 'user-1' };
 
@@ -81,10 +91,12 @@ const setup = (storedDocument?: ConversationDocument) => {
   } as unknown as CoreSetup<ElasticConsoleStartDependencies, ElasticConsolePluginStart>;
 
   const handlers: Record<string, RequestHandler> = {};
+  const configs: Record<string, RouteConfig<unknown, unknown, unknown, never>> = {};
   const register =
     (method: string) =>
-    ({ path }: { path: string }, handler: RequestHandler) => {
-      handlers[`${method} ${path}`] = handler;
+    (config: RouteConfig<unknown, unknown, unknown, never>, handler: RequestHandler) => {
+      handlers[`${method} ${config.path}`] = handler;
+      configs[`${method} ${config.path}`] = config;
     };
   const router = {
     get: register('GET'),
@@ -111,7 +123,7 @@ const setup = (storedDocument?: ConversationDocument) => {
     return response;
   };
 
-  return { esClient, call };
+  return { esClient, call, getRouteConfig: (key: string) => configs[key] };
 };
 
 const hitlEvents = (): ConversationEvent[] => {
@@ -157,6 +169,56 @@ const hitlEvents = (): ConversationEvent[] => {
     },
   ] as unknown as ConversationEvent[];
 };
+
+describe('conversation route validation', () => {
+  const validate = (key: string, part: 'params' | 'query' | 'body', value: unknown) => {
+    const routeValidate = setup().getRouteConfig(key)?.validate;
+    if (!routeValidate || typeof routeValidate === 'function' || !routeValidate[part]) {
+      throw new Error(`missing ${part} validation for ${key}`);
+    }
+    return (routeValidate[part] as { validate: (input: unknown) => unknown }).validate(value);
+  };
+
+  const tooLongId = 'a'.repeat(MAX_IDENTIFIER_LENGTH + 1);
+
+  it('bounds the agent_id list filter', () => {
+    const key = 'GET /internal/elastic_ramen/conversations';
+    expect(() =>
+      validate(key, 'query', { agent_id: 'a'.repeat(MAX_IDENTIFIER_LENGTH) })
+    ).not.toThrow();
+    expect(() => validate(key, 'query', { agent_id: tooLongId })).toThrow();
+  });
+
+  it('bounds conversation ids in path params', () => {
+    for (const key of [
+      'GET /internal/elastic_ramen/conversations/{id}',
+      'PUT /internal/elastic_ramen/conversations/{id}',
+    ]) {
+      expect(() => validate(key, 'params', { id: 'conv-1' })).not.toThrow();
+      expect(() => validate(key, 'params', { id: tooLongId })).toThrow();
+    }
+  });
+
+  it('bounds agent_id, title and round keys on create', () => {
+    const key = 'POST /internal/elastic_ramen/conversations';
+    const body = { agent_id: 'agent-1', title: 'a conversation' };
+    expect(() => validate(key, 'body', body)).not.toThrow();
+    expect(() => validate(key, 'body', { ...body, agent_id: tooLongId })).toThrow();
+    expect(() =>
+      validate(key, 'body', { ...body, title: 'a'.repeat(MAX_TITLE_LENGTH + 1) })
+    ).toThrow();
+    expect(() =>
+      validate(key, 'body', { ...body, conversation_rounds: [{ [tooLongId]: 'x' }] })
+    ).toThrow();
+  });
+
+  it('bounds title and round keys on update', () => {
+    const key = 'PUT /internal/elastic_ramen/conversations/{id}';
+    expect(() => validate(key, 'body', { title: 'renamed' })).not.toThrow();
+    expect(() => validate(key, 'body', { title: 'a'.repeat(MAX_TITLE_LENGTH + 1) })).toThrow();
+    expect(() => validate(key, 'body', { conversation_rounds: [{ [tooLongId]: 'x' }] })).toThrow();
+  });
+});
 
 describe('conversation routes', () => {
   describe('GET /internal/elastic_ramen/conversations', () => {

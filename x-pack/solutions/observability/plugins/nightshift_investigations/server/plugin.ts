@@ -36,6 +36,7 @@ import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
+import { installOnlineEvalsWorkflow } from './lib/managed_workflows/install_online_evals_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
@@ -62,7 +63,9 @@ import { renderSlackMessageStepDefinition } from './step_definitions/render_slac
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { followUpRecoveredAlertStepDefinition } from './step_definitions/follow_up_recovered_alert';
 import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/classify_online_evals_round';
+import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
+import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
 import { referenceFreeJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
@@ -478,11 +481,22 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           followUpRecoveredAlertStepDefinition(this.getInvestigationsClient)
         );
+        const isOnlineEvalsPaused = createIsOnlineEvalsPaused(core.getStartServices);
         plugins.workflowsExtensions.registerStepDefinition(
           classifyOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             isEvalsAvailable: () => this.evals !== undefined,
-            isPaused: createIsOnlineEvalsPaused(core.getStartServices),
+            isPaused: isOnlineEvalsPaused,
+            telemetry,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          scoreOnlineEvalsRoundStepDefinition({
+            getAgentBuilder: () => this.agentBuilder,
+            getEvaluate: () => this.evals?.evaluate,
+            isPaused: isOnlineEvalsPaused,
+            shouldIncludeExplanations: createShouldIncludeExplanations(core.getStartServices),
+            telemetry,
           })
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -534,6 +548,8 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           cortexHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
             logger: this.logger.get('cortex'),
             isEnabled: () => this.cortexEnabled,
@@ -542,13 +558,18 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           memoryMaterializeToSandboxStepDefinition({
             getSandboxStart: getGatedSandboxStart,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('memory'),
             isEnabled: () => this.memoryEnabled,
             telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
-          composeHydrateNotificationsStepDefinition()
+          composeHydrateNotificationsStepDefinition({
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
+          })
         );
         // Registered unconditionally: the combined materialize workflow installs with Cortex
         // or Memory, so a trees-off install would otherwise reference an unknown step type.
@@ -556,6 +577,8 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
@@ -592,6 +615,8 @@ export class NightshiftInvestigationsPlugin
                 ? (await this.getInvestigationsClient(request).getTelemetryTarget(conversationId))
                     .connectorId
                 : this.ctx.config.get().sandbox?.telemetry_connector_id,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
@@ -599,6 +624,8 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeReinforceStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
           })
         );
@@ -959,6 +986,7 @@ export class NightshiftInvestigationsPlugin
     // up (see lib/service_account). Not installing the Slack thread's global copy here lets
     // ready() remove any left from earlier versions.
     await installInvestigationWorkflow({ client });
+    await installOnlineEvalsWorkflow({ client });
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });

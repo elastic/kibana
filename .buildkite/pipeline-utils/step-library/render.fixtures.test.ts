@@ -35,6 +35,10 @@ process.chdir(root);
 
 const fragmentPaths = (): string[] => {
   const dir = '.buildkite/pipelines/pull_request';
+  if (!fs.existsSync(path.join(root, dir))) {
+    return [];
+  }
+
   return fs
     .readdirSync(path.join(root, dir), { recursive: true, encoding: 'utf8' })
     .filter((file) => file.endsWith('.yml'))
@@ -57,7 +61,7 @@ const yamlPathKeys = (file: string): string[] | 'throws' => {
     : [];
 };
 
-describe.each(fragmentPaths())('%s', (file) => {
+const coverFragment = (file: string) => {
   const steps: Step[] = load(file).steps ?? [];
 
   it('round-trips through the renderer unchanged', () => {
@@ -81,4 +85,13 @@ describe.each(fragmentPaths())('%s', (file) => {
     }
     expect(rendered).toEqual(yamlPathKeys(file));
   });
-});
+};
+
+const fragmentFiles = fragmentPaths();
+if (fragmentFiles.length > 0) {
+  describe.each(fragmentFiles)('%s', (file) => {
+    coverFragment(file);
+  });
+} else {
+  it.skip('has no YAML fragments left to cover', () => undefined);
+}
