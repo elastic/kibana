@@ -18,6 +18,8 @@ import type {
 import { clearSidebarRuntimeContext, setSidebarRuntimeContext } from './sidebar';
 import { AgentBuilderAccessChecker } from './services';
 import { createPublicConversationTemplatesContract } from './services/conversation_templates';
+import { BrowserToolRegistry } from './services/browser_tools';
+import { builtinBrowserToolIds } from '@kbn/agent-builder-common';
 
 jest.mock('./services/access', () => ({
   ...jest.requireActual('./services/access'),
@@ -309,6 +311,27 @@ describe('AgentBuilderPlugin', () => {
       });
 
       expect(getAgentBuilderAccess).toHaveBeenCalled();
+    });
+  });
+
+  describe('browser tools', () => {
+    it('start registers the builtin browser tools', () => {
+      const registerSpy = jest.spyOn(BrowserToolRegistry.prototype, 'register');
+      try {
+        const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+        plugin.setup(createMockCoreSetup(), createMockSetupDeps());
+        plugin.start(createMockCoreStart(createMockSidebarApp()), createMockStartDeps());
+
+        expect(registerSpy.mock.calls.map(([def]) => def.id)).toEqual([
+          builtinBrowserToolIds.getPageSnapshot,
+          builtinBrowserToolIds.takeScreenshot,
+          builtinBrowserToolIds.clickElement,
+          builtinBrowserToolIds.fillForm,
+          builtinBrowserToolIds.navigateTo,
+        ]);
+      } finally {
+        registerSpy.mockRestore();
+      }
     });
   });
 

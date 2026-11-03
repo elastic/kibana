@@ -20,5 +20,8 @@ export const TEXT_MAX_CHARS = 300;
 /** Number of snapshot generations whose refs stay resolvable. */
 export const KEPT_GENERATIONS = 3;
 
+/** Attribute set on the root element of every Agent Builder chat surface. */
+export const CHAT_SURFACE_ATTRIBUTE = 'data-agent-builder-surface';
+
 /** Matches the Agent Builder chat UI, which the snapshot walker skips. */
-export const CHAT_SURFACE_SELECTOR = '[data-agent-builder-surface]';
+export const CHAT_SURFACE_SELECTOR = `[${CHAT_SURFACE_ATTRIBUTE}]`;
