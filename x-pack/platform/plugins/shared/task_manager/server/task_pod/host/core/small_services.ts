@@ -5,9 +5,19 @@
  * 2.0.
  */
 
+import { kibanaPackageJson } from '@kbn/repo-info';
+import type { Logger } from '@kbn/logging';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import {
+  UiSettingsClient,
+  UiSettingsGlobalClient,
+} from '@kbn/core-ui-settings-server-internal/src/clients';
+import { NamespacedCache } from '@kbn/core-ui-settings-server-internal/src/namespaced_cache';
 import type { Client } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of } from 'rxjs';
+import { POD_KIBANA_VERSION } from '../version';
 import { TaskPodUnsupportedError } from '../errors';
 
 /**
@@ -183,27 +193,57 @@ export const createFeatureFlagsStart = () => {
   };
 };
 
-/** UI settings registered by plugins during setup; values resolve to their registered defaults. */
-export const createUiSettings = () => {
-  const registered = new Map<string, { value?: unknown }>();
-  const get = async (key: string) => registered.get(key)?.value;
-  const register = (settings: Record<string, { value?: unknown }>) => {
-    for (const [key, setting] of Object.entries(settings)) registered.set(key, setting);
-  };
-  const client = {
-    get,
-    getAll: async () => Object.fromEntries([...registered].map(([k, s]) => [k, s.value])),
-    getRegistered: () => Object.fromEntries(registered),
-  };
+/**
+ * UI settings as in Kibana: the settings plugins registered during setup, and the values users stored
+ * in the `config` (per space) and `config-global` saved objects, read through Core's own clients.
+ */
+export const createUiSettings = (logger: Logger) => {
+  const defaults: Record<string, UiSettingsParams> = {};
+  const globalDefaults: Record<string, UiSettingsParams> = {};
+  const cache = new NamespacedCache<Record<string, unknown>>();
+  const id = POD_KIBANA_VERSION.replace(/-.*$/, '');
+  const buildNum = kibanaPackageJson.build.number;
+
+  const registerInto =
+    (target: Record<string, UiSettingsParams>) =>
+    (settings: Record<string, UiSettingsParams> = {}) => {
+      for (const [key, setting] of Object.entries(settings)) {
+        if (key in target)
+          throw new Error(`uiSettings for the key [${key}] has been already registered`);
+        target[key] = setting;
+      }
+    };
+
   return {
     setup: {
-      register,
-      // Global settings resolve the same way: to what was registered.
-      registerGlobal: register,
+      register: registerInto(defaults),
+      registerGlobal: registerInto(globalDefaults),
     },
     start: {
-      asScopedToClient: () => client,
-      globalAsScopedToClient: () => client,
+      asScopedToClient: (savedObjectsClient: SavedObjectsClientContract) =>
+        new UiSettingsClient({
+          type: 'config',
+          id,
+          buildNum,
+          savedObjectsClient,
+          defaults,
+          overrides: {},
+          log: logger,
+          sharedUserProvidedCache: cache,
+          namespace: savedObjectsClient.getCurrentNamespace() || 'default',
+        }),
+      globalAsScopedToClient: (savedObjectsClient: SavedObjectsClientContract) =>
+        new UiSettingsGlobalClient({
+          type: 'config-global',
+          id,
+          buildNum,
+          savedObjectsClient,
+          defaults: globalDefaults,
+          overrides: {},
+          log: logger,
+          sharedUserProvidedCache: cache,
+          namespace: '__global__',
+        }),
     },
   };
 };

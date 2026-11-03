@@ -166,6 +166,34 @@ describe('task pod parity (agent builder family)', () => {
     expect(kibanaRun).not.toHaveBeenCalled();
   });
 
+  it('reads the settings stored in Kibana: the default connector', async () => {
+    // Only the stored setting says which model to use, so the pod has to read it.
+    const settings = await http(`http://localhost:${KIBANA_PORT}/internal/kibana/settings`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'kbn-xsrf': 'x',
+        'x-elastic-internal-origin': 'kibana',
+        authorization: auth,
+      },
+      body: JSON.stringify({ changes: { 'genAiSettings:defaultAIConnector': 'parity-llm' } }),
+    });
+    expect(settings.status).toBe(200);
+
+    const before = simulator.requests.length;
+    const response = await http(
+      `http://localhost:${KIBANA_PORT}/api/agent_builder/converse/async`,
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'kbn-xsrf': 'x', authorization: auth },
+        body: JSON.stringify({ input: 'hello again', execution_id: randomUUID() }),
+      }
+    );
+    expect(response.status).toBe(200);
+    expect(response.text()).toContain(REPLY);
+    expect(simulator.requests.length).toBeGreaterThan(before);
+  });
+
   it('did not create any index or data stream', async () => {
     const created = (await listIndices(kibanaServer)).filter((i) => !indicesBeforePod.includes(i));
     const notThePods = (i: string) =>

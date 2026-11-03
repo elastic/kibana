@@ -64,6 +64,8 @@
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-plugins-server",
     "@kbn/repo-info",
+    "@kbn/core-ui-settings-common",
+    "@kbn/core-ui-settings-server-internal",
     "@kbn/alerting-v2-constants",
     "@kbn/repo-packages",
   ],

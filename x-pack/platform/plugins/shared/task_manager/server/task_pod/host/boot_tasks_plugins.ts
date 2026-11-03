@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  uiSettingsGlobalType,
+  uiSettingsType,
+} from '@kbn/core-ui-settings-server-internal/src/saved_objects';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 import type { PluginPackage } from '@kbn/repo-packages';
@@ -134,7 +138,7 @@ export const bootTasksPlugins = async ({
 
   const elasticsearch = createElasticsearchCore();
   const savedObjects = new PodSavedObjects();
-  const uiSettings = createUiSettings();
+  const uiSettings = createUiSettings(rootLogger.get('uiSettings') as never);
   const analytics = createAnalytics();
   const http = createHttpStart(config);
   const dataStreams = createDataStreams(
@@ -149,6 +153,9 @@ export const bootTasksPlugins = async ({
     injection: injectionSetup,
     savedObjects: savedObjects.setup,
   } as unknown as PluginsServiceTasksSetupDeps;
+  // The saved objects that hold users' UI settings, per space and global.
+  savedObjects.setup.registerType(uiSettingsType);
+  savedObjects.setup.registerType(uiSettingsGlobalType);
   const contracts = await system.setupPlugins(setupDeps);
 
   if (savedObjects.hasTypes) await savedObjects.load();
