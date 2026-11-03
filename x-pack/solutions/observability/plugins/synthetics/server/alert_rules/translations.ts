@@ -163,7 +163,7 @@ export const statusRuleCheckedAtVariable = {
     'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.checkedAtPreformatted',
     {
       defaultMessage:
-        "Timestamp of the monitor run, pre-formatted with the space's date format and timezone. Use FormatDate with the timestamp variable to render it in a specific timezone.",
+        'The time of the check, preformatted using the Kibana dateFormat and dateFormat:tz settings. Do not pass it to FormatDate; use the timestamp variable instead.',
     }
   ),
 };
@@ -174,7 +174,7 @@ export const statusRuleTimestampVariable = {
     'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.timestamp',
     {
       defaultMessage:
-        'The timestamp of the last check, as an ISO 8601 string. Use with FormatDate to render it in a specific timezone.',
+        'The ISO 8601 time of the check included with this alert. Empty for a pending monitor with no ping. On recovery without an up check, this is the previous alert time. Use FormatDate to render it in a timezone.',
     }
   ),
 };

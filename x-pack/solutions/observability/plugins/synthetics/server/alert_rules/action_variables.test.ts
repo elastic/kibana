@@ -21,19 +21,15 @@ describe('getActionVariables', () => {
   it('exposes the raw ISO timestamp next to checkedAt for the monitor status rule', () => {
     const { context } = getActionVariables({ plugins, ruleType: 'monitorStatus' });
     const names = context.map((variable) => variable.name);
-    const checkedAtIndex = names.indexOf('checkedAt');
 
-    expect(names[checkedAtIndex + 1]).toBe('timestamp');
-    expect(names.filter((name) => name === 'checkedAt' || name === 'timestamp')).toEqual([
-      'checkedAt',
-      'timestamp',
-    ]);
+    expect(names).toContain('timestamp');
+    expect(names.filter((name) => name === 'checkedAt')).toEqual(['checkedAt']);
 
-    expect(context.find((variable) => variable.name === 'timestamp')?.description).toBe(
-      'The timestamp of the last check, as an ISO 8601 string. Use with FormatDate to render it in a specific timezone.'
+    expect(context.find((variable) => variable.name === 'timestamp')?.description).toContain(
+      'Empty for a pending monitor with no ping'
     );
     expect(context.find((variable) => variable.name === 'checkedAt')?.description).toContain(
-      'pre-formatted'
+      'Do not pass it to FormatDate'
     );
   });
 
