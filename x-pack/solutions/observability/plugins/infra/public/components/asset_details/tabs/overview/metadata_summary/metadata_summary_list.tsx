@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
-  EuiButtonEmpty,
+  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiDescriptionList,
@@ -78,7 +78,7 @@ const MetadataSummaryListWrapper = ({
       data-test-subj="infraAssetDetailsMetadataCollapsible"
       id="metadata"
       extraAction={
-        <EuiButtonEmpty
+        <EuiLink
           aria-label={i18n.translate(
             'xpack.infra.assetDetails.metadataSummary.showAllMetadataButton.ariaLabel',
             {
@@ -87,17 +87,13 @@ const MetadataSummaryListWrapper = ({
           )}
           data-test-subj="infraAssetDetailsMetadataShowAllButton"
           onClick={onClick}
-          size="xs"
-          flush="both"
-          iconSide="right"
-          iconType="sortRight"
           key="metadata-link"
         >
           <FormattedMessage
             id="xpack.infra.assetDetails.metadataSummary.showAllMetadataButton"
             defaultMessage="Show all"
           />
-        </EuiButtonEmpty>
+        </EuiLink>
       }
     >
       <>

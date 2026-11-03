@@ -8,13 +8,19 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
+  ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
   ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
+  ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
+  ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
+  ALERTZERO_PROPOSAL_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { initializeManagedWorkflows } from './initialize_managed_workflows';
+
+const RULE_TUNING_ID = 'system-security-detection-rule-tuning';
 
 const makeState = (spaceId: string) => ({
   workflowId: `wf-${spaceId}`,
@@ -52,6 +58,10 @@ describe('initializeManagedWorkflows', () => {
       ...ALERTZERO_ACTION_WORKFLOW_IDS,
       ...ALERTZERO_ATTACK_DISCOVERY_WORKFLOW_IDS,
       ...ALERTZERO_FORENSICS_WORKFLOW_IDS,
+      ...ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
+      ...ALERTZERO_HUNT_CHILD_WORKFLOW_IDS,
+      ...ALERTZERO_PROPOSAL_WORKFLOW_IDS,
+      ...ALERTZERO_INVESTIGATION_SUMMARY_WORKFLOW_IDS,
     ]);
     expect(client.install).not.toHaveBeenCalledWith(
       expect.anything(),
@@ -132,6 +142,27 @@ describe('initializeManagedWorkflows', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('"space-a"') && expect.stringContaining('agent ensure failed')
       );
+    });
+
+    it('never rewrites an installed Worker document, even one behind the current defaults', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        {
+          workflowId: `${RULE_TUNING_ID}-default`,
+          spaceId: 'default',
+          definitionId: RULE_TUNING_ID,
+          templateValues: { settingsVersion: 1, autonomyLevel: 'supervised' },
+          documentVersion: 9,
+        },
+      ]);
+
+      await initializeManagedWorkflows({
+        workflowsExtensions,
+        logger,
+        ensureAgentForSpace: jest.fn(),
+      });
+
+      expect(client.install).not.toHaveBeenCalledWith(RULE_TUNING_ID, expect.anything());
     });
 
     it('logs a warning when listInstalledWorkflowStates throws', async () => {

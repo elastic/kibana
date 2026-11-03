@@ -198,7 +198,7 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
   ): ChangePointRuleBucket {
     const meta = ruleMetadata.get(bucket.key);
     const ruleName = meta?.ruleName ?? 'unknown';
-    const streamName = meta?.streamName ?? 'unknown';
+    const sourceId = meta?.sourceId ?? 'unknown';
     const verdict = bucket.change_points?.type ?? EMPTY_CHANGE_POINT_TYPE;
 
     return {
@@ -206,7 +206,9 @@ export class SignificantEventsAlertsReaderV2 implements ISignificantEventsAlerts
       severity_score: meta?.severityScore ?? 0,
       doc_count: bucket.doc_count,
       rule_name: { top: [{ metrics: { 'kibana.alert.rule.name': ruleName } }] },
-      stream: { buckets: [{ key: streamName }] },
+      // detection.yaml reads `source_id` from each bucket.
+      source_id: sourceId,
+      stream: { buckets: [{ key: sourceId }] },
       change_points: {
         type: INDETERMINABLE_CHANGE_POINT_TYPE in verdict ? EMPTY_CHANGE_POINT_TYPE : verdict,
       },

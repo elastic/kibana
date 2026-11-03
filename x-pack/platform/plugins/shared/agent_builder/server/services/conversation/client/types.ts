@@ -11,10 +11,13 @@ import type {
   ConversationRoundStepMixin,
   ReasoningStep,
   CompactionStep,
+  SubstitutionStep,
+  InjectedContextStep,
   BackgroundAgentCompleteStep,
   TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
+  PreExecutionWorkflowStep,
   SubagentRosterUpdatedStep,
   ConversationRoundStepType,
   Conversation,
@@ -26,12 +29,18 @@ import type {
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
-import type { ConversationEvent, TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
+import type {
+  ConversationEvent,
+  ConversationWriteSource,
+  TimelineEvent,
+  UserIdAndName,
+} from '@kbn/agent-builder-common';
+import type { ExecutionPeek } from '../../execution/persistence';
 import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
-  'id' | 'created_at' | 'updated_at' | 'user' | 'access_control'
+  'id' | 'created_at' | 'updated_at' | 'user' | 'access_control' | 'active_execution'
 > & {
   id?: string;
   /**
@@ -39,7 +48,24 @@ export type ConversationCreateRequest = Omit<
    */
   user?: UserIdAndName;
   access_control?: ConversationAccessControl;
+  /** Makes this execution the new conversation's active execution. */
+  activeExecution?: AcquireActiveExecution;
 };
+
+/** Makes an execution the conversation's active execution, unless another live one holds it. */
+export interface AcquireActiveExecution {
+  action: 'acquire';
+  executionId: string;
+}
+
+/** Clears the conversation's active execution when this execution still holds it. */
+export interface ReleaseActiveExecution {
+  action: 'release';
+  executionId: string;
+}
+
+/** A change to the conversation's active execution, applied in the same write. */
+export type ActiveExecutionUpdate = AcquireActiveExecution | ReleaseActiveExecution;
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
@@ -56,9 +82,11 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'pinned'
       | 'workspace_id'
       | 'access_control'
+      | 'feedback'
       | 'metadata'
       | 'template_id'
       | 'template_version'
+      | 'active_execution'
     >
   > & { read_by?: ConversationReadByEntry[]; pinned_by?: ConversationPinnedByEntry[] };
 
@@ -96,6 +124,8 @@ export interface AppendEventsRequest {
    * on the returned conversation.
    */
   skipIfTerminalExistsFor?: string;
+  /** Changes the active execution in the same write. */
+  activeExecution?: ActiveExecutionUpdate;
 }
 
 export interface ReplaceRoundEventsRequest {
@@ -122,6 +152,8 @@ export interface ReplaceRoundEventsRequest {
    * on the returned conversation.
    */
   skipIfTerminalExistsFor?: string;
+  /** Changes the active execution in the same write. */
+  activeExecution?: ActiveExecutionUpdate;
 }
 
 export interface ConversationListOptions {
@@ -163,7 +195,10 @@ export type PersistentConversationRoundStep =
   | TodosStep
   | AskUserQuestionStep
   | RelevantSkillsStep
-  | SubagentRosterUpdatedStep;
+  | PreExecutionWorkflowStep
+  | SubagentRosterUpdatedStep
+  | SubstitutionStep
+  | InjectedContextStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.
@@ -216,4 +251,11 @@ export interface ConversationPinnedByEntry {
 export type NormalizedConversation = Conversation & {
   read_by?: ConversationReadByEntry[];
   pinned_by?: ConversationPinnedByEntry[];
+  execution?: ExecutionPeek;
 };
+
+/** Options of every conversation write that can emit `ai.conversation.updated`. */
+export interface ConversationWriteOptions {
+  /** The code path performing the write, recorded on the trigger event. */
+  source: ConversationWriteSource;
+}

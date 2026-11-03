@@ -6,7 +6,8 @@
  */
 
 import { newestValue } from './field_retention_operations';
-import type { EntityDefinitionWithoutId } from './entity_schema';
+import type { EntityDefinitionManagedBy, ManagedEntityDefinitionWithoutId } from './entity_schema';
+import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
   getCommonFieldDescriptions,
@@ -21,44 +22,48 @@ import {
 // strings mint entities.
 export const genericEntityDefinition = {
   type: 'generic',
-  name: `Security 'generic' Entity Store Definition`,
+  managedBy: { kind: 'plugin', id: PLUGIN_ID },
+  name: 'Generic',
+  description:
+    'Any entity that carries its own entity.id, such as an asset discovered by an integration. The id is used as-is and is not prefixed with the type.',
   identityField: { singleField: 'entity.id', skipTypePrepend: true },
-  indexPatterns: [],
-  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
-  fields: [
-    // We want this to make sure it's also extracted on remote log extraction
-    newestValue({ source: 'entity.id' }),
-    newestValue({ source: 'entity.name' }),
-    ...getEntityFieldsDescriptions(),
+  extraction: {
+    fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
+    fields: [
+      // We want this to make sure it's also extracted on remote log extraction
+      newestValue({ source: 'entity.id' }),
+      newestValue({ source: 'entity.name' }),
+      ...getEntityFieldsDescriptions(),
 
-    newestValue({ source: 'cloud.account.id' }),
-    newestValue({ source: 'cloud.account.name' }),
-    newestValue({ source: 'cloud.availability_zone' }),
-    newestValue({ source: 'cloud.instance.id' }),
-    newestValue({ source: 'cloud.instance.name' }),
-    newestValue({ source: 'cloud.machine.type' }),
-    newestValue({ source: 'cloud.project.id' }),
-    newestValue({ source: 'cloud.project.name' }),
-    newestValue({ source: 'cloud.provider' }),
-    newestValue({ source: 'cloud.region' }),
-    newestValue({ source: 'cloud.service.name' }),
+      newestValue({ source: 'cloud.account.id' }),
+      newestValue({ source: 'cloud.account.name' }),
+      newestValue({ source: 'cloud.availability_zone' }),
+      newestValue({ source: 'cloud.instance.id' }),
+      newestValue({ source: 'cloud.instance.name' }),
+      newestValue({ source: 'cloud.machine.type' }),
+      newestValue({ source: 'cloud.project.id' }),
+      newestValue({ source: 'cloud.project.name' }),
+      newestValue({ source: 'cloud.provider' }),
+      newestValue({ source: 'cloud.region' }),
+      newestValue({ source: 'cloud.service.name' }),
 
-    newestValue({ source: 'orchestrator.api_version' }),
-    newestValue({ source: 'orchestrator.cluster.id' }),
-    newestValue({ source: 'orchestrator.cluster.name' }),
-    newestValue({ source: 'orchestrator.cluster.url' }),
-    newestValue({ source: 'orchestrator.cluster.version' }),
-    newestValue({ source: 'orchestrator.namespace' }),
-    newestValue({ source: 'orchestrator.organization' }),
-    newestValue({ source: 'orchestrator.resource.annotation' }),
-    newestValue({ source: 'orchestrator.resource.id' }),
-    newestValue({ source: 'orchestrator.resource.ip', mapping: { type: 'ip' } }),
-    newestValue({ source: 'orchestrator.resource.label' }),
-    newestValue({ source: 'orchestrator.resource.name' }),
-    newestValue({ source: 'orchestrator.resource.parent.type' }),
-    newestValue({ source: 'orchestrator.resource.type' }),
-    newestValue({ source: 'orchestrator.type' }),
+      newestValue({ source: 'orchestrator.api_version' }),
+      newestValue({ source: 'orchestrator.cluster.id' }),
+      newestValue({ source: 'orchestrator.cluster.name' }),
+      newestValue({ source: 'orchestrator.cluster.url' }),
+      newestValue({ source: 'orchestrator.cluster.version' }),
+      newestValue({ source: 'orchestrator.namespace' }),
+      newestValue({ source: 'orchestrator.organization' }),
+      newestValue({ source: 'orchestrator.resource.annotation' }),
+      newestValue({ source: 'orchestrator.resource.id' }),
+      newestValue({ source: 'orchestrator.resource.ip', mapping: { type: 'ip' } }),
+      newestValue({ source: 'orchestrator.resource.label' }),
+      newestValue({ source: 'orchestrator.resource.name' }),
+      newestValue({ source: 'orchestrator.resource.parent.type' }),
+      newestValue({ source: 'orchestrator.resource.type' }),
+      newestValue({ source: 'orchestrator.type' }),
 
-    ...getCommonFieldDescriptions('entity'),
-  ],
-} satisfies EntityDefinitionWithoutId;
+      ...getCommonFieldDescriptions('entity'),
+    ],
+  },
+} satisfies ManagedEntityDefinitionWithoutId & { managedBy: EntityDefinitionManagedBy };

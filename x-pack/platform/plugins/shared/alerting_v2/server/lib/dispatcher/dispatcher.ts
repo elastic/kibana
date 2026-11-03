@@ -6,9 +6,12 @@
  */
 
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import { PluginInitializer } from '@kbn/core-di-server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
 import { v4 as uuidV4 } from 'uuid';
+import type { PluginConfig } from '../../config';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -22,11 +25,11 @@ import {
   PRE_FETCH_STUCK_ADVANCE_LAG_MS,
   SETTLE_BUFFER_SECONDS,
   STUCK_TICK_LIMIT,
-  TICK_DEADLINE_MS,
+  getTickDeadlineMs,
 } from './constants';
 import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
-import { EpisodeScan } from './state';
-import { toAction } from './steps/store_actions_step';
+import { AlertScan } from './state';
+import { toAction } from './steps/utils/action_documents';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
@@ -43,10 +46,11 @@ const isValidDate = (d: Date | undefined): d is Date =>
 // AbortSignal.timeout / AbortSignal.any are unavailable in the jsdom test env,
 // so the deadline is wired manually.
 const combineSignalWithDeadline = (
-  signal: AbortSignal
+  signal: AbortSignal,
+  deadlineMs: number
 ): { signal: AbortSignal; deadlineExceeded: () => boolean; cleanup: () => void } => {
   const deadlineController = new AbortController();
-  const deadlineTimer = setTimeout(() => deadlineController.abort(), TICK_DEADLINE_MS);
+  const deadlineTimer = setTimeout(() => deadlineController.abort(), deadlineMs);
 
   const tickController = new AbortController();
   const abortTick = () => tickController.abort();
@@ -75,13 +79,18 @@ export interface DispatcherServiceContract {
 @injectable()
 export class DispatcherService implements DispatcherServiceContract {
   private readonly parentLogger: LoggerServiceContract;
+  private readonly tickDeadlineMs: number;
 
   constructor(
     @inject(DispatcherPipeline) private readonly pipeline: DispatcherPipelineContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
-    @inject(LoggerServiceToken) logger: LoggerServiceContract
+    @inject(LoggerServiceToken) logger: LoggerServiceContract,
+    @inject(PluginInitializer('config'))
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
     this.parentLogger = logger.forSubsystem('dispatcher');
+    const { dispatcher } = pluginConfigAccessor.get<PluginConfig>();
+    this.tickDeadlineMs = getTickDeadlineMs(dispatcher.run.timeout);
   }
 
   public async run({
@@ -99,7 +108,11 @@ export class DispatcherService implements DispatcherServiceContract {
     const settled = new Date(startedAt.getTime() - SETTLE_BUFFER_SECONDS * 1_000);
     const windowEnd = maxEnd < settled ? maxEnd : settled;
 
-    const { signal: tickSignal, deadlineExceeded, cleanup } = combineSignalWithDeadline(signal);
+    const {
+      signal: tickSignal,
+      deadlineExceeded,
+      cleanup,
+    } = combineSignalWithDeadline(signal, this.tickDeadlineMs);
 
     try {
       const input: DispatcherPipelineInput = {
@@ -117,7 +130,7 @@ export class DispatcherService implements DispatcherServiceContract {
           logger.warn({
             code: ALERTING_LOG_CODES.DISPATCHER_TICK_DEADLINE_EXCEEDED,
             message: () =>
-              `tick deadline (${TICK_DEADLINE_MS}ms) exceeded; pipeline stopped early. ` +
+              `tick deadline (${this.tickDeadlineMs}ms) exceeded; pipeline stopped early. ` +
               `Watermark is safe.`,
           });
         } else {
@@ -130,7 +143,7 @@ export class DispatcherService implements DispatcherServiceContract {
       const nextWatermark = computeNextWatermark({ input, result: pipelineResult });
       const isStuck = nextWatermark.getTime() === resolvedWatermark.getTime();
       const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
-      const scan = pipelineResult.finalState.scan ?? EpisodeScan.empty();
+      const scan = pipelineResult.finalState.scan ?? AlertScan.empty();
 
       logger.debug({
         message: () => {
@@ -142,7 +155,7 @@ export class DispatcherService implements DispatcherServiceContract {
             `watermark_lag_ms=${watermarkLagMs}`,
             `window_span_ms=${windowSpanMs}`,
             `truncated=${scan.truncated}`,
-            `episode_count=${scan.episodes.length}`,
+            `alert_count=${scan.alerts.length}`,
             `stuck_ticks=${nextStuckTicks}`,
           ].join(' ');
         },
@@ -176,24 +189,29 @@ export class DispatcherService implements DispatcherServiceContract {
       return eventWatermark;
     }
 
-    const code = eventWatermark
-      ? ALERTING_LOG_CODES.DISPATCHER_INVALID_WATERMARK
-      : ALERTING_LOG_CODES.DISPATCHER_COLD_START;
-    logger.warn({
-      code,
+    const seed = new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
+
+    if (eventWatermark) {
+      logger.warn({
+        code: ALERTING_LOG_CODES.DISPATCHER_INVALID_WATERMARK,
+        message: () =>
+          `eventWatermark is Invalid Date; falling back to cold start ` +
+          `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`,
+      });
+      return seed;
+    }
+
+    logger.info({
       message: () =>
-        eventWatermark
-          ? `eventWatermark is Invalid Date; falling back to cold start ` +
-            `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`
-          : `no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
-            `Rule events older than that will not be dispatched.`,
+        `no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
+        `Rule events older than that will not be dispatched.`,
     });
-    return new Date(startedAt.getTime() - OVERLAP_WINDOW_MINUTES * 60_000);
+    return seed;
   }
 
   /**
    * The watermark has not advanced for STUCK_TICK_LIMIT consecutive ticks:
-   * force-record the blocking episodes as `unmatched` so the `.alert-actions`
+   * force-record the blocking alerts as `unmatched` so the `.alert-actions`
    * dedup mark moves past them, then advance the watermark.
    */
   private async escapeStuckWatermark({
@@ -206,11 +224,11 @@ export class DispatcherService implements DispatcherServiceContract {
     logger: LoggerServiceContract;
   }): Promise<DispatcherExecutionResult> {
     const { startedAt, eventWatermark, windowEnd } = input;
-    const blockingEpisodes = pipelineResult.finalState.scan?.episodes ?? [];
+    const blockingAlerts = pipelineResult.finalState.scan?.alerts ?? [];
     const lagMs = startedAt.getTime() - eventWatermark.getTime();
 
-    if (blockingEpisodes.length === 0) {
-      // No episodes were fetched (aborted before or during FetchEpisodesStep, or
+    if (blockingAlerts.length === 0) {
+      // No alerts were fetched (aborted before or during FetchAlertsStep, or
       // the scan query was rejected): nothing to force-record, and advancing
       // would silently drop the window. Hold while lag is within one max scan
       // window so the scan can recover and the overlap re-read still covers the
@@ -220,9 +238,9 @@ export class DispatcherService implements DispatcherServiceContract {
         logger.error({
           code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE,
           message: () =>
-            `escape hatch triggered with no fetched episodes (halt_reason: ${haltReason}, ` +
+            `escape hatch triggered with no fetched alerts (halt_reason: ${haltReason}, ` +
             `lag: ${lagMs}ms > ${MAX_WINDOW_MINUTES}m). Force-advancing to ` +
-            `${windowEnd.toISOString()}; unread episodes in this window are skipped.`,
+            `${windowEnd.toISOString()}; unread alerts in this window are skipped.`,
           error: new Error(`Pre-fetch watermark stuck at ${eventWatermark.toISOString()}`),
         });
         return { startedAt, nextWatermark: windowEnd, nextStuckTicks: 0, pipelineResult };
@@ -231,7 +249,7 @@ export class DispatcherService implements DispatcherServiceContract {
       logger.warn({
         code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK,
         message: () =>
-          `escape hatch triggered with no fetched episodes (halt_reason: ${haltReason}, ` +
+          `escape hatch triggered with no fetched alerts (halt_reason: ${haltReason}, ` +
           `lag: ${lagMs}ms). Holding watermark at ${eventWatermark.toISOString()} ` +
           `and resetting stuck counter.`,
       });
@@ -239,13 +257,13 @@ export class DispatcherService implements DispatcherServiceContract {
     }
 
     // On a truncated batch, advance only to the truncation edge so the tail
-    // (beyond EPISODE_QUERY_LIMIT) is re-read and also escape-hatched next tick.
+    // (beyond ESQL_QUERY_ROW_LIMIT) is re-read and also escape-hatched next tick.
     // The edge can sit at or behind the watermark (that is what made a truncated
     // tick stuck) — clamp so the watermark never regresses; progress then comes
     // from the dedup marks written below.
     const truncated = pipelineResult.finalState.scan?.truncated ?? false;
-    const lastEpisode = blockingEpisodes[blockingEpisodes.length - 1];
-    const escapeTarget = truncated ? new Date(lastEpisode.last_event_timestamp) : windowEnd;
+    const lastAlert = blockingAlerts[blockingAlerts.length - 1];
+    const escapeTarget = truncated ? new Date(lastAlert.last_event_timestamp) : windowEnd;
     const clampedEscapeTarget = new Date(
       Math.max(escapeTarget.getTime(), eventWatermark.getTime())
     );
@@ -254,23 +272,21 @@ export class DispatcherService implements DispatcherServiceContract {
       code: ALERTING_LOG_CODES.DISPATCHER_WATERMARK_STUCK,
       message: () =>
         `watermark stuck for ${STUCK_TICK_LIMIT} consecutive ticks ` +
-        `(lag: ${lagMs}ms, blocking episodes: ${blockingEpisodes.length}, ` +
+        `(lag: ${lagMs}ms, blocking alerts: ${blockingAlerts.length}, ` +
         `truncated: ${truncated}). ` +
         `Force-recording as unmatched and advancing to ${clampedEscapeTarget.toISOString()}.`,
       error: new Error(`Watermark stuck at ${eventWatermark.toISOString()}`),
     });
 
     try {
-      const escapeNow = new Date();
       await this.storageService.bulkIndexDocs({
         index: ALERT_ACTIONS_DATA_STREAM,
-        docs: blockingEpisodes.map((episode) =>
+        docs: blockingAlerts.map((alert) =>
           toAction({
-            episode,
+            alert,
             actionType: 'unmatched',
-            now: escapeNow,
-            reason: 'watermark-stuck escape hatch; episode force-recorded as unmatched',
-            spaceId: episode.space_id,
+            reason: 'watermark-stuck escape hatch; alert force-recorded as unmatched',
+            spaceId: alert.space_id,
           })
         ),
       });
@@ -281,7 +297,7 @@ export class DispatcherService implements DispatcherServiceContract {
         code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_WRITE_FAILED,
         message: () =>
           `escape hatch bulkIndexDocs failed; holding watermark so ` +
-          `episodes will be retried. ${err.message}`,
+          `alerts will be retried. ${err.message}`,
       });
       // Reset stuckTicks so the hatch does not re-fire (and re-attempt the bulk
       // write) every tick while ES is unavailable.

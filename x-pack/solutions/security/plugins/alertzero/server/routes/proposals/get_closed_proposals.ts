@@ -17,10 +17,12 @@ import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { ProposalsPageResponse } from '../../../common/proposals/list';
 import {
   MAX_QUEUE_PAGE_SIZE,
+  MAX_ENTITY_FILTER_LENGTH,
   MAX_QUEUE_REACH,
   fitsQueueReach,
 } from '../../../common/proposals/list';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
 // PROPOSALS_API_PRIVILEGE_READ cannot be imported from proposals/server (cross-plugin
 // server import is forbidden), so we derive the identical value here. It is load-bearing: the
@@ -33,6 +35,7 @@ const GetClosedProposalsQuery = z
   .object({
     size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(25),
     from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
+    entity: z.string().min(1).max(MAX_ENTITY_FILTER_LENGTH).optional(),
   })
   .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` });
 
@@ -64,14 +67,14 @@ export const registerGetClosedProposalsRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
-          const { size, from } = request.query;
+          const { size, from, entity } = request.query;
 
           const body: ProposalsPageResponse = await getConversationProposalsService().listClosed(
             request,
             getSpaceId(request),
-            { size, from }
+            { size, from, entity }
           );
 
           return response.ok({ body });
@@ -82,6 +85,6 @@ export const registerGetClosedProposalsRoute = ({
             body: { message: 'Failed to get closed proposals' },
           });
         }
-      }
+      })
     );
 };

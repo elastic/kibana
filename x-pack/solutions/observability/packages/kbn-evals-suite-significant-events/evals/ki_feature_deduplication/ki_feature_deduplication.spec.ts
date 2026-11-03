@@ -15,6 +15,7 @@ import {
   type AnalysisTarget,
   type SimilarFeatureHit,
   featuresPrompt,
+  compactInferenceDocuments,
 } from '@kbn/nightshift-ai';
 import { tags } from '@kbn/scout';
 import {
@@ -26,7 +27,6 @@ import {
   type Example,
 } from '@kbn/evals';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';
@@ -111,8 +111,12 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
           id: 'checkout-service',
           title: 'Checkout API',
           description: 'Checkout API service handling checkout requests',
+          type: 'entity',
+          subtype: 'service',
+          properties: { name: 'checkout-api' },
           // Feature confidence is 0-100; the hit is handed to the model verbatim.
           confidence: 99,
+          sources: ['checkout-logs'],
         },
       },
       output: {
@@ -290,7 +294,7 @@ evaluate.describe(
                       id: scenario.input.scenario_id,
                       input: {
                         scenario_id: scenario.input.scenario_id,
-                        stream_name: MANAGED_STREAM_NAME,
+                        source_id: MANAGED_STREAM_NAME,
                         iterations: scenario.input.iterations,
                       },
                     })),
@@ -302,7 +306,7 @@ evaluate.describe(
                 }: {
                   input: {
                     scenario_id: string;
-                    stream_name: string;
+                    source_id: string;
                     iterations: number;
                   };
                 }) => {

@@ -9,7 +9,7 @@ Scout supports two ways to authenticate API tests:
 - **API keys** via the `requestAuth` fixture (best for `api/*` endpoints)
 - **Interactive session cookies** via the `samlAuth` fixture (best for `internal/*` endpoints)
 
-Both return headers you can spread into `apiClient` requests (`apiKeyHeader` or `cookieHeader`).
+Both return headers you can spread into `apiClient` requests (`apiKeyHeader` or `cookieHeader`). For the overall auth model and which fixture uses which identity, see [Authentication in Scout](./scout-auth.md).
 
 ## Choose an auth type [choose-auth-type]
 

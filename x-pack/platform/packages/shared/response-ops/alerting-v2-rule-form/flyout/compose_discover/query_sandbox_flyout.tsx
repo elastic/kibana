@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/code-editor';
-import type { RuleQuery } from '../../form/types';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import type { RuleQuery, RuleRecovery } from '../../form/types';
 import { getBreachQuery, getRecoverQuery } from '../../form/utils/query_helpers';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
@@ -51,10 +52,14 @@ import { validateTabQueries, type TabValidationError } from './validate_tab_quer
  * `dateRange` persists across open/close cycles.
  */
 export interface QuerySandboxFlyoutProps {
-  /** The live query being edited. Shape drives the split-editor layout. */
+  /** The live query being edited. */
   query: RuleQuery;
   /** Called on every editor change. Absent → all query editors are read-only. */
   onQueryChange?: (q: RuleQuery) => void;
+  /** The live recovery block being edited — only read when the `recovery` tab is shown. */
+  recovery?: RuleRecovery;
+  /** Called on every recovery editor change. */
+  onRecoveryChange?: (recovery: RuleRecovery) => void;
   /**
    * Which tabs to show. Absent or [] → single editor, no tab bar.
    * ['base', 'alert'] → base-alert split; ['recovery'] → recovery tab only.
@@ -94,6 +99,8 @@ const QUERY_SANDBOX_TITLE_ID = 'composeDiscoverChildTitle';
 export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   query,
   onQueryChange,
+  recovery,
+  onRecoveryChange,
   tabs,
   activeTab = 'alert',
   onTabChange,
@@ -116,43 +123,25 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
 }) => {
   const isReadOnly = !onQueryChange;
 
-  const queryFields = useMemo(
-    () =>
-      query.format === 'composed'
-        ? {
-            base: query.base,
-            breach: query.breach.segment,
-            recover: query.recovery?.segment ?? '',
-          }
-        : {
-            base: query.no_data?.query ?? '',
-            breach: query.breach.query,
-            recover: query.recovery?.query ?? '',
-          },
-    [query]
-  );
+  const recoveryBlock = recovery?.segment ?? '';
 
   const updateQuery = useCallback(
-    (patch: { base?: string; breach?: string; recover?: string }) => {
+    (patch: { base?: string; breach?: string }) => {
       if (!onQueryChange) return;
-      const next = { ...queryFields, ...patch };
-      onQueryChange(
-        query.format === 'composed'
-          ? {
-              format: 'composed',
-              base: next.base,
-              breach: { segment: next.breach },
-              ...(next.recover ? { recovery: { segment: next.recover } } : {}),
-            }
-          : {
-              format: 'standalone',
-              breach: { query: next.breach },
-              ...(next.base ? { no_data: { query: next.base } } : {}),
-              ...(next.recover ? { recovery: { query: next.recover } } : {}),
-            }
-      );
+      onQueryChange({
+        base: patch.base ?? query.base,
+        breach: { segment: patch.breach ?? query.breach.segment },
+      });
     },
-    [query, queryFields, onQueryChange]
+    [query, onQueryChange]
+  );
+
+  /* Preserves the current strategy so editing the block never rewrites the user's choice. */
+  const updateRecoveryBlock = useCallback(
+    (segment: string) => {
+      onRecoveryChange?.({ strategy: recoveryStrategy.condition, ...recovery, segment });
+    },
+    [recovery, onRecoveryChange]
   );
 
   /*
@@ -163,9 +152,9 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     if (!tabs?.length) return getBreachQuery(query);
     switch (activeTab) {
       case 'base':
-        return queryFields.base;
+        return query.base;
       case 'recovery':
-        return getRecoverQuery(query);
+        return getRecoverQuery(query, recovery);
       default:
         return getBreachQuery(query);
     }
@@ -191,12 +180,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       return { alert: getBreachQuery(query) };
     }
     return {
-      ...(tabs.includes('base') && { base: queryFields.base }),
+      ...(tabs.includes('base') && { base: query.base }),
       ...(tabs.includes('alert') &&
         !isAlertTabDisabled(tabs, query) && { alert: getBreachQuery(query) }),
-      ...(tabs.includes('recovery') && { recovery: getRecoverQuery(query) }),
+      ...(tabs.includes('recovery') && { recovery: getRecoverQuery(query, recovery) }),
     };
-  }, [tabs, query, queryFields.base]);
+  }, [tabs, query, recovery]);
 
   const [isValidating, setIsValidating] = useState(false);
   const [applyErrors, setApplyErrors] = useState<TabValidationError[]>([]);
@@ -222,17 +211,14 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   }, [onApply, validationQueries, esqlCallbacks, activeTab, onTabChange]);
 
   /*
-   * Unified composed mode: the editor holds the whole pipeline, so write it to
-   * `base` with an empty `segment` and `getBreachQuery` returns it verbatim.
-   * Writing to `segment` would re-join base + segment and duplicate lines; the
+   * Unified mode: the editor holds the whole pipeline, so write it to `base`
+   * with an empty `segment` and `getBreachQuery` returns it verbatim. Writing
+   * to `segment` would re-join base + segment and duplicate lines; the
    * heuristic split runs on Apply, not here.
    */
   const handleQueryChange = useCallback(
-    (v: string) =>
-      query.format === 'composed'
-        ? updateQuery({ base: v, breach: '' })
-        : updateQuery({ breach: v }),
-    [query.format, updateQuery]
+    (v: string) => updateQuery({ base: v, breach: '' }),
+    [updateQuery]
   );
 
   /*
@@ -251,12 +237,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
       tabs,
       activeTab,
       onTabChange: onTabChange ?? (() => {}),
-      baseQuery: queryFields.base,
-      alertBlock: queryFields.breach,
-      recoveryBlock: queryFields.recover,
+      baseQuery: query.base,
+      alertBlock: query.breach.segment,
+      recoveryBlock,
       onBaseQueryChange: (v: string) => updateQuery({ base: v }),
       onAlertBlockChange: (v: string) => updateQuery({ breach: v }),
-      onRecoveryBlockChange: (v: string) => updateQuery({ recover: v }),
+      onRecoveryBlockChange: updateRecoveryBlock,
       onAlertEditorMount,
       onRecoveryEditorMount,
       onBaseEditorMount,
@@ -266,8 +252,10 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     tabs,
     activeTab,
     onTabChange,
-    queryFields,
+    query,
+    recoveryBlock,
     updateQuery,
+    updateRecoveryBlock,
     onAlertEditorMount,
     onRecoveryEditorMount,
     onBaseEditorMount,

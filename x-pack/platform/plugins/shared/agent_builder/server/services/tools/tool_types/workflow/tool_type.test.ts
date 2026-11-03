@@ -68,6 +68,26 @@ describe('workflow tool type', () => {
     expect(toolType.toolType).toBe(ToolType.workflow);
   });
 
+  it('checks the requesting user when loading a workflow input schema', async () => {
+    const request = httpServerMock.createKibanaRequest();
+    const getWorkflow = jest.fn().mockResolvedValue(null);
+    mockWorkflowsManagement.management.getWorkflow = getWorkflow;
+    const toolType = getWorkflowToolType({
+      workflowsManagement: mockWorkflowsManagement,
+      security,
+    });
+    if (!isEnabledDefinition(toolType)) throw new Error('Expected enabled');
+    const props = await toolType.getDynamicProps(
+      { workflow_id: 'private-workflow' },
+      {
+        spaceId: 'default',
+        request,
+      }
+    );
+    await props.getSchema();
+    expect(getWorkflow).toHaveBeenCalledWith('private-workflow', 'default', request);
+  });
+
   describe('authorization', () => {
     const config = { workflow_id: 'wf-123', wait_for_completion: true };
     const request = httpServerMock.createKibanaRequest();

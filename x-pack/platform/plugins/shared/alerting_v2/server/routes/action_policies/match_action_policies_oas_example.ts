@@ -16,7 +16,7 @@ import { ACTION_POLICY_RESPONSE } from './action_policy_oas_shared_examples';
 
 export const MATCH_ACTION_POLICIES_REQUEST: MatchActionPoliciesBody = {
   rule: {
-    tags: ['production'],
+    routing_tags: ['production'],
   },
 };
 
@@ -27,7 +27,6 @@ const TAGGED_ACTION_POLICY_RESPONSE = {
 
 export const MATCH_ACTION_POLICIES_RESPONSE: MatchActionPoliciesResponse = {
   items: [{ action_policy: TAGGED_ACTION_POLICY_RESPONSE, category: 'tags' }],
-  total: 1,
   evaluated_count: 1,
   is_truncated: false,
 };

@@ -27,7 +27,7 @@ export const POLICY_EXECUTION_FIELDS = {
   policy: 'policy',
   outcome: 'outcome',
   rules: 'rules',
-  episodeCount: 'episode_count',
+  episodeCount: 'alert_count',
   actionGroupCount: 'action_group_count',
   workflows: 'workflows',
 } as const satisfies Record<string, keyof PolicyExecutionHistoryItem>;
@@ -82,9 +82,9 @@ export const usePolicyExecutionsDataView = () => useAdHocDataView(POLICY_EXECUTI
 
 // Extra flattened values consumed by cell renderers but not shown as their own column: the outcome
 // cell's failure tooltip (`errorMessage`, `failureReason`) and the rules cell's true total
-// (`totalRuleCount`, since the embedded `rules` array is capped server-side).
+// (`ruleCount`, since the embedded `rules` array is capped server-side).
 export const POLICY_RECORD_EXTRA_FIELDS = {
-  totalRuleCount: 'total_rule_count',
+  ruleCount: 'rule_count',
   failureReason: 'failure_reason',
   errorMessage: 'error_message',
 } as const;
@@ -106,10 +106,10 @@ export const policyExecutionToDataTableRecord = (
     [POLICY_EXECUTION_FIELDS.policy]: item.policy,
     [POLICY_EXECUTION_FIELDS.outcome]: item.outcome,
     [POLICY_EXECUTION_FIELDS.rules]: item.rules,
-    [POLICY_EXECUTION_FIELDS.episodeCount]: item.episode_count,
+    [POLICY_EXECUTION_FIELDS.episodeCount]: item.alert_count,
     [POLICY_EXECUTION_FIELDS.actionGroupCount]: item.action_group_count,
     [POLICY_EXECUTION_FIELDS.workflows]: item.workflows,
-    [POLICY_RECORD_EXTRA_FIELDS.totalRuleCount]: item.total_rule_count,
+    [POLICY_RECORD_EXTRA_FIELDS.ruleCount]: item.rule_count,
     [POLICY_RECORD_EXTRA_FIELDS.failureReason]: item.failure_reason ?? null,
     [POLICY_RECORD_EXTRA_FIELDS.errorMessage]: item.error?.message ?? null,
   },

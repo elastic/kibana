@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shouldSwallowFetchError } from './should_swallow_fetch_error';
+import { isPrivilegeFetchError, shouldSwallowFetchError } from './should_swallow_fetch_error';
 
 const httpError = (status: number, extras: Record<string, unknown> = {}) => ({
   name: 'Error',
@@ -45,6 +45,30 @@ describe('shouldSwallowFetchError', () => {
     ).toBe(true);
   });
 
+  it('swallows an ES|QL security_exception wrapped by the expressions error', () => {
+    expect(
+      shouldSwallowFetchError({
+        name: 'Error',
+        message: 'action [indices:data/read/esql] is unauthorized',
+        original: {
+          name: 'EsError',
+          message: 'action [indices:data/read/esql] is unauthorized',
+          attributes: { error: { type: 'security_exception', reason: 'unauthorized' } },
+        },
+      })
+    ).toBe(true);
+  });
+
+  it('does not swallow other ES|QL errors', () => {
+    expect(
+      shouldSwallowFetchError({
+        name: 'EsError',
+        message: 'parsing failed',
+        attributes: { error: { type: 'parsing_exception', reason: 'bad query' } },
+      })
+    ).toBe(false);
+  });
+
   it('does not swallow HTTP 500', () => {
     expect(shouldSwallowFetchError(httpError(500))).toBe(false);
   });
@@ -65,5 +89,30 @@ describe('shouldSwallowFetchError', () => {
 
   it('does not swallow undefined', () => {
     expect(shouldSwallowFetchError(undefined)).toBe(false);
+  });
+});
+
+describe('isPrivilegeFetchError', () => {
+  it.each([401, 403])('is true for HTTP %s', (status) => {
+    expect(isPrivilegeFetchError(httpError(status))).toBe(true);
+  });
+
+  it('is true for an ES security_exception', () => {
+    expect(
+      isPrivilegeFetchError({
+        name: 'EsError',
+        message: 'unauthorized',
+        attributes: { error: { type: 'security_exception' } },
+      })
+    ).toBe(true);
+  });
+
+  it('is false for transient failures and aborts', () => {
+    const abortError = new Error('aborted');
+    abortError.name = 'AbortError';
+
+    expect(isPrivilegeFetchError(httpError(503))).toBe(false);
+    expect(isPrivilegeFetchError(httpError(500))).toBe(false);
+    expect(isPrivilegeFetchError(abortError)).toBe(false);
   });
 });

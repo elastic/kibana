@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/tooling-log'
   - '@kbn/repo-info'
+  - '@kbn/core-test-helpers-kbn-server'
 tags:
   - shared-common
   - package
@@ -30,10 +31,9 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

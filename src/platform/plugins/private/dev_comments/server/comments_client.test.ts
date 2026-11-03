@@ -269,6 +269,19 @@ describe('CommentsClient', () => {
     });
   });
 
+  describe('get', () => {
+    it('reads the one comment, if there is one', async () => {
+      expect(await client().get('a')).toEqual({ ...stored, id: 'a' });
+      expect(comments.get).toHaveBeenCalledWith({ id: 'a' });
+
+      comments.get.mockRejectedValueOnce(responseError(404));
+      expect(await client().get('none')).toBeUndefined();
+
+      comments.get.mockRejectedValueOnce(responseError(500));
+      await expect(client().get('a')).rejects.toThrow(errors.ResponseError);
+    });
+  });
+
   describe('getSnapshot', () => {
     it('reads the screenshot stored under the comment id, if there is one', async () => {
       expect(await client().getSnapshot('a')).toEqual(snapshot);

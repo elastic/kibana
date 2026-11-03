@@ -98,7 +98,6 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
           />
         ) : undefined
       }
-      isTechnicalPreview
       prepareExportJson={prepareExportJson}
       titleId={titleId}
     />

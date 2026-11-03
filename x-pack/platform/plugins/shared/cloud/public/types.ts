@@ -34,6 +34,24 @@ export interface CloudBasicUrls {
    */
   deploymentUrl?: string;
   /**
+   * The full URL to the edit page of the deployment to which the Kibana instance belongs.
+   *
+   * @example `{deploymentUrl}/edit`
+   */
+  deploymentEditUrl?: string;
+  /**
+   * The full URL to the security page of the deployment to which the Kibana instance belongs.
+   *
+   * @example `{deploymentUrl}/security`
+   */
+  deploymentSecurityUrl?: string;
+  /**
+   * The full URL to the deployment page with the upgrade flow open.
+   *
+   * @example `{deploymentUrl}?show_upgrade=true`
+   */
+  deploymentUpgradeUrl?: string;
+  /**
    * This is the path to the Cloud deployment creation page. The value is already prepended with `baseUrl`.
    *
    * @example `{baseUrl}/deployments/create`
@@ -82,6 +100,13 @@ export interface CloudPrivilegedUrls {
    * or if the user does not have the `manage_security` cluster privilege.
    */
   usersAndRolesUrl?: string;
+  /**
+   * The full URL to the serverless project page on Elastic Cloud with the Search Power editor expanded.
+   * Undefined if not running in Serverless, or if the user does not have one of the `superuser`, `admin` or `developer` roles.
+   *
+   * @example `{deploymentUrl}?tab=settings&edit=search_power`
+   */
+  searchPowerUrl?: string;
 }
 
 export type CloudUrls = CloudBasicUrls & CloudPrivilegedUrls;

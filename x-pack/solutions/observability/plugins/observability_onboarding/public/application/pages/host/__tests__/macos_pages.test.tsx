@@ -132,10 +132,13 @@ describe('HostMacosOtelPage', () => {
     expect(screen.getByTestId('otelInstallStep')).toBeInTheDocument();
   });
 
-  it('wires the pre-existing-data probe with the otel_host flow id', () => {
+  it('scopes the pre-existing-data probe to darwin so other hosts cannot end the session', () => {
     usePreExistingDataCheckMock.mockClear();
     renderMacosOtelPage();
-    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({ flow: 'otel_host' });
+    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({
+      flow: 'otel_host',
+      osType: 'darwin',
+    });
   });
 
   it('reports onboardingFlowType=otel_logs to the window-blur and time-window detection hooks', () => {

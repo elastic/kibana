@@ -23,6 +23,7 @@ import {
 import { getDurationNanoseconds } from '../../lib/persistence';
 
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
+import { isContentFilterError } from '../../lib/errors/is_content_filter_error';
 import { isContextLengthExceededError } from '../../lib/errors/is_context_length_exceeded_error';
 
 import type {
@@ -227,6 +228,14 @@ const extractGenerationWorkflowResult = ({
 }): ExtractedGenerationWorkflowResult => {
   if (execution.status === 'failed') {
     const errorMessage = execution.error?.message ?? 'Unknown error';
+
+    if (isContentFilterError(errorMessage)) {
+      throw new AttackDiscoveryError({
+        errorCategory: 'content_filter',
+        message: `Generation workflow failed: ${errorMessage}`,
+        workflowId: execution.workflowId,
+      });
+    }
 
     if (isContextLengthExceededError(errorMessage)) {
       throw new AttackDiscoveryError({
@@ -605,7 +614,7 @@ export const invokeGenerationWorkflow = async ({
 
   try {
     // Step 1: Get and validate the workflow
-    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
     const validatedWorkflow = validateWorkflow(rawWorkflow, workflowId);
     workflowName = validatedWorkflow.name;
 
@@ -720,6 +729,7 @@ export const invokeGenerationWorkflow = async ({
 
     // Step 4: Poll for completion
     const execution = await pollForWorkflowCompletion({
+      request,
       executionId: workflowRunId,
       isReady: (exec) => exec.stepExecutions.some((step) => step.stepType === GENERATION_STEP_TYPE),
       logger,

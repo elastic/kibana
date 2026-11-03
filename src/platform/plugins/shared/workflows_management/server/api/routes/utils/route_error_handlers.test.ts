@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
@@ -21,8 +23,17 @@ import {
 } from '../../../lib/workflow_history_pagination_error';
 import { ManagedWorkflowDeleteForbiddenError } from '../../managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from '../../managed_workflow_errors';
+import { WorkflowTriggerInputError } from '../../workflow_trigger_input_error';
 
 describe('handleRouteError', () => {
+  it('preserves service-account authorization errors', () => {
+    const response = httpServerMock.createResponseFactory();
+    handleRouteError(response, Boom.forbidden('manage_security is required'));
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'manage_security is required' },
+    });
+  });
   it('returns forbidden for managed workflow update policy errors', () => {
     const response = httpServerMock.createResponseFactory();
 
@@ -74,6 +85,30 @@ describe('handleRouteError', () => {
     });
   });
 
+  it('returns bad request without the ES request body when the result window is exceeded', () => {
+    const response = httpServerMock.createResponseFactory();
+    const error = new errors.ResponseError({
+      statusCode: 400,
+      body: {
+        error: {
+          type: 'search_phase_execution_exception',
+          reason: 'Result window is too large, from + size must be less than or equal to: [10000]',
+        },
+      },
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+
+    handleRouteError(response, error);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message: 'Pagination exceeds the maximum result window. Use a smaller page or size.',
+      },
+    });
+  });
+
   it('returns bad request carrying validation reasons under attributes', () => {
     const response = httpServerMock.createResponseFactory();
     const validationErrors = [
@@ -121,6 +156,22 @@ describe('handleRouteError', () => {
     });
     expect(logger.error).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('returns bad request for trigger input errors without logging', () => {
+    const response = httpServerMock.createResponseFactory();
+    const logger = loggingSystemMock.createLogger();
+    const inputError = new WorkflowTriggerInputError('No documents found with the provided IDs');
+
+    handleRouteError(response, inputError, {
+      logger,
+      logContext: { route: 'POST /api/workflows/workflow/{id}/run', workflowId: 'wf-1' },
+    });
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: 'No documents found with the provided IDs' },
+    });
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('logs and returns 500 for unexpected errors when logger is provided', () => {

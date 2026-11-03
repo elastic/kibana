@@ -73,16 +73,3 @@ export const AskUserQuestion: Story = {
     ],
   },
 };
-
-export const SeveralPrompts: Story = {
-  args: {
-    prompts: [
-      createConfirmationPrompt(),
-      createConfirmationPrompt({
-        id: 'prompt-2',
-        title: 'Confirm second action',
-        message: 'The agent also wants to reindex `logs-*`. Allow?',
-      }),
-    ],
-  },
-};

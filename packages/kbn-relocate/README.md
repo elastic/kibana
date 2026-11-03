@@ -43,7 +43,7 @@ You can also specify combinations of the above filters, to include modules that 
 Excluding modules explictly is also supported:
 
 ```sh
-node scripts/relocate --pr <prNumber> --team "@elastic/obs-ux-management-team" --exclude "@kbn/data-forge"
+node scripts/relocate --pr <prNumber> --team "@elastic/obs-signals-logs-team" --exclude "@kbn/data-forge"
 ```
 
 ## Details

@@ -27,14 +27,16 @@ interface ImageEmbeddableProps {
   api: ImageEmbeddableApi & {
     setDataLoading: (loading: boolean | undefined) => void;
     imageConfig$: PublishingSubject<ImageConfig>;
+    disableTriggers$: PublishingSubject<boolean>;
   };
   filesClient: FilesClient<FileImageMetadata>;
 }
 
 export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
-  const [imageConfig, drilldowns] = useBatchedPublishingSubjects(
+  const [imageConfig, drilldowns, disableTriggers] = useBatchedPublishingSubjects(
     api.imageConfig$,
-    api.drilldowns$ ?? new BehaviorSubject<undefined>(undefined)
+    api.drilldowns$ ?? new BehaviorSubject<undefined>(undefined),
+    api.disableTriggers$
   );
   const [hasTriggerActions, setHasTriggerActions] = useState(false);
 
@@ -48,8 +50,8 @@ export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
 
   useEffect(() => {
     // set `hasTriggerActions` depending on whether or not the image has at least one drilldown
-    setHasTriggerActions(drilldowns?.length > 0);
-  }, [drilldowns]);
+    setHasTriggerActions(!disableTriggers && drilldowns?.length > 0);
+  }, [disableTriggers, drilldowns]);
 
   return (
     <ImageViewerContext.Provider

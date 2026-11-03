@@ -25,7 +25,7 @@ import type { ConnectorSpec } from '../../connector_spec';
 
 const IpInputSchema = lazySchema(() =>
   z.object({
-    ip: z.ipv4().describe('IP address'),
+    ip: z.ipv4().max(45).describe('IPv4 address, e.g. 8.8.8.8'),
   })
 );
 
@@ -48,6 +48,9 @@ export const GreyNoiseConnector: ConnectorSpec = {
     getIpContext: {
       isTool: true,
       scope: 'read',
+      description:
+        'Get full GreyNoise context for an IPv4 address: whether it was seen scanning the internet, its classification (benign, malicious, unknown), first/last seen dates, actor, and tags. ' +
+        'Use quickLookup instead when only a fast noise yes/no is needed.',
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -69,6 +72,9 @@ export const GreyNoiseConnector: ConnectorSpec = {
     quickLookup: {
       isTool: true,
       scope: 'read',
+      description:
+        'Quickly check whether an IPv4 address is known internet background noise. ' +
+        'Returns a noise boolean plus a GreyNoise status code and message; use getIpContext for detailed classification.',
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -87,6 +93,8 @@ export const GreyNoiseConnector: ConnectorSpec = {
     getMetadata: {
       isTool: true,
       scope: 'read',
+      description:
+        'Get network and geolocation metadata for an IPv4 address from GreyNoise, including ASN, city, country, and owning organization.',
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -108,6 +116,9 @@ export const GreyNoiseConnector: ConnectorSpec = {
     riotLookup: {
       isTool: true,
       scope: 'read',
+      description:
+        'Check whether an IPv4 address belongs to a known benign business service (GreyNoise RIOT dataset, e.g. CDNs, DNS resolvers, cloud providers). ' +
+        'Use this to rule out false positives; returns the service name, category, description, and last update time.',
       input: IpInputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };

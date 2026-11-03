@@ -42,12 +42,15 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns 400 for a significant event body without a title',
+      'returns 400 for a significant event subject, which is not accepted by this route',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { subject: { type: 'significant_event', id: 'se-1' } },
+          body: {
+            subject: { type: 'significant_event', id: 'se-1' },
+            title: 'Investigate significant event',
+          },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(400);
@@ -55,17 +58,27 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 400 when subject.id exceeds 500 characters',
+      'returns 400 when an entry of subject.ids exceeds 500 characters',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { subject: { type: 'alert', id: 'x'.repeat(501) } },
+          body: { subject: { type: 'alert', ids: ['x'.repeat(501)] } },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(400);
       }
     );
+
+    apiTest('returns 400 when subject.ids is empty', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+      const response = await apiClient.post(START_PATH, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: { subject: { type: 'alert', ids: [] } },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
 
     // Without this, every negative test above would still pass if the alert branch rejected
     // every body it was given. A well-formed alert body passes validation and reaches the
@@ -76,7 +89,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { subject: { type: 'alert', id: 'alert-uuid-1' } },
+          body: { subject: { type: 'alert', ids: ['alert-uuid-1'] } },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(404);
@@ -89,7 +102,7 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { subject: { type: 'alert', id: 'some-id' } },
+          body: { subject: { type: 'alert', ids: ['some-id'] } },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(403);

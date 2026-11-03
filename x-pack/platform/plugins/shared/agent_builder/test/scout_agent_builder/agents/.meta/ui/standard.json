@@ -1,9 +1,73 @@
 {
-  "sha1": "",
+  "sha1": "ae62b835f675c28df340fab23132021029aa04bf",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c8279dde7d9bcf0-f8dab1e1ef240ae",
+      "title": "Agent Builder — agent connectors page shows empty state when agent has no connectors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agent_connectors.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "c8279dde7d9bcf0-37b13724894e1e9",
+      "title": "Agent Builder — agent connectors page empty state \"Add connector\" button opens menu with both options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agent_connectors.spec.ts",
+        "line": 45,
+        "column": 13
+      }
+    },
+    {
+      "id": "c8279dde7d9bcf0-c1bd82443ba942b",
+      "title": "Agent Builder — agent connectors page \"From library\" menu item opens the connector library flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agent_connectors.spec.ts",
+        "line": 54,
+        "column": 47
+      }
+    },
+    {
+      "id": "c8279dde7d9bcf0-a3c06c7a608b4a4",
+      "title": "Agent Builder — agent connectors page \"Create new connector\" menu item opens the connector creation flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agent_connectors.spec.ts",
+        "line": 69,
+        "column": 26
+      }
+    },
     {
       "id": "e65520b227a3627-a575d75181b677a",
       "title": "Agent Builder — agents list agents list journeys",
@@ -17,7 +81,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agents_list.spec.ts",
         "line": 54,
-        "column": 49
+        "column": 67
       }
     },
     {
@@ -32,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/create_agent.spec.ts",
-        "line": 29,
+        "line": 28,
         "column": 11
       }
     },
@@ -48,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/edit_agent_overview.spec.ts",
-        "line": 40,
-        "column": 28
+        "line": 41,
+        "column": 7
       }
     },
     {
@@ -65,7 +129,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/edit_agent.spec.ts",
         "line": 48,
-        "column": 58
+        "column": 76
       }
     },
     {
@@ -80,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/landing_page.spec.ts",
-        "line": 25,
-        "column": 39
+        "line": 18,
+        "column": 25
       }
     },
     {
@@ -96,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/landing_page.spec.ts",
-        "line": 31,
-        "column": 25
+        "line": 25,
+        "column": 15
       }
     },
     {
@@ -112,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/sidebar_agent_switch.spec.ts",
-        "line": 44,
+        "line": 43,
         "column": 11
       }
     },
@@ -126,7 +190,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/space_default_agent.spec.ts",
-        "line": 76,
+        "line": 75,
         "column": 11
       }
     },
@@ -140,8 +204,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/space_default_agent.spec.ts",
-        "line": 100,
-        "column": 61
+        "line": 99,
+        "column": 9
       }
     },
     {
@@ -155,7 +219,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/space_default_agent.spec.ts",
         "line": 130,
-        "column": 15
+        "column": 34
       }
     }
   ]

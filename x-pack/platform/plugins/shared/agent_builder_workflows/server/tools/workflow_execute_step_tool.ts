@@ -6,8 +6,7 @@
  */
 
 import YAML, { LineCounter, parseDocument } from 'yaml';
-import { AgentExecutionMode, ToolType } from '@kbn/agent-builder-common';
-import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
+import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
@@ -24,55 +23,16 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows';
+import { confirmToolCall, hashDefinition } from './utils/confirm_tool_call';
+import { formatCodeBlock } from './utils/code_block';
+import { findUnsafeSteps, resolveYamlAliases, type UnsafeStep } from './utils/step_risk';
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
-export const SAFE_STEP_TYPES = new Set([
-  'console',
-  'data.set',
-  'data.map',
-  'data.filter',
-  'data.find',
-  'data.dedupe',
-  'data.aggregate',
-  'data.concat',
-  'data.parseJson',
-  'data.regexExtract',
-  'data.regexReplace',
-  'data.stringifyJson',
-  'if',
-  'foreach',
-  'while',
-  'wait',
-  'elasticsearch.search',
-  'elasticsearch.esql.query',
-  'elasticsearch.indices.exists',
-  'kibana.getCase',
-  'kibana.streams.list',
-  'kibana.streams.get',
-  'cases.getCase',
-  'cases.getCases',
-  'cases.findCases',
-  'cases.findSimilarCases',
-  'cases.getAllAttachments',
-  'cases.getCasesByAlertId',
-  // Slack read-only actions (.slack2 connector): query the Slack API without
-  // posting messages or mutating workspace state.
-  'slack2.searchMessages',
-  'slack2.listChannels',
-  'slack2.resolveChannelId',
-]);
-
-/**
- * Every unsafe step already requires human approval — the HITL dialog gates
- * execution regardless of step type. This list only adds emphasis: entries
- * render the confirm button with `color: 'danger'` instead of `'warning'`.
- */
-const DESTRUCTIVE_STEP_TYPES = new Set([
-  'elasticsearch.indices.delete',
-  'cases.deleteCases',
-  'cases.deleteObservable',
-]);
+/** `execute_api` selector for the same operation, so one auto-approval covers both tools. */
+const STEP_TEST_API = 'workflows.post-workflows-step-test';
 
 const CONDITION_STEP_TYPES = new Set(['if', 'while']);
 
@@ -131,24 +91,21 @@ const getDescendantStepIds = (stepId: string, allSteps: Record<string, StepInfo>
 };
 
 /**
- * A step is safe only if its own type and every descendant's type are in SAFE_STEP_TYPES.
- * Returns the first unsafe step found (self or descendant), or null if fully safe.
+ * A step is safe only if its own type and every descendant's type are safe.
+ * Returns the steps that need confirmation (self first, then descendants).
  */
-const findUnsafeStep = (stepId: string, allSteps: Record<string, StepInfo>): StepInfo | null => {
+const findUnsafeStepsIn = (
+  stepId: string,
+  allSteps: Record<string, StepInfo>,
+  interactivity: ToolHandlerContext['interactivity']
+): UnsafeStep[] => {
   const step = allSteps[stepId];
-  if (!step) return null;
+  if (!step) return [];
 
-  if (!SAFE_STEP_TYPES.has(step.stepType)) return step;
-
-  const descendantIds = getDescendantStepIds(stepId, allSteps);
-  for (const id of descendantIds) {
-    const descendant = allSteps[id];
-    if (descendant && !SAFE_STEP_TYPES.has(descendant.stepType)) {
-      return descendant;
-    }
-  }
-
-  return null;
+  const descendants = getDescendantStepIds(stepId, allSteps)
+    .map((id) => allSteps[id])
+    .filter((descendant): descendant is StepInfo => descendant !== undefined);
+  return findUnsafeSteps([step, ...descendants], interactivity);
 };
 
 /**
@@ -326,7 +283,7 @@ const executeAndPollStep = async ({
     request
   );
 
-  const result = await pollExecution(api, executionId, stepName, spaceId);
+  const result = await pollExecution(api, executionId, stepName, spaceId, request);
 
   return { executionId, result };
 };
@@ -345,32 +302,6 @@ const formatExecutionResult = ({
   ...(result.error !== undefined ? { error: result.error } : {}),
   ...(result.duration != null ? { duration: result.duration } : {}),
 });
-
-const getUnsafeStepValidation = async ({
-  api,
-  yaml,
-  spaceId,
-  request,
-}: {
-  api: WorkflowsManagementApi;
-  yaml: string;
-  spaceId: string;
-  request: ToolHandlerContext['request'];
-}): Promise<{ valid: boolean; errors?: string[] } | undefined> => {
-  try {
-    const result = await api.validateWorkflow(yaml, spaceId, request);
-    if (result.valid) {
-      return { valid: true };
-    }
-
-    const errors = result.diagnostics
-      .filter((d) => d.severity === 'error')
-      .map((d) => `[${d.source}] ${d.message}${d.path ? ` (at ${d.path.join('.')})` : ''}`);
-    return { valid: false, errors };
-  } catch {
-    return undefined;
-  }
-};
 
 const executeConditionStepWithStubs = async ({
   api,
@@ -408,91 +339,78 @@ const executeConditionStepWithStubs = async ({
   }
 };
 
-const buildFallbackPreview = (
-  stepInfo: StepInfo,
-  unsafeStep: StepInfo,
-  contextOverride?: Record<string, unknown>
-): string => {
+/** Max characters of rendered step YAML shown in the confirmation dialog. */
+const MAX_STEP_YAML_PREVIEW_CHARS = 2000;
+
+/**
+ * Builds the dialog body: the steps that need confirmation, the step YAML (with its
+ * `with:` block and nested children), then the agent's summary. The list comes
+ * first, so a cut in a long YAML cannot hide an unsafe child.
+ */
+const buildConfirmationMessage = ({
+  stepInfo,
+  unsafeSteps,
+  contextOverride,
+  confirmationBody,
+}: {
+  stepInfo: StepInfo;
+  unsafeSteps: UnsafeStep[];
+  contextOverride?: Record<string, unknown>;
+  confirmationBody?: string;
+}): string => {
   const lines: string[] = [
-    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.step', {
-      defaultMessage: '**Step:** `{stepId}`',
-      values: { stepId: stepInfo.stepId },
+    i18n.translate('workflows.agentBuilder.executeStep.confirmation.unsafeSteps', {
+      defaultMessage: '**Needs confirmation:** {steps}',
+      values: {
+        steps: unsafeSteps
+          .map(({ step }) => `\`${step.stepId}\` (\`${step.stepType}\`)`)
+          .join(', '),
+      },
     }),
-    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.type', {
-      defaultMessage: '**Type:** `{stepType}`',
-      values: { stepType: stepInfo.stepType },
-    }),
+    '',
+    formatCodeBlock(
+      'yaml',
+      YAML.stringify(stepInfo.stepYamlNode.toJSON()).trimEnd(),
+      MAX_STEP_YAML_PREVIEW_CHARS
+    ),
   ];
-  if (unsafeStep.stepId !== stepInfo.stepId) {
-    lines.push(
-      i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.unsafeDescendant', {
-        defaultMessage: '**Unsafe descendant:** `{stepId}` (`{stepType}`)',
-        values: { stepId: unsafeStep.stepId, stepType: unsafeStep.stepType },
-      })
-    );
-  }
+
   if (contextOverride && Object.keys(contextOverride).length > 0) {
     const keys = Object.keys(contextOverride).join(', ');
     lines.push(
-      i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.contextOverrideKeys', {
+      '',
+      i18n.translate('workflows.agentBuilder.executeStep.confirmation.contextOverrideKeys', {
         defaultMessage: '**Context override keys:** {keys}',
         values: { keys },
       })
     );
   }
-  lines.push(
-    '',
-    i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.body', {
-      defaultMessage:
-        'This step has external side effects. Review the workflow YAML before confirming.',
-    })
-  );
+
+  lines.push('');
+  if (confirmationBody) {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeStep.confirmation.agentSummary', {
+        defaultMessage: '**Agent summary:**\n\n{summary}',
+        values: { summary: confirmationBody },
+      })
+    );
+  } else {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeStep.confirmation.sideEffectsWarning', {
+        defaultMessage:
+          'This step has external side effects. Review the workflow YAML before confirming.',
+      })
+    );
+  }
   return lines.join('\n');
-};
-
-const createUnsafeStepResult = async ({
-  api,
-  yaml,
-  stepName,
-  stepInfo,
-  unsafeStep,
-  context,
-}: {
-  api: WorkflowsManagementApi;
-  yaml: string;
-  stepName: string;
-  stepInfo: StepInfo;
-  unsafeStep: StepInfo;
-  context: ToolHandlerContext;
-}) => {
-  const validation = await getUnsafeStepValidation({
-    api,
-    yaml,
-    spaceId: context.spaceId,
-    request: context.request,
-  });
-
-  const isChildUnsafe = unsafeStep.stepId !== stepName;
-  const reason = isChildUnsafe
-    ? `Step "${stepName}" contains child step "${unsafeStep.stepId}" (type "${unsafeStep.stepType}") which has external side effects`
-    : `Step type "${unsafeStep.stepType}" has external side effects and cannot be auto-executed`;
-
-  return createToolResult({
-    blocked: true,
-    reason,
-    stepType: stepInfo.stepType,
-    unsafeStepType: unsafeStep.stepType,
-    ...(isChildUnsafe ? { unsafeChildStepId: unsafeStep.stepId } : {}),
-    ...(validation ? { validation } : {}),
-    hint: 'Ask the user to test this step manually using the "Run step" button in the editor.',
-  });
 };
 
 const pollExecution = async (
   api: WorkflowsManagementApi,
   executionId: string,
   stepName: string,
-  spaceId: string
+  spaceId: string,
+  request: ToolHandlerContext['request']
 ): Promise<{
   status: string;
   output?: unknown;
@@ -506,6 +424,7 @@ const pollExecution = async (
 
     const execution = await api.getWorkflowExecution(executionId, spaceId, {
       includeOutput: true,
+      request,
     });
 
     if (!execution) {
@@ -534,7 +453,8 @@ const pollExecution = async (
 
 export function registerWorkflowExecuteStepTool(
   agentBuilder: AgentBuilderPluginSetup,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  getSecurity: () => SecurityPluginStart | undefined
 ): void {
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
@@ -547,10 +467,10 @@ export function registerWorkflowExecuteStepTool(
       openWorldHint: true,
     },
     description: `Execute a single workflow step against the real environment.
-- Safe steps (data, ES reads, cases reads): executed and output returned with no prompt.
-- Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, ES writes, kibana.request, http, …): execution is gated by a user confirmation dialog. ALWAYS populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX.
+- Safe steps (data, read-scoped connector actions, and ES/Kibana APIs that \`execute_api\` does not treat as destructive, e.g. searches, \`indices.create\`, and \`create\` for new documents): executed and output returned with no prompt.
+- Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, elasticsearch.index and other writes that can overwrite data, kibana.request, http, …): in a conversation, execution is gated by a user confirmation dialog. With no user to confirm (for example in an \`ai.agent\` workflow step), they are refused unless the run pre-approved the workflows API, like \`execute_workflow\`. ALWAYS populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX.
 - if/while steps containing unsafe children: children are auto-replaced with safe stubs so the condition can be tested — returns which branch was taken (no prompt).
-- Other safe-container steps with unsafe descendants (e.g. foreach with an unsafe child): conversation mode prompts once and authorizes the whole container; standalone mode returns a preview with validation (no prompt).
+- Other safe-container steps with unsafe descendants (e.g. foreach with an unsafe child): one prompt authorizes the whole container.
 
 Provide \`contextOverride\` with mock data when the step references outputs from previous steps.
 Provide \`yaml\` to execute a step without needing a workflow.yaml attachment (useful for field discovery before creating the full workflow).
@@ -584,6 +504,19 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
       { stepName, yaml: inlineYaml, contextOverride, confirmation_body: confirmationBody },
       context
     ) => {
+      const canExecute = await hasWorkflowExecutePrivilege({
+        security: getSecurity(),
+        request: context.request,
+        spaceId: context.spaceId,
+      });
+      if (!canExecute) {
+        return createToolResult({
+          success: false,
+          error:
+            "Unauthorized to execute workflow step. The 'workflowsManagement' execute privilege is required.",
+        });
+      }
+
       const attachment = inlineYaml ? null : findWorkflowYamlAttachment(context);
       if (!inlineYaml && !attachment) {
         return createToolResult({
@@ -608,6 +541,14 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
           error: `Invalid workflow YAML: ${yamlParseError}`,
         });
       }
+      const resolved = resolveYamlAliases(yaml);
+      if ('error' in resolved) {
+        return createToolResult({
+          success: false,
+          error: `Invalid workflow YAML: ${resolved.error}`,
+        });
+      }
+      yaml = resolved.yaml;
 
       const lookup = buildLookup(yaml);
       const stepInfo = lookup.steps[stepName];
@@ -621,13 +562,12 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
         });
       }
 
-      const isStepUnsafe = !SAFE_STEP_TYPES.has(stepInfo.stepType);
-      const unsafeStep = isStepUnsafe ? stepInfo : findUnsafeStep(stepName, lookup.steps);
+      const unsafeSteps = findUnsafeStepsIn(stepName, lookup.steps, context.interactivity);
       const isCondition = CONDITION_STEP_TYPES.has(stepInfo.stepType);
 
       // Conditions with unsafe descendants: stub the children and run the
       // condition, no prompt — execution stays side-effect-free.
-      if (unsafeStep && isCondition && !isStepUnsafe && unsafeStep.stepId !== stepName) {
+      if (isCondition && unsafeSteps.length > 0 && unsafeSteps[0].step.stepId !== stepName) {
         return executeConditionStepWithStubs({
           api,
           yaml,
@@ -638,70 +578,54 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
         });
       }
 
-      if (unsafeStep) {
-        // Standalone (non-interactive) runs cannot prompt — fall back to the
-        // existing preview-only result. This keeps background runs / evals /
-        // A2A invocations friction-free.
-        if (context.executionMode === AgentExecutionMode.standalone) {
-          return createUnsafeStepResult({
-            api,
-            yaml,
-            stepName,
-            stepInfo,
-            unsafeStep,
-            context,
-          });
+      if (unsafeSteps.length > 0) {
+        const confirmation = await confirmToolCall({
+          context,
+          toolId: WORKFLOW_EXECUTE_STEP_TOOL_ID,
+          api: STEP_TEST_API,
+          declinedMessage: 'The user declined to execute this step. Do not retry it.',
+          // The attachment can change after the prompt; a changed step asks again.
+          getPromptKey: async () => hashDefinition(yaml),
+          getPrompt: async () => {
+            const [{ step: unsafeStep }] = unsafeSteps;
+            const isContainer = unsafeStep.stepId !== stepInfo.stepId;
+            return {
+              title: isContainer
+                ? i18n.translate('workflows.agentBuilder.executeStep.confirmation.titleContainer', {
+                    defaultMessage:
+                      'Execute step "{stepName}" ({stepType}) — contains unsafe `{unsafeStepId}` ({unsafeStepType})',
+                    values: {
+                      stepName,
+                      stepType: stepInfo.stepType,
+                      unsafeStepId: unsafeStep.stepId,
+                      unsafeStepType: unsafeStep.stepType,
+                    },
+                  })
+                : i18n.translate('workflows.agentBuilder.executeStep.confirmation.title', {
+                    defaultMessage: 'Execute step "{stepName}" ({stepType})',
+                    values: { stepName, stepType: stepInfo.stepType },
+                  }),
+              message: buildConfirmationMessage({
+                stepInfo,
+                unsafeSteps,
+                contextOverride,
+                confirmationBody,
+              }),
+              confirm_text: i18n.translate(
+                'workflows.agentBuilder.executeStep.confirmation.confirmText',
+                { defaultMessage: 'Run step' }
+              ),
+              cancel_text: i18n.translate(
+                'workflows.agentBuilder.executeStep.confirmation.cancelText',
+                { defaultMessage: 'Cancel' }
+              ),
+              color: unsafeSteps.some(({ risk }) => risk.destructive) ? 'danger' : 'warning',
+            };
+          },
+        });
+        if (confirmation) {
+          return confirmation;
         }
-
-        const promptId = `${WORKFLOW_EXECUTE_STEP_TOOL_ID}.${context.callContext.toolCallId}`;
-        const status = context.prompts.checkConfirmationStatus(promptId);
-
-        if (status.status === ConfirmationStatus.rejected) {
-          return createToolResult({
-            success: false,
-            error: i18n.translate('workflows.agentBuilder.executeStep.error.userDeclined', {
-              defaultMessage: 'User declined to execute this step.',
-            }),
-          });
-        }
-
-        if (status.status === ConfirmationStatus.unprompted) {
-          const isDestructive = DESTRUCTIVE_STEP_TYPES.has(unsafeStep.stepType);
-          const isContainer = unsafeStep.stepId !== stepInfo.stepId;
-          return context.prompts.askForConfirmation({
-            id: promptId,
-            title: isContainer
-              ? i18n.translate('workflows.agentBuilder.executeStep.confirmation.titleContainer', {
-                  defaultMessage:
-                    'Execute step "{stepName}" ({stepType}) — contains unsafe `{unsafeStepId}` ({unsafeStepType})',
-                  values: {
-                    stepName,
-                    stepType: stepInfo.stepType,
-                    unsafeStepId: unsafeStep.stepId,
-                    unsafeStepType: unsafeStep.stepType,
-                  },
-                })
-              : i18n.translate('workflows.agentBuilder.executeStep.confirmation.title', {
-                  defaultMessage: 'Execute step "{stepName}" ({stepType})',
-                  values: { stepName, stepType: stepInfo.stepType },
-                }),
-            // `||` (not `??`) so empty-string `confirmation_body` falls back to
-            // the generated preview instead of rendering a blank dialog body.
-            message:
-              confirmationBody || buildFallbackPreview(stepInfo, unsafeStep, contextOverride),
-            confirm_text: i18n.translate(
-              'workflows.agentBuilder.executeStep.confirmation.confirmText',
-              { defaultMessage: 'Run step' }
-            ),
-            cancel_text: i18n.translate(
-              'workflows.agentBuilder.executeStep.confirmation.cancelText',
-              { defaultMessage: 'Cancel' }
-            ),
-            color: isDestructive ? 'danger' : 'warning',
-          });
-        }
-
-        // accepted → fall through to execute below
       }
 
       try {

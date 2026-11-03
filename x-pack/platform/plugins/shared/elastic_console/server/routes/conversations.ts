@@ -8,27 +8,17 @@
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, CoreStart, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
-import { type ConversationRound, isToolCallStep } from '@kbn/agent-builder-common';
+import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { ElasticConsolePluginStart, ElasticConsoleStartDependencies } from '../types';
 import { createConversationClient } from '../lib/conversation_storage';
+import {
+  conversationSchemaVersion,
+  eventsForRoundsWrite,
+  eventsFromRounds,
+  roundsForDocument,
+  serializeConversationRounds,
+} from '../lib/timeline';
 import { isElasticConsoleEnabled } from './is_enabled';
-
-/**
- * Agent_builder stores tool_call step results as JSON strings (via serializeStepResults).
- * The CLI sends them as objects/arrays. Serialize them so agent_builder can deserialize
- * with JSON.parse when reading conversations back.
- */
-const serializeConversationRounds = (rounds: ConversationRound[]): ConversationRound[] => {
-  return rounds.map((round) => ({
-    ...round,
-    steps: round.steps.map((step) => {
-      if (isToolCallStep(step) && step.results !== undefined && typeof step.results !== 'string') {
-        return { ...step, results: JSON.stringify(step.results) };
-      }
-      return step;
-    }),
-  })) as ConversationRound[];
-};
 
 const getSpace = (basePath: string): string => {
   const spaceMatch = basePath.match(/(?:^|\/)s\/([^/]+)/);
@@ -106,7 +96,7 @@ export const registerConversationRoutes = ({
             bool: { filter },
           },
           _source: {
-            excludes: ['conversation_rounds'],
+            excludes: ['conversation_rounds', 'events'],
           },
           sort: [{ updated_at: { order: 'desc' as const } }],
         });
@@ -173,10 +163,16 @@ export const registerConversationRoutes = ({
           return response.notFound();
         }
 
+        const source = hit._source;
         return response.ok({
           body: {
             id: hit._id,
-            ...hit._source,
+            ...source,
+            conversation_rounds: roundsForDocument({
+              schemaVersion: source.schema_version,
+              storedRounds: source.conversation_rounds,
+              events: source.events,
+            }),
           },
         });
       } catch (error) {
@@ -236,13 +232,20 @@ export const registerConversationRoutes = ({
         const id = uuidv4();
         const now = new Date().toISOString();
         const rounds = request.body.conversation_rounds as unknown as ConversationRound[];
+        const serialized = serializeConversationRounds(rounds);
 
         await client.index({
           id,
           document: {
             agent_id: request.body.agent_id,
             title: request.body.title,
-            conversation_rounds: serializeConversationRounds(rounds),
+            conversation_rounds: serialized,
+            events: eventsFromRounds(rounds, {
+              agentId: request.body.agent_id,
+              username: user.username,
+              userId: user.userId,
+            }),
+            schema_version: conversationSchemaVersion,
             user_id: user.userId,
             user_name: user.username,
             space,
@@ -329,6 +332,18 @@ export const registerConversationRoutes = ({
           ...(request.body.title !== undefined && { title: request.body.title }),
           ...(rounds !== undefined && {
             conversation_rounds: serializeConversationRounds(rounds),
+            events: eventsForRoundsWrite({
+              schemaVersion: hit._source.schema_version,
+              storedRounds: hit._source.conversation_rounds,
+              storedEvents: hit._source.events,
+              rounds,
+              ctx: {
+                agentId: hit._source.agent_id,
+                username: user.username,
+                userId: user.userId,
+              },
+            }),
+            schema_version: conversationSchemaVersion,
           }),
           updated_at: new Date().toISOString(),
         };

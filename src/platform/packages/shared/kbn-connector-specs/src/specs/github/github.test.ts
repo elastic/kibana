@@ -71,6 +71,7 @@ describe('GithubConnector', () => {
       expect(bearerType).toEqual(
         expect.objectContaining({
           type: 'bearer',
+          supportsSandbox: true,
           overrides: expect.objectContaining({ label: 'Personal Access Token (PAT)' }),
         })
       );

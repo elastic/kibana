@@ -17,6 +17,7 @@ import {
 import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
+import { autoApprovedApisSchema } from './approvals_schema';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
@@ -104,9 +105,28 @@ const SUBAGENT_IDS_SCHEMA = schema.arrayOf(
   {
     maxSize: 50,
     meta: {
-      availability: { stability: 'tech_preview' },
+      availability: { stability: 'stable', since: '9.6.0' },
       description:
-        "**Technical Preview; added in 9.6.0.** Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
+        "Allowlist of subagent IDs this agent may spawn. Missing or empty disables the `run_subagent` tool. Use '_self' to enable self-fork.",
+    },
+  }
+);
+
+const APPROVALS_SCHEMA = schema.object(
+  {
+    auto_approved_apis: schema.maybe(
+      autoApprovedApisSchema({
+        scope: 'every run of this agent',
+        description:
+          'Destructive Elasticsearch or Kibana APIs this agent may call without a user confirmation, keyed by backend.',
+        knownApisOnly: false,
+      })
+    ),
+  },
+  {
+    meta: {
+      availability: { stability: 'stable', since: '9.6.0' },
+      description: 'Auto-approval defaults applied to every run of this agent.',
     },
   }
 );
@@ -165,8 +185,9 @@ const ACCESS_CONTROL_MODE_SCHEMA = schema.oneOf(
   ],
   {
     meta: {
+      availability: { stability: 'stable', since: '9.4.0' },
       description:
-        '**Technical Preview; added in 9.4.0.** Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.',
+        'Access-control mode: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write). Agents created without an access-control mode default to `private`.',
     },
   }
 );
@@ -180,7 +201,7 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
           minLength: 1,
           maxLength: AGENT_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
           meta: {
-            availability: { stability: 'tech_preview', since: '9.6.0' },
+            availability: { stability: 'stable', since: '9.6.0' },
             description:
               'Stable identifier of the user to grant access to (Kibana user profile uid). Preferred over `name`.',
           },
@@ -257,7 +278,19 @@ export function registerAgentRoutes({
     .addVersion(
       {
         version: '2023-10-31',
-        validate: false,
+        validate: {
+          request: {
+            query: schema.object({
+              include_hidden: schema.boolean({
+                defaultValue: false,
+                meta: {
+                  description:
+                    'When true, hidden agents (such as built-in system agents) are included in the response.',
+                },
+              }),
+            }),
+          },
+        },
         options: {
           oasOperationObject: () => path.join(__dirname, 'examples/agents_list.yaml'),
         },
@@ -265,7 +298,8 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents: agentsService } = getInternalServices();
         const service = await agentsService.getRegistry({ request });
-        const agents = await service.list();
+        const includeHidden = request.query.include_hidden;
+        const agents = await service.list({ includeHidden });
         const contextEngineEnabled = await isContextEngineEnabled(ctx);
         return response.ok<ListAgentResponse>({
           body: { results: agents.map((agent) => withAiIndices(agent, contextEngineEnabled)) },
@@ -417,6 +451,7 @@ export function registerAgentRoutes({
                   connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                   ai_indices: schema.maybe(AI_INDICES_SCHEMA),
                   subagent_ids: schema.maybe(SUBAGENT_IDS_SCHEMA),
+                  approvals: schema.maybe(APPROVALS_SCHEMA),
                 },
                 {
                   meta: { description: 'Configuration settings for the agent.' },
@@ -568,6 +603,7 @@ export function registerAgentRoutes({
                     connector_ids: schema.maybe(CONNECTORS_SCHEMA),
                     ai_indices: schema.maybe(AI_INDICES_SCHEMA),
                     subagent_ids: schema.maybe(SUBAGENT_IDS_SCHEMA),
+                    approvals: schema.maybe(APPROVALS_SCHEMA),
                   },
                   {
                     meta: { description: 'Updated configuration settings for the agent.' },
@@ -685,7 +721,7 @@ export function registerAgentRoutes({
         'Get the access control for a specific agent. Callers without permission to manage access control receive `permissions.update_access_control: false` and only their own entry. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
-        availability: { stability: 'tech_preview', since: '9.5.0' },
+        availability: { stability: 'stable', since: '9.5.0' },
       },
     })
     .addVersion(
@@ -727,7 +763,7 @@ export function registerAgentRoutes({
         'Replace the per-agent access-control entries. Each entry grants one user a role on this agent. Identify the user by their Kibana user profile uid (`id`). Entries created before profile uids were adopted may use `name` (deprecated) instead. The agent owner, cluster admins, and anyone access control grants Manager can call this endpoint. Each call replaces the entire entries list — the most recent successful update wins. To learn more about agents, refer to the [agents documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-agents).',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
-        availability: { stability: 'tech_preview', since: '9.5.0' },
+        availability: { stability: 'stable', since: '9.5.0' },
       },
     })
     .addVersion(

@@ -5,11 +5,13 @@
  * 2.0.
  */
 import {
+  formatMWs,
   handleMultilineStringFormatter,
   inlineSourceFormatter,
   replaceStringWithParams,
 } from './formatting_utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 
 describe('replaceStringWithParams', () => {
@@ -271,5 +273,39 @@ describe('handleMultilineStringFormatter', () => {
     expect(JSON.stringify(value)).toEqual(
       '"-----BEGIN CERTIFICATE-----\\n\\nMIICMJBgNV\\n\\n\\npAqElJlQND\\n\\n-----END CERTIFICATE-----"'
     );
+  });
+});
+
+describe('formatMWs', () => {
+  const dtstart = '2026-10-12T00:00:00.000Z';
+  const toMW = (rRule: Record<string, unknown>) =>
+    [{ duration: 3600000, rRule: { dtstart, tzid: 'UTC', ...rRule } }] as MaintenanceWindow[];
+
+  it('returns undefined without maintenance windows', () => {
+    expect(formatMWs(undefined, false)).toBeUndefined();
+  });
+
+  it('converts a numeric freq to its name', () => {
+    expect(formatMWs(toMW({ freq: 3, interval: 1 }), false)).toEqual([
+      { dtstart, tzid: 'UTC', freq: 'daily', interval: 1, duration: '3600000ms' },
+    ]);
+  });
+
+  it('keeps a yearly one-off window as is', () => {
+    expect(formatMWs(toMW({ freq: 0, count: 1 }), false)).toEqual([
+      { dtstart, tzid: 'UTC', freq: 'yearly', count: 1, duration: '3600000ms' },
+    ]);
+  });
+
+  it('sends a window stored without freq as a single yearly occurrence', () => {
+    // A one-off window created through the public API is stored without a freq
+    expect(formatMWs(toMW({}), false)).toEqual([
+      { dtstart, tzid: 'UTC', freq: 'yearly', count: 1, duration: '3600000ms' },
+    ]);
+  });
+
+  it('always includes freq in the stringified output', () => {
+    const [window] = JSON.parse(formatMWs(toMW({}), true) as string);
+    expect(window.freq).toBe('yearly');
   });
 });

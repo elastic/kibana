@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { withTimeout } from '@kbn/std';
 import type { ParallelConcurrencyObject, StackFrame } from '@kbn/workflows';
 import {
   DEFAULT_PARALLEL_CONCURRENCY,
@@ -580,25 +581,15 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       return true;
     }
 
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let timedOut = false;
-    const timeoutPromise = new Promise<void>((resolve) => {
-      timer = setTimeout(() => {
-        timedOut = true;
-        abortController.abort();
-        resolve();
-      }, remaining);
+    const outcome = await withTimeout({
+      promise: fn().catch(() => undefined),
+      timeoutMs: remaining,
     });
-
-    try {
-      await Promise.race([fn().catch(() => undefined), timeoutPromise]);
-    } finally {
-      if (timer) {
-        clearTimeout(timer);
-      }
+    if (outcome.timedout) {
+      abortController.abort();
+      return true;
     }
-
-    return timedOut;
+    return false;
   }
 
   /**

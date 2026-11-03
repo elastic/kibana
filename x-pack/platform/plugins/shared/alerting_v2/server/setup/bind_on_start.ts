@@ -6,7 +6,7 @@
  */
 
 import { Logger, OnStart, PluginStart } from '@kbn/core-di';
-import { PluginInitializer } from '@kbn/core-di-server';
+import { CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
@@ -17,6 +17,8 @@ import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_
 import { INVALIDATE_API_KEYS_TASK_ID } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
 import type { PluginConfig } from '../config';
 import type { AlertingServerStartDependencies } from '../types';
+import { scheduleAlertActionsCleanupTask } from '../lib/tasks/alert_actions_cleanup/schedule_task';
+import { ALERT_ACTIONS_CLEANUP_TASK_ID } from '../lib/tasks/alert_actions_cleanup/constants';
 import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 import { TASK_ID as TELEMETRY_TASK_ID } from '../lib/usage/constants';
@@ -24,6 +26,7 @@ import { initSubscribers } from '../lib/events/init_subscribers';
 import { ALERTING_LOG_CODES } from '../lib/errors/error_codes';
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { DISPATCHER_TASK_ID } from '../lib/dispatcher/constants';
+import { installAlertingV2ManagedWorkflows } from '../lib/workflow_extensions/managed_workflows';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
@@ -33,6 +36,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     const coreLogger = container.get(Logger);
     const esClient = container.get(EsServiceInternalToken);
     const changeHistoryClient = container.get(ChangeHistoryClientToken);
+    const userProfileService = container.get(CoreStart('userProfile'));
     const taskManager = container.get(
       PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager')
     );
@@ -45,9 +49,31 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       esClient,
       coreLogger,
       changeHistoryClient,
+      retention: config.retention,
+      userProfileService,
     });
 
     initSubscribers(container);
+
+    try {
+      await installAlertingV2ManagedWorkflows(
+        container.get(
+          PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions')
+        )
+      );
+    } catch (error) {
+      coreLogger.warn('Failed to install alerting v2 managed workflows', { error });
+    }
+
+    if (config.dispatcher.paused) {
+      tasksLogger.warn({
+        code: ALERTING_LOG_CODES.DISPATCHER_PAUSED,
+        labels: { task_id: DISPATCHER_TASK_ID },
+        message:
+          'alerting v2 dispatcher is paused by xpack.alerting_v2.dispatcher.paused; no ' +
+          'notifications are sent and pending alerts are dispatched late once it is removed',
+      });
+    }
 
     scheduleDispatcherTask({ taskManager }).catch((error) => {
       tasksLogger.error({
@@ -66,6 +92,18 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         error,
         code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
         labels: { task_id: INVALIDATE_API_KEYS_TASK_ID },
+      });
+    });
+
+    scheduleAlertActionsCleanupTask({
+      logger: tasksLogger,
+      taskManager,
+      enabled: config.retention.alertActions.dispatcher.enabled,
+    }).catch((error) => {
+      tasksLogger.error({
+        error,
+        code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
+        labels: { task_id: ALERT_ACTIONS_CLEANUP_TASK_ID },
       });
     });
 

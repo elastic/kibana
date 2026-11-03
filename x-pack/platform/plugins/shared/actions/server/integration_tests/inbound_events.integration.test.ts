@@ -60,7 +60,8 @@ describe('Inbound events HTTP API', () => {
   const postHub = (
     connectorId: string,
     token: string,
-    body: Record<string, unknown> = { eventType: 'order.created', orderId: '1' }
+    body: Record<string, unknown> = { eventType: 'order.created', orderId: '1' },
+    contentType: 'json' | 'form' = 'json'
   ) =>
     getSupertest(
       kibanaServer.root,
@@ -73,6 +74,7 @@ describe('Inbound events HTTP API', () => {
       .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
       .set('kbn-xsrf', 'kibana')
       .set('Authorization', `Bearer ${token}`)
+      .type(contentType)
       .send(body);
 
   const readScopedAction = async (id: string): Promise<ScopedActionAttributes> => {
@@ -141,6 +143,12 @@ describe('Inbound events HTTP API', () => {
     }).expect(200, { challenge: 'abc' });
 
     await postHub(created.id, ingestToken!).expect(202, { ok: true });
+    await postHub(
+      created.id,
+      ingestToken!,
+      { payload: JSON.stringify({ eventType: 'order.created' }) },
+      'form'
+    ).expect(202, { ok: true });
 
     await getSupertest(kibanaServer.root, 'put', `/api/actions/connector/${created.id}`)
       .set('kbn-xsrf', 'kibana')

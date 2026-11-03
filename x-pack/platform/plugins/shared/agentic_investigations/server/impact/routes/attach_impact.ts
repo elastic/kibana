@@ -11,6 +11,7 @@ import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
 import { attachImpactRequestSchema } from '../../../common/impact/impact';
 import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import type { ImpactRouteDependencies } from '../types';
+import { attachImpactToInvestigation } from '../attachments/attach_impact_to_investigation';
 import { handleRouteError } from './handle_route_error';
 import { INTERNAL_ACCESS } from './shared';
 
@@ -20,6 +21,8 @@ export const registerAttachImpactRoute = ({
   getImpactService,
   getSpaceId,
   resolveUser,
+  getAttachmentClient,
+  getConversationClient,
 }: ImpactRouteDependencies) => {
   router.versioned
     .post({
@@ -35,9 +38,20 @@ export const registerAttachImpactRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const body = await getImpactService().attach(request.body, {
-            spaceId: getSpaceId(request),
-            user: await resolveUser(request),
+          const spaceId = getSpaceId(request);
+          const user = await resolveUser(request);
+          const service = getImpactService();
+          const [attachments, conversations] = await Promise.all([
+            getAttachmentClient(request),
+            getConversationClient(request),
+          ]);
+          const body = await attachImpactToInvestigation({
+            attachments,
+            conversations,
+            conversationId: request.body.conversationId,
+            readImpact: () => service.getByConversationId(request.body.conversationId, spaceId),
+            writeImpact: () => service.attach(request.body, { spaceId, user }),
+            revertImpact: (args) => service.revertAttach(args),
           });
           return response.ok({ body });
         } catch (error) {

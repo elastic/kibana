@@ -7,22 +7,23 @@
 
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { createOtherResult } from '@kbn/agent-builder-server';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { z } from '@kbn/zod/v4';
 import { policyFactory } from '../../../../../common/endpoint/models/policy_config';
 import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 import { createToolHandlerContext } from '../../../__mocks__/test_helpers';
+import { describePathWritability, getFieldRegistry } from '../domain/field_registry';
 import { hashPolicyConfig } from '../domain/hash_policy_config';
 import { normalize } from '../domain/normalize_policy_config';
+import type { EndpointPolicyBaseline } from '../domain/normalized_endpoint_policy';
 import type { EndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
 import type { EndpointPolicyRead } from '../services/read_policy';
 import {
   COMPARE_POLICIES_TOOL_ID,
   comparePoliciesSchema,
   createComparePoliciesTool,
-  type PolicyComparisonRef,
 } from './compare_policies';
 import { createPolicyTool } from './create_policy_tool';
 import { toPresentationHash } from './trim_policy_result';
@@ -32,7 +33,6 @@ jest.mock('./create_policy_tool', () => ({
 }));
 
 const SPACE_ID = 'space-marketing';
-const getStartServices = jest.fn() as unknown as StartServicesAccessor;
 const mockedCreatePolicyTool = jest.mocked(createPolicyTool);
 const mockService = {
   comparePolicies: jest.fn(),
@@ -43,6 +43,7 @@ const createPolicyRead = (overrides: Partial<EndpointPolicyRead> = {}): Endpoint
   const storedConfig = policyFactory();
   const normalizedConfig = normalize(storedConfig);
   return {
+    kind: 'policy',
     policy: {
       id: 'policy-1',
       name: 'Endpoint Policy',
@@ -57,6 +58,31 @@ const createPolicyRead = (overrides: Partial<EndpointPolicyRead> = {}): Endpoint
   };
 };
 
+const createBaseline = (
+  overrides: Partial<Omit<EndpointPolicyBaseline, 'kind'>> = {}
+): EndpointPolicyBaseline => {
+  const normalizedConfig = normalize(policyFactory());
+  return {
+    kind: 'baseline',
+    preset: 'NGAV',
+    environment: { license: 'enterprise', cloud: false, telemetryOptedIn: 'unresolved' },
+    normalizedConfig,
+    normalizedHash: hashPolicyConfig(normalizedConfig),
+    summary: {
+      windowsProtectionModes: {
+        malware: 'prevent',
+        ransomware: 'prevent',
+        memoryThreat: 'prevent',
+        behavior: 'prevent',
+      },
+      macProtectionModes: { malware: 'prevent', behavior: 'prevent' },
+      linuxProtectionModes: { malware: 'prevent', ransomware: 'prevent', behavior: 'prevent' },
+      globalTelemetryEnabled: false,
+    },
+    ...overrides,
+  };
+};
+
 const createContext = () =>
   createToolHandlerContext(
     httpServerMock.createKibanaRequest(),
@@ -65,10 +91,12 @@ const createContext = () =>
     { spaceId: SPACE_ID }
   );
 
-const getResult = async (from: PolicyComparisonRef, to: PolicyComparisonRef) => {
+const getResult = async (
+  from: z.infer<typeof comparePoliciesSchema>['from'],
+  to: z.infer<typeof comparePoliciesSchema>['to']
+) => {
   const tool = createComparePoliciesTool({
     endpointAppContextService: createMockEndpointAppContextService(),
-    getStartServices,
   });
   const result = await tool.handler({ from, to }, createContext());
   if (!('results' in result)) {
@@ -86,7 +114,7 @@ describe('createComparePoliciesTool', () => {
       schema: options.schema,
       maxResultTokens: options.maxResultTokens,
       handler: async (params) => ({
-        results: [createOtherResult(await options.run(params, mockService))],
+        results: [createOtherResult(await options.run(params, mockService, createContext()))],
       }),
     }));
     mockedComparePolicies.mockReset();
@@ -95,12 +123,10 @@ describe('createComparePoliciesTool', () => {
   it('registers the approved id, schema, and 12000-token budget without wrapper authorization', () => {
     createComparePoliciesTool({
       endpointAppContextService: createMockEndpointAppContextService(),
-      getStartServices,
     });
 
     expect(mockedCreatePolicyTool).toHaveBeenCalledWith({
       endpointAppContextService: expect.anything(),
-      getStartServices,
       id: COMPARE_POLICIES_TOOL_ID,
       description: expect.any(String),
       schema: comparePoliciesSchema,
@@ -109,22 +135,26 @@ describe('createComparePoliciesTool', () => {
     });
   });
 
-  it('accepts two live policy refs and rejects invalid refs', () => {
-    expect(
-      comparePoliciesSchema.parse({
-        from: { type: 'policy', idOrName: '  policy-1  ' },
-        to: { type: 'policy', idOrName: 'policy-2' },
-      })
-    ).toEqual({
-      from: { type: 'policy', idOrName: 'policy-1' },
-      to: { type: 'policy', idOrName: 'policy-2' },
-    });
-    expect(
-      comparePoliciesSchema.safeParse({
-        from: { type: 'policy', idOrName: '' },
-        to: { type: 'policy', idOrName: 'policy-2' },
-      }).success
-    ).toBe(false);
+  it('emits strict exclusive serialized branches', () => {
+    const jsonSchema = z.toJSONSchema(comparePoliciesSchema, { io: 'input' });
+    expect(jsonSchema.type).toBe('object');
+    expect(jsonSchema.required).toEqual(['from', 'to']);
+    for (const side of ['from', 'to'] as const) {
+      const sideSchema = jsonSchema.properties?.[side];
+      expect(sideSchema).toBeDefined();
+      if (typeof sideSchema !== 'object') {
+        throw new Error('expected a compare side schema object');
+      }
+      const branches = sideSchema.anyOf ?? [];
+      expect(branches).toHaveLength(2);
+      for (const field of ['idOrName', 'preset'] as const) {
+        const branch = branches.find((b) => field in (b.properties ?? {}));
+        expect(branch).toBeDefined();
+        expect(branch?.type).toBe('object');
+        expect(branch?.required).toEqual([field]);
+        expect(branch?.additionalProperties).toBe(false);
+      }
+    }
   });
 
   it('presents both service-read sides with digested hashes and truthful totals', async () => {
@@ -144,11 +174,7 @@ describe('createComparePoliciesTool', () => {
       ],
     });
 
-    const result = await getResult(
-      { type: 'policy', idOrName: 'policy-1' },
-      { type: 'policy', idOrName: 'policy-2' }
-    );
-
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-2' });
     expect(mockedComparePolicies).toHaveBeenCalledWith(
       { type: 'policy', idOrName: 'policy-1' },
       { type: 'policy', idOrName: 'policy-2' }
@@ -176,14 +202,123 @@ describe('createComparePoliciesTool', () => {
     );
   });
 
+  it('presents a live side and a baseline side in a mixed comparison', async () => {
+    const liveRead = createPolicyRead();
+    const baseline = createBaseline();
+    mockedComparePolicies.mockResolvedValue({
+      from: liveRead,
+      to: baseline,
+      diffs: [
+        {
+          path: 'windows.antivirus_registration.enabled',
+          from: true,
+          to: false,
+        },
+        {
+          path: 'windows.malware.mode',
+          from: ProtectionModes.prevent,
+          to: ProtectionModes.detect,
+        },
+        { path: 'windows.device_control.enabled', from: undefined, to: true },
+        { path: 'windows.device_control.usb_storage', from: undefined, to: 'deny_all' },
+        { path: 'windows.memory_protection.custom_yara_signatures', from: undefined, to: true },
+        { path: 'linux.events.dns', from: undefined, to: true },
+        { path: 'windows.advanced.alerts.rollback', from: { enabled: true }, to: undefined },
+      ],
+    });
+
+    const result = await getResult({ idOrName: 'policy-1' }, { preset: 'NGAV' });
+
+    expect(mockedComparePolicies).toHaveBeenCalledWith(
+      { type: 'policy', idOrName: 'policy-1' },
+      { type: 'baseline', preset: 'NGAV' }
+    );
+    expect(result.data).toEqual(
+      expect.objectContaining({
+        from: {
+          type: 'policy',
+          policy: liveRead.policy,
+          normalizedHash: toPresentationHash(liveRead.normalizedHash),
+        },
+        to: {
+          type: 'baseline',
+          baseline: {
+            preset: 'NGAV',
+            environment: baseline.environment,
+          },
+          normalizedHash: toPresentationHash(baseline.normalizedHash),
+        },
+        normalized_posture_equal: false,
+        value_truncated: false,
+      })
+    );
+
+    const dto = result.data as {
+      diffs: Array<Record<string, unknown>>;
+      value_total: number;
+      value_truncated: boolean;
+    };
+    expect(dto.value_total).toBe(7);
+    expect(dto.value_truncated).toBe(false);
+    expect(dto.diffs).toEqual([
+      {
+        path: 'windows.malware.mode',
+        from: ProtectionModes.prevent,
+        to: ProtectionModes.detect,
+        writable: true,
+      },
+      {
+        path: 'windows.device_control.enabled',
+        from: null,
+        to: true,
+        absent_side: 'from',
+        writable: true,
+      },
+      {
+        path: 'windows.device_control.usb_storage',
+        from: null,
+        to: 'deny_all',
+        absent_side: 'from',
+        writable: true,
+      },
+      {
+        path: 'windows.memory_protection.custom_yara_signatures',
+        from: null,
+        to: true,
+        absent_side: 'from',
+        writable: true,
+      },
+      {
+        path: 'windows.antivirus_registration.enabled',
+        from: true,
+        to: false,
+        writable: false,
+        not_writable_reason: 'derived_setting',
+      },
+      {
+        path: 'linux.events.dns',
+        from: null,
+        to: true,
+        absent_side: 'from',
+        writable: false,
+        not_writable_reason: 'missing_on_one_side',
+      },
+      {
+        path: 'windows.advanced.alerts.rollback',
+        from: { enabled: true },
+        to: null,
+        absent_side: 'to',
+        writable: false,
+        not_writable_reason: 'unknown_path',
+      },
+    ]);
+  });
+
   it('returns normalized_posture_equal true when the full deterministic diff is empty', async () => {
     const read = createPolicyRead();
     mockedComparePolicies.mockResolvedValue({ from: read, to: read, diffs: [] });
 
-    const result = await getResult(
-      { type: 'policy', idOrName: 'policy-1' },
-      { type: 'policy', idOrName: 'policy-1' }
-    );
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-1' });
 
     expect(result.data).toEqual(
       expect.objectContaining({
@@ -211,10 +346,7 @@ describe('createComparePoliciesTool', () => {
       diffs: fullDiff,
     });
 
-    const result = await getResult(
-      { type: 'policy', idOrName: 'policy-1' },
-      { type: 'policy', idOrName: 'policy-2' }
-    );
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-2' });
     const dto = result.data as {
       diffs: Array<Record<string, unknown>>;
       value_total: number;
@@ -236,6 +368,46 @@ describe('createComparePoliciesTool', () => {
     );
   });
 
+  it('returns every writable row even when non-writable rows exceed the display cap', async () => {
+    const leftRead = createPolicyRead();
+    const rightRead = createPolicyRead({
+      policy: { ...leftRead.policy, id: 'policy-2' },
+    });
+    const writablePaths = getFieldRegistry()
+      .map((entry) => entry.path)
+      .filter((path) => describePathWritability(path).writable)
+      .slice(0, 55);
+    expect(writablePaths.length).toBeGreaterThan(50);
+    const fullDiff = [
+      ...Array.from({ length: 60 }, (_, index) => ({
+        path: `windows.advanced.extra_${index}`,
+        from: 'left',
+        to: 'right',
+      })),
+      ...writablePaths.map((path) => ({ path, from: 'left', to: 'right' })),
+    ];
+    mockedComparePolicies.mockResolvedValue({
+      from: leftRead,
+      to: rightRead,
+      diffs: fullDiff,
+    });
+
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-2' });
+    const dto = result.data as {
+      diffs: Array<Record<string, unknown>>;
+      value_total: number;
+      value_truncated: boolean;
+    };
+
+    const returnedPaths = new Set(dto.diffs.map((entry) => entry.path));
+    for (const path of writablePaths) {
+      expect(returnedPaths.has(path)).toBe(true);
+    }
+    expect(dto.diffs.filter((entry) => entry.writable === true)).toHaveLength(writablePaths.length);
+    expect(dto.diffs.filter((entry) => entry.writable === false)).toHaveLength(50);
+    expect(dto.value_total).toBe(fullDiff.length);
+  });
+
   it('annotates primitive and array from/to truncation on the parent diff entry', async () => {
     const leftRead = createPolicyRead();
     const rightRead = createPolicyRead({
@@ -253,10 +425,7 @@ describe('createComparePoliciesTool', () => {
       ],
     });
 
-    const result = await getResult(
-      { type: 'policy', idOrName: 'policy-1' },
-      { type: 'policy', idOrName: 'policy-2' }
-    );
+    const result = await getResult({ idOrName: 'policy-1' }, { idOrName: 'policy-2' });
     const [entry] = (result.data as { diffs: Array<Record<string, unknown>> }).diffs;
 
     expect(entry).toEqual(

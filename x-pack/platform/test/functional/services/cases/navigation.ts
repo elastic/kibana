@@ -19,12 +19,12 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
     },
 
     /**
-     * Clicks a cases header menu item (e.g. `configure-case-button`). In the redesign the item lives
-     * in the app header menu, which collapses into an overflow popover at narrower widths, so open it
-     * first when the item is not directly clickable.
+     * Clicks a cases header menu item (e.g. `configure-case-button`). The item lives in the app
+     * header menu, which collapses into an overflow popover at narrower widths, so open it first
+     * when the item is not directly clickable.
      */
     async clickHeaderMenuItem(testSubj: string) {
-      if (await testSubjects.exists(testSubj, { timeout: 2000 })) {
+      if (await testSubjects.waitForExists(testSubj, { timeout: 2000 })) {
         await testSubjects.click(testSubj);
         return;
       }
@@ -37,10 +37,7 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
       await this.navigateToApp(app, 'cases-app');
       await this.clickHeaderMenuItem('configure-case-button');
       await retry.waitFor('the configuration page to load', async () => {
-        return (
-          (await testSubjects.exists('case-configure-title')) ||
-          (await testSubjects.exists('cases-redesign-settings-panel'))
-        );
+        return testSubjects.exists('cases-settings-panel');
       });
     },
 

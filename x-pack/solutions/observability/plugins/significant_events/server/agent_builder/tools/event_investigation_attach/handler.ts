@@ -8,40 +8,43 @@
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 
 export const attachEventInvestigationToolHandler = async ({
-  eventClient,
-  eventUuid,
+  eventSearchClient,
+  eventId,
   workflowExecutionId,
   startedAt,
   completedAt,
   alertEventsClient,
+  emitTrigger,
   logger,
 }: {
-  eventClient: EventClient;
-  eventUuid: string;
+  eventSearchClient: RuleEventsClient;
+  eventId: string;
   workflowExecutionId: string;
   startedAt: string;
   completedAt?: string;
-  alertEventsClient?: AlertEventsClientApi;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
   logger?: Logger;
-}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
-  const { hits } = await eventClient.findByEventUuid(eventUuid);
-  const event = hits[0];
-  if (!event) {
-    throw new Error(`Significant event "${eventUuid}" not found`);
+}): Promise<{ updated: number; ignored: number }> => {
+  const { hits } = await eventSearchClient.findByEventId(eventId);
+  if (hits.length === 0) {
+    throw new Error(`Significant event "${eventId}" not found`);
   }
 
   return attachInvestigationToEvent({
-    eventClient,
-    eventId: event.event_id,
+    eventSearchClient,
+    eventId,
     investigation: {
       workflow_execution_id: workflowExecutionId,
       started_at: startedAt,
       completed_at: completedAt,
     },
     alertEventsClient,
+    emitTrigger,
     logger,
   });
 };

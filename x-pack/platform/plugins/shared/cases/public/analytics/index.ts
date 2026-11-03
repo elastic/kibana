@@ -14,12 +14,12 @@ import {
   CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
-  CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE,
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
 } from '../../common/constants';
 import { registerFieldLibraryAnalytics } from './field_library';
+import { registerObservablesAnalytics } from './observables';
 import { registerTemplateAnalytics } from './templates';
 
 export const registerAnalytics = ({
@@ -69,26 +69,6 @@ export const registerAnalytics = ({
         type: 'keyword',
         _meta: {
           description: 'The solution ID (owner) in which the attachments tab is accessed',
-          optional: false,
-        },
-      },
-    },
-  });
-
-  analyticsService.registerEventType({
-    eventType: CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE,
-    schema: {
-      owner: {
-        type: 'keyword',
-        _meta: {
-          description: 'The solution ID (owner) in which the attachments tab is accessed',
-          optional: false,
-        },
-      },
-      attachment_type: {
-        type: 'keyword',
-        _meta: {
-          description: 'Which attachments type is rendered in the sub tab',
           optional: false,
         },
       },
@@ -277,4 +257,6 @@ export const registerAnalytics = ({
   registerTemplateAnalytics({ analyticsService });
 
   registerFieldLibraryAnalytics({ analyticsService });
+
+  registerObservablesAnalytics({ analyticsService });
 };

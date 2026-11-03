@@ -26,6 +26,7 @@ function transformRuleForExport(
       enabled: false,
       apiKey: null,
       apiKeyOwner: null,
+      apiKeyOwnerProfileUid: null,
       apiKeyCreatedByUser: null,
       uiamApiKey: null,
       scheduledTaskId: null,
