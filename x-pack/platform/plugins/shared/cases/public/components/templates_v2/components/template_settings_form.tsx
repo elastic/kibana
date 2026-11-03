@@ -7,6 +7,8 @@
 
 import React, { useCallback } from 'react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiSwitch,
@@ -18,9 +20,15 @@ import {
 
 import type { CaseConnectorWithoutName } from '../../../../common/types/domain/connector/v1';
 import type { TemplateSettings } from '../../../../common/types/domain/template/v1';
+import type { ExternalSyncSettings } from '../../../../common/types/domain';
 import { useCasesFeatures } from '../../../common/use_cases_features';
+import { useIsExternalSyncEnabled } from '../../../common/use_is_external_sync_enabled';
+import { getExplicitTemplateSettings } from '../utils/template_settings_yaml';
 import { TemplateConnectorForm } from './template_connector_form';
+import { SyncSettings } from '../../edit_connector/sync_settings';
+import { ExperimentalBadge } from '../../experimental_badge/experimental_badge';
 import * as commonI18n from '../../../common/translations';
+import * as editConnectorI18n from '../../edit_connector/translations';
 import * as i18n from '../translations';
 
 export interface TemplateSettingsFormProps {
@@ -49,17 +57,20 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
   const { isSyncAlertsEnabled, observablesAuthorized, isExtractObservablesEnabled } =
     useCasesFeatures();
   const canExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
+  const isExternalSyncEnabled = useIsExternalSyncEnabled();
 
   const setSetting = useCallback(
-    (key: keyof TemplateSettings, value: boolean) => {
+    (key: 'syncAlerts' | 'extractObservables', value: boolean) => {
       // Keep both settings keys explicit in the panel state so an "off" toggle is a real `false`
       // (and is written as such into the definition merged on save) rather than a dropped key.
-      onSettingsChange({
-        syncAlerts: settings?.syncAlerts ?? false,
-        extractObservables: settings?.extractObservables ?? false,
-        [key]: value,
-      });
+      onSettingsChange({ ...getExplicitTemplateSettings(settings), [key]: value });
     },
+    [settings, onSettingsChange]
+  );
+
+  const setExternalSync = useCallback(
+    (externalSync: ExternalSyncSettings) =>
+      onSettingsChange({ ...getExplicitTemplateSettings(settings), externalSync }),
     [settings, onSettingsChange]
   );
 
@@ -117,6 +128,24 @@ export const TemplateSettingsForm: React.FC<TemplateSettingsFormProps> = ({
         connector={connector}
         onChange={onConnectorChange}
       />
+
+      {isExternalSyncEnabled && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxs">
+                <h4>{editConnectorI18n.SYNC_TITLE}</h4>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ExperimentalBadge data-test-subj="templateSettingsSyncTechPreviewBadge" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <SyncSettings value={settings?.externalSync} onChange={setExternalSync} />
+        </>
+      )}
     </EuiForm>
   );
 };

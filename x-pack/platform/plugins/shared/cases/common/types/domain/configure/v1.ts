@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { CaseConnectorSchema, ConnectorMappingsSchema } from '../connector/v1';
+import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  CaseConnectorSchema,
+  ConnectorMappingsSchema,
+  ConnectorSyncSettingsSchema,
+} from '../connector/v1';
 import { UserSchema } from '../user/v1';
 import {
   CustomFieldTextTypeSchema,
@@ -140,13 +144,19 @@ export const ConfigurationAttributesSchema = CasesConfigureBasicSchema.merge(
   ConfigurationActivityFieldsSchema
 );
 
-export const ConfigurationSchema = ConfigurationAttributesSchema.extend({
-  id: z.string(),
-  version: z.string(),
-  error: z.string().nullable(),
-  owner: z.string(),
-  mappings: ConnectorMappingsSchema,
-});
+/**
+ * Sync settings of the configuration's connector (technical preview). Stored on the
+ * connector mappings, surfaced on the configuration for the settings page.
+ */
+export const ConfigurationSchema = lazySchema(() =>
+  ConfigurationAttributesSchema.extend({
+    id: z.string(),
+    version: z.string(),
+    error: z.string().nullable(),
+    owner: z.string(),
+    mappings: ConnectorMappingsSchema,
+  }).merge(ConnectorSyncSettingsSchema)
+);
 
 export const ConfigurationsSchema = z.array(ConfigurationSchema);
 

@@ -17,3 +17,5 @@ properties:
       value resolves to `false` regardless of the space configuration.
     type: boolean
     example: true
+  externalSync:
+    $ref: 'external_sync_settings.yaml'

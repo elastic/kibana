@@ -10,18 +10,21 @@ import type { Owner } from '../../../common/constants/types';
 import { getAlertInfoFromComments, getEventInfoFromComments } from '../../common/utils';
 import type { AlertInfo } from '../../common/types';
 import type { CasesClientArgs } from '..';
+import type { CaseUpdateOrigin } from '../../events/types';
 
 export function emitAttachmentsAddedEvent(
   clientArgs: CasesClientArgs,
   { id: caseId, owner }: Pick<Case, 'id' | 'owner'>,
   ids: string[],
-  attachmentType: string
+  attachmentType: string,
+  origin?: CaseUpdateOrigin
 ): void {
   clientArgs.casesEventBus?.emitAttachmentsAdded(clientArgs.request, {
     caseId,
     ids,
     attachmentType,
     owner: owner as Owner,
+    ...(origin != null ? { origin } : {}),
   });
 }
 

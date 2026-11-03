@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
@@ -31,6 +31,16 @@ import {
 } from '../../domain/custom_field/v1';
 import { ClosureTypeSchema, ConfigurationBasicWithoutOwnerSchema } from '../../domain/configure/v1';
 import type { Configuration, Configurations } from '../../domain/configure/v1';
+import {
+  EXTERNAL_SYNC_FIELDS,
+  ExternalSyncFieldMappingSchema,
+  ExternalSyncFieldRuleSchema,
+  ExternalSyncSettingsSchema,
+} from '../../domain/external_sync/v1';
+import {
+  MAX_EXTERNAL_SYNC_FIELD_KEY_LENGTH,
+  MAX_EXTERNAL_SYNC_FIELD_MAPPINGS,
+} from '../../../utils/external_sync_fields';
 import { CaseConnectorSchema } from '../../domain/connector/v1';
 import { CaseBaseOptionalFieldsRequestSchema } from '../case/v1';
 import {
@@ -174,25 +184,55 @@ export const TemplatesConfigurationSchema = limitedArraySchema({
   fieldName: 'templates',
 });
 
-export const ConfigurationRequestSchema = z.object({
-  /**
-   * The external connector
-   */
-  connector: CaseConnectorSchema,
-  /**
-   * Whether to close the case after it has been synced with the external system
-   */
-  closure_type: ClosureTypeSchema,
-  /**
-   * The plugin owner that manages this configuration
-   */
-  owner: z.string().max(MAX_TITLE_LENGTH),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
+const ExternalSyncFieldRulesRequestSchema = limitedArraySchema({
+  codec: ExternalSyncFieldRuleSchema,
+  min: 0,
+  max: EXTERNAL_SYNC_FIELDS.length,
+  fieldName: 'externalSyncFields',
 });
+
+const ExternalSyncFieldMappingsRequestSchema = limitedArraySchema({
+  codec: ExternalSyncFieldMappingSchema.extend({
+    externalField: limitedStringSchema({
+      fieldName: 'externalField',
+      min: 1,
+      max: MAX_EXTERNAL_SYNC_FIELD_KEY_LENGTH,
+    }),
+    caseField: limitedStringSchema({
+      fieldName: 'caseField',
+      min: 1,
+      max: MAX_EXTERNAL_SYNC_FIELD_KEY_LENGTH,
+    }),
+  }),
+  min: 0,
+  max: MAX_EXTERNAL_SYNC_FIELD_MAPPINGS,
+  fieldName: 'externalSyncFieldMappings',
+});
+
+export const ConfigurationRequestSchema = lazySchema(() =>
+  z.object({
+    /**
+     * The external connector
+     */
+    connector: CaseConnectorSchema,
+    /**
+     * Whether to close the case after it has been synced with the external system
+     */
+    closure_type: ClosureTypeSchema,
+    /**
+     * The plugin owner that manages this configuration
+     */
+    owner: z.string().max(MAX_TITLE_LENGTH),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+    externalSync: ExternalSyncSettingsSchema.optional(),
+    externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
+    externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),
+  })
+);
 
 export const GetConfigurationFindRequestSchema = z.object({
   /**
@@ -208,16 +248,21 @@ export const CaseConfigureRequestParamsSchema = z.object({
   configuration_id: z.string().max(512),
 });
 
-export const ConfigurationPatchRequestSchema = z.object({
-  closure_type: ClosureTypeSchema.optional(),
-  connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
-  customFields: CustomFieldsConfigurationSchema.optional(),
-  templates: TemplatesConfigurationSchema.optional(),
-  observableTypes: ObservableTypesConfigurationSchema.optional(),
-  extractObservables: z.boolean().optional(),
-  workflowTags: WorkflowTagsConfigurationSchema.optional(),
-  version: z.string().max(512),
-});
+export const ConfigurationPatchRequestSchema = lazySchema(() =>
+  z.object({
+    closure_type: ClosureTypeSchema.optional(),
+    connector: ConfigurationBasicWithoutOwnerSchema.shape.connector.optional(),
+    customFields: CustomFieldsConfigurationSchema.optional(),
+    templates: TemplatesConfigurationSchema.optional(),
+    observableTypes: ObservableTypesConfigurationSchema.optional(),
+    extractObservables: z.boolean().optional(),
+    workflowTags: WorkflowTagsConfigurationSchema.optional(),
+    externalSync: ExternalSyncSettingsSchema.optional(),
+    externalSyncFields: ExternalSyncFieldRulesRequestSchema.optional(),
+    externalSyncFieldMappings: ExternalSyncFieldMappingsRequestSchema.optional(),
+    version: z.string().max(512),
+  })
+);
 
 export type ConfigurationRequest = z.infer<typeof ConfigurationRequestSchema>;
 export type ConfigurationPatchRequest = z.infer<typeof ConfigurationPatchRequestSchema>;

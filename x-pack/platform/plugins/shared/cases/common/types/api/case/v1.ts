@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CASE_EXTENDED_FIELDS,
   MAX_ASSIGNEES_FILTER_LENGTH,
@@ -596,6 +596,16 @@ export const CasePushRequestParamsSchema = z.object({
   case_id: z.string().max(512),
   connector_id: z.string().max(512),
 });
+
+/**
+ * Sync case from its external incident
+ */
+
+export const CaseSyncRequestParamsSchema = lazySchema(() =>
+  z.object({
+    case_id: z.string().max(512),
+  })
+);
 
 /**
  * Taxonomies

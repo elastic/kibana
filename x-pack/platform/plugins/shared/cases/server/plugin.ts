@@ -78,6 +78,12 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { registerAutoPushListener } from './external_sync/auto_push_listener';
+import { externalIncidentUpdatedTopic } from './external_sync/external_incident_topic';
+import { registerExternalIncidentConsumer } from './external_sync/external_incident_consumer';
+import { registerExternalSyncWorkloadType } from './external_sync/service_account';
+import { getExternalSyncRoutes } from './routes/api/external_sync';
+import { LicensingService } from './services/licensing';
 import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
 
@@ -172,6 +178,24 @@ export class CasePlugin
 
     this.casesEventBus = new CasesEventBus(this.logger);
 
+    // Registered even when the sync is off, so existing bindings can still be listed and removed.
+    registerExternalSyncWorkloadType(core.security.serviceAccounts);
+
+    if (this.caseConfig.bidirectionalSync.enabled) {
+      core.pubsub.registerTopic(externalIncidentUpdatedTopic);
+      registerExternalIncidentConsumer({
+        pubsub: core.pubsub,
+        logger: this.logger,
+        getServices: async () => {
+          const [coreStart] = await core.getStartServices();
+          return {
+            serviceAccounts: coreStart.security.serviceAccounts,
+            getCasesClient: this.getCasesClientWithRequest(coreStart, 'external_sync'),
+          };
+        },
+      });
+    }
+
     registerSavedObjects({
       core,
       logger: this.logger,
@@ -257,6 +281,11 @@ export class CasePlugin
         }
       : undefined;
 
+    const getActionsClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.actions.getActionsClientWithRequest(request);
+    };
+
     registerRoutes({
       router,
       routes: [
@@ -272,6 +301,19 @@ export class CasePlugin
             ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
             : undefined
         ),
+        ...(this.caseConfig.bidirectionalSync.enabled
+          ? getExternalSyncRoutes({
+              getStartServices: async () => {
+                const [coreStart] = await core.getStartServices();
+                return {
+                  pubsub: coreStart.pubsub,
+                  serviceAccounts: coreStart.security.serviceAccounts,
+                };
+              },
+              getActionsClient,
+              getSpaceId,
+            })
+          : []),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -288,11 +330,6 @@ export class CasePlugin
         const [coreStart] = await core.getStartServices();
         return this.getCasesClientWithRequest(coreStart, clientSource)(request, options);
       };
-    };
-
-    const getActionsClient = async (request: KibanaRequest) => {
-      const [, pluginsStart] = await core.getStartServices();
-      return pluginsStart.actions.getActionsClientWithRequest(request);
     };
 
     const serverlessProjectType = this.isServerless
@@ -484,6 +521,19 @@ export class CasePlugin
     // this.casesEventBus will be set to a defined value in the setup() function
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     registerCasesWorkflowEventBridge(this.casesEventBus!, plugins.workflowsExtensions, this.logger);
+
+    if (this.caseConfig.bidirectionalSync.enabled && this.casesEventBus != null) {
+      const licensingService = new LicensingService(
+        plugins.licensing.license$,
+        plugins.licensing.featureUsage.notifyUsage
+      );
+      registerAutoPushListener({
+        casesEventBus: this.casesEventBus,
+        getCasesClient: this.getCasesClientWithRequest(core, 'external_sync'),
+        isAtLeastEnterprise: () => licensingService.isAtLeastEnterprise(),
+        logger: this.logger,
+      });
+    }
 
     this.clientFactory.initialize({
       // securityPluginSetup will be set to a defined value in the setup() function

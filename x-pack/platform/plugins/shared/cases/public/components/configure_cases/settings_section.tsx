@@ -10,7 +10,7 @@ import type { ReactNode } from 'react';
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 export interface SettingsSectionProps {
-  title: string;
+  title: ReactNode;
   description: ReactNode;
   children: ReactNode;
   'data-test-subj'?: string;

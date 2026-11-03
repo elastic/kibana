@@ -34,7 +34,7 @@ const createAttachments = async (
   model: CaseCommentModel;
   createdAttachments: AttachmentSavedObjectTransformedV2[];
 }> => {
-  const { attachments, caseId } = args;
+  const { attachments, caseId, origin } = args;
 
   const {
     logger,
@@ -110,7 +110,7 @@ const createAttachments = async (
       idsByType.set(attachment.type, ids);
     }
     for (const [type, ids] of idsByType) {
-      emitAttachmentsAddedEvent(clientArgs, caseInfo, ids, type);
+      emitAttachmentsAddedEvent(clientArgs, caseInfo, ids, type, origin);
     }
 
     // This call never throws — failures are logged and do not abort the attachment creation.

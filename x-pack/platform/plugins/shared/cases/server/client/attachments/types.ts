@@ -11,6 +11,7 @@ import type { ReplaySubject } from 'rxjs';
 import type { AttachmentType } from '../../../common';
 import type { UnifiedAttachmentsFindQueryParams } from '../../../common/types/api';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
+import type { CaseUpdateOrigin } from '../../events/types';
 
 /**
  * The arguments needed for creating a new attachment to a case.
@@ -33,6 +34,8 @@ export interface BulkCreateArgs {
    * Unified payloads only.
    */
   attachments: UnifiedAttachmentPayload[];
+  /** Tags the emitted event so listeners can tell imported attachments from user additions. */
+  origin?: CaseUpdateOrigin;
 }
 
 /**

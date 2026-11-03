@@ -71,12 +71,24 @@ Array [
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
-    "username": <Memo(HoverableUserResolver)
-      user={
+    "username": <Memo(AttachmentAuthor)
+      attachment={
         Object {
-          "email": "leslie.knope@elastic.co",
-          "fullName": "Leslie Knope",
-          "username": "lknope",
+          "comment": "Solve this fast!",
+          "createdAt": "2020-02-19T23:06:33.798Z",
+          "createdBy": Object {
+            "email": "leslie.knope@elastic.co",
+            "fullName": "Leslie Knope",
+            "username": "lknope",
+          },
+          "id": "basic-comment-id",
+          "owner": "securitySolution",
+          "pushedAt": null,
+          "pushedBy": null,
+          "type": "user",
+          "updatedAt": null,
+          "updatedBy": null,
+          "version": "WzQ3LDFc",
         }
       }
       userProfiles={
@@ -189,12 +201,24 @@ Array [
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
-    "username": <Memo(HoverableUserResolver)
-      user={
+    "username": <Memo(AttachmentAuthor)
+      attachment={
         Object {
-          "email": "leslie.knope@elastic.co",
-          "fullName": "Leslie Knope",
-          "username": "lknope",
+          "comment": "Solve this fast!",
+          "createdAt": "2020-02-19T23:06:33.798Z",
+          "createdBy": Object {
+            "email": "leslie.knope@elastic.co",
+            "fullName": "Leslie Knope",
+            "username": "lknope",
+          },
+          "id": "basic-comment-id",
+          "owner": "securitySolution",
+          "pushedAt": null,
+          "pushedBy": null,
+          "type": "user",
+          "updatedAt": null,
+          "updatedBy": null,
+          "version": "WzQ3LDFc",
         }
       }
       userProfiles={
@@ -293,12 +317,24 @@ Array [
     "timestamp": <Memo(UserActionTimestamp)
       createdAt="2020-02-19T23:06:33.798Z"
     />,
-    "username": <Memo(HoverableUserResolver)
-      user={
+    "username": <Memo(AttachmentAuthor)
+      attachment={
         Object {
-          "email": "leslie.knope@elastic.co",
-          "fullName": "Leslie Knope",
-          "username": "lknope",
+          "comment": "Solve this fast!",
+          "createdAt": "2020-02-19T23:06:33.798Z",
+          "createdBy": Object {
+            "email": "leslie.knope@elastic.co",
+            "fullName": "Leslie Knope",
+            "username": "lknope",
+          },
+          "id": "basic-comment-id",
+          "owner": "securitySolution",
+          "pushedAt": null,
+          "pushedBy": null,
+          "type": "user",
+          "updatedAt": null,
+          "updatedBy": null,
+          "version": "WzQ3LDFc",
         }
       }
       userProfiles={

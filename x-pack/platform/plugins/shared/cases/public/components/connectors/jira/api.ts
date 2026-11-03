@@ -57,6 +57,30 @@ export async function getFieldsByIssueType({
   return rewriteResponseToCamelCase(res);
 }
 
+export interface GetFieldsProps {
+  http: HttpSetup;
+  connectorId: string;
+  signal?: AbortSignal;
+}
+
+/** Fields shared by every issue type, with their labels. */
+export async function getFields({
+  http,
+  connectorId,
+  signal,
+}: GetFieldsProps): Promise<ActionTypeExecutorResult<Fields>> {
+  const res = await http.post<ConnectorExecutorResult<Fields>>(
+    getExecuteConnectorUrl(connectorId),
+    {
+      body: JSON.stringify({
+        params: { subAction: 'getFields', subActionParams: {} },
+      }),
+      signal,
+    }
+  );
+  return rewriteResponseToCamelCase(res);
+}
+
 export interface GetIssuesTypeProps {
   http: HttpSetup;
   connectorId: string;

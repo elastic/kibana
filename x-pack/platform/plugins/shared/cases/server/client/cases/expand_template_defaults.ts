@@ -119,8 +119,8 @@ export const resolveTemplateForCreate = async ({
  *   creation on lower license tiers; caller-sent assignees keep today's hard license failure.
  * - `tags`: caller-wins like the other list/scalar defaults — template tags apply only when the
  *   caller sent none (an empty `tags` array is a caller decision and wins). Deduped defensively.
- * - `settings.extractObservables`: filled from the template when the caller omitted it
- *   (`syncAlerts` is required on the wire, so it is always the caller's).
+ * - `settings.extractObservables` / `settings.externalSync`: filled from the template when the
+ *   caller omitted them (`syncAlerts` is required on the wire, so it is always the caller's).
  * - `connector`: the template connector applies only when the caller sent `.none`. Its `name` is
  *   resolved via the actions client here (lazily, behind the `.none` gate); an unresolvable id is
  *   dropped and the caller's `.none` connector is kept, mirroring the create form's fallback.
@@ -175,6 +175,10 @@ export const applyTemplateDefaultsToCreateRequest = async <T extends CasePostReq
       ...query.settings,
       extractObservables: definition.settings.extractObservables,
     };
+  }
+
+  if (query.settings.externalSync === undefined && definition.settings?.externalSync != null) {
+    expanded.settings = { ...expanded.settings, externalSync: definition.settings.externalSync };
   }
 
   // Resolve the template's default connector only when the caller sent `.none` — the sole case
