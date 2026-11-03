@@ -358,14 +358,15 @@ Reading `dimensions`, with `affected` from `spread`:
   timestamp fails the second or third test). Without an isolating scope there is no `a`: a field is
   informative when `2 <= f <= 50` and `f <= 0.5 × affected`. The test checks your picks; it does not
   rank them.
-- `present_{field}` is the number of failing rows with a non-null value for the field. Only when it
-  equals `affected` can a value describe every failing row; otherwise state it only for the
+- `rows` is the `dimensions` query's count of failing rows. `present_{field}` is the number of those
+  rows with a non-null value for the field. Only when it equals `rows` can a value describe every
+  failing row; otherwise state it only for the
   `present_{field}` rows and never use it to show containment or uniformity.
 - Keep up to 4 informative fields that best read the failure (what happened or the result first,
   then the conditions and where it ran), always including an informative field that names the
   service, dependency or target. State each by its values, never by a count alone: with `f = 1`, as
   `field = value` (the sampled row's, when that row falls in the hour; omit the field otherwise) and,
-  only when `present_{field} = affected`, say the failing rows carry it; with `f` of 2 or more, by
+  only when `present_{field} = rows`, say the failing rows carry it; with `f` of 2 or more, by
   the values of its `breakdown` (Reading
   `breakdown`), which the first 3 such fields get. A count (`f` of `a`) goes only next to the values,
   or alone when its `breakdown` was not sent or failed (a failure is named, Profile step); it never
@@ -444,9 +445,9 @@ Good (spread, isolating scope):
 Good (spread, no isolating scope; use only when {scope} does not isolate the operation):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS affected = COUNT(*)
 Good (dimensions, isolating scope):
-  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS `f_{field1}` = COUNT_DISTINCT(`{field1}`) WHERE {failure}, `a_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(`{field1}`) WHERE {failure}, `f_{field2}` = COUNT_DISTINCT(`{field2}`) WHERE {failure}, `a_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(`{field2}`) WHERE {failure}
+  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS rows = COUNT(*) WHERE {failure}, `f_{field1}` = COUNT_DISTINCT(`{field1}`) WHERE {failure}, `a_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(*) WHERE {failure} AND `{field1}` IS NOT NULL, `f_{field2}` = COUNT_DISTINCT(`{field2}`) WHERE {failure}, `a_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(*) WHERE {failure} AND `{field2}` IS NOT NULL
 Good (dimensions, no isolating scope; use only when {scope} does not isolate the operation):
-  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS `f_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(`{field1}`), `f_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(`{field2}`)
+  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS rows = COUNT(*), `f_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(*) WHERE `{field1}` IS NOT NULL, `f_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(*) WHERE `{field2}` IS NOT NULL
 Good (trend, buckets):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour) | SORT bucket ASC
 Good (baseline):
@@ -551,7 +552,7 @@ Each entry:
        stricter authored limit): give the number of sampled rows; the sample window (detection time
        minus 15 minutes, to now) holds only those, which says nothing about the profile windows;
      - a value `dimensions` found constant across the failing rows (`f` is 1 and `present_{field} =
-       affected`) is stated for the failing rows with no caveat. Values that every `examples` result
+       rows`) is stated for the failing rows with no caveat. Values that every `examples` result
        shows remain sampled observations; the profile numbers in sentences 2 and 3 show the failure
        is widespread.
 
@@ -562,10 +563,10 @@ Each entry:
      downstream fields can copy P. Give the dimensions the failing rows carry, by their values (Reading `dimensions`)
      and, from the examples, how many failure messages differ (Reading examples). Services: when `{scope}` pins the service, say the rule is
      scoped to it (never "the number of services is not measured"); otherwise follow Reading
-     `dimensions`. A service field with `f = a` and `present_{field} = affected` is an exception:
+     `dimensions`. A service field with `f = a` and `present_{field} = rows` is an exception:
      state that the failure reaches `f` of `a` measured services even when the field is otherwise
      non-informative, and list values only from its `breakdown` or the `f = 1` rule. When
-     `present_{field} < affected`, state that coverage and do not make an all-failing-rows claim.
+     `present_{field} < rows`, state that coverage and do not make an all-failing-rows claim.
 
      A `spread`, `trend` or `baseline` figure that was not measured is stated as not measured; a
      figure that does not apply to the shape that ran is left out.
