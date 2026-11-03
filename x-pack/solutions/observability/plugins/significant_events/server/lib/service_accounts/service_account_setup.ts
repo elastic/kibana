@@ -37,6 +37,7 @@ export interface DetectionEngineSetupService {
   }) => Promise<DetectionEngineServiceAccountStatus>;
 }
 
+/** Creates the setup service for one deployment. `isServerless` picks the name of the account's role. */
 export function createDetectionEngineSetupService({
   core,
   spaces,
@@ -48,7 +49,13 @@ export function createDetectionEngineSetupService({
 }): DetectionEngineSetupService {
   const role = getNightshiftRoleName('detection', { isServerless });
 
-  const assertSpaceExists = async (request: KibanaRequest, spaceId: string): Promise<void> => {
+  const assertSpaceExists = async ({
+    request,
+    spaceId,
+  }: {
+    request: KibanaRequest;
+    spaceId: string;
+  }): Promise<void> => {
     if (!spaces) {
       return;
     }
@@ -86,13 +93,13 @@ export function createDetectionEngineSetupService({
           400
         );
       }
-      if (!(await canManageSecurity(core, request))) {
+      if (!(await canManageSecurity({ core, request }))) {
         throw new StatusError(
           'Setting up the detection engine service account requires the manage_security cluster privilege.',
           403
         );
       }
-      await assertSpaceExists(request, spaceId);
+      await assertSpaceExists({ request, spaceId });
       await assertRoleExists(request);
       await core.security.serviceAccounts.bindWorkload(request, {
         serviceAccountId,
@@ -106,7 +113,8 @@ export function createDetectionEngineSetupService({
       const serviceAccountsEnabled = core.security.serviceAccounts.isEnabled();
       const [serviceAccountId, canSetUp] = await Promise.all([
         getDetectionEngineAccountId({ core, spaceId }),
-        serviceAccountsEnabled ? canManageSecurity(core, request) : false,
+        // A failing privilege probe must not fail a read: it reads as "cannot set up".
+        serviceAccountsEnabled ? canManageSecurity({ core, request }).catch(() => false) : false,
       ]);
       return {
         serviceAccountsEnabled,

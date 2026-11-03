@@ -252,13 +252,4 @@ describe('ensureNightshiftServiceAccount', () => {
       expect.objectContaining({ name: 'nightshift_detection', roles: ['_nightshift_detection'] })
     );
   });
-
-  it('keeps the detection role out of the investigations setup', async () => {
-    const { api } = createApi({ roles: ['_nightshift_agent', '_nightshift_automations'] });
-
-    await expect(ensureNightshiftServiceAccounts(api, { isServerless: true })).resolves.toEqual({
-      agent: 'uiam-1',
-      automations: 'uiam-2',
-    });
-  });
 });

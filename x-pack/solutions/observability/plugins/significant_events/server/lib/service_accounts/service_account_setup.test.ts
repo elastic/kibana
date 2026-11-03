@@ -15,23 +15,39 @@ const createCore = ({
   enabled = true,
   canManageSecurity = true,
   roleCount = 1,
+  boundAccountId,
+  privilegeProbeFails = false,
 }: {
   enabled?: boolean;
   canManageSecurity?: boolean;
   roleCount?: number;
+  boundAccountId?: string;
+  privilegeProbeFails?: boolean;
 } = {}) => {
+  const hasPrivileges = jest.fn(async () => {
+    if (privilegeProbeFails) {
+      throw new Error('boom');
+    }
+    return { has_all_requested: canManageSecurity };
+  });
   const bindWorkload = jest.fn(async () => ({}));
   const queryRole = jest.fn(async () => ({ total: roleCount }));
   const core = {
     security: {
-      serviceAccounts: { isEnabled: () => enabled, bindWorkload, getWorkloadBinding: jest.fn() },
+      serviceAccounts: {
+        isEnabled: () => enabled,
+        bindWorkload,
+        getWorkloadBinding: jest.fn(async () =>
+          boundAccountId ? { serviceAccountId: boundAccountId } : null
+        ),
+      },
     },
     elasticsearch: {
       client: {
         asScoped: () => ({
           asCurrentUser: {
             security: {
-              hasPrivileges: async () => ({ has_all_requested: canManageSecurity }),
+              hasPrivileges,
               queryRole,
             },
           },
@@ -39,7 +55,7 @@ const createCore = ({
       },
     },
   } as unknown as CoreStart;
-  return { core, bindWorkload, queryRole };
+  return { core, bindWorkload, queryRole, hasPrivileges };
 };
 
 describe('createDetectionEngineSetupService.enable', () => {
@@ -104,5 +120,63 @@ describe('createDetectionEngineSetupService.enable', () => {
       })
     ).rejects.toMatchObject({ statusCode: 400 });
     expect(bindWorkload).not.toHaveBeenCalled();
+  });
+});
+
+describe('createDetectionEngineSetupService.getStatus', () => {
+  it('reports a space that is not set up with a null account, and a user who can set it up', async () => {
+    const { core } = createCore();
+
+    expect(
+      await createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        isServerless: true,
+      }).getStatus({ request, spaceId: 'default' })
+    ).toEqual({
+      serviceAccountsEnabled: true,
+      canSetUp: true,
+      role: '_nightshift_detection',
+      serviceAccountId: null,
+    });
+  });
+
+  it('reports the bound account', async () => {
+    const { core } = createCore({ boundAccountId: 'account-1' });
+
+    expect(
+      (
+        await createDetectionEngineSetupService({
+          core,
+          spaces: undefined,
+          isServerless: false,
+        }).getStatus({ request, spaceId: 'default' })
+      ).serviceAccountId
+    ).toBe('account-1');
+  });
+
+  it('does not probe privileges when service accounts are off', async () => {
+    const { core, hasPrivileges } = createCore({ enabled: false });
+
+    const status = await createDetectionEngineSetupService({
+      core,
+      spaces: undefined,
+      isServerless: false,
+    }).getStatus({ request, spaceId: 'default' });
+
+    expect(status).toMatchObject({ serviceAccountsEnabled: false, canSetUp: false });
+    expect(hasPrivileges).not.toHaveBeenCalled();
+  });
+
+  it('answers when the privilege probe fails, reading it as cannot set up', async () => {
+    const { core } = createCore({ privilegeProbeFails: true });
+
+    expect(
+      await createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        isServerless: false,
+      }).getStatus({ request, spaceId: 'default' })
+    ).toMatchObject({ canSetUp: false });
   });
 });

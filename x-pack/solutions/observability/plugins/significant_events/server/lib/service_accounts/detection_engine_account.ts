@@ -70,7 +70,13 @@ export async function isDetectionEngineSetUp({
 }
 
 /** Whether the request's user holds `manage_security`, which binding an account requires. */
-export async function canManageSecurity(core: CoreStart, request: KibanaRequest): Promise<boolean> {
+export async function canManageSecurity({
+  core,
+  request,
+}: {
+  core: CoreStart;
+  request: KibanaRequest;
+}): Promise<boolean> {
   const { has_all_requested: allowed } = await core.elasticsearch.client
     .asScoped(request)
     .asCurrentUser.security.hasPrivileges({ cluster: ['manage_security'] });

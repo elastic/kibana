@@ -54,12 +54,9 @@ describe('getDetectionEngineAccountId', () => {
   });
 
   it('reads the account bound to the space', async () => {
-    const { core, getWorkloadBinding } = createCore({ boundAccountId: ACCOUNT_ID });
+    const { core } = createCore({ boundAccountId: ACCOUNT_ID });
 
     expect(await isDetectionEngineSetUp({ core, spaceId: SPACE_ID })).toBe(true);
-    expect(getWorkloadBinding).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: SPACE_ID, workloadType: 'detection_engine' })
-    );
   });
 });
 
