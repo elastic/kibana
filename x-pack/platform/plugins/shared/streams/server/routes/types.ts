@@ -25,6 +25,7 @@ import type { ProcessorSuggestionsService } from '../lib/streams/ingest_pipeline
 import type { IPatternExtractionService } from '../lib/pattern_extraction/pattern_extraction_service';
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { UnitConfigHooks } from '../lib/unit_config/types';
+import type { ComponentCatalogueService } from '../lib/component_catalogue/component_catalogue_service';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -57,6 +58,7 @@ export interface RouteDependencies {
   patternExtractionService: IPatternExtractionService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
   unitConfigHooks: UnitConfigHooks;
+  componentCatalogue: ComponentCatalogueService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;
