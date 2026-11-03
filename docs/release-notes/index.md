@@ -481,9 +481,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix highlighting in fields where the string field format applies a lowercase, uppercase, or title case transform [#281098]({{kib-pull}}281098).
 * Use the current time zone and date format when {{kib}} formats dates on the server, such as in CSV exports. Before, values that were already formatted kept the old settings after a change [#282501]({{kib-pull}}282501).
 * Show `(null)` instead of `-` for null dates in server-generated CSV exports [#281367]({{kib-pull}}281367).
-* Fix the {{esql}} editor validation and autocomplete for `STATS` aggregations in `TS` queries. For example, `TS my_ts_index | STATS AVG(requests_total)` no longer shows `Invalid input types for AVG` [#297978]({{kib-pull}}297978).
 * Fix an error in Discover when an {{esql}} query groups with `BY` by a field that a previous `STATS` command created as an aggregate, for example `STATS x = MAX(bytes) | STATS c = COUNT(*) BY x` [#290259]({{kib-pull}}290259).
-* Accept columns that you create in the `BY` clause of `STATS` when you use them in the aggregations of the same command, for example `STATS COUNT() WHERE addr != null BY addr = address` [#295730]({{kib-pull}}295730).
 * Fix opening a group in the {{esql}} group-by layout in Discover for time series (`TS`) queries. The group failed to open because `TS` queries don't support some functions outside `STATS` [#280580]({{kib-pull}}280580).
 * Stop Discover from showing the group-by layout for an {{esql}} `STATS` query that groups by more than one field when a later `WHERE` command refers to a grouping column [#291115]({{kib-pull}}291115).
 * Keep a renamed background search, or an extended search session expiration, when the session status updates at the same moment. Before, the change could be silently reverted [#296401]({{kib-pull}}296401).
@@ -515,6 +513,8 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix {{esql}} control variables not being recognized inside a `PROMQL` expression, such as `{app=?variable}` [#281437]({{kib-pull}}281437).
 * Fix autocomplete after a `PROMQL` command suggesting only the grouping labels as columns. It now also suggests the `step` column and the column for the expression result [#280538]({{kib-pull}}280538).
 * Fix autocomplete after `TS_INFO` and `METRICS_INFO` suggesting columns from the source time series data. It now suggests the metadata that these commands return [#280524]({{kib-pull}}280524).
+* Fix the {{esql}} editor validation and autocomplete for `STATS` aggregations in `TS` queries. For example, `TS my_ts_index | STATS AVG(requests_total)` no longer shows `Invalid input types for AVG` [#297978]({{kib-pull}}297978).
+* Accept columns that you create in the `BY` clause of `STATS` when you use them in the aggregations of the same command, for example `STATS COUNT() WHERE addr != null BY addr = address` [#295730]({{kib-pull}}295730).
 
 **{{kib}} platform**:
 * Fix the date range picker calendar ignoring the `dateFormat:tz` and `dateFormat:dow` advanced settings. It could apply a range in the browser time zone instead of the time zone you set, and it ignored your first day of the week [#299851]({{kib-pull}}299851).
