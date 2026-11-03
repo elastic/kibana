@@ -936,6 +936,40 @@ describe('Workflow routes', () => {
       expect(response.notFound).toHaveBeenCalledWith();
       expect(mockApi.cloneWorkflow).not.toHaveBeenCalled();
     });
+
+    it('should reject cloning a managed workflow without managed workflow read privilege', async () => {
+      mockApi.getWorkflow.mockResolvedValue({ id: 'managed-wf', managed: true });
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'managed-wf' } });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.create]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(handleRouteError).toHaveBeenCalledWith(
+        response,
+        expect.any(ManagedWorkflowReadForbiddenError)
+      );
+      expect(mockApi.cloneWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('should clone a managed workflow with managed workflow read privilege', async () => {
+      const wf = { id: 'managed-wf', managed: true };
+      const cloned = { id: 'wf-2', managed: false };
+      mockApi.getWorkflow.mockResolvedValue(wf);
+      mockApi.cloneWorkflow.mockResolvedValue(cloned);
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'managed-wf' } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.cloneWorkflow).toHaveBeenCalledWith(wf, 'default-space', request);
+      expect(response.ok).toHaveBeenCalledWith({ body: cloned });
+    });
   });
 
   describe('POST:/api/workflows/validate', () => {
