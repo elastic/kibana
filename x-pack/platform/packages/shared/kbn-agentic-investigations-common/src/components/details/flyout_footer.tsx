@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { AiButtonEmpty } from '@kbn/ui-ai-components';
 import type { Investigation } from '../../types';
-import type {
-  CloseInvestigationModalRenderProps,
-  EscalationModalRenderProps,
+import { type CardActionType } from '../actions';
+import {
+  InvestigationActionModals,
+  type CloseInvestigationModalRenderProps,
+  type EscalationModalRenderProps,
 } from '../modals/investigation_action_modals';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+import { ACTIONS_TRANSLATIONS } from '../actions/translations';
 
 export type { CloseInvestigationModalRenderProps };
 
@@ -23,41 +26,83 @@ export interface ConversationDetailsFlyoutFooterProps {
   /** Supplied by the caller because flyout slots render outside a `KibanaContextProvider`. */
   onOpenChat: () => void;
   /**
-   * Kept for callers that still wire escalation; the footer no longer shows "Open an escalation"
-   * in technical preview (elastic/nightshift-program#2168).
+   * When provided, the "Open an escalation" item in the actions menu opens the escalation modal.
+   * Supplied by the caller who has access to Kibana HTTP hooks unavailable in this package.
    */
   onOpenEscalation?: (props: EscalationModalRenderProps) => React.ReactNode;
   /**
-   * Kept for API compatibility; unused while the escalation footer button is hidden.
+   * Wraps the "Open escalation" button, so the caller can hide it once it learns at render time
+   * that the user may not escalate. Without it the button shows whenever `onOpenEscalation` is
+   * supplied.
    */
   wrapEscalationButton?: (button: React.ReactElement) => React.ReactNode;
   /**
-   * Kept for API compatibility with close-investigation wiring; unused in this footer today.
+   * When provided, the "Close investigation" action renders a confirmation modal.
+   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
    */
   onCloseInvestigation?: (props: CloseInvestigationModalRenderProps) => React.ReactNode;
 }
 
 /**
- * Footer slot content for the investigation details flyout.
+ * Footer slot content. It owns its action modals rather than delegating them upwards: the flyout
+ * can be mounted through `core.overlays.openFlyout`, where there is no page-level React tree.
  */
 export const ConversationDetailsFlyoutFooter = ({
   isOpenedFromChat,
+  investigation,
   onOpenChat,
+  onOpenEscalation,
+  wrapEscalationButton,
+  onCloseInvestigation,
 }: ConversationDetailsFlyoutFooterProps) => {
+  const [modalAction, setModalAction] = useState<CardActionType | null>(null);
+  const closeModal = useCallback(() => setModalAction(null), []);
+  const canRenderEscalationButton = Boolean(onOpenEscalation);
+
+  const escalationButton = (
+    <EuiFlexItem grow={false}>
+      <EuiButton
+        color="primary"
+        iconType="document"
+        onClick={() => setModalAction('createEscalation')}
+        size="s"
+      >
+        {ACTIONS_TRANSLATIONS.buttons.openEscalation}
+      </EuiButton>
+    </EuiFlexItem>
+  );
+
+  const renderCloseModal = onCloseInvestigation
+    ? (props: CloseInvestigationModalRenderProps) => onCloseInvestigation(props)
+    : undefined;
+
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
-      {!isOpenedFromChat && (
-        <EuiFlexItem grow={false}>
-          <AiButtonEmpty
-            size="s"
-            iconType="productAgent"
-            onClick={onOpenChat}
-            data-test-subj="investigationFlyoutOpenChat"
-          >
-            {DETAILS_FLYOUT_LABELS.actions.openChat}
-          </AiButtonEmpty>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
+        {!isOpenedFromChat && (
+          <EuiFlexItem grow={false}>
+            <AiButtonEmpty
+              size="s"
+              iconType="productAgent"
+              onClick={onOpenChat}
+              data-test-subj="investigationFlyoutOpenChat"
+            >
+              {DETAILS_FLYOUT_LABELS.actions.openChat}
+            </AiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {canRenderEscalationButton &&
+          (wrapEscalationButton ? wrapEscalationButton(escalationButton) : escalationButton)}
+      </EuiFlexGroup>
+
+      <InvestigationActionModals
+        action={modalAction}
+        investigation={investigation}
+        onCloseAction={closeModal}
+        onCloseApproval={closeModal}
+        renderCloseModal={renderCloseModal}
+        renderEscalationModal={onOpenEscalation}
+      />
+    </>
   );
 };

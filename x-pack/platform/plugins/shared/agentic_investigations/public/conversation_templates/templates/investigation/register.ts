@@ -81,6 +81,17 @@ export const investigationTemplate: TemplateDefinition = {
       return ManageEscalationsGate;
     });
 
+    // Nightshift TP: hide "Open an escalation" in that app only (nightshift-program#2168).
+    // Alert Zero and other hosts still get the button via the shared footer.
+    const LazyHideEscalationInNightshift = makeLazyWithProviders<React.PropsWithChildren>(
+      async () => {
+        const { HideEscalationInNightshift } = await import(
+          '../../shared/escalation_modal/hide_escalation_in_nightshift'
+        );
+        return HideEscalationInNightshift;
+      }
+    );
+
     // Shares `getSharedInvestigationsQueryClient()` with a solution's queue page rather than
     // creating its own — see https://github.com/elastic/kibana/pull/292946#discussion_r4092473937.
     // Both read and decide the same proposals; an isolated client here would let a decision made
@@ -261,7 +272,11 @@ export const investigationTemplate: TemplateDefinition = {
             React.createElement(
               React.Suspense,
               { fallback: null },
-              React.createElement(LazyManageEscalationsGate, null, button)
+              React.createElement(
+                LazyHideEscalationInNightshift,
+                null,
+                React.createElement(LazyManageEscalationsGate, null, button)
+              )
             )
         : undefined,
       // Listing and deciding proposals needs the proposals plugin, which is optional here.
