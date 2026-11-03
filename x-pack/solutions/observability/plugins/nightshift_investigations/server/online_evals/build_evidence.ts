@@ -14,12 +14,15 @@ export const MAX_EVIDENCE_TOOL_CALLS = 200;
 /**
  * The evidence judges grade for one round: its user input, tool calls and final response. Keeps
  * the earliest tool calls when there are more than `evaluate()` accepts, the same end the
- * judges' renderer keeps within its prompt budget; the final response is always included.
+ * judges' renderer keeps within its prompt budget; the final response is always included. An
+ * alert outcome, the recovery round's conclusion, is the ground truth the round is graded against.
  */
 export const buildOnlineEvalsEvidence = ({
   round,
+  alertOutcome,
 }: {
   round: ConversationRound;
+  alertOutcome?: string;
 }): EvaluateEvidence => {
   const toolCalls = round.steps.flatMap((step) =>
     step.type === ConversationRoundStepType.toolCall
@@ -40,5 +43,6 @@ export const buildOnlineEvalsEvidence = ({
       steps: toolCalls.slice(0, MAX_EVIDENCE_TOOL_CALLS),
       response: { message: round.response.message },
     },
+    ...(alertOutcome === undefined ? {} : { reference_data: { alert_outcome: alertOutcome } }),
   };
 };

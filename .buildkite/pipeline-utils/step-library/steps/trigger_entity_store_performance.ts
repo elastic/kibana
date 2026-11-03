@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { onDemandAgent } from '../presets.ts';
+import { gcpImageAgent, onDemandAgent } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const entityStorePerformanceSteps = (): readonly Step[] => [
@@ -17,9 +17,7 @@ export const entityStorePerformanceSteps = (): readonly Step[] => [
     label: 'Entity Store Performance Tests',
     key: 'entity_store_performance',
     agents: {
-      provider: 'gcp',
-      image: 'family/kibana-minimal-ubuntu-2604',
-      imageProject: 'elastic-images-prod',
+      ...gcpImageAgent('kibana-minimal-ubuntu-2604'),
       ...onDemandAgent('n2-standard-2'),
     },
     timeout_in_minutes: 10,
