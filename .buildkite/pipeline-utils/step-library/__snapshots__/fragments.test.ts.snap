@@ -7,6 +7,7 @@ exports[`pull_request fragments fips/verify_fips_enabled 1`] = `
       "agents": {
         "machineType": "n2-standard-2",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/pipelines/fips/verify_fips_enabled.sh",
       "depends_on": "build",
@@ -434,6 +435,7 @@ exports[`pull_request fragments pull_request/build_cloud_fips_image 1`] = `
       "agents": {
         "machineType": "n2-standard-2",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/fips/build_cloud_fips_image.sh",
       "depends_on": [
@@ -463,6 +465,7 @@ exports[`pull_request fragments pull_request/build_cloud_image 1`] = `
       "agents": {
         "machineType": "n2-standard-16",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/cloud/build_cloud_image.sh",
       "key": "build_cloud_image",
@@ -489,6 +492,7 @@ exports[`pull_request fragments pull_request/build_project 1`] = `
       "agents": {
         "machineType": "n2-standard-16",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/artifacts/docker_image.sh",
       "key": "build_project_image",
@@ -515,6 +519,7 @@ exports[`pull_request fragments pull_request/check_next_docs 1`] = `
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/next_docs/build_and_validate_docs.sh",
       "key": "check_next_docs",
@@ -660,6 +665,7 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
       "agents": {
         "machineType": "n2-standard-16",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/cloud/build_cloud_image.sh",
       "concurrency": 1,
@@ -680,6 +686,7 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
       "agents": {
         "machineType": "n2-standard-2",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/cloud/deploy.sh",
       "concurrency": 1,
@@ -710,6 +717,7 @@ exports[`pull_request fragments pull_request/deploy_project 1`] = `
       "agents": {
         "machineType": "n2-standard-16",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/artifacts/docker_image.sh",
       "key": "build_project_image",
@@ -728,6 +736,7 @@ exports[`pull_request fragments pull_request/deploy_project 1`] = `
       "agents": {
         "machineType": "n2-standard-4",
         "preemptible": true,
+        "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c",
       },
       "command": ".buildkite/scripts/steps/serverless/deploy.sh",
       "depends_on": [
