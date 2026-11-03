@@ -5,188 +5,165 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { DecideParams, DecideResult, DecisionsStart } from '@kbn/agent-builder-server';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { AgentBuilderConfig } from '../../config';
-import { parseDecisionResponse } from './parse_decision_response';
-import { decideWithOpenRouter } from './openrouter_decide';
-
-interface DecisionEndpointsResponse {
-  endpoints?: Array<{ inference_id: string }>;
-}
+import type { ModelProviderFactoryFn } from '../execution/runner/model_provider';
+import { createEisDecisionProvider } from './providers/eis';
+import { createFastModelDecisionProvider } from './providers/fast_model';
+import { createOpenRouterDecisionProvider } from './providers/openrouter';
+import type {
+  DecisionProvider,
+  DecisionProviderId,
+  DecisionProviderResult,
+} from './providers/types';
+import { isDecisionProviderUnavailableError } from './providers/types';
 
 /**
- * Resolves the decision endpoint: the configured one, else the first the cluster lists.
- * Not cached, so each call sees the endpoints the calling user can reach.
+ * The decision providers, in the order they are tried: OpenRouter when configured (temporary),
+ * the Elasticsearch `decision` task (EIS), then Agent Builder's fast model as the fallback.
  */
-const resolveInferenceId = async ({
-  esClient,
-  configuredId,
-  signal,
+export const createDecisionProviders = ({
+  config,
+  elasticsearch,
+  createModelProvider,
 }: {
-  esClient: ElasticsearchClient;
-  configuredId?: string;
-  signal: AbortSignal;
-}): Promise<string | undefined> => {
-  if (configuredId) {
-    return configuredId;
-  }
+  config: AgentBuilderConfig['decisionModel'];
+  elasticsearch: ElasticsearchServiceStart;
+  createModelProvider: ModelProviderFactoryFn;
+}): DecisionProvider[] => [
+  ...(config.openRouter ? [createOpenRouterDecisionProvider(config.openRouter)] : []),
+  createEisDecisionProvider({ elasticsearch, inferenceId: config.inferenceId }),
+  createFastModelDecisionProvider({ createModelProvider }),
+];
 
-  const { endpoints = [] } = await esClient.transport.request<DecisionEndpointsResponse>(
-    { method: 'GET', path: '/_inference/decision/_all' },
-    { signal }
-  );
-
-  return endpoints[0]?.inference_id;
-};
-
-/** Rejects once `timeoutMs` elapses or `signal` aborts, aborting `controller` either way. */
-const createDeadline = ({
+/** Runs one provider with its own timeout, also aborted when the caller aborts. */
+const attempt = async ({
+  provider,
+  params: { request, input, questions },
   timeoutMs,
-  signal,
-  controller,
+  abortSignal,
 }: {
+  provider: DecisionProvider;
+  params: DecideParams;
   timeoutMs: number;
-  signal?: AbortSignal;
-  controller: AbortController;
-}): { deadline: Promise<never>; clear: () => void } => {
+  abortSignal?: AbortSignal;
+}): Promise<{ result: DecisionProviderResult } | { error: Error; timedOut: boolean }> => {
+  const controller = new AbortController();
+  const onAbort = () => controller.abort();
   let timer: ReturnType<typeof setTimeout> | undefined;
-  let onAbort: (() => void) | undefined;
+
+  abortSignal?.addEventListener('abort', onAbort, { once: true });
 
   const deadline = new Promise<never>((_, reject) => {
-    const fail = (error: Error) => {
+    timer = setTimeout(() => {
       controller.abort();
-      reject(error);
-    };
+      reject(new Error(`Decision provider [${provider.id}] timed out after ${timeoutMs}ms`));
+    }, timeoutMs);
 
-    onAbort = () => fail(new Error('Decision aborted'));
-
-    if (signal?.aborted) {
-      onAbort();
-      return;
-    }
-
-    timer = setTimeout(() => fail(new Error(`Decision timed out after ${timeoutMs}ms`)), timeoutMs);
-    signal?.addEventListener('abort', onAbort, { once: true });
+    controller.signal.addEventListener('abort', () =>
+      reject(new Error(`Decision provider [${provider.id}] aborted`))
+    );
   });
 
-  return {
-    deadline,
-    clear: () => {
-      clearTimeout(timer);
-      if (onAbort) {
-        signal?.removeEventListener('abort', onAbort);
-      }
-    },
-  };
+  try {
+    const result = await Promise.race([
+      provider.decide({ request, input, questions, signal: controller.signal }),
+      deadline,
+    ]);
+
+    return { result };
+  } catch (error) {
+    return { error, timedOut: controller.signal.aborted };
+  } finally {
+    clearTimeout(timer);
+    abortSignal?.removeEventListener('abort', onAbort);
+  }
 };
 
 /**
- * Creates the decision service, which asks the cluster's `decision` inference endpoint bounded
- * questions as the requesting user.
+ * Creates the decision service. It tries the providers in order, giving each `timeoutMs`, and
+ * moves on when one fails. A provider that reports it can never answer is skipped until Kibana
+ * restarts.
  */
 export const createDecisionService = ({
   logger,
-  elasticsearch,
-  config,
+  providers,
+  timeoutMs: defaultTimeoutMs,
 }: {
   logger: Logger;
-  elasticsearch: ElasticsearchServiceStart;
-  config: AgentBuilderConfig['decisionModel'];
+  providers: DecisionProvider[];
+  timeoutMs: number;
 }): DecisionsStart => {
-  const decide = async ({
-    request,
-    input,
-    questions,
-    timeoutMs = config.timeoutMs,
-    abortSignal,
-  }: DecideParams): Promise<DecideResult> => {
-    const questionNames = Object.keys(questions);
-    const controller = new AbortController();
-    const startedAt = Date.now();
+  const unavailable = new Set<DecisionProviderId>();
 
-    const run = async (): Promise<DecideResult> => {
-      if (config.openRouter) {
-        const answers = await decideWithOpenRouter({
-          config: config.openRouter,
-          input,
-          questions,
-          signal: controller.signal,
-        });
+  const decide = async (params: DecideParams): Promise<DecideResult> => {
+    const { abortSignal, timeoutMs = defaultTimeoutMs, questions } = params;
+    const questionNames = Object.keys(questions).join(', ');
+    let lastError: Error | undefined;
+
+    for (const provider of providers) {
+      if (abortSignal?.aborted) {
+        return { status: 'failed', error: new Error('Decision aborted') };
+      }
+
+      if (unavailable.has(provider.id)) {
+        continue;
+      }
+
+      const startedAt = Date.now();
+      const outcome = await attempt({ provider, params, timeoutMs, abortSignal });
+      const elapsed = Date.now() - startedAt;
+
+      if ('result' in outcome) {
+        const { inferenceId, answers } = outcome.result;
 
         logger.debug(
           () =>
-            `Decision from OpenRouter [${config.openRouter?.model}] in ${
-              Date.now() - startedAt
-            }ms: ${JSON.stringify(answers)}`
+            `Decision [${questionNames}] from [${
+              provider.id
+            }:${inferenceId}] in ${elapsed}ms: ${JSON.stringify(answers)}`
         );
 
-        return { status: 'decided', answers, inferenceId: `openrouter:${config.openRouter.model}` };
+        return { status: 'decided', inferenceId, answers };
       }
 
-      const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
+      const { error, timedOut } = outcome;
 
-      const inferenceId = await resolveInferenceId({
-        esClient,
-        configuredId: config.inferenceId,
-        signal: controller.signal,
-      });
-
-      if (!inferenceId) {
-        logger.debug('No decision inference endpoint available');
-        return { status: 'unavailable' };
+      if (isDecisionProviderUnavailableError(error)) {
+        unavailable.add(provider.id);
+        logger.debug(
+          `Decision provider [${provider.id}] is unavailable until Kibana restarts: ${error.message}`
+        );
+        continue;
       }
 
-      const body = await esClient.transport.request(
-        {
-          method: 'POST',
-          path: `/_inference/decision/${encodeURIComponent(inferenceId)}`,
-          querystring: { timeout: `${timeoutMs}ms` },
-          body: { input, task_settings: { questions } },
-        },
-        { signal: controller.signal, requestTimeout: timeoutMs }
-      );
+      lastError = error;
 
-      const answers = parseDecisionResponse(body, questionNames);
+      const message = `Decision [${questionNames}] failed on [${provider.id}] after ${elapsed}ms: ${error.message}`;
 
-      logger.debug(
-        () =>
-          `Decision from [${inferenceId}] in ${Date.now() - startedAt}ms: ${JSON.stringify(
-            answers
-          )}`
-      );
-
-      return { status: 'decided', answers, inferenceId };
-    };
-
-    return withActiveInferenceSpan(
-      'decide',
-      { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
-      async () => {
-        const { deadline, clear } = createDeadline({ timeoutMs, signal: abortSignal, controller });
-
-        try {
-          return await Promise.race([run(), deadline]);
-        } catch (error) {
-          const message = `Decision [${questionNames.join(', ')}] failed after ${
-            Date.now() - startedAt
-          }ms: ${error.message}`;
-
-          // A timeout or abort is expected under load; anything else may mean a misconfigured endpoint or a changed response shape.
-          if (controller.signal.aborted) {
-            logger.debug(message);
-          } else {
-            logger.warn(message);
-          }
-
-          return { status: 'failed', error };
-        } finally {
-          clear();
-        }
+      // A timeout or abort is expected under load; anything else may mean a misconfiguration.
+      if (timedOut) {
+        logger.debug(message);
+      } else {
+        logger.warn(message);
       }
-    );
+    }
+
+    if (abortSignal?.aborted) {
+      return { status: 'failed', error: new Error('Decision aborted') };
+    }
+
+    return lastError ? { status: 'failed', error: lastError } : { status: 'unavailable' };
   };
 
-  return { decide };
+  return {
+    decide: (params) =>
+      withActiveInferenceSpan(
+        'decide',
+        { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
+        () => decide(params)
+      ),
+  };
 };

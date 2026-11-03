@@ -6,7 +6,9 @@
  */
 
 import type { DecisionQuestion } from '@kbn/agent-builder-server';
-import { decideWithOpenRouter } from './openrouter_decide';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createOpenRouterDecisionProvider, decideWithOpenRouter } from './openrouter';
+import { DecisionProviderUnavailableError, isDecisionProviderUnavailableError } from './types';
 
 const config = {
   apiKey: 'test-key',
@@ -123,4 +125,45 @@ describe('decideWithOpenRouter', () => {
       expect.objectContaining({ message: expect.not.stringContaining('test-key') })
     );
   });
+});
+
+describe('createOpenRouterDecisionProvider', () => {
+  const run = () =>
+    createOpenRouterDecisionProvider(config).decide({
+      request: httpServerMock.createKibanaRequest(),
+      input: 'hello',
+      questions: { should_respond: questions.should_respond },
+      signal: new AbortController().signal,
+    });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('reports the model as the inference id', async () => {
+    mockFetch(200, { answers: { should_respond: { type: 'noul', noul: 0.4 } } });
+
+    await expect(run()).resolves.toEqual({
+      inferenceId: 'openrouter:typesafe/jev-1.13',
+      answers: { should_respond: { type: 'predicate', probability: 0.4 } },
+    });
+  });
+
+  it.each([401, 403])('is unavailable when OpenRouter answers %s', async (status) => {
+    mockFetch(status, { error: { message: 'bad key' } });
+
+    await expect(run()).rejects.toBeInstanceOf(DecisionProviderUnavailableError);
+  });
+
+  it.each([404, 429, 500])(
+    'fails with a retryable error when OpenRouter answers %s',
+    async (status) => {
+      mockFetch(status, { error: { message: 'nope' } });
+
+      const error = await run().catch((thrown) => thrown);
+
+      expect(error).toBeInstanceOf(Error);
+      expect(isDecisionProviderUnavailableError(error)).toBe(false);
+    }
+  );
 });

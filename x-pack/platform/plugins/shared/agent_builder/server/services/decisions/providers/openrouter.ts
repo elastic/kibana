@@ -6,6 +6,8 @@
  */
 
 import type { DecisionAnswer, DecisionQuestion } from '@kbn/agent-builder-server';
+import type { DecisionProvider } from './types';
+import { DecisionProviderUnavailableError } from './types';
 
 /**
  * Temporary dev path to OpenRouter's alpha Decisions API, until decision models are served by EIS.
@@ -137,11 +139,16 @@ export const decideWithOpenRouter = async ({
   const body = await response.json().catch(() => undefined);
 
   if (!response.ok) {
-    throw new Error(
-      `OpenRouter decisions request failed with ${response.status}: ${
-        body?.error?.message ?? response.statusText
-      }`
-    );
+    const message = `OpenRouter decisions request failed with ${response.status}: ${
+      body?.error?.message ?? response.statusText
+    }`;
+
+    // A rejected key stays rejected until the config changes.
+    if (response.status === 401 || response.status === 403) {
+      throw new DecisionProviderUnavailableError(message);
+    }
+
+    throw new Error(message);
   }
 
   const answers: Record<string, OpenRouterAnswer> = body?.answers ?? {};
@@ -158,3 +165,14 @@ export const decideWithOpenRouter = async ({
     })
   );
 };
+
+/** Answers through OpenRouter's Decisions API. Temporary, until EIS serves decision models. */
+export const createOpenRouterDecisionProvider = (
+  config: OpenRouterDecideConfig
+): DecisionProvider => ({
+  id: 'openrouter',
+  decide: async ({ input, questions, signal }) => ({
+    inferenceId: `openrouter:${config.model}`,
+    answers: await decideWithOpenRouter({ config, input, questions, signal }),
+  }),
+});

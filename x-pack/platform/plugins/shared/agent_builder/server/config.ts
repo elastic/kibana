@@ -34,13 +34,15 @@ export const configSchema = schema.object({
     scheduledDelay,
   }),
   /**
-   * Decision model used for quick decisions, such as whether `trigger_mode: 'auto'` runs the agent.
-   * Without `inferenceId`, the first `decision` inference endpoint on the cluster is used.
+   * Decision models used for quick decisions, such as whether `trigger_mode: 'auto'` runs the agent.
+   * Providers are tried in order: OpenRouter when configured, the cluster's `decision` endpoint
+   * (`inferenceId`, else the first one listed), then Agent Builder's fast model.
    */
   decisionModel: schema.object({
     inferenceId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
     triggerThreshold: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
-    timeoutMs: schema.number({ defaultValue: 2000, min: 100, max: 30000 }),
+    /** How long each decision provider gets before the next one is tried. */
+    timeoutMs: schema.number({ defaultValue: 1000, min: 100, max: 30000 }),
     /**
      * Temporary dev path: ask OpenRouter's Decisions API directly instead of Elasticsearch, until
      * decision models are served by EIS. To be removed once they are.

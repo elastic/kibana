@@ -16,7 +16,8 @@ import type {
 } from './types';
 import type { ConversationEventBus } from '../workflows/triggers/conversation_event_bus';
 import { ToolsService } from './tools';
-import { createDecisionService } from './decisions';
+import { createDecisionProviders, createDecisionService } from './decisions';
+import { createModelProviderFactory } from './execution/runner/model_provider';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
@@ -296,8 +297,20 @@ export class ServiceManager {
 
     const decisions = createDecisionService({
       logger: logger.get('decisions'),
-      elasticsearch,
-      config: this.config.decisionModel,
+      timeoutMs: this.config.decisionModel.timeoutMs,
+      providers: createDecisionProviders({
+        config: this.config.decisionModel,
+        elasticsearch,
+        createModelProvider: createModelProviderFactory({
+          inference,
+          trackingService,
+          searchInferenceEndpoints,
+          logger: logger.get('decisions.model-provider'),
+          spaces,
+          security,
+          elasticsearch,
+        }),
+      }),
     });
 
     executionService = createAgentExecutionService({

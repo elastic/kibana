@@ -8,9 +8,9 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DecideResult, DecisionQuestion } from '@kbn/agent-builder-server';
-import decisionResponse from './__fixtures__/decision_response.json';
-import decisionEndpoints from './__fixtures__/decision_endpoints.json';
-import { createDecisionService } from './decision_service';
+import { createDecisionProviders, createDecisionService } from './decision_service';
+import type { DecisionProvider, DecisionProviderId } from './providers/types';
+import { DecisionProviderUnavailableError } from './providers/types';
 
 const questions: Record<string, DecisionQuestion> = {
   should_respond: { type: 'predicate', instructions: 'Should the agent respond?' },
@@ -18,247 +18,201 @@ const questions: Record<string, DecisionQuestion> = {
 
 const input = 'secret conversation text';
 
-const setup = ({
-  inferenceId,
-  openRouter,
-}: {
-  inferenceId?: string;
-  openRouter?: { apiKey: string; model: string; url: string };
-} = {}) => {
+const answered = (probability: number) => ({
+  inferenceId: 'model-1',
+  answers: { should_respond: { type: 'predicate' as const, probability } },
+});
+
+const fakeProvider = (
+  id: DecisionProviderId,
+  decide: DecisionProvider['decide'] = async () => answered(0.5)
+): DecisionProvider & { decide: jest.Mock } => ({ id, decide: jest.fn(decide) });
+
+const never = () => new Promise<never>(() => {});
+
+const setup = (providers: DecisionProvider[]) => {
   const logger = loggingSystemMock.createLogger();
-  const elasticsearch = elasticsearchServiceMock.createStart();
-  const scopedClient = elasticsearchServiceMock.createScopedClusterClient();
+  const service = createDecisionService({ logger, providers, timeoutMs: 1000 });
   const request = httpServerMock.createKibanaRequest();
 
-  elasticsearch.client.asScoped.mockReturnValue(scopedClient);
+  const decide = (abortSignal?: AbortSignal) =>
+    service.decide({ request, input, questions, abortSignal });
 
-  const transportRequest = scopedClient.asCurrentUser.transport.request;
-
-  const service = createDecisionService({
-    logger,
-    elasticsearch,
-    config: { inferenceId, openRouter, triggerThreshold: 0.5, timeoutMs: 2000 },
-  });
-
-  return { service, logger, transportRequest, scopedClient, request };
+  return { decide, logger };
 };
-
-const isGet = ({ method }: { method: string }) => method === 'GET';
 
 describe('createDecisionService', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('uses config.inferenceId without listing endpoints', async () => {
-    const { service, transportRequest, request } = setup({ inferenceId: 'my-decision' });
+  it('uses the first provider that answers, in order', async () => {
+    const first = fakeProvider('openrouter', async () => answered(0.9));
+    const second = fakeProvider('eis');
+    const { decide } = setup([first, second]);
 
-    transportRequest.mockResolvedValue(decisionResponse);
-
-    await service.decide({ request, input, questions });
-
-    expect(transportRequest).toHaveBeenCalledTimes(1);
-    expect(transportRequest.mock.calls[0][0]).toEqual(
-      expect.objectContaining({
-        method: 'POST',
-        path: '/_inference/decision/my-decision',
-        body: { input, task_settings: { questions } },
-      })
-    );
+    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.9) });
+    expect(second.decide).not.toHaveBeenCalled();
   });
 
-  it('discovers the first decision endpoint when none is configured', async () => {
-    const { service, transportRequest, request } = setup();
+  it('falls through to the next provider on a retryable failure, and retries it next time', async () => {
+    const first = fakeProvider('openrouter', async () => {
+      throw new Error('boom');
+    });
+    const second = fakeProvider('eis', async () => answered(0.3));
+    const { decide } = setup([first, second]);
 
-    transportRequest.mockImplementation(async (params) =>
-      isGet(params) ? decisionEndpoints : decisionResponse
-    );
+    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.3) });
+    await decide();
 
-    const result = await service.decide({ request, input, questions });
-
-    expect(transportRequest.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ method: 'GET', path: '/_inference/decision/_all' })
-    );
-    expect(transportRequest.mock.calls[1][0]).toEqual(
-      expect.objectContaining({ method: 'POST', path: '/_inference/decision/.jev-1.13-decision' })
-    );
-    expect(result).toEqual(expect.objectContaining({ inferenceId: '.jev-1.13-decision' }));
+    expect(first.decide).toHaveBeenCalledTimes(2);
   });
 
-  it('returns unavailable when no decision endpoint exists', async () => {
-    const { service, transportRequest, request } = setup();
+  it('skips a provider that is unavailable until Kibana restarts', async () => {
+    const first = fakeProvider('eis', async () => {
+      throw new DecisionProviderUnavailableError('no endpoint');
+    });
+    const second = fakeProvider('fast_model', async () => answered(0.7));
+    const { decide } = setup([first, second]);
 
-    transportRequest.mockResolvedValue({ endpoints: [] });
+    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.7) });
+    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.7) });
 
-    const result = await service.decide({ request, input, questions });
-
-    expect(result).toEqual({ status: 'unavailable' });
-    expect(transportRequest).toHaveBeenCalledTimes(1);
+    expect(first.decide).toHaveBeenCalledTimes(1);
+    expect(second.decide).toHaveBeenCalledTimes(2);
   });
 
-  it('returns failed when ES errors', async () => {
-    const { service, transportRequest, request } = setup({ inferenceId: 'my-decision' });
-    const error = new Error('boom');
-
-    transportRequest.mockRejectedValue(error);
-
-    const result = await service.decide({ request, input, questions });
-
-    expect(result).toEqual({ status: 'failed', error });
-  });
-
-  it('returns failed on timeout', async () => {
+  it('gives each provider its own timeout before moving on', async () => {
     jest.useFakeTimers();
 
-    const { service, transportRequest, request } = setup({ inferenceId: 'my-decision' });
-
-    transportRequest.mockReturnValue(new Promise(() => {}));
-
-    const pending = service.decide({ request, input, questions, timeoutMs: 50 });
-
-    await jest.advanceTimersByTimeAsync(50);
-
-    const result = await pending;
-
-    expect(result.status).toBe('failed');
-  });
-
-  it('returns failed on a malformed response', async () => {
-    const { service, transportRequest, request } = setup({ inferenceId: 'my-decision' });
-
-    transportRequest.mockResolvedValue({ decision: { answers: {} } });
-
-    const result = await service.decide({ request, input, questions });
-
-    expect(result.status).toBe('failed');
-  });
-
-  it('returns decided with parsed answers and inferenceId', async () => {
-    const { service, transportRequest, request, scopedClient } = setup({
-      inferenceId: 'my-decision',
+    let firstSignal: AbortSignal | undefined;
+    const first = fakeProvider('openrouter', ({ signal }) => {
+      firstSignal = signal;
+      return never();
     });
+    const second = fakeProvider('fast_model', async () => answered(0.2));
+    const { decide, logger } = setup([first, second]);
 
-    transportRequest.mockResolvedValue(decisionResponse);
+    const pending = decide();
 
-    const result = await service.decide({ request, input, questions });
+    await jest.advanceTimersByTimeAsync(999);
+    expect(second.decide).not.toHaveBeenCalled();
 
-    expect(result).toEqual({
-      status: 'decided',
-      inferenceId: 'my-decision',
-      answers: { should_respond: { type: 'predicate', probability: 0.94 } },
-    });
-    expect(scopedClient.asInternalUser.transport.request).not.toHaveBeenCalled();
-  });
+    await jest.advanceTimersByTimeAsync(1);
 
-  it('returns failed instead of throwing when the scoped client cannot be created', async () => {
-    const { request } = setup({ inferenceId: 'my-decision' });
-    const elasticsearch = elasticsearchServiceMock.createStart();
-    const error = new Error('no client');
-
-    elasticsearch.client.asScoped.mockImplementation(() => {
-      throw error;
-    });
-
-    const failing = createDecisionService({
-      logger: loggingSystemMock.createLogger(),
-      elasticsearch,
-      config: { inferenceId: 'my-decision', triggerThreshold: 0.5, timeoutMs: 2000 },
-    });
-
-    await expect(failing.decide({ request, input, questions })).resolves.toEqual({
-      status: 'failed',
-      error,
-    });
-  });
-
-  it('returns failed without waiting when the abort signal is already aborted', async () => {
-    jest.useFakeTimers();
-
-    const { service, transportRequest, request } = setup({ inferenceId: 'my-decision' });
-    const controller = new AbortController();
-
-    controller.abort();
-    transportRequest.mockReturnValue(new Promise(() => {}));
-
-    let result: DecideResult | undefined;
-
-    service
-      .decide({ request, input, questions, abortSignal: controller.signal })
-      .then((decided) => {
-        result = decided;
-      });
-
-    await jest.advanceTimersByTimeAsync(0);
-
-    expect(result?.status).toBe('failed');
-  });
-
-  it('logs a malformed response at warn', async () => {
-    const { service, transportRequest, request, logger } = setup({ inferenceId: 'my-decision' });
-
-    transportRequest.mockResolvedValue({ decision: { answers: {} } });
-
-    await service.decide({ request, input, questions });
-
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-  });
-
-  it('logs a timeout at debug only', async () => {
-    jest.useFakeTimers();
-
-    const { service, transportRequest, request, logger } = setup({ inferenceId: 'my-decision' });
-
-    transportRequest.mockReturnValue(new Promise(() => {}));
-
-    const pending = service.decide({ request, input, questions, timeoutMs: 50 });
-
-    await jest.advanceTimersByTimeAsync(50);
-    await pending;
-
+    await expect(pending).resolves.toEqual({ status: 'decided', ...answered(0.2) });
+    expect(firstSignal?.aborted).toBe(true);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('asks OpenRouter instead of Elasticsearch when openRouter is configured', async () => {
-    const { service, transportRequest, request } = setup({
-      openRouter: {
-        apiKey: 'test-key',
-        model: 'typesafe/jev-1.13',
-        url: 'https://openrouter.test',
-      },
+  it('stops the chain when the caller aborts', async () => {
+    const controller = new AbortController();
+    const first = fakeProvider('openrouter', () => {
+      controller.abort();
+      return never();
     });
-    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify({ answers: { should_respond: { type: 'noul', noul: 0.2 } } }), {
-        status: 200,
-      })
-    );
+    const second = fakeProvider('fast_model');
+    const { decide } = setup([first, second]);
 
-    const result = await service.decide({ request, input, questions });
+    const result = await decide(controller.signal);
 
-    expect(result).toEqual({
-      status: 'decided',
-      inferenceId: 'openrouter:typesafe/jev-1.13',
-      answers: { should_respond: { type: 'predicate', probability: 0.2 } },
-    });
-    expect(fetchSpy).toHaveBeenCalledTimes(1);
-    expect(transportRequest).not.toHaveBeenCalled();
-
-    fetchSpy.mockRestore();
+    expect(result.status).toBe('failed');
+    expect(second.decide).not.toHaveBeenCalled();
   });
 
-  it('does not log the input text', async () => {
-    const { service, transportRequest, request, logger } = setup({ inferenceId: 'my-decision' });
+  it('fails without asking anyone when the caller already aborted', async () => {
+    const controller = new AbortController();
+    const first = fakeProvider('openrouter');
+    const { decide } = setup([first]);
 
-    transportRequest.mockResolvedValue(decisionResponse);
+    controller.abort();
 
-    await service.decide({ request, input, questions });
+    await expect(decide(controller.signal)).resolves.toEqual(
+      expect.objectContaining({ status: 'failed' })
+    );
+    expect(first.decide).not.toHaveBeenCalled();
+  });
+
+  it('returns unavailable when every provider is unavailable', async () => {
+    const { decide } = setup([
+      fakeProvider('eis', async () => {
+        throw new DecisionProviderUnavailableError('no endpoint');
+      }),
+      fakeProvider('fast_model', async () => {
+        throw new DecisionProviderUnavailableError('no model');
+      }),
+    ]);
+
+    await expect(decide()).resolves.toEqual({ status: 'unavailable' });
+  });
+
+  it('returns failed with the last error when every provider fails', async () => {
+    const last = new Error('last');
+    const { decide } = setup([
+      fakeProvider('eis', async () => {
+        throw new Error('first');
+      }),
+      fakeProvider('fast_model', async () => {
+        throw last;
+      }),
+    ]);
+
+    const result: DecideResult = await decide();
+
+    expect(result).toEqual({ status: 'failed', error: last });
+  });
+
+  it('logs retryable failures at warn without the input text', async () => {
+    const { decide, logger } = setup([
+      fakeProvider('openrouter', async () => {
+        throw new Error('boom');
+      }),
+      fakeProvider('fast_model', async () => answered(0.5)),
+    ]);
+
+    await decide();
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
 
     const logged = JSON.stringify([
       ...logger.debug.mock.calls,
       ...logger.info.mock.calls,
       ...logger.warn.mock.calls,
-      ...logger.error.mock.calls,
     ]);
 
     expect(logged).not.toContain(input);
+  });
+});
+
+describe('createDecisionProviders', () => {
+  const elasticsearch = elasticsearchServiceMock.createStart();
+  const createModelProvider = jest.fn();
+
+  it('orders OpenRouter, EIS, then the fast model', () => {
+    const providers = createDecisionProviders({
+      elasticsearch,
+      createModelProvider,
+      config: {
+        triggerThreshold: 0.5,
+        timeoutMs: 1000,
+        openRouter: {
+          apiKey: 'test-key',
+          model: 'typesafe/jev-1.13',
+          url: 'https://openrouter.test',
+        },
+      },
+    });
+
+    expect(providers.map(({ id }) => id)).toEqual(['openrouter', 'eis', 'fast_model']);
+  });
+
+  it('leaves out OpenRouter when it is not configured', () => {
+    const providers = createDecisionProviders({
+      elasticsearch,
+      createModelProvider,
+      config: { triggerThreshold: 0.5, timeoutMs: 1000 },
+    });
+
+    expect(providers.map(({ id }) => id)).toEqual(['eis', 'fast_model']);
   });
 });
