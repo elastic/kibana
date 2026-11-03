@@ -47,6 +47,13 @@ export const dispatchApiRequest = async ({
   const { method, path, querystring, body, bulkBody } = apiRequest;
 
   if (target === 'kibana') {
+    // A task pod has no route back to Kibana, so there is no self client there; Elasticsearch calls
+    // work, Kibana ones fail with this message.
+    if (!selfClient) {
+      throw new Error(
+        'Calling Kibana APIs is not supported when an agent runs in a task pod: the pod has no route back to Kibana. Use an Elasticsearch API or run the agent in Kibana.'
+      );
+    }
     return selfClient.asScoped(request).fetch(path, {
       method,
       query: toSelfFetchQuery(querystring),

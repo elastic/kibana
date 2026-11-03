@@ -62,6 +62,8 @@ import { runToolIdBackfill } from './backfills/tool_id_backfill';
 import { RecommendedEndpointsPoller } from './recommended_endpoints_poller';
 import { registerDeductiveAgent } from './services/execution/run_agent/deductive/register_deductive_agent';
 import { getDeploymentInfo } from './utils/deployment_info';
+import { createSetupContract } from './setup_contract';
+import { agentBuilderBridge } from './tasks/bridge';
 
 export class AgentBuilderPlugin
   implements
@@ -315,52 +317,13 @@ export class AgentBuilderPlugin
       serviceSetups.tools.register(tool);
     });
 
-    return {
-      tools: {
-        register: serviceSetups.tools.register.bind(serviceSetups.tools),
-      },
-      agents: {
-        register: serviceSetups.agents.register.bind(serviceSetups.agents),
-        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
-        registerAiIndexResolver: serviceSetups.agents.registerAiIndexResolver.bind(
-          serviceSetups.agents
-        ),
-      },
-      attachments: {
-        registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
-      },
-      renderers: {
-        register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
-      },
-      conversationEvents: {
-        register: serviceSetups.conversationEvents.register.bind(serviceSetups.conversationEvents),
-      },
-      hooks: {
-        register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
-        registerCycleHook: serviceSetups.hooks.registerCycleHook.bind(serviceSetups.hooks),
-      },
-      skills: {
-        register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
-      },
-      plugins: {
-        register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
-      },
-      conversationTemplates: {
-        register: serviceSetups.conversationTemplates.register.bind(
-          serviceSetups.conversationTemplates
-        ),
-      },
-      conversations: {
-        enableUpdatedTrigger: (optIn) => {
-          this.conversationUpdatedOptIns.push(optIn);
-        },
-      },
-      callbacks: {
-        registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
-        registerTransport: serviceSetups.callbacks.registerTransport,
-      },
+    const setupContract = createSetupContract({
+      serviceSetups,
       topSnippets: this.config.topSnippets,
-    };
+      conversationUpdatedOptIns: this.conversationUpdatedOptIns,
+    });
+    agentBuilderBridge.setSetup(setupContract);
+    return setupContract;
   }
 
   start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
@@ -464,7 +427,7 @@ export class AgentBuilderPlugin
     // See https://github.com/elastic/search-team/issues/16741
     // this.recommendedEndpointsPoller.start();
 
-    return {
+    const startContract: AgentBuilderPluginStart = {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
         ensure: agents.ensure,
@@ -509,6 +472,8 @@ export class AgentBuilderPlugin
       },
       conversationTemplates,
     };
+    agentBuilderBridge.setStart(startContract);
+    return startContract;
   }
 
   async stop() {

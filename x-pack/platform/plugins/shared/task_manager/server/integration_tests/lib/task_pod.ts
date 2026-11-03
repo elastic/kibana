@@ -24,11 +24,13 @@ export const http = (
   url: string,
   init: { method?: string; headers?: Record<string, string>; body?: string } = {}
 ) =>
-  new Promise<{ status: number; json: () => unknown }>((resolve, reject) => {
+  new Promise<{ status: number; json: () => unknown; text: () => string }>((resolve, reject) => {
     const req = request(url, { method: init.method ?? 'GET', headers: init.headers }, (res) => {
       let data = '';
       res.on('data', (chunk) => (data += chunk));
-      res.on('end', () => resolve({ status: res.statusCode ?? 0, json: () => JSON.parse(data) }));
+      res.on('end', () =>
+        resolve({ status: res.statusCode ?? 0, json: () => JSON.parse(data), text: () => data })
+      );
     });
     req.on('error', reject);
     req.end(init.body);
@@ -75,10 +77,13 @@ export const startPodProcess = async ({
   family,
   port,
   podConfig = {},
+  esUser = { username: 'elastic', password: 'changeme' },
 }: {
   family: string;
   port: number;
   podConfig?: Record<string, unknown>;
+  /** The Elasticsearch user of the pod: `kibana_system` writes to restricted system indices. */
+  esUser?: { username: string; password: string };
 }): Promise<PodProcess> => {
   const url = `http://localhost:${port}`;
   const dir = mkdtempSync(join(tmpdir(), 'task-pod-'));
@@ -96,8 +101,8 @@ export const startPodProcess = async ({
     env: {
       ...process.env,
       ES_URL: `http://${hostname}:${esPort}`,
-      ES_USERNAME: 'elastic',
-      ES_PASSWORD: 'changeme',
+      ES_USERNAME: esUser.username,
+      ES_PASSWORD: esUser.password,
       POD_CONFIG: configPath,
       PORT: String(port),
     },

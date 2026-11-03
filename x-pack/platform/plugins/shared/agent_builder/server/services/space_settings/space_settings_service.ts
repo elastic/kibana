@@ -10,7 +10,7 @@ import type {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   AGENT_BUILDER_SPACE_SETTINGS_SAVED_OBJECT_TYPE,
   AGENT_BUILDER_SPACE_SETTINGS_OBJECT_ID,

@@ -100,6 +100,8 @@ const cloneAsInternalUser =
 export const createSecurityStart = (client: Client) => ({
   authc: {
     getCurrentUser: (request: KibanaRequest) => getPodRequestUser(request),
+    // Nothing in a pod is a service account: runs as one stay in Kibana.
+    getPrincipal: () => null,
     getRedactedSessionId: () => undefined,
     apiKeys: {
       uiam: { invalidate: uiamInvalidate },
@@ -185,18 +187,23 @@ export const createFeatureFlagsStart = () => {
 export const createUiSettings = () => {
   const registered = new Map<string, { value?: unknown }>();
   const get = async (key: string) => registered.get(key)?.value;
+  const register = (settings: Record<string, { value?: unknown }>) => {
+    for (const [key, setting] of Object.entries(settings)) registered.set(key, setting);
+  };
+  const client = {
+    get,
+    getAll: async () => Object.fromEntries([...registered].map(([k, s]) => [k, s.value])),
+    getRegistered: () => Object.fromEntries(registered),
+  };
   return {
     setup: {
-      register: (settings: Record<string, { value?: unknown }>) => {
-        for (const [key, setting] of Object.entries(settings)) registered.set(key, setting);
-      },
+      register,
+      // Global settings resolve the same way: to what was registered.
+      registerGlobal: register,
     },
     start: {
-      asScopedToClient: () => ({
-        get,
-        getAll: async () => Object.fromEntries([...registered].map(([k, s]) => [k, s.value])),
-        getRegistered: () => Object.fromEntries(registered),
-      }),
+      asScopedToClient: () => client,
+      globalAsScopedToClient: () => client,
     },
   };
 };

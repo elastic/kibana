@@ -22,6 +22,7 @@ export const FAMILY_OWNERS: Record<string, string> = {
   alerting_v2: 'alertingVTwo',
   connectors: 'actions',
   workflows: 'workflowsExecutionEngine',
+  agent_builder: 'agentBuilder',
 };
 
 export const loadFamily = (name: string): TaskPodFamily => {

@@ -1,0 +1,22 @@
+{
+  // The task pod family for agent builder: every plugin whose `server/tasks` entry the pod boots. A
+  // plugin's tasks dependencies must be listed here (checked at pod boot). Plugins that register tools,
+  // skills, attachments or agents belong here too; one that is not listed is not available to agents
+  // running in the pod. Only runs with an API key reach a pod: runs bound to a service account stay in
+  // Kibana.
+  "family": "agent_builder",
+  "taskTypes": ["agent-builder:run-agent"],
+  "plugins": [
+    "agentBuilder",
+    "inference",
+    "searchInferenceEndpoints",
+    "isomer",
+    "actions",
+    "stackConnectors",
+    "taskManager",
+    "spaces",
+    "licensing",
+    "eventLog",
+    "encryptedSavedObjects"
+  ]
+}

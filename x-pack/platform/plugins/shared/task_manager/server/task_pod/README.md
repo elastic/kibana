@@ -85,6 +85,7 @@ fails if a listed plugin's tasks dependency is missing from the list.
 | `alerting_v2` | `alerting_v2/task_pod.jsonc` | `alerting_v2:*` | rule executor, dispatcher, housekeeping |
 | `connectors` | `actions/task_pod.jsonc` | `actions:.*` | connector executions; `.`-prefixed ids keep the cleanup and telemetry tasks in Kibana |
 | `workflows` | `workflows_execution_engine/task_pod.jsonc` | `workflow:run`, `workflow:resume`, `workflow:scheduled` | includes the connectors plugins, for connector steps |
+| `agent_builder` | `agent_builder/task_pod.jsonc` | `agent-builder:run-agent` | runs with an API key only; includes inference, search inference endpoints, isomer and the connectors plugins |
 
 **What a pod does not run, and how it fails**
 
@@ -96,6 +97,12 @@ fails if a listed plugin's tasks dependency is missing from the list.
 - A workflow step registered by a plugin that is not in the family fails with `Unknown node type: <step>`.
   `node scripts/task_pod_coverage.js` lists the plugins that register into a family's registries and
   whether each has a tasks entry and is in the manifest; most of them do not yet.
+- Agent runs bound to a service account stay in Kibana (Task Manager keeps `runAs` tasks in-process). An
+  agent that calls a Kibana API (the execute-API tool) fails with an explicit message; Elasticsearch
+  calls work. Tools, skills and attachments registered by other plugins are only there if the plugin has a
+  tasks entry and is in the family (none do yet).
+- A pod that writes to restricted system indices, as agent builder's executions, needs Elasticsearch
+  credentials that may do so: Kibana's internal user (`kibana_system`), not a superuser.
 - A task timeout longer than 2^31-1 ms (about 24.8 days, e.g. a workflow's `365d`) is cut at that length on
   both sides of the call.
 
@@ -146,5 +153,5 @@ creates no indices. `task_pod.test.ts` covers the wire format.
 ## Known gaps
 
 No authentication between Kibana and the pod. Tasks that run `runAs` a service account, and
-`http.selfClient` calls, are not available in pods. The agent builder family is not onboarded yet. The host still uses hand-built Core stand-ins
+`http.selfClient` calls, are not available in pods. The host still uses hand-built Core stand-ins
 (`host/core/`), over the real saved objects repository and type registry.

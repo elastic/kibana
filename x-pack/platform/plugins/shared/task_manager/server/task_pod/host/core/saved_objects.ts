@@ -73,6 +73,11 @@ const scopeToSpace = (
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
   return new Proxy(repository, {
     get: (target, prop, receiver) => {
+      // The scoped client's own helpers: which space it is in, and the same client for another one.
+      if (prop === 'getCurrentNamespace') return () => namespace;
+      if (prop === 'asScopedToNamespace') {
+        return (otherNamespace: string) => scopeToSpace(repository, otherNamespace);
+      }
       const value = Reflect.get(target, prop, receiver);
       if (typeof value !== 'function' || typeof prop !== 'string') return value;
       return (...args: unknown[]) => {
@@ -152,14 +157,17 @@ export class PodSavedObjects {
         includedHiddenTypes?: string[];
         excludedExtensions?: string[];
       }) =>
-        this.getRepository(
-          options?.includedHiddenTypes,
-          this.encryptionExtensionFactory && {
-            encryptionExtension: this.encryptionExtensionFactory({
-              typeRegistry: this.getTypeRegistry(),
-              request: undefined as never,
-            }),
-          }
+        scopeToSpace(
+          this.getRepository(
+            options?.includedHiddenTypes,
+            this.encryptionExtensionFactory && {
+              encryptionExtension: this.encryptionExtensionFactory({
+                typeRegistry: this.getTypeRegistry(),
+                request: undefined as never,
+              }),
+            }
+          ),
+          'default'
         ),
       getScopedClient: (
         request: KibanaRequest & { spaceId?: string },

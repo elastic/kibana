@@ -57,6 +57,17 @@
       "usageApi",
       "home",
     ],
-    "extraPublicDirs": []
+    "extraPublicDirs": [],
+    "tasks": {
+      "requiredPlugins": [
+        "taskManager",
+        "actions",
+        "inference",
+        "searchInferenceEndpoints",
+        "isomer",
+        "licensing",
+        "spaces"
+      ]
+    }
   }
 }
