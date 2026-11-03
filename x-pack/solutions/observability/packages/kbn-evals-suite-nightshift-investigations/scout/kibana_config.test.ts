@@ -11,6 +11,7 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getConfigFromFiles } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
+import { getConnectorSpec, getSandboxSupportedAuthTypeIds } from '@kbn/connector-specs';
 import { CONNECTOR_SETS } from '../evals/investigation/connector_sets';
 
 it('resolves credentials from the environment and preserves other preconfigured connectors', () => {
@@ -81,7 +82,7 @@ it('resolves credentials from the environment and preserves other preconfigured 
 });
 
 it.each(Object.entries(CONNECTOR_SETS))(
-  'connector set %s preconfigures exactly the connectors the eval saves',
+  'connector set %s preconfigures exactly the connectors the eval saves, sandbox-ready',
   (connectorSet, connectorIds) => {
     const originalEnv = process.env;
     process.env = {
@@ -97,9 +98,19 @@ it.each(Object.entries(CONNECTOR_SETS))(
       const config = getConfigFromFiles([
         Path.join(__dirname, `connector_sets/${connectorSet}.yml`),
       ]);
-      expect(Object.keys(config.xpack.actions.preconfigured).sort()).toEqual(
-        [...connectorIds].sort()
-      );
+      const { preconfigured } = config.xpack.actions;
+      expect(Object.keys(preconfigured).sort()).toEqual([...connectorIds].sort());
+      // A spec connector's secrets select their auth type; sandbox credential injection rejects
+      // secrets without a sandbox-capable `authType`.
+      for (const { actionTypeId, secrets } of Object.values<{
+        actionTypeId: string;
+        secrets: { authType?: string };
+      }>(preconfigured)) {
+        const spec = getConnectorSpec(actionTypeId);
+        if (spec) {
+          expect(getSandboxSupportedAuthTypeIds(spec.auth)).toContain(secrets.authType);
+        }
+      }
     } finally {
       process.env = originalEnv;
     }

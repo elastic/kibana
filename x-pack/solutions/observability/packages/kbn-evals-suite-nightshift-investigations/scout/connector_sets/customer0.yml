@@ -1,7 +1,8 @@
 # The `customer0` connector set: the connectors saved on the investigator in the nightshift-customer0
 # deployment, with the same ids and names. evals/investigation/connector_sets.ts lists these ids and
 # saves them on the investigator. Credentials stay in the hook environment.
-# `.http` is required because sandbox credential injection does not support `.webhook`.
+# `.http` is required because sandbox credential injection does not support `.webhook`. Spec
+# connectors such as `.github` select their auth type with `secrets.authType`.
 xpack.actions.preconfigured.c0-es:
   name: c0_es
   actionTypeId: .http
@@ -21,6 +22,7 @@ xpack.actions.preconfigured.gh:
     hasAuth: true
     authType: bearer
   secrets:
+    authType: bearer
     token: ${NIGHTSHIFT_GITHUB_GH_TOKEN}
 
 xpack.actions.preconfigured.github-elastic-org:
@@ -31,4 +33,5 @@ xpack.actions.preconfigured.github-elastic-org:
     hasAuth: true
     authType: bearer
   secrets:
+    authType: bearer
     token: ${NIGHTSHIFT_GITHUB_ORG_TOKEN}
