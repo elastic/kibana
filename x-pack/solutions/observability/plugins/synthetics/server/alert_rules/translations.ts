@@ -154,6 +154,31 @@ export const commonMonitorStateI18: Array<{
   },
 ];
 
+// Monitor status `checkedAt` is pre-formatted, so FormatDate reparses it in the Node timezone.
+// `timestamp` is the raw ISO instant. The TLS rule keeps the shared `checkedAt` text because
+// that rule already exposes the raw `@timestamp`.
+export const statusRuleCheckedAtVariable = {
+  name: 'checkedAt' as const,
+  description: i18n.translate(
+    'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.checkedAtPreformatted',
+    {
+      defaultMessage:
+        "Timestamp of the monitor run, pre-formatted with the space's date format and timezone. Use FormatDate with the timestamp variable to render it in a specific timezone.",
+    }
+  ),
+};
+
+export const statusRuleTimestampVariable = {
+  name: 'timestamp' as const,
+  description: i18n.translate(
+    'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.timestamp',
+    {
+      defaultMessage:
+        'The timestamp of the last check, as an ISO 8601 string. Use with FormatDate to render it in a specific timezone.',
+    }
+  ),
+};
+
 export const commonStateTranslations = [
   {
     name: 'firstCheckedAt',
