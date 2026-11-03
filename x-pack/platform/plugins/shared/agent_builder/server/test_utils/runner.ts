@@ -43,6 +43,8 @@ import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attach
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AgentExecutionMode, type ConversationTemplate } from '@kbn/agent-builder-common';
+import { createBrowserToolDescriptorRegistry } from '../services/browser_tools';
+import type { BrowserToolsService } from '../services/browser_tools';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { ConversationTemplatesServiceStart } from '../services/conversation/templates';
 import type { CreateRunnerDeps, CreateScopedRunnerDeps } from '../services/execution/runner/runner';
@@ -194,6 +196,18 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
     convertSkillTool: jest.fn(),
   };
 };
+
+export const createBrowserToolsServiceMock = (): BrowserToolsService => ({
+  registry: createBrowserToolDescriptorRegistry(),
+  callClient: {
+    create: jest.fn(),
+    get: jest.fn(),
+    answer: jest.fn(),
+    setStatus: jest.fn(),
+    deleteOlderThan: jest.fn(),
+  },
+  uploadImage: jest.fn(),
+});
 
 export const createToolManagerMock = (): ToolManagerMock => {
   return {
@@ -373,6 +387,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     plugins: createPluginsServiceMock(),
     conversationTemplates: createInMemoryConversationTemplates(),
     toolManager: createToolManagerMock(),
+    browserTools: createBrowserToolsServiceMock(),
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
@@ -513,6 +528,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    browserTools: createBrowserToolsServiceMock(),
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
@@ -562,6 +578,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    browserTools: createBrowserToolsServiceMock(),
     getExecutionService: jest.fn(),
   };
 };

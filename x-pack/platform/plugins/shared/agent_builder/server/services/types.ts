@@ -15,6 +15,7 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import type { FilesStart } from '@kbn/files-plugin/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -57,6 +58,7 @@ import type {
   ConversationTemplatesServiceSetup,
   ConversationTemplatesServiceStart,
 } from './conversation/templates';
+import type { BrowserToolsService } from './browser_tools';
 import type { DeploymentInfo } from '../utils/deployment_info';
 
 export interface InternalSetupServices {
@@ -98,6 +100,7 @@ export interface InternalStartServices {
   callbackDeliveryService: CallbackDeliveryService;
   spaceSettings: SpaceSettingsService;
   conversationTemplates: ConversationTemplatesServiceStart;
+  browserTools: BrowserToolsService;
 }
 
 export interface ServiceSetupDeps {
@@ -131,6 +134,7 @@ export interface ServicesStartDeps {
   licensing: LicensingPluginStart;
   deploymentInfo: DeploymentInfo;
   isomer: IsomerPluginStart;
+  files: FilesStart;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
 }

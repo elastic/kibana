@@ -40,6 +40,7 @@ import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
 import { SurfacesServiceImpl } from './surfaces';
+import { createBrowserToolsService } from './browser_tools';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -139,6 +140,7 @@ export class ServiceManager {
     deploymentInfo,
     deductiveRegister,
     isomer,
+    files,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -164,6 +166,12 @@ export class ServiceManager {
     };
 
     const conversationTemplatesStart = this.services.conversationTemplates.start();
+
+    const browserTools = createBrowserToolsService({
+      logger: logger.get('browser-tools'),
+      elasticsearch,
+      files,
+    });
 
     const attachments = this.services.attachments.start({
       spaces,
@@ -258,6 +266,7 @@ export class ServiceManager {
       licensing,
       deploymentInfo,
       deductiveRegister,
+      browserTools,
     });
     runner = runnerFactory.getRunner();
 
@@ -343,6 +352,7 @@ export class ServiceManager {
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
       conversationTemplates: conversationTemplatesStart,
+      browserTools,
     };
 
     return this.internalStart;

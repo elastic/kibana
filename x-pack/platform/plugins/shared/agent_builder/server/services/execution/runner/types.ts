@@ -28,6 +28,7 @@ import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { BrowserToolsService } from '../../browser_tools';
 import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface RunnerFactoryDeps {
@@ -52,6 +53,7 @@ export interface RunnerFactoryDeps {
   conversationEventsService: ConversationEventsServiceStart;
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
+  browserTools: BrowserToolsService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   hooks: HooksServiceStart;

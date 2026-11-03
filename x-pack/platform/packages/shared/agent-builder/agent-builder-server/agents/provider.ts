@@ -41,6 +41,7 @@ import type {
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
+  BrowserToolsRunContext,
   TodoStateManager,
   IFilesystemService,
   IBashService,
@@ -320,6 +321,10 @@ export interface AgentHandlerContext {
    * Tool manager to manage active tools for the agent.
    */
   toolManager: ToolManager;
+  /**
+   * Browser tools registry, call client and image upload, for tools whose handlers run in the browser.
+   */
+  browserTools: BrowserToolsRunContext;
   /**
    * Result store to access and add tool results during execution.
    */

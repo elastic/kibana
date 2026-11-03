@@ -380,6 +380,7 @@ export class AgentBuilderPlugin
       licensing,
       security: securityPlugin,
       isomer,
+      files,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
@@ -417,6 +418,7 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      files,
       conversationEventBus: this.conversationEventBus,
     });
 

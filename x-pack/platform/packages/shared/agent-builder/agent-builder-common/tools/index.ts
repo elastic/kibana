@@ -87,6 +87,7 @@ export {
   type VisualizationResult,
   type OtherResult,
   type FileReferenceResult,
+  type ImageResult,
   NON_INTERACTIVE_DECLINED_REASON,
   isErrorResult,
   isNonInteractiveDeclinedResult,

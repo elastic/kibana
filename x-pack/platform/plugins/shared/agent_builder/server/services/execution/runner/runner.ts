@@ -90,6 +90,7 @@ import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { BrowserToolsService } from '../../browser_tools';
 import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface CreateScopedRunnerDeps {
@@ -146,6 +147,8 @@ export interface CreateScopedRunnerDeps {
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
+  /** Browser tools registry, call client and image upload. */
+  browserTools: BrowserToolsService;
   /** Execution mode for this runner context. */
   executionMode: AgentExecutionMode;
   /** Canonical interactivity config for this runner context. */
