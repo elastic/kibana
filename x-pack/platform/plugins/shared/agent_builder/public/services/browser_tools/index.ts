@@ -6,4 +6,6 @@
  */
 
 export { BrowserToolRegistry } from './browser_tool_registry';
+export { BrowserToolDispatcher, type DispatchContext } from './browser_tool_dispatcher';
+export { getPageScheduler, type PageScheduler } from './page_scheduler';
 export type { BrowserToolsService } from './types';

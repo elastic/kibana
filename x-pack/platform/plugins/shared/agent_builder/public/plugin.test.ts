@@ -155,6 +155,7 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
   ({
     http: {},
     docLinks: { links: {} },
+    notifications: { toasts: { addDanger: jest.fn() } },
     application: {
       getUrlForApp: jest.fn(
         (appId: string, { path = '' }: { path?: string } = {}) =>

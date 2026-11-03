@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { BrowserToolDispatcher } from './browser_tool_dispatcher';
 import type { BrowserToolRegistry } from './browser_tool_registry';
 
 export interface BrowserToolsService {
   registry: BrowserToolRegistry;
+  dispatcher: BrowserToolDispatcher;
 }

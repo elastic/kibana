@@ -55,7 +55,11 @@ import { createPublicConversationEventsContract } from './services/conversation_
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
-import { BrowserToolRegistry } from './services/browser_tools';
+import {
+  BrowserToolDispatcher,
+  BrowserToolRegistry,
+  getPageScheduler,
+} from './services/browser_tools';
 import { createPublicConversationsContract } from './services/conversations';
 import { registerWorkflowSteps } from './step_types';
 import type {
@@ -211,6 +215,16 @@ export class AgentBuilderPlugin
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
+    const browserToolRegistry = new BrowserToolRegistry();
+    const browserToolsService = {
+      registry: browserToolRegistry,
+      dispatcher: new BrowserToolDispatcher({
+        registry: browserToolRegistry,
+        chatService,
+        scheduler: getPageScheduler(),
+        toasts: core.notifications.toasts,
+      }),
+    };
     const conversationsService = new ConversationsService({ http });
     const conversationTemplatesService = new ConversationTemplatesService();
     const docLinksService = new DocLinksService(core.docLinks.links);
@@ -311,7 +325,7 @@ export class AgentBuilderPlugin
       usageCollection,
       accessChecker,
       eventsService,
-      browserToolsService: { registry: new BrowserToolRegistry() },
+      browserToolsService,
       isEarsEnabled: this.isEarsEnabled,
       isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
       isServerless: this.isServerless,
