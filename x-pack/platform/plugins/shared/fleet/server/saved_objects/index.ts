@@ -1115,7 +1115,7 @@ export const getSavedObjectTypes = (
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
           package_agent_version_condition: { type: 'keyword' },
-          onboarding_deployment_id: { type: 'keyword' },
+          onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1374,7 +1374,7 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                onboarding_deployment_id: { type: 'keyword' },
+                onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
               },
             },
           ],
@@ -1450,7 +1450,7 @@ export const getSavedObjectTypes = (
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
           package_agent_version_condition: { type: 'keyword' },
-          onboarding_deployment_id: { type: 'keyword' },
+          onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1573,7 +1573,7 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                onboarding_deployment_id: { type: 'keyword' },
+                onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
               },
             },
           ],

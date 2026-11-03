@@ -1329,16 +1329,65 @@ export default function (providerContext: FtrProviderContext) {
         return body.item.id as string;
       };
 
+      let packagePolicySoType: string;
+      let seededPolicyIds: string[];
+
+      // The saved object type of the package policies depends on space awareness.
+      const resolvePackagePolicySoType = async (packagePolicyId: string) => {
+        for (const type of ['ingest-package-policies', 'fleet-package-policies']) {
+          const { status } = await supertest.get(`${SO_API}/${type}/${packagePolicyId}`);
+          if (status === 200) return type;
+        }
+        throw new Error(`Saved object of package policy ${packagePolicyId} not found`);
+      };
+
+      // A package policy of an onboarding package, saved directly: only policies of those packages
+      // are stamped, and the test registry has none of them.
+      const seedOnboardingPackagePolicy = async (name: string) => {
+        const now = new Date().toISOString();
+        const { body } = await supertest
+          .post(`${SO_API}/${packagePolicySoType}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            attributes: {
+              name,
+              namespace: 'default',
+              enabled: true,
+              policy_ids: [agentPolicyId],
+              inputs: [],
+              package: { name: 'aws', title: 'AWS', version: '1.0.0' },
+              revision: 1,
+              latest_revision: true,
+              created_at: now,
+              created_by: 'test',
+              updated_at: now,
+              updated_by: 'test',
+            },
+          })
+          .expect(200);
+        return body.id as string;
+      };
+
       const getOnboardingDeploymentId = async (packagePolicyId: string) => {
         const { body } = await supertest
-          .get(`/api/fleet/package_policies/${packagePolicyId}`)
+          .get(`${SO_API}/${packagePolicySoType}/${packagePolicyId}`)
           .expect(200);
-        return body.item.onboarding_deployment_id ?? null;
+        return body.attributes.onboarding_deployment_id ?? null;
+      };
+
+      // Sets the stamp without the deployment recording the policy, for the tests of what the stamp
+      // does to a package policy of a registry package.
+      const stampPackagePolicy = async (packagePolicyId: string, deploymentId: string) => {
+        await supertest
+          .put(`${SO_API}/${packagePolicySoType}/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ attributes: { onboarding_deployment_id: deploymentId } })
+          .expect(200);
       };
 
       // Like the onboarding flow: the deployment is created first, and records its package
       // policies once they are deployed.
-      const createDeployment = async (policyIdsByInstance: Record<string, string>) => {
+      const createDeployment = async (policyIdsByInstance: Record<string, string> = {}) => {
         const { body } = await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
@@ -1350,12 +1399,20 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         deploymentIds.push(body.item.id);
-        await supertest
-          .put(`${BASE_URL}/${body.item.id}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({ policyIdsByInstance })
-          .expect(200);
+        if (Object.keys(policyIdsByInstance).length) {
+          await supertest
+            .put(`${BASE_URL}/${body.item.id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ policyIdsByInstance })
+            .expect(200);
+        }
         return body.item.id as string;
+      };
+
+      const createStampedDeployment = async (packagePolicyId: string) => {
+        const deploymentId = await createDeployment();
+        await stampPackagePolicy(packagePolicyId, deploymentId);
+        return deploymentId;
       };
 
       before(async () => {
@@ -1365,12 +1422,23 @@ export default function (providerContext: FtrProviderContext) {
           .send({ name: `ownership-test-policy-${Date.now()}`, namespace: 'default' })
           .expect(200);
         agentPolicyId = body.item.id;
+
+        const probeId = await createPackagePolicy(`ownership-test-probe-${Date.now()}`);
+        packagePolicySoType = await resolvePackagePolicySoType(probeId);
+        await supertest
+          .delete(`/api/fleet/package_policies/${probeId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
       });
 
       beforeEach(async () => {
         packagePolicyIds = [
           await createPackagePolicy(`ownership-test-1-${Date.now()}`),
           await createPackagePolicy(`ownership-test-2-${Date.now()}`),
+        ];
+        seededPolicyIds = [
+          await seedOnboardingPackagePolicy(`ownership-test-aws-1-${Date.now()}`),
+          await seedOnboardingPackagePolicy(`ownership-test-aws-2-${Date.now()}`),
         ];
       });
 
@@ -1394,6 +1462,13 @@ export default function (providerContext: FtrProviderContext) {
             .set('kbn-xsrf', 'xxxx')
             .catch(() => {});
         }
+        for (const seededPolicyId of seededPolicyIds) {
+          await supertest
+            .delete(`${SO_API}/${packagePolicySoType}/${seededPolicyId}`)
+            .query({ force: true })
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        }
       });
 
       after(async () => {
@@ -1404,43 +1479,49 @@ export default function (providerContext: FtrProviderContext) {
           .catch(() => {});
       });
 
-      it('stamps the package policies a new deployment owns', async () => {
-        const deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+      it('stamps the package policies of the onboarding flow a new deployment owns', async () => {
+        const deploymentId = await createDeployment({ cloudtrail: seededPolicyIds[0] });
 
-        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
-        expect(await getOnboardingDeploymentId(packagePolicyIds[1])).to.equal(null);
+        expect(await getOnboardingDeploymentId(seededPolicyIds[0])).to.equal(deploymentId);
+        expect(await getOnboardingDeploymentId(seededPolicyIds[1])).to.equal(null);
       });
 
       it('stamps added policies and clears the stamp of removed ones on update', async () => {
-        const deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+        const deploymentId = await createDeployment({ cloudtrail: seededPolicyIds[0] });
 
         await supertest
           .put(`${BASE_URL}/${deploymentId}`)
           .set('kbn-xsrf', 'xxxx')
-          .send({ policyIdsByInstance: { cloudtrail: packagePolicyIds[1] } })
+          .send({ policyIdsByInstance: { cloudtrail: seededPolicyIds[1] } })
           .expect(200);
 
-        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(null);
-        expect(await getOnboardingDeploymentId(packagePolicyIds[1])).to.equal(deploymentId);
+        expect(await getOnboardingDeploymentId(seededPolicyIds[0])).to.equal(null);
+        expect(await getOnboardingDeploymentId(seededPolicyIds[1])).to.equal(deploymentId);
       });
 
       it('does not take over a package policy owned by another deployment', async () => {
-        const firstDeploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+        const firstDeploymentId = await createDeployment({ cloudtrail: seededPolicyIds[0] });
+        await createDeployment({ cloudtrail: seededPolicyIds[0] });
+
+        expect(await getOnboardingDeploymentId(seededPolicyIds[0])).to.equal(firstDeploymentId);
+      });
+
+      it('does not stamp package policies of other packages than those of the onboarding flow', async () => {
         await createDeployment({ cloudtrail: packagePolicyIds[0] });
 
-        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(firstDeploymentId);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(null);
       });
 
       it('keeps the stamp when the deployment is deleted', async () => {
-        const deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+        const deploymentId = await createDeployment({ cloudtrail: seededPolicyIds[0] });
 
         await supertest.delete(`${BASE_URL}/${deploymentId}`).set('kbn-xsrf', 'xxxx').expect(200);
 
-        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+        expect(await getOnboardingDeploymentId(seededPolicyIds[0])).to.equal(deploymentId);
       });
 
       it('keeps the stamp across package policy updates that do not mention it', async () => {
-        const deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+        const deploymentId = await createStampedDeployment(packagePolicyIds[0]);
 
         // Partial update
         await supertest
@@ -1492,7 +1573,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('lets the package policy list leave out the policies an onboarding instance manages', async () => {
-        await createDeployment({ cloudtrail: packagePolicyIds[0] });
+        await createStampedDeployment(packagePolicyIds[0]);
 
         const { body } = await supertest
           .get('/api/fleet/package_policies')
@@ -1508,7 +1589,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('counts the policies an onboarding instance manages in the package list', async () => {
-        await createDeployment({ cloudtrail: packagePolicyIds[0] });
+        await createStampedDeployment(packagePolicyIds[0]);
 
         const { body } = await supertest
           .get('/api/fleet/epm/packages')
@@ -1525,7 +1606,7 @@ export default function (providerContext: FtrProviderContext) {
         let deploymentId: string;
 
         beforeEach(async () => {
-          deploymentId = await createDeployment({ cloudtrail: packagePolicyIds[0] });
+          deploymentId = await createStampedDeployment(packagePolicyIds[0]);
         });
 
         it('rejects an update without the id of the deployment that manages the policy', async () => {
@@ -1648,7 +1729,7 @@ export default function (providerContext: FtrProviderContext) {
           upgradablePolicyId = body.item.id;
           // Deleted by the suite's afterEach.
           packagePolicyIds.push(upgradablePolicyId);
-          deploymentId = await createDeployment({ cloudtrail: upgradablePolicyId });
+          deploymentId = await createStampedDeployment(upgradablePolicyId);
         });
 
         it('upgrades a managed policy without the id of the onboarding instance and keeps the stamp', async () => {
@@ -1666,7 +1747,7 @@ export default function (providerContext: FtrProviderContext) {
             .get(`/api/fleet/package_policies/${upgradablePolicyId}`)
             .expect(200);
           expect(upgraded.item.package.version).to.equal(INSTALLED_VERSION);
-          expect(upgraded.item.onboarding_deployment_id).to.equal(deploymentId);
+          expect(await getOnboardingDeploymentId(upgradablePolicyId)).to.equal(deploymentId);
         });
       });
     });

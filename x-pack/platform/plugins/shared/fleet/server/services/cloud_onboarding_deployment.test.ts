@@ -81,7 +81,7 @@ function makePackagePolicySO(
     type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     version,
     references: [],
-    attributes: attributes as PackagePolicySOAttributes,
+    attributes: { package: { name: 'aws' }, ...attributes } as PackagePolicySOAttributes,
   };
 }
 
@@ -250,6 +250,77 @@ describe('cloudOnboardingDeploymentService', () => {
 
       expect(soClient.bulkUpdate).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('pp-other'));
+    });
+
+    it('does not stamp policies of other packages than those of the onboarding flow', async () => {
+      mockUpdateWith(
+        makeAttributes({ packagePolicyIds: ['pp-aws', 'pp-fleet-server', 'pp-nopkg'] })
+      );
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          makePackagePolicySO('pp-aws', { package: { name: 'aws_bedrock' } } as any),
+          makePackagePolicySO('pp-fleet-server', { package: { name: 'fleet_server' } } as any),
+          { ...makePackagePolicySO('pp-nopkg'), attributes: {} as PackagePolicySOAttributes },
+        ],
+      });
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'succeeded' });
+
+      expect(stampsWritten().map(({ id }) => id)).toEqual(['pp-aws']);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('pp-fleet-server'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('pp-nopkg'));
+    });
+
+    it('does not clear a policy a newer write of the deployment owns', async () => {
+      // This write read the deployment before a newer write added pp-new and stamped it.
+      soClient.get
+        .mockResolvedValueOnce(makeSOResponse('deploy-1', makeAttributes()))
+        .mockResolvedValue(
+          makeSOResponse('deploy-1', makeAttributes({ packagePolicyIds: ['pp-new'] }))
+        );
+      soClient.create.mockImplementation(async (_type, attributes) =>
+        makeSOResponse('deploy-1', attributes as CloudOnboardingDeploymentSOAttributes)
+      );
+      mockStamped([makePackagePolicySO('pp-new', { onboarding_deployment_id: 'deploy-1' })]);
+
+      await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', { status: 'deploying' });
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('changes the package policies with the client given for them, and only reads the deployment with the other', async () => {
+      const packagePolicySoClient = savedObjectsClientMock.create();
+      packagePolicySoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 0,
+        page: 1,
+      });
+      packagePolicySoClient.bulkGet.mockResolvedValue({
+        saved_objects: [makePackagePolicySO('pp-1')],
+      });
+      packagePolicySoClient.bulkUpdate.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ id, type }) => ({
+          id,
+          type,
+          references: [],
+          attributes: {},
+        })),
+      }));
+      mockUpdateWith(makeAttributes({ packagePolicyIds: ['pp-1'] }));
+
+      await cloudOnboardingDeploymentService.update(
+        soClient,
+        'deploy-1',
+        { status: 'succeeded' },
+        undefined,
+        packagePolicySoClient
+      );
+
+      expect(packagePolicySoClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
     });
 
     it('does not fail the deployment write when stamping fails', async () => {

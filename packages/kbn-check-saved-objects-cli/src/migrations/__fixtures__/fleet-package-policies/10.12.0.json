@@ -13,13 +13,6 @@
       "enabled": true,
       "inputs": [],
       "package": { "name": "test", "version": "1.0.0" }
-    },
-    {
-      "name": "onboarding-policy",
-      "enabled": true,
-      "inputs": [],
-      "package": { "name": "aws", "version": "1.0.0" },
-      "onboarding_deployment_id": "onboarding-deployment-1"
     }
   ]
 }

@@ -15,6 +15,7 @@ import { nodeBuilder } from '@kbn/es-query';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  AWS_ONBOARDING_PACKAGE_NAMES,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../common/constants';
@@ -74,7 +75,8 @@ class CloudOnboardingDeploymentService {
   public async create(
     soClient: SavedObjectsClientContract,
     input: CreateCloudOnboardingDeploymentInput,
-    updatedBy?: string
+    updatedBy?: string,
+    packagePolicySoClient: SavedObjectsClientContract = soClient
   ): Promise<CloudOnboardingDeployment> {
     // Validates connectorId exists in the same space; throws SavedObjectsErrorHelpers not-found if not.
     if (input.connectorId) {
@@ -94,9 +96,8 @@ class CloudOnboardingDeploymentService {
     );
 
     // A new deployment has nothing stamped yet, so there is only something to do if it owns policies.
-    const ownedIds = getOwnedPackagePolicyIds(attributes);
-    if (ownedIds.size) {
-      await this.syncPackagePolicyOwnership(soClient, so.id, ownedIds);
+    if (getOwnedPackagePolicyIds(attributes).size) {
+      await this.syncPackagePolicyOwnership(soClient, packagePolicySoClient, so.id);
     }
 
     return toDeployment(so);
@@ -220,7 +221,8 @@ class CloudOnboardingDeploymentService {
     soClient: SavedObjectsClientContract,
     id: string,
     update: UpdateCloudOnboardingDeploymentInput,
-    updatedBy?: string
+    updatedBy?: string,
+    packagePolicySoClient: SavedObjectsClientContract = soClient
   ): Promise<CloudOnboardingDeployment> {
     // soClient.update sends a partial ES doc update. ES deep-merges nested objects, so keys
     // removed from record fields like policyIdsByInstance or serviceVars would persist in the
@@ -261,7 +263,7 @@ class CloudOnboardingDeploymentService {
         continue;
       }
 
-      await this.syncPackagePolicyOwnership(soClient, id, getOwnedPackagePolicyIds(attributes));
+      await this.syncPackagePolicyOwnership(soClient, packagePolicySoClient, id);
       return toDeployment(so);
     }
   }
@@ -275,15 +277,24 @@ class CloudOnboardingDeploymentService {
   /**
    * Stamps the package policies the deployment owns with its id, and clears the stamp from every
    * other policy stamped with it. The current state is read on every write, so a stamp or a clear
-   * that failed on an earlier write is retried. A policy stamped by another deployment is left
-   * untouched, and each write carries the version it was decided on, so a concurrent change makes it
-   * fail instead of overwriting that change. Failures are logged and do not fail the deployment
-   * write: an unstamped policy stays visible and editable in Fleet.
+   * that failed on an earlier write is retried.
+   *
+   * - Only policies of the packages of the onboarding flow are stamped, so an id that is not one of
+   *   its policies (for example a Fleet Server policy) can't be locked by a deployment.
+   * - A policy stamped by another deployment is left untouched.
+   * - The deployment is read after the stamped policies, so a policy stamped by a newer write of
+   *   the deployment is seen as owned and not cleared by an older one. Each change carries the
+   *   version it was decided on, so a concurrent change makes it fail instead of being overwritten.
+   * - Package policies are read and written with the client of the request, so the caller needs the
+   *   privileges for them. `deploymentSoClient` only reads the deployment.
+   *
+   * Failures are logged and do not fail the deployment write: an unstamped policy stays visible and
+   * editable in Fleet.
    */
   private async syncPackagePolicyOwnership(
+    deploymentSoClient: SavedObjectsClientContract,
     soClient: SavedObjectsClientContract,
-    deploymentId: string,
-    ownedIds: Set<string>
+    deploymentId: string
   ): Promise<void> {
     const logger = appContextService.getLogger();
     try {
@@ -296,6 +307,13 @@ class CloudOnboardingDeploymentService {
         ),
         perPage: SO_SEARCH_LIMIT,
       });
+      const { attributes: deployment } =
+        await deploymentSoClient.get<CloudOnboardingDeploymentSOAttributes>(
+          CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          deploymentId
+        );
+      const ownedIds = getOwnedPackagePolicyIds(deployment);
+
       const stampedIds = new Set(stampedPolicies.map(({ id }) => id));
       const unstampedIds = [...ownedIds].filter((policyId) => !stampedIds.has(policyId));
       const { saved_objects: unstampedPolicies } = unstampedIds.length
@@ -319,6 +337,13 @@ class CloudOnboardingDeploymentService {
       for (const policy of unstampedPolicies) {
         // Missing policies were deleted out-of-band; previous revisions are never stamped.
         if (isSavedObjectErrorResult(policy) || policy.attributes.latest_revision === false) {
+          continue;
+        }
+        const packageName = policy.attributes.package?.name;
+        if (!packageName || !AWS_ONBOARDING_PACKAGE_NAMES.includes(packageName)) {
+          logger.warn(
+            `Package policy ${policy.id} is not a policy of the packages of the onboarding flow, not stamping it with ${deploymentId}`
+          );
           continue;
         }
         const current = policy.attributes.onboarding_deployment_id;

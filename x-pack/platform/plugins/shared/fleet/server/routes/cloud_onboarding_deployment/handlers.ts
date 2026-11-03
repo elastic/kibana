@@ -75,7 +75,7 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateCloudOnboardingDeploymentRequestSchema.body>
 > = async (context, request, response) => {
-  const fleetContext = await context.fleet;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
   const { internalSoClient } = fleetContext;
 
   const authMethodError = validateAuthMethod(
@@ -90,7 +90,9 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
     const deployment = await cloudOnboardingDeploymentService.create(
       internalSoClient,
       request.body,
-      getUsername(request)
+      getUsername(request),
+      // The package policies the deployment manages are changed as the user of the request.
+      coreContext.savedObjects.client
     );
     return response.ok({ body: { item: toResponseItem(deployment) } });
   } catch (error) {
@@ -177,7 +179,7 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof UpdateCloudOnboardingDeploymentRequestSchema.body>
 > = async (context, request, response) => {
-  const fleetContext = await context.fleet;
+  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
   const { internalSoClient } = fleetContext;
 
   // Validate non-null connectorId is space-scoped, matching the create-time invariant.
@@ -223,7 +225,8 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
       internalSoClient,
       request.params.id,
       request.body,
-      getUsername(request)
+      getUsername(request),
+      coreContext.savedObjects.client
     );
     return response.ok({ body: { item: toResponseItem(deployment) } });
   } catch (error) {
