@@ -10,7 +10,12 @@ import type { InvestigationTriggerType } from './workflows/triggers';
 
 export type { Severity } from '@kbn/significant-events-schema';
 
-export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
+export {
+  MAX_RULE_NAMES,
+  MAX_ALERT_SOURCES,
+  CLASSIC_ALERT_SOURCE,
+  MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
+} from './automation_limits';
 export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
 export type { PresetSchedule } from './automation_schedule';
 

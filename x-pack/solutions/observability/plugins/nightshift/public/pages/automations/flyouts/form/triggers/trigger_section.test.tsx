@@ -39,6 +39,8 @@ const legacyPatternTrigger: TriggerFormValues = {
   ruleNamePattern: 'cpu',
   ruleNames: [],
   ruleTags: [],
+  alertSources: [],
+  alertSourceMode: 'include',
 };
 
 const onTriggerChange = jest.fn();

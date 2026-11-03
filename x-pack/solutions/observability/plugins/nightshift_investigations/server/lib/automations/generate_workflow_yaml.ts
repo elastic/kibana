@@ -8,6 +8,7 @@
 import { stringify } from 'yaml';
 import { IF_CONDITION_MAX_LENGTH } from '@kbn/workflows';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
+import { CLASSIC_ALERT_SOURCE } from '../../../common/automation_limits';
 import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
@@ -70,18 +71,21 @@ export function generateWorkflowYaml({
   const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
+  const classicRows = alertRows.filter(passesClassic);
+  const universalRows = universalAlerts ? alertRows.filter(passesUniversal) : [];
   const hasMultipleTriggers =
-    Number(alertRows.length > 0) * (universalAlerts ? 2 : 1) +
+    Number(classicRows.length > 0) +
+      Number(universalRows.length > 0) +
       Number(slackRows.length > 0) +
       Number(Boolean(schedule)) >
     1;
   const alertWorkflow =
-    alertRows.length > 0 || (slackRows.length === 0 && !schedule)
-      ? generateAlertWorkflow(automationId, automation, alertRows, hasMultipleTriggers)
+    classicRows.length > 0 || (alertRows.length === 0 && slackRows.length === 0 && !schedule)
+      ? generateAlertWorkflow(automationId, automation, classicRows, hasMultipleTriggers)
       : undefined;
   const alertV2Workflow =
-    universalAlerts && alertRows.length > 0
-      ? generateAlertV2Workflow(automationId, automation, alertRows)
+    universalRows.length > 0
+      ? generateAlertV2Workflow(automationId, automation, universalRows)
       : undefined;
   const slackWorkflow =
     slackRows.length > 0
@@ -135,7 +139,7 @@ function generateAlertWorkflow(
   alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>,
   hasMultipleTriggers: boolean
 ) {
-  const condition = buildCondition(alertRows, ALERT_STATUS_CONDITION);
+  const condition = buildCondition(alertRows, ALERT_STATUS_CONDITION, false);
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'alert');
 
   return {
@@ -182,7 +186,7 @@ function generateAlertV2Workflow(
   automation: NightshiftAutomationAttributes,
   alertRows: AlertRow[]
 ) {
-  const condition = buildCondition(alertRows, ALERT_V2_STATUS_CONDITION);
+  const condition = buildCondition(alertRows, ALERT_V2_STATUS_CONDITION, true);
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'alert');
 
   return {
@@ -534,8 +538,32 @@ function kqlOneOf(field: string, values: string[]): string {
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' or ')})`;
 }
 
-function buildCondition(rows: AlertRow[], statusCondition: string): string {
-  const rowConditions = rows.map((row) => buildRowCondition(row, statusCondition)).filter(Boolean);
+function passesClassic({ alertSources, alertSourceMode }: AlertRow): boolean {
+  const sources = cleanValues(alertSources);
+  if (sources.length === 0) return true;
+  return sources.includes(CLASSIC_ALERT_SOURCE) === (alertSourceMode !== 'exclude');
+}
+
+function universalSources({ alertSources }: AlertRow): string[] {
+  return cleanValues(alertSources).filter((source) => source !== CLASSIC_ALERT_SOURCE);
+}
+
+function passesUniversal(row: AlertRow): boolean {
+  if (cleanValues(row.alertSources).length === 0 || row.alertSourceMode === 'exclude') return true;
+  return universalSources(row).length > 0;
+}
+
+function buildSourceCondition(row: AlertRow): string | undefined {
+  const sources = universalSources(row);
+  if (sources.length === 0) return undefined;
+  const clause = kqlOneOf('event.source', sources);
+  return row.alertSourceMode === 'exclude' ? `NOT ${clause}` : clause;
+}
+
+function buildCondition(rows: AlertRow[], statusCondition: string, withSources: boolean): string {
+  const rowConditions = rows
+    .map((row) => buildRowCondition(row, statusCondition, withSources))
+    .filter(Boolean);
   if (rowConditions.length === 0) return '';
   if (rowConditions.length === 1) return rowConditions[0];
   return rowConditions.map((c) => `(${c})`).join(' OR ');
@@ -546,8 +574,13 @@ const ALERT_STATUS_CONDITION = '(event.alert.status: "active" OR event.alert.sta
 const ALERT_V2_STATUS_CONDITION =
   '((event.alert.status: "active" AND NOT event.alert.previousStatus: "recovering") OR event.alert.status: "inactive")';
 
-function buildRowCondition(row: AlertRow, statusCondition: string): string {
+function buildRowCondition(row: AlertRow, statusCondition: string, withSources: boolean): string {
   const parts: string[] = [statusCondition];
+
+  const sourceCondition = withSources ? buildSourceCondition(row) : undefined;
+  if (sourceCondition) {
+    parts.push(sourceCondition);
+  }
 
   if (row.ruleNamePattern) {
     parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);

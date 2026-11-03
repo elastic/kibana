@@ -7,7 +7,7 @@
 
 import { lazySchema, z } from '@kbn/zod/v4';
 import { presetScheduleSchema } from '../../../common/automation_schedule';
-import { MAX_RULE_NAMES } from '../../../common/automation_limits';
+import { MAX_ALERT_SOURCES, MAX_RULE_NAMES } from '../../../common/automation_limits';
 
 export const triggerRowSchema = lazySchema(() =>
   z.union([
@@ -18,6 +18,8 @@ export const triggerRowSchema = lazySchema(() =>
       ruleNameMatchMode: z.enum(['substring', 'regex']).optional(),
       alertStatus: z.enum(['active', 'inactive', 'any']).optional(),
       tags: z.array(z.string().max(500)).optional(),
+      alertSources: z.array(z.string().trim().min(1).max(500)).max(MAX_ALERT_SOURCES).optional(),
+      alertSourceMode: z.enum(['include', 'exclude']).optional(),
     }),
     presetScheduleSchema.and(
       z.object({
