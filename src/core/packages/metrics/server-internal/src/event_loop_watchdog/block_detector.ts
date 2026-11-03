@@ -25,10 +25,12 @@ export interface DetectedBlock {
   blockedMs: number;
   /** False when the warning is suppressed by the rate limit. */
   report: boolean;
-  /** Blocks whose warnings were suppressed since the last reported one. */
+  /** Blocks with no warning at all (neither ongoing nor end) since the last reported one. */
   suppressedBlocks: number;
   /** True for a report on a block that hasn't ended yet. */
   ongoing: boolean;
+  /** True once an ongoing warning was written for the block, including this report. */
+  reportedOngoing: boolean;
 }
 
 export interface PollContext {
@@ -43,6 +45,8 @@ interface OngoingBlock {
   phase: Phase;
   /** When the next ongoing report is due. */
   nextReportAt: number;
+  /** An ongoing warning was written for this block. */
+  reportedOngoing: boolean;
 }
 
 /** Clock-injected state machine detecting blocks from a stale heartbeat (milliseconds). */
@@ -70,6 +74,7 @@ export class BlockDetector {
         startedAt: lastHeartbeat,
         phase,
         nextReportAt: lastHeartbeat + Math.max(thresholdMs, ONGOING_REPORT_AFTER_MS),
+        reportedOngoing: false,
       };
       // Due right away when the threshold is the longer of the two.
       return this.pollOngoing(now, this.ongoing);
@@ -80,7 +85,12 @@ export class BlockDetector {
     this.ongoing = undefined;
     const report = this.takeReportToken(now);
     const suppressedBlocks = report ? this.suppressedBlocks : 0;
-    this.suppressedBlocks = report ? 0 : this.suppressedBlocks + 1;
+    // A block whose ongoing warning was written isn't one without a warning, even if its end is.
+    if (report) {
+      this.suppressedBlocks = 0;
+    } else if (!ongoing.reportedOngoing) {
+      this.suppressedBlocks++;
+    }
     return {
       phase: ongoing.phase,
       startedAt: ongoing.startedAt,
@@ -89,6 +99,7 @@ export class BlockDetector {
       report,
       suppressedBlocks,
       ongoing: false,
+      reportedOngoing: ongoing.reportedOngoing,
     };
   }
 
@@ -107,6 +118,7 @@ export class BlockDetector {
       fastRepeatAt - ongoing.startedAt <= ONGOING_FAST_REPEAT_UNTIL_MS
         ? fastRepeatAt
         : now + REPORT_REFILL_MS;
+    ongoing.reportedOngoing = true;
     return {
       phase: ongoing.phase,
       startedAt: ongoing.startedAt,
@@ -116,6 +128,7 @@ export class BlockDetector {
       // Left to the block's end report, which reports or counts the suppressed blocks as before.
       suppressedBlocks: 0,
       ongoing: true,
+      reportedOngoing: true,
     };
   }
 

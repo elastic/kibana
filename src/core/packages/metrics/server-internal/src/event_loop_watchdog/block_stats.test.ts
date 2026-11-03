@@ -18,6 +18,7 @@ const block = (blockedMs: number, overrides: Partial<DetectedBlock> = {}): Detec
   report: true,
   suppressedBlocks: 0,
   ongoing: false,
+  reportedOngoing: false,
   ...overrides,
 });
 
@@ -75,6 +76,12 @@ describe('BlockStats', () => {
     expect(starting).toMatchObject({ blocks: 2, suppressed: 1, maxBlockedMs: 2500 });
     expect(starting.buckets).toEqual({ lt1s: 1, lt2s: 0, lt5s: 1, gte5s: 0 });
     expect(running).toMatchObject({ blocks: 1, suppressed: 0, maxBlockedMs: 700 });
+  });
+
+  it('does not count a block as suppressed when an ongoing warning was written for it', () => {
+    const stats = new BlockStats(thresholds, 0);
+    stats.record(block(1500, { report: false, reportedOngoing: true }));
+    expect(stats.snapshot(0).running).toMatchObject({ blocks: 1, suppressed: 0 });
   });
 
   it('carries counts over until reset', () => {

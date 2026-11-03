@@ -102,6 +102,7 @@ describe('BlockDetector', () => {
         report: true,
         suppressedBlocks: 0,
         ongoing: false,
+        reportedOngoing: false,
       });
       expect(t.blockedFor(10)).toBeUndefined();
     });
@@ -148,6 +149,7 @@ describe('BlockDetector', () => {
         report: true,
         suppressedBlocks: 0,
         ongoing: true,
+        reportedOngoing: true,
       });
       expect(t.blockedFor(POLL_INTERVAL_MS)).toBeUndefined();
     });
@@ -236,10 +238,11 @@ describe('BlockDetector', () => {
       expect(t.pollBlockedUntil(repeatAt)).toEqual([
         expect.objectContaining({ endedAt: repeatAt, report: true, ongoing: true }),
       ]);
-      // The end of the block takes the normal path: no token left, so suppressed and counted.
-      expect(t.resume()).toMatchObject({ report: false, ongoing: false });
+      // The end of the block takes the normal path: no token left, so suppressed. It isn't counted
+      // as a block without a warning, since its ongoing warnings were written.
+      expect(t.resume()).toMatchObject({ report: false, ongoing: false, reportedOngoing: true });
       t.runUntil(firstReportAt + REPORT_REFILL_MS);
-      expect(t.shortBlock()).toMatchObject({ report: true, suppressedBlocks: 1 });
+      expect(t.shortBlock()).toMatchObject({ report: true, suppressedBlocks: 0 });
     });
   });
 });

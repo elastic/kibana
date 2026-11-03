@@ -24,7 +24,10 @@ export interface BlockBuckets {
 export interface PhaseStats {
   thresholdMs: number;
   blocks: number;
-  /** Blocks whose warning log line was suppressed by the rate limit. */
+  /**
+   * Blocks with no warning log line: the end was suppressed by the rate limit and no ongoing
+   * warning was written for the block.
+   */
   suppressed: number;
   maxBlockedMs: number;
   buckets: BlockBuckets;
@@ -68,12 +71,12 @@ export class BlockStats {
     this.phases = this.emptyPhases();
   }
 
-  public record({ phase, blockedMs, report }: DetectedBlock): void {
+  public record({ phase, blockedMs, report, reportedOngoing }: DetectedBlock): void {
     const stats = this.phases[phase];
     stats.blocks++;
     stats.buckets[bucketOf(blockedMs)]++;
     stats.maxBlockedMs = Math.max(stats.maxBlockedMs, blockedMs);
-    if (!report) {
+    if (!report && !reportedOngoing) {
       stats.suppressed++;
     }
   }
