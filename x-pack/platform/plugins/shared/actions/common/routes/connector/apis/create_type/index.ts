@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { createConnectorTypeRequestSchema } from './schemas/latest';
+export {
+  createConnectorTypeRequestSchema,
+  identifierSchema,
+  headerNameSchema,
+  CONNECTOR_TYPE_ID_MAX_LENGTH,
+} from './schemas/latest';
 export type { CreateConnectorTypeRequest } from './types/latest';
 export { createConnectorTypeRequestSchema as createConnectorTypeRequestSchemaV1 } from './schemas/v1';
 export type { CreateConnectorTypeRequest as CreateConnectorTypeRequestV1 } from './types/v1';

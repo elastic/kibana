@@ -17,10 +17,12 @@ const MAX_BODY_DEPTH = 10;
 const MAX_BODY_NODES = 500;
 const RESERVED_IDENTIFIERS = new Set(['__proto__', 'constructor', 'prototype']);
 
+export const CONNECTOR_TYPE_ID_MAX_LENGTH = 127;
+
 export const connectorTypeIdSchema = lazySchema(() =>
   z
     .string()
-    .max(127)
+    .max(CONNECTOR_TYPE_ID_MAX_LENGTH)
     .regex(/^[a-z0-9_-]+$/, 'Use only a-z, 0-9, "_" and "-".')
 );
 
@@ -256,7 +258,7 @@ export const createConnectorTypeResponseSchema = lazySchema(() =>
   z.object({
     id: z
       .string()
-      .max(128)
+      .max(CONNECTOR_TYPE_ID_MAX_LENGTH)
       .regex(/^\.[a-z0-9_-]+$/),
   })
 );

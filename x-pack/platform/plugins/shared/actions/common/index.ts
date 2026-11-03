@@ -123,6 +123,16 @@ export type {
   CancelOAuthPathParams,
   CancelOAuthBody,
 } from './routes/connector/apis/oauth';
+export type {
+  CreateConnectorTypeRequest,
+  CreateConnectorTypeResponse,
+} from './routes/connector/apis/create_type';
+export {
+  createConnectorTypeRequestSchema,
+  identifierSchema,
+  headerNameSchema,
+  CONNECTOR_TYPE_ID_MAX_LENGTH,
+} from './routes/connector/apis/create_type';
 export {
   OAuthAuthorizationStatus,
   OAUTH_CALLBACK_QUERY_PARAMS,
