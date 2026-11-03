@@ -45,10 +45,12 @@ function formatToMilliseconds(value?: number | null) {
   return formatToSec(value, 'ms');
 }
 
+// `goodValue` / `badValue` mirror the display labels as numbers comparable to the
+// raw metric values: milliseconds for LCP/INP, unitless for CLS.
 const CoreVitalsThresholds = {
-  LCP: { good: '2.5s', bad: '4.0s' },
-  INP: { good: '200ms', bad: '500ms' },
-  CLS: { good: '0.1', bad: '0.25' },
+  LCP: { good: '2.5s', bad: '4.0s', goodValue: 2500, badValue: 4000 },
+  INP: { good: '200ms', bad: '500ms', goodValue: 200, badValue: 500 },
+  CLS: { good: '0.1', bad: '0.25', goodValue: 0.1, badValue: 0.25 },
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -78,6 +80,7 @@ export default function CoreVitals({
           <CoreVitalItem
             title={LCP_LABEL}
             value={formatToMilliseconds(lcp)}
+            rawValue={lcp}
             ranks={lcpRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.LCP}
@@ -89,6 +92,7 @@ export default function CoreVitals({
           <CoreVitalItem
             title={INP_LABEL}
             value={formatToMilliseconds(inp)}
+            rawValue={inp}
             ranks={inpRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.INP}
@@ -100,6 +104,7 @@ export default function CoreVitals({
           <CoreVitalItem
             title={CLS_LABEL}
             value={cls?.toFixed(3) ?? null}
+            rawValue={cls}
             ranks={clsRanks}
             loading={loading}
             thresholds={CoreVitalsThresholds.CLS}
