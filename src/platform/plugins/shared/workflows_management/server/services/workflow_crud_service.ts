@@ -733,10 +733,6 @@ export class WorkflowCrudService {
       logger: this.deps.logger,
     });
 
-    if (hasPageTrigger(definition)) {
-      await this.deps.setPageRunIdentity?.({ workflowId: id, spaceId, request });
-    }
-
     return transformStorageDocumentToWorkflowDto(id, workflowData);
   }
 
@@ -939,18 +935,6 @@ export class WorkflowCrudService {
       );
     }
 
-    // Imported pages run as the importer. An overwrite that drops the page trigger retires the URL.
-    await Promise.allSettled(
-      successfullyWritten.map(async (vw) => {
-        const ref = { workflowId: vw.id, spaceId: vw.workflowData.spaceId };
-        if (hasPageTrigger(vw.definition)) {
-          await this.deps.setPageRunIdentity?.({ ...ref, request });
-        } else if (overwrite) {
-          await this.deps.retirePage?.(ref);
-        }
-      })
-    );
-
     return { created, failed };
   }
 
@@ -1070,11 +1054,8 @@ export class WorkflowCrudService {
       shouldUpdateScheduler,
     });
 
-    // A page runs as whoever saved the workflow last. Removing the page trigger retires
-    // the URL; adding it back later gives a new one.
-    if (hasPageTrigger(finalData.definition)) {
-      await this.deps.setPageRunIdentity?.({ workflowId: id, spaceId, request });
-    } else if (hadPage) {
+    // Removing the page trigger retires the URL; adding it back later gives a new one.
+    if (hadPage && !hasPageTrigger(finalData.definition)) {
       await this.deps.retirePage?.({ workflowId: id, spaceId });
     }
 

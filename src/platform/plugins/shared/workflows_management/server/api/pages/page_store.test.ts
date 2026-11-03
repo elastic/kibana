@@ -16,16 +16,14 @@ import { computePageSecretHash } from './page_secret';
 import { getPageId, WorkflowPageStore } from './page_store';
 
 const ref = { workflowId: 'report-incident', spaceId: 'marketing' };
-const identity = { apiKey: 'a2V5', apiKeyId: 'key-1', runAsUsername: 'alice' };
 const notFound = () =>
   SavedObjectsErrorHelpers.createGenericNotFoundError(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, 'id');
 
 const setup = () => {
   const client = savedObjectsClientMock.create();
   const encryptedClient = encryptedSavedObjectsMock.createClient();
-  const invalidateApiKey = jest.fn().mockResolvedValue(undefined);
-  const store = new WorkflowPageStore({ client, encryptedClient, invalidateApiKey });
-  return { client, encryptedClient, invalidateApiKey, store };
+  const store = new WorkflowPageStore({ client, encryptedClient });
+  return { client, encryptedClient, store };
 };
 
 const storedPage = (attributes: Partial<WorkflowPageAttributes> & { secret: string }) => ({
@@ -88,59 +86,16 @@ describe('WorkflowPageStore', () => {
     await expect(store.getOrCreateSecret(ref)).resolves.toBe('winner');
   });
 
-  it('overwrites the secret on rotate and keeps the run identity', async () => {
-    const { client, encryptedClient, store } = setup();
-    encryptedClient.getDecryptedAsInternalUser.mockResolvedValue(
-      storedPage({ secret: 'old', ...identity })
-    );
+  it('overwrites the secret on rotate', async () => {
+    const { client, store } = setup();
 
     const secret = await store.rotate(ref);
 
-    expect(secret).not.toBe('old');
     expect(client.create).toHaveBeenCalledWith(
       WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-      expect.objectContaining({ secret, ...identity }),
+      expect.objectContaining({ secret }),
       expect.objectContaining({ overwrite: true })
     );
-  });
-
-  it('keeps the URL and replaces the key of the previous saver', async () => {
-    const { client, encryptedClient, invalidateApiKey, store } = setup();
-    encryptedClient.getDecryptedAsInternalUser.mockResolvedValue(
-      storedPage({ secret: 'kept', ...identity })
-    );
-    const next = { apiKey: 'bmV3', apiKeyId: 'key-2', runAsUsername: 'bob' };
-
-    await store.setRunIdentity(ref, next);
-
-    expect(client.create).toHaveBeenCalledWith(
-      WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-      expect.objectContaining({ secret: 'kept', ...next }),
-      expect.objectContaining({ overwrite: true })
-    );
-    expect(invalidateApiKey).toHaveBeenCalledWith('key-1');
-  });
-
-  it('invalidates the new key when the page cannot be written', async () => {
-    const { client, encryptedClient, invalidateApiKey, store } = setup();
-    encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(notFound());
-    client.create.mockRejectedValue(new Error('boom'));
-
-    await expect(
-      store.setRunIdentity(ref, { apiKey: 'bmV3', apiKeyId: 'key-2', runAsUsername: 'bob' })
-    ).rejects.toThrow('boom');
-    expect(invalidateApiKey).toHaveBeenCalledWith('key-2');
-  });
-
-  it('returns the run key decrypted and the run user without decrypting', async () => {
-    const { client, encryptedClient, store } = setup();
-    encryptedClient.getDecryptedAsInternalUser.mockResolvedValue(
-      storedPage({ secret: 's', ...identity })
-    );
-    client.get.mockResolvedValue(storedPage({ secret: 's', runAsUsername: 'alice' }));
-
-    await expect(store.getRunApiKey(ref)).resolves.toBe(identity.apiKey);
-    await expect(store.getRunAsUsername(ref)).resolves.toBe('alice');
   });
 
   it('accepts only the stored secret of an enabled page', async () => {
@@ -161,24 +116,13 @@ describe('WorkflowPageStore', () => {
     await expect(store.verify({ ...ref, secret: 'any' })).resolves.toBe(false);
   });
 
-  it('deletes the page and invalidates its key on retire', async () => {
-    const { client, invalidateApiKey, store } = setup();
-    client.get.mockResolvedValue(storedPage({ secret: 's', ...identity }));
+  it('ignores a missing page on retire', async () => {
+    const { client, store } = setup();
+    client.delete.mockRejectedValue(notFound());
 
-    await store.retire(ref);
-
+    await expect(store.retire(ref)).resolves.toBeUndefined();
     expect(client.delete).toHaveBeenCalledWith(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, getPageId(ref), {
       namespace: 'marketing',
     });
-    expect(invalidateApiKey).toHaveBeenCalledWith('key-1');
-  });
-
-  it('ignores a missing page on retire', async () => {
-    const { client, invalidateApiKey, store } = setup();
-    client.get.mockRejectedValue(notFound());
-
-    await expect(store.retire(ref)).resolves.toBeUndefined();
-    expect(client.delete).not.toHaveBeenCalled();
-    expect(invalidateApiKey).not.toHaveBeenCalled();
   });
 });

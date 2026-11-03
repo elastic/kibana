@@ -17,11 +17,13 @@ import type { RouteDependencies } from '../types';
 
 /**
  * Workflow pages are a proof of concept. `workflowsManagement.pages.enabled` is the
- * deployment-wide kill switch. The routes fail closed: while pages are off or no
- * encryption key is set, they are not mounted and no unauthenticated surface exists.
+ * deployment-wide kill switch. The routes fail closed: while pages are off, no run
+ * identity is configured, or no encryption key is set, they are not mounted and no
+ * unauthenticated surface exists.
  */
 export function registerPageRoutes(deps: RouteDependencies) {
-  if (!deps.config?.pages?.enabled) {
+  const pages = deps.config?.pages;
+  if (!pages?.enabled || !pages.runAsApiKey) {
     return;
   }
   if (!deps.canEncryptPages) {
@@ -32,7 +34,7 @@ export function registerPageRoutes(deps: RouteDependencies) {
   }
 
   registerPageFormRoute(deps);
-  registerPageSubmitRoute(deps);
+  registerPageSubmitRoute(deps, pages.runAsApiKey);
   registerPageLinkRoute(deps);
   registerPageRotateRoute(deps);
 }
