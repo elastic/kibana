@@ -40,7 +40,7 @@ import {
   truncateInboundIngressDetail,
 } from './log_inbound_ingress_outcome';
 import type { InMemoryConnector, RawAction } from '../types';
-import { encodeApiKey } from './event_identity/encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-api-keys';
 import type {
   ConnectorEventEmitParams,
   ConnectorEventEmitter,
@@ -69,7 +69,7 @@ describe('ingestInboundEvent', () => {
   const emitConnectorEvents = jest
     .fn<Promise<DispatchConnectorEventsResult>, [ConnectorEventEmitParams]>()
     .mockResolvedValue({ ok: true });
-  const storedApiKey = encodeApiKey('es-id', 'es-secret')!;
+  const storedApiKey = encodeApiKey('es-id', 'es-secret');
   const getDecryptedConnectorAttributes = jest.fn<Promise<RawAction>, [string, string]>();
   const elasticsearchClient = elasticsearchClientMock.createClusterClient();
   const getElasticsearchClient = jest.fn().mockResolvedValue(elasticsearchClient);

@@ -11,11 +11,11 @@ import {
   buildEventScheduleRequest,
   resolveConnectorEventScheduleRequest,
 } from './build_event_fake_request';
-import { encodeApiKey } from './encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-api-keys';
 
 describe('buildEventScheduleRequest', () => {
   test('puts the ES apiKey on Authorization', () => {
-    const apiKey = encodeApiKey('es-id', 'es-secret')!;
+    const apiKey = encodeApiKey('es-id', 'es-secret');
     const request = buildEventScheduleRequest({ apiKey }, 'default');
 
     expect(request.headers.authorization).toBe(`ApiKey ${apiKey}`);
@@ -23,15 +23,15 @@ describe('buildEventScheduleRequest', () => {
   });
 
   test('unwraps an encoded UIAM key to the raw essu_ secret', () => {
-    const uiamApiKey = encodeApiKey('uiam-id', 'essu_granted')!;
+    const uiamApiKey = encodeApiKey('uiam-id', 'essu_granted');
     const request = buildEventScheduleRequest({ uiamApiKey }, 'sales');
 
     expect(request.headers.authorization).toBe('ApiKey essu_granted');
   });
 
   test('prefers UIAM over ES when both are present', () => {
-    const apiKey = encodeApiKey('es-id', 'es-secret')!;
-    const uiamApiKey = encodeApiKey('uiam-id', 'essu_granted')!;
+    const apiKey = encodeApiKey('es-id', 'es-secret');
+    const uiamApiKey = encodeApiKey('uiam-id', 'essu_granted');
     const request = buildEventScheduleRequest({ apiKey, uiamApiKey }, 'default');
 
     expect(request.headers.authorization).toBe('ApiKey essu_granted');
@@ -65,7 +65,7 @@ describe('resolveConnectorEventScheduleRequest', () => {
   });
 
   test('builds a request from the stored apiKey', () => {
-    const apiKey = encodeApiKey('es-id', 'es-secret')!;
+    const apiKey = encodeApiKey('es-id', 'es-secret');
     const request = resolveConnectorEventScheduleRequest(
       {
         actionTypeId: '.inboundWebhook',

@@ -8,7 +8,7 @@
 import { loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
-import { encodeApiKey } from './encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-api-keys';
 import { invalidateConnectorEventIdentity } from './invalidate_connector_event_identity';
 
 describe('invalidateConnectorEventIdentity', () => {
@@ -27,7 +27,7 @@ describe('invalidateConnectorEventIdentity', () => {
     });
 
     await invalidateConnectorEventIdentity({
-      identity: { apiKey: encodeApiKey('es-id', 'es-secret')! },
+      identity: { apiKey: encodeApiKey('es-id', 'es-secret') },
       securityService,
       logger,
       connectorId: 'connector-1',
@@ -48,7 +48,7 @@ describe('invalidateConnectorEventIdentity', () => {
     });
 
     await invalidateConnectorEventIdentity({
-      identity: { uiamApiKey: encodeApiKey('uiam-id', 'essu_granted')! },
+      identity: { uiamApiKey: encodeApiKey('uiam-id', 'essu_granted') },
       securityService,
       logger,
       connectorId: 'connector-1',
@@ -72,7 +72,7 @@ describe('invalidateConnectorEventIdentity', () => {
 
     await expect(
       invalidateConnectorEventIdentity({
-        identity: { apiKey: encodeApiKey('es-id', 'es-secret')! },
+        identity: { apiKey: encodeApiKey('es-id', 'es-secret') },
         securityService,
         logger,
         connectorId: 'connector-1',

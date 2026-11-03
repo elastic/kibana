@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { hasInboundEventIdentityAttributes } from './encode_api_key';
+import { hasInboundEventIdentityAttributes } from './identity_attributes';
 
 describe('hasInboundEventIdentityAttributes', () => {
   it('is true only when the unencrypted presence flag is set', () => {

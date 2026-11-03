@@ -8,7 +8,7 @@
 import { httpServerMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
-import { encodeApiKey } from './encode_api_key';
+import { encodeApiKey } from '@kbn/response-ops-api-keys';
 import { mintConnectorEventIdentity } from './mint_editor_api_keys';
 import {
   CONNECTOR_EVENT_IDENTITY_API_KEY_METADATA,
@@ -50,11 +50,11 @@ describe('mintConnectorEventIdentity', () => {
       connectorId,
     });
 
-    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
-      name,
-      role_descriptors: {},
-      metadata: CONNECTOR_EVENT_IDENTITY_API_KEY_METADATA,
-    });
+    expect(securityService.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+      request,
+      { name, role_descriptors: {}, metadata: CONNECTOR_EVENT_IDENTITY_API_KEY_METADATA },
+      { refresh: undefined }
+    );
     expect(identity).toEqual({
       apiKey: encodeApiKey('es-id', 'es-secret'),
     });
