@@ -23,7 +23,13 @@ import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { type Filter, type ProjectRouting, buildExistsFilter } from '@kbn/es-query';
-import { getGeohexPrecision, getGeotilePrecision, GRID_RESOLUTION } from '@kbn/geo-precision';
+import {
+  getGeohexPrecision,
+  getGeohexPrecisionDelta,
+  getGeotilePrecision,
+  getGeotilePrecisionDelta,
+  GRID_RESOLUTION,
+} from '@kbn/geo-precision';
 import { makeESBbox } from '../../../../common/elasticsearch_util';
 import { convertCompositeRespToGeoJson, convertRegularRespToGeoJson } from './convert_to_geojson';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -62,7 +68,6 @@ import type { ImmutableSourceProperty, OnSourceChangeArgs, SourceEditorArgs } fr
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { getExecutionContextId, mergeExecutionContext } from '../execution_context_utils';
 import { isMvt } from './is_mvt';
-import { getGeoGridPrecisionResolutionDelta } from './get_geo_grid_precision';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { getIconSize } from './get_icon_size';
 
@@ -232,13 +237,6 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     return this._descriptor.requestType === RENDER_AS.HEX
       ? getGeohexPrecision(zoom, this._descriptor.resolution)
       : getGeotilePrecision(zoom, this._descriptor.resolution);
-  }
-
-  _getGeoGridPrecisionResolutionDelta() {
-    return getGeoGridPrecisionResolutionDelta(
-      this._descriptor.resolution,
-      this._descriptor.requestType
-    );
   }
 
   async _compositeAggRequest({
@@ -541,7 +539,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const tileUrlParams = getTileUrlParams({
       geometryFieldName: this._descriptor.geoField,
       index: dataView.getIndexPattern(),
-      gridPrecision: this._getGeoGridPrecisionResolutionDelta(),
+      gridPrecision:
+        this._descriptor.requestType === RENDER_AS.HEX
+          ? getGeohexPrecisionDelta(this._descriptor.resolution)
+          : getGeotilePrecisionDelta(this._descriptor.resolution),
       hasLabels,
       buffer,
       requestBody: _.pick(searchSource.getSearchRequestBody(), [
