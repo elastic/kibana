@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getGeotileLevelDelta, getGeotilePrecision } from '@kbn/geo-precision';
+import { GEOHEX_LEVEL_DELTAS, GEOTILE_LEVEL_DELTAS } from '@kbn/geo-precision';
 import type { GRID_RESOLUTION } from '../../../../common/constants';
 import { RENDER_AS } from '../../../../common/constants';
 
@@ -14,9 +14,10 @@ export function getGeoGridPrecisionResolutionDelta(
   resolution: GRID_RESOLUTION,
   renderAs: RENDER_AS
 ): number {
-  try {
-    return getGeotileLevelDelta(resolution, renderAs === RENDER_AS.HEX);
-  } catch (e) {
+  const delta = (renderAs === RENDER_AS.HEX ? GEOHEX_LEVEL_DELTAS : GEOTILE_LEVEL_DELTAS)[
+    resolution
+  ];
+  if (delta === undefined) {
     throw new Error(
       i18n.translate('xpack.maps.source.esGrid.resolutionParamErrorMessage', {
         defaultMessage: `Grid resolution param not recognized: {resolution}`,
@@ -26,16 +27,5 @@ export function getGeoGridPrecisionResolutionDelta(
       })
     );
   }
-}
-
-/**
- * Geotile level (precision) for the given map zoom, resolution and render type.
- */
-export function getGeoGridPrecision(
-  zoom: number,
-  resolution: GRID_RESOLUTION,
-  renderAs: RENDER_AS
-): number {
-  getGeoGridPrecisionResolutionDelta(resolution, renderAs); // validates resolution
-  return getGeotilePrecision(zoom, resolution, renderAs === RENDER_AS.HEX);
+  return delta;
 }

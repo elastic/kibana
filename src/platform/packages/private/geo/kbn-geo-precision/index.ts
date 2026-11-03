@@ -10,7 +10,8 @@
 export { GRID_RESOLUTION } from './src/grid_resolution';
 export {
   DEFAULT_GRID_RESOLUTION,
-  getGeotileLevelDelta,
+  GEOHEX_LEVEL_DELTAS,
+  GEOTILE_LEVEL_DELTAS,
   getGeotilePrecision,
   getGeohexPrecision,
   getGeohashPrecision,

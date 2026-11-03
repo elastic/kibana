@@ -12,26 +12,24 @@ import { GRID_RESOLUTION } from './grid_resolution';
 
 describe('getGeotilePrecision', () => {
   test.each([
-    [GRID_RESOLUTION.COARSE, false, 7],
-    [GRID_RESOLUTION.FINE, false, 8],
-    [GRID_RESOLUTION.MOST_FINE, false, 9],
-    [GRID_RESOLUTION.SUPER_FINE, false, 13],
-    [GRID_RESOLUTION.COARSE, true, 7],
-    [GRID_RESOLUTION.FINE, true, 10],
-    [GRID_RESOLUTION.MOST_FINE, true, 10],
-    [GRID_RESOLUTION.SUPER_FINE, true, 13],
-  ] as const)('%s, hex %s at zoom 4.5 should be %s', (resolution, hex, expected) => {
-    expect(getGeotilePrecision(4.5, resolution, hex)).toBe(expected);
+    [GRID_RESOLUTION.COARSE, 7],
+    [GRID_RESOLUTION.FINE, 8],
+    [GRID_RESOLUTION.MOST_FINE, 9],
+    [GRID_RESOLUTION.SUPER_FINE, 13],
+  ] as const)('%s at zoom 4.5 should be %s', (resolution, expected) => {
+    expect(getGeotilePrecision(4.5, resolution)).toBe(expected);
   });
 
-  test('should throw for an unknown resolution', () => {
-    expect(() => getGeotilePrecision(4.5, 'UNKNOWN' as unknown as GRID_RESOLUTION)).toThrow(
-      'Grid resolution param not recognized: UNKNOWN'
-    );
+  test('should use the FINE delta for an unknown resolution', () => {
+    expect(getGeotilePrecision(4.5, 'UNKNOWN' as unknown as GRID_RESOLUTION)).toBe(8);
   });
 });
 
 describe('getGeohexPrecision', () => {
+  test('should use the FINE delta for an unknown resolution', () => {
+    expect(getGeohexPrecision(4.5, 'UNKNOWN' as unknown as GRID_RESOLUTION)).toBe(4);
+  });
+
   test.each([
     [GRID_RESOLUTION.COARSE, 3],
     [GRID_RESOLUTION.FINE, 4],

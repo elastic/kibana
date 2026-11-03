@@ -22,18 +22,19 @@ export const DEFAULT_GRID_RESOLUTION: GRID_RESOLUTION = GRID_RESOLUTION.FINE;
 
 const MAX_GEOTILE_LEVEL = 29;
 
-/**
- * Levels added to the map zoom for each resolution.
- * Hexagon resolutions do not scale evenly to zoom levels, so FINE and MOST_FINE
- * share a delta and the steps are wider.
- */
-const DELTAS: Record<GRID_RESOLUTION, number> = {
+/** Levels added to the map zoom for each resolution. */
+export const GEOTILE_LEVEL_DELTAS: Record<GRID_RESOLUTION, number> = {
   COARSE: 2,
   FINE: 3,
   MOST_FINE: 4,
   SUPER_FINE: 8,
 };
-const HEX_DELTAS: Record<GRID_RESOLUTION, number> = {
+/**
+ * Levels added to the map zoom for each resolution.
+ * Hexagon resolutions do not scale evenly to zoom levels, so FINE and MOST_FINE
+ * share a delta and the steps are wider.
+ */
+export const GEOHEX_LEVEL_DELTAS: Record<GRID_RESOLUTION, number> = {
   COARSE: 2,
   FINE: 5,
   MOST_FINE: 5,
@@ -56,27 +57,21 @@ const GEOTILE_LEVEL_TO_H3_RESOLUTION = [
  */
 const GEOHASH_PRECISION_TO_GEOTILE_LEVEL = [3, 5, 8, 10, 13, 15, 18, 20, 23, 25, 28, 30];
 
-export function getGeotileLevelDelta(resolution: GRID_RESOLUTION, hex = false): number {
-  const delta = (hex ? HEX_DELTAS : DELTAS)[resolution];
-  if (delta === undefined) {
-    throw new Error(`Grid resolution param not recognized: ${resolution}`);
-  }
-  return delta;
-}
-
 export function getGeotilePrecision(
   zoom: number,
-  resolution: GRID_RESOLUTION = DEFAULT_GRID_RESOLUTION,
-  hex = false
+  resolution: GRID_RESOLUTION = DEFAULT_GRID_RESOLUTION
 ): number {
-  return Math.min(Math.ceil(zoom) + getGeotileLevelDelta(resolution, hex), MAX_GEOTILE_LEVEL);
+  const delta = GEOTILE_LEVEL_DELTAS[resolution] ?? GEOTILE_LEVEL_DELTAS[GRID_RESOLUTION.FINE];
+  return Math.min(Math.ceil(zoom) + delta, MAX_GEOTILE_LEVEL);
 }
 
 export function getGeohexPrecision(
   zoom: number,
   resolution: GRID_RESOLUTION = DEFAULT_GRID_RESOLUTION
 ): number {
-  return GEOTILE_LEVEL_TO_H3_RESOLUTION[getGeotilePrecision(zoom, resolution, true)];
+  const delta = GEOHEX_LEVEL_DELTAS[resolution] ?? GEOHEX_LEVEL_DELTAS[GRID_RESOLUTION.FINE];
+  const level = Math.min(Math.ceil(zoom) + delta, MAX_GEOTILE_LEVEL);
+  return GEOTILE_LEVEL_TO_H3_RESOLUTION[level];
 }
 
 /**

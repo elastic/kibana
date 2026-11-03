@@ -37,12 +37,12 @@ import { asyncMap } from '@kbn/std';
 import {
   getGeohashPrecision,
   getGeohexPrecision,
+  getGeotilePrecision,
   DEFAULT_GRID_RESOLUTION,
 } from '@kbn/geo-precision';
 import {
   FIELD_ORIGIN,
   GEOJSON_FEATURE_ID_PROPERTY_NAME,
-  RENDER_AS,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
@@ -60,7 +60,6 @@ import type { IVectorSource, GeoJsonWithMeta, SourceStatus } from '../vector_sou
 import type { IESSource } from '../es_source';
 import type { IField } from '../../fields/field';
 import { getData, getHttp, getIndexPatternService, getUiSettings } from '../../../kibana_services';
-import { getGeoGridPrecision } from '../es_geo_grid_source/get_geo_grid_precision';
 import { convertToGeoJson } from './convert_to_geojson';
 import { isGeometryColumn, ESQL_GEO_SHAPE_TYPE, getFields } from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -400,7 +399,7 @@ export class ESQLSource
    * the source's grid resolution (same calculation as the geo grid source).
    */
   getGeotilePrecision(zoom: number): number {
-    return getGeoGridPrecision(zoom, this._getResolution(), RENDER_AS.GRID);
+    return getGeotilePrecision(zoom, this._getResolution());
   }
 
   /**

@@ -6,23 +6,21 @@
  */
 
 import { GRID_RESOLUTION, RENDER_AS } from '../../../../common/constants';
-import { getGeoGridPrecision } from './get_geo_grid_precision';
+import { getGeoGridPrecisionResolutionDelta } from './get_geo_grid_precision';
 
-describe('getGeoGridPrecision', () => {
+describe('getGeoGridPrecisionResolutionDelta', () => {
   test.each([
-    [GRID_RESOLUTION.COARSE, RENDER_AS.GRID, 7],
-    [GRID_RESOLUTION.FINE, RENDER_AS.GRID, 8],
-    [GRID_RESOLUTION.MOST_FINE, RENDER_AS.GRID, 9],
-    [GRID_RESOLUTION.SUPER_FINE, RENDER_AS.GRID, 13],
-    [GRID_RESOLUTION.COARSE, RENDER_AS.HEX, 7],
-    [GRID_RESOLUTION.FINE, RENDER_AS.HEX, 10],
-    [GRID_RESOLUTION.MOST_FINE, RENDER_AS.HEX, 10],
-    [GRID_RESOLUTION.SUPER_FINE, RENDER_AS.HEX, 13],
-  ])('resolution %s, render as %s at zoom 4.5 should be %s', (resolution, renderAs, expected) => {
-    expect(getGeoGridPrecision(4.5, resolution, renderAs)).toBe(expected);
+    [GRID_RESOLUTION.COARSE, RENDER_AS.GRID, 2],
+    [GRID_RESOLUTION.FINE, RENDER_AS.GRID, 3],
+    [GRID_RESOLUTION.COARSE, RENDER_AS.HEX, 2],
+    [GRID_RESOLUTION.FINE, RENDER_AS.HEX, 5],
+  ])('resolution %s, render as %s should be %s', (resolution, renderAs, expected) => {
+    expect(getGeoGridPrecisionResolutionDelta(resolution, renderAs)).toBe(expected);
   });
 
-  test('should not exceed the max geotile level', () => {
-    expect(getGeoGridPrecision(28, GRID_RESOLUTION.SUPER_FINE, RENDER_AS.GRID)).toBe(29);
+  test('should throw for unrecognized resolution', () => {
+    expect(() =>
+      getGeoGridPrecisionResolutionDelta('foo' as GRID_RESOLUTION, RENDER_AS.GRID)
+    ).toThrow();
   });
 });
