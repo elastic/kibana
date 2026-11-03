@@ -39,6 +39,7 @@ import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
 import { isDisconnectError } from '../../../services/chat/reattach_on_disconnect';
+import type { ChatTriggerMode } from '../../../../common/http_api/chat';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
@@ -54,6 +55,7 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  triggerMode?: ChatTriggerMode;
 }
 
 export interface SendMessageMutationBindings {
@@ -210,6 +212,7 @@ export const useSendMessageMutation = ({
           ],
           browserApiTools: browserApiToolsMetadata,
           projectRouting,
+          triggerMode: vars.triggerMode,
         });
 
         const events$ = rawEvents$.pipe(

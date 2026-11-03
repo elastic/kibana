@@ -502,7 +502,7 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
-      submitMessage(content);
+      submitMessage(content, { triggerMode });
     }
     clearDraft();
     messageEditorController.clear();

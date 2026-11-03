@@ -38,6 +38,7 @@ interface BaseConverseParams {
 
 export type ChatParams = BaseConverseParams & {
   input: string;
+  triggerMode?: ChatTriggerMode;
   attachments?: AttachmentInput[];
 };
 
@@ -80,6 +81,7 @@ export class ChatService {
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
       project_routing: params.projectRouting,
+      ...(params.triggerMode ? { trigger_mode: params.triggerMode } : {}),
     });
   }
 

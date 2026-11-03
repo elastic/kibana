@@ -9,6 +9,7 @@ import { useCallback, useReducer, useRef } from 'react';
 import type { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useIsSharedConversation } from '../../../hooks/use_conversation';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import type { LeadingMention } from './mentions/get_leading_mention';
 import {
   INITIAL_TRIGGER_MODE_STATE,
@@ -16,10 +17,15 @@ import {
   triggerModeReducer,
 } from './trigger_mode_state';
 
-/** State of the "Ask agent / Skip agent" toggle. A leading mention can switch it. */
+/**
+ * State of the "Ask agent / Skip agent" toggle. A leading mention can switch it. With the
+ * experimental flag on, a shared conversation has no toggle: it sends `auto` and the server decides.
+ */
 export const useTriggerMode = ({ canMention }: { canMention: boolean }) => {
   const conversationId = useConversationId();
-  const isSelectable = useIsSharedConversation();
+  const isShared = useIsSharedConversation();
+  const isAutoEnabled = useExperimentalFeatures() && isShared;
+  const isSelectable = isShared && !isAutoEnabled;
 
   const [state, dispatch] = useReducer(triggerModeReducer, INITIAL_TRIGGER_MODE_STATE);
 
@@ -27,7 +33,7 @@ export const useTriggerMode = ({ canMention }: { canMention: boolean }) => {
     dispatch({ type: 'reset' });
   }
 
-  const triggerMode = getTriggerMode(state, { conversationId, isSelectable });
+  const triggerMode = getTriggerMode(state, { conversationId, isSelectable, isAutoEnabled });
 
   // Long-lived handlers call the callbacks below, so they read the latest values from a ref
   const latest = useRef({ conversationId, canMention, triggerMode });

@@ -12,7 +12,7 @@ export interface TriggerModeState {
   conversationId?: string;
   selected: ChatTriggerMode;
   /** Set by a mention at the start of the message. Wins over `selected`. */
-  auto?: ChatTriggerMode;
+  fromMention?: ChatTriggerMode;
   isManualOverride: boolean;
 }
 
@@ -41,11 +41,20 @@ const forConversation = (state: TriggerModeState, conversationId?: string): Trig
 /** A choice only counts in the chat it was made in, and only while the toggle is shown. */
 export const getTriggerMode = (
   state: TriggerModeState,
-  { conversationId, isSelectable }: { conversationId?: string; isSelectable: boolean }
-): ChatTriggerMode =>
-  !isSelectable || state.conversationId !== conversationId
+  {
+    conversationId,
+    isSelectable,
+    isAutoEnabled = false,
+  }: { conversationId?: string; isSelectable: boolean; isAutoEnabled?: boolean }
+): ChatTriggerMode => {
+  if (isAutoEnabled) {
+    return ChatTriggerMode.Auto;
+  }
+
+  return !isSelectable || state.conversationId !== conversationId
     ? ChatTriggerMode.Always
-    : state.auto ?? state.selected;
+    : state.fromMention ?? state.selected;
+};
 
 /**
  * How the agent toggle changes:
@@ -72,31 +81,31 @@ export const triggerModeReducer = (
         return current;
       }
       const { leadingMention } = action;
-      const auto = leadingMention
+      const fromMention = leadingMention
         ? leadingMention.kind === 'user'
           ? ChatTriggerMode.Never
           : ChatTriggerMode.Always
         : undefined;
-      return current.auto === auto ? current : { ...current, auto };
+      return current.fromMention === fromMention ? current : { ...current, fromMention };
     }
     case 'manualChange':
       return {
         ...forConversation(state, action.conversationId),
         selected: action.mode,
-        auto: undefined,
+        fromMention: undefined,
         isManualOverride: true,
       };
     case 'sent':
       return {
         ...forConversation(state, action.conversationId),
         selected: action.mode,
-        auto: undefined,
+        fromMention: undefined,
         isManualOverride: false,
       };
     case 'cleared':
-      return state.auto === undefined && !state.isManualOverride
+      return state.fromMention === undefined && !state.isManualOverride
         ? state
-        : { ...state, auto: undefined, isManualOverride: false };
+        : { ...state, fromMention: undefined, isManualOverride: false };
     case 'reset':
       return INITIAL_TRIGGER_MODE_STATE;
   }

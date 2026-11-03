@@ -302,7 +302,9 @@ describe('ConversationInput', () => {
     fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
     expect(submitMessage).toHaveBeenCalledTimes(1);
-    expect(submitMessage).toHaveBeenCalledWith('hello agent');
+    expect(submitMessage).toHaveBeenCalledWith('hello agent', {
+      triggerMode: ChatTriggerMode.Always,
+    });
     expect(editorController.clear).toHaveBeenCalledTimes(1);
   });
 
@@ -457,7 +459,9 @@ describe('ConversationInput', () => {
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(submitMessage).toHaveBeenCalledWith('hello agent', {
+        triggerMode: ChatTriggerMode.Always,
+      });
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
 
@@ -514,7 +518,9 @@ describe('ConversationInput', () => {
 
       fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-      expect(submitMessage).toHaveBeenCalledWith('hello agent');
+      expect(submitMessage).toHaveBeenCalledWith('hello agent', {
+        triggerMode: ChatTriggerMode.Always,
+      });
       expect(sendUserMessage).not.toHaveBeenCalled();
     });
   });
@@ -547,7 +553,7 @@ describe('ConversationInput', () => {
       expect(editorController.insertText).toHaveBeenCalledWith('@');
     });
 
-    describe('switching the trigger mode with a mention at the start', () => {
+    describe('trigger mode with the experimental flag on', () => {
       const julian = '[@Julian Rosado](mention://u_julian_0?kind=user)';
       const agent = '[@Elastic AI Agent](mention://elastic-ai-agent?kind=agent)';
 
@@ -570,124 +576,42 @@ describe('ConversationInput', () => {
         mockedUseIsSharedConversation.mockReturnValue(true);
       });
 
-      it('posts to the team when the message starts with a user', () => {
+      it('hides the trigger mode selector and the post to team header', () => {
         renderInput(<ConversationInput />);
 
         type(`${julian} look`);
 
-        expect(modeValue()).toHaveValue('never');
+        expect(screen.queryByTestId('mock-trigger-mode-selector')).not.toBeInTheDocument();
         expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveAttribute(
           'aria-hidden',
-          'false'
+          'true'
         );
       });
 
-      it('asks the agent when the message starts with the agent, also after skipping the agent', async () => {
-        renderInput(<ConversationInput />);
-        fireEvent.change(modeValue(), { target: { value: 'never' } });
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-        await waitFor(() => expect(editorController.clear).toHaveBeenCalled());
-        expect(modeValue()).toHaveValue('never');
-
-        type(`${agent} summarize`);
-
-        expect(modeValue()).toHaveValue('always');
-      });
-
-      it('ignores spaces and new lines before the mention', () => {
-        renderInput(<ConversationInput />);
-
-        type(`  \n${julian} look`);
-
-        expect(modeValue()).toHaveValue('never');
-      });
-
       it.each([
-        ['text before it', `hey ${julian} look`],
-        ['an image before it', `[photo.png](image://photo.png) ${julian}`],
-        ['typed @name text', '@julian look'],
-      ])('does not switch with %s', (_name, content) => {
+        ['a user mention', `${julian} look`],
+        ['an agent mention', `${agent} summarize`],
+        ['no mention', 'what do you think?'],
+      ])('sends trigger_mode auto for a message starting with %s', (_name, content) => {
         renderInput(<ConversationInput />);
 
         type(content);
-
-        expect(modeValue()).toHaveValue('always');
-      });
-
-      it('goes back to the earlier mode once the message stops starting with a mention', () => {
-        renderInput(<ConversationInput />);
-
-        type(`${julian}, talk to ${agent} please`);
-        expect(modeValue()).toHaveValue('never');
-
-        type(`, talk to ${agent} please`);
-        expect(modeValue()).toHaveValue('always');
-      });
-
-      it('stops switching once the user flips the toggle by hand, until the message is sent', async () => {
-        renderInput(<ConversationInput />);
-
-        fireEvent.change(modeValue(), { target: { value: 'always' } });
-        type(`${julian} look`);
-        expect(modeValue()).toHaveValue('always');
-
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-        type(`${julian} look again`);
-        expect(modeValue()).toHaveValue('never');
-      });
-
-      it('locks the toggle when it is flipped in an empty input', () => {
-        renderInput(<ConversationInput />);
-
-        fireEvent.change(modeValue(), { target: { value: 'never' } });
-        type(`${agent} summarize`);
-
-        expect(modeValue()).toHaveValue('never');
-      });
-
-      it('keeps the mode after the message is sent', async () => {
-        renderInput(<ConversationInput />);
-
-        type(`${julian} look`);
+        editorController.getContent.mockReturnValue(content);
         fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-        expect(sendUserMessage).toHaveBeenCalledWith(`${julian} look`);
-        await waitFor(() => expect(editorController.clear).toHaveBeenCalled());
-        expect(modeValue()).toHaveValue('never');
+        expect(submitMessage).toHaveBeenCalledWith(content, { triggerMode: ChatTriggerMode.Auto });
+        expect(sendUserMessage).not.toHaveBeenCalled();
       });
 
-      it('keeps the mention switch when the send fails', async () => {
-        sendUserMessage.mockRejectedValue(new Error('boom'));
+      it('sends trigger_mode always in a private conversation', () => {
+        mockedUseIsSharedConversation.mockReturnValue(false);
         renderInput(<ConversationInput />);
 
-        type(`${julian} look`);
         fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-        await waitFor(() => expect(addErrorToast).toHaveBeenCalled());
-        expect(modeValue()).toHaveValue('never');
-      });
-
-      it('checks a restored draft once, after it loads', () => {
-        mockedUseInputDraft.mockReturnValue({
-          draft: `${julian} look`,
-          saveDraft: jest.fn(),
-          clearDraft: jest.fn(),
+        expect(submitMessage).toHaveBeenCalledWith('hello agent', {
+          triggerMode: ChatTriggerMode.Always,
         });
-
-        renderInput(<ConversationInput />);
-
-        expect(editorController.setContent).toHaveBeenCalledWith(`${julian} look`);
-        expect(modeValue()).toHaveValue('never');
-      });
-
-      it('does not carry the switch over to another conversation', () => {
-        const { rerender } = renderInput(<ConversationInput />);
-        type(`${julian} look`);
-
-        mockedUseConversationId.mockReturnValue('conv-2');
-        rerenderInput(rerender);
-
-        expect(modeValue()).toHaveValue('always');
       });
 
       it('does not switch with the experimental flag off', () => {

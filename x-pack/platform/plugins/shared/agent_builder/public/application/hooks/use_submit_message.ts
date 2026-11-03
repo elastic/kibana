@@ -18,6 +18,7 @@ import { useConversationStream } from './use_conversation_stream';
 import { useNavigation } from './use_navigation';
 import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
+import type { ChatTriggerMode } from '../../../common/http_api/chat';
 
 /**
  * Single source of truth for "send this message". A new conversation is created on the server
@@ -46,9 +47,9 @@ export const useSubmitMessage = () => {
   });
 
   const submitMessage = useCallback(
-    async (message: string) => {
+    async (message: string, { triggerMode }: { triggerMode?: ChatTriggerMode } = {}) => {
       if (conversationId) {
-        sendMessage({ message, conversationId });
+        sendMessage({ message, conversationId, triggerMode });
         return;
       }
       if (!agentId) {
@@ -62,7 +63,7 @@ export const useSubmitMessage = () => {
         return;
       }
 
-      sendMessage({ message, conversationId: created.id });
+      sendMessage({ message, conversationId: created.id, triggerMode });
 
       if (isEmbeddedContext) {
         setConversationId?.(created.id);

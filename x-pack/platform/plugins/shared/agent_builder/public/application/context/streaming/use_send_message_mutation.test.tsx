@@ -11,7 +11,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { of, Subject } from 'rxjs';
 import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
-import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, ChatTriggerMode, TimelineEventType } from '@kbn/agent-builder-common';
 import { ConversationStreamService } from '../../../services/events/conversation_stream_service';
 import {
   EXECUTION_STREAMING_EVENT_TYPE,
@@ -150,6 +150,39 @@ describe('useSendMessageMutation', () => {
     await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
     expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
     expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]);
+  });
+
+  it('passes triggerMode to chatService.chat', async () => {
+    const { result } = setup();
+
+    act(() => result.current.mutate({ ...vars, triggerMode: ChatTriggerMode.Auto }));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+
+    expect(mockChat).toHaveBeenCalledWith(
+      expect.objectContaining({ triggerMode: ChatTriggerMode.Auto })
+    );
+  });
+
+  it('clears the pending message and resets attachments when the stream has no execution events', async () => {
+    const { bindings, source, result } = setup();
+    const resetAttachments = jest.fn();
+    mockGet.mockResolvedValue(savedConversation([createUserMessageEvent({ id: 'message-1' })]));
+
+    act(() => result.current.mutate({ ...vars, resetAttachments }));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    act(() => {
+      source.next({
+        type: ChatEventType.conversationUpdated,
+        data: { conversation_id: conversationId, title: 'Chat' },
+      } as ChatEvent);
+      source.complete();
+    });
+
+    await waitFor(() => expect(bindings.clearPendingMessage).toHaveBeenCalledWith(conversationId));
+    expect(resetAttachments).toHaveBeenCalled();
+    expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId);
+    expect(bindings.markStreamStarted).not.toHaveBeenCalled();
+    expect(mockAddDanger).not.toHaveBeenCalled();
   });
 
   it('keeps the pending message and live events when the refetch lacks the saved copies', async () => {

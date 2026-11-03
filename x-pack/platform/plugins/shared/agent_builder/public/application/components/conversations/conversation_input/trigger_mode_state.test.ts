@@ -89,7 +89,7 @@ describe('trigger mode state', () => {
     });
 
     it('drops the automatic switch', () => {
-      expect(run(typed(userMention), flip(Always)).auto).toBeUndefined();
+      expect(run(typed(userMention), flip(Always)).fromMention).toBeUndefined();
     });
   });
 
@@ -158,6 +158,16 @@ describe('trigger mode state', () => {
     const state = run(flip(Never));
 
     expect(getTriggerMode(state, { conversationId: CONV, isSelectable: false })).toBe(Always);
+  });
+
+  it('returns auto when auto is enabled, ignoring mentions and manual selection', () => {
+    const { Auto } = ChatTriggerMode;
+    const options = { conversationId: CONV, isSelectable: false, isAutoEnabled: true };
+
+    expect(getTriggerMode(INITIAL_TRIGGER_MODE_STATE, options)).toBe(Auto);
+    expect(getTriggerMode(run(typed(userMention)), options)).toBe(Auto);
+    expect(getTriggerMode(run(flip(Never)), options)).toBe(Auto);
+    expect(getTriggerMode(run(flip(Never)), { ...options, conversationId: 'other' })).toBe(Auto);
   });
 
   it('can be reset', () => {

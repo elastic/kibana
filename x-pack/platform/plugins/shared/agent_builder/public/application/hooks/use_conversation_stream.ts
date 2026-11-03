@@ -13,6 +13,7 @@ import { useAgentId, useConversation } from './use_conversation';
 import { useConnectorSelection } from './chat/use_connector_selection';
 import { useAgentModel } from './agents/use_agent_model';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
+import type { ChatTriggerMode } from '../../../common/http_api/chat';
 
 /**
  * Per-conversation scoped slice of the streaming state machine.
@@ -55,9 +56,11 @@ export const useConversationStream = () => {
     ({
       message,
       conversationId: targetConversationId,
+      triggerMode,
     }: {
       message: string;
       conversationId: string;
+      triggerMode?: ChatTriggerMode;
     }) => {
       if (!agentId) {
         throw new Error('agentId is required to send a message');
@@ -72,6 +75,7 @@ export const useConversationStream = () => {
         conversationAttachments: conversation?.attachments,
         resetAttachments,
         browserApiTools,
+        triggerMode,
       });
     },
     [
