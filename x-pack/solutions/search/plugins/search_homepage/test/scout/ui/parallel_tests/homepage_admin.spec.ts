@@ -7,215 +7,122 @@
 
 import { tags } from '@kbn/scout-search';
 import { expect } from '@kbn/scout-search/ui';
-import { test } from '../fixtures';
+import { mockDeploymentStats, test } from '../fixtures';
 
 test.describe(
   'Homepage - Admin',
   { tag: [...tags.serverless.search, ...tags.stateful.classic] },
   () => {
-    test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ page, browserAuth }) => {
       await browserAuth.loginAsAdmin();
       await page.addInitScript(() => {
-        window.sessionStorage.setItem('gettingStartedVisited', 'true');
+        window.localStorage.setItem('gettingStartedVisited', 'true');
       });
+    });
+
+    test('renders the shared home page with every stat card', async ({ pageObjects }) => {
       await pageObjects.homepage.goto();
+
+      const { homepage } = pageObjects;
+      await expect(homepage.container).toBeVisible();
+      await expect(homepage.header).toContainText('Welcome');
+      await expect(homepage.dataCard).toBeVisible();
+      await expect(homepage.dashboardsCard).toBeVisible();
+      await expect(homepage.workflowsCard).toBeVisible();
+      await expect(homepage.apiKeysCard).toBeVisible();
+      await expect(homepage.documentationLink).toHaveText(/Learn more about Elasticsearch/);
     });
 
-    test('API keys button should be enabled', async ({ pageObjects }) => {
-      const apiKeysButton = await pageObjects.homepage.getApiKeyButton();
-      await expect(apiKeysButton).toBeEnabled();
-    });
-
-    test('Should open connection details flyout', async ({ pageObjects }) => {
-      await pageObjects.homepage.clickConnectionDetailsButton();
-
-      const flyout = await pageObjects.homepage.getConnectionDetailsFlyout();
-      await expect(flyout).toBeVisible();
-
-      const flyoutTitle = await pageObjects.homepage.getConnectionDetailsFlyoutTitle();
-      await expect(flyoutTitle).toBeVisible();
-    });
-
-    test('Should create API key through the modal', async ({ pageObjects }) => {
-      await pageObjects.homepage.clickApiKeysButton();
-
-      const flyout = await pageObjects.homepage.getConnectionDetailsFlyout();
-      await expect(flyout).toBeVisible();
-
-      await pageObjects.homepage.fillApiKeyName('Test API Key');
-      await pageObjects.homepage.clickCreateApiKeySubmitButton();
-
-      const successForm = await pageObjects.homepage.getApiKeySuccessForm();
-      await expect(successForm).toBeVisible();
-
-      const apiKeyValueRow = await pageObjects.homepage.getApiKeyValueRow();
-      await expect(apiKeyValueRow).toBeVisible();
-    });
-
-    // === Embedded Console Tests ===
-    test('should have embedded dev console that can be toggled', async ({ pageObjects }) => {
-      await expect(pageObjects.embeddedConsole.section).toBeVisible();
-
-      // Console body should be hidden initially
-      await expect(pageObjects.embeddedConsole.body).toBeHidden();
-
-      // Click to open console
-      await pageObjects.embeddedConsole.toggle();
-
-      // Verify console is open and fullscreen toggle is visible
-      await expect(pageObjects.embeddedConsole.fullscreenToggle).toBeVisible();
-      await expect(pageObjects.embeddedConsole.body).toBeVisible();
-
-      // Click to close console
-      await pageObjects.embeddedConsole.toggle();
-      await expect(pageObjects.embeddedConsole.body).toBeHidden();
-    });
-
-    // === Endpoint Copy Functionality Tests ===
-    test('should show Elasticsearch endpoint with copy functionality', async ({ pageObjects }) => {
-      const endpointValueField = await pageObjects.homepage.getEndpointValueField();
-      await expect(endpointValueField).toBeVisible();
-
-      const copyEndpointButton = await pageObjects.homepage.getCopyEndpointButton();
-      await expect(copyEndpointButton).toBeVisible();
-    });
-
-    test('should show checkmark feedback when copy button is clicked', async ({ pageObjects }) => {
-      const copyEndpointButton = await pageObjects.homepage.getCopyEndpointButton();
-      await expect(copyEndpointButton).toBeVisible();
-
-      await copyEndpointButton.click();
-
-      // After clicking, the button should show copied state
-      const copiedButton = await pageObjects.homepage.getCopyEndpointButtonCopied();
-      await expect(copiedButton).toBeVisible();
-
-      // After a short delay, it should revert back to normal state
-      const normalButton = await pageObjects.homepage.getCopyEndpointButton();
-      await expect(normalButton).toBeVisible();
-    });
-
-    // === Navigation Cards Tests ===
-    test('navigation cards should navigate to correct places', async ({ pageObjects, page }) => {
-      const navigationCards = await pageObjects.homepage.getNavigationCards();
-      await expect(navigationCards).toHaveCount(6);
-
-      const navCardTests = [
-        {
-          cardTestId: 'searchHomepageNavLinks-discover',
-          expectedUrl: 'discover',
-        },
-        {
-          cardTestId: 'searchHomepageNavLinks-dashboards',
-          expectedUrl: 'dashboards',
-        },
-        {
-          cardTestId: 'searchHomepageNavLinks-agentBuilder',
-          expectedUrl: 'agent_builder',
-        },
-        {
-          cardTestId: 'searchHomepageNavLinks-machineLearning',
-          expectedUrl: 'ml/overview',
-        },
-        {
-          cardTestId: 'searchHomepageNavLinks-dataManagement',
-          expectedUrl: 'index_management',
-        },
-        {
-          cardTestId: 'searchHomepageNavLinks-workflows',
-          expectedUrl: 'workflows',
-        },
-      ];
-
-      for (const { cardTestId, expectedUrl } of navCardTests) {
-        await pageObjects.homepage.clickNavigationCard(cardTestId);
-        await expect(page).toHaveURL(new RegExp(expectedUrl));
-        await pageObjects.homepage.goto();
-      }
-    });
-
-    // === Kibana Version Badge Tests ===
-    test('should display kibana version badge', async ({ pageObjects }) => {
-      const versionBadge = await pageObjects.homepage.getKibanaVersionBadge();
-      await expect(versionBadge).toBeVisible();
-    });
-
-    // === Getting Started Banner Tests ===
-    test('should display Getting Started banner with title and button', async ({ pageObjects }) => {
-      const gettingStartedButton = await pageObjects.homepage.getGettingStartedButton();
-      await expect(gettingStartedButton).toBeVisible();
-      await expect(gettingStartedButton).toContainText('Get started with Elasticsearch');
-    });
-
-    test('Get started button should navigate to getting started page', async ({
-      pageObjects,
+    test('directs an empty deployment to getting started from the banner', async ({
       page,
+      pageObjects,
     }) => {
-      await pageObjects.homepage.clickGettingStartedButton();
-      await expect(page).toHaveURL(new RegExp('getting_started'));
+      await mockDeploymentStats(page);
+      await pageObjects.homepage.goto();
+
+      await expect(pageObjects.homepage.banner).toContainText('Get started with Elasticsearch');
+      await pageObjects.homepage.bannerGetStartedButton.click();
+
+      await expect(page).toHaveURL(/getting_started/);
     });
 
-    // === Body Links Tests ===
-    test('should display all body links with external documentation', async ({ pageObjects }) => {
-      const bodyLinks = await pageObjects.homepage.getBodyLinks();
-      await expect(bodyLinks).toHaveCount(3);
+    test('drops the banner once the deployment holds data', async ({ page, pageObjects }) => {
+      await mockDeploymentStats(page, { indicesCount: 3, documentsCount: 10 });
+      await pageObjects.homepage.goto();
 
-      // Verify specific links exist
-      const askExpertLink = await pageObjects.homepage.getBodyLinkByText(
-        'Contact customer engineering'
+      await expect(pageObjects.homepage.dataCardTotalIndicesValue).toHaveText('3');
+      await expect(pageObjects.homepage.banner).toBeHidden();
+    });
+
+    test('manage data navigates to index management', async ({ page, pageObjects }) => {
+      await pageObjects.homepage.goto();
+
+      await pageObjects.homepage.manageDataButton.click();
+
+      await expect(page).toHaveURL(/index_management/);
+    });
+
+    test('opens the connection details flyout', async ({ pageObjects }) => {
+      await pageObjects.homepage.goto();
+
+      await pageObjects.homepage.connectionDetailsButton.click();
+
+      await expect(pageObjects.homepage.connectionDetailsFlyout).toBeVisible();
+      await expect(pageObjects.homepage.connectionDetailsFlyoutTitle).toBeVisible();
+    });
+
+    test('creates an API key through the connection details flyout', async ({ pageObjects }) => {
+      await pageObjects.homepage.goto();
+
+      const { homepage } = pageObjects;
+      await homepage.generateApiKeyButton.click();
+      await expect(homepage.connectionDetailsFlyout).toBeVisible();
+
+      await homepage.apiKeyNameInput.fill('Test API Key');
+      await homepage.createApiKeySubmitButton.click();
+
+      await expect(homepage.apiKeySuccessForm).toBeVisible();
+      await expect(homepage.apiKeyValueRow).toBeVisible();
+    });
+
+    test('opens Console from the add data links', async ({ pageObjects }) => {
+      await pageObjects.homepage.goto();
+
+      await pageObjects.homepage.addDataDevToolsLink.click();
+
+      await expect(pageObjects.consolePage.inputEditor).toBeVisible();
+    });
+
+    test('shows the agent skills prompt for building in an IDE', async ({ pageObjects }) => {
+      await pageObjects.homepage.goto();
+
+      await pageObjects.homepage.viewPromptButton.click();
+
+      await expect(pageObjects.homepage.promptModal).toContainText(
+        'npx skills add elastic/agent-skills'
       );
-      await expect(askExpertLink).toBeVisible();
-
-      const trainingLink = await pageObjects.homepage.getBodyLinkByText('Elastic Training');
-      await expect(trainingLink).toBeVisible();
-
-      const docsLink = await pageObjects.homepage.getBodyLinkByText('View documentation');
-      await expect(docsLink).toBeVisible();
     });
 
-    test('body links should have external target attribute', async ({ pageObjects }) => {
-      const bodyLinks = await pageObjects.homepage.getBodyLinks();
-      const allLinks = await bodyLinks.all();
+    // clicking would auto-send the onboarding message to an LLM, which Scout has no connector for
+    test('offers to chat with the AI agent', async ({ pageObjects }) => {
+      await pageObjects.homepage.goto();
 
-      for (const link of allLinks) {
-        await expect(link).toHaveAttribute('target', '_blank');
-        await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-      }
+      await expect(pageObjects.homepage.openElasticAgentButton).toBeVisible();
     });
 
-    test('body links should navigate to correct URLs when clicked', async ({
-      pageObjects,
-      page,
-    }) => {
-      const bodyLinkTests = [
-        {
-          linkText: 'Contact customer engineering',
-          expectedUrlPattern: /contact\/ce-help/,
-        },
-        {
-          linkText: 'Elastic Training',
-          expectedUrlPattern: /training/,
-        },
-        {
-          linkText: 'View documentation',
-          expectedUrlPattern: /solutions\/search\/get-started/,
-        },
-      ];
+    test('has an embedded dev console that can be toggled', async ({ pageObjects }) => {
+      await pageObjects.homepage.goto();
 
-      for (const { linkText, expectedUrlPattern } of bodyLinkTests) {
-        const link = await pageObjects.homepage.getBodyLinkByText(linkText);
-        await expect(link).toBeVisible();
+      const { embeddedConsole } = pageObjects;
+      await expect(embeddedConsole.section).toBeVisible();
+      await expect(embeddedConsole.body).toBeHidden();
 
-        // Click the link and wait for new page to open
-        const context = page.context();
-        const [newPage] = await Promise.all([context.waitForEvent('page'), link.click()]);
+      await embeddedConsole.toggle();
+      await expect(embeddedConsole.fullscreenToggle).toBeVisible();
+      await expect(embeddedConsole.body).toBeVisible();
 
-        // Verify the new page URL matches expected pattern
-        await expect(newPage).toHaveURL(expectedUrlPattern);
-
-        // Close the new page and continue with the original page
-        await newPage.close();
-      }
+      await embeddedConsole.toggle();
+      await expect(embeddedConsole.body).toBeHidden();
     });
   }
 );

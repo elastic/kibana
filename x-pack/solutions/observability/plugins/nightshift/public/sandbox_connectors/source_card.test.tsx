@@ -28,6 +28,15 @@ describe('SourceCard', () => {
     expect(onClick).toHaveBeenCalled();
   });
 
+  it('shows a custom mark in place of the icon plate', () => {
+    render(
+      <SourceCard mark={<span data-test-subj="mark" />} title="All sources" data-test-subj="card" />
+    );
+
+    expect(screen.getByTestId('mark')).toBeInTheDocument();
+    expect(screen.getByTestId('card').querySelector('[data-euiicon-type]')).toBeNull();
+  });
+
   it('disables the action with a reason', () => {
     render(
       <SourceCard
@@ -38,19 +47,5 @@ describe('SourceCard', () => {
     );
 
     expect(screen.getByRole('button', { name: 'Connect GitHub' })).toBeDisabled();
-  });
-
-  it('marks a connected source with a check instead of its logo', () => {
-    const { container } = render(
-      <SourceCard
-        icon="logoGithub"
-        title="gh"
-        connected
-        action={{ label: 'Edit connector', icon: 'pencil', onClick: jest.fn() }}
-      />
-    );
-
-    expect(container.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
-    expect(container.querySelector('[data-euiicon-type="logoGithub"]')).not.toBeInTheDocument();
   });
 });

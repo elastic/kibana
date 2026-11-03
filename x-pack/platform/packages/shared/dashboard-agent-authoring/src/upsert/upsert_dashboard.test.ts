@@ -1808,6 +1808,19 @@ describe('executeDashboardUpsert', () => {
         );
         expect(result.dashboardData.panels).toEqual([{ ...vegaPanel, config: { updated: true } }]);
       });
+
+      it('drops applyChartRules when renderer is omitted on a vega panel', async () => {
+        const { result, resolvePanelContent } = await editWith(vegaPanel, {
+          source: 'request',
+          query: 'change the title',
+          applyChartRules: true,
+        });
+
+        expect(resolvePanelContent).toHaveBeenCalledWith(
+          expect.objectContaining({ renderer: 'vega', applyChartRules: undefined })
+        );
+        expect(result.failures).toEqual([]);
+      });
     });
 
     it('resolves multiple panel edits in parallel', async () => {
@@ -2046,6 +2059,7 @@ describe('executeDashboardUpsert', () => {
 
       expect(resolvePanelContent).toHaveBeenCalledWith({
         renderer: 'custom_content',
+        resolveEsqlVariables: expect.any(Function),
         nlQuery: 'updated prompt',
         esql: 'FROM logs | STATS count = COUNT(*)',
         existingPanel,
@@ -2093,6 +2107,7 @@ describe('executeDashboardUpsert', () => {
 
       expect(resolvePanelContent).toHaveBeenCalledWith({
         renderer: 'custom_content',
+        resolveEsqlVariables: expect.any(Function),
         nlQuery: 'Show error rate KPI',
         esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
         hasData: true,

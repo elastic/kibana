@@ -62,14 +62,47 @@ export const getVectordbHomeConfig = ({
     onGetStarted: () =>
       application.navigateToApp(VECTORDB_APP_ID, { deepLinkId: GETTING_STARTED_DEEP_LINK_ID }),
   },
-  primaryAddDataLink: {
-    key: 'embeddings',
-    iconType: 'rocket',
-    label: i18n.translate('xpack.serverlessVectordb.home.addData.embeddings', {
-      defaultMessage: 'Generate or store embeddings',
-    }),
-    onClick: () => application.navigateToApp(VECTORDB_APP_ID, { path: GETTING_STARTED_PATH }),
-    testSubj: 'addDataEmbeddingsLink',
-    telemetryId: `${TELEMETRY_PREFIX}-addData-embeddings`,
-  },
+  addDataLinks: [
+    {
+      key: 'embeddings',
+      iconType: 'rocket',
+      label: i18n.translate('xpack.serverlessVectordb.home.addData.embeddings', {
+        defaultMessage: 'Generate or store embeddings',
+      }),
+      onClick: () => application.navigateToApp(VECTORDB_APP_ID, { path: GETTING_STARTED_PATH }),
+      testSubj: 'addDataEmbeddingsLink',
+      telemetryId: `${TELEMETRY_PREFIX}-addData-embeddings`,
+    },
+    {
+      key: 'devTools',
+      iconType: 'code',
+      label: i18n.translate('xpack.serverlessVectordb.home.addData.devTools', {
+        defaultMessage: 'Query your data in Console',
+      }),
+      onClick: () => application.navigateToApp('dev_tools'),
+      testSubj: 'addDataDevToolsLink',
+      telemetryId: `${TELEMETRY_PREFIX}-addData-devTools`,
+    },
+    {
+      key: 'sampleData',
+      iconType: 'unarchive',
+      label: i18n.translate('xpack.serverlessVectordb.home.addData.sampleData', {
+        defaultMessage: 'Browse sample data sets',
+      }),
+      onClick: () => application.navigateToApp('home', { path: '#/tutorial_directory/sampleData' }),
+      testSubj: 'addDataSampleDataLink',
+      telemetryId: `${TELEMETRY_PREFIX}-addData-sampleData`,
+    },
+    {
+      key: 'uploadFile',
+      iconType: 'upload',
+      label: i18n.translate('xpack.serverlessVectordb.home.addData.uploadFile', {
+        defaultMessage: 'Upload a file',
+      }),
+      onClick: () =>
+        application.navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' }),
+      testSubj: 'addDataUploadFileLink',
+      telemetryId: `${TELEMETRY_PREFIX}-addData-uploadFile`,
+    },
+  ],
 });

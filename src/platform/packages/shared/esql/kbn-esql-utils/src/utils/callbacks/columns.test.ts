@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { clearESQLSourceInfoCache, getESQLSourceInfo } from '../get_source_info';
-import { getEsqlSourceColumns } from './columns';
+import { getEsqlColumns, getEsqlSourceColumns } from './columns';
 
 const createHttp = () =>
   ({
@@ -128,5 +130,31 @@ describe('getEsqlSourceColumns', () => {
 
     expect(await getEsqlSourceColumns({ esqlQuery: '', http })).toEqual([]);
     expect(http.post).not.toHaveBeenCalled();
+  });
+});
+
+describe('getEsqlColumns', () => {
+  const mockSearch: jest.MockedFunction<ISearchGeneric> = jest.fn();
+
+  beforeEach(() => {
+    mockSearch.mockReset();
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: { columns: [{ name: 'host', type: 'keyword' }], values: [] },
+      }) as unknown as ReturnType<ISearchGeneric>
+    );
+  });
+
+  it('forwards the project routing to the search options', async () => {
+    await getEsqlColumns({
+      esqlQuery: 'FROM logs-*',
+      search: mockSearch,
+      projectRouting: '_alias:*',
+    });
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ projectRouting: '_alias:*' })
+    );
   });
 });

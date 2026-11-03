@@ -17,7 +17,6 @@ export {
   OBLT_UX_APP_ID,
   OBLT_DIGITAL_EXPERIENCE_APP_ID,
   OBLT_PROFILING_APP_ID,
-  SIGNIFICANT_EVENTS_APP_ID,
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
   NIGHTSHIFT_APP_ID,
@@ -36,7 +35,6 @@ export type {
   AppId,
   DeepLinkId,
   ObservabilityAlertingLinkId,
-  SignificantEventsLinkId,
   NightshiftLinkId,
   StreamsLinkId,
 } from './deep_links';
