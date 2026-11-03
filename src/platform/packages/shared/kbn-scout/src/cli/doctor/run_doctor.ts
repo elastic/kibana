@@ -34,7 +34,12 @@ interface DoctorSection {
   /** Checks for all targets when not set */
   target?: DoctorTarget;
   checks: DoctorCheck[];
+  /** Shown when a check fails or warns; titles only, as the docs are internal */
+  docs?: string;
 }
+
+const CLOUD_DOCS =
+  'Kibana team docs "Run Scout tests on Elastic Cloud" and "Create Cloud users", QAF docs "Getting started"';
 
 interface ReportedResult extends CheckResult {
   check: DoctorCheck;
@@ -88,9 +93,9 @@ const TARGETS: Record<DoctorTarget, { title: string; location: DoctorLocation; r
 const getSections = (): DoctorSection[] => [
   { checks: [...environmentChecks, ...playwrightChecks] },
   { target: 'local', checks: [...localServerChecks, ...esSnapshotChecks, ...dockerChecks] },
-  { target: 'qaf', checks: [...qafChecks, ...getQafCloudChecks()] },
+  { target: 'qaf', checks: [...qafChecks, ...getQafCloudChecks()], docs: CLOUD_DOCS },
   // only when the config files for running Scout against Cloud without QAF exist
-  { target: 'scout', checks: getScoutCloudChecks() },
+  { target: 'scout', checks: getScoutCloudChecks(), docs: CLOUD_DOCS },
 ];
 
 const ICONS: Record<CheckResult['status'], string> = {
@@ -167,7 +172,7 @@ const runChecks = async (log: ToolingLog, sections: DoctorSection[]) => {
   sections.forEach(({ checks }) => checks.forEach(start));
 
   const reported: ReportedResult[] = [];
-  for (const { target, checks } of sections) {
+  for (const { target, checks, docs } of sections) {
     log.write(`\n ${chalk.bold(target ? TARGETS[target].title : 'General')}`);
     const results = await withSpinner(
       () => `Checking ${checks.find((check) => !done.has(check))?.title ?? ''}`,
@@ -180,6 +185,9 @@ const runChecks = async (log: ToolingLog, sections: DoctorSection[]) => {
         log.write(formatResult(result, target && `[${check.arch ?? 'general'}]`));
       }
     });
+    if (docs && results.some((result) => result && result.status !== 'pass')) {
+      log.write(chalk.dim(`   Docs: ${docs}`));
+    }
   }
   return reported;
 };

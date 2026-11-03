@@ -197,7 +197,7 @@ const cloudUsersCheck = (arch: DoctorArch): DoctorCheck => ({
       await readCloudUsers(),
       roles,
       (await getCopyFtrUsersFix(roles)) ??
-        `add them under role_credentials.${getEnvironment()}, or to ${FTR_ROLE_USERS_FILE} to copy them with --fix`
+        `create Cloud users with these roles and add them under role_credentials.${getEnvironment()}`
     );
   },
 });
@@ -212,7 +212,7 @@ const qafCustomRoleCheck: DoctorCheck = {
       `${tildify(CLOUD_SECRETS_FILE)} (${getEnvironment()})`,
       await readCloudUsers(),
       (await getCopyFtrUsersFix([CUSTOM_ROLE])) ??
-        `add it under role_credentials.${getEnvironment()}, QAF assigns the role when creating a project`
+        `create a Cloud user and add it under role_credentials.${getEnvironment()}, QAF assigns it the role when creating a project`
     ),
 };
 
@@ -222,7 +222,7 @@ const apiKeyCheck: DoctorCheck = {
   run: async () => {
     if (!Fs.existsSync(CLOUD_SECRETS_FILE)) {
       return fail(`${tildify(CLOUD_SECRETS_FILE)} does not exist`, {
-        hint: 'QAF reads the API key and Cloud users from it',
+        hint: `create it with api_key.${getEnvironment()} and role_credentials.${getEnvironment()}`,
       });
     }
 
@@ -233,7 +233,7 @@ const apiKeyCheck: DoctorCheck = {
     return secrets?.api_key?.[keyName]
       ? pass(`${tildify(CLOUD_SECRETS_FILE)} has API key "${keyName}"`)
       : fail(`${tildify(CLOUD_SECRETS_FILE)} has no API key "${keyName}"`, {
-          hint: 'QAF needs it to create projects and deployments',
+          hint: `create one in the Elastic Cloud ${getEnvironment()} console (Organization → API keys) and add it as api_key.${keyName}`,
         });
   },
 };
