@@ -48,14 +48,14 @@ export type ToolOutcome =
   | { type: 'interrupted'; prompts: ToolPromptEntry[] };
 
 /**
- * How a tool call is executed and represented: `server` calls are durable; `browser` and
- * `dedicated` (tools with their own step lifecycle, e.g. ask_user_question) calls are runtime-only steps.
+ * How a tool call is represented: `server` calls are durable; `dedicated` (tools with their own
+ * step lifecycle, e.g. ask_user_question) calls are runtime-only steps.
  */
-export type ToolCallKind = 'server' | 'browser' | 'dedicated';
+export type ToolCallKind = 'server' | 'dedicated';
 
 /** Runtime-only per-tool-call data needed to render the current run byte-equivalently. */
 export interface ToolRenderState {
-  /** The LangChain tool name used in the AI message (`sanitizeToolId(tool_id)` or the browser-prefixed name). */
+  /** The LangChain tool name used in the AI message (`sanitizeToolId(tool_id)`). */
   toolName: string;
   kind: ToolCallKind;
   /** The research cycle the call was issued in; drives cycle-limit notices and in-flight compaction. */

@@ -39,6 +39,7 @@ import { HookLifecycle } from '@kbn/agent-builder-common';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import {
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_BROWSER_TOOLS_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
@@ -452,6 +453,38 @@ describe('AgentBuilder runner', () => {
           expect.objectContaining({
             experimentalFeatures: expect.objectContaining({
               apiDiscovery: apiDiscoveryEnabled,
+            }),
+          })
+        );
+      }
+    );
+
+    it.each([true, false])(
+      'experimentalFeatures.browserTools follows the agentBuilder:browserTools setting (%s)',
+      async (browserToolsEnabled) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        (runnerDeps.uiSettings.asScopedToClient as jest.Mock).mockReturnValue({
+          get: jest.fn((settingId: string) => {
+            if (settingId === AGENT_BUILDER_BROWSER_TOOLS_SETTING_ID) {
+              return Promise.resolve(browserToolsEnabled);
+            }
+            return Promise.resolve(false);
+          }),
+        } as any);
+
+        const runner = createRunner(runnerDeps);
+        await runner.runAgent({
+          agentId: 'test-tool',
+          agentParams: { nextInput: { message: 'dolly' } },
+          request: scopedRunnerDeps.request,
+        });
+
+        expect(agentHandler).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            experimentalFeatures: expect.objectContaining({
+              browserTools: browserToolsEnabled,
             }),
           })
         );

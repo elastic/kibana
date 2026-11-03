@@ -12,6 +12,7 @@ import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_BROWSER_TOOLS_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
@@ -63,6 +64,20 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       }),
       name: i18n.translate('xpack.agentBuilder.uiSettings.bashSupport.name', {
         defaultMessage: 'Elastic Agent Builder: Bash Tool',
+      }),
+      schema: schema.boolean(),
+      value: false,
+      experimental: true,
+      requiresPageReload: false,
+      readonly: false,
+    },
+    [AGENT_BUILDER_BROWSER_TOOLS_SETTING_ID]: {
+      description: i18n.translate('xpack.agentBuilder.uiSettings.browserTools.description', {
+        defaultMessage:
+          'Enables the experimental built-in browser tools, which let Elastic Agent Builder read and act on the page the user is looking at. Disabled by default; intended for controlled experimentation.',
+      }),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.browserTools.name', {
+        defaultMessage: 'Elastic Agent Builder: Browser Tools',
       }),
       schema: schema.boolean(),
       value: false,

@@ -21,7 +21,6 @@ import {
   isSubstitutionStep,
 } from '@kbn/agent-builder-common/chat';
 import {
-  createBrowserToolCallEvent,
   createMessageEvent,
   createPromptRequestEvent,
   createReasoningEvent,
@@ -84,16 +83,7 @@ const stepUpdatesToEvents = (
     } else if (update.type === 'append_tool_call') {
       const { step } = update;
       const kind = renderState[step.tool_call_id]?.kind ?? 'server';
-      if (kind === 'browser') {
-        events.push(
-          createBrowserToolCallEvent({
-            toolId: step.tool_id,
-            toolCallId: step.tool_call_id,
-            params: step.params,
-            expiresAt: new Date().toISOString(),
-          })
-        );
-      } else if (kind === 'server') {
+      if (kind === 'server') {
         events.push(
           createToolCallEvent({
             toolId: step.tool_id,

@@ -8,7 +8,13 @@
 import type { MonoTypeOperatorFunction } from 'rxjs';
 import { filter } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatEvent, InteractivityConfigInput } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  BrowserToolDescriptor,
+  BrowserToolsRequest,
+  ChatEvent,
+  InteractivityConfigInput,
+} from '@kbn/agent-builder-common';
 import {
   createBadRequestError,
   AgentExecutionMode,
@@ -18,6 +24,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type {
   AgentExecutionService,
+  BrowserToolsExecutionParams,
   ExecuteAgentParams,
   ExecutionConversationOrigin,
 } from '@kbn/agent-builder-server/execution';
@@ -97,6 +104,35 @@ export const getConverseHelpers = ({
     }
   };
 
+  /**
+   * Resolves the browser tools a request makes available: `browser_tools` ids are looked up in the
+   * registry, legacy `browser_api_tools` entries carry their own descriptor.
+   */
+  const resolveBrowserTools = ({
+    browserToolsRequest,
+    legacyBrowserTools = [],
+  }: {
+    browserToolsRequest?: BrowserToolsRequest;
+    legacyBrowserTools?: BrowserApiToolMetadata[];
+  }): BrowserToolsExecutionParams | undefined => {
+    const tools: BrowserToolDescriptor[] = [
+      ...(browserToolsRequest?.tool_ids ?? []).map((id) => {
+        const descriptor = getInternalServices().browserTools.registry.get(id);
+        if (!descriptor) {
+          throw createBadRequestError(`Unknown browser tool id "${id}"`);
+        }
+        return descriptor;
+      }),
+      ...legacyBrowserTools.map(({ id, description, schema, timeout_ms: timeoutMs }) => ({
+        id,
+        description,
+        schema,
+        timeout_ms: timeoutMs,
+      })),
+    ];
+    return tools.length > 0 ? { clientId: browserToolsRequest?.client_id, tools } : undefined;
+  };
+
   const defaultExecutionOptions = (payload: ChatRequestBodyPayload): ResolvedExecutionOptions => {
     const { _execution_mode: executionMode, execution_id: executionId } = payload;
 
@@ -131,7 +167,8 @@ export const getConverseHelpers = ({
       attachments,
       access_control: accessControl,
       read_only: readOnly,
-      browser_api_tools: browserApiTools,
+      browser_api_tools: legacyBrowserTools,
+      browser_tools: browserToolsRequest,
       configuration_overrides: configurationOverrides,
       project_routing: projectRouting,
       reasoning_level: reasoningLevel,
@@ -139,6 +176,7 @@ export const getConverseHelpers = ({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
+    const browserTools = resolveBrowserTools({ browserToolsRequest, legacyBrowserTools });
     const { useTaskManager, origin, callback, executionId, metadata } =
       executionOptions ?? defaultExecutionOptions(payload);
 
@@ -160,7 +198,7 @@ export const getConverseHelpers = ({
         readOnly,
         origin,
         callback,
-        browserApiTools,
+        browserTools,
         configurationOverrides,
         projectRouting,
         reasoningLevel,

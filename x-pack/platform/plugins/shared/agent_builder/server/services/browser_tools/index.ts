@@ -8,3 +8,4 @@
 export { BrowserToolDescriptorRegistry, createBrowserToolDescriptorRegistry } from './registry';
 export { createBrowserToolsService } from './browser_tools_service';
 export type { BrowserToolsService } from './browser_tools_service';
+export { createBrowserToolExecutable } from './executable/create_browser_tool_executable';

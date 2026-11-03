@@ -11,7 +11,6 @@ import { Command, Overwrite } from '@langchain/langgraph';
 import { isStreamEvent, reverseMap } from '@kbn/agent-builder-genai-utils/langchain';
 import type {
   AttachmentTimelineEvent,
-  BrowserApiToolMetadata,
   ChatAgentEvent,
   ConversationRoundStep,
   MetadataFieldValue,
@@ -20,7 +19,7 @@ import type {
   SubagentEntry,
   TodosStep,
 } from '@kbn/agent-builder-common';
-import { ToolOrigin } from '@kbn/agent-builder-common';
+import { isBuiltinBrowserToolId } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   AgentExecutionMode,
@@ -34,6 +33,7 @@ import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolManager, TodoStateManager } from '@kbn/agent-builder-server/runner';
+import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import {
   addRoundCompleteEvent,
@@ -58,6 +58,7 @@ import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attach
 import { sourceEvents } from '../../conversation/client/source_events';
 import { nextResumeIndex, userMessageActor } from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
+import { createBrowserToolExecutable } from '../../browser_tools';
 import {
   RunAttachmentEvents,
   inheritedAttachmentEvents,
@@ -85,7 +86,6 @@ import {
 const chatAgentGraphName = 'default-agent-builder-agent';
 
 export type RunChatAgentParams = Omit<RunAgentParams, 'mode'> & {
-  browserApiTools?: BrowserApiToolMetadata[];
   startTime?: Date;
 };
 
@@ -112,7 +112,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runId = uuidv4(),
     agentId,
     abortSignal,
-    browserApiTools,
+    browserTools,
     structuredOutput = false,
     outputSchema,
     startTime = new Date(),
@@ -336,8 +336,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         logger,
       }),
       toolManager.addTools({
-        type: ToolManagerToolType.browser,
-        tools: (browserApiTools ?? []).map((tool) => ({ ...tool, origin: ToolOrigin.internal })),
+        type: ToolManagerToolType.executable,
+        tools: createBrowserTools({
+          browserTools,
+          context,
+          executionId: executionId ?? runId,
+        }),
+        logger,
       }),
     ]);
 
@@ -774,4 +779,35 @@ const getPreviousRoundInfo = (
  */
 export const getRecursionLimit = (cycleLimit: number): number => {
   return Math.ceil(cycleLimit * 5.5 + 20);
+};
+
+/**
+ * The executables of the browser tools the sending client offered. None for a non-interactive run,
+ * which has no browser to answer; the built-in ones only when their experimental setting is on.
+ */
+const createBrowserTools = ({
+  browserTools,
+  context,
+  executionId,
+}: {
+  browserTools: RunChatAgentParams['browserTools'];
+  context: AgentHandlerContext;
+  executionId: string;
+}): ExecutableToolWithOrigin[] => {
+  if (!browserTools || !context.interactivity.enabled) {
+    return [];
+  }
+  return browserTools.tools
+    .filter(({ id }) => context.experimentalFeatures.browserTools || !isBuiltinBrowserToolId(id))
+    .map((descriptor) =>
+      createBrowserToolExecutable({
+        descriptor,
+        clientId: browserTools.clientId,
+        executionId,
+        spaceId: context.spaceId,
+        browserTools: context.browserTools,
+        runner: context.runner,
+        logger: context.logger,
+      })
+    );
 };

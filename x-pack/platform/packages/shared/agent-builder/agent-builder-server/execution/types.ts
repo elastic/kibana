@@ -13,6 +13,7 @@ import type {
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
+  BrowserToolDescriptor,
   ConversationAccessControl,
   ConversationRoundOrigin,
   ConversationOrigin,
@@ -94,6 +95,14 @@ export type ExecutionConversationOrigin = ConversationOrigin &
 /** Whether a request resolved an existing conversation or created it. */
 export type ConversationOperation = 'CREATE' | 'UPDATE';
 
+/** Browser-side tools made available to a run, resolved from the request. */
+export interface BrowserToolsExecutionParams {
+  /** Id of the client that sent the request and can execute the tools. */
+  clientId?: string;
+  /** Descriptors of the tools the client can execute. */
+  tools: BrowserToolDescriptor[];
+}
+
 export interface ConversationExecutionParams extends BaseExecutionParams {
   /** Id of the conversation to continue. */
   conversationId?: string;
@@ -118,8 +127,8 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
     /** URL to deliver the execution result to. */
     url: string;
   };
-  /** Browser API tools to make available to the agent. */
-  browserApiTools?: BrowserApiToolMetadata[];
+  /** Browser-side tools the sending client can execute. */
+  browserTools?: BrowserToolsExecutionParams;
   /**
    * Used to establish the parent linkage and add subagent-specific metadata
    * to the newly-created child conversation.
@@ -154,6 +163,11 @@ export interface StoredConversationExecutionParams extends ConversationExecution
    * than the update its own read sees.
    */
   conversationOperation: ConversationOperation;
+  /**
+   * @deprecated Written by executions created before `browserTools` existed; only read to map
+   * such in-flight executions to `browserTools`.
+   */
+  browserApiTools?: BrowserApiToolMetadata[];
 }
 
 /**

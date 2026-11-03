@@ -6,11 +6,7 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import {
-  createToolIdMappings,
-  sanitizeToolId,
-  toolToLangchain,
-} from '@kbn/agent-builder-genai-utils/langchain';
+import { createToolIdMappings, toolToLangchain } from '@kbn/agent-builder-genai-utils/langchain';
 import { reverseMap } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { LRUCache } from 'lru-cache';
 import type { ToolOrigin, ToolType } from '@kbn/agent-builder-common';
@@ -24,11 +20,9 @@ import type {
   AddToolInput,
   ExecutableToolWithOrigin,
   ExecutableToolInput,
-  BrowserToolInput,
   DynamicToolInput,
 } from '@kbn/agent-builder-server/runner/tool_manager';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manager';
-import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import {
   buildGuardedToolContent,
   DEFAULT_MAX_TOOL_RESULT_TOKENS,
@@ -88,9 +82,9 @@ export class ToolManager implements IToolManager {
 
   /**
    * Adds tools to the tool manager.
-   * Supports executable tools, browser API tools and dynamic tools (reachable only through the
+   * Supports executable tools and dynamic tools (reachable only through the
    * `execute_dynamic_tool` meta-tool, see `DynamicToolRegistry`).
-   * @param input - The tool input configuration (executable, browser or dynamic)
+   * @param input - The tool input configuration (executable or dynamic)
    * @param options - Optional configuration for tool storage (static vs dynamic)
    */
   public async addTools(input: AddToolInput, options: AddToolOptions = {}): Promise<void> {
@@ -102,9 +96,6 @@ export class ToolManager implements IToolManager {
     switch (input.type) {
       case ToolManagerToolType.executable:
         ({ langchainTools, idMappings } = await this.convertExecutableTools(input));
-        break;
-      case ToolManagerToolType.browser:
-        ({ langchainTools, idMappings } = this.convertBrowserTools(input));
         break;
       case ToolManagerToolType.dynamic:
         this.addDynamicTools(input);
@@ -248,20 +239,6 @@ export class ToolManager implements IToolManager {
     return {
       langchainTools,
       idMappings,
-    };
-  }
-
-  private convertBrowserTools(input: BrowserToolInput): ConvertedTools {
-    const browserToolsWithOrigin = Array.isArray(input.tools) ? input.tools : [input.tools];
-    const browserApiTools = browserToolsWithOrigin.map(({ origin, ...tool }) => {
-      this.toolOrigins.set(sanitizeToolId(`browser_${tool.id}`), origin);
-      return tool;
-    });
-    const browserLangchainTools = browserToolsToLangchain({ browserApiTools });
-
-    return {
-      langchainTools: browserLangchainTools.tools,
-      idMappings: browserLangchainTools.idMappings,
     };
   }
 

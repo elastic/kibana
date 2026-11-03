@@ -28,7 +28,7 @@ import {
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
 import { isToolHandlerInterruptReturn } from '@kbn/agent-builder-server/tools';
-import { BROWSER_TOOL_PREFIX, TOOLS_WITH_DEDICATED_STEP_LIFECYCLE } from './constants';
+import { TOOLS_WITH_DEDICATED_STEP_LIFECYCLE } from './constants';
 import { stepUpdates, type RunStepUpdate } from './step_state';
 import type {
   AnswerOutcome,
@@ -121,7 +121,6 @@ export const processResearchResponse = (
     seen.add(toolCall.toolCallId);
 
     const toolId = toolIdentifierFromToolCall(toolCall, mapping);
-    const isBrowser = toolId.startsWith(BROWSER_TOOL_PREFIX);
     const isDedicated = TOOLS_WITH_DEDICATED_STEP_LIFECYCLE.has(toolId);
 
     if (toolCall.reasoning && toolCall.reasoning.trim().length > 0) {
@@ -149,7 +148,7 @@ export const processResearchResponse = (
     const step: ToolCallStep = {
       type: ConversationRoundStepType.toolCall,
       tool_call_id: toolCall.toolCallId,
-      tool_id: isBrowser ? toolId.slice(BROWSER_TOOL_PREFIX.length) : toolId,
+      tool_id: toolId,
       params: toolCall.args,
       ...dynamicFields,
       results: [],
@@ -162,7 +161,7 @@ export const processResearchResponse = (
 
     renderState[toolCall.toolCallId] = {
       toolName: toolCall.toolName,
-      kind: isDedicated ? 'dedicated' : isBrowser ? 'browser' : 'server',
+      kind: isDedicated ? 'dedicated' : 'server',
       cycle,
     };
   }
@@ -202,7 +201,7 @@ export const processToolNodeResponse = (
   }: {
     cycle: number;
     drainProgress: (toolCallId: string) => ToolCallProgress[];
-    /** Returns the internal tool id (browser-prefixed for browser tools) of a tool call of this run. */
+    /** Returns the internal tool id of a tool call of this run. */
     toolIdFor: (toolCallId: string) => string;
   }
 ): ToolNodeTurn => {

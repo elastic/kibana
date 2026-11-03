@@ -26,7 +26,6 @@ import type {
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
   ScopedRunner,
@@ -48,7 +47,7 @@ import type {
   ConversationTemplatesService,
 } from '../runner';
 import type { AttachmentStateManager } from '../attachments';
-import type { ExecutionConversationOrigin } from '../execution/types';
+import type { BrowserToolsExecutionParams, ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
@@ -185,6 +184,8 @@ export interface ExperimentalFeatures {
    * `execute_dynamic_tool` meta-tool instead of being added to the native tool list.
    */
   dynamicTools: boolean;
+  /** Whether the built-in browser tools are enabled (consumer-registered ones are not gated). */
+  browserTools: boolean;
 }
 
 /**
@@ -468,7 +469,10 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
-  browserApiTools?: BrowserApiToolMetadata[];
+  /**
+   * Browser-side tools the sending client can execute.
+   */
+  browserTools?: BrowserToolsExecutionParams;
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
    */

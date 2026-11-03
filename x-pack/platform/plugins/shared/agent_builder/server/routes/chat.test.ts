@@ -94,6 +94,31 @@ describe('conversePayloadSchema', () => {
     ).toThrow(/input/);
   });
 
+  it('accepts browser_tools', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        browser_tools: { client_id: 'client-1', tool_ids: ['get_page_snapshot'] },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects a legacy browser_api_tools timeout_ms below one second', () => {
+    const tool = { id: 'legacy', description: 'legacy', schema: {} };
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        browser_api_tools: [{ ...tool, timeout_ms: 5000 }],
+      })
+    ).not.toThrow();
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        browser_api_tools: [{ ...tool, timeout_ms: 999 }],
+      })
+    ).toThrow(/timeout_ms/);
+  });
+
   it('rejects trigger_mode', () => {
     expect(() => conversePayloadSchema.validate({ input: 'Hello', trigger_mode: 'never' })).toThrow(
       /trigger_mode/

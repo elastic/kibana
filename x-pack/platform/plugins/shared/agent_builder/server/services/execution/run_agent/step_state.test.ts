@@ -7,7 +7,9 @@
 
 import {
   ConversationRoundStepType,
+  ToolOrigin,
   ToolResultType,
+  ToolType,
   type ConversationRoundStep,
   type ReasoningStep,
   type TodosStep,
@@ -166,13 +168,25 @@ describe('countNonTodosSteps', () => {
 });
 
 describe('persistableSteps', () => {
-  it('drops browser and dedicated-lifecycle tool call steps, keeps unknown ones', () => {
-    const steps = [toolCall('server'), toolCall('browser'), toolCall('ask'), toolCall('unknown')];
+  it('drops dedicated-lifecycle tool call steps, keeps server and unknown ones', () => {
+    const steps = [toolCall('server'), toolCall('ask'), toolCall('unknown')];
     const result = persistableSteps(steps, {
       server: { toolName: 'my_tool', kind: 'server' },
-      browser: { toolName: 'browser_x', kind: 'browser' },
       ask: { toolName: 'platform_core_ask_user_question', kind: 'dedicated' },
     });
     expect(result.map((s) => (s as ToolCallStep).tool_call_id)).toEqual(['server', 'unknown']);
+  });
+
+  it('browser tool call steps are persisted', () => {
+    const browserCall: ToolCallStep = {
+      ...toolCall('b1'),
+      tool_id: 'get_page_snapshot',
+      tool_origin: ToolOrigin.internal,
+      tool_type: ToolType.builtin,
+    };
+    const result = persistableSteps([browserCall], {
+      b1: { toolName: 'get_page_snapshot', kind: 'server' },
+    });
+    expect(result).toEqual([browserCall]);
   });
 });

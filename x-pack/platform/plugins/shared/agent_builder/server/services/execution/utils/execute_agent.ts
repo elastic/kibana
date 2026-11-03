@@ -17,9 +17,9 @@ import type {
   ConversationRoundAuthor,
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { ExecutionConversationAccess, RunAgentFn } from '@kbn/agent-builder-server';
 import type {
+  BrowserToolsExecutionParams,
   ExecutionConversationOrigin,
   ExecutionRunAs,
 } from '@kbn/agent-builder-server/execution';
@@ -46,7 +46,7 @@ export const executeAgent$ = ({
   telemetryMetadata,
   maxContentLength,
   reasoningLevel,
-  browserApiTools,
+  browserTools,
   configurationOverrides,
   executionMode,
   interactivity,
@@ -75,7 +75,7 @@ export const executeAgent$ = ({
   telemetryMetadata?: ConnectorTelemetryMetadata;
   maxContentLength?: number;
   reasoningLevel?: ChatCompletionReasoningEffort;
-  browserApiTools?: BrowserApiToolMetadata[];
+  browserTools?: BrowserToolsExecutionParams;
   configurationOverrides?: AgentConfigurationOverrides;
   executionMode?: AgentExecutionMode;
   interactivity?: InteractivityConfigInput;
@@ -108,7 +108,7 @@ export const executeAgent$ = ({
         conversation,
         origin,
         author,
-        browserApiTools,
+        browserTools,
         configurationOverrides,
         structuredOutput,
         outputSchema,

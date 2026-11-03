@@ -355,8 +355,8 @@ describe('unitAnchor', () => {
     const steps = [call('s1', 'g'), call('b1', 'g'), call('b2')];
     const renderState = {
       s1: { toolName: 's', kind: 'server' as const },
-      b1: { toolName: 'b', kind: 'browser' as const },
-      b2: { toolName: 'b', kind: 'browser' as const },
+      b1: { toolName: 'b', kind: 'dedicated' as const },
+      b2: { toolName: 'b', kind: 'dedicated' as const },
     };
     const units = listVisibleUnits({ entries: [], steps, visibility: FULLY_VISIBLE });
     expect(

@@ -241,11 +241,33 @@ export const conversePayloadSchema = schema.object({
         schema: schema.any({
           meta: { description: 'JSON Schema defining the tool parameters (JsonSchema7Type).' },
         }),
+        timeout_ms: schema.maybe(
+          schema.number({
+            min: 1000,
+            meta: {
+              description: 'How long the agent waits for the browser to answer a call, in ms.',
+            },
+          })
+        ),
       }),
       {
         meta: {
           description:
             'Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.',
+        },
+      }
+    )
+  ),
+  browser_tools: schema.maybe(
+    schema.object(
+      {
+        client_id: schema.string(),
+        tool_ids: schema.arrayOf(schema.string()),
+      },
+      {
+        meta: {
+          description: 'Experimental. Browser-side tools the sending client can execute.',
+          availability: { stability: 'experimental' },
         },
       }
     )
