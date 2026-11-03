@@ -52,11 +52,12 @@ export const getComponentCatalogueRoute = createServerRoute({
     const { catalogue, etag, stale } = await componentCatalogue.get();
 
     // Kibana's default `no-store` would keep the browser from revalidating. With an ETag, Hapi
-    // answers a matching If-None-Match with a 304 on its own.
+    // answers a matching If-None-Match with a 304 on its own. A stale copy carries none: a 304 on
+    // its tag would leave the stale marker in the browser's stored copy once the distributor is back.
     return response.ok({
       body: catalogue,
       headers: {
-        ...(etag ? { etag: toEntityTag(etag) } : {}),
+        ...(etag && !stale ? { etag: toEntityTag(etag) } : {}),
         'cache-control': stale ? STALE_CATALOGUE_CACHE_CONTROL : CATALOGUE_CACHE_CONTROL,
         ...(stale ? { [STALE_COMPONENT_CATALOGUE_HEADER]: 'true' } : {}),
       },

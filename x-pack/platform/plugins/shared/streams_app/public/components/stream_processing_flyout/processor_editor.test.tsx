@@ -271,6 +271,28 @@ describe('ProcessorEditor', () => {
       );
     });
 
+    it('keeps offering the signals an existing processor enables after they are all removed', async () => {
+      renderEditor({
+        telemetry: ['logs'],
+        step: {
+          ...savedStep,
+          processor: { ...savedStep.processor, supported_telemetry: ['logs', 'metrics'] },
+        },
+      });
+
+      await userEvent.click(screen.getByLabelText('Remove logs from selection in this group'));
+      await userEvent.click(screen.getByLabelText('Remove metrics from selection in this group'));
+
+      expect(screen.getByText('Choose at least one signal')).toBeTruthy();
+      expect(screen.getByTestId('streamsProcessingFlyoutEditorSubmit')).toBeDisabled();
+
+      const picker = screen.getByTestId('streamsProcessingFlyoutEditorSignals');
+      await userEvent.click(within(picker).getByRole('combobox'));
+      await userEvent.click(screen.getByRole('option', { name: 'metrics' }));
+      expect(within(picker).getByText('metrics')).toBeTruthy();
+      expect(screen.queryByText('Choose at least one signal')).toBeNull();
+    });
+
     it('offers item scopes only while the processor applies to more than one signal', async () => {
       renderEditor({ telemetry: ['logs', 'metrics'] });
       expect(screen.getByTestId('componentDefinitionFormItemTelemetry')).toBeTruthy();
@@ -437,6 +459,43 @@ describe('ProcessorEditor', () => {
       expect(
         within(callout).getByText('action must be one of upsert, update, insert, delete')
       ).toBeTruthy();
+      expect(onCommit).not.toHaveBeenCalled();
+    });
+
+    it('shows warnings from a valid check and commits only once the user continues', async () => {
+      const { onCommit } = renderEditor({
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: true,
+          diagnostics: [{ severity: 'warning', code: 'W001', message: 'This field is deprecated' }],
+        }),
+      });
+      await fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+
+      const callout = await screen.findByTestId('streamsProcessingFlyoutEditorWarnings');
+      expect(within(callout).getByText('W001:')).toBeTruthy();
+      expect(within(callout).getByText('This field is deprecated')).toBeTruthy();
+      expect(onCommit).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorCommitAnyway'));
+      expect(onCommit).toHaveBeenCalledWith(expect.objectContaining({ type: 'add_fields' }));
+    });
+
+    it('drops the warnings once the processor is edited again', async () => {
+      const { onCommit } = renderEditor({
+        fetchCheck: jest.fn().mockResolvedValue({
+          valid: true,
+          diagnostics: [{ severity: 'warning', code: 'W001', message: 'This field is deprecated' }],
+        }),
+      });
+      await fillOperation();
+      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
+      await screen.findByTestId('streamsProcessingFlyoutEditorWarnings');
+
+      fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
+        target: { value: 'platform' },
+      });
+      expect(screen.queryByTestId('streamsProcessingFlyoutEditorWarnings')).toBeNull();
       expect(onCommit).not.toHaveBeenCalled();
     });
 

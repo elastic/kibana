@@ -137,6 +137,14 @@ export function ProcessorEditor({
   const { type, component, definition, signals, doesNotFit } = form;
   const check = useComponentCheck(checkComponent);
   const [outcome, setOutcome] = useState<CheckOutcome>();
+  // The processor the warnings were about; "Continue anyway" commits exactly that.
+  const [warnedProcessor, setWarnedProcessor] = useState<DraftProcessor>();
+  const clearWarnings = () => {
+    if (warnedProcessor) {
+      setWarnedProcessor(undefined);
+      setOutcome(undefined);
+    }
+  };
 
   const confirmCancel = useDiscardConfirm(onCancel, {
     enabled: form.isDirty,
@@ -166,6 +174,7 @@ export function ProcessorEditor({
       return;
     }
     setOutcome(undefined);
+    setWarnedProcessor(undefined);
     // A processor saved as it was opened was already checked when it was last committed, and the
     // unit save checks everything again, so no round trip is spent on it.
     if (step && isEqual(processor, step.processor)) {
@@ -179,6 +188,12 @@ export function ProcessorEditor({
 
     switch (result.status) {
       case 'valid':
+        // Warnings do not block, but the user sees them before the processor is committed.
+        if (result.diagnostics.length > 0) {
+          setWarnedProcessor(processor);
+          setOutcome({ kind: 'warned', diagnostics: result.diagnostics });
+          return;
+        }
         onCommit(processor);
         return;
       case 'unchecked':
@@ -244,6 +259,7 @@ export function ProcessorEditor({
                     onChange={([selected]) => {
                       setIsSelectionCleared(selected?.value === undefined);
                       if (selected?.value !== undefined && selected.value !== type) {
+                        clearWarnings();
                         form.changeType(selected.value);
                       }
                     }}
@@ -306,11 +322,12 @@ export function ProcessorEditor({
                       options={form.signalOptions}
                       selected={signals}
                       error={form.signalsError}
-                      onChange={(next) =>
+                      onChange={(next) => {
+                        clearWarnings();
                         form.setSignals(
                           form.signalOptions.filter((signal) => next.includes(signal))
-                        )
-                      }
+                        );
+                      }}
                       dataTestSubj="streamsProcessingFlyoutEditorSignals"
                     />
                     <EuiSpacer size="m" />
@@ -339,14 +356,24 @@ export function ProcessorEditor({
                     values={form.values}
                     errors={form.errors}
                     componentRefs={componentRefs}
-                    onChange={form.setValues}
+                    onChange={(values) => {
+                      clearWarnings();
+                      form.setValues(values);
+                    }}
                     onUnparsedInputChange={form.setHasUnparsedInput}
                   />
                 ) : null}
               </EuiForm>
             </fieldset>
           </div>
-          <CheckOutcomeCallout outcome={outcome} />
+          <CheckOutcomeCallout
+            outcome={outcome}
+            onCommitAnyway={() => {
+              if (warnedProcessor) {
+                onCommit(warnedProcessor);
+              }
+            }}
+          />
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>

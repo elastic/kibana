@@ -124,10 +124,12 @@ export const useProcessorForm = ({
     () => step?.processor.supported_telemetry ?? defaultSignals(definition, telemetry)
   );
   const [signalsTouched, setSignalsTouched] = useState(false);
-  // Signals an existing processor enables stay listed even when they no longer flow here.
+  // Signals an existing processor enables stay listed even when they no longer flow here. They
+  // come from the processor as opened, not the current choice, so clearing the choice keeps them.
+  const openedSignals = step?.processor.supported_telemetry;
   const signalOptions = useMemo(
-    () => uniq([...flowingSignals(definition, telemetry), ...signals]),
-    [definition, signals, telemetry]
+    () => uniq([...flowingSignals(definition, telemetry), ...(openedSignals ?? [])]),
+    [definition, openedSignals, telemetry]
   );
   const doesNotFit = definition !== undefined && signalOptions.length === 0;
   const canChooseSignals =

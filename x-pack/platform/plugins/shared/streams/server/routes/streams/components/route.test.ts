@@ -78,8 +78,8 @@ describe('GET /internal/streams/components', () => {
     } as unknown as GetHandlerParams);
 
     expect(response.status).toBe(200);
+    // No ETag: a 304 on it after recovery would leave the stale marker in the browser's copy.
     expect(response.options.headers).toEqual({
-      etag: 'sha256:body',
       'cache-control': 'private, no-cache',
       'x-streams-catalogue-stale': 'true',
     });
