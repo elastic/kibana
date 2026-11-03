@@ -908,7 +908,7 @@ Non-zero timings and web vital values always have a fractional part, so dynamic 
 
 The data is written through the `otelEsClient`, which indexes documents as-is. In code and Scout tests, use the `edotBrowser` DSL from `@kbn/synthtrace-client` (`edotBrowser.app()`, `edotBrowser.session()`) with the `otelSynthtraceEsClient` fixture from `@kbn/scout-synthtrace`. For exact values in a test, pass `random: createSeededRandom('my-test')` (from `@kbn/synthtrace-client`) and a fixed `start` or `end` to `edotBrowser.session()`, which makes the whole session, trace and span IDs included, reproducible. Unlike the scenarios' `seed` option, it doesn't fix the session and tab IDs: pass those to `app.client()` yourself.
 
-> **Warning:** `--clean` (and `otelEsClient.clean()` in code and Scout tests) deletes every `logs-*.otel-*` and `traces-*.otel-*` data stream, not only the EDOT Browser data. On a shared cluster, that also removes other OTel data.
+> **Warning:** `--clean` (and `otelEsClient.clean()` in code and Scout tests) deletes every `logs-*.otel-*` and `traces-*.otel-*` data stream, not only the Digital Experience data. On a shared cluster, that also removes other OTel data.
 
 **Options (`digital_experience_browser` and `digital_experience_mixed`):**
 
