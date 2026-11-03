@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import {
@@ -45,6 +45,7 @@ export function createSignificantEventsClients({
   space,
   triggerEmitter,
   getAlertEventsClient,
+  getAlertActionsClient,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
@@ -55,6 +56,8 @@ export function createSignificantEventsClients({
   space: string;
   triggerEmitter?: TriggerEmitter;
   getAlertEventsClient: () => Promise<AlertEventsClientApi>;
+  /** Writes an operator's deactivate or activate as an Alerting v2 alert action. */
+  getAlertActionsClient?: () => Promise<AlertActionsClientApi>;
 }): SignificantEventsClients {
   const eventSearchClient = new RuleEventsClient({
     esClient,
@@ -62,6 +65,7 @@ export function createSignificantEventsClients({
     logger,
     space,
     getAlertEventsClient,
+    getAlertActionsClient,
     emitTrigger: triggerEmitter,
   });
 

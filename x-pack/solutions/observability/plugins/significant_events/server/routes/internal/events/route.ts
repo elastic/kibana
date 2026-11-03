@@ -12,14 +12,14 @@ import {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   severitySchema,
   MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
+  MAX_DEACTIVATION_REASON_LENGTH,
   type InvestigationRunStatus,
   type SignificantEventResponse,
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
-import { notFound, serverUnavailable } from '@hapi/boom';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { forbidden, notFound, serverUnavailable } from '@hapi/boom';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
@@ -444,6 +444,9 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
 });
 
+export const USER_PROFILE_REQUIRED_MESSAGE =
+  "A user profile is required to change a significant event's status";
+
 const eventsUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/update',
   options: {
@@ -457,19 +460,28 @@ const eventsUpdateRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    body: z.object({
-      status: significantEventManualStatusSchema,
-      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+      body: z.object({
+        status: significantEventManualStatusSchema,
+        assessment_note: z.string().max(MAX_DEACTIVATION_REASON_LENGTH).optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
+
+    // The change is recorded as an Alerting v2 alert action, which names its actor by profile.
+    // A request with no user profile (an API key, an unactivated profile) cannot be that actor.
+    const userProfileUid = await server.core.userProfile.getCurrentProfileId({ request });
+    if (userProfileUid == null) {
+      throw forbidden(USER_PROFILE_REQUIRED_MESSAGE);
+    }
 
     return (await getEventSearchClient()).updateEventStatus({
       eventId: params.path.id,
