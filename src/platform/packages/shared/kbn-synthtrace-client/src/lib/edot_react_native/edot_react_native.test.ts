@@ -709,16 +709,15 @@ describe('edotReactNative', () => {
       expect(crashes[0]['@timestamp']).toBe(Math.max(...docs.map(timeOf)));
     });
 
-    it('loses the spans the SDK had not exported yet when the app crashes', () => {
+    it('loses what the SDK had not exported yet when the app crashes', () => {
       // Slow requests that all fail, so that some still run at the crash and have span events
       const health = withHealth({
         crashRate: 1,
         httpFailureRate: 1,
+        errorLogRate: 1,
         httpLatency: { median: 3_000, sigma: 1 },
       });
       (['android', 'ios'] as const).forEach((platform) => {
-        // EDOT Android also loses the spans still waiting in its export queue
-        const exportDelay = platform === 'android' ? 1_000 : 0;
         for (let i = 0; i < 20; i++) {
           const docs = simulate({
             platform,
@@ -737,16 +736,14 @@ describe('edotReactNative', () => {
           spans
             .filter((span) => timeOf(span) < crashedAt)
             .forEach((span) => {
-              expect(timeOf(span) + (span.duration ?? 0) / 1_000_000).toBeLessThan(
-                crashedAt - exportDelay
-              );
+              expect(timeOf(span) + (span.duration ?? 0) / 1_000_000).toBeLessThan(crashedAt);
             });
+
           // Nothing happens between the crash and the relaunch
-          expect(
-            docs.filter(
-              (doc) => doc !== crash && timeOf(doc) > crashedAt && timeOf(doc) < crashedAt + 60_000
-            )
-          ).toEqual([]);
+          const afterCrash = docs.filter(
+            (doc) => doc !== crash && timeOf(doc) >= crashedAt && timeOf(doc) < crashedAt + 60_000
+          );
+          expect(afterCrash).toEqual([]);
           // Span events are lost with their span
           const spanIds = new Set(spans.map(({ span_id: spanId }) => spanId));
           logs(docs)

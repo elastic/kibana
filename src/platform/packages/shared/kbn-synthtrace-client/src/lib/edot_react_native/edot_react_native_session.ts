@@ -104,11 +104,12 @@ const MIN_DWELL_MS = 1_000;
 const WARM_LAUNCH_FACTOR = 0.25;
 const MAX_TAPS_PER_SCREEN = 2;
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
-// How long before a crash a span may have ended and still wait in the SDK's export queue, which a
-// crash loses. EDOT Android exports spans every second, and its crash handler only flushes logs.
-const SPAN_EXPORT_DELAY_MS: Readonly<Record<MobilePlatform, number>> = {
-  android: 1_000,
-  ios: 0,
+// How often the SDKs' batch processors export what has ended since, in milliseconds. A crash loses
+// what still waits in their queues: EDOT Android exports spans every second and flushes only logs
+// when it crashes, EDOT iOS exports spans and logs every 5 seconds and flushes nothing.
+const EXPORT_DELAY_MS: Readonly<Record<MobilePlatform, { spans: number; logs: number }>> = {
+  android: { spans: 1_000, logs: 0 },
+  ios: { spans: 5_000, logs: 5_000 },
 };
 const FAULT_ADDRESS_RANGE = 2 ** 32;
 
@@ -178,7 +179,8 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
  * - the crash: EDOT Android writes it right away, EDOT iOS on the next launch. When the session
  *   ends with an iOS crash, the user relaunches the app within the session to report it. Spans
  *   that hadn't been exported yet are lost: the screen span and requests still running at the
- *   crash and, on Android, spans that ended within a second before it.
+ *   crash, and what ended since the last export, up to 1 second (Android spans) or 5 seconds
+ *   (iOS spans and logs) before the crash.
  *
  * Planning and simulation draw from the same `random` source, so a seed reproduces a session.
  */
@@ -422,16 +424,19 @@ const describeCrash = ({ client, app, random }: SessionContext): CrashReport => 
 };
 
 /**
- * What the SDK has exported of a visit when the app crashes. Spans that were still running, or
- * had ended so recently that they still waited in the export queue, are lost with their span
- * events, and nothing happens after the crash.
+ * What the SDK has exported of a visit when the app crashes. Spans that were still running, and
+ * spans and logs that had ended since the last export of their batch processor, are lost, span
+ * events with their span. Nothing happens after the crash.
  */
 const exportedBeforeCrash = (
-  { client }: SessionContext,
+  { client, random }: SessionContext,
   events: EdotReactNativeEvent[],
   crashedAt: number
 ): EdotReactNativeEvent[] => {
-  const exportedUntil = crashedAt - SPAN_EXPORT_DELAY_MS[client.platform];
+  const delays = EXPORT_DELAY_MS[client.platform];
+  // The processors last exported at some point of their interval before the crash
+  const spansExportedUntil = crashedAt - random() * delays.spans;
+  const logsExportedUntil = crashedAt - random() * delays.logs;
   const lostSpanIds = new Set<string>();
   return events
     .filter(({ fields }) => {
@@ -439,7 +444,7 @@ const exportedBeforeCrash = (
         return true;
       }
       const { '@timestamp': time = 0, duration = 0, span_id: spanId } = fields;
-      if (time + duration / 1_000_000 < exportedUntil) {
+      if (time + duration / 1_000_000 < spansExportedUntil) {
         return true;
       }
       lostSpanIds.add(spanId);
@@ -450,7 +455,10 @@ const exportedBeforeCrash = (
         return true;
       }
       const { '@timestamp': time = 0, span_id: spanId } = fields;
-      return time <= crashedAt && !(spanId !== undefined && lostSpanIds.has(spanId));
+      if (spanId !== undefined && lostSpanIds.has(spanId)) {
+        return false;
+      }
+      return delays.logs > 0 ? time < logsExportedUntil : time <= crashedAt;
     });
 };
 
