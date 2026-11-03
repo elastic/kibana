@@ -86,9 +86,9 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
         // query with a 403, while a wildcard silently skips what it cannot read. Saving a source
         // checks that its author can read the indices, but the query can name any of them, so the
         // account reads every index except system ones, the pattern the `viewer` role uses.
-        // `.rule-events` and `.alert-actions` need no grant: the `nightshift` feature privilege
-        // below carries implicit read on them, and the Alerting v2 client writes as the internal
-        // user.
+        // `.rule-events`, `.alert-actions` and the `.significant_events-*` data streams need no
+        // grant: the `nightshift` feature privilege below carries implicit read on them, and
+        // Kibana writes them as the internal user.
         names: ['/~(([.]|ilm-history-).*)/'],
         privileges: ['read', 'view_index_metadata', 'read_view_metadata'],
         allow_restricted_indices: false,
