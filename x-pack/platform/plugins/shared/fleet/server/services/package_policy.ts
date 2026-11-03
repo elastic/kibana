@@ -325,12 +325,14 @@ function keepsAgentVersionConditions({
   pkgInfo: PackageInfo;
   assetsMap: PackagePolicyAssetsMap;
 }): boolean {
-  // On the same package version the stored condition is rewritten to the same value, and
-  // `inputs_for_versions` is only rewritten when `hasAgentVersionCondition` holds.
-  // (Un)assigning changes which agent policies count this package policy's conditions.
+  // The update writes the manifest condition, so a stale stored one (left by an upgrade before
+  // #294439) gets cleared. `inputs_for_versions` is only rewritten when `hasAgentVersionCondition`
+  // holds. (Un)assigning changes which agent policies count this package policy's conditions.
   return (
     oldPackagePolicy.package?.name === newPackage?.name &&
     oldPackagePolicy.package?.version === newPackage?.version &&
+    (oldPackagePolicy.package_agent_version_condition ?? '') ===
+      (pkgInfo.conditions?.agent?.version ?? '') &&
     !hasAgentVersionCondition(pkgInfo, assetsMap) &&
     xor(oldPackagePolicy.policy_ids, newPolicyIds).length === 0
   );

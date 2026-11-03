@@ -7232,6 +7232,11 @@ describe('Package policy service', () => {
           expected: false,
         },
         {
+          when: 'a stale stored condition is cleared on the same package version',
+          old: { package_agent_version_condition: '>=9.3.0' },
+          expected: false,
+        },
+        {
           when: 'version specific policies are disabled and the package version is unchanged',
           old: { package_agent_version_condition: '>=9.3.0' },
           setup: () => {
