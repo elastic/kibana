@@ -17,6 +17,7 @@ import {
   REPORT_BURST,
   REPORT_REFILL_MS,
 } from './constants';
+import { ReportTokens } from './report_tokens';
 
 export interface DetectedBlock {
   phase: Phase;
@@ -51,33 +52,6 @@ interface OngoingBlock {
   tokenChecked: boolean;
   /** An ongoing warning was written for this block. */
   reportedOngoing: boolean;
-}
-
-/** A rate limit: a burst of tokens, then one more per refill interval (D14). */
-class ReportTokens {
-  private tokens: number;
-  private lastRefillAt?: number;
-
-  constructor(private readonly burst: number, private readonly refillMs: number) {
-    this.tokens = burst;
-  }
-
-  public take(now: number): boolean {
-    if (this.lastRefillAt === undefined) {
-      this.lastRefillAt = now;
-    } else {
-      const refills = Math.floor((now - this.lastRefillAt) / this.refillMs);
-      if (refills > 0) {
-        this.tokens = Math.min(this.burst, this.tokens + refills);
-        this.lastRefillAt += refills * this.refillMs;
-      }
-    }
-    if (this.tokens <= 0) {
-      return false;
-    }
-    this.tokens--;
-    return true;
-  }
 }
 
 /** Clock-injected state machine detecting blocks from a stale heartbeat (milliseconds). */
