@@ -369,12 +369,12 @@ export function initializeLayoutManager(
     } else if (pinnedPanels[uuid]) {
       delete pinnedPanels[uuid];
       // Recompute the order of the remaining pinned panels
-      const newPinnedPanels: typeof pinnedPanels = Object.entries(pinnedPanels)
+      const newPinnedPanels: typeof pinnedPanels = {};
+      Object.entries(pinnedPanels)
         .sort(([, a], [, b]) => a.order - b.order)
-        .reduce(
-          (result, [key, value], i) => ({ ...result, [key as string]: { ...value, order: i } }),
-          {}
-        );
+        .forEach(([key, value], i) => {
+          newPinnedPanels[key] = { ...value, order: i };
+        });
       layout$.next({ ...layout$.value, pinnedPanels: newPinnedPanels });
     }
 

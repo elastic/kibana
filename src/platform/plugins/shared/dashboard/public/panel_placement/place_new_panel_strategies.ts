@@ -30,16 +30,16 @@ export const runPanelPlacementStrategy = (
       const otherSections = { ...currentSections };
 
       // push all sections down
-      for (const [id, section] of Object.entries({ ...currentSections })) {
+      for (const [id, section] of Object.entries(currentSections)) {
         otherSections[id] = { ...section, grid: { y: section.grid.y + height } };
       }
 
       // push relative panels down
-      for (const [id, panel] of Object.entries({ ...currentPanels })) {
+      for (const [id, panel] of Object.entries(currentPanels)) {
         // only consider collisions with panels in the same section
         if (!sectionId || panel.grid.sectionId === sectionId) {
-          const { grid, ...currentPanel } = cloneDeep(panel);
-          if (!targetPanel || grid.y >= targetPanel.grid.y) {
+          if (!targetPanel || panel.grid.y >= targetPanel.grid.y) {
+            const { grid, ...currentPanel } = cloneDeep(panel);
             // if a target panel is provided, only push down panels in the same row and below
             const newGridData = { ...grid, y: grid.y + height };
             otherPanels[id] = { ...currentPanel, grid: newGridData };

@@ -175,25 +175,22 @@ export const DashboardUnsavedListing = ({
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
     findService.findByIds(existingDashboardsWithUnsavedChanges).then((results) => {
-      const dashboardMap = {};
       if (canceled) {
         return;
       }
       let hasError = false;
-      const newItems = results.reduce((map, result) => {
+      const newItems: UnsavedItemMap = {};
+      results.forEach((result) => {
         if (result.status === 'error') {
           hasError = true;
           if (result.error && result.notFound) {
             // Save object not found error
             getDashboardBackupService().clearState(result.id);
           }
-          return map;
+          return;
         }
-        return {
-          ...map,
-          [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
-        };
-      }, dashboardMap);
+        newItems[result.id || DASHBOARD_PANELS_UNSAVED_ID] = result.attributes;
+      });
       if (hasError) {
         refreshUnsavedDashboards();
         return;
