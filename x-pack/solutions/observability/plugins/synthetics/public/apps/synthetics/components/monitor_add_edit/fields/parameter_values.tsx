@@ -21,7 +21,7 @@ import { isEqual } from 'lodash';
 import type { Pair } from './key_value_field';
 import { JSONEditor } from './code_editor';
 
-interface ParameterValuesEditorProps {
+export interface ParameterValuesEditorProps {
   onBlur?: () => void;
   onChange: (value: string) => void;
   readOnly?: boolean;

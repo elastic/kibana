@@ -65,6 +65,7 @@ import {
   RequestBodyField,
   ResponseBodyIndexField,
   KeyValuePairsField,
+  ParameterValuesEditor,
   TextArea,
   ThrottlingWrapper,
   MaintenanceWindowsFieldWrapper,
@@ -109,7 +110,6 @@ import {
   FLOATS_ONLY,
 } from './validation';
 import type { KeyValuePairsFieldProps } from '../fields/key_value_field';
-import { ParameterValuesEditor } from '../fields/parameter_values';
 
 export const API_PRIVATE_LOCATIONS_ONLY = i18n.translate(
   'xpack.synthetics.monitorConfig.locations.apiPrivateOnlyErrorMessage',
