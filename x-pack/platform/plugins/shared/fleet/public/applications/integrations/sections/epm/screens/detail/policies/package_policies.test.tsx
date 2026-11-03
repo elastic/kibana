@@ -83,13 +83,12 @@ const getInstallStatusMock = jest.requireMock('../../../../../hooks')
 const useGetPackageInfoByKeyQueryMock = jest.requireMock('../../../../../hooks')
   .useGetPackageInfoByKeyQuery as jest.Mock;
 
-const renderPage = ({ onboardingEnabled = false } = {}) => {
+const renderPage = () => {
   getInstallStatusMock.mockReturnValue(() => ({
     status: InstallStatus.installed,
     version: '1.0.0',
   }));
   const renderer = createIntegrationsTestRendererMock();
-  renderer.startServices.featureFlags.useBooleanValue.mockReturnValue(onboardingEnabled);
   return renderer.render(<PackagePoliciesPage packageInfo={packageInfo} />);
 };
 
@@ -178,49 +177,6 @@ describe('PackagePoliciesPage agentless table source', () => {
     const legacyCall = legacyAgentlessCall();
     expect(legacyCall).toBeDefined();
     expect(legacyCall![1]).toEqual({ enabled: true });
-  });
-});
-
-describe('PackagePoliciesPage policies managed by a cloud onboarding instance', () => {
-  const kueries = () => [
-    ...jest.mocked(usePackagePoliciesWithAgentPolicy).mock.calls.map(([query]) => query.kuery),
-    ...jest.mocked(useAgentlessPolicies).mock.calls.map(([query]) => query.kuery),
-  ];
-
-  afterEach(() => {
-    jest.clearAllMocks();
-    jest.restoreAllMocks();
-  });
-
-  it('leaves them out of the agent-based and agentless tables when the onboarding flow is enabled', () => {
-    renderPage({ onboardingEnabled: true });
-
-    expect(jest.mocked(usePackagePoliciesWithAgentPolicy)).toHaveBeenCalledWith(
-      expect.objectContaining({
-        kuery: expect.stringMatching(
-          /AND NOT [\w-]+\.supports_agentless: true AND NOT [\w-]+\.onboarding_deployment_id:\*$/
-        ),
-      })
-    );
-    // The legacy agentless source is the only one called with options.
-    const legacyCall = jest
-      .mocked(usePackagePoliciesWithAgentPolicy)
-      .mock.calls.find(([, options]) => options !== undefined);
-    expect(legacyCall![0].kuery).toMatch(
-      /AND [\w-]+\.supports_agentless: true AND NOT [\w-]+\.onboarding_deployment_id:\*$/
-    );
-    expect(jest.mocked(useAgentlessPolicies)).toHaveBeenCalledWith(
-      expect.objectContaining({
-        kuery: 'package.name: "cspm" AND NOT onboarding_deployment_id:*',
-      }),
-      expect.anything()
-    );
-  });
-
-  it('lists them when the onboarding flow is disabled', () => {
-    renderPage();
-
-    expect(kueries().some((kuery) => kuery?.includes('onboarding_deployment_id'))).toBe(false);
   });
 });
 

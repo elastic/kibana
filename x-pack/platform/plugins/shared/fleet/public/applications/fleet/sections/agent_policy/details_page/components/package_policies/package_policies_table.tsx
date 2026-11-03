@@ -38,7 +38,6 @@ import {
   useOnboardingInstanceUrl,
 } from '../../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
-import { ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE } from '../../../../../../../services/aws_onboarding_override';
 
 import {
   OTEL_INPUTS_MINIMUM_VERSION,
@@ -62,42 +61,6 @@ interface FilterOption {
   name: string;
   value: string;
 }
-
-// Links to the onboarding instance; explains why there is no link while the onboarding flow is off.
-const ManagedByOnboardingBadge = ({
-  onboardingInstanceUrl,
-}: {
-  onboardingInstanceUrl: string | undefined;
-}) => {
-  const label = (
-    <FormattedMessage
-      id="xpack.fleet.policyDetails.packagePoliciesTable.managedByOnboardingBadge"
-      defaultMessage="Managed by AWS onboarding"
-    />
-  );
-
-  return onboardingInstanceUrl ? (
-    <EuiBadge
-      data-test-subj="PackagePoliciesTableManagedByOnboardingBadge"
-      color="hollow"
-      iconType="lock"
-      href={onboardingInstanceUrl}
-    >
-      {label}
-    </EuiBadge>
-  ) : (
-    <EuiToolTip content={ONBOARDING_DISABLED_MANAGED_POLICY_MESSAGE}>
-      <EuiBadge
-        data-test-subj="PackagePoliciesTableManagedByOnboardingBadge"
-        color="hollow"
-        iconType="lock"
-        tabIndex={0}
-      >
-        {label}
-      </EuiBadge>
-    </EuiToolTip>
-  );
-};
 
 const stringSortAscending = (a: string, b: string): number => a.localeCompare(b);
 const toFilterOption = (value: string): FilterOption => ({ name: value, value });
@@ -196,10 +159,14 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 title={value}
                 {...(canReadIntegrationPolicies
                   ? {
-                      href: getHref('edit_integration', {
-                        policyId: agentPolicy.id,
-                        packagePolicyId: packagePolicy.id,
-                      }),
+                      // A policy managed by a cloud onboarding instance is edited in the onboarding flow.
+                      href:
+                        (packagePolicy.onboarding_deployment_id &&
+                          getOnboardingInstanceUrl(packagePolicy.onboarding_deployment_id)) ||
+                        getHref('edit_integration', {
+                          policyId: agentPolicy.id,
+                          packagePolicyId: packagePolicy.id,
+                        }),
                     }
                   : { disabled: true })}
               >
@@ -212,16 +179,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
-            {packagePolicy.onboarding_deployment_id && (
-              // It can only be changed from the onboarding flow, which the badge opens.
-              <EuiFlexItem grow={false}>
-                <ManagedByOnboardingBadge
-                  onboardingInstanceUrl={getOnboardingInstanceUrl(
-                    packagePolicy.onboarding_deployment_id
-                  )}
-                />
-              </EuiFlexItem>
-            )}
             {enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
@@ -320,14 +277,11 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   </EuiFlexGroup>
                 </EuiLink>
               </EuiFlexItem>
-              {/* Its upgrade page edits the policy, which only the onboarding flow may do. */}
-              {!packagePolicy.onboarding_deployment_id && (
-                <PackagePolicyUpgradeCell
-                  packagePolicy={packagePolicy}
-                  agentPolicies={[agentPolicy]}
-                  from="fleet-policy-list"
-                />
-              )}
+              <PackagePolicyUpgradeCell
+                packagePolicy={packagePolicy}
+                agentPolicies={[agentPolicy]}
+                from="fleet-policy-list"
+              />
             </EuiFlexGroup>
           );
         },

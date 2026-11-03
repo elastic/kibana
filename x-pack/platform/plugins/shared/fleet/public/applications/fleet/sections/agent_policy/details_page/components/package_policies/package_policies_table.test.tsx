@@ -140,25 +140,22 @@ describe('PackagePoliciesTable', () => {
   });
 
   describe('a policy managed by a cloud onboarding instance', () => {
-    it('shows a badge linking to the onboarding instance', async () => {
+    const nameLink = (result: ReturnType<typeof renderTable>) =>
+      result.getByTestId('PackagePoliciesTableName').querySelector('a');
+
+    it('links its name to the onboarding instance in the onboarding flow', async () => {
       const result = renderTable({ onboardingDeploymentId: 'deploy-1' });
       await act(async () => {});
 
-      const badge = result.getByTestId('PackagePoliciesTableManagedByOnboardingBadge');
-      expect(badge).toHaveTextContent('Managed by AWS onboarding');
-      expect(badge.closest('a') ?? badge.querySelector('a')).toHaveAttribute(
-        'href',
-        '/app/onboarding/aws?deploymentId=deploy-1'
-      );
+      expect(nameLink(result)).toHaveAttribute('href', '/app/onboarding/aws?deploymentId=deploy-1');
     });
 
-    it('shows the badge without a link while the onboarding flow is turned off', async () => {
+    it('links its name to the edit page while the onboarding flow is turned off', async () => {
+      // The edit page then explains that the policy is managed by the turned-off flow.
       const result = renderTable({ onboardingDeploymentId: 'deploy-1', onboardingEnabled: false });
       await act(async () => {});
 
-      const badge = result.getByTestId('PackagePoliciesTableManagedByOnboardingBadge');
-      expect(badge).toHaveTextContent('Managed by AWS onboarding');
-      expect(badge.closest('a') ?? badge.querySelector('a')).toBeNull();
+      expect(nameLink(result)?.getAttribute('href')).not.toContain('/app/onboarding');
     });
 
     it('does not offer the upgrade page, which edits the policy', async () => {
@@ -168,13 +165,11 @@ describe('PackagePoliciesTable', () => {
       expect(result.queryByText('Upgrade')).not.toBeInTheDocument();
     });
 
-    it('shows no badge for other policies', async () => {
+    it('links the name of other policies to their edit page', async () => {
       const result = renderTable({});
       await act(async () => {});
 
-      expect(
-        result.queryByTestId('PackagePoliciesTableManagedByOnboardingBadge')
-      ).not.toBeInTheDocument();
+      expect(nameLink(result)?.getAttribute('href')).not.toContain('/app/onboarding');
     });
   });
 });

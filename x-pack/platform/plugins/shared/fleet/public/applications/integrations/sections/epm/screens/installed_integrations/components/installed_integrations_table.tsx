@@ -25,14 +25,7 @@ import type { Action } from '@elastic/eui/src/components/basic_table/action_type
 import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
 import { AWS_ONBOARDING_PACKAGE_NAMES } from '../../../../../../../../common/constants';
-import {
-  type UrlPagination,
-  useLink,
-  useAuthz,
-  useLicense,
-  useStartServices,
-} from '../../../../../../../hooks';
-import { ONBOARDING_ENABLED_FLAG } from '../../../../../../../services/aws_onboarding_override';
+import { type UrlPagination, useLink, useAuthz, useLicense } from '../../../../../../../hooks';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewOnboardingInstances, useViewPolicies } from '../hooks/use_url_filters';
@@ -96,13 +89,6 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   const { addViewPolicies } = useViewPolicies();
   const { addViewOnboardingInstances } = useViewOnboardingInstances();
   const hasOnboardingInstances = [...onboardingInstanceCounts.values()].some((count) => count > 0);
-  // The policies view leaves out the policies managed by a cloud onboarding instance, so they are
-  // not counted here either. Uninstalling and upgrading still count every policy.
-  const { featureFlags } = useStartServices();
-  const onboardingEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
-  const getViewablePolicyCount = (item: InstalledPackageUIPackageListItem) =>
-    (item.packagePoliciesInfo?.count ?? 0) -
-    (onboardingEnabled ? item.packagePoliciesInfo?.onboardingManagedCount ?? 0 : 0);
   const {
     actions: {
       bulkUninstallIntegrationsWithConfirmModal,
@@ -321,7 +307,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             ),
             width: '270px',
             render: (item: InstalledPackageUIPackageListItem) => {
-              const policyCount = getViewablePolicyCount(item);
+              const policyCount = item.packagePoliciesInfo?.count ?? 0;
               const status = item.ui.installation_status;
               const review = item.installationInfo?.pending_upgrade_review;
               const showPendingReview = status === 'pending_upgrade_review' && review;
@@ -357,9 +343,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   </EuiLink>
                 </DisabledWrapperTooltip>
               ) : null;
-              // The warning shows even without viewable policies, e.g. when the onboarding flow
-              // manages all of them.
-              if (showPendingReview) {
+              if (policyCount && showPendingReview) {
                 return (
                   <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
                     {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
@@ -455,7 +439,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                     }
                   ),
                   onClick: (item) => addViewPolicies(item.name),
-                  enabled: (item) => getViewablePolicyCount(item) > 0,
+                  enabled: (item) => (item?.packagePoliciesInfo?.count ?? 0) > 0,
                 },
                 !authz.fleet.readAgentPolicies,
                 i18n.translate(

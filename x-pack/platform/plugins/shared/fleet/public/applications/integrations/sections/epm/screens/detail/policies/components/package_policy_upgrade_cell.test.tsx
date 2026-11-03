@@ -85,6 +85,18 @@ describe('PackagePolicyUpgradeCell', () => {
     expect(button).toHaveAttribute('href');
   });
 
+  it('does not link to the upgrade page of an agent-based policy managed by a cloud onboarding instance', () => {
+    const utils = renderCell({
+      packagePolicy: createPackagePolicy({
+        supports_agentless: false,
+        onboarding_deployment_id: 'deploy-1',
+      }),
+    });
+
+    // The upgrade page edits the policy, which only the onboarding flow may do.
+    expect(utils.queryByTestId('integrationPolicyUpgradeBtn')).not.toBeInTheDocument();
+  });
+
   describe('with disableAgentlessLegacyAPI enabled', () => {
     beforeEach(() => {
       // disableAgentlessLegacyAPI is on by default via allowedExperimentalValues.
@@ -108,6 +120,17 @@ describe('PackagePolicyUpgradeCell', () => {
 
       // The shared agentless-upgrade confirm modal is shown.
       expect(utils.getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+    });
+
+    it('keeps the in-place upgrade of a managed integration managed by a cloud onboarding instance', () => {
+      const utils = renderCell({
+        packagePolicy: createPackagePolicy({
+          supports_agentless: true,
+          onboarding_deployment_id: 'deploy-1',
+        }),
+      });
+
+      expect(utils.getByTestId('integrationPolicyUpgradeBtn')).not.toHaveAttribute('href');
     });
   });
 });
