@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ALERT_RULE_TYPE_ID, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
@@ -27,9 +28,12 @@ const getDocViewerResult = (
   record: DataTableRecord,
   toolkitActions: {
     refreshData?: () => void;
-  } = {}
+  } = {},
+  getFeatureById: jest.Mock = jest.fn()
 ) => {
-  const providerServices = {} as ProfileProviderServices;
+  const providerServices = {
+    discoverShared: { features: { registry: { getById: getFeatureById } } },
+  } as unknown as ProfileProviderServices;
   const [enhancedProvider] = createSecurityDocumentProfileProviders(providerServices);
   const prevRenderHeader = jest.fn();
   const prevRenderFooter = jest.fn();
@@ -144,6 +148,49 @@ describe('createSecurityDocumentProfileProviders', () => {
         expect.objectContaining({ id: 'doc_view_alerts_overview' })
       );
     });
+
+    it.each([
+      [
+        'alert',
+        { 'event.kind': 'signal' },
+        'security-solution-alert-flyout-overview-tab',
+        'doc_view_alerts_overview',
+      ],
+      [
+        'attack discovery',
+        { 'event.kind': 'signal', [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID },
+        'security-solution-attack-flyout-overview-tab',
+        'doc_view_attack_overview',
+      ],
+      [
+        'IOC',
+        { 'event.type': 'indicator' },
+        'security-solution-ioc-flyout-overview-tab',
+        'doc_view_ioc_overview',
+      ],
+    ])(
+      "registers the %s overview tab's shareable state schema and hands it the feature",
+      (_, fields, featureId, docViewId) => {
+        const shareableStateSchema = z.object({});
+        const overviewTab = { id: featureId, shareableStateSchema };
+        const getFeatureById = jest.fn().mockReturnValue(overviewTab);
+        const hit = createRecord(fields as DataTableRecord['flattened']);
+        const { result } = getDocViewerResult(hit, {}, getFeatureById);
+        const registry = { add: jest.fn() };
+        result.docViewsRegistry(registry as never);
+
+        expect(getFeatureById).toHaveBeenCalledTimes(1);
+        expect(getFeatureById).toHaveBeenCalledWith(featureId);
+        expect(registry.add).toHaveBeenCalledWith(
+          expect.objectContaining({ id: docViewId, shareableStateSchema })
+        );
+
+        const rendered = registry.add.mock.calls[0][0].render({ hit, dataView: dataViewMock });
+        expect((rendered as { props: { overviewTab: unknown } }).props.overviewTab).toBe(
+          overviewTab
+        );
+      }
+    );
 
     it('adds the overview tab to the registry for non-alert events', () => {
       const { result } = getDocViewerResult(createRecord({ 'event.kind': 'event' }));

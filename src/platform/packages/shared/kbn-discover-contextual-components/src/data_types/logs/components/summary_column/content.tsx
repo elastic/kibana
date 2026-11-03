@@ -16,6 +16,7 @@ import {
   getLogLevelCoalescedValue,
   getLogLevelColor,
   LOG_LEVEL_REGEX,
+  MAX_RENDERED_FIELD_VALUE_LENGTH,
   OTEL_MESSAGE_FIELD,
 } from '@kbn/discover-utils';
 import { MESSAGE_FIELD } from '@kbn/discover-utils';
@@ -194,6 +195,7 @@ export const Content = ({
       hit: row.raw,
       fieldFormats,
       fieldName: field,
+      maxDisplayLength: MAX_RENDERED_FIELD_VALUE_LENGTH,
     });
 
     // Then apply log level highlighting on top, preserving search highlights

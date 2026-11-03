@@ -38,6 +38,11 @@ export interface Investigation {
   /** Full list of assignee user-profile uids. Used by the interactive assignee picker in the flyout. */
   assignees: string[];
   status?: string;
+  /**
+   * The investigation's own status, on a card built from a proposal. Never the proposal's status,
+   * which `status` must not carry.
+   */
+  conversationStatus?: 'open' | 'closed';
   pendingProposalCount: number;
   recommendedAction?: RecommendedAction;
   /**

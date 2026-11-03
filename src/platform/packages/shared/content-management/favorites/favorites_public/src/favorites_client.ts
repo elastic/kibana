@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type HttpStart } from '@kbn/core-http-browser';
+import { buildPath, type HttpStart } from '@kbn/core-http-browser';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type {
@@ -72,7 +72,9 @@ export class FavoritesClient<Metadata extends object | void = void>
     if (!(await this.ifAvailablePreCheck())) {
       return this.getUnavailableFavoritesResponse();
     }
-    return this.deps.http.get(`/internal/content_management/favorites/${this.favoriteObjectType}`);
+    return this.deps.http.get(
+      buildPath('/internal/content_management/favorites/{type}', { type: this.favoriteObjectType })
+    );
   }
 
   public async addFavorite(params: AddFavoriteRequest<Metadata>): Promise<AddFavoriteResponse> {
@@ -80,7 +82,10 @@ export class FavoritesClient<Metadata extends object | void = void>
       return { favoriteIds: [] };
     }
     return this.deps.http.post(
-      `/internal/content_management/favorites/${this.favoriteObjectType}/${params.id}/favorite`,
+      buildPath('/internal/content_management/favorites/{type}/{id}/favorite', {
+        type: this.favoriteObjectType,
+        id: params.id,
+      }),
       { body: 'metadata' in params ? JSON.stringify({ metadata: params.metadata }) : undefined }
     );
   }
@@ -90,7 +95,10 @@ export class FavoritesClient<Metadata extends object | void = void>
       return { favoriteIds: [] };
     }
     return this.deps.http.post(
-      `/internal/content_management/favorites/${this.favoriteObjectType}/${id}/unfavorite`
+      buildPath('/internal/content_management/favorites/{type}/{id}/unfavorite', {
+        type: this.favoriteObjectType,
+        id,
+      })
     );
   }
 

@@ -11,11 +11,14 @@ import { render, screen } from '@testing-library/react';
 import type { SecurityWorkflowInsight } from '../../../../../../../../../common/endpoint/types/workflow_insights';
 import { WorkflowInsightsPolicyResponseFailureResult } from './policy_response_failure';
 
-const baseInsight = (link?: string): SecurityWorkflowInsight =>
+const baseInsight = (
+  link?: string,
+  descriptive: string = 'Reapply the endpoint policy.'
+): SecurityWorkflowInsight =>
   ({
     value: 'Policy response failure detected',
     remediation: {
-      descriptive: 'Reapply the endpoint policy.',
+      descriptive,
       link,
     },
     metadata: {
@@ -58,5 +61,18 @@ describe('WorkflowInsightsPolicyResponseFailureResult remediation link', () => {
     const button = getRemediationButton();
     expect(button).not.toHaveAttribute('href');
     expect(button).toHaveStyle({ visibility: 'hidden' });
+  });
+});
+
+describe('WorkflowInsightsPolicyResponseFailureResult remediation text', () => {
+  it('unescapes `\\n` and `\\\\` without turning an escaped backslash before `n` into a newline', () => {
+    const { container } = render(
+      <WorkflowInsightsPolicyResponseFailureResult
+        insight={baseInsight(undefined, 'Check C:\\\\new_folder\\\\app.exe.\\nThen reapply.')}
+        index={0}
+      />
+    );
+
+    expect(container.textContent).toContain('Check C:\\new_folder\\app.exe.\nThen reapply.');
   });
 });
