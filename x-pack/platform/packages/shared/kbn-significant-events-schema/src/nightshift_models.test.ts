@@ -17,6 +17,7 @@ describe('NIGHTSHIFT_DEFAULT_MODELS', () => {
       investigation: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_5_5_SONNET,
       kiExtraction: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
       kiQueryGeneration: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
+      onlineEvalsJudge: defaultInferenceEndpoints.OPENAI_GPT_6_SOL,
     });
   });
 });
