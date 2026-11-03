@@ -72,6 +72,15 @@ const createExecuteEsqlToolSchemaShape = () => ({
     .describe(
       '(Optional) An Elasticsearch Query DSL object combined with the query using AND, e.g. {"term": {"status": "open"}}. It can only narrow the results, never widen them. This is not a WHERE clause: it is pushed down to the data source, so it removes documents before any ES|QL command sees them, and it is parsed separately from the query text, so it cannot reference ?named parameters.'
     ),
+  timeout_seconds: z
+    .number()
+    .int()
+    .min(1)
+    .max(300)
+    .optional()
+    .describe(
+      "(Optional) The maximum seconds to wait for this query before giving up. It can only shorten the wait: the deployment's own request timeout (30 seconds by default) still applies, so a larger value has no effect beyond it, and when omitted that timeout applies alone. A short value makes a query over a large or frozen-tier data set time out, and `limit` does not shorten a scan."
+    ),
 });
 
 const createExecuteEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
@@ -138,6 +147,10 @@ Use it only when something outside the query itself requires the results to be n
 It is parsed separately from the query text, so it cannot reference \`?named\` parameters.
 Prefer a filter that every targeted index can match: against a wildcard pattern such as \`FROM logs-*\`, a clause naming a field that only some indices have will drop the others from the results.
 
+### Waiting time
+
+Set \`timeout_seconds\` to fail fast on exploratory queries over large or frozen-tier data; a query that hits it returns an error.
+
 ${isServerless ? '' : dataTiersSection}## API documentation
 - ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
 - Query DSL reference (for the filter parameter): https://www.elastic.co/docs/reference/query-languages/querydsl`,
@@ -159,6 +172,7 @@ ${isServerless ? '' : dataTiersSection}## API documentation
         time_range: explicitTimeRange,
         limit = 100,
         filter: esqlFilter,
+        timeout_seconds: timeoutSeconds,
       } = toolParams;
       const usesTimeRangeParams = hasStartEndParams(esqlQuery);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
@@ -178,6 +192,7 @@ ${isServerless ? '' : dataTiersSection}## API documentation
         limit,
         filter: esqlFilter as QueryDslQueryContainer | undefined,
         includeFrozen: getIncludeFrozenParam(toolParams),
+        ...(timeoutSeconds !== undefined ? { timeoutMs: timeoutSeconds * 1000 } : {}),
       });
 
       // need the interpolated query to return in the results / to display in the UI
