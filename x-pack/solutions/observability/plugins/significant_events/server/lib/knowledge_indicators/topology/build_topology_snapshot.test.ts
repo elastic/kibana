@@ -40,6 +40,23 @@ const dependency = (
 const build = (features: Feature[], sourceIds = ['src-a']) =>
   buildTopologySnapshot({ features, sourceIds, builtAt: BUILT_AT });
 
+const conflictingVariantSnapshot = build(
+  [
+    entity('frontend', { source_id: 'src-a' }),
+    entity('redis', { source_id: 'src-a' }),
+    entity('redis-cluster', { source_id: 'src-b' }),
+    dependency('frontend-cache', 'frontend', 'redis', {
+      source_id: 'src-a',
+      confidence: 90,
+    }),
+    dependency('frontend-cache', 'frontend', 'redis-cluster', {
+      source_id: 'src-b',
+      confidence: 60,
+    }),
+  ],
+  ['src-a', 'src-b']
+);
+
 describe('buildTopologySnapshot', () => {
   it('merges same-slug entities with provenance', () => {
     const snapshot = build(
@@ -75,26 +92,27 @@ describe('buildTopologySnapshot', () => {
     const snapshot = build([
       entity('checkout'),
       entity('orders-db', { properties: { name: 'Orders Database', technology: 'postgres' } }),
-      entity('cache-1', { properties: { name: 'redis-primary', technology: 'redis' } }),
-      entity('cache-2', { properties: { name: 'redis-replica', technology: 'redis' } }),
+      entity('cache-1', { properties: { name: 'redis', technology: 'ioredis' } }),
+      entity('cache-2', { properties: { name: 'redis', technology: 'keydb' } }),
+      entity('cache-3', { properties: { name: 'other-cache', technology: 'redis' } }),
       dependency('checkout-orders', 'checkout', 'postgres'),
       dependency('checkout-redis', 'checkout', 'redis'),
       dependency('checkout-by-name', 'checkout', 'orders database'),
     ]);
 
-    const edgesById = new Map(snapshot.edges.map((edge) => [edge.edge_id, edge]));
+    const variantsById = new Map(snapshot.edges.map((edge) => [edge.edge_id, edge.variants[0]]));
 
-    expect(edgesById.get('checkout-orders')).toMatchObject({
+    expect(variantsById.get('checkout-orders')).toMatchObject({
       source_node_id: 'checkout',
       source_resolution: 'slug',
       target_node_id: 'orders-db',
       target_resolution: 'technology',
     });
-    expect(edgesById.get('checkout-by-name')).toMatchObject({
+    expect(variantsById.get('checkout-by-name')).toMatchObject({
       target_node_id: 'orders-db',
       target_resolution: 'name',
     });
-    expect(edgesById.get('checkout-redis')).toMatchObject({
+    expect(variantsById.get('checkout-redis')).toMatchObject({
       target_node_id: null,
       target_resolution: 'unresolved',
       target_ref: 'redis',
@@ -102,24 +120,33 @@ describe('buildTopologySnapshot', () => {
     expect(snapshot.nodes.map((n) => n.node_id)).toEqual([
       'cache-1',
       'cache-2',
+      'cache-3',
       'checkout',
       'orders-db',
     ]);
     expect(topologySnapshotPropertiesSchema.safeParse(snapshot).success).toBe(true);
   });
 
-  it('keeps ambiguous names unresolved', () => {
-    const snapshot = build([
-      entity('cache-1', { properties: { name: 'redis', technology: 'ioredis' } }),
-      entity('cache-2', { properties: { name: 'redis', technology: 'keydb' } }),
-      entity('cache-3', { properties: { name: 'other-cache', technology: 'redis' } }),
-      dependency('checkout-cache', 'checkout', 'redis'),
-    ]);
-
-    expect(snapshot.edges[0]).toMatchObject({
-      target_node_id: null,
-      target_resolution: 'unresolved',
+  it('preserves conflicting endpoint variants with their own provenance', () => {
+    expect(conflictingVariantSnapshot.edges).toHaveLength(1);
+    expect(conflictingVariantSnapshot.edges[0]).toMatchObject({
+      edge_id: 'frontend-cache',
+      variants: [
+        {
+          source_ref: 'frontend',
+          target_ref: 'redis',
+          provenance: [{ source_id: 'src-a' }],
+        },
+        {
+          source_ref: 'frontend',
+          target_ref: 'redis-cluster',
+          provenance: [{ source_id: 'src-b' }],
+        },
+      ],
     });
+    expect(topologySnapshotPropertiesSchema.safeParse(conflictingVariantSnapshot).success).toBe(
+      true
+    );
   });
 
   it('is input-order independent', () => {
@@ -205,5 +232,23 @@ describe('topologyNeighborhood', () => {
       'external-orders',
       'orders-db',
     ]);
+  });
+
+  it('expands each endpoint variant of a shared dependency feature', () => {
+    expect(
+      topologyNeighborhood({ snapshot: conflictingVariantSnapshot, seedIds: ['redis'] })
+    ).toEqual(['frontend', 'frontend-cache', 'redis']);
+    expect(
+      topologyNeighborhood({
+        snapshot: conflictingVariantSnapshot,
+        seedIds: ['redis-cluster'],
+      })
+    ).toEqual(['frontend', 'frontend-cache', 'redis-cluster']);
+    expect(
+      topologyNeighborhood({
+        snapshot: conflictingVariantSnapshot,
+        seedIds: ['frontend-cache'],
+      })
+    ).toEqual(['frontend', 'frontend-cache', 'redis', 'redis-cluster']);
   });
 });

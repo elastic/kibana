@@ -81,6 +81,7 @@ export { FeatureAccumulator } from './src/feature_accumulator';
 
 export {
   type TopologyEdge,
+  type TopologyEdgeVariant,
   type TopologyEdgeResolution,
   type TopologyNode,
   type TopologyNodeType,
@@ -90,6 +91,7 @@ export {
   TOPOLOGY_EDGE_RESOLUTIONS,
   TOPOLOGY_NODE_TYPES,
   topologyEdgeSchema,
+  topologyEdgeVariantSchema,
   topologyNodeSchema,
   topologyProvenanceSchema,
   topologySnapshotPropertiesSchema,

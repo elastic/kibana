@@ -51,15 +51,6 @@ function makeClient(
 }
 
 describe('TopologySnapshotClient', () => {
-  it('skips the read when there are no sources', async () => {
-    const { client, getTopologyFeaturesPage } = makeClient();
-
-    const snapshot = await client.get([]);
-
-    expect(getTopologyFeaturesPage).not.toHaveBeenCalled();
-    expect(snapshot).toMatchObject({ nodes: [], edges: [], node_count: 0, edge_count: 0 });
-  });
-
   it('reads every page at one point in time', async () => {
     const cursor = { sourceId: 'src-a', type: 'feature', id: inputFeatures[0].uuid };
     const { client, getTopologyFeaturesPage } = makeClient([

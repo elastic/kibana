@@ -9,6 +9,7 @@ import { isString } from 'lodash';
 import type {
   Feature,
   TopologyEdge,
+  TopologyEdgeVariant,
   TopologyEdgeResolution,
   TopologyNode,
   TopologyNodeType,
@@ -163,25 +164,55 @@ function buildEdges(features: Feature[], index: NodeIndex): TopologyEdge[] {
 
   const edges: TopologyEdge[] = [];
   for (const [slug, group] of grouped) {
-    const sorted = [...group].sort(byConfidenceDesc);
-    const [primary] = sorted;
-    const sourceRef = stringProperty(primary, 'source');
-    const targetRef = stringProperty(primary, 'target');
-    if (!sourceRef || !targetRef) continue;
-    const protocol = sorted.map((f) => stringProperty(f, 'protocol')).find(isString);
-    const source = resolveEndpoint(sourceRef, index);
-    const target = resolveEndpoint(targetRef, index);
+    const variantGroups = new Map<string, Feature[]>();
+    for (const feature of group) {
+      const sourceRef = stringProperty(feature, 'source');
+      const targetRef = stringProperty(feature, 'target');
+      if (!sourceRef || !targetRef) continue;
+      const protocol = stringProperty(feature, 'protocol');
+      const variantKey = JSON.stringify([
+        normalizeFeatureSlug(sourceRef),
+        normalizeFeatureSlug(targetRef),
+        feature.subtype ? normalizeFeatureSlug(feature.subtype) : null,
+        protocol ? normalizeFeatureSlug(protocol) : null,
+      ]);
+      variantGroups.set(variantKey, [...(variantGroups.get(variantKey) ?? []), feature]);
+    }
+
+    const variants: TopologyEdgeVariant[] = [...variantGroups.values()]
+      .map((variantGroup) => {
+        const sorted = [...variantGroup].sort(byConfidenceDesc);
+        const [primary] = sorted;
+        const sourceRef = stringProperty(primary, 'source');
+        const targetRef = stringProperty(primary, 'target');
+        if (!sourceRef || !targetRef) return undefined;
+        const protocol = stringProperty(primary, 'protocol');
+        const source = resolveEndpoint(sourceRef, index);
+        const target = resolveEndpoint(targetRef, index);
+        return {
+          ...(primary.subtype ? { subtype: primary.subtype } : {}),
+          ...(protocol ? { protocol } : {}),
+          source_ref: sourceRef,
+          target_ref: targetRef,
+          source_node_id: source.nodeId,
+          target_node_id: target.nodeId,
+          source_resolution: source.resolution,
+          target_resolution: target.resolution,
+          provenance: sortProvenance(sorted.map(toProvenance)),
+        };
+      })
+      .filter((variant): variant is TopologyEdgeVariant => variant !== undefined)
+      .sort(
+        (a, b) =>
+          a.source_ref.localeCompare(b.source_ref) ||
+          a.target_ref.localeCompare(b.target_ref) ||
+          (a.subtype ?? '').localeCompare(b.subtype ?? '') ||
+          (a.protocol ?? '').localeCompare(b.protocol ?? '')
+      );
+    if (variants.length === 0) continue;
     edges.push({
       edge_id: slug,
-      ...(primary.subtype ? { subtype: primary.subtype } : {}),
-      ...(protocol ? { protocol } : {}),
-      source_ref: sourceRef,
-      target_ref: targetRef,
-      source_node_id: source.nodeId,
-      target_node_id: target.nodeId,
-      source_resolution: source.resolution,
-      target_resolution: target.resolution,
-      provenance: sortProvenance(sorted.map(toProvenance)),
+      variants,
     });
   }
   return edges;
@@ -225,27 +256,32 @@ export function topologyNeighborhood({
   const seeds = new Set(seedIds.map(normalizeFeatureSlug));
   const reached = new Set(seeds);
   const edgesReached = new Set<string>();
+  const variantsReached = new Set<string>();
   let frontier = new Set(seeds);
 
   for (let hop = 0; hop < hops && frontier.size > 0; hop++) {
     const next = new Set<string>();
-    for (const edge of snapshot.edges) {
-      if (edgesReached.has(edge.edge_id)) continue;
-      const touches =
-        frontier.has(edge.edge_id) ||
-        frontier.has(normalizeFeatureSlug(edge.source_ref)) ||
-        frontier.has(normalizeFeatureSlug(edge.target_ref)) ||
-        (edge.source_node_id !== null && frontier.has(edge.source_node_id)) ||
-        (edge.target_node_id !== null && frontier.has(edge.target_node_id));
-      if (!touches) continue;
-      edgesReached.add(edge.edge_id);
-      for (const nodeId of [edge.source_node_id, edge.target_node_id]) {
-        if (nodeId !== null && !reached.has(nodeId)) {
-          reached.add(nodeId);
-          next.add(nodeId);
+    snapshot.edges.forEach((edge, edgeIndex) => {
+      edge.variants.forEach((variant, variantIndex) => {
+        const variantKey = `${edgeIndex}:${variantIndex}`;
+        if (variantsReached.has(variantKey)) return;
+        const touches =
+          frontier.has(edge.edge_id) ||
+          frontier.has(normalizeFeatureSlug(variant.source_ref)) ||
+          frontier.has(normalizeFeatureSlug(variant.target_ref)) ||
+          (variant.source_node_id !== null && frontier.has(variant.source_node_id)) ||
+          (variant.target_node_id !== null && frontier.has(variant.target_node_id));
+        if (!touches) return;
+        variantsReached.add(variantKey);
+        edgesReached.add(edge.edge_id);
+        for (const nodeId of [variant.source_node_id, variant.target_node_id]) {
+          if (nodeId !== null && !reached.has(nodeId)) {
+            reached.add(nodeId);
+            next.add(nodeId);
+          }
         }
-      }
-    }
+      });
+    });
     frontier = next;
   }
 

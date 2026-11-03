@@ -43,12 +43,10 @@ export const topologyNodeSchema = lazySchema(() =>
 
 export type TopologyNode = z.infer<typeof topologyNodeSchema>;
 
-export const topologyEdgeSchema = lazySchema(() =>
+export const topologyEdgeVariantSchema = lazySchema(() =>
   z.object({
-    edge_id: z.string().max(MAX_ID_LENGTH),
     subtype: z.string().max(MAX_ID_LENGTH).optional(),
     protocol: z.string().max(MAX_ID_LENGTH).optional(),
-    /** Raw `properties.source` / `properties.target` of the dependency feature. */
     source_ref: z.string().max(MAX_ID_LENGTH),
     target_ref: z.string().max(MAX_ID_LENGTH),
     source_node_id: z.string().max(MAX_ID_LENGTH).nullable(),
@@ -56,6 +54,15 @@ export const topologyEdgeSchema = lazySchema(() =>
     source_resolution: z.enum(TOPOLOGY_EDGE_RESOLUTIONS),
     target_resolution: z.enum(TOPOLOGY_EDGE_RESOLUTIONS),
     provenance: z.array(topologyProvenanceSchema).max(MAX_TOPOLOGY_PROVENANCE),
+  })
+);
+
+export type TopologyEdgeVariant = z.infer<typeof topologyEdgeVariantSchema>;
+
+export const topologyEdgeSchema = lazySchema(() =>
+  z.object({
+    edge_id: z.string().max(MAX_ID_LENGTH),
+    variants: z.array(topologyEdgeVariantSchema).min(1),
   })
 );
 
