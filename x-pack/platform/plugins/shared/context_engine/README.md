@@ -4,8 +4,9 @@ Server-side plugin for the Context Engine.
 
 ## AI Indices API
 
-AI Indices attach a logical name to a single user index or data stream. AI Index records are stored in a hidden Kibana system index
-(`.contextengine-ai-indices`), separate from the backing data.
+AI Indices attach a logical name to a single user index or data stream. AI Index records are stored by Elasticsearch in its
+`.context-engine-ai-indices` system index, written and read through the `_context_engine/ai_index` API as `kibana_system`,
+separate from the backing data.
 
 | Method   | Path                                                            | Description                          |
 | -------- | --------------------------------------------------------------- | ------------------------------------ |
@@ -341,7 +342,7 @@ its own reads.
 
 **By target index.** `server/tasks/self_referential.ts` recognizes reads of the
 loop's own observability surface: the `context-engine-` user namespace (signals,
-improvements), the `.contextengine-` system namespace (the AI index registry),
+improvements), the `.contextengine-` and `.context-engine-` system namespaces (the AI index registry, session memory and events),
 and `traces-agent_builder.otel-*`. `build` in `server/tasks/transform.ts` drops
 those spans before round context is computed, so an analysis round emits no
 signals and does not affect the `looped` / `fell_back_to_raw` counters of the
