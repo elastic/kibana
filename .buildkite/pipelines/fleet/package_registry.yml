@@ -113,6 +113,7 @@ steps:
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
+      diskType: pd-balanced
     timeout_in_minutes: 60
     parallelism: 3
     key: osquery-cypress-stateful
@@ -130,6 +131,7 @@ steps:
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
+      diskType: pd-balanced
     timeout_in_minutes: 60
     parallelism: 3
     key: osquery-cypress-serverless
