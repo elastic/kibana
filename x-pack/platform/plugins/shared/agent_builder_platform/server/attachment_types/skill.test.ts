@@ -159,9 +159,19 @@ describe('skill toSurfaceComposition', () => {
     expect((await renderSurface(composition)).valid).toBe(true);
   });
 
+  const committed = {
+    origin: 'incident triage',
+    versionData: {
+      version: 2,
+      versionCount: 2,
+      createdAt: '2026-01-01T00:00:00.000Z',
+      originSyncedAt: '2026-01-02T00:00:00.000Z',
+    },
+  };
+
   it('links to the skill in Management once it is persisted', async () => {
     const composition = await definition.toSurfaceComposition?.(
-      { ...buildAttachment(validSkill), origin: 'incident triage' },
+      { ...buildAttachment(validSkill), ...committed },
       surfaceContext
     );
 
@@ -177,6 +187,25 @@ describe('skill toSurfaceComposition', () => {
     expect(slack).toContain(
       `${SURFACE_BASE_URL}/app/agent_builder/manage/skills/incident%20triage`
     );
+  });
+
+  it.each([
+    [
+      'it was never saved',
+      { versionData: { ...committed.versionData, originSyncedAt: undefined } },
+    ],
+    [
+      'it has draft changes',
+      { versionData: { ...committed.versionData, createdAt: '2026-01-03T00:00:00.000Z' } },
+    ],
+    ['it is an older version', { versionData: { ...committed.versionData, version: 1 } }],
+  ])('leaves out the Management link when %s', async (_case, overrides) => {
+    const composition = await definition.toSurfaceComposition?.(
+      { ...buildAttachment(validSkill), ...committed, ...overrides },
+      surfaceContext
+    );
+
+    expect(composition?.body.some(({ type }) => type === 'link')).toBe(false);
   });
 
   it('cuts long content and says so, and still renders', async () => {

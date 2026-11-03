@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   AttachmentTypeDefinition,
   SurfaceComposition,
@@ -79,15 +80,36 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
       },
     };
   },
-  toSurfaceComposition: ({ data: { skill }, origin }) => toSkillSurfaceComposition(skill, origin),
+  toSurfaceComposition: (attachment) =>
+    toSkillSurfaceComposition(
+      attachment.data.skill,
+      isCommitted(attachment) ? attachment.origin : undefined
+    ),
   getAgentDescription: () => {
     return `A \`skill\` attachment is a versioned draft of an Agent Builder skill. When \`mode\` is "create" the card shows a "Create" button (POST). When \`mode\` is "edit" the card shows an "Edit in Management" link if the skill has no unsaved changes, or a "Save changes" button (PUT) once edits are present. \`skill.id\` always identifies the persisted skill. In both cases \`skill\` holds the full content including \`id\`. Render it inline by emitting <render_attachment id="ATTACHMENT_ID" />. Emit at most one render per round — if you call \`patch_skill\` after loading or proposing the skill, hold the render until after the final patch so the user sees a single up-to-date card. Do not invent attachment ids — only render ids returned by propose_skill, load_skill_for_editing, or patch_skill.`;
   },
 });
 
 /**
- * The skill's description, tools and files, and its content as code. Once it's persisted, which
- * the attachment's `origin` records, it links to its page in Management, as the browser card does.
+ * Whether the attachment is the latest version of a skill persisted with no draft changes since,
+ * when the browser card offers "Edit in Management" instead of "Save changes".
+ */
+const isCommitted = ({
+  origin,
+  versionData,
+}: Attachment<typeof SKILL_ATTACHMENT_TYPE, SkillAttachmentData>): boolean => {
+  if (!origin || !versionData?.originSyncedAt) {
+    return false;
+  }
+
+  const { version, versionCount, createdAt, originSyncedAt } = versionData;
+
+  return version === versionCount && createdAt <= originSyncedAt;
+};
+
+/**
+ * The skill's description, tools and files, and its content as code. With the `origin` of a
+ * committed skill, it links to its page in Management, as the browser card does.
  */
 const toSkillSurfaceComposition = (
   {

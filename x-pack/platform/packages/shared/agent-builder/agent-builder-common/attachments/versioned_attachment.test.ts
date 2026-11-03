@@ -156,6 +156,22 @@ describe('versioned_attachment', () => {
         versionData: { version: 1, versionCount: 2, createdAt: '2025-01-01T00:00:00Z' },
       });
     });
+
+    it('keeps when the attachment was last synced with its origin', () => {
+      const v1 = createTestVersion({ version: 1 });
+      const attachment = createTestAttachment({
+        versions: [v1],
+        origin: 'origin-1',
+        origin_snapshot_at: '2025-01-03T00:00:00Z',
+      });
+
+      expect(toAttachment(attachment, v1).versionData).toEqual({
+        version: 1,
+        versionCount: 1,
+        createdAt: '2025-01-01T00:00:00Z',
+        originSyncedAt: '2025-01-03T00:00:00Z',
+      });
+    });
   });
 
   describe('createVersionId', () => {
