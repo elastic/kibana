@@ -76,6 +76,11 @@ const conflictError = () =>
 const mockHandleAgentExecution = jest.fn();
 const mockCollectAndWriteEvents = jest.fn();
 
+const mockShouldRunAgent = jest.fn();
+jest.mock('./auto_trigger/should_run_agent', () => ({
+  shouldRunAgent: (...args: unknown[]) => mockShouldRunAgent(...args),
+}));
+
 jest.mock('./execution_runner', () => ({
   handleAgentExecution: (...args: any[]) => mockHandleAgentExecution(...args),
   collectAndWriteEvents: (...args: any[]) => mockCollectAndWriteEvents(...args),
@@ -183,6 +188,8 @@ describe('AgentExecutionService', () => {
     meteringService,
     searchInferenceEndpoints,
     callbackDeliveryService,
+    decisions: { decide: jest.fn() },
+    decisionConfig: { triggerThreshold: 0.5, timeoutMs: 2000 },
   });
 
   beforeEach(() => {
@@ -255,6 +262,8 @@ describe('AgentExecutionService', () => {
         meteringService,
         searchInferenceEndpoints,
         callbackDeliveryService,
+        decisions: { decide: jest.fn() },
+        decisionConfig: { triggerThreshold: 0.5, timeoutMs: 2000 },
       });
     const converse = (
       boundService: ReturnType<typeof createBoundService>,
@@ -2492,6 +2501,95 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
       expect(appendedActiveExecution()).toBeUndefined();
       expect(conversationClient.update).not.toHaveBeenCalled();
+    });
+
+    describe('trigger_mode auto', () => {
+      const send = () =>
+        service.maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          useTaskManager: true,
+          params: {
+            agentId: 'agent-1',
+            conversationId: 'conversation-1',
+            triggerMode: ChatTriggerMode.Auto,
+            nextInput: { message: '@jane thanks!' },
+          },
+        });
+
+      const busy = () =>
+        createConversationBusyError({
+          conversationId: 'conversation-1',
+          activeExecutionId: 'other-exec',
+        });
+
+      beforeEach(() => {
+        (attachmentsService.createStateManager as jest.Mock).mockReturnValue({
+          getAccessedRefs: () => [],
+          getAll: () => [],
+          drainChanges: () => [],
+        });
+      });
+
+      it('with a "no" decision persists the user message without an active execution', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(false);
+
+        const result = await send();
+
+        expect(result.executionId).toBeUndefined();
+        expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+        expect(appendedActiveExecution()).toBeUndefined();
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+
+      it('with a "yes" decision runs the agent', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(true);
+
+        const result = await send();
+
+        expect(mockExecutionClient.create).toHaveBeenCalledTimes(1);
+        expect(result.executionId).toBeDefined();
+        expect(appendedActiveExecution()).toEqual(
+          expect.objectContaining({ action: 'acquire', executionId: result.executionId })
+        );
+      });
+
+      it('passes the conversation request to the decision', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(true);
+
+        await send();
+
+        expect(mockShouldRunAgent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            params: expect.objectContaining({
+              conversationId: 'conversation-1',
+              nextInput: { message: '@jane thanks!' },
+            }),
+          })
+        );
+      });
+
+      it('with a "yes" decision on a busy conversation throws ConversationBusyError', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(true);
+        conversationClient.appendEvents.mockRejectedValueOnce(busy());
+
+        const error = await send().catch((thrown) => thrown);
+
+        expect(isConversationBusyError(error)).toBe(true);
+      });
+
+      it('with a "no" decision on a busy conversation still persists the message', async () => {
+        mockShouldRunAgent.mockResolvedValueOnce(false);
+        conversationClient.get.mockResolvedValue({
+          ...conversation,
+          active_execution: { execution_id: 'other-exec' },
+        });
+
+        await send();
+
+        expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
     });
   });
 });

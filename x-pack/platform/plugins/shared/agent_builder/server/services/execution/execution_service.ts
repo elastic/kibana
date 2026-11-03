@@ -15,6 +15,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { DecisionsStart } from '@kbn/agent-builder-server';
 import { validateReasoningEffort, type InferenceConnector } from '@kbn/inference-common';
 import type {
   ChatEvent,
@@ -54,6 +55,8 @@ import type {
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS, FOLLOW_POLL_INTERVAL_MS } from './constants';
+import type { AgentBuilderConfig } from '../../config';
+import { shouldRunAgent } from './auto_trigger/should_run_agent';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
@@ -96,6 +99,8 @@ interface ParentExecution {
 }
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
+  decisions: DecisionsStart;
+  decisionConfig: AgentBuilderConfig['decisionModel'];
   elasticsearch: ElasticsearchServiceStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
@@ -376,11 +381,19 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
   /**
    * The chat API's entry point: persists the request's user message, then runs the agent unless
-   * `trigger_mode: 'never'` asked for the message alone. Callers that always run the agent use
-   * {@link executeAgent}.
+   * `trigger_mode: 'never'` asked for the message alone, or `trigger_mode: 'auto'` decided the
+   * agent should not respond. Callers that always run the agent use {@link executeAgent}.
    */
   async maybeExecuteAgent(args: ExecuteAgentParams): Promise<MaybeExecuteAgentResult> {
     if ('triggerMode' in args.params && args.params.triggerMode === ChatTriggerMode.Never) {
+      return this.handleNeverTriggerMode(args);
+    }
+
+    if (
+      args.mode === AgentExecutionMode.conversation &&
+      args.params.triggerMode === ChatTriggerMode.Auto &&
+      !(await shouldRunAgent({ request: args.request, params: args.params, deps: this.deps }))
+    ) {
       return this.handleNeverTriggerMode(args);
     }
 

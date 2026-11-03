@@ -319,6 +319,8 @@ export class ServiceManager {
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
       securityPlugin,
+      decisions,
+      decisionConfig: this.config.decisionModel,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
