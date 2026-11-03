@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
+import { createIsomerRuntimeProvider } from './runtime';
 
 export type IsomerPluginSetup = Record<string, never>;
 
@@ -15,20 +16,11 @@ export interface IsomerPluginStart {
   getRuntime: () => Promise<KibanaIsomerRuntime>;
 }
 
-const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
-  const [{ createKibanaIsomerRuntime }, { componentsPack }] = await Promise.all([
-    import('@kbn/isomer'),
-    import('@kbn/isomer-components'),
-  ]);
-  return createKibanaIsomerRuntime({ packs: [componentsPack] });
-};
-
 export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart> {
-  private readonly logger: Logger;
-  private runtime?: Promise<KibanaIsomerRuntime>;
+  private readonly runtimeProvider: ReturnType<typeof createIsomerRuntimeProvider>;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+    this.runtimeProvider = createIsomerRuntimeProvider(initializerContext.logger.get());
   }
 
   setup(): IsomerPluginSetup {
@@ -36,22 +28,8 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
   }
 
   start(): IsomerPluginStart {
-    return { getRuntime: this.getRuntime };
+    return { getRuntime: this.runtimeProvider.getRuntime };
   }
 
   stop() {}
-
-  private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
-    this.runtime ??= createRuntime().then(
-      (runtime) => {
-        this.logger.debug('Built the Isomer runtime with the components pack.');
-        return runtime;
-      },
-      (error) => {
-        this.runtime = undefined;
-        throw error;
-      }
-    );
-    return this.runtime;
-  };
 }
