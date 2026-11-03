@@ -8,7 +8,7 @@
 import { Agent } from 'undici';
 import type { CancellableTask, RunResult } from '../task';
 import { createRetryableError, deserializeTaskRunError } from '../task_running/errors';
-import { deserializeRunResult } from './wire';
+import { deserializeRunResult, MAX_TIMER_MS } from './wire';
 import type { PodRunRequest, PodRunResponse } from './wire';
 
 export interface PodRoute {
@@ -29,7 +29,7 @@ const getLongRunDispatcher = () =>
 /** An abort signal that fires after `ms`, or when `parent` aborts; `dispose` clears the timer. */
 const abortAfter = (ms: number, parent?: AbortSignal) => {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ms);
+  const timer = setTimeout(() => controller.abort(), Math.min(ms, MAX_TIMER_MS));
   const onParentAbort = () => controller.abort();
   if (parent?.aborted) controller.abort();
   parent?.addEventListener('abort', onParentAbort, { once: true });

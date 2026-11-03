@@ -159,14 +159,27 @@ export const createUserProfileStart = (client: Client) => ({
 });
 
 /** Feature flags have no evaluation backend in a pod, so every flag resolves to its fallback. */
-export const createFeatureFlagsStart = () => ({
-  getStringValue: async (_flag: string, fallback: string) => fallback,
-  getBooleanValue: async (_flag: string, fallback: boolean) => fallback,
-  getNumberValue: async (_flag: string, fallback: number) => fallback,
-  getStringValue$: (_flag: string, fallback: string) => of(fallback),
-  getBooleanValue$: (_flag: string, fallback: boolean) => of(fallback),
-  getNumberValue$: (_flag: string, fallback: number) => of(fallback),
-});
+/**
+ * Feature flags resolve to their fallbacks, except where a pod has to differ from Kibana: workflows
+ * must go through Core's self client for Kibana API calls, which a pod does not have, so those calls
+ * fail with an explicit error instead of reaching a Kibana through the legacy fetch.
+ */
+const POD_FLAG_OVERRIDES: Record<string, unknown> = {
+  'workflows.kibanaRequest.coreSelfClientEnabled': true,
+};
+
+export const createFeatureFlagsStart = () => {
+  const value = <T>(flag: string, fallback: T) =>
+    flag in POD_FLAG_OVERRIDES ? (POD_FLAG_OVERRIDES[flag] as T) : fallback;
+  return {
+    getStringValue: async (flag: string, fallback: string) => value(flag, fallback),
+    getBooleanValue: async (flag: string, fallback: boolean) => value(flag, fallback),
+    getNumberValue: async (flag: string, fallback: number) => value(flag, fallback),
+    getStringValue$: (flag: string, fallback: string) => of(value(flag, fallback)),
+    getBooleanValue$: (flag: string, fallback: boolean) => of(value(flag, fallback)),
+    getNumberValue$: (flag: string, fallback: number) => of(value(flag, fallback)),
+  };
+};
 
 /** UI settings registered by plugins during setup; values resolve to their registered defaults. */
 export const createUiSettings = () => {

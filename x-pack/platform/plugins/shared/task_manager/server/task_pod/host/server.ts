@@ -10,7 +10,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { serializeTaskRunError } from '../../task_running/errors';
 import type { PodRunRequest, PodRunResponse } from '../wire';
-import { reviveTaskInstance, serializeRunResult } from '../wire';
+import { MAX_TIMER_MS, reviveTaskInstance, serializeRunResult } from '../wire';
 import type { CapturedTaskDefinition } from './boot_tasks_plugins';
 import { enrichPodFakeRequest } from './core/small_services';
 import { POD_KIBANA_VERSION } from './version';
@@ -106,7 +106,7 @@ export const startPodServer = ({
     const deadlineMs = body.deadline ? new Date(body.deadline).getTime() - Date.now() : undefined;
     const deadlineTimer =
       deadlineMs !== undefined && Number.isFinite(deadlineMs)
-        ? setTimeout(() => abortController.abort(), Math.max(deadlineMs, 0))
+        ? setTimeout(() => abortController.abort(), Math.min(Math.max(deadlineMs, 0), MAX_TIMER_MS))
         : undefined;
     const customFields: Record<string, unknown>[] = [];
     // The fake request factory pulls in Core's HTTP utils (APM, gRPC, OpenTelemetry); only runs that

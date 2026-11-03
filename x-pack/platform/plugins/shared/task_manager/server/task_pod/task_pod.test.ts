@@ -215,6 +215,18 @@ describe('task pod wire format', () => {
       expect(isRetryableError(error)).toBeTruthy();
     });
 
+    test('a task timeout beyond the longest timer does not overflow it', async () => {
+      const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+      try {
+        const { runner } = build(respond({ kind: 'result' }), 365 * 24 * 60 * 60 * 1000);
+        await runner.run();
+        const delays = setTimeoutSpy.mock.calls.map(([, ms]) => ms as number);
+        expect(Math.max(...delays)).toBeLessThanOrEqual(2 ** 31 - 1);
+      } finally {
+        setTimeoutSpy.mockRestore();
+      }
+    });
+
     test('stops waiting at the task timeout (plus grace)', async () => {
       jest.useFakeTimers();
       try {

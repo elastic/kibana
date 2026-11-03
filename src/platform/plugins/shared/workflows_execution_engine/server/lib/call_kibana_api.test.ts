@@ -12,6 +12,7 @@ import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-serv
 import {
   callKibanaApi,
   CallKibanaApiResponseTooLargeError,
+  KIBANA_API_UNSUPPORTED_IN_TASK_POD,
   KibanaApiCallError,
 } from './call_kibana_api';
 import { toExecutionError } from '../step/errors';
@@ -110,6 +111,20 @@ describe('callKibanaApi', () => {
     mockSelfFetch.mockReset();
     mockAsScoped.mockClear();
     mockAsScoped.mockImplementation(() => ({ fetch: mockSelfFetch }));
+  });
+
+  it('fails with an explicit message where there is no self client, as in a task pod', async () => {
+    const coreStart = {
+      http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
+    } as unknown as CoreStart;
+
+    await expect(
+      callKibanaApi(
+        { fakeRequest: createFakeRequest(), coreStart },
+        { method: 'GET', path: '/api/status' }
+      )
+    ).rejects.toThrow(KIBANA_API_UNSUPPORTED_IN_TASK_POD);
+    expect(mockSelfFetch).not.toHaveBeenCalled();
   });
 
   it('forwards the path, query, and method to the self client', async () => {

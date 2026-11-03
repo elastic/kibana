@@ -21,6 +21,7 @@ export interface TaskPodFamily {
 export const FAMILY_OWNERS: Record<string, string> = {
   alerting_v2: 'alertingVTwo',
   connectors: 'actions',
+  workflows: 'workflowsExecutionEngine',
 };
 
 export const loadFamily = (name: string): TaskPodFamily => {

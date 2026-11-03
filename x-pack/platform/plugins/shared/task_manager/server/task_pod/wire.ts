@@ -14,6 +14,13 @@ import type { SerializedTaskRunError } from '../task_running/errors';
 import { deserializeTaskRunError, serializeTaskRunError } from '../task_running/errors';
 import type { ConcreteTaskInstance, RunResult } from '../task';
 
+/**
+ * The longest a timer can wait: Node treats anything above 2^31-1 ms (about 24.8 days) as 1 ms and
+ * warns, which is fatal in Kibana. A task timeout beyond it, such as a workflow's `365d`, is cut at
+ * this length.
+ */
+export const MAX_TIMER_MS = 2 ** 31 - 1;
+
 export interface PodRunRequest {
   taskType: string;
   /** `ConcreteTaskInstance` with credential fields stripped; dates are ISO strings. */

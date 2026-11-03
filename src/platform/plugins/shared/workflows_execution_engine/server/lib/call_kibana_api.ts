@@ -303,11 +303,21 @@ const validateKibanaApiPath = (path: string): void => {
  * Core does not manage (custom + event-chain) and keeps its own response-shaping contract (size
  * cap, binary handling, structured {@link KibanaApiCallError}).
  */
+/**
+ * A task pod has no route back to Kibana, so there is no self client there. Calls to Kibana fail with
+ * this message instead of reaching a Kibana the pod was never meant to depend on.
+ */
+export const KIBANA_API_UNSUPPORTED_IN_TASK_POD =
+  'Calling Kibana APIs is not supported when workflows run in a task pod: the pod has no route back to Kibana. Run this workflow in Kibana.';
+
 export async function callKibanaApi<T = unknown>(
   deps: CallKibanaApiDeps,
   params: CallKibanaApiParams
 ): Promise<CallKibanaApiResult<T>> {
   const { fakeRequest, workflowRunId, coreStart, spaceId } = deps;
+  if (!coreStart.http.selfClient) {
+    throw new Error(KIBANA_API_UNSUPPORTED_IN_TASK_POD);
+  }
   const maxResponseBytes =
     params.maxResponseBytes ?? deps.maxResponseBytes ?? DEFAULT_MAX_RESPONSE_BYTES;
 

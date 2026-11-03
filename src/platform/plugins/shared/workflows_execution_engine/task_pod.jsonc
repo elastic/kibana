@@ -1,0 +1,19 @@
+{
+  // The task pod family for workflows: every plugin whose `server/tasks` entry the pod boots. A
+  // plugin's tasks dependencies must be listed here (checked at pod boot). Plugins that register
+  // workflow steps belong here too; a step whose plugin is not listed fails by name when it runs.
+  "family": "workflows",
+  "taskTypes": ["workflow:run", "workflow:resume", "workflow:scheduled"],
+  "plugins": [
+    "workflowsExecutionEngine",
+    "workflowsExtensions",
+    "workflowsManagement",
+    "actions",
+    "stackConnectors",
+    "taskManager",
+    "spaces",
+    "licensing",
+    "eventLog",
+    "encryptedSavedObjects"
+  ]
+}
