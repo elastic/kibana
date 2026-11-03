@@ -68,7 +68,7 @@ interface FixtureDocument {
  * can actually perform.
  *
  * `kibana.alert.uuid` is the alert's OWN identity, distinct from the rule
- * identity (`kibana.alert.rule.uuid`, one value shared by both fixture alerts):
+ * identity (`kibana.alert.rule.uuid`, one value per fixture rule):
  * a retrieval that keeps no `_id` metadata still returns this column, so the
  * observed population stays countable by identity rather than by row count
  * (`extractAgentAlertRetrievalPopulation`).
@@ -87,7 +87,7 @@ const createDocuments = (now: number = Date.now()): FixtureDocument[] => [
           uuid: fixtureAlertIds[0],
           rule: {
             name: 'AD2 encoded PowerShell fixture',
-            uuid: `${attackDiscoveryFixtureMarker}-rule`,
+            uuid: `${attackDiscoveryFixtureMarker}-powershell-rule`,
           },
           severity: 'high',
           reason: `Encoded PowerShell execution marker ${attackDiscoveryFixtureMarker}`,
@@ -115,7 +115,7 @@ const createDocuments = (now: number = Date.now()): FixtureDocument[] => [
           uuid: fixtureAlertIds[1],
           rule: {
             name: 'AD2 LSASS access fixture',
-            uuid: `${attackDiscoveryFixtureMarker}-rule`,
+            uuid: `${attackDiscoveryFixtureMarker}-lsass-rule`,
           },
           severity: 'critical',
           reason: `LSASS access marker ${attackDiscoveryFixtureMarker}`,

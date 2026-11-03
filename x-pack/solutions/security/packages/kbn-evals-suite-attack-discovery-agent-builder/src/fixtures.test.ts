@@ -60,12 +60,37 @@ describe('the golden fixture is retrievable by the query its question implies', 
     expect(new Set(ids).size).toBe(ids.length);
 
     // `kibana.alert.uuid` is the alert's OWN identity, distinct from the rule
-    // identity (`kibana.alert.rule.uuid`, one value shared by both alerts): a
+    // identity (`kibana.alert.rule.uuid`, one value per fixture rule): a
     // retrieval that keeps no `_id` metadata still returns this column, so the
     // observed population stays countable by identity rather than by row count.
     for (const { id, source } of documents) {
       const alert = (source.kibana as { alert?: { uuid?: unknown } })?.alert;
       expect(alert?.uuid).toBe(id);
     }
+  });
+});
+
+describe('the golden fixture seeds a chain that spans more than one rule', () => {
+  const seededRules = async (): Promise<Array<{ name: unknown; uuid: unknown }>> =>
+    (await seededDocuments()).map(({ source }) => {
+      const { rule } = (source.kibana as { alert: { rule: { name: unknown; uuid: unknown } } })
+        .alert;
+      return { name: rule.name, uuid: rule.uuid };
+    });
+
+  // The skill requires an attack chain to span more than one rule. Alerts from
+  // two differently named rules that share one rule uuid read as a single rule
+  // by id, so each seeded alert carries its own rule identity.
+  it('seeds each alert under its own rule uuid', async () => {
+    const rules = await seededRules();
+
+    expect(rules).toHaveLength(2);
+    expect(new Set(rules.map(({ uuid }) => uuid)).size).toBe(rules.length);
+  });
+
+  it('keeps rule names and rule uuids one-to-one', async () => {
+    const rules = await seededRules();
+
+    expect(new Set(rules.map(({ name }) => name)).size).toBe(rules.length);
   });
 });
