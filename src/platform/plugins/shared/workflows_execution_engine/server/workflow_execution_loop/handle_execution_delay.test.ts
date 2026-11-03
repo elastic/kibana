@@ -811,6 +811,113 @@ describe('handleExecutionDelay', () => {
       });
       expect(params.workflowExecutionCursor.stop).toHaveBeenCalledTimes(1);
     });
+
+    it('schedules the resume at the workflow deadline when it is sooner than the wait', async () => {
+      jest.useFakeTimers();
+      try {
+        const startedAt = '2025-06-01T12:00:00.000Z';
+        jest.setSystemTime(new Date(startedAt));
+        const params = makeParams();
+        (params.workflowRuntime.getWorkflowExecution as jest.Mock).mockReturnValue({
+          id: 'exec-parent',
+          spaceId: 'default',
+          startedAt,
+          scopeStack: [],
+        });
+        (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('20s');
+        const waitEndsAt = new Date(Date.now() + 60_000).toISOString();
+        const stepRuntime = makeStepRuntime({
+          node: { stepType: 'wait' } as any,
+          stepExecution: {
+            status: ExecutionStatus.WAITING,
+            state: { resumeAt: waitEndsAt },
+          } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
+        expect(call.resumeAt).toEqual(new Date(Date.parse(startedAt) + 20_000));
+        expect(stepRuntime.stepExecution?.state?.resumeAt).toBe(waitEndsAt);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('schedules the resume at an enclosing step timeout when it is sooner than the wait', async () => {
+      jest.useFakeTimers();
+      try {
+        const startedAt = '2025-06-01T12:00:00.000Z';
+        jest.setSystemTime(new Date(startedAt));
+        const params = makeParams({
+          currentStackFrames: [
+            {
+              stepId: 'pause',
+              nestedScopes: [
+                {
+                  nodeId: 'enterTimeout_pause',
+                  nodeType: 'enter-timeout-zone',
+                },
+              ],
+            },
+          ],
+        });
+        (params.workflowExecutionGraph.getNode as jest.Mock).mockReturnValue({
+          type: 'enter-timeout-zone',
+          stepType: 'step_level_timeout',
+          stepId: 'pause',
+          timeout: '15s',
+        });
+        (params.workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([
+          {
+            stepType: 'step_level_timeout',
+            startedAt,
+          },
+        ]);
+        const waitEndsAt = new Date(Date.now() + 60_000).toISOString();
+        const stepRuntime = makeStepRuntime({
+          node: { stepType: 'wait' } as any,
+          stepExecution: {
+            status: ExecutionStatus.WAITING,
+            state: { resumeAt: waitEndsAt },
+          } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
+        expect(call.resumeAt).toEqual(new Date(Date.parse(startedAt) + 15_000));
+        expect(stepRuntime.stepExecution?.state?.resumeAt).toBe(waitEndsAt);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('schedules a claimable wake when the enclosing deadline is already due', async () => {
+      jest.useFakeTimers();
+      try {
+        const now = new Date('2026-10-28T12:00:00.000Z');
+        jest.setSystemTime(now);
+        const params = makeParams();
+        (params.workflowExecutionGraph.getWorkflowLevelTimeout as jest.Mock).mockReturnValue('20s');
+        const waitEndsAt = new Date(now.getTime() + 60_000).toISOString();
+        const stepRuntime = makeStepRuntime({
+          node: { stepType: 'wait' } as any,
+          stepExecution: {
+            status: ExecutionStatus.WAITING,
+            state: { resumeAt: waitEndsAt },
+          } as any,
+        });
+
+        await handleExecutionDelay(params, stepRuntime);
+
+        const call = (params.workflowTaskManager.scheduleResumeTask as jest.Mock).mock.calls[0][0];
+        expect(call.resumeAt).toEqual(new Date(now.getTime() + 500));
+        expect(stepRuntime.stepExecution?.state?.resumeAt).toBe(waitEndsAt);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
   });
 
   describe('resumeAt in the past', () => {
