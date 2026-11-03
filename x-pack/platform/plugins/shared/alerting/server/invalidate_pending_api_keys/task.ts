@@ -11,11 +11,15 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { runInvalidate } from '@kbn/task-manager-plugin/server';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
+import {
+  apiKeyInvalidationTaskStateSchemaByVersion,
+  emptyApiKeyInvalidationTaskState,
+  runInvalidate,
+  type ApiKeyInvalidationTaskState,
+} from '@kbn/response-ops-api-keys';
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart } from '../plugin';
-import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 
@@ -44,7 +48,7 @@ export async function scheduleApiKeyInvalidatorTask(
       schedule: {
         interval,
       },
-      state: emptyState,
+      state: emptyApiKeyInvalidationTaskState,
       params: {},
     });
   } catch (e) {
@@ -61,7 +65,7 @@ function registerApiKeyInvalidatorTaskDefinition(
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
-      stateSchemaByVersion,
+      stateSchemaByVersion: apiKeyInvalidationTaskStateSchemaByVersion,
       createTaskRunner: taskRunner(logger, coreStartServices, config),
     },
   });
@@ -73,7 +77,7 @@ export function taskRunner(
   config: AlertingConfig
 ) {
   return ({ taskInstance }: RunContext) => {
-    const state = taskInstance.state as LatestTaskStateSchema;
+    const state = taskInstance.state as ApiKeyInvalidationTaskState;
     return {
       async run() {
         let totalInvalidated = 0;
@@ -96,6 +100,7 @@ export function taskRunner(
             invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
             logger,
             missingApiKeyRetries,
+            pluginTag: 'alerting',
             removalDelay: config.invalidateApiKeysTask.removalDelay,
             savedObjectsClient,
             savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
@@ -127,7 +132,7 @@ export function taskRunner(
           totalInvalidated = result.totalInvalidated;
           missingApiKeyRetries = result.missingApiKeyRetries;
 
-          const updatedState: LatestTaskStateSchema = {
+          const updatedState: ApiKeyInvalidationTaskState = {
             runs: (state.runs || 0) + 1,
             total_invalidated: totalInvalidated,
             missing_api_key_retries: missingApiKeyRetries,
@@ -140,7 +145,7 @@ export function taskRunner(
           };
         } catch (e) {
           logger.warn(`Error executing alerting apiKey invalidation task: ${e.message}`);
-          const updatedState: LatestTaskStateSchema = {
+          const updatedState: ApiKeyInvalidationTaskState = {
             runs: state.runs + 1,
             total_invalidated: totalInvalidated,
             missing_api_key_retries: missingApiKeyRetries,
