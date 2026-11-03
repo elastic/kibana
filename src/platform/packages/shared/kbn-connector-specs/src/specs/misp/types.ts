@@ -21,7 +21,6 @@ const MAX_DATE_LENGTH = 64;
 const MAX_WARNINGLIST_VALUES = 1000;
 const MAX_EVENT_ID_LENGTH = 36;
 // Event ids are numeric (at most 10 digits) or UUIDs, per the MISP OpenAPI spec's EventId and UUID schemas.
-const NUMERIC_EVENT_ID = /^\d{1,10}$/;
 const EVENT_ID_OR_UUID =
   /^(\d{1,10}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 
@@ -270,12 +269,7 @@ export const SearchAttributesInputSchema = lazySchema(() =>
       .max(50)
       .optional()
       .describe('Tag names to filter on.'),
-    eventId: z
-      .string()
-      .max(10)
-      .regex(NUMERIC_EVENT_ID, 'Use a numeric event id.')
-      .optional()
-      .describe('Restrict results to a single event, by its numeric id.'),
+    eventId: eventIdSchema('Restrict results to a single event, by its id or UUID.').optional(),
     limit: z.coerce
       .number()
       .int()

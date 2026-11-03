@@ -88,6 +88,13 @@ describe('Misp', () => {
       expect(SearchAttributesInputSchema.safeParse({ eventId: 'abc' }).success).toBe(false);
     });
 
+    it.each(['42', '5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60'])(
+      'searchAttributes filters by event id or UUID: %s',
+      (eventId) => {
+        expect(SearchAttributesInputSchema.safeParse({ eventId }).success).toBe(true);
+      }
+    );
+
     it('accepts only MISP attribute types and categories', () => {
       const base = { eventId: '1', value: '1.2.3.4' };
       expect(AddAttributeInputSchema.safeParse({ ...base, type: 'ip-dst' }).success).toBe(true);
@@ -150,6 +157,19 @@ describe('Misp', () => {
         count: 1,
         attributes: [{ id: '1', value: '1.2.3.4' }],
       });
+    });
+
+    it('sends an event UUID as the eventid filter', async () => {
+      mockClient.post.mockResolvedValue({ data: { response: { Attribute: [] } } });
+      const eventId = '5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60';
+
+      await Misp.actions.searchAttributes.handler(mockContext, { eventId, limit: 5, page: 1 });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        `${BASE_URL}/attributes/restSearch`,
+        expect.objectContaining({ eventid: eventId }),
+        { headers: jsonHeaders }
+      );
     });
   });
 

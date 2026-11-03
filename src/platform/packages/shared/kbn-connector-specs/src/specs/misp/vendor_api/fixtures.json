@@ -18,6 +18,14 @@
     ]
   },
   "searchAttributes": {
+    "input": [
+      {
+        "eventId": "42"
+      },
+      {
+        "eventId": "5d1b6a2e-1f4c-4a9e-9b1e-0c2a3d4e5f60"
+      }
+    ],
     "queries": [
       {
         "method": "POST",
