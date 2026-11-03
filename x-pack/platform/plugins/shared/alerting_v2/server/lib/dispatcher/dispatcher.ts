@@ -347,7 +347,7 @@ export class DispatcherService implements DispatcherServiceContract {
         ...deferral,
         reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
         message:
-          `Transient error persisted for ${STUCK_TICK_LIMIT} ticks; notification dropped. ` +
+          `Transient error persisted until the stuck-watermark escape hatch fired; notification dropped. ` +
           deferral.message,
       })),
       rules: finalState.rules ?? RuleCatalog.empty(),

@@ -1648,8 +1648,29 @@ describe('DispatcherService', () => {
           expect.objectContaining({ workflow_ids: ['wf-2'] }),
         ]);
         expect(events[0]?.error?.message).toBe(
-          `Transient error persisted for ${STUCK_TICK_LIMIT} ticks; notification dropped. service unavailable`
+          'Transient error persisted until the stuck-watermark escape hatch fired; notification dropped. service unavailable'
         );
+      });
+
+      it('emits a dispatch_failed event per deferral when the escape hatch fires on an aborted tick', async () => {
+        const { storageService: escapeStorage, mockEsClient: escapeMockEsClient } =
+          createStorageService();
+        escapeMockEsClient.bulk.mockResolvedValue({ errors: false, took: 0, items: [] });
+        const { eventLogService, mockEventLogger } = createEventLogService();
+        const service = createService(
+          buildStuckPipeline([deferredAlert], 'aborted', deferredOutcome),
+          escapeStorage,
+          undefined,
+          undefined,
+          eventLogService
+        );
+
+        await service.run({ eventWatermark, stuckTicks: STUCK_TICK_LIMIT - 1, taskId: 'task-1' });
+
+        expect(mockEventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action)).toEqual([
+          'dispatch_failed',
+          'dispatch_failed',
+        ]);
       });
 
       it('emits no event when the escape hatch drops no deferral', async () => {

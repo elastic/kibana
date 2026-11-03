@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
+import { isError } from 'lodash';
 import { EsTransientRetryService } from '../../../services/retry_service';
 import {
   DISPATCH_RETRY_BASE_DELAY_MS,
@@ -22,8 +23,9 @@ const backOffFactory = fullJitterBackoffFactory({
 
 /**
  * Retries one dispatch operation while its error is transient, the tick signal has not fired and
- * the next backoff still fits in `DISPATCH_RETRY_BUDGET_MS`. Holds attempt state: use one instance
- * per operation.
+ * the next backoff still fits in `DISPATCH_RETRY_BUDGET_MS`. A backoff is not interrupted by the
+ * signal, but no attempt starts after it once the signal fired: the last error is rethrown instead.
+ * Holds attempt state: use one instance per operation.
  */
 export class DispatchRetryService extends EsTransientRetryService {
   private readonly startedAt = Date.now();
@@ -31,6 +33,21 @@ export class DispatchRetryService extends EsTransientRetryService {
 
   constructor(logger: Logger, private readonly signal: AbortSignal, maxRetries: number) {
     super(logger, backOffFactory, 'alerting_v2_dispatch', maxRetries);
+  }
+
+  public async retryWithBackoff<T>(cb: () => Promise<T>): Promise<T> {
+    let lastFailure: { error: Error } | undefined;
+    return super.retryWithBackoff(async () => {
+      if (lastFailure && this.signal.aborted) {
+        throw lastFailure.error;
+      }
+      try {
+        return await cb();
+      } catch (error) {
+        lastFailure = { error: isError(error) ? error : new Error(String(error)) };
+        throw error;
+      }
+    });
   }
 
   protected isRetryableError(error: Error): boolean {

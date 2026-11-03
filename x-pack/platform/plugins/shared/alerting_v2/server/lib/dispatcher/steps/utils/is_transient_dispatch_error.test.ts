@@ -7,13 +7,37 @@
 
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
+import {
+  EsConcurrentModificationError,
+  EsUnacknowledgedError,
+} from '../../../services/retry_service';
 import { isTransientDispatchError } from './is_transient_dispatch_error';
 
 describe('isTransientDispatchError', () => {
-  it('treats a 503 response as transient', () => {
+  it.each([408, 410, 429, 502, 503, 504])('treats a %s response as transient', (statusCode) => {
     expect(
-      isTransientDispatchError(new errors.ResponseError({ statusCode: 503 } as DiagnosticResult))
+      isTransientDispatchError(new errors.ResponseError({ statusCode } as DiagnosticResult))
     ).toBe(true);
+  });
+
+  it('treats a request timeout as transient', () => {
+    expect(isTransientDispatchError(new errors.TimeoutError('timed out'))).toBe(true);
+  });
+
+  it('treats a missing living connection as transient', () => {
+    expect(
+      isTransientDispatchError(
+        new errors.NoLivingConnectionsError('no connections', {} as DiagnosticResult)
+      )
+    ).toBe(true);
+  });
+
+  it('treats an unacknowledged write as transient', () => {
+    expect(isTransientDispatchError(new EsUnacknowledgedError('not acknowledged'))).toBe(true);
+  });
+
+  it('treats a concurrent modification as transient', () => {
+    expect(isTransientDispatchError(new EsConcurrentModificationError('conflict'))).toBe(true);
   });
 
   it('treats a connection error as transient', () => {

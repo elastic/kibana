@@ -222,10 +222,9 @@ export class DispatchStep implements DispatcherStep {
     // their alerts. A deferred group is dispatched again next tick; the outcome carries the
     // deferrals so the stuck-watermark escape hatch can report them if it gives up.
     if (ledger.hasUnattemptedGroups()) {
-      if (input.signal.aborted || progress.deferrals.length === 0) {
-        return { type: 'halt', reason: 'aborted' };
-      }
-      return { type: 'halt', reason: 'dispatch_deferred', data: { outcome: outcome() } };
+      const reason =
+        input.signal.aborted || progress.deferrals.length === 0 ? 'aborted' : 'dispatch_deferred';
+      return { type: 'halt', reason, data: { outcome: outcome() } };
     }
 
     return { type: 'continue', data: { outcome: outcome() } };
@@ -452,7 +451,7 @@ export class DispatchStep implements DispatcherStep {
             error,
             code: ALERTING_LOG_CODES.DISPATCH_TRANSIENT_FAILURE_DEFERRED,
             message: () =>
-              `Failed to look up ${ids.length} workflow(s) in space ${spaceId} after retries; ` +
+              `Failed to look up ${ids.length} workflow(s) in space ${spaceId} with a transient error; ` +
               `their action groups are dispatched again next tick. ${error.message}`,
             labels: { space_id: spaceId },
           });
@@ -667,7 +666,7 @@ export class DispatchStep implements DispatcherStep {
           code: ALERTING_LOG_CODES.DISPATCH_TRANSIENT_FAILURE_DEFERRED,
           message: () =>
             `Failed to schedule ${chunk.length} workflow(s) for ${groupCount} action group(s) ` +
-            `after retries; they are dispatched again next tick. ${error.message}`,
+            `with a transient error; they are dispatched again next tick. ${error.message}`,
           labels: { space_id: chunk[0].group.spaceId },
         });
         for (const { group, workflowId } of chunk) {

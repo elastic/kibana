@@ -12,8 +12,9 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  *
  * Rules (applied in order):
  * - Aborted (the tick stopped in any step, or DispatchStep left groups unattempted),
- *   commit_failed (an alert action write failed), or inline_stats_too_large (scan query
- *   rejected): no advance.
+ *   commit_failed (an alert action write failed), dispatch_deferred (transient errors
+ *   deferred groups to the next tick), or inline_stats_too_large (scan query rejected):
+ *   no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
  * - Truncated (row count === ESQL_QUERY_ROW_LIMIT): advance to the last fetched
  *   alert's timestamp (the truncation edge); the deferred tail is re-read next tick.

@@ -90,6 +90,23 @@ describe('DispatchRetryService', () => {
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
+  it('rethrows the last error instead of attempting again when the signal fires during a backoff', async () => {
+    const controller = new AbortController();
+    const error = transientError();
+    const callback = jest.fn<Promise<string>, []>().mockImplementation(async () => {
+      setTimeout(() => controller.abort(), 0);
+      throw error;
+    });
+
+    const result = await run(
+      new DispatchRetryService(logger, controller.signal, DISPATCH_RETRY_MAX_RETRIES),
+      callback
+    );
+
+    expect(result).toEqual({ error });
+    expect(callback).toHaveBeenCalledTimes(1);
+  });
+
   it('makes a single attempt with no retries allowed', async () => {
     const callback = jest.fn<Promise<string>, []>().mockRejectedValue(transientError());
 

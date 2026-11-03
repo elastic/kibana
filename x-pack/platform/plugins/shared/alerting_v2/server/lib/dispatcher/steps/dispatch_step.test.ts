@@ -843,7 +843,11 @@ describe('DispatchStep', () => {
       loggerService
     );
 
-    expect(result).toEqual({ type: 'halt', reason: 'aborted' });
+    expect(result).toEqual({
+      type: 'halt',
+      reason: 'aborted',
+      data: { outcome: expect.any(DispatchOutcome) },
+    });
     expect(mockWfm.getWorkflowsByIdsForRequests).not.toHaveBeenCalled();
     expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
     expect(mockStorageService.bulkIndexDocs).not.toHaveBeenCalled();
@@ -1104,7 +1108,11 @@ describe('DispatchStep', () => {
       loggerService
     );
 
-    expect(result).toEqual({ type: 'halt', reason: 'aborted' });
+    expect(result).toEqual({
+      type: 'halt',
+      reason: 'aborted',
+      data: { outcome: expect.any(DispatchOutcome) },
+    });
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
     expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(DISPATCH_CHUNK_SIZE);
   });
@@ -1510,7 +1518,11 @@ describe('DispatchStep', () => {
           loggerService
         );
 
-        expect(result).toEqual({ type: 'halt', reason: 'aborted' });
+        expect(result).toEqual({
+          type: 'halt',
+          reason: 'aborted',
+          data: { outcome: expect.any(DispatchOutcome) },
+        });
         expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
         const docs = committedDocs();
         expect(docs.filter(({ action_type: type }) => type === 'notified')).toHaveLength(
@@ -1538,7 +1550,11 @@ describe('DispatchStep', () => {
           loggerService
         );
 
-        expect(result).toEqual({ type: 'halt', reason: 'aborted' });
+        expect(result).toEqual({
+          type: 'halt',
+          reason: 'aborted',
+          data: { outcome: expect.any(DispatchOutcome) },
+        });
         expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
         expect(mockStorageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
         expect(actionTypes(docsOfCommit(0))).toEqual(['suppress', 'unmatched']);
@@ -1929,8 +1945,109 @@ describe('DispatchStep', () => {
           })
         );
 
-        expect(result).toEqual({ type: 'halt', reason: 'aborted' });
+        expect(result).toEqual({
+          type: 'halt',
+          reason: 'aborted',
+          data: { outcome: expect.any(DispatchOutcome) },
+        });
         expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+        expect(getDeferrals(result).map(({ actionGroupId }) => actionGroupId)).toEqual(['g0']);
+      });
+
+      it('does not attempt again when the tick signal fires during a backoff', async () => {
+        const controller = new AbortController();
+        mockWfm.bulkScheduleWorkflow.mockImplementation(async () => {
+          setTimeout(() => controller.abort(), 0);
+          throw transientError();
+        });
+
+        const result = await execute(
+          createDispatcherPipelineState({
+            dispatch: [groupFor(0)],
+            policies,
+            input: createDispatcherPipelineInput({ signal: controller.signal }),
+          })
+        );
+
+        expect(result).toMatchObject({ type: 'halt', reason: 'aborted' });
+        expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+        expect(notifiedGroupIds()).toEqual([]);
+        expect(getDeferrals(result).map(({ actionGroupId }) => actionGroupId)).toEqual(['g0']);
+      });
+
+      it('makes a single schedule attempt once the workflow lookup exhausted its retries', async () => {
+        mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+          { status: 'rejected', reason: transientError() },
+          { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+        ]);
+        mockWfm.bulkScheduleWorkflow.mockRejectedValue(transientError());
+
+        const result = await execute(
+          createDispatcherPipelineState({
+            dispatch: [
+              createActionGroup({ id: 'g-a', policyId: 'p1', spaceId: 'space-a' }),
+              createActionGroup({ id: 'g-b', policyId: 'p1', spaceId: 'space-b' }),
+            ],
+            policies,
+          })
+        );
+
+        expect(result).toMatchObject({ type: 'halt', reason: 'dispatch_deferred' });
+        expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledTimes(
+          DISPATCH_RETRY_MAX_RETRIES + 1
+        );
+        expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+        expect(getDeferrals(result).map(({ actionGroupId }) => actionGroupId)).toEqual([
+          'g-a',
+          'g-b',
+        ]);
+      });
+
+      it('defers the space with a transient lookup rejection and fails the space with a permanent one', async () => {
+        mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+          { status: 'rejected', reason: transientError() },
+          { status: 'rejected', reason: new Error('forbidden') },
+        ]);
+
+        const result = await execute(
+          createDispatcherPipelineState({
+            dispatch: [
+              createActionGroup({ id: 'g-a', policyId: 'p1', spaceId: 'space-a' }),
+              createActionGroup({ id: 'g-b', policyId: 'p1', spaceId: 'space-b' }),
+            ],
+            policies,
+          })
+        );
+
+        expect(result).toMatchObject({ type: 'halt', reason: 'dispatch_deferred' });
+        expect(notifiedGroupIds()).toEqual(['g-b']);
+        expect(getDeferrals(result).map(({ actionGroupId }) => actionGroupId)).toEqual(['g-a']);
+        const failedEvents = mockEventLogger.logEvent.mock.calls
+          .map(([event]) => event)
+          .filter((event) => event?.event?.action === 'dispatch_failed');
+        expect(failedEvents.map((event) => event?.kibana?.alerting_v2?.dispatcher)).toEqual([
+          expect.objectContaining({
+            action_group_ids: ['g-b'],
+            failure_reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+          }),
+        ]);
+      });
+
+      it('rethrows a permanent lookup error raised by a retry', async () => {
+        mockWfm.getWorkflowsByIdsForRequests
+          .mockResolvedValueOnce([{ status: 'rejected', reason: transientError() }])
+          .mockRejectedValueOnce(new Error('workflows down'));
+
+        const execution = createStep().execute(
+          createDispatcherPipelineState({ dispatch: [groupFor(0)], policies }),
+          loggerService
+        );
+        const assertion = expect(execution).rejects.toThrow('workflows down');
+        await jest.advanceTimersByTimeAsync(DISPATCH_RETRY_BUDGET_MS);
+
+        await assertion;
+        expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledTimes(2);
+        expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
       });
     });
 

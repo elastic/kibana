@@ -92,9 +92,10 @@ export const DISPATCH_RETRY_BASE_DELAY_MS = 1_000;
 export const DISPATCH_RETRY_MAX_BACKOFF_MS = 4_000;
 
 /**
- * Wall-clock budget of one dispatch operation and its retries. Must stay below
- * TICK_DEADLINE_MARGIN_MS: the backoff does not yield to the tick signal, so a retry
- * sequence that started before the soft deadline still has to end before the task timeout.
+ * Wall-clock budget of one dispatch operation and its retries. A backoff does not yield to the
+ * tick signal, but no attempt starts after it once the signal fired, so past the soft deadline a
+ * tick runs at most the attempt in flight, one DISPATCH_RETRY_MAX_BACKOFF_MS backoff and a commit.
+ * That must fit in TICK_DEADLINE_MARGIN_MS.
  */
 export const DISPATCH_RETRY_BUDGET_MS = 8_000;
 
