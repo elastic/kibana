@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/react';
 import { EuiPortal, transparentize, useEuiTheme } from '@elastic/eui';
 import { FontInfoCard } from './font_info_card';
 import { PinnedFontCard } from './pinned_font_card';
 import { getElementFromPoint } from '../../lib/dom/get_element_from_point';
-import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 import { isIgnoredElement } from '../../lib/dom/is_ignored_element';
 import { FONT_INSPECT_OVERLAY_ID } from '../../lib/constants';
 import { useEscapeKey } from '../../hooks/use_escape_key';
+import { useFontInspectCardPosition } from '../../hooks/use_font_inspect_card_position';
 import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
 import {
   useOverlayClickCapture,
@@ -38,7 +38,7 @@ interface PinnedEntry {
 /**
  * Font inspect overlay: hover to preview typography, click to pin.
  * Multiple elements can be pinned at once; clicking a pinned element unpins it.
- * Escape exits inspect mode entirely.
+ * Escape key exits inspect mode entirely.
  */
 export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -66,16 +66,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
   const handleEscape = useCallback(() => setIsInspectingFont(false), [setIsInspectingFont]);
   useEscapeKey(handleEscape);
 
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el || !hoverRect) return;
-    const { width, height } = el.getBoundingClientRect();
-    const desiredLeft = hoverRect.left + hoverRect.width / 2 - width / 2;
-    const desiredTop = hoverRect.bottom + 4;
-    const clamped = clampToViewport(desiredLeft, desiredTop, width, height);
-    el.style.left = `${clamped.left}px`;
-    el.style.top = `${clamped.top}px`;
-  }, [hoverRect, hoverElement]);
+  useFontInspectCardPosition(cardRef, hoverRect, hoverElement);
 
   // Attached on `document` (capture phase), not via the backdrop's
   // `onPointerMove`: the pinned card renders above the backdrop with
@@ -87,13 +78,6 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
     (event: PointerEvent) => {
       const { clientX, clientY } = event;
       const pointerTarget = event.target;
-      // getElementFromPoint deliberately "sees through" the backdrop to
-      // reveal real page content underneath it. But when the pointer is
-      // directly over actual devtool UI chrome (e.g. a pinned card), that
-      // same pass-through walks past the card's own (ignored) elements
-      // down to whatever page content happens to sit beneath it on
-      // screen - showing a bogus hover preview for an unrelated element.
-      // Only the backdrop itself should get the pass-through treatment.
       if (
         pointerTarget instanceof Element &&
         pointerTarget.id !== FONT_INSPECT_OVERLAY_ID &&

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { FontInfoCard } from './font_info_card';
-import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 import { useElementRect } from '../../hooks/use_element_rect';
+import { useFontInspectCardPosition } from '../../hooks/use_font_inspect_card_position';
 import type { OverlayZIndex } from '../../hooks/use_overlay_z_index';
 
 interface Props {
@@ -25,23 +25,14 @@ interface Props {
 /**
  * One pinned font-inspect card. Tracks its own rect via `useElementRect`
  * (scroll/resize synced) so it stays aligned independent of pointer
- * movement, unlike the transient hover preview.
+ * movement.
  */
 export const PinnedFontCard = ({ element, zIndex, onClose }: Props) => {
   const { euiTheme } = useEuiTheme();
   const rect = useElementRect(element);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el) return;
-    const { width, height } = el.getBoundingClientRect();
-    const desiredLeft = rect.left + rect.width / 2 - width / 2;
-    const desiredTop = rect.bottom + 4;
-    const clamped = clampToViewport(desiredLeft, desiredTop, width, height);
-    el.style.left = `${clamped.left}px`;
-    el.style.top = `${clamped.top}px`;
-  }, [rect]);
+  useFontInspectCardPosition(cardRef, rect);
 
   const highlightCss = useMemo(
     () => buildHighlightCss(rect, euiTheme.colors.success, zIndex.highlight),

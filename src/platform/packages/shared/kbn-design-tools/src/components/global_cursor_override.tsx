@@ -19,9 +19,7 @@ interface Props {
 /**
  * Renders a Global style that forces `cursor` on all elements.
  * `ignoredElementsCursor`, when set, resets the cursor for devtool-ignore
- * elements (e.g. a pinned panel) and their contents, since those aren't
- * inspectable targets. `allowButtons` additionally keeps a pointer cursor
- * on buttons inside them (takes precedence due to selector specificity).
+ * elements (e.g. a pinned panel).
  */
 export const GlobalCursorOverride = ({ cursor, allowButtons, ignoredElementsCursor }: Props) => (
   <Global

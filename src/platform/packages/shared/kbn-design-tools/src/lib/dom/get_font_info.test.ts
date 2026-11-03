@@ -30,7 +30,7 @@ describe('getFontInfo', () => {
     jest.spyOn(window, 'getComputedStyle').mockReturnValue(styles as CSSStyleDeclaration);
   };
 
-  it('should return computed font properties with double-quoted resolved family', () => {
+  it('should return computed font properties', () => {
     mockComputedStyle({
       fontFamily: '"Inter", system-ui, sans-serif',
       fontSize: '16px',
@@ -41,36 +41,11 @@ describe('getFontInfo', () => {
 
     expect(getFontInfo(element)).toEqual({
       fontFamily: '"Inter", system-ui, sans-serif',
-      resolvedFamily: 'Inter',
       fontSize: '16px',
       fontWeight: '400',
       lineHeight: '24px',
       letterSpacing: 'normal',
     });
-  });
-
-  it('should strip single quotes from the first font family', () => {
-    mockComputedStyle({
-      fontFamily: "'Open Sans', Arial, sans-serif",
-      fontSize: '14px',
-      fontWeight: '600',
-      lineHeight: '1.5',
-      letterSpacing: '0px',
-    });
-
-    expect(getFontInfo(element).resolvedFamily).toBe('Open Sans');
-  });
-
-  it('should use the first unquoted family before a comma', () => {
-    mockComputedStyle({
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '12px',
-      fontWeight: '700',
-      lineHeight: 'normal',
-      letterSpacing: 'inherit',
-    });
-
-    expect(getFontInfo(element).resolvedFamily).toBe('system-ui');
   });
 
   it('should round fractional pixel values in size, line-height, and letter-spacing', () => {

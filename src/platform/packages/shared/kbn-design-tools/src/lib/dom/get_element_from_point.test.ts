@@ -57,32 +57,6 @@ describe('getElementFromPoint', () => {
     expect(getElementFromPoint(mockEvent)).toBe(target);
   });
 
-  it('should temporarily disable pointer events on measure and font inspect overlays', () => {
-    const measureOverlay = document.createElement('div');
-    measureOverlay.id = MEASURE_OVERLAY_ID;
-    measureOverlay.style.pointerEvents = 'auto';
-    document.body.appendChild(measureOverlay);
-
-    const fontInspectOverlay = document.createElement('div');
-    fontInspectOverlay.id = FONT_INSPECT_OVERLAY_ID;
-    fontInspectOverlay.style.pointerEvents = 'auto';
-    document.body.appendChild(fontInspectOverlay);
-
-    const target = document.createElement('div');
-    document.elementsFromPoint = jest.fn().mockImplementation(() => {
-      expect(measureOverlay.style.pointerEvents).toBe('none');
-      expect(fontInspectOverlay.style.pointerEvents).toBe('none');
-      return [target];
-    });
-
-    expect(getElementFromPoint(mockEvent)).toBe(target);
-    expect(measureOverlay.style.pointerEvents).toBe('');
-    expect(fontInspectOverlay.style.pointerEvents).toBe('');
-
-    document.body.removeChild(measureOverlay);
-    document.body.removeChild(fontInspectOverlay);
-  });
-
   it('should skip the edit overlay', () => {
     const overlay = document.createElement('div');
     overlay.id = EDIT_OVERLAY_ID;

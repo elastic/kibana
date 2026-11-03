@@ -38,20 +38,15 @@ describe('useDesignTokenSections', () => {
     const { result } = renderHook(() => useDesignTokenSections(element));
 
     expect(result.current.fontFamily).toBe('"Inter", sans-serif');
-    expect(result.current.rows.find((row) => row.label === 'Size')?.cssProperty).toBe('font-size');
-    expect(result.current.rows.find((row) => row.label === 'Size')?.token).toBe('font.scale.s');
-    expect(result.current.rows.find((row) => row.label === 'Weight')?.cssProperty).toBe(
-      'font-weight'
-    );
-    expect(result.current.rows.find((row) => row.label === 'Weight')?.token).toBe(
+    expect(result.current.rows.find((row) => row.label === 'Size')?.cssValue).toBe('14px');
+    expect(result.current.rows.find((row) => row.label === 'Size')?.euiToken).toBe('font.scale.s');
+    expect(result.current.rows.find((row) => row.label === 'Weight')?.cssValue).toBe('400');
+    expect(result.current.rows.find((row) => row.label === 'Weight')?.euiToken).toBe(
       'font.weight.regular'
     );
-    expect(result.current.rows.find((row) => row.label === 'Line height')?.cssProperty).toBe(
-      'line-height'
-    );
+    expect(result.current.rows.find((row) => row.label === 'Line height')?.cssValue).toBe('20px');
     const textColor = result.current.rows.find((row) => row.label === 'Text color');
-    expect(textColor?.cssProperty).toBe('color');
-    expect(textColor?.value).toBe('#1d2a3e');
+    expect(textColor?.cssValue).toBe('#1d2a3e');
     expect(textColor?.swatchColor).toBe('#1d2a3e');
     expect(result.current.rows.map((row) => row.label)).toEqual([
       'Size',
@@ -61,7 +56,7 @@ describe('useDesignTokenSections', () => {
     ]);
   });
 
-  it('includes letter spacing row with cssProperty when spacing is non-default', () => {
+  it('includes letter spacing row when spacing is non-default', () => {
     mockComputedStyle({
       fontFamily: '"Inter", sans-serif',
       fontSize: '14px',
@@ -73,8 +68,8 @@ describe('useDesignTokenSections', () => {
 
     const { result } = renderHook(() => useDesignTokenSections(element));
 
-    expect(
-      result.current.rows.find((row) => row.label === 'Letter spacing')?.cssProperty
-    ).toBe('letter-spacing');
+    expect(result.current.rows.find((row) => row.label === 'Letter spacing')?.cssValue).toBe(
+      '1px'
+    );
   });
 });

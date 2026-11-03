@@ -33,7 +33,7 @@ interface Props {
   onClose?: () => void;
 }
 
-const NO_TOKEN = '—';
+const NO_EUI_TOKEN = '—';
 
 const FontInfoCardPanel = ({ element, isPinned, onClose }: Props) => {
   const { euiTheme } = useEuiTheme();
@@ -43,6 +43,7 @@ const FontInfoCardPanel = ({ element, isPinned, onClose }: Props) => {
   const closeAriaLabel = i18n.translate('kbnDesignTools.fontInspect.card.closeAriaLabel', {
     defaultMessage: 'Unpin',
   });
+  const showCloseButton = isPinned && Boolean(onClose);
   const valueFontCss = css({ fontFamily: familyCode });
   const tokenGridCss = css({
     display: 'grid',
@@ -74,28 +75,18 @@ const FontInfoCardPanel = ({ element, isPinned, onClose }: Props) => {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isPinned && onClose ? (
-              <EuiToolTip content={closeAriaLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="cross"
-                  size="xs"
-                  aria-label={closeAriaLabel}
-                  onClick={onClose}
-                  data-test-subj="fontInfoCardClose"
-                />
-              </EuiToolTip>
-            ) : (
-              <EuiToolTip content={closeAriaLabel} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  iconType="cross"
-                  size="xs"
-                  disabled
-                  aria-hidden
-                  aria-label={closeAriaLabel}
-                  css={css({ visibility: 'hidden' })}
-                />
-              </EuiToolTip>
-            )}
+            <EuiToolTip content={closeAriaLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                size="xs"
+                aria-label={closeAriaLabel}
+                aria-hidden={showCloseButton ? undefined : true}
+                disabled={!showCloseButton}
+                onClick={showCloseButton ? onClose : undefined}
+                data-test-subj="fontInfoCardClose"
+                css={showCloseButton ? undefined : css({ visibility: 'hidden' })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
@@ -103,10 +94,10 @@ const FontInfoCardPanel = ({ element, isPinned, onClose }: Props) => {
           {rows.map((row, index) => (
             <React.Fragment key={index}>
               <EuiText size="xs" color="subdued">
-                {row.cssProperty}
+                {row.label}
               </EuiText>
               <EuiText size="xs" css={valueFontCss}>
-                {row.token ?? NO_TOKEN}
+                {row.euiToken ?? NO_EUI_TOKEN}
               </EuiText>
               <EuiFlexGroup
                 gutterSize="xs"
@@ -117,7 +108,7 @@ const FontInfoCardPanel = ({ element, isPinned, onClose }: Props) => {
                 {row.swatchColor && (
                   <EuiIcon type="stopFill" color={row.swatchColor} size="s" aria-hidden />
                 )}
-                <EuiCode>{row.value}</EuiCode>
+                <EuiCode>{row.cssValue}</EuiCode>
               </EuiFlexGroup>
             </React.Fragment>
           ))}
