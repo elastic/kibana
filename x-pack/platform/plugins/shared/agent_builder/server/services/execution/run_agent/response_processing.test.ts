@@ -25,11 +25,13 @@ const toolManager = {
   getToolIdMapping: () =>
     new Map([
       ['my_tool', 'my.tool'],
-      ['browser_open', 'browser_open'],
+      ['get_page_snapshot', 'get_page_snapshot'],
     ]),
   getToolMeta: (toolId: string) =>
     toolId === 'my.tool'
       ? { origin: 'builtin', type: 'builtin' }
+      : toolId === 'get_page_snapshot'
+      ? { origin: 'internal', type: 'builtin' }
       : { origin: undefined, type: undefined },
 } as unknown as ToolManager;
 
@@ -119,10 +121,10 @@ describe('processResearchResponse', () => {
     expect(turn.pendingToolCallIds).toEqual(['c1', 'c2']);
   });
 
-  it('creates a runtime-only browser step and flags it as a browser call', () => {
+  it('creates a standard server step for a browser tool call', () => {
     const message = new AIMessageChunk({
       content: '',
-      tool_calls: [{ id: 'b1', name: 'browser_open', args: { url: 'x' } }],
+      tool_calls: [{ id: 'b1', name: 'get_page_snapshot', args: {} }],
     });
     const turn = processResearchResponse(message, { cycle: 1, toolManager });
     expect(turn.stepUpdates).toEqual([
@@ -130,12 +132,18 @@ describe('processResearchResponse', () => {
         type: 'append_tool_call',
         step: expect.objectContaining({
           tool_call_id: 'b1',
-          tool_id: 'open',
-          params: { url: 'x' },
+          tool_id: 'get_page_snapshot',
+          params: {},
+          tool_origin: 'internal',
+          tool_type: 'builtin',
         }),
       },
     ]);
-    expect(turn.renderState.b1).toMatchObject({ toolName: 'browser_open', kind: 'browser' });
+    expect(turn.renderState.b1).toEqual({
+      toolName: 'get_page_snapshot',
+      kind: 'server',
+      cycle: 1,
+    });
   });
 
   it('creates a runtime-only step for ask_user_question flagged as a dedicated call', () => {

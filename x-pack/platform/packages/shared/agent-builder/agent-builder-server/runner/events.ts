@@ -9,6 +9,7 @@ import type {
   ChatEventType,
   ToolProgressEventData,
   ToolUiEventData,
+  BrowserToolCallEventData,
   ChatEventBase,
 } from '@kbn/agent-builder-common';
 
@@ -29,6 +30,16 @@ export type InternalToolUiEvent<TEvent = string, TData extends object = object> 
   InternalToolUiEventData<TEvent, TData>
 >;
 
+export type InternalBrowserToolCallEventData = Omit<
+  BrowserToolCallEventData,
+  'tool_call_id' | 'tool_id'
+>;
+
+export type InternalBrowserToolCallEvent = ChatEventBase<
+  ChatEventType.browserToolCall,
+  InternalBrowserToolCallEventData
+>;
+
 export const DYNAMIC_TOOL_EVENT_TYPE = 'dynamic_tool_event' as const;
 
 /**
@@ -41,13 +52,14 @@ export interface DynamicToolEvent {
   data: {
     /** Id of the inner tool that emitted `event`. */
     tool_id: string;
-    event: InternalToolProgressEvent | InternalToolUiEvent;
+    event: InternalToolProgressEvent | InternalToolUiEvent | InternalBrowserToolCallEvent;
   };
 }
 
 export type AgentBuilderToolEvent =
   | InternalToolProgressEvent
   | InternalToolUiEvent
+  | InternalBrowserToolCallEvent
   | DynamicToolEvent;
 
 export const isDynamicToolEvent = (event: AgentBuilderToolEvent): event is DynamicToolEvent =>
@@ -84,4 +96,14 @@ export interface ToolEventEmitter {
    * Note: UI events aren't persisted, they are just meant to be used during streaming by the UI.
    */
   sendUiEvent<TEvent extends string, TData extends object>(event: TEvent, data: TData): void;
+  /**
+   * Emit a `browser_tool_call` event asking the client to run a browser-side tool.
+   */
+  emitBrowserToolCall(data: {
+    params: Record<string, unknown>;
+    clientId?: string;
+    /** ISO server time at emit. */
+    issuedAt: string;
+    expiresAt: string;
+  }): void;
 }

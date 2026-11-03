@@ -21,6 +21,7 @@ import {
   createInternalError,
   ConversationAccessControlMode,
   ConversationOriginType,
+  MAX_BROWSER_TOOL_TIMEOUT_MS,
 } from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import type {
@@ -241,11 +242,34 @@ export const conversePayloadSchema = schema.object({
         schema: schema.any({
           meta: { description: 'JSON Schema defining the tool parameters (JsonSchema7Type).' },
         }),
+        timeout_ms: schema.maybe(
+          schema.number({
+            min: 1000,
+            max: MAX_BROWSER_TOOL_TIMEOUT_MS,
+            meta: {
+              description: 'How long the agent waits for the browser to answer a call, in ms.',
+            },
+          })
+        ),
       }),
       {
         meta: {
           description:
-            'Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.',
+            'Deprecated: inline browser tool definitions executed by the sending client. Prefer browser_tools.',
+        },
+      }
+    )
+  ),
+  browser_tools: schema.maybe(
+    schema.object(
+      {
+        client_id: schema.string(),
+        tool_ids: schema.arrayOf(schema.string()),
+      },
+      {
+        meta: {
+          description: 'Experimental. Browser-side tools the sending client can execute.',
+          availability: { stability: 'experimental' },
         },
       }
     )

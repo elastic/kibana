@@ -59,6 +59,7 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
+  'agentBuilder:browserTools': boolean;
   'agentBuilder:apiDiscovery': boolean;
   'agentBuilder:includeFrozenByDefault': boolean;
   'agentBuilder:deductiveEnabled': boolean;

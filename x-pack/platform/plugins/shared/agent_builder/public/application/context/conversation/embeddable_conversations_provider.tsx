@@ -11,6 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { agentBuilderDefaultAgentId, AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common';
 import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { v4 as uuidv4 } from 'uuid';
 import type {
   EmbeddableConversationInternalProps,
   EmbeddableConversationProps,
@@ -28,6 +29,7 @@ import { usePersistedConversationId } from '../../hooks/use_persisted_conversati
 import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
 import { RedirectLoading } from '../../components/redirects/redirect_loading';
 import { refreshListsOnAgentChanges } from '../../utils/refresh_lists_on_agent_changes';
+import { selectBrowserToolIds } from '../../../services/browser_tools';
 
 /**
  * Pins restricted (non-`manageAgents`) users to their space's default agent.
@@ -90,6 +92,17 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   // Create a QueryClient per instance to ensure cache isolation between multiple embeddable conversations
   const queryClient = useMemo(() => new QueryClient(), []);
   const conversationStreamService = useMemo(() => new ConversationStreamService(), []);
+  // useState, not useMemo: React may discard memoised values, and the id must stay stable.
+  const [clientId] = useState(() => uuidv4());
+  const browserToolIds = useMemo(
+    () =>
+      selectBrowserToolIds({
+        registry: services.browserToolsService.registry,
+        uiSettings: coreStart.uiSettings,
+        surface: 'embedded',
+      }),
+    [services.browserToolsService.registry, coreStart.uiSettings]
+  );
   useEffect(() => {
     return () => {
       conversationStreamService.dispose();
@@ -279,6 +292,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       onSubmit: currentProps.onSubmit,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
+      browserToolIds,
       setConversationId,
       setAgentId,
       attachments: currentProps.attachments,
@@ -296,6 +310,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.greetingMessage,
       currentProps.onSubmit,
       currentProps.browserApiTools,
+      browserToolIds,
       currentProps.attachments,
       upsertAttachments,
       resetInitialMessage,
@@ -312,7 +327,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
-            <StreamingProvider conversationStreamService={conversationStreamService}>
+            <StreamingProvider
+              conversationStreamService={conversationStreamService}
+              clientId={clientId}
+            >
               <PinnedConversationProvider baseValue={conversationContextValue}>
                 {children}
               </PinnedConversationProvider>

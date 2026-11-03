@@ -13,9 +13,11 @@ import type {
   RuntimeAgentConfigurationOverrides,
   ConversationRoundAuthor,
 } from '@kbn/agent-builder-common';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
-import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import type {
+  BrowserToolsExecutionParams,
+  ExecutionConversationOrigin,
+} from '@kbn/agent-builder-server/execution';
 import { runDefaultAgentMode } from './run_chat_agent';
 import { shouldUseDeductive, runDeductiveAgent } from './deductive';
 
@@ -56,9 +58,9 @@ export interface RunAgentParams {
    */
   abortSignal?: AbortSignal;
   /**
-   * Browser API tools to make available to the agent
+   * Browser-side tools the sending client can execute.
    */
-  browserApiTools?: BrowserApiToolMetadata[];
+  browserTools?: BrowserToolsExecutionParams;
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
    */

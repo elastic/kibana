@@ -24,6 +24,7 @@ import type { SmlService } from './sml/sml_service';
 import type { PluginsService } from './plugins/plugins_service';
 import type { OAuthClientsService } from './oauth_clients';
 import type { NavigationService } from './navigation';
+import type { BrowserToolsService } from './browser_tools';
 import type { EventsService } from './events';
 import type { SpaceSettingsService } from './space_settings';
 
@@ -48,6 +49,7 @@ export interface AgentBuilderInternalService {
   usageCollection?: UsageCollectionSetup;
   accessChecker: AgentBuilderAccessChecker;
   eventsService: EventsService;
+  browserToolsService: BrowserToolsService;
   isEarsEnabled: boolean;
   isEarsExperimentalEnabled: boolean;
   isServerless: boolean;

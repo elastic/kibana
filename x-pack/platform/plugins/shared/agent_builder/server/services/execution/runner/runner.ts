@@ -49,6 +49,7 @@ import type {
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
+  AGENT_BUILDER_BROWSER_TOOLS_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
   CONTEXT_ENGINE_ENABLED_SETTING_ID,
 } from '@kbn/management-settings-ids';
@@ -90,6 +91,7 @@ import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
 import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
+import type { BrowserToolsService } from '../../browser_tools';
 import type { DeploymentInfo } from '../../../utils/deployment_info';
 
 export interface CreateScopedRunnerDeps {
@@ -146,6 +148,8 @@ export interface CreateScopedRunnerDeps {
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
+  /** Browser tools registry, call client and image upload. */
+  browserTools: BrowserToolsService;
   /** Execution mode for this runner context. */
   executionMode: AgentExecutionMode;
   /** Canonical interactivity config for this runner context. */
@@ -368,6 +372,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       apiDiscoveryEnabled,
       contextEngineEnabled,
       dynamicToolsEnabled,
+      browserToolsEnabled,
     ] = await Promise.all([
       uiSettingsClient
         .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
@@ -379,6 +384,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
         .get<boolean | undefined>(AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID)
         .then((value) => !!value)
         .catch(() => false),
+      uiSettingsClient.get<boolean>(AGENT_BUILDER_BROWSER_TOOLS_SETTING_ID).catch(() => false),
     ]);
     const experimentalFeatures: ExperimentalFeatures = {
       skills: true,
@@ -390,6 +396,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,
       dynamicTools: dynamicToolsEnabled,
+      browserTools: browserToolsEnabled,
     };
 
     // External Deductive execution path: gated per-deployment by the LaunchDarkly feature

@@ -11,6 +11,7 @@ import {
   CHAT_MESSAGE_MAX_LENGTH,
   ChatEventType,
   ConversationOriginType,
+  MAX_BROWSER_TOOL_TIMEOUT_MS,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import { firstValueFrom, of, Subject, toArray } from 'rxjs';
@@ -92,6 +93,43 @@ describe('conversePayloadSchema', () => {
     expect(() =>
       conversePayloadSchema.validate({ input: 'a'.repeat(CHAT_MESSAGE_MAX_LENGTH + 1) })
     ).toThrow(/input/);
+  });
+
+  it('accepts browser_tools', () => {
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        browser_tools: { client_id: 'client-1', tool_ids: ['get_page_snapshot'] },
+      })
+    ).not.toThrow();
+  });
+
+  it('rejects a legacy browser_api_tools timeout_ms below one second or above the max', () => {
+    const tool = { id: 'legacy', description: 'legacy', schema: {} };
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        browser_api_tools: [{ ...tool, timeout_ms: 5000 }],
+      })
+    ).not.toThrow();
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        browser_api_tools: [{ ...tool, timeout_ms: 999 }],
+      })
+    ).toThrow(/timeout_ms/);
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        browser_api_tools: [{ ...tool, timeout_ms: MAX_BROWSER_TOOL_TIMEOUT_MS }],
+      })
+    ).not.toThrow();
+    expect(() =>
+      conversePayloadSchema.validate({
+        input: 'Hello',
+        browser_api_tools: [{ ...tool, timeout_ms: MAX_BROWSER_TOOL_TIMEOUT_MS + 1 }],
+      })
+    ).toThrow(/timeout_ms/);
   });
 
   it('rejects trigger_mode', () => {

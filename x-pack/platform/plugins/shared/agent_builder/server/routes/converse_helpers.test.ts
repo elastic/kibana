@@ -18,10 +18,12 @@ import {
   type MessageChunkEvent,
   type RoundCompleteEvent,
   type RoundInterruptedEvent,
+  builtinBrowserToolDescriptors,
 } from '@kbn/agent-builder-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ChatRequestBodyPayload } from '../../common/http_api/chat';
+import { createBrowserToolDescriptorRegistry } from '../services/browser_tools';
 import {
   filterEventsNativeApiEvents,
   filterLegacyApiEvents,
@@ -185,5 +187,127 @@ describe('converse_helpers executeAgent', () => {
     expect(executeAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({ requestImmediateClaim: false })
     );
+  });
+});
+
+describe('converse_helpers browser tools', () => {
+  const executeAgentMock = jest.fn();
+  const executionService = { executeAgent: executeAgentMock } as unknown as AgentExecutionService;
+  const registry = createBrowserToolDescriptorRegistry({ seed: builtinBrowserToolDescriptors });
+  const { executeAgent } = getConverseHelpers({
+    getInternalServices: jest.fn(() => ({ browserTools: { registry } })) as any,
+  });
+  const request = httpServerMock.createKibanaRequest();
+
+  const executedParams = () => executeAgentMock.mock.calls[0][0].params;
+
+  beforeEach(() => {
+    executeAgentMock.mockReset();
+  });
+
+  it('resolves browser_tools ids to descriptors', async () => {
+    await executeAgent({
+      payload: {
+        input: 'hello',
+        browser_tools: { client_id: 'client-1', tool_ids: ['get_page_snapshot', 'click_element'] },
+      },
+      request,
+      executionService,
+    });
+
+    expect(executedParams().browserTools).toEqual({
+      clientId: 'client-1',
+      tools: [registry.get('get_page_snapshot'), registry.get('click_element')],
+    });
+  });
+
+  it('rejects an unknown browser tool id with a bad request error', async () => {
+    await expect(
+      executeAgent({
+        payload: {
+          input: 'hello',
+          browser_tools: { client_id: 'client-1', tool_ids: ['does_not_exist'] },
+        },
+        request,
+        executionService,
+      })
+    ).rejects.toThrow('Unknown browser tool id "does_not_exist"');
+    expect(executeAgentMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects an id listed twice in browser_tools.tool_ids with a bad request error', async () => {
+    await expect(
+      executeAgent({
+        payload: {
+          input: 'hello',
+          browser_tools: {
+            client_id: 'client-1',
+            tool_ids: ['get_page_snapshot', 'get_page_snapshot'],
+          },
+        },
+        request,
+        executionService,
+      })
+    ).rejects.toThrow('Duplicate browser tool id "get_page_snapshot"');
+    expect(executeAgentMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects a legacy browser_api_tools id colliding with a browser_tools id', async () => {
+    await expect(
+      executeAgent({
+        payload: {
+          input: 'hello',
+          browser_tools: { client_id: 'client-1', tool_ids: ['get_page_snapshot'] },
+          browser_api_tools: [
+            { id: 'get_page_snapshot', description: 'legacy', schema: { type: 'object' } },
+          ],
+        },
+        request,
+        executionService,
+      })
+    ).rejects.toThrow('Duplicate browser tool id "get_page_snapshot"');
+    expect(executeAgentMock).not.toHaveBeenCalled();
+  });
+
+  it('merges legacy browser_api_tools into browserTools.tools', async () => {
+    await executeAgent({
+      payload: {
+        input: 'hello',
+        browser_tools: { client_id: 'client-1', tool_ids: ['get_page_snapshot'] },
+        browser_api_tools: [
+          {
+            id: 'legacy_tool',
+            description: 'legacy tool',
+            schema: { type: 'object', properties: {} },
+            timeout_ms: 5000,
+          },
+        ],
+      },
+      request,
+      executionService,
+    });
+
+    expect(executedParams().browserTools).toEqual({
+      clientId: 'client-1',
+      tools: [
+        registry.get('get_page_snapshot'),
+        {
+          id: 'legacy_tool',
+          description: 'legacy tool',
+          schema: { type: 'object', properties: {} },
+          timeout_ms: 5000,
+        },
+      ],
+    });
+  });
+
+  it('leaves browserTools undefined when no browser tool is requested', async () => {
+    await executeAgent({
+      payload: { input: 'hello', browser_tools: { client_id: 'client-1', tool_ids: [] } },
+      request,
+      executionService,
+    });
+
+    expect(executedParams().browserTools).toBeUndefined();
   });
 });

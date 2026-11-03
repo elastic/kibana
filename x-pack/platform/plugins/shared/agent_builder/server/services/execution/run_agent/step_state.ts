@@ -123,8 +123,8 @@ export const countNonTodosSteps = (steps: ConversationRoundStep[]): number =>
   steps.filter((step) => !isTodosStep(step)).length;
 
 /**
- * Browser and dedicated-lifecycle tool calls are runtime-only and never persisted. Calls with no
- * render state (pre-resume steps) are always kept: they were persisted before, so they are durable.
+ * Dedicated-lifecycle tool calls are runtime-only and never persisted. Calls with no render state
+ * (pre-resume steps) are always kept: they were persisted before, so they are durable.
  */
 export const persistableSteps = (
   steps: ConversationRoundStep[],

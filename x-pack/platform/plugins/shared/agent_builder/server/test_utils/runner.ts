@@ -43,6 +43,8 @@ import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attach
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AgentExecutionMode, type ConversationTemplate } from '@kbn/agent-builder-common';
+import { createBrowserToolDescriptorRegistry } from '../services/browser_tools';
+import type { BrowserToolsService } from '../services/browser_tools';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { ConversationTemplatesServiceStart } from '../services/conversation/templates';
 import type { CreateRunnerDeps, CreateScopedRunnerDeps } from '../services/execution/runner/runner';
@@ -195,12 +197,24 @@ export const createSkillsServiceMock = (): SkillsServiceMock => {
   };
 };
 
+export const createBrowserToolsServiceMock = (): BrowserToolsService => ({
+  registry: createBrowserToolDescriptorRegistry(),
+  callClient: {
+    create: jest.fn(),
+    get: jest.fn(),
+    answer: jest.fn(),
+    setStatus: jest.fn(),
+    deleteOlderThan: jest.fn(),
+  },
+  uploadImage: jest.fn(),
+});
+
 export const createToolManagerMock = (): ToolManagerMock => {
   return {
     setEventEmitter: jest.fn(),
     setMaxToolResultTokens: jest.fn(),
     addTools: jest.fn(),
-    list: jest.fn(),
+    list: jest.fn().mockReturnValue([]),
     recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),
     getToolMeta: jest.fn(),
@@ -373,6 +387,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     plugins: createPluginsServiceMock(),
     conversationTemplates: createInMemoryConversationTemplates(),
     toolManager: createToolManagerMock(),
+    browserTools: createBrowserToolsServiceMock(),
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
@@ -382,6 +397,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
+      browserTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -441,6 +457,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     events: {
       reportProgress: jest.fn(),
       sendUiEvent: jest.fn(),
+      emitBrowserToolCall: jest.fn(),
     },
     logger: loggerMock.create(),
     prompts: createToolPromptManagerMock(),
@@ -459,6 +476,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
+      browserTools: false,
     },
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
@@ -513,6 +531,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    browserTools: createBrowserToolsServiceMock(),
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
@@ -522,6 +541,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       bash: false,
       apiDiscovery: false,
       dynamicTools: false,
+      browserTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
@@ -562,6 +582,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),
     toolManager: createToolManagerMock(),
+    browserTools: createBrowserToolsServiceMock(),
     getExecutionService: jest.fn(),
   };
 };

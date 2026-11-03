@@ -6,12 +6,7 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type {
-  BrowserApiToolMetadata,
-  ToolDefinitionWithSchema,
-  ToolOrigin,
-  ToolType,
-} from '@kbn/agent-builder-common';
+import type { ToolDefinitionWithSchema, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
@@ -27,7 +22,6 @@ export interface AddToolOptions {
 }
 
 export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
-export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
 
 /**
  * A tool reachable through the `execute_dynamic_tool` meta-tool, as written into the transcript.
@@ -41,7 +35,6 @@ export interface DynamicToolDefinition {
 
 export enum ToolManagerToolType {
   executable = 'executable',
-  browser = 'browser',
   /** Reachable only through the `execute_dynamic_tool` meta-tool; never bound to the model. */
   dynamic = 'dynamic',
 }
@@ -50,11 +43,6 @@ export interface ExecutableToolInput {
   type: ToolManagerToolType.executable;
   tools: ExecutableToolWithOrigin | ExecutableToolWithOrigin[];
   logger: Logger;
-}
-
-export interface BrowserToolInput {
-  type: ToolManagerToolType.browser;
-  tools: BrowserToolWithOrigin | BrowserToolWithOrigin[];
 }
 
 /**
@@ -67,7 +55,7 @@ export interface DynamicToolInput {
   tools: ExecutableToolWithOrigin | ExecutableToolWithOrigin[];
 }
 
-export type AddToolInput = ExecutableToolInput | BrowserToolInput | DynamicToolInput;
+export type AddToolInput = ExecutableToolInput | DynamicToolInput;
 
 /**
  * Interface for managing tools in the agent system.

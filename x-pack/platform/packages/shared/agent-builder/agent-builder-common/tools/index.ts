@@ -87,6 +87,7 @@ export {
   type VisualizationResult,
   type OtherResult,
   type FileReferenceResult,
+  type ImageResult,
   NON_INTERACTIVE_DECLINED_REASON,
   isErrorResult,
   isNonInteractiveDeclinedResult,
@@ -99,6 +100,24 @@ export {
   isFileReferenceResult,
 } from './tool_result';
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
+export {
+  DEFAULT_BROWSER_TOOL_TIMEOUT_MS,
+  MAX_BROWSER_TOOL_TIMEOUT_MS,
+  BrowserToolCallStatus,
+  type BrowserToolDescriptor,
+  type BrowserToolsRequest,
+  type BrowserToolImagePayload,
+  type BrowserToolResultPayload,
+  zodToBrowserToolSchema,
+  builtinBrowserToolIds,
+  builtinBrowserToolDescriptors,
+  isBuiltinBrowserToolId,
+  getPageSnapshotSchema,
+  takeScreenshotSchema,
+  clickElementSchema,
+  fillFormSchema,
+  navigateToSchema,
+} from './browser_tools';
 export {
   visualizationElement,
   dashboardElement,

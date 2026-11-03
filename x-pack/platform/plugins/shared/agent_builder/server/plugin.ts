@@ -48,6 +48,10 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerAfterExecutionWorkflowsHook } from './hooks/agent_workflows/register_after_execution_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createRelevantSkillsCycleHook } from './services/execution/run_agent/cycle_hooks/relevant_skills_hook';
+import {
+  ensureBrowserToolCallsCleanupScheduled,
+  registerBrowserToolCallsCleanupTask,
+} from './services/browser_tools/cleanup_task';
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
@@ -156,6 +160,18 @@ export class AgentBuilderPlugin
           throw new Error('getTaskHandler called before service init');
         }
         return services.taskHandler;
+      },
+    });
+
+    registerBrowserToolCallsCleanupTask({
+      taskManager: setupDeps.taskManager,
+      logger: this.logger.get('browser-tools-cleanup'),
+      getCallClient: () => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('getCallClient called before service init');
+        }
+        return services.browserTools.callClient;
       },
     });
 
@@ -380,12 +396,18 @@ export class AgentBuilderPlugin
       licensing,
       security: securityPlugin,
       isomer,
+      files,
     } = startDeps;
     const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
     this.cleanupLegacySmlTasks(taskManager).catch((error) => {
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
+    });
+
+    void ensureBrowserToolCallsCleanupScheduled({
+      taskManager,
+      logger: this.logger.get('browser-tools-cleanup'),
     });
 
     this.runBackfill(elasticsearch).catch((error) => {
@@ -417,6 +439,7 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      files,
       conversationEventBus: this.conversationEventBus,
     });
 

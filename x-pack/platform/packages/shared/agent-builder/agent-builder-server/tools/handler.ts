@@ -136,6 +136,10 @@ export interface ToolHandlerContext {
    */
   events: ToolEventEmitter;
   /**
+   * Abort signal of the current run, when one was provided.
+   */
+  abortSignal?: AbortSignal;
+  /**
    * Logger scoped to this execution
    */
   logger: Logger;

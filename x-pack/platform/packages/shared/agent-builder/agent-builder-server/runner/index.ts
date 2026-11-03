@@ -84,3 +84,10 @@ export type {
 export type { FileEntryAccessor } from './file_entry_accessor';
 export type { IFilesystemService } from './filesystem_service';
 export type { IBashService, BashExecResult } from './bash_service';
+export type {
+  BrowserToolsRunContext,
+  BrowserToolCallClientContract,
+  BrowserToolCallRecord,
+  BrowserToolCallAnswerOutcome,
+  BrowserToolCallSetStatusOutcome,
+} from './browser_tools';

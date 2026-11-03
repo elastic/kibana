@@ -7,7 +7,7 @@
 
 import { Overwrite, type Command } from '@langchain/langgraph';
 import type {
-  BrowserApiToolMetadata,
+  BrowserToolDescriptor,
   CompactionSummary,
   PreExecutionWorkflowStep,
   ToolCallStep,
@@ -21,6 +21,8 @@ import {
   EventActorType,
   HookLifecycle,
   ToolOrigin,
+  ToolType,
+  builtinBrowserToolDescriptors,
   createAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
@@ -105,6 +107,135 @@ const registerInternalToolsMock = registerInternalTools as jest.MockedFn<
 >;
 const createImageResolverMock = createImageResolver as jest.MockedFn<typeof createImageResolver>;
 
+describe('runDefaultAgentMode browser tools', () => {
+  const builtinDescriptor = builtinBrowserToolDescriptors[0];
+  const consumerDescriptor: BrowserToolDescriptor = {
+    id: 'consumer_tool',
+    description: 'a consumer browser tool',
+    schema: { type: 'object', properties: {} },
+  };
+
+  const setup = ({
+    interactive = true,
+    browserToolsEnabled = true,
+  }: { interactive?: boolean; browserToolsEnabled?: boolean } = {}) => {
+    const context = createAgentHandlerContextMock();
+    context.interactivity = { enabled: interactive };
+    context.experimentalFeatures = {
+      ...context.experimentalFeatures,
+      browserTools: browserToolsEnabled,
+    };
+
+    jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+      connector: { name: 'test-connector' },
+      chatModel: {} as any,
+    } as any);
+    context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+    context.toolManager.getDynamicToolIds.mockReturnValue([]);
+    getPendingTurnMock.mockReturnValue(undefined);
+    selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+    prepareConversationMock.mockResolvedValue({
+      timeline: [],
+      nextInput: { message: 'hello', attachments: [] },
+      attachments: [],
+      attachmentTypes: [],
+      attachmentStateManager: context.attachmentStateManager,
+    } as any);
+    extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+    createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+    return context;
+  };
+
+  /** The browser tools registered through the tool manager (static, non-dynamic executable adds). */
+  const registeredBrowserTools = (context: ReturnType<typeof setup>) =>
+    context.toolManager.addTools.mock.calls
+      .filter(([input, options]) => input.type === ToolManagerToolType.executable && !options)
+      .flatMap(([input]) => (Array.isArray(input.tools) ? input.tools : [input.tools]))
+      .filter((tool) => (tool as { browser?: boolean }).browser);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    createPreExecutionStepsMock.mockReturnValue([]);
+  });
+
+  it('registers browser tools as executable builtin tools', async () => {
+    const context = setup();
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration: { tools: [] } as any,
+        executionId: 'exec-1',
+        browserTools: { clientId: 'client-1', tools: [builtinDescriptor, consumerDescriptor] },
+      },
+      context
+    );
+
+    const tools = registeredBrowserTools(context);
+    expect(tools.map((tool) => tool.id)).toEqual([builtinDescriptor.id, consumerDescriptor.id]);
+    tools.forEach((tool) => {
+      expect(tool.type).toBe(ToolType.builtin);
+      expect(tool.origin).toBe(ToolOrigin.internal);
+    });
+  });
+
+  it('does not register browser tools when interactivity is disabled', async () => {
+    const context = setup({ interactive: false });
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration: { tools: [] } as any,
+        executionId: 'exec-1',
+        browserTools: { clientId: 'client-1', tools: [builtinDescriptor, consumerDescriptor] },
+      },
+      context
+    );
+
+    expect(registeredBrowserTools(context)).toEqual([]);
+  });
+
+  it('drops builtin browser tools when experimentalFeatures.browserTools is false but keeps consumer ones', async () => {
+    const context = setup({ browserToolsEnabled: false });
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration: { tools: [] } as any,
+        executionId: 'exec-1',
+        browserTools: { clientId: 'client-1', tools: [builtinDescriptor, consumerDescriptor] },
+      },
+      context
+    );
+
+    expect(registeredBrowserTools(context).map((tool) => tool.id)).toEqual([consumerDescriptor.id]);
+  });
+
+  it('skips a browser tool whose name is already taken by a static tool', async () => {
+    const context = setup();
+    context.toolManager.list.mockReturnValue([{ name: consumerDescriptor.id } as any]);
+
+    await runDefaultAgentMode(
+      {
+        nextInput: { message: 'hello' },
+        agentConfiguration: { tools: [] } as any,
+        executionId: 'exec-1',
+        browserTools: { clientId: 'client-1', tools: [builtinDescriptor, consumerDescriptor] },
+      },
+      context
+    );
+
+    expect(registeredBrowserTools(context).map((tool) => tool.id)).toEqual([builtinDescriptor.id]);
+    expect(context.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(`Skipping browser tool [${consumerDescriptor.id}]`)
+    );
+  });
+
+  // Stored executions with legacy `browserApiTools` params are mapped to `browserTools` by the
+  // execution runner: see execution_runner.test.ts.
+});
+
 describe('runDefaultAgentMode', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -154,34 +285,26 @@ describe('runDefaultAgentMode', () => {
       streamEvents: jest.fn(() => []),
     } as any);
 
-    const browserApiTools: BrowserApiToolMetadata[] = [
-      {
-        id: 'browser-tool-1',
-        description: 'browser tool',
-        schema: { type: 'object', properties: {} },
-      },
-    ];
-
     await runDefaultAgentMode(
       {
         nextInput: { message: 'hello' },
         agentConfiguration: { tools: [] } as any,
-        browserApiTools,
       },
       context
     );
 
     expect(context.toolManager.addTools).toHaveBeenCalledTimes(3);
 
-    // Static tools are added first (executable tools + browser API tools)
+    // Static tools are added first, then browser tools
     expect(context.toolManager.addTools).toHaveBeenNthCalledWith(1, {
       type: ToolManagerToolType.executable,
       tools: staticTools,
       logger: context.logger,
     });
     expect(context.toolManager.addTools).toHaveBeenNthCalledWith(2, {
-      type: ToolManagerToolType.browser,
-      tools: [{ ...browserApiTools[0], origin: ToolOrigin.internal }],
+      type: ToolManagerToolType.executable,
+      tools: [],
+      logger: context.logger,
     });
 
     // Dynamic tools are added afterwards with the dynamic flag

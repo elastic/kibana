@@ -68,7 +68,8 @@ describe('convertGraphEvents', () => {
   it('emits reasoning and tool_call events from researchAgent step updates in order', async () => {
     const renderState: ToolRenderStateUpdate = {
       c1: { toolName: 'my_tool', kind: 'server', cycle: 1 },
-      b1: { toolName: 'browser_open', kind: 'browser', cycle: 1 },
+      // browser tool calls run through the server: a standard tool_call event
+      b1: { toolName: 'get_page_snapshot', kind: 'server', cycle: 1 },
       a1: { toolName: 'platform_core_ask_user_question', kind: 'dedicated', cycle: 1 },
     };
     const output = {
@@ -98,11 +99,13 @@ describe('convertGraphEvents', () => {
         stepUpdates.appendToolCall({
           type: ConversationRoundStepType.toolCall,
           tool_call_id: 'b1',
-          tool_id: 'open',
+          tool_id: 'get_page_snapshot',
           params: {},
           results: [],
           progression: [],
           tool_call_group_id: 'g',
+          tool_origin: ToolOrigin.internal,
+          tool_type: ToolType.builtin,
         }),
         // dedicated-lifecycle call (ask_user_question): runtime step, no tool_call event
         stepUpdates.appendToolCall({
@@ -125,7 +128,7 @@ describe('convertGraphEvents', () => {
       ChatEventType.reasoning,
       ChatEventType.reasoning,
       ChatEventType.toolCall,
-      ChatEventType.browserToolCall,
+      ChatEventType.toolCall,
     ]);
     expect(events[0].data).toEqual({ reasoning: 'group', tool_call_group_id: 'g' });
     expect(events[1].data).toEqual({
@@ -141,7 +144,14 @@ describe('convertGraphEvents', () => {
       tool_origin: ToolOrigin.internal,
       tool_type: ToolType.builtin,
     });
-    expect(events[3].data).toEqual({ tool_call_id: 'b1', tool_id: 'open', params: {} });
+    expect(events[3].data).toEqual({
+      tool_call_id: 'b1',
+      tool_id: 'get_page_snapshot',
+      params: {},
+      tool_call_group_id: 'g',
+      tool_origin: ToolOrigin.internal,
+      tool_type: ToolType.builtin,
+    });
   });
 
   it('emits tool_result, prompt_request, user_question_asked and roster events from executeTool', async () => {

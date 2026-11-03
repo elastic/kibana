@@ -14,6 +14,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import type {
   InternalToolUiEvent,
+  InternalBrowserToolCallEvent,
   InternalToolProgressEvent,
 } from '@kbn/agent-builder-server/runner/events';
 import { ChatEventType } from '@kbn/agent-builder-common';
@@ -74,6 +75,18 @@ export const createToolEventEmitter = ({
       };
       eventHandler(event);
     },
+    emitBrowserToolCall: ({ params, clientId, issuedAt, expiresAt }) => {
+      const event: InternalBrowserToolCallEvent = {
+        type: ChatEventType.browserToolCall,
+        data: {
+          params,
+          ...(clientId ? { client_id: clientId } : {}),
+          issued_at: issuedAt,
+          expires_at: expiresAt,
+        },
+      };
+      eventHandler(event);
+    },
   };
 };
 
@@ -81,6 +94,7 @@ const createNoopToolEventEmitter = (): ToolEventEmitter => {
   return {
     reportProgress: () => {},
     sendUiEvent: () => {},
+    emitBrowserToolCall: () => {},
   };
 };
 

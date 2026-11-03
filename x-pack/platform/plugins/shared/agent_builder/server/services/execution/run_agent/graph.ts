@@ -39,13 +39,7 @@ import {
 } from './utils/context_management';
 import type { PromptFactory } from './prompts';
 import { getRandomThinkingMessage } from './i18n';
-import {
-  steps,
-  tags,
-  BACKGROUND_CHECK_CYCLE_INTERVAL,
-  BROWSER_TOOL_PREFIX,
-  MAX_CONTEXT_RETRY_COUNT,
-} from './constants';
+import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL, MAX_CONTEXT_RETRY_COUNT } from './constants';
 import type { BackgroundExecutionService } from './background_execution_service';
 import type { StateType, StateUpdate } from './state';
 import { StateAnnotation, toCurrentRun } from './state';
@@ -283,8 +277,7 @@ export const createAgentGraph = ({
     const toolNode = new ToolNode<BaseMessage[]>(toolManager.list());
     const toolNodeResult = await toolNode.invoke([createToolCallMessage(outcome.toolCalls)], {});
 
-    // The internal tool id of a call: the step stores the stripped id for browser tools, but
-    // `tool_result` events use the prefixed one — reconstruct it from the render state.
+    // The internal tool id of a call, as stored on its step.
     const toolIdFor = (toolCallId: string): string => {
       const step = state.steps.find(
         (candidate): candidate is ToolCallStep =>
@@ -293,9 +286,7 @@ export const createAgentGraph = ({
       if (!step) {
         throw invalidState(`[executeTool] tool_call_id "${toolCallId}" has no step in the run`);
       }
-      return state.toolRenderState[toolCallId]?.kind === 'browser'
-        ? `${BROWSER_TOOL_PREFIX}${step.tool_id}`
-        : step.tool_id;
+      return step.tool_id;
     };
 
     const processed = processToolNodeResponse(toolNodeResult, {

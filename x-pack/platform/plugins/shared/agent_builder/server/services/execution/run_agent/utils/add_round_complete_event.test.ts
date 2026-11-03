@@ -607,15 +607,15 @@ describe('addRoundCompleteEvent', () => {
       progression: [],
       tool_call_group_id: 'g1',
     };
-    const browserCall: ToolCallStep = {
+    const dedicatedCall: ToolCallStep = {
       ...serverCall,
-      tool_call_id: 'brw',
-      tool_id: 'open_tab',
+      tool_call_id: 'ded',
+      tool_id: 'ask_user_question',
       results: [],
     };
     const updates: RunStepUpdate[] = [
       stepUpdates.appendToolCall({ ...serverCall, results: [] }),
-      stepUpdates.appendToolCall(browserCall),
+      stepUpdates.appendToolCall(dedicatedCall),
       stepUpdates.resolveToolCall({
         toolCallId: 'srv',
         toolId: 'my_tool',
@@ -640,7 +640,7 @@ describe('addRoundCompleteEvent', () => {
         currentCycle: 1,
         toolRenderState: {
           srv: { toolName: 'my_tool', kind: 'server' },
-          brw: { toolName: 'browser_open_tab', kind: 'browser' },
+          ded: { toolName: 'ask_user_question', kind: 'dedicated' },
         },
       }).pipe(
         addRoundCompleteEvent({

@@ -32,6 +32,8 @@ import type { OptimisticAttachments } from '../../utils/build_optimistic_attachm
 
 export interface StreamingContextValue {
   conversationStreamService: ConversationStreamService;
+  /** Identifies this chat surface to the server, so browser tool calls reach the right client. */
+  clientId: string;
   activeStreams: Map<string, ActiveStream>;
   byConversationId: Record<string, StreamRecord>;
   mutateSendMessage: (vars: SendMessageVars) => void;
@@ -46,9 +48,11 @@ const emptyRecord: StreamRecord = {};
 
 export const StreamingProvider = ({
   conversationStreamService,
+  clientId,
   children,
 }: {
   conversationStreamService: ConversationStreamService;
+  clientId: string;
   children: React.ReactNode;
 }) => {
   const [activeStreams, setActiveStreams] = useState<Map<string, ActiveStream>>(() => new Map());
@@ -102,6 +106,7 @@ export const StreamingProvider = ({
 
   const sendMutation = useSendMessageMutation({
     conversationStreamService,
+    clientId,
     setPendingMessage,
     clearPendingMessage,
     clearActiveStream,
@@ -110,6 +115,7 @@ export const StreamingProvider = ({
 
   const resumeMutation = useResumeRoundMutation({
     conversationStreamService,
+    clientId,
     clearActiveStream,
     markStreamStarted,
   });
@@ -169,6 +175,7 @@ export const StreamingProvider = ({
   const value = useMemo<StreamingContextValue>(
     () => ({
       conversationStreamService,
+      clientId,
       activeStreams,
       byConversationId,
       mutateSendMessage,
@@ -178,6 +185,7 @@ export const StreamingProvider = ({
     }),
     [
       conversationStreamService,
+      clientId,
       activeStreams,
       byConversationId,
       mutateSendMessage,

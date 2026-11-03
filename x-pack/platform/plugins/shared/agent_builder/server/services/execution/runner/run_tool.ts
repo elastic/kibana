@@ -349,6 +349,7 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     }),
     toolManager,
     events: createToolEventEmitter({ eventHandler: onEvent, context: manager.context }),
+    abortSignal: manager.deps.abortSignal,
     runContext: manager.context,
     executionMode: manager.deps.executionMode,
     interactivity: manager.deps.interactivity,

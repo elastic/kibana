@@ -25,6 +25,7 @@ import { registerA2ARoutes } from './a2a';
 import { registerSkillsRoutes } from './skills';
 import { registerPluginsRoutes } from './plugins';
 import { registerInternalExecutionRoutes } from './internal/executions';
+import { registerInternalBrowserToolResultRoutes } from './internal/browser_tool_results';
 import { registerAccessPrincipalsRoutes } from './internal/access_principals';
 import { registerWorkspaceFileRoutes } from './internal/workspace_files';
 import { registerSpaceSettingsRoutes } from './internal/space_settings';
@@ -49,6 +50,7 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerSkillsRoutes(dependencies);
   registerPluginsRoutes(dependencies);
   registerInternalExecutionRoutes(dependencies);
+  registerInternalBrowserToolResultRoutes(dependencies);
   registerAccessPrincipalsRoutes(dependencies);
   registerWorkspaceFileRoutes(dependencies);
   registerSpaceSettingsRoutes(dependencies);

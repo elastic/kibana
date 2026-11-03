@@ -13,7 +13,11 @@ import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { type PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  BrowserToolResultPayload,
+  BrowserToolsRequest,
+} from '@kbn/agent-builder-common';
 import { chatApiPath, internalApiPath } from '../../../common/constants';
 import type {
   AbortExecutionResponse,
@@ -33,6 +37,7 @@ interface BaseConverseParams {
   conversationId: string;
   executionId: string;
   browserApiTools?: BrowserApiToolMetadata[];
+  browserTools?: BrowserToolsRequest;
   projectRouting?: string;
 }
 
@@ -79,6 +84,7 @@ export class ChatService {
       connector_id: params.connectorId,
       attachments: params.attachments,
       browser_api_tools: params.browserApiTools ?? [],
+      ...(params.browserTools ? { browser_tools: params.browserTools } : {}),
       project_routing: params.projectRouting,
     });
   }
@@ -94,6 +100,7 @@ export class ChatService {
       connector_id: params.connectorId,
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
+      ...(params.browserTools ? { browser_tools: params.browserTools } : {}),
       project_routing: params.projectRouting,
     });
   }
@@ -137,6 +144,40 @@ export class ChatService {
     return this.http.post<AbortExecutionResponse>(
       `${internalApiPath}/executions/${executionId}/abort`
     );
+  }
+
+  /**
+   * Posts the result of a browser tool call.
+   * Resolves `accepted` when the server took the result, `final` when the call is unknown
+   * or can no longer be answered (already answered, expired or consumed).
+   */
+  async postBrowserToolResult({
+    executionId,
+    toolCallId,
+    clientId,
+    result,
+  }: {
+    executionId: string;
+    toolCallId: string;
+    clientId?: string;
+    result: BrowserToolResultPayload;
+  }): Promise<'accepted' | 'final'> {
+    try {
+      await this.http.post(
+        buildPath(`${internalApiPath}/executions/{executionId}/browser_tool_results/{toolCallId}`, {
+          executionId,
+          toolCallId,
+        }),
+        { body: JSON.stringify({ client_id: clientId, result }) }
+      );
+      return 'accepted';
+    } catch (error) {
+      const status = error?.response?.status ?? error?.body?.statusCode;
+      if (status === 404 || status === 409) {
+        return 'final';
+      }
+      throw error;
+    }
   }
 
   private converse(signal: AbortSignal | undefined, payload: ConversePayload) {

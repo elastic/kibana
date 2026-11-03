@@ -24,6 +24,7 @@ export const PageWrapper: React.FC<{ children: ReactNode }> = ({ children }) => 
       css={wrapperStyles}
       data-ebt-element={AGENT_BUILDER_UI_EBT.element.pageContent}
       data-test-subj="agentBuilderWrapper"
+      data-agent-builder-surface=""
     >
       <AccessBoundary>{children}</AccessBoundary>
     </div>

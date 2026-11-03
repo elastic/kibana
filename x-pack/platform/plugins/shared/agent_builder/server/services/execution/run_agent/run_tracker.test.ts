@@ -152,14 +152,13 @@ describe('projectExecutionSteps', () => {
     ).toThrow(/1 steps for 2 inherited ones/);
   });
 
-  it('drops browser and dedicated-lifecycle calls using the render state', () => {
-    const steps = [toolCall('srv'), toolCall('brw'), toolCall('ded')];
+  it('drops dedicated-lifecycle calls using the render state', () => {
+    const steps = [toolCall('srv'), toolCall('ded')];
     expect(
       projectExecutionSteps({
         steps,
         renderState: {
           srv: { toolName: 'x', kind: 'server' },
-          brw: { toolName: 'browser_x', kind: 'browser' },
           ded: { toolName: 'y', kind: 'dedicated' },
         },
       })
@@ -340,7 +339,7 @@ describe('RunTracker', () => {
     expect(
       tracker.executionProjection({
         steps: finalSteps,
-        toolRenderState: { b1: { toolName: 'browser_x', kind: 'browser' } },
+        toolRenderState: { b1: { toolName: 'ask_x', kind: 'dedicated' } },
         currentCycle: 1,
         errorCount: 0,
         pendingToolCallIds: [],

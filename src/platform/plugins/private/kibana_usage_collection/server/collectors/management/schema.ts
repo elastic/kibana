@@ -576,6 +576,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:browserTools': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether the experimental built-in browser tools of Elastic Agent Builder are enabled.',
+    },
+  },
   'agentBuilder:apiDiscovery': {
     type: 'boolean',
     _meta: {

@@ -79,7 +79,7 @@ const bigHistory = () =>
 
 const renderStateOf = (
   steps: ToolCallStep[],
-  kinds: Record<string, 'server' | 'browser'> = {}
+  kinds: Record<string, 'server' | 'dedicated'> = {}
 ): ToolRenderStateMap =>
   Object.fromEntries(
     steps.map((step, index) => [
@@ -98,7 +98,7 @@ const run = (
   {
     compactionSummary,
     kinds,
-  }: { compactionSummary?: CompactionSummary; kinds?: Record<string, 'server' | 'browser'> } = {}
+  }: { compactionSummary?: CompactionSummary; kinds?: Record<string, 'server' | 'dedicated'> } = {}
 ): CurrentRun => ({
   roundId: 'current',
   steps,
@@ -385,7 +385,7 @@ describe('compactContext', () => {
     const result = await compact(
       {
         conversation: conversationOf([]),
-        run: run(steps, { kinds: { x2: 'browser' } }),
+        run: run(steps, { kinds: { x2: 'dedicated' } }),
         tailCapTokens: 20_000,
       },
       deps

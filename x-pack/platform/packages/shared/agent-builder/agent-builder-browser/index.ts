@@ -61,6 +61,13 @@ export type {
   ApiStateChangesOptions,
 } from './events';
 export { filterApiStateChanges } from './events';
+export type {
+  BrowserToolDefinition,
+  BrowserToolCallContext,
+  BrowserToolHandlerReturn,
+  BrowserToolImage,
+} from './tools/browser_tool';
+export { toBrowserToolDescriptor } from './tools/browser_tool';
 export { WorkflowComboBox } from './workflow_combo_box';
 export type { WorkflowComboBoxProps, WorkflowComboBoxOption } from './workflow_combo_box';
 export {

@@ -368,6 +368,63 @@ describe('handleAgentExecution', () => {
     );
   });
 
+  describe('browser tools', () => {
+    const descriptor = {
+      id: 'consumer_tool',
+      description: 'a consumer browser tool',
+      schema: { type: 'object', properties: {} },
+    };
+
+    const runWithParams = async (agentParams: Record<string, unknown>) => {
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        title: 'Existing conversation',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+      resolveServicesMock.mockResolvedValue({
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+
+      const events$ = await runHandle({
+        agentParams: {
+          agentId: 'test-agent',
+          nextInput: { message: 'Hello' },
+          ...agentParams,
+        },
+        conversationClient,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+    };
+
+    it('forwards browserTools to the agent run', async () => {
+      await runWithParams({ browserTools: { clientId: 'client-1', tools: [descriptor] } });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          browserTools: { clientId: 'client-1', tools: [descriptor] },
+        })
+      );
+    });
+
+    it('maps the legacy browserApiTools of a stored execution to browserTools', async () => {
+      await runWithParams({ browserApiTools: [descriptor] });
+
+      expect(executeAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({ browserTools: { tools: [descriptor] } })
+      );
+    });
+  });
+
   it('loads tracing privacy settings from the request-scoped saved objects client', async () => {
     const conversation = createEmptyConversation({
       id: 'conversation-1',

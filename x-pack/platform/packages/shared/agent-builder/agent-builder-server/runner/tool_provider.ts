@@ -63,6 +63,11 @@ export interface ExecutableTool<
    * Set to `Infinity` to fully exempt this tool's results from truncation.
    */
   maxResultTokens?: number;
+  /**
+   * When true, the tool's handler runs in the browser of the client that sent the request:
+   * the server-side execution only dispatches the call and waits for the browser's answer.
+   */
+  browser?: boolean;
 }
 
 export interface LLmDescriptionHandlerParams<TConfig extends object = {}> {

@@ -133,6 +133,30 @@ describe('toolToLangchain', () => {
     });
   });
 
+  it('stamps browser tool call events with the tool id and call id', async () => {
+    const data = {
+      params: { a: 1 },
+      client_id: 'c1',
+      issued_at: '2025-12-31T23:59:30.000Z',
+      expires_at: '2026-01-01T00:00:00.000Z',
+    };
+    const tool = createTool('toolA', {
+      execute: jest.fn().mockImplementation(async ({ onEvent }) => {
+        onEvent({ type: ChatEventType.browserToolCall, data });
+        return { results: [] };
+      }),
+    });
+    const sendEvent = jest.fn();
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, sendEvent });
+    await langchainTool.invoke({});
+
+    expect(sendEvent).toHaveBeenCalledWith({
+      type: ChatEventType.browserToolCall,
+      data: { ...data, tool_id: 'toolA', tool_call_id: 'unknown' },
+    });
+  });
+
   it('attributes a dynamic tool event to the inner tool, on the same call', async () => {
     const tool = createTool('execute_dynamic_tool', {
       execute: jest.fn().mockImplementation(async ({ onEvent }) => {

@@ -276,16 +276,16 @@ describe('renderHistorySteps', () => {
 describe('renderCurrentRun', () => {
   it('uses the render state tool name and raw content', async () => {
     const messages = await current([call('b1', { tool_id: 'open', params: { url: 'x' } })], {
-      b1: { toolName: 'browser_open', kind: 'browser', cycle: 1, content: 'browser said hi' },
+      b1: { toolName: 'rendered_open', kind: 'server', cycle: 1, content: 'tool said hi' },
     });
     const [ai, tool] = messages as [AIMessage, ToolMessage];
     expect(ai.tool_calls?.[0]).toEqual({
       id: 'b1',
-      name: 'browser_open',
+      name: 'rendered_open',
       args: { url: 'x' },
       type: 'tool_call',
     });
-    expect(tool.content).toBe(wrapToolResultContent('browser said hi'));
+    expect(tool.content).toBe(wrapToolResultContent('tool said hi'));
   });
 
   it('sanitizes the render state tool name', async () => {

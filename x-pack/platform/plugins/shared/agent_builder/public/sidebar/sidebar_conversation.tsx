@@ -48,7 +48,7 @@ export function SidebarConversation({ onClose }: SidebarComponentProps): React.R
   };
 
   return (
-    <div css={sidebarBodyStyles}>
+    <div css={sidebarBodyStyles} data-agent-builder-surface="">
       <ConversationComponent
         onClose={handleOnClose}
         ariaLabelledBy="agent-builder-sidebar"

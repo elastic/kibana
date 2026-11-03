@@ -9,7 +9,6 @@ import { ToolManager, createToolManager } from './tool_manager';
 import type { StructuredTool } from '@langchain/core/tools';
 import {
   ToolManagerToolType,
-  type BrowserToolWithOrigin,
   type ExecutableToolWithOrigin,
 } from '@kbn/agent-builder-server/runner/tool_manager';
 import { ToolOrigin } from '@kbn/agent-builder-common';
@@ -47,26 +46,6 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain/tools', () => ({
   }),
 }));
 
-jest.mock('../../../tools/browser_tool_adapter', () => ({
-  browserToolsToLangchain: jest.fn(({ browserApiTools }) => {
-    const tools = browserApiTools.map(
-      (tool: any) =>
-        ({
-          name: `browser_${tool.id}`,
-          description: tool.description,
-          invoke: jest.fn(),
-        } as unknown as StructuredTool)
-    );
-
-    const idMappings = new Map();
-    browserApiTools.forEach((tool: any) => {
-      idMappings.set(`browser_${tool.id}`, `browser_${tool.id}`);
-    });
-
-    return { tools, idMappings };
-  }),
-}));
-
 describe('ToolManager', () => {
   let toolManager: ToolManager;
   const mockLogger = loggerMock.create();
@@ -89,20 +68,6 @@ describe('ToolManager', () => {
     configuration: {},
     getSchema: async () => z.object({}),
     execute: jest.fn(),
-    origin,
-  });
-
-  const createMockBrowserTool = (
-    id: string,
-    description: string = 'Browser tool',
-    origin: ToolOrigin = ToolOrigin.internal
-  ): BrowserToolWithOrigin => ({
-    id,
-    description,
-    schema: {
-      type: 'object',
-      properties: {},
-    },
     origin,
   });
 
@@ -339,50 +304,6 @@ describe('ToolManager', () => {
     });
   });
 
-  describe('addTool - browser tools', () => {
-    it('adds a single browser tool as static tool', async () => {
-      const tool = createMockBrowserTool('browser-tool-1');
-
-      await toolManager.addTools({
-        type: ToolManagerToolType.browser,
-        tools: tool,
-      });
-
-      const tools = toolManager.list();
-      expect(tools).toHaveLength(1);
-      expect(tools[0].name).toBe('browser_browser-tool-1');
-    });
-
-    it('adds multiple browser tools as static tools', async () => {
-      const tool1 = createMockBrowserTool('browser-tool-1');
-      const tool2 = createMockBrowserTool('browser-tool-2');
-
-      await toolManager.addTools({
-        type: ToolManagerToolType.browser,
-        tools: [tool1, tool2],
-      });
-
-      const tools = toolManager.list();
-      expect(tools).toHaveLength(2);
-    });
-
-    it('adds browser tool as dynamic tool when dynamic option is true', async () => {
-      const tool = createMockBrowserTool('dynamic-browser-tool');
-
-      await toolManager.addTools(
-        {
-          type: ToolManagerToolType.browser,
-          tools: tool,
-        },
-        { dynamic: true }
-      );
-
-      const tools = toolManager.list();
-      expect(tools).toHaveLength(1);
-      expect(toolManager.getDynamicToolIds()).toContain('browser_dynamic-browser-tool');
-    });
-  });
-
   describe('list', () => {
     it('returns empty array when no tools are added', () => {
       expect(toolManager.list()).toEqual([]);
@@ -551,31 +472,17 @@ describe('ToolManager', () => {
       expect(mappings.size).toBeGreaterThan(0);
     });
 
-    it('returns mappings for browser tools', async () => {
-      const tool = createMockBrowserTool('browser-tool-1');
-
-      await toolManager.addTools({
-        type: ToolManagerToolType.browser,
-        tools: tool,
-      });
-
-      const mappings = toolManager.getToolIdMapping();
-      expect(mappings.size).toBeGreaterThan(0);
-    });
-
     it('merges mappings from multiple addTool calls', async () => {
-      const executableTool = createMockExecutableTool('exec-tool');
-      const browserTool = createMockBrowserTool('browser-tool');
-
       await toolManager.addTools({
         type: ToolManagerToolType.executable,
-        tools: executableTool,
+        tools: createMockExecutableTool('exec-tool-1'),
         logger: mockLogger,
       });
 
       await toolManager.addTools({
-        type: ToolManagerToolType.browser,
-        tools: browserTool,
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('exec-tool-2'),
+        logger: mockLogger,
       });
 
       const mappings = toolManager.getToolIdMapping();
@@ -832,17 +739,6 @@ describe('ToolManager', () => {
       });
 
       expect(toolManager.getSummarizer('tool-with-summarizer')).toBe(summarizer);
-    });
-
-    it('returns undefined for browser tools', async () => {
-      const tool = createMockBrowserTool('browser-tool-1');
-
-      await toolManager.addTools({
-        type: ToolManagerToolType.browser,
-        tools: tool,
-      });
-
-      expect(toolManager.getSummarizer('browser-tool-1')).toBeUndefined();
     });
 
     it('returns the latest summarizer when a tool is re-added', async () => {

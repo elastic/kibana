@@ -7,6 +7,7 @@
 
 export type {
   BaseExecutionParams,
+  BrowserToolsExecutionParams,
   ExecutionConversationOrigin,
   ConversationExecutionParams,
   StoredConversationExecutionParams,

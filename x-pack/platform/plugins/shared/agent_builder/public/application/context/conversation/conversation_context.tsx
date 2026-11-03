@@ -25,6 +25,8 @@ interface ConversationContextValue {
   resetAttachments?: () => void;
   removeAttachment?: (attachmentIndex: number) => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  /** Ids of the registered browser tools this surface supports. */
+  browserToolIds?: string[];
   setConversationId?: (conversationId?: string) => void;
   setAgentId?: (agentId: string) => void;
   conversationActions: ConversationActions;

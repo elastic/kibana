@@ -9,15 +9,22 @@ import type { ChatEvent } from '@kbn/agent-builder-common';
 import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import { finalize, type Observable } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
-import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
+import type { BrowserToolDefinition } from '@kbn/agent-builder-browser/tools/browser_tool';
 import type { ConversationActions } from '../conversation/use_conversation_actions';
-import type { BrowserToolExecutor } from '../../services/browser_tool_executor';
+import type { BrowserToolDispatcher } from '../../../services/browser_tools';
 
 interface SubscribeOptions {
   events$: Observable<ChatEvent>;
   conversationActions: ConversationActions;
-  browserApiTools?: Array<BrowserApiToolDefinition<any>>;
-  browserToolExecutor?: BrowserToolExecutor;
+  dispatcher?: BrowserToolDispatcher;
+  clientId?: string;
+  executionId: string;
+  agentId: string;
+  conversationId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  legacyTools?: Array<BrowserToolDefinition<any>>;
+  /** Aborted only when the stream is cancelled or replaced; never on component unmount. */
+  streamSignal: AbortSignal;
   isAborted: () => boolean;
 }
 
@@ -30,8 +37,13 @@ interface SubscribeOptions {
 export const subscribeToChatEvents = ({
   events$,
   conversationActions,
-  browserApiTools,
-  browserToolExecutor,
+  dispatcher,
+  clientId,
+  executionId,
+  agentId,
+  conversationId,
+  legacyTools,
+  streamSignal,
   isAborted,
 }: SubscribeOptions): Promise<void> => {
   const nextChatEvent = (event: ChatEvent) => {
@@ -40,28 +52,15 @@ export const subscribeToChatEvents = ({
     } else if (isExecutionTerminalEvent(event)) {
       conversationActions.onExecutionTerminated();
     } else if (isBrowserToolCallEvent(event)) {
-      const toolId = event.data.tool_id;
-      if (toolId && browserToolExecutor && browserApiTools) {
-        const toolDef = browserApiTools.find((tool) => tool.id === toolId);
-        if (toolDef) {
-          const toolsMap = new Map([[toolId, toolDef]]);
-          browserToolExecutor
-            .executeToolCalls(
-              [
-                {
-                  tool_id: toolId,
-                  call_id: event.data.tool_call_id,
-                  params: event.data.params,
-                  timestamp: Date.now(),
-                },
-              ],
-              toolsMap
-            )
-            .catch((error) => {
-              // eslint-disable-next-line no-console
-              console.error('Failed to execute browser tool:', error);
-            });
-        }
+      if (dispatcher && clientId) {
+        dispatcher.dispatch(event, {
+          clientId,
+          executionId,
+          conversationId,
+          agentId,
+          legacyTools,
+          streamSignal,
+        });
       }
     }
   };

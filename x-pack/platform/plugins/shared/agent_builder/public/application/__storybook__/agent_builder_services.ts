@@ -219,6 +219,7 @@ const defaultServices: AgentBuilderInternalService = {
   startDependencies: { data: { search: { search: () => EMPTY } } } as never,
   accessChecker: {} as never,
   eventsService: { track: noOp } as never,
+  browserToolsService: {} as never,
   isEarsEnabled: false,
   isEarsExperimentalEnabled: false,
   isServerless: false,

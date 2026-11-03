@@ -189,7 +189,8 @@ const handleConversationExecution = async ({
     origin,
     author: requestAuthor,
     nextInput,
-    browserApiTools,
+    browserTools: storedBrowserTools,
+    browserApiTools: legacyBrowserApiTools,
     configurationOverrides,
     telemetryMetadata,
     workflowExecutionId,
@@ -203,6 +204,11 @@ const handleConversationExecution = async ({
   } = execution.agentParams;
 
   const { owner } = execution;
+
+  // An execution stored before `browserTools` existed carries the legacy `browserApiTools`.
+  const browserTools =
+    storedBrowserTools ??
+    (legacyBrowserApiTools?.length ? { tools: legacyBrowserApiTools } : undefined);
 
   // A record written before the execution service resolved all of these cannot be run.
   if (!conversationId || !roundId || !conversationOperation || !owner || !receivedAtIso) {
@@ -303,7 +309,7 @@ const handleConversationExecution = async ({
       maxContentLength,
       reasoningLevel: resolvedReasoningLevel,
       runAgent,
-      browserApiTools,
+      browserTools,
       configurationOverrides,
       interactivity,
       parentExecutionId: execution.parentExecutionId,
