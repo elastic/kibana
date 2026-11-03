@@ -101,6 +101,8 @@ describe('useDesignTokenSections', () => {
 
     const { result } = renderHook(() => useDesignTokenSections(element));
 
-    expect(result.current.rows.find((row) => row.label === 'Letter spacing')?.cssValue).toBe('0.4px');
+    expect(result.current.rows.find((row) => row.label === 'Letter spacing')?.cssValue).toBe(
+      '0.4px'
+    );
   });
 });
