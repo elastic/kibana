@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Parser, Walker } from '@elastic/esql';
+import { Parser, Walker, isStringLiteral } from '@elastic/esql';
 import { getESQLQuery, getESQLQueryFromIndexPattern, getApmIndexPattern } from './get_esql_query';
 import {
   EXCEPTION_MESSAGE,
@@ -346,14 +346,17 @@ describe('getESQLQuery', () => {
       expect(result).toContain('WHERE KQL("user.id: \\"123\\"")');
     });
 
+    // Inline on purpose: `getKqlSearchQueries` in @kbn/esql-utils does the same, but it trims the
+    // values (which would hide whitespace changes), drops parse errors, and would add a package
+    // dependency to the APM plugin just for this test.
     const getKqlLiterals = (query: string) => {
       const { root, errors } = Parser.parse(query);
       const literals: string[] = [];
       Walker.walk(root, {
         visitFunction: (fn) => {
-          const arg = fn.args[0];
-          if (fn.name.toLowerCase() === 'kql' && !Array.isArray(arg) && arg.type === 'literal') {
-            literals.push((arg as { valueUnquoted: string }).valueUnquoted);
+          const [arg] = fn.args;
+          if (fn.name.toLowerCase() === 'kql' && isStringLiteral(arg)) {
+            literals.push(arg.valueUnquoted);
           }
         },
       });
@@ -383,6 +386,7 @@ describe('getESQLQuery', () => {
       ['comment markers inside a phrase', 'a: "/* x */" or b: "// y"'],
       ['a pipe followed by another command', 'a: 1 | LIMIT 1'],
       ['tab and newline', 'a: x\tand\nb: y'],
+      ['leading and trailing whitespace', '  a: 1  '],
       ['non-ASCII characters', 'name: "żółć ü é 日本"'],
       ['KQL ranges and boolean operators', 'a > 5 and not (b < 3 or c: *)'],
     ])('keeps a kuery with %s intact as a single KQL string literal', (_, kuery) => {
@@ -412,7 +416,7 @@ describe('getESQLQuery', () => {
       expect(errors).toHaveLength(0);
       expect(literals).toHaveLength(3);
       expect(literals[0]).toContain(SERVICE_ENVIRONMENT);
-      expect(literals[1]).toContain('exception');
+      expect(literals[1]).toContain(OTEL_EVENT_NAME);
       expect(literals[2]).toBe('url.query: "a"b""');
     });
 
@@ -427,16 +431,17 @@ describe('getESQLQuery', () => {
     });
 
     it('does not let a kuery break out of the string literal to inject another command', () => {
+      const kuery = '") | DROP service.name | WHERE KQL("';
       const result = getESQLQuery({
         indexType: 'traces',
-        params: { kuery: '") | DROP service.name | WHERE KQL("' },
+        params: { kuery },
         indexSettings: createMockIndexSettings(),
       });
 
-      // The text stays inside the escaped literal; what matters is the command structure.
+      // The payload must stay inside the escaped literal: one FROM and one WHERE, nothing else.
       const { root } = Parser.parse(result!);
-      const commands = root.commands.map((command) => command.name);
-      expect(commands).toEqual(['from', 'where']);
+      expect(root.commands.map((command) => command.name)).toEqual(['from', 'where']);
+      expect(getKqlLiterals(result!).literals).toEqual([kuery]);
     });
   });
 
