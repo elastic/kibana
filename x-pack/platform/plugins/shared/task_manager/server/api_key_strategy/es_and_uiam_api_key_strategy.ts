@@ -14,12 +14,12 @@ import type {
 } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
+import { getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import {
   createApiKey,
   getApiKeyFromRequest,
-  getUiamApiKeySecret,
   hasApiKey,
   shouldCloneApiKeyFromRequest,
 } from '../lib/api_key_utils';

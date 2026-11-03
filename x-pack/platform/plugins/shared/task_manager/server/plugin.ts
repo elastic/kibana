@@ -27,6 +27,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InvalidateAPIKeysParams } from '@kbn/security-plugin-types-server';
+import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '@kbn/response-ops-api-keys';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -80,10 +81,6 @@ import {
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 import { LicenseSubscriber } from './license_subscriber';
-import type {
-  ApiKeyInvalidationFn,
-  UiamApiKeyInvalidationFn,
-} from './invalidate_api_keys/invalidate_api_keys_task';
 import {
   registerInvalidateApiKeyTask,
   scheduleInvalidateApiKeyTask,
