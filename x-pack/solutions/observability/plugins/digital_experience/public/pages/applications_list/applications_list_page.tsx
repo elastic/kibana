@@ -46,7 +46,7 @@ import { PageLoadsChart } from './components/page_loads_chart';
 import { SourceFilter } from './components/source_filter';
 import { ColumnSelector } from '../../components/column_selector';
 import { EnvironmentFilter } from '../../components/environment_filter';
-import { formatVital, RATING_COLORS, RATING_LABELS } from '../../components/web_vital_badges';
+import { formatVital, RATING_COLORS, RATING_LABELS } from '../../utils/web_vitals';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import {

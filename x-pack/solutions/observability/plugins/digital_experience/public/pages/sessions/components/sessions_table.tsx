@@ -26,7 +26,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import type { CoreWebVital } from '../../../../common/core_web_vitals';
 import type { SessionSortField, SessionSummary } from '../../../../common/sessions';
-import { VITAL_LABELS, WebVitalBadge } from '../../../components/web_vital_badges';
+import { WebVitalBadge } from '../../../components/web_vital_badges';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
 import { ANONYMOUS_USER } from '../../../labels';
@@ -34,6 +34,7 @@ import { clientOf, locationOf } from '../../../utils/describe_session';
 import { formatSessionDuration } from '../../../utils/format_session_duration';
 import type { SessionsListState } from '../hooks/use_sessions_list_query';
 import { SESSIONS_PAGE_SIZES } from '../../../utils/sessions_list_query';
+import { VITAL_LABELS } from '../../../utils/web_vitals';
 import { JourneyTrail } from './journey_trail';
 
 /** Elasticsearch `index.max_result_window` default: the list pages no further. */
