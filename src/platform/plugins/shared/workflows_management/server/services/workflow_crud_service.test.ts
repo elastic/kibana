@@ -4442,7 +4442,7 @@ describe('managed orphan cleanup without a request', () => {
 
       await expect(
         service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
-      ).resolves.toEqual(expect.objectContaining({ switchedOff: true }));
+      ).resolves.toEqual(expect.objectContaining({ enabled: false }));
 
       expect(client.index).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -4462,14 +4462,42 @@ describe('managed orphan cleanup without a request', () => {
       expect(core.elasticsearch.client.asScoped).not.toHaveBeenCalled();
     });
 
-    it('reports it did not switch the workflow off when a concurrent write did so first', async () => {
+    it('reads only live workflows', async () => {
+      const { client, service } = setup();
+
+      await service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN);
+
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: expect.objectContaining({
+              must_not: expect.arrayContaining([{ exists: { field: 'deleted_at' } }]),
+            }),
+          },
+        })
+      );
+    });
+
+    it.each([
+      ['missing', null],
+      ['not managed', { managed: false }],
+      ['already off', { enabled: false }],
+    ] as const)('resolves to null without writing when the workflow is %s', async (_, changed) => {
       const { client, source, service } = setup();
-      const switchedOffConcurrently = {
-        ...source,
-        enabled: false,
-        yaml: 'name: Test Workflow\nenabled: false',
-        definition: { ...source.definition, enabled: false },
-      };
+      if (changed) {
+        Object.assign(source, changed);
+      } else {
+        client.search.mockResolvedValue({ hits: { hits: [] } });
+      }
+
+      await expect(
+        service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
+      ).resolves.toBeNull();
+      expect(client.index).not.toHaveBeenCalled();
+    });
+
+    it('skips the write when a concurrent write switched the workflow off first', async () => {
+      const { client, source, service } = setup();
       client.search
         .mockResolvedValueOnce({
           hits: { hits: [{ ...occSearchHit('system-orphan', undefined, 5, 1), _source: source }] },
@@ -4479,7 +4507,7 @@ describe('managed orphan cleanup without a request', () => {
             hits: [
               {
                 ...occSearchHit('system-orphan', undefined, 6, 1),
-                _source: switchedOffConcurrently,
+                _source: { ...source, enabled: false },
               },
             ],
           },
@@ -4488,10 +4516,8 @@ describe('managed orphan cleanup without a request', () => {
 
       await expect(
         service.disableManagedWorkflowWithoutRequest('system-orphan', 'default', ORPHAN)
-      ).resolves.toEqual(expect.objectContaining({ switchedOff: false }));
-      expect(client.index).toHaveBeenLastCalledWith(
-        expect.objectContaining({ if_seq_no: 6, if_primary_term: 1 })
-      );
+      ).resolves.toBeNull();
+      expect(client.index).toHaveBeenCalledTimes(1);
     });
 
     it('refuses a workflow that no longer matches the sweep snapshot', async () => {

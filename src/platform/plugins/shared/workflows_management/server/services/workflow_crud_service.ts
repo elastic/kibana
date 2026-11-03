@@ -113,6 +113,9 @@ import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks'
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
 const TOCTOU_MAX_RETRIES = 5;
 
+// `OccWriter.readModifyWrite` always indexes what `mutate` returns; throwing this skips the write.
+const NOTHING_TO_DISABLE = new Error('The workflow has nothing to switch off.');
+
 const extractRestoreSnapshotYaml = (
   snapshot: Record<string, unknown> | undefined
 ): string | null => {
@@ -1397,32 +1400,47 @@ export class WorkflowCrudService {
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
   }
 
-  /** Disables a managed workflow without a request, refusing any write that changes more than `enabled`. */
+  /**
+   * Switches a managed workflow off without a request, refusing any write that changes more than
+   * `enabled`. Resolves to the written document, or `null` without writing when the guarded read
+   * finds the workflow missing, soft-deleted, unmanaged, or already off.
+   */
   async disableManagedWorkflowWithoutRequest(
     id: string,
     spaceId: string,
     expectedOwnership: ManagedWorkflowOrphan
-  ): Promise<{ document: WorkflowProperties; switchedOff: boolean }> {
-    // Read on the attempt that wins the OCC write, so a concurrent switch-off is not reported as ours.
-    let switchedOff = false;
-    const { document } = await this.runOccWrite(id, async () => {
+  ): Promise<WorkflowProperties | null> {
+    const written = await this.runOccWrite(id, async () => {
       const writer = this.getReadModifyWriteOccWriter(
         spaceId,
         undefined,
-        { includeDeleted: true },
+        undefined,
         undefined,
         expectedOwnership
       );
-      return writer.readModifyWrite({
-        id,
-        mutate: (existing) => {
-          switchedOff = existing.enabled;
-          return applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing);
-        },
-      });
+      try {
+        return await writer.readModifyWrite({
+          id,
+          mutate: (existing) => {
+            // Decided on every OCC attempt, so a concurrent switch-off or delete skips the write.
+            if (!existing.managed || !existing.enabled) {
+              throw NOTHING_TO_DISABLE;
+            }
+            return applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing);
+          },
+        });
+      } catch (error) {
+        if (error === NOTHING_TO_DISABLE || this.isWorkflowDocumentNotFoundError(error, id)) {
+          return null;
+        }
+        throw error;
+      }
     });
+    if (!written) {
+      return null;
+    }
     await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
-    return { document, switchedOff };
+    return written.document;
   }
 
   /**
