@@ -131,8 +131,8 @@ describe('<ProviderSelector />', () => {
       const awsOption = getByTestId('aws-radio-option');
       await userEvent.click(awsOption);
 
-      // Should still call the handler even for already selected option
-      expect(mockSetProvider).toHaveBeenCalledWith('aws');
+      // Should not call the handler since clicking an already checked radio fires no change event
+      expect(mockSetProvider).not.toHaveBeenCalled();
     });
   });
 
