@@ -307,7 +307,8 @@ const sendRequest = (
   requestedTime: number,
   latestEnd: number
 ): EdotReactNativeEvent[] => {
-  // The request, and with it its 1ms minimum duration, must end within the screen view
+  // The request, and with it its 1ms minimum duration, must end by latestEnd: the end of the screen
+  // view, or never on a view that crashes, whose requests may even start after the crash
   const time = Math.min(requestedTime, latestEnd - 1);
   const {
     method,
