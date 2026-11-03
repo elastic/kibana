@@ -50,3 +50,9 @@ export const SECURITY_PROJECT_SETTINGS = [
   settings.AI_CHAT_EXPERIENCE_TYPE,
   settings.CASES_MAX_OPEN_CASES_PER_RULE_RUN_ID,
 ];
+
+/** Allowlisted on complete and Search AI Lake tiers only (see security_solution_serverless). */
+export const SECURITY_CONTEXT_ENGINE_PROJECT_SETTINGS = [
+  settings.CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  settings.CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+];
