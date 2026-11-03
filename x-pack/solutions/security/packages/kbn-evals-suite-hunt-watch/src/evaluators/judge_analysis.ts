@@ -62,18 +62,16 @@ const describeReport = (report: HuntReportExpectation): string => {
   ];
   lines.push(
     report.tier1Status
-      ? `Tier 1 IOC search ${TIER1_WORDING[report.tier1Status]}.`
-      : 'Tier 1 IOC search counts are not pinned; any match count is acceptable.'
+      ? `IOC Hunt ${TIER1_WORDING[report.tier1Status]}.`
+      : 'IOC Hunt counts are not pinned; any match count is acceptable.'
   );
   if (report.tier2Executed === undefined) {
-    lines.push(
-      'Tier 2 behavior hunt results are not pinned; any number of behaviors is acceptable.'
-    );
+    lines.push('Behavior Hunt results are not pinned; any number of behaviors is acceptable.');
   } else {
     lines.push(
       report.tier2Executed
-        ? 'Tier 2 behavior hunt executed at least one validated ES|QL query.'
-        : 'Tier 2 behavior hunt executed no queries.'
+        ? 'Behavior Hunt executed at least one validated ES|QL query.'
+        : 'Behavior Hunt executed no queries.'
     );
   }
   lines.push(describeProposals(report.pendingProposals));
@@ -86,7 +84,7 @@ const describeReport = (report: HuntReportExpectation): string => {
 export const buildJudgeQuestion = ({ spaceId, reportIds }: HuntWatchExample['input']): string =>
   `Run the continuous threat hunt over threat report(s) ${reportIds.join(', ')} in Kibana ` +
   `space "${spaceId}". For each report, state whether the environment shows the reported threat, ` +
-  `what the Tier 1 IOC search and Tier 2 behavior hunt found, and what action, if any, is proposed.`;
+  `what IOC Hunt and Behavior Hunt found, and what action, if any, is proposed.`;
 
 /**
  * A row that pins `partial` alone expects an incomplete run, and the judge has to know that:
@@ -104,7 +102,7 @@ const describeOutcome = (expected: HuntWatchExample['output']['expected']): stri
 
 export const buildGroundTruth = ({ expected, criteria }: HuntWatchExample['output']): string =>
   [
-    'The hunt runs Tier 1 (IOC search) first, then Tier 2 (behavior hunt), then records a verdict.',
+    'The hunt runs IOC Hunt first, then Behavior Hunt, then records a verdict.',
     ...describeOutcome(expected),
     ...expected.reports.map(describeReport),
     ...(criteria.length > 0 ? ['The narrative must also satisfy:', ...criteria] : []),

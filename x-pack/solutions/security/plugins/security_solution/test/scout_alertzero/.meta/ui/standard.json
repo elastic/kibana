@@ -1,0 +1,22 @@
+{
+  "sha1": "25eea903aff81847e7fda1db4f20fc1e5e447255",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "12e1f9dc0a1a5b4-20dcfefc21169df",
+      "title": "AlertZero queue page width keeps the trend charts within the window and resizes them when it narrows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/ui/tests/queue_page_width.spec.ts",
+        "line": 54,
+        "column": 26
+      }
+    }
+  ]
+}
