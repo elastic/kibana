@@ -53,7 +53,6 @@ const metric = (overrides: Partial<HomePageStatPanelMetric> = {}): HomePageStatP
   key: 'total',
   label: 'Total',
   value: '12',
-  isLoading: false,
   ...overrides,
 });
 
@@ -101,19 +100,32 @@ describe('HomePageStatPanel', () => {
   });
 
   describe('metrics', () => {
-    it('shows a loading placeholder instead of the value while a metric is loading', () => {
+    it('shows the label and value of each metric', () => {
       renderPanel({
         metrics: [
-          metric({ key: 'total', label: 'Total', value: '12', isLoading: true }),
-          metric({ key: 'starred', label: 'Starred', value: '3', isLoading: false }),
+          metric({ key: 'total', label: 'Total', value: '12' }),
+          metric({ key: 'starred', label: 'Starred', value: '3' }),
         ],
       });
 
-      // the label stays visible so the panel does not reflow once the value lands
       expect(screen.getByTestId('dashboardsCard-total-label')).toHaveTextContent('Total');
-      expect(screen.getByTestId('dashboardsCard-total-loading')).toBeInTheDocument();
-      expect(screen.queryByTestId('dashboardsCard-total-value')).not.toBeInTheDocument();
+      expect(screen.getByTestId('dashboardsCard-total-value')).toHaveTextContent('12');
+      expect(screen.getByTestId('dashboardsCard-starred-label')).toHaveTextContent('Starred');
       expect(screen.getByTestId('dashboardsCard-starred-value')).toHaveTextContent('3');
+    });
+  });
+
+  describe('title', () => {
+    it('shows an info icon next to the title when the card has a tooltip', () => {
+      renderPanel({ titleTooltip: 'What these stats count' });
+
+      expect(screen.getByTestId('dashboardsCardTitleInfo')).toBeInTheDocument();
+    });
+
+    it('shows no info icon without a tooltip', () => {
+      renderPanel();
+
+      expect(screen.queryByTestId('dashboardsCardTitleInfo')).not.toBeInTheDocument();
     });
   });
 

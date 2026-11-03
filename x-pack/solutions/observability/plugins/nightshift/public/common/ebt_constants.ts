@@ -39,6 +39,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   OPEN_IN_CHAT: 'openInChat',
   OPEN_KNOWLEDGE_PURGE_CONFIRMATION: 'openKnowledgePurgeConfirmation',
   OPEN_RESET_CONFIRMATION: 'openResetConfirmation',
+  OPEN_START_INVESTIGATION: 'openStartInvestigation',
   PREVIEW_KNOWLEDGE_PURGE: 'previewKnowledgePurge',
   PAUSE_DETECTION_ENGINE: 'pauseDetectionEngine',
   RESET_TUNING_DOCUMENT: 'resetTuningDocument',
@@ -50,7 +51,6 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
   TOGGLE_AUTOMATION: 'toggleAutomation',
   START_INVESTIGATION: EBT_CLICK_ACTIONS.START_INVESTIGATION,
-  TOGGLE_SLACK_CHANNELS: 'toggleSlackChannels',
   VIEW_ALL_SIGNIFICANT_EVENTS: 'viewAllSignificantEvents',
   VIEW_AUTOMATION_RUNS: 'viewAutomationRuns',
   VIEW_AUTOMATIONS: 'viewAutomations',
@@ -94,6 +94,7 @@ export const NIGHTSHIFT_EBT_ELEMENTS = {
   SETTINGS: 'nightshiftSettings',
   SEVERITY_TILES: 'nightshiftSeverityTiles',
   SIGNIFICANT_EVENTS_LIST: 'nightshiftSignificantEventsList',
+  START_INVESTIGATION_PANEL: 'nightshiftStartInvestigationPanel',
   STATUS_SUMMARY: 'nightshiftStatusSummary',
 } as const;
 
