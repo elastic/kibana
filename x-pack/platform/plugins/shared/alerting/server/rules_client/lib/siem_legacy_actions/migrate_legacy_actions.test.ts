@@ -208,10 +208,7 @@ describe('bulkMigrateLegacyActions', () => {
 
       expect(migratedIds).toEqual([RULE_ID]);
       expect(rule.attributes.actions).toEqual([
-        {
-          ...ruleAction,
-          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
-        },
+        ruleAction,
         expect.objectContaining({
           actionRef: 'action_1',
           actionTypeId: '.slack',
@@ -257,7 +254,7 @@ describe('bulkMigrateLegacyActions', () => {
   );
 
   it.each(['rule', 'no_actions'])(
-    'discards a "%s" sidecar left behind by a migration without overwriting the saved frequencies',
+    'keeps the frequency an action has already when it migrates a "%s" sidecar',
     async (ruleThrottle) => {
       mockLegacyObjects({ sidecars: [buildSidecar(ruleThrottle)] });
       const savedFrequency = {
@@ -265,8 +262,11 @@ describe('bulkMigrateLegacyActions', () => {
         notifyWhen: 'onActionGroupChange',
         throttle: null,
       } as const;
-      const rule = buildRule([{ ...existingAction, frequency: savedFrequency }]);
-      rule.attributes.notifyWhen = null;
+      const rule = buildRule([
+        { ...existingAction, frequency: savedFrequency },
+        { ...existingAction, actionRef: 'action_1' },
+      ]);
+      rule.attributes.notifyWhen = 'onActiveAlert';
       rule.attributes.throttle = null;
 
       const migratedIds = await bulkMigrateLegacyActions({
@@ -275,11 +275,18 @@ describe('bulkMigrateLegacyActions', () => {
         skipActionsValidation: true,
       });
 
-      expect(migratedIds).toEqual([]);
-      expect(rule.attributes.actions).toEqual([{ ...existingAction, frequency: savedFrequency }]);
-      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-        { type: legacyRuleActionsSavedObjectType, id: SIDECAR_ID },
+      expect(migratedIds).toEqual([RULE_ID]);
+      expect(rule.attributes.actions).toEqual([
+        { ...existingAction, frequency: savedFrequency },
+        {
+          ...existingAction,
+          actionRef: 'action_1',
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
       ]);
+      expect(rule.attributes.notifyWhen).toBeNull();
+      // deleted after the rule is saved
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
     }
   );
 

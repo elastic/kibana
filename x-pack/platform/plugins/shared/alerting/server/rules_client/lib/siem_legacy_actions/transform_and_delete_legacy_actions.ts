@@ -85,23 +85,6 @@ const ruleHasAllSidecarActions = (
   return sidecarActions.every(ruleContainsSidecarAction);
 };
 
-const ruleHasOnlyActionsWithFrequency = (rule: SavedObject<RawRule>): boolean =>
-  rule.attributes.actions.length > 0 &&
-  rule.attributes.actions.every(({ frequency }) => frequency !== undefined);
-
-/**
- * True when a previous migration already saved the sidecar's content on the rule but could not delete the sidecar.
- * A throttled sidecar holds actions: the rule must contain them. A `rule` or `no_actions` sidecar holds nothing
- * to copy and its migration only gives each action a frequency: the rule must already have them.
- */
-const isSidecarMigrated = (
-  rule: SavedObject<RawRule>,
-  sidecar: SavedObject<LegacyIRuleActionsAttributes>
-): boolean =>
-  hasThrottledActions(sidecar.attributes)
-    ? ruleHasAllSidecarActions(rule, sidecar)
-    : ruleHasOnlyActionsWithFrequency(rule);
-
 type LegacySidecar = SavedObject<LegacyIRuleActionsAttributes>;
 
 const toRuleReferences = (ruleIds: string[]) =>
@@ -280,17 +263,16 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
         throw new Error('Failed to find rule reference on legacy action Saved Object');
       }
 
-      const rule = rules.find((r) => r.id === ruleId);
-      if (rule != null && isSidecarMigrated(rule, savedObject)) {
-        alreadyMigratedSidecarIds.push(savedObject.id);
-        return;
-      }
-
       if (!hasThrottledActions(savedObject.attributes)) {
         // There are no actions to copy: the actions that run are the ones already on the rule.
         // The rule is still part of the result, with nothing to add, because its legacy notify
         // setting still has to be applied to those actions.
         transformedActionsByRuleId[ruleId] = { transformedActions: [], transformedReferences: [] };
+        return;
+      }
+      const rule = rules.find((r) => r.id === ruleId);
+      if (rule != null && ruleHasAllSidecarActions(rule, savedObject)) {
+        alreadyMigratedSidecarIds.push(savedObject.id);
         return;
       }
 
