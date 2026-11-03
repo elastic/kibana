@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup } from '@kbn/core/public';
-import type { Logger } from '@kbn/logging';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import type { Logger } from '@kbn/logging';
 import { SeededOfrepWebProvider } from './seeded_ofrep_provider';
 
 /** How often the browser asks Kibana for the server's flag snapshot. */
@@ -26,7 +28,7 @@ export function createKibanaOfrepProvider({
   initialFlags,
   logger,
 }: {
-  basePath: CoreSetup['http']['basePath'];
+  basePath: IBasePath;
   kibanaVersion: string;
   initialFlags: Record<string, unknown>;
   logger: Pick<Logger, 'warn'>;

@@ -302,10 +302,19 @@ export class FeatureFlagsService {
     this.contextChanged$.next();
   }
 
+  /**
+   * Flag values the browser should render. Config overrides win over the provider snapshot,
+   * matching server-side evaluation.
+   */
+  private async getBrowserSnapshot(): Promise<Record<string, unknown>> {
+    const flags = await this.initialFeatureFlagsGetter();
+    return { ...flags, ...this.overrides$.value };
+  }
+
   private registerRoutes(http: InternalHttpServiceSetup): void {
     const router = http.createRouter('');
     this.registerCounterRoute(router);
-    registerOfrepRoutes(router, () => this.initialFeatureFlagsGetter(), this.logger);
+    registerOfrepRoutes(router, () => this.getBrowserSnapshot(), this.logger);
   }
 
   private registerCounterRoute(router: IRouter): void {

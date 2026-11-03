@@ -12,8 +12,8 @@ tags: ['kibana', 'dev', 'contributor', 'api docs', 'cloud', 'a/b testing', 'expe
 > [!NOTE]  
 > This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeatureFlagsService" /> for more information about how to interact with feature flags.
 
-This plugin registers the LaunchDarkly provider on the server and the evaluation context that segmentation rules rely on.
-The browser does not talk to LaunchDarkly. It reads the server's evaluations from Kibana's internal OFREP endpoints, so the client ID stays on the server.  
+This plugin registers the LaunchDarkly provider and the evaluation context on the server. Segmentation metadata, including `has_data`, is updated there.
+The browser feature-flags service reads Kibana's internal OFREP endpoints, so this plugin has no browser bundle and the client ID stays on the server.  
 
 The `cloudExperiments` plugin is disabled by default and only enabled on Elastic Cloud deployments.
 

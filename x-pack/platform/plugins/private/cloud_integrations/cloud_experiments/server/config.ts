@@ -44,8 +44,5 @@ const configSchema = schema.object({
 export type CloudExperimentsConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudExperimentsConfigType> = {
-  exposeToBrowser: {
-    metadata_refresh_interval: true,
-  },
   schema: configSchema,
 };

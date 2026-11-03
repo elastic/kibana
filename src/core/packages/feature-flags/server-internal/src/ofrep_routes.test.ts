@@ -20,11 +20,11 @@ import { entityTag, OFREP_BULK_PATH, OFREP_SINGLE_PATH, toBulkResponse } from '.
 import { ofrepRequestBodySchema } from './ofrep_routes';
 
 describe('OFREP routes', () => {
-  const createService = () => {
+  const createService = (overrides: Record<string, unknown> = {}) => {
     const logger = loggerMock.create();
     const mockedConfigService = configServiceMock.create();
     mockedConfigService.atPath.mockReturnValue(
-      new BehaviorSubject<FeatureFlagsConfig>({ overrides: {} })
+      new BehaviorSubject<FeatureFlagsConfig>({ overrides })
     );
     const http = httpServiceMock.createInternalSetupContract();
     const router = mockRouter.create();
@@ -80,6 +80,25 @@ describe('OFREP routes', () => {
     ).toEqual({
       context: { kind: 'multi', kibana: { key: 'deployment-1', version: '9.3.0' } },
     });
+  });
+
+  test('layers config overrides over the provider snapshot', async () => {
+    const { service, setup, router } = createService({
+      'my.flag': true,
+      nested: { enabled: 'on' },
+    });
+    setup.setInitialFeatureFlagsGetter(async () => ({ 'my.flag': false, other: 'off' }));
+    const { handler } = findRoute(router, OFREP_BULK_PATH);
+    const response = mockRouter.createResponseFactory();
+
+    await handler({}, mockRouter.createKibanaRequest({ method: 'post', body: {} }), response);
+
+    const body = toBulkResponse({ 'my.flag': true, other: 'off', 'nested.enabled': 'on' });
+    expect(response.ok).toHaveBeenCalledWith({
+      body,
+      headers: { etag: entityTag(body) },
+    });
+    await service.stop();
   });
 
   test('returns the server snapshot and a matching etag', async () => {

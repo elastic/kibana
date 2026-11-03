@@ -25,7 +25,7 @@ const OFREP_BODY_MAX_BYTES = 65_536;
 
 /**
  * Accepts the OFREP request body and ignores it.
- * Evaluation uses the server context, which is the same deployment context the browser is still building.
+ * Evaluation uses the server snapshot, including config overrides. The posted context is not applied.
  */
 export const ofrepRequestBodySchema = schema.nullable(
   schema.object(
