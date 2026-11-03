@@ -7,6 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
@@ -79,7 +80,10 @@ export const useScheduledExecutionDetails = ({
     ['scheduledExecutionDetails', { scheduleId, executionCount }],
     () =>
       http.get<ScheduledActionResultsResponse>(
-        `/api/osquery/scheduled_results/${scheduleId}/${executionCount}`,
+        buildPath('/api/osquery/scheduled_results/{scheduleId}/{executionCount}', {
+          scheduleId,
+          executionCount,
+        }),
         {
           version: API_VERSIONS.public.v1,
           query: { pageSize: 1 },

@@ -22,6 +22,7 @@ export const AnomalyCountCell = memo(
     if (typeof value !== 'number' || value === 0) return <>{'—'}</>;
     return onAnomalyCountClick ? (
       <EuiLink
+        data-test-subj="eaGridAnomalyCountLink"
         onClick={() => onAnomalyCountClick(row)}
         onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
       >

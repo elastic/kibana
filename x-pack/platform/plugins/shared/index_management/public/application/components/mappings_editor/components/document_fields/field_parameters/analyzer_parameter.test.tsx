@@ -149,9 +149,9 @@ describe('AnalyzerParameter', () => {
     const indexSettings = {
       analysis: {
         analyzer: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+          // eslint-disable-next-line @kbn/compat/typescript-naming-convention
           customAnalyzer_1: { type: 'custom', tokenizer: 'standard' },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+          // eslint-disable-next-line @kbn/compat/typescript-naming-convention
           customAnalyzer_2: { type: 'custom', tokenizer: 'standard' },
         },
       },
