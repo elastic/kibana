@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { recursiveRecord } from '../shared/record_types';
 
 /**
@@ -64,6 +64,14 @@ const sourceSchema = z.strictObject({
   ...componentFields,
   path_template: z.string().max(2048).optional(),
 });
+
+export const streamsComponentValidationRequestSchema = lazySchema(() =>
+  z.discriminatedUnion('kind', [
+    z.strictObject({ kind: z.literal('source'), component: sourceSchema }),
+    z.strictObject({ kind: z.literal('processor'), component: componentBaseSchema }),
+    z.strictObject({ kind: z.literal('destination'), component: componentBaseSchema }),
+  ])
+);
 
 const identifierListSchema = z.array(streamsUnitIdentifierSchema).max(2000);
 
@@ -357,6 +365,7 @@ export namespace StreamsUnit {
   export type StatsProcessorResult = z.infer<typeof streamsUnitStatsProcessorResultSchema>;
   export type StatsMeta = z.infer<typeof streamsUnitStatsMetaSchema>;
   export type StatsResponse = z.infer<typeof streamsUnitStatsResponseSchema>;
+  export type ComponentValidationRequest = z.infer<typeof streamsComponentValidationRequestSchema>;
   export interface ConfigurationSavedObjectAttributes {
     unit_id: Identifier;
     unit: Configuration;
@@ -366,12 +375,14 @@ export namespace StreamsUnit {
     metadata: UiMetadata;
   }
   export type DiagnosticSeverity = 'error' | 'warning' | 'info';
-  /** A config-distributor finding about a unit, from `POST /v1/validate` or a rejected publish. */
+  /**
+   * A config-distributor finding, from `POST /v1/units/validate`, a rejected publish, or
+   * `POST /v1/components/validate`.
+   */
   export interface Diagnostic {
     severity: DiagnosticSeverity;
     code: string;
     message: string;
-    /** Location in the validated unit, e.g. `pipelines > p-input > routes > 0`. */
     path?: string;
     line?: number;
   }

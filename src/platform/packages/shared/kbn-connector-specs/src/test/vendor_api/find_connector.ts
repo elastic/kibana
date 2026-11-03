@@ -19,6 +19,7 @@ export interface FoundConnector {
 const SRC = path.resolve(__dirname, '../..');
 // `export * from './specs/…'` and named re-exports such as `export { ThreatQ } from './specs/…'`.
 const SPEC_EXPORT = /^export (?:\*|\{[^}]*\}) from '\.\/(specs\/[^']+)';$/gm;
+const UNWRITTEN_CONNECTOR_ID = /^\.[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
 
 const isConnectorSpec = (value: unknown): value is ConnectorSpec =>
   typeof value === 'object' &&
@@ -41,12 +42,33 @@ export const listConnectors = async (): Promise<FoundConnector[]> => {
   return found;
 };
 
+const toConnectorId = (id: string): string => (id.startsWith('.') ? id : `.${id}`);
+
+const findRegistered = async (wanted: string): Promise<FoundConnector | undefined> =>
+  (await listConnectors()).find(({ connector }) => connector.metadata.id === wanted);
+
 /** Finds a connector by `metadata.id` (with or without the leading dot) and its `vendor_api` folder. */
 export const findConnector = async (id: string): Promise<FoundConnector> => {
-  const wanted = id.startsWith('.') ? id : `.${id}`;
-  const match = (await listConnectors()).find(({ connector }) => connector.metadata.id === wanted);
+  const wanted = toConnectorId(id);
+  const match = await findRegistered(wanted);
   if (!match) {
     throw new Error(`No connector in all_specs.ts has metadata.id "${wanted}"`);
   }
   return match;
+};
+
+/**
+ * The `vendor_api` folder of a connector, which may not be written yet: spec folders are named
+ * after the id, with underscores for its hyphens, so `.azure-blob` is in `specs/azure_blob`.
+ */
+export const findVendorApiDirectory = async (id: string): Promise<string> => {
+  const wanted = toConnectorId(id);
+  const match = await findRegistered(wanted);
+  if (match) {
+    return match.directory;
+  }
+  if (!UNWRITTEN_CONNECTOR_ID.test(wanted)) {
+    throw new Error(`"${wanted}" is not a connector id, such as .datadog or .azure-blob`);
+  }
+  return path.join(SRC, 'specs', wanted.slice(1).replace(/-/g, '_'), 'vendor_api');
 };

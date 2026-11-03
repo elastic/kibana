@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { toValue } from 'liquidjs';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
 import {
@@ -30,7 +31,9 @@ const textEncoder = new TextEncoder();
 // Keep a leading U+FEFF: by default the decoder would drop it as a byte order mark.
 const textDecoder = new TextDecoder('utf-8', { ignoreBOM: true });
 
-const stringifyTemplateValue = (value: unknown): string => {
+const stringifyTemplateValue = (rawValue: unknown): string => {
+  // `nil`, `empty` and `blank` are Drop objects; unwrap them (array items go through here too).
+  const value = toValue(rawValue);
   if (value === null || value === undefined) {
     return '';
   }

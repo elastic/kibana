@@ -97,6 +97,7 @@ describe('sandbox bash tool — connector credentials', () => {
     jest.fn().mockResolvedValue({
       env: { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN, CONNECTOR_CONFIG_URL: 'https://gh' },
       secretValues: [GITHUB_TOKEN],
+      secretEnvKeys: [{ key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] }],
     });
 
   it('resolves the connector for the calling user and passes its credentials to the command', async () => {
@@ -130,6 +131,16 @@ describe('sandbox bash tool — connector credentials', () => {
     expect(env.FOO).toBe('bar');
   });
 
+  it('sends the connector header keys as secrets bound to the connector hosts', async () => {
+    const { run, runCommand } = setup({ resolveConnectorCredentials: resolved() });
+
+    await run({ connector_id: 'connector-1' });
+
+    expect(runCommand.mock.calls[0][0].secret_env_keys).toEqual([
+      { key: 'CONNECTOR_HEADER_AUTHORIZATION', allowed_hosts: ['api.github.com'] },
+    ]);
+  });
+
   it('passes space egress firewall rules in allowed_hosts when configured on the space', async () => {
     const { run, runCommand } = setup({
       resolveConnectorCredentials: resolved(),
@@ -144,8 +155,8 @@ describe('sandbox bash tool — connector credentials', () => {
     ]);
   });
 
-  it('returns a structured tool error without running the command when getHostsForCommand rejects', async () => {
-    const { run, runCommand, sandboxAllowlistClient } = setup();
+  it('logs the error and returns a structured tool error without running the command when getHostsForCommand rejects', async () => {
+    const { run, runCommand, sandboxAllowlistClient, logger } = setup();
     sandboxAllowlistClient.getHostsForCommand.mockRejectedValueOnce(new Error('corrupted policy'));
 
     const res = await run({});
@@ -158,9 +169,11 @@ describe('sandbox bash tool — connector credentials', () => {
         },
       ],
     });
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to load space sandbox egress allowlist: corrupted policy'
+    );
     expect(runCommand).not.toHaveBeenCalled();
   });
-
   it('passes no credentials without a connector_id', async () => {
     const resolveConnectorCredentials = resolved();
     const { run, runCommand } = setup({ resolveConnectorCredentials });
@@ -169,6 +182,7 @@ describe('sandbox bash tool — connector credentials', () => {
 
     expect(resolveConnectorCredentials).not.toHaveBeenCalled();
     expect(runCommand.mock.calls[0][0].env).not.toHaveProperty('CONNECTOR_HEADER_AUTHORIZATION');
+    expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
   });
 
   it('redacts the secret from stdout and stderr of a successful command', async () => {
@@ -273,6 +287,7 @@ describe('sandbox bash tool — output size', () => {
     const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
       env: { CONNECTOR_HEADER_AUTHORIZATION: GITHUB_TOKEN },
       secretValues: [GITHUB_TOKEN],
+      secretEnvKeys: [],
     });
     const { run, writeFiles } = setup({ stdout, resolveConnectorCredentials });
 

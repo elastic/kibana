@@ -11,7 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { SandboxPluginStart, SandboxSession, SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
@@ -183,7 +183,7 @@ export const createSandboxBashTool = ({
         };
       }
       credentialEnv = resolved.env;
-      secretEnvKeys = (resolved as { secretEnvKeys?: SecretEnvKey[] }).secretEnvKeys ?? [];
+      secretEnvKeys = resolved.secretEnvKeys;
       secretValues = resolved.secretValues;
     }
 
@@ -191,7 +191,12 @@ export const createSandboxBashTool = ({
     if (sandboxAllowlistClient) {
       try {
         spaceAllowedHosts = await sandboxAllowlistClient.getHostsForCommand(context.request);
-      } catch {
+      } catch (error) {
+        logger.error(
+          `Failed to load space sandbox egress allowlist: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
         return {
           results: [
             {

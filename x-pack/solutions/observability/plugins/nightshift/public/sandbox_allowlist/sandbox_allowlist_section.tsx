@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   MAX_SANDBOX_ALLOWLIST_HOSTS,
   validateSandboxAllowlist,
@@ -92,37 +92,23 @@ export const SandboxAllowlistSection = () => {
           announceOnMount
           size="s"
           title={i18n.translate('xpack.nightshift.settings.sandboxAllowlistLoadError', {
-            defaultMessage: 'Failed to load the sandbox credential allowlist',
+            defaultMessage: 'Failed to load the sandbox egress allowlist',
           })}
           text={error.message}
           data-test-subj="nightshiftSandboxAllowlistLoadError"
         />
       ) : (
         <>
-          {hosts.length === 0 && !isInvalid && (
-            <>
-              <KbnWarningCallout
-                announceOnMount={false}
-                size="s"
-                title={i18n.translate('xpack.nightshift.settings.sandboxAllowlistEmptyWarning', {
-                  defaultMessage:
-                    'The allowlist is empty: sandbox commands cannot use any credentials.',
-                })}
-                data-test-subj="nightshiftSandboxAllowlistEmptyWarning"
-              />
-              <EuiSpacer size="s" />
-            </>
-          )}
           <EuiFormRow
             fullWidth
             isInvalid={isInvalid}
             error={errors}
             helpText={i18n.translate('xpack.nightshift.settings.sandboxAllowlistCount', {
-              defaultMessage: '{count} of {max} hosts',
+              defaultMessage: '{count} of {max} rules',
               values: { count: hosts.length, max: MAX_SANDBOX_ALLOWLIST_HOSTS },
             })}
             label={i18n.translate('xpack.nightshift.settings.sandboxAllowlistLabel', {
-              defaultMessage: 'Allowed hosts',
+              defaultMessage: 'Allowed hosts and rules',
             })}
           >
             <EuiTextArea

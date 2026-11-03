@@ -35,11 +35,14 @@ export type Zone =
 
 // Add a machine type here when a ported step first uses it.
 export type MachineType =
+  | 'c4d-standard-2'
+  | 'c4d-standard-16'
   | 'n2-highcpu-8'
   | 'n2-highmem-4'
   | 'n2-standard-2'
   | 'n2-standard-4'
   | 'n2-standard-8'
+  | 'n2-standard-16'
   | 'n2d-custom-16-32768'
   | 'n2d-standard-2'
   | 'n2d-standard-8'
@@ -62,6 +65,7 @@ export const usZones = [
 
 export const spotZones = {
   centralFCA: ['us-central1-f', 'us-central1-c', 'us-central1-a'],
+  centralFCBA: ['us-central1-f', 'us-central1-c', 'us-central1-b', 'us-central1-a'],
   allUS: usZones,
   // Zones aligned with the preemptible N2D CPU quota, which is separate from the standard quota.
   n2dPreemptible: [
@@ -101,7 +105,27 @@ export const retry = {
 
 export const hyperdiskBalanced = { diskType: 'hyperdisk-balanced' } as const;
 
+export const k8sMinimalAgent = (): AgentConfig => ({
+  provider: 'k8s',
+  image: 'docker.elastic.co/ci-agent-images/kibana/ci-minimal',
+  imageUID: 1000,
+});
+
+// Add a family here when a ported step first uses it.
+export type ImageFamily = 'kibana-minimal-ubuntu-2604' | 'kibana-ubuntu-2404';
+
+export const gcpImageAgent = (family: ImageFamily): AgentConfig => ({
+  provider: 'gcp',
+  image: `family/${family}`,
+  imageProject: 'elastic-images-prod',
+});
+
 export const onDemandAgent = (machineType: MachineType): AgentConfig => ({ machineType });
+
+export const preemptibleAgent = (machineType: MachineType): AgentConfig => ({
+  machineType,
+  preemptible: true,
+});
 
 // For a non-preemptible agent restricted to these zones.
 export const agentZones = (zones: readonly Zone[]): Pick<AgentConfig, 'zones'> => ({
@@ -109,8 +133,7 @@ export const agentZones = (zones: readonly Zone[]): Pick<AgentConfig, 'zones'> =
 });
 
 export const spotAgent = (machineType: MachineType, zones: readonly Zone[]): AgentConfig => ({
-  machineType,
-  preemptible: true,
+  ...preemptibleAgent(machineType),
   spotZones: zones.join(','),
 });
 

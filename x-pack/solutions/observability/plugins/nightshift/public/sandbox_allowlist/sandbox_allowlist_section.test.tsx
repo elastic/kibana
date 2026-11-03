@@ -60,14 +60,15 @@ describe('SandboxAllowlistSection', () => {
 
     expect(screen.getByTestId('nightshiftSandboxAllowlistTextArea')).toHaveValue('api.github.com');
     expect(screen.getByTestId('nightshiftSandboxAllowlistSave')).toBeDisabled();
-    expect(screen.getByText('1 of 32 hosts')).toBeInTheDocument();
+    expect(screen.getByText('1 of 32 rules')).toBeInTheDocument();
   });
 
-  it('warns when the allowlist is empty', () => {
+  it('renders an empty editor without warnings when no additional rules are configured', () => {
     mockFetchResult = { data: { hosts: [] }, isLoading: false, error: null };
     renderSection();
 
-    expect(screen.getByTestId('nightshiftSandboxAllowlistEmptyWarning')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftSandboxAllowlistTextArea')).toHaveValue('');
+    expect(screen.getByText('0 of 32 rules')).toBeInTheDocument();
   });
 
   it('shows inline errors for invalid wildcards and blocks saving', () => {

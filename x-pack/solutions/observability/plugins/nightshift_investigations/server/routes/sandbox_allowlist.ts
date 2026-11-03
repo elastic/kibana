@@ -44,9 +44,9 @@ const getSandboxAllowlistRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'GET /internal/nightshift/sandbox_allowlist',
   options: {
     access: 'internal',
-    summary: 'Get the sandbox credential host allowlist',
+    summary: 'Get the sandbox egress firewall allowlist',
     description:
-      'Returns the hosts that may receive real connector and sandbox secret values from sandbox commands in the current space.',
+      'Returns the outbound hostnames and egress firewall DSL rules permitted for sandbox commands in the current space.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: lazySchema(() => z.object({})),

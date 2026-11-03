@@ -16,12 +16,12 @@ import { NIGHTSHIFT_SANDBOX_ALLOWLIST_QUERY_KEY } from './use_fetch_sandbox_allo
 
 const SAVE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.sandboxAllowlist.saveSuccessToastTitle',
-  { defaultMessage: 'Sandbox credential allowlist saved' }
+  { defaultMessage: 'Sandbox egress allowlist saved' }
 );
 
 const SAVE_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.sandboxAllowlist.saveErrorToastTitle',
-  { defaultMessage: 'Failed to save the sandbox credential allowlist' }
+  { defaultMessage: 'Failed to save the sandbox egress allowlist' }
 );
 
 const toError = (error: unknown): Error =>

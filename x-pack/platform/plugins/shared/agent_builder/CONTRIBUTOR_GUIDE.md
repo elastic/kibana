@@ -1860,15 +1860,17 @@ The full implementation is ~130 lines and serves as the reference for new types.
 The chat streaming layer lives across two folders:
 
 - `public/application/context/streaming/` — the lifted provider, its context hook, the
-  send and resume mutation hooks, the chat-events subscriber, and shared types.
+  send, resume, and attach mutation hooks, the chat-events subscriber, and shared types.
 - `public/application/hooks/` — the per-conversation convenience hook
-  (`use_conversation_stream.ts`) and the "any stream active?" derived hook
-  (`use_is_any_conversation_streaming.ts`). They live here because they compose
+  (`use_conversation_stream.ts`), the "any stream active?" derived hook
+  (`use_is_any_conversation_streaming.ts`), and the attach decision
+  (`use_attach_to_active_execution.ts`). They live here because they compose
   `useConversation` (a sibling in `hooks/`) with the streaming context.
 
 This section documents how mutations, lifted state, and the React Query cache fit
 together. Read this before touching any of: `streaming_context.tsx`,
 `use_send_message_mutation.ts`, `use_resume_round_mutation.ts`,
+`use_attach_execution_mutation.ts`, `use_attach_to_active_execution.ts`,
 `use_subscribe_to_chat_events.ts`, `use_conversation_stream.ts`,
 `use_is_any_conversation_streaming.ts`.
 
@@ -1882,58 +1884,54 @@ together. Read this before touching any of: `streaming_context.tsx`,
   instance because each instance has its own `QueryClient`.
 
 The sidebar uses `useStreamingContext()` directly. `useIsAnyConversationStreaming()`
-is derived from the same context and is used by the page-leave guard and the
-embeddable welcome-message dismiss — both genuinely care about "is anything in
-flight, anywhere?". Anything inside the conversation tree should use the per-conversation
+is derived from the same context and is used by the embeddable welcome-message
+dismiss. Anything inside the conversation tree should use the per-conversation
 scoped hook, `useConversationStream()` (in `hooks/use_conversation_stream.ts`).
-
 
 ### Lifted state
 
 `StreamingProvider` owns two slices with split lifecycles:
 
-- `activeStreams: Map<conversationId, { type, agentReasoning }>` — one entry per
+- `activeStreams: Map<conversationId, ActiveStream>` — one entry per
   in-flight stream. Set synchronously when each mutation kicks off; deleted in the
   mutation's `finally`. Multiple entries can coexist — concurrent streams are
-  supported, one per conversation. Native `Map` rather than `Record` because the
-  same key shape pairs with the `Map<conversationId, AbortController>` ref each
-  mutation hook holds, and `cancelAllStreams` iterates this map's keys.
+  supported, one per conversation. Each entry has a `type` (`send`, `resume`, or
+  `attach`), a `started` flag once `execution_started` arrives, and a `cancelling`
+  flag after Stop.
 - `byConversationId: Record<string, StreamRecord>` — per-conversation
-  `pendingMessage`, `error`, `errorSteps`. Persists across stream end so a user
-  can hit Retry after a failure. Mutated via immer; lifecycle is unrelated to
-  in-flight streams so it stayed a plain record.
+  `pendingMessage` and `pendingAttachments`, retained until completion handling
+  releases them.
+
+The provider also keeps an `attemptedExecutionIds` ref. `mutateAttach` records an
+execution before attaching, and `cancelStream` records executions stopped here.
+Repeated fetches of the same pointer cannot start another attach during this mount.
 
 ### Mutations: single-scope `mutationFn`
 
-`useSendMessageMutation` and `useResumeRoundMutation` use a **single-scope `mutationFn`
-with `try / catch / finally`**, not React Query's lifecycle methods (`onMutate`,
-`onSuccess`, `onError`, `onSettled`). The shape is:
+`useSendMessageMutation`, `useResumeRoundMutation`, and `useAttachExecutionMutation`
+keep the stream lifecycle inside `mutationFn`, including error handling and a
+`finally` block for cleanup. The shape is:
 
 ```ts
 mutationFn: async (vars) => {
-  // setup phase (sync, before any await): seed the optimistic round, set pending message.
-  // Note: `activeStream` is set by the provider's `mutateSendMessage` wrapper *before*
-  // `mutate()` returns — not here.
+  // The provider registers the active stream before calling the mutation.
   const streamActions = createConversationActions({ conversationId: vars.conversationId, ... });
 
   try {
     await subscribeToChatEvents({ events$, conversationActions: streamActions, ... });
-    // success cleanup
-  } catch (err) {
-    // error cleanup
-    throw err;
+    if (isDetached(handle)) return;
+    await releaseLocalContent({ refetch: streamActions.refetchConversation, ... });
   } finally {
-    // cleanup: invalidate cache (skipped if round paused on HITL),
-    // delete this conversation's `activeStreams` entry, delete its abort controller.
+    // Clear this conversation's active-stream entry and remove this mutation's handle.
   }
 }
 ```
 
-Each mutation hook holds a `Map<conversationId, AbortController>` ref so concurrent
-streams have independent cancel signals. The map is keyed by `vars.conversationId`,
-the cancel helper takes the same key, and the `finally` block deletes only the
-entry it installed (compared by reference so a re-mutate's controller isn't
-clobbered).
+Each mutation hook holds a `Map<conversationId, StreamHandle>` ref with a controller,
+the execution id used by the abort endpoint, and an `abortRequested` flag. The map
+is keyed by `vars.conversationId`, the cancel helper takes the same key, and the
+`finally` block deletes only the entry it installed (compared by reference so a
+re-mutate's controller isn't clobbered).
 
 **Why not lifecycle methods?** Streams aren't typical mutations — the bulk of the work
 happens *during* `mutationFn`, with state mutations flowing for many seconds. Splitting
@@ -1950,22 +1948,59 @@ is closure-bound to the mutation's conversation id. **Stream events target the
 conversation the mutation was started for, regardless of where the user has navigated.**
 
 If the user submits on conversation A and immediately switches to B, the stream events
-keep writing to A's cache. B loads cleanly from the server.
+keep updating A's live timeline. B loads cleanly from the server.
+
+Each view has its own `ConversationStreamService`. Mutations feed their events into
+its `trackStream` operator; saved events take precedence over live copies with the
+same id. After a run ends, `releaseLocalContent` refetches the conversation and
+clears local execution events once their saved terminal event is present.
 
 ### Per-conversation `useConversation` gate
 
-`useConversation` is disabled for a conversation when (a) a stream is currently writing
-to its cache, or (b) the cache shows it's paused on a HITL prompt. The cache is
-authoritative in both cases, so a refetch would race with optimistic chunks (streaming)
-or with the resume mutation about to fire on Approve (HITL). Other conversations stay
-free to refetch — switch to conversation B while A streams and B loads cleanly. See the
-inline comment on the `enabled` predicate for details.
+`useConversation` is disabled while this provider has an active stream for the
+conversation. The saved document lags behind the live events during a run. Other
+conversations remain free to fetch, and shared conversations poll every five seconds
+while they have no local stream. Completion handling explicitly refetches the saved
+conversation even when the query is disabled.
+
+### Attach and detach
+
+`useAttachToActiveExecution` runs in `Conversation`, covering both the full app and
+the embeddable. When a conversation GET carries `active_execution.execution_id`
+and this provider has no stream for that conversation, it calls `mutateAttach`.
+The provider's attempted-id guard permits one attach per execution per mount.
+
+`ChatService.attachToExecution` replays from `/reattach?offset=0` and follows the
+live tail using the existing reconnect helper. Attach events feed the local
+timeline but are not published to `EventsService`, because replaying them could
+repeat other plugins' side effects. A resumed execution gets a synthetic local
+`prompt_response` to link it to the paused turn; the saved response replaces it
+after the completion refetch. Only a send creates a scroll anchor.
+
+Unmounting the provider calls `detachAllStreams`, which aborts local fetch
+controllers without requesting a server abort. Detached mutations skip completion
+refetches and composer cleanup. The server run continues, and a newly mounted view
+can attach through the saved execution pointer. Switching conversations within the
+same provider leaves its streams running.
+
+Attach failures are handled without a toast and followed by a conversation refetch.
+The attempted-id guard prevents another attach to that execution in this mount,
+including after the reconnect helper exhausts its recovery attempt. Reloading or
+remounting the view permits a fresh attempt.
+
+**Browser tools:** attached streams do not execute browser-tool calls, from either
+the replay or the live tail. The view that sent or resumed the run executes them
+while it stays connected. Closing it and reopening the conversation restores the
+timeline, but does not restore browser-tool execution. The server does not wait for browser
+acknowledgement, so the run can finish without applying a browser action. Recovering
+these actions safely requires execution ownership and deduplication across views;
+user-facing handling of missed actions is a follow-up.
 
 ### Concurrent streams
 
 The app supports concurrent per-conversation streams. Submitting on conversation B
-while A is mid-stream starts a second stream alongside A — A keeps writing to its
-cache, B writes to its own. Cancelling one doesn't affect the other.
+while A is mid-stream starts a second stream alongside A. Each updates its own live
+timeline. Cancelling one doesn't affect the other.
 
 What this means in practice:
 
@@ -1973,14 +2008,10 @@ What this means in practice:
   from `useConversationStream()`. The new-conversation route (`/conversations/new`) has
   no `conversationId`, so `isResponseLoading` is `false` and submit is always
   allowed there even while other conversations stream.
-- **HITL Approve / Cancel gate** (`round_layout.tsx`) is per-conversation:
-  `isResponseLoading && !isResuming`. Other in-flight conversations cannot
-  corrupt this conversation's cache because `streamActions` are closure-bound
-  to `vars.conversationId`.
 - **Per-conversation cancel** is wired through `cancelStream(id)` on the context.
-  The mutation hooks hold `Map<conversationId, AbortController>` refs so cancels
-  hit only the targeted controller.
-- **Page-leave guard** is the lone remaining global check. If any stream is in
-  flight when the user navigates away, a confirm dialog appears; on confirm,
-  `cancelAllStreams()` aborts every controller in the map before the platform
-  proceeds.
+  It asks the mutation holding the handle to abort the server execution and records
+  the returned execution id so a lingering pointer cannot cause reattachment.
+  Stop keeps the connection open for the terminal event unless the abort request
+  fails or reports that no terminal event was persisted.
+- **Provider unmount** detaches all of its streams locally. It does not stop the
+  server executions.

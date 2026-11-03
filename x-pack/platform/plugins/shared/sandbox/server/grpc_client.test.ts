@@ -42,7 +42,6 @@ describe('serializeRunCommandRequest', () => {
       ])
     );
   });
-
   it('encodes session-level allowed_hosts / egress rules in field 7', () => {
     const buffer = serializeRunCommandRequest({
       ...baseRequest,
