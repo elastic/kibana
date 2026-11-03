@@ -127,7 +127,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   } else if (policies && policies.length === 0) {
     content = (
       <EuiPageTemplate.EmptyPrompt
-        iconType="managementApp"
+        iconType="gear"
         title={
           <h1>
             <FormattedMessage
