@@ -56,6 +56,29 @@ describe('createConnectorTypeRequestSchema', () => {
     expect(result.success).toBe(true);
   });
 
+  it('accepts typed scalar defaults and rejects mismatched or invalid defaults', () => {
+    const withDefaults = {
+      ...validRequest,
+      config: [
+        { name: 'baseUrl', type: 'string', format: 'uri', default: 'https://api.example.com' },
+        { name: 'limit', type: 'number', default: 25 },
+        { name: 'verbose', type: 'boolean', default: false },
+      ],
+    };
+    expect(createConnectorTypeRequestSchema.safeParse(withDefaults).success).toBe(true);
+    for (const field of [
+      { name: 'baseUrl', type: 'string', default: 25 },
+      { name: 'baseUrl', type: 'string', format: 'uri', default: 'not a URL' },
+      { name: 'limit', type: 'number', default: '25' },
+      { name: 'verbose', type: 'boolean', default: 'false' },
+      { name: 'hosts', type: 'array', items: 'string', default: 'example.com' },
+    ]) {
+      expect(
+        createConnectorTypeRequestSchema.safeParse({ ...validRequest, config: [field] }).success
+      ).toBe(false);
+    }
+  });
+
   it('requires an item type for arrays and rejects unsupported formats', () => {
     expect(
       createConnectorTypeRequestSchema.safeParse({

@@ -10,6 +10,7 @@ import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormErrorText,
@@ -88,6 +89,27 @@ const arrayItemTypeOptions = [
   ...fieldTypeOptions.filter(({ value }) => value !== 'array'),
 ];
 
+const booleanDefaultOptions = [
+  {
+    value: '',
+    text: i18n.translate('xpack.triggersActionsUI.buildConnector.default.unset', {
+      defaultMessage: 'No default',
+    }),
+  },
+  {
+    value: 'true',
+    text: i18n.translate('xpack.triggersActionsUI.buildConnector.default.true', {
+      defaultMessage: 'True',
+    }),
+  },
+  {
+    value: 'false',
+    text: i18n.translate('xpack.triggersActionsUI.buildConnector.default.false', {
+      defaultMessage: 'False',
+    }),
+  },
+];
+
 const LABELS = {
   name: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.field.nameLabel', {
     defaultMessage: 'Name',
@@ -98,6 +120,12 @@ const LABELS = {
   items: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.field.itemsLabel', {
     defaultMessage: 'Item type',
   }),
+  default: i18n.translate(
+    'xpack.triggersActionsUI.sections.buildConnectorFlyout.field.defaultLabel',
+    {
+      defaultMessage: 'Default value',
+    }
+  ),
   required: i18n.translate(
     'xpack.triggersActionsUI.sections.buildConnectorFlyout.field.requiredLabel',
     { defaultMessage: 'Required' }
@@ -131,7 +159,7 @@ const FieldListEditorComponent: React.FC<Props> = ({
   addButtonLabel,
   testSubjPrefix,
 }) => {
-  const { control, trigger } = useFormContext<BuildConnectorFormData>();
+  const { control, setValue, trigger } = useFormContext<BuildConnectorFormData>();
   const { fields, append, remove } = useFieldArray({ control, name });
   const { errors } = useFormState({ control, name });
   const listError: string | undefined = get(errors, `${name}.root.message`);
@@ -206,6 +234,7 @@ const FieldListEditorComponent: React.FC<Props> = ({
                           value={field.value}
                           onChange={(e) => {
                             field.onChange(e.target.value);
+                            setValue(`${name}.${index}.default`, undefined);
                             void trigger();
                           }}
                           onBlur={field.onBlur}
@@ -236,6 +265,78 @@ const FieldListEditorComponent: React.FC<Props> = ({
                                 onBlur={itemsField.onBlur}
                                 inputRef={itemsField.ref}
                               />
+                            </EuiFormRow>
+                          )}
+                        />
+                      )}
+                      {field.value !== 'array' && (
+                        <Controller
+                          name={`${name}.${index}.default`}
+                          control={control}
+                          render={({
+                            field: defaultField,
+                            fieldState: { error: defaultError },
+                          }) => (
+                            <EuiFormRow
+                              label={LABELS.default}
+                              display="rowCompressed"
+                              isInvalid={!!defaultError}
+                              error={defaultError?.message}
+                            >
+                              {field.value === 'number' ? (
+                                <EuiFieldNumber
+                                  compressed
+                                  isInvalid={!!defaultError}
+                                  data-test-subj={`${testSubjPrefix}-${index}-default`}
+                                  value={
+                                    typeof defaultField.value === 'number' ? defaultField.value : ''
+                                  }
+                                  onChange={(event) =>
+                                    defaultField.onChange(
+                                      event.target.value === ''
+                                        ? undefined
+                                        : Number(event.target.value)
+                                    )
+                                  }
+                                  onBlur={defaultField.onBlur}
+                                  inputRef={defaultField.ref}
+                                />
+                              ) : field.value === 'boolean' ? (
+                                <EuiSelect
+                                  compressed
+                                  isInvalid={!!defaultError}
+                                  options={booleanDefaultOptions}
+                                  data-test-subj={`${testSubjPrefix}-${index}-default`}
+                                  value={
+                                    typeof defaultField.value === 'boolean'
+                                      ? String(defaultField.value)
+                                      : ''
+                                  }
+                                  onChange={(event) =>
+                                    defaultField.onChange(
+                                      event.target.value === ''
+                                        ? undefined
+                                        : event.target.value === 'true'
+                                    )
+                                  }
+                                  onBlur={defaultField.onBlur}
+                                  inputRef={defaultField.ref}
+                                />
+                              ) : (
+                                <EuiFieldText
+                                  compressed
+                                  isInvalid={!!defaultError}
+                                  data-test-subj={`${testSubjPrefix}-${index}-default`}
+                                  value={
+                                    typeof defaultField.value === 'string' ? defaultField.value : ''
+                                  }
+                                  onChange={(event) =>
+                                    defaultField.onChange(event.target.value || undefined)
+                                  }
+                                  onBlur={defaultField.onBlur}
+                                  inputRef={defaultField.ref}
+                                />
+                              )}
                             </EuiFormRow>
                           )}
                         />

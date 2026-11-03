@@ -556,7 +556,14 @@ describe('BuildConnectorFlyout', () => {
       displayName: 'Acme',
       description: 'Talks to Acme',
       auth: { type: 'api_key_header' as const, headerName: 'X-Api-Key' },
-      config: [{ name: 'baseUrl', type: 'string' as const, required: true }],
+      config: [
+        {
+          name: 'baseUrl',
+          type: 'string' as const,
+          required: true,
+          default: 'https://api.acme.com',
+        },
+      ],
       actions: {
         ping: {
           description: 'Ping',
@@ -616,6 +623,9 @@ describe('BuildConnectorFlyout', () => {
       expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
       expect(screen.getByTestId('buildConnectorAuthTypeSelect')).toHaveValue('api_key_header');
       expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Api-Key');
+      expect(screen.getByTestId('buildConnectorConfigFields-0-default')).toHaveValue(
+        'https://api.acme.com'
+      );
       expect(screen.getByTestId('buildConnectorAction-0-name')).toHaveValue('ping');
       expect(screen.getByTestId('buildConnectorAction-0-url')).toHaveValue(
         '{{config.baseUrl}}/ping'
@@ -661,6 +671,14 @@ describe('BuildConnectorFlyout', () => {
       expect(createConnectorType).toHaveBeenCalledWith(
         expect.objectContaining({
           connectorType: expect.objectContaining({
+            config: [
+              {
+                name: 'baseUrl',
+                type: 'string',
+                required: true,
+                default: 'https://api.acme.com',
+              },
+            ],
             actions: expect.objectContaining({
               get_blacklist: expect.objectContaining({
                 input: [{ name: 'onlyCountries', type: 'array', items: 'string', required: false }],
@@ -800,7 +818,14 @@ describe('BuildConnectorFlyout', () => {
               displayName: 'Acme',
               description: 'Talks to Acme',
               auth: { type: 'api_key_header', headerName: 'X-Api-Key' },
-              config: [{ name: 'baseUrl', type: 'string', required: true }],
+              config: [
+                {
+                  name: 'baseUrl',
+                  type: 'string',
+                  required: true,
+                  default: 'https://api.acme.com',
+                },
+              ],
               actions: {
                 ping: {
                   description: 'Ping',

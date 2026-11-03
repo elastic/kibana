@@ -53,6 +53,7 @@ const toRequestField = (field: ConnectorTypeField): ConnectorTypeField => ({
   name: field.name,
   type: field.type,
   required: field.required ?? false,
+  ...(field.default !== undefined ? { default: field.default } : {}),
   ...(field.type === 'array' && field.items ? { items: field.items } : {}),
   ...(field.type === 'string' && field.format ? { format: field.format } : {}),
   ...(field.label ? { label: field.label } : {}),

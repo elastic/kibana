@@ -7,6 +7,7 @@
 
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { ConnectorSpec } from '@kbn/connector-specs';
+import { z } from '@kbn/zod/v4';
 import { createConnectorType } from './create_type';
 
 const request = {
@@ -26,6 +27,34 @@ const request = {
 };
 
 describe('createConnectorType', () => {
+  it('keeps a documented default in the runtime and form schemas', () => {
+    const createTypeFromSpec = jest.fn(() => ({ id: '.dynamic_type' })) as never;
+    createConnectorType({
+      actionTypeRegistry: { has: jest.fn(() => false) } as unknown as ActionTypeRegistry,
+      createTypeFromSpec,
+      registerType: jest.fn(),
+      request: {
+        ...request,
+        config: [
+          {
+            name: 'baseUrl',
+            type: 'string',
+            format: 'uri',
+            required: true,
+            default: 'https://api.abuseipdb.com',
+          },
+        ],
+      },
+    });
+    const spec = (createTypeFromSpec as jest.Mock).mock.calls[0][0] as ConnectorSpec;
+    if (!spec.schema) throw new Error('Expected connector config schema.');
+
+    expect(spec.schema.parse({})).toEqual({ baseUrl: 'https://api.abuseipdb.com' });
+    expect(z.toJSONSchema(spec.schema)).toMatchObject({
+      properties: { baseUrl: { default: 'https://api.abuseipdb.com' } },
+    });
+  });
+
   it('converts and registers the requested connector type', () => {
     const actionTypeRegistry = { has: jest.fn(() => false) } as unknown as ActionTypeRegistry;
     const registerType = jest.fn();

@@ -38,6 +38,9 @@ export const identifierSchema = lazySchema(() =>
 );
 
 const scalarFieldTypeSchema = lazySchema(() => z.enum(['string', 'number', 'boolean']));
+const fieldDefaultSchema = lazySchema(() =>
+  z.union([z.string().min(1).max(2048), z.number().finite(), z.boolean()])
+);
 export const fieldSchema = lazySchema(() =>
   z
     .object({
@@ -45,6 +48,7 @@ export const fieldSchema = lazySchema(() =>
       type: z.enum(['string', 'number', 'boolean', 'array']),
       items: scalarFieldTypeSchema.optional(),
       format: z.enum(['uri', 'ipv4', 'date-time']).optional(),
+      default: fieldDefaultSchema.optional(),
       required: z.boolean().default(false),
       label: z.string().max(MAX_TEXT).optional(),
       description: z.string().max(MAX_LONG_TEXT).optional(),
@@ -68,6 +72,28 @@ export const fieldSchema = lazySchema(() =>
           path: ['format'],
           message: 'Formats apply only to string fields.',
         });
+      if (field.default !== undefined) {
+        if (field.type === 'array' || typeof field.default !== field.type) {
+          context.addIssue({
+            code: 'custom',
+            path: ['default'],
+            message: 'Default value must match the field type.',
+          });
+        } else if (field.type === 'string' && field.format) {
+          const formatSchema = {
+            uri: z.url(),
+            ipv4: z.ipv4(),
+            'date-time': z.iso.datetime(),
+          }[field.format];
+          if (!formatSchema.safeParse(field.default).success) {
+            context.addIssue({
+              code: 'custom',
+              path: ['default'],
+              message: 'Default value must match the field format.',
+            });
+          }
+        }
+      }
     })
 );
 

@@ -26,9 +26,12 @@ const fieldToZodSchema = (field: CreateConnectorTypeRequest['config'][number]) =
     if (field.format === 'date-time') return z.iso.datetime();
     return z.string();
   };
-  const fieldSchema =
+  const fieldSchema: z.ZodType<string | number | boolean | Array<string | number | boolean>> =
     field.type === 'array' ? z.array(scalar(field.items ?? 'string')).max(100) : scalar(field.type);
-  return (field.required ? fieldSchema : fieldSchema.optional()).meta({
+  const optionalSchema = field.required ? fieldSchema : fieldSchema.optional();
+  const schemaWithDefault =
+    field.default === undefined ? optionalSchema : optionalSchema.default(field.default);
+  return schemaWithDefault.meta({
     label: field.label?.trim() || field.name,
     ...(field.description ? { helpText: field.description } : {}),
   });
