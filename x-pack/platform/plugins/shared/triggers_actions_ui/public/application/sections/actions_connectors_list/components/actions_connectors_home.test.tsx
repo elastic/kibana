@@ -14,6 +14,7 @@ import { createMemoryHistory, createLocation } from 'history';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -30,6 +31,12 @@ const { loadAllActions, loadConnectorAuthStatus } = jest.requireMock(
   '../../../lib/action_connector_api'
 );
 jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/code-editor', () => ({
+  ...(jest.requireActual('@kbn/code-editor') as object),
+  CodeEditor: (props: React.ComponentProps<typeof MockedCodeEditor>) => (
+    <MockedCodeEditor {...props} />
+  ),
+}));
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveActionsCapability: jest.fn(),
 }));
@@ -181,6 +188,18 @@ describe('ActionsConnectorsHome', () => {
       name: 'Select a connector',
     });
     expect(selectConnectorFlyout).toBeInTheDocument();
+  });
+
+  it('show "Build a connector" flyout when the secondary "Create connector" button pressed', async () => {
+    renderHome(connectorsTabProps());
+
+    const buildConnectorButton = await screen.findByTestId(
+      'createConnectorButton-secondary-button'
+    );
+    expect(buildConnectorButton).toHaveAccessibleName('Build a connector');
+    await userEvent.click(buildConnectorButton);
+
+    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
   });
 
   it('hide "Create connector" button when the user only has read access', async () => {

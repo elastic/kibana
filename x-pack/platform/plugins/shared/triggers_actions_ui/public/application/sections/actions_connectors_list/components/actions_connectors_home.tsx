@@ -27,6 +27,7 @@ import type { ActionConnector } from '../../../../types';
 import type { EditConnectorTabs } from '../../../../types';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
+import { BuildConnectorFlyout } from '../../action_connector_form/build_connector_flyout';
 import type { EditConnectorProps } from './types';
 import { loadAllActions, loadConnectorAuthStatus } from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
@@ -35,6 +36,11 @@ import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflict
 type ConnectorAuthStatusError = string | undefined;
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
+
+const BUILD_CONNECTOR_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.connectors.home.buildConnector',
+  { defaultMessage: 'Build a connector' }
+);
 
 export interface MatchParams {
   section: Section;
@@ -61,6 +67,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const { skippedPreconfiguredConnectorIds } = useSkippedPreconfiguredConnectorIds();
 
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
+  const [buildFlyoutVisible, setBuildFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [actions, setActions] = useState<ActionConnector[]>([]);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
@@ -169,6 +176,12 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
               iconType: 'plusCircle',
               testId: 'createConnectorButton',
               run: () => setAddFlyoutVisibility(true),
+              splitButtonProps: {
+                secondaryButtonIconType: 'wrench',
+                secondaryButtonAriaLabel: BUILD_CONNECTOR_LABEL,
+                secondaryButtonTooltipContent: BUILD_CONNECTOR_LABEL,
+                run: () => setBuildFlyoutVisibility(true),
+              },
             }
           : undefined,
     }),
@@ -260,6 +273,9 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           onTestConnector={loadActions}
           actionTypeRegistry={actionTypeRegistry}
         />
+      )}
+      {buildFlyoutVisible && (
+        <BuildConnectorFlyout onClose={() => setBuildFlyoutVisibility(false)} />
       )}
       {editConnectorProps.initialConnector && (
         <EditConnectorFlyout
