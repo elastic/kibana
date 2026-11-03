@@ -7,6 +7,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 
+import type { ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, ViewMode, useSearchApi } from '@kbn/presentation-publishing';
 import type { HasSerializedChildState } from '@kbn/presentation-publishing';
@@ -32,6 +33,7 @@ interface GeneralLensApi {
   hideTitle$: BehaviorSubject<boolean | undefined>;
   reload$: BehaviorSubject<void>;
   disableTriggers$: BehaviorSubject<boolean>;
+  projectRouting$: PublishingSubject<ProjectRouting | undefined>;
 }
 
 export type LensParentApi = SearchApi &

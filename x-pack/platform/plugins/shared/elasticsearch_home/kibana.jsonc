@@ -17,10 +17,10 @@
     ],
     "requiredPlugins": [
       "features",
-      "share",
-      "agentBuilder"
+      "share"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "cloud"
     ]
   }
