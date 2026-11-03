@@ -13,6 +13,7 @@ import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { readFirstNumber } from './read_first_number';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
+import type { TileDeltaFailure } from '../data';
 
 interface NewEntityDeltaOptions {
   spaceId: string;
@@ -23,11 +24,13 @@ interface NewEntityDeltaOptions {
   isReady: boolean;
   /** The live count, which the previous period is compared with. */
   count: number;
+  /** True when the count came back: a failed, timed-out or skipped count has no change to show. */
+  hasCount: boolean;
 }
 
 /**
  * The delta of the New entity tile. It runs on the local cluster only, like the count, once the
- * page's counts have loaded and its own count is above 0, after a check that the entity store
+ * page's counts have loaded and its own count came back, after a check that the entity store
  * reaches back twice the range (the oldest `first_seen`).
  */
 export const useNewEntityDelta = ({
@@ -37,6 +40,7 @@ export const useNewEntityDelta = ({
   entityFilters = EMPTY_ENTITY_FILTERS,
   isReady,
   count,
+  hasCount,
 }: NewEntityDeltaOptions): {
   delta: number | undefined;
   /** The count over the previous period, which the sparkline starts from. */
@@ -45,6 +49,8 @@ export const useNewEntityDelta = ({
   isHistoryMissing: boolean;
   /** True once the history check passed, so the sparkline can follow the same rule. */
   reachesBack: boolean | undefined;
+  /** Set when the history check or the previous-period query failed. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const {
     data: resolvedIndex,
@@ -60,13 +66,12 @@ export const useNewEntityDelta = ({
     [index, timeRange, entityFilterClauses]
   );
 
-  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError, failure } = usePreviousPeriod({
     tileKey: 'newEntity',
     guardQuery,
     previousQuery,
-    enabled: !skip && isReady && count > 0 && !isIndexLoading && Boolean(index),
+    enabled: !skip && isReady && hasCount && !isIndexLoading && Boolean(index),
     parse: (raw) => readFirstNumber(raw, 'value'),
-    localOnly: true,
   });
 
   return {
@@ -74,9 +79,10 @@ export const useNewEntityDelta = ({
     previous,
     isHistoryMissing,
     reachesBack,
+    failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
-      count,
+      hasCount,
       // Once the index has loaded, a missing one means the query can never run.
       isUnavailable: !skip && !isIndexLoading && !index,
       isError,
