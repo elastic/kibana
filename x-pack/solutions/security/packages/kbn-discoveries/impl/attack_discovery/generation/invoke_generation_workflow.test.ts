@@ -402,6 +402,31 @@ describe('invokeGenerationWorkflow', () => {
       expect(workflowInputs.additional_context).toContain('Skill corroboration: high-risk host');
     });
 
+    it('passes plugin_id and aggregate_by in workflow inputs when telemetryMetadata is set', async () => {
+      await invokeGenerationWorkflow({
+        ...defaultProps,
+        telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+      });
+
+      expect(mockWorkflowsManagementApi.scheduleWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'default',
+        expect.objectContaining({ aggregate_by: 'rollup_parent', plugin_id: 'some_plugin' }),
+        mockRequest,
+        'attack-discovery-pipeline'
+      );
+    });
+
+    it('does NOT include plugin_id or aggregate_by in workflow inputs when unset', async () => {
+      await invokeGenerationWorkflow(defaultProps);
+
+      const workflowInputs = (mockWorkflowsManagementApi.scheduleWorkflow as jest.Mock).mock
+        .calls[0][2] as Record<string, unknown>;
+
+      expect(workflowInputs).not.toHaveProperty('plugin_id');
+      expect(workflowInputs).not.toHaveProperty('aggregate_by');
+    });
+
     it('does NOT include newAlerts in the generate-step-succeeded event', async () => {
       await invokeGenerationWorkflow(defaultProps);
 
