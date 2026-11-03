@@ -6,7 +6,7 @@
  */
 import { z } from '@kbn/zod';
 
-import { serverlessSloSettingsSchema, sloSettingsSchema } from '../../schema/zod/settings';
+import { serverlessSloSettingsSchema, sloSettingsSchema } from '../../schema/settings';
 
 const putSLOSettingsParamsSchema = z.object({
   body: sloSettingsSchema,

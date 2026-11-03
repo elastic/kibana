@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { DeveloperModeBadge } from '../components/ui/developer_mode_badge';
 import { useKibana } from '../hooks/use_kibana';
-import { AppsSection } from './components/apps_section';
+import { SlackChannelsSection } from './components/apps_section';
+import { ConnectorsSection } from './components/connectors_section';
 import { DeveloperModeSection } from './components/developer_mode_section';
 import { KnowledgePurgeSection } from './components/knowledge_purge_section';
 import { SettingsSection } from './components/settings_section';
@@ -25,7 +26,8 @@ export const GeneralSettingsTab = () => {
 
   return (
     <>
-      <AppsSection canEdit={canManageAndConfigure} />
+      <ConnectorsSection />
+      <SlackChannelsSection canEdit={canManageAndConfigure} />
 
       <EuiSpacer />
 

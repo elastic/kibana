@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/sample-data-ingest'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/search-shared-ui'
-  - '@kbn/shared-components'
   - '@kbn/licensing-types'
   - '@kbn/licensing-plugin'
   - '@kbn/react-query'
@@ -55,12 +54,14 @@ dependsOn:
   - '@kbn/workflows-ui'
   - '@kbn/scout-search'
   - '@kbn/announcement-banner'
+  - '@kbn/elasticsearch-home'
 tags:
   - plugin
   - prod
   - group-search
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - __mocks__/**/*

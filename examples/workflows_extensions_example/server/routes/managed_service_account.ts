@@ -25,6 +25,13 @@ export const registerManagedServiceAccountRoutes = (
   const path = '/internal/workflows_extensions_example/managed_service_account/{id}';
   const params = schema.object({ id: schema.string({ minLength: 1, maxLength: 256 }) });
   const [defaultMode, inheritMode, overrideMode] = WorkflowRunAsModeSchema.options;
+  /** Matches workflow errors (e.g. `WorkflowForbiddenError`) that carry an HTTP `statusCode`. */
+  const isStatusCodeError = (error: unknown): error is { statusCode: number; message: string } =>
+    typeof error === 'object' &&
+    error !== null &&
+    'statusCode' in error &&
+    typeof (error as { statusCode: unknown }).statusCode === 'number' &&
+    (error as { statusCode: number }).statusCode >= 400;
   const options = (request: KibanaRequest<{ id: string }>, global = false) => ({
     spaceId: global ? GLOBAL_WORKFLOW_SPACE_ID : getSpaceId(request),
     workflowIdSuffix: request.params.id,
@@ -58,6 +65,7 @@ export const registerManagedServiceAccountRoutes = (
               ])
             ),
             fallbackChild: schema.maybe(schema.boolean()),
+            conditionalChild: schema.maybe(schema.boolean()),
             asynchronous: schema.maybe(schema.boolean()),
             waitForInput: schema.maybe(schema.boolean()),
             message: schema.maybe(schema.string({ maxLength: 1024 })),
@@ -161,6 +169,12 @@ export const registerManagedServiceAccountRoutes = (
         if (Boom.isBoom(error)) {
           return response.customError({
             statusCode: error.output.statusCode,
+            body: { message: error.message },
+          });
+        }
+        if (isStatusCodeError(error)) {
+          return response.customError({
+            statusCode: error.statusCode,
             body: { message: error.message },
           });
         }

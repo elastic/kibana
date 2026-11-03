@@ -17,6 +17,15 @@ export const THREAT_FRAMEWORK_NAME: Record<MitreFramework, string> = {
   atlas: 'MITRE ATLAS',
 };
 
+/**
+ * Framework names for display in the UI, with MITRE's trademark symbols. Use
+ * THREAT_FRAMEWORK_NAME, not this, for any value read from or written to a rule.
+ */
+export const THREAT_FRAMEWORK_DISPLAY_NAME: Record<MitreFramework, string> = {
+  enterprise: 'MITRE ATT&CK®',
+  atlas: 'MITRE ATLAS™',
+};
+
 /** Framework string carried by MITRE ATT&CK Enterprise threat entries on rules and alerts. */
 export const MITRE_ATTACK_FRAMEWORK = THREAT_FRAMEWORK_NAME.enterprise;
 /** Framework string carried by MITRE ATLAS threat entries on rules and alerts. */

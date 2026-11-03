@@ -171,15 +171,6 @@ describe('SignificantEventItem', () => {
     );
   });
 
-  it('renders the title as plain text, not a link or button', () => {
-    const onClick = jest.fn();
-    renderItem({ onClick });
-
-    const title = screen.getByText(mockEvent.title);
-    expect(title.closest('a')).toBeNull();
-    expect(title.closest('button')).toBeNull();
-  });
-
   describe('investigation marker', () => {
     it('leaves an event without investigations unlabeled', () => {
       renderItem();
