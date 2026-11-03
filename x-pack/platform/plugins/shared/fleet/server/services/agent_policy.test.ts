@@ -1520,6 +1520,7 @@ describe('Agent policy', () => {
         revision: 1,
         monitoring_enabled: [],
         has_agent_version_conditions: false,
+        min_agent_version: null,
       });
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -1538,34 +1539,45 @@ describe('Agent policy', () => {
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
 
-    it('should still compute version conditions when unchanged but never stored', async () => {
-      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    it.each([
+      { stored: 'never stored', storedFields: {} },
+      // Policies last updated before `min_agent_version` was introduced.
+      { stored: 'only the flag stored', storedFields: { has_agent_version_conditions: false } },
+    ])(
+      'should still compute version conditions when unchanged but $stored',
+      async ({ storedFields }) => {
+        const soClient = getSavedObjectMock({
+          revision: 1,
+          monitoring_enabled: [],
+          ...storedFields,
+        });
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      mockPackagePolicySOs(soClient, [
-        {
-          name: 'apache-1',
-          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
-          package_agent_version_condition: '>=9.3.0',
-        },
-      ]);
+        mockPackagePolicySOs(soClient, [
+          {
+            name: 'apache-1',
+            package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+            package_agent_version_condition: '>=9.3.0',
+          },
+        ]);
 
-      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
-        agentVersionConditionsUnchanged: true,
-      });
+        await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+          agentVersionConditionsUnchanged: true,
+        });
 
-      expect(soClient.find).toHaveBeenCalledWith(
-        expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
-      );
-      expect(soClient.update).toHaveBeenCalledWith(
-        expect.anything(),
-        'agent-policy',
-        expect.objectContaining({
-          has_agent_version_conditions: true,
-          min_agent_version: '9.3.0',
-        })
-      );
-    });
+        expect(soClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+        );
+        expect(soClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          'agent-policy',
+          expect.objectContaining({
+            has_agent_version_conditions: true,
+            min_agent_version: '9.3.0',
+          })
+        );
+      }
+    );
   });
 
   describe('bumpAllAgentPoliciesForOutput', () => {

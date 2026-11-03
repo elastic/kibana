@@ -306,11 +306,12 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
-    // Policies not updated since these fields were introduced have nothing stored to keep yet.
+    // Every recompute writes `min_agent_version` (null when there is no condition), so a missing
+    // one means the fields were never fully stored, e.g. last updated before it was introduced.
     const agentVersionData =
       options.agentVersionConditions === 'recompute' ||
       (options.agentVersionConditions === 'keep' &&
-        typeof existingAgentPolicy.has_agent_version_conditions !== 'boolean')
+        existingAgentPolicy.min_agent_version === undefined)
         ? await this.computeMinAgentVersionData(soClient, id)
         : undefined;
 
