@@ -21,7 +21,12 @@ import { localServerChecks } from './checks/local_servers';
 import { esSnapshotChecks } from './checks/es_snapshot';
 import { dockerChecks } from './checks/docker';
 import { qafChecks } from './checks/qaf';
-import { getQafCloudChecks, getScoutCloudChecks } from './checks/elastic_cloud';
+import {
+  CUSTOM_ROLE,
+  getQafCloudChecks,
+  getScoutCloudChecks,
+  hasQafCustomRoleUser,
+} from './checks/elastic_cloud';
 
 type DoctorTarget = 'qaf' | 'scout' | 'local';
 
@@ -53,19 +58,24 @@ const getRunCommands = (location: DoctorLocation, arch: DoctorArch): string[] =>
     return [`node scripts/scout run-tests --arch ${arch} --domain ${domain} ${CONFIG_PLACEHOLDER}`];
   }
 
-  const [create, target] =
-    arch === 'serverless'
+  if (arch === 'serverless') {
+    const customRole = hasQafCustomRoleUser()
       ? [
-          `qaf elastic-cloud projects create --project-type elasticsearch --project-name ${QAF_NAME}`,
-          `--ec-project-name ${QAF_NAME}`,
+          `  --custom-kibana-role-names ${CUSTOM_ROLE} --custom-kibana-role-assignments ${CUSTOM_ROLE}:${CUSTOM_ROLE} && \\`,
         ]
-      : [
-          `qaf elastic-cloud deployments create --stack-version ${kibanaPackageJson.version}-SNAPSHOT --deployment-name ${QAF_NAME}`,
-          `--ec-deployment-name ${QAF_NAME}`,
-        ];
+      : [];
+    return [
+      `qaf elastic-cloud projects create --project-type elasticsearch --project-name ${QAF_NAME}${
+        customRole.length ? ' \\' : ' && \\'
+      }`,
+      ...customRole,
+      `qaf kibana scout run-config --ec-project-name ${QAF_NAME} --kibana-repo-root . ${CONFIG_PLACEHOLDER}`,
+    ];
+  }
+  // the SAML realm lets custom roles log in without Cloud users
   return [
-    `${create} && \\`,
-    `qaf kibana scout run-config ${target} --kibana-repo-root . ${CONFIG_PLACEHOLDER}`,
+    `qaf elastic-cloud deployments create --stack-version ${kibanaPackageJson.version}-SNAPSHOT --deployment-name ${QAF_NAME} --add-custom-saml-realm && \\`,
+    `qaf kibana scout run-config --ec-deployment-name ${QAF_NAME} --kibana-repo-root . ${CONFIG_PLACEHOLDER}`,
   ];
 };
 

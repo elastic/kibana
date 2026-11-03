@@ -26,6 +26,8 @@ const CLOUD_SECRETS_FILE = Path.join(Os.homedir(), '.elastic/cloud.json');
 const getEnvironment = () => process.env.EC_ENV ?? 'qa';
 const QAF_ENVIRONMENTS = ['qa', 'staging', 'production'];
 const KIBANA_TIMEOUT_MS = 10_000;
+// Scout logs in with custom roles as custom_role_worker_<n>, and Cloud users are set up for the first
+export const CUSTOM_ROLE = 'custom_role_worker_1';
 
 // Used for test setup, tests don't log in with it
 const SKIPPED_ROLES = ['system_indices_superuser'];
@@ -105,6 +107,28 @@ const checkUsers = (file: string, users: Users, expected: string[], copyFix?: Fi
   return missing.includes('admin') ? fail(message, remedy) : warn(message, remedy);
 };
 
+const checkCustomRoleUser = (file: string, users: Users, remedy: Fix | string): CheckResult =>
+  getDefinedRoles(users).includes(CUSTOM_ROLE)
+    ? pass(`${file} has a user for custom role tests ("${CUSTOM_ROLE}")`)
+    : warn(
+        `${file} has no user for custom role tests ("${CUSTOM_ROLE}"), they will fail`,
+        typeof remedy === 'string'
+          ? { hint: remedy }
+          : { fix: remedy, hint: `copy them only if they are ${getEnvironment()} users` }
+      );
+
+/** For the QAF create command, which assigns the custom role to this user */
+export const hasQafCustomRoleUser = (): boolean => {
+  try {
+    const secrets: CloudSecrets = JSON.parse(Fs.readFileSync(CLOUD_SECRETS_FILE, 'utf8'));
+    return getDefinedRoles(secrets.role_credentials?.[getEnvironment()] ?? {}).includes(
+      CUSTOM_ROLE
+    );
+  } catch {
+    return false;
+  }
+};
+
 const readCloudUsers = async () =>
   (await readJson<CloudSecrets>(CLOUD_SECRETS_FILE))?.role_credentials?.[getEnvironment()] ?? {};
 
@@ -173,6 +197,20 @@ const cloudUsersCheck = (arch: DoctorArch): DoctorCheck => ({
     );
   },
 });
+
+const qafCustomRoleCheck: DoctorCheck = {
+  title: 'Cloud user for custom role tests',
+  // on ECH custom roles log in through the SAML realm QAF adds, without a Cloud user
+  arch: 'serverless',
+  dependsOn: environmentCheck,
+  run: async () =>
+    checkCustomRoleUser(
+      `${tildify(CLOUD_SECRETS_FILE)} (${getEnvironment()})`,
+      await readCloudUsers(),
+      (await getCopyFtrUsersFix([CUSTOM_ROLE])) ??
+        `add it under role_credentials.${getEnvironment()}, QAF assigns the custom role to it when it creates the project`
+    ),
+};
 
 const apiKeyCheck: DoctorCheck = {
   title: 'Elastic Cloud API key',
@@ -294,6 +332,34 @@ const scoutKibanaCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChe
   },
 });
 
+const scoutCustomRoleCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorCheck => ({
+  title: `Custom role tests with ${SCOUT_CLOUD_CONFIGS[arch]}`,
+  arch,
+  dependsOn: configCheck,
+  run: async () => {
+    const configFile = SCOUT_CLOUD_CONFIGS[arch];
+    const { customSamlProviderName, cloudUsersFilePath } = ScoutTestConfigSchema.parse(
+      await readJson(Path.resolve(REPO_ROOT, configFile))
+    );
+    if (arch === 'stateful') {
+      return customSamlProviderName
+        ? pass(
+            `${configFile} logs in custom roles through SAML provider "${customSamlProviderName}"`
+          )
+        : warn(`${configFile} has no customSamlProviderName, custom role tests will fail`, {
+            hint: 'create the deployment with qaf elastic-cloud deployments create --add-custom-saml-realm and set "customSamlProviderName": "qaf"',
+          });
+    }
+
+    const usersFile = Path.resolve(REPO_ROOT, cloudUsersFilePath);
+    return checkCustomRoleUser(
+      displayPath(usersFile),
+      (await readJson<Users>(usersFile)) ?? {},
+      'create the custom role in the project and assign it to the user'
+    );
+  },
+});
+
 const qafRunFileCheck = (file: string, arch?: DoctorArch): DoctorCheck => ({
   title: 'Files that block QAF runs',
   arch,
@@ -325,6 +391,7 @@ export const getQafCloudChecks = (): DoctorCheck[] => [
   environmentCheck,
   apiKeyCheck,
   ...DOCTOR_ARCHS.map(cloudUsersCheck),
+  qafCustomRoleCheck,
   ...getQafRunFileChecks(),
 ];
 
@@ -332,5 +399,10 @@ export const getQafCloudChecks = (): DoctorCheck[] => [
 export const getScoutCloudChecks = (): DoctorCheck[] =>
   DOCTOR_ARCHS.filter((arch) => existsInRepo(SCOUT_CLOUD_CONFIGS[arch])).flatMap((arch) => {
     const configCheck = scoutConfigCheck(arch);
-    return [configCheck, scoutKibanaCheck(arch, configCheck), scoutUsersCheck(arch, configCheck)];
+    return [
+      configCheck,
+      scoutKibanaCheck(arch, configCheck),
+      scoutUsersCheck(arch, configCheck),
+      scoutCustomRoleCheck(arch, configCheck),
+    ];
   });
