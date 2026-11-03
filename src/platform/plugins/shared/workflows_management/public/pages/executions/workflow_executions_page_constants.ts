@@ -26,6 +26,8 @@ export const EXECUTION_TABLE_SORT_FIELD_MAP: Record<string, string> = {
 };
 
 export const EXECUTED_BY_FILTER_FIELD = 'executedByUser.name';
+/** Field the Triggered by control used before display names were stored on the execution. */
+export const LEGACY_EXECUTED_BY_FILTER_FIELD = 'executedBy';
 
 export const DEFAULT_EXECUTION_PAGE_FILTERS: FilterControlConfig[] = [
   {

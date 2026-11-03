@@ -10,10 +10,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { getWorkflowExecutionsFilterDataViewSpec } from './workflow_executions_data_view';
 import { WorkflowExecutionsFilters } from './workflow_executions_filters';
 import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
   EXECUTED_BY_FILTER_FIELD,
+  LEGACY_EXECUTED_BY_FILTER_FIELD,
 } from './workflow_executions_page_constants';
 import {
   buildExcludeManagedExecutionsFilter,
@@ -156,6 +158,28 @@ describe('WorkflowExecutionsFilters', () => {
     );
   });
 
+  it('migrates a saved executedBy control onto the display-name field', async () => {
+    getReadableWorkflowIds.mockResolvedValue({});
+
+    renderFilters();
+
+    await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
+    const { transformControls } = mockFilterControls.mock.calls[0][0];
+    expect(
+      transformControls?.([
+        { field_name: 'status', selected_options: ['failed'] },
+        {
+          field_name: LEGACY_EXECUTED_BY_FILTER_FIELD,
+          selected_options: ['u_jane'],
+          title: 'Triggered by',
+        },
+      ])
+    ).toEqual([
+      { field_name: 'status', selected_options: ['failed'] },
+      { field_name: EXECUTED_BY_FILTER_FIELD, selected_options: [], title: 'Triggered by' },
+    ]);
+  });
+
   it('removes the "Triggered by" control everywhere when the show-executor setting is off', async () => {
     mockUseUiSetting.mockReturnValue(false);
     getReadableWorkflowIds.mockResolvedValue({});
@@ -163,17 +187,29 @@ describe('WorkflowExecutionsFilters', () => {
     renderFilters({
       controlsUrlState: [
         { field_name: 'status' },
+        { field_name: LEGACY_EXECUTED_BY_FILTER_FIELD, selected_options: ['u_jane'] },
         { field_name: EXECUTED_BY_FILTER_FIELD, selected_options: ['Jane Doe'] },
       ],
     });
 
     await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
-    const { controlsUrlState, defaultControls } = mockFilterControls.mock.calls[0][0];
+    const { controlsUrlState, dataViewSpec, defaultControls, transformControls } =
+      mockFilterControls.mock.calls[0][0];
     expect(defaultControls?.map(({ field_name: fieldName }) => fieldName)).toEqual([
       'status',
       'workflowId',
       'triggeredBy',
     ]);
     expect(controlsUrlState).toEqual([{ field_name: 'status' }]);
+    expect(dataViewSpec).toEqual(getWorkflowExecutionsFilterDataViewSpec(false));
+    expect(dataViewSpec?.fields).not.toHaveProperty(EXECUTED_BY_FILTER_FIELD);
+    expect(dataViewSpec?.fields).not.toHaveProperty(LEGACY_EXECUTED_BY_FILTER_FIELD);
+    expect(
+      transformControls?.([
+        { field_name: 'status' },
+        { field_name: LEGACY_EXECUTED_BY_FILTER_FIELD, selected_options: ['u_jane'] },
+        { field_name: EXECUTED_BY_FILTER_FIELD, selected_options: ['Jane Doe'] },
+      ])
+    ).toEqual([{ field_name: 'status' }]);
   });
 });

@@ -16,14 +16,13 @@ import { useQuery } from '@kbn/react-query';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import {
-  WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-  WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
-} from './workflow_executions_data_view';
+import { migrateExecutionFilterControls } from './migrate_execution_filter_controls';
+import { getWorkflowExecutionsFilterDataViewSpec } from './workflow_executions_data_view';
 import {
   DEFAULT_EXECUTION_PAGE_FILTERS,
   EXECUTED_BY_FILTER_FIELD,
   EXECUTION_FILTERS_STORAGE_KEY,
+  LEGACY_EXECUTED_BY_FILTER_FIELD,
 } from './workflow_executions_page_constants';
 import {
   buildExcludeManagedExecutionsFilter,
@@ -37,6 +36,12 @@ import {
   FilterControls,
   type FilterGroupHandler,
 } from '../../shared/ui/filter_controls';
+
+const withoutExecutorControls = <T extends { field_name: string }>(controls: T[] | undefined) =>
+  controls?.filter(
+    ({ field_name: fieldName }) =>
+      fieldName !== EXECUTED_BY_FILTER_FIELD && fieldName !== LEGACY_EXECUTED_BY_FILTER_FIELD
+  );
 
 export interface WorkflowExecutionsFiltersProps {
   controlsUrlState?: FilterControlConfig[];
@@ -64,25 +69,23 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     const { canReadManagedWorkflowExecution } = useWorkflowsCapabilities();
     const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
 
-    // When executor identities are hidden, the "Triggered by" control is removed entirely —
-    // including from URL-provided state — so executor names are never listed as options.
+    // When executor identities are hidden, the "Triggered by" control is removed from defaults,
+    // URL state, and whatever local storage restores. The data view also drops the fields so the
+    // add-control editor cannot put the control back.
     const defaultControls = useMemo(
       () =>
         showExecutor
           ? DEFAULT_EXECUTION_PAGE_FILTERS
-          : DEFAULT_EXECUTION_PAGE_FILTERS.filter(
-              ({ field_name: fieldName }) => fieldName !== EXECUTED_BY_FILTER_FIELD
-            ),
+          : withoutExecutorControls(DEFAULT_EXECUTION_PAGE_FILTERS),
       [showExecutor]
     );
     const visibleControlsUrlState = useMemo(
-      () =>
-        showExecutor
-          ? controlsUrlState
-          : controlsUrlState?.filter(
-              ({ field_name: fieldName }) => fieldName !== EXECUTED_BY_FILTER_FIELD
-            ),
+      () => (showExecutor ? controlsUrlState : withoutExecutorControls(controlsUrlState)),
       [controlsUrlState, showExecutor]
+    );
+    const transformControls = useCallback(
+      (controls: FilterControlConfig[]) => migrateExecutionFilterControls(controls, showExecutor),
+      [showExecutor]
     );
 
     // The options lists read the execution data as the current user, which ignores workflow access
@@ -114,11 +117,8 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     }, [refetch]);
 
     const dataViewSpec = useMemo(
-      () => ({
-        ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
-        id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-      }),
-      []
+      () => getWorkflowExecutionsFilterDataViewSpec(showExecutor),
+      [showExecutor]
     );
 
     const services = useMemo(
@@ -166,6 +166,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
     return (
       <div data-test-subj="workflowExecutionsFilters">
         <FilterControls
+          key={showExecutor ? 'show-executor' : 'hide-executor'}
           controlsUrlState={visibleControlsUrlState}
           dataViewSpec={dataViewSpec}
           defaultControls={defaultControls}
@@ -180,6 +181,7 @@ export const WorkflowExecutionsFilters = React.memo<WorkflowExecutionsFiltersPro
           spaceId={spaceId}
           storageKey={EXECUTION_FILTERS_STORAGE_KEY}
           timeRange={timeRange}
+          transformControls={transformControls}
         />
       </div>
     );
