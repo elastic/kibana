@@ -323,7 +323,15 @@ examples; read the row count beside each mean.
   split across sentences ("Verify first. Then revoke.") is flagged, past forms ("the key was
   revoked") are never flagged, and a verb with no directive frame ("the team can disable it") is not
   recognised. A condition with no verification verb or judgement ("if the owner denies creating the
-  key, revoke it") is flagged. Use it as a screen and read the flagged text.
+  key, revoke it") is flagged. Use it as a screen and read the flagged text. It under-counts: unconditional phrasings outside these frames are missed, so treat the failure rate
+  as a lower bound. Known misses, left as they are:
+  - A verify/confirm verb used as a statement still satisfies the restated-event rule: "We confirm
+    the account is compromised. If they did not rotate it, disable it." and "Verify the bucket
+    policy. If they did not change it, revoke the key." are not flagged.
+  - One question covers every follow-up cue in a chain: "Ask the owner whether they created the key.
+    If not, revoke it. If they did, disable the user anyway." is not flagged.
+  - "Determine that ..." counts as a question: "Determine that the instance exists. If it does,
+    terminate it." is not flagged.
 - `EntityCoOccurrence` reads `{{ field value }}` tokens and, when a discovery has none, falls back to
   matching plain text against the alert values. Every user x linked-entity pair inside a discovery
   counts even if the sentence does not link them. A value the variant does not render (for example

@@ -198,7 +198,7 @@ const SHOULD_PROVE_CUE = new RegExp(
  * "yet" anywhere in the clause disqualifies it.
  */
 const ELLIPTICAL_CUE =
-  /^(?:if|once)\s+(?:so|not|yes|that is the case|(?:it|they|he|she|this|that)\s+(?:is|are|was|were|did|does|do|has|have|had)(?:\s+not|n't)?|(?:they|he|she)\s+did(?:\s+not|n't)\s+\w+\s+(?:it|them|this))\s*$/i;
+  /^(?:if|once)\s+(?:so|not|yes|that is the case|(?:it|they|he|she|this|that)\s+(?:is|are|was|were|did|does|do|has|have|had|can(?:not|'t)?)(?:\s+not|n't)?|(?:they|he|she)\s+did(?:\s+not|n't)\s+\w+\s+(?:it|them|this))\s*$/i;
 const NOT_YET_DONE = /\b(?:already|yet)\b/i;
 /**
  * The previous sentence must raise a question the cue answers: a verification verb followed by
@@ -302,7 +302,10 @@ export const findUnconditionalContainment = (markdown: string): string[] => {
         }
         if (!ELLIPTICAL_CUE.test(splitClauses(sentence)[0] ?? '')) previousSentence = sentence;
       }
-      const endsWithColon = line.trim().endsWith(':');
+      const endsWithColon = line
+        .replace(/\*\*|__/g, '')
+        .trim()
+        .endsWith(':');
       if (
         !isListItem &&
         endsWithColon &&

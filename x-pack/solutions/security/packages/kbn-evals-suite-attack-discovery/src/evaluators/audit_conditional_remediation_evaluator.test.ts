@@ -143,6 +143,7 @@ describe('findUnconditionalContainment', () => {
       'Check whether the key was created by the owner. If it was not, disable the user.',
       'Investigate whether the host is compromised; if so, isolate it.',
       'Determine whether the traffic is expected. If they are, leave it; if not, block the IP.',
+      'Validate with the owner that the change was authorized. If they cannot, suspend the account.',
     ])('honours a cue that follows a verification instruction: %s', (text) => {
       expect(findUnconditionalContainment(text)).toEqual([]);
     });
@@ -220,6 +221,12 @@ describe('findUnconditionalContainment', () => {
   it('treats a list under a conditional header as conditional', () => {
     const markdown =
       'If the activity is confirmed unauthorized:\n- Revoke the key\n- Disable the user';
+    expect(findUnconditionalContainment(markdown)).toEqual([]);
+  });
+
+  it('treats a list under a bold conditional header as conditional', () => {
+    const markdown =
+      '**Recommended actions (if confirmed malicious):**\n1. Revoke the key\n2. Disable the user\n3. Isolate the host';
     expect(findUnconditionalContainment(markdown)).toEqual([]);
   });
 
