@@ -23,11 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getCortexEntityTypeLabel, getCortexStatusLabel } from './entity_type_labels';
-import {
-  useArchiveCortexPage,
-  useCortexPage,
-  useRestoreCortexPage,
-} from './use_cortex';
+import { useArchiveCortexPage, useCortexPage, useRestoreCortexPage } from './use_cortex';
 import { contentWithoutDuplicateTitle, pageMarkdownCss } from '../page_markdown';
 
 interface CortexPageViewProps {
