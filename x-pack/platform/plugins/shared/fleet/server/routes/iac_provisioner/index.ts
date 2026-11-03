@@ -58,7 +58,8 @@ const IAC_PROVISIONER_ROUTE_SECURITY = {
 
 const PROVISIONING_CALLBACK_WRITE_SECURITY = {
   authz: {
-    // Creates an API key, so it needs the same privileges as creating an identity.
+    // Creates a record a stack turns into an identity, so it needs the same privileges as
+    // creating an identity.
     requiredPrivileges: [
       {
         anyRequired: [
@@ -131,7 +132,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
       summary: 'Create a provisioning callback',
       description:
-        'Create a one-time record and a short-lived, zero-privilege API key that a launched CloudFormation stack uses to report its role back to Kibana. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
+        'Create a one-time record and the single-use token a launched CloudFormation stack presents to report its role back to Kibana. The token grants nothing but that report and is not an API key. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
       access: 'internal',
       security: PROVISIONING_CALLBACK_WRITE_SECURITY,
     })
@@ -161,7 +162,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .get({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN,
       summary: 'Get a provisioning callback',
-      description: 'Get the state of a callback record. Never returns the API key.',
+      description: 'Get the state of a callback record. Never returns the token.',
       access: 'internal',
       security: IAC_PROVISIONER_ROUTE_SECURITY,
     })
@@ -187,7 +188,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_DELETE_PATTERN,
       summary: 'Cancel a provisioning callback',
       description:
-        'Retire a callback record the form no longer waits on and invalidate its API key. A record the stack has already reported to is returned unchanged.',
+        'Retire a callback record the form no longer waits on, so that its token is no longer accepted. A record the stack has already reported to is returned unchanged.',
       access: 'internal',
       security: PROVISIONING_CALLBACK_WRITE_SECURITY,
     })

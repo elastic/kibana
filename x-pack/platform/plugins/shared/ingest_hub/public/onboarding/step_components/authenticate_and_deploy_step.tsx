@@ -901,6 +901,37 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         </>
       )}
 
+      {showDriftCallout && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.title"
+                defaultMessage="Settings changed since last deployment"
+              />
+            }
+            text={
+              <p>
+                {showAgentSection ? (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.bodyAgentBased"
+                    defaultMessage="Settings have changed since last deployment. Click Next to apply the updated configuration."
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.driftCallout.body"
+                    defaultMessage="Settings have changed since last deployment. Click Deploy to apply the updated configuration."
+                  />
+                )}
+              </p>
+            }
+            data-test-subj="authenticateAndDeployStep-driftCallout"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
       {showMiSection && (
         <ManagedIntegrationsSection
           serviceCount={miServiceIds.length}

@@ -20,9 +20,10 @@ const AccountTypeSchema = schema.oneOf([
 ]);
 
 /**
- * Stored shape of a `fleet-provisioning-callback`. Only the API key id is kept so the key can be
- * invalidated and matched against the caller; the key itself is never stored. The identity
- * fields are set at launch and copied to the cloud connector the report creates.
+ * Stored shape of a `fleet-provisioning-callback`. Only a hash of the token is kept, bound to
+ * the record's id, space and expiry, so a presented token can be matched; the token itself is
+ * never stored. The identity fields are set at launch and copied to the cloud connector the
+ * report creates.
  */
 export const ProvisioningCallbackSchemaV1 = schema.object({
   provider: schema.literal('aws'),

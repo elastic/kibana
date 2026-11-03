@@ -30,10 +30,11 @@ describe('useAutoDeployOutcome', () => {
   const persistDeploymentId = jest.fn();
   const setFailedInstances = jest.fn();
 
-  const render = () =>
+  const render = (selectedConnectorId?: string) =>
     renderHook(() =>
       useAutoDeployOutcome({
         deployGroups,
+        selectedConnectorId,
         updateDetectAndReviewStep,
         persistDeploymentId,
         setFailedInstances,
@@ -107,6 +108,43 @@ describe('useAutoDeployOutcome', () => {
     });
     expect(setFailedInstances).toHaveBeenCalledWith(['c']);
     expect(persistDeploymentId).toHaveBeenCalledWith('dep-1');
+  });
+
+  it('keeps the session dirty when the identity was switched while the server deployed', async () => {
+    mockedGetDeployment.mockResolvedValue({
+      item: {
+        id: 'dep-1',
+        status: 'succeeded',
+        connectorId: 'cc-from-stack',
+        policyIdsByInstance: { a: 'pp-1', b: 'pp-1', c: 'pp-2' },
+      },
+    } as any);
+    // The form let the user pick another identity on the Existing tab during the wait.
+    const { result } = render('cc-other');
+    await act(async () => {
+      await result.current.applyOutcome({ status: 'deployed', onboardingDeploymentId: 'dep-1' });
+    });
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
+      expect.objectContaining({ isDirty: true, isAuthDirty: true, isPolicySelectionDirty: false })
+    );
+  });
+
+  it('clears the drift when the session holds the identity the stack made', async () => {
+    mockedGetDeployment.mockResolvedValue({
+      item: {
+        id: 'dep-1',
+        status: 'succeeded',
+        connectorId: 'cc-from-stack',
+        policyIdsByInstance: { a: 'pp-1', b: 'pp-1', c: 'pp-2' },
+      },
+    } as any);
+    const { result } = render('cc-from-stack');
+    await act(async () => {
+      await result.current.applyOutcome({ status: 'deployed', onboardingDeploymentId: 'dep-1' });
+    });
+    expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
+      expect.objectContaining({ isDirty: false, isAuthDirty: false })
+    );
   });
 
   it('treats every service as failed when the deployment cannot be read back', async () => {

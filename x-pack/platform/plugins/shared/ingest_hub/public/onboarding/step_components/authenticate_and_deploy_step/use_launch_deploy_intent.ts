@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import type { PendingAgentlessPolicy } from '@kbn/fleet-plugin/common/types/models/cloud_onboarding_deployment';
@@ -51,12 +51,18 @@ export function useLaunchDeployIntent({
   const { detectAndReviewStep, updateDetectAndReviewStep, servicesStep, awsServicesMap } =
     useOnboardingFlow();
   const { createDeployment } = useOnboardingSO();
+  // The deployment the last Launch of this step stored its requests on. Its id goes into the flow
+  // at once, so a launch whose callback failed or whose wait ran out leaves it there; the next
+  // Launch picks it up again instead of losing the automatic deploy.
+  const [preparedDeploymentId, setPreparedDeploymentId] = useState<string | undefined>();
+  const isPreparedDeployment =
+    !!preparedDeploymentId && detectAndReviewStep.onboardingDeploymentId === preparedDeploymentId;
 
   const canAutoDeploy = useMemo(() => {
     if (deployGroups.length === 0) return false;
     // `?deploymentId=` means edit mode throughout the flow.
     if (new URLSearchParams(location.search).has('deploymentId')) return false;
-    if (detectAndReviewStep.onboardingDeploymentId) return false;
+    if (detectAndReviewStep.onboardingDeploymentId && !isPreparedDeployment) return false;
     if (Object.keys(detectAndReviewStep.pendingCleanupPolicyIds ?? {}).length > 0) return false;
     const policyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
     return !deployGroups.some((group) =>
@@ -66,6 +72,7 @@ export function useLaunchDeployIntent({
     deployGroups,
     location.search,
     detectAndReviewStep.onboardingDeploymentId,
+    isPreparedDeployment,
     detectAndReviewStep.pendingCleanupPolicyIds,
     detectAndReviewStep.policyIdsByInstance,
   ]);
@@ -73,6 +80,11 @@ export function useLaunchDeployIntent({
   const prepareLaunch = useCallback(async () => {
     if (!canAutoDeploy) {
       return undefined;
+    }
+    // Nothing the requests are built from can change while this step is shown, so the pending
+    // deployment of an earlier launch still holds what this one would store.
+    if (isPreparedDeployment && preparedDeploymentId) {
+      return { onboardingDeploymentId: preparedDeploymentId };
     }
     const globalRegion = serviceSettings?.globalRegion ?? '';
     const integrationName = serviceSettings?.integrationName?.trim() || undefined;
@@ -114,9 +126,12 @@ export function useLaunchDeployIntent({
     }
     // In the flow state only: the URL parameter would switch the flow into edit mode.
     updateDetectAndReviewStep({ onboardingDeploymentId });
+    setPreparedDeploymentId(onboardingDeploymentId);
     return { onboardingDeploymentId };
   }, [
     canAutoDeploy,
+    isPreparedDeployment,
+    preparedDeploymentId,
     deployGroups,
     serviceSettings,
     hasEcfServices,

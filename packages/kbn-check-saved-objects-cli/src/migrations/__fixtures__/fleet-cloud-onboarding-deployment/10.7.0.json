@@ -116,27 +116,7 @@
         "aws.cloudtrail": {
           "bucket_arn": "arn:aws:s3:::my-bucket"
         }
-      },
-      "pendingAgentlessPolicies": [
-        {
-          "id": "11111111-2222-3333-4444-555555555555",
-          "instanceIds": ["aws.cloudtrail"],
-          "request": {
-            "name": "aws-callback-cloudtrail",
-            "namespace": "default",
-            "package": {
-              "name": "aws",
-              "version": "3.0.0"
-            },
-            "inputs": {
-              "cloudtrail-aws-s3": {
-                "enabled": true,
-                "streams": {}
-              }
-            }
-          }
-        }
-      ]
+      }
     }
   ]
 }

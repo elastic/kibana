@@ -197,6 +197,34 @@ describe('useLaunchDeployIntent', () => {
       );
     });
 
+    it('hands a later launch the deployment an earlier one prepared instead of creating another', async () => {
+      const { result, rerender } = render();
+      await act(async () => {
+        await result.current.prepareLaunch();
+      });
+      flow({ onboardingDeploymentId: 'dep-1' });
+      rerender();
+
+      // The first launch's callback failed, or its wait ran out, and the user launches again.
+      let prepared: { onboardingDeploymentId: string } | undefined;
+      await act(async () => {
+        prepared = await result.current.prepareLaunch();
+      });
+      expect(prepared).toEqual({ onboardingDeploymentId: 'dep-1' });
+      expect(createDeployment).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps canAutoDeploy true when the deployment in the flow is the one this step prepared', async () => {
+      const { result, rerender } = render();
+      await act(async () => {
+        await result.current.prepareLaunch();
+      });
+      // The flow now carries the prepared id, as the hook stored it.
+      flow({ onboardingDeploymentId: 'dep-1' });
+      rerender();
+      expect(result.current.canAutoDeploy).toBe(true);
+    });
+
     it('returns undefined when the deployment could not be created', async () => {
       createDeployment.mockResolvedValue(null);
       const { result } = render();

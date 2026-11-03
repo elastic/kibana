@@ -11,10 +11,13 @@ import type { ProvisioningCallbackDeployOutcome } from '@kbn/fleet-plugin/public
 
 import type { DetectAndReviewStepState } from '../../onboarding_flow_context';
 import { buildInstanceStatuses } from './deploy_groups';
+import { detectAuthDrift } from './detect_drift';
 import type { DeployGroup } from './deploy_groups';
 
 export interface UseAutoDeployOutcomeParams {
   deployGroups: DeployGroup[];
+  /** The identity the session holds when the outcome lands; the deploy used the stack's. */
+  selectedConnectorId?: string;
   updateDetectAndReviewStep: (update: Partial<DetectAndReviewStepState>) => void;
   persistDeploymentId: (deploymentId: string) => void;
   setFailedInstances: (instanceIds: string[]) => void;
@@ -33,6 +36,7 @@ export interface UseAutoDeployOutcomeResult {
  */
 export function useAutoDeployOutcome({
   deployGroups,
+  selectedConnectorId,
   updateDetectAndReviewStep,
   persistDeploymentId,
   setFailedInstances,
@@ -42,10 +46,18 @@ export function useAutoDeployOutcome({
       const targets = deployGroups.flatMap((group) => group.instanceIds);
       let policyIdsByInstance: Record<string, string> = {};
       let message = outcome.error;
+      // The identity form stays usable while the server deploys, so the session may by now hold
+      // another identity than the one the stack made and the deploy used. That is a change still
+      // to apply, exactly as the drift check would report it.
+      let authDirty = false;
       try {
         const { item } = await sendGetCloudOnboardingDeployment(outcome.onboardingDeploymentId);
         policyIdsByInstance = item.policyIdsByInstance ?? {};
         message = item.statusMessage ?? message;
+        authDirty = detectAuthDrift(
+          { connectorId: selectedConnectorId },
+          { connectorId: item.connectorId }
+        );
       } catch (error) {
         message = error instanceof Error ? error.message : String(error);
       }
@@ -62,16 +74,23 @@ export function useAutoDeployOutcome({
         deployErrors,
         // The deployment id is in the flow from Launch, so the drift check re-ran the moment the
         // identity was created, against a deployment the server had not written the connector
-        // to yet, and marked the session dirty. The finished deploy holds exactly what the
-        // session holds, and the id does not change, so nothing else would clear that.
-        isDirty: false,
-        isAuthDirty: false,
+        // to yet, and marked the session dirty. The finished deploy holds what the session
+        // holds, unless the identity was switched meanwhile, and the id does not change, so
+        // nothing else would clear that.
+        isDirty: authDirty,
+        isAuthDirty: authDirty,
         isPolicySelectionDirty: false,
       });
       setFailedInstances(failedInstances);
       persistDeploymentId(outcome.onboardingDeploymentId);
     },
-    [deployGroups, updateDetectAndReviewStep, persistDeploymentId, setFailedInstances]
+    [
+      deployGroups,
+      selectedConnectorId,
+      updateDetectAndReviewStep,
+      persistDeploymentId,
+      setFailedInstances,
+    ]
   );
 
   return { applyOutcome };

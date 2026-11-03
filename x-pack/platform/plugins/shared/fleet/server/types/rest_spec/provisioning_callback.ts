@@ -114,7 +114,7 @@ export const CreateProvisioningCallbackRequestSchema = {
         maxLength: 256,
         meta: {
           description:
-            'Onboarding deployment whose stored agentless policies Kibana deploys once the stack has reported back. Requires the Fleet All and Integrations All privileges.',
+            'Onboarding deployment whose stored agentless policies Kibana deploys once the stack has reported back. Requires the privilege to create integration policies: Integrations All together with Fleet Agent policies All.',
         },
       })
     ),

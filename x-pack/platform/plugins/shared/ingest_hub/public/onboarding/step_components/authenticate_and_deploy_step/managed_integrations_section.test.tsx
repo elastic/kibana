@@ -267,6 +267,30 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
     });
 
+    it('moves Deploy below the form once the New Identity tab holds a ready identity and nothing is in flight', () => {
+      setupMocks();
+      renderSection({ showIdentityFederation: true });
+      fireEvent.click(screen.getByText('tab-new'));
+
+      // The stack's report made and selected the identity, and this launch could not deploy on
+      // its own: Deploy is the next click, so it must not sit under "Create stack manually".
+      fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeEnabled();
+    });
+
+    it('keeps Deploy in the manual section while a launch with a ready identity is still in flight', () => {
+      setupMocks({ isLaunchLocked: true });
+      renderSection({ showIdentityFederation: true });
+      fireEvent.click(screen.getByText('tab-new'));
+
+      // The identity exists but the server is still deploying for it.
+      fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('manual-entry-actions')).toContainElement(
+        screen.getByTestId('managedIntegrationsSection-deployButton')
+      );
+    });
+
     it('passes the launch preparation, outcome and waiting callbacks to the identity form', () => {
       setupMocks();
       const onPrepareLaunch = jest.fn();

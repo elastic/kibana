@@ -311,6 +311,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
   });
   const { applyOutcome: applyAutoDeployOutcome } = useAutoDeployOutcome({
     deployGroups,
+    selectedConnectorId: authenticateAndDeployStep.connectorId,
     updateDetectAndReviewStep,
     persistDeploymentId,
     setFailedInstances,
