@@ -363,16 +363,17 @@ describe('getInputsWithIds', () => {
       expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
     });
 
-    it('throws when a deeply nested override id contains a traversal sequence', () => {
+    it('does not throw for a non-identity nested id in an override (e.g. event-data field)', () => {
       const policy = policyWithInputId('safe-input-id') as any;
       policy.overrides = {
         inputs: {
           'safe-input-id': {
-            streams: [{ meta: { nested: { id: '../../evil' } } }],
+            processors: [{ add_fields: { target: '', fields: { id: 42 } } }],
+            streams: [{ meta: { nested: { id: '../../not-a-path' } } }],
           },
         },
       };
-      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
     });
 
     it('does not throw for safe nested override ids', () => {
