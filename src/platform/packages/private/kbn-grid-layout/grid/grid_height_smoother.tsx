@@ -65,10 +65,14 @@ const styles = {
     transition: 'min-height 500ms linear',
   }),
   hasActivePanel: css({
+    // When a panel is expanded, the grid fills its nearest positioned ancestor instead of relying
+    // on a percentage height, which collapses to 0 if no ancestor has a definite height. The
+    // consumer sizes that ancestor; `--kbnGridExpandedInset` lets it reserve space around the grid.
     '&:has(.kbnGridPanel--expanded)': {
-      minHeight: '100% !important',
-      maxHeight: '100vh', // fallback in case if the parent doesn't set the height correctly
-      position: 'relative',
+      position: 'absolute',
+      inset: 'var(--kbnGridExpandedInset, 0)',
+      height: 'auto',
+      minHeight: '0 !important', // overrides the inline `min-height` set while the grid is not expanded
       transition: 'none',
     },
   }),

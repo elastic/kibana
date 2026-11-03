@@ -207,7 +207,7 @@ export const DashboardGrid = () => {
       className={classNames({
         'dshLayout--editing': viewMode === 'edit',
         'dshLayout-withoutMargins': !useMargins,
-        'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
+        'dshLayout-isMaximizedPanel': Boolean(expandedPanelId),
       })}
       css={styles.dashboard}
     >
@@ -241,7 +241,9 @@ const dashboardGridStyles = {
         visibility: 'hidden !important' as 'hidden',
       },
       '&.dshLayout-isMaximizedPanel': {
-        height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded
+        // the layout is the positioned box that kbn-grid-layout fills when a panel is expanded;
+        // stretching it as a flex item sizes it even if no ancestor has a definite height
+        flex: 1,
         '.dshDashboardGrid__item--expanded': {
           position: 'absolute',
           width: '100%',
@@ -258,6 +260,12 @@ const dashboardGridStyles = {
         paddingTop: euiTheme.size.s,
         paddingLeft: euiTheme.size.s,
         paddingRight: euiTheme.size.s,
+        // kbn-grid-layout fills the layout's padding box when a panel is expanded, so reserve the
+        // padding as an inset instead
+        '&.dshLayout-isMaximizedPanel': {
+          padding: 0,
+          '--kbnGridExpandedInset': `${euiTheme.size.s} ${euiTheme.size.s} 0`,
+        },
         '.embPanel__content, .embPanel, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer': {
           borderRadius: 0,
         },
