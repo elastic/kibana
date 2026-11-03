@@ -215,6 +215,19 @@ describe('executeDeclarativeRequest', () => {
     }
   });
 
+  it('rejects dot path segments before sending a request', async () => {
+    const { client, requests } = createRecordingAxiosClient({});
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', url: 'https://api.example/items/{{ input.id }}' },
+        input: { id: '..' },
+        config: {},
+      })
+    ).rejects.toThrow(TemplateRenderError);
+    expect(requests).toHaveLength(0);
+  });
+
   it('retries a 429 and then returns the success response', async () => {
     const sleep = jest.fn(async () => undefined);
     let calls = 0;

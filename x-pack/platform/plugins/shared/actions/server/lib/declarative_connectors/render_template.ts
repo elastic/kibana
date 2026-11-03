@@ -80,6 +80,9 @@ export const renderUrlTemplate = (
       throw new TemplateRenderError(`Declarative URL template "${path}" must resolve to a scalar.`);
     }
     const rendered = String(resolved);
+    if (rendered === '.' || rendered === '..') {
+      throw new TemplateRenderError(`Declarative URL template "${path}" is a dot path segment.`);
+    }
     return allowBaseUrlPrefix && offset === 0 && path === 'config.baseUrl'
       ? rendered
       : encodeURIComponent(rendered);
