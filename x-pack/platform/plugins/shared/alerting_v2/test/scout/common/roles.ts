@@ -193,6 +193,29 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
   ],
 };
 
+/**
+ * Reads action policies and runs workflows, which is what sending a test notification requires.
+ * `workflow_execution_read` lets the spec read back the workflow test runs it started.
+ */
+export const ALERTING_V2_ACTION_POLICIES_READ_AND_WORKFLOW_EXECUTE_ROLE: KibanaRole = {
+  elasticsearch: READER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_action_policies: ['read'],
+        workflowsManagement: [
+          'minimal_read',
+          'workflow_read',
+          'workflow_execute',
+          'workflow_execution_read',
+        ],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [

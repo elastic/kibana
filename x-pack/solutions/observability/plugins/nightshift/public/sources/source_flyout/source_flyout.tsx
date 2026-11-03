@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiResizableContainer,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTextArea,
   EuiTitle,
@@ -45,16 +46,22 @@ import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
 import { SourcePreview } from './source_preview';
 import { useSourceQueryValidation } from './use_source_query_validation';
 
-interface SourceFormValues {
+export interface SourceFormValues {
   title: string;
   description: string;
   tags: string[];
   esql: string;
+  /** Only sent when creating. An existing source is enabled or disabled from the table. */
+  enabled: boolean;
 }
 
 interface SourceFlyoutProps {
   /** Source to edit; the flyout creates a new source when it is absent. */
   source?: NightshiftSource;
+  /** Unsaved values to edit without creating a source. */
+  initialValues?: Partial<Pick<SourceFormValues, 'title' | 'description' | 'tags' | 'esql'>>;
+  /** Returns draft values instead of persisting them. */
+  onSubmit?: (values: SourceFormValues) => void;
   /** Shows the source without letting the user change it, for users who cannot manage sources. */
   readOnly?: boolean;
   onClose: () => void;
@@ -64,7 +71,13 @@ interface SourceFlyoutProps {
 // API is about the query (parse, allowed commands, the one-type check, or the `LIMIT 0` probe).
 const isBadRequest = (error: unknown) => isHttpFetchError(error) && error.response?.status === 400;
 
-export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyoutProps) {
+export function SourceFlyout({
+  source,
+  initialValues,
+  onSubmit,
+  readOnly = false,
+  onClose,
+}: SourceFlyoutProps) {
   const {
     notifications: { toasts },
   } = useKibana().services;
@@ -72,15 +85,19 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
   const titleId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
   // `runId` changes on every run, so running an unchanged query still refetches it.
-  const [preview, setPreview] = useState({ esql: source?.esql ?? '', runId: 0 });
+  const [preview, setPreview] = useState({
+    esql: source?.esql ?? initialValues?.esql ?? '',
+    runId: 0,
+  });
 
   const { control, getValues, handleSubmit, setError, clearErrors, formState } =
     useForm<SourceFormValues>({
       defaultValues: {
-        title: source?.title ?? '',
-        description: source?.description ?? '',
-        tags: source?.tags ?? [],
-        esql: source?.esql ?? '',
+        title: source?.title ?? initialValues?.title ?? '',
+        description: source?.description ?? initialValues?.description ?? '',
+        tags: source?.tags ?? initialValues?.tags ?? [],
+        esql: source?.esql ?? initialValues?.esql ?? '',
+        enabled: true,
       },
     });
 
@@ -97,7 +114,14 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
   });
   const canSave = isQueryUnchanged || queryValidation.status === 'valid';
 
-  const persist = async ({ title, description, tags, esql }: SourceFormValues) => {
+  const persist = async (values: SourceFormValues) => {
+    if (onSubmit) {
+      onSubmit(values);
+      onClose();
+      return;
+    }
+
+    const { title, description, tags, esql, enabled } = values;
     const body = {
       title,
       description: description.trim() === '' ? undefined : description,
@@ -108,7 +132,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
       if (source) {
         await updateSource.mutateAsync({ sourceId: source.id, body });
       } else {
-        await createSource.mutateAsync(body);
+        await createSource.mutateAsync({ ...body, enabled });
       }
       onClose();
     } catch (error) {
@@ -154,7 +178,9 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={titleId}>{readOnly ? DETAILS_TITLE : source ? EDIT_TITLE : CREATE_TITLE}</h2>
+            <h2 id={titleId}>
+              {readOnly ? DETAILS_TITLE : source || initialValues ? EDIT_TITLE : CREATE_TITLE}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         {/* A flex child of the flyout, so both panels fill the height between header and footer. */}
@@ -328,6 +354,22 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                       </EuiButton>
                     </EuiFlexItem>
                   </EuiFlexGroup>
+                  {!source && !onSubmit && (
+                    <Controller
+                      name="enabled"
+                      control={control}
+                      render={({ field }) => (
+                        <EuiFormRow helpText={field.value ? ENABLED_HELP_TEXT : DISABLED_HELP_TEXT}>
+                          <EuiSwitch
+                            data-test-subj="significantEventsAppSourceFlyoutEnabledSwitch"
+                            label={ENABLED_LABEL}
+                            checked={field.value}
+                            onChange={(event) => field.onChange(event.target.checked)}
+                          />
+                        </EuiFormRow>
+                      )}
+                    />
+                  )}
                 </EuiForm>
               </EuiResizablePanel>
               <EuiResizableButton indicator="border" />
@@ -355,7 +397,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                 isDisabled={!canSave}
                 onClick={save}
               >
-                {source ? SAVE_LABEL : CREATE_LABEL}
+                {source || initialValues ? SAVE_LABEL : onSubmit ? ADD_LABEL : CREATE_LABEL}
               </EuiButton>
             )}
           </EuiFlexGroup>
@@ -438,6 +480,20 @@ const RUN_QUERY_LABEL = i18n.translate('xpack.nightshift.sources.flyout.runQuery
   defaultMessage: 'Run query',
 });
 
+const ENABLED_LABEL = i18n.translate('xpack.nightshift.sources.flyout.enabledLabel', {
+  defaultMessage: 'Enabled',
+});
+
+const ENABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.enabledHelpText', {
+  defaultMessage:
+    'Onboarding starts as soon as the source is created, so Nightshift can learn its knowledge indicators and watch it for significant events.',
+});
+
+const DISABLED_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.disabledHelpText', {
+  defaultMessage:
+    'The source is created but nothing runs on it. Turn it on from the Sources table to start onboarding it.',
+});
+
 const CANCEL_LABEL = i18n.translate('xpack.nightshift.sources.flyout.cancelLabel', {
   defaultMessage: 'Cancel',
 });
@@ -448,6 +504,10 @@ const CLOSE_LABEL = i18n.translate('xpack.nightshift.sources.flyout.closeLabel',
 
 const CREATE_LABEL = i18n.translate('xpack.nightshift.sources.flyout.createLabel', {
   defaultMessage: 'Create source',
+});
+
+const ADD_LABEL = i18n.translate('xpack.nightshift.sources.flyout.addLabel', {
+  defaultMessage: 'Add source',
 });
 
 const SAVE_LABEL = i18n.translate('xpack.nightshift.sources.flyout.saveLabel', {

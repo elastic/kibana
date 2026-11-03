@@ -23,10 +23,7 @@ export type {
   SignificantEventsSortOrder,
 } from './events_list';
 
-export { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from './feature_flags';
-
 export {
-  SIGNIFICANT_EVENTS_APP_ROUTE,
   SIGNIFICANT_EVENT_TIERED_FEATURES,
   SIGNIFICANT_EVENTS_TIERED_FEATURE,
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -124,6 +121,7 @@ export type {
   RunQuotaConsumeResponse,
   RunQuotaGroup,
   RunQuotaSettings,
+  RunQuotaSettingsPatch,
   RunQuotaSettingsUpdate,
   RunQuotaWindow,
   RunQuotasResponse,
