@@ -725,8 +725,14 @@ describe('chatPayloadSchema', () => {
     ).toMatchObject({ trigger_mode: 'never' });
   });
 
+  it('accepts trigger_mode auto', () => {
+    expect(chatPayloadSchema.validate({ input: 'hi', trigger_mode: 'auto' }).trigger_mode).toBe(
+      'auto'
+    );
+  });
+
   it('rejects unsupported trigger_mode values', () => {
-    expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
+    expect(() => chatPayloadSchema.validate({ trigger_mode: 'sometimes' })).toThrow();
   });
 
   it('accepts execution options alongside trigger_mode never', () => {

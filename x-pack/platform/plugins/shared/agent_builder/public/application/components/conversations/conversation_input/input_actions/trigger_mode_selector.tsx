@@ -20,6 +20,10 @@ const triggerModeLabels: Readonly<Record<ChatTriggerMode, string>> = {
     'xpack.agentBuilder.conversationInput.triggerModeSelector.skipAgent',
     { defaultMessage: 'Skip agent' }
   ),
+  [ChatTriggerMode.Auto]: i18n.translate(
+    'xpack.agentBuilder.conversationInput.triggerModeSelector.autoAgent',
+    { defaultMessage: 'Agent decides' }
+  ),
 };
 
 const selectorAriaLabel = i18n.translate(
