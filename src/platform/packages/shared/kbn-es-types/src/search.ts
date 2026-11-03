@@ -693,6 +693,26 @@ export interface EsqlProfileDriver {
   took_nanos?: number;
   /** CPU time for this driver, excluding waiting. */
   cpu_nanos?: number;
+  /** Times this driver stopped to wait, for example for an exchange to fill. */
+  sleeps?: EsqlProfileSleeps;
+}
+
+/** One stretch where a driver was not running. Times are epoch millis. */
+export interface EsqlProfileSleep {
+  reason?: string;
+  thread_name?: string;
+  sleep_millis?: number;
+  wake_millis?: number;
+}
+
+/**
+ * Waiting summary for a driver. `counts` covers every sleep, while `first` and `last` only keep
+ * a few of them, so the recorded sleeps can be fewer than the counted ones.
+ */
+export interface EsqlProfileSleeps {
+  counts?: Record<string, number>;
+  first?: EsqlProfileSleep[];
+  last?: EsqlProfileSleep[];
 }
 
 /** Physical plan text attached to an ES|QL profile. */

@@ -12,6 +12,7 @@ import type { ESQLSearchParams } from '@kbn/es-types';
 import type { IEsqlSearchParams } from '@kbn/search-types';
 import type { ISearchStart } from '../../search';
 import { aggregateEsqlProfile, type QueryProfileView } from './aggregate_esql_profile';
+import { summarizeResults } from './compare_results';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -47,16 +48,14 @@ export async function loadEsqlQueryProfile({
         : {}),
       ...(typeof requestJson.time_zone === 'string' ? { timeZone: requestJson.time_zone } : {}),
       ...(typeof requestJson.locale === 'string' ? { locale: requestJson.locale } : {}),
-    },
-    {
-      abortSignal,
       profile: true,
       includeExecutionMetadata: requestJson.include_execution_metadata === true,
       columnMetadata: settings?.column_metadata === true,
       ...(typeof requestJson.approximation === 'boolean'
         ? { approximation: requestJson.approximation }
         : {}),
-    }
+    },
+    { abortSignal }
   );
 
   const profile = 'profile' in rawResponse ? rawResponse.profile : undefined;
@@ -68,5 +67,5 @@ export async function loadEsqlQueryProfile({
     );
   }
 
-  return aggregateEsqlProfile(profile);
+  return { ...aggregateEsqlProfile(profile), results: summarizeResults(rawResponse) };
 }

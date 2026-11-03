@@ -40,11 +40,13 @@ jest.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', 
     entityName,
     entityType,
     mode,
+    scopeId,
   }: {
     entityId: string;
     entityName: string;
     entityType: string;
     mode?: string;
+    scopeId?: string;
   }) => (
     <div
       data-test-subj="mockAnomaliesTab"
@@ -52,6 +54,7 @@ jest.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', 
       data-entity-name={entityName}
       data-entity-type={entityType}
       data-mode={mode ?? ''}
+      data-scope-id={scopeId ?? ''}
     />
   ),
 }));
@@ -108,6 +111,20 @@ describe('<AnomalyInsights /> host', () => {
       />
     );
     expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-mode', 'resolved');
+  });
+
+  it('forwards the scope it was opened from to the tab', () => {
+    const { getByTestId } = render(
+      <AnomalyInsights
+        entityType={EntityType.host}
+        value="my-host"
+        scopeId="entity-analytics-new-entities-table-7d"
+      />
+    );
+    expect(getByTestId('mockAnomaliesTab')).toHaveAttribute(
+      'data-scope-id',
+      'entity-analytics-new-entities-table-7d'
+    );
   });
 
   it('forwards onOpenEntity to the header click handler', () => {

@@ -38,15 +38,11 @@ type CapturedHandler = (
 const rule = createRuleResponse({
   id: 'rule-1',
   enabled: true,
-  metadata: { template: { id: 'template-1' } },
 });
 
-const eventOfType = (
-  type: RuleEvent['type'],
-  payload: Omit<RuleEventPayload, 'origin'> & Partial<Pick<RuleEventPayload, 'origin'>>
-): RuleEvent => ({
+const eventOfType = (type: RuleEvent['type'], payload: RuleEventPayload): RuleEvent => ({
   type,
-  payload: { origin: { channel: 'api' }, ...payload },
+  payload,
 });
 
 const createdEvent = (...args: [Parameters<typeof eventOfType>[1]]): RuleEvent =>
@@ -71,7 +67,10 @@ describe('RuleTelemetrySubscriber', () => {
     ebtService = createMockEbtService();
     const { loggerService } = createLoggerService();
     subscriber = new RuleTelemetrySubscriber(bus, ebtService, loggerService);
-    context = { request: httpServerMock.createKibanaRequest() as KibanaRequest, origin: 'user' };
+    context = {
+      request: httpServerMock.createKibanaRequest() as KibanaRequest,
+      origin: { actor: 'user', channel: 'api' },
+    };
   });
 
   describe('start()', () => {
@@ -105,7 +104,12 @@ describe('RuleTelemetrySubscriber', () => {
         subscriber.start();
 
         await handler(type)(
-          eventOfType(type, { ruleId: 'rule-1', spaceId: 'default', rule }),
+          eventOfType(type, {
+            ruleId: 'rule-1',
+            spaceId: 'default',
+            rule,
+            templateId: 'template-1',
+          }),
           context
         );
 
@@ -129,7 +133,7 @@ describe('RuleTelemetrySubscriber', () => {
 
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), {
         ...context,
-        origin: 'internal',
+        origin: { actor: 'internal', channel: 'api' },
       });
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
@@ -141,18 +145,13 @@ describe('RuleTelemetrySubscriber', () => {
       );
     });
 
-    it('forwards the channel and app from the event payload as origin.channel and origin.app', async () => {
+    it('forwards the channel and app from the publisher context', async () => {
       subscriber.start();
 
-      await handler()(
-        createdEvent({
-          ruleId: 'rule-1',
-          spaceId: 'default',
-          rule,
-          origin: { channel: 'ui', app: 'discover' },
-        }),
-        context
-      );
+      await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), {
+        ...context,
+        origin: { actor: 'user', channel: 'ui', app: 'discover' },
+      });
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
         RULE_CREATED_EBT_EVENT_TYPE,
@@ -163,7 +162,7 @@ describe('RuleTelemetrySubscriber', () => {
       );
     });
 
-    it('omits origin.app when the event payload has none', async () => {
+    it('omits origin.app when the publisher context has none', async () => {
       subscriber.start();
 
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), context);
@@ -209,9 +208,8 @@ describe('RuleTelemetrySubscriber', () => {
         eventOfType(RULE_DELETED_EVENT_TYPE, {
           ruleId: 'rule-1',
           spaceId: 'default',
-          origin: { channel: 'system', app: 'nightshift' },
         }),
-        context
+        { ...context, origin: { actor: 'user', channel: 'system', app: 'nightshift' } }
       );
 
       expect(ebtService.reportEvent).toHaveBeenNthCalledWith(1, RULE_CREATED_EBT_EVENT_TYPE, {

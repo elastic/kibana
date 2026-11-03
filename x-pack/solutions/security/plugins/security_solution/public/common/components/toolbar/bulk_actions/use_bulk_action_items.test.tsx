@@ -145,6 +145,66 @@ describe('useBulkActionItems', () => {
   });
 
   describe('workflow actions', () => {
+    it('passes only id pairs for the selected rows, not their sources', () => {
+      renderUseBulkActionItems({
+        eventIds: ['selected-1', 'selected-2'],
+        data: [
+          {
+            _id: 'selected-1',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'selected-1', host: { name: ['host-1'] } },
+          },
+          {
+            _id: 'selected-2',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'selected-2', host: { name: ['host-2'] } },
+          },
+          {
+            _id: 'not-selected',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'not-selected' },
+          },
+        ],
+      });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentIds: [
+            { _id: 'selected-1', _index: 'test-index' },
+            { _id: 'selected-2', _index: 'test-index' },
+          ],
+        })
+      );
+    });
+
+    it('drops selected rows without an index', () => {
+      renderUseBulkActionItems({
+        eventIds: ['selected-1', 'no-index'],
+        data: [
+          {
+            _id: 'selected-1',
+            _index: 'test-index',
+            data: [],
+            ecs: { _id: 'selected-1' },
+          },
+          {
+            _id: 'no-index',
+            data: [],
+            ecs: { _id: 'no-index' },
+          },
+        ],
+      });
+
+      expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          documentIds: [{ _id: 'selected-1', _index: 'test-index' }],
+        })
+      );
+    });
+
     it('should include workflow menu items when useRunDocumentWorkflowPanel returns items', () => {
       const mockMenuItem = {
         key: 'run-document-workflow-action',

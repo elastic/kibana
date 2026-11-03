@@ -48,7 +48,6 @@ const payload: RuleEvent['payload'] = {
   spaceId: 'my-space',
   rule,
   correlationId: 'corr-1',
-  origin: { channel: 'api' },
 };
 
 const eventOf = (type: RuleEvent['type'], override = payload): RuleEvent =>
@@ -114,7 +113,10 @@ describe('RuleChangesHistorySubscriber', () => {
       async ({ eventType, action, ecsEventType }) => {
         subscriber.start();
 
-        await handlerFor(eventType)(eventOf(eventType), { request, origin: 'user' });
+        await handlerFor(eventType)(eventOf(eventType), {
+          request,
+          origin: { actor: 'user', channel: 'api' },
+        });
 
         expect(userProfile.getCurrent).toHaveBeenCalledWith({ request });
         expect(changeHistory.logRuleChanges).toHaveBeenCalledTimes(1);
@@ -135,7 +137,7 @@ describe('RuleChangesHistorySubscriber', () => {
 
       await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
@@ -151,9 +153,8 @@ describe('RuleChangesHistorySubscriber', () => {
           ruleId: 'rule-1',
           spaceId: 'my-space',
           correlationId: 'corr-1',
-          origin: { channel: 'api' },
         }),
-        { request, origin: 'user' }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
 
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
@@ -164,7 +165,7 @@ describe('RuleChangesHistorySubscriber', () => {
 
       await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
         request,
-        origin: 'user',
+        origin: { actor: 'user', channel: 'api' },
       });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
@@ -179,7 +180,7 @@ describe('RuleChangesHistorySubscriber', () => {
       await expect(
         handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
           request,
-          origin: 'user',
+          origin: { actor: 'user', channel: 'api' },
         })
       ).resolves.toBeUndefined();
 

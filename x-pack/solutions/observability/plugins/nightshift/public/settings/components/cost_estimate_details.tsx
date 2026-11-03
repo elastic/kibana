@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiIconTip, EuiSwitch, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiSwitch, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type {
   CostCaveat,
   CostResponse,
@@ -131,19 +132,15 @@ export const TrackingCoverageCallout = ({ coverage }: { coverage: TokenTrackingC
         });
 
   return (
-    <EuiCallOut
-      color="warning"
-      iconType="info"
+    <KbnWarningCallout
+      size="s"
       title={title}
+      text={i18n.translate('xpack.nightshift.settings.costEstimate.trackingCoverageDescription', {
+        defaultMessage:
+          'This deployment-wide estimate includes all significant events calls recorded during the selected period. Calls made while tracking was disabled are not included.',
+      })}
       data-test-subj="nightshiftTrackingCoverageCallout"
-    >
-      <p>
-        {i18n.translate('xpack.nightshift.settings.costEstimate.trackingCoverageDescription', {
-          defaultMessage:
-            'This deployment-wide estimate includes all significant events calls recorded during the selected period. Calls made while tracking was disabled are not included.',
-        })}
-      </p>
-    </EuiCallOut>
+    />
   );
 };
 
@@ -196,12 +193,19 @@ export const RetryCallout = ({
   body?: string;
   onRetry: () => void;
 }) => (
-  <EuiCallOut announceOnMount color="danger" iconType="error" title={title}>
-    {body ? <p>{body}</p> : null}
-    <EuiButton size="s" onClick={onRetry} data-test-subj="nightshiftCostRetryButton">
-      {i18n.translate('xpack.nightshift.settings.costEstimate.retryButtonLabel', {
-        defaultMessage: 'Retry',
-      })}
-    </EuiButton>
-  </EuiCallOut>
+  <KbnDangerCallout
+    announceOnMount
+    size="s"
+    title={title}
+    text={body}
+    actionProps={{
+      primary: {
+        children: i18n.translate('xpack.nightshift.settings.costEstimate.retryButtonLabel', {
+          defaultMessage: 'Retry',
+        }),
+        onClick: onRetry,
+        'data-test-subj': 'nightshiftCostRetryButton',
+      },
+    }}
+  />
 );

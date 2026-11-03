@@ -27,6 +27,9 @@ jest.mock('../hooks/use_url_filters', () => ({
   useViewPolicies: jest.fn().mockReturnValue({
     addViewPolicies: jest.fn(),
   }),
+  useViewOnboardingInstances: jest.fn().mockReturnValue({
+    addViewOnboardingInstances: jest.fn(),
+  }),
 }));
 
 jest.mock('../hooks/use_installed_integrations_actions', () => ({
@@ -55,6 +58,7 @@ jest.mock('../../../../../services', () => ({
 import { useAuthz, useLicense } from '../../../../../../../hooks';
 import { useRollbackAvailablePackages } from '../hooks/use_rollback_available';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
+import { useViewOnboardingInstances } from '../hooks/use_url_filters';
 
 import { InstalledIntegrationsTable } from './installed_integrations_table';
 
@@ -133,6 +137,7 @@ describe('InstalledIntegrationsTable', () => {
   const renderComponent = (
     packages: InstalledPackageUIPackageListItem[],
     overrides?: {
+      onboardingInstanceCounts?: Map<string, number>;
       rollingbackIntegrations?: InstalledPackageUIPackageListItem[];
       rollbackAvailable?: Record<string, boolean>;
     }
@@ -161,6 +166,7 @@ describe('InstalledIntegrationsTable', () => {
         isLoading={false}
         pagination={defaultPagination}
         selection={defaultSelection}
+        onboardingInstanceCounts={overrides?.onboardingInstanceCounts}
       />
     );
 
@@ -223,6 +229,44 @@ describe('InstalledIntegrationsTable', () => {
       });
       const rollbackButton = screen.getByTestId('rollbackButton');
       expect(rollbackButton).toBeDisabled();
+    });
+  });
+
+  describe('instances', () => {
+    it('fixes the integration name column width only with the Instances column', () => {
+      const { unmount } = renderComponent([basePackage]);
+      expect(screen.getByText('Integration name').closest('th')).not.toHaveStyle({
+        width: '340px',
+      });
+      unmount();
+
+      renderComponent([basePackage], { onboardingInstanceCounts: new Map([['test-package', 1]]) });
+      expect(screen.getByText('Integration name').closest('th')).toHaveStyle({ width: '340px' });
+    });
+
+    it('shows no column without instances', () => {
+      renderComponent([basePackage]);
+      expect(screen.queryByText('Instances')).not.toBeInTheDocument();
+    });
+
+    it('shows the count as a link for a package with instances', () => {
+      renderComponent([basePackage], { onboardingInstanceCounts: new Map([['test-package', 3]]) });
+      expect(screen.getByText('Instances')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('installedIntegrationsTable.instancesLink.test-package')
+      ).toHaveTextContent('3');
+    });
+
+    it('opens the instances of the package on click', async () => {
+      const addViewOnboardingInstances = jest.fn();
+      (useViewOnboardingInstances as jest.Mock).mockReturnValue({ addViewOnboardingInstances });
+      renderComponent([basePackage], { onboardingInstanceCounts: new Map([['test-package', 2]]) });
+
+      await act(async () => {
+        screen.getByTestId('installedIntegrationsTable.instancesLink.test-package').click();
+      });
+
+      expect(addViewOnboardingInstances).toHaveBeenCalledWith('test-package');
     });
   });
 });

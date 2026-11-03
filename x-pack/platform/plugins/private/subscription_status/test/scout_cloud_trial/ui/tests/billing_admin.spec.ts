@@ -37,7 +37,10 @@ test.describe(
       });
 
       await test.step('links point to Cloud billing and pricing', async () => {
-        await expect(subscribeButton).toHaveAttribute('href', /\/billing\/overview\/$/);
+        await expect(subscribeButton).toHaveAttribute(
+          'href',
+          /\/billing\/overview#uTargetOrganizationId=\w+$/
+        );
         await expect(viewPricingLink).toHaveAttribute('href', /\/cloud-pricing-table\?/);
       });
     });

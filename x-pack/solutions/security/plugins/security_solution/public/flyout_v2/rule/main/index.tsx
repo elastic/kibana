@@ -14,6 +14,7 @@ import { Content } from './content';
 import { Footer } from './footer';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutError } from '../../shared/components/flyout_error';
+import { RuleNotFound } from './rule_not_found';
 import { RULE_DETAILS_LOADING_TEST_ID } from './test_ids';
 
 export interface RuleDetailsProps {
@@ -35,7 +36,7 @@ export const RuleDetails: FC<RuleDetailsProps> = memo(({ ruleId }) => {
   }
 
   if (!rule) {
-    return <FlyoutError />;
+    return isExistingRule ? <FlyoutError /> : <RuleNotFound />;
   }
 
   return (

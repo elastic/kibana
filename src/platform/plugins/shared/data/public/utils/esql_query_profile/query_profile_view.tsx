@@ -9,32 +9,46 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  EuiButtonIcon,
   EuiComboBox,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { HttpStart } from '@kbn/core/public';
 import type { Adapters, Request } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
 import { esqlRequestLabels } from './esql_request_label';
 import { listEsqlInspectorRequests } from './is_esql_inspector_request';
 import { loadEsqlQueryProfile } from './load_esql_query_profile';
 import type { QueryProfileView as QueryProfileViewModel } from './aggregate_esql_profile';
+import { FasterQuerySuggestion } from './faster_query_suggestion';
+import { isSameQuery } from './query_commands';
+import { ProfileComparisonPanel } from './profile_comparison';
+import { getProfileBaseline, setProfileBaseline } from './profile_baseline';
+import type { ProfileBaseline } from './profile_baseline';
 import { QueryProfileBody } from './query_profile_body';
 
 export function QueryProfileView({
   adapters,
   search,
+  http,
   options,
 }: {
   adapters: Adapters;
   search: Pick<ISearchStart, 'esql'>;
+  /** Needed for the AI suggestion. Without it the suggestion is not offered. */
+  http?: Pick<HttpStart, 'get' | 'post'>;
   title?: string;
   options?: unknown;
 }) {
@@ -44,22 +58,45 @@ export function QueryProfileView({
     () => requests.find((request) => request.id === selectedId) ?? requests[0],
     [requests, selectedId]
   );
-  const { view, error, loading } = useQueryProfile(search, selected);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [baseline, setBaseline] = useState<ProfileBaseline | undefined>(getProfileBaseline);
+  const { view, error, loading } = useQueryProfile(search, selected, reloadKey);
   const completedTime = completedRequestTime(selected);
+  const selectedQuery = readQuery(selected);
+  // A request can be a different query than the one in the editor, such as the one behind a
+  // visualization. Nothing can be done with a faster version of it, and it cannot be shown on the
+  // editor or replace the editor's query, so those actions are only offered for the editor's query.
+  const editorQuery = readEditorQuery(options);
+  const isEditorQuery =
+    selectedQuery !== undefined &&
+    editorQuery !== undefined &&
+    isSameQuery(selectedQuery, editorQuery);
+  const isOtherQuery = selectedQuery !== undefined && editorQuery !== undefined && !isEditorQuery;
+
+  const updateBaseline = (next: ProfileBaseline | undefined) => {
+    setProfileBaseline(next);
+    setBaseline(next);
+  };
 
   return (
     <div data-test-subj="esqlQueryProfile">
-      <EuiText size="s" color="subdued">
+      <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileIntro">
         <p>
-          <FormattedMessage
-            id="data.inspector.queryProfile.rerunDescription"
-            defaultMessage="Re-runs the selected request with profiling. The request that already completed is unchanged."
-          />
+          {completedTime
+            ? i18n.translate('data.inspector.queryProfile.introWithTimeDescription', {
+                defaultMessage:
+                  'Profiled re-run of the request. The original took {time} and is unchanged.',
+                values: { time: completedTime },
+              })
+            : i18n.translate('data.inspector.queryProfile.introDescription', {
+                defaultMessage:
+                  'Profiled re-run of the selected request. The original is unchanged.',
+              })}
         </p>
       </EuiText>
       {requests.length > 1 && selected ? (
         <>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
           <RequestPicker
             requests={requests}
             selected={selected}
@@ -67,21 +104,18 @@ export function QueryProfileView({
           />
         </>
       ) : null}
-      {completedTime ? (
+      {isOtherQuery ? (
         <>
-          <EuiSpacer size="m" />
-          <EuiText size="s" data-test-subj="esqlQueryProfileCompletedRequest">
-            <p>
-              <FormattedMessage
-                id="data.inspector.queryProfile.completedRequestDescription"
-                defaultMessage="Completed request: {time}"
-                values={{ time: completedTime }}
-              />
-            </p>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileOtherQuery">
+            <FormattedMessage
+              id="data.inspector.queryProfile.otherQueryDescription"
+              defaultMessage="This is not the query in the editor, for example it is the query behind a visualization. It can be profiled, but not changed or shown on the editor."
+            />
           </EuiText>
         </>
       ) : null}
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       {error ? (
         <KbnDangerCallout
           announceOnMount
@@ -106,9 +140,143 @@ export function QueryProfileView({
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
-        <QueryProfileBody key={selected?.id} view={view} />
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem>
+              {http && selected?.json && selectedQuery && !isOtherQuery ? (
+                <FasterQuerySuggestion
+                  http={http}
+                  search={search}
+                  requestJson={selected.json}
+                  originalQuery={selectedQuery}
+                  originalView={view}
+                  onApplyQuery={isEditorQuery ? readOnApplyQuery(options) : undefined}
+                />
+              ) : null}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ProfileActionsMenu
+                onProfileAgain={() => setReloadKey((key) => key + 1)}
+                onUseAsBaseline={
+                  selectedQuery && baseline?.view !== view
+                    ? () => updateBaseline({ view, query: selectedQuery })
+                    : undefined
+                }
+                onClearBaseline={baseline ? () => updateBaseline(undefined) : undefined}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {baseline?.view === view ? (
+            <>
+              <EuiText size="xs" color="subdued" data-test-subj="esqlQueryProfileIsBaseline">
+                <FormattedMessage
+                  id="data.inspector.queryProfile.isBaselineDescription"
+                  defaultMessage="This run is the baseline. Change the query and profile it again, or pick another request, to compare."
+                />
+              </EuiText>
+              <EuiSpacer size="m" />
+            </>
+          ) : baseline ? (
+            <ProfileComparisonPanel
+              baseline={baseline}
+              current={view}
+              currentQuery={selectedQuery}
+            />
+          ) : null}
+          <QueryProfileBody
+            key={selected?.id}
+            view={view}
+            query={selectedQuery}
+            canShowOnQuery={isEditorQuery}
+          />
+        </>
       )}
     </div>
+  );
+}
+
+function ProfileActionsMenu({
+  onProfileAgain,
+  onUseAsBaseline,
+  onClearBaseline,
+}: {
+  onProfileAgain: () => void;
+  onUseAsBaseline?: () => void;
+  onClearBaseline?: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const run = (action: () => void) => () => {
+    setIsOpen(false);
+    action();
+  };
+
+  const items = [
+    <EuiContextMenuItem
+      key="again"
+      icon="refresh"
+      onClick={run(onProfileAgain)}
+      data-test-subj="esqlQueryProfileRunAgain"
+    >
+      {i18n.translate('data.inspector.queryProfile.profileAgainButtonLabel', {
+        defaultMessage: 'Profile again',
+      })}
+    </EuiContextMenuItem>,
+    ...(onUseAsBaseline
+      ? [
+          <EuiContextMenuItem
+            key="baseline"
+            icon="pin"
+            onClick={run(onUseAsBaseline)}
+            data-test-subj="esqlQueryProfileSetBaseline"
+          >
+            {i18n.translate('data.inspector.queryProfile.setBaselineButtonLabel', {
+              defaultMessage: 'Use as baseline',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(onClearBaseline
+      ? [
+          <EuiContextMenuItem
+            key="clear"
+            icon="cross"
+            onClick={run(onClearBaseline)}
+            data-test-subj="esqlQueryProfileClearBaseline"
+          >
+            {i18n.translate('data.inspector.queryProfile.clearBaselineButtonLabel', {
+              defaultMessage: 'Clear baseline',
+            })}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+  ];
+
+  const moreActionsLabel = i18n.translate('data.inspector.queryProfile.moreActionsAriaLabel', {
+    defaultMessage: 'More actions',
+  });
+
+  return (
+    <EuiPopover
+      aria-label={moreActionsLabel}
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+      button={
+        <EuiToolTip content={moreActionsLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="ellipsis"
+            size="s"
+            color="text"
+            aria-label={moreActionsLabel}
+            onClick={() => setIsOpen((open) => !open)}
+            data-test-subj="esqlQueryProfileActions"
+          />
+        </EuiToolTip>
+      }
+    >
+      <EuiContextMenuPanel items={items} />
+    </EuiPopover>
   );
 }
 
@@ -118,6 +286,33 @@ function readInitialRequestId(options: unknown): string | undefined {
   }
   const requestId = (options as { initialRequestId?: unknown }).initialRequestId;
   return typeof requestId === 'string' && requestId.length > 0 ? requestId : undefined;
+}
+
+/** The opener can say which query its editor holds. */
+function readEditorQuery(options: unknown): string | undefined {
+  if (!options || typeof options !== 'object' || !('editorQuery' in options)) {
+    return undefined;
+  }
+  const { editorQuery } = options as { editorQuery?: unknown };
+  return typeof editorQuery === 'string' ? editorQuery : undefined;
+}
+
+/** The opener can pass a function that puts a query in its editor. */
+function readOnApplyQuery(options: unknown): ((query: string) => void) | undefined {
+  if (!options || typeof options !== 'object' || !('onApplyQuery' in options)) {
+    return undefined;
+  }
+  const { onApplyQuery } = options as { onApplyQuery?: unknown };
+  return typeof onApplyQuery === 'function' ? (onApplyQuery as (query: string) => void) : undefined;
+}
+
+function readQuery(request: Request | undefined): string | undefined {
+  const json: unknown = request?.json;
+  if (!json || typeof json !== 'object' || !('query' in json)) {
+    return undefined;
+  }
+  const { query } = json as { query?: unknown };
+  return typeof query === 'string' && query.length > 0 ? query : undefined;
 }
 
 function completedRequestTime(request: Request | undefined): string | undefined {
@@ -187,7 +382,8 @@ function useEsqlRequests(adapters: Adapters): Request[] {
 
 function useQueryProfile(
   search: Pick<ISearchStart, 'esql'>,
-  request: Request | undefined
+  request: Request | undefined,
+  reloadKey: number
 ): { view?: QueryProfileViewModel; error?: string; loading: boolean } {
   const [view, setView] = useState<QueryProfileViewModel | undefined>();
   const [error, setError] = useState<string | undefined>();
@@ -232,7 +428,7 @@ function useQueryProfile(
     return () => {
       controller.abort();
     };
-  }, [requestId, requestJson, search]);
+  }, [requestId, requestJson, search, reloadKey]);
 
   return { view, error, loading };
 }

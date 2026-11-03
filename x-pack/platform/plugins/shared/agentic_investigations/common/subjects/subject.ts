@@ -58,6 +58,12 @@ export const alertSubjectSnapshotSchema = z
     /** `kibana.alert.url`: the link the rule type writes, if any (for example a Discover link). */
     url: z.string().max(2000).optional(),
     rule_tags: z.array(z.string().max(500)).max(50).optional(),
+    /**
+     * `source` of an alerting v2 alert: what produced it (`universal` for a rule,
+     * `elastic.significant_event`, or the external service a workflow imported it from). Only v2
+     * alerts carry one, so its presence is what tells the two alertings apart.
+     */
+    source: z.string().min(1).max(500).optional(),
   })
   .refine((value) => Object.keys(value).length <= MAX_SNAPSHOT_KEYS, {
     message: `snapshot exceeds ${MAX_SNAPSHOT_KEYS} key limit`,
@@ -69,6 +75,13 @@ export const alertSubjectSnapshotSchema = z
     message: `snapshot exceeds ${MAX_SUBJECT_SNAPSHOT_LENGTH} characters`,
   });
 export type AlertSubjectSnapshot = z.infer<typeof alertSubjectSnapshotSchema>;
+
+/**
+ * Whether an alert subject is an alerting v2 (universal) alert rather than a classic one. Every
+ * v2 alert has a `source` naming its producer; a classic alert has none.
+ */
+export const isUniversalAlertSnapshot = (snapshot?: AlertSubjectSnapshot): boolean =>
+  typeof snapshot?.source === 'string' && snapshot.source.length > 0;
 
 /** A delivered Slack event and the run (for example a workflow execution) that handled it. */
 export const slackSeenEventSchema = z.object({

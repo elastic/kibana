@@ -274,6 +274,173 @@ describe('aggregateEsqlProfile', () => {
   });
 });
 
+describe('aggregateEsqlProfile operator time', () => {
+  // Statuses trimmed from a real `FROM logstash-8 | ... | STATS ... | SORT ... | LIMIT` profile.
+  const profile = {
+    drivers: [
+      {
+        description: 'data',
+        operators: [
+          { operator: 'EvalOperator', status: { process_nanos: 1_804_385, rows_received: 5 } },
+          {
+            operator: 'HashAggregationOperator[mode=INITIAL]',
+            status: {
+              hash_nanos: 279_788,
+              aggregation_nanos: 1_293_042,
+              emit_nanos: 73_959,
+              rows_received: 96_440,
+              rows_emitted: 5,
+            },
+          },
+          { operator: 'ExchangeSinkOperator', status: { rows_received: 5 } },
+        ],
+      },
+      {
+        description: 'final',
+        operators: [
+          { operator: 'ExchangeSourceOperator', status: { rows_emitted: 5 } },
+          {
+            operator: 'TopNOperator[count=null]',
+            status: { receive_nanos: 15_166, emit_nanos: 21_875, rows_received: 5 },
+          },
+        ],
+      },
+    ],
+  };
+
+  it('sums the phase timings of aggregation and TopN operators', () => {
+    const { operators } = aggregateEsqlProfile(profile);
+    const nanosOf = (title: string) =>
+      operators.find((operator) => operator.title === title)?.processNanos;
+
+    expect(nanosOf('HashAggregation')).toBe(279_788 + 1_293_042 + 73_959);
+    expect(nanosOf('TopN')).toBe(15_166 + 21_875);
+    expect(nanosOf('ExchangeSink')).toBe(0);
+  });
+
+  it('includes those operators in shares and the per-driver timeline', () => {
+    const view = aggregateEsqlProfile({
+      ...profile,
+      drivers: profile.drivers.map((driver, index) => ({
+        ...driver,
+        start_millis: 1_000 + index,
+        stop_millis: 1_010 + index,
+      })),
+    });
+    const total = 1_804_385 + 279_788 + 1_293_042 + 73_959 + 15_166 + 21_875;
+    const aggregation = view.operators.find((operator) => operator.title === 'HashAggregation');
+    expect(aggregation?.share).toBeCloseTo((279_788 + 1_293_042 + 73_959) / total);
+
+    const dataDriver = view.timeline.drivers[0];
+    const timelineAggregation = dataDriver.operators.find(
+      (operator) => operator.title === 'HashAggregation'
+    );
+    expect(timelineAggregation?.processNanos).toBe(279_788 + 1_293_042 + 73_959);
+    expect(timelineAggregation?.share).toBeGreaterThan(0.4);
+  });
+
+  it('tells an operator that reports no time apart from one that reports zero', () => {
+    const { operators } = aggregateEsqlProfile({
+      drivers: [
+        {
+          description: 'data',
+          operators: [
+            { operator: 'EvalOperator', status: { process_nanos: 0, rows_received: 1 } },
+            { operator: 'ExchangeSinkOperator', status: { rows_received: 1 } },
+            { operator: 'OutputOperator[columns = [a]]' },
+          ],
+        },
+      ],
+    });
+    const reported = (title: string) =>
+      operators.find((operator) => operator.title === title)?.timeReported;
+
+    expect(reported('Eval')).toBe(true);
+    expect(reported('ExchangeSink')).toBe(false);
+    expect(reported('Output')).toBe(false);
+  });
+
+  it('prefers process_nanos when an operator reports it', () => {
+    const { operators } = aggregateEsqlProfile({
+      drivers: [
+        {
+          description: 'data',
+          operators: [{ operator: 'EvalOperator', status: { process_nanos: 7, emit_nanos: 99 } }],
+        },
+      ],
+    });
+    expect(operators[0].processNanos).toBe(7);
+  });
+});
+
+describe('aggregateEsqlProfile sleeps', () => {
+  // Trimmed from a real profile: the final driver waited on an exchange twice.
+  const sleep = (start: number, wake: number, thread = 'T#18') => ({
+    reason: 'exchange empty',
+    thread_name: thread,
+    sleep_millis: start,
+    wake_millis: wake,
+  });
+  const finalDriver = {
+    description: 'final',
+    start_millis: 1_793_629_006_518,
+    stop_millis: 1_793_629_006_546,
+    sleeps: {
+      counts: { 'exchange empty': 2 },
+      first: [
+        sleep(1_793_629_006_520, 1_793_629_006_541),
+        sleep(1_793_629_006_541, 1_793_629_006_546, 'T#14'),
+      ],
+      last: [
+        sleep(1_793_629_006_520, 1_793_629_006_541),
+        sleep(1_793_629_006_541, 1_793_629_006_546, 'T#14'),
+      ],
+    },
+  };
+
+  it('merges the first and last sleeps without counting one twice', () => {
+    const { timeline } = aggregateEsqlProfile({ drivers: [finalDriver] });
+
+    expect(timeline.drivers[0].sleeps).toEqual([
+      { reason: 'exchange empty', startMillis: 1_793_629_006_520, stopMillis: 1_793_629_006_541 },
+      { reason: 'exchange empty', startMillis: 1_793_629_006_541, stopMillis: 1_793_629_006_546 },
+    ]);
+    expect(timeline.drivers[0].sleepCount).toBe(2);
+  });
+
+  it('clips a sleep to the driver span and ignores malformed ones', () => {
+    const { timeline } = aggregateEsqlProfile({
+      drivers: [
+        {
+          ...finalDriver,
+          sleeps: {
+            counts: { 'exchange empty': 5 },
+            first: [
+              sleep(1_793_629_006_510, 1_793_629_006_520),
+              { reason: 'broken' },
+              sleep(1_793_629_006_600, 1_793_629_006_700),
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(timeline.drivers[0].sleeps).toEqual([
+      { reason: 'exchange empty', startMillis: 1_793_629_006_518, stopMillis: 1_793_629_006_520 },
+    ]);
+    expect(timeline.drivers[0].sleepCount).toBe(5);
+  });
+
+  it('has no sleeps when the profile does not report any', () => {
+    const { timeline } = aggregateEsqlProfile({
+      drivers: [{ description: 'data', start_millis: 1, stop_millis: 5 }],
+    });
+
+    expect(timeline.drivers[0].sleeps).toEqual([]);
+    expect(timeline.drivers[0].sleepCount).toBe(0);
+  });
+});
+
 describe('formatOperatorLabel', () => {
   it('keeps the bracketed detail and drops the Operator suffix', () => {
     expect(formatOperatorLabel('LuceneSourceOperator[index=logs]')).toEqual({

@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { HttpStart } from '@kbn/core/public';
 import type { InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
 import { hasEsqlInspectorRequest } from './is_esql_inspector_request';
@@ -18,7 +19,7 @@ export { ESQL_QUERY_PROFILE_VIEW_ID } from './view_id';
 
 /** Inspector view that re-runs a logged ES|QL request with `profile: true`. */
 export const getEsqlQueryProfileViewDescription = (
-  getStartServices: () => { search: ISearchStart }
+  getStartServices: () => { search: ISearchStart; http: HttpStart }
 ): InspectorViewDescription => ({
   id: ESQL_QUERY_PROFILE_VIEW_ID,
   title: i18n.translate('data.inspector.queryProfile.queryProfileTitle', {

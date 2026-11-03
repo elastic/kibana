@@ -8,6 +8,7 @@
  */
 
 import type { EsqlProfileDriver, EsqlProfilePlan, EsqlQueryProfile } from '@kbn/es-types';
+import type { QueryResultsSummary } from './compare_results';
 
 const PLANNING_PHASE_IDS = [
   'parsing',
@@ -28,8 +29,14 @@ export interface PlanningPhase {
 }
 
 export interface AggregatedOperatorDriver {
+  /** Position of the driver in the profile. Drivers that belong together are listed together. */
+  driverIndex: number;
+  /** What the driver is for, such as data, final or subplan-0.final. */
+  description: string;
   label: string;
   processNanos: number;
+  /** False when this operator type reports no time at all, which is not the same as 0 ms. */
+  timeReported: boolean;
   rowsReceived: number;
   rowsEmitted: number;
   bytesRead?: number;
@@ -42,6 +49,8 @@ export interface AggregatedOperator {
   title: string;
   detail?: string;
   processNanos: number;
+  /** False when no driver reported any time for this operator. */
+  timeReported: boolean;
   /** Share of summed process time, from 0 to 1. */
   share: number;
   /**
@@ -66,6 +75,8 @@ export interface TimelineOperator {
   title: string;
   detail?: string;
   processNanos: number;
+  /** False when this operator reports no time, so it should show a dash instead of 0%. */
+  timeReported: boolean;
   /** Share of this driver's summed process time, from 0 to 1. */
   share: number;
   rowsReceived: number;
@@ -83,7 +94,18 @@ export interface TimelineDriver {
   stopMillis: number;
   tookNanos?: number;
   cpuNanos?: number;
+  /** Recorded waits inside this driver's span, in start order. */
+  sleeps: TimelineSleep[];
+  /** Every wait ES counted. It can exceed `sleeps.length` because ES only records a few. */
+  sleepCount: number;
   operators: TimelineOperator[];
+}
+
+/** One stretch where a driver was waiting, on the same clock as the driver span. */
+export interface TimelineSleep {
+  reason: string;
+  startMillis: number;
+  stopMillis: number;
 }
 
 export interface TimelinePlanning {
@@ -107,11 +129,14 @@ export interface QueryProfileView {
   /** True when at least one driver has a usable start and stop. */
   hasTimeline: boolean;
   timeline: QueryProfileTimeline;
+  /** What the profiled run returned. Set by the loader, since the profile does not hold rows. */
+  results?: QueryResultsSummary;
 }
 
 interface OperatorAccumulator {
   operator: string;
   processNanos: number;
+  timeReported: boolean;
   rowsReceived: number;
   rowsEmitted: number;
   bytesRead?: number;
@@ -209,6 +234,21 @@ function readPipelineIndex(drivers: EsqlProfileDriver[]): Map<string, number> {
   return index;
 }
 
+/**
+ * Most operators report `process_nanos`. Aggregation and TopN operators report their time in
+ * separate phases instead, so those are summed. Exchange and output operators report no time.
+ */
+const PHASE_NANOS_FIELDS = ['hash_nanos', 'aggregation_nanos', 'receive_nanos', 'emit_nanos'];
+
+function readOperatorNanos(status: Record<string, unknown>): number | undefined {
+  const processNanos = readNumber(status, 'process_nanos');
+  if (processNanos !== undefined) {
+    return processNanos;
+  }
+  const phases = PHASE_NANOS_FIELDS.flatMap((field) => readNumber(status, field) ?? []);
+  return phases.length > 0 ? phases.reduce((sum, nanos) => sum + nanos, 0) : undefined;
+}
+
 function aggregateOperators(
   drivers: EsqlProfileDriver[],
   pipelineIndex: Map<string, number>
@@ -225,17 +265,20 @@ function aggregateOperators(
       const current: OperatorAccumulator = byOperator.get(entry.operator) ?? {
         operator: entry.operator,
         processNanos: 0,
+        timeReported: false,
         rowsReceived: 0,
         rowsEmitted: 0,
         drivers: [],
       };
-      const processNanos = readNumber(status, 'process_nanos') ?? 0;
+      const reportedNanos = readOperatorNanos(status);
+      const processNanos = reportedNanos ?? 0;
       const rowsReceived = readNumber(status, 'rows_received') ?? 0;
       const rowsEmitted = readNumber(status, 'rows_emitted') ?? 0;
       const bytesRead = readNumber(status, 'bytes_read');
       const bytesDecoded = readNumber(status, 'bytes_decoded');
 
       current.processNanos += processNanos;
+      current.timeReported = current.timeReported || reportedNanos !== undefined;
       current.rowsReceived += rowsReceived;
       current.rowsEmitted += rowsEmitted;
       if (bytesRead !== undefined) {
@@ -245,8 +288,11 @@ function aggregateOperators(
         current.bytesDecoded = (current.bytesDecoded ?? 0) + bytesDecoded;
       }
       current.drivers.push({
+        driverIndex: index,
+        description: driver.description ?? '',
         label,
         processNanos,
+        timeReported: reportedNanos !== undefined,
         rowsReceived,
         rowsEmitted,
         bytesRead,
@@ -299,6 +345,7 @@ function toAggregatedOperator(
     title,
     detail,
     processNanos: operator.processNanos,
+    timeReported: operator.timeReported,
     share: totalProcessNanos > 0 ? operator.processNanos / totalProcessNanos : 0,
     pipelineIndex,
     rowsReceived: operator.rowsReceived,
@@ -331,6 +378,8 @@ function readTimeline(
         ...clock,
         tookNanos: readFinite(driver.took_nanos),
         cpuNanos: readFinite(driver.cpu_nanos),
+        sleeps: readSleeps(driver, clock),
+        sleepCount: countSleeps(driver),
         operators: readDriverOperators(driver),
       },
     ];
@@ -342,6 +391,44 @@ function readTimeline(
   };
 }
 
+/**
+ * ES keeps only the first and last few sleeps, and they overlap when there are few of them.
+ * Sleeps are merged, de-duplicated and clipped to the driver's own span.
+ */
+function readSleeps(
+  driver: EsqlProfileDriver,
+  clock: { startMillis: number; stopMillis: number }
+): TimelineSleep[] {
+  const recorded = [...(driver.sleeps?.first ?? []), ...(driver.sleeps?.last ?? [])];
+  const seen = new Set<string>();
+
+  return recorded
+    .flatMap((sleep) => {
+      const start = readFinite(sleep?.sleep_millis);
+      const wake = readFinite(sleep?.wake_millis);
+      if (start === undefined || wake === undefined) {
+        return [];
+      }
+      const startMillis = Math.max(start, clock.startMillis);
+      const stopMillis = Math.min(wake, clock.stopMillis);
+      const key = `${sleep.thread_name ?? ''}|${start}|${wake}`;
+      if (stopMillis <= startMillis || seen.has(key)) {
+        return [];
+      }
+      seen.add(key);
+      return [{ reason: sleep.reason ?? '', startMillis, stopMillis }];
+    })
+    .sort((left, right) => left.startMillis - right.startMillis);
+}
+
+function countSleeps(driver: EsqlProfileDriver): number {
+  return Object.values(driver.sleeps?.counts ?? {}).reduce(
+    (sum: number, count) =>
+      typeof count === 'number' && Number.isFinite(count) ? sum + count : sum,
+    0
+  );
+}
+
 /** Operators stay in the driver's own order. Share is of this driver only. */
 function readDriverOperators(driver: EsqlProfileDriver): TimelineOperator[] {
   const operators = (driver.operators ?? []).flatMap((entry) => {
@@ -349,10 +436,12 @@ function readDriverOperators(driver: EsqlProfileDriver): TimelineOperator[] {
       return [];
     }
     const status = isRecord(entry.status) ? entry.status : {};
+    const reportedNanos = readOperatorNanos(status);
     return [
       {
         operator: entry.operator,
-        processNanos: readNumber(status, 'process_nanos') ?? 0,
+        processNanos: reportedNanos ?? 0,
+        timeReported: reportedNanos !== undefined,
         rowsReceived: readNumber(status, 'rows_received') ?? 0,
         rowsEmitted: readNumber(status, 'rows_emitted') ?? 0,
         rawStatus: status,

@@ -86,3 +86,13 @@ export function formatCount(count: number): string {
     values: { count },
   });
 }
+
+/** Formats a change as a share of a baseline, such as +12% or −35%. */
+export function formatChange(ratio: number): string {
+  const percent = Math.abs(ratio * 100);
+  const rounded = percent >= 10 ? String(Math.round(percent)) : percent.toFixed(1);
+  return i18n.translate('data.inspector.queryProfile.changeLabel', {
+    defaultMessage: '{sign}{percent}%',
+    values: { sign: ratio < 0 ? '−' : '+', percent: rounded },
+  });
+}

@@ -317,9 +317,19 @@ export const scoreSseAttachment = (expected: HuntExpected, artifacts: HuntArtifa
     'no reports'
   );
 
-const hasEvidence = (doc: HuntReportArtifacts['reportDoc']): boolean => {
+/**
+ * Whether the report carries a hunt-once stamp. A bare `evidence` element is not one: the coverage
+ * ledger lives on the same element and is written by runs that leave the report unstamped.
+ */
+const hasHuntStamp = (doc: HuntReportArtifacts['reportDoc']): boolean => {
   const evidence = doc?.evidence;
-  return Array.isArray(evidence) ? evidence.length > 0 : Boolean(evidence);
+  const elements = Array.isArray(evidence) ? evidence : [evidence];
+  return elements.some(
+    (element) =>
+      typeof element === 'object' &&
+      element !== null &&
+      (element as { last_hunted_at?: unknown }).last_hunted_at != null
+  );
 };
 
 export const scoreEvidenceHonesty = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
@@ -328,19 +338,21 @@ export const scoreEvidenceHonesty = (expected: HuntExpected, artifacts: HuntArti
     artifacts,
     (report, actual) => {
       if (!actual.reportDoc) return missing('report doc not found');
-      const written = hasEvidence(actual.reportDoc);
-      // The flag the hunt child's `write_evidence` step keys off: true for `complete` and
-      // `incomplete_final`, false for `incomplete_retryable`, absent when no coordinator read
-      // completed. The child's own `status` is `partial` for both incomplete kinds, so it cannot
-      // tell a retired-with-incomplete-evidence hunt from one that wrote nothing.
-      const completedSuccessfully = actual.coordinator?.completed_successfully === true;
+      const written = hasHuntStamp(actual.reportDoc);
+      // The write rule: a confirmed hit is always stamped, and a run that found nothing is stamped
+      // when `completed_successfully` (`complete` or `incomplete_final`), never for
+      // `incomplete_retryable`. The child's own `status` is `partial` for both incomplete kinds, so
+      // it cannot tell a retired-with-incomplete-evidence hunt from one that stamped nothing.
+      const stampExpected =
+        actual.coordinator?.completed_successfully === true ||
+        actual.coordinator?.has_confirmed_hit === true;
       const completeness =
         typeof actual.coordinator?.completeness === 'string'
           ? actual.coordinator.completeness
           : 'absent';
       const want =
         report.evidenceWritten === 'iff_completed_successfully'
-          ? completedSuccessfully
+          ? stampExpected
           : report.evidenceWritten;
       const context = `coordinator ${completeness}, hunt ${actual.hunt?.status}, outcome ${actual.outcome}`;
       return written === want

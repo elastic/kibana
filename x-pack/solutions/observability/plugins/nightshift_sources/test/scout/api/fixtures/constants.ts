@@ -18,9 +18,10 @@ export const SOURCES_PATH = 'internal/nightshift/sources';
 
 /**
  * Test data indices are created under this prefix so roles can be scoped to them. It avoids
- * `logs-*` on purpose: that template only allows data streams.
+ * `logs-*` on purpose because that template only allows data streams.
  */
 export const TEST_INDEX_PREFIX = 'nightshift-sources-test-';
+export const RECOMMENDED_SOURCE_TEST_INDEX_PREFIX = 'logsnightshift-sources-recommendation-test-';
 
 const VIEW_NAME_PATTERN = `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}*`;
 
@@ -32,7 +33,7 @@ const VIEW_READ_PRIVILEGES = {
   privileges: ['read', 'read_view_metadata'],
 };
 const TEST_DATA_READ_PRIVILEGES = {
-  names: [`${TEST_INDEX_PREFIX}*`],
+  names: [`${TEST_INDEX_PREFIX}*`, `${RECOMMENDED_SOURCE_TEST_INDEX_PREFIX}*`],
   privileges: ['read', 'view_index_metadata'],
 };
 

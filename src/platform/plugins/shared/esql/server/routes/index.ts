@@ -24,6 +24,7 @@ import { registerGetTimeFieldRoute } from './get_timefield';
 import { registerGetSourceInfoRoute } from './get_source_info';
 import { registerNLtoESQLRoute } from './nl_to_esql_route';
 import { registerSuggestFixRoute } from './suggest_fix_route';
+import { registerOptimizeQueryRoute } from './optimize_query_route';
 
 export const registerRoutes = (
   setup: CoreSetup<EsqlServerPluginStart>,
@@ -45,4 +46,5 @@ export const registerRoutes = (
   registerGetSourceInfoRoute(router, initContext);
   registerNLtoESQLRoute(router, setup.getStartServices, initContext);
   registerSuggestFixRoute(router, setup.getStartServices, initContext);
+  registerOptimizeQueryRoute(router, setup.getStartServices, initContext);
 };

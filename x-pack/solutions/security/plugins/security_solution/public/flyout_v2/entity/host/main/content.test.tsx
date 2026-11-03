@@ -61,6 +61,14 @@ jest.mock('../../../../cloud_security_posture/components/entity_insight', () => 
 jest.mock('../../shared/components/observed_data_section', () => ({
   ObservedDataSection: () => null,
 }));
+const mockUseAnomalyOverview = jest.fn((_params: { from?: number; to?: number }) => ({
+  data: undefined,
+  isLoading: false,
+  isError: false,
+}));
+jest.mock('../../../../entity_analytics/api/hooks/use_anomaly_overview', () => ({
+  useAnomalyOverview: (params: { from?: number; to?: number }) => mockUseAnomalyOverview(params),
+}));
 
 const defaultProps = {
   identityFields: { 'host.name': 'host-1' },
@@ -274,5 +282,34 @@ describe('Content — legacy asset criticality accordion gating', () => {
       { wrapper: TestProviders }
     );
     expect(screen.queryByTestId('assetCriticalityAccordionMock')).not.toBeInTheDocument();
+  });
+});
+
+describe('Content — scope time range', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('lets the server default the anomaly overview lookback when the scope does not pin a range', () => {
+    render(<Content {...defaultProps} />, { wrapper: TestProviders });
+    expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+      expect.objectContaining({ from: undefined, to: undefined })
+    );
+  });
+
+  it('bounds the anomaly overview to the pinned range when opened from the new Entity Analytics home', () => {
+    render(<Content {...defaultProps} scopeId="entity-analytics-new-entities-table-7d" />, {
+      wrapper: TestProviders,
+    });
+    expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        from: new Date('2024-06-08T12:00:00.000Z').valueOf(),
+        to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
+      })
+    );
   });
 });

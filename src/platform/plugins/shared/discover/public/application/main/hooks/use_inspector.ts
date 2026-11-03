@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type {
   InspectorSession,
   Start as InspectorPublicPluginStart,
@@ -53,6 +54,13 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
   const currentTabId = useCurrentTabSelector((state) => state.id);
   const runtimeStateManager = useRuntimeStateManager();
   const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
+  const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
+  // The query in the editor, so an inspector view can tell it from the query of another request,
+  // such as the one behind a visualization.
+  const editorQuery = useCurrentTabSelector((state) =>
+    isOfAggregateQueryType(state.appState.query) ? state.appState.query.esql : undefined
+  );
+  const isEsqlMode = editorQuery !== undefined;
 
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
@@ -76,6 +84,18 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
       // prevent overlapping
       dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
+      // Lets an inspector view, such as the query profile, put a query in the editor.
+      const onApplyQuery = isEsqlMode
+        ? (query: string) => {
+            dispatch(updateESQLQuery({ queryOrUpdater: query }));
+            session?.close();
+          }
+        : undefined;
+      const viewOptions = {
+        ...(options?.initialRequestId ? { initialRequestId: options.initialRequestId } : {}),
+        ...(onApplyQuery ? { onApplyQuery, editorQuery } : {}),
+      };
+
       const session = inspector.open(
         {
           requests: getInspectorRequestAdapters(dataStateContainer, cascadedDocumentsFetcher),
@@ -89,9 +109,7 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
         {
           title: persistedDiscoverSession?.title,
           initialViewId: options?.initialViewId,
-          options: options?.initialRequestId
-            ? { initialRequestId: options.initialRequestId }
-            : undefined,
+          options: Object.keys(viewOptions).length > 0 ? viewOptions : undefined,
         }
       );
 
@@ -106,10 +124,13 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
     [
       currentTabId,
       dispatch,
+      editorQuery,
       inspector,
+      isEsqlMode,
       persistedDiscoverSession?.title,
       runtimeStateManager,
       setExpandedDoc,
+      updateESQLQuery,
     ]
   );
 

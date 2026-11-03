@@ -132,6 +132,15 @@ describe('bulk_delete', () => {
         })
       );
       expect(creator.bulkCreateAttachmentDeletion).not.toHaveBeenCalled();
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          ids: ['mock-comment-1', 'mock-comment-2'],
+          attachmentType: 'user',
+          owner: 'securitySolution',
+        }
+      );
     });
 
     it('counts every referenced id and passes each deleted attachment for the audit log', async () => {
@@ -334,7 +343,7 @@ describe('bulk_delete', () => {
             caseId,
             owner: mockCases[0].attributes.owner,
             attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
-            attachmentIds: ['attachment-1'],
+            ids: ['attachment-1'],
             alertIds: ['alert-1', 'alert-2'],
             alertIndices: ['index-1', 'index-2'],
           }
@@ -517,7 +526,7 @@ describe('bulk_delete', () => {
 
       it('throws when the attachment ids are empty', async () => {
         await expect(deleteAlerts([])).rejects.toThrow(
-          'Failed to bulk delete attachments for case: mock-id-1: Error: The length of the field attachmentIds is too short. Array must be of length >= 1'
+          'Failed to bulk delete attachments for case: mock-id-1: Error: attachmentIds: The length of the field attachmentIds is too short. Array must be of length >= 1'
         );
       });
     });
@@ -530,7 +539,7 @@ describe('bulk_delete', () => {
       relatedArgs.unifiedAttachmentTypeRegistry.register({
         id: PARENT_TYPE,
         schema: z.object({}),
-        getRelatedAttachments: getRelated,
+        relatedAttachments: { readTypes: [], get: getRelated },
       });
       const { attachmentService, caseService } = relatedArgs.services;
 
@@ -692,7 +701,7 @@ describe('bulk_delete', () => {
         await expect(
           bulkDeleteAttachments({ caseId: 'mock-id-1', savedObjectIds }, clientArgs)
         ).rejects.toThrow(
-          `Failed to bulk delete attachments for case: mock-id-1: Error: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_DELETE_ATTACHMENTS}`
+          `Failed to bulk delete attachments for case: mock-id-1: Error: ids: The length of the field ids is too long. Array must be of length <= ${MAX_BULK_DELETE_ATTACHMENTS}`
         );
       });
 
@@ -700,7 +709,7 @@ describe('bulk_delete', () => {
         await expect(
           bulkDeleteAttachments({ caseId: 'mock-id-1', savedObjectIds: [] }, clientArgs)
         ).rejects.toThrow(
-          'Failed to bulk delete attachments for case: mock-id-1: Error: The length of the field ids is too short. Array must be of length >= 1'
+          'Failed to bulk delete attachments for case: mock-id-1: Error: ids: The length of the field ids is too short. Array must be of length >= 1'
         );
       });
 
@@ -797,7 +806,7 @@ describe('bulk_delete', () => {
       await expect(
         bulkDeleteFileAttachments({ caseId: 'mock-id', fileIds }, clientArgs, casesClient)
       ).rejects.toThrow(
-        'Failed to delete file attachments for case: mock-id: Error: The length of the field ids is too long. Array must be of length <= 10'
+        'Failed to delete file attachments for case: mock-id: Error: ids: The length of the field ids is too long. Array must be of length <= 10'
       );
     });
 
@@ -855,7 +864,30 @@ describe('bulk_delete', () => {
         clientArgs.request,
         {
           caseId,
-          attachmentIds: ['file-attachment-1'],
+          ids: ['file-attachment-1'],
+          attachmentType: 'externalReference',
+          owner: 'securitySolution',
+        }
+      );
+    });
+
+    it('only emits the event for the file attachments confirmed deleted', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachmentsForDeletion.mockResolvedValue([
+        fileAttachment,
+        { ...fileAttachment, id: 'file-attachment-2' },
+      ]);
+      clientArgs.services.attachmentService.bulkDelete.mockResolvedValueOnce(['file-attachment-2']);
+
+      await expect(deleteFileAttachments()).rejects.toThrow(
+        'Failed to delete attachment file-attachment-1 on case mock-id-1.'
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledTimes(1);
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId,
+          ids: ['file-attachment-2'],
           attachmentType: 'externalReference',
           owner: 'securitySolution',
         }

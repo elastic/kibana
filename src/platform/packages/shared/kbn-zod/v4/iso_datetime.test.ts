@@ -17,15 +17,18 @@ describe('isoDateTime', () => {
   const offsetMinute = '2024-01-01T10:00+01:00';
   const offsetSecond = '2024-01-01T10:00:00+01:00';
   const localMinute = '2024-01-01T10:00';
-  const localSecond = '2024-01-01T10:00:00';
+  const tooLong = `2024-01-01T10:00:00.${'1'.repeat(44)}Z`;
 
   it('accepts minute and second precision for default UTC Z semantics', () => {
     const schema = isoDateTime();
     expect(schema.parse(utcMinute)).toBe(utcMinute);
     expect(schema.parse(utcSecond)).toBe(utcSecond);
     expect(schema.parse(utcFraction)).toBe(utcFraction);
+    expect(schema.parse('2024-02-29T10:00Z')).toBe('2024-02-29T10:00Z');
     expect(schema.safeParse(offsetMinute).success).toBe(false);
     expect(schema.safeParse(localMinute).success).toBe(false);
+    expect(schema.safeParse('2023-02-29T10:00Z').success).toBe(false);
+    expect(schema.safeParse('2024-01-01T24:00Z').success).toBe(false);
   });
 
   it('accepts minute and second precision when offset is enabled', () => {
@@ -34,14 +37,8 @@ describe('isoDateTime', () => {
     expect(schema.parse(offsetMinute)).toBe(offsetMinute);
     expect(schema.parse(offsetSecond)).toBe(offsetSecond);
     expect(schema.safeParse(localMinute).success).toBe(false);
-  });
-
-  it('accepts local datetimes with and without seconds when local is enabled', () => {
-    const schema = isoDateTime({ local: true });
-    expect(schema.parse(localMinute)).toBe(localMinute);
-    expect(schema.parse(localSecond)).toBe(localSecond);
-    expect(schema.parse(utcSecond)).toBe(utcSecond);
-    expect(schema.safeParse(offsetMinute).success).toBe(false);
+    expect(schema.safeParse('2024-01-01T10:00+24:00').success).toBe(false);
+    expect(schema.safeParse('2024-01-01T10:00+0100').success).toBe(false);
   });
 
   it('emits a single date-time string in JSON Schema', () => {
@@ -50,9 +47,32 @@ describe('isoDateTime', () => {
       expect.objectContaining({
         type: 'string',
         format: 'date-time',
+        maxLength: 64,
+        pattern: expect.any(String),
       })
     );
     expect(z.toJSONSchema(schema)).not.toHaveProperty('anyOf');
+  });
+
+  it('emits a JSON Schema pattern that matches the same datetimes', () => {
+    const pattern = new RegExp(
+      (z.toJSONSchema(isoDateTime({ offset: true })) as { pattern: string }).pattern
+    );
+    expect(pattern.test(utcMinute)).toBe(true);
+    expect(pattern.test(offsetMinute)).toBe(true);
+    expect(pattern.test(localMinute)).toBe(false);
+    expect(pattern.test('2024-02-30T10:00Z')).toBe(false);
+  });
+
+  it('rejects values longer than 64 characters', () => {
+    const result = isoDateTime().safeParse('x'.repeat(65));
+    expect(result.error?.issues.map(({ code }) => code)).toEqual(['too_big']);
+    expect(result.error?.issues[0]?.message).toBe('Invalid ISO datetime');
+  });
+
+  it('uses the custom message for values longer than 64 characters', () => {
+    const result = isoDateTime({ message: 'Custom datetime message' }).safeParse(tooLong);
+    expect(result.error?.issues.map(({ message }) => message)).toEqual(['Custom datetime message']);
   });
 
   it('surfaces a reasonable error message for invalid input', () => {

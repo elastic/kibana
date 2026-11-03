@@ -101,6 +101,7 @@ export class DataPublicPlugin
     inspector.registerView(
       getEsqlQueryProfileViewDescription(() => ({
         search: startServices().self.search,
+        http: startServices().core.http,
       }))
     );
 
