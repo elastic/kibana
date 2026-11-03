@@ -62,7 +62,9 @@ describe('ConversationDetailsFlyoutFooter', () => {
         investigation={investigation}
         isOpenedFromChat={false}
         onOpenChat={jest.fn()}
-        onOpenEscalation={jest.fn(() => <div>Escalation modal</div>)}
+        onOpenEscalation={jest.fn(() => (
+          <div>Escalation modal</div>
+        ))}
         wrapEscalationButton={(button) => button}
       />
     );
