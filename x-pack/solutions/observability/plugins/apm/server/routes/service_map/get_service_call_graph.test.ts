@@ -71,22 +71,29 @@ function getSearchCall(search: SearchMock, callIndex: number) {
   };
 }
 
+function rollupIntervalOf(params: CallGraphSearchParams) {
+  return params.apm.sources?.[0].rollupInterval;
+}
+
 describe('getServiceCallGraph', () => {
-  it('uses the 60 minute rollup when it has data', async () => {
+  it('uses the 60 minute count and still reads the finer rollups', async () => {
     const search: SearchMock = jest
       .fn()
-      .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 12)]));
+      .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 12)]))
+      .mockResolvedValue(callResponse([]));
     const graph = await getServiceCallGraph(
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
     );
 
-    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledTimes(3);
     const call = getSearchCall(search, 0);
     expect(call.operationName).toBe('get_service_call_graph_for_service_map');
     expect(call.params.apm.sources?.[0]).toEqual({
       documentType: ApmDocumentType.ServiceDestinationMetric,
       rollupInterval: RollupInterval.SixtyMinutes,
     });
+    expect(rollupIntervalOf(getSearchCall(search, 1).params)).toBe(RollupInterval.TenMinutes);
+    expect(rollupIntervalOf(getSearchCall(search, 2).params)).toBe(RollupInterval.OneMinute);
     expect(graph).toEqual({ cart: [{ destination: 'payment', calls: 12 }] });
   });
 
@@ -114,17 +121,18 @@ describe('getServiceCallGraph', () => {
     expect(graph).toEqual({ cart: [{ destination: 'payment', calls: 3 }] });
   });
 
-  it('keeps the 10 minute rollup when it is the coarsest with data', async () => {
+  it('keeps the 10 minute count when the 60 minute rollup has no such pair', async () => {
     const search: SearchMock = jest
       .fn()
       .mockResolvedValueOnce(callResponse([]))
-      .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 8)]));
+      .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 8)]))
+      .mockResolvedValueOnce(callResponse([]));
 
     const graph = await getServiceCallGraph(
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
     );
 
-    expect(search).toHaveBeenCalledTimes(2);
+    expect(search).toHaveBeenCalledTimes(3);
     expect(getSearchCall(search, 1).params.apm.sources?.[0].rollupInterval).toBe(
       RollupInterval.TenMinutes
     );
@@ -143,17 +151,20 @@ describe('getServiceCallGraph', () => {
   });
 
   it('uses the summed call count, and the document count when the sum is missing', async () => {
-    const search: SearchMock = jest.fn().mockResolvedValueOnce(
-      callResponse([
-        bucket('cart', 'payment', 40, 2),
-        {
-          key: { service: 'cart', destination: 'shipping' },
-          doc_count: 7,
-          calls: { value: null },
-        },
-        { key: { service: 'cart' }, doc_count: 1, calls: { value: 1 } },
-      ])
-    );
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValueOnce(
+        callResponse([
+          bucket('cart', 'payment', 40, 2),
+          {
+            key: { service: 'cart', destination: 'shipping' },
+            doc_count: 7,
+            calls: { value: null },
+          },
+          { key: { service: 'cart' }, doc_count: 1, calls: { value: 1 } },
+        ])
+      )
+      .mockResolvedValue(callResponse([]));
 
     const graph = await getServiceCallGraph(
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
@@ -171,6 +182,9 @@ describe('getServiceCallGraph', () => {
     const search: SearchMock = jest
       .fn()
       .mockImplementation(async (_name, params: CallGraphSearchParams) => {
+        if (rollupIntervalOf(params) !== RollupInterval.SixtyMinutes) {
+          return callResponse([]);
+        }
         const size = params.aggs.calls.composite.size;
         if (!params.aggs.calls.composite.after) {
           return callResponse(
@@ -185,7 +199,7 @@ describe('getServiceCallGraph', () => {
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
     );
 
-    expect(search).toHaveBeenCalledTimes(2);
+    expect(search).toHaveBeenCalledTimes(4);
     expect(getSearchCall(search, 1).params.aggs.calls.composite.after).toEqual({
       service: 'next',
       destination: 'next',
@@ -201,6 +215,9 @@ describe('getServiceCallGraph', () => {
     const search: SearchMock = jest
       .fn()
       .mockImplementation(async (_name, params: CallGraphSearchParams) => {
+        if (rollupIntervalOf(params) !== RollupInterval.SixtyMinutes) {
+          return callResponse([]);
+        }
         const size = params.aggs.calls.composite.size;
         if (!params.aggs.calls.composite.after) {
           return callResponse(
@@ -227,6 +244,9 @@ describe('getServiceCallGraph', () => {
     const search: SearchMock = jest
       .fn()
       .mockImplementation(async (_name, params: CallGraphSearchParams) => {
+        if (rollupIntervalOf(params) !== RollupInterval.SixtyMinutes) {
+          return callResponse([]);
+        }
         const size = params.aggs.calls.composite.size;
         const page = search.mock.calls.length;
         return callResponse(
@@ -241,14 +261,19 @@ describe('getServiceCallGraph', () => {
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
     );
 
-    expect(search).toHaveBeenCalledTimes(50);
+    const sixtyMinuteCalls = search.mock.calls.filter(
+      (call) => rollupIntervalOf(call[1] as CallGraphSearchParams) === RollupInterval.SixtyMinutes
+    );
+    expect(sixtyMinuteCalls).toHaveLength(50);
+    expect(search).toHaveBeenCalledTimes(52);
   });
 
   it('filters on the environment and the service group, over the day ending at the map range', async () => {
     const serviceGroupKuery = 'service.name: "checkout"';
     const search: SearchMock = jest
       .fn()
-      .mockResolvedValueOnce(callResponse([bucket('checkout', 'payment', 1)]));
+      .mockResolvedValueOnce(callResponse([bucket('checkout', 'payment', 1)]))
+      .mockResolvedValue(callResponse([]));
 
     await getServiceCallGraph(
       makeOptions({
@@ -268,7 +293,8 @@ describe('getServiceCallGraph', () => {
   it('leaves the service group out when the map is not scoped to one', async () => {
     const search: SearchMock = jest
       .fn()
-      .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 1)]));
+      .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 1)]))
+      .mockResolvedValue(callResponse([]));
 
     await getServiceCallGraph(
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
@@ -289,7 +315,8 @@ describe('getServiceCallGraph', () => {
           bucket('toString', 'cart', 2),
           bucket('__proto__', 'cart', 1),
         ])
-      );
+      )
+      .mockResolvedValue(callResponse([]));
 
     const graph = await getServiceCallGraph(
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
@@ -299,6 +326,53 @@ describe('getServiceCallGraph', () => {
     expect(graph.toString).toEqual([{ destination: 'cart', calls: 2 }]);
     expect(graph.__proto__).toEqual([{ destination: 'cart', calls: 1 }]);
     expect(Object.getPrototypeOf(graph)).toBeNull();
+  });
+
+  it('adds a destination that exists only on a finer rollup, and does not sum a pair already counted', async () => {
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 100)]))
+      .mockResolvedValueOnce(
+        callResponse([bucket('cart', 'payment', 100), bucket('cart', 'shipping', 4)])
+      )
+      .mockResolvedValueOnce(
+        callResponse([
+          bucket('cart', 'payment', 80),
+          bucket('cart', 'shipping', 9),
+          bucket('cart', 'orders', 5),
+        ])
+      );
+
+    const graph = await getServiceCallGraph(
+      makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
+    );
+
+    expect(graph).toEqual({
+      cart: [
+        { destination: 'payment', calls: 100 },
+        { destination: 'shipping', calls: 4 },
+        { destination: 'orders', calls: 5 },
+      ],
+    });
+  });
+
+  it('does not add a finer destination once a service already has 1000', async () => {
+    const search: SearchMock = jest
+      .fn()
+      .mockResolvedValueOnce(
+        callResponse(
+          Array.from({ length: 1000 }, (_, index) => bucket('gateway', `dest-${index}`, 1))
+        )
+      )
+      .mockResolvedValueOnce(callResponse([]))
+      .mockResolvedValueOnce(callResponse([bucket('gateway', 'otel-only', 9)]));
+
+    const graph = await getServiceCallGraph(
+      makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
+    );
+
+    expect(graph.gateway).toHaveLength(1000);
+    expect(graph.gateway.some((call) => call.destination === 'otel-only')).toBe(false);
   });
 
   it('rejects when the search fails, without trying a finer rollup', async () => {

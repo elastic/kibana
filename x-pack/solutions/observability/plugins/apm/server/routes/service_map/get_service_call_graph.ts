@@ -24,11 +24,6 @@ const MAX_DESTINATIONS_PER_SERVICE = 1000;
 const PAGE_SIZE = 5000;
 /** At most this many pages: 250,000 pairs. */
 const MAX_PAGES = 50;
-const ROLLUP_INTERVALS = [
-  RollupInterval.SixtyMinutes,
-  RollupInterval.TenMinutes,
-  RollupInterval.OneMinute,
-] as const;
 
 export interface ServiceDestinationCall {
   destination: string;
@@ -55,28 +50,50 @@ interface ServiceCallAggregate {
 }
 
 /**
- * Reads each service's calls over the last day from the service destination metrics.
+ * Reads each service's calls over the last day, keeping the coarsest count for each pair
+ * and adding pairs that exist only on a finer rollup.
  */
-export async function getServiceCallGraph({
-  apmEventClient,
-  environment,
-  end,
-  serviceGroupKuery,
-}: ServiceCallGraphOptions): Promise<ServiceCallGraph> {
-  // The coarsest rollup that has data. Clusters fed by the OTel connector only have 1 minute.
-  for (const rollupInterval of ROLLUP_INTERVALS) {
-    const graph = await readServiceCalls({
-      apmEventClient,
-      environment,
-      end,
-      serviceGroupKuery,
-      rollupInterval,
-    });
-    if (Object.keys(graph).length > 0) {
-      return graph;
+export async function getServiceCallGraph(
+  options: ServiceCallGraphOptions
+): Promise<ServiceCallGraph> {
+  // A failure on the coarse rollup is a failed query. It does not fall through to a finer one.
+  const sixtyMinutes = await readServiceCalls({
+    ...options,
+    rollupInterval: RollupInterval.SixtyMinutes,
+  });
+  const [tenMinutes, oneMinute] = await Promise.all([
+    readServiceCalls({ ...options, rollupInterval: RollupInterval.TenMinutes }),
+    readServiceCalls({ ...options, rollupInterval: RollupInterval.OneMinute }),
+  ]);
+
+  return mergeServiceCalls([sixtyMinutes, tenMinutes, oneMinute]);
+}
+
+/** Finer rollups only contribute pairs the coarser ones did not already count. */
+function mergeServiceCalls(graphs: readonly ServiceCallGraph[]): ServiceCallGraph {
+  const merged = new Map<string, Map<string, number>>();
+
+  for (const graph of graphs) {
+    for (const [service, destinations] of Object.entries(graph)) {
+      const byDestination = merged.get(service) ?? new Map<string, number>();
+      for (const { destination, calls } of destinations) {
+        if (byDestination.has(destination) || byDestination.size >= MAX_DESTINATIONS_PER_SERVICE) {
+          continue;
+        }
+        byDestination.set(destination, calls);
+      }
+      if (byDestination.size > 0) {
+        merged.set(service, byDestination);
+      }
     }
   }
-  return recordByService([]);
+
+  return recordByService(
+    [...merged].map(([service, destinations]) => [
+      service,
+      [...destinations].map(([destination, calls]) => ({ destination, calls })),
+    ])
+  );
 }
 
 async function readServiceCalls({
