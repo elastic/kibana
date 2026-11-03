@@ -28,7 +28,6 @@
     "@kbn/workflows",
     "@kbn/zod",
     "@kbn/config",
-    "@kbn/config-schema",
-    "@kbn/connector-specs"
+    "@kbn/config-schema"
   ]
 }

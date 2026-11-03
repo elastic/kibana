@@ -1,8 +1,7 @@
-# The `customer0` connector set: the connectors saved on the investigator in the nightshift-customer0
-# deployment, with the same ids and names. evals/investigation/connector_sets.ts lists these ids and
-# saves them on the investigator. Credentials stay in the hook environment.
-# `.http` is required because sandbox credential injection does not support `.webhook`. Spec
-# connectors such as `.github` select their auth type with `secrets.authType`.
+# The `customer0` connector set: the Elasticsearch connector to the customer0 cluster, with the id
+# and name it has on nightshift-customer0. evals/investigation/connector_sets.ts lists this id and
+# saves it on the investigator. Credentials stay in the hook environment.
+# `.http` is required because sandbox credential injection does not support `.webhook`.
 xpack.actions.preconfigured.c0-es:
   name: c0_es
   actionTypeId: .http
@@ -13,25 +12,3 @@ xpack.actions.preconfigured.c0-es:
   secrets:
     secretHeaders:
       Authorization: "ApiKey ${NIGHTSHIFT_C0_ES_API_KEY}"
-
-xpack.actions.preconfigured.gh:
-  name: gh
-  actionTypeId: .github
-  config:
-    serverUrl: https://api.githubcopilot.com/mcp/
-    hasAuth: true
-    authType: bearer
-  secrets:
-    authType: bearer
-    token: ${NIGHTSHIFT_GITHUB_GH_TOKEN}
-
-xpack.actions.preconfigured.github-elastic-org:
-  name: github-elastic-org
-  actionTypeId: .github
-  config:
-    serverUrl: https://api.githubcopilot.com/mcp/
-    hasAuth: true
-    authType: bearer
-  secrets:
-    authType: bearer
-    token: ${NIGHTSHIFT_GITHUB_ORG_TOKEN}

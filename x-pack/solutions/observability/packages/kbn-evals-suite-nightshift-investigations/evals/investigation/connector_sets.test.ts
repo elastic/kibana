@@ -42,7 +42,7 @@ describe('saveConnectorSetOnInvestigator', () => {
     expect(putBody(fetch as unknown as jest.Mock)).toEqual({
       configuration: {
         ...savedAgent.configuration,
-        connector_ids: ['c0-es', 'github-elastic-org', 'gh'],
+        connector_ids: ['c0-es'],
       },
     });
   });

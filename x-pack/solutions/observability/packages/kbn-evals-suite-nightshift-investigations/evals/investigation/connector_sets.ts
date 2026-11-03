@@ -11,12 +11,9 @@ import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigation
 /** The Elasticsearch connector to the cluster holding the ORCA snapshot. */
 export const ORCABENCH_ES_CONNECTOR_ID = 'orcabench-es';
 
-/**
- * Connector ids each Scout connector set preconfigures, in `scout/connector_sets/<set>.yml`.
- * `customer0` matches the investigator on nightshift-customer0 (`gh2` there is not assigned).
- */
+/** Connector ids each Scout connector set preconfigures, in `scout/connector_sets/<set>.yml`. */
 export const CONNECTOR_SETS = {
-  customer0: ['c0-es', 'github-elastic-org', 'gh'],
+  customer0: ['c0-es'],
   orcabench: [ORCABENCH_ES_CONNECTOR_ID],
 } as const;
 

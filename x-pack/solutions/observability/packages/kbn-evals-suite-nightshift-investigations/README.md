@@ -276,17 +276,16 @@ the agent in `connectors.md`. There is no eval-only telemetry setting, start par
 hint; the agent finds the data through the connectors, as it must for a customer. A connector set
 is the group of preconfigured connectors one Scout stack starts with:
 
-| Set         | Kibana config                                                                | Connectors                                                    | Credentials (Vault / profile JSON)                  |
-| ----------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------- |
-| `customer0` | [`scout/connector_sets/customer0.yml`](scout/connector_sets/customer0.yml) | `c0-es` (`.http`), `gh` and `github-elastic-org` (`.github`)  | `nightshift.telemetry.{url,apiKey}`, `nightshift.github.{gh,org}` |
-| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.http`)                                      | `nightshiftOrcaEs.{url,apiKey}`                     |
+| Set         | Kibana config                                                              | Connectors               | Credentials (Vault / profile JSON)  |
+| ----------- | -------------------------------------------------------------------------- | ------------------------ | ----------------------------------- |
+| `customer0` | [`scout/connector_sets/customer0.yml`](scout/connector_sets/customer0.yml) | `c0-es` (`.http`)        | `nightshift.telemetry.{url,apiKey}` |
+| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.http`) | `nightshiftOrcaEs.{url,apiKey}`     |
 
-`customer0` has the same ids and names as the investigator on the nightshift-customer0 deployment
-(`gh2` there is not assigned). The hook selects `orcabench` on the ORCA shard (or
-`NIGHTSHIFT_DATASETS=orcabench`), and `customer0` whenever c0-es credentials are configured. It
-exports `NIGHTSHIFT_CONNECTOR_SET` and points the Scout config set at the set's YAML; the eval then
-saves every connector in the set on the investigator through the Agent Builder agents API
-(`saveConnectorSetOnInvestigator` in
+To add a connector to a set, declare it in the set's YAML and add its id to `CONNECTOR_SETS`. The
+hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `customer0`
+whenever c0-es credentials are configured. It exports `NIGHTSHIFT_CONNECTOR_SET` and points the
+Scout config set at the set's YAML; the eval then saves every connector in the set on the
+investigator through the Agent Builder agents API (`saveConnectorSetOnInvestigator` in
 [`connector_sets.ts`](evals/investigation/connector_sets.ts)), as a user would in the agent's
 settings. Without a connector set, nothing is saved. One stack runs one set; the eval does not
 switch connectors per example.
@@ -295,24 +294,20 @@ The c0-es credentials keep the Vault field name `nightshift.telemetry`:
 
 ```json
 "nightshift": {
-  "telemetry": { "url": "https://c0.example.com", "apiKey": "..." },
-  "github": { "gh": "...", "org": "..." }
+  "telemetry": { "url": "https://c0.example.com", "apiKey": "..." }
 }
 ```
 
-`url` and `apiKey` are required together, and the set refuses to start without both GitHub tokens
-or without sandbox credentials. Profile values take precedence over these shell fallbacks:
+`url` and `apiKey` are required together, and a connector set requires sandbox credentials.
+Profile values take precedence over these shell fallbacks, which replace the former
+`NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` and `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY`:
 
-| Variable                      | Purpose                                                                                 |
-| ----------------------------- | --------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_C0_ES_URL`        | c0-es Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
-| `NIGHTSHIFT_C0_ES_API_KEY`    | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.        |
-| `NIGHTSHIFT_GITHUB_GH_TOKEN`  | Bearer token for the `gh` connector.                                                    |
-| `NIGHTSHIFT_GITHUB_ORG_TOKEN` | Bearer token for the `github-elastic-org` connector.                                    |
+| Variable                   | Purpose                                                                                 |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| `NIGHTSHIFT_C0_ES_URL`     | c0-es Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
+| `NIGHTSHIFT_C0_ES_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.        |
 
-The former `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL`, `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` and
-`NIGHTSHIFT_SANDBOX_READABLE_INDICES` make the hook fail, so a stale shell does not silently start
-without connectors. A `readableIndices` field left in Vault is ignored.
+A `readableIndices` field left in Vault is ignored.
 
 Restrict each Elasticsearch API key to `read` and `view_index_metadata` on the patterns the
 examples need, with only the cluster privileges required for discovery. Keep endpoints and keys in

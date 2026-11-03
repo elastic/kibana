@@ -1668,6 +1668,37 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       context: { inputs },
     });
 
+  it.each([
+    ['as the caller', { type: 'user', id: 'elastic' }],
+    ['as another service account', { type: 'service_account', id: 'kibana/other' }],
+    ['without an identity', undefined],
+  ])('rejects a run that executes %s before touching the investigation', async (_, identity) => {
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      id: 'exec-1',
+      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      effectiveIdentity: identity,
+      status: ExecutionStatus.RUNNING,
+      context: { inputs: { investigation_id: 'inv-1', subjects } },
+    });
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
+      /only run as the Nightshift service account/
+    );
+    expect(conversations.create).not.toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+  });
+
+  it('rejects a run as the agent account when the space is no longer set up', async () => {
+    withExecution();
+    mockManagement.getWorkflow.mockResolvedValueOnce(null);
+
+    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
+      /only run as the Nightshift service account/
+    );
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+
   it('creates the investigation conversation and records the run subjects', async () => {
     withExecution();
 

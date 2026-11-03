@@ -91,22 +91,9 @@ ca="$(pem_path SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 # a user would, and the agent finds them in connectors.md like in production. The ORCA shard uses
 # `orcabench`; any other run with customer0 Elasticsearch credentials uses `customer0`.
 
-# These configured the former eval-only telemetry connector. Fail rather than start a stack
-# without the connectors they were meant to provide.
-for name in NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY \
-  NIGHTSHIFT_SANDBOX_READABLE_INDICES; do
-  if [[ -n "${!name:-}" ]]; then
-    echo "nightshift-investigations scout hook: $name was removed; set NIGHTSHIFT_C0_ES_URL and" \
-      "NIGHTSHIFT_C0_ES_API_KEY for the customer0 connector set (there is no index hint)" >&2
-    exit 1
-  fi
-done
-
 connector_set=''
 es_url=''
 es_key=''
-github_gh=''
-github_org=''
 if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcabench ]]; then
   # Only the suite's own config holds the ORCA key. CI forwards this same input when the native
   # CLI invokes the hook again.
@@ -138,16 +125,6 @@ else
     # The URL becomes unredacted connector config, so credentials belong in the API key alone.
     if [[ "$es_url" == *@* ]]; then
       echo "nightshift-investigations scout hook: the c0-es URL must not embed credentials" >&2
-      exit 1
-    fi
-    # Tokens come from the profile block, or from the shell when the block has neither.
-    github_gh="$(config_value '.nightshift.github.gh')"
-    github_org="$(config_value '.nightshift.github.org')"
-    github_gh="${github_gh:-${NIGHTSHIFT_GITHUB_GH_TOKEN:-}}"
-    github_org="${github_org:-${NIGHTSHIFT_GITHUB_ORG_TOKEN:-}}"
-    if [[ -z "$github_gh" || -z "$github_org" ]]; then
-      echo "nightshift-investigations scout hook: the customer0 connector set requires" \
-        "nightshift.github.gh and nightshift.github.org" >&2
       exit 1
     fi
     connector_set=customer0
@@ -199,8 +176,6 @@ HOOK_HOST="$host" \
   HOOK_CONNECTORS_CONFIG="${connector_set:+$script_dir/connector_sets/$connector_set.yml}" \
   HOOK_ES_URL="$es_url" \
   HOOK_ES_KEY="$es_key" \
-  HOOK_GITHUB_GH="$github_gh" \
-  HOOK_GITHUB_ORG="$github_org" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
   jq -n '{
     env: (({
@@ -222,8 +197,6 @@ HOOK_HOST="$host" \
       NIGHTSHIFT_ORCABENCH_ES_API_KEY: $ENV.HOOK_ES_KEY
     } elif $ENV.HOOK_CONNECTOR_SET == "customer0" then {
       NIGHTSHIFT_C0_ES_URL: $ENV.HOOK_ES_URL,
-      NIGHTSHIFT_C0_ES_API_KEY: $ENV.HOOK_ES_KEY,
-      NIGHTSHIFT_GITHUB_GH_TOKEN: $ENV.HOOK_GITHUB_GH,
-      NIGHTSHIFT_GITHUB_ORG_TOKEN: $ENV.HOOK_GITHUB_ORG
+      NIGHTSHIFT_C0_ES_API_KEY: $ENV.HOOK_ES_KEY
     } else {} end))
   }'

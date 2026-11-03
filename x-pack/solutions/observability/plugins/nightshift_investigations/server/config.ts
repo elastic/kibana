@@ -53,4 +53,13 @@ export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<NightshiftInvestigationsConfig> = {
   schema: configSchema,
+  // The former `sandbox.telemetry_*` settings: Elasticsearch is now a connector saved on the
+  // investigator. Dropped with a warning so a stale kibana.yml does not stop Kibana from starting.
+  deprecations: ({ unused }) => [
+    unused('sandbox', {
+      level: 'warning',
+      message:
+        '"xpack.nightshift_investigations.sandbox" is no longer used. Save the Elasticsearch connector on the Nightshift investigator agent instead.',
+    }),
+  ],
 };
