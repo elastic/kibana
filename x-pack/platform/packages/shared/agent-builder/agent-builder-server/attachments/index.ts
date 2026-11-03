@@ -38,6 +38,7 @@ export type {
 export { createAttachmentStateManager } from './attachment_state_manager';
 export type { AttachmentChangesToEventsOptions } from './attachment_change_events';
 export { attachmentChangesToEvents } from './attachment_change_events';
+export { SURFACE_LIMITS, clampText, hasText, toLine } from './surface_limits';
 export type {
   AttachmentPublicClient,
   AttachmentWriteAccess,

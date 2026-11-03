@@ -15,10 +15,10 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, clampText, hasText } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SURFACE_LIMITS, clampText, hasText } from './surface_helpers';
 
 /** The params of Discover's locator that an ES|QL attachment opens it with. */
 export interface DiscoverEsqlLocatorParams extends SerializableRecord {

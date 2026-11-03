@@ -470,7 +470,7 @@ const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
 - **Heading.** `title` becomes a `header` and `subtitle` a `context` line, above the body.
 - **Nodes.** `markdown` for prose (GitHub-flavored markdown is converted per surface), `fields` for labeled values, `code` for source shown as written, `table` for rows, `context`, `section`, `quote`, `divider`, `link` and `actions`. Each primitive's schema describes it.
 - **Links back to Kibana.** Use `link` with an app id and a path, not a URL. Slack resolves it against the Kibana URL of the conversation's space, and leaves it out when there's none. `actions` take absolute URLs only: a relative `/app/…` URL would lose the base path and the space.
-- **Limits.** Each primitive has limits, such as 12,000 characters of `code` or 1,000 for a `fields` value. A composition that fails validation, or a mapping that throws, leaves the whole attachment out, so clamp what can be long.
+- **Limits.** Each primitive has limits, such as 12,000 characters of `code` or 1,000 for a `fields` value. A composition that fails validation, or a mapping that throws, leaves the whole attachment out, so clamp what can be long: `@kbn/agent-builder-server/attachments` exports `SURFACE_LIMITS` with `clampText`, `toLine` and `hasText`.
 
 See the `agentBuilderPlatform` types, such as `esql`, `skill` and `connector_setup`, for examples.
 

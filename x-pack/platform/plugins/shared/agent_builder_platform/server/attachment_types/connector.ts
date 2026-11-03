@@ -12,6 +12,7 @@ import {
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition, SurfaceNode } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, clampText, hasText, toLine } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
@@ -19,7 +20,6 @@ import {
   formatConnectorActionLine,
   getConnectorSpec,
 } from '@kbn/connector-specs';
-import { SURFACE_LIMITS, clampText, hasText, toLine } from './surface_helpers';
 
 /**
  * Creates the definition for the `connector` attachment type.

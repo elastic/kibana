@@ -6,23 +6,21 @@
  */
 
 /**
- * Limits of the `@kbn/isomer-components` primitives the surface compositions use. A node over its
+ * Limits of the `@kbn/isomer-components` primitives that surface compositions use. A node over its
  * limit fails validation, and that leaves the whole attachment out, so values are clamped to them.
  */
 export const SURFACE_LIMITS = {
-  codeText: 12000,
+  headerText: 200,
   contextText: 500,
+  codeText: 12000,
   fieldLabel: 100,
   /** Slack shows at most 10 fields in a section. */
   fieldItems: 10,
   fieldValue: 1000,
   linkPath: 2000,
   tableCell: 500,
-  tableColumnLabel: 100,
-  /** Rows a table shows before the rest are counted in a note. */
+  /** Rows a table shows before the rest are counted. */
   tableRows: 50,
-  /** Items a list shows before the rest are counted. */
-  listItems: 50,
 } as const;
 
 /** `value` cut to `max` characters, with an ellipsis when it's cut. */

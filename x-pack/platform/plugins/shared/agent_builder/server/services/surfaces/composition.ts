@@ -23,15 +23,12 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, toLine } from '@kbn/agent-builder-server/attachments';
 import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 
 const { tagName, attributes } = renderAttachmentElement;
-
-// The components pack's limits for a `header`'s text and a `context` item.
-const HEADER_TEXT_MAX = 200;
-const CONTEXT_TEXT_MAX = 500;
 
 /**
  * A `<render_attachment>` tag of the response message, with its attributes as written. Its
@@ -72,12 +69,6 @@ const toMessageNodes = (message: string): MessageNode[] =>
     return attachmentId ? [{ type: 'attachment', attachmentId, version }] : [];
   });
 
-/** `value` on one line, cut to `max` characters with an ellipsis. */
-const toLine = (value: string, max: number): string => {
-  const line = value.replace(/\s+/g, ' ').trim();
-  return line.length > max ? `${line.slice(0, max - 1).trimEnd()}…` : line;
-};
-
 /**
  * Keeps the `title` and `subtitle` of an attachment's composition, which would otherwise be lost
  * when its body is spliced into the message: the title becomes a `header` and the subtitle a
@@ -85,8 +76,8 @@ const toLine = (value: string, max: number): string => {
  * `toSurfaceComposition` that decides whether an attachment has a heading.
  */
 const toHeadingNodes = ({ title, subtitle }: SurfaceComposition): SurfaceNode[] => {
-  const titleLine = title ? toLine(title, HEADER_TEXT_MAX) : '';
-  const subtitleLine = subtitle ? toLine(subtitle, CONTEXT_TEXT_MAX) : '';
+  const titleLine = title ? toLine(title, SURFACE_LIMITS.headerText) : '';
+  const subtitleLine = subtitle ? toLine(subtitle, SURFACE_LIMITS.contextText) : '';
 
   return [
     ...(titleLine ? [{ type: 'header' as const, text: titleLine, level: 2 as const }] : []),

@@ -11,8 +11,8 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, clampText, hasText, toLine } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
-import { SURFACE_LIMITS, clampText, hasText, toLine } from './surface_helpers';
 
 /**
  * Creates the definition for the `screen_context` attachment type.

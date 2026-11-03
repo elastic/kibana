@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { AgentsStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { hasText } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -18,7 +19,6 @@ import {
   type ConnectorSetupAttachmentData,
 } from '../../common/attachments';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
-import { hasText } from './surface_helpers';
 
 /** Agent Builder's connectors page, which the browser card links to as well. */
 const CONNECTORS_MANAGE_PATH = '/manage/connectors';

@@ -10,6 +10,7 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, clampText, hasText } from '@kbn/agent-builder-server/attachments';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { i18n } from '@kbn/i18n';
 import {
@@ -17,7 +18,6 @@ import {
   skillAttachmentDataSchema,
   type SkillAttachmentData,
 } from '../../common/attachments';
-import { SURFACE_LIMITS, clampText, hasText } from './surface_helpers';
 
 /** Agent Builder's skills page, which the browser card's "Edit in Management" opens. */
 const SKILLS_MANAGE_PATH = '/manage/skills';

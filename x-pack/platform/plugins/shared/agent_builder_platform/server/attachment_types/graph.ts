@@ -10,10 +10,10 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, toLine } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import type { GraphAttachment, GraphAttachmentData, GraphEdge } from '../../common/attachments';
 import { GRAPH_ATTACHMENT_TYPE, graphAttachmentDataSchema } from '../../common/attachments';
-import { SURFACE_LIMITS, toLine } from './surface_helpers';
 
 export const createGraphAttachmentType = (): AttachmentTypeDefinition<
   typeof GRAPH_ATTACHMENT_TYPE,
