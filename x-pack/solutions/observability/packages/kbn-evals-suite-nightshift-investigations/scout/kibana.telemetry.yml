@@ -1,5 +1,8 @@
-# Remote telemetry credentials are resolved from the scout hook environment. The connector is
-# `.http` because sandbox credential injection (getSandboxCredentials) doesn't support `.webhook`.
+# Remote telemetry credentials are resolved from the scout hook environment. Telemetry is an ordinary
+# connector: the eval adds it to the investigator's saved connectors (see
+# evals/investigation/investigator_connectors.ts), as a user would in the agent's settings. The
+# connector is `.http` because sandbox credential injection (getSandboxCredentials) doesn't support
+# `.webhook`.
 xpack.actions.preconfigured.nightshift-evals-telemetry:
   name: Remote Elasticsearch telemetry
   actionTypeId: .http
@@ -10,7 +13,3 @@ xpack.actions.preconfigured.nightshift-evals-telemetry:
   secrets:
     secretHeaders:
       Authorization: "ApiKey ${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY}"
-
-xpack.nightshift_investigations.sandbox:
-  telemetry_connector_id: nightshift-evals-telemetry
-  telemetry_readable_indices: ${NIGHTSHIFT_SANDBOX_READABLE_INDICES}

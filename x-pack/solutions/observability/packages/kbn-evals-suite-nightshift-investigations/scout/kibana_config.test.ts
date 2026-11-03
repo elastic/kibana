@@ -60,10 +60,8 @@ it('resolves credentials from the environment and preserves other preconfigured 
       key: '/certs/tls.key',
       certificate_authorities: '',
     });
-    expect(config.xpack.nightshift_investigations.sandbox).toEqual({
-      telemetry_connector_id: 'nightshift-evals-telemetry',
-      telemetry_readable_indices: 'remote:logs-*',
-    });
+    // Telemetry is a plain connector the eval assigns to the investigator, not a plugin setting.
+    expect(config.xpack.nightshift_investigations).toBeUndefined();
     expect(
       schema
         .arrayOf(

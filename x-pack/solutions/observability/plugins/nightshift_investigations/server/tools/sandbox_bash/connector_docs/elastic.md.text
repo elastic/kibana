@@ -1,0 +1,90 @@
+# Elasticsearch
+
+Use for: querying cluster telemetry (logs, metrics, traces) with ES|QL or the REST API.
+
+Check `/workspace/connectors.md` for an Elasticsearch connector. Query that cluster by passing its id
+as `connector_id: "<connector-id>"` to `nightshift_sandbox_bash`.
+Credentials are not stored here: for that single command only, the environment contains
+
+- `CONNECTOR_CONFIG_URL` — Elasticsearch URL
+- `CONNECTOR_HEADER_AUTHORIZATION` — full Authorization header value (`ApiKey <key>`)
+
+Reference those variables directly and never hard-code their values. A command that omits
+`connector_id` gets no credentials and cannot reach Elasticsearch.
+
+## Remote clusters
+
+This cluster may reach other clusters through cross-cluster search (CCS). Address a remote
+index as `<remote>:<index>`, in `_resolve/index`, `_field_caps`, `_count`, `_search` and ES|QL
+`FROM` alike. List the remote names with `GET /_remote/info`; if that is forbidden, use the
+names in the space's custom context. Which indices you may read depends on the API key: discover them
+with the workflow below rather than assuming names.
+
+## Workflow
+
+This document says where and how to look, not what the data contains. Every name, number or
+list you report must come from a query result in this session, never from this document or
+from memory.
+
+1. Find the data stream: `GET /_resolve/index/<pattern>` (`<remote>:<pattern>` for a remote).
+   Query one specific data stream, not a broad `logs-*`: on large clusters a broad pattern
+   scans every data stream and times out.
+2. Check which streams map a field before querying it: `GET /<index>/_field_caps?fields=<field>`
+   with `include_unmapped=true`. `Unknown column [x]` means no index in the `FROM` pattern maps
+   `x`: pick another stream instead of retrying. Field names differ between ECS data and
+   OpenTelemetry data, so confirm them rather than assuming.
+3. Query with ES|QL (`POST /_query?format=txt`), or `_count` / `_search` where that is simpler.
+   Prefer `STATS` for totals and a small `LIMIT` for raw documents.
+
+## Query rules
+
+- Bound every telemetry query with a time range on the timestamp field and every curl with
+  `--max-time 120`. If a query times out, filter on a keyword field before any text match, or
+  split the window.
+- Never hide a failure: no `2>/dev/null`, `|| true`, or piping a response straight into `jq`.
+  A failed request then looks like no data. Check for `.error` first.
+- With many remotes, name each one explicitly and query them in parallel with a short
+  per-request timeout (last example below): a sequential loop over dozens of remotes exceeds
+  the sandbox command timeout and returns nothing. Never use wildcard remote names in
+  `_resolve/*` or `_cat/*` calls.
+- Build ES|QL bodies with `jq -n --arg q '<ES|QL>' '{query: $q}' | curl … -d @-` so the query
+  needs no JSON escaping, and put regexes in triple-quoted `"""…"""` strings.
+- ES|QL traps: `LIKE` wildcards are `*`, not `%`; string comparison is case-sensitive; use
+  `MATCH_PHRASE(message, "…")` for text; count conditionally with `COUNT(*) WHERE …`; numeric
+  looking fields may be `keyword` (compare with `TO_INTEGER(…)`); integer division truncates
+  (`100.0 * a / b`); `==` and `!=` never match null (use `IS NULL`); quote field names
+  containing `/` or `-` in backticks; `first` and `last` are reserved; without `LIMIT`,
+  results stop at 1000 rows.
+- The sandbox has `jq` and `python3`; there is no `python`.
+
+## Examples
+
+```bash
+# connector_id must be set on every one of these commands
+# Find data streams matching a keyword (add "<remote>:" for a remote)
+curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
+  "$CONNECTOR_CONFIG_URL/_resolve/index/*<keyword>*"
+
+# Which indices map a field
+curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
+  "$CONNECTOR_CONFIG_URL/<index>/_field_caps?fields=<field>&include_unmapped=true"
+
+# Count and group, bounded in time
+curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
+  -H "Content-Type: application/json" \
+  "$CONNECTOR_CONFIG_URL/_query?format=txt" \
+  -d '{"query":"FROM <index> | WHERE @timestamp >= \"<START>\" AND @timestamp < \"<END>\" | STATS count = COUNT(*) BY <keyword_field> | SORT count DESC | LIMIT 20"}'
+
+# Count one data stream on every remote whose name starts with <prefix>, 8 at a time, each
+# line prefixed with its remote; failed requests print their error
+q() {
+  curl --fail-with-body -sS --max-time 30 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
+    -H "Content-Type: application/json" "$CONNECTOR_CONFIG_URL/_query?format=txt" \
+    -d "{\"query\":\"FROM $1:<index> | WHERE @timestamp >= \\\"<START>\\\" AND @timestamp < \\\"<END>\\\" | STATS count = COUNT(*)\"}" \
+    2>&1 | sed "s/^/$1\t/"
+}
+export -f q
+curl --fail-with-body -sS --max-time 120 -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" \
+  "$CONNECTOR_CONFIG_URL/_remote/info" | jq -r 'keys[] | select(startswith("<prefix>"))' \
+  | xargs -P 8 -n 1 bash -c 'q "$0"'
+```

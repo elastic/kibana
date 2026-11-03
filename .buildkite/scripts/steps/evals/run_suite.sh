@@ -680,6 +680,7 @@ if [[ -n "${EVAL_SPEC_FILES:-}" ]]; then
   EVAL_RUN_ARGS+=(${EVAL_SPEC_FILE_LIST[@]+"${EVAL_SPEC_FILE_LIST[@]}"})
 fi
 
+# stdin is detached so the CLI never prompts for a profile on agents that attach a terminal.
 run_eval_suite() {
   if [[ -n "${EVAL_PROJECT:-}" ]]; then
     KBN_EVALS_RUN_LOG="$(mktemp -t kbn-evals-run.XXXXXX.log)"

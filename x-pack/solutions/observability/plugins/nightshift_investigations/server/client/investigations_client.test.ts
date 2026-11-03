@@ -65,6 +65,9 @@ const installAssistantAgentMock = installAssistantAgent as jest.MockedFunction<
 
 const SPACE_ID = 'test-space';
 
+const startFromApi = (client: NightshiftInvestigationsClient, request: StartInvestigationRequest) =>
+  client.start(request, { entryPoint: 'start_api' });
+
 const mockManagement = {
   getWorkflowExecution: jest.fn(),
   getWorkflow: jest.fn(),
@@ -106,7 +109,6 @@ const makeConversation = ({
   status,
   owner = true,
   templateId = 'investigation',
-  telemetryTarget,
   workflowExecutionIds,
 }: {
   id: string;
@@ -114,15 +116,12 @@ const makeConversation = ({
   status?: 'open' | 'closed';
   owner?: boolean;
   templateId?: string;
-  telemetryTarget?: string;
   workflowExecutionIds?: string[];
 }) => ({
   id,
   title,
   template_id: templateId,
-  agent_id: 'nightshift.investigation',
   metadata: {
-    ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
     ...(status ? { status } : {}),
     ...(workflowExecutionIds ? { workflow_execution_ids: workflowExecutionIds } : {}),
   },
@@ -230,13 +229,12 @@ beforeEach(() => {
     }: {
       id: string;
       title?: string;
-      metadata?: { workflow_execution_ids?: string[]; telemetry_target?: string };
+      metadata?: { workflow_execution_ids?: string[] };
     }) =>
       makeConversation({
         id,
         title: title ?? DEFAULT_CONVERSATION_TITLE,
         workflowExecutionIds: metadata?.workflow_execution_ids,
-        telemetryTarget: metadata?.telemetry_target,
       })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
@@ -277,7 +275,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    const result = await makeClient().start({
+    const result = await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'manual',
@@ -310,7 +308,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
     getConnectorById.mockResolvedValue({ connectorId: 'canonical-model' });
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'event-1' },
       trigger_type: 'manual',
@@ -327,54 +325,11 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('passes the telemetry default separately from the LLM and stores it alongside the creating run', async () => {
-    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
-    mockManagement.runWorkflow.mockResolvedValue('exec-123');
-    await makeClient({
-      telemetryConfig: {
-        default_telemetry_target: 'c0',
-        telemetry_targets: { c0: { connector_id: 'telemetry-c0' } },
-      },
-    }).start({ subject: { type: 'manual', id: 'question' }, trigger_type: 'manual' });
-    expect(mockManagement.runWorkflow.mock.calls[0][2]).toMatchObject({ telemetry_target: 'c0' });
-    expect(installInvestigationAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: SPACE_ID, availability: mockAgentAvailability })
-    );
-    expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        agentId: 'nightshift.investigation',
-        templateId: 'investigation',
-        metadata: {
-          severity: 'medium',
-          telemetry_target: 'c0',
-          workflow_execution_ids: ['exec-123'],
-        },
-      })
-    );
-    expect(getConnectorById).toHaveBeenCalledWith(
-      NIGHTSHIFT_DEFAULT_MODELS.investigation,
-      mockRequest
-    );
-  });
-
-  it('rejects an unknown telemetry target before launching or claiming', async () => {
-    await expect(
-      makeClient().start({
-        subject: { type: 'manual', id: 'question' },
-        trigger_type: 'manual',
-        telemetry_target: 'unknown',
-      })
-    ).rejects.toThrow('Unknown telemetry target');
-    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
-    expect(conversations.create).not.toHaveBeenCalled();
-  });
-
   it('rejects an unknown custom connector before launching or claiming', async () => {
     getConnectorById.mockRejectedValue(createInferenceRequestError('not found', 404));
 
     await expect(
-      makeClient().start({
+      startFromApi(makeClient(), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'event-1' },
         trigger_type: 'manual',
@@ -391,7 +346,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     getConnectorById.mockRejectedValue(createInferenceRequestError('not found', 404));
 
     await expect(
-      makeClient().start({
+      startFromApi(makeClient(), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'event-1' },
         trigger_type: 'manual',
@@ -403,7 +358,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
     await expect(
-      makeClient({ isServiceAccountExecutionEnabled: () => false }).start({
+      startFromApi(makeClient({ isServiceAccountExecutionEnabled: () => false }), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'event-1' },
         trigger_type: 'manual',
@@ -432,7 +387,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(boundWorkflow);
 
     await expect(
-      makeClient().start({
+      startFromApi(makeClient(), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'event-1' },
         trigger_type: 'manual',
@@ -451,7 +406,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(investigationWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
-    const result = await makeClient().start({
+    const result = await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
@@ -492,7 +447,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
-    await makeClient({ assistantEnabled: true }).start({
+    await startFromApi(makeClient({ assistantEnabled: true }), {
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
       message: 'Why did payment timeouts increase?',
@@ -517,7 +472,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     await expect(
-      makeClient({ assistantEnabled: true }).start({
+      startFromApi(makeClient({ assistantEnabled: true }), {
         subject: { type: 'manual', id: 'manual' },
         trigger_type: 'manual',
         message: 'Why did payment timeouts increase?',
@@ -536,7 +491,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       },
     };
     mockManagement.getWorkflow.mockResolvedValue(workflow);
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'automatic',
       message: 'Review errors.',
@@ -563,8 +518,8 @@ describe('NightshiftInvestigationsClient.start()', () => {
       trigger_type: 'automatic' as const,
       message: 'Review checkout health.',
     };
-    expect(await client.start(request)).toEqual({ investigation_id: 'inv-one' });
-    expect(await client.start(request)).toEqual({ investigation_id: 'inv-two' });
+    expect(await startFromApi(client, request)).toEqual({ investigation_id: 'inv-one' });
+    expect(await startFromApi(client, request)).toEqual({ investigation_id: 'inv-two' });
     expect(agenticInvestigationsClient.findOpenBySubjects).not.toHaveBeenCalled();
     expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
   });
@@ -578,7 +533,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
@@ -615,7 +570,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
@@ -638,7 +593,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'manual', id: 'manual', summary: 'Checkout latency' },
       trigger_type: 'manual',
@@ -660,7 +615,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-sig');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'event-1' },
       trigger_type: 'manual',
@@ -677,7 +632,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-sig');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'event-1' },
       trigger_type: 'manual',
@@ -686,11 +641,36 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID, mockRequest);
   });
 
+  it("records the entry point in the workflow context over the caller's value", async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-124');
+
+    await makeClient().start(
+      {
+        subject: { type: 'manual', id: 'question' },
+        message: 'Why did checkout slow down?',
+        trigger_type: 'automatic',
+        context: { entry_point: 'start_api' },
+      },
+      { entryPoint: 'automation' }
+    );
+
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      expect.objectContaining({
+        context: expect.objectContaining({ entry_point: 'automation' }),
+      }),
+      expect.anything(),
+      'nightshift-investigations'
+    );
+  });
+
   it('persists an explicit trigger_type into the workflow context', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-124');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-2' },
       trigger_type: 'automatic',
@@ -719,7 +699,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Checkout latency breach',
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'manual',
@@ -735,7 +715,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       subject: { type: 'manual', id: 'manual' },
       message: 'Why is checkout slow?',
       trigger_type: 'manual',
@@ -755,7 +735,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       investigationQuotaCallback.mockResolvedValue({ allowed: false });
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject,
           trigger_type: 'automatic',
@@ -774,7 +754,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1', summary: 'CPU saturation on checkout-api' },
       trigger_type: 'manual',
@@ -789,7 +769,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'manual',
@@ -804,7 +784,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-456');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-99' },
       trigger_type: 'manual',
@@ -819,7 +799,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-789');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'manual',
@@ -838,7 +818,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-999');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'manual',
@@ -853,7 +833,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'manual',
@@ -874,12 +854,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValueOnce('exec-123').mockResolvedValueOnce('exec-124');
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'automatic',
     });
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'significant_event', id: 'se-2' },
       trigger_type: 'automatic',
@@ -893,7 +873,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.runWorkflow.mockRejectedValueOnce(new Error('Workflow launch failed'));
 
     await expect(
-      makeClient().start({
+      startFromApi(makeClient(), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',
@@ -908,7 +888,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     installInvestigationAgentMock.mockRejectedValueOnce(new Error('Agent installation failed'));
 
     await expect(
-      makeClient().start({
+      startFromApi(makeClient(), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',
@@ -923,7 +903,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
     await expect(
-      makeClient().start({
+      startFromApi(makeClient(), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'automatic',
@@ -945,7 +925,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     });
 
     await expect(
-      client.start({
+      startFromApi(client, {
         title: 'Latency is too high',
         subject: { type: 'alert', id: 'alert-1' },
         trigger_type: 'automatic',
@@ -956,13 +936,16 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('throws InvestigationUnavailableError when a start requirement is unavailable', async () => {
     await expect(
-      makeClient({
-        isInfrastructureAvailable: jest.fn().mockResolvedValue(false),
-      }).start({
-        title: 'Latency is too high',
-        subject: { type: 'significant_event', id: 'se-1' },
-        trigger_type: 'automatic',
-      })
+      startFromApi(
+        makeClient({
+          isInfrastructureAvailable: jest.fn().mockResolvedValue(false),
+        }),
+        {
+          title: 'Latency is too high',
+          subject: { type: 'significant_event', id: 'se-1' },
+          trigger_type: 'automatic',
+        }
+      )
     ).rejects.toThrow(InvestigationUnavailableError);
     expect(investigationQuotaCallback).not.toHaveBeenCalled();
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
@@ -981,7 +964,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
           trigger_type: 'manual',
@@ -1000,7 +983,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
         mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
         await expect(
-          makeClient().start({
+          startFromApi(makeClient(), {
             title: 'Latency is too high',
             subject: { type: 'alert', id: 'alert-1' },
             trigger_type: 'manual',
@@ -1015,7 +998,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
           trigger_type: 'manual',
@@ -1038,7 +1021,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       };
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
           trigger_type: 'manual',
@@ -1063,7 +1046,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'alert', id: 'episode-1' },
           trigger_type: 'manual',
@@ -1076,7 +1059,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'alert', id: 'alert-1' },
           trigger_type: 'manual',
@@ -1098,7 +1081,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
@@ -1120,7 +1103,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.runWorkflow.mockResolvedValue('exec-791');
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
@@ -1134,7 +1117,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.runWorkflow.mockResolvedValue('exec-790');
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
@@ -1148,7 +1131,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.runWorkflow.mockResolvedValue('exec-789');
 
       await expect(
-        makeClient().start({
+        startFromApi(makeClient(), {
           title: 'Latency is too high',
           subject: { type: 'significant_event', id: 'se-1' },
           trigger_type: 'manual',
@@ -1160,7 +1143,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
       mockManagement.runWorkflow.mockResolvedValue('exec-321');
 
-      await makeClient().start({
+      await startFromApi(makeClient(), {
         title: 'Latency is too high',
         subject: { type: 'alert', id: 'alert-1' },
         trigger_type: 'manual',
@@ -1178,7 +1161,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
       mockManagement.runWorkflow.mockResolvedValue('exec-654');
 
-      await makeClient().start({
+      await startFromApi(makeClient(), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'manual',
@@ -1210,7 +1193,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     start: '2026-08-24T12:00:00.000Z',
   });
   const startAlerts = (...ids: string[]) =>
-    makeClient().start({
+    startFromApi(makeClient(), {
       title: 'Latency is too high',
       subject: { type: 'alert', id: ids[0] },
       trigger_type: 'automatic',
@@ -1221,85 +1204,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
   beforeEach(() => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
-  });
-
-  const telemetryConfig = {
-    default_telemetry_target: 'orca',
-    telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
-  };
-
-  it('keeps a matched investigation target when the follow-up omits it', async () => {
-    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
-    await makeClient({ telemetryConfig }).start({
-      subject: { type: 'manual', id: 'question' },
-      trigger_type: 'manual',
-    });
-    expect(runInputs()).toMatchObject({ investigation_id: 'inv-1', telemetry_target: 'c0' });
-    expect(conversations.create).not.toHaveBeenCalled();
-  });
-
-  it.each(['c0', 'none', undefined])(
-    'defers an omitted target to the pending investigation binding %p',
-    async (target) => {
-      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-pending' });
-      const client = makeClient({
-        telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
-      });
-
-      await expect(
-        client.start({
-          subject: { type: 'alert', id: 'alert-1' },
-          trigger_type: 'automatic',
-          context: { alerts: [makeAlert('alert-1')] },
-        })
-      ).resolves.toEqual({ investigation_id: 'inv-pending' });
-
-      const inputs = runInputs();
-      expect(inputs.telemetry_target).toBeUndefined();
-      expect(conversations.create).not.toHaveBeenCalled();
-
-      // The first run creates the conversation before this queued follow-up is ensured.
-      withConversations(
-        makeConversation({
-          id: 'inv-pending',
-          telemetryTarget: target,
-          workflowExecutionIds: ['exec-original'],
-        })
-      );
-      mockManagement.getWorkflowExecution.mockResolvedValue({
-        effectiveIdentity: INVESTIGATOR_IDENTITY,
-        id: 'exec-1',
-        workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-        status: ExecutionStatus.RUNNING,
-        context: { inputs },
-      });
-
-      await expect(client.ensureOrCreate('inv-pending', 'exec-1')).resolves.toBe('inv-pending');
-      expect(conversations.create).not.toHaveBeenCalled();
-      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-pending', {
-        workflow_execution_ids: ['exec-original', 'exec-1'],
-      });
-      const expectedConnectorId = target === 'none' ? undefined : target ?? 'legacy';
-      expect((await client.getTelemetryTarget('inv-pending')).connectorId).toBe(
-        expectedConnectorId
-      );
-    }
-  );
-
-  it('rejects changing a matched investigation target before launching its follow-up', async () => {
-    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
-    await expect(
-      makeClient({ telemetryConfig }).start({
-        subject: { type: 'manual', id: 'question' },
-        trigger_type: 'manual',
-        telemetry_target: 'orca',
-      })
-    ).rejects.toThrow('cannot change its telemetry target');
-    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalled();
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 
   it('claims the subjects, runs the workflow, and leaves recording the subjects to it', async () => {
@@ -1462,7 +1366,10 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
           trigger_type: triggerType,
           context: { alerts: [makeAlert('alert-1')] },
         },
-        { automationBudget: createAutomationBudget(repository, 'a1', dailyLimit) }
+        {
+          automationBudget: createAutomationBudget(repository, 'a1', dailyLimit),
+          entryPoint: 'automation',
+        }
       );
     const usage = () => readAutomationUsage(repository, 'a1');
 
@@ -1507,13 +1414,48 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
       expect(investigationQuotaCallback).toHaveBeenCalledTimes(1);
     });
 
-    it('releases the automation budget when the start loses the claim and continues the holder', async () => {
-      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
-      withConversations(makeConversation({ id: 'inv-holder' }));
+    describe('global quota release', () => {
+      const release = jest.fn().mockResolvedValue(undefined);
 
-      await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-holder' });
+      beforeEach(() => {
+        release.mockClear();
+        investigationQuotaCallback.mockResolvedValue({ allowed: true, release });
+      });
 
-      expect(await usage()).toBe(0);
+      it('releases both slots when the start loses the claim and continues the holder', async () => {
+        subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-holder' });
+        withConversations(makeConversation({ id: 'inv-holder' }));
+
+        await expect(startWithBudget(1)).resolves.toEqual({ investigation_id: 'inv-holder' });
+
+        expect(release).toHaveBeenCalledTimes(1);
+        expect(await usage()).toBe(0);
+      });
+
+      it('releases the automation slot and fails the start when the quota check is unavailable', async () => {
+        investigationQuotaCallback.mockRejectedValue(new Error('Storage unavailable'));
+
+        await expect(startWithBudget(1)).rejects.toBeInstanceOf(InvestigationUnavailableError);
+
+        expect(await usage()).toBe(0);
+      });
+
+      it('keeps both slots when the claim attempt fails', async () => {
+        subjectsClient.claimSubjects.mockRejectedValue(new Error('claim conflict'));
+
+        await expect(startWithBudget(1)).rejects.toThrow('claim conflict');
+
+        expect(release).not.toHaveBeenCalled();
+        expect(await usage()).toBe(1);
+      });
+
+      it('keeps the global slot when the start fails after claiming', async () => {
+        mockManagement.runWorkflow.mockRejectedValueOnce(new Error('failed'));
+
+        await expect(startWithBudget(1)).rejects.toThrow('failed');
+
+        expect(release).not.toHaveBeenCalled();
+      });
     });
 
     it.each([
@@ -1574,7 +1516,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
     withConversations(makeConversation({ id: 'inv-1' }));
 
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Checkout errors',
       subject: { type: 'significant_event', id: 'se-1' },
       trigger_type: 'automatic',
@@ -1678,7 +1620,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
   });
 
   it('records a question without a subject id under the new investigation, matching nothing', async () => {
-    await makeClient().start({
+    await startFromApi(makeClient(), {
       title: 'Payment timeouts',
       subject: { type: 'manual', id: 'manual' },
       trigger_type: 'manual',
@@ -1694,7 +1636,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
 
   it('throws InvestigationUnavailableError without agentic investigations', async () => {
     await expect(
-      makeClient({ agenticInvestigations: undefined }).start({
+      startFromApi(makeClient({ agenticInvestigations: undefined }), {
         title: 'Latency is too high',
         subject: { type: 'significant_event', id: 'se-1' },
         trigger_type: 'manual',
@@ -1725,164 +1667,6 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       status,
       context: { inputs },
     });
-
-  it.each([
-    ['as the caller', { type: 'user', id: 'elastic' }],
-    ['as another service account', { type: 'service_account', id: 'kibana/other' }],
-    ['without an identity', undefined],
-  ])('rejects a run that executes %s before touching the investigation', async (_, identity) => {
-    mockManagement.getWorkflowExecution.mockResolvedValue({
-      id: 'exec-1',
-      workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-      effectiveIdentity: identity,
-      status: ExecutionStatus.RUNNING,
-      context: { inputs: { investigation_id: 'inv-1', subjects } },
-    });
-
-    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
-    );
-    expect(conversations.create).not.toHaveBeenCalled();
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  const telemetryConfig = {
-    default_telemetry_target: 'orca',
-    telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
-  };
-
-  it.each(['c0', 'orca', 'none'])(
-    'binds the %s target to a new shared investigation conversation',
-    async (target) => {
-      withExecution({ inputs: { investigation_id: 'inv-1', subjects, telemetry_target: target } });
-      await makeClient({ telemetryConfig }).ensureOrCreate('inv-1', 'exec-1');
-      expect(conversations.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          agentId: 'nightshift.investigation',
-          metadata: {
-            severity: 'medium',
-            telemetry_target: target,
-            workflow_execution_ids: ['exec-1'],
-          },
-          templateId: 'investigation',
-        })
-      );
-      expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    }
-  );
-
-  it('keeps the conversation target when a later run omits it', async () => {
-    withExecution();
-    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
-    const client = makeClient({ telemetryConfig });
-    await client.ensureOrCreate('inv-1', 'exec-1');
-    await expect(client.getTelemetryTarget('inv-1')).resolves.toMatchObject({
-      connectorId: 'c0',
-      allowSecretFallback: false,
-    });
-    expect(conversations.create).not.toHaveBeenCalled();
-  });
-
-  it('keeps direct chats on the investigator working without an investigation template', async () => {
-    withConversations(makeConversation({ id: 'chat-1', templateId: 'default' }));
-    await expect(
-      makeClient({
-        telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
-      }).getTelemetryTarget('chat-1')
-    ).resolves.toMatchObject({ connectorId: 'legacy' });
-  });
-
-  it('keeps legacy telemetry when a named default is added', async () => {
-    withExecution();
-    withConversations(makeConversation({ id: 'inv-1' }));
-    const client = makeClient({
-      telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
-    });
-    await client.ensureOrCreate('inv-1', 'exec-1');
-    await expect(client.getTelemetryTarget('inv-1')).resolves.toMatchObject({
-      connectorId: 'legacy',
-    });
-    expect(conversations.create).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalledWith(
-      'inv-1',
-      expect.objectContaining({ telemetry_target: expect.anything() })
-    );
-  });
-
-  it.each(['a'.repeat(64), 'orca-', 'orca_'])(
-    'accepts target %s without turning its name into an agent id',
-    async (target) => {
-      withExecution({ inputs: { investigation_id: 'inv-1', telemetry_target: target } });
-      await makeClient({
-        telemetryConfig: { telemetry_targets: { [target]: { connector_id: 'telemetry' } } },
-      }).ensureOrCreate('inv-1', 'exec-1');
-      expect(conversations.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          agentId: 'nightshift.investigation',
-          metadata: {
-            severity: 'medium',
-            telemetry_target: target,
-            workflow_execution_ids: ['exec-1'],
-          },
-        })
-      );
-    }
-  );
-
-  it('rejects another target before reopening or recording subjects and execution metadata', async () => {
-    withExecution({ inputs: { investigation_id: 'inv-1', subjects, telemetry_target: 'orca' } });
-    withConversations(makeConversation({ id: 'inv-1', status: 'closed', telemetryTarget: 'c0' }));
-    await expect(makeClient({ telemetryConfig }).ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      'cannot change its telemetry target'
-    );
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('rejects a run as the agent account when the space is no longer set up', async () => {
-    withExecution();
-    mockManagement.getWorkflow.mockResolvedValueOnce(null);
-
-    await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      /only run as the Nightshift service account/
-    );
-    expect(conversations.create).not.toHaveBeenCalled();
-  });
-
-  it('stores the target while using the single investigator for an early failure', async () => {
-    withExecution({
-      inputs: { investigation_id: 'inv-1', telemetry_target: 'c0' },
-      status: ExecutionStatus.FAILED,
-    });
-    await makeClient({ telemetryConfig }).ensureForFailure(
-      'inv-1',
-      'exec-1',
-      'Sandbox startup failed'
-    );
-    expect(installInvestigationAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: SPACE_ID, availability: mockAgentAvailability })
-    );
-    expect(conversations.addEvents).toHaveBeenCalledWith({
-      conversationId: 'inv-1',
-      events: [
-        {
-          type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
-          data: { execution_id: 'exec-1', reason: 'Sandbox startup failed' },
-        },
-      ],
-    });
-    expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        agentId: 'nightshift.investigation',
-        metadata: {
-          severity: 'medium',
-          telemetry_target: 'c0',
-          workflow_execution_ids: ['exec-1'],
-        },
-      })
-    );
-  });
 
   it('creates the investigation conversation and records the run subjects', async () => {
     withExecution();
@@ -2699,7 +2483,7 @@ describe('NightshiftInvestigationsClient notification destinations', () => {
   });
 
   const startManual = (extra: Pick<StartInvestigationRequest, 'notificationDestinations'> = {}) =>
-    makeClient().start({
+    startFromApi(makeClient(), {
       subject: { type: 'manual', id: 'question' },
       message: 'Why is checkout slow?',
       trigger_type: 'manual',
@@ -2948,7 +2732,7 @@ describe('NightshiftInvestigationsClient.followUpRecoveredAlert()', () => {
       {
         investigation_id: 'inv-1',
         message: expect.stringContaining('An alert in this investigation has recovered.'),
-        context: { source: 'alert', follow_up: 'alert_recovered' },
+        context: { source: 'alert', follow_up: 'alert_recovered', entry_point: 'alert_recovery' },
       },
       mockRequest,
       'nightshift-investigations'

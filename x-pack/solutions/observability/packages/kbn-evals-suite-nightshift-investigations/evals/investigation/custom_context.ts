@@ -43,6 +43,18 @@ export const getDatasetCustomContext = ({
     ? [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT]
     : [];
 
+/**
+ * The operator's note on which indices the telemetry connector can read, as the space's custom
+ * context: the place a user tells the agent about their data, and where the elastic.md guide
+ * points for it.
+ */
+export const getReadableIndicesContext = (
+  env: NodeJS.ProcessEnv = process.env
+): readonly string[] => {
+  const readableIndices = env.NIGHTSHIFT_SANDBOX_READABLE_INDICES?.trim();
+  return readableIndices ? [readableIndices] : [];
+};
+
 /** Replaces the space's custom context with exactly these snippets. */
 export const replaceCustomContext = async (
   fetch: HttpHandler,
