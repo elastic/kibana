@@ -11,6 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import { closeAddToCaseModal } from '@kbn/alerting-v2-episodes-ui/components/add_to_case_modal';
 import { createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import { EpisodesHistogram } from '@kbn/alerting-v2-episodes-ui/components/episodes_histogram';
@@ -48,14 +49,18 @@ function UniversalAlertsSectionContent({
   const [breakdownField, setBreakdownField] = useState<string | undefined>();
 
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
-  const refreshedAt = useRef(lastUpdated);
+  const lastRefresh = useRef({ lastUpdated, timeRange });
   useEffect(() => {
-    if (refreshedAt.current === lastUpdated) {
+    const previous = lastRefresh.current;
+    lastRefresh.current = { lastUpdated, timeRange };
+    // A changed range already refetches through the query keys; only a same-range refresh needs this.
+    const isSameRange =
+      previous.timeRange.from === timeRange.from && previous.timeRange.to === timeRange.to;
+    if (previous.lastUpdated === lastUpdated || !isSameRange) {
       return;
     }
-    refreshedAt.current = lastUpdated;
     invalidateEpisodeQueries();
-  }, [lastUpdated, invalidateEpisodeQueries]);
+  }, [lastUpdated, timeRange, invalidateEpisodeQueries]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -121,6 +126,9 @@ export function UniversalAlertsSection({ alertingVTwo }: { alertingVTwo: Alertin
       ),
     [cases, getAlertFormatter, coreStart]
   );
+
+  // Add to case mounts its modal outside this tree, so it outlives the section without this.
+  useEffect(() => closeAddToCaseModal, []);
 
   const { AlertsProvider } = alertingVTwo;
 

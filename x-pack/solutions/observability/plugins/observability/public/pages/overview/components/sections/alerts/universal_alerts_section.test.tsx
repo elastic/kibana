@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import { closeAddToCaseModal } from '@kbn/alerting-v2-episodes-ui/components/add_to_case_modal';
 import { UniversalAlertsSection } from './universal_alerts_section';
 import * as datePickerHook from '../../../../../hooks/use_date_picker_context';
 import * as kibanaHook from '../../../../../utils/kibana_react';
@@ -47,6 +48,11 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries', (
   useInvalidateEpisodeQueries: () => invalidateEpisodeQueries,
 }));
 
+jest.mock('@kbn/alerting-v2-episodes-ui/components/add_to_case_modal', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-episodes-ui/components/add_to_case_modal'),
+  closeAddToCaseModal: jest.fn(),
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: { storage: {}, http: {} } }),
 }));
@@ -63,10 +69,10 @@ const alertingVTwo = {
   createAlertingV2HostApp: jest.fn(() => ({})),
 } as unknown as AlertingV2PublicStart;
 
-const mockDatePicker = (lastUpdated: number) =>
+const mockDatePicker = (lastUpdated: number, relativeStart = 'now-15m', relativeEnd = 'now') =>
   jest.spyOn(datePickerHook, 'useDatePickerContext').mockReturnValue({
-    relativeStart: 'now-15m',
-    relativeEnd: 'now',
+    relativeStart,
+    relativeEnd,
     updateTimeRange,
     lastUpdated,
   } as unknown as ReturnType<typeof datePickerHook.useDatePickerContext>);
@@ -177,6 +183,15 @@ describe('UniversalAlertsSection', () => {
     );
   });
 
+  it('closes an open add to case modal when the section unmounts', () => {
+    const { unmount } = render(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
+    jest.mocked(closeAddToCaseModal).mockClear();
+
+    unmount();
+
+    expect(closeAddToCaseModal).toHaveBeenCalledTimes(1);
+  });
+
   it('refetches when the Overview is refreshed without the range changing', () => {
     const { rerender } = render(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
 
@@ -186,6 +201,15 @@ describe('UniversalAlertsSection', () => {
     rerender(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
 
     expect(invalidateEpisodeQueries).toHaveBeenCalled();
+  });
+
+  it('leaves a range change to the query keys instead of invalidating on top of it', () => {
+    const { rerender } = render(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
+
+    mockDatePicker(2, 'now-1h', 'now-30m');
+    rerender(<UniversalAlertsSection alertingVTwo={alertingVTwo} />);
+
+    expect(invalidateEpisodeQueries).not.toHaveBeenCalled();
   });
 
   it('keeps the histogram breakdown selector working', () => {
