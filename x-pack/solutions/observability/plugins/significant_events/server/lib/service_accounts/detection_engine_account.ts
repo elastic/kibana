@@ -31,10 +31,15 @@ export function registerDetectionEngineWorkloadType(core: CoreSetup): void {
  * The refusal for detection engine work in a space that is not set up. There is no fallback to the
  * caller's own privileges: a space either runs as its account or does not run.
  */
-export function createNotSetUpError(): StatusError {
+export function createNotSetUpError({
+  serviceAccountsEnabled = true,
+}: { serviceAccountsEnabled?: boolean } = {}): StatusError {
   return new StatusError(
-    'Nightshift is not set up in this space. A user with the manage_security privilege must set it ' +
-      'up: POST /internal/significant_events/service_account/_enable in this space.',
+    serviceAccountsEnabled
+      ? 'Nightshift is not set up in this space. A user with the manage_security privilege must set it ' +
+        'up: POST /internal/significant_events/service_account/_enable in this space.'
+      : 'Nightshift is not set up in this space: service accounts are disabled in this deployment. ' +
+        'Set xpack.security.serviceAccounts.enabled: true, then set the space up.',
     503
   );
 }
@@ -129,7 +134,9 @@ export async function asDetectionEngineAccount<T>({
 }): Promise<T> {
   const accountId = await getDetectionEngineAccountId({ core, spaceId });
   if (accountId === undefined) {
-    throw createNotSetUpError();
+    throw createNotSetUpError({
+      serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
+    });
   }
   const principal = core.security.authc.getPrincipal(request);
   if (principal?.type !== 'service_account') {

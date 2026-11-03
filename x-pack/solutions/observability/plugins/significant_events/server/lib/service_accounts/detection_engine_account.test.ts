@@ -83,6 +83,22 @@ describe('asDetectionEngineAccount', () => {
     expect(fn).not.toHaveBeenCalled();
   });
 
+  it('says service accounts are disabled when they are off, not to call _enable', async () => {
+    const { core } = createCore({ enabled: false });
+
+    await expect(
+      asDetectionEngineAccount({
+        core,
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: SPACE_ID,
+        fn,
+      })
+    ).rejects.toMatchObject({
+      statusCode: 503,
+      message: expect.stringContaining('service accounts are disabled'),
+    });
+  });
+
   it('swaps a user request for one authenticated as the account, pinned to the bound account', async () => {
     const { core, withScopedRequestForWorkload } = createCore({
       boundAccountId: ACCOUNT_ID,
