@@ -100,6 +100,8 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
         privileges: [
           // `manage_nightshift`, which every detection engine route requires.
           'feature_nightshift.minimal_all',
+          // The KI extraction `ai.agent` step runs agents as the account.
+          'feature_agentBuilder.read',
           // The stack connectors a run may name: the LLM lookup lists them through Actions, and a
           // connector it cannot list is reported as not found.
           'feature_actions.read',
