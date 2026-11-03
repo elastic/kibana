@@ -19,6 +19,8 @@ export interface FakeRequest {
   headers: Headers;
   /** The space ID this request is scoped to. Used by CPS for space-level routing. */
   spaceId?: SpaceId;
+  /** The project this request is scoped to. Picks the project's cluster when multi-tenancy is enabled. */
+  projectId?: string;
 }
 
 /**

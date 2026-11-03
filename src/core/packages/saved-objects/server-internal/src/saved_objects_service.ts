@@ -356,8 +356,14 @@ export class SavedObjectsService
       createInternalRepository: (
         includedHiddenTypes?: string[],
         extensions?: SavedObjectsExtensions | undefined,
-        serverTiming?: RequestTiming
-      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions, serverTiming),
+        request?: KibanaRequest
+      ) =>
+        createRepository(
+          request ? client.asScoped(request).asInternalUser : client.asInternalUser,
+          includedHiddenTypes,
+          extensions,
+          request?.serverTiming
+        ),
       createScopedRepository: (
         req: KibanaRequest,
         includedHiddenTypes?: string[],
@@ -397,12 +403,13 @@ export class SavedObjectsService
 
     return {
       getScopedClient: clientProvider.getClient.bind(clientProvider),
-      getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [] } = {}) => {
+      getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [], request } = {}) => {
         const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
         const extensions = this.getInternalExtensions(safeExcludedExtensions);
         const repository = repositoryFactory.createInternalRepository(
           includedHiddenTypes,
-          extensions
+          extensions,
+          request
         );
         return new SavedObjectsClient(repository);
       },

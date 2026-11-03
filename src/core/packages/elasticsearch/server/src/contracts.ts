@@ -12,6 +12,7 @@ import type {
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
+  ScopeableRequest,
   UnauthorizedErrorHandler,
 } from './client';
 import type { IElasticsearchConfig } from './elasticsearch_config';
@@ -144,6 +145,12 @@ export interface ElasticsearchServiceStart {
    */
 
   readonly publicBaseUrl?: string;
+
+  /**
+   * Returns the encryption key of the request's project from the multi-tenancy tenants file, if any.
+   * @internal
+   */
+  readonly getProjectEncryptionKey?: (request: ScopeableRequest) => string | undefined;
 }
 
 /**

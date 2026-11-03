@@ -10,7 +10,9 @@ import { createHash } from 'crypto';
 
 import type {
   CoreSetup,
+  CoreStart,
   ISavedObjectTypeRegistry,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
@@ -63,10 +65,31 @@ export class EncryptedSavedObjectsPlugin
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
   #service?: Readonly<EncryptedSavedObjectsService>;
+  readonly #projectServices = new Map<string, EncryptedSavedObjectsService>();
+  #getProjectEncryptionKey?: CoreStart['elasticsearch']['getProjectEncryptionKey'];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
+
+  private getProjectService = (request: KibanaRequest) => {
+    const encryptionKey = this.#getProjectEncryptionKey?.(request);
+    if (!encryptionKey || !this.#service) {
+      return undefined;
+    }
+
+    let projectService = this.#projectServices.get(encryptionKey);
+    if (!projectService) {
+      projectService = this.#service.withPrimaryCrypto(nodeCrypto({ encryptionKey }));
+      this.#projectServices.set(encryptionKey, projectService);
+      this.logger.info(
+        `Hashed encryption key for project [${request.projectId}]: ${createHash('sha3-256')
+          .update(encryptionKey)
+          .digest('base64')}`
+      );
+    }
+    return projectService;
+  };
 
   public setup(core: CoreSetup): EncryptedSavedObjectsPluginSetup {
     const config = this.initializerContext.config.get<ConfigType>();
@@ -115,6 +138,7 @@ export class EncryptedSavedObjectsPlugin
 
     this.savedObjectsSetup = setupSavedObjects({
       service: this.#service,
+      getProjectService: this.getProjectService,
       savedObjects: core.savedObjects,
       getStartServices: core.getStartServices,
       logger: this.logger,
@@ -181,8 +205,9 @@ export class EncryptedSavedObjectsPlugin
     };
   }
 
-  public start() {
+  public start(core: CoreStart) {
     this.logger.debug('Starting plugin');
+    this.#getProjectEncryptionKey = core.elasticsearch.getProjectEncryptionKey;
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getClient: (options = {}) => this.savedObjectsSetup(options),

@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import {
   coreMock,
+  httpServerMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
@@ -64,9 +65,51 @@ describe('#setupSavedObjects', () => {
     it('includes hiddenTypes when specified', async () => {
       setupContract({ includedHiddenTypes: ['hiddenType'] });
       await nextTick();
-      expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith([
-        'hiddenType',
+      expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith(
+        ['hiddenType'],
+        undefined,
+        undefined
+      );
+    });
+
+    it('builds the internal repository for the request when one is given', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      setupContract({ includedHiddenTypes: ['hiddenType'], request });
+      await nextTick();
+      expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith(
+        ['hiddenType'],
+        undefined,
+        request
+      );
+    });
+  });
+
+  describe('per-project encryption keys', () => {
+    it("decrypts with the service of the request's project when it has its own key", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const projectService = encryptedSavedObjectsServiceMock.createWithTypes([
+        { type: 'known-type', attributesToEncrypt: new Set(['attrSecret']) },
       ]);
+      const projectContract = setupSavedObjects({
+        service: mockEncryptedSavedObjectsService,
+        getProjectService: (projectRequest) =>
+          projectRequest === request ? projectService : undefined,
+        savedObjects: coreSetupMock.savedObjects,
+        getStartServices: coreSetupMock.getStartServices,
+        logger: mockLogger,
+      });
+      mockSavedObjectsRepository.get.mockResolvedValue({
+        id: 'some-id',
+        type: 'known-type',
+        attributes: { attrSecret: '*secret*' },
+        references: [],
+      });
+
+      await projectContract({ request }).getDecryptedAsInternalUser('known-type', 'some-id');
+      await projectContract().getDecryptedAsInternalUser('known-type', 'some-id');
+
+      expect(projectService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
     });
   });
 

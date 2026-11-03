@@ -683,9 +683,11 @@ describe('CPS onRequestHandlerFactory', () => {
 });
 
 describe('multi-tenancy', () => {
-  const projectRequest = (projectId: string) => ({
-    headers: { 'x-elastic-project-id': projectId },
-  });
+  const projectRequest = (projectId: string) => ({ headers: {}, projectId });
+  const projectKibanaRequest = (projectId: string) =>
+    httpServerMock.createKibanaRequest({
+      kibanaRequestState: { requestId: '123', requestUuid: '123', startTime: 0, projectId },
+    });
   let tenantClient: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
 
   beforeEach(() => {
@@ -695,6 +697,7 @@ describe('multi-tenancy', () => {
         hosts: ['http://localhost:9201'],
         username: 'kibana_system',
         password: 'changeme-b',
+        encryptionKey: 'b'.repeat(32),
       },
     });
     tenantClient = elasticsearchClientMock.createCustomClusterClient();
@@ -738,16 +741,40 @@ describe('multi-tenancy', () => {
     );
   });
 
+  it("returns the project's encryption key without passing it to the project client", async () => {
+    await elasticsearchService.setup(setupDeps);
+    const { client, getProjectEncryptionKey } = await elasticsearchService.start();
+
+    client.asScoped(projectRequest('project-b'));
+
+    expect(getProjectEncryptionKey?.(projectRequest('project-b'))).toBe('b'.repeat(32));
+    expect(getProjectEncryptionKey?.({ headers: {} })).toBeUndefined();
+    const [[{ config }]] = MockClusterClient.mock.calls.filter(
+      ([{ type }]) => type === 'tenant-project-b'
+    );
+    expect(config).not.toHaveProperty('encryptionKey');
+  });
+
+  it('falls back to the project header for fake requests that only copy headers', async () => {
+    await elasticsearchService.setup(setupDeps);
+    const { client } = await elasticsearchService.start();
+
+    client.asScoped({ headers: { 'x-elastic-project-id': 'project-b' } });
+
+    expect(tenantClient.asScoped).toHaveBeenCalledTimes(1);
+    expect(mockClusterClientInstance.asScoped).not.toHaveBeenCalled();
+  });
+
   it('rejects requests for an unknown project before authentication', async () => {
     await elasticsearchService.setup(setupDeps);
     const [handler] = jest.mocked(setupDeps.http.registerOnPreAuth).mock.lastCall!;
     const response = httpServerMock.createLifecycleResponseFactory();
     const toolkit = httpServerMock.createToolkit();
 
-    handler(httpServerMock.createKibanaRequest(projectRequest('project-z')), response, toolkit);
+    handler(projectKibanaRequest('project-z'), response, toolkit);
     expect(response.badRequest).toHaveBeenCalledWith({ body: 'Unknown project [project-z]' });
 
-    handler(httpServerMock.createKibanaRequest(projectRequest('project-b')), response, toolkit);
+    handler(projectKibanaRequest('project-b'), response, toolkit);
     handler(httpServerMock.createKibanaRequest(), response, toolkit);
     expect(toolkit.next).toHaveBeenCalledTimes(2);
   });

@@ -2438,6 +2438,35 @@ describe('space extraction in onRequest', () => {
     expect(response.body).toEqual({ basePath: '', spaceId: 'default' });
   });
 
+  test('exposes the x-elastic-project-id header as request.projectId', async () => {
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: { projectId: req.projectId ?? null } });
+      }
+    );
+
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
+    registerRouter(router);
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/foo')
+      .set('x-elastic-project-id', 'project-b')
+      .expect(200, { projectId: 'project-b' });
+    await supertest(innerServer.listener).get('/foo').expect(200, { projectId: null });
+  });
+
   for (const method of ['get', 'put', 'post', 'delete', 'patch'] as const) {
     test(`${method.toUpperCase()} /s/default/... is served without redirect and keeps /s/default as request basePath`, async () => {
       // API integrations and old bookmarks may send requests to /s/default/...

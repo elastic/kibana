@@ -208,7 +208,10 @@ export interface SavedObjectsServiceStart {
    * ```
    */
   getUnsafeInternalClient: (
-    options?: SavedObjectsClientProviderOptions
+    options?: SavedObjectsClientProviderOptions & {
+      /** Picks the request's project when multi-tenancy is enabled. Its credentials are not used. */
+      request?: KibanaRequest;
+    }
   ) => SavedObjectsClientContract;
   /**
    * Creates a {@link ISavedObjectsRepository | Saved Objects repository} that
@@ -234,10 +237,13 @@ export interface SavedObjectsServiceStart {
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
+   * @param request - Optional request the repository works for. Its credentials are not used: it picks the
+   * request's project when multi-tenancy is enabled.
    */
   createInternalRepository: (
     includedHiddenTypes?: string[],
-    extensions?: SavedObjectsExtensions
+    extensions?: SavedObjectsExtensions,
+    request?: KibanaRequest
   ) => ISavedObjectsRepository;
   /**
    * Creates a {@link ISavedObjectsSerializer | serializer} that is aware of all registered types.

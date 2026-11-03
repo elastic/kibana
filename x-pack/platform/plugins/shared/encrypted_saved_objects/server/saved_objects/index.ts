@@ -11,6 +11,7 @@ import {
   type ISavedObjectsPointInTimeFinder,
   type ISavedObjectsRepository,
   type ISavedObjectTypeRegistry,
+  type KibanaRequest,
   type Logger,
   type SavedObject,
   type SavedObjectsBaseOptions,
@@ -36,6 +37,10 @@ export type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions };
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
+  /** Returns the service holding the encryption key of the request's project, if it has its own key. */
+  getProjectService?: (
+    request: KibanaRequest
+  ) => PublicMethodsOf<EncryptedSavedObjectsService> | undefined;
   savedObjects: SavedObjectsServiceSetup;
   getStartServices: StartServicesAccessor;
   logger: Logger;
@@ -54,17 +59,21 @@ export type ClientInstanciator = (
 ) => EncryptedSavedObjectsClient;
 
 export function setupSavedObjects({
-  service,
+  service: defaultService,
+  getProjectService,
   savedObjects,
   getStartServices,
   logger,
 }: SetupSavedObjectsParams): ClientInstanciator {
+  const getService = (request?: KibanaRequest) =>
+    (request && getProjectService?.(request)) || defaultService;
+
   // Register custom saved object extension that will encrypt, decrypt and strip saved object
   // attributes where appropriate for any saved object repository request.
   savedObjects.setEncryptionExtension(({ typeRegistry: baseTypeRegistry, request }) => {
     return new SavedObjectsEncryptionExtension({
       baseTypeRegistry,
-      service,
+      service: getService(request),
       getCurrentUser: async () => {
         const [{ security }] = await getStartServices();
         return security.authc.getCurrentUser(request) ?? undefined;
@@ -73,10 +82,15 @@ export function setupSavedObjects({
   });
 
   return (clientOpts) => {
+    const service = getService(clientOpts?.request);
     const internalRepositoryAndTypeRegistryPromise = getStartServices().then(
       ([core]) =>
         [
-          core.savedObjects.createInternalRepository(clientOpts?.includedHiddenTypes),
+          core.savedObjects.createInternalRepository(
+            clientOpts?.includedHiddenTypes,
+            undefined,
+            clientOpts?.request
+          ),
           core.savedObjects.getTypeRegistry(),
         ] as [ISavedObjectsRepository, ISavedObjectTypeRegistry]
     );

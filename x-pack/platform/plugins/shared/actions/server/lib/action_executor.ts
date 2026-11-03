@@ -80,6 +80,7 @@ export interface ActionExecutorContext {
   getServices: GetServicesFunction;
   getUnsecuredServices: GetUnsecuredServicesFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  getEncryptedSavedObjectsClient?: (request: KibanaRequest) => EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   analyticsService: AnalyticsServiceStart;
   eventLogger: IEventLogger;
@@ -294,7 +295,7 @@ export class ActionExecutor {
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
-      this.actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
+      this.actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace, request);
     }
 
     const task = taskInfo
@@ -337,9 +338,11 @@ export class ActionExecutor {
 
   private async getActionInfoInternal(
     actionId: string,
-    namespace: string | undefined
+    namespace: string | undefined,
+    request?: KibanaRequest
   ): Promise<ActionInfo> {
-    const { encryptedSavedObjectsClient, inMemoryConnectors } = this.actionExecutorContext!;
+    const { encryptedSavedObjectsClient, getEncryptedSavedObjectsClient, inMemoryConnectors } =
+      this.actionExecutorContext!;
 
     // check to see if it's in memory connector first
     const inMemoryAction = inMemoryConnectors.find(
@@ -368,13 +371,13 @@ export class ActionExecutor {
     }
 
     try {
-      const rawAction = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>(
-        'action',
-        actionId,
-        {
-          namespace: namespace === 'default' ? undefined : namespace,
-        }
-      );
+      const esoClient =
+        request && getEncryptedSavedObjectsClient
+          ? getEncryptedSavedObjectsClient(request)
+          : encryptedSavedObjectsClient;
+      const rawAction = await esoClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
+        namespace: namespace === 'default' ? undefined : namespace,
+      });
       const {
         attributes: { secrets, actionTypeId, config, name },
       } = rawAction;
@@ -434,7 +437,7 @@ export class ActionExecutor {
       async (span) => {
         const { actionTypeRegistry, analyticsService, eventLogger } = this.actionExecutorContext!;
 
-        const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
+        const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace, request);
 
         const { actionTypeId, name, config, secrets, rawAction, connectorVersion, isInMemory } =
           actionInfo;

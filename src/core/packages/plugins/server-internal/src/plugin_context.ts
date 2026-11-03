@@ -378,6 +378,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
       getCapabilities: deps.elasticsearch.getCapabilities,
+      getProjectEncryptionKey: deps.elasticsearch.getProjectEncryptionKey,
     },
     executionContext: deps.executionContext,
     featureFlags: {

@@ -9,6 +9,7 @@
 
 import type {
   ISavedObjectsPointInTimeFinder,
+  KibanaRequest,
   SavedObject,
   SavedObjectsBaseOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
@@ -50,4 +51,6 @@ export interface EncryptedSavedObjectsClient {
 
 export interface EncryptedSavedObjectsClientOptions {
   includedHiddenTypes?: string[];
+  /** Picks the request's project when multi-tenancy is enabled. Its credentials are not used. */
+  request?: KibanaRequest;
 }

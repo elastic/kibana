@@ -572,6 +572,18 @@ describe('CoreKibanaRequest', () => {
         expect(kibanaRequest.isFakeRequest).toBe(false);
       });
     });
+
+    describe('projectId property', () => {
+      it('uses the request.app.projectId property if present', () => {
+        const request = hapiMocks.createRequest({ app: { projectId: 'project-b' } });
+        expect(CoreKibanaRequest.from(request).projectId).toEqual('project-b');
+      });
+
+      it('is undefined if request.app.projectId is not present', () => {
+        const request = hapiMocks.createRequest({ app: {} });
+        expect(CoreKibanaRequest.from(request).projectId).toBeUndefined();
+      });
+    });
   });
 
   describe('using fake requests', () => {
@@ -582,6 +594,13 @@ describe('CoreKibanaRequest', () => {
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isFakeRequest).toBe(true);
+      });
+    });
+
+    describe('projectId', () => {
+      it('uses the projectId of the fake request', () => {
+        const request: FakeRawRequest = { headers: {}, projectId: 'project-b' };
+        expect(CoreKibanaRequest.from(request).projectId).toEqual('project-b');
       });
     });
 

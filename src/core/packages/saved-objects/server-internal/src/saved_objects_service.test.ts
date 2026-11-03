@@ -759,6 +759,27 @@ describe('SavedObjectsService', () => {
 
           expect(includedHiddenTypes).toEqual(['someHiddenType']);
         });
+
+        it("uses the internal user of the request's project when a request is given", async () => {
+          const coreContext = createCoreContext({ skipMigration: false });
+          const soService = new SavedObjectsService(coreContext);
+          await soService.setup(createSetupDeps());
+          const coreStart = createStartDeps();
+          const { createInternalRepository } = await soService.start(coreStart);
+          const request = httpServerMock.createKibanaRequest();
+
+          createInternalRepository(['someHiddenType'], undefined, request);
+
+          const [[, , , client, , includedHiddenTypes, , serverTiming]] = (
+            SavedObjectsRepository.createRepository as jest.Mocked<any>
+          ).mock.calls;
+          const { asScoped } = coreStart.elasticsearch.client;
+          expect(asScoped).toHaveBeenCalledWith(request);
+          expect(client).toBe(jest.mocked(asScoped).mock.results[0].value.asInternalUser);
+          expect(client).not.toBe(coreStart.elasticsearch.client.asInternalUser);
+          expect(includedHiddenTypes).toEqual(['someHiddenType']);
+          expect(serverTiming).toBe(request.serverTiming);
+        });
       });
 
       describe('index retrieval APIs', () => {
@@ -904,6 +925,23 @@ describe('SavedObjectsService', () => {
           const calls = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
           const [, , , , , lastCallIncludedHiddenTypes] = calls[calls.length - 1];
           expect(lastCallIncludedHiddenTypes).toEqual(includedHiddenTypes);
+        });
+
+        it("uses the internal user of the request's project when a request is given", async () => {
+          const coreContext = createCoreContext();
+          const soService = new SavedObjectsService(coreContext);
+          await soService.setup(createSetupDeps());
+          const coreStart = createStartDeps();
+          const startContract = await soService.start(coreStart);
+          const request = httpServerMock.createKibanaRequest();
+
+          startContract.getUnsafeInternalClient({ request });
+
+          const calls = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
+          const [, , , client] = calls[calls.length - 1];
+          const { asScoped } = coreStart.elasticsearch.client;
+          expect(asScoped).toHaveBeenCalledWith(request);
+          expect(client).toBe(jest.mocked(asScoped).mock.results[0].value.asInternalUser);
         });
 
         it('passes excludedExtensions to getInternalExtensions', async () => {

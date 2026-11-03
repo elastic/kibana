@@ -58,6 +58,8 @@ export interface KibanaRequestState extends RequestApplicationState {
   traceId?: string;
   /** The resolved space ID for this request. Defaults to 'default'. */
   spaceId?: SpaceId;
+  /** The project ID from the `x-elastic-project-id` header, if any. */
+  projectId?: string;
   /** The top HTTP Otel Span for this request. */
   httpSpan?: OTelSpan;
   /** The OTel sub-span: used to group the pre-route handlers, the route handler, and the post-route handlers. */
@@ -224,6 +226,12 @@ export interface KibanaRequest<
    * Always populated; defaults to {@link DEFAULT_SPACE_ID} ('default') when no explicit space is present in the URL.
    */
   readonly spaceId: SpaceId;
+
+  /**
+   * The project this request targets, from the `x-elastic-project-id` header.
+   * Only used to pick the project's Elasticsearch cluster when multi-tenancy is enabled.
+   */
+  readonly projectId?: string;
 
   /**
    * The resolved Kibana base path for this request.

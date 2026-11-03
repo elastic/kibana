@@ -697,6 +697,8 @@ export class HttpServer {
       app.requestId = requestId;
       app.requestUuid = uuidv4();
       app.spaceId = spaceId;
+      const projectId = request.headers['x-elastic-project-id'];
+      app.projectId = Array.isArray(projectId) ? projectId[0] : projectId;
       const serverBasePath = config.basePath ?? '';
       app.basePath = `${serverBasePath}${spaceBasePath}`;
       app.rewrittenUrl = request.url !== originalUrl ? originalUrl : undefined;

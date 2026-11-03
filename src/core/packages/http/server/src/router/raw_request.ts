@@ -24,6 +24,8 @@ export interface FakeRawRequest {
   path?: string;
   /** The space this request is scoped to. Defaults to the default space when omitted. */
   spaceId?: SpaceId;
+  /** The project this request is scoped to. */
+  projectId?: string;
   method?: string;
   url?: URL;
   app?: Record<string, unknown>;

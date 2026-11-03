@@ -184,7 +184,11 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
       await this.options.client
         // Use original request if no additional auth headers are provided, otherwise fall back to
         // the "fake" request with combined headers.
-        .asScoped(authHeaders ? { headers: { ...request.headers, ...authHeaders } } : request)
+        .asScoped(
+          authHeaders
+            ? { headers: { ...request.headers, ...authHeaders }, projectId: request.projectId }
+            : request
+        )
         .asCurrentUser.security.authenticate()
     );
   }

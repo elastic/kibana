@@ -2425,6 +2425,30 @@ describe('#shouldEnforceRandomId', () => {
   });
 });
 
+describe('#withPrimaryCrypto', () => {
+  it('shares registered types, including types registered later', () => {
+    service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attrSecret']) });
+    const projectService = service.withPrimaryCrypto(nodeCrypto({ encryptionKey: 'b'.repeat(32) }));
+    service.registerType({ type: 'known-type-2', attributesToEncrypt: new Set(['attrSecret']) });
+
+    expect(projectService.isRegistered('known-type-1')).toBe(true);
+    expect(projectService.isRegistered('known-type-2')).toBe(true);
+  });
+
+  it('encrypts and decrypts with its own key only', async () => {
+    service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attrSecret']) });
+    const projectService = service.withPrimaryCrypto(nodeCrypto({ encryptionKey: 'b'.repeat(32) }));
+    const descriptor = { type: 'known-type-1', id: 'object-id' };
+
+    const encrypted = await projectService.encryptAttributes(descriptor, { attrSecret: 'secret' });
+
+    await expect(projectService.decryptAttributes(descriptor, encrypted)).resolves.toEqual({
+      attrSecret: 'secret',
+    });
+    await expect(service.decryptAttributes(descriptor, encrypted)).rejects.toThrow(EncryptionError);
+  });
+});
+
 describe('#__dangerousClone', () => {
   it('returns a new EncryptedSavedObjectsService instance', () => {
     const clone = service.__dangerousClone();
