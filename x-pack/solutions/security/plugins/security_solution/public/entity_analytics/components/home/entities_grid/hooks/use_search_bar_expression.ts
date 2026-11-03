@@ -30,6 +30,8 @@ interface SearchBarExpression {
   /** The same patch for DSL queries; absent when the search is not judged on groups. */
   searchOverrides?: ResolvedEntityFilterOverrides;
   isSearchOverridesPending: boolean;
+  /** The search bar's query and pills before the overrides: the search as the user typed it. */
+  rawSearchExpression?: string;
   /** The search text, when it matches the main entities' own values only; `undefined` otherwise. */
   mainEntityOnlySearch?: string;
 }
@@ -75,6 +77,7 @@ export const useSearchBarExpression = (rowsMode: RowsMode): SearchBarExpression 
     searchExpression,
     searchOverrides,
     isSearchOverridesPending: isJudgedOnGroups && searchOverrides === undefined,
+    rawSearchExpression: expression,
     mainEntityOnlySearch: isMainEntityOnlySearch(rowsMode, hasSearch, isJudgedOnGroups)
       ? expression
       : undefined,
