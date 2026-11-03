@@ -64,6 +64,7 @@ import {
   classifyModelFailure,
   runBatchedGenerationWorkflow,
   toAttackDiscovery,
+  toTaskErrors,
   type GenerationPathTaskOutput,
 } from '../../src/generation_path/workflow_task';
 
@@ -251,7 +252,7 @@ baseEvaluate.describe(
 
                 return {
                   insights: insights.length > 0 ? insights : null,
-                  errors: output?.batch_errors ? [JSON.stringify(output.batch_errors)] : undefined,
+                  errors: toTaskErrors(output?.batch_errors),
                   raw: output,
                   executionId: execution.id,
                   executionStatus: execution.status,

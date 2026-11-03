@@ -27,6 +27,7 @@ import { buildRoutingProof, modelIdMatchesSubject } from './token_usage';
 import {
   classifyModelFailure,
   toAttackDiscovery,
+  toTaskErrors,
   type GenerationPathTaskOutput,
 } from './workflow_task';
 
@@ -191,6 +192,16 @@ describe('model failure', () => {
         timedOut: false,
       })
     ).toMatch(/FAILED|failed/i);
+  });
+
+  it('treats an empty batch_errors as no task error', () => {
+    expect(toTaskErrors(undefined)).toBeUndefined();
+    expect(toTaskErrors(null)).toBeUndefined();
+    expect(toTaskErrors([])).toBeUndefined();
+    expect(toTaskErrors({})).toBeUndefined();
+    expect(toTaskErrors([{ batch: 1, message: 'boom' }])).toEqual([
+      '[{"batch":1,"message":"boom"}]',
+    ]);
   });
 
   it('is clean for a run that produced discoveries', () => {

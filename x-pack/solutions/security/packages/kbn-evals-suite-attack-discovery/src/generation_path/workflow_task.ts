@@ -194,6 +194,17 @@ export const runBatchedGenerationWorkflow = async ({
 };
 
 /**
+ * The workflow reports `batch_errors: []` on a clean run. Only a non-empty value is a task error;
+ * otherwise the rubric evaluator would short-circuit every run to `task_error`.
+ */
+export const toTaskErrors = (batchErrors: unknown): string[] | undefined => {
+  if (batchErrors === undefined || batchErrors === null) return undefined;
+  if (Array.isArray(batchErrors) && batchErrors.length === 0) return undefined;
+  if (typeof batchErrors === 'object' && Object.keys(batchErrors).length === 0) return undefined;
+  return [JSON.stringify(batchErrors)];
+};
+
+/**
  * Decides whether a run is a model failure. A completed run with failed batches, or with
  * analysed alerts and no discovery, is the model's: a refusal or an empty completion comes
  * back this way. It is never an infra skip. A run that analysed zero alerts never reached the
