@@ -16,18 +16,12 @@ import {
 
 export function eventSourceStreamIntoObservable(
   readable: Readable,
+  // `maxDurationMs` caps the whole stream and is not retryable (408). `idleTimeoutMs` caps the
+  // silence between chunks, counted from subscription, and is retryable (504); omitted = no guard.
   {
     maxDurationMs = MAX_STREAM_DURATION_MS,
     idleTimeoutMs,
-  }: {
-    /** Total backstop for the whole stream. Expiry is NOT retryable (408). */
-    maxDurationMs?: number;
-    /**
-     * Max silence between chunks, counted from subscription. Expiry is retryable (504).
-     * Opt-in: no idle guard is armed when omitted.
-     */
-    idleTimeoutMs?: number;
-  } = {}
+  }: { maxDurationMs?: number; idleTimeoutMs?: number } = {}
 ) {
   return new Observable<string>((subscriber) => {
     const parser = createParser({
