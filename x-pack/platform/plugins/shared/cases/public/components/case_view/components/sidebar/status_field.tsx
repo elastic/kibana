@@ -7,31 +7,35 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import type { CaseStatuses } from '../../../../../common/types/domain';
+import type { CaseStatusDefinition } from '../../../../../common/types/domain';
 import { StatusSelector } from '../../../status/selector';
 import { STATUS } from '../../translations';
 
 interface Props {
-  selectedStatus: CaseStatuses;
-  onStatusChange: (status: CaseStatuses) => void;
+  /** The statuses to list, in admin order. */
+  statuses: CaseStatusDefinition[];
+  selectedStatusKey: string;
+  onStatusChange: (status: CaseStatusDefinition) => void;
   isLoading: boolean;
   isDisabled: boolean;
 }
 
 export const StatusField: React.FC<Props> = ({
-  selectedStatus,
+  statuses,
+  selectedStatusKey,
   onStatusChange,
   isLoading,
   isDisabled,
 }) => {
-  // Picking a status from a menu of three named states is already an explicit choice; asking the
+  // Picking a status from a menu of named states is already an explicit choice; asking the
   // reader to confirm it turned a one-click change into three, and the loading state plus the
   // activity feed entry are the acknowledgement. Same for the other attributes below.
   return (
     <EuiFlexItem grow={false} data-test-subj="sidebar-status">
       <EuiFormRow label={STATUS} fullWidth>
         <StatusSelector
-          selectedStatus={selectedStatus}
+          statuses={statuses}
+          selectedStatusKey={selectedStatusKey}
           onStatusChange={onStatusChange}
           isLoading={isLoading}
           isDisabled={isDisabled}

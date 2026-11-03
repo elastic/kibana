@@ -7,6 +7,8 @@
 
 /* eslint-disable @kbn/compat/typescript-naming-convention */
 
+import { omit } from 'lodash';
+
 import type {
   SavedObject,
   SavedObjectReference,
@@ -16,6 +18,7 @@ import type {
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import { getStatusKeyField } from '../../common/custom_statuses';
 import { NONE_CONNECTOR_ID } from '../../../common/constants';
 import type { Case, CaseCustomFields, ExternalService } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
@@ -209,9 +212,10 @@ export function transformESModelToCase(
     totalComment: total_comments ?? 0,
     totalAlerts: total_alerts ?? 0,
     totalEvents: total_events ?? 0,
-    ...caseAttributes,
+    ...omit(caseAttributes, 'status_key'),
     severity,
     status,
+    ...getStatusKeyField(caseAttributes.status_key),
     connector,
     external_service: externalService,
     category,
@@ -300,9 +304,10 @@ export function transformSavedObjectToExternalModel(
   return {
     ...caseSavedObject,
     attributes: {
-      ...caseSavedObjectAttributes,
+      ...omit(caseSavedObjectAttributes, 'status_key'),
       severity,
       status,
+      ...getStatusKeyField(caseSavedObjectAttributes.status_key),
       connector,
       external_service: externalService,
       category,

@@ -15,6 +15,9 @@ import { TestProviders } from '../../../../../common/mock';
 import { useOnUpdateField } from '../../../use_on_update_field';
 import { useStatusAction } from '../../../../actions/status/use_status_action';
 import type { CaseUI } from '../../../../../../common';
+import type { CaseStatusDefinition } from '../../../../../../common/types/domain';
+import { DEFAULT_CASE_STATUSES } from '../../../../../../common/utils/statuses';
+import * as customStatuses from '../../../../../common/custom_statuses';
 
 jest.mock('../../../../../common/navigation/hooks');
 jest.mock('../../../use_on_update_field');
@@ -31,6 +34,16 @@ const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
 
 const caseData: CaseUI = basicCase;
+const [openStatus, , closedStatus] = DEFAULT_CASE_STATUSES;
+const awaitingCustomer: CaseStatusDefinition = {
+  key: 'awaiting_customer',
+  label: 'Awaiting customer',
+  color: 'accent',
+  category: 'active',
+  order: 3,
+  isDefault: false,
+  disabled: false,
+};
 
 describe('useCaseViewActivity', () => {
   beforeEach(() => {
@@ -46,7 +59,7 @@ describe('useCaseViewActivity', () => {
     const { result } = renderHook(() => useCaseViewActivity({ caseData }), { wrapper });
 
     act(() => {
-      result.current.changeStatus(CaseStatuses.open);
+      result.current.changeStatus(openStatus);
     });
 
     expect(onUpdateField).toHaveBeenCalledWith({ key: 'status', value: CaseStatuses.open });
@@ -57,15 +70,28 @@ describe('useCaseViewActivity', () => {
     const { result } = renderHook(() => useCaseViewActivity({ caseData }), { wrapper });
 
     act(() => {
-      result.current.changeStatus(CaseStatuses.closed, 'because reasons');
+      result.current.changeStatus(closedStatus, 'because reasons');
     });
 
     expect(onUpdateField).not.toHaveBeenCalled();
     expect(handleUpdateCaseStatus).toHaveBeenCalledWith(
       [caseData],
-      CaseStatuses.closed,
+      closedStatus,
       'because reasons'
     );
+  });
+
+  it('moves the case to the picked status when custom statuses are on', () => {
+    const spy = jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(true);
+    const { result } = renderHook(() => useCaseViewActivity({ caseData }), { wrapper });
+
+    act(() => {
+      result.current.changeStatus(awaitingCustomer);
+    });
+
+    expect(onUpdateField).not.toHaveBeenCalled();
+    expect(handleUpdateCaseStatus).toHaveBeenCalledWith([caseData], awaitingCustomer, undefined);
+    spy.mockRestore();
   });
 
   it('only reports the description as loading while it is the field being updated', () => {

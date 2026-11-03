@@ -5,7 +5,6 @@ type: object
 required:
   - connector
   - description
-  - owner
   - settings
   - tags
   - title
@@ -24,11 +23,18 @@ properties:
   description:
     $ref: 'case_description.yaml'
   owner:
-    $ref: 'owner.yaml'
+    allOf:
+      - $ref: 'owner.yaml'
+    description: >
+      The solution the case comes from. If you omit it, the case takes the owner of its
+      template, the only solution in the deployment, or `cases`, in that order. It is required
+      when `xpack.cases.topLevelApp.enabled` is `false`.
   settings:
     $ref: 'settings.yaml'
   severity:
     $ref: 'case_severity.yaml'
+  status_key:
+    $ref: 'case_status_key.yaml'
   tags:
     $ref: 'case_tags.yaml'
   category:

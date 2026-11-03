@@ -69,3 +69,22 @@ export const BULK_ACTION_STATUS_IN_PROGRESS = i18n.translate(
     defaultMessage: 'Mark in progress',
   }
 );
+
+export const MARKED_CASES_AS = ({
+  totalCases,
+  caseTitle,
+  status,
+}: {
+  totalCases: number;
+  caseTitle?: string;
+  status: string;
+}) =>
+  i18n.translate('xpack.cases.actions.markedCasesAs', {
+    values: { caseTitle, totalCases, status },
+    defaultMessage:
+      'Marked {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}} as {status}',
+  });
+
+export const DISABLED_STATUS = i18n.translate('xpack.cases.actions.status.disabledStatus', {
+  defaultMessage: 'Disabled',
+});

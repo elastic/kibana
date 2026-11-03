@@ -10,6 +10,7 @@ import type { AvailabilityContext } from '@kbn/agent-builder-server';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import { searchCasesTool } from './search_cases';
+import { setTopLevelAppEnabled } from '../../common/top_level_app';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { makeCoreWithSolution } from '../utils/mock_core_with_solution';
 import { createCasesToolAvailability } from '../utils/get_cases_tool_availability';
@@ -367,5 +368,35 @@ describe('searchCasesTool availability', () => {
     const availability = createCasesToolAvailability(coreSetup, loggingSystemMock.createLogger());
     const tool = { ...searchCasesTool(coreSetup, jest.fn()), availability };
     expect(tool.availability?.cacheMode).toBe('space');
+  });
+});
+
+describe('searchCasesTool with the top-level Cases app', () => {
+  beforeEach(() => setTopLevelAppEnabled(true));
+  afterEach(() => setTopLevelAppEnabled(false));
+
+  it('searches every accessible case when owner is omitted', async () => {
+    const casesClient = createCasesClientMock();
+    casesClient.cases.find.mockResolvedValue({
+      cases: [],
+      total: 0,
+      page: 1,
+      per_page: 10,
+      count_open_cases: 0,
+      count_closed_cases: 0,
+      count_in_progress_cases: 0,
+    } as never);
+
+    const { tool } = buildTool(casesClient);
+    await tool.handler({ mode: 'search' } as never, buildToolContext());
+
+    const findCall = (casesClient.cases.find as jest.Mock).mock.calls[0][0];
+    expect(findCall).not.toHaveProperty('owner');
+  });
+
+  it('describes owner as optional', () => {
+    const { tool } = buildTool(createCasesClientMock());
+    expect(tool.description).toContain('`owner` is optional for `search`');
+    expect(tool.description).not.toContain('Which Elastic app is this in');
   });
 });

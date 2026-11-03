@@ -1,7 +1,8 @@
 type: string
 description: >
-  The application that owns the cases: Stack Management, Observability, or
-  Elastic Security.
+  The solution the case comes from: Stack Management (`cases`), Observability, or Elastic
+  Security. Roles that grant Cases for all solutions can see every case in the space; roles that
+  grant Cases for one solution see only that solution's cases.
 enum:
   - cases
   - observability

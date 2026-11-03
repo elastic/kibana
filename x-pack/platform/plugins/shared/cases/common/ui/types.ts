@@ -94,6 +94,12 @@ export interface CasesUiConfigType {
   runWorkflows: {
     enabled: boolean;
   };
+  topLevelApp?: {
+    enabled: boolean;
+  };
+  customStatuses?: {
+    enabled: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;

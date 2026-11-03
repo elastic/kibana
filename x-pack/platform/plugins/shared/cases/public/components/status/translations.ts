@@ -27,3 +27,13 @@ export const CASE_IN_PROGRESS = i18n.translate('xpack.cases.caseView.caseInProgr
 export const CASE_CLOSED = i18n.translate('xpack.cases.caseView.caseClosed', {
   defaultMessage: 'Case closed',
 });
+
+export const DISABLED = i18n.translate('xpack.cases.status.disabled', {
+  defaultMessage: 'Disabled',
+});
+
+export const MARK_AS = (status: string) =>
+  i18n.translate('xpack.cases.status.markAs', {
+    values: { status },
+    defaultMessage: 'Mark as {status}',
+  });

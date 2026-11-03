@@ -12,9 +12,8 @@ import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Case, RelatedCase } from '../../../common/types/domain';
-import { GENERAL_CASES_OWNER, OWNER_INFO } from '../../../common/constants';
 import { getCaseViewPath } from '../../common/utils';
-import { isValidOwner } from '../../../common/utils/owner';
+import { getCasesAppBasePath } from '../../common/top_level_app';
 
 export interface CoreServices {
   coreStart: CoreStart;
@@ -151,8 +150,7 @@ export function getCaseUrl(
       });
     }
 
-    const ownerInfo = isValidOwner(owner) ? OWNER_INFO[owner] : OWNER_INFO[GENERAL_CASES_OWNER];
-    const path = `${ownerInfo.appBasePath}${ownerInfo.casesBasePath}/${caseId}`;
+    const path = `${getCasesAppBasePath(owner)}/${caseId}`;
     return buildFullUrl(request, core, spaceId, path);
   } catch (error) {
     return null;

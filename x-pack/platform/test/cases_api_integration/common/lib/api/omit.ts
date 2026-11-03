@@ -42,6 +42,8 @@ export const removeServerGeneratedPropertiesFromCase = (theCase: Case): Partial<
     'in_progress_at',
     'time_to_acknowledge',
     'incremental_id',
+    // Depends on xpack.cases.customStatuses.enabled; the custom_statuses suite asserts it.
+    'status_key',
   ]);
 };
 
@@ -51,4 +53,14 @@ export const removeServerGeneratedPropertiesFromComments = (
   return comments?.map((comment) => {
     return removeServerGeneratedPropertiesFromSavedObject<Attachment>(comment, []);
   });
+};
+
+/**
+ * Drops `status_key`, which is present only while `xpack.cases.customStatuses.enabled` is on. Suites
+ * that run under configs with either flag state compare without it; the custom_statuses suite
+ * asserts it.
+ */
+export const omitStatusKey = <T extends object>(value: T): Omit<T, 'status_key'> => {
+  const { status_key: _statusKey, ...rest } = value as T & { status_key?: unknown };
+  return rest;
 };

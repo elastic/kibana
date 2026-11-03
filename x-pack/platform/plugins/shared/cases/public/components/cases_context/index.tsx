@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, ReactNode, FC, PropsWithChildren } from 'react';
+import type { ReactNode, FC, PropsWithChildren } from 'react';
 
 import { merge } from 'lodash';
 import React, { useCallback, useMemo, useReducer } from 'react';
@@ -15,35 +15,22 @@ import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { QueryClient } from '@kbn/react-query';
 import { QueryClientProvider } from '@kbn/react-query';
-import type {
-  CasesFeaturesAllRequired,
-  CasesFeatures,
-  CasesPermissions,
-} from '../../containers/types';
+import type { CasesFeaturesAllRequired, CasesFeatures } from '../../containers/types';
 import type { ReleasePhase } from '../types';
-import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
+import type { CasesContextValue } from './context';
+import { CasesContext } from './context';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import type { CasesContextStoreAction } from './state/cases_context_reducer';
 import { casesContextReducer, getInitialCasesContextState } from './state/cases_context_reducer';
 import { CasesStateContext } from './state/cases_state_context';
 import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
-type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
-
-export interface CasesContextValue {
-  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
-  owner: string[];
-  permissions: CasesPermissions;
-  basePath: string;
-  features: CasesFeaturesAllRequired;
-  releasePhase: ReleasePhase;
-  dispatch: CasesContextValueDispatch;
-}
+export type { CasesContextValue } from './context';
+export { CasesContext } from './context';
 
 export interface CasesContextProps
   extends Pick<CasesContextValue, 'owner' | 'permissions' | 'unifiedAttachmentTypeRegistry'> {
@@ -52,8 +39,6 @@ export interface CasesContextProps
   releasePhase?: ReleasePhase;
   getFilesClient: (scope: string) => ScopedFilesClient;
 }
-
-export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
 
 export const CasesProvider: FC<
   PropsWithChildren<{
@@ -105,6 +90,7 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
+      getFilesClient,
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.

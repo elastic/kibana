@@ -10,6 +10,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIcon, EuiSuperSelect } from '@elastic/eui';
 import { OWNER_INFO } from '../../../common/constants';
 
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 import * as i18n from './translations';
 
 interface Props {
@@ -54,7 +55,7 @@ const CaseOwnerSelector: React.FC<Props> = ({
   return (
     <EuiFormRow
       display="columnCompressed"
-      label={i18n.SOLUTION_SELECTOR_LABEL}
+      label={isTopLevelAppEnabled() ? i18n.SOLUTION_LABEL : i18n.SOLUTION_SELECTOR_LABEL}
       data-test-subj="caseOwnerSelector"
       fullWidth
     >

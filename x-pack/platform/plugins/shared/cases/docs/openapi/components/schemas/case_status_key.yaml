@@ -1,0 +1,8 @@
+type: string
+description: >
+  The key of a case status defined in the space. Setting it also sets `status` to the category
+  of that status. Rejected when custom statuses are turned off.
+minLength: 1
+maxLength: 50
+pattern: '^[a-z0-9_-]+$'
+example: awaiting_customer

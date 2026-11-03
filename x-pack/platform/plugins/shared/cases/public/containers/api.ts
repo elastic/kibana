@@ -7,7 +7,12 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { CaseCustomField, User } from '../../common/types/domain';
+import type {
+  CaseCustomField,
+  CaseStatusDefinition,
+  CasesSpaceSettings,
+  User,
+} from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
   BulkCreateUnifiedAttachmentsRequest,
@@ -68,13 +73,16 @@ import {
 import {
   CASE_REPORTERS_URL,
   CASE_TAGS_URL,
+  INTERNAL_AVAILABLE_OWNERS_URL,
   CASES_URL,
   COMMENT_ATTACHMENT_TYPE,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+  INTERNAL_CASES_SPACE_SETTINGS_URL,
 } from '../../common/constants';
+import { getEffectiveStatuses } from '../../common/utils/statuses';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
 import { KibanaServices } from '../common/lib/kibana';
@@ -93,12 +101,14 @@ import {
 
 import type {
   ActionLicense,
+  CasesFilterOptions,
   CaseUI,
   FeatureIdsResponse,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   UserActionUI,
 } from './types';
+import { isCustomStatusesEnabled } from '../common/custom_statuses';
 
 import {
   decodeCaseResponse,
@@ -111,6 +121,7 @@ import {
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
+  getStatusKeyFilter,
   decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
@@ -162,6 +173,28 @@ export const getTags = async ({
     query: { ...(owner.length > 0 ? { owner } : {}) },
   });
   return response ?? [];
+};
+
+export interface AvailableOwners {
+  owners: string[];
+  createOwners: string[];
+  settingsOwners: string[];
+}
+
+export const getAvailableOwners = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<AvailableOwners> => {
+  const response = await KibanaServices.get().http.fetch<AvailableOwners>(
+    INTERNAL_AVAILABLE_OWNERS_URL,
+    { method: 'GET', signal }
+  );
+  return {
+    owners: response?.owners ?? [],
+    createOwners: response?.createOwners ?? [],
+    settingsOwners: response?.settingsOwners ?? [],
+  };
 };
 
 export const getCategories = async ({
@@ -315,7 +348,8 @@ export const getCases = async ({
     sortOrder: 'desc',
   },
   signal,
-}: FetchCasesProps): Promise<CasesFindResponseUI> => {
+}: FetchCasesProps & { filterOptions?: CasesFilterOptions }): Promise<CasesFindResponseUI> => {
+  const statusKeys = isCustomStatusesEnabled() ? getStatusKeyFilter(filterOptions) : [];
   const body = {
     ...removeOptionFromFilter({
       filterKey: 'status',
@@ -327,6 +361,7 @@ export const getCases = async ({
       filterOptions: filterOptions.severity,
       optionToBeRemoved: 'all',
     }),
+    ...(statusKeys.length > 0 ? { status_key: statusKeys } : {}),
     ...constructAssigneesFilter(filterOptions.assignees),
     ...constructReportersFilter(filterOptions.reporters),
     ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
@@ -751,4 +786,34 @@ export const getSimilarCases = async ({
   );
 
   return convertSimilarCasesToCamel(decodeCasesSimilarResponse(response));
+};
+
+/** The statuses of the current space, in admin order. */
+export const getCaseStatuses = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<CaseStatusDefinition[]> => {
+  const response = await KibanaServices.get().http.fetch<CasesSpaceSettings>(
+    INTERNAL_CASES_SPACE_SETTINGS_URL,
+    { method: 'GET', signal }
+  );
+
+  return getEffectiveStatuses(response);
+};
+
+/** Replaces the statuses of the current space and returns the saved list, in admin order. */
+export const putCaseStatuses = async ({
+  statuses,
+  signal,
+}: {
+  statuses: CaseStatusDefinition[];
+  signal?: AbortSignal;
+}): Promise<CaseStatusDefinition[]> => {
+  const response = await KibanaServices.get().http.fetch<CasesSpaceSettings>(
+    INTERNAL_CASES_SPACE_SETTINGS_URL,
+    { method: 'PUT', body: JSON.stringify({ statuses }), signal }
+  );
+
+  return getEffectiveStatuses(response);
 };

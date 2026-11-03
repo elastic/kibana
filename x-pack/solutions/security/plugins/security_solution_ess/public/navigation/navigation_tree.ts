@@ -74,6 +74,8 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
+      // Shown instead of the Security Cases node when Cases runs as the top-level app.
+      { link: 'cases', icon: 'briefcase' },
       defaultNavigationTree.entityAnalytics(),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),

@@ -277,6 +277,28 @@ describe('Cases Ui Plugin', () => {
     });
   });
 
+  describe('top-level Cases app', () => {
+    it('does not register the app when the flag is off', () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.application.register).not.toHaveBeenCalled();
+    });
+
+    it('registers /app/cases and hides the Stack Management entry when the flag is on', () => {
+      context = coreMock.createPluginInitializerContext(
+        getConfig({ topLevelApp: { enabled: true } })
+      );
+      new CasesUiPlugin(context).setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'cases', appRoute: '/app/cases' })
+      );
+      expect(
+        pluginsSetup.management.sections.section.insightsAndAlerting.registerApp
+      ).toHaveBeenCalledWith(expect.objectContaining({ hideFromSidebar: true, visibleIn: [] }));
+    });
+  });
+
   describe('start', () => {
     it('should start cases plugin correctly', async () => {
       const pluginStart = plugin.start(coreStart, pluginsStart);
@@ -295,6 +317,8 @@ describe('Cases Ui Plugin', () => {
           attachmentsEnabled: false,
           chatEnabled: false,
           runWorkflowsEnabled: true,
+          topLevelAppEnabled: false,
+          customStatusesEnabled: false,
         },
         helpers: {
           canUseCases: expect.any(Function),

@@ -213,7 +213,9 @@ export const useBulkAddToCaseActions = ({
                       : [];
                   }
 
-                  const owner = theCase.owner ?? caseOwner;
+                  // The alerts' solution decides their attachment type; the case still owns the
+                  // attachment. Equal to the case owner whenever the table and case share one.
+                  const owner = caseOwner ?? theCase.owner;
                   if (!owner) {
                     return [];
                   }

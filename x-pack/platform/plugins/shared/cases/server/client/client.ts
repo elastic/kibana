@@ -22,6 +22,8 @@ import type { TemplatesSubClient } from './templates/client';
 import { createTemplatesSubClient } from './templates/client';
 import type { FieldDefinitionsSubClient } from './field_definitions/client';
 import { createFieldDefinitionsSubClient } from './field_definitions/client';
+import type { SpaceSettingsSubClient } from './space_settings/client';
+import { createSpaceSettingsSubClient } from './space_settings/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -35,6 +37,7 @@ export class CasesClient {
   private readonly _metrics: MetricsSubClient;
   private readonly _templates: TemplatesSubClient;
   private readonly _fieldDefinitions: FieldDefinitionsSubClient;
+  private readonly _spaceSettings: SpaceSettingsSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
@@ -45,6 +48,7 @@ export class CasesClient {
     this._metrics = createMetricsSubClient(args, this);
     this._templates = createTemplatesSubClient(args);
     this._fieldDefinitions = createFieldDefinitionsSubClient(args);
+    this._spaceSettings = createSpaceSettingsSubClient(args);
   }
 
   /**
@@ -59,6 +63,13 @@ export class CasesClient {
    */
   public get fieldDefinitions() {
     return this._fieldDefinitions;
+  }
+
+  /**
+   * Retrieves an interface for the Cases settings that apply to the whole space.
+   */
+  public get spaceSettings() {
+    return this._spaceSettings;
   }
 
   /**

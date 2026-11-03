@@ -9,6 +9,9 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import type { CaseStatusDefinition } from '../../../../../../common/types/domain';
+import { DEFAULT_CASE_STATUSES } from '../../../../../../common/utils/statuses';
+import * as customStatuses from '../../../../../common/custom_statuses';
 
 import { useCloseCaseFlow } from './use_close_case_flow';
 import { basicCase } from '../../../../../containers/mock';
@@ -24,6 +27,22 @@ jest.mock('../../../use_on_refresh_case_view_page');
 
 const mockHandleUpdateCaseStatus = jest.fn();
 const mockOpenCloseCaseModal = jest.fn();
+const [openStatus, inProgressStatus, closedStatus] = DEFAULT_CASE_STATUSES;
+const resolved: CaseStatusDefinition = {
+  key: 'resolved',
+  label: 'Resolved',
+  color: 'success',
+  category: 'done',
+  order: 3,
+  isDefault: false,
+  disabled: false,
+};
+const awaitingCustomer: CaseStatusDefinition = {
+  ...resolved,
+  key: 'awaiting_customer',
+  label: 'Awaiting customer',
+  category: 'active',
+};
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);
@@ -49,7 +68,7 @@ describe('useCloseCaseFlow', () => {
     });
 
     act(() => {
-      result.current.onStatusChanged(CaseStatuses.open);
+      result.current.onStatusChanged(openStatus);
     });
 
     expect(onUpdateField).toHaveBeenCalledWith({ key: 'status', value: CaseStatuses.open });
@@ -62,7 +81,7 @@ describe('useCloseCaseFlow', () => {
     });
 
     act(() => {
-      result.current.onStatusChanged(CaseStatuses['in-progress']);
+      result.current.onStatusChanged(inProgressStatus);
     });
 
     expect(onUpdateField).toHaveBeenCalledWith({
@@ -78,11 +97,41 @@ describe('useCloseCaseFlow', () => {
     });
 
     act(() => {
-      result.current.onStatusChanged(CaseStatuses.closed);
+      result.current.onStatusChanged(closedStatus);
     });
 
     expect(onUpdateField).not.toHaveBeenCalled();
     expect(mockOpenCloseCaseModal).toHaveBeenCalled();
+  });
+
+  it('applies the picked done status once a close reason is given', () => {
+    const { result } = renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.onStatusChanged(resolved);
+    });
+
+    const { onCloseCase } = (useCloseCaseModal as jest.Mock).mock.calls.at(-1)[0];
+    onCloseCase('duplicate');
+
+    expect(mockHandleUpdateCaseStatus).toHaveBeenCalledWith([basicCase], resolved, 'duplicate');
+  });
+
+  it('moves to the picked status through the status action when custom statuses are on', () => {
+    const spy = jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(true);
+    const { result } = renderHook(() => useCloseCaseFlow({ caseData: basicCase, onUpdateField }), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.onStatusChanged(awaitingCustomer);
+    });
+
+    expect(onUpdateField).not.toHaveBeenCalled();
+    expect(mockHandleUpdateCaseStatus).toHaveBeenCalledWith([basicCase], awaitingCustomer);
+    spy.mockRestore();
   });
 
   it('returns closeCaseModal from useCloseCaseModal', () => {
@@ -116,6 +165,7 @@ describe('useCloseCaseFlow', () => {
       expect.objectContaining({
         isDisabled: false,
         selectedStatus: basicCase.status,
+        selectedStatusKey: null,
       })
     );
   });

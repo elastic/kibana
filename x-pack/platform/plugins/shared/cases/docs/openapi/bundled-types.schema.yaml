@@ -148,6 +148,7 @@ paths:
         - $ref: '#/components/parameters/sortField'
         - $ref: '#/components/parameters/sort_order'
         - $ref: '#/components/parameters/status'
+        - $ref: '#/components/parameters/status_key'
         - $ref: '#/components/parameters/tags'
         - $ref: '#/components/parameters/to'
       responses:
@@ -2655,6 +2656,19 @@ components:
           - in-progress
           - open
       example: open
+    status_key:
+      in: query
+      name: status_key
+      description: |
+        Filters the returned cases by the key of their space status. A default status also matches the cases of its category that were never set to a status by key.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/case_status_key'
+          - type: array
+            items:
+              $ref: '#/components/schemas/case_status_key'
+            maxItems: 50
+      example: awaiting_customer
     tags:
       in: query
       name: tags
@@ -3156,7 +3170,7 @@ components:
     owner:
       type: string
       description: |
-        The application that owns the cases: Stack Management, Observability, or Elastic Security.
+        The solution the case comes from: Stack Management (`cases`), Observability, or Elastic Security. Roles that grant Cases for all solutions can see every case in the space; roles that grant Cases for one solution see only that solution's cases.
       enum:
         - cases
         - observability
@@ -3185,6 +3199,14 @@ components:
         - high
         - low
         - medium
+    case_status_key:
+      type: string
+      description: |
+        The key of a case status defined in the space. Setting it also sets `status` to the category of that status. Rejected when custom statuses are turned off.
+      minLength: 1
+      maxLength: 50
+      pattern: ^[a-z0-9_-]+$
+      example: awaiting_customer
     case_tags:
       description: |
         The words and phrases that help categorize cases. It can be an empty array.
@@ -3222,7 +3244,6 @@ components:
       required:
         - connector
         - description
-        - owner
         - settings
         - tags
         - title
@@ -3241,11 +3262,16 @@ components:
         description:
           $ref: '#/components/schemas/case_description'
         owner:
-          $ref: '#/components/schemas/owner'
+          allOf:
+            - $ref: '#/components/schemas/owner'
+          description: |
+            The solution the case comes from. If you omit it, the case takes the owner of its template, the only solution in the deployment, or `cases`, in that order. It is required when `xpack.cases.topLevelApp.enabled` is `false`.
         settings:
           $ref: '#/components/schemas/settings'
         severity:
           $ref: '#/components/schemas/case_severity'
+        status_key:
+          $ref: '#/components/schemas/case_status_key'
         tags:
           $ref: '#/components/schemas/case_tags'
         category:
@@ -3856,6 +3882,12 @@ components:
           $ref: '#/components/schemas/case_severity'
         status:
           $ref: '#/components/schemas/case_status'
+        status_key:
+          type: string
+          description: |
+            The key of the space status the case is in. `status` holds its category. Null for cases that were never set to a status by key; they are in their category's default status.
+          nullable: true
+          example: awaiting_customer
         tags:
           type: array
           items:
@@ -4011,6 +4043,8 @@ components:
                 $ref: '#/components/schemas/case_severity'
               status:
                 $ref: '#/components/schemas/case_status'
+              status_key:
+                $ref: '#/components/schemas/case_status_key'
               tags:
                 $ref: '#/components/schemas/case_tags'
               title:

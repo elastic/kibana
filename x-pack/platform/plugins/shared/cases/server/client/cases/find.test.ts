@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { v1 as uuidv1 } from 'uuid';
+import { toKqlExpression } from '@kbn/es-query';
 
 import type { Case } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
@@ -136,6 +137,65 @@ describe('find', () => {
       });
       await find(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
+    });
+  });
+
+  describe('status_key filter', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.findCasesGroupedByID.mockResolvedValue({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      casesMap: new Map(),
+    });
+    clientArgs.services.caseService.getCaseStatusStats.mockResolvedValue({
+      open: 0,
+      'in-progress': 0,
+      closed: 0,
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('filters by key, matching legacy cases for a default key, and leaves the status counts alone', async () => {
+      await find(
+        createCasesClientMockFindRequest({
+          status_key: ['closed'],
+          status: undefined,
+          severity: undefined,
+        }),
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.spaceSettingsService.getStatuses).toHaveBeenCalledTimes(1);
+      const { filter } =
+        clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0].caseOptions;
+      expect(filter && toKqlExpression(filter)).toBe(
+        '(cases.attributes.status_key: closed OR (cases.attributes.status: 20 AND NOT cases.attributes.status_key: *))'
+      );
+      const statsFilter =
+        clientArgs.services.caseService.getCaseStatusStats.mock.calls[0][0].searchOptions.filter;
+      expect(statsFilter).toBeUndefined();
+    });
+
+    it('does not load the space statuses without the filter', async () => {
+      await find(createCasesClientMockFindRequest(), clientArgs, casesClientMock);
+
+      expect(clientArgs.services.spaceSettingsService.getStatuses).not.toHaveBeenCalled();
+    });
+
+    it('rejects more than 50 keys', async () => {
+      await expect(
+        find(
+          createCasesClientMockFindRequest({
+            status_key: Array.from({ length: 51 }, (_, index) => `status_${index}`),
+          }),
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow();
     });
   });
 

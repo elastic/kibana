@@ -91,6 +91,12 @@ import type { TemplatesService } from '../../services/templates';
 import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
 import {
+  clearStatusKeyWhileDisabled,
+  getStatusesForWrite,
+  resolveStatusForUpdate,
+} from './status_write';
+import type { CaseStatusDefinition } from '../../../common/types/domain/space_settings/v1';
+import {
   loadFieldLinkIndexes,
   logUnresolvedMirrorKeys,
   throwIfMalformedFieldLinkage,
@@ -456,7 +462,7 @@ function partitionPatchRequest(
 /**
  * Fields that are allowed to be present when users reopen cases
  */
-const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status']);
+const REOPEN_ONLY_CASE_FIELDS = new Set(['id', 'version', 'status', 'status_key']);
 
 /**
  * Fields that are allowed to be present when case is reassigned
@@ -500,6 +506,35 @@ export function getOperationsToAuthorize({
 
   return operations;
 }
+
+const resolveStatusInPatchRequest = ({
+  reqCase,
+  foundCase,
+  statuses,
+}: {
+  reqCase: CasePatchRequest;
+  foundCase: CaseSavedObjectTransformed | undefined;
+  statuses: CaseStatusDefinition[] | undefined;
+}): CasePatchRequest => {
+  const { status, status_key: statusKey, ...rest } = reqCase;
+
+  if (!foundCase || isSOError(foundCase) || (status == null && statusKey == null)) {
+    return reqCase;
+  }
+
+  return {
+    ...rest,
+    ...resolveStatusForUpdate({
+      statuses,
+      status,
+      statusKey,
+      current: {
+        status: foundCase.attributes.status,
+        statusKey: foundCase.attributes.status_key,
+      },
+    }),
+  };
+};
 
 export interface UpdateRequestWithOriginalCase {
   updateReq: CasePatchRequest;
@@ -598,8 +633,8 @@ export const bulkUpdate = async (
 
   try {
     const rawQuery = decodeWithExcessOrThrowZod(CasesPatchRequestSchema)(cases);
-    const query = emptyCasesAssigneesSanitizer(rawQuery);
-    const caseIds = query.cases.map((q) => q.id);
+    const sanitizedQuery = emptyCasesAssigneesSanitizer(rawQuery);
+    const caseIds = sanitizedQuery.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
       caseIds,
     });
@@ -613,6 +648,21 @@ export const bulkUpdate = async (
       acc.set(so.id, so as CaseSavedObjectTransformed);
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
+
+    const statuses = sanitizedQuery.cases.some(
+      ({ status, status_key: statusKey }) => status != null || statusKey != null
+    )
+      ? await getStatusesForWrite(clientArgs.services)
+      : undefined;
+
+    // Resolved before partitioning so reopen detection and every lifecycle step below see the
+    // category in `status`. A same-category move is left with `status_key` alone.
+    const query = {
+      ...sanitizedQuery,
+      cases: sanitizedQuery.cases.map((reqCase) =>
+        resolveStatusInPatchRequest({ reqCase, foundCase: casesMap.get(reqCase.id), statuses })
+      ),
+    };
 
     const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases, changedAssignees } =
       partitionPatchRequest(casesMap, query.cases);
@@ -1362,6 +1412,13 @@ const createPatchCasesPayload = async ({
         }),
         updatedAttributes: {
           ...trimmedCaseAttributes,
+          ...clearStatusKeyWhileDisabled({
+            status: trimmedCaseAttributes.status,
+            current: {
+              status: originalCase.attributes.status,
+              statusKey: originalCase.attributes.status_key,
+            },
+          }),
           ...(dedupedAssignees && { assignees: dedupedAssignees }),
           ...getClosedInfoForUpdate({
             user,

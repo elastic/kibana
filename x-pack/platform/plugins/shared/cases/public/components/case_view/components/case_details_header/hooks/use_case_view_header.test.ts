@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react';
+import * as topLevelApp from '../../../../../common/top_level_app';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { useCaseViewHeader } from './use_case_view_header';
 import { basicCase } from '../../../../../containers/mock';
@@ -16,6 +17,10 @@ import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
 import { useCasesConfig } from '../../../../../common/lib/kibana';
 import type { CaseUI } from '../../../../../../common';
+import type { CaseStatusDefinition } from '../../../../../../common/types/domain';
+import { DEFAULT_CASE_STATUSES } from '../../../../../../common/utils/statuses';
+import * as customStatuses from '../../../../../common/custom_statuses';
+import * as api from '../../../../../containers/api';
 
 jest.mock('../../../../../containers/use_get_case_connectors');
 jest.mock('../../../../../containers/use_delete_cases');
@@ -146,6 +151,20 @@ describe('useCaseViewHeader', () => {
         'data-test-subj': 'case-view-incremental-id',
       })
     );
+  });
+
+  it('names the solution the case comes from in the top-level app', () => {
+    jest.spyOn(topLevelApp, 'isTopLevelAppEnabled').mockReturnValue(true);
+    const { result } = renderHook(
+      () =>
+        useCaseViewHeader({ ...defaultArgs, caseData: { ...basicCase, owner: 'observability' } }),
+      { wrapper }
+    );
+
+    expect(
+      result.current.metadata.find((m) => m?.['data-test-subj'] === 'case-view-solution')
+    ).toEqual(expect.objectContaining({ label: 'Solution: Observability' }));
+    jest.restoreAllMocks();
   });
 
   it('does not include incremental ID in metadata when undefined', () => {
@@ -417,7 +436,85 @@ describe('useCaseViewHeader', () => {
       statusBadge?.items?.[2]?.onClick?.();
     });
 
-    expect(mockOnStatusChanged).toHaveBeenCalledWith('closed');
+    expect(mockOnStatusChanged).toHaveBeenCalledWith(
+      expect.objectContaining({ key: 'closed', category: 'done' })
+    );
+  });
+
+  describe('with custom statuses', () => {
+    const triage: CaseStatusDefinition = {
+      key: 'triage',
+      label: 'Triage',
+      color: 'accent',
+      category: 'not_started',
+      order: 1,
+      isDefault: false,
+      disabled: false,
+    };
+    const retired: CaseStatusDefinition = {
+      ...triage,
+      key: 'retired',
+      label: 'Retired',
+      color: 'danger',
+      order: 3,
+      disabled: true,
+    };
+
+    beforeEach(() => {
+      jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(true);
+      jest
+        .spyOn(api, 'getCaseStatuses')
+        .mockResolvedValue([
+          { ...DEFAULT_CASE_STATUSES[0], order: 0 },
+          triage,
+          { ...DEFAULT_CASE_STATUSES[1], order: 2 },
+          retired,
+          { ...DEFAULT_CASE_STATUSES[2], order: 4 },
+        ]);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('shows the label and color of the status the case is in', async () => {
+      const caseData: CaseUI = { ...basicCase, ...{ statusKey: 'triage' } };
+      const { result } = renderHook(() => useCaseViewHeader({ ...defaultArgs, caseData }), {
+        wrapper,
+      });
+
+      await waitFor(() => {
+        const statusBadge = result.current.badges.find(
+          (b) => b['data-test-subj'] === 'case-view-status-badge'
+        );
+        expect(statusBadge).toEqual(expect.objectContaining({ label: 'Triage', color: 'accent' }));
+      });
+    });
+
+    it('lists enabled statuses, plus the disabled one the case is in', async () => {
+      const caseData: CaseUI = { ...basicCase, ...{ statusKey: 'retired' } };
+      const { result } = renderHook(() => useCaseViewHeader({ ...defaultArgs, caseData }), {
+        wrapper,
+      });
+
+      await waitFor(() => {
+        const statusBadge = result.current.badges.find(
+          (b) => b['data-test-subj'] === 'case-view-status-badge'
+        );
+        expect(statusBadge?.items?.map(({ name }) => name)).toEqual([
+          'Open',
+          'Triage',
+          'In progress',
+          'Retired',
+          'Closed',
+        ]);
+      });
+
+      const statusBadge = result.current.badges.find(
+        (b) => b['data-test-subj'] === 'case-view-status-badge'
+      );
+      expect(statusBadge?.items?.[3]).toEqual(expect.objectContaining({ disabled: true }));
+    });
   });
 
   it('calls onSeverityChanged when severity badge item is clicked', () => {

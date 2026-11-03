@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
 import { Settings } from '../../../bundled-types.gen';
 import {
@@ -136,24 +136,31 @@ const CaseBasicSchema = z.object({
   ...CaseBaseFields,
 });
 
-export const CaseAttributesSchema = CaseBasicSchema.extend({
-  duration: z.number().nullable(),
-  closed_at: z.string().nullable(),
-  closed_by: UserSchema.nullable(),
-  created_at: z.string(),
-  created_by: UserSchema,
-  external_service: ExternalServiceSchema.nullable(),
-  updated_at: z.string().nullable(),
-  updated_by: UserSchema.nullable(),
-  total_observables: z.number().nullable(),
-  incremental_id: z.number().nullable().optional(),
-  in_progress_at: z.string().nullable().optional(),
-  time_to_acknowledge: z.number().nullable().optional(),
-  time_to_investigate: z.number().nullable().optional(),
-  time_to_resolve: z.number().nullable().optional(),
-  template: CaseTemplateSchema.nullable().optional(),
-  [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
-});
+export const CaseAttributesSchema = lazySchema(() =>
+  CaseBasicSchema.extend({
+    duration: z.number().nullable(),
+    closed_at: z.string().nullable(),
+    closed_by: UserSchema.nullable(),
+    created_at: z.string(),
+    created_by: UserSchema,
+    external_service: ExternalServiceSchema.nullable(),
+    updated_at: z.string().nullable(),
+    updated_by: UserSchema.nullable(),
+    total_observables: z.number().nullable(),
+    incremental_id: z.number().nullable().optional(),
+    /**
+     * The key of the space's status the case is in. `null` for cases that were never moved to one
+     * by key; they are in their category's default status.
+     */
+    status_key: z.string().nullable().optional(),
+    in_progress_at: z.string().nullable().optional(),
+    time_to_acknowledge: z.number().nullable().optional(),
+    time_to_investigate: z.number().nullable().optional(),
+    time_to_resolve: z.number().nullable().optional(),
+    template: CaseTemplateSchema.nullable().optional(),
+    [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
+  })
+);
 
 export const CaseSchema = CaseAttributesSchema.extend({
   // Populated at response time by enrichCasesWithFieldLabels — not persisted to the SO.
@@ -180,14 +187,17 @@ export const AttachmentTotalsSchema = z.object({
   userComments: z.number(),
 });
 
-export const RelatedCaseSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  description: z.string(),
-  status: CaseStatusSchema,
-  createdAt: z.string(),
-  totals: AttachmentTotalsSchema,
-});
+export const RelatedCaseSchema = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    title: z.string(),
+    description: z.string(),
+    status: CaseStatusSchema,
+    status_key: z.string().nullable().optional(),
+    createdAt: z.string(),
+    totals: AttachmentTotalsSchema,
+  })
+);
 
 export const SimilaritySchema = z.object({
   typeKey: z.string(),

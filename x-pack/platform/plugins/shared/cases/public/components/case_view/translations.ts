@@ -120,6 +120,10 @@ export const SEVERITY_BADGE_ARIA_LABEL = (severity: string) =>
     values: { severity },
   });
 
+export const STATUS_DISABLED_HINT = i18n.translate('xpack.cases.caseView.statusDisabledHint', {
+  defaultMessage: 'This status is disabled.',
+});
+
 export const STATUS_BADGE_ARIA_LABEL = (status: string) =>
   i18n.translate('xpack.cases.caseView.statusBadgeAriaLabel', {
     defaultMessage: 'Status: {status}',
@@ -335,6 +339,12 @@ export const TEMPLATE_NOT_FOUND_GENERIC = i18n.translate(
     defaultMessage: 'Template not found',
   }
 );
+
+export const SOLUTION = (name: string) =>
+  i18n.translate('xpack.cases.details.solution', {
+    defaultMessage: 'Solution: {name}',
+    values: { name },
+  });
 
 export const REPORTED_BY = (name: string) =>
   i18n.translate('xpack.cases.details.reportedBy', {

@@ -24,6 +24,9 @@ import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/
 
 import type { CaseCustomFields } from '../../../common/types/domain';
 import { omit } from 'lodash';
+import type { CaseStatusDefinition } from '../../../common/types/domain/space_settings/v1';
+import { DEFAULT_CASE_STATUSES } from '../../../common/utils/statuses';
+import { setCustomStatusesEnabled } from '../../common/custom_statuses';
 
 describe('create', () => {
   const theCase = {
@@ -2439,6 +2442,74 @@ describe('create', () => {
 
       const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
       expect(createCaseCall.settings.extractObservables).toBe(true);
+    });
+  });
+  describe('Custom statuses', () => {
+    const clientArgs = createCasesClientMockArgs();
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+    const triage: CaseStatusDefinition = {
+      key: 'triage',
+      label: 'Triage',
+      color: 'accent',
+      category: 'not_started',
+      order: 3,
+      isDefault: true,
+      disabled: false,
+    };
+
+    const getCreatedAttributes = () =>
+      clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      setCustomStatusesEnabled(true);
+      clientArgs.services.spaceSettingsService.getStatuses.mockResolvedValue([
+        ...DEFAULT_CASE_STATUSES.map((status) =>
+          status.category === 'not_started' ? { ...status, isDefault: false } : status
+        ),
+        triage,
+      ]);
+    });
+
+    afterAll(() => {
+      setCustomStatusesEnabled(false);
+    });
+
+    it("creates the case in the space's default not started status", async () => {
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(getCreatedAttributes()).toEqual(
+        expect.objectContaining({ status: 'open', status_key: 'triage' })
+      );
+    });
+
+    it('creates the case in a requested not started status', async () => {
+      await create({ ...theCase, status_key: 'open' }, clientArgs, casesClientMock);
+
+      expect(getCreatedAttributes().status_key).toBe('open');
+      expect(
+        clientArgs.services.userActionService.creator.createUserAction.mock.calls[0][0].userAction
+          .payload
+      ).not.toHaveProperty('status_key');
+    });
+
+    it('rejects a status of another category', async () => {
+      await expect(
+        create({ ...theCase, status_key: 'closed' }, clientArgs, casesClientMock)
+      ).rejects.toThrow('Status "Closed" is a done status, which does not match status "open".');
+      expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
+    });
+
+    it('rejects a status_key while custom statuses are off and writes no key otherwise', async () => {
+      setCustomStatusesEnabled(false);
+
+      await expect(
+        create({ ...theCase, status_key: 'triage' }, clientArgs, casesClientMock)
+      ).rejects.toThrow('Custom statuses are turned off.');
+
+      await create(theCase, clientArgs, casesClientMock);
+      expect(getCreatedAttributes()).not.toHaveProperty('status_key');
+      expect(clientArgs.services.spaceSettingsService.getStatuses).not.toHaveBeenCalled();
     });
   });
 });

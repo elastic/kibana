@@ -7,6 +7,7 @@
 
 import { intersection } from 'lodash';
 import Boom from '@hapi/boom';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 import type { ObservableType } from '../../../common/types/domain/observable/v1';
 import { OWNER_FIELD } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
@@ -130,7 +131,11 @@ export const similar = async (
       };
     }
 
-    const filters = combineFilters([similarCasesFilter, ownerFilter]);
+    // In the top-level app owner is only the case's source, so similar cases span every owner the
+    // authorization filter allows.
+    const filters = isTopLevelAppEnabled()
+      ? similarCasesFilter
+      : combineFilters([similarCasesFilter, ownerFilter]);
 
     const finalCasesFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);
 

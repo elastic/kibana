@@ -94,4 +94,18 @@ describe('buildCasesSkill', () => {
       expect(skill.content).toContain('create_from_template');
     });
   });
+
+  describe('with the top-level Cases app', () => {
+    it('treats owner as an optional source instead of asking for the app', () => {
+      const { content } = buildCasesSkill(false, true);
+      expect(content).toContain('## Solution (source)');
+      expect(content).not.toContain('Which Elastic app is this in');
+    });
+
+    it('keeps the solution context rule when the top-level app is off', () => {
+      expect(buildCasesSkill(false).content).toContain(
+        '## Solution context — highest-priority rule'
+      );
+    });
+  });
 });

@@ -114,6 +114,11 @@ function createNavTree({
         ],
         icon: 'briefcase',
       },
+      // Shown instead of the node above when Cases runs as the top-level app.
+      {
+        link: 'cases',
+        icon: 'briefcase',
+      },
       {
         link: 'slo',
         icon: 'chartGauge',

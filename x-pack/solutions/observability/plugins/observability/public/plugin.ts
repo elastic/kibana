@@ -87,6 +87,7 @@ import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-invest
 import type { EntityInventoryAppPublicStart } from '@kbn/entity-inventory-app-plugin/public';
 import { isAlertingV2Enabled, shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
 import { observabilityAppId, observabilityFeatureId } from '../common';
+import { createCaseAttachmentProviders } from './cases/attachments/providers';
 import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
@@ -264,7 +265,22 @@ export class Plugin
           },
         })
       );
-      pluginsSetup.cases.attachmentFramework.registerAttachment(getObservabilityAlertType());
+      const pluginConfig = this.initContext.config.get();
+      pluginsSetup.cases.attachmentFramework.registerAttachment({
+        ...getObservabilityAlertType(),
+        providers: createCaseAttachmentProviders(async () => {
+          const [core, plugins] = await startServicesPromise;
+          return {
+            core,
+            plugins,
+            pluginContext: {
+              config: pluginConfig,
+              observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
+              ObservabilityPageTemplate: plugins.observabilityShared.navigation.PageTemplate,
+            },
+          };
+        }),
+      });
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
@@ -276,8 +292,11 @@ export class Plugin
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
-    pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
-    pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
+    const casesLocatorOptions = {
+      topLevelAppEnabled: pluginsSetup.cases?.config.topLevelAppEnabled ?? false,
+    };
+    pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition(casesLocatorOptions));
+    pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition(casesLocatorOptions));
     pluginsSetup.share.url.locators.create(new AlertsLocatorDefinition());
 
     const logsLocator =

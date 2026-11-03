@@ -30,6 +30,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type {
@@ -158,6 +159,11 @@ export interface CasesServerSetup {
    * dynamically registered owners (e.g. FTR fixtures); built-in solutions are pre-registered.
    */
   registerOwnerPrefix: (owner: string, prefix: string) => void;
+  /**
+   * Deprecates a solution's legacy Cases feature in favor of `casesV4` when the top-level Cases
+   * app is enabled. Returns any other feature, or every feature when the app is off, unchanged.
+   */
+  withCasesV4Replacement: (feature: KibanaFeatureConfig) => KibanaFeatureConfig;
 }
 
 export type PartialField<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;

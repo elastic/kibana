@@ -17,6 +17,11 @@ export const FEATURE_ID = 'generalCases' as const;
 /** @deprecated Please use FEATURE_ID_V3 instead */
 export const FEATURE_ID_V2 = 'generalCasesV2' as const;
 export const FEATURE_ID_V3 = 'generalCasesV3' as const;
+/** The single Cases feature granting every owner. Registered when `xpack.cases.topLevelApp.enabled` is on. */
+export const FEATURE_ID_V4 = 'casesV4' as const;
+/** The top-level Cases app, mounted at `/app/cases`. */
+export const CASES_APP_ID = 'cases' as const;
+export const CASES_APP_PATH = '/app/cases' as const;
 export const APP_OWNER = 'cases' as const;
 export const APP_PATH = '/app/management/insightsAndAlerting/cases' as const;
 export const CASES_CREATE_PATH = '/create' as const;

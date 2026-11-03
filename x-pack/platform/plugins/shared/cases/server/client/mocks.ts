@@ -38,6 +38,7 @@ import type { ConfigureSubClient, InternalConfigureSubClient } from './configure
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { TemplatesSubClient } from './templates/client';
+import type { SpaceSettingsSubClient } from './space_settings/client';
 import type { FieldDefinitionsSubClient } from './field_definitions/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
@@ -55,6 +56,7 @@ import {
   createUserActionServiceMock,
   createNotificationServiceMock,
   createTemplatesServiceMock,
+  createSpaceSettingsServiceMock,
   createFieldDefinitionsServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
@@ -99,6 +101,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     delete: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
+    getAvailableOwners: jest.fn(),
     getCasesByAlertID: jest.fn(),
     getCasesByAttachmentIDs: jest.fn(),
     getCategories: jest.fn(),
@@ -200,6 +203,15 @@ const createFieldDefinitionsSubClientMock = (): FieldDefinitionsSubClientMock =>
   });
 };
 
+type SpaceSettingsSubClientMock = jest.Mocked<SpaceSettingsSubClient>;
+
+const createSpaceSettingsSubClientMock = (): SpaceSettingsSubClientMock => {
+  return lazyObject({
+    get: jest.fn(),
+    update: jest.fn(),
+  });
+};
+
 type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
 
 const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
@@ -216,6 +228,7 @@ export interface CasesClientMock extends CasesClient {
   userActions: UserActionsSubClientMock;
   templates: TemplatesSubClientMock;
   fieldDefinitions: FieldDefinitionsSubClientMock;
+  spaceSettings: SpaceSettingsSubClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
@@ -227,6 +240,7 @@ export const createCasesClientMock = (): CasesClientMock => {
     metrics: createMetricsSubClientMock(),
     templates: createTemplatesSubClientMock(),
     fieldDefinitions: createFieldDefinitionsSubClientMock(),
+    spaceSettings: createSpaceSettingsSubClientMock(),
   });
   return client as unknown as CasesClientMock;
 };
@@ -280,6 +294,7 @@ export const createCasesClientMockArgs = () => {
       notificationService: createNotificationServiceMock(),
       templatesService: createTemplatesServiceMock(),
       fieldDefinitionsService: createFieldDefinitionsServiceMock(),
+      spaceSettingsService: createSpaceSettingsServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),

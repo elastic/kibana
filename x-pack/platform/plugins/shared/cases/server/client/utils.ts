@@ -28,6 +28,8 @@ import type {
   TemplatesConfiguration,
   CustomFieldTypes,
 } from '../../common/types/domain';
+import type { CaseStatusDefinition } from '../../common/types/domain/space_settings/v1';
+import { CATEGORY_TO_STATUS, findStatus } from '../../common/utils/statuses';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesSearchParams } from './types';
 
@@ -67,6 +69,44 @@ const addStatusFilter = (status: CaseStatuses | CaseStatuses[]): KueryNode | und
   return nodeBuilder.is(
     `${CASE_SAVED_OBJECT}.attributes.status`,
     `${STATUS_EXTERNAL_TO_ESMODEL[status]}`
+  );
+};
+
+/**
+ * Matches cases in any of the statuses. A category's default status also matches the cases of that
+ * category that have no `status_key`, since that is the status they read as.
+ */
+export const buildStatusKeyFilter = (
+  statusKey: string | string[] | undefined,
+  statuses: readonly CaseStatusDefinition[]
+): KueryNode | undefined => {
+  if (statusKey == null) {
+    return;
+  }
+
+  const keys = Array.isArray(statusKey) ? statusKey : [statusKey];
+
+  if (keys.length === 0) {
+    return;
+  }
+
+  return nodeBuilder.or(
+    keys.map((key) => {
+      const keyFilter = nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.status_key`, key);
+      const status = findStatus(statuses, key);
+
+      if (!status?.isDefault) {
+        return keyFilter;
+      }
+
+      const legacyFilter = fromKueryExpression(
+        `${CASE_SAVED_OBJECT}.attributes.status: ${
+          STATUS_EXTERNAL_TO_ESMODEL[CATEGORY_TO_STATUS[status.category]]
+        } and not ${CASE_SAVED_OBJECT}.attributes.status_key: *`
+      );
+
+      return nodeBuilder.or([keyFilter, legacyFilter]);
+    })
   );
 };
 
@@ -353,9 +393,13 @@ export const constructQueryOptions = ({
   category,
   customFields,
   customFieldsConfiguration,
+  status_key: statusKey,
+  statuses = [],
   searchType = 'find',
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
+  /** The space's statuses; needed to match legacy cases when filtering by `status_key`. */
+  statuses?: readonly CaseStatusDefinition[];
   searchType?: 'find' | 'search';
 }): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
@@ -363,6 +407,7 @@ export const constructQueryOptions = ({
   const sortByField = convertSortField(sortField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
   const statusFilter = status != null ? addStatusFilter(status) : undefined;
+  const statusKeyFilter = buildStatusKeyFilter(statusKey, statuses);
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
@@ -371,6 +416,7 @@ export const constructQueryOptions = ({
 
   const filters = combineFilters([
     statusFilter,
+    statusKeyFilter,
     severityFilter,
     tagsFilter,
     reportersFilter,

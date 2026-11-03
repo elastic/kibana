@@ -17,6 +17,7 @@ import {
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  INTERNAL_CASES_SPACE_SETTINGS_URL,
 } from '../../common/constants';
 import { SortFieldCase } from '../../common/ui/types';
 
@@ -46,7 +47,11 @@ import {
   patchObservable,
   deleteObservable,
   bulkDeleteObservables,
+  getCaseStatuses,
+  putCaseStatuses,
 } from './api';
+import * as customStatuses from '../common/custom_statuses';
+import { DEFAULT_CASE_STATUSES } from '../../common/utils/statuses';
 
 import {
   actionLicenses,
@@ -1539,6 +1544,90 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await bulkDeleteObservables(mockCase.id, observableIds, abortCtrl.signal);
       expect(resp).toEqual(basicCase);
+    });
+  });
+
+  describe('case statuses', () => {
+    const triage = {
+      key: 'triage',
+      label: 'Triage',
+      color: 'accent' as const,
+      category: 'not_started' as const,
+      order: 0,
+      isDefault: false,
+      disabled: false,
+    };
+    const savedStatuses = [
+      { ...DEFAULT_CASE_STATUSES[0], order: 1 },
+      triage,
+      { ...DEFAULT_CASE_STATUSES[1], order: 2 },
+      { ...DEFAULT_CASE_STATUSES[2], order: 3 },
+    ];
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('gets the statuses of the space in admin order', async () => {
+      fetchMock.mockResolvedValue({ statuses: savedStatuses });
+
+      const statuses = await getCaseStatuses({ signal: abortCtrl.signal });
+
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_CASES_SPACE_SETTINGS_URL, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+      });
+      expect(statuses.map(({ key }) => key)).toEqual(['triage', 'open', 'in-progress', 'closed']);
+    });
+
+    it('falls back to the default statuses when the space has none', async () => {
+      fetchMock.mockResolvedValue({ statuses: [] });
+
+      expect(await getCaseStatuses({})).toEqual(DEFAULT_CASE_STATUSES);
+    });
+
+    it('saves the statuses of the space', async () => {
+      fetchMock.mockResolvedValue({ statuses: savedStatuses });
+
+      await putCaseStatuses({ statuses: savedStatuses });
+
+      expect(fetchMock).toHaveBeenCalledWith(INTERNAL_CASES_SPACE_SETTINGS_URL, {
+        method: 'PUT',
+        body: JSON.stringify({ statuses: savedStatuses }),
+        signal: undefined,
+      });
+    });
+
+    it('filters cases by status key when custom statuses are on', async () => {
+      jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(true);
+      fetchMock.mockResolvedValue(allCasesSnake);
+
+      await getCases({
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, statusKey: ['triage'] },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual(
+        expect.objectContaining({ status_key: ['triage'] })
+      );
+    });
+
+    it('ignores the status key filter when custom statuses are off', async () => {
+      jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(false);
+      fetchMock.mockResolvedValue(allCasesSnake);
+
+      await getCases({
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, statusKey: ['triage'] },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(JSON.parse(fetchMock.mock.calls[0][1].body)).not.toHaveProperty('status_key');
     });
   });
 });

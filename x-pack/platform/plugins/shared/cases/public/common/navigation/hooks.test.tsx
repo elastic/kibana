@@ -20,6 +20,7 @@ import {
   useCaseViewNavigation,
 } from './hooks';
 import { CasesDeepLinkId } from './deep_links';
+import * as topLevelApp from '../top_level_app';
 
 const useNavigationMock = useNavigation as jest.Mock;
 jest.mock('../lib/kibana');
@@ -201,6 +202,46 @@ describe('hooks', () => {
       });
 
       expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: APP_ID, path: '/test' });
+    });
+  });
+
+  describe('with the top-level Cases app', () => {
+    beforeEach(() => {
+      jest.spyOn(topLevelApp, 'isTopLevelAppEnabled').mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('navigates to the cases app whatever app is current', () => {
+      const { result } = renderHook(() => useCaseViewNavigation(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.navigateToCaseView({ detailName: 'test' });
+      });
+
+      expect(useNavigationMock).toHaveBeenCalledWith('cases');
+      expect(navigateTo).toHaveBeenCalledWith({ deepLinkId: undefined, path: '/test' });
+    });
+
+    it('builds list URLs without the host app deep link', () => {
+      const { result } = renderHook(() => useAllCasesNavigation(), {
+        wrapper: ({ children }: React.PropsWithChildren<{}>) => (
+          <TestProviders>{children}</TestProviders>
+        ),
+      });
+
+      act(() => {
+        result.current.getAllCasesUrl(false);
+      });
+
+      expect(useNavigationMock).toHaveBeenCalledWith('cases');
+      expect(getAppUrl).toHaveBeenCalledWith({ absolute: false, deepLinkId: undefined, path: '/' });
     });
   });
 });

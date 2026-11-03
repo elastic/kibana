@@ -25,6 +25,8 @@ import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
 export class ProductFeatures {
   private featuresSetup?: FeaturesPluginSetup;
+  private transformFeature: (feature: KibanaFeatureConfig) => KibanaFeatureConfig = (feature) =>
+    feature;
   private readonly groupVersions: Map<ProductFeatureGroup, ProductFeatureParams[]>;
   private readonly registeredActions: Set<string>;
 
@@ -42,8 +44,14 @@ export class ProductFeatures {
     this.groupVersions.set(featureGroup, versions);
   }
 
-  public init(featuresSetup: FeaturesPluginSetup) {
+  public init(
+    featuresSetup: FeaturesPluginSetup,
+    transformFeature?: (feature: KibanaFeatureConfig) => KibanaFeatureConfig
+  ) {
     this.featuresSetup = featuresSetup;
+    if (transformFeature) {
+      this.transformFeature = transformFeature;
+    }
   }
 
   public register(
@@ -85,10 +93,12 @@ export class ProductFeatures {
           featureVersion.subFeaturesMap ?? new Map()
         );
 
-        const completeProductFeatureConfig = featureConfigMerger.mergeProductFeatureConfigs(
-          featureVersion.baseKibanaFeature,
-          featureVersion.baseKibanaSubFeatureIds ?? [],
-          filteredConfig
+        const completeProductFeatureConfig = this.transformFeature(
+          featureConfigMerger.mergeProductFeatureConfigs(
+            featureVersion.baseKibanaFeature,
+            featureVersion.baseKibanaSubFeatureIds ?? [],
+            filteredConfig
+          )
         );
 
         this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);

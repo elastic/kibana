@@ -16,6 +16,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation';
 import { CaseViewPage } from './case_view_page';
+import { CaseOwnerScope } from '../cases_context/case_owner_scope';
 import type { CaseViewProps } from './types';
 import { useCasePageViewEbt } from './use_case_page_view_ebt';
 import * as i18n from './translations';
@@ -62,7 +63,9 @@ export const CaseView = React.memo(({ timelineIntegration, refreshRef }: CaseVie
   ) : data ? (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
       {getLegacyUrlConflictCallout()}
-      <CaseViewPage caseData={data.case} refreshRef={refreshRef} />
+      <CaseOwnerScope caseOwner={data.case.owner}>
+        <CaseViewPage caseData={data.case} refreshRef={refreshRef} />
+      </CaseOwnerScope>
     </CasesTimelineIntegrationProvider>
   ) : null;
 });

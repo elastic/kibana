@@ -41,6 +41,7 @@ import {
   getCaseUserActionStats,
   addAttachmentV2,
   updateAttachmentV2,
+  omitStatusKey,
 } from '../../../../common/lib/api';
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -569,7 +570,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(statusUserAction.type).to.eql('status');
         expect(statusUserAction.action).to.eql('update');
-        expect(statusUserAction.payload).to.eql({ status: 'closed' });
+        expect(omitStatusKey(statusUserAction.payload)).to.eql({ status: 'closed' });
       });
 
       it('retrieves only the settings user actions', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -32,7 +32,8 @@ import {
   injectAttachmentIds,
   toCaseAttachmentData,
 } from '../attachments/emit_attachments';
-import { CASES_SOLUTION_CONTEXT_INSTRUCTION } from '../utils/tool_instructions';
+import { getCasesSolutionContextInstruction } from '../utils/tool_instructions';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 
 const emitSearchAttachments = async (
   cases: EnhancedCaseData[],
@@ -55,36 +56,43 @@ const emitSearchAttachments = async (
 // array must stay bounded to avoid resource exhaustion.
 const MAX_ALERT_IDS = 100;
 
-const casesSchema = z.object({
-  mode: z
-    .enum(['get', 'bulk_get', 'similar', 'by_alert', 'search'])
-    .describe(
-      'Required fields per mode:\n' +
-        '- get: case_id\n' +
-        '- bulk_get: case_ids (keep ≤10)\n' +
-        '- similar: similar_to_case_id (+ optional page, perPage)\n' +
-        `- by_alert: alert_ids (max ${MAX_ALERT_IDS}) (+ optional owner)\n` +
-        '- search: owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage'
-    ),
-  ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
-  ...getCasesStepCommonDefinition.inputSchema.partial().shape,
-  ...findCasesStepCommonDefinition.inputSchema.partial().shape,
-  // Custom fields not in any step schema:
-  similar_to_case_id: z
-    .string()
-    .optional()
-    .describe(
-      'Find cases similar to this case ID based on shared observables. Required for similar mode.'
-    ),
-  alert_ids: z
-    .array(z.string().min(1))
-    .max(MAX_ALERT_IDS)
-    .optional()
-    .describe(
-      `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). Required for by_alert mode.`
-    ),
-  // owner, assignees, from, to, search: descriptions inherited from step schemas
-});
+const SEARCH_MODE_FIELDS =
+  'owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage';
+const TOP_LEVEL_SEARCH_MODE_FIELDS =
+  'optional owner (omit to search every case the user can access), search, severity, status, tags, assignees, reporters, category, from, to, searchFields, sortField, sortOrder, page, perPage';
+
+const casesSchema = lazySchema(() =>
+  z.object({
+    mode: z
+      .enum(['get', 'bulk_get', 'similar', 'by_alert', 'search'])
+      .describe(
+        'Required fields per mode:\n' +
+          '- get: case_id\n' +
+          '- bulk_get: case_ids (keep ≤10)\n' +
+          '- similar: similar_to_case_id (+ optional page, perPage)\n' +
+          `- by_alert: alert_ids (max ${MAX_ALERT_IDS}) (+ optional owner)\n` +
+          `- search: ${SEARCH_MODE_FIELDS}`
+      ),
+    ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
+    ...getCasesStepCommonDefinition.inputSchema.partial().shape,
+    ...findCasesStepCommonDefinition.inputSchema.partial().shape,
+    // Custom fields not in any step schema:
+    similar_to_case_id: z
+      .string()
+      .optional()
+      .describe(
+        'Find cases similar to this case ID based on shared observables. Required for similar mode.'
+      ),
+    alert_ids: z
+      .array(z.string().min(1))
+      .max(MAX_ALERT_IDS)
+      .optional()
+      .describe(
+        `Array of alert IDs to find cases containing these alerts (max ${MAX_ALERT_IDS}). Required for by_alert mode.`
+      ),
+    // owner, assignees, from, to, search: descriptions inherited from step schemas
+  })
+);
 
 async function fetchCaseById(
   caseId: string,
@@ -153,21 +161,35 @@ export const searchCasesTool = (
   coreSetup: CoreSetup<CasesServerStartDependencies>,
   getCasesClientFn: (request: KibanaRequest) => Promise<CasesClient>
 ): BuiltinToolDefinition<typeof casesSchema> => {
+  const topLevelAppEnabled = isTopLevelAppEnabled();
   return {
     id: platformCoreTools.cases,
     type: ToolType.builtin,
     description: `Read-only retrieval of Elastic cases (Security / Observability / Stack Management). For writes use \`platform.core.cases.manage\` (CRUD), \`platform.core.cases.manage_attachments\` (comments, alerts, events), or \`platform.core.cases.observables\` (IOCs). To retrieve all attachments use \`platform.core.cases.get_attachments\`.
 
-${CASES_SOLUTION_CONTEXT_INSTRUCTION}
+${getCasesSolutionContextInstruction()}
 
 Modes: \`get\`, \`bulk_get\`, \`similar\`, \`by_alert\`, \`search\`. See \`mode\` field for required inputs.
 
-\`owner\` is required for \`search\` (other modes use specific identifiers instead). Never call this tool multiple times with different \`owner\` values — that's always a bug.
+${
+  topLevelAppEnabled
+    ? '`owner` is optional for `search`: omit it to search every case the user can access.'
+    : "`owner` is required for `search` (other modes use specific identifiers instead). Never call this tool multiple times with different `owner` values — that's always a bug."
+}
 
 \`search\` mode returns one page; default \`perPage\` **10**, max **50**, paginate with \`page\` (1-indexed).
 
 Returns metadata only; for comments/alert/event attachments call \`platform.core.cases.get_attachments\`. Cases auto-render as structured attachments — emit \`<render_attachment id="..." />\` for each ID in \`attachment_ids\` and don't format markdown links to the case in your text.`,
-    schema: casesSchema,
+    schema: topLevelAppEnabled
+      ? casesSchema.extend({
+          mode: casesSchema.shape.mode.describe(
+            casesSchema.shape.mode.description?.replace(
+              SEARCH_MODE_FIELDS,
+              TOP_LEVEL_SEARCH_MODE_FIELDS
+            ) ?? ''
+          ),
+        })
+      : casesSchema,
     annotations: {
       title: 'Search Cases',
       readOnlyHint: true,
@@ -334,7 +356,8 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
           }
 
           case 'search': {
-            if (!owner) {
+            // Every case lives in one app when the top-level app is on, so `owner` only narrows.
+            if (!owner && !topLevelAppEnabled) {
               return createErrorResponse(
                 new Error('owner is required for search mode'),
                 '[Cases Tool] Missing required field',
@@ -350,7 +373,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
               sortOrder: sortOrder ?? 'desc',
               perPage: requestedPerPage,
               page: requestedPage,
-              owner,
+              ...(owner && { owner }),
               ...(search && { search }),
               ...(searchFields && {
                 searchFields: searchFields as CasesFindRequest['searchFields'],

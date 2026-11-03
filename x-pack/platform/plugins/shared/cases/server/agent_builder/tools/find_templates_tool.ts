@@ -13,9 +13,10 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { Owner } from '../../../common/bundled-types.gen';
 import type { CasesClient } from '../../client';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 import {
   CASES_TOOL_TEXT_INSTRUCTION,
-  CASES_SOLUTION_CONTEXT_INSTRUCTION,
+  getCasesSolutionContextInstruction,
 } from '../utils/tool_instructions';
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
@@ -56,12 +57,17 @@ const findTemplatesSchema = z.object({
 export const findTemplatesTool = (
   getCasesClientFn: GetCasesClientFn
 ): BuiltinToolDefinition<typeof findTemplatesSchema> => {
+  // In the top-level Cases app `owner` only narrows: omitted, templates of every owner the user
+  // can read are listed.
+  const topLevelAppEnabled = isTopLevelAppEnabled();
   return {
     id: platformCoreCasesTools.findTemplates,
     type: ToolType.builtin,
-    description: `Look up case templates by name, or list them, to resolve the \`case_template_id\` required by \`${platformCoreCasesTools.manage}\`'s \`create_from_template\` mode.
+    description: `Look up case templates by name, or list them, to resolve the \`case_template_id\` required by \`${
+      platformCoreCasesTools.manage
+    }\`'s \`create_from_template\` mode.
 
-${CASES_SOLUTION_CONTEXT_INSTRUCTION}
+${getCasesSolutionContextInstruction()}
 
 Use \`search\` with the name the user mentioned — it matches as a case-insensitive substring against the template name (also checks description and field names/labels). Omit \`search\` to list all templates for \`owner\`.
 
@@ -75,7 +81,13 @@ Judge uniqueness by the response's \`total\`, not by how many rows are on the cu
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: findTemplatesSchema,
+    schema: topLevelAppEnabled
+      ? (findTemplatesSchema.extend({
+          owner: Owner.optional().describe(
+            'The solution the templates belong to. Omit to list templates of every solution.'
+          ),
+        }) as unknown as typeof findTemplatesSchema)
+      : findTemplatesSchema,
     tags: ['cases'],
     handler: async ({ owner, search, tags, isEnabled, page, perPage }, { request, logger }) => {
       try {
@@ -96,7 +108,7 @@ Judge uniqueness by the response's \`total\`, not by how many rows are on the cu
           search: search ?? '',
           tags: tags ?? [],
           author: [],
-          owner: [owner],
+          owner: owner ? [owner] : [],
           isDeleted: false,
           isEnabled: effectiveIsEnabled,
         });
@@ -124,9 +136,10 @@ Judge uniqueness by the response's \`total\`, not by how many rows are on the cu
         const totalPages = Math.max(1, Math.ceil(total / requestedPerPage));
         let message: string | undefined;
         if (total === 0) {
+          const scope = owner ? ` for owner "${owner}"` : '';
           message = search
-            ? `No templates found matching "${search}" for owner "${owner}".`
-            : `No templates found for owner "${owner}".`;
+            ? `No templates found matching "${search}"${scope}.`
+            : `No templates found${scope}.`;
         } else if (requestedPage < totalPages) {
           message = `Showing page ${requestedPage} of ${totalPages} (${results.length} of ${total} matches). Pass \`page\` to fetch additional pages.`;
         } else if (total > 1) {

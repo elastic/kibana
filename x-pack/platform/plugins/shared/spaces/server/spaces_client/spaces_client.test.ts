@@ -427,6 +427,100 @@ describe('#get', () => {
   });
 });
 
+describe('disabled features consolidated from several categories', () => {
+  const consolidatedFeatures = [
+    {
+      id: 'cases_all',
+      name: 'Cases',
+      app: [],
+      category: { id: 'kibana' },
+      scope: ['spaces', 'security'],
+    },
+    ...(['securitySolution', 'observability'] as const).map((category) => ({
+      deprecated: { notice: 'Use cases_all.' },
+      id: `${category}_cases`,
+      name: `${category} Cases`,
+      app: [],
+      category: { id: category },
+      scope: ['spaces', 'security'],
+      privileges: {
+        all: {
+          savedObject: { all: [], read: [] },
+          ui: [],
+          replacedBy: [{ feature: 'cases_all', privileges: ['all'] }],
+        },
+        read: {
+          savedObject: { all: [], read: [] },
+          ui: [],
+          replacedBy: [{ feature: 'cases_all', privileges: ['read'] }],
+        },
+      },
+    })),
+  ];
+
+  const createClient = (disabledFeatures: string[]) => {
+    const consolidatedFeaturesStart = featuresPluginMock.createStart();
+    consolidatedFeaturesStart.getKibanaFeatures.mockReturnValue(
+      consolidatedFeatures as unknown as KibanaFeature[]
+    );
+    const repository = savedObjectsRepositoryMock.create();
+    repository.get.mockResolvedValue({
+      id: 'space',
+      type: 'space',
+      references: [],
+      attributes: { name: 'space', disabledFeatures },
+    });
+    const client = new SpacesClient(
+      createMockDebugLogger(),
+      createMockConfig(),
+      repository,
+      [],
+      'traditional',
+      consolidatedFeaturesStart,
+      undefined
+    );
+    return { client, repository };
+  };
+
+  const getDisabledFeatures = async (disabledFeatures: string[]) =>
+    (await createClient(disabledFeatures).client.get('space')).disabledFeatures;
+
+  const saveDisabledFeatures = async (stored: string[], incoming: string[]) => {
+    const { client, repository } = createClient(stored);
+    await client.update('space', {
+      id: asSpaceId('space'),
+      name: 'space',
+      disabledFeatures: incoming,
+    });
+    const [[, , attributes]] = repository.update.mock.calls as unknown as Array<
+      [string, string, { disabledFeatures: string[] }]
+    >;
+    return attributes.disabledFeatures;
+  };
+
+  test('keeps a stored one-category choice when the space is saved again', async () => {
+    expect(await saveDisabledFeatures(['observability_cases'], [])).toEqual([
+      'observability_cases',
+    ]);
+  });
+
+  test('stores every replaced feature when the consolidated feature is disabled', async () => {
+    expect((await saveDisabledFeatures([], ['cases_all'])).sort()).toEqual(
+      ['cases_all', 'observability_cases', 'securitySolution_cases'].sort()
+    );
+  });
+
+  test('keeps the consolidated feature enabled when only one category disabled its feature', async () => {
+    expect(await getDisabledFeatures(['observability_cases'])).toEqual([]);
+  });
+
+  test('disables the consolidated feature when every category disabled its feature', async () => {
+    expect(await getDisabledFeatures(['observability_cases', 'securitySolution_cases'])).toEqual([
+      'cases_all',
+    ]);
+  });
+});
+
 describe('#getPersistedFeatureVisibility', () => {
   test('returns stored disabledFeatures for a space', async () => {
     const mockDebugLogger = createMockDebugLogger();

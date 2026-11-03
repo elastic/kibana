@@ -8,6 +8,7 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import {
   FEATURE_ID_V3,
+  FEATURE_ID_V4,
   GENERAL_CASES_OWNER,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
@@ -27,10 +28,15 @@ export type CasesOwners =
  * Permissions for a specific owners can be found by passing an owner array
  */
 export const canUseCases =
-  (capabilities: Partial<ApplicationStart['capabilities']>) =>
+  (capabilities: Partial<ApplicationStart['capabilities']>, topLevelAppEnabled = false) =>
   (
     owners: CasesOwners[] = [OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER, GENERAL_CASES_OWNER]
   ): CasesPermissions => {
+    // The space is the only access boundary: casesV4 grants the same permissions for every owner.
+    if (topLevelAppEnabled) {
+      return getUICapabilities(capabilities[FEATURE_ID_V4]);
+    }
+
     const aggregatedPermissions = owners.reduce<CasesPermissions>(
       // eslint-disable-next-line complexity
       (acc, owner) => {

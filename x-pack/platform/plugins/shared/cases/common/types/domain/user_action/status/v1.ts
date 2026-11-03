@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { CaseCloseReasonSchema, CaseStatusSchema } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const StatusUserActionPayloadSchema = z.object({
-  status: CaseStatusSchema,
-  closeReason: CaseCloseReasonSchema.optional(),
-  syncedAlertCount: z.number().optional(),
-});
+export const StatusUserActionPayloadSchema = lazySchema(() =>
+  z.object({
+    status: CaseStatusSchema,
+    /** The key of the space's status the case moved to; absent on actions recorded before it. */
+    status_key: z.string().optional(),
+    closeReason: CaseCloseReasonSchema.optional(),
+    syncedAlertCount: z.number().optional(),
+  })
+);
 
 export const StatusUserActionSchema = z.object({
   type: z.literal(UserActionTypes.status),

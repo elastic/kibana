@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
-import type { CaseSeverity, CaseStatuses } from '../../../../../../common/types/domain';
+import type { CaseSeverity, CaseStatusDefinition } from '../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../common';
 import type { OnUpdateFields } from '../../../types';
 import { useAllCasesNavigation } from '../../../../../common/navigation';
@@ -22,20 +22,23 @@ import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
 import * as commonI18n from '../../../../../common/translations';
 import { useAddCaseToChat } from '../../../../../agent_builder/use_add_case_to_chat';
+import { getOwnerLabel, isTopLevelAppEnabled } from '../../../../../common/top_level_app';
 import {
+  SOLUTION,
   REPORTED_BY,
   CREATED_ON,
   UNKNOWN_REPORTER,
   EDIT_CASE_NAME_ARIA,
 } from '../../../translations';
 import { getBadges } from '../utils/header_badges';
+import { useCaseStatuses } from '../../../../status/use_case_statuses';
 import { getMenu } from '../utils/header_menu';
 import { useRunCaseWorkflow } from '../../../../workflows/use_run_case_workflow';
 import { RunCaseWorkflowModal } from '../../../../workflows/run_case_workflow_modal';
 
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
-  onStatusChanged: (status: CaseStatuses) => void;
+  onStatusChanged: (status: CaseStatusDefinition) => void;
   onSeverityChanged: (severity: CaseSeverity) => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
@@ -121,36 +124,67 @@ export const useCaseViewHeader = ({
       'data-test-subj': 'case-view-created-at',
     };
 
-    if (typeof caseData.incrementalId === 'number') {
-      return [
-        {
-          type: 'text' as const,
-          label: `#${caseData.incrementalId}`,
-          'data-test-subj': 'case-view-incremental-id',
-        },
-        reportedByItem,
-        createdAtItem,
-      ];
+    const incrementalIdItem =
+      typeof caseData.incrementalId === 'number'
+        ? {
+            type: 'text' as const,
+            label: `#${caseData.incrementalId}`,
+            'data-test-subj': 'case-view-incremental-id',
+          }
+        : undefined;
+
+    if (!isTopLevelAppEnabled()) {
+      return incrementalIdItem
+        ? [incrementalIdItem, reportedByItem, createdAtItem]
+        : [reportedByItem, createdAtItem];
     }
 
-    return [reportedByItem, createdAtItem];
-  }, [caseData.incrementalId, caseData.createdBy, caseData.createdAt, timeZone, dateFormat]);
+    // One app shows every solution's cases, so the case says which solution it comes from. The
+    // header holds three items at most, so the creation date joins the reporter.
+    const solutionItem = {
+      type: 'text' as const,
+      label: SOLUTION(getOwnerLabel(caseData.owner)),
+      'data-test-subj': 'case-view-solution',
+    };
+    const reportedOnItem = { ...reportedByItem, value: CREATED_ON(formattedDate) };
+    return incrementalIdItem
+      ? [incrementalIdItem, solutionItem, reportedOnItem]
+      : [solutionItem, reportedOnItem];
+  }, [
+    caseData.incrementalId,
+    caseData.owner,
+    caseData.createdBy,
+    caseData.createdAt,
+    timeZone,
+    dateFormat,
+  ]);
 
   // Back
   const backHref = useMemo(() => getAllCasesUrl(), [getAllCasesUrl]);
 
   // Badges
-  const badges = useMemo(
-    () =>
-      getBadges({
-        caseData,
-        isStatusMenuDisabled,
-        isSeverityMenuDisabled,
-        onStatusChanged,
-        onSeverityChanged,
-      }),
-    [caseData, isStatusMenuDisabled, isSeverityMenuDisabled, onStatusChanged, onSeverityChanged]
-  );
+  const { getStatus, getPickableStatuses } = useCaseStatuses();
+  const badges = useMemo(() => {
+    const currentStatus = getStatus(caseData);
+
+    return getBadges({
+      caseData,
+      currentStatus,
+      statusOptions: getPickableStatuses(currentStatus),
+      isStatusMenuDisabled,
+      isSeverityMenuDisabled,
+      onStatusChanged,
+      onSeverityChanged,
+    });
+  }, [
+    caseData,
+    getStatus,
+    getPickableStatuses,
+    isStatusMenuDisabled,
+    isSeverityMenuDisabled,
+    onStatusChanged,
+    onSeverityChanged,
+  ]);
 
   // Menu
   const currentExternalIncident = useMemo(

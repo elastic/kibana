@@ -8,17 +8,21 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
+import type { CaseStatusDefinition } from '../../../common/types/domain';
 import { CaseStatuses, caseStatuses } from '../../../common/types/domain';
+import { STATUS_TO_CATEGORY } from '../../../common/utils/statuses';
 import { useCloseCaseModal } from '../all_cases/hooks/use_close_case_modal';
 import { useCanSyncCloseReasonToAlerts } from '../all_cases/hooks/use_can_sync_close_reason_to_alerts';
 import { statuses } from './config';
+import { useCaseStatuses } from './use_case_statuses';
+import * as i18n from './translations';
 
 interface Props {
   status: CaseStatuses;
   totalAlerts: number;
   syncAlertsEnabled: boolean;
   isLoading: boolean;
-  onStatusChanged: (status: CaseStatuses, closeReason?: string) => void;
+  onStatusChanged: (status: CaseStatusDefinition, closeReason?: string) => void;
 }
 
 // Rotate over the statuses. open -> in-progress -> closes -> open...
@@ -31,19 +35,10 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   onStatusChanged,
   isLoading,
 }) => {
+  const { isCustomStatusesEnabled, getCategoryDefaultStatus } = useCaseStatuses();
   const canSyncCloseReasonToAlerts = useCanSyncCloseReasonToAlerts({
     totalAlerts,
     syncAlertsEnabled,
-  });
-  const onCloseCase = useCallback(
-    (closeReason?: string) => {
-      onStatusChanged(CaseStatuses.closed, closeReason);
-    },
-    [onStatusChanged]
-  );
-  const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
-    canSyncCloseReasonToAlerts,
-    onCloseCase,
   });
 
   const indexOfCurrentStatus = useMemo(
@@ -52,24 +47,37 @@ const StatusActionButtonComponent: React.FC<Props> = ({
   );
   const nextStatusIndex = useMemo(() => getNextItem(indexOfCurrentStatus), [indexOfCurrentStatus]);
   const nextStatus = caseStatuses[nextStatusIndex];
+  // The button moves the case to the next lifecycle stage, landing on its first status.
+  const target = getCategoryDefaultStatus(STATUS_TO_CATEGORY[nextStatus]);
+
+  const onCloseCase = useCallback(
+    (closeReason?: string) => {
+      onStatusChanged(target, closeReason);
+    },
+    [onStatusChanged, target]
+  );
+  const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
+    canSyncCloseReasonToAlerts,
+    onCloseCase,
+  });
 
   const onClick = useCallback(() => {
     if (nextStatus === CaseStatuses.closed) {
       openCloseCaseModal();
     } else {
-      onStatusChanged(nextStatus);
+      onStatusChanged(target);
     }
-  }, [nextStatus, onStatusChanged, openCloseCaseModal]);
+  }, [nextStatus, onStatusChanged, openCloseCaseModal, target]);
 
   return (
     <>
       <EuiButton
         data-test-subj="case-view-status-action-button"
-        iconType={statuses[caseStatuses[nextStatusIndex]].icon}
+        iconType={statuses[nextStatus].icon}
         isLoading={isLoading}
         onClick={onClick}
       >
-        {statuses[caseStatuses[nextStatusIndex]].button.label}
+        {isCustomStatusesEnabled ? i18n.MARK_AS(target.label) : statuses[nextStatus].button.label}
       </EuiButton>
       {closeCaseModal}
     </>

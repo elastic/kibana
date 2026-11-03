@@ -53,8 +53,8 @@ import { parseFieldDefinitionsToInlineFields } from '../../../common/utils';
 import { enrichCasesWithFieldLabels } from './utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
-import { getOwnersFilter } from '../../authorization/utils';
 import {
+  OWNERS,
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   MAX_ATTACHMENT_ID_LENGTH,
@@ -64,6 +64,7 @@ import {
   MAX_CONCURRENT_SEARCHES,
   MAX_OWNER_LENGTH,
 } from '../../../common/constants';
+import { getOwnersFilter } from '../../authorization/utils';
 import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
@@ -73,6 +74,7 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseSchema, CaseStatusSchema } from '../../../common/types/domain';
+import { getStatusKeyField } from '../../common/custom_statuses';
 
 export const CasesByAttachmentIDsRequestSchema = z.object({
   /**
@@ -224,6 +226,7 @@ export const getCasesByAlertID = async (
       title: caseInfo.attributes.title,
       description: caseInfo.attributes.description,
       status: caseInfo.attributes.status,
+      ...getStatusKeyField(caseInfo.attributes.status_key),
       createdAt: caseInfo.attributes.created_at,
       totals: getAttachmentTotalsForCaseId(caseInfo.id, commentStats),
     }));
@@ -647,5 +650,33 @@ export async function getCategories(
     return decodeOrThrowZod(GetCategoriesResponseSchema)(categories);
   } catch (error) {
     throw createCaseError({ message: `Failed to get categories: ${error}`, error, logger });
+  }
+}
+
+/**
+ * The owners (solutions) that exist in this deployment that the user can read, create cases in, and
+ * manage settings for.
+ */
+export interface AvailableOwners {
+  owners: string[];
+  createOwners: string[];
+  settingsOwners: string[];
+}
+
+export async function getAvailableOwners(clientArgs: CasesClientArgs): Promise<AvailableOwners> {
+  const { logger, authorization } = clientArgs;
+
+  try {
+    const [owners, createOwners, settingsOwners] = await Promise.all(
+      [Operations.getCase, Operations.createCase, Operations.updateConfiguration].map(
+        async (operation) => {
+          const authorized = await authorization.getAvailableOwners(operation);
+          return OWNERS.filter((owner) => authorized.includes(owner));
+        }
+      )
+    );
+    return { owners, createOwners, settingsOwners };
+  } catch (error) {
+    throw createCaseError({ message: `Failed to get available owners: ${error}`, error, logger });
   }
 }

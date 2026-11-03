@@ -7,9 +7,14 @@
 
 import { AttachmentTypeRegistry } from '../../../common/registry';
 import type { RegisteredUnifiedAttachmentType } from './types';
+import { withAttachmentProviders } from './with_providers';
 
 export class UnifiedAttachmentTypeRegistry extends AttachmentTypeRegistry<RegisteredUnifiedAttachmentType> {
   constructor() {
     super('UnifiedAttachmentTypeRegistry');
+  }
+
+  public register(item: RegisteredUnifiedAttachmentType) {
+    super.register(withAttachmentProviders(item));
   }
 }

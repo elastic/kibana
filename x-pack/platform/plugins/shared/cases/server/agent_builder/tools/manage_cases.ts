@@ -32,7 +32,7 @@ import type { CasesClient } from '../../client';
 import { invokeStepHandler } from '../utils/invoke_step';
 import {
   CASES_TOOL_TEXT_INSTRUCTION,
-  CASES_SOLUTION_CONTEXT_INSTRUCTION,
+  getCasesSolutionContextInstruction,
 } from '../utils/tool_instructions';
 import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_attachments';
 
@@ -134,7 +134,7 @@ export const manageCasesTool = (
     type: ToolType.builtin,
     description: `Cases CRUD + assign/tags/custom fields${
       isTemplatesEnabled ? '/extended fields' : ''
-    }. Modes: ${modesDescription}. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    }. Modes: ${modesDescription}. See \`mode\` field for required inputs.\n\n${getCasesSolutionContextInstruction()}${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
       title: 'Manage Cases',
       readOnlyHint: false,

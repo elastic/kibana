@@ -20,36 +20,42 @@ export interface CasesLocatorParams extends CasesOverviewLocatorParams {
 }
 
 export const CASE_DETAIL_PATH = '/app/observability/cases';
+const TOP_LEVEL_CASES_PATH = '/app/cases';
 
-export const CaseDetailsLocatorDefinition = (): LocatorDefinition<CasesLocatorParams> => ({
+interface CasesLocatorOptions {
+  /** Cases runs as the single top-level app at `/app/cases`. */
+  topLevelAppEnabled?: boolean;
+}
+
+const getCasesLocation = (
+  { spaceId, basePath }: CasesOverviewLocatorParams,
+  { topLevelAppEnabled = false }: CasesLocatorOptions
+) => {
+  const casesPath = topLevelAppEnabled ? TOP_LEVEL_CASES_PATH : CASE_DETAIL_PATH;
+  return {
+    app: topLevelAppEnabled ? 'cases' : 'observability',
+    path: spaceId
+      ? addSpaceIdToPath(basePath ?? '', spaceId, casesPath)
+      : (basePath ?? '') + casesPath,
+  };
+};
+
+export const CaseDetailsLocatorDefinition = (
+  options: CasesLocatorOptions = {}
+): LocatorDefinition<CasesLocatorParams> => ({
   id: casesDetailLocatorID,
   getLocation: async (params: CasesLocatorParams) => {
-    const { spaceId, basePath, caseId } = params;
-    const path = (
-      spaceId
-        ? addSpaceIdToPath(basePath ?? '', spaceId, CASE_DETAIL_PATH)
-        : (basePath ?? '') + CASE_DETAIL_PATH
-    ).concat('/', caseId);
-    return {
-      app: 'observability',
-      path,
-      state: {},
-    };
+    const { app, path } = getCasesLocation(params, options);
+    return { app, path: path.concat('/', params.caseId), state: {} };
   },
 });
 
-export const CasesOverviewLocatorDefinition =
-  (): LocatorDefinition<CasesOverviewLocatorParams> => ({
-    id: casesOverviewLocatorID,
-    getLocation: async (params: CasesOverviewLocatorParams) => {
-      const { spaceId, basePath } = params;
-      const path = spaceId
-        ? addSpaceIdToPath(basePath ?? '', spaceId, CASE_DETAIL_PATH)
-        : (basePath ?? '') + CASE_DETAIL_PATH;
-      return {
-        app: 'observability',
-        path,
-        state: {},
-      };
-    },
-  });
+export const CasesOverviewLocatorDefinition = (
+  options: CasesLocatorOptions = {}
+): LocatorDefinition<CasesOverviewLocatorParams> => ({
+  id: casesOverviewLocatorID,
+  getLocation: async (params: CasesOverviewLocatorParams) => ({
+    ...getCasesLocation(params, options),
+    state: {},
+  }),
+});

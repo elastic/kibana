@@ -43,7 +43,13 @@ import type {
   UserActions,
 } from '../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
-import type { CaseUI, ExtendedFieldFilter, FilterOptions, UpdateByKey } from './types';
+import type {
+  CaseUI,
+  CasesFilterOptions,
+  ExtendedFieldFilter,
+  FilterOptions,
+  UpdateByKey,
+} from './types';
 import * as i18n from './translations';
 import type { CustomFieldFactoryFilterOption } from '../components/custom_fields/types';
 
@@ -188,6 +194,9 @@ export const constructReportersFilter = (reporters: User[]) => {
       }
     : {};
 };
+
+/** The status keys a cases list filters by. */
+export const getStatusKeyFilter = ({ statusKey }: CasesFilterOptions): string[] => statusKey ?? [];
 
 export const constructCustomFieldsFilter = (
   optionKeysByCustomFieldKey: FilterOptions['customFields']

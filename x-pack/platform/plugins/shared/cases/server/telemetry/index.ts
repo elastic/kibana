@@ -16,6 +16,7 @@ import {
   CASES_TELEMETRY_TASK_NAME,
   CASE_TELEMETRY_SAVED_OBJECT_ID,
   CASE_RULES_SAVED_OBJECT,
+  CASES_SPACE_SETTINGS_SAVED_OBJECT,
 } from '../../common/constants';
 import type { CasesTelemetry } from './types';
 import { casesSchema } from './schema';
@@ -47,6 +48,7 @@ export const createCasesTelemetry = ({
       ...getSavedObjectsTypes({ templates: templatesConfig }),
       FILE_SO_TYPE,
       CASE_RULES_SAVED_OBJECT,
+      CASES_SPACE_SETTINGS_SAVED_OBJECT,
     ]);
 
     // Wrapping the internalRepository with the `TelemetrySavedObjectsClient`

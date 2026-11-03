@@ -25,6 +25,7 @@ import { bulkCreate } from './bulk_create';
 import { CaseSeverity, ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 import type { CaseCustomFields } from '../../../common/types/domain';
+import { setCustomStatusesEnabled } from '../../common/custom_statuses';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -2314,6 +2315,45 @@ describe('bulkCreate', () => {
       const bulkCreateCall =
         clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0];
       expect(bulkCreateCall.settings.extractObservables).toBe(true);
+    });
+  });
+  describe('Custom statuses', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      setCustomStatusesEnabled(true);
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO, { ...caseSO, id: 'mock-id-2' }],
+      });
+    });
+
+    afterAll(() => {
+      setCustomStatusesEnabled(false);
+    });
+
+    it('loads the space statuses once and resolves each case', async () => {
+      await bulkCreate(
+        { cases: [getCases()[0], { ...getCases()[0], status_key: 'open' }] },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.spaceSettingsService.getStatuses).toHaveBeenCalledTimes(1);
+      const { cases } = clientArgs.services.caseService.bulkCreateCases.mock.calls[0][0];
+      expect(cases.map(({ status_key: statusKey }) => statusKey)).toEqual(['open', 'open']);
+    });
+
+    it('rejects a status_key while custom statuses are off', async () => {
+      setCustomStatusesEnabled(false);
+
+      await expect(
+        bulkCreate(
+          { cases: [{ ...getCases()[0], status_key: 'open' }] },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow('Custom statuses are turned off.');
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
     });
   });
 });

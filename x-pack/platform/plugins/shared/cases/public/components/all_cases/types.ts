@@ -7,6 +7,7 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { FilterOptions, QueryParams, SortOrder } from '../../../common/ui';
+import type { CasesFilterOptions } from '../../containers/types';
 import type { AllCasesURLQueryParamsSchema } from './schema';
 
 export interface FilterConfigState {
@@ -54,12 +55,12 @@ export interface CasesColumnSelection {
 }
 
 type SupportedFilterOptionsInURL = Pick<
-  FilterOptions,
-  'search' | 'severity' | 'status' | 'tags' | 'assignees' | 'category'
+  CasesFilterOptions,
+  'search' | 'severity' | 'status' | 'statusKey' | 'tags' | 'assignees' | 'category'
 >;
 
 export interface AllCasesTableState {
-  filterOptions: FilterOptions;
+  filterOptions: CasesFilterOptions;
   queryParams: QueryParams;
 }
 

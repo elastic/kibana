@@ -58,6 +58,8 @@ import {
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
 
+const STATUS_KEY_FIELD = 'status_key';
+
 export class UserActionPersister {
   private static readonly userActionFieldsAllowed: Set<string> = new Set(
     Object.keys(UserActionTypes)
@@ -96,19 +98,34 @@ export class UserActionPersister {
       // action already records are suppressed (#282474) — see getSuppressedCustomFieldKeys.
       const suppressedCustomFieldKeys = this.getSuppressedCustomFieldKeys(updatedCase);
 
+      const { status: updatedStatus, status_key: updatedStatusKey } = updatedCase.updatedAttributes;
+      const hasStatusChange = updatedStatus != null || updatedStatusKey != null;
+      let statusUserActionBuilt = false;
+
       updatedFields
-        .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
+        .filter(
+          (field) =>
+            UserActionPersister.userActionFieldsAllowed.has(field) ||
+            (field === STATUS_KEY_FIELD && hasStatusChange)
+        )
         .forEach((field) => {
           // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
-          // Persist the closeReason to the status userAction
-          if (field === UserActionTypes.status && updatedCase.updatedAttributes.status != null) {
+          // Persist the closeReason to the status userAction. A move between two statuses of the
+          // same category only changes `status_key`, and still records one status user action.
+          if ((field === UserActionTypes.status || field === STATUS_KEY_FIELD) && hasStatusChange) {
+            if (statusUserActionBuilt) {
+              return;
+            }
+            statusUserActionBuilt = true;
+
             const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.status);
             const statusUserAction = userActionBuilder?.build({
               caseId,
               owner,
               user,
               payload: {
-                status: updatedCase.updatedAttributes.status,
+                status: updatedStatus ?? originalCase.attributes.status,
+                status_key: updatedStatusKey,
                 closeReason: updatedCase.closeReason,
                 syncAlerts:
                   updatedCase.updatedAttributes.settings?.syncAlerts ??

@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { Status } from '@kbn/cases-components/src/status/status';
+import { CaseStatusBadge } from '../../../status/case_status_badge';
 
 import type { CaseUI } from '../../../../../common/ui/types';
 import type { CasesColumnSelection } from '../../types';
@@ -31,6 +31,7 @@ import { useCaseViewNavigation } from '../../../../common/navigation/hooks';
 import { ActionColumnComponent as ActionColumn } from '../../hooks/use_actions';
 import { severities } from '../../../severity/config';
 import { CASE_DETAILS_LINK_ARIA } from '../../../links/translations';
+import { getOwnerLabel, isTopLevelAppEnabled } from '../../../../common/top_level_app';
 import * as i18n from '../../translations';
 
 const LIST_ITEM_HEIGHT = 80;
@@ -244,7 +245,7 @@ export const CaseListItem: React.FC<{
                         </EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <Status status={theCase.status} />
+                        <CaseStatusBadge theCase={theCase} />
                       </EuiFlexItem>
                       {theCase.totalAlerts > 0 && (
                         <EuiFlexItem grow={false}>
@@ -302,6 +303,17 @@ export const CaseListItem: React.FC<{
                           </EuiFlexItem>
                         )}
                       </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )}
+                  {isTopLevelAppEnabled() && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued" data-test-subj="cases-list-item-solution">
+                        <span css={styles.labelSpan}>
+                          {i18n.LIST_SOLUTION}
+                          {':'}
+                        </span>{' '}
+                        {getOwnerLabel(theCase.owner)}
+                      </EuiText>
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem grow={false}>

@@ -135,6 +135,13 @@ properties:
     $ref: 'case_severity.yaml'
   status:
     $ref: 'case_status.yaml'
+  status_key:
+    type: string
+    description: >
+      The key of the space status the case is in. `status` holds its category. Null for cases
+      that were never set to a status by key; they are in their category's default status.
+    nullable: true
+    example: awaiting_customer
   tags:
     type: array
     items:

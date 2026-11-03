@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseDetailsLocatorDefinition } from './cases';
+import { CaseDetailsLocatorDefinition, CasesOverviewLocatorDefinition } from './cases';
 
 describe('CaseDetailsLocatorDefinition', () => {
   it('should generate the correct URL path for a case without spaceId', async () => {
@@ -50,5 +50,25 @@ describe('CaseDetailsLocatorDefinition', () => {
     expect(app).toBe('observability');
     expect(path).toBe(`/app/observability/cases/${caseId}`);
     expect(state).toEqual({});
+  });
+});
+
+describe('cases locators with the top-level Cases app', () => {
+  it('points a case at /app/cases', async () => {
+    const { app, path } = await CaseDetailsLocatorDefinition({
+      topLevelAppEnabled: true,
+    }).getLocation({ caseId: 'abc', spaceId: 'my-space' });
+
+    expect(app).toBe('cases');
+    expect(path).toBe('/s/my-space/app/cases/abc');
+  });
+
+  it('points the overview at /app/cases', async () => {
+    const { app, path } = await CasesOverviewLocatorDefinition({
+      topLevelAppEnabled: true,
+    }).getLocation({});
+
+    expect(app).toBe('cases');
+    expect(path).toBe('/app/cases');
   });
 });

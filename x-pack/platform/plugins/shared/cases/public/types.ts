@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, IToasts } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart, IToasts } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';
@@ -14,7 +14,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
@@ -112,7 +112,7 @@ export interface CasesPublicStartDependencies {
 export type StartServices = CoreStart & CasesPublicStartDependencies;
 
 export interface RenderAppProps {
-  mountParams: ManagementAppMountParams;
+  mountParams: Pick<AppMountParameters, 'element' | 'history'>;
   coreStart: CoreStart;
   pluginsStart: CasesPublicStartDependencies;
   storage: Storage;
@@ -122,6 +122,10 @@ export interface RenderAppProps {
 
 export interface CasesPublicSetup {
   attachmentFramework: AttachmentFramework;
+  config: {
+    /** Cases runs as the single top-level app at `/app/cases`. */
+    topLevelAppEnabled: boolean;
+  };
 }
 
 export interface CasesPublicStart {
@@ -130,6 +134,9 @@ export interface CasesPublicStart {
     attachmentsEnabled: boolean;
     chatEnabled: boolean;
     runWorkflowsEnabled: boolean;
+    /** Cases runs as the single top-level app at `/app/cases`. */
+    topLevelAppEnabled: boolean;
+    customStatusesEnabled: boolean;
   };
   api: {
     getRelatedCases: (

@@ -18,6 +18,7 @@ import type { CaseRoute } from './types';
 import { bulkGetAttachmentsRoute } from './internal/bulk_get_attachments';
 import { bulkDeleteAttachmentsRoute } from './internal/bulk_delete_attachments';
 import { getCaseUsersRoute } from './internal/get_case_users';
+import { getAvailableOwnersRoute } from './internal/get_available_owners';
 import { bulkDeleteFileAttachments } from './internal/bulk_delete_file_attachments';
 import { getCategoriesRoute } from './cases/categories/get_categories';
 import { getCaseMetricRoute } from './internal/get_case_metrics';
@@ -35,6 +36,7 @@ import type { ConfigType } from '../../config';
 import { getTemplateRoutes } from './templates';
 import { getFieldDefinitionRoutes } from './field_definitions';
 import { createRunWorkflowRoute } from './internal/run_workflow';
+import { getSpaceSettingsRoute, putSpaceSettingsRoute } from './internal/space_settings';
 
 export const getInternalRoutes = (
   userProfileService: UserProfileService,
@@ -54,6 +56,7 @@ export const getInternalRoutes = (
     bulkGetAttachmentsRoute,
     bulkDeleteAttachmentsRoute,
     getCaseUsersRoute,
+    getAvailableOwnersRoute,
     bulkDeleteFileAttachments,
     getCategoriesRoute,
     getCaseMetricRoute,
@@ -67,6 +70,8 @@ export const getInternalRoutes = (
     similarCaseRoute,
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
+    getSpaceSettingsRoute,
+    putSpaceSettingsRoute,
     ...getTemplateRoutes(config),
     ...getFieldDefinitionRoutes(config),
     ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),

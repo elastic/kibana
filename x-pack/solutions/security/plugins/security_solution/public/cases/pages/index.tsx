@@ -6,9 +6,10 @@
  */
 
 import React, { Suspense, lazy, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { CASES_APP_ID, CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useDispatch } from 'react-redux-v7';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import type { SelectTimelineModalProps } from '@kbn/cases-plugin/public';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
 import { TimelineId } from '../../../common/types/timeline';
@@ -107,4 +108,24 @@ const CaseContainerComponent: React.FC = () => {
   );
 };
 
-export const Cases = React.memo(CaseContainerComponent);
+/** Sends old Security Cases links to the same page of the top-level Cases app. */
+const RedirectToCasesApp: React.FC = () => {
+  const { application } = useKibana().services;
+  const { pathname, search, hash } = useLocation();
+
+  useEffect(() => {
+    void application.navigateToApp(CASES_APP_ID, {
+      path: `${pathname.replace(new RegExp(`^${CASES_PATH}`), '')}${search}${hash}`,
+      replace: true,
+    });
+  }, [application, pathname, search, hash]);
+
+  return null;
+};
+
+const CasesComponent: React.FC = () => {
+  const { cases } = useKibana().services;
+  return cases.config.topLevelAppEnabled ? <RedirectToCasesApp /> : <CaseContainerComponent />;
+};
+
+export const Cases = React.memo(CasesComponent);

@@ -10,6 +10,7 @@ import type { z } from '@kbn/zod/v4';
 import { UnifiedAttachmentBoundsSchema } from '../../../common/types/api/attachment/v2';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { isTypeAllowedForOwner } from '../../../common/utils/attachments';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 
 const summarizeIssues = (error: z.ZodError): string =>
@@ -51,9 +52,10 @@ export const validateUnifiedAttachments = ({
     );
   }
 
-  // A solution-scoped type renders with that solution's providers; under another owner it
-  // passes schema validation but crashes the case view.
-  if (!isTypeAllowedForOwner(query.type, query.owner)) {
+  // A solution-scoped type renders with that solution's providers. In the per-solution apps a
+  // case only had its own solution's providers, so other types crashed its view; the top-level
+  // app wraps each attachment in its type's providers, so any solution can attach to any case.
+  if (!isTopLevelAppEnabled() && !isTypeAllowedForOwner(query.type, query.owner)) {
     throw Boom.badRequest(
       `Attachment type ${query.type} cannot be attached to a case with owner ${query.owner}.`
     );

@@ -7,11 +7,17 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusActionButton } from './button';
 import { TestProviders } from '../../common/mock';
 import * as i18n from '../all_cases/translations';
+import type { CaseStatusDefinition } from '../../../common/types/domain';
+import { DEFAULT_CASE_STATUSES } from '../../../common/utils/statuses';
+import * as customStatuses from '../../common/custom_statuses';
+import * as api from '../../containers/api';
 
 describe('StatusActionButton', () => {
   const onStatusChanged = jest.fn();
@@ -70,7 +76,9 @@ describe('StatusActionButton', () => {
         .find(`button[data-test-subj="case-view-status-action-button"]`)
         .first()
         .simulate('click');
-      expect(onStatusChanged).toHaveBeenCalledWith('in-progress');
+      expect(onStatusChanged).toHaveBeenCalledWith(
+        expect.objectContaining({ key: 'in-progress', category: 'active' })
+      );
     });
 
     it('rotates correctly to closed when status is in-progress', () => {
@@ -88,7 +96,10 @@ describe('StatusActionButton', () => {
         .find('button')
         .filterWhere((node) => node.text() === i18n.CLOSE_CASE_MODAL_CONFIRM)
         .simulate('click');
-      expect(onStatusChanged).toHaveBeenLastCalledWith('closed', undefined);
+      expect(onStatusChanged).toHaveBeenLastCalledWith(
+        expect.objectContaining({ key: 'closed', category: 'done' }),
+        undefined
+      );
     });
 
     it('rotates correctly to open when status is closed', () => {
@@ -98,7 +109,56 @@ describe('StatusActionButton', () => {
         .find(`button[data-test-subj="case-view-status-action-button"]`)
         .first()
         .simulate('click');
-      expect(onStatusChanged).toHaveBeenCalledWith('open');
+      expect(onStatusChanged).toHaveBeenCalledWith(
+        expect.objectContaining({ key: 'open', category: 'not_started' })
+      );
+    });
+  });
+
+  describe('with custom statuses', () => {
+    const waiting: CaseStatusDefinition = {
+      key: 'waiting',
+      label: 'Waiting',
+      color: 'accent',
+      category: 'active',
+      order: 1,
+      isDefault: false,
+      disabled: false,
+    };
+    const parked: CaseStatusDefinition = { ...waiting, key: 'parked', label: 'Parked', order: 0 };
+
+    beforeEach(() => {
+      jest.spyOn(customStatuses, 'isCustomStatusesEnabled').mockReturnValue(true);
+      // A non-default status and a disabled one come first; the button targets the default.
+      jest
+        .spyOn(api, 'getCaseStatuses')
+        .mockResolvedValue([
+          { ...DEFAULT_CASE_STATUSES[0], order: 2 },
+          { ...parked, disabled: true },
+          waiting,
+          { ...DEFAULT_CASE_STATUSES[1], order: 3 },
+          { ...DEFAULT_CASE_STATUSES[2], order: 4 },
+        ]);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('moves the case to the default status of the next stage', async () => {
+      render(
+        <TestProviders>
+          <StatusActionButton {...defaultProps} />
+        </TestProviders>
+      );
+
+      expect(
+        await screen.findByRole('button', { name: 'Mark as In progress' })
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('case-view-status-action-button'));
+
+      expect(onStatusChanged).toHaveBeenCalledWith(expect.objectContaining({ key: 'in-progress' }));
     });
   });
 });

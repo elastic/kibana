@@ -6,11 +6,15 @@
  */
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { GENERAL_CASES_OWNER, OWNER_INFO } from '../../../common/constants';
+import { CASES_APP_ID, GENERAL_CASES_OWNER, OWNER_INFO } from '../../../common/constants';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 import type { CaseAttachmentData } from '../../../common/types/agent_builder/attachment_schemas';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
-const getOwnerInfo = (owner: string) => {
+const getOwnerInfo = (owner: string): { appId: string; casesBasePath: string } => {
+  if (isTopLevelAppEnabled()) {
+    return { appId: CASES_APP_ID, casesBasePath: '' };
+  }
   const info = (OWNER_INFO as Record<string, { appId: string; casesBasePath: string }>)[owner];
   return info ?? OWNER_INFO[GENERAL_CASES_OWNER];
 };

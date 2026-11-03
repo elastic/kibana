@@ -1,0 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createTestConfig } from '../common/config';
+
+// The common suite (RBAC per owner, files, alerts sync, push) with both kill switches pinned
+// off. See `config_trial_legacy_cases.ts`.
+export default createTestConfig('security_and_spaces', {
+  license: 'trial',
+  ssl: true,
+  testFiles: [require.resolve('./tests/common/index_common_trial')],
+  publicBaseUrl: true,
+  kbnServerArgs: [
+    '--xpack.cases.topLevelApp.enabled=false',
+    '--xpack.cases.customStatuses.enabled=false',
+  ],
+});

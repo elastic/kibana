@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/public';
 import { AppStatus, type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
+import { FEATURE_ID_V4 } from '@kbn/cases-plugin/common';
 import { casesFeatureId } from '../../common';
 
 /** Capability-based Observability access — pricing tiers do not affect this. */
@@ -37,8 +38,13 @@ export function hasObservabilityCapabilities(capabilities: Capabilities): boolea
   }).some(Boolean);
 }
 
+// casesV4 is only registered when the top-level Cases app is on, and then the Observability
+// Cases feature is deprecated, so its capabilities no longer reach the browser.
+const isTopLevelCasesApp = (capabilities: Capabilities): boolean =>
+  capabilities[FEATURE_ID_V4] != null;
+
 function hasAccessToCases(capabilities: Capabilities): boolean {
-  return Boolean(capabilities[casesFeatureId]?.read_cases);
+  return Boolean((capabilities[FEATURE_ID_V4] ?? capabilities[casesFeatureId])?.read_cases);
 }
 
 export function updateGlobalNavigation({
@@ -69,7 +75,10 @@ export function updateGlobalNavigation({
           if (hasCasesAccess) {
             return {
               ...link,
-              visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+              // The top-level Cases app has its own nav entry; this route only redirects to it.
+              visibleIn: isTopLevelCasesApp(capabilities)
+                ? []
+                : ['classicSideNav', 'projectSideNav', 'globalSearch'],
             };
           }
           return null;

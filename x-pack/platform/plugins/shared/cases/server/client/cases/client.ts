@@ -7,7 +7,6 @@
 
 import type { Case, CaseCustomField, User } from '../../../common/types/domain';
 import type {
-  CasePostRequest,
   CasesFindResponse,
   CasesSearchResponse,
   CaseResolveResponse,
@@ -35,10 +34,12 @@ import type { CasesClientInternal } from '../client_internal';
 import type { CasesClientArgs } from '../types';
 import { bulkGet } from './bulk_get';
 import { create } from './create';
+import type { CasePostRequestWithOptionalOwner } from './resolve_owner';
 import { deleteCases } from './delete';
 import { search } from './search';
 import { find } from './find';
 import type {
+  AvailableOwners,
   CasesByAlertIDParams,
   CasesByAttachmentIDsRequest,
   GetCaseIDsByAttachmentIDsResponse,
@@ -52,6 +53,7 @@ import {
   getReporters,
   getTags,
   getCategories,
+  getAvailableOwners,
 } from './get';
 import type { PushParams } from './push';
 import { push } from './push';
@@ -80,7 +82,11 @@ export interface CasesSubClient {
   /**
    * Creates a case.
    */
-  create(data: CasePostRequest): Promise<Case>;
+  /**
+   * Creates a case. With the top-level app on, `owner` may be omitted and is resolved from the
+   * template, the deployment's only owner, or the stack owner.
+   */
+  create(data: CasePostRequestWithOptionalOwner): Promise<Case>;
   /**
    * Bulk create cases. `options` is internal-only (bulkCreate has no HTTP route) — see
    * {@link BulkCreateCasesClientOptions}.
@@ -140,6 +146,11 @@ export interface CasesSubClient {
    * Retrieves all the reporters across all accessible cases.
    */
   getReporters(params: AllReportersFindRequest): Promise<User[]>;
+  /**
+   * Retrieves the owners that exist in this deployment that the user can read, create cases in,
+   * and manage settings for.
+   */
+  getAvailableOwners(): Promise<AvailableOwners>;
   /**
    * Retrieves the cases ID and title that have the requested alert attached to them
    */
@@ -205,6 +216,7 @@ const usageCounterByMethod = {
   getTags: null,
   getCategories: null,
   getReporters: null,
+  getAvailableOwners: null,
   getCasesByAlertID: null,
   getCasesByAttachmentIDs: null,
   replaceCustomField: 'replace_custom_field',
@@ -228,8 +240,10 @@ export const createCasesSubClient = (
   casesClientInternal: CasesClientInternal
 ): CasesSubClient => {
   const casesSubClient: CasesSubClient = {
-    create: withUsageCounter(usageCounterByMethod.create, clientArgs, (data: CasePostRequest) =>
-      create(data, clientArgs, casesClient)
+    create: withUsageCounter(
+      usageCounterByMethod.create,
+      clientArgs,
+      (data: CasePostRequestWithOptionalOwner) => create(data, clientArgs, casesClient)
     ),
     bulkCreate: withUsageCounter(
       usageCounterByMethod.bulkCreate,
@@ -256,6 +270,7 @@ export const createCasesSubClient = (
     getTags: (params: AllTagsFindRequest) => getTags(params, clientArgs),
     getCategories: (params: AllCategoriesFindRequest) => getCategories(params, clientArgs),
     getReporters: (params: AllReportersFindRequest) => getReporters(params, clientArgs),
+    getAvailableOwners: () => getAvailableOwners(clientArgs),
     getCasesByAlertID: (params: CasesByAlertIDParams) => getCasesByAlertID(params, clientArgs),
     getCasesByAttachmentIDs: (params: CasesByAttachmentIDsRequest) =>
       getCasesByAttachmentIDs(params, clientArgs),

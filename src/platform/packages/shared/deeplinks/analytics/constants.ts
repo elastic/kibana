@@ -23,6 +23,8 @@ export const CANVAS_APP_ID = 'canvas';
 
 export const GRAPH_APP_ID = 'graph';
 
+export const CASES_APP_ID = 'cases';
+
 export const DISCOVER_ESQL_LOCATOR = 'DISCOVER_ESQL_LOCATOR';
 
 export const DASHBOARD_APP_LOCATOR = 'DASHBOARD_APP_LOCATOR';

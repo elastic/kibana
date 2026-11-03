@@ -25,6 +25,7 @@ import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  CASES_SPACE_SETTINGS_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from '../common/constants';
@@ -60,6 +61,8 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     runWorkflows: { enabled: true },
     attachments: { enabled: true },
     chat: { enabled: true },
+    topLevelApp: { enabled: true, disabledSubFeaturePrivileges: [] },
+    customStatuses: { enabled: true },
     ...overrides,
   };
 }
@@ -136,13 +139,42 @@ describe('Cases Plugin', () => {
 
     it('should not register kibana feature when stack is disabled', async () => {
       context = coreMock.createPluginInitializerContext<ConfigType>(
-        getConfig({ stack: { enabled: false } })
+        getConfig({
+          stack: { enabled: false },
+          topLevelApp: { enabled: false, disabledSubFeaturePrivileges: [] },
+        })
       );
       const pluginWithStackDisabled = new CasePlugin(context);
 
       pluginWithStackDisabled.setup(coreSetup, pluginsSetup);
 
       expect(pluginsSetup.features.registerKibanaFeature).not.toHaveBeenCalled();
+    });
+
+    it('registers casesV4 and the deprecated stack features when the top-level app is enabled', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      const registered = (pluginsSetup.features.registerKibanaFeature as jest.Mock).mock.calls.map(
+        ([feature]) => ({ id: feature.id, deprecated: Boolean(feature.deprecated) })
+      );
+      expect(registered).toEqual([
+        { id: 'casesV4', deprecated: false },
+        { id: 'generalCases', deprecated: true },
+        { id: 'generalCasesV2', deprecated: true },
+        { id: 'generalCasesV3', deprecated: true },
+      ]);
+    });
+
+    it('registers only casesV4 when the stack owner is disabled', async () => {
+      context = coreMock.createPluginInitializerContext<ConfigType>(
+        getConfig({ stack: { enabled: false } })
+      );
+      new CasePlugin(context).setup(coreSetup, pluginsSetup);
+
+      expect(pluginsSetup.features.registerKibanaFeature).toHaveBeenCalledTimes(1);
+      expect(pluginsSetup.features.registerKibanaFeature).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'casesV4' })
+      );
     });
 
     it('registers the workflow execution route when run workflows is enabled', () => {
@@ -185,6 +217,20 @@ describe('Cases Plugin', () => {
         (call) => call[0]?.name === CASE_ATTACHMENT_SAVED_OBJECT
       );
       expect(attachmentSOCall).toBeDefined();
+    });
+
+    it('should always register the cases-space-settings SO even when custom statuses are disabled', async () => {
+      context = coreMock.createPluginInitializerContext<ConfigType>(
+        getConfig({ customStatuses: { enabled: false } })
+      );
+      const pluginWithCustomStatusesDisabled = new CasePlugin(context);
+
+      pluginWithCustomStatusesDisabled.setup(coreSetup, pluginsSetup);
+
+      const registeredTypeNames = coreSetup.savedObjects.registerType.mock.calls.map(
+        (call) => call[0]?.name
+      );
+      expect(registeredTypeNames).toContain(CASES_SPACE_SETTINGS_SAVED_OBJECT);
     });
 
     // Registration must be unconditional so a serverless release has the
@@ -235,6 +281,9 @@ describe('Cases Plugin', () => {
               "enabled": true,
             },
             "chat": Object {
+              "enabled": true,
+            },
+            "customStatuses": Object {
               "enabled": true,
             },
             "enabled": true,
@@ -346,6 +395,10 @@ describe('Cases Plugin', () => {
               "enabled": true,
             },
             "templates": Object {
+              "enabled": true,
+            },
+            "topLevelApp": Object {
+              "disabledSubFeaturePrivileges": Array [],
               "enabled": true,
             },
           },

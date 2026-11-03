@@ -67,11 +67,13 @@ export const casesQueriesKeys = {
   connectorTypes: () => [...casesQueriesKeys.connectors, 'types'] as const,
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
+  availableOwners: () => [...casesQueriesKeys.all, 'available-owners'] as const,
   categories: () => [...casesQueriesKeys.all, 'categories'] as const,
   alertFeatureIds: (alertIds: string[]) =>
     [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
   workflowTagAggs: () => [...casesQueriesKeys.all, 'workflow-tag-aggs'] as const,
+  caseStatusDefinitions: () => [...casesQueriesKeys.all, 'space-settings', 'statuses'] as const,
 };
 
 export const casesMutationsKeys = {
@@ -86,6 +88,7 @@ export const casesMutationsKeys = {
   bulkDeleteAttachments: ['bulk-delete-attachments'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
   persistCaseConfiguration: ['persist-case-configuration'] as const,
+  persistCaseStatuses: ['persist-case-statuses'] as const,
   replaceCustomField: ['replace-custom-field'] as const,
   postObservable: ['post-observable'] as const,
   patchObservable: ['patch-observable'] as const,

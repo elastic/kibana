@@ -26,4 +26,37 @@ describe('Stats', () => {
       expect(res.getByText(label)).toBeInTheDocument();
     }
   );
+
+  it('renders the category label and color when no overrides are given', () => {
+    const res = render(<Status status={CaseStatuses.open} />);
+
+    expect(res.getByTestId('case-status-badge-open')).toHaveTextContent(
+      statusConfiguration[CaseStatuses.open].label
+    );
+  });
+
+  it('renders a custom label', () => {
+    const res = render(<Status status={CaseStatuses['in-progress']} label="Awaiting customer" />);
+
+    expect(res.getByTestId('case-status-badge-in-progress')).toHaveTextContent('Awaiting customer');
+    expect(
+      res.queryByText(statusConfiguration[CaseStatuses['in-progress']].label)
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders a custom color', () => {
+    const withCategoryColor = render(<Status status={CaseStatuses.open} />);
+    const categoryClassName = withCategoryColor.getByTestId('case-status-badge-open').className;
+    withCategoryColor.unmount();
+
+    const res = render(<Status status={CaseStatuses.open} color="danger" label="Escalated" />);
+
+    expect(res.getByTestId('case-status-badge-open').className).not.toEqual(categoryClassName);
+  });
+
+  it('uses the given test subject', () => {
+    const res = render(<Status status={CaseStatuses.closed} dataTestSubj="my-badge" />);
+
+    expect(res.getByTestId('my-badge')).toBeInTheDocument();
+  });
 });

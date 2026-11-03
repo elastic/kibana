@@ -35,6 +35,8 @@ export interface CaseStatusChangedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
   readonly previousStatus: string;
   readonly status: string;
+  readonly previousStatusKey?: string | null;
+  readonly statusKey?: string | null;
 }
 
 /**

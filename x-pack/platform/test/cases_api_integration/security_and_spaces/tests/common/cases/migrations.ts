@@ -19,6 +19,7 @@ import {
   getCaseSavedObjectsFromES,
   resolveCase,
   findCases,
+  omitStatusKey,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
 import { findAttachments } from '../../../../common/lib/api/attachments';
@@ -81,7 +82,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         const cases = await findCases({ supertest });
         const theCase = cases.cases[0];
 
-        const { version, ...caseWithoutVersion } = theCase;
+        const { version, ...caseWithoutVersion } = omitStatusKey(theCase);
         const { cases: _, ...caseStats } = cases;
 
         expect(cases.cases.length).to.eql(1);

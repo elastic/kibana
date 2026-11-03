@@ -33,6 +33,9 @@ import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
 import type { UserActionEvent } from '../../services/user_actions/types';
 import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
+import type { CaseStatusDefinition } from '../../../common/types/domain/space_settings/v1';
+import { DEFAULT_CASE_STATUSES } from '../../../common/utils/statuses';
+import { setCustomStatusesEnabled } from '../../common/custom_statuses';
 
 describe('update', () => {
   const cases = {
@@ -4704,6 +4707,205 @@ describe('update', () => {
       expect(updatedAttributes.customFields).toEqual(
         expect.arrayContaining([{ key: 'priority', type: CustomFieldTypes.TEXT, value: null }])
       );
+    });
+  });
+  describe('Custom statuses', () => {
+    const clientArgs = createCasesClientMockArgs();
+    const statuses: CaseStatusDefinition[] = [
+      ...DEFAULT_CASE_STATUSES,
+      {
+        key: 'triage',
+        label: 'Triage',
+        color: 'accent',
+        category: 'not_started',
+        order: 3,
+        isDefault: false,
+        disabled: false,
+      },
+      {
+        key: 'duplicate',
+        label: 'Duplicate',
+        color: 'default',
+        category: 'done',
+        order: 4,
+        isDefault: false,
+        disabled: false,
+      },
+    ];
+
+    const caseWithStatus = (
+      status: CaseStatuses,
+      statusKey: string | null
+    ): CaseSavedObjectTransformed => ({
+      ...mockCases[0],
+      attributes: { ...mockCases[0].attributes, status, status_key: statusKey },
+    });
+
+    const patch = (fields: { status?: CaseStatuses; status_key?: string }) =>
+      bulkUpdate(
+        { cases: [{ id: mockCases[0].id, version: mockCases[0].version ?? '', ...fields }] },
+        clientArgs,
+        casesClientMock
+      );
+
+    const getUpdatedAttributes = () =>
+      clientArgs.services.caseService.patchCases.mock.calls[0][0].cases[0].updatedAttributes;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      setCustomStatusesEnabled(true);
+      clientArgs.services.spaceSettingsService.getStatuses.mockResolvedValue(statuses);
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [caseWithStatus(CaseStatuses.open, null)],
+      });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0] }],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: 0,
+      });
+    });
+
+    afterAll(() => {
+      setCustomStatusesEnabled(false);
+    });
+
+    it('records a move between two statuses of the same category without lifecycle changes', async () => {
+      await patch({ status_key: 'triage' });
+
+      const updatedAttributes = getUpdatedAttributes();
+      expect(updatedAttributes.status_key).toBe('triage');
+      expect(updatedAttributes).not.toHaveProperty('status');
+      expect(updatedAttributes).not.toHaveProperty('closed_at');
+      expect(updatedAttributes).not.toHaveProperty('closed_by');
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entities: [{ id: mockCases[0].id, owner: mockCases[0].attributes.owner }],
+        operation: [Operations.updateCase],
+      });
+      expect(
+        clientArgs.services.userActionService.creator.buildUserActions.mock.calls[0][0].updatedCases
+          .cases[0].updatedAttributes.status_key
+      ).toBe('triage');
+      expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+      expect(clientArgs.casesEventBus?.emitCaseUpdated).toHaveBeenCalledWith(
+        clientArgs.request,
+        expect.objectContaining({ updatedFields: ['status_key'] }),
+        expect.anything()
+      );
+    });
+
+    it('sets the category of a key and closes the case for a done status', async () => {
+      await patch({ status_key: 'duplicate' });
+
+      const updatedAttributes = getUpdatedAttributes();
+      expect(updatedAttributes.status).toBe(CaseStatuses.closed);
+      expect(updatedAttributes.status_key).toBe('duplicate');
+      expect(updatedAttributes.closed_at).toEqual(expect.any(String));
+      expect(updatedAttributes.closed_by).toEqual(clientArgs.user);
+    });
+
+    it('lands a status-only write on the category default', async () => {
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [caseWithStatus(CaseStatuses.open, 'triage')],
+      });
+
+      await patch({ status: CaseStatuses.closed });
+
+      const updatedAttributes = getUpdatedAttributes();
+      expect(updatedAttributes.status).toBe(CaseStatuses.closed);
+      expect(updatedAttributes.status_key).toBe('closed');
+    });
+
+    it('keeps a custom status when a status-only write names its category', async () => {
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [caseWithStatus(CaseStatuses.open, 'triage')],
+      });
+
+      await expect(patch({ status: CaseStatuses.open })).rejects.toThrow(
+        'All update fields are identical to current version.'
+      );
+    });
+
+    it('treats the default key of a legacy case as unchanged', async () => {
+      await expect(patch({ status_key: 'open' })).rejects.toThrow(
+        'All update fields are identical to current version.'
+      );
+    });
+
+    it('only needs the reopen privilege to reopen by key', async () => {
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [caseWithStatus(CaseStatuses.closed, 'duplicate')],
+      });
+
+      await patch({ status_key: 'triage' });
+
+      expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entities: [{ id: mockCases[0].id, owner: mockCases[0].attributes.owner }],
+        operation: [Operations.reopenCase],
+      });
+      expect(getUpdatedAttributes()).toEqual(
+        expect.objectContaining({ status: CaseStatuses.open, status_key: 'triage' })
+      );
+    });
+
+    it('rejects an unknown key', async () => {
+      await expect(patch({ status_key: 'missing' })).rejects.toThrow(
+        'Status "missing" does not exist in this space.'
+      );
+      expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('does not load the space statuses when the request has no status', async () => {
+      await bulkUpdate(
+        {
+          cases: [{ id: mockCases[0].id, version: mockCases[0].version ?? '', title: 'New title' }],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.spaceSettingsService.getStatuses).not.toHaveBeenCalled();
+    });
+
+    describe('when custom statuses are off', () => {
+      beforeEach(() => {
+        setCustomStatusesEnabled(false);
+      });
+
+      it('rejects a status_key', async () => {
+        await expect(patch({ status_key: 'triage' })).rejects.toThrow(
+          'Custom statuses are turned off.'
+        );
+        expect(clientArgs.services.caseService.patchCases).not.toHaveBeenCalled();
+      });
+
+      it('writes no key for a status change', async () => {
+        await patch({ status: CaseStatuses.closed });
+
+        expect(getUpdatedAttributes()).not.toHaveProperty('status_key');
+        expect(clientArgs.services.spaceSettingsService.getStatuses).not.toHaveBeenCalled();
+      });
+
+      it('clears a key left from when they were on when the category changes', async () => {
+        clientArgs.services.caseService.getCases.mockResolvedValue({
+          saved_objects: [caseWithStatus(CaseStatuses.open, 'triage')],
+        });
+
+        await patch({ status: CaseStatuses.closed });
+
+        expect(getUpdatedAttributes()).toEqual(
+          expect.objectContaining({ status: CaseStatuses.closed, status_key: null })
+        );
+      });
     });
   });
 });

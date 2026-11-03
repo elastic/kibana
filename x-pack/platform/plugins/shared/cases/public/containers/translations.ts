@@ -112,3 +112,18 @@ export const OBSERVABLE_MAX_REACHED = (maxObservables: number) =>
     defaultMessage:
       "You've reached the maximum number of observables {maxObservables} that can be added to a case. Some observables were not added.",
   });
+
+export const STATUSES_SAVED = i18n.translate('xpack.cases.containers.statusesSaved', {
+  defaultMessage: 'Statuses saved',
+});
+
+export const ERROR_SAVING_STATUSES = i18n.translate('xpack.cases.containers.errorSavingStatuses', {
+  defaultMessage: "Couldn't save statuses",
+});
+
+export const ERROR_FETCHING_STATUSES = i18n.translate(
+  'xpack.cases.containers.errorFetchingStatuses',
+  {
+    defaultMessage: "Couldn't load statuses",
+  }
+);

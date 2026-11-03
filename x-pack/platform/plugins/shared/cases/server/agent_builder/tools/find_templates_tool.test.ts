@@ -9,6 +9,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import { findTemplatesTool } from './find_templates_tool';
+import { setTopLevelAppEnabled } from '../../common/top_level_app';
 
 const buildToolContext = (): ToolHandlerContext =>
   ({
@@ -370,6 +371,28 @@ describe('findTemplatesTool', () => {
     const { results } = result as { results: Array<{ type: string; data: unknown }> };
     expect(results[0]).toMatchObject({
       data: expect.objectContaining({ message: expect.stringContaining('boom') }),
+    });
+  });
+
+  describe('with the top-level Cases app', () => {
+    beforeEach(() => setTopLevelAppEnabled(true));
+    afterEach(() => setTopLevelAppEnabled(false));
+
+    it('makes owner optional and lists every owner when it is omitted', async () => {
+      casesClient.templates.getAllTemplates.mockResolvedValue({
+        templates: [],
+        page: 1,
+        perPage: 20,
+        total: 0,
+      });
+
+      const tool = buildTool();
+      expect(tool.schema.shape.owner.isOptional()).toBe(true);
+      await tool.handler({ search: 'phishing' } as never, buildToolContext());
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({ owner: [] })
+      );
     });
   });
 });

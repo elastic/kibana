@@ -17,6 +17,7 @@ import type {
   AttachmentFrameworkSchema,
   AttachmentTypeStatsSchema,
   CustomFieldsSolutionTelemetrySchema,
+  CustomStatusesCategoryTelemetrySchema,
   FieldLibrarySolutionTelemetrySchema,
   ObservablesSchema,
   TemplatesSolutionTelemetrySchema,
@@ -192,6 +193,23 @@ const fieldLibrarySolutionTelemetrySchema: FieldLibrarySolutionTelemetrySchema =
     _meta: {
       description:
         'Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references.',
+    },
+  },
+};
+
+const customStatusesCategoryTelemetrySchema: CustomStatusesCategoryTelemetrySchema = {
+  total: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of case statuses in this category across the spaces that saved their own statuses, including disabled ones.',
+    },
+  },
+  max: {
+    type: 'long',
+    _meta: {
+      description:
+        'Highest number of case statuses in this category saved by a single space, including disabled ones.',
     },
   },
 };
@@ -552,6 +570,20 @@ export const casesSchema: CasesTelemetrySchema = {
     sec: fieldLibrarySolutionTelemetrySchema,
     obs: fieldLibrarySolutionTelemetrySchema,
     main: fieldLibrarySolutionTelemetrySchema,
+  },
+  customStatuses: {
+    totalSpaces: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of spaces that saved their own case statuses. Spaces that never saved any use the three default statuses.',
+      },
+    },
+    byCategory: {
+      notStarted: customStatusesCategoryTelemetrySchema,
+      active: customStatusesCategoryTelemetrySchema,
+      done: customStatusesCategoryTelemetrySchema,
+    },
   },
   workflows: {
     all: workflowsSolutionTelemetrySchema,

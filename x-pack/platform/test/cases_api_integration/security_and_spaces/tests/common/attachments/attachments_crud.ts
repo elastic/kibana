@@ -64,6 +64,9 @@ const linkedAlertMessage = `Cannot attach an alert from a linked project or remo
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const topLevelAppEnabled = !getService('config')
+    .get('kbnTestServer.serverArgs')
+    .includes('--xpack.cases.topLevelApp.enabled=false');
 
   describe('attachments_crud', () => {
     afterEach(async () => {
@@ -168,7 +171,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(response.message).to.be(fileNotSupportedMessage);
     });
 
-    it('should reject a solution type under another solution owner', async () => {
+    // The top-level Cases app lets any solution attach to any case; the per-solution apps did not.
+    it('should accept a solution type under another solution owner only in the top-level app', async () => {
       const postedCase = await createCase(
         supertest,
         getPostCaseRequest({ owner: 'observabilityFixture' })
@@ -178,12 +182,14 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         caseId: postedCase.id,
         params: { ...postUnifiedAlertReq, owner: 'observabilityFixture' },
-        expectedHttpCode: 400,
+        expectedHttpCode: topLevelAppEnabled ? 201 : 400,
       })) as unknown as { message: string };
 
-      expect(response.message).to.be(
-        `Attachment type ${SECURITY_ALERT_ATTACHMENT_TYPE} cannot be attached to a case with owner observabilityFixture.`
-      );
+      if (!topLevelAppEnabled) {
+        expect(response.message).to.be(
+          `Attachment type ${SECURITY_ALERT_ATTACHMENT_TYPE} cannot be attached to a case with owner observabilityFixture.`
+        );
+      }
     });
 
     it('should reject an alert from a linked project index', async () => {

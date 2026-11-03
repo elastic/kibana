@@ -392,6 +392,10 @@ export const UNKNOWN = i18n.translate('xpack.cases.listView.unknown', {
   defaultMessage: 'Unknown',
 });
 
+export const LIST_SOLUTION = i18n.translate('xpack.cases.listView.solution', {
+  defaultMessage: 'Solution',
+});
+
 export const LIST_REPORTED_BY = i18n.translate('xpack.cases.listView.reportedBy', {
   defaultMessage: 'Reported by',
 });
@@ -481,3 +485,7 @@ export const ACTION_LICENSE_DISABLED_BY_CONFIG = i18n.translate(
       'External connectors are disabled in the Kibana configuration. Update xpack.actions.enabledActionTypes to enable them.',
   }
 );
+
+export const STATUS_DISABLED = i18n.translate('xpack.cases.caseTable.statusDisabled', {
+  defaultMessage: 'Disabled',
+});

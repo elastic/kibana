@@ -13,7 +13,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { createConnectorObject } from '../../test_utils';
+import { createConnectorObject, createCaseSavedObjectResponse } from '../../test_utils';
 import { UserActionPersister } from './create';
 import { createUserActionSO } from '../test_utils';
 import type {
@@ -54,7 +54,14 @@ import {
   patchRemoveTemplateCasesRequest,
   getTemplateUserActions,
 } from '../mocks';
-import { AttachmentType, CustomFieldTypes, UserActionTypes } from '../../../../common/types/domain';
+import {
+  AttachmentType,
+  CaseStatuses,
+  CustomFieldTypes,
+  UserActionTypes,
+} from '../../../../common/types/domain';
+import type { PatchCasesArgs } from '../../cases/types';
+import { transformSavedObjectToExternalModel } from '../../cases/transform';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -462,6 +469,63 @@ describe('UserActionPersister', () => {
           isMock: false,
         })
       );
+    });
+
+    describe('status', () => {
+      const originalCase = transformSavedObjectToExternalModel(
+        createCaseSavedObjectResponse({ overrides: { status_key: null } })
+      );
+
+      const buildStatusActions = (
+        updatedAttributes: PatchCasesArgs['cases'][number]['updatedAttributes']
+      ) =>
+        persister.buildUserActions({
+          updatedCases: {
+            cases: [
+              {
+                ...createCaseSavedObjectResponse(),
+                caseId: '1',
+                updatedAttributes,
+                originalCase,
+              },
+            ],
+          },
+          user: testUser,
+        })['1'];
+
+      it('records one status action with the key for a move within a category', () => {
+        const userActions = buildStatusActions({ status_key: 'triage' });
+
+        expect(userActions).toHaveLength(1);
+        expect(userActions[0].parameters.attributes).toEqual(
+          expect.objectContaining({
+            type: UserActionTypes.status,
+            payload: { status: CaseStatuses.open, status_key: 'triage' },
+          })
+        );
+      });
+
+      it('records one status action with both fields when the category changes', () => {
+        const userActions = buildStatusActions({
+          status: CaseStatuses.closed,
+          status_key: 'duplicate',
+        });
+
+        expect(userActions).toHaveLength(1);
+        expect(userActions[0].parameters.attributes.payload).toEqual({
+          status: CaseStatuses.closed,
+          status_key: 'duplicate',
+        });
+      });
+
+      it('records no key when the write cleared it', () => {
+        const userActions = buildStatusActions({ status: CaseStatuses.closed, status_key: null });
+
+        expect(userActions).toHaveLength(1);
+        expect(userActions[0].parameters.attributes.payload).toEqual({
+          status: CaseStatuses.closed,
+        });
+      });
     });
 
     it('creates the correct user actions when sync alerts settings is changed', async () => {

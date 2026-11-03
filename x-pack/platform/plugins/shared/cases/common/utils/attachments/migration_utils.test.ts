@@ -37,6 +37,7 @@ import {
   getReferenceAttachmentId,
   isConvertibleToUnified,
   isTypeAllowedForOwner,
+  toUnifiedAttachmentTypesForAnyOwner,
   isPersistableType,
   resolveUnifiedAttachmentType,
   isUnifiedOnlyAttachmentType,
@@ -172,6 +173,18 @@ describe('migration_utils', () => {
       registerOwnerPrefix(customOwner, 'security');
 
       expect(isTypeAllowedForOwner('security.event', customOwner)).toBe(true);
+    });
+  });
+
+  describe('toUnifiedAttachmentTypesForAnyOwner', () => {
+    it.each(['alert', 'event'])('maps legacy %s to every solution prefix', (type) => {
+      expect(toUnifiedAttachmentTypesForAnyOwner(type).sort()).toEqual(
+        [`observability.${type}`, `security.${type}`, `stack.${type}`].sort()
+      );
+    });
+
+    it('maps other legacy types to their single unified type', () => {
+      expect(toUnifiedAttachmentTypesForAnyOwner('user')).toEqual(['comment']);
     });
   });
 

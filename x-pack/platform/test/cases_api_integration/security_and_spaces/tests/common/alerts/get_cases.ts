@@ -20,6 +20,7 @@ import {
   createComment,
   getCasesByAlert,
   deleteAllCaseItems,
+  omitStatusKey,
 } from '../../../../common/lib/api';
 import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
 import {
@@ -337,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
           query: { owner: 'securitySolutionFixture' },
         });
 
-        expect(res).to.eql([
+        expect(res.map(omitStatusKey)).to.eql([
           {
             id: case1.id,
             title: case1.title,
@@ -388,7 +389,7 @@ export default ({ getService }: FtrProviderContext): void => {
           query: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
         });
 
-        expect(res).to.eql([
+        expect(res.map(omitStatusKey)).to.eql([
           {
             id: case1.id,
             title: case1.title,

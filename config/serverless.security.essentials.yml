@@ -9,6 +9,9 @@ xpack.agentBuilder.enabled: false
 ### Workflows Management plugin is not available in this tier
 workflowsManagement.available: false
 
+### Cases connectors are not available in this tier
+xpack.cases.topLevelApp.disabledSubFeaturePrivileges: ['cases_connectors']
+
 xpack.features.overrides:
   ### The following features are Security features hidden in Role management UI for this specific tier.
   workflowsManagement.hidden: true

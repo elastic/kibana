@@ -305,3 +305,6 @@ xpack.actions.preconfigured:
       inferenceId: ".google-gemini-3.0-flash-chat_completion"
       providerConfig:
         model_id: "google-gemini-3.0-flash"
+
+### These projects have no Cases feature, so they do not get the top-level Cases app either.
+xpack.cases.topLevelApp.enabled: false

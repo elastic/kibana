@@ -52,6 +52,7 @@ import {
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
+import { getCasesAppBasePath } from './top_level_app';
 
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
@@ -114,15 +115,19 @@ const pinStoredTemplate = (
 
 export const transformNewCase = ({
   user,
-  newCase: { template, ...newCase },
+  newCase: { template, status_key: _requestedStatusKey, ...newCase },
+  statusKey,
 }: {
   user: User;
   newCase: CasePostRequest;
+  /** The resolved key of the case's status; omitted while custom statuses are off. */
+  statusKey?: string;
 }): CaseTransformedAttributes => ({
   ...newCase,
   // Re-added only when present so an absent template stays absent (an explicit
   // `template: undefined` key changes SO create payloads and snapshots).
   ...(template !== undefined ? { template: pinStoredTemplate(template) } : {}),
+  ...(statusKey !== undefined ? { status_key: statusKey } : {}),
   duration: null,
   severity: newCase.severity ?? CaseSeverity.LOW,
   closed_at: null,
@@ -678,8 +683,7 @@ export const getCaseViewPath = (params: {
 
   const publicBaseUrlWithoutEndingSlash = removeEndingSlash(publicBaseUrl);
   const publicBaseUrlWithSpace = addSpaceIdToPath(publicBaseUrlWithoutEndingSlash, spaceId);
-  const ownerInfo = isValidOwner(owner) ? OWNER_INFO[owner] : OWNER_INFO[GENERAL_CASES_OWNER];
-  const basePath = `${publicBaseUrlWithSpace}${ownerInfo.appBasePath}${ownerInfo.casesBasePath}`;
+  const basePath = `${publicBaseUrlWithSpace}${getCasesAppBasePath(owner)}`;
 
   if (commentId) {
     const commentPath = normalizePath(

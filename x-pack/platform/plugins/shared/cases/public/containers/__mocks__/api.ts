@@ -44,7 +44,9 @@ import type {
   CasePatchRequest,
   AttachmentRequest,
 } from '../../../common/types/api';
+import type { CaseStatusDefinition } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
+import { DEFAULT_CASE_STATUSES } from '../../../common/utils/statuses';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
@@ -68,6 +70,13 @@ export const getSingleCaseMetrics = async (
 ): Promise<SingleCaseMetricsResponse> => Promise.resolve(basicCaseMetrics);
 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
+
+export const getAvailableOwners = async () =>
+  Promise.resolve({
+    owners: ['observability', 'cases'],
+    createOwners: ['observability', 'cases'],
+    settingsOwners: ['observability', 'cases'],
+  });
 
 export const findAssignees = async (): Promise<UserProfile[]> => userProfiles;
 
@@ -202,3 +211,16 @@ export const bulkDeleteObservables = jest.fn();
 export const bulkDeleteAttachments = jest.fn();
 
 export const searchEvents = jest.fn();
+
+export const getCaseStatuses = async ({
+  signal,
+}: {
+  signal?: AbortSignal;
+}): Promise<CaseStatusDefinition[]> => Promise.resolve([...DEFAULT_CASE_STATUSES]);
+
+export const putCaseStatuses = async ({
+  statuses,
+}: {
+  statuses: CaseStatusDefinition[];
+  signal?: AbortSignal;
+}): Promise<CaseStatusDefinition[]> => Promise.resolve(statuses);

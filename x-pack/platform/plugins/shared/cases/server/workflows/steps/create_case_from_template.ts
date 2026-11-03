@@ -28,14 +28,25 @@ import {
 import { getNoneConnector } from '../../../common/utils/connectors';
 import { getCaseSettings } from '../../../common/utils/case_settings';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
+import { isTopLevelAppEnabled } from '../../common/top_level_app';
 
 const findTemplateById = (
   configurations: Configurations,
   templateId: string
-): TemplateConfiguration | undefined => {
-  return configurations
-    .flatMap((configuration) => configuration.templates ?? [])
-    .find((template) => template.key === templateId);
+): { template: TemplateConfiguration; owner: string } | undefined => {
+  const matches = configurations.flatMap((configuration) => {
+    const template = configuration.templates?.find(({ key }) => key === templateId);
+    return template ? [{ template, owner: configuration.owner }] : [];
+  });
+  // Template keys are unique per solution, not across solutions.
+  if (matches.length > 1) {
+    throw new Error(
+      `Case template "${templateId}" exists in more than one solution. Set owner to choose one: ${matches
+        .map(({ owner }) => owner)
+        .join(', ')}`
+    );
+  }
+  return matches[0];
 };
 
 export const createCaseFromTemplateStepDefinition = (
@@ -49,7 +60,11 @@ export const createCaseFromTemplateStepDefinition = (
       CreateCaseFromTemplateStepConfig,
       CreateCaseFromTemplateStepOutput['case']
     >(getCasesClient, async (casesClient, input) => {
-      const { case_template_id, owner, overwrites } = input;
+      // With the top-level app on, `owner` is optional and the case takes the template's owner.
+      const { case_template_id, owner: requestedOwner, overwrites } = input;
+      if (requestedOwner === undefined && !isTopLevelAppEnabled()) {
+        throw new Error('Owner is required.');
+      }
       const normalizedOverwrites = overwrites
         ? normalizeCaseStepUpdatesForBulkPatch(overwrites)
         : {};
@@ -69,9 +84,12 @@ export const createCaseFromTemplateStepDefinition = (
           // seed this create — fail with clear owner context now rather than falling through to
           // `cases.create`'s generic "Template not found" error, which doesn't mention the owner
           // mismatch and leaves the caller guessing whether the template id itself was wrong.
-          if (templateSO.attributes.owner !== owner) {
-            throw new Error(`Case template "${case_template_id}" not found for owner "${owner}"`);
+          if (requestedOwner !== undefined && templateSO.attributes.owner !== requestedOwner) {
+            throw new Error(
+              `Case template "${case_template_id}" not found for owner "${requestedOwner}"`
+            );
           }
+          const owner = templateSO.attributes.owner;
 
           // `cases.create` re-fetches and re-parses the template for expansion; parsing here as well
           // is a small duplicate read on a cold create path, kept for the wire-required seed values
@@ -139,12 +157,19 @@ export const createCaseFromTemplateStepDefinition = (
       // Legacy path: the templates feature is disabled, or the id is not a v2 template SO — fall
       // back to the per-space configuration templates (`cases-configure`). No server-side expansion
       // applies here; the configuration template's `caseFields` are merged directly, as before.
-      const configurations = await casesClient.configure.get({ owner });
-      const template = findTemplateById(configurations, case_template_id);
+      const configurations = await casesClient.configure.get(
+        requestedOwner !== undefined ? { owner: requestedOwner } : {}
+      );
+      const found = findTemplateById(configurations, case_template_id);
 
-      if (!template) {
-        throw new Error(`Case template not found for owner "${owner}": ${case_template_id}`);
+      if (!found) {
+        throw new Error(
+          requestedOwner !== undefined
+            ? `Case template not found for owner "${requestedOwner}": ${case_template_id}`
+            : `Case template not found: ${case_template_id}`
+        );
       }
+      const { template, owner } = found;
 
       const templateCaseFields = template.caseFields ?? {};
       // Key-by-key settings merge: a partial overwrites.settings (e.g. only syncAlerts) must not

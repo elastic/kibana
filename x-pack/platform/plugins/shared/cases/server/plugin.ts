@@ -43,7 +43,13 @@ import type {
 } from './types';
 import { CasesClientFactory } from './client/factory';
 import type { CasesClientSource, GetCasesClientOptions } from './client/types';
-import { getCasesKibanaFeatures } from './features';
+import {
+  getCasesKibanaFeatures,
+  getTopLevelAppCasesKibanaFeatures,
+  withCasesV4Replacement,
+} from './features';
+import { setTopLevelAppEnabled } from './common/top_level_app';
+import { setCustomStatusesEnabled } from './common/custom_statuses';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
 import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
@@ -161,7 +167,16 @@ export class CasePlugin
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
 
-    if (this.caseConfig.stack.enabled) {
+    setTopLevelAppEnabled(this.caseConfig.topLevelApp.enabled);
+    setCustomStatusesEnabled(this.caseConfig.customStatuses.enabled);
+
+    if (this.caseConfig.topLevelApp.enabled) {
+      const { v4, legacy } = getTopLevelAppCasesKibanaFeatures(this.caseConfig.topLevelApp);
+      plugins.features.registerKibanaFeature(v4);
+      if (this.caseConfig.stack.enabled) {
+        legacy.forEach((feature) => plugins.features.registerKibanaFeature(feature));
+      }
+    } else if (this.caseConfig.stack.enabled) {
       // V1 is deprecated, but has to be maintained for the time being
       // https://github.com/elastic/kibana/pull/186800#issue-2369812818
       const casesFeatures = getCasesKibanaFeatures();
@@ -354,6 +369,10 @@ export class CasePlugin
       registerOwnerPrefix: (owner: string, prefix: string) => {
         registerOwnerPrefix(owner, prefix);
       },
+      withCasesV4Replacement: (feature) =>
+        this.caseConfig.topLevelApp.enabled
+          ? withCasesV4Replacement(feature, this.caseConfig.topLevelApp)
+          : feature,
     };
   }
 

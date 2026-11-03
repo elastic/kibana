@@ -42,7 +42,13 @@ export const search = async (
   casesClient: CasesClient
 ): Promise<CasesSearchResponse> => {
   const {
-    services: { caseService, licensingService, templatesService, fieldDefinitionsService },
+    services: {
+      caseService,
+      licensingService,
+      templatesService,
+      fieldDefinitionsService,
+      spaceSettingsService,
+    },
     authorization,
     logger,
     spaceId,
@@ -110,11 +116,16 @@ export const search = async (
       assignees: paramArgs.assignees,
       category: paramArgs.category,
       customFields: paramArgs.customFields,
+      status_key: paramArgs.status_key,
     };
+
+    const statuses =
+      paramArgs.status_key != null ? await spaceSettingsService.getStatuses() : undefined;
 
     const statusStatsOptions = constructQueryOptions({
       ...options,
       status: undefined,
+      status_key: undefined,
       customFieldsConfiguration,
       authorizationFilter,
       searchType: 'search',
@@ -123,6 +134,7 @@ export const search = async (
     const caseQueryOptions = constructQueryOptions({
       ...options,
       customFieldsConfiguration,
+      statuses,
       authorizationFilter,
       searchType: 'search',
     });

@@ -18,7 +18,7 @@ import type { CasesClient } from '../../client';
 import { invokeStepHandler } from '../utils/invoke_step';
 import {
   CASES_TOOL_TEXT_INSTRUCTION,
-  CASES_SOLUTION_CONTEXT_INSTRUCTION,
+  getCasesSolutionContextInstruction,
 } from '../utils/tool_instructions';
 import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_attachments';
 
@@ -47,7 +47,7 @@ export const observablesTool = (
   return {
     id: platformCoreCasesTools.observables,
     type: ToolType.builtin,
-    description: `Case observables — IOCs/indicators (IPs, domains, file hashes, URLs, emails, registry keys). Modes: \`add\`, \`update\`, \`delete\`. See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    description: `Case observables — IOCs/indicators (IPs, domains, file hashes, URLs, emails, registry keys). Modes: \`add\`, \`update\`, \`delete\`. See \`mode\` field for required inputs.\n\n${getCasesSolutionContextInstruction()}${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
       title: 'Case Observables',
       readOnlyHint: false,
