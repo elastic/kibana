@@ -496,6 +496,20 @@ describe('edotReactNative', () => {
       expect(click).not.toHaveProperty('body');
     });
 
+    it('keeps the observed time whether it is set before or after the timestamp', () => {
+      const crash = { type: 'SIGABRT', message: '#0 at 4339548160', stacktrace: '...' };
+      const [observedFirst] = ios()
+        .crash(crash)
+        .observedAt(TIMESTAMP - 60_000)
+        .timestamp(TIMESTAMP)
+        .serialize();
+      expect(observedFirst['@timestamp']).toBe(TIMESTAMP);
+      expect(observedFirst.observed_timestamp).toBe(TIMESTAMP - 60_000);
+
+      const [log] = ios().errorLog('Image failed to load').timestamp(TIMESTAMP).serialize();
+      expect(log.observed_timestamp).toBe(TIMESTAMP);
+    });
+
     it('writes crashes the way each platform does', () => {
       const crash = { type: 'SIGABRT', message: '#0 at 4339548160', stacktrace: '...' };
       const [iosCrash] = ios({ network: CELLULAR })
