@@ -400,6 +400,42 @@ describe('useResolveTimeField', () => {
     expect(useDataFields).toHaveBeenCalledWith(expect.objectContaining({ search: undefined }));
   });
 
+  it('forwards the project routing to the field lookup and the timefield API', async () => {
+    renderHook(() => useResolveTimeField({ ...defaultParams, projectRouting: '_alias:*' }), {
+      wrapper: createWrapper(),
+    });
+
+    expect(useDataFields).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:*' })
+    );
+    await waitFor(() => {
+      expect(getESQLTimeField).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRouting: '_alias:*' })
+      );
+    });
+  });
+
+  it('prefers the project routing set in the query', async () => {
+    renderHook(
+      () =>
+        useResolveTimeField({
+          ...defaultParams,
+          query: `SET project_routing = "_alias:_origin"; ${FLIGHTS_QUERY}`,
+          projectRouting: '_alias:*',
+        }),
+      { wrapper: createWrapper() }
+    );
+
+    expect(useDataFields).toHaveBeenCalledWith(
+      expect.objectContaining({ projectRouting: '_alias:_origin' })
+    );
+    await waitFor(() => {
+      expect(getESQLTimeField).toHaveBeenCalledWith(
+        expect.objectContaining({ projectRouting: '_alias:_origin' })
+      );
+    });
+  });
+
   it('recognizes date_nanos fields as temporal and offers them for selection', async () => {
     const onTimeFieldChange = jest.fn();
     (useDataFields as jest.Mock).mockReturnValue({
