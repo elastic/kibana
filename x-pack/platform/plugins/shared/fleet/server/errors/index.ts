@@ -10,6 +10,8 @@ import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { isObjectLike } from 'lodash';
 
+import type { BreakingChangesLog } from '../../common/services/changelog_utils';
+
 import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
@@ -60,6 +62,15 @@ export class RegistryResponseError extends RegistryError {
 
 export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
+export class PackageBreakingChangesNotAcknowledgedError extends FleetError {
+  constructor(message: string, breakingChanges: BreakingChangesLog) {
+    super(message);
+    this.attributes = {
+      type: 'breaking_changes_not_acknowledged',
+      breaking_changes: breakingChanges,
+    };
+  }
+}
 export class PackageFailedVerificationError extends FleetError {
   constructor(pkgName: string, pkgVersion: string) {
     super(`${pkgName}-${pkgVersion} failed signature verification.`);
@@ -205,6 +216,7 @@ export class FleetNotFoundError<TMeta = unknown> extends FleetError<TMeta> {}
 export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
+export class FleetServerHostInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
 export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}

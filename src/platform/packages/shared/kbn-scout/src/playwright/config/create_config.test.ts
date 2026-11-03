@@ -169,6 +169,17 @@ describe('createPlaywrightConfig', () => {
     expect(local).not.toHaveProperty('timeout');
   });
 
+  it('cloud projects raise the navigation timeout above the global default', () => {
+    const config = createPlaywrightConfig({ testDir: './my_tests' });
+    const byName = (name: string) => config.projects!.find((p) => p.name === name)!.use;
+
+    // Every test gets a fresh browser context, so a cloud navigation is a cold, remote
+    // Kibana bootstrap and cannot reliably settle within the global 20 s cap.
+    expect(byName('ech')).toHaveProperty('navigationTimeout', 45_000);
+    expect(byName('mki')).toHaveProperty('navigationTimeout', 45_000);
+    expect(byName('local')).not.toHaveProperty('navigationTimeout');
+  });
+
   it('should add global.setup.ts and global.teardown.ts projects when runGlobalSetup is true', () => {
     const testDir = './my_tests';
     const defaultGlobalHookTimeout = 180000;

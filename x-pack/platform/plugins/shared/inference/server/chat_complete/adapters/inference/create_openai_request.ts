@@ -11,6 +11,7 @@ import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
 import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { getModelId } from './utils';
 
 export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIRequest => {
   const {
@@ -21,7 +22,11 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     simulatedFunctionCalling,
     temperature = 0,
     modelName,
+    logger,
   } = applyProviderTransforms(options);
+
+  // Preconfigured EIS connectors carry no model_id, so fall back to the inference endpoint id.
+  const model = modelName ?? getModelId(options.connector) ?? options.connector.config?.inferenceId;
 
   let request: OpenAIRequest;
   if (simulatedFunctionCalling) {
@@ -46,7 +51,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       messages: messagesToOpenAI({ system, messages }),
       ...(hasTools
         ? {
-            tool_choice: toolChoiceToOpenAI(toolChoice),
+            tool_choice: toolChoiceToOpenAI(toolChoice, { modelId: model, logger }),
             tools: openAiTools,
           }
         : {}),

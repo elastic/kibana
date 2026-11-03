@@ -9,6 +9,7 @@ import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { buildPath } from '@kbn/core-http-browser';
 import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
@@ -41,7 +42,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
     Partial<PackSavedObject> & { id: string }
   >(
     ({ id, ...payload }) =>
-      http.put(`/api/osquery/packs/${id}`, {
+      http.put(buildPath('/api/osquery/packs/{id}', { id }), {
         version: API_VERSIONS.public.v1,
         body: JSON.stringify(payload),
       }),
