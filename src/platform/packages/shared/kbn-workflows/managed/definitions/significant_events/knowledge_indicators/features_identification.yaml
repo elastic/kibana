@@ -68,9 +68,11 @@ triggers:
         description: "Number of days before a KI feature expires and is cleaned up."
       - name: entityFilteredRatio
         type: number
+        default: 0.4
         description: "Fraction (0–1) of sample allocated to entity-filtered (must_not) documents."
       - name: diverseRatio
         type: number
+        default: 0.4
         description: "Fraction (0–1) of sample allocated to diverse (unfiltered) documents."
       - name: maxExcludedFeaturesInPrompt
         type: number
