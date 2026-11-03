@@ -28,12 +28,21 @@ import {
   randomUuid,
 } from './digital_experience_apps';
 
+export interface DigitalExperienceMobileAppVersion {
+  serviceVersion: string;
+  buildNumber: number;
+  /** Share of the installations that run this version. */
+  share: number;
+  /** Crashes only this version has, on top of the app's. */
+  crashes?: EdotReactNativeAppModel['crashes'];
+}
+
 export interface DigitalExperienceMobileApp {
   serviceName: string;
-  serviceVersion: string;
+  /** The versions the installations run, newest first. */
+  versions: readonly DigitalExperienceMobileAppVersion[];
   /** Android application ID and iOS bundle ID. */
   appId: string;
-  buildNumber: number;
   health: HealthProfileName;
   sessionsPerMinute: number;
   /** Omits the environment, which EDOT iOS then reports as `default`. */
@@ -97,9 +106,12 @@ export const DIGITAL_EXPERIENCE_MOBILE_APPS: readonly DigitalExperienceMobileApp
   {
     // Modelled on the EDOT weather demos, with the same backend endpoints
     serviceName: 'weather-demo-react-native',
-    serviceVersion: '1.0.0',
+    versions: [
+      { serviceVersion: '1.0.0', buildNumber: 12, share: 0.7 },
+      { serviceVersion: '0.9.1', buildNumber: 11, share: 0.25 },
+      { serviceVersion: '0.9.0', buildNumber: 10, share: 0.05 },
+    ],
     appId: 'co.elastic.otel.demo.weather',
-    buildNumber: 12,
     health: 'healthy',
     sessionsPerMinute: 3,
     manualSpans: { launch: true },
@@ -126,9 +138,12 @@ export const DIGITAL_EXPERIENCE_MOBILE_APPS: readonly DigitalExperienceMobileApp
   },
   {
     serviceName: 'shop-mobile',
-    serviceVersion: '5.3.1',
+    versions: [
+      { serviceVersion: '5.3.1', buildNumber: 5031, share: 0.7 },
+      { serviceVersion: '5.3.0', buildNumber: 5030, share: 0.25 },
+      { serviceVersion: '5.2.4', buildNumber: 5024, share: 0.05 },
+    ],
     appId: 'com.example.store',
-    buildNumber: 5031,
     health: 'healthy',
     sessionsPerMinute: 6,
     deviceWeights: { galaxyS23Android14: 30, galaxyA14Android13: 25, iphone12Ios17: 8 },
@@ -180,9 +195,25 @@ export const DIGITAL_EXPERIENCE_MOBILE_APPS: readonly DigitalExperienceMobileApp
   },
   {
     serviceName: 'banking-mobile',
-    serviceVersion: '3.8.0',
+    versions: [
+      {
+        serviceVersion: '3.8.0',
+        buildNumber: 380,
+        share: 0.7,
+        // A regression of the newest version
+        crashes: {
+          android: [
+            {
+              type: 'com.facebook.react.common.JavascriptException',
+              message: "TypeError: undefined is not an object (evaluating 'payee.iban')",
+            },
+          ],
+        },
+      },
+      { serviceVersion: '3.7.2', buildNumber: 372, share: 0.25 },
+      { serviceVersion: '3.7.0', buildNumber: 370, share: 0.05 },
+    ],
     appId: 'com.example.bank',
-    buildNumber: 380,
     health: 'erroring',
     sessionsPerMinute: 3,
     // About 15% Android
@@ -227,20 +258,17 @@ export const DIGITAL_EXPERIENCE_MOBILE_APPS: readonly DigitalExperienceMobileApp
       errorLogs: ['Biometric authentication failed', 'Session token refresh failed'],
       crashes: {
         ios: [{ type: 'SIGTRAP', message: '#0' }],
-        android: [
-          {
-            type: 'com.facebook.react.common.JavascriptException',
-            message: "TypeError: undefined is not an object (evaluating 'payee.iban')",
-          },
-        ],
       },
     },
   },
   {
     serviceName: 'news-mobile',
-    serviceVersion: '2.14.2',
+    versions: [
+      { serviceVersion: '2.14.2', buildNumber: 2142, share: 0.7 },
+      { serviceVersion: '2.14.1', buildNumber: 2141, share: 0.25 },
+      { serviceVersion: '2.13.0', buildNumber: 2130, share: 0.05 },
+    ],
     appId: 'com.example.news',
-    buildNumber: 2142,
     health: 'slow',
     sessionsPerMinute: 4,
     model: {
@@ -281,9 +309,12 @@ export const DIGITAL_EXPERIENCE_MOBILE_APPS: readonly DigitalExperienceMobileApp
   },
   {
     serviceName: 'field-service-mobile',
-    serviceVersion: '0.9.4',
+    versions: [
+      { serviceVersion: '0.9.4', buildNumber: 94, share: 0.7 },
+      { serviceVersion: '0.9.3', buildNumber: 93, share: 0.25 },
+      { serviceVersion: '0.9.0', buildNumber: 90, share: 0.05 },
+    ],
     appId: 'com.example.fieldservice',
-    buildNumber: 94,
     health: 'critical',
     sessionsPerMinute: 1,
     withoutEnvironment: true,
@@ -358,6 +389,9 @@ export const parseDigitalExperienceMobileScenarioOpts = (
   };
 };
 
+// How often each installation opens the app. Both SDKs keep a session until it has been idle
+// for 30 minutes, so this leaves more than 30 minutes between the sessions of an installation.
+const MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION = 90;
 const MIN_SCREEN_VIEWS = 2;
 const MAX_SCREEN_VIEWS = 6;
 // Share of sessions in which the user leaves the app and comes back within 30 minutes
@@ -389,6 +423,31 @@ const CELLULAR_NETWORKS: Readonly<Record<MobilePlatform, readonly NetworkConnect
   ],
 };
 
+const withVersionCrashes = (
+  model: EdotReactNativeAppModel,
+  crashes: NonNullable<EdotReactNativeAppModel['crashes']>
+): EdotReactNativeAppModel => ({
+  ...model,
+  crashes: {
+    android: [...(model.crashes?.android ?? []), ...(crashes.android ?? [])],
+    ios: [...(model.crashes?.ios ?? []), ...(crashes.ios ?? [])],
+  },
+});
+
+/** The index of an app version, picked by the shares of the installations that run it. */
+const pickVersion = (
+  random: () => number,
+  versions: readonly DigitalExperienceMobileAppVersion[]
+): number => {
+  const total = versions.reduce((sum, { share }) => sum + share, 0);
+  let threshold = random() * total;
+  const index = versions.findIndex(({ share }) => {
+    threshold -= share;
+    return threshold < 0;
+  });
+  return index === -1 ? versions.length - 1 : index;
+};
+
 /** One generator of EDOT React Native sessions per app, ending at their tick and cut off at `from`. */
 export const generateEdotReactNativeSessions = (
   range: Timerange,
@@ -407,9 +466,8 @@ export const generateEdotReactNativeSessions = (
   return DIGITAL_EXPERIENCE_MOBILE_APPS.map(
     ({
       serviceName,
-      serviceVersion,
+      versions,
       appId,
-      buildNumber,
       health,
       sessionsPerMinute,
       withoutEnvironment,
@@ -417,52 +475,68 @@ export const generateEdotReactNativeSessions = (
       model,
       manualSpans = {},
     }) => {
-      const app = edotReactNative.app({
-        serviceName,
-        serviceVersion,
-        appId,
-        buildNumber,
-        environment: withoutEnvironment ? undefined : environment,
-      });
+      const versionApps = versions.map(({ serviceVersion, buildNumber, crashes = {} }) => ({
+        app: edotReactNative.app({
+          serviceName,
+          serviceVersion,
+          appId,
+          buildNumber,
+          environment: withoutEnvironment ? undefined : environment,
+        }),
+        model: withVersionCrashes(model, crashes),
+      }));
       const healthProfile = edotReactNative.healthProfiles[health];
-
-      return generatePerMinute<EdotReactNativeDocument>(
-        range,
-        sessionsPerMinute * scale,
-        ({ time, index }) => {
-          const random = createSeededRandom(`${seed}:${serviceName}:${index}`);
-          // Everything below is drawn even when it isn't used, so that options don't change the
-          // rest of the draws of the session
-          const profile = edotReactNative.pickDeviceProfile(random, deviceWeights, platforms);
-          const [sessionId, installationId, deviceId] = Array.from({ length: 3 }, () =>
-            randomUuid(random)
-          );
-          const screenViews =
-            MIN_SCREEN_VIEWS + Math.floor(random() * (MAX_SCREEN_VIEWS - MIN_SCREEN_VIEWS + 1));
-          const visits = random() < MULTI_VISIT_RATE ? 2 : 1;
-          const onCellular = random() < healthProfile.cellularRate;
-          const networkPick = random();
-          if (!profile) {
-            return [];
-          }
-
-          const networks = CELLULAR_NETWORKS[profile.platform];
-          const network: NetworkConnection = onCellular
-            ? networks[Math.floor(networkPick * networks.length)]
-            : { type: 'wifi' };
-          const events = edotReactNative.session({
-            client: app.client(profile, { installationId, sessionId, deviceId, network }),
-            app: model,
-            health: healthProfile,
-            screenViews,
-            visits,
-            manualSpans: withManualSpans ? manualSpans : {},
-            random,
-            end: time,
-          });
-          return events.filter((event) => getTimestamp(event) >= from);
-        }
+      const perMinute = sessionsPerMinute * scale;
+      // Sessions take turns among the installations, so that each opens the app at a fixed interval
+      const installations = Math.max(
+        Math.ceil(perMinute * MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION),
+        1
       );
+
+      return generatePerMinute<EdotReactNativeDocument>(range, perMinute, ({ time, index }) => {
+        // An installation keeps its device and app version across sessions
+        const installationRandom = createSeededRandom(
+          `${seed}:${serviceName}:installation:${index % installations}`
+        );
+        const profile = edotReactNative.pickDeviceProfile(
+          installationRandom,
+          deviceWeights,
+          platforms
+        );
+        const [installationId, deviceId] = Array.from({ length: 2 }, () =>
+          randomUuid(installationRandom)
+        );
+        const { app, model: versionModel } = versionApps[pickVersion(installationRandom, versions)];
+
+        const random = createSeededRandom(`${seed}:${serviceName}:${index}`);
+        // Everything below is drawn even when it isn't used, so that options don't change the
+        // rest of the draws of the session
+        const sessionId = randomUuid(random);
+        const screenViews =
+          MIN_SCREEN_VIEWS + Math.floor(random() * (MAX_SCREEN_VIEWS - MIN_SCREEN_VIEWS + 1));
+        const visits = random() < MULTI_VISIT_RATE ? 2 : 1;
+        const onCellular = random() < healthProfile.cellularRate;
+        const networkPick = random();
+        if (!profile) {
+          return [];
+        }
+
+        const networks = CELLULAR_NETWORKS[profile.platform];
+        const network: NetworkConnection = onCellular
+          ? networks[Math.floor(networkPick * networks.length)]
+          : { type: 'wifi' };
+        const events = edotReactNative.session({
+          client: app.client(profile, { installationId, sessionId, deviceId, network }),
+          app: versionModel,
+          health: healthProfile,
+          screenViews,
+          visits,
+          manualSpans: withManualSpans ? manualSpans : {},
+          random,
+          end: time,
+        });
+        return events.filter((event) => getTimestamp(event) >= from);
+      });
     }
   );
 };

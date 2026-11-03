@@ -176,6 +176,107 @@ describe('digital experience mobile apps', () => {
       expect(sdkOnly).toEqual(withoutManualSpans);
     });
 
+    describe('installations and versions', () => {
+      // Each installation opens the app every 90 minutes, so they come back over a longer range
+      const longRange = timerange(
+        range.from,
+        new Date(range.from.getTime() + 6 * 60 * 60_000),
+        {} as ToolingLog
+      );
+      let longDocs: EdotReactNativeDocument[];
+      beforeAll(() => {
+        longDocs = collect({ scale: 0.2 }, longRange);
+      });
+
+      const resourceOf = (doc: EdotReactNativeDocument) =>
+        (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes) ?? {};
+
+      const sessionsByInstallation = (serviceName: string) => {
+        const sessions = new Map<string, Map<string, { start: number; end: number }>>();
+        longDocs
+          .filter((doc) => serviceOf(doc) === serviceName && doc.attributes?.['session.id'])
+          .forEach((doc) => {
+            const installationId = String(resourceOf(doc)['app.installation.id']);
+            const sessionId = String(doc.attributes?.['session.id']);
+            const time = Number(doc['@timestamp']);
+            const end = time + (isSpan(doc) ? (doc.duration ?? 0) / 1_000_000 : 0);
+            const byId = sessions.get(installationId) ?? new Map();
+            const session = byId.get(sessionId) ?? { start: time, end };
+            byId.set(sessionId, {
+              start: Math.min(session.start, time),
+              end: Math.max(session.end, end),
+            });
+            sessions.set(installationId, byId);
+          });
+        return sessions;
+      };
+
+      it('brings installations back for more sessions, at least 30 minutes after the last', () => {
+        DIGITAL_EXPERIENCE_MOBILE_APPS.forEach(({ serviceName }) => {
+          const sessions = sessionsByInstallation(serviceName);
+          const sessionCount = [...sessions.values()].reduce((sum, { size }) => sum + size, 0);
+          expect(sessions.size).toBeLessThan(sessionCount / 2);
+          sessions.forEach((byId) => {
+            const sorted = [...byId.values()].sort((a, b) => a.start - b.start);
+            sorted.slice(1).forEach(({ start }, i) => {
+              expect(start - sorted[i].end).toBeGreaterThan(30 * 60_000);
+            });
+          });
+        });
+      });
+
+      it('keeps the device and the app version of an installation', () => {
+        const byInstallation = new Map<string, Set<string>>();
+        longDocs.forEach((doc) => {
+          const resource = resourceOf(doc);
+          const key = String(resource['app.installation.id']);
+          const values = byInstallation.get(key) ?? new Set();
+          values.add(
+            [
+              resource['device.id'],
+              resource['device.model.identifier'],
+              resource['service.version'],
+            ]
+              .map(String)
+              .join('|')
+          );
+          byInstallation.set(key, values);
+        });
+        byInstallation.forEach((values) => expect(values.size).toBe(1));
+      });
+
+      it('spreads the installations over the app versions, newest first', () => {
+        DIGITAL_EXPERIENCE_MOBILE_APPS.forEach(({ serviceName, versions }) => {
+          const versionByInstallation = new Map(
+            longDocs
+              .filter((doc) => serviceOf(doc) === serviceName)
+              .map((doc) => [
+                resourceOf(doc)['app.installation.id'],
+                resourceOf(doc)['service.version'],
+              ])
+          );
+          const counts = versions.map(
+            ({ serviceVersion }) =>
+              [...versionByInstallation.values()].filter((version) => version === serviceVersion)
+                .length
+          );
+          expect(counts[0]).toBeGreaterThan(counts[1]);
+          expect(counts[1]).toBeGreaterThan(0);
+          expect(counts.reduce((sum, count) => sum + count, 0)).toBe(versionByInstallation.size);
+        });
+      });
+
+      it('only crashes the newest banking-mobile version with its regression', () => {
+        const regression = logsOf(collect({ scale: 3 }, longRange)).filter(
+          (doc) =>
+            serviceOf(doc) === 'banking-mobile' &&
+            String(doc.attributes?.['exception.message']).includes('payee.iban')
+        );
+        expect(regression.length).toBeGreaterThan(0);
+        regression.forEach((doc) => expect(resourceOf(doc)['service.version']).toBe('3.8.0'));
+      });
+    });
+
     it('keeps everything within the range', () => {
       const from = range.from.getTime();
       const to = range.to.getTime();
