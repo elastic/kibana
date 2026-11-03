@@ -99,7 +99,7 @@ describe('updateRuleApiKey() API key invalidation characterization', () => {
       );
     });
 
-    test('queues a user-created base64(id:essu_) UIAM key because the uiamApiKey push has no apiKeyCreatedByUser guard (current behavior)', async () => {
+    test('does not queue a user-created base64(id:essu_) UIAM key', async () => {
       mockDecryptedRule({ apiKey: null, uiamApiKey: OLD_UIAM_KEY, apiKeyCreatedByUser: true });
       mockUserApiKeyAuth({ id: 'user-uiam-id', name: 'n', api_key: 'essu_user' });
 
@@ -111,26 +111,16 @@ describe('updateRuleApiKey() API key invalidation characterization', () => {
         apiKeyCreatedByUser: true,
         uiamApiKey: encode('user-uiam-id:essu_user'),
       });
-      expect(bulkMarkMock).toHaveBeenCalledTimes(1);
-      expect(bulkMarkMock).toHaveBeenCalledWith(
-        { apiKeys: [encode('user-uiam-id:essu_user')] },
-        rulesClientParams.logger,
-        unsecuredSavedObjectsClient
-      );
+      expect(bulkMarkMock).not.toHaveBeenCalled();
     });
 
-    test('passes a user-created raw essu_ UIAM key to bulkMarkApiKeysForInvalidation (current behavior)', async () => {
+    test('does not queue a user-created raw essu_ UIAM key', async () => {
       mockDecryptedRule({ apiKey: null, uiamApiKey: 'essu_user_raw', apiKeyCreatedByUser: true });
       mockUserApiKeyAuth({ name: 'n', api_key: 'essu_user_raw' });
 
       await expect(rulesClient.updateRuleApiKey({ id: '1' })).rejects.toThrow('Fail');
 
-      expect(bulkMarkMock).toHaveBeenCalledTimes(1);
-      expect(bulkMarkMock).toHaveBeenCalledWith(
-        { apiKeys: ['essu_user_raw'] },
-        rulesClientParams.logger,
-        unsecuredSavedObjectsClient
-      );
+      expect(bulkMarkMock).not.toHaveBeenCalled();
     });
 
     test('does not queue a user-created ES key', async () => {
