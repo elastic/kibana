@@ -7,14 +7,19 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
+import { DATASTREAM_DATASET } from '@kbn/metrics-data-access-plugin/common';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { termQuery } from '../../../common/utils/term_query';
 import type { IEnvOptions } from './get_service_map';
 import { recordByService } from './record_by_service';
+
+/** OpenTelemetry service-destination metrics that are not part of the APM rollup. */
+const OTEL_ONE_MINUTE_DATASET = `service_destination.${RollupInterval.OneMinute}.otel`;
 
 /** How far back the calls reach, ending when the map's own range ends. */
 export const SERVICE_CALL_GRAPH_WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -50,23 +55,45 @@ interface ServiceCallAggregate {
 }
 
 /**
- * Reads each service's calls over the last day, keeping the coarsest count for each pair
- * and adding pairs that exist only on a finer rollup.
+ * Reads each service's calls over the last day from the coarsest rollup that has data.
+ * OpenTelemetry calls that exist only at 1 minute are added without reading the APM copy.
  */
 export async function getServiceCallGraph(
   options: ServiceCallGraphOptions
 ): Promise<ServiceCallGraph> {
-  // A failure on the coarse rollup is a failed query. It does not fall through to a finer one.
-  const sixtyMinutes = await readServiceCalls({
-    ...options,
-    rollupInterval: RollupInterval.SixtyMinutes,
-  });
-  const [tenMinutes, oneMinute] = await Promise.all([
-    readServiceCalls({ ...options, rollupInterval: RollupInterval.TenMinutes }),
-    readServiceCalls({ ...options, rollupInterval: RollupInterval.OneMinute }),
-  ]);
+  // A failure here is a failed query. It does not fall through to a finer rollup.
+  const sixtyMinutes = await readCoarseRollup(options, RollupInterval.SixtyMinutes);
+  if (sixtyMinutes) {
+    return sixtyMinutes;
+  }
 
-  return mergeServiceCalls([sixtyMinutes, tenMinutes, oneMinute]);
+  const tenMinutes = await readCoarseRollup(options, RollupInterval.TenMinutes);
+  if (tenMinutes) {
+    return tenMinutes;
+  }
+
+  return readServiceCalls({ ...options, rollupInterval: RollupInterval.OneMinute });
+}
+
+/**
+ * Returns the rollup, plus 1-minute OpenTelemetry calls it does not already contain.
+ * An empty rollup returns undefined so the caller can try a finer interval.
+ */
+async function readCoarseRollup(
+  options: ServiceCallGraphOptions,
+  rollupInterval: RollupInterval.SixtyMinutes | RollupInterval.TenMinutes
+): Promise<ServiceCallGraph | undefined> {
+  const coarse = await readServiceCalls({ ...options, rollupInterval });
+  if (Object.keys(coarse).length === 0) {
+    return undefined;
+  }
+
+  const otelOnly = await readServiceCalls({
+    ...options,
+    rollupInterval: RollupInterval.OneMinute,
+    dataset: OTEL_ONE_MINUTE_DATASET,
+  });
+  return mergeServiceCalls([coarse, otelOnly]);
 }
 
 /** Finer rollups only contribute pairs the coarser ones did not already count. */
@@ -102,7 +129,11 @@ async function readServiceCalls({
   end,
   serviceGroupKuery,
   rollupInterval,
-}: ServiceCallGraphOptions & { rollupInterval: RollupInterval }): Promise<ServiceCallGraph> {
+  dataset,
+}: ServiceCallGraphOptions & {
+  rollupInterval: RollupInterval;
+  dataset?: string;
+}): Promise<ServiceCallGraph> {
   const graph = new Map<string, ServiceDestinationCall[]>();
   let after: Record<string, string | number | null> | undefined;
 
@@ -119,6 +150,7 @@ async function readServiceCalls({
             ...rangeQuery(end - SERVICE_CALL_GRAPH_WINDOW_MS, end),
             ...environmentQuery(environment),
             ...kqlQuery(serviceGroupKuery),
+            ...termQuery(DATASTREAM_DATASET, dataset),
           ],
         },
       },

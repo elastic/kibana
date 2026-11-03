@@ -7,6 +7,7 @@
 
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
+import { DATASTREAM_DATASET } from '@kbn/metrics-data-access-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getServiceCallGraph, SERVICE_CALL_GRAPH_WINDOW_MS } from './get_service_call_graph';
@@ -71,12 +72,27 @@ function getSearchCall(search: SearchMock, callIndex: number) {
   };
 }
 
+const OTEL_ONE_MINUTE_DATASET = `service_destination.${RollupInterval.OneMinute}.otel`;
+
 function rollupIntervalOf(params: CallGraphSearchParams) {
   return params.apm.sources?.[0].rollupInterval;
 }
 
+function datasetOf(params: CallGraphSearchParams): string | undefined {
+  for (const filter of params.query.bool.filter) {
+    if (typeof filter !== 'object' || filter === null || !('term' in filter)) {
+      continue;
+    }
+    const dataset = (filter as { term: Record<string, unknown> }).term[DATASTREAM_DATASET];
+    if (typeof dataset === 'string') {
+      return dataset;
+    }
+  }
+  return undefined;
+}
+
 describe('getServiceCallGraph', () => {
-  it('uses the 60 minute count and still reads the finer rollups', async () => {
+  it('reads 1 minute OpenTelemetry calls when the 60 minute rollup has data', async () => {
     const search: SearchMock = jest
       .fn()
       .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 12)]))
@@ -85,15 +101,20 @@ describe('getServiceCallGraph', () => {
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
     );
 
-    expect(search).toHaveBeenCalledTimes(3);
+    expect(search).toHaveBeenCalledTimes(2);
     const call = getSearchCall(search, 0);
     expect(call.operationName).toBe('get_service_call_graph_for_service_map');
     expect(call.params.apm.sources?.[0]).toEqual({
       documentType: ApmDocumentType.ServiceDestinationMetric,
       rollupInterval: RollupInterval.SixtyMinutes,
     });
-    expect(rollupIntervalOf(getSearchCall(search, 1).params)).toBe(RollupInterval.TenMinutes);
-    expect(rollupIntervalOf(getSearchCall(search, 2).params)).toBe(RollupInterval.OneMinute);
+    expect(datasetOf(call.params)).toBeUndefined();
+    const otelCall = getSearchCall(search, 1);
+    expect(rollupIntervalOf(otelCall.params)).toBe(RollupInterval.OneMinute);
+    expect(datasetOf(otelCall.params)).toBe(OTEL_ONE_MINUTE_DATASET);
+    expect(
+      search.mock.calls.map((callArgs) => rollupIntervalOf(callArgs[1] as CallGraphSearchParams))
+    ).not.toContain(RollupInterval.TenMinutes);
     expect(graph).toEqual({ cart: [{ destination: 'payment', calls: 12 }] });
   });
 
@@ -118,6 +139,7 @@ describe('getServiceCallGraph', () => {
     expect(getSearchCall(search, 2).params.apm.sources?.[0].rollupInterval).toBe(
       RollupInterval.OneMinute
     );
+    expect(datasetOf(getSearchCall(search, 2).params)).toBeUndefined();
     expect(graph).toEqual({ cart: [{ destination: 'payment', calls: 3 }] });
   });
 
@@ -136,6 +158,8 @@ describe('getServiceCallGraph', () => {
     expect(getSearchCall(search, 1).params.apm.sources?.[0].rollupInterval).toBe(
       RollupInterval.TenMinutes
     );
+    expect(rollupIntervalOf(getSearchCall(search, 2).params)).toBe(RollupInterval.OneMinute);
+    expect(datasetOf(getSearchCall(search, 2).params)).toBe(OTEL_ONE_MINUTE_DATASET);
     expect(graph.cart[0].calls).toBe(8);
   });
 
@@ -199,7 +223,7 @@ describe('getServiceCallGraph', () => {
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
     );
 
-    expect(search).toHaveBeenCalledTimes(4);
+    expect(search).toHaveBeenCalledTimes(3);
     expect(getSearchCall(search, 1).params.aggs.calls.composite.after).toEqual({
       service: 'next',
       destination: 'next',
@@ -265,7 +289,7 @@ describe('getServiceCallGraph', () => {
       (call) => rollupIntervalOf(call[1] as CallGraphSearchParams) === RollupInterval.SixtyMinutes
     );
     expect(sixtyMinuteCalls).toHaveLength(50);
-    expect(search).toHaveBeenCalledTimes(52);
+    expect(search).toHaveBeenCalledTimes(51);
   });
 
   it('filters on the environment and the service group, over the day ending at the map range', async () => {
@@ -328,29 +352,22 @@ describe('getServiceCallGraph', () => {
     expect(Object.getPrototypeOf(graph)).toBeNull();
   });
 
-  it('adds a destination that exists only on a finer rollup, and does not sum a pair already counted', async () => {
+  it('adds an OpenTelemetry destination without summing a pair the coarse rollup already counted', async () => {
     const search: SearchMock = jest
       .fn()
       .mockResolvedValueOnce(callResponse([bucket('cart', 'payment', 100)]))
       .mockResolvedValueOnce(
-        callResponse([bucket('cart', 'payment', 100), bucket('cart', 'shipping', 4)])
-      )
-      .mockResolvedValueOnce(
-        callResponse([
-          bucket('cart', 'payment', 80),
-          bucket('cart', 'shipping', 9),
-          bucket('cart', 'orders', 5),
-        ])
+        callResponse([bucket('cart', 'payment', 80), bucket('cart', 'orders', 5)])
       );
 
     const graph = await getServiceCallGraph(
       makeOptions({ apmEventClient: { search } as unknown as APMEventClient })
     );
 
+    expect(datasetOf(getSearchCall(search, 1).params)).toBe(OTEL_ONE_MINUTE_DATASET);
     expect(graph).toEqual({
       cart: [
         { destination: 'payment', calls: 100 },
-        { destination: 'shipping', calls: 4 },
         { destination: 'orders', calls: 5 },
       ],
     });
@@ -364,7 +381,6 @@ describe('getServiceCallGraph', () => {
           Array.from({ length: 1000 }, (_, index) => bucket('gateway', `dest-${index}`, 1))
         )
       )
-      .mockResolvedValueOnce(callResponse([]))
       .mockResolvedValueOnce(callResponse([bucket('gateway', 'otel-only', 9)]));
 
     const graph = await getServiceCallGraph(
