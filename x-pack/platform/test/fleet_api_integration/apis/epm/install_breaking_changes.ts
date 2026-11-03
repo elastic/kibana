@@ -22,7 +22,7 @@ export default function (providerContext: FtrProviderContext) {
     supertest
       .post(`/api/fleet/epm/packages/${PKG_NAME}/${version}`)
       .set('kbn-xsrf', 'xxxx')
-      .send({ allow_outdated_version: true, ...body });
+      .send(body);
 
   const deletePackage = async () => {
     const res = await supertest.get(`/api/fleet/epm/packages/${PKG_NAME}`).expect(200);
@@ -67,7 +67,8 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('package install', () => {
       beforeEach(async () => {
-        await installPackage('1.0.0').expect(200);
+        // 9.5 only allows installing a version older than the latest with `force`
+        await installPackage('1.0.0', { force: true }).expect(200);
       });
 
       afterEach(async () => {
@@ -89,7 +90,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should allow an upgrade without breaking changes', async () => {
-        await installPackage('1.1.0').expect(200);
+        await installPackage('1.1.0', { force: true }).expect(200);
 
         await expectInstalledVersion('1.1.0');
       });
@@ -161,7 +162,8 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('package policy upgrade', () => {
       before(async () => {
-        await installPackage('1.0.0').expect(200);
+        // 9.5 only allows installing a version older than the latest with `force`
+        await installPackage('1.0.0', { force: true }).expect(200);
         await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
