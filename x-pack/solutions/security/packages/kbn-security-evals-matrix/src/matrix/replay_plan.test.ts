@@ -196,6 +196,27 @@ describe('planReplay', () => {
     expect(planReplay([doc(), other, otherRun], refs).cells).toHaveLength(3);
   });
 
+  it('keeps every repetition of one execution as its own cell', () => {
+    // A 3-rep sweep stores three trajectories under one execution id and
+    // example; deduping on (execution, example) would rejudge one and drop two.
+    const rep = (repetition_index: number) =>
+      doc({
+        task: {
+          model: { id: 'm' },
+          repetition_index,
+          output: { messages: [{ message: `answer ${repetition_index}` }] },
+        },
+      } as never);
+
+    const plan = planReplay([rep(0), rep(1), rep(2), rep(1)], refs);
+
+    expect(plan.cells.map((cell) => [cell.repetition, cell.agentResponse])).toEqual([
+      [0, 'answer 0'],
+      [1, 'answer 1'],
+      [2, 'answer 2'],
+    ]);
+  });
+
   it('skips ungradeable cells instead of grading empty strings', () => {
     const noAnswer = doc({ task: { model: { id: 'm' }, output: { messages: [] } } });
     const plan = planReplay([noAnswer], refs);

@@ -55,6 +55,46 @@ describe('anonymizeCell steps', () => {
   });
 });
 
+describe('anonymizeCell structured payloads', () => {
+  const aliases = new Map([['anthropic-claude-4.6-sonnet', 'A']]);
+
+  it('scrubs identity from the task output an Attack Discovery jury grades', () => {
+    const c = anonymizeCell(
+      cell({
+        taskOutput: {
+          insights: [{ title: 'Found by Claude', alertIds: ['a1'], count: 2 }],
+          model: 'anthropic-claude-4.6-sonnet',
+        },
+      }),
+      aliases
+    );
+    const serialized = JSON.stringify(c.taskOutput);
+    expect(serialized).not.toMatch(/claude|anthropic/i);
+    expect(c.taskOutput).toMatchObject({ insights: [{ alertIds: ['a1'], count: 2 }] });
+  });
+
+  it('scrubs identity from the structured reference', () => {
+    const c = anonymizeCell(
+      cell({ expectedStructured: { criteria: ['Mentions OpenAI tooling'], n: 1 } }),
+      aliases
+    );
+    expect(JSON.stringify(c.expectedStructured)).not.toMatch(/openai/i);
+    expect(c.expectedStructured).toMatchObject({ n: 1 });
+  });
+
+  it('keeps absent structured payloads absent', () => {
+    const c = anonymizeCell(cell(), aliases);
+    expect(c.taskOutput).toBeUndefined();
+    expect(c.expectedStructured).toBeUndefined();
+  });
+
+  it('does not mutate the source task output', () => {
+    const taskOutput = { insights: [{ title: 'Claude says' }] };
+    anonymizeCell(cell({ taskOutput }), aliases);
+    expect(taskOutput.insights[0].title).toBe('Claude says');
+  });
+});
+
 describe('buildAliasMap', () => {
   it('assigns a stable alias per model, ordered by model id', () => {
     // Aliases must not depend on cell order: two runs of the same replay have

@@ -61,6 +61,8 @@ export type ReferenceLookup = (exampleId: string) => string | undefined;
 export interface ReplayCell {
   executionId: string;
   exampleId: string;
+  /** Repetition of the example this trajectory is; 0 for single-rep runs. */
+  repetition?: number;
   modelId: string;
   /** The question put to the agent. */
   question: string;
@@ -109,6 +111,7 @@ export interface ReplayCell {
 export interface PlanIssue {
   executionId: string;
   exampleId: string;
+  repetition?: number;
   reason: string;
 }
 
@@ -143,10 +146,13 @@ export function agentSteps(output: unknown): unknown[] {
   return Array.isArray(steps) ? steps : [];
 }
 
+const cellKey = (executionId: string, exampleId: string, repetition: number): string =>
+  `${executionId}::${exampleId}::${repetition}`;
+
 /**
  * Build a replay plan from golden score documents.
  *
- * Deduplicates by (executionId, exampleId): a cell carries one trajectory but
+ * Deduplicates by (executionId, exampleId, repetition): a cell carries one trajectory but
  * many evaluator documents, and re-judging the same trajectory once per
  * evaluator would multiply judge cost by the evaluator count and write
  * conflicting analyses for a single cell.
@@ -185,7 +191,8 @@ export function planReplay(
   for (const doc of docs) {
     const executionId = doc.metadata?.execution_id ?? '';
     const exampleId = joinValue(doc, joinField);
-    const key = `${executionId}::${exampleId}`;
+    const repetition = doc.task?.repetition_index ?? 0;
+    const key = cellKey(executionId, exampleId, repetition);
     if (!cells.has(key)) {
       const question = (doc.example?.input as { question?: unknown })?.question;
       // Reference comes from the dataset, not the document (see ReferenceLookup).
@@ -195,6 +202,7 @@ export function planReplay(
       const candidate: ReplayCell = {
         executionId,
         exampleId,
+        repetition,
         modelId: doc.task?.model?.id ?? '',
         question: typeof question === 'string' ? question : '',
         expected: typeof expected === 'string' ? expected : '',
@@ -229,6 +237,7 @@ export function planReplay(
         skipped.push({
           executionId,
           exampleId,
+          repetition,
           reason: `missing ${missing.join(', ')}`,
         });
       }
@@ -242,7 +251,9 @@ export function planReplay(
   const resolved = new Set(cells.keys());
   return {
     cells: [...cells.values()],
-    skipped: skipped.filter((s) => !resolved.has(`${s.executionId}::${s.exampleId}`)),
+    skipped: skipped.filter(
+      (s) => !resolved.has(cellKey(s.executionId, s.exampleId, s.repetition ?? 0))
+    ),
   };
 }
 

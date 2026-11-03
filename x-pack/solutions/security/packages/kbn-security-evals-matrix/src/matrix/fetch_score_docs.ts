@@ -14,6 +14,8 @@ import { DEFAULT_JOIN_FIELD } from './reference_adapters';
 export interface RawScoreDoc {
   metadata?: { execution_id?: string; suite_id?: string };
   task?: {
+    /** Which repetition of the example this trajectory is; absent on single-rep runs. */
+    repetition_index?: number;
     model?: { id?: string };
     output?: { messages?: Array<{ message?: { content?: unknown } }> };
   };
@@ -30,14 +32,17 @@ const SCORES_INDEX = '.ds-.evaluation-scores*';
 // payloads total ~7 MB per example (~56 min for 21 examples). Callers scope by
 // execution id or model, so this only has to bound a pathological request.
 const PAGE_SIZE = 200;
-// Evaluator count per (execution, example) group. A suite writes one document
-// per evaluator (~15 today); 50 leaves headroom without pulling whole runs.
-const MEMBERS_PER_EXECUTION = 50;
+// Document count per (execution, example) group. A suite writes one document
+// per evaluator (~15 today) for EVERY repetition, so 3-rep sweeps need ~45.
+// 100 is Elasticsearch's default `index.max_inner_result_window`; asking for
+// more makes the whole query fail.
+const MEMBERS_PER_EXECUTION = 100;
 
 const SOURCE_FIELDS = [
   'metadata.execution_id',
   'metadata.suite_id',
   'task.model.id',
+  'task.repetition_index',
   'task.output',
   'example.id',
   'example.metadata',
@@ -135,9 +140,9 @@ export const fetchScoreDocs = async ({
   // pre-dates trajectory capture -- so newer, gradable runs never surface.
   // Resolve the newest execution per (model, example) first, then fetch only
   // those executions.
-  const effectiveExecutionIds =
+  const executionsByExample: Map<string, string[]> =
     executionIds?.length && executionIds.length > 0
-      ? executionIds
+      ? new Map(exampleIds.map((exampleId) => [exampleId, executionIds]))
       : await resolveLatestExecutions({
           esUrl,
           apiKey,
@@ -148,12 +153,6 @@ export const fetchScoreDocs = async ({
           asOf,
         });
 
-  if (effectiveExecutionIds.length === 0) {
-    return [];
-  }
-
-  filter.push({ terms: { 'metadata.execution_id': effectiveExecutionIds } });
-
   // One request per example, collapsed to one document per execution.
   //
   // A trajectory is stored once per evaluator (~15 docs), so scrolling the raw
@@ -162,7 +161,17 @@ export const fetchScoreDocs = async ({
   // the judge needs, which is both correct and ~100x cheaper.
   const docs: RawScoreDoc[] = [];
 
-  for (const exampleId of exampleIds) {
+  // An example with no execution has nothing to fetch.
+  const fetchableExampleIds = exampleIds.filter(
+    (exampleId) => (executionsByExample.get(exampleId) ?? []).length > 0
+  );
+
+  for (const exampleId of fetchableExampleIds) {
+    // Each example is fetched from ITS newest executions only. Unioning the
+    // executions across examples re-adds an older run whenever any other
+    // example's newest run is that older one, so the same example would be
+    // fetched and rejudged from both runs.
+    const exampleExecutionIds = executionsByExample.get(exampleId) ?? [];
     const response = await fetch(`${esUrl.replace(/\/$/, '')}/${SCORES_INDEX}/_search`, {
       method: 'POST',
       headers: {
@@ -172,7 +181,15 @@ export const fetchScoreDocs = async ({
       body: JSON.stringify({
         size: PAGE_SIZE,
         track_total_hits: false,
-        query: { bool: { filter: [...filter, { term: { [joinField]: exampleId } }] } },
+        query: {
+          bool: {
+            filter: [
+              ...filter,
+              { terms: { 'metadata.execution_id': exampleExecutionIds } },
+              { term: { [joinField]: exampleId } },
+            ],
+          },
+        },
         // A trajectory is written once per evaluator, and only some of those
         // documents carry the graded payload (`task.output.messages` for prose
         // suites, `task.output.insights` for attack discovery). `collapse`
@@ -212,10 +229,7 @@ export const fetchScoreDocs = async ({
         .map((member) => member._source)
         .filter((source): source is RawScoreDoc => Boolean(source));
 
-      const chosen = members.find(hasGradablePayload) ?? hit._source;
-      if (chosen) {
-        docs.push(chosen);
-      }
+      docs.push(...chooseDocsForHit(hit._source, members));
     }
   }
 
@@ -223,7 +237,35 @@ export const fetchScoreDocs = async ({
 };
 
 /**
- * Maps each (model, example) to its newest execution.
+ * Pick the documents to replay for one collapsed (execution, example) hit.
+ *
+ * A multi-repetition run stores each repetition's trajectory under the same
+ * execution id; only `task.repetition_index` tells them apart. Collapsing to
+ * one document per execution would silently drop all but one repetition, so a
+ * gradable member is chosen PER repetition.
+ */
+const chooseDocsForHit = (
+  representative: RawScoreDoc | undefined,
+  members: RawScoreDoc[]
+): RawScoreDoc[] => {
+  const byRepetition = new Map<number, RawScoreDoc[]>();
+  for (const member of members) {
+    const repetition = member.task?.repetition_index ?? 0;
+    byRepetition.set(repetition, [...(byRepetition.get(repetition) ?? []), member]);
+  }
+
+  if (byRepetition.size === 0) {
+    return representative ? [representative] : [];
+  }
+
+  return [...byRepetition.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([, group]) => group.find(hasGradablePayload) ?? group[0])
+    .filter((doc): doc is RawScoreDoc => Boolean(doc));
+};
+
+/**
+ * Maps each example to the newest execution of each model that ran it.
  *
  * Runs the per-example aggregation one example at a time, mirroring the
  * document fetch, so a wide example set costs no more than the fetch that
@@ -245,9 +287,9 @@ async function resolveLatestExecutions({
   modelIds?: string[];
   suiteIds?: string[];
   asOf?: number;
-}): Promise<string[]> {
+}): Promise<Map<string, string[]>> {
   const indexUrl = `${esUrl.replace(/\/$/, '')}/${SCORES_INDEX}/_search`;
-  const chosen = new Set<string>();
+  const chosen = new Map<string, string[]>();
 
   const filter: unknown[] = [];
   if (suiteIds?.length) {
@@ -306,13 +348,15 @@ async function resolveLatestExecutions({
       };
     };
 
+    const executionIds = new Set<string>();
     for (const bucket of parsed.aggregations?.by_model?.buckets ?? []) {
       const executionId = bucket.latest?.hits?.hits?.[0]?._source?.metadata?.execution_id;
       if (executionId) {
-        chosen.add(executionId);
+        executionIds.add(executionId);
       }
     }
+    chosen.set(exampleId, [...executionIds]);
   }
 
-  return [...chosen];
+  return chosen;
 }

@@ -12,6 +12,7 @@ import {
   buildStructuredReferences,
   collectExamples,
   selectAdapter,
+  resolveJoinField,
   type DatasetExample,
 } from './reference_adapters';
 
@@ -159,6 +160,44 @@ describe('reference adapters', () => {
 
     it('returns no adapter for an unrecognised suite shape', () => {
       expect(selectAdapter([{ id: 'a', output: { somethingElse: 1 } }])).toBeUndefined();
+    });
+  });
+
+  describe('attack-discovery join field per dataset shape', () => {
+    // `goldenPathExamples` (agent-builder suite) carries metadata.fixture, not
+    // metadata.scenarioKey. Filtering golden on a field no document has returns
+    // zero cells, which reads as "nothing to replay" rather than a bad join.
+    const goldenPath: DatasetExample[] = [
+      { output: { criteria: ['a'] }, metadata: { fixture: 'provided-alerts' } },
+      { output: { criteria: ['b'] }, metadata: { fixture: 'live-retrieval' } },
+    ];
+    const registry: DatasetExample[] = [
+      { output: { criteria: ['a'] }, metadata: { scenarioKey: 'wmi-lateral' } },
+    ];
+
+    it('joins goldenPathExamples on metadata.fixture', () => {
+      expect(resolveJoinField(attackDiscoveryAdapter, goldenPath)).toBe('example.metadata.fixture');
+    });
+
+    it('keys both reference maps by fixture so lookups agree with the join field', () => {
+      expect([...attackDiscoveryAdapter.build(goldenPath).keys()]).toEqual([
+        'provided-alerts',
+        'live-retrieval',
+      ]);
+      expect([...buildStructuredReferences(goldenPath).keys()]).toEqual([
+        'provided-alerts',
+        'live-retrieval',
+      ]);
+    });
+
+    it('keeps scenarioKey for scenario-registry datasets', () => {
+      expect(resolveJoinField(attackDiscoveryAdapter, registry)).toBe(
+        'example.metadata.scenarioKey'
+      );
+    });
+
+    it('uses example.id for adapters that name no join field', () => {
+      expect(resolveJoinField(personaMatrixAdapter, [])).toBe('example.id');
     });
   });
 

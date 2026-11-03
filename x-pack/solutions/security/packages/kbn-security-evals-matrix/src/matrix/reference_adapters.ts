@@ -49,6 +49,12 @@ export interface ReferenceAdapter {
    * `example.id` when omitted.
    */
   joinField?: string;
+  /**
+   * Resolve the join field from the loaded examples when one adapter accepts
+   * datasets that identify their examples differently. Takes precedence over
+   * `joinField`.
+   */
+  joinFieldFor?: (examples: DatasetExample[]) => string;
   /** True when this adapter recognises the module's examples. */
   matches: (examples: DatasetExample[]) => boolean;
   /** joinField value -> reference string. */
@@ -59,6 +65,13 @@ export interface ReferenceAdapter {
 export const DEFAULT_JOIN_FIELD = 'example.id';
 
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.length > 0;
+
+const metadataString = (example: DatasetExample, key: string): unknown =>
+  (example?.metadata as Record<string, unknown> | undefined)?.[key];
+
+/** Join field a loaded dataset's reference keys correspond to. */
+export const resolveJoinField = (adapter: ReferenceAdapter, examples: DatasetExample[]): string =>
+  adapter.joinFieldFor?.(examples) ?? adapter.joinField ?? DEFAULT_JOIN_FIELD;
 
 /**
  * persona-matrix: the reference is already prose.
@@ -107,6 +120,16 @@ export const attackDiscoveryAdapter: ReferenceAdapter = {
     'dataset',
   ],
   joinField: 'example.metadata.scenarioKey',
+  // The scenario-registry datasets carry `metadata.scenarioKey`; the
+  // agent-builder `goldenPathExamples` carry `metadata.fixture` instead. Both are
+  // registered one example per dataset, so `example.id` is '0' either way and
+  // the field that varies is the only usable join.
+  joinFieldFor: (examples) =>
+    examples.length > 0 &&
+    examples.every((e) => isNonEmptyString(metadataString(e, 'fixture'))) &&
+    !examples.some((e) => isNonEmptyString(metadataString(e, 'scenarioKey')))
+      ? 'example.metadata.fixture'
+      : 'example.metadata.scenarioKey',
   matches: (examples) => examples.some((e) => Array.isArray(e?.output?.criteria)),
   build: (examples) => {
     const refs = new Map<string, string>();
@@ -249,14 +272,18 @@ export function selectAdapter(examples: DatasetExample[]): ReferenceAdapter | un
  *
  * attack-discovery registers each scenario as its own single-example dataset, so
  * golden records `example.id = '0'` on every document and only
- * `example.metadata.scenarioKey` distinguishes them. Prefer that key, fall back
- * to an explicit id, then to the position, so datasets that do carry ids or rely
- * on order keep working.
+ * `example.metadata.scenarioKey` distinguishes them. Prefer that key, then
+ * `metadata.fixture` (agent-builder golden path), then an explicit id, then the
+ * position, so datasets that carry ids or rely on order keep working.
  */
 function exampleKey(example: DatasetExample, index: number): string {
-  const scenarioKey = (example as { metadata?: { scenarioKey?: unknown } })?.metadata?.scenarioKey;
+  const scenarioKey = metadataString(example, 'scenarioKey');
   if (isNonEmptyString(scenarioKey)) {
     return scenarioKey;
+  }
+  const fixture = metadataString(example, 'fixture');
+  if (isNonEmptyString(fixture)) {
+    return fixture;
   }
   return example.id ?? String(index);
 }

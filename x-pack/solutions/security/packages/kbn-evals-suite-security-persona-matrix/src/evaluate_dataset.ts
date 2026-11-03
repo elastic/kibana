@@ -129,21 +129,56 @@ const ARTIFACT_PRODUCING_TOOL_IDS = new Set([
   'security.update_detection_rule',
 ]);
 
+const messageTexts = (output: TaskOutput): string[] =>
+  (
+    ((output as { messages?: Array<{ message?: unknown }> }).messages ?? []) as Array<{
+      message?: unknown;
+    }>
+  )
+    .map((entry) => entry?.message)
+    .filter((message): message is string => typeof message === 'string');
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const isRenderTagFor = (text: string, attachmentId: string): boolean =>
+  text.includes('<render_attachment') &&
+  new RegExp(`<render_attachment[^>]*\\bid\\s*=\\s*["']?${escapeRegExp(attachmentId)}\\b`).test(
+    text
+  );
+
 /**
- * True when the run produced a rendered artifact: an artifact-producing tool
- * returned `success: true` with a `rule` payload. Mirrors the shape asserted
- * by the dataset references ("renders the created rule attachment inline").
+ * True when the run rendered an artifact: an artifact-producing tool returned
+ * `success: true` with a `rule` payload AND an `attachment_id`, and a message
+ * emitted a `<render_attachment id="<that id>">` tag. The tool only stores the
+ * attachment; the user sees it solely when the agent emits the tag, so a
+ * successful tool result alone is not a rendered artifact.
  */
-const hasRenderedArtifact = (output: TaskOutput): boolean =>
-  getToolCallSteps(output).some((step) => {
+const hasRenderedArtifact = (output: TaskOutput): boolean => {
+  const texts = messageTexts(output);
+  if (texts.length === 0) {
+    return false;
+  }
+  return getToolCallSteps(output).some((step) => {
     if (!step.tool_id || !ARTIFACT_PRODUCING_TOOL_IDS.has(step.tool_id)) {
       return false;
     }
     return (step.results ?? []).some((result) => {
-      const data = (result as { data?: { success?: unknown; rule?: unknown } } | undefined)?.data;
-      return Boolean(data?.success === true && data?.rule);
+      const data = (
+        result as
+          | { data?: { success?: unknown; rule?: unknown; attachment_id?: unknown } }
+          | undefined
+      )?.data;
+      const attachmentId = data?.attachment_id;
+      return Boolean(
+        data?.success === true &&
+          data?.rule &&
+          typeof attachmentId === 'string' &&
+          attachmentId.length > 0 &&
+          texts.some((text) => isRenderTagFor(text, attachmentId))
+      );
     });
   });
+};
 
 /**
  * Regression gate for the empty-final-message failure mode: 62% of
@@ -152,12 +187,13 @@ const hasRenderedArtifact = (output: TaskOutput): boolean =>
  * read.
  *
  * Scores 1 when the run leaves the user something to read: either non-empty
- * closing prose, or a rendered artifact (a successfully created/updated rule).
- * The artifact clause exists because `detection-rule-edit` references
- * explicitly ask the agent to render the rule attachment inline "rather than
- * describing the rule in prose only" — scoring those runs 0 measured the
- * harness, not the model. Runs that end silently *without* producing an
- * artifact still score 0: that is the real premature-termination failure.
+ * closing prose, or a rendered artifact (a created/updated rule whose
+ * `<render_attachment>` tag was emitted). The artifact clause exists because
+ * `detection-rule-edit` references explicitly ask the agent to render the rule
+ * attachment inline "rather than describing the rule in prose only". A
+ * successful rule tool call alone does not count: it only stores the
+ * attachment, so a run that ends silently after it is the real
+ * premature-termination failure and still scores 0.
  *
  * N/A only when the task produced no output at all (harness failure — already
  * surfaced by every other evaluator).

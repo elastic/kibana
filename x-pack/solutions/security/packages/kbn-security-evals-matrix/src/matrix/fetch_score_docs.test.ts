@@ -90,7 +90,7 @@ describe('fetchScoreDocs', () => {
 
     expect(body(0).collapse).toEqual({
       field: 'metadata.execution_id',
-      inner_hits: { name: 'members', size: 50, _source: expect.any(Array) },
+      inner_hits: { name: 'members', size: 100, _source: expect.any(Array) },
     });
   });
 
@@ -216,5 +216,92 @@ describe('fetchScoreDocs', () => {
     await expect(
       fetchScoreDocs({ esUrl, apiKey, exampleIds: ['a'], executionIds: ['e1'] })
     ).rejects.toThrow(/403 forbidden/);
+  });
+
+  it('scopes each example to its own newest executions, not the union across examples', async () => {
+    // Example X's newest run is `new`; example Y only exists in `old`. Unioning
+    // would also fetch X from `old`, rejudging X twice from different runs.
+    const resolution = (executionId: string) => ({
+      ok: true,
+      json: async () => ({
+        aggregations: {
+          by_model: {
+            buckets: [
+              {
+                latest: {
+                  hits: { hits: [{ _source: { metadata: { execution_id: executionId } } }] },
+                },
+              },
+            ],
+          },
+        },
+      }),
+    });
+    fetchMock
+      .mockResolvedValueOnce(resolution('new'))
+      .mockResolvedValueOnce(resolution('old'))
+      .mockResolvedValue(okResponse([]));
+
+    await fetchScoreDocs({ esUrl, apiKey, exampleIds: ['x', 'y'], modelIds: ['m1'] });
+
+    const fetches = fetchMock.mock.calls.slice(2).map(([, init]) => JSON.parse(init.body));
+    expect(fetches).toHaveLength(2);
+    expect(fetches[0].query.bool.filter).toContainEqual({ term: { 'example.id': 'x' } });
+    expect(fetches[0].query.bool.filter).toContainEqual({
+      terms: { 'metadata.execution_id': ['new'] },
+    });
+    expect(fetches[1].query.bool.filter).toContainEqual({ term: { 'example.id': 'y' } });
+    expect(fetches[1].query.bool.filter).toContainEqual({
+      terms: { 'metadata.execution_id': ['old'] },
+    });
+    expect(fetches[1].query.bool.filter).not.toContainEqual({
+      terms: { 'metadata.execution_id': ['new'] },
+    });
+  });
+
+  it('keeps one gradable document per repetition of an execution', async () => {
+    const rep = (index: number, text: string) => ({
+      _source: {
+        task: { repetition_index: index, output: { messages: [{ message: text }] } },
+        example: { id: 'a' },
+      },
+    });
+    const emptyRep1 = {
+      _source: { task: { repetition_index: 1, output: {} }, example: { id: 'a' } },
+    };
+
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        hits: {
+          hits: [
+            {
+              _source: rep(0, 'rep zero')._source,
+              inner_hits: {
+                members: {
+                  hits: {
+                    hits: [rep(0, 'rep zero'), emptyRep1, rep(1, 'rep one'), rep(2, 'rep two')],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      }),
+    });
+
+    const docs = await fetchScoreDocs({ esUrl, apiKey, exampleIds: ['a'], executionIds: ['e1'] });
+
+    expect(
+      docs.map((d) => (d as { task?: { repetition_index?: number } }).task?.repetition_index)
+    ).toEqual([0, 1, 2]);
+  });
+
+  it('requests the repetition index and a member window that holds every repetition', async () => {
+    await fetchScoreDocs({ esUrl, apiKey, exampleIds: ['a'], executionIds: ['e1'] });
+
+    expect(body(0)._source).toContain('task.repetition_index');
+    expect(body(0).collapse.inner_hits.size).toBeGreaterThanOrEqual(45);
+    expect(body(0).collapse.inner_hits.size).toBeLessThanOrEqual(100);
   });
 });

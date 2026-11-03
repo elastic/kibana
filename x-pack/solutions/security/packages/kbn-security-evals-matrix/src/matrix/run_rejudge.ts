@@ -29,6 +29,8 @@ export interface RejudgeResult {
   sourceExecutionId: string;
   modelId: string;
   exampleId: string;
+  /** Repetition of the example that was re-graded; 0 for single-rep runs. */
+  repetition?: number;
   recordedAt: string;
   scores: RejudgeScore[];
   analyses?: Record<string, unknown>;
@@ -96,6 +98,7 @@ export async function runRejudge({
             sourceExecutionId: cell.executionId,
             modelId: cell.modelId,
             exampleId: cell.exampleId,
+            repetition: cell.repetition,
             recordedAt: cell.recordedAt,
             scores,
             analyses,
@@ -112,7 +115,11 @@ export async function runRejudge({
   );
 
   // Deterministic order regardless of completion order, so artifacts diff cleanly.
-  results.sort((a, b) => `${a.modelId}${a.exampleId}`.localeCompare(`${b.modelId}${b.exampleId}`));
+  results.sort((a, b) =>
+    `${a.modelId}${a.exampleId}${a.repetition ?? 0}`.localeCompare(
+      `${b.modelId}${b.exampleId}${b.repetition ?? 0}`
+    )
+  );
   failures.sort((a, b) =>
     `${a.executionId}${a.exampleId}`.localeCompare(`${b.executionId}${b.exampleId}`)
   );

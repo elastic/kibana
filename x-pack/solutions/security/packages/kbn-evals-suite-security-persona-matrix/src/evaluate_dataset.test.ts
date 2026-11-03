@@ -334,15 +334,24 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
     results: [{ type: 'other', data }],
   });
 
+  const RULE_ATTACHMENT_ID = 'rule_attachment_1';
+  const renderTag = (id: string) => `<render_attachment id="${id}" version="1" />`;
+  const createdRule = (extra: Record<string, unknown> = {}) => ({
+    success: true,
+    rule: { id: 'abc', severity: 'high' },
+    attachment_id: RULE_ATTACHMENT_ID,
+    ...extra,
+  });
+
   // The detection-rule-edit references ask the agent to render the created rule
-  // attachment inline "rather than describing the rule in prose only", so a run
-  // that ends on a successful rule tool call HAS answered the user. Scoring it 0
-  // measured the harness, not the model: 86% of FinalAnswerPresent=0 runs in the
-  // family had successfully created a rule.
-  it('scores 1 when the run ended on a rendered rule artifact instead of prose', async () => {
+  // attachment inline "rather than describing the rule in prose only". A run
+  // whose only message is chat_client's last-assistant-step fallback but that
+  // emitted the matching render tag HAS shown the rule to the user.
+  it('scores 1 when the run rendered the created rule via a matching render tag', async () => {
     const result = await evaluate({
-      messages: [{ message: '' }],
-      steps: [ruleToolStep({ success: true, rule: { id: 'abc', severity: 'high' } })],
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule())],
     });
     expect(result.score).toBe(1);
     expect(result.explanation).toContain('artifact');
@@ -350,36 +359,64 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
 
   it('scores 1 for an update_detection_rule artifact as well', async () => {
     const result = await evaluate({
-      messages: [],
-      steps: [
-        ruleToolStep({ success: true, rule: { id: 'abc' } }, 'security.update_detection_rule'),
-      ],
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule(), 'security.update_detection_rule')],
     });
     expect(result.score).toBe(1);
   });
 
-  // The gate must keep biting real silent failures: 27 of 196 FinalAnswerPresent=0
-  // runs in the family produced no rule at all.
-  it('still scores 0 when the rule tool call failed', async () => {
+  // The rule tool only stores the attachment; without the render tag the user
+  // sees nothing. This is the silent-termination case the gate must catch.
+  it('scores 0 when a rule was created but no render tag was emitted', async () => {
     const result = await evaluate({
       messages: [{ message: '' }],
-      steps: [ruleToolStep({ success: false, rule: { id: 'abc' } })],
+      steps: [ruleToolStep(createdRule())],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when the fallback narration does not render the created attachment', async () => {
+    const result = await evaluate({
+      messages: [{ message: 'Let me create that rule.' }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule())],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when the render tag points at a different attachment', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag('some_other_attachment') }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule())],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('still scores 0 when the rule tool call failed', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule({ success: false }))],
     });
     expect(result.score).toBe(0);
   });
 
   it('still scores 0 when a rule tool reported success without a rule payload', async () => {
     const result = await evaluate({
-      messages: [{ message: '' }],
-      steps: [ruleToolStep({ success: true })],
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep({ success: true, attachment_id: RULE_ATTACHMENT_ID })],
     });
     expect(result.score).toBe(0);
   });
 
   it('does not count a non-artifact tool call as an answer', async () => {
     const result = await evaluate({
-      messages: [{ message: '' }],
-      steps: [ruleToolStep({ success: true, rule: { id: 'abc' } }, 'security.run_rule_preview')],
+      messages: [{ message: renderTag(RULE_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [ruleToolStep(createdRule(), 'security.run_rule_preview')],
     });
     expect(result.score).toBe(0);
   });

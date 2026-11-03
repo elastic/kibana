@@ -82,6 +82,25 @@ function scrub(text: string, modelId: string): string {
 }
 
 /**
+ * Scrub every string value in an arbitrary JSON structure, leaving keys and
+ * non-string values untouched so the shape a jury adapter reads is preserved.
+ */
+function scrubDeep(value: unknown, modelId: string): unknown {
+  if (typeof value === 'string') {
+    return scrub(value, modelId);
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => scrubDeep(item, modelId));
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, scrubDeep(item, modelId)])
+    );
+  }
+  return value;
+}
+
+/**
  * Strip model identity from every judge-visible field of a cell.
  *
  * Returns a new cell; the caller's plan is reused for the non-blind pass and
@@ -101,5 +120,10 @@ export function anonymizeCell(cell: ReplayCell, aliases: Map<string, string>): R
     steps: cell.steps.length
       ? JSON.parse(scrub(JSON.stringify(cell.steps), cell.modelId))
       : cell.steps,
+    // Attack Discovery juries grade `taskOutput.insights` and compare against
+    // `expectedStructured` instead of `agentResponse`/`steps`, so a blind pass
+    // that leaves them intact still shows the judge which model wrote the text.
+    taskOutput: scrubDeep(cell.taskOutput, cell.modelId),
+    expectedStructured: scrubDeep(cell.expectedStructured, cell.modelId),
   };
 }

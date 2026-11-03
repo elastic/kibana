@@ -40,8 +40,8 @@ import {
   collectExamples,
   selectAdapter,
   buildStructuredReferences,
+  resolveJoinField,
   REFERENCE_ADAPTERS,
-  DEFAULT_JOIN_FIELD,
 } from '../../matrix/reference_adapters';
 import { selectJury, checkJuryCoverage, JURY_ADAPTERS } from '../../matrix/jury_adapters';
 import type { JuryAdapter, JuryArgs } from '../../matrix/jury_adapters';
@@ -60,15 +60,13 @@ const DEFAULT_OUT_DIR = 'target/llm_matrix_rejudge';
  * Load the AD rubric items from the suite package at runtime.
  *
  * A platform package must not statically import the private solutions-side
- * suite, so the jury keeps a fallback copy of the rubric. Two copies drift:
- * the suite moved to per-item scoring while the jury still collapsed all seven
- * items into one "5 of 7 -> Y or N" question, so a rejudge silently graded a
- * different thing under the same column name.
+ * suite, so the jury keeps a fallback copy of the suite's rubric criterion.
+ * Two copies drift. Resolving the suite's own `ATTACK_DISCOVERY_RUBRIC_ITEMS`
+ * export keeps one definition authoritative once the suite publishes one.
  *
- * Resolving the suite's own export keeps one definition authoritative. Returns
- * undefined when the module cannot be resolved -- the jury's fallback then
- * applies, and it is the same per-item form, so a miss degrades to a stale
- * wording rather than to the collapsed rubric.
+ * Returns undefined when the module cannot be resolved or exports no items
+ * (the suite does not export them today) -- the jury's fallback then applies,
+ * and it mirrors the suite's current collapsed 5-of-7 criterion.
  */
 export async function loadSuiteRubricItems(
   datasetPath: string,
@@ -156,9 +154,48 @@ async function loadReferences(
     references,
     structured: buildStructuredReferences(examples),
     adapterName: adapter.name,
-    joinField: adapter.joinField ?? DEFAULT_JOIN_FIELD,
+    joinField: resolveJoinField(adapter, examples),
   };
 }
+
+/** One row of `scores.debug.json`: the aggregated suites a model's column was built from. */
+export interface PublishedMatrixRow {
+  modelId: string;
+  suites: Array<{
+    experimentId: string;
+    executions?: Array<{ experimentId?: string; executionId: string }>;
+    executionIds?: string[];
+  }>;
+}
+
+/**
+ * Execution ids the rendered matrix actually published.
+ *
+ * A suite row is an aggregate: a sharded sweep contributes one execution per VM
+ * and `experimentId` names only the representative experiment, which is not
+ * necessarily an `metadata.execution_id`. Reading it would match nothing or drop
+ * the other shards, so prefer the recorded executions.
+ */
+export const selectPublishedExecutionIds = (
+  debug: PublishedMatrixRow[],
+  modelFilter: ReadonlySet<string> = new Set()
+): string[] => [
+  ...new Set(
+    debug
+      .filter((row) => modelFilter.size === 0 || modelFilter.has(row.modelId))
+      .flatMap((row) =>
+        row.suites.flatMap((suite) => {
+          if (suite.executions?.length) {
+            return suite.executions.map((execution) => execution.executionId);
+          }
+          if (suite.executionIds?.length) {
+            return suite.executionIds;
+          }
+          return [suite.experimentId];
+        })
+      )
+  ),
+];
 
 /**
  * JUDGE_KBN_AUTH is raw `user:pass` and is base64-encoded here. A value that is
@@ -336,18 +373,10 @@ export const rejudgeCmd: Command<void> = {
         throw createFlagError(`--from-matrix path does not exist: ${resolved}`);
       }
 
-      const debug = JSON.parse(Fs.readFileSync(resolved, 'utf8')) as Array<{
-        modelId: string;
-        suites: Array<{ experimentId: string }>;
-      }>;
-
-      executionIds = [
-        ...new Set(
-          debug
-            .filter((row) => modelFilter.size === 0 || modelFilter.has(row.modelId))
-            .flatMap((row) => row.suites.map((suite) => suite.experimentId))
-        ),
-      ];
+      executionIds = selectPublishedExecutionIds(
+        JSON.parse(Fs.readFileSync(resolved, 'utf8')) as PublishedMatrixRow[],
+        modelFilter
+      );
 
       log.info(`Selected ${executionIds.length} published execution(s) from ${matrixDebugPath}`);
     }

@@ -26,23 +26,51 @@ export interface ConnectorExpectation {
   expectedStepType?: string;
 }
 
+const WORKFLOW_ARTIFACT_TOOL_IDS = new Set([
+  'platform.core.generate_workflow',
+  'platform.workflows.validate_workflow',
+]);
+
+const collectStrings = (node: unknown, parts: string[]): void => {
+  if (typeof node === 'string') {
+    parts.push(node);
+  } else if (Array.isArray(node)) {
+    node.forEach((child) => collectStrings(child, parts));
+  } else if (node && typeof node === 'object') {
+    Object.values(node as Record<string, unknown>).forEach((child) => collectStrings(child, parts));
+  }
+};
+
 /**
- * Pull every string the agent produced: the final answer plus any tool results.
- * The workflow YAML can surface in either depending on whether the model
- * rendered it inline or left it in the generate_workflow response.
+ * Pull the text that can contain the authored workflow: the final answer
+ * messages plus the `results` of the workflow-authoring tools. The YAML can
+ * surface in either depending on whether the model rendered it inline or left
+ * it in the generate_workflow response.
+ *
+ * Deliberately NOT scanned: tool-call `params` (the agent echoes the
+ * prompt's connector id there), reasoning steps, and the precomputed
+ * correctness/groundedness analyses. An echo in any of those is not an
+ * authored workflow targeting the connector.
  */
 export const collectProducedText = (output: unknown): string => {
   const parts: string[] = [];
-  const visit = (node: unknown): void => {
-    if (typeof node === 'string') {
-      parts.push(node);
-    } else if (Array.isArray(node)) {
-      node.forEach(visit);
-    } else if (node && typeof node === 'object') {
-      Object.values(node as Record<string, unknown>).forEach(visit);
-    }
-  };
-  visit(output);
+  const { messages, steps } = (output ?? {}) as { messages?: unknown; steps?: unknown };
+  if (Array.isArray(messages)) {
+    messages.forEach((entry) => {
+      const message = (entry as { message?: unknown } | undefined)?.message;
+      if (typeof message === 'string') {
+        parts.push(message);
+      }
+    });
+  }
+  if (Array.isArray(steps)) {
+    steps.forEach((step) => {
+      const { tool_id: toolId, results } = (step ?? {}) as { tool_id?: string; results?: unknown };
+      if (toolId && WORKFLOW_ARTIFACT_TOOL_IDS.has(toolId)) {
+        collectStrings(results, parts);
+      }
+    });
+  }
   return parts.join('\n');
 };
 

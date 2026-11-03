@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Fs from 'fs';
+import Path from 'path';
 import {
   selectJury,
   checkJuryCoverage,
@@ -109,23 +111,44 @@ describe('attackDiscoveryJury.criteriaFor', () => {
     expect(specs.find((s) => s.name === 'Criteria')!.criteria).toEqual(['c1', 'c2']);
   });
 
-  it('passes each of the 7 rubric items as its own criterion', () => {
-    // One criterion per requirement is what lets the shared criteria judge
-    // return partial credit. Collapsing them into a single "5 of 7 -> Y or N"
-    // question, as this adapter used to, scored 95.6% of cells at exactly 1.0
-    // and left the AD column unable to rank any model against another.
+  it('mirrors the suite Rubric evaluator: one collapsed 5-of-7 Y/N criterion', () => {
+    // The published AD Rubric column is produced by the suite's evaluator, which
+    // sends a single criterion ending "at least 5 of the 7 ... Y or N". A rejudge
+    // that sent 7 separate criteria would grade partial credit against a binary
+    // column and not be comparable with it.
     const rubric = attackDiscoveryJury.criteriaFor!(args).find(
       (s) => s.name === 'Rubric'
     )!.criteria;
 
-    expect(rubric).toHaveLength(7);
-    expect(rubric.some((c) => c.includes('alertIds'))).toBe(true);
-    expect(rubric.some((c) => c.includes('MITRE'))).toBe(true);
-    // The threshold must not come back: a pass rule on top of per-item scores
-    // re-collapses them to binary.
-    expect(rubric.some((c) => c.includes('at least 5 of the 7'))).toBe(false);
-    // Every criterion carries the reference so it can be judged standalone.
-    expect(rubric.every((c) => c.includes('Reference:'))).toBe(true);
+    expect(rubric).toHaveLength(1);
+    expect(rubric[0]).toContain('using these 7 rubric items');
+    expect(rubric[0]).toContain('alertIds');
+    expect(rubric[0]).toContain('MITRE');
+    expect(rubric[0]).toContain('at least 5 of the 7 rubric items');
+    expect(rubric[0]).toContain('end with a single character: Y or N');
+    expect(rubric[0]).toContain('Reference:');
+  });
+
+  it('keeps the fallback wording identical to the suite evaluator source', () => {
+    const suiteSource = Fs.readFileSync(
+      Path.resolve(
+        __dirname,
+        '../../../kbn-evals-suite-attack-discovery-agent-builder/src/evaluators/attack_discovery_rubric_evaluator.ts'
+      ),
+      'utf8'
+    );
+    const [criterion] = attackDiscoveryJury.criteriaFor!(args).find(
+      (s) => s.name === 'Rubric'
+    )!.criteria;
+    // The interpolated reference is multi-line JSON; compare only the fixed wording.
+    const staticLines = criterion
+      .split('\n')
+      .filter((line) => /^(Evaluate |\d\. |Score the submission)/.test(line));
+    expect(staticLines).toHaveLength(9);
+
+    for (const line of staticLines) {
+      expect(suiteSource).toContain(line);
+    }
   });
 
   it('prefers rubric items injected by the caller over its own copy', () => {

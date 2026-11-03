@@ -98,10 +98,53 @@ describe('ConnectorInvoked evaluator', () => {
   it('finds the workflow whether it is in the final answer or a tool result', async () => {
     const inToolResult = {
       messages: [{ message: 'Here is your workflow.' }],
-      steps: [{ tool_id: 'platform.core.generate_workflow', result: WORKFLOW_WITH_SLACK }],
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.generate_workflow',
+          params: { query: 'post to Slack' },
+          results: [{ type: 'other', data: { workflow: { yaml: WORKFLOW_WITH_SLACK } } }],
+        },
+      ],
     };
     const result = await run(inToolResult);
     expect(result.score).toBe(1);
+  });
+
+  // The agent echoes the prompt's connector id into generate_workflow params
+  // and judge analyses; neither is an authored workflow.
+  it('does not credit a connector id echoed in tool params, reasoning or analyses', async () => {
+    const result = await run({
+      messages: [{ message: 'Done.' }],
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.generate_workflow',
+          params: { query: `http step on connector ${SLACK_CONNECTOR_ID}, type: http` },
+          results: [{ type: 'other', data: { workflow: { yaml: WORKFLOW_WITHOUT_SLACK } } }],
+        },
+        { type: 'reasoning', reasoning: `use connector ${SLACK_CONNECTOR_ID} with type: http` },
+      ],
+      correctnessAnalysis: `connector ${SLACK_CONNECTOR_ID} type: http`,
+      groundednessAnalysis: `connector ${SLACK_CONNECTOR_ID} type: http`,
+    });
+    expect(result.score).toBe(0);
+    expect(result.metadata).toMatchObject({ connectorPresent: false, stepPresent: false });
+  });
+
+  it('ignores results of tools that are not workflow-authoring tools', async () => {
+    const result = await run({
+      messages: [{ message: 'Done.' }],
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.search',
+          params: {},
+          results: [{ type: 'other', data: WORKFLOW_WITH_SLACK }],
+        },
+      ],
+    });
+    expect(result.score).toBe(0);
   });
 
   it('treats regex metacharacters in the step type literally', async () => {
@@ -115,11 +158,22 @@ describe('ConnectorInvoked evaluator', () => {
   });
 
   describe('collectProducedText', () => {
-    it('gathers strings from nested structures', () => {
-      const text = collectProducedText({ a: 'one', b: [{ c: 'two' }], d: { e: ['three'] } });
+    it('gathers final messages and workflow tool results, nothing else', () => {
+      const text = collectProducedText({
+        messages: [{ message: 'one' }],
+        steps: [
+          {
+            tool_id: 'platform.workflows.validate_workflow',
+            params: { yaml: 'param-only' },
+            results: [{ data: { yaml: ['two'] } }],
+          },
+        ],
+        correctnessAnalysis: 'analysis-only',
+      });
       expect(text).toContain('one');
       expect(text).toContain('two');
-      expect(text).toContain('three');
+      expect(text).not.toContain('param-only');
+      expect(text).not.toContain('analysis-only');
     });
   });
 });

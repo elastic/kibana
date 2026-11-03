@@ -6,6 +6,7 @@
  */
 
 import {
+  assertPersonaMatrixToolsRegistered,
   collectExpectedToolIds,
   findUnregisteredToolIds,
   findUnattachedToolIds,
@@ -126,5 +127,40 @@ describe('findUnattachedToolIds', () => {
     await expect(
       findUnattachedToolIds(kbnClient, ['virustotal_lookup', 'on_call_lookup'])
     ).resolves.toEqual([]);
+  });
+});
+
+describe('assertPersonaMatrixToolsRegistered', () => {
+  const log = { info: jest.fn() } as unknown as Parameters<
+    typeof assertPersonaMatrixToolsRegistered
+  >[0]['log'];
+
+  // Tools list exposes only the built-in the selected example needs.
+  const makeKbnClient = () =>
+    ({
+      request: jest.fn().mockResolvedValue({ data: { results: [{ id: 'security.get_entity' }] } }),
+    } as unknown as KbnClient);
+
+  it('only requires the tools of the examples that will run', async () => {
+    await expect(
+      assertPersonaMatrixToolsRegistered({
+        kbnClient: makeKbnClient(),
+        log,
+        examples: [{ metadata: { expectedTools: ['security.get_entity'] } }],
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('still fails when a selected example needs a tool that is not exposed', async () => {
+    await expect(
+      assertPersonaMatrixToolsRegistered({
+        kbnClient: makeKbnClient(),
+        log,
+        examples: [
+          { metadata: { expectedTools: ['security.get_entity'] } },
+          { metadata: { expectedTools: ['security.search_entities'] } },
+        ],
+      })
+    ).rejects.toThrow('security.search_entities');
   });
 });

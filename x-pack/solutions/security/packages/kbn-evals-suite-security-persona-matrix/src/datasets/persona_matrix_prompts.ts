@@ -281,9 +281,10 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       // security.entity_risk_score is force-disabled whenever
       // agentBuilder:experimentalFeatures (skills) is on — which the persona
       // matrix always runs with — so it can never be invoked here. Risk data
-      // comes from get_entity plus, for the "unusual behavior tied to it"
-      // phrasing, the risk score history tool.
-      expectedTools: ['security.get_entity', 'security.get_entity_risk_score_history'],
+      // comes from get_entity. The risk score history tool is documented for
+      // risk-over-time questions only; this is a point-in-time profile, so
+      // requiring it would fail an agent that follows the tool contract.
+      expectedTools: ['security.get_entity'],
       severity: 'medium',
       tags: ['entity', 'host-profile'],
     },
@@ -570,9 +571,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
       // `workflow-authoring` documents that it is NOT required for creating or
       // editing a workflow — call `platform.core.generate_workflow` directly.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
-      // This prompt names no connector id, so only the http step is a fair
-      // deterministic assertion. Asserting an id the prompt never gave would
-      // false-fail a correct answer.
+      // Prompt names the connector id explicitly, so both are assertable.
+      expectedConnectorId: 'd7306385-cbe6-4541-9726-49afdff59ba5',
       expectedStepType: 'http',
       severity: 'low',
       tags: ['workflow', 'authoring-fixed'],

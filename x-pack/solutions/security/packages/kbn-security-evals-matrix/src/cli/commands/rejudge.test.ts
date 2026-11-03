@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
-import { buildJudgeAuthHeader, loadSuiteRubricItems } from './rejudge';
+import { buildJudgeAuthHeader, loadSuiteRubricItems, selectPublishedExecutionIds } from './rejudge';
 
 describe('buildJudgeAuthHeader', () => {
   it('base64-encodes raw user:pass credentials', () => {
@@ -47,8 +47,8 @@ describe('buildJudgeAuthHeader', () => {
 describe('loadSuiteRubricItems', () => {
   // The suite owns the rubric; the jury keeps a fallback copy. These tests pin
   // the resolution so a suite-side rubric change cannot be silently shadowed by
-  // the stale copy -- the exact drift that let a rejudge grade a collapsed
-  // "5 of 7 -> Y or N" rubric while the suite scored seven items separately.
+  // the stale copy: a rejudge must grade the same rubric shape the suite
+  // published, whether that is separate items or one collapsed criterion.
   let root: string;
 
   beforeEach(() => {
@@ -107,5 +107,48 @@ describe('loadSuiteRubricItems', () => {
     const datasetPath = writeEvaluator('export const ATTACK_DISCOVERY_RUBRIC_ITEMS = [1, 2, 3];\n');
 
     await expect(loadSuiteRubricItems(datasetPath)).resolves.toBeUndefined();
+  });
+});
+
+describe('selectPublishedExecutionIds', () => {
+  it('uses every recorded shard execution instead of the representative experiment id', () => {
+    const ids = selectPublishedExecutionIds([
+      {
+        modelId: 'm1',
+        suites: [
+          {
+            experimentId: 'exp-representative',
+            executions: [
+              { experimentId: 'exp-a', executionId: 'exec-a' },
+              { experimentId: 'exp-b', executionId: 'exec-b' },
+            ],
+            executionIds: ['exec-a', 'exec-b'],
+          },
+        ],
+      },
+    ]);
+
+    expect(ids).toEqual(['exec-a', 'exec-b']);
+  });
+
+  it('falls back to executionIds, then to experimentId for rows that predate both', () => {
+    expect(
+      selectPublishedExecutionIds([
+        {
+          modelId: 'm1',
+          suites: [{ experimentId: 'e1', executionIds: ['x1', 'x2'] }, { experimentId: 'legacy' }],
+        },
+      ])
+    ).toEqual(['x1', 'x2', 'legacy']);
+  });
+
+  it('honours the model filter and de-duplicates across models', () => {
+    const rows = [
+      { modelId: 'm1', suites: [{ experimentId: 'e', executionIds: ['x'] }] },
+      { modelId: 'm2', suites: [{ experimentId: 'e', executionIds: ['x', 'y'] }] },
+      { modelId: 'm3', suites: [{ experimentId: 'e', executionIds: ['z'] }] },
+    ];
+
+    expect(selectPublishedExecutionIds(rows, new Set(['m1', 'm2']))).toEqual(['x', 'y']);
   });
 });

@@ -96,30 +96,33 @@ export function selectListAssertableBuiltins(toolIds: string[]): string[] {
 export async function assertPersonaMatrixToolsRegistered({
   kbnClient,
   log,
+  examples = personaMatrixDataset,
 }: {
   kbnClient: KbnClient;
   log: ToolingLog;
+  /** Examples that will actually run; tools of filtered-out examples are not required. */
+  examples?: Array<{ metadata?: { expectedTools?: string[] } }>;
 }): Promise<void> {
-  const expected = collectExpectedToolIds(personaMatrixDataset);
+  const expected = collectExpectedToolIds(examples);
   // Only custom (eval-seeded) tools are listed in the Agent Builder registry;
   // platform.* and security.* built-ins are always available and not registered
   // as custom tools, so they're excluded from the registry check below.
   const custom = expected.filter((id) => !id.includes('.'));
   if (custom.length === 0) {
     log.info('[persona-matrix] pre-flight: no custom expectedTools to verify');
-    return;
-  }
-  const missing = await findUnregisteredToolIds(kbnClient, custom);
-  if (missing.length > 0) {
-    throw new Error(
-      `[persona-matrix] pre-flight tool-registration check failed: expected custom tools not registered: ${missing.join(
-        ', '
-      )}. Seed them via seedPersonaMatrixTools before running the suite.`
+  } else {
+    const missing = await findUnregisteredToolIds(kbnClient, custom);
+    if (missing.length > 0) {
+      throw new Error(
+        `[persona-matrix] pre-flight tool-registration check failed: expected custom tools not registered: ${missing.join(
+          ', '
+        )}. Seed them via seedPersonaMatrixTools before running the suite.`
+      );
+    }
+    log.info(
+      `[persona-matrix] pre-flight: ${custom.length} custom tools registered (${custom.join(', ')})`
     );
   }
-  log.info(
-    `[persona-matrix] pre-flight: ${custom.length} custom tools registered (${custom.join(', ')})`
-  );
 
   // BUILT-IN EXPECTED TOOLS: registration alone is not enough. The public
   // tools list already excludes built-ins whose availability handler returned
@@ -148,6 +151,9 @@ export async function assertPersonaMatrixToolsRegistered({
   // tools attached to the agent's configuration plus `defaultAgentToolIds`.
   // A registered-but-unattached tool is invisible to the model, which zeroes
   // ExpectedToolCalled while every other signal looks healthy.
+  if (custom.length === 0) {
+    return;
+  }
   const unattached = await findUnattachedToolIds(kbnClient, custom);
   if (unattached.length > 0) {
     throw new Error(

@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { evaluate } from '../src/evaluate';
 import { personaMatrixDataset } from '../src/datasets';
+import { selectShard } from '../src/datasets/select_shard';
 import {
   seedChrysalisAlerts,
   cleanupChrysalisAlerts,
@@ -60,7 +61,13 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
 
     // Pre-flight: fail fast if an expected custom tool isn't registered, rather
     // than silently scoring a tool that doesn't exist.
-    await assertPersonaMatrixToolsRegistered({ kbnClient, log });
+    // Only require the tools of examples this run will execute: EVAL_EXAMPLES and the
+    // shard slice (re-applied inside evaluateDataset) both narrow the dataset.
+    await assertPersonaMatrixToolsRegistered({
+      kbnClient,
+      log,
+      examples: selectShard(examples, process.env.PERSONA_MATRIX_SHARD),
+    });
 
     await evaluateDataset({
       dataset: {
