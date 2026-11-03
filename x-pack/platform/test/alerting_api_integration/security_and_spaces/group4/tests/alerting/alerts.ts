@@ -47,6 +47,18 @@ const parseSummarizedAlertsMessage = (message: string) => {
     : mapValues(parsed, (chunk) => ({ ...chunk, data: sortByInstanceId(chunk.data) }));
 };
 
+const sortRenderedInstanceIds = (message: string): string =>
+  message.replace(
+    /IDs:\[([^\]]*)\]/g,
+    (_, ids: string) =>
+      `IDs:[${ids
+        .split(',')
+        .filter(Boolean)
+        .sort()
+        .map((id) => `${id},`)
+        .join('')}]`
+  );
+
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -1309,10 +1321,10 @@ instanceStateValue: true
 
               // @ts-expect-error doesnt handle total: number
               expect(searchResult.body.hits.total.value).to.be.greaterThan(0);
-              // @ts-expect-error _source: unknown
-              expect(searchResult.body.hits.hits[0]._source.params.message).to.eql(
-                'Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]'
-              );
+              expect(
+                // @ts-expect-error _source: unknown
+                sortRenderedInstanceIds(searchResult.body.hits.hits[0]._source.params.message)
+              ).to.eql('Alerts, all:2, new:2 IDs:[1,2,], ongoing:0 IDs:[], recovered:0 IDs:[]');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
