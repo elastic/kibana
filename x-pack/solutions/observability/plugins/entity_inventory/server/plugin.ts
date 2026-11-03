@@ -15,6 +15,7 @@ import type {
 import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import type { EntityInventoryConfig } from './config';
 import { registerInventoryDefinitions } from './inventory/definitions/register_definitions';
+import { registerPocRoutes } from './routes/register_poc_routes';
 import type {
   EntityInventoryPluginSetup,
   EntityInventoryPluginStart,
@@ -40,10 +41,14 @@ export class EntityInventoryPlugin
   }
 
   public setup(
-    _core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>,
+    core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>,
     { entityStore }: EntityInventorySetupDependencies
   ): EntityInventoryPluginSetup {
     registerInventoryDefinitions(entityStore, this.logger);
+    registerPocRoutes({
+      router: core.http.createRouter(),
+      getEntityStore: async () => (await core.getStartServices())[1].entityStore,
+    });
     this.logger.debug('Entity inventory plugin set up');
   }
 
