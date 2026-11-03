@@ -49,6 +49,7 @@ type BootstrapConfig struct {
 }
 
 func main() {
+	log.SetOutput(os.Stdout)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
 
 	config, err := readBootstrapConfig()
