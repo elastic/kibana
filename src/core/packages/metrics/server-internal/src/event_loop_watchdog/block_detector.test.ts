@@ -9,243 +9,237 @@
 
 import type { PollContext } from './block_detector';
 import { BlockDetector } from './block_detector';
-import { ONGOING_REPORT_AFTER_MS, REPORT_BURST, REPORT_REFILL_MS } from './constants';
+import {
+  ONGOING_REPORT_AFTER_MS,
+  POLL_INTERVAL_MS,
+  REPORT_BURST,
+  REPORT_REFILL_MS,
+} from './constants';
 
 const running: PollContext = { thresholdMs: 200, phase: 'running' };
+const starting: PollContext = { thresholdMs: 200, phase: 'starting' };
+
+/** A block over the threshold and under the ongoing mark. */
+const SHORT_BLOCK_MS = 300;
+/** Time the main thread runs between two short blocks. */
+const GAP_MS = 1_000;
+
+/**
+ * Drives a detector along a timeline the way the worker does, so a test reads as what the main
+ * thread did. Times are in milliseconds from the start. The heartbeat only moves while the main
+ * thread runs; while it is blocked, the worker keeps polling against the last heartbeat.
+ */
+const createTimeline = () => {
+  const detector = new BlockDetector();
+  let now = 0;
+  let heartbeat = 0;
+  const poll = (context: PollContext) => detector.poll(now, heartbeat, context);
+
+  const timeline = {
+    detector,
+    now: () => now,
+    /** The main thread runs normally for `ms`; its heartbeat is current at the end. */
+    runFor: (ms: number) => {
+      now += ms;
+      heartbeat = now;
+    },
+    runUntil: (time: number) => timeline.runFor(time - now),
+    /** The main thread stays blocked; the worker polls `ms` after its last poll. */
+    blockedFor: (ms: number, context = running) => {
+      now += ms;
+      return poll(context);
+    },
+    blockedUntil: (time: number, context = running) => timeline.blockedFor(time - now, context),
+    /** The main thread runs again; the worker's next poll sees the block end. */
+    resume: (context = running) => {
+      now += POLL_INTERVAL_MS;
+      heartbeat = now;
+      return poll(context);
+    },
+    /** A short block after a gap; returns its end report. */
+    shortBlock: (context = running) => {
+      timeline.runFor(GAP_MS);
+      timeline.blockedFor(SHORT_BLOCK_MS, context);
+      return timeline.resume(context);
+    },
+    /** Uses up the burst with reported short blocks; returns when the refill clock started. */
+    drainBurst: () => {
+      timeline.shortBlock();
+      const firstReportAt = now;
+      for (let i = 1; i < REPORT_BURST; i++) {
+        timeline.shortBlock();
+      }
+      return firstReportAt;
+    },
+  };
+  return timeline;
+};
 
 describe('BlockDetector', () => {
-  it('reports a block once the heartbeat resumes', () => {
-    const detector = new BlockDetector();
-    expect(detector.poll(150, 0, running)).toBeUndefined();
-    expect(detector.poll(250, 0, running)).toBeUndefined();
-    expect(detector.poll(900, 0, running)).toBeUndefined();
-    expect(detector.poll(1000, 950, running)).toEqual({
-      phase: 'running',
-      startedAt: 0,
-      endedAt: 950,
-      blockedMs: 950,
-      report: true,
-      suppressedBlocks: 0,
-      ongoing: false,
+  describe('block end', () => {
+    it('reports a block once the heartbeat resumes', () => {
+      const t = createTimeline();
+      expect(t.blockedFor(150)).toBeUndefined();
+      expect(t.blockedFor(100)).toBeUndefined();
+      expect(t.blockedFor(650)).toBeUndefined();
+      expect(t.resume()).toEqual({
+        phase: 'running',
+        startedAt: 0,
+        endedAt: 900 + POLL_INTERVAL_MS,
+        blockedMs: 900 + POLL_INTERVAL_MS,
+        report: true,
+        suppressedBlocks: 0,
+        ongoing: false,
+      });
+      expect(t.blockedFor(10)).toBeUndefined();
     });
-    expect(detector.poll(1010, 1000, running)).toBeUndefined();
-  });
 
-  it('exposes the start of the ongoing block', () => {
-    const detector = new BlockDetector();
-    detector.poll(100, 0, running);
-    expect(detector.ongoingStartedAt).toBeUndefined();
-    detector.poll(300, 0, running);
-    expect(detector.ongoingStartedAt).toBe(0);
-    detector.poll(400, 350, running);
-    expect(detector.ongoingStartedAt).toBeUndefined();
-  });
+    it('treats a stale heartbeat of exactly the threshold as a block', () => {
+      const t = createTimeline();
+      expect(t.blockedFor(running.thresholdMs - 1)).toBeUndefined();
+      expect(t.resume()).toBeUndefined();
+      expect(t.blockedFor(running.thresholdMs)).toBeUndefined();
+      expect(t.resume()).toMatchObject({ blockedMs: running.thresholdMs + POLL_INTERVAL_MS });
+    });
 
-  it('reports an ongoing block once it has lasted the ongoing mark, then every refill interval', () => {
-    const detector = new BlockDetector();
-    detector.poll(300, 0, running);
-    expect(detector.poll(ONGOING_REPORT_AFTER_MS - 25, 0, running)).toBeUndefined();
-    expect(detector.poll(ONGOING_REPORT_AFTER_MS, 0, running)).toEqual({
-      phase: 'running',
-      startedAt: 0,
-      endedAt: ONGOING_REPORT_AFTER_MS,
-      blockedMs: ONGOING_REPORT_AFTER_MS,
-      report: true,
-      suppressedBlocks: 0,
-      ongoing: true,
+    it('judges each poll against the threshold passed with it', () => {
+      const t = createTimeline();
+      expect(t.blockedFor(500, { thresholdMs: 1000, phase: 'running' })).toBeUndefined();
+      expect(t.resume()).toBeUndefined();
+      expect(t.blockedFor(500, { thresholdMs: 400, phase: 'running' })).toBeUndefined();
+      expect(t.resume()).toMatchObject({ blockedMs: 500 + POLL_INTERVAL_MS });
     });
-    expect(detector.poll(ONGOING_REPORT_AFTER_MS + 25, 0, running)).toBeUndefined();
-    const repeatAt = ONGOING_REPORT_AFTER_MS + REPORT_REFILL_MS;
-    expect(detector.poll(repeatAt - 25, 0, running)).toBeUndefined();
-    expect(detector.poll(repeatAt, 0, running)).toMatchObject({
-      blockedMs: repeatAt,
-      report: true,
-      ongoing: true,
-    });
-    expect(detector.poll(repeatAt + 100, repeatAt + 50, running)).toMatchObject({
-      blockedMs: repeatAt + 50,
-      report: true,
-      ongoing: false,
-    });
-    expect(detector.poll(repeatAt + 200, repeatAt + 150, running)).toBeUndefined();
-  });
 
-  it('waits for the phase threshold when that is longer than the ongoing mark', () => {
-    const detector = new BlockDetector();
-    const slow: PollContext = { thresholdMs: 2 * ONGOING_REPORT_AFTER_MS, phase: 'starting' };
-    expect(detector.poll(ONGOING_REPORT_AFTER_MS, 0, slow)).toBeUndefined();
-    // Detected and reported on the same poll.
-    expect(detector.poll(2 * ONGOING_REPORT_AFTER_MS, 0, slow)).toMatchObject({
-      blockedMs: 2 * ONGOING_REPORT_AFTER_MS,
-      ongoing: true,
+    it('keeps the phase the block started in', () => {
+      const t = createTimeline();
+      t.blockedFor(300, starting);
+      t.blockedFor(300, running);
+      expect(t.resume(running)).toMatchObject({ phase: 'starting' });
+    });
+
+    it('does not start a block below the threshold of the current phase', () => {
+      const t = createTimeline();
+      expect(t.blockedFor(300, { thresholdMs: 500, phase: 'starting' })).toBeUndefined();
+      expect(t.resume(running)).toBeUndefined();
+    });
+
+    it('exposes the start of the ongoing block', () => {
+      const t = createTimeline();
+      t.runFor(500);
+      t.blockedFor(100);
+      expect(t.detector.ongoingStartedAt).toBeUndefined();
+      t.blockedFor(200);
+      expect(t.detector.ongoingStartedAt).toBe(500);
+      t.resume();
+      expect(t.detector.ongoingStartedAt).toBeUndefined();
     });
   });
 
-  it('takes one token per block: the end of a block reported while ongoing is free', () => {
-    const detector = new BlockDetector();
-    const shortBlock = (at: number) => {
-      detector.poll(at + 300, at, running);
-      return detector.poll(at + 310, at + 300, running)!;
-    };
-    // A long block first: its ongoing report takes one token, its end report none.
-    detector.poll(300, 0, running);
-    expect(detector.poll(ONGOING_REPORT_AFTER_MS, 0, running)).toMatchObject({
-      report: true,
-      ongoing: true,
+  describe('ongoing block', () => {
+    it('is reported once it has lasted the ongoing mark, then every refill interval', () => {
+      const t = createTimeline();
+      expect(t.blockedFor(ONGOING_REPORT_AFTER_MS - POLL_INTERVAL_MS)).toBeUndefined();
+      expect(t.blockedFor(POLL_INTERVAL_MS)).toEqual({
+        phase: 'running',
+        startedAt: 0,
+        endedAt: ONGOING_REPORT_AFTER_MS,
+        blockedMs: ONGOING_REPORT_AFTER_MS,
+        report: true,
+        suppressedBlocks: 0,
+        ongoing: true,
+      });
+      expect(t.blockedFor(POLL_INTERVAL_MS)).toBeUndefined();
+      const repeatAt = ONGOING_REPORT_AFTER_MS + REPORT_REFILL_MS;
+      expect(t.blockedUntil(repeatAt - POLL_INTERVAL_MS)).toBeUndefined();
+      expect(t.blockedUntil(repeatAt)).toMatchObject({ blockedMs: repeatAt, ongoing: true });
+      expect(t.resume()).toMatchObject({ blockedMs: repeatAt + POLL_INTERVAL_MS, ongoing: false });
+      expect(t.blockedFor(100)).toBeUndefined();
     });
-    expect(detector.poll(3000, 2950, running)).toMatchObject({
-      report: true,
-      suppressedBlocks: 0,
-      ongoing: false,
-    });
-    // The other tokens of the burst are all still there.
-    for (let i = 1; i < REPORT_BURST; i++) {
-      expect(shortBlock(3000 + i * 1000).report).toBe(true);
-    }
-    expect(shortBlock(3000 + REPORT_BURST * 1000)).toMatchObject({ report: false });
-  });
 
-  it('retries a suppressed ongoing report as soon as a token refills', () => {
-    const detector = new BlockDetector();
-    const shortBlock = (at: number) => {
-      detector.poll(at + 300, at, running);
-      return detector.poll(at + 310, at + 300, running)!;
-    };
-    // The bucket's refill clock starts at the first report, at 310.
-    for (let i = 0; i < REPORT_BURST; i++) {
-      shortBlock(i * 1000);
-    }
-    const startedAt = 10_000;
-    detector.poll(startedAt + 300, startedAt, running);
-    expect(detector.poll(startedAt + ONGOING_REPORT_AFTER_MS, startedAt, running)).toMatchObject({
-      report: false,
-      ongoing: true,
-    });
-    const refillAt = 310 + REPORT_REFILL_MS;
-    expect(detector.poll(refillAt - 25, startedAt, running)).toBeUndefined();
-    expect(detector.poll(refillAt, startedAt, running)).toMatchObject({
-      blockedMs: refillAt - startedAt,
-      report: true,
-      ongoing: true,
-    });
-    // Reported while ongoing after all, so the end report is free.
-    expect(detector.poll(refillAt + 100, refillAt + 50, running)).toMatchObject({
-      report: true,
-      ongoing: false,
+    it('waits for the phase threshold when that is longer than the ongoing mark', () => {
+      const t = createTimeline();
+      const slow: PollContext = { thresholdMs: 2 * ONGOING_REPORT_AFTER_MS, phase: 'starting' };
+      expect(t.blockedFor(ONGOING_REPORT_AFTER_MS, slow)).toBeUndefined();
+      // Detected and reported on the same poll.
+      expect(t.blockedFor(ONGOING_REPORT_AFTER_MS, slow)).toMatchObject({
+        blockedMs: 2 * ONGOING_REPORT_AFTER_MS,
+        ongoing: true,
+      });
     });
   });
 
-  it('takes a token for each repeated ongoing report', () => {
-    const detector = new BlockDetector();
-    const shortBlock = (at: number) => {
-      detector.poll(at + 300, at, running);
-      return detector.poll(at + 310, at + 300, running)!;
-    };
-    for (let i = 1; i < REPORT_BURST; i++) {
-      shortBlock(i * 1000);
-    }
-    // The last token goes to the ongoing report, the one refill to its repeat.
-    const startedAt = REPORT_BURST * 1000;
-    detector.poll(startedAt + 300, startedAt, running);
-    expect(detector.poll(startedAt + ONGOING_REPORT_AFTER_MS, startedAt, running)).toMatchObject({
-      report: true,
-      ongoing: true,
+  describe('rate limit', () => {
+    it('reports a burst, then one block per refill, counting the suppressed ones', () => {
+      const t = createTimeline();
+      const firstReportAt = t.drainBurst();
+      expect(t.shortBlock()).toMatchObject({ report: false });
+      expect(t.shortBlock()).toMatchObject({ report: false });
+      t.runUntil(firstReportAt + REPORT_REFILL_MS);
+      expect(t.shortBlock()).toMatchObject({ report: true, suppressedBlocks: 2 });
+      t.runUntil(firstReportAt + 2 * REPORT_REFILL_MS);
+      expect(t.shortBlock()).toMatchObject({ report: true, suppressedBlocks: 0 });
     });
-    const repeatAt = startedAt + ONGOING_REPORT_AFTER_MS + REPORT_REFILL_MS;
-    expect(detector.poll(repeatAt, startedAt, running)).toMatchObject({
-      report: true,
-      ongoing: true,
+
+    it('refills no more than the burst after a long idle stretch', () => {
+      const t = createTimeline();
+      t.drainBurst();
+      t.runFor(10 * REPORT_REFILL_MS);
+      for (let i = 0; i < REPORT_BURST; i++) {
+        expect(t.shortBlock()).toMatchObject({ report: true });
+      }
+      expect(t.shortBlock()).toMatchObject({ report: false });
     });
-    detector.poll(repeatAt + 100, repeatAt + 50, running);
-    expect(shortBlock(repeatAt + 1000)).toMatchObject({ report: false });
-  });
 
-  it('suppresses the ongoing report when the bucket is empty, without counting a suppressed block', () => {
-    const detector = new BlockDetector();
-    const shortBlock = (at: number) => {
-      detector.poll(at + 300, at, running);
-      return detector.poll(at + 310, at + 300, running)!;
-    };
-    for (let i = 0; i < REPORT_BURST; i++) {
-      shortBlock(i * 1000);
-    }
-    detector.poll(10_300, 10_000, running);
-    expect(detector.poll(10_000 + ONGOING_REPORT_AFTER_MS, 10_000, running)).toMatchObject({
-      report: false,
-      ongoing: true,
+    it('takes one token per block: the end of a block reported while ongoing is free', () => {
+      const t = createTimeline();
+      expect(t.blockedFor(ONGOING_REPORT_AFTER_MS)).toMatchObject({ report: true, ongoing: true });
+      expect(t.resume()).toMatchObject({ report: true, suppressedBlocks: 0, ongoing: false });
+      // The long block used one token; the rest of the burst is still there.
+      for (let i = 1; i < REPORT_BURST; i++) {
+        expect(t.shortBlock()).toMatchObject({ report: true });
+      }
+      expect(t.shortBlock()).toMatchObject({ report: false });
     });
-    // The end report takes the normal path: suppressed too, and counted once.
-    expect(detector.poll(13_000, 12_950, running)).toMatchObject({
-      report: false,
-      ongoing: false,
+
+    it('takes a token for each repeated ongoing report', () => {
+      const t = createTimeline();
+      for (let i = 1; i < REPORT_BURST; i++) {
+        t.shortBlock();
+      }
+      // The last token goes to the ongoing report, and the one refill to its repeat.
+      t.runFor(GAP_MS);
+      expect(t.blockedFor(ONGOING_REPORT_AFTER_MS)).toMatchObject({ report: true, ongoing: true });
+      expect(t.blockedFor(REPORT_REFILL_MS)).toMatchObject({ report: true, ongoing: true });
+      t.resume();
+      expect(t.shortBlock()).toMatchObject({ report: false });
     });
-    expect(shortBlock(10_000 + REPORT_REFILL_MS)).toMatchObject({
-      report: true,
-      suppressedBlocks: 1,
+
+    it('suppresses the ongoing report when the bucket is empty, without counting a suppressed block', () => {
+      const t = createTimeline();
+      const firstReportAt = t.drainBurst();
+      t.runFor(GAP_MS);
+      expect(t.blockedFor(ONGOING_REPORT_AFTER_MS)).toMatchObject({ report: false, ongoing: true });
+      // The end report takes the normal path: suppressed too, and the block counted once.
+      expect(t.resume()).toMatchObject({ report: false, ongoing: false });
+      t.runUntil(firstReportAt + REPORT_REFILL_MS);
+      expect(t.shortBlock()).toMatchObject({ report: true, suppressedBlocks: 1 });
     });
-  });
 
-  it('treats a stale heartbeat of exactly the threshold as a block', () => {
-    const detector = new BlockDetector();
-    detector.poll(199, 0, running);
-    expect(detector.poll(260, 250, running)).toBeUndefined();
-    detector.poll(450, 250, running);
-    expect(detector.poll(470, 460, running)).toMatchObject({ startedAt: 250, blockedMs: 210 });
-  });
-
-  it('judges each poll against the threshold passed with it', () => {
-    const detector = new BlockDetector();
-    detector.poll(500, 0, { thresholdMs: 1000, phase: 'running' });
-    expect(detector.poll(510, 500, running)).toBeUndefined();
-
-    detector.poll(1000, 500, { thresholdMs: 400, phase: 'running' });
-    expect(detector.poll(1010, 1000, running)).toMatchObject({ blockedMs: 500 });
-  });
-
-  it('keeps the phase the block started in', () => {
-    const detector = new BlockDetector();
-    detector.poll(300, 0, { thresholdMs: 200, phase: 'starting' });
-    detector.poll(600, 0, running);
-    expect(detector.poll(700, 650, running)).toMatchObject({ phase: 'starting' });
-  });
-
-  it('does not start a block below the threshold of the current phase', () => {
-    const detector = new BlockDetector();
-    detector.poll(300, 0, { thresholdMs: 500, phase: 'starting' });
-    expect(detector.poll(310, 300, running)).toBeUndefined();
-  });
-
-  it('rate limits reports, counting suppressed blocks', () => {
-    const detector = new BlockDetector();
-    const block = (at: number) => {
-      detector.poll(at + 300, at, running);
-      return detector.poll(at + 310, at + 300, running)!;
-    };
-    for (let i = 0; i < REPORT_BURST; i++) {
-      expect(block(i * 1000).report).toBe(true);
-    }
-    expect(block(10_000)).toMatchObject({ report: false });
-    expect(block(11_000)).toMatchObject({ report: false });
-    expect(block(10_000 + REPORT_REFILL_MS)).toMatchObject({ report: true, suppressedBlocks: 2 });
-    expect(block(10_000 + 2 * REPORT_REFILL_MS)).toMatchObject({
-      report: true,
-      suppressedBlocks: 0,
+    it('retries a suppressed ongoing report as soon as a token refills', () => {
+      const t = createTimeline();
+      const firstReportAt = t.drainBurst();
+      t.runFor(GAP_MS);
+      const blockStartedAt = t.now();
+      expect(t.blockedFor(ONGOING_REPORT_AFTER_MS)).toMatchObject({ report: false, ongoing: true });
+      const refillAt = firstReportAt + REPORT_REFILL_MS;
+      expect(t.blockedUntil(refillAt - POLL_INTERVAL_MS)).toBeUndefined();
+      expect(t.blockedUntil(refillAt)).toMatchObject({
+        blockedMs: refillAt - blockStartedAt,
+        report: true,
+        ongoing: true,
+      });
+      // Reported while ongoing after all, so the end report is free.
+      expect(t.resume()).toMatchObject({ report: true, ongoing: false });
     });
-  });
-
-  it('refills no more than the burst after a long idle stretch', () => {
-    const detector = new BlockDetector();
-    const block = (at: number) => {
-      detector.poll(at + 300, at, running);
-      return detector.poll(at + 310, at + 300, running)!;
-    };
-    for (let i = 0; i < REPORT_BURST; i++) {
-      block(i * 1000);
-    }
-    const later = 10 * REPORT_REFILL_MS;
-    for (let i = 0; i < REPORT_BURST; i++) {
-      expect(block(later + i * 1000).report).toBe(true);
-    }
-    expect(block(later + REPORT_BURST * 1000).report).toBe(false);
   });
 });
