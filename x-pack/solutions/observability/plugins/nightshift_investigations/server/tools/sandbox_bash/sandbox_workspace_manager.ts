@@ -10,7 +10,6 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { TelemetryTarget } from '../../telemetry_targets';
 import type { SandboxCallContext } from './tool_utils';
-import { listAgentConnectors } from './agent_connectors';
 import { authorizeConnector } from './connector_authorization';
 import { writeConnectorManifest } from './connector_manifest';
 import {
@@ -18,21 +17,12 @@ import {
   CONNECTOR_MANIFEST_PATH,
   ELASTIC_MANIFEST_PATH,
 } from './connector_docs';
-import { writeElasticManifest } from './elastic_manifest';
-
-const ELASTICSEARCH_CONNECTOR_TYPE_ID = '.elasticsearch';
-
-/** Written to `elastic.md` when the agent has no single telemetry connector to describe. */
-export const NO_TELEMETRY_GUIDANCE =
-  'No single Elasticsearch telemetry connector is enabled for this agent, so there is no cluster ' +
-  'to describe here. To query cluster telemetry, enable exactly one External Elasticsearch ' +
-  'connector in Nightshift Settings > Connectors. The connectors you can use are listed in ' +
-  '/workspace/connectors.md.\n';
+import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
 
 /**
- * Tracks per-conversation workspace state (connector IDs) and writes the connector manifest (and,
- * when configured, the Elasticsearch telemetry manifest) to the sandbox whenever the session is
- * reset or the allowed connector list changes.
+ * Tracks per-conversation workspace state (connector IDs) and writes the connector manifest and
+ * the Elasticsearch guide (naming the configured telemetry connector when the agent may use it)
+ * to the sandbox whenever the session is reset or the allowed connector list changes.
  *
  * Create one instance per plugin lifecycle and share it across all sandbox tools.
  */
@@ -45,7 +35,7 @@ export const createSandboxWorkspaceManager = ({
   logger,
 }: {
   getDeps: () => { actions?: ActionsPluginStart };
-  /** When set, `/workspace/.connector-docs/elastic.md` is (re-)seeded alongside the connector manifest. */
+  /** When set and usable by the agent, `/workspace/.connector-docs/elastic.md` names this connector. */
   telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
   telemetryTargets?: TelemetryTarget[];
@@ -58,24 +48,7 @@ export const createSandboxWorkspaceManager = ({
     { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices },
   ];
   const telemetryConnectorIds = new Set(configuredTargets.map(({ connectorId }) => connectorId));
-  const hasConfiguredTelemetry = configuredTargets.some(({ connectorId }) => connectorId);
   const callTargets = new WeakMap<SandboxCallContext, Promise<TelemetryTarget | undefined>>();
-
-  // Without kibana.yml telemetry, the source is the one External Elasticsearch connector the
-  // agent has enabled in Nightshift Settings; with none or several, `elastic.md` says so.
-  const findEnabledElasticsearchConnector = async (
-    callContext: SandboxCallContext
-  ): Promise<TelemetryTarget | undefined> => {
-    const { actions } = getDeps();
-    const connectors = await listAgentConnectors(
-      callContext,
-      actions ? (req: KibanaRequest) => actions.getActionsClientWithRequest(req) : undefined
-    );
-    const elasticsearch = connectors.filter(
-      ({ actionTypeId }) => actionTypeId === ELASTICSEARCH_CONNECTOR_TYPE_ID
-    );
-    return elasticsearch.length === 1 ? { connectorId: elasticsearch[0].id } : undefined;
-  };
 
   const prepareCallContext = (
     callContext: SandboxCallContext
@@ -96,8 +69,8 @@ export const createSandboxWorkspaceManager = ({
       // Agents without a bound target (the assistant, custom agents) can use several telemetry
       // connectors; infer guidance for an unambiguous source, else fall back to the legacy
       // `telemetry_connector_id`, the same default an investigation without a named target uses.
-      // With several named targets and no legacy default, `elastic.md` stays unseeded and the
-      // agent picks one from `connectors.md`.
+      // With several named targets and no legacy default, `elastic.md` names none and the agent
+      // picks one from `connectors.md`.
       const inferredTarget =
         new Set(allowedTargets.map(({ connectorId }) => connectorId)).size === 1
           ? allowedTargets[0]
@@ -106,9 +79,7 @@ export const createSandboxWorkspaceManager = ({
         telemetryConnectorId && callContext.allowedConnectorIds.includes(telemetryConnectorId)
           ? { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices }
           : undefined;
-      const configuredTarget = boundTarget ?? inferredTarget ?? defaultTarget;
-      if (configuredTarget?.connectorId || hasConfiguredTelemetry) return configuredTarget;
-      return (await findEnabledElasticsearchConnector(callContext)) ?? configuredTarget;
+      return boundTarget ?? inferredTarget ?? defaultTarget;
     })();
     callTargets.set(callContext, pending);
     return pending;
@@ -160,12 +131,13 @@ export const createSandboxWorkspaceManager = ({
 
       if (!canUseTelemetry) {
         lastWorkspaceKeys.delete(session);
-        // Clear previously seeded hints on revocation; a failed clear must block file access.
+        // The generic guide replaces previously seeded telemetry hints; a failed write must block
+        // file access.
         await session.mkdirs([CONNECTOR_DOCS_ROOT]);
         const [result] = await session.writeFiles([
           {
             path: ELASTIC_MANIFEST_PATH,
-            content: Buffer.from(NO_TELEMETRY_GUIDANCE),
+            content: Buffer.from(renderElasticManifest()),
           },
         ]);
         if (!result?.success) throw new Error('Failed to clear sandbox telemetry guidance');

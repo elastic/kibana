@@ -13,7 +13,7 @@ import {
 } from '@kbn/actions-plugin/server/mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
-import { createSandboxWorkspaceManager, NO_TELEMETRY_GUIDANCE } from './sandbox_workspace_manager';
+import { createSandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 jest.mock('./connector_manifest', () => ({
   writeConnectorManifest: jest.fn().mockResolvedValue(undefined),
@@ -24,7 +24,7 @@ jest.mock('./elastic_manifest', () => ({
 }));
 
 import { writeConnectorManifest } from './connector_manifest';
-import { writeElasticManifest } from './elastic_manifest';
+import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
 
 const mockWriteConnectorManifest = writeConnectorManifest as jest.Mock;
 const mockWriteElasticManifest = writeElasticManifest as jest.Mock;
@@ -303,7 +303,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(noneSession.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from(NO_TELEMETRY_GUIDANCE),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
@@ -360,7 +360,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from(NO_TELEMETRY_GUIDANCE),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
@@ -559,94 +559,6 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).not.toHaveBeenCalled();
     });
 
-    describe('without kibana.yml telemetry', () => {
-      const enableConnectors = (connectors: Array<{ id: string; actionTypeId: string }>) => {
-        actionsClient.getAll.mockResolvedValue(
-          connectors.map(({ id, actionTypeId }) => ({
-            id,
-            name: id,
-            actionTypeId,
-            config: {},
-            isPreconfigured: false,
-            isDeprecated: false,
-            isSystemAction: false,
-            isConnectorTypeDeprecated: false,
-            referencedByCount: 0,
-          }))
-        );
-        actionsClient.get.mockImplementation(async ({ id }) => {
-          const { actionTypeId } = connectors.find((connector) => connector.id === id) ?? {
-            actionTypeId: '.elasticsearch',
-          };
-          return {
-            id,
-            name: id,
-            actionTypeId,
-            config: {},
-            isPreconfigured: false,
-            isDeprecated: false,
-            isSystemAction: false,
-            isConnectorTypeDeprecated: false,
-          };
-        });
-      };
-      const createUiOnlyManager = () =>
-        createSandboxWorkspaceManager({
-          getDeps: () => ({ actions }),
-          telemetryTargets: [],
-          getTelemetryTarget: async () => ({}),
-          logger,
-        });
-
-      it('seeds the guide for the one External Elasticsearch connector enabled in Settings', async () => {
-        enableConnectors([
-          { id: 'ui-es', actionTypeId: '.elasticsearch' },
-          { id: 'ui-github', actionTypeId: '.github' },
-        ]);
-        const session = createSessionMock(false);
-
-        await createUiOnlyManager().ensureWorkspaceReady({
-          session,
-          callContext: createCallContext(['ui-es', 'ui-github']),
-        });
-
-        expect(mockWriteElasticManifest).toHaveBeenCalledWith(
-          expect.objectContaining({
-            credentials: { kind: 'connector', connectorId: 'ui-es' },
-            readableIndices: undefined,
-          })
-        );
-        expect(session.writeFiles).not.toHaveBeenCalled();
-      });
-
-      it.each([
-        ['no Elasticsearch connector', [{ id: 'ui-github', actionTypeId: '.github' }]],
-        [
-          'several Elasticsearch connectors',
-          [
-            { id: 'ui-es-a', actionTypeId: '.elasticsearch' },
-            { id: 'ui-es-b', actionTypeId: '.elasticsearch' },
-          ],
-        ],
-      ])('explains the missing telemetry connector with %s enabled', async (_, connectors) => {
-        enableConnectors(connectors);
-        const session = createSessionMock(false);
-
-        await createUiOnlyManager().ensureWorkspaceReady({
-          session,
-          callContext: createCallContext(connectors.map(({ id }) => id)),
-        });
-
-        expect(mockWriteElasticManifest).not.toHaveBeenCalled();
-        expect(session.writeFiles).toHaveBeenCalledWith([
-          {
-            path: '/workspace/.connector-docs/elastic.md',
-            content: Buffer.from(NO_TELEMETRY_GUIDANCE),
-          },
-        ]);
-      });
-    });
-
     it('passes the configured readable indices to the telemetry manifest', async () => {
       const session = createSessionMock(false);
       const configuredManager = createSandboxWorkspaceManager({
@@ -705,7 +617,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from(NO_TELEMETRY_GUIDANCE),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
@@ -750,7 +662,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from(NO_TELEMETRY_GUIDANCE),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
@@ -770,7 +682,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from(NO_TELEMETRY_GUIDANCE),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
