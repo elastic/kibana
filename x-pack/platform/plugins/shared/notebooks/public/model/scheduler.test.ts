@@ -723,6 +723,29 @@ describe('NotebookScheduler', () => {
       ]);
       expect(env.fake.callsFor('FROM logs')).toHaveLength(1);
     });
+
+    it('refreshes only the given time input and the cells it feeds', async () => {
+      const globalQuery = 'FROM logs | WHERE @timestamp >= ?_tstart';
+      const periodQuery = 'FROM logs | WHERE @timestamp >= ?period_start';
+      const env = track(
+        setup([
+          pinnedTime('time'),
+          input('period', { kind: 'time', defaultValue: { from: 'now-1h', to: 'now' } }),
+          esql('global', globalQuery),
+          esql('scoped', periodQuery),
+        ])
+      );
+      await env.open();
+
+      env.clock.now = new Date('2026-10-29T12:05:00.000Z');
+      await env.scheduler.refresh(['period']);
+
+      expect(env.fake.callsFor(periodQuery).map(({ params }) => params)).toEqual([
+        { period_start: '2026-10-29T11:00:00.000Z' },
+        { period_start: '2026-10-29T11:05:00.000Z' },
+      ]);
+      expect(env.fake.callsFor(globalQuery)).toHaveLength(1);
+    });
   });
 
   describe('params and inputs', () => {

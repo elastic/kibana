@@ -220,7 +220,12 @@ const RangeControl = ({
   );
 };
 
+const TIME_REFRESH_TOOLTIP = i18n.translate('xpack.notebook.inputCell.timeRefreshTooltip', {
+  defaultMessage: 'Run cells that use this time range',
+});
+
 const TimeControl = ({ cell }: { cell: InputCellDefinition }) => {
+  const { scheduler } = useNotebook();
   const { value, setValue } = useInputCell(cell);
   if (value?.kind !== 'time') return null;
   return (
@@ -229,8 +234,10 @@ const TimeControl = ({ cell }: { cell: InputCellDefinition }) => {
       width="auto"
       start={value.range.from}
       end={value.range.to}
-      showUpdateButton={false}
       onTimeChange={({ start, end }) => setValue({ kind: 'time', range: { from: start, to: end } })}
+      onRefresh={() => scheduler.refresh([cell.id])}
+      showUpdateButton="iconOnly"
+      updateButtonProps={{ toolTipProps: { content: TIME_REFRESH_TOOLTIP } }}
     />
   );
 };

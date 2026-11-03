@@ -143,10 +143,11 @@ export class NotebookScheduler {
     return this.propagate(order, new Set(order));
   }
 
-  refresh(): Promise<void> {
+  /** Re-resolves relative time ranges (all time inputs, or only `ids`) and re-runs what they feed. */
+  refresh(ids?: readonly string[]): Promise<void> {
     const timeInputs = this.graph.order.filter((id) => {
       const cell = this.cells[id];
-      return cell?.type === 'input' && cell.input.kind === 'time';
+      return (!ids || ids.includes(id)) && cell?.type === 'input' && cell.input.kind === 'time';
     });
     return this.propagate(timeInputs, new Set());
   }
