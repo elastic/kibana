@@ -366,7 +366,7 @@ export const extractDiamond = async (
     );
     // Bound fallback prompts even when the single call failed for a non-overflow
     // reason (parse/schema). Resending the full article on four vertex calls can
-    // blow a Reasoning window on long reports. If we already degraded for overflow,
+    // blow a Frontier window on long reports. If we already degraded for overflow,
     // shrink again; if the source is actually over budget, select the standard
     // overflow window; otherwise a short report was never at risk and keeping the
     // full text (rather than force-halving it) lets every vertex see all of it.

@@ -45,6 +45,7 @@ import {
 } from './translations';
 import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
 import { CaseAttachmentWorkflowProvider } from '../../workflows/case_attachment_workflow_provider';
+import { useAttachmentRemoval } from './use_attachment_removal';
 
 interface CaseViewAttachmentsProps {
   caseData: CaseUI;
@@ -117,6 +118,13 @@ export const CaseViewAttachments = ({
     [unifiedAttachmentTypeRegistry]
   );
 
+  const {
+    canRemove,
+    onRemove,
+    isRemoving,
+    modal: removalModal,
+  } = useAttachmentRemoval(caseData.id);
+
   // Render one accordion per registered type that has a tab view AND a non-zero count.
   const attachmentSections = useMemo(
     () =>
@@ -133,10 +141,25 @@ export const CaseViewAttachments = ({
           if (count < 1) {
             return [];
           }
-          return [{ id: type.id, label: type.getLabel(), count, Children }];
+          return [
+            {
+              id: type.id,
+              label: type.getLabel(),
+              count,
+              Children,
+              onRemoveSection: canRemove ? onRemove(type) : undefined,
+            },
+          ];
         })
         .sort((a, b) => a.label.localeCompare(b.label)),
-    [unifiedAttachmentTypeRegistry, countsByType, effectiveFileCount, isTypeVisible]
+    [
+      unifiedAttachmentTypeRegistry,
+      countsByType,
+      effectiveFileCount,
+      isTypeVisible,
+      canRemove,
+      onRemove,
+    ]
   );
 
   // Observables stays hardcoded: there's no other entry point to add observables
@@ -330,7 +353,7 @@ export const CaseViewAttachments = ({
         ) : (
           <CaseAttachmentWorkflowProvider caseId={caseData.id}>
             <EuiFlexGroup direction="column" gutterSize="m">
-              {attachmentSections.map(({ id, label, count, Children }) => (
+              {attachmentSections.map(({ id, label, count, Children, onRemoveSection }) => (
                 <AttachmentAccordion
                   key={id}
                   id={id}
@@ -339,7 +362,12 @@ export const CaseViewAttachments = ({
                   isOpen={!collapsedAttachmentIds.has(id)}
                   onToggle={(isOpen) => onAttachmentToggle(id, isOpen)}
                 >
-                  <Children caseData={authorFilteredCaseData} searchTerm={searchTerm} />
+                  <Children
+                    caseData={authorFilteredCaseData}
+                    searchTerm={searchTerm}
+                    onRemove={onRemoveSection}
+                    isRemoving={isRemoving}
+                  />
                 </AttachmentAccordion>
               ))}
               {hasVisibleObservables && (
@@ -356,6 +384,7 @@ export const CaseViewAttachments = ({
             </EuiFlexGroup>
           </CaseAttachmentWorkflowProvider>
         )}
+        {removalModal}
       </EuiFlexItem>
     </>
   );

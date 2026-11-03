@@ -2736,6 +2736,123 @@ describe('Package policy service', () => {
     });
   });
 
+  describe('getSummaryForAgentPolicies', () => {
+    const attributes = `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes`;
+    const bucket = ({
+      key,
+      count,
+      fleetServer = 0,
+      managed = 0,
+      root = 0,
+      agentPolicyIds = [key],
+    }: {
+      key: string;
+      count: number;
+      fleetServer?: number;
+      managed?: number;
+      root?: number;
+      agentPolicyIds?: string[];
+    }) => ({
+      key,
+      doc_count: count,
+      has_fleet_server: { doc_count: fleetServer },
+      has_managed: { doc_count: managed },
+      has_root_integrations: { doc_count: root },
+      agent_policies: { buckets: agentPolicyIds.map((id) => ({ key: id, doc_count: 1 })) },
+    });
+
+    it('should not query when there are no agent policies', async () => {
+      const soClient = createSavedObjectClientMock();
+
+      const summaries = await packagePolicyService.getSummaryForAgentPolicies(soClient, []);
+
+      expect(summaries.size).toBe(0);
+      expect(soClient.find).not.toHaveBeenCalled();
+    });
+
+    it('should aggregate the package policies instead of loading them', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce({
+        total: 3,
+        page: 1,
+        per_page: 0,
+        saved_objects: [],
+        aggregations: { by_agent_policy: { buckets: [] } },
+      });
+
+      await packagePolicyService.getSummaryForAgentPolicies(soClient, ['policy-1', 'policy-2']);
+
+      expect(soClient.find).toHaveBeenCalledTimes(1);
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          filter: `NOT ${attributes}.latest_revision:false AND (${attributes}.policy_ids:("policy-1" or "policy-2"))`,
+          aggs: {
+            by_agent_policy: expect.objectContaining({
+              terms: {
+                field: `${attributes}.policy_ids`,
+                include: ['policy-1', 'policy-2'],
+                size: 2,
+              },
+            }),
+          },
+        })
+      );
+    });
+
+    it('should map the aggregation buckets to a summary per agent policy', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce({
+        total: 4302,
+        page: 1,
+        per_page: 0,
+        saved_objects: [],
+        aggregations: {
+          by_agent_policy: {
+            buckets: [
+              bucket({ key: 'policy-1', count: 4301, root: 2, managed: 1 }),
+              bucket({
+                key: 'policy-2',
+                count: 1,
+                fleetServer: 1,
+                agentPolicyIds: ['policy-2', 'other-policy'],
+              }),
+            ],
+          },
+        },
+      });
+
+      const summaries = await packagePolicyService.getSummaryForAgentPolicies(soClient, [
+        'policy-1',
+        'policy-2',
+        'empty-policy',
+      ]);
+
+      expect(summaries.get('policy-1')).toEqual({
+        count: 4301,
+        has_fleet_server: false,
+        has_managed: true,
+        has_root_integrations: true,
+        has_shared: false,
+      });
+      expect(summaries.get('policy-2')).toEqual({
+        count: 1,
+        has_fleet_server: true,
+        has_managed: false,
+        has_root_integrations: false,
+        has_shared: true,
+      });
+      expect(summaries.get('empty-policy')).toEqual({
+        count: 0,
+        has_fleet_server: false,
+        has_managed: false,
+        has_root_integrations: false,
+        has_shared: false,
+      });
+    });
+  });
+
   describe('list', () => {
     it('should use NOT latest_revision:false filter to include 8.x policies without the field', async () => {
       const soClient = createSavedObjectClientMock();
@@ -5800,6 +5917,9 @@ describe('Package policy service', () => {
       expect(res.failedPolicies[0].error).toEqual(
         new PackagePolicyValidationError(`cat is a frozen variable and cannot be modified`)
       );
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        `Preparing update to package policy [${toUpdate.id}] failed: [PackagePolicyValidationError] cat is a frozen variable and cannot be modified`
+      );
     });
 
     it('should put item in failedPolicies when package name is changed', async () => {
@@ -5841,6 +5961,40 @@ describe('Package policy service', () => {
         new PackagePolicyValidationError(
           'Cannot change the package of an existing integration policy. Create a new policy with the desired package.'
         )
+      );
+    });
+
+    it('should put item in failedPolicies when preparing the update rejects with a non-Error value', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: mockPackagePolicy,
+          },
+        ],
+      });
+      savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+      mockedSecretsModule.isSecretStorageEnabled.mockResolvedValueOnce(true);
+      mockedSecretsModule.extractAndUpdateSecrets.mockRejectedValueOnce(undefined);
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        mockPackagePolicy,
+      ]);
+
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(mockPackagePolicy);
+      expect(res.failedPolicies[0].error).toEqual(new Error('undefined'));
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        `Preparing update to package policy [${mockPackagePolicy.id}] failed: [Error] undefined`
       );
     });
 

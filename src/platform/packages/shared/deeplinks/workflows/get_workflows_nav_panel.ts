@@ -43,7 +43,7 @@ interface WorkflowsNavNode {
 /**
  * Returns Workflows side-nav entries for solution navigation trees.
  *
- * When the Workflow Template Library tech preview is enabled, returns a panel
+ * When the Workflow Template library tech preview is enabled, returns a panel
  * opener with list and library children. Otherwise returns a single direct link.
  *
  * ```ts

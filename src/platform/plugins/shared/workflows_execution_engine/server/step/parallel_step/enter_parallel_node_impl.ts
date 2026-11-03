@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { withTimeout } from '@kbn/std';
 import type { ParallelConcurrencyObject, StackFrame } from '@kbn/workflows';
 import {
   DEFAULT_PARALLEL_CONCURRENCY,
@@ -514,11 +515,10 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
         // Pre-warm (rehydrate evicted outputs) — scope-independent, safe to run
         // concurrently with sibling branches.
         await branchRuntime.contextManager.ensureContextReady();
-        // Start the node with the branch's scope installed. The step's
-        // synchronous template rendering (getInput) reads the scope before the
-        // first await, so the scope only needs to be correct for this synchronous
-        // prefix; we restore it immediately so concurrent siblings are unaffected.
-        // The returned promise's awaited I/O does not read the global scope.
+        // Start the node with the branch's scope installed. The scope only needs
+        // to be correct for this synchronous prefix; we restore it immediately so
+        // concurrent siblings are unaffected. Template rendering (getInput) reads
+        // the branch runtime's own stack frames, so it may run after an await.
         const runPromise = this.withBranchScope(branchStackFrames, () =>
           Promise.resolve(branchImpl.run())
         );
@@ -580,32 +580,22 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       return true;
     }
 
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    let timedOut = false;
-    const timeoutPromise = new Promise<void>((resolve) => {
-      timer = setTimeout(() => {
-        timedOut = true;
-        abortController.abort();
-        resolve();
-      }, remaining);
+    const outcome = await withTimeout({
+      promise: fn().catch(() => undefined),
+      timeoutMs: remaining,
     });
-
-    try {
-      await Promise.race([fn().catch(() => undefined), timeoutPromise]);
-    } finally {
-      if (timer) {
-        clearTimeout(timer);
-      }
+    if (outcome.timedout) {
+      abortController.abort();
+      return true;
     }
-
-    return timedOut;
+    return false;
   }
 
   /**
    * Installs `branchStackFrames` as the global workflow scope, runs `fn`, then
-   * restores the previous scope. `fn` MUST complete all scope-dependent reads
-   * synchronously (e.g. template rendering in a step's `getInput()`), because
-   * the scope is restored as soon as `fn` returns — before any awaited I/O.
+   * restores the previous scope. `fn` MUST complete all reads of the global
+   * scope synchronously, because the scope is restored as soon as `fn`
+   * returns — before any awaited I/O.
    *
    * The shared workflow scope is a single mutable slot, so two branches must
    * never have their scope installed at the same time. `Promise.all` advances

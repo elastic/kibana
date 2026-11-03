@@ -7,6 +7,7 @@
 
 import { Subject } from 'rxjs';
 import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 import type {
   EntityStoreCoreSetup,
@@ -19,6 +20,7 @@ import type {
 import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
+import { getExtractEntityTaskId } from './tasks/extract_entity_task';
 import { scheduleLegacySecurityAssetsMigrationIfNeeded } from './tasks/legacy_security_assets_migration_task';
 import { registerTriggers } from './workflow/triggers';
 import { registerSteps } from './workflow/steps';
@@ -31,6 +33,7 @@ import {
   LegacyRemoteLogExtractionStateType,
 } from './domain/saved_objects';
 import { EntityResolutionRuleType } from './domain/resolution/rules/saved_object';
+import { CustomResolutionRuleType } from './domain/resolution/rules';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import { getMaintainerStatus } from './domain/entity_maintainers';
@@ -55,6 +58,7 @@ import { userEntityDefinition } from '../common/domain/definitions/user';
 import { hostEntityDefinition } from '../common/domain/definitions/host';
 import { serviceEntityDefinition } from '../common/domain/definitions/service';
 import { genericEntityDefinition } from '../common/domain/definitions/generic';
+import { EXTRACTION_MODE } from '../common/domain/definitions/entity_schema';
 
 export class EntityStorePlugin
   implements
@@ -122,6 +126,7 @@ export class EntityStorePlugin
     core.savedObjects.registerType(LegacyRemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
     core.savedObjects.registerType(EntityResolutionRuleType);
+    core.savedObjects.registerType(CustomResolutionRuleType);
 
     registerEntityMaintainerTask({
       taskManager: plugins.taskManager,
@@ -175,6 +180,17 @@ export class EntityStorePlugin
       coreStart: core,
       logger: this.logger,
       stop$: this.stop$,
+      isNonPriorityTaskScheduled: async (type, namespace) => {
+        try {
+          await plugins.taskManager.get(
+            getExtractEntityTaskId(type, namespace, EXTRACTION_MODE.nonPriority)
+          );
+          return true;
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) return false;
+          throw err;
+        }
+      },
     });
 
     const { logger, entityDefinitionRegistry } = this;
@@ -194,7 +210,12 @@ export class EntityStorePlugin
       createRelationshipsClient: (esClient, namespace) =>
         new RelationshipsClient({ logger, esClient, namespace }),
       createResolutionClient: (esClient, namespace) =>
-        new ResolutionClient({ logger, esClient, namespace }),
+        new ResolutionClient({
+          logger,
+          esClient,
+          namespace,
+          analytics: createReportEvent(core.analytics),
+        }),
       createResolutionRulesClient: (savedObjectsClient, namespace) =>
         new ResolutionRulesClient(savedObjectsClient, namespace, logger),
       getMaintainerStatus: (namespace, ids) =>

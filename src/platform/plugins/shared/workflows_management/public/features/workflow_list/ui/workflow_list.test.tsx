@@ -97,15 +97,16 @@ jest.mock('./workflows_utility_bar', () => ({
   WorkflowsUtilityBar: () => <div data-test-subj="workflows-utility-bar">{'Utility Bar'}</div>,
 }));
 
-jest.mock('../../../components', () => ({
-  WorkflowsEmptyState: ({ onCreateWorkflow }: { onCreateWorkflow?: () => void }) => (
+jest.mock('../../../components', () => {
+  const EmptyState = ({ onStartManually }: { onStartManually?: () => void }) => (
     <div data-test-subj="workflows-empty-state">
-      <button type="button" onClick={onCreateWorkflow}>
+      <button type="button" onClick={onStartManually}>
         {'Create Workflow'}
       </button>
     </div>
-  ),
-}));
+  );
+  return { AgenticFirstEmptyStateLive: EmptyState };
+});
 
 jest.mock('../../../components/workflows_empty_state/workflows_empty_state', () => ({
   WorkflowsEmptyStateReadOnly: () => <div data-test-subj="workflows-empty-state-readonly" />,
@@ -170,12 +171,10 @@ const createMockWorkflowListDto = (
 
 describe('WorkflowList', () => {
   const setSearch = jest.fn();
-  const onCreateWorkflow = jest.fn();
 
   const defaultProps = {
     search: defaultSearch,
     setSearch,
-    onCreateWorkflow,
   };
 
   beforeEach(() => {
@@ -321,6 +320,13 @@ describe('WorkflowList', () => {
       const nameLink = screen.getByTestId('workflowNameLink');
       expect(nameLink).toBeInTheDocument();
       expect(nameLink).toHaveTextContent('My Test Workflow');
+    });
+
+    it('renders workflow names as a single link, not a link nested inside a button', () => {
+      renderComponent();
+      const nameLink = screen.getByTestId('workflowNameLink');
+      expect(nameLink.tagName).toBe('A');
+      expect(nameLink.closest('button')).toBeNull();
     });
 
     it('keeps workflow name links clean while preserving list search params in route state', async () => {

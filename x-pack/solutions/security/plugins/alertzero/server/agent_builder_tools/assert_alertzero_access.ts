@@ -7,27 +7,34 @@
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
   ALERTZERO_API_PRIVILEGE_WRITE,
 } from '../../common/constants';
+import { isSpaceSupported } from '../lib/is_space_supported';
 
 export type AssertAlertZeroAccess = (
   request: KibanaRequest,
   access: 'read' | 'write'
 ) => Promise<void>;
 
-interface AlertZeroAccessServices {
+interface SpaceAccessServices {
+  isServerless: boolean;
+  spaces?: SpacesPluginStart;
+}
+
+interface AlertZeroAccessServices extends SpaceAccessServices {
   core: Pick<CoreStart, 'savedObjects' | 'uiSettings'>;
   security?: SecurityPluginStart;
 }
 
-/** Checks the caller's space setting and AlertZero privilege before tool execution. */
+/** Checks the caller's space, space setting and AlertZero privilege before tool execution. */
 export const createAssertAlertZeroAccess =
   (getServices: () => Promise<AlertZeroAccessServices>): AssertAlertZeroAccess =>
   async (request, access) => {
-    const { core, security } = await getServices();
+    const { core, security, isServerless, spaces } = await getServices();
     if (!security) {
       throw new Error('Cannot authorize AlertZero access because security is unavailable.');
     }
@@ -42,14 +49,24 @@ export const createAssertAlertZeroAccess =
       throw new Error(`Missing AlertZero ${access === 'read' ? 'Read' : 'All (write)'} privilege.`);
     }
 
-    await assertAlertZeroEnabled(core, request);
+    await assertAlertZeroEnabled({ core, isServerless, spaces }, request);
   };
 
-/** Checks the caller's space setting without imposing feature privileges on shared operations. */
+/**
+ * Checks that the caller's space can use AlertZero and has the setting on, without imposing feature
+ * privileges on shared operations.
+ */
 export const assertAlertZeroEnabled = async (
-  core: Pick<CoreStart, 'savedObjects' | 'uiSettings'>,
+  {
+    core,
+    isServerless,
+    spaces,
+  }: SpaceAccessServices & { core: Pick<CoreStart, 'savedObjects' | 'uiSettings'> },
   request: KibanaRequest
 ): Promise<void> => {
+  if (!(await isSpaceSupported({ isServerless, spaces, request }))) {
+    throw new Error('AlertZero is available only in a Security solution space.');
+  }
   const savedObjectsClient = core.savedObjects.getScopedClient(request);
   const uiSettingsClient = core.uiSettings.asScopedToClient(savedObjectsClient);
   if (!(await uiSettingsClient.get<boolean>(ALERTZERO_ENABLED_SETTING_ID))) {

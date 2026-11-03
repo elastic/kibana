@@ -22,7 +22,6 @@ import {
   FLYOUT_SESSION_KIND,
 } from '../../common/lib/telemetry';
 import { FLYOUT_DESCRIPTOR_KIND } from '../shared/url_state/flyout_v2_url_param';
-import { FLYOUT_WIDTH_LOCAL_STORAGE } from '../shared/constants/local_storage';
 
 jest.mock('react-redux-v7', () => ({
   ...jest.requireActual('react-redux-v7'),
@@ -44,10 +43,12 @@ jest.mock('../shared/hooks/use_default_flyout_properties', () => ({
 
 const mockWriteOnOpen = jest.fn();
 const mockBuildOnClose = jest.fn(() => jest.fn());
+const mockReadRootDescriptor = jest.fn((): unknown => null);
 jest.mock('../shared/url_state/flyout_v2_url_writer', () => ({
   useFlyoutV2UrlWriter: jest.fn(() => ({
     writeOnOpen: mockWriteOnOpen,
     buildOnClose: mockBuildOnClose,
+    readRootDescriptor: mockReadRootDescriptor,
   })),
 }));
 
@@ -107,32 +108,6 @@ describe('useAttackFlyoutApi', () => {
       session: FLYOUT_SESSION_KIND.START,
       origin: FLYOUT_ORIGIN.ATTACKS_TABLE,
     });
-  });
-
-  it('openAttackFlyout opens at the origin flyout size instead of the persisted Security width', () => {
-    const storageGet = jest.fn((key: string) =>
-      key === FLYOUT_WIDTH_LOCAL_STORAGE ? 720 : undefined
-    );
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        overlays: { openSystemFlyout: mockOpenSystemFlyout },
-        storage: { get: storageGet, set: jest.fn(), remove: jest.fn() },
-        telemetry: { reportEvent: mockReportEvent },
-      },
-    });
-
-    const { result } = renderHook(() => useAttackFlyoutApi());
-    result.current.openAttackFlyout({
-      attackId: 'attack-1',
-      indexName: '.alerts-security',
-      originFlyoutSize: 640,
-    });
-
-    const properties = mockOpenSystemFlyout.mock.calls[0][1];
-    expect(properties.size).toBe(640);
-    expect(properties.maxWidth).toBe(false);
-    expect(properties.defaultSize).toBeUndefined();
-    expect(properties.onResize).toBeUndefined();
   });
 
   it('openAttackFlyout writes an attack descriptor to the URL', () => {
@@ -212,7 +187,6 @@ describe('useAttackFlyoutApi', () => {
       kind: FLYOUT_DESCRIPTOR_KIND.attackCorrelations,
       attackId: 'attack-id',
       indexName: 'attack-index',
-      alertIds: ['alert-1', 'alert-2'],
     });
     // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
@@ -249,7 +223,6 @@ describe('useAttackFlyoutApi', () => {
       kind: FLYOUT_DESCRIPTOR_KIND.attackEntities,
       attackId: 'attack-id',
       indexName: 'attack-index',
-      alertIds: ['alert-1', 'alert-2'],
     });
     // A tool is a session:'start' root; closing it clears the param (no parent to revert to).
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);

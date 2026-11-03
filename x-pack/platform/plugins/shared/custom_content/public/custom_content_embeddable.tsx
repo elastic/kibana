@@ -9,13 +9,16 @@ import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
   HasTypeDisplayName,
   HasEditCapabilities,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesDataLoading,
   PublishesEsql,
   PublishesWritableTimeRange,
+  ViewMode,
 } from '@kbn/presentation-publishing';
 import {
   initializeTitleManager,
@@ -28,6 +31,7 @@ import {
   apiPublishesTimeRange,
   apiIsPresentationContainer,
   fetch$,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout, tracksOverlays } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
@@ -50,12 +54,15 @@ import {
 } from 'rxjs';
 import {
   isExecutionTerminalEvent,
+  isToolCallEvent,
   isToolUiEvent,
   type ToolUiEvent,
 } from '@kbn/agent-builder-common';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
   readEsqlQuery,
   toEsqlQueryState,
 } from '@kbn/custom-content-common';
@@ -80,6 +87,18 @@ import {
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import type { CustomContentEmbeddableState } from '../server';
 
+const isToolCallForPanel = (event: BrowserChatEvent, panelId: string): boolean => {
+  if (!isToolCallEvent(event)) return false;
+  const { tool_id: toolId, params } = event.data;
+  if (toolId === CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID) return params.embeddable_id === panelId;
+  if (toolId !== CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID || !Array.isArray(params.panels))
+    return false;
+  return params.panels.some(
+    (panel: unknown) =>
+      typeof panel === 'object' && panel !== null && 'id' in panel && panel.id === panelId
+  );
+};
+
 const isCustomContentUpdatedUiEvent = (
   event: BrowserChatEvent
 ): event is ToolUiEvent<typeof CUSTOM_CONTENT_UPDATED_UI_EVENT, CustomContentUpdatedUiEventData> =>
@@ -95,10 +114,11 @@ const panelMeasureCss = css({
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
   HasEditCapabilities &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesDataLoading &
   PublishesEsql &
-  PublishesWritableTimeRange;
+  PublishesWritableTimeRange &
+  HasInspectorAdapters;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   CustomContentEmbeddableState,
@@ -133,13 +153,21 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     let isRetained = false;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
+    const requestAdapter = new RequestAdapter();
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const isGenerating$ = new BehaviorSubject<boolean>(false);
-    const chatGeneratingCallbacks = {
-      onSubmit: () => isGenerating$.next(true),
-      onClose: () => {
-        if (isGenerating$.getValue()) isGenerating$.next(false);
-      },
+    const createChatGeneratingCallbacks = () => {
+      let hasSubmitted = false;
+      return {
+        onSubmit: () => {
+          if (hasSubmitted) return;
+          hasSubmitted = true;
+          isGenerating$.next(true);
+        },
+        onClose: () => {
+          if (isGenerating$.getValue()) isGenerating$.next(false);
+        },
+      };
     };
     const esql$ = new BehaviorSubject<AggregateQuery[]>([]);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -156,7 +184,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           ? parentApi.timeRange$.getValue() ?? undefined
           : undefined)
     );
-    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
     // Starts true so the panel is not reported as render-complete before its first fetch resolves;
     // screenshotting would otherwise capture an empty panel.
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
@@ -210,8 +238,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       esql$,
       approximationApplied$,
-      dataViews$,
+      dataSources$,
       dataLoading$,
+      // A static panel makes no request, so it offers no Inspect entry.
+      getInspectorAdapters: () =>
+        esqlQuery$.getValue() ? { requests: requestAdapter } : undefined,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom panel',
@@ -254,7 +285,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               closeFlyout();
               agentBuilder.openChat({
                 newConversation: true,
-                ...chatGeneratingCallbacks,
+                ...createChatGeneratingCallbacks(),
                 attachments: [
                   buildCustomContentContextAttachment({
                     template: draftTemplate,
@@ -360,7 +391,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           ).pipe(catchError(() => of(undefined)));
         })
       )
-      .subscribe((dataView) => dataViews$.next(dataView ? [dataView] : undefined));
+      .subscribe((dataView) => dataSources$.next(dataView ? [dataView] : undefined));
 
     const fetchSubscription = fetch$(api).subscribe((ctx) => {
       isApproximate$.next(ctx.isApproximate);
@@ -373,6 +404,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         previewHtml$.next(null);
       }
     });
+
+    const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('edit');
 
     return {
       api,
@@ -389,6 +422,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           previewHtml,
           timeRange,
           isGenerating,
+          viewMode,
         ] = useBatchedPublishingSubjects(
           esqlQuery$,
           template$,
@@ -400,7 +434,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlVariables$,
           previewHtml$,
           effectiveTimeRange$,
-          isGenerating$
+          isGenerating$,
+          viewMode$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
 
@@ -453,6 +488,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 return;
               }
 
+              if (isToolCallForPanel(event, uuid)) {
+                isGenerating$.next(true);
+                return;
+              }
+
               if (!isCustomContentUpdatedUiEvent(event)) return;
 
               const {
@@ -492,7 +532,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             newConversation: true,
-            ...chatGeneratingCallbacks,
+            ...createChatGeneratingCallbacks(),
             attachments: [
               buildCustomContentContextAttachment({
                 template: '',
@@ -525,8 +565,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               filters={filters}
               esqlVariables={esqlVariables}
               previewHtml={previewHtml}
-              isAiAvailable={Boolean(agentBuilder)}
+              isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}
+              isInteractive={viewMode !== 'non-interactive'}
+              minHeight={0}
+              requestAdapter={requestAdapter}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

@@ -31,6 +31,7 @@ type CreateExecutionParams = Pick<
   | 'interactivity'
   | 'parentExecutionId'
   | 'owner'
+  | 'runAs'
 >;
 
 /** What a status update records alongside the status. */
@@ -48,8 +49,18 @@ export interface ExecutionPeek {
   eventCount: number;
   lastHeartbeat?: string;
   conversationId?: string;
+  agentId?: string;
+  spaceId?: string;
   owner?: UserIdAndName;
+  runAs?: AgentExecution['runAs'];
 }
+
+const runAsFromEs = (
+  runAs: NonNullable<AgentExecutionProperties['run_as']>
+): NonNullable<AgentExecution['runAs']> => ({
+  type: runAs.type,
+  serviceAccountId: runAs.service_account_id,
+});
 
 const fromEs = (source: AgentExecutionProperties): AgentExecution => {
   return {
@@ -63,6 +74,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
     spaceId: source.space_id,
     ...(source.owner ? { owner: source.owner } : {}),
+    ...(source.run_as ? { runAs: runAsFromEs(source.run_as) } : {}),
     agentParams: source.agent_params,
     eventCount: source.event_count ?? 0,
     events: source.events ?? [],
@@ -116,6 +128,9 @@ export interface AgentExecutionClient {
     since?: number
   ): Promise<{ events: ChatEvent[]; status: ExecutionStatus; error?: SerializedExecutionError }>;
 
+  /** Delete an execution document. Resolves silently when it does not exist. */
+  delete(executionId: string): Promise<void>;
+
   /** Search executions by metadata and/or status filters. */
   find(options: FindExecutionsOptions): Promise<AgentExecution[]>;
 }
@@ -156,6 +171,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     interactivity,
     parentExecutionId,
     owner,
+    runAs,
   }: CreateExecutionParams): Promise<AgentExecution> {
     if (metadata) {
       for (const key of Object.keys(metadata)) {
@@ -177,6 +193,9 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       parent_execution_id: parentExecutionId,
       space_id: spaceId,
       ...(owner ? { owner } : {}),
+      ...(runAs
+        ? { run_as: { type: runAs.type, service_account_id: runAs.serviceAccountId } }
+        : {}),
       agent_params: agentParams,
       event_count: 0,
       events: [],
@@ -270,14 +289,23 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
           'event_count',
           'last_heartbeat',
           'agent_params.conversationId',
+          'agent_id',
+          'space_id',
           'owner',
+          'run_as',
         ] as string[],
       });
       const source = response._source;
       if (!source) {
         return undefined;
       }
-      const { agent_params: agentParams, owner } = source;
+      const {
+        agent_params: agentParams,
+        agent_id: agentId,
+        space_id: spaceId,
+        owner,
+        run_as: runAs,
+      } = source;
       const conversationId =
         agentParams && 'conversationId' in agentParams ? agentParams.conversationId : undefined;
       return {
@@ -286,11 +314,25 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
         ...(source.error ? { error: source.error } : {}),
         ...(source.last_heartbeat ? { lastHeartbeat: source.last_heartbeat } : {}),
         ...(conversationId ? { conversationId } : {}),
+        ...(agentId ? { agentId } : {}),
+        ...(spaceId ? { spaceId } : {}),
         ...(owner ? { owner } : {}),
+        ...(runAs ? { runAs: runAsFromEs(runAs) } : {}),
       };
     } catch (err) {
       if (err?.meta?.statusCode === 404) {
         return undefined;
+      }
+      throw err;
+    }
+  }
+
+  async delete(executionId: string): Promise<void> {
+    try {
+      await this.esClient.delete({ index: agentExecutionIndexName, id: executionId });
+    } catch (err) {
+      if (err?.meta?.statusCode === 404) {
+        return;
       }
       throw err;
     }

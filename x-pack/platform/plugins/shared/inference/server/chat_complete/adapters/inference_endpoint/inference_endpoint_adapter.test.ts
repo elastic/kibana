@@ -23,13 +23,14 @@ import {
 import { getRetryFilter } from '../../../../common/utils/error_retry_filter';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
+import type { OpenAIChatCompletionChunkDelta } from '../openai/types';
 import { inferenceEndpointAdapter } from './inference_endpoint_adapter';
 
 function createOpenAIChunk({
   delta,
   usage,
 }: {
-  delta?: OpenAI.ChatCompletionChunk['choices'][number]['delta'];
+  delta?: OpenAIChatCompletionChunkDelta;
   usage?: OpenAI.ChatCompletionChunk['usage'];
 }): OpenAI.ChatCompletionChunk {
   return {
@@ -76,6 +77,37 @@ describe('inferenceEndpointAdapter', () => {
   };
 
   describe('when creating the request', () => {
+    it('sends a template and omits messages', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: { content: 'ok' },
+        })
+      );
+
+      executorMock.invoke.mockResolvedValue(observableIntoEventSourceStream(source$, logger));
+
+      const response$ = inferenceEndpointAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [{ role: MessageRole.User, content: 'should not be sent' }],
+        template: {
+          id: '.attack-discovery',
+          version: 1,
+          variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
+        },
+      });
+
+      await lastValueFrom(response$.pipe(toArray()));
+
+      const body = executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+      expect(body.template).toEqual({
+        id: '.attack-discovery',
+        version: 1,
+        variables: { phase: 'generate', alerts: ['alert text'], partial: '' },
+      });
+      expect(body).not.toHaveProperty('messages');
+      expect(body).not.toHaveProperty('tools');
+    });
+
     it('emits chunk events', async () => {
       const source$ = of(
         createOpenAIChunk({
@@ -290,6 +322,68 @@ describe('inferenceEndpointAdapter', () => {
             completion: 5,
             prompt: 10,
             total: 15,
+          },
+          model: 'gpt-4o',
+        },
+      ]);
+    });
+
+    it('propagates reasoning chunks and reasoning token counts', async () => {
+      const source$ = of(
+        createOpenAIChunk({
+          delta: { reasoning: 'Let me think' },
+        }),
+        createOpenAIChunk({
+          delta: { reasoning: ' about it.' },
+        }),
+        createOpenAIChunk({
+          delta: { content: 'Answer', reasoning: null },
+          usage: {
+            completion_tokens: 20,
+            prompt_tokens: 10,
+            total_tokens: 30,
+            completion_tokens_details: { reasoning_tokens: 12 },
+          },
+        })
+      );
+
+      executorMock.invoke.mockResolvedValue(observableIntoEventSourceStream(source$, logger));
+
+      const response$ = inferenceEndpointAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [{ role: MessageRole.User, content: 'Hello' }],
+      });
+
+      const events = await lastValueFrom(response$.pipe(toArray()));
+
+      expect(events.filter(isChatCompletionChunkEvent)).toEqual([
+        {
+          content: '',
+          reasoning: 'Let me think',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        {
+          content: '',
+          reasoning: ' about it.',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+        {
+          content: 'Answer',
+          tool_calls: [],
+          type: ChatCompletionEventType.ChatCompletionChunk,
+        },
+      ]);
+
+      expect(events.filter(isChatCompletionTokenCountEvent)).toEqual([
+        {
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
+          tokens: {
+            completion: 8,
+            prompt: 10,
+            total: 30,
+            thinking: 12,
           },
           model: 'gpt-4o',
         },
@@ -661,6 +755,27 @@ describe('inferenceEndpointAdapter', () => {
       } finally {
         jest.useRealTimers();
       }
+    });
+
+    it('guards template requests with the same first-byte and idle timeouts', async () => {
+      executorMock.invoke.mockResolvedValue(new Readable({ read: () => {} }));
+
+      const error = await lastValueFrom(
+        inferenceEndpointAdapter.chatComplete({
+          ...defaultArgs,
+          messages: [],
+          template: { id: '.attack-discovery', version: 1, variables: {} },
+          firstByteTimeoutMs: 45_000,
+          idleTimeoutMs: 20,
+        })
+      ).catch((e) => e);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({ firstByteTimeoutMs: 45_000 })
+      );
+      expect(isInferenceProviderError(error)).toBe(true);
+      expect(error.meta.status).toBe(504);
+      expect(getRetryFilter('auto')(error)).toBe(true);
     });
 
     it('propagates the abort signal', () => {
@@ -1114,6 +1229,94 @@ describe('inferenceEndpointAdapter', () => {
             }),
           })
         );
+      });
+    });
+  });
+
+  describe('forced tool choice', () => {
+    const tools = { set_title: { description: 'set the title' } };
+
+    beforeEach(() => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+    });
+
+    const getBody = () => executorMock.invoke.mock.calls[0][0].body as Record<string, unknown>;
+
+    it('sends `auto` instead of a named function for a Claude model that rejects forced tool choice', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'eu.anthropic.claude-sonnet-5-5',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+
+    it('sends `auto` instead of `required` for a Claude model that rejects forced tool choice', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'anthropic-claude-5.5-opus',
+          tools,
+          toolChoice: ToolChoiceType.required,
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+
+    it('keeps the named function for a Claude model that accepts forced tool choice', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'anthropic-claude-4.6-sonnet',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
+      });
+    });
+
+    it('falls back to the request model name when endpoint model metadata is missing', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'claude-opus-5-5',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toBe('auto');
+    });
+
+    it('keeps the named function for a non-Claude model', () => {
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          endpointModelId: 'openai-gpt-5.4',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getBody().tool_choice).toEqual({
+        type: 'function',
+        function: { name: 'set_title' },
       });
     });
   });

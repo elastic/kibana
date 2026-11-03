@@ -16,8 +16,9 @@ import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import { css } from '@emotion/react';
 import type { VisualizationDimensionEditorProps } from '@kbn/lens-common';
+import { LENS_GAUGE_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
-import { PalettePanelContainer } from '../../shared_components';
+import { PalettePanelContainer, LENS_PALETTE_MAX_COLOR_RANGES } from '../../shared_components';
 import type { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';
 import { getAccessorsFromState } from './utils';
@@ -132,6 +133,8 @@ export function GaugeDimensionEditor(
                 palettes={props.paletteService}
                 activePalette={activePalette}
                 dataBounds={currentMinMax}
+                maxSteps={LENS_PALETTE_MAX_COLOR_RANGES}
+                defaultBandCount={LENS_GAUGE_DEFAULT_COLOR_STEPS}
                 setPalette={(newPalette) => {
                   // if the new palette is not custom, replace the rangeMin with the artificial one
                   if (

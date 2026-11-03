@@ -20,7 +20,7 @@ cd kibana
 
 ## Install dependencies
 
-Install the version of Node.js listed in the `.node-version` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm). As we also include a `.nvmrc` file you can switch to the correct version when using nvm by running:
+Install the version of Node.js listed in the `.nvmrc` file. This can be automated with tools such as [nvm](https://github.com/creationix/nvm), which switches to the correct version when you run:
 
 ```sh
 nvm use
@@ -137,7 +137,7 @@ To develop against serverless projects, you need to start both Elasticsearch and
 pnpm es serverless --projectType=oblt          
 pnpm es serverless --projectType=security 
 pnpm es serverless --projectType=es            
-pnpm es serverless --projectType=workplaceai  
+pnpm es serverless --projectType=vectordb
 ```
 
 **Step 2:** Start Kibana in the matching serverless mode:
@@ -146,7 +146,7 @@ pnpm es serverless --projectType=workplaceai
 pnpm serverless-oblt         
 pnpm serverless-security     
 pnpm serverless-es           
-pnpm serverless-workplace-ai 
+pnpm serverless-vectordb
 ```
 
 **Important:** The Kibana serverless mode must match the ES `--projectType` value. Mismatched modes will cause errors.

@@ -6,13 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { EuiComboBox, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 import { useService } from '@kbn/core-di-browser';
 import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../hooks/use_fetch_rules';
 import { UserCapabilities } from '../../../services/user_capabilities';
+import { ExecutionHistorySearchField } from './execution_history_search_field';
 
 const SEARCH_DEBOUNCE_MS = 300;
 const RULE_FILTER_MAX_RESULTS = 20;
@@ -68,20 +69,11 @@ export const ExecutionHistorySearchBar = ({
   onRuleFiltersChange,
   showRuleFilter = true,
 }: ExecutionHistorySearchBarProps) => {
-  const [searchInput, setSearchInput] = useState('');
   const [ruleSearchInput, setRuleSearchInput] = useState('');
   const [debouncedRuleSearch, setDebouncedRuleSearch] = useState('');
 
   const canReadRules = useService(UserCapabilities).canRead('rules');
   const showRuleComboBox = showRuleFilter && canReadRules;
-
-  useDebounce(
-    () => {
-      onSearchChange(searchInput);
-    },
-    SEARCH_DEBOUNCE_MS,
-    [onSearchChange, searchInput]
-  );
 
   useDebounce(
     () => {
@@ -109,20 +101,16 @@ export const ExecutionHistorySearchBar = ({
   return (
     <EuiFlexGroup gutterSize="s" direction="row" responsive={false} css={{ flexGrow: 0 }}>
       <EuiFlexItem grow>
-        <EuiFieldSearch
-          compressed
-          fullWidth
+        <ExecutionHistorySearchField
           data-test-subj="executionHistorySearchBar"
+          onSearchChange={onSearchChange}
           placeholder={i18n.translate(
             'xpack.alertingV2.executionHistory.searchBar.searchPlaceholder',
             { defaultMessage: 'Search execution history...' }
           )}
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          aria-label={i18n.translate(
-            'xpack.alertingV2.executionHistory.searchBar.searchAriaLabel',
-            { defaultMessage: 'Search execution history by action policy or rule' }
-          )}
+          ariaLabel={i18n.translate('xpack.alertingV2.executionHistory.searchBar.searchAriaLabel', {
+            defaultMessage: 'Search execution history by action policy or rule',
+          })}
         />
       </EuiFlexItem>
       {showRuleComboBox && (

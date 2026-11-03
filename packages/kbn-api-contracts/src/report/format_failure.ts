@@ -23,6 +23,8 @@ const RELEASE_NOTE = `Release note:
 
 ${releaseNote.guidance}
 
+${releaseNote.breakingContext}
+
 See the @kbn/api-contracts README for tier definitions and the allowlist workflow: ${README_LINK}
 `;
 
@@ -167,6 +169,7 @@ export function formatFailure(entries: ImpactReportEntry[]): string {
     ...HEADER,
     `Detected ${gating.length} breaking change(s) in stable/tech_preview APIs ` +
       `(${stable.length} stable, ${techPreview.length} tech_preview):`,
+    'Stable and Technical Preview changes block merge.',
     '',
     ...gating.flatMap(formatEntry),
     ...allowlistedSection,

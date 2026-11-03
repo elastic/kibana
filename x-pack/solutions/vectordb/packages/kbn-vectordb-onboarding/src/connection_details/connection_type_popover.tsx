@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PATH_SELECTION_TELEMETRY_PREFIX } from './telemetry_prefix';
 
 const connectionTypeLabels = {
   elasticsearch: i18n.translate('vectordbOnboarding.connectionType.elasticsearchLabel', {
@@ -25,16 +26,13 @@ const CONNECTION_TYPES = Object.keys(connectionTypeLabels) as ConnectionType[];
 interface ConnectionTypePopoverProps {
   connectionType: ConnectionType;
   onConnectionTypeChange: (connectionType: ConnectionType) => void;
-  telemetryPage: string;
 }
 
 export const ConnectionTypePopover = ({
   connectionType,
   onConnectionTypeChange,
-  telemetryPage,
 }: ConnectionTypePopoverProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const telemetryPrefix = `vectordbOnboarding-${telemetryPage}`;
 
   const selectConnectionType = (type: ConnectionType) => {
     setIsPopoverOpen(false);
@@ -47,7 +45,7 @@ export const ConnectionTypePopover = ({
       icon={connectionType === type ? 'check' : 'empty'}
       onClick={() => selectConnectionType(type)}
       data-test-subj={`vectordbConnectionTypeOption-${type}`}
-      data-telemetry-id={`${telemetryPrefix}-connectionType-${type}`}
+      data-telemetry-id={`${PATH_SELECTION_TELEMETRY_PREFIX}-connectionType-${type}`}
     >
       {connectionTypeLabels[type]}
     </EuiContextMenuItem>
@@ -63,7 +61,7 @@ export const ConnectionTypePopover = ({
           iconSide="right"
           onClick={() => setIsPopoverOpen((open) => !open)}
           data-test-subj="vectordbConnectionTypeButton"
-          data-telemetry-id={`${telemetryPrefix}-connectionType-openPopover`}
+          data-telemetry-id={`${PATH_SELECTION_TELEMETRY_PREFIX}-connectionType-openPopover`}
           aria-label={i18n.translate('vectordbOnboarding.connectionType.buttonAriaLabel', {
             defaultMessage: 'Select connection details type',
           })}

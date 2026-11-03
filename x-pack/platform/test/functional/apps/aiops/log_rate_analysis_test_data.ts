@@ -42,28 +42,31 @@ export const logRateAnalysisTestData: TestData[] = [
     zeroDocsFallback: false,
     autoRun: false,
   }),
+  // For the zero docs fallback data sets the `change_point` aggregation reports a `trend_change`
+  // at the first non-empty bucket. Extending that change point covers every bucket with documents,
+  // so clicking any bar in the chart lands inside the change point and auto-runs the analysis.
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: true,
     zeroDocsFallback: true,
-    autoRun: false,
+    autoRun: true,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
     textField: false,
     zeroDocsFallback: true,
-    autoRun: false,
+    autoRun: true,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: true,
     zeroDocsFallback: true,
-    autoRun: false,
+    autoRun: true,
   }),
   getArtificialLogDataViewTestData({
     analysisType: LOG_RATE_ANALYSIS_TYPE.DIP,
     textField: false,
     zeroDocsFallback: true,
-    autoRun: false,
+    autoRun: true,
   }),
 ];

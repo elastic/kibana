@@ -81,6 +81,7 @@ interface MetricPanelConfig {
   field: string;
   x: number;
   y: number;
+  w: number;
 }
 
 interface XYPanelConfig {
@@ -103,7 +104,7 @@ interface TablePanelConfig {
   y: number;
 }
 
-function buildMetricPanel({ panelId, title, field, x, y }: MetricPanelConfig) {
+function buildMetricPanel({ panelId, title, field, x, y, w }: MetricPanelConfig) {
   const layerId = `layer-${panelId}`;
   const colMetric = `col-${panelId}-metric`;
 
@@ -112,7 +113,7 @@ function buildMetricPanel({ panelId, title, field, x, y }: MetricPanelConfig) {
       type: 'lens' as const,
       panelIndex: panelId,
       title,
-      gridData: { i: panelId, x, y, w: 12, h: 6 },
+      gridData: { i: panelId, x, y, w, h: 6 },
       embeddableConfig: {
         hidePanelTitles: false,
         attributes: {
@@ -185,7 +186,7 @@ function buildCountMetricPanel() {
       type: 'lens' as const,
       panelIndex: panelId,
       title,
-      gridData: { i: panelId, x: 36, y: 0, w: 12, h: 6 },
+      gridData: { i: panelId, x: 39, y: 0, w: 9, h: 6 },
       embeddableConfig: {
         hidePanelTitles: false,
         attributes: {
@@ -370,6 +371,7 @@ function buildTablePanel({ panelId, title, bucketField, bucketLabel, x, y }: Tab
   const colTotal = `col-${panelId}-total`;
   const colPrompt = `col-${panelId}-prompt`;
   const colCompletion = `col-${panelId}-completion`;
+  const colThinking = `col-${panelId}-thinking`;
 
   return {
     panel: {
@@ -399,6 +401,7 @@ function buildTablePanel({ panelId, title, bucketField, bucketLabel, x, y }: Tab
                 { columnId: colTotal, isTransposed: false },
                 { columnId: colPrompt, isTransposed: false },
                 { columnId: colCompletion, isTransposed: false },
+                { columnId: colThinking, isTransposed: false },
               ],
             },
             datasourceStates: {
@@ -454,8 +457,18 @@ function buildTablePanel({ panelId, title, bucketField, bucketLabel, x, y }: Tab
                         params: { emptyAsNull: true },
                         customLabel: true,
                       },
+                      [colThinking]: {
+                        label: 'Thinking tokens',
+                        dataType: 'number',
+                        operationType: 'sum',
+                        sourceField: 'token_usage.thinking_tokens',
+                        isBucketed: false,
+                        scale: 'ratio',
+                        params: { emptyAsNull: true },
+                        customLabel: true,
+                      },
                     },
-                    columnOrder: [colBucket, colTotal, colPrompt, colCompletion],
+                    columnOrder: [colBucket, colTotal, colPrompt, colCompletion, colThinking],
                     incompleteColumns: {},
                   },
                 },
@@ -488,6 +501,7 @@ function buildDashboard() {
       field: 'token_usage.total_tokens',
       x: 0,
       y: 0,
+      w: 12,
     }),
     buildMetricPanel({
       panelId: 'prompt-tokens',
@@ -495,13 +509,23 @@ function buildDashboard() {
       field: 'token_usage.prompt_tokens',
       x: 12,
       y: 0,
+      w: 9,
     }),
     buildMetricPanel({
       panelId: 'completion-tokens',
       title: 'Completion tokens',
       field: 'token_usage.completion_tokens',
-      x: 24,
+      x: 21,
       y: 0,
+      w: 9,
+    }),
+    buildMetricPanel({
+      panelId: 'thinking-tokens',
+      title: 'Thinking tokens',
+      field: 'token_usage.thinking_tokens',
+      x: 30,
+      y: 0,
+      w: 9,
     }),
     buildCountMetricPanel(),
     buildXYPanel({

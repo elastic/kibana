@@ -6,12 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { capitalize } from 'lodash';
 import path from 'node:path';
 import { editableToolTypes, toAutoApprovedApis } from '@kbn/agent-builder-common';
-import type { ApiTarget } from '@kbn/agent-builder-common';
-import { isKnownApiSelector } from '@kbn/agent-builder-common/apis/known_apis';
 import type { RouteDependencies } from './types';
+import { autoApprovedApisSchema } from './approvals_schema';
 import { getHandlerWrapper } from './wrap_handler';
 import { toDescriptor, toDescriptorWithSchema } from '../services/tools/utils/tool_conversion';
 import { TOOL_USED_BY_AGENTS_ERROR_CODE } from '../../common/http_api/tools';
@@ -28,31 +26,6 @@ import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from './route_security';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
-
-const apiSelectorArraySchema = (target: ApiTarget, exampleApi: string) => {
-  const targetLabel = capitalize(target);
-  const exampleNamespace = exampleApi.split('.')[0];
-  return schema.maybe(
-    schema.arrayOf(
-      schema.string({
-        maxLength: 256,
-        validate: (api) =>
-          isKnownApiSelector({ target, api })
-            ? undefined
-            : `Unknown api "${api}" for target "${target}".`,
-      }),
-      {
-        maxSize: 100,
-        meta: {
-          description:
-            `${targetLabel} APIs pre-approved for this run. Each entry is an exact identifier formed ` +
-            `from the namespace and name (for example \`${exampleApi}\`), a namespace wildcard ` +
-            `(for example \`${exampleNamespace}.*\`), or \`*\` for every ${targetLabel} API.`,
-        },
-      }
-    )
-  );
-};
 
 export function registerToolsRoutes({
   router,
@@ -490,21 +463,12 @@ export function registerToolsRoutes({
                 schema.object(
                   {
                     auto_approved_apis: schema.maybe(
-                      schema.object(
-                        {
-                          elasticsearch: apiSelectorArraySchema('elasticsearch', 'indices.create'),
-                          kibana: apiSelectorArraySchema(
-                            'kibana',
-                            'alerting.delete-alerting-rule-id'
-                          ),
-                        },
-                        {
-                          meta: {
-                            description:
-                              'Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation, keyed by backend. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.',
-                          },
-                        }
-                      )
+                      autoApprovedApisSchema({
+                        scope: 'this run',
+                        description:
+                          'Destructive Elasticsearch or Kibana APIs the tool may call without a user confirmation, keyed by backend. A tool run has no live user to answer the confirmation prompt, so a destructive API is refused unless it is listed here.',
+                        knownApisOnly: true,
+                      })
                     ),
                   },
                   {

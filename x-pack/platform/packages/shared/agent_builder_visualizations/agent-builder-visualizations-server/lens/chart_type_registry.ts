@@ -130,7 +130,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       rules: [
         panelTitleRule,
         'Hide axis titles by setting `title: { visible: false }` on both the x and y axes, and do not set axis title text.',
-        'Area series use `styling.areas.fill: "gradient"`, never solid.',
+        'Omit `styling.areas.fill` so area series use the default gradient.',
         'Set `legend.position: "bottom"` and keep the default outside placement. Use `legend.layout: { type: "list" }` without legend statistics and `legend.layout: { type: "grid" }` when statistics are set, so the values line up in columns. Always set `legend.visibility`, because an unset value hides the legend entirely. Use `"auto"` so Lens shows the legend for multiple series and hides it for a single series. Use `"visible"` instead when legend statistics are set.',
         'Use the default Lens palette by omitting explicit `color` properties. During enhancement, remove all custom palettes and series color overrides. Add colors only when requested, and never use legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
         'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',

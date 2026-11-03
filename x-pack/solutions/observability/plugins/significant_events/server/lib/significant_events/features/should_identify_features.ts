@@ -14,14 +14,14 @@ export interface ShouldIdentifyFeaturesResult {
 
 export async function shouldIdentifyFeatures({
   kiClient,
-  streamName,
+  sourceId,
   thresholdHours,
 }: {
   kiClient: KnowledgeIndicatorClient;
-  streamName: string;
+  sourceId: string;
   thresholdHours: number;
 }): Promise<ShouldIdentifyFeaturesResult> {
-  const inferred = await kiClient.getLatestRevisionTimestamp(streamName, {
+  const inferred = await kiClient.getLatestRevisionTimestamp(sourceId, {
     types: [...INFERRED_FEATURE_TYPES],
   });
 
@@ -29,7 +29,7 @@ export async function shouldIdentifyFeatures({
     return { shouldIdentify: true };
   }
 
-  const computed = await kiClient.getLatestRevisionTimestamp(streamName, {
+  const computed = await kiClient.getLatestRevisionTimestamp(sourceId, {
     types: [...COMPUTED_FEATURE_TYPES],
   });
 
