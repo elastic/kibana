@@ -25,18 +25,20 @@ test.describe(
   'Rollup jobs - create wizard',
   { tag: ['@local-stateful-classic', '@cloud-stateful-classic'] },
   () => {
-    test.beforeEach(async ({ browserAuth, esClient, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, esClient, pageObjects, uiSettings }) => {
       // Rollup jobs and indices are cluster-global; clear leftovers from a crashed run so the
       // empty-list prompt holds, then unhide the deprecated UI and seed matching source indices.
       await deleteAllRollupJobs(esClient);
       await cleanupRollupIndices(esClient);
       await createMockRollupIndex(esClient);
       await seedSourceIndices(esClient);
+      await uiSettings.set({ 'xpack.rollup.ui.enabled': true });
       await browserAuth.loginAsAdmin();
       await pageObjects.rollup.goto();
     });
 
-    test.afterEach(async ({ esClient }) => {
+    test.afterEach(async ({ esClient, uiSettings }) => {
+      await uiSettings.unset('xpack.rollup.ui.enabled');
       await deleteAllRollupJobs(esClient);
       await cleanupRollupIndices(esClient);
     });

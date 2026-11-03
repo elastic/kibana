@@ -17,6 +17,7 @@ export const PLUGIN = {
 export const MAJOR_VERSION = '8.0.0';
 
 export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
+export const CONFIG_ROLLUP_UI_ENABLED = 'xpack.rollup.ui.enabled';
 
 export const API_BASE_PATH = '/api/rollup';
 

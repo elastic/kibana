@@ -1874,6 +1874,20 @@ groups:
       Rollups were deprecated in 8.11.0. Rollups are deprecated and will be removed in a future version. Use [downsampling](docs-content://manage-data/data-store/data-streams/downsampling-time-series-data-stream.md) instead.
     settings:
 
+      - setting: "xpack.rollup.ui.enabled"
+        id: xpack-rollup-ui-enabled
+        description: |
+          Shows the deprecated Rollup Jobs UI in Stack Management. Refresh the page to apply changes. Off by default.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: deprecated 8.11
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless: unavailable
+
       - setting: "rollups:enableIndexPatterns"
         id: rollups-enableindexpatterns
         description: |

@@ -15,4 +15,8 @@ describe('rollup config', () => {
   it('is enabled by default', () => {
     expect(config.schema.validate({}, { serverless: false }).enabled).toBe(true);
   });
+
+  it('has the Rollup UI disabled by default', () => {
+    expect(config.schema.validate({}, { serverless: false }).ui.enabled).toBe(false);
+  });
 });

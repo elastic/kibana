@@ -23,6 +23,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('./apps/ml/anomaly_detection_jobs/group1'),
     ],
 
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.rollup.ui.enabled=true',
+      ],
+    },
+
     junit: {
       reportName: 'X-Pack CCS Tests',
     },

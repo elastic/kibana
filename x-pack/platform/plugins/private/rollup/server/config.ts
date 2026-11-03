@@ -21,7 +21,7 @@ const kibanaVersion = new SemVer(MAJOR_VERSION);
 const schemaLatest = schema.object(
   {
     ui: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
+      enabled: schema.boolean({ defaultValue: false }),
     }),
     enabled: schema.boolean({ defaultValue: true }),
   },
@@ -29,9 +29,6 @@ const schemaLatest = schema.object(
 );
 
 const configLatest: PluginConfigDescriptor<RollupConfig> = {
-  exposeToBrowser: {
-    ui: true,
-  },
   schema: schemaLatest,
   deprecations: () => [],
 };

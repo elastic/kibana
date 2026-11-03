@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import { PLUGIN, CONFIG_ROLLUPS } from '../common';
+import { PLUGIN, CONFIG_ROLLUPS, CONFIG_ROLLUP_UI_ENABLED } from '../common';
 import type { Dependencies } from './types';
 import { registerApiRoutes } from './routes';
 import { License } from './services';
@@ -70,6 +70,25 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
     });
 
     uiSettings.register({
+      [CONFIG_ROLLUP_UI_ENABLED]: {
+        name: i18n.translate('xpack.rollupJobs.enableUiTitle', {
+          defaultMessage: 'Enable rollup jobs UI',
+        }),
+        value: this.config.ui.enabled,
+        description: i18n.translate('xpack.rollupJobs.enableUiDescription', {
+          defaultMessage:
+            'Show Rollup Jobs in Stack Management. Refresh the page to apply changes.',
+        }),
+        category: ['rollups'],
+        schema: schema.boolean(),
+        requiresPageReload: true,
+        deprecation: {
+          message: i18n.translate('xpack.rollupJobs.enableUiDeprecation', {
+            defaultMessage: 'Rollup jobs are deprecated. Use downsampling instead.',
+          }),
+          docLinksKey: 'rollupSettings',
+        },
+      },
       [CONFIG_ROLLUPS]: {
         name: i18n.translate('xpack.rollupJobs.rollupDataViewsTitle', {
           defaultMessage: 'Enable rollup data views',
@@ -101,14 +120,12 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       }
     }
 
-    if (this.config.ui.enabled) {
-      if (indexManagement && indexManagement.indexDataEnricher) {
-        indexManagement.indexDataEnricher.add(rollupDataEnricher);
-      }
-
-      dataViews.enableRollups();
-      data.search.enableRollups();
+    if (indexManagement && indexManagement.indexDataEnricher) {
+      indexManagement.indexDataEnricher.add(rollupDataEnricher);
     }
+
+    dataViews.enableRollups();
+    data.search.enableRollups();
   }
 
   start() {}

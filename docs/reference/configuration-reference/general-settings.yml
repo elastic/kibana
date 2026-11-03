@@ -1754,9 +1754,9 @@ groups:
 
       - setting: xpack.rollup.ui.enabled
         description: |
-          Set this value to false to disable the Rollup Jobs UI.
+          Sets the default value of the Rollup Jobs UI setting in Stack Management > Advanced Settings. Set it to true to show the deprecated Rollup Jobs UI.
         datatype: bool
-        default: true
+        default: false
         applies_to:
           - "stack: deprecated 8.11"
           - "ech: unavailable"

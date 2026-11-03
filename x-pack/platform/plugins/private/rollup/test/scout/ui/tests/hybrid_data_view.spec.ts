@@ -33,18 +33,20 @@ test.describe(
   'Rollup jobs - hybrid data view',
   { tag: ['@local-stateful-classic', '@cloud-stateful-classic'] },
   () => {
-    test.beforeEach(async ({ browserAuth, esClient, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, esClient, pageObjects, uiSettings }) => {
       // Rollup jobs and indices are cluster-global; clear leftovers, then seed a rollup job whose
       // target index a data view can span alongside a regular index.
       await deleteAllRollupJobs(esClient);
       await cleanupHybridIndices(esClient, seed);
       await createMockRollupIndex(esClient);
       await seedHybridRollup(esClient, uniqueJobName(), seed);
+      await uiSettings.set({ 'xpack.rollup.ui.enabled': true });
       await browserAuth.loginAsAdmin();
       await pageObjects.dataViewsManagement.goto();
     });
 
-    test.afterEach(async ({ esClient, kbnClient }) => {
+    test.afterEach(async ({ esClient, kbnClient, uiSettings }) => {
+      await uiSettings.unset('xpack.rollup.ui.enabled');
       await kbnClient.savedObjects.clean({ types: ['index-pattern'] });
       await deleteAllRollupJobs(esClient);
       await cleanupHybridIndices(esClient, seed);
