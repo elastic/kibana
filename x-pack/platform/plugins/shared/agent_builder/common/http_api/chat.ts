@@ -13,13 +13,25 @@ import type {
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { BrowserApiToolMetadata, BrowserToolsRequest } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  BrowserToolResultPayload,
+  BrowserToolsRequest,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest, PromptResponse } from '@kbn/agent-builder-common/agents';
 import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { ChatTriggerMode } from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions } from './conversations';
 
 export { ChatTriggerMode } from '@kbn/agent-builder-common';
+
+/**
+ * Body of the internal route the browser uses to post the result of a browser-side tool call.
+ */
+export interface PostBrowserToolResultRequestBody {
+  client_id?: string;
+  result: BrowserToolResultPayload;
+}
 
 /**
  * Body payload for the public agent_builder converse endpoints (`/api/agent_builder/converse`, `/converse/async`).
