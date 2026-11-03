@@ -71,13 +71,15 @@ export function htmlOk(response: KibanaResponseFactory, body: string) {
 export function handleExternalResumeError(
   response: KibanaResponseFactory,
   error: unknown,
-  logger?: Logger
+  logger?: Logger,
+  /** Status for a hidden failure. The security plugin replaces a 401 page with its login redirect. */
+  hiddenStatusCode = 401
 ) {
   if (error instanceof ExternalResumeError) {
     logger?.debug(() => `External resume failed: ${error.message}`);
     return htmlError(
       response,
-      error.expose ? error.statusCode : 401,
+      error.expose ? error.statusCode : hiddenStatusCode,
       error.expose ? error.message : EXTERNAL_RESUME_INVALID_LINK_MESSAGE
     );
   }
