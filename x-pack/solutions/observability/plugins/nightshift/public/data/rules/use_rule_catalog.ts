@@ -6,15 +6,16 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { isHttpFetchError, type HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { useKibana } from '../../hooks/use_kibana';
+import { getHttpErrorStatus } from '../../common/http_error';
 
 const FIND_RULES_PATH = '/internal/alerting/rules/_find';
 const MAX_RULES = 1000;
 const V2_PAGE_SIZE = 100;
-const V2_UNAVAILABLE_STATUSES = [403, 404];
+const V2_UNAVAILABLE_STATUSES = [403, 404, 503];
 
 export interface CatalogRule {
   name: string;
@@ -79,7 +80,7 @@ const findV2Rules = async (
 };
 
 const isV2Unavailable = (error: unknown): boolean =>
-  isHttpFetchError(error) && V2_UNAVAILABLE_STATUSES.includes(error.response?.status ?? 0);
+  V2_UNAVAILABLE_STATUSES.includes(getHttpErrorStatus(error) ?? 0);
 
 const findV2RulesWhenAvailable = async (
   http: HttpSetup,

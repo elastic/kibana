@@ -133,6 +133,15 @@ describe('useRuleCatalog', () => {
     expect(result.current.isError).toBe(false);
   });
 
+  it('keeps the Observability rules when universal alerting is turned off', async () => {
+    get.mockRejectedValue(httpError(503));
+
+    const { result } = renderCatalog();
+
+    await waitFor(() => expect(result.current.data).toHaveLength(2));
+    expect(result.current.isError).toBe(false);
+  });
+
   it('reports an error when loading universal rules fails for another reason', async () => {
     get.mockRejectedValue(httpError(500));
 
