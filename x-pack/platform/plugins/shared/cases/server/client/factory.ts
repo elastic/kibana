@@ -60,7 +60,7 @@ import type { CasesClientArgs, CasesServices, CasesClientSource } from './types'
 import type { ActionSource } from '../../common/types/domain';
 import { getDefaultActionSource } from '../common/get_default_action_source';
 import { LicensingService } from '../services/licensing';
-import type { ObservablesStorageClient } from '../services/observables';
+import type { ObservablesStorageClient, ObservablesStorageMode } from '../services/observables';
 import { EmailNotificationService } from '../services/notifications/email_notification_service';
 import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
@@ -127,6 +127,8 @@ interface CasesClientFactoryArgs {
    * requests are authorized through the case saved object, never against the index.
    */
   observablesStorageClient: ObservablesStorageClient;
+  /** Shared by every request: whether the observables index is complete, and where reads come from. */
+  observablesStorageMode: ObservablesStorageMode;
 }
 
 interface CreateCasesClientParams {
@@ -409,6 +411,7 @@ export class CasesClientFactory {
         storageClient: this.options.observablesStorageClient,
         logger: this.logger.get('observables'),
       }),
+      observablesStorageMode: this.options.observablesStorageMode,
     };
   }
 
