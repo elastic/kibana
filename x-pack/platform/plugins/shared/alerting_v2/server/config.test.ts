@@ -32,6 +32,21 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
+  describe('invalidateApiKeysTask', () => {
+    it('defaults to a 5m interval and a 1h removal delay', () => {
+      expect(configSchema.validate({}).invalidateApiKeysTask).toEqual({
+        interval: '5m',
+        removalDelay: '1h',
+      });
+    });
+
+    it.each(['250ms', '1w'])('rejects %s, which the invalidation task cannot parse', (interval) => {
+      expect(() => configSchema.validate({ invalidateApiKeysTask: { interval } })).toThrow(
+        `string is not a valid duration: ${interval}`
+      );
+    });
+  });
+
   describe('rules.minimumScheduleInterval', () => {
     it('defaults to 1m', () => {
       const config = configSchema.validate({});

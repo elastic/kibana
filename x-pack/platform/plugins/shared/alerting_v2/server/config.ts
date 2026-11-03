@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import { DEFAULT_MINIMUM_SCHEDULE_INTERVAL, MIN_SCHEDULE_INTERVAL } from '@kbn/alerting-v2-schemas';
+import { apiKeyInvalidationTaskConfigSchema } from '@kbn/response-ops-api-keys';
 import { parseDurationToMs, validateDuration } from './lib/duration';
 import type { EsqlResponseFormat } from './lib/services/query_service/formats';
 
@@ -214,10 +215,7 @@ const dispatcherSchema = schema.object({
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  invalidateApiKeysTask: schema.object({
-    interval: schema.string({ defaultValue: '5m', validate: validateDuration }),
-    removalDelay: schema.string({ defaultValue: '1h', validate: validateDuration }),
-  }),
+  invalidateApiKeysTask: apiKeyInvalidationTaskConfigSchema,
   rules: rulesSchema,
   retention: retentionSchema,
   dispatcher: dispatcherSchema,
