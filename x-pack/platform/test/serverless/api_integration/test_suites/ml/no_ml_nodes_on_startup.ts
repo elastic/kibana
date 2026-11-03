@@ -11,6 +11,8 @@ import { EXPECTED_STARTUP_TRAINED_MODEL_IDS } from './constants';
 
 const GUIDANCE =
   'Serverless must not start ML nodes or deploy trained models on startup. ' +
+  'This check runs after the other suites in this config, so a failure can also mean a suite ' +
+  'created or deployed a trained model and did not clean it up. ' +
   'See https://github.com/elastic/kibana-team/issues/4111. Do not update the expected model list to fix this.';
 
 // Background work (tasks, unawaited start hooks, timers) can run after Kibana reports available,
@@ -36,11 +38,11 @@ const getUnexpectedState = async (es: Client) => {
 };
 
 /**
- * Registers the "no ML models or deployments on startup" checks. Load it last in a serverless API
+ * Registers the "no unexpected ML models or deployments" checks. Load it last in a serverless API
  * config so that other suites have had a chance to trigger background work first.
  */
 export const defineNoMlNodesOnStartupTests = (es: Client) => {
-  describe('No ML nodes or models on startup', function () {
+  describe('No unexpected ML models or deployments after test run', function () {
     this.timeout(WATCH_DURATION_MS + 60_000);
 
     it('has only the expected trained models and no deployments', async () => {
