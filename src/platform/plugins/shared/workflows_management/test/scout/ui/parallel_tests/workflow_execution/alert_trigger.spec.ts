@@ -340,6 +340,9 @@ test.describe(
       await page.testSubj.waitForSelector('workflowsDisableConfirmationModal', {
         state: 'visible',
       });
+      await expect(
+        page.testSubj.locator('workflowLinkedRulesCallout').getByRole('link')
+      ).toHaveCount(1);
       await page.testSubj.click('confirmModalConfirmButton');
       await expect(toggleSwitch).not.toBeChecked();
 

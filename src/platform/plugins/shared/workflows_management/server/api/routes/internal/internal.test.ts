@@ -654,7 +654,7 @@ describe('Internal Routes', () => {
     });
   });
 
-  it('should return no linked rules when the user cannot read any rule types', async () => {
+  it('should return forbidden when the user cannot read any rule types', async () => {
     mockRulesFind.mockRejectedValue(
       Boom.forbidden('Unauthorized to find rules for any rule types.')
     );
@@ -668,7 +668,10 @@ describe('Internal Routes', () => {
       response
     );
 
-    expect(response.ok).toHaveBeenCalledWith({ body: { total: 0, rules: [] } });
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'Unauthorized to find rules for any rule types.' },
+    });
   });
 
   it('rejects non-integer workflow history page values at route validation', () => {

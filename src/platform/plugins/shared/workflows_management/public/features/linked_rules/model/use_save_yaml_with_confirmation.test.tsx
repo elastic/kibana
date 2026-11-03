@@ -28,7 +28,7 @@ const buildYaml = (enabled: boolean) =>
 describe('useSaveYamlWithConfirmation', () => {
   const confirmDisable = jest.fn();
 
-  const renderSave = (yamlEnabled: boolean) => {
+  const renderSave = (...yamlEnabledEdits: boolean[]) => {
     const store = createMockStore();
     store.dispatch(
       setWorkflow({
@@ -44,7 +44,7 @@ describe('useSaveYamlWithConfirmation', () => {
         valid: true,
       })
     );
-    store.dispatch(setYamlString(buildYaml(yamlEnabled)));
+    yamlEnabledEdits.forEach((enabled) => store.dispatch(setYamlString(buildYaml(enabled))));
     const { result } = renderHook(() => useSaveYamlWithConfirmation(confirmDisable), {
       wrapper: ({ children }) => <TestWrapper store={store}>{children}</TestWrapper>,
     });
@@ -70,6 +70,14 @@ describe('useSaveYamlWithConfirmation', () => {
 
     expect(confirmDisable).toHaveBeenCalledWith(['wf-1']);
     expect(mockSaveYaml).toHaveBeenCalled();
+  });
+
+  it('confirms a disable that is not yet in the computed workflow definition', async () => {
+    confirmDisable.mockResolvedValue(true);
+
+    await renderSave(true, false)();
+
+    expect(confirmDisable).toHaveBeenCalledWith(['wf-1']);
   });
 
   it('does not save when the user cancels disabling the workflow', async () => {

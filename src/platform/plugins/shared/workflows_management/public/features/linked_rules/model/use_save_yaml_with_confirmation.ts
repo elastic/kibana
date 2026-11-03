@@ -9,12 +9,13 @@
 
 import { useCallback } from 'react';
 import { useStore } from 'react-redux-v7';
+import { parseDocument } from 'yaml';
 import type { ConfirmDisableWorkflows } from './use_disable_workflows_confirmation';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { RootState } from '../../../entities/workflows/store/types';
 import {
   selectWorkflow,
-  selectWorkflowDefinition,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 
 /** Saves the YAML after confirming any disable; resolves to false when the user cancels. */
@@ -27,9 +28,11 @@ export const useSaveYamlWithConfirmation = (
   return useCallback(async () => {
     const state = store.getState();
     const workflow = selectWorkflow(state);
+    const yamlString = selectYamlString(state);
     if (
       workflow?.enabled &&
-      selectWorkflowDefinition(state)?.enabled === false &&
+      yamlString &&
+      parseDocument(yamlString).get('enabled') === false &&
       !(await confirmDisable([workflow.id]))
     ) {
       return false;
