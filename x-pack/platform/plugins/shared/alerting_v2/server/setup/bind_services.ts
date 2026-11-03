@@ -51,6 +51,7 @@ import {
   RuleChangesHistoryServiceToken,
 } from '../lib/rule_changes_history';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import { SpacesService } from '../lib/services/spaces_service/spaces_service';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import {
   EsServiceInternalToken,
@@ -145,17 +146,17 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     )
     .inRequestScope();
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
+  bind(SpacesService).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toResolvedValue(
-      (request, spaces) => spaces.spacesService.getSpaceId(request),
-      [Request, PluginStart<AlertingServerStartDependencies['spaces']>('spaces')]
+      (request, spacesService) => spacesService.getSpaceId(request),
+      [Request, SpacesService]
     )
     .inRequestScope();
   bind(ActionPolicyNamespaceToken)
     .toResolvedValue(
-      (request, spaces) =>
-        spaces.spacesService.spaceIdToNamespace(spaces.spacesService.getSpaceId(request)),
-      [Request, PluginStart<AlertingServerStartDependencies['spaces']>('spaces')]
+      (request, spacesService) => spacesService.getNamespace(request),
+      [Request, SpacesService]
     )
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
@@ -281,12 +282,12 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesSavedObjectServiceScopedToken).toService(RulesSavedObjectService);
   bind(RulesSavedObjectServiceInternalToken)
     .toResolvedValue(
-      (savedObjects, spaces) =>
+      (savedObjects, spacesService) =>
         new RulesSavedObjectService(
           savedObjects.createInternalRepository([RULE_SAVED_OBJECT_TYPE]),
-          spaces
+          spacesService
         ),
-      [CoreStart('savedObjects'), PluginStart<AlertingServerStartDependencies['spaces']>('spaces')]
+      [CoreStart('savedObjects'), SpacesService]
     )
     .inSingletonScope();
 
@@ -330,17 +331,13 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(ActionPolicySavedObjectServiceScopedToken).toService(ActionPolicySavedObjectService);
   bind(ActionPolicySavedObjectServiceInternalToken)
     .toResolvedValue(
-      (savedObjects, spaces, esoClient) =>
+      (savedObjects, spacesService, esoClient) =>
         new ActionPolicySavedObjectService(
           savedObjects.createInternalRepository([ACTION_POLICY_SAVED_OBJECT_TYPE]),
-          spaces,
+          spacesService,
           esoClient
         ),
-      [
-        CoreStart('savedObjects'),
-        PluginStart<AlertingServerStartDependencies['spaces']>('spaces'),
-        EncryptedSavedObjectsClientToken,
-      ]
+      [CoreStart('savedObjects'), SpacesService, EncryptedSavedObjectsClientToken]
     )
     .inSingletonScope();
 
