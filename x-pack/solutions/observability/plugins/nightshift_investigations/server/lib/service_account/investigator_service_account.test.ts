@@ -401,7 +401,7 @@ describe('createInvestigatorServiceAccountService', () => {
 
   // Uninstalling without unbinding would leave the space reading as removed while the agent stays
   // pinned, and running as that account again the moment service accounts come back.
-  it('refuses to disable while service accounts are disabled, before uninstalling anything', async () => {
+  it('refuses to disable an installed agent while service accounts are disabled, before uninstalling anything', async () => {
     const { service, setServiceAccount, managedWorkflows } = setup({
       serviceAccountsEnabled: false,
     });
@@ -411,6 +411,19 @@ describe('createInvestigatorServiceAccountService', () => {
     });
     expect(setServiceAccount).not.toHaveBeenCalled();
     expect(managedWorkflows.uninstall).not.toHaveBeenCalled();
+  });
+
+  // Nothing can hold a binding there, so the teardown must not depend on service accounts.
+  it('tears a space down with service accounts disabled when the agent is not installed', async () => {
+    const { service, hasAgent, setServiceAccount, managedWorkflows } = setup({
+      serviceAccountsEnabled: false,
+    });
+    hasAgent.mockResolvedValue(false);
+
+    await service.disable(request, SPACE_ID);
+
+    expect(setServiceAccount).not.toHaveBeenCalled();
+    expect(managedWorkflows.uninstall).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
   });
 
   it('uninstalls every bound workflow on disable, entry point first', async () => {
