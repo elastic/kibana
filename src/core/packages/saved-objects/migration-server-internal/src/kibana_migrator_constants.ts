@@ -10,3 +10,8 @@
 // ensure plugins don't try to convert SO namespaceTypes after 8.0.0
 // see https://github.com/elastic/kibana/issues/147344
 export const ALLOWED_CONVERT_VERSION = '8.0.0';
+
+/**
+ * Defines settings for the elasticsearch-js client used for the SO migrations
+ */
+export const MIGRATION_CLIENT_OPTIONS = { maxRetries: 0, requestTimeout: 310_000 };
