@@ -37,7 +37,7 @@ describe('useLatencyGrid', () => {
     expect(runEsql).toHaveBeenCalledTimes(2);
     expect(result.current.grid?.cells.size).toBe(1);
     expect(result.current.timeGrid?.bins).toBe(60);
-    expect(result.current.sampled).toBe(false);
+    expect(result.current.sampling).toBeUndefined();
     expect(result.current.loadedSource).toEqual(source);
   });
 
@@ -57,7 +57,7 @@ describe('useLatencyGrid', () => {
     const { result } = renderHook(() => useLatencyGrid({ source, runEsql, targetBins: 60 }));
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(runEsql).toHaveBeenCalledTimes(3);
-    expect(result.current.sampled).toBe(true);
+    expect(result.current.sampling?.probability).toBe(0.25);
     // 5 exact, plus 10 sampled at 25%, each standing for 4: 45.
     expect([...result.current.grid!.cells.values()][0].spans).toBe(45);
   });

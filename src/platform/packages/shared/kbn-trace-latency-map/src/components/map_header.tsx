@@ -15,12 +15,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DurationStats } from '../types';
+import type { MapSampling } from '../query/latency_map_query';
 import { formatDuration } from '../geometry/ticks';
+import { ErrorsMenu } from './errors_menu';
 
 export type SlowestPercentile = 90 | 95 | 99;
 export const SLOWEST_PERCENTILES: SlowestPercentile[] = [90, 95, 99];
@@ -28,26 +30,50 @@ export const SLOWEST_PERCENTILES: SlowestPercentile[] = [90, 95, 99];
 const percentileDuration = (stats: DurationStats, percentile: SlowestPercentile) =>
   percentile === 99 ? stats.p99 : percentile === 95 ? stats.p95 : stats.p90;
 
-/** The range's statistics, the failed-only switch, the slowest shortcuts and the sampling note. */
+const formatShare = (share: number) => `${(share * 100).toFixed(1)}%`;
+
+/** Says what a sampled map draws exactly and what it estimates. */
+function SamplingNote({ stats, sampling }: { stats: DurationStats; sampling: MapSampling }) {
+  return (
+    <EuiToolTip
+      content={i18n.translate('traceLatencyMap.header.samplingTooltip', {
+        defaultMessage:
+          '{spans} spans in this range. Failed spans and spans from {tail} on are all drawn. The others are drawn from a {percent} sample, with counts scaled up.',
+        values: {
+          spans: stats.spans.toLocaleString(),
+          tail: formatDuration(sampling.tail),
+          percent: formatShare(sampling.probability),
+        },
+      })}
+    >
+      <EuiText size="xs" color="subdued" tabIndex={0} data-test-subj="traceLatencyMapSamplingNote">
+        {i18n.translate('traceLatencyMap.header.sampled', { defaultMessage: 'Sampled' })}
+      </EuiText>
+    </EuiToolTip>
+  );
+}
+
+/** The range's statistics, the sampling note, the slowest shortcuts and the errors menu. */
 export function MapHeader({
   stats,
   failedOnly,
   onFailedOnlyChange,
   onSelectSlowest,
-  sampled,
+  sampling,
   isDisabled,
 }: {
   stats?: DurationStats;
   failedOnly: boolean;
   onFailedOnlyChange: (failedOnly: boolean) => void;
   onSelectSlowest: (percentile: SlowestPercentile) => void;
-  sampled: boolean;
+  /** How a large range is sampled; undefined when every span is read. */
+  sampling?: MapSampling;
   isDisabled: boolean;
 }) {
   const [isSlowestOpen, setIsSlowestOpen] = useState(false);
   return (
     <EuiFlexGroup
-      gutterSize="m"
+      gutterSize="s"
       alignItems="center"
       wrap
       responsive={false}
@@ -70,20 +96,15 @@ export function MapHeader({
           </EuiText>
         )}
       </EuiFlexItem>
-      <EuiSwitch
-        compressed
-        label={i18n.translate('traceLatencyMap.header.failedOnly', {
-          defaultMessage: 'Failed only',
-        })}
-        checked={failedOnly}
-        onChange={(event) => onFailedOnlyChange(event.target.checked)}
-        disabled={isDisabled}
-        data-test-subj="traceLatencyMapFailedOnly"
-      />
+      {stats && sampling && (
+        <EuiFlexItem grow={false}>
+          <SamplingNote stats={stats} sampling={sampling} />
+        </EuiFlexItem>
+      )}
       <EuiPopover
         button={
           <EuiButtonEmpty
-            size="s"
+            size="xs"
             iconType="sortDown"
             isDisabled={isDisabled || !stats}
             onClick={() => setIsSlowestOpen((open) => !open)}
@@ -123,14 +144,11 @@ export function MapHeader({
           ))}
         />
       </EuiPopover>
-      {sampled && (
-        <EuiText size="xs" color="subdued" data-test-subj="traceLatencyMapSamplingNote">
-          {i18n.translate('traceLatencyMap.header.sampled', {
-            defaultMessage:
-              'Large range: failed and slowest spans are exact, the rest is estimated from a sample.',
-          })}
-        </EuiText>
-      )}
+      <ErrorsMenu
+        failedOnly={failedOnly}
+        onFailedOnlyChange={onFailedOnlyChange}
+        isDisabled={isDisabled}
+      />
     </EuiFlexGroup>
   );
 }

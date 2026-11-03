@@ -81,13 +81,13 @@ export interface LatencyMapProps {
   selection?: LatencyMapSelection;
   /**
    * Whether the host filters the query to failed spans (`FAILED_SPAN_CONDITION`). With
-   * `onFailedOnlyChange`, the "Failed only" switch is the host's: the switch asks the host to
+   * `onFailedOnlyChange`, the errors filter is the host's: the filter asks the host to
    * write or remove that filter, a selection's condition never carries the failure clause
-   * itself, and this prop is what the switch shows. Without it, the switch is the map's own
+   * itself, and this prop is what the filter shows. Without it, the filter is the map's own
    * state and a selection says `failedOnly` on its own.
    */
   failedOnly?: boolean;
-  /** The "Failed only" switch changed, for hosts that keep the failure filter in their query. */
+  /** The errors filter changed, for hosts that keep the failure filter in their query. */
   onFailedOnlyChange?: (failedOnly: boolean) => void;
   /**
    * Called once a draw, move or resize ends, and when the selection is cleared, with the
@@ -150,8 +150,9 @@ export function LatencyMap({
   const settledWidth = useSettledWidth(measuredWidth);
   const targetBins = getTimeBinsForWidth(settledWidth);
   const mapSource = getMapSource(source, { unit, selectionCondition, mapFilters });
-  const { grid, stats, timeGrid, sampled, isLoading, isEmpty, error, loadedSource } =
+  const { grid, stats, timeGrid, sampling, isLoading, isEmpty, error, loadedSource } =
     useLatencyGrid({ source: mapSource, runEsql, targetBins, enabled: settledWidth > 0 });
+  const sampled = Boolean(sampling);
 
   const callbacks = useRef({ onStats, onLoad });
   callbacks.current = { onStats, onLoad };
@@ -186,7 +187,7 @@ export function LatencyMap({
   );
 
   // With `onFailedOnlyChange` the host's query filter owns the outcome and the prop is the
-  // switch; a selection whose condition still carries the failure clause (a shared URL from
+  // filter; a selection whose condition still carries the failure clause (a shared URL from
   // before the host filter) shows as failed too. Without it, the map keeps its own state.
   const controlled = onFailedOnlyChange !== undefined;
   const [localFailedOnly, setLocalFailedOnly] = useState(Boolean(selection?.failedOnly));
@@ -197,7 +198,7 @@ export function LatencyMap({
   const failedOnly = controlled
     ? Boolean(hostFailedOnly || selection?.failedOnly)
     : localFailedOnly;
-  // Once the user chooses an outcome with the switch, a drawn region keeps it: the failure
+  // Once the user chooses an outcome with the errors filter, a drawn region keeps it: the failure
   // inference below only speaks while the user has not.
   const outcomeChosen = useRef(false);
 
@@ -286,7 +287,7 @@ export function LatencyMap({
       // With a host filter the failure clause is the host's, never the selection's.
       let next = geometry.rangeToSelection(range, controlled ? undefined : failedOnly);
       // A region where failures concentrate is about them: the selection says so on its
-      // own, as long as the user has not chosen an outcome with the switch.
+      // own, as long as the user has not chosen an outcome with the errors filter.
       if (!failedOnly && !outcomeChosen.current && grid && timeGrid && stats) {
         const counts = getSelectionCounts({ grid, timeGrid, stats, selection: next });
         if (isFailureRegion(counts, getGridTotals(grid))) {
@@ -622,7 +623,7 @@ export function LatencyMap({
         failedOnly={failedOnly}
         onFailedOnlyChange={changeFailedOnly}
         onSelectSlowest={selectSlowest}
-        sampled={sampled && Boolean(grid) && !isEmpty}
+        sampling={grid && !isEmpty ? sampling : undefined}
         isDisabled={!geometry || isEmpty}
       />
       <EuiSpacer size="s" />
