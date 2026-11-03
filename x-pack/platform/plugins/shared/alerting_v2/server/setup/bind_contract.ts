@@ -16,6 +16,7 @@ import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
+import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
 import { InternalRulesClient } from '../lib/internal_rules_client';
 import type {
@@ -30,9 +31,13 @@ import type {
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Setup).toDynamicValue(({ get }) => {
     const registry = get(ArtifactTypeRegistry);
+    const alertStatusChangedOptIns = get(AlertStatusChangedOptIns);
     const contract: AlertingServerSetup = {
       registerArtifactType: (definition) => {
         registry.register(definition);
+      },
+      enableAlertStatusChanged: (optIn) => {
+        alertStatusChangedOptIns.register(optIn);
       },
     };
     return contract;

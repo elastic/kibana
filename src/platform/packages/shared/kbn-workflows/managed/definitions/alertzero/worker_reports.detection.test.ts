@@ -73,6 +73,18 @@ describe('Rule Tuning and Rule Coverage close reports', () => {
         definition: ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
         reportStep: 'report_investigation_closed_declined',
       },
+      {
+        closeReason: 'other',
+        closeStep: 'close_investigation_no_rule',
+        definition: ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
+        reportStep: 'report_investigation_closed_no_rule',
+      },
+      {
+        closeReason: 'other',
+        closeStep: 'close_investigation_retry',
+        definition: ALERTZERO_COVERAGE_REVIEW_WORKFLOW,
+        reportStep: 'report_investigation_closed_retry',
+      },
     ],
     definitions: [
       ALERTZERO_RULE_TUNING_WORKER_WORKFLOW,
@@ -110,10 +122,28 @@ describe('Rule Tuning outcome reports', () => {
     const steps = topLevelSteps(ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.yaml);
     const report = stepNamed(steps, 'report_worker_run_completed');
 
-    describeReportStep(steps, 'report_worker_run_completed', 'worker_run_completed', 'emit_result');
+    describeReportStep(
+      steps,
+      'report_worker_run_completed',
+      'worker_run_completed',
+      'emit_failed_result'
+    );
 
     /** A harvest row; the rule's `id@revision` key is its fifth column. */
     const harvestRow = (ruleKey: string): unknown[] => [0, 0, 0, 0, ruleKey];
+
+    const withReadFailure = (context: {
+      consts: Record<string, unknown>;
+      steps: Record<string, unknown>;
+    }): Record<string, unknown> => ({
+      ...context,
+      steps: {
+        ...context.steps,
+        resolve_read_failure: {
+          output: renderReport(stepNamed(steps, 'resolve_read_failure'), context),
+        },
+      },
+    });
 
     const sweepContext = ({
       activeReviews = 0,
@@ -142,7 +172,7 @@ describe('Rule Tuning outcome reports', () => {
       const eligibleKeys = Array.from({ length: eligible }, (_, index) => `rule-${index}@1`);
       const ineligibleKeys = Array.from({ length: ineligible }, (_, index) => `stale-${index}@1`);
       const harvested = [...eligibleKeys, ...ineligibleKeys];
-      return {
+      return withReadFailure({
         consts: { no_rows: [] },
         steps: {
           collect_active_rules: { output: { expected: activeReviews } },
@@ -178,8 +208,29 @@ describe('Rule Tuning outcome reports', () => {
             ? { error: { message: 'search_phase_execution_exception' } }
             : { output: { values: [] } },
         },
-      };
+      });
     };
+
+    it.each([
+      ['a failed harvest', { harvestFailed: true }, true],
+      ['a failed enabled-rule lookup', { rulesLookupFailed: true }, true],
+      ['a failed screen', { screenFailed: true }, true],
+      ['a failed active-review lookup', { lookupFailed: true }, false],
+      ['reviews requested for noisy rules', { eligible: 3, requested: 2 }, false],
+      ['no noisy rule', {}, false],
+    ])('ends the sweep as failed after %s', (_scenario, scenario, expected) => {
+      expect(evalGuard(stepNamed(steps, 'emit_failed_result'), sweepContext(scenario))).toBe(
+        expected
+      );
+    });
+
+    it('ends the run with a failed workflow output', () => {
+      const { type, status } = stepNamed(steps, 'emit_failed_result') as YamlStep & {
+        status?: string;
+      };
+
+      expect({ type, status }).toEqual({ type: 'workflow.output', status: 'failed' });
+    });
 
     it.each([
       [
@@ -1070,10 +1121,10 @@ describe('Rule Coverage outcome reports', () => {
 
 describe('Rule Tuning and Rule Coverage managed versions', () => {
   it.each([
-    [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 33],
-    [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 35],
+    [ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.id, ALERTZERO_RULE_TUNING_WORKER_WORKFLOW.version, 34],
+    [ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.id, ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW.version, 36],
     [ALERTZERO_COVERAGE_WORKER_WORKFLOW.id, ALERTZERO_COVERAGE_WORKER_WORKFLOW.version, 6],
-    [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 7],
+    [ALERTZERO_COVERAGE_REVIEW_WORKFLOW.id, ALERTZERO_COVERAGE_REVIEW_WORKFLOW.version, 8],
   ])('bumps %s to the version that carries its reports', (_id, version, expected) => {
     expect(version).toBe(expected);
   });

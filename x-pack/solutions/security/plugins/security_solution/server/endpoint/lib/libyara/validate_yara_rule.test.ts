@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   clearYaraValidateCache,
@@ -212,6 +213,69 @@ rule Broken {
       expect(debugMessage).toContain('outcome=compile_error');
       expect(debugMessage).toContain('ruleCount=0');
       expect(debugMessage).not.toContain(uniqueMarker);
+    });
+
+    describe('slow validate warning', () => {
+      const ruleText = 'rule Slow { strings: $a = "UNIQUE_YARA_LOG_MARKER_slow" condition: $a }';
+      let compileDurationMs: number;
+      let restoreMocks: () => void;
+
+      beforeEach(async () => {
+        let now = 0;
+        const nowSpy = jest.spyOn(performance, 'now').mockImplementation(() => now);
+
+        const mod = await loadYaraValidateModule();
+        const originalCcall = mod.ccall;
+        mod.ccall = ((
+          ident: string,
+          returnType: string | null,
+          argTypes: string[],
+          args: unknown[]
+        ) => {
+          if (ident === 'validate_yara') {
+            now += compileDurationMs;
+          }
+          return originalCcall(ident, returnType, argTypes, args);
+        }) as typeof mod.ccall;
+
+        restoreMocks = () => {
+          mod.ccall = originalCcall;
+          nowSpy.mockRestore();
+        };
+      });
+
+      afterEach(() => {
+        restoreMocks();
+      });
+
+      it('warns with metadata but without rule source when validate takes more than 1s', async () => {
+        const mockLogger = loggingSystemMock.createLogger();
+        setYaraLogger(mockLogger);
+        compileDurationMs = 1500;
+
+        await validateYaraRule(ruleText);
+
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        const warnMessage = String(mockLogger.warn.mock.calls[0][0]);
+        expect(warnMessage).toContain('blocked the event loop for 1500ms');
+        expect(warnMessage).toContain('outcome=success');
+        expect(warnMessage).toContain('ruleCount=1');
+        expect(warnMessage).toContain(`sourceByteLength=${Buffer.byteLength(ruleText, 'utf8')}`);
+        expect(warnMessage).toContain(
+          `sourceSha256=${createHash('sha256').update(ruleText, 'utf8').digest('hex')}`
+        );
+        expect(warnMessage).not.toContain('UNIQUE_YARA_LOG_MARKER_slow');
+      });
+
+      it('does not warn when validate takes 1s or less', async () => {
+        const mockLogger = loggingSystemMock.createLogger();
+        setYaraLogger(mockLogger);
+        compileDurationMs = 1000;
+
+        await validateYaraRule(ruleText);
+
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -510,7 +574,7 @@ rule ${module}Check {
       }
     });
 
-    it('logs cache hits without rule source', async () => {
+    it('logs cache hits at trace level without rule source', async () => {
       const mockLogger = loggingSystemMock.createLogger();
       setYaraLogger(mockLogger);
 
@@ -521,13 +585,14 @@ rule ${module}Check {
       mockLogger.debug.mockClear();
       await validateYaraRule(source);
 
-      expect(mockLogger.debug).toHaveBeenCalled();
-      const debugArg = mockLogger.debug.mock.calls[0][0];
-      const debugMessage = typeof debugArg === 'function' ? debugArg() : String(debugArg);
+      expect(mockLogger.debug).not.toHaveBeenCalled();
+      expect(mockLogger.trace).toHaveBeenCalled();
+      const traceArg = mockLogger.trace.mock.calls[0][0];
+      const traceMessage = typeof traceArg === 'function' ? traceArg() : String(traceArg);
 
-      expect(debugMessage).toContain('YARA validate cache hit');
-      expect(debugMessage).toContain('sourceSha256=');
-      expect(debugMessage).not.toContain(uniqueMarker);
+      expect(traceMessage).toContain('YARA validate cache hit');
+      expect(traceMessage).toContain('sourceSha256=');
+      expect(traceMessage).not.toContain(uniqueMarker);
     });
 
     it('evicts the least recently used source when the cache is full', async () => {

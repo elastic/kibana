@@ -401,6 +401,13 @@ steps:
             preview_invocation_count: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
             parent_run_id: "{{ execution.id }}"
 
+  # Check if any steps that read required source data failed.
+  - name: resolve_read_failure
+    type: data.set
+    with:
+      failed: "${{ steps.list_enabled_rules.error != null or steps.screen_rule_fp_rates.error != null or steps.harvest_fp_alerts_by_rule.error != null }}"
+      error_message: "{{ steps.list_enabled_rules.error.message | default: steps.screen_rule_fp_rates.error.message | default: steps.harvest_fp_alerts_by_rule.error.message }}"
+
   # Telemetry: the sweep's outcome.
   - name: report_worker_run_completed
     type: alertzero.reportWorkerOutcome
@@ -414,13 +421,13 @@ steps:
       items_in_flight: |-
         {%- assign started = steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size -%}
         {{ steps.collect_active_rules.output.expected | default: 0 | plus: started }}
-      source_read_failed: "${{ steps.list_enabled_rules.error != null or steps.screen_rule_fp_rates.error != null or steps.harvest_fp_alerts_by_rule.error != null }}"
+      source_read_failed: "${{ steps.resolve_read_failure.output.failed }}"
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"
       # `capacity` when the enabled-rule page was full: the rules past it were never screened.
-      degraded_reason: "{% if steps.list_enabled_rules.error != null or steps.screen_rule_fp_rates.error != null or steps.harvest_fp_alerts_by_rule.error != null or steps.list_active_reviews.error != null %}dependency_unavailable{% elsif steps.resolve_enabled_rules.output.truncated %}capacity{% else %}none{% endif %}"
+      degraded_reason: "{% if steps.resolve_read_failure.output.failed or steps.list_active_reviews.error != null %}dependency_unavailable{% elsif steps.resolve_enabled_rules.output.truncated %}capacity{% else %}none{% endif %}"
       run_outcome: |-
         {%- assign requested = steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size -%}
-        {%- if steps.list_enabled_rules.error != null or steps.screen_rule_fp_rates.error != null or steps.harvest_fp_alerts_by_rule.error != null -%}
+        {%- if steps.resolve_read_failure.output.failed -%}
         failed_source_unavailable
         {%- elsif steps.resolve_enabled_rules.output.truncated -%}
         degraded_partial
@@ -429,6 +436,20 @@ steps:
         {%- else -%}
         empty_nothing_found
         {%- endif -%}
+
+  # Emit a failed result if any steps that read required source data failed.
+  # This will make the worker failure banner show up on the AZ proposals page.
+  - name: emit_failed_result
+    type: workflow.output
+    if: "${{ steps.resolve_read_failure.output.failed == true }}"
+    status: failed
+    with:
+      message: "Could not read this space's rules or alerts, so no rule was screened for tuning: {{ steps.resolve_read_failure.output.error_message }}"
+      reviews_requested: 0
+      reviews_in_flight: "${{ steps.collect_active_rules.output.expected }}"
+      harvest_failed: true
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"
+      rules_truncated: "${{ steps.resolve_enabled_rules.output.truncated | default: false }}"
 
   # Decisions are not known here: each review reports its own outcome and tags its
   # alerts once its gate resolves.
@@ -442,7 +463,7 @@ steps:
       # Every read can fail without stopping the sweep. Zero requested after a failed
       # read does not mean no noisy rule. The enabled-rule lookup and the screen are
       # part of the harvest.
-      harvest_failed: "${{ steps.list_enabled_rules.error != null or steps.screen_rule_fp_rates.error != null or steps.harvest_fp_alerts_by_rule.error != null }}"
+      harvest_failed: "${{ steps.resolve_read_failure.output.failed }}"
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"
       # The space has more enabled rules than one page holds; the rest went unscreened.
       rules_truncated: "${{ steps.resolve_enabled_rules.output.truncated | default: false }}"

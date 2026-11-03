@@ -33,3 +33,5 @@ export const test = baseTest.extend<AlertZeroTestFixtures, SecurityWorkerFixture
 });
 
 export * as testData from './constants';
+export { createInvestigation, deleteInvestigation, enableAlertZero } from './investigations';
+export { cleanupProposalsOfConversation, seedApprovedNoActionProposal } from './proposals';

@@ -84,6 +84,7 @@
     "@kbn/ebt-click",
     "@kbn/std",
     "@kbn/usage-collection-plugin",
-    "@kbn/unsaved-changes-prompt"
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/cloud-plugin"
   ]
 }
