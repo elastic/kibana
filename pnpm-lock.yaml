@@ -3187,6 +3187,9 @@ importers:
       '@kbn/response-ops-alerts-table':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/response-ops/alerts-table
+      '@kbn/response-ops-api-keys':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/response-ops/api-keys
       '@kbn/response-ops-detections-close-reason':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/response-ops/detections-close-reason
@@ -9267,6 +9270,8 @@ importers:
   x-pack/platform/packages/shared/response-ops/alerts-filters-form: {}
 
   x-pack/platform/packages/shared/response-ops/alerts-table: {}
+
+  x-pack/platform/packages/shared/response-ops/api-keys: {}
 
   x-pack/platform/packages/shared/response-ops/detections-close-reason: {}
 
