@@ -30,6 +30,7 @@ import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 import { useCreateConnectorType } from '../../../hooks/use_create_connector_type';
 import { AiAssistantPanel } from './ai_assistant_panel';
 import { BuildConnectorForm } from './build_connector_form';
+import { getFormErrorSummary } from './error_summary';
 import { YamlImportPanel } from './yaml_import_panel';
 import { buildConnectorFormResolver } from './form_resolver';
 import { formDataToRequest, getEmptyFormData, requestToFormData } from './form_serializers';
@@ -56,6 +57,7 @@ const BuildConnectorFlyoutComponent: React.FC<BuildConnectorFlyoutProps> = ({
     handleSubmit,
     reset,
     trigger,
+    getValues,
     formState: { errors, isSubmitting },
   } = methods;
   const {
@@ -64,10 +66,7 @@ const BuildConnectorFlyoutComponent: React.FC<BuildConnectorFlyoutProps> = ({
     createConnectorTypeError,
   } = useCreateConnectorType();
 
-  // Issues on the definition as a whole, e.g. unknown top-level keys in an imported YAML.
-  const definitionErrors = [errors.root?.message].filter((message): message is string =>
-    Boolean(message)
-  );
+  const formErrors = getFormErrorSummary(errors, getValues());
 
   const onApplyDefinition = useCallback(
     (connectorType: Partial<CreateConnectorTypeRequest>) => {
@@ -137,7 +136,7 @@ const BuildConnectorFlyoutComponent: React.FC<BuildConnectorFlyoutProps> = ({
           </div>
         </EuiAccordion>
         <EuiSpacer size="m" />
-        {definitionErrors.length > 0 && (
+        {formErrors.length > 0 && (
           <>
             <KbnDangerCallout
               announceOnMount
@@ -149,8 +148,8 @@ const BuildConnectorFlyoutComponent: React.FC<BuildConnectorFlyoutProps> = ({
               )}
               text={
                 <ul>
-                  {definitionErrors.map((message) => (
-                    <li key={message}>{message}</li>
+                  {formErrors.map(({ label, message }) => (
+                    <li key={`${label}:${message}`}>{`${label}: ${message}`}</li>
                   ))}
                 </ul>
               }

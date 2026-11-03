@@ -30,7 +30,7 @@ const EDITABLE_PATHS = new Set([
   'auth.headerName',
 ]);
 /** Row fields of a field list (`config`, action inputs). */
-const FIELD_ROW_KEYS = new Set(['name', 'type', 'required', 'label', 'description']);
+const FIELD_ROW_KEYS = new Set(['name', 'type', 'items', 'required', 'label', 'description']);
 
 const FIELD_NAME_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.buildConnectorFlyout.error.requiredFieldName',

@@ -69,6 +69,23 @@ const fieldTypeOptions: Array<{ value: ConnectorTypeField['type']; text: string 
       { defaultMessage: 'Boolean' }
     ),
   },
+  {
+    value: 'array',
+    text: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.fieldType.array', {
+      defaultMessage: 'Array',
+    }),
+  },
+];
+
+const arrayItemTypeOptions = [
+  {
+    value: '',
+    text: i18n.translate(
+      'xpack.triggersActionsUI.sections.buildConnectorFlyout.fieldType.selectItemType',
+      { defaultMessage: 'Select item type' }
+    ),
+  },
+  ...fieldTypeOptions.filter(({ value }) => value !== 'array'),
 ];
 
 const LABELS = {
@@ -77,6 +94,9 @@ const LABELS = {
   }),
   type: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.field.typeLabel', {
     defaultMessage: 'Type',
+  }),
+  items: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorFlyout.field.itemsLabel', {
+    defaultMessage: 'Item type',
   }),
   required: i18n.translate(
     'xpack.triggersActionsUI.sections.buildConnectorFlyout.field.requiredLabel',
@@ -111,7 +131,7 @@ const FieldListEditorComponent: React.FC<Props> = ({
   addButtonLabel,
   testSubjPrefix,
 }) => {
-  const { control } = useFormContext<BuildConnectorFormData>();
+  const { control, trigger } = useFormContext<BuildConnectorFormData>();
   const { fields, append, remove } = useFieldArray({ control, name });
   const { errors } = useFormState({ control, name });
   const listError: string | undefined = get(errors, `${name}.root.message`);
@@ -171,23 +191,56 @@ const FieldListEditorComponent: React.FC<Props> = ({
                   name={`${name}.${index}.type`}
                   control={control}
                   render={({ field, fieldState: { error } }) => (
-                    <EuiFormRow
-                      label={LABELS.type}
-                      display="rowCompressed"
-                      isInvalid={!!error}
-                      error={error?.message}
-                    >
-                      <EuiSelect
-                        compressed
+                    <>
+                      <EuiFormRow
+                        label={LABELS.type}
+                        display="rowCompressed"
                         isInvalid={!!error}
-                        options={fieldTypeOptions}
-                        data-test-subj={`${testSubjPrefix}-${index}-type`}
-                        value={field.value}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        onBlur={field.onBlur}
-                        inputRef={field.ref}
-                      />
-                    </EuiFormRow>
+                        error={error?.message}
+                      >
+                        <EuiSelect
+                          compressed
+                          isInvalid={!!error}
+                          options={fieldTypeOptions}
+                          data-test-subj={`${testSubjPrefix}-${index}-type`}
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                            void trigger();
+                          }}
+                          onBlur={field.onBlur}
+                          inputRef={field.ref}
+                        />
+                      </EuiFormRow>
+                      {field.value === 'array' && (
+                        <Controller
+                          name={`${name}.${index}.items`}
+                          control={control}
+                          render={({ field: itemsField, fieldState: { error: itemsError } }) => (
+                            <EuiFormRow
+                              label={LABELS.items}
+                              display="rowCompressed"
+                              isInvalid={!!itemsError}
+                              error={itemsError?.message}
+                            >
+                              <EuiSelect
+                                compressed
+                                isInvalid={!!itemsError}
+                                options={arrayItemTypeOptions}
+                                data-test-subj={`${testSubjPrefix}-${index}-items`}
+                                value={itemsField.value ?? ''}
+                                onChange={(event) => {
+                                  itemsField.onChange(event.target.value || undefined);
+                                  void trigger();
+                                }}
+                                onBlur={itemsField.onBlur}
+                                inputRef={itemsField.ref}
+                              />
+                            </EuiFormRow>
+                          )}
+                        />
+                      )}
+                    </>
                   )}
                 />
               </EuiFlexItem>

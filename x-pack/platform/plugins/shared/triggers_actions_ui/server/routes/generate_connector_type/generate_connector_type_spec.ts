@@ -31,7 +31,7 @@ export const buildSystemPrompt = (): string =>
     'displayName is 1 to 512 characters. description is at most 1000 characters.',
     'config is an array of at most 50 fields with unique names.',
     'A field is { name, type, required, label?, description?, items?, format? }.',
-    'type is "string", "number", "boolean" or "array". items is only for arrays and is "string", "number" or "boolean".',
+    'type is "string", "number", "boolean" or "array". Every array requires items: "string", "number" or "boolean".',
     'format is only for strings and is "uri", "ipv4" or "date-time".',
     'Field and action names start with a letter and use only letters, digits and "_".',
     'auth is one of { "type": "none" }, { "type": "basic" }, { "type": "bearer" }, or { "type": "api_key_header", "headerName": "X-Api-Key" }.',

@@ -627,6 +627,89 @@ describe('BuildConnectorFlyout', () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
+    it('keeps generated array item types when saving', async () => {
+      generateConnectorType.mockResolvedValue({
+        connectorType: {
+          ...generatedConnectorType,
+          actions: {
+            ...generatedConnectorType.actions,
+            get_blacklist: {
+              description: 'Get blacklist',
+              scope: 'read',
+              input: [{ name: 'onlyCountries', type: 'array', items: 'string', required: false }],
+              request: { method: 'GET', url: '{{config.baseUrl}}', path: '/blacklist' },
+            },
+          },
+        },
+      });
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      await openAiPanel();
+      await userEvent.type(
+        screen.getByTestId('build-connector-flyout-ai-url'),
+        'https://docs.example.com/api'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+
+      expect(await screen.findByTestId('buildConnectorAction-1-input-0-type')).toHaveValue('array');
+      expect(screen.getByTestId('buildConnectorAction-1-input-0-items')).toHaveValue('string');
+      expect(
+        screen.queryByTestId('build-connector-flyout-definition-errors')
+      ).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('build-connector-flyout-save-btn'));
+      await waitFor(() => expect(createConnectorType).toHaveBeenCalledTimes(1));
+      expect(createConnectorType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorType: expect.objectContaining({
+            actions: expect.objectContaining({
+              get_blacklist: expect.objectContaining({
+                input: [{ name: 'onlyCountries', type: 'array', items: 'string', required: false }],
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('lists a generated field error with its action and param near the top', async () => {
+      generateConnectorType.mockResolvedValue({
+        connectorType: {
+          ...generatedConnectorType,
+          actions: {
+            ...generatedConnectorType.actions,
+            get_blacklist: {
+              description: 'Get blacklist',
+              scope: 'read',
+              input: [{ name: 'onlyCountries', type: 'array', required: false }],
+              request: { method: 'GET', url: '{{config.baseUrl}}', path: '/blacklist' },
+            },
+          },
+        },
+      });
+      appMockRenderer.render(<BuildConnectorFlyout onClose={onClose} />);
+      await openAiPanel();
+      await userEvent.type(
+        screen.getByTestId('build-connector-flyout-ai-url'),
+        'https://docs.example.com/api'
+      );
+      await userEvent.click(screen.getByTestId('build-connector-flyout-ai-generate-btn'));
+
+      const summary = await screen.findByTestId('build-connector-flyout-definition-errors');
+      expect(summary).toHaveTextContent(
+        'Action 2 (get_blacklist) > Param 1 (onlyCountries) > Item type: Array fields require an item type.'
+      );
+      expect(screen.getByTestId('buildConnectorAction-1-input-0-items')).toHaveValue('');
+      await userEvent.selectOptions(
+        screen.getByTestId('buildConnectorAction-1-input-0-items'),
+        'string'
+      );
+      await waitFor(() =>
+        expect(
+          screen.queryByTestId('build-connector-flyout-definition-errors')
+        ).not.toBeInTheDocument()
+      );
+    });
+
     it('shows the callout and guidance for a typed API error', async () => {
       generateConnectorType.mockRejectedValue({
         body: {
