@@ -64,7 +64,7 @@ export const EmptyPrompt = ({ onCreateClick }: EmptyPromptProps) => {
             />
           ),
           onClick: onCreateClick,
-          iconType: 'productLens',
+          iconType: 'plusCircle',
         }}
       />
     </div>
