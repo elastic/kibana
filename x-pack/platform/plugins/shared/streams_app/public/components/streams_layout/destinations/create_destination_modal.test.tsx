@@ -68,4 +68,59 @@ describe('CreateDestinationModal', () => {
       )
     );
   });
+
+  describe('remote Elasticsearch', () => {
+    const ENDPOINT_REQUIRED = 'Enter the endpoint of the remote cluster.';
+    const API_KEY_REQUIRED = 'Enter an API key.';
+
+    it('only shows connection errors after their input is left', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
+
+      expect(screen.queryByText(ENDPOINT_REQUIRED)).not.toBeInTheDocument();
+
+      await userEvent.click(
+        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchEndpoint')
+      );
+      await userEvent.tab();
+
+      expect(screen.getByText(ENDPOINT_REQUIRED)).toBeInTheDocument();
+      expect(screen.queryByText(API_KEY_REQUIRED)).not.toBeInTheDocument();
+    });
+
+    it('submits the remote form values', async () => {
+      const { createDestination } = renderModal();
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
+      await userEvent.click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
+      await userEvent.type(screen.getByTestId('streamsCreateDestinationIndex'), 'shared-idx');
+      await userEvent.type(
+        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchEndpoint'),
+        'https://es.example.com:443'
+      );
+      await userEvent.type(
+        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchApiKey'),
+        'remote-key'
+      );
+      await userEvent.type(screen.getByTestId('streamsCreateDestinationName'), 'Central');
+      await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
+
+      await waitFor(() =>
+        expect(createDestination).toHaveBeenCalledWith(
+          expect.objectContaining({
+            storageKind: 'remote_elasticsearch',
+            destinationName: 'Central',
+            remoteElasticsearch: expect.objectContaining({
+              auto: false,
+              logsIndex: 'shared-idx',
+              metricsIndex: 'shared-idx',
+              tracesIndex: 'shared-idx',
+              endpoint: 'https://es.example.com:443',
+              apiKey: 'remote-key',
+            }),
+          }),
+          expect.anything()
+        )
+      );
+    });
+  });
 });

@@ -13,7 +13,13 @@ import {
   DestinationsGrid,
   getDestinationSortableValue,
 } from './destinations_grid';
-import type { ElasticsearchDestinationViewModel, S3DestinationViewModel } from './types';
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type DestinationViewModel,
+  type ElasticsearchDestinationViewModel,
+  type RemoteElasticsearchDestinationViewModel,
+  type S3DestinationViewModel,
+} from './types';
 
 const mockDestinationIndicesTable = jest.fn((_props: { destinationId: string }) => null);
 const mockIndicesTableMount = jest.fn((_destinationId: string) => undefined);
@@ -66,9 +72,20 @@ describe('DestinationsGrid', () => {
     prefix: 'otel/',
   };
 
-  const renderGrid = (
-    destinations: Array<ElasticsearchDestinationViewModel | S3DestinationViewModel>
-  ) =>
+  const remoteDestination = (
+    partial: Partial<RemoteElasticsearchDestinationViewModel> = {}
+  ): RemoteElasticsearchDestinationViewModel => ({
+    id: 'backup',
+    name: 'Backup',
+    type: REMOTE_ELASTICSEARCH_TYPE,
+    signals: ['logs', 'metrics', 'traces'],
+    endpoint: 'https://my-cluster.es.example.com:9243',
+    mode: 'auto',
+    indexBySignal: {},
+    ...partial,
+  });
+
+  const renderGrid = (destinations: DestinationViewModel[]) =>
     render(
       <DestinationsGrid
         status="ready"
@@ -137,5 +154,67 @@ describe('DestinationsGrid', () => {
     await waitFor(() =>
       expect(mockIndicesTableMount.mock.calls).toEqual([['es-logs'], ['es-metrics']])
     );
+  });
+
+  const getCell = (container: HTMLElement, columnId: string) => {
+    const cell = container.querySelector<HTMLElement>(
+      `[data-gridcell-column-id="${columnId}"][data-gridcell-row-index="0"]`
+    );
+    if (!cell) {
+      throw new Error(`No ${columnId} cell rendered`);
+    }
+    return cell;
+  };
+
+  it('shows a remote row as Remote Elasticsearch with no index count', () => {
+    const { container } = renderGrid([remoteDestination()]);
+
+    expect(
+      within(getCell(container, 'type')).getByText('Remote Elasticsearch')
+    ).toBeInTheDocument();
+    expect(within(getCell(container, 'indices')).getByText('-')).toBeInTheDocument();
+  });
+
+  it('does not render the indices table when only a remote row is expanded', async () => {
+    renderGrid([remoteDestination(), destination()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand details for Backup' }));
+
+    expect(renderedIndexTableIds()).toEqual([]);
+  });
+
+  it('expands a remote Auto row to show its endpoint, routing and key status', async () => {
+    renderGrid([remoteDestination()]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand details for Backup' }));
+
+    const details = within(screen.getByTestId('streamsRemoteElasticsearchDestinationDetails'));
+    expect(details.getByText('https://my-cluster.es.example.com:9243')).toBeInTheDocument();
+    expect(details.getByText('Routing')).toBeInTheDocument();
+    expect(details.getByText('Auto (default)')).toBeInTheDocument();
+    expect(details.getByText('API key')).toBeInTheDocument();
+    expect(details.getByText('Configured')).toBeInTheDocument();
+    expect(details.queryByRole('heading')).not.toBeInTheDocument();
+  });
+
+  it('expands a remote Fixed row to show each signal and its index', async () => {
+    renderGrid([
+      remoteDestination({
+        signals: ['logs', 'traces'],
+        mode: 'static',
+        indexBySignal: { logs: 'remote-logs', traces: 'remote-traces' },
+      }),
+    ]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand details for Backup' }));
+
+    const details = within(screen.getByTestId('streamsRemoteElasticsearchDestinationDetails'));
+    expect(details.getByText('Fixed index per signal')).toBeInTheDocument();
+    expect(details.getByText('Logs')).toBeInTheDocument();
+    expect(details.getByText('remote-logs')).toBeInTheDocument();
+    expect(details.getByText('Traces')).toBeInTheDocument();
+    expect(details.getByText('remote-traces')).toBeInTheDocument();
+    expect(details.queryByText('Metrics')).not.toBeInTheDocument();
+    expect(details.queryByText('Auto (default)')).not.toBeInTheDocument();
   });
 });

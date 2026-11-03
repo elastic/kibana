@@ -19,6 +19,7 @@ const getNodeSearchText = (node: ClassicCanvasNode): string =>
     node.data.subtitle,
     node.data.streamName,
     node.data.bucket,
+    node.data.endpoint,
     ...(Array.isArray(node.data.signals) ? node.data.signals : []),
     ...(Array.isArray(node.data.targetedIndexNames) ? node.data.targetedIndexNames : []),
   ]

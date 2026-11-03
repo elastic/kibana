@@ -37,6 +37,7 @@ export interface DestinationNodeData extends Record<string, unknown> {
   subtitle?: string;
   streamName?: string;
   bucket?: string;
+  endpoint?: string;
   destinationId?: string;
   signals?: DestinationSignal[];
   indexCount?: number;

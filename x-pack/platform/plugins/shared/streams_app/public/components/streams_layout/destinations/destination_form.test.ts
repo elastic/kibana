@@ -10,8 +10,16 @@ import {
   canSubmitDestinationForm,
   getDestinationCreationFormErrors,
   getVisibleDestinationFormErrors,
+  validateRemoteEndpoint,
 } from './destination_form';
-import { EMPTY_ELASTICSEARCH_DESTINATION_FORM, EMPTY_S3_DESTINATION_FORM } from './types';
+import { validateRemoteIndex, validateStaticSignalIndex } from './destination_models';
+import {
+  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_S3_DESTINATION_FORM,
+  REMOTE_ELASTICSEARCH_TYPE,
+  type RemoteElasticsearchDestinationFormData,
+} from './types';
 
 const unitDefinition: StreamsUnit.GetResponse = {
   unit: {
@@ -27,6 +35,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Application logs',
       description: '',
       elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
@@ -42,6 +51,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Application logs',
       description: '',
       elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, auto: false },
@@ -57,6 +67,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Templated logs',
       description: '',
       elasticsearch: {
@@ -76,6 +87,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Metrics as logs',
       description: '',
       elasticsearch: {
@@ -95,6 +107,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Application',
       description: '',
       elasticsearch: {
@@ -116,6 +129,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Application logs',
       description: '',
       elasticsearch: {
@@ -151,6 +165,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Application',
       description: '',
       elasticsearch: {
@@ -179,6 +194,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Billing',
       description: '',
       elasticsearch: {
@@ -200,6 +216,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Billing',
       description: '',
       elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, useCustomWritePatterns: true },
@@ -225,6 +242,7 @@ describe('destination form', () => {
     const formData = {
       storageKind: 'local_elasticsearch' as const,
       s3: { ...EMPTY_S3_DESTINATION_FORM },
+      remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
       destinationName: 'Billing',
       description: '',
       elasticsearch: {
@@ -245,6 +263,7 @@ describe('destination form', () => {
       const formData = {
         storageKind: 'local_elasticsearch' as const,
         s3: { ...EMPTY_S3_DESTINATION_FORM },
+        remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
         destinationName: 'Billing',
         description: '',
         elasticsearch: {
@@ -269,6 +288,7 @@ describe('S3', () => {
     destinationName: 'S3 archive',
     description: '',
     elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
+    remoteElasticsearch: { ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM },
     s3: {
       ...EMPTY_S3_DESTINATION_FORM,
       region: 'eu-west-1',
@@ -384,5 +404,269 @@ describe('getVisibleDestinationFormErrors', () => {
     expect(
       getVisibleDestinationFormErrors({ errors, touchedFields: {}, isSubmitted: true })
     ).toEqual(errors);
+  });
+});
+
+describe('validateRemoteEndpoint', () => {
+  it.each([
+    'https://es.example.com',
+    'https://es.example.com:9243',
+    'https://proxy.example.com/es/',
+    'https://10.0.0.1:443',
+    'https://proxy.example.com/es%20prod/',
+  ])('accepts %s', (endpoint) => {
+    expect(validateRemoteEndpoint(endpoint)).toBeUndefined();
+  });
+
+  it.each([
+    'http://es.example.com',
+    'https:example.com',
+    'https:/example.com',
+    'https://user:pw@es.example.com',
+    'https://es.example.com?x=1',
+    'https://es.example.com#a',
+    'https://es.exa\nmple.com',
+    'es.example.com',
+    '\thttps://es.example.com',
+    'https://es.example.com\\proxy',
+    'https://es.example.com/a b',
+    '\u00a0https://es.example.com',
+    'https://es.exa\u200bmple.com',
+    'https://ex\u034fample.com',
+    'https://es.example.com:99999',
+    'https://es.example.com/%',
+    'https://es.example.com/%GG',
+    'https://es%41.example.com',
+  ])('rejects %j', (endpoint) => {
+    expect(validateRemoteEndpoint(endpoint)).toBe('invalid');
+  });
+
+  it.each(['', '  '])('is required when blank (%j)', (endpoint) => {
+    expect(validateRemoteEndpoint(endpoint)).toBe('required');
+  });
+
+  it('trims plain surrounding spaces', () => {
+    expect(validateRemoteEndpoint('  https://es.example.com  ')).toBeUndefined();
+  });
+
+  it('accepts up to 2048 characters', () => {
+    const endpoint = `https://${'a'.repeat(2048 - 'https://'.length - '.com'.length)}.com`;
+    expect(endpoint).toHaveLength(2048);
+    expect(validateRemoteEndpoint(endpoint)).toBeUndefined();
+    expect(validateRemoteEndpoint(`${endpoint}/`)).toBe('invalid');
+    expect(validateRemoteEndpoint(`https://${'a'.repeat(2048)}.com`)).toBe('invalid');
+  });
+});
+
+describe('validateRemoteIndex', () => {
+  it('accepts a name local rejects', () => {
+    expect(validateStaticSignalIndex('logs', 'my-index')).toBe('signalPattern');
+    expect(validateRemoteIndex('my-index')).toBeUndefined();
+  });
+
+  it('ignores blank and trims plain surrounding spaces', () => {
+    expect(validateRemoteIndex('')).toBeUndefined();
+    expect(validateRemoteIndex('  my-index  ')).toBeUndefined();
+  });
+
+  it('accepts up to 255 UTF-8 bytes', () => {
+    expect(validateRemoteIndex('a'.repeat(255))).toBeUndefined();
+    expect(validateRemoteIndex('a'.repeat(256))).toBe('invalidName');
+    expect(validateRemoteIndex('\u00e9'.repeat(128))).toBe('invalidName');
+  });
+
+  it.each([
+    ['{{x}}', 'template'],
+    ['logs-${foo}-default', 'template'],
+    ['a b', 'invalidCharacter'],
+    ['a\u0001b', 'invalidCharacter'],
+    ['a\u00a0b', 'invalidCharacter'],
+    ['a*b', 'invalidCharacter'],
+    ['MyIndex', 'uppercase'],
+    ['.ds-my-index', 'invalidName'],
+  ])('rejects %j as %s', (index, error) => {
+    expect(validateRemoteIndex(index)).toBe(error);
+  });
+});
+
+describe('remote Elasticsearch', () => {
+  const remoteForm = (
+    overrides: Partial<RemoteElasticsearchDestinationFormData> = {},
+    destinationName = 'Central'
+  ) => ({
+    storageKind: 'remote_elasticsearch' as const,
+    destinationName,
+    description: '',
+    elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM },
+    s3: { ...EMPTY_S3_DESTINATION_FORM },
+    remoteElasticsearch: {
+      ...EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
+      endpoint: 'https://es.example.com:443',
+      apiKey: 'k1',
+      ...overrides,
+    },
+  });
+
+  it('accepts auto with an endpoint and an API key', () => {
+    const formData = remoteForm();
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
+      destinationName: undefined,
+    });
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
+  });
+
+  it('requires the endpoint and the API key after trim', () => {
+    const formData = remoteForm({ endpoint: '  ', apiKey: ' ' });
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toMatchObject({
+      endpoint: 'required',
+      apiKey: 'required',
+    });
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+  });
+
+  it('does not validate the local or S3 slices', () => {
+    const formData = {
+      ...remoteForm(),
+      elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, auto: false },
+    };
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
+      destinationName: undefined,
+    });
+  });
+
+  it('requires at least one index in fixed', () => {
+    const formData = remoteForm({ auto: false });
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition }).staticIndexes).toBe(
+      'required'
+    );
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+  });
+
+  it('accepts full index names without a signal prefix in fixed', () => {
+    const formData = remoteForm({ auto: false, logsIndex: 'my-index', tracesIndex: 'my-traces' });
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
+      destinationName: undefined,
+    });
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
+  });
+
+  it('validates each fixed index with the remote rules', () => {
+    const formData = remoteForm({
+      auto: false,
+      logsIndex: 'logs-${foo}-default',
+      metricsIndex: 'a\tb',
+      tracesIndex: 'MyIndex',
+    });
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toMatchObject({
+      logsIndex: 'template',
+      metricsIndex: 'invalidCharacter',
+      tracesIndex: 'uppercase',
+    });
+    expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+  });
+
+  it('ignores index values left over in auto, which are not saved', () => {
+    const formData = remoteForm({ auto: true, logsIndex: 'MyIndex' });
+    expect(getDestinationCreationFormErrors({ formData, unitDefinition })).toEqual({
+      destinationName: undefined,
+    });
+  });
+
+  it('rejects a name whose API key credential name would exceed 256 characters', () => {
+    expect(
+      getDestinationCreationFormErrors({
+        formData: remoteForm({}, 'a'.repeat(249)),
+        unitDefinition,
+      }).destinationName
+    ).toBe('tooLong');
+    expect(
+      getDestinationCreationFormErrors({
+        formData: remoteForm({}, 'a'.repeat(248)),
+        unitDefinition,
+      }).destinationName
+    ).toBeUndefined();
+  });
+
+  it('rejects a name whose API key credential name is already referenced in the unit', () => {
+    const unit: StreamsUnit.GetResponse = {
+      ...unitDefinition,
+      unit: {
+        ...unitDefinition.unit,
+        sources: [
+          {
+            id: 'src',
+            type: 'otlp',
+            supported_telemetry: ['logs'],
+            config: [{ name: 'token', value: { credential: 'central-api-key' } }],
+          },
+        ],
+      },
+    };
+    expect(
+      getDestinationCreationFormErrors({ formData: remoteForm(), unitDefinition: unit })
+        .destinationName
+    ).toBe('credentialConflict');
+  });
+
+  describe('duplicate name', () => {
+    const unit: StreamsUnit.GetResponse = {
+      ...unitDefinition,
+      unit: {
+        ...unitDefinition.unit,
+        destinations: [
+          {
+            id: 'central',
+            name: 'Central',
+            type: REMOTE_ELASTICSEARCH_TYPE,
+            supported_telemetry: ['traces'],
+          },
+        ],
+      },
+    };
+
+    it('checks every signal in auto, even with index values left over', () => {
+      expect(
+        getDestinationCreationFormErrors({ formData: remoteForm(), unitDefinition: unit })
+          .destinationName
+      ).toBe('duplicate');
+      expect(
+        getDestinationCreationFormErrors({
+          formData: remoteForm({ logsIndex: 'my-index' }),
+          unitDefinition: unit,
+        }).destinationName
+      ).toBe('duplicate');
+    });
+
+    it('checks only the filled signals in fixed', () => {
+      expect(
+        getDestinationCreationFormErrors({
+          formData: remoteForm({ auto: false, logsIndex: 'my-index' }),
+          unitDefinition: unit,
+        }).destinationName
+      ).toBeUndefined();
+      expect(
+        getDestinationCreationFormErrors({
+          formData: remoteForm({ auto: false, tracesIndex: 'my-index' }),
+          unitDefinition: unit,
+        }).destinationName
+      ).toBe('duplicate');
+    });
+  });
+
+  it('reveals remote errors from the remote inputs', () => {
+    const errors = getDestinationCreationFormErrors({
+      formData: remoteForm({ endpoint: '', apiKey: '', auto: false, logsIndex: 'MyIndex' }),
+      unitDefinition,
+    });
+    expect(
+      getVisibleDestinationFormErrors({
+        errors,
+        touchedFields: {
+          remoteElasticsearch: { endpoint: true, logsIndex: true },
+          elasticsearch: { metricsIndex: true },
+        },
+        isSubmitted: false,
+      })
+    ).toEqual({ endpoint: 'required', logsIndex: 'uppercase' });
   });
 });
