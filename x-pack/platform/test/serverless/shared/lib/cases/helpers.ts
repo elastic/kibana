@@ -48,13 +48,11 @@ export const createAndNavigateToCase = async (
 ) => {
   const cases = getService('cases');
   const common = getPageObject('common');
-  const header = getPageObject('header');
   const app = owner === SECURITY_SOLUTION_OWNER ? 'securitySolution' : 'observability';
 
   const theCase = await cases.api.createCase({ owner });
   await common.navigateToUrlWithBrowserHistory(app, `/cases/${theCase.id}`);
   await cases.common.waitForCaseViewToLoad();
-  await header.waitUntilLoadingHasFinished();
   await cases.common.assertCaseTitle(theCase.title);
 
   return theCase;
