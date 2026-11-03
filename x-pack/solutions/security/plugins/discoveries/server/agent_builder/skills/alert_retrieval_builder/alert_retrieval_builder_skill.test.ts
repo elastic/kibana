@@ -11,6 +11,7 @@ import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_d
 
 import { alertRetrievalBuilderSkill } from './alert_retrieval_builder_skill';
 import { GET_DEFAULT_ESQL_QUERY_TOOL_ID } from '../tools/get_default_esql_query_tool';
+import { RUN_ATTACK_DISCOVERY_TOOL_ID } from '../tools/run_attack_discovery_tool';
 
 describe('alertRetrievalBuilderSkill', () => {
   it('passes validateSkillDefinition without error', async () => {
@@ -125,6 +126,45 @@ describe('alertRetrievalBuilderSkill', () => {
 
     it('includes guidance for the alert index pattern', () => {
       expect(alertRetrievalBuilderSkill.content).toContain('.alerts-security.alerts-');
+    });
+
+    // A generated query can parse and still match nothing; handing it to the
+    // Attack Discovery pipeline unexecuted runs generation on zero alerts.
+    describe('execute-before-handoff gate', () => {
+      it('requires executing the exact query before it reaches the editor or the pipeline', () => {
+        expect(alertRetrievalBuilderSkill.content).toContain(
+          '### Execute before you hand a query on'
+        );
+        expect(alertRetrievalBuilderSkill.content).toContain(
+          `run that exact query with
+\`platform.core.execute_esql\` and read the row count`
+        );
+      });
+
+      it('forbids calling the Attack Discovery run tool with an unexecuted or zero-row query', () => {
+        expect(alertRetrievalBuilderSkill.content).toContain(
+          `Never call
+  \`${RUN_ATTACK_DISCOVERY_TOOL_ID}\` with a query you have not executed, or with one that returned
+  zero rows.`
+        );
+      });
+
+      it('makes both the from-scratch and the modify flows point at the gate', () => {
+        const references = alertRetrievalBuilderSkill.content.match(
+          /apply the rules in\s+\*\*Execute before you hand a query on\*\*/g
+        );
+
+        expect(references).toHaveLength(2);
+      });
+
+      it('no longer frames execution as an optional spot check', () => {
+        expect(alertRetrievalBuilderSkill.content).not.toContain(
+          'verify the results look correct'
+        );
+        expect(alertRetrievalBuilderSkill.content).not.toContain(
+          'test a query against real data before updating the editor'
+        );
+      });
     });
   });
 
