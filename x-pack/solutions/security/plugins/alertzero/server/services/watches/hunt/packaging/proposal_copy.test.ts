@@ -178,7 +178,7 @@ describe('buildProposalComment', () => {
     );
     expect(comment).toContain('**Why**');
     expect(comment).toContain(
-      "Observed during the report's confirmed hunt window (Tier 1 matched 4 events)."
+      "Observed during the report's confirmed hunt window (IOC Hunt matched 4 events)."
     );
     expect(comment).toContain('`powershell.exe` (PID 4212) last seen 2026-09-27T16:34:41.000Z');
     expect(comment).toContain('Killing it stops execution immediately.');
@@ -258,7 +258,7 @@ describe('buildProposalComment', () => {
     expect(isolateComment).toContain('Isolating the host cuts off its network access');
   });
 
-  it('includes exactly one Tier 1 line even when three SSEs carried the same evidence', () => {
+  it('includes exactly one IOC Hunt line even when three SSEs carried the same evidence', () => {
     const state = baseState({
       titles: ['Hunt: PowerShell (T1059.001) [ti-repor]'],
       evidence: { tier1HitCount: 4, tier2Confirmed: [] },
@@ -268,7 +268,7 @@ describe('buildProposalComment', () => {
       subject: processSubject(withPid),
       state,
     });
-    const tier1Lines = comment.split('\n').filter((line) => line.includes('Tier 1 matched'));
+    const tier1Lines = comment.split('\n').filter((line) => line.includes('IOC Hunt matched'));
     expect(tier1Lines).toHaveLength(1);
   });
 
@@ -283,7 +283,7 @@ describe('buildProposalComment', () => {
     expect(comment).not.toContain('hunt_result');
   });
 
-  it('summarizes confirmed Tier 2 techniques on a host-scoped proposal when present', () => {
+  it('summarizes confirmed Behavior Hunt techniques on a host-scoped proposal when present', () => {
     const state = baseState({
       evidence: {
         tier1HitCount: 4,
@@ -298,10 +298,10 @@ describe('buildProposalComment', () => {
       subject: hostSubject,
       state,
     });
-    expect(comment).toContain('Tier 2 confirmed T1059.001 (3 rows) and T1078.004 (4 rows)');
+    expect(comment).toContain('Behavior Hunt confirmed T1059.001 (3 rows) and T1078.004 (4 rows)');
   });
 
-  it('falls back to the plain technique list on a host-scoped proposal when no Tier 2 behavior is confirmed', () => {
+  it('falls back to the plain technique list on a host-scoped proposal when no behavior is confirmed', () => {
     const state = baseState({ techniques: ['T1078.004'], evidence: { tier2Confirmed: [] } });
     const comment = buildProposalComment({
       entry: isolateHost,
@@ -372,7 +372,7 @@ describe('buildRecommendationComment', () => {
     expect(comment).toContain('**Recommended steps**');
     expect(comment).toContain('- Rotate credentials for role X.');
     expect(comment).toContain(
-      'Hunt Watch confirmed *Shadow admin AssumeRole*; Tier 1 matched 12 events.'
+      'Hunt Watch confirmed *Shadow admin AssumeRole*; IOC Hunt matched 12 events.'
     );
   });
 

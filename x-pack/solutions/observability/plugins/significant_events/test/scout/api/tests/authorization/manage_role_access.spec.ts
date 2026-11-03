@@ -144,13 +144,18 @@ for (const { name, label, role } of ROLES) {
       apiTest('closes a significant event', async ({ apiClient }) => {
         await expect
           .poll(async () => {
-            const response = await apiClient.get(`${EVENTS_ENDPOINT}/${eventId}`, {
+            const response = await apiClient.get(`${EVENTS_ENDPOINT}?event_id=${eventId}`, {
               headers,
               responseType: 'json',
             });
-            return response.statusCode;
+            return {
+              statusCode: response.statusCode,
+              eventIds: (response.body.hits ?? []).map(
+                ({ event_id: id }: { event_id: string }) => id
+              ),
+            };
           }, POLL_OPTIONS)
-          .toBe(200);
+          .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
 
         const response = await apiClient.post(`${EVENTS_ENDPOINT}/${eventId}/update`, {
           headers,

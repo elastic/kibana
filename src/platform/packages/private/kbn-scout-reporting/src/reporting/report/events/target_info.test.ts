@@ -13,6 +13,7 @@ import { buildScoutTargetInfo } from './target_info';
 // be varied from here. That is the part these tests are about.
 describe('buildScoutTargetInfo', () => {
   const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
+  const originalProjectId = process.env.SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID;
 
   afterEach(() => {
     if (originalTargetAttributes === undefined) {
@@ -20,6 +21,19 @@ describe('buildScoutTargetInfo', () => {
     } else {
       process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
     }
+    if (originalProjectId === undefined) {
+      delete process.env.SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID;
+    } else {
+      process.env.SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID = originalProjectId;
+    }
+  });
+
+  it('records the Elastic Cloud project the run targets, when one is declared', () => {
+    delete process.env.SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID;
+    expect(buildScoutTargetInfo().elastic_cloud).toBeUndefined();
+
+    process.env.SCOUT_TARGET_ELASTIC_CLOUD_PROJECT_ID = '3f1c9a';
+    expect(buildScoutTargetInfo().elastic_cloud).toEqual({ project: { id: '3f1c9a' } });
   });
 
   it('records the attributes declared via SCOUT_TARGET_ATTRIBUTES', () => {

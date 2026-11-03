@@ -193,6 +193,8 @@ export const FLYOUT_ORIGIN = {
   ATTACHMENT_SUMMARY: 'attachment_summary',
   // Privileged user monitoring users table.
   PRIVILEGED_USERS_TABLE: 'privileged_users_table',
+  // Privileged user monitoring user activity table row.
+  PRIVILEGED_USER_ACTIVITY_TABLE: 'privileged_user_activity_table',
   // Privileged access detection chart entity link.
   PRIVILEGED_ACCESS_DETECTION: 'privileged_access_detection',
   // Recent anomalies chart entity link.

@@ -12,6 +12,7 @@ import path from 'path';
 import { expandAgentQueue } from '../agent_images.ts';
 import { BuildkiteClient, type BuildkiteStep } from '../buildkite/index.ts';
 import { collectEnvFromLabels } from '../pr_labels.ts';
+import { SCOUT_STEP_KEYS } from './step_keys.ts';
 import { getKibanaDir, getRequiredEnv } from '#pipeline-utils';
 
 export interface ModuleDiscoveryInfo {
@@ -155,7 +156,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       ? process.env.SCOUT_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build_scout_tests', 'build'];
+      : [SCOUT_STEP_KEYS.BUILDER, 'build'];
 
   // Apply the heavy-suite split here, at scheduling time, so each (arch, domain) mode
   // for module gets its own Buildkite step. The scheduled (post-split)

@@ -12,6 +12,7 @@ import type {
 } from '../hunt_coordinator';
 import type { HuntModelTier } from '../types';
 import type { ValidatedBehavior } from '../tier2/types';
+import { isRetryableIncompleteReason } from './completeness';
 import { TIER2_MODEL_TIERS, describeModelTiers } from './hunt_model_tiers';
 import type { Tier2TargetSource } from './resolve_tier2_targets';
 
@@ -64,42 +65,48 @@ const describeReport = (result: HuntCoordinatorCoreResult, ctx: HuntNarrativeCon
 
 const TIER2_TARGET_SOURCE_LABELS: Record<Tier2TargetSource, string> = {
   report_match: "the report's vendor or product",
-  tier1_hits: 'Tier 1 hits',
+  tier1_hits: 'IOC Hunt hits',
   model: 'a model match',
   actionable: 'process telemetry',
 };
 
 const describeTier2Skip = (
   reason: HuntCoordinatorTier2SkipReason,
-  unavailableTiers: readonly HuntModelTier[] = []
+  unavailableTiers: readonly HuntModelTier[] = [],
+  detail?: string
 ): string => {
   const missingTier2Tiers = unavailableTiers.filter((tier) => TIER2_MODEL_TIERS.includes(tier));
   switch (reason) {
     case 'configured_never':
-      return 'Tier 2 behavior hunting was turned off for this run.';
+      return 'Behavior Hunt was turned off for this run.';
     case 'no_environment_hits':
-      return 'Tier 2 behavior hunting was skipped because Tier 1 found no environment hits and this run only escalates to Tier 2 on a hit.';
+      return 'Behavior Hunt was skipped because IOC Hunt found no environment hits and this run only escalates to Behavior Hunt on a hit.';
     case 'no_inference':
+      // A model was selected for dataset matching and its call failed; naming a missing tier or
+      // connector here would send the operator to fix configuration that is fine.
+      if (detail) {
+        return `Behavior Hunt was skipped because the model call that chooses where to hunt failed (${detail}). The next sweep retries it.`;
+      }
       if (missingTier2Tiers.length > 0) {
-        return `Tier 2 behavior hunting was skipped because no model was available for the ${describeModelTiers(
+        return `Behavior Hunt was skipped because no model was available for the ${describeModelTiers(
           missingTier2Tiers
         )}.`;
       }
       // Both Tier 2 tiers resolved, so the Efficient tier is what was missing: it chooses the
       // dataset to hunt when nothing else points at one.
       return unavailableTiers.includes('efficient')
-        ? 'Tier 2 behavior hunting was skipped because the Efficient tier had no model to choose where to hunt.'
-        : 'Tier 2 behavior hunting was skipped because no GenAI connector was available.';
+        ? 'Behavior Hunt was skipped because the Efficient tier had no model to choose where to hunt.'
+        : 'Behavior Hunt was skipped because no GenAI connector was available.';
     case 'no_tier2_targets':
-      return 'Tier 2 behavior hunting was skipped because no index could be chosen for it: the report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry.';
+      return 'Behavior Hunt was skipped because no index could be chosen for it: the report matched no dataset, IOC Hunt hit no index, and no index in the default data view carries process telemetry.';
     case 'no_report_text':
-      return 'Tier 2 behavior hunting was skipped because the report has no body text to derive behaviors from.';
+      return 'Behavior Hunt was skipped because the report has no body text to derive behaviors from.';
     case 'no_searchable_input':
-      return 'Tier 2 behavior hunting was skipped because the report exposed nothing to search for.';
+      return 'Behavior Hunt was skipped because the report exposed nothing to search for.';
     case 'tier2_failed':
-      return 'Tier 2 behavior hunting failed before it could finish.';
+      return 'Behavior Hunt failed before it could finish.';
     case 'extraction_pending':
-      return 'Tier 2 behavior hunting was skipped because the report has not been enriched yet.';
+      return 'Behavior Hunt was skipped because the report has not been enriched yet.';
     case 'report_not_found':
     case 'scope_blocked':
       return '';
@@ -136,11 +143,15 @@ const describeBehavior = (behavior: ValidatedBehavior): string => {
 };
 
 const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
-  const lines: string[] = ['**Tier 2: behavior hunts derived from the report**'];
+  const lines: string[] = ['**Behavior Hunt: behaviors derived from the report**'];
   const { tier2 } = result;
   if (!tier2) {
     if (result.tier2_skipped_reason) {
-      const skip = describeTier2Skip(result.tier2_skipped_reason, result.unavailable_model_tiers);
+      const skip = describeTier2Skip(
+        result.tier2_skipped_reason,
+        result.unavailable_model_tiers,
+        result.tier2_skip_detail
+      );
       lines.push(
         result.tier2_skipped_reason === 'tier2_failed' ? `${skip} ${result.message}` : skip
       );
@@ -149,12 +160,12 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
   }
 
   if (tier2.status === 'no_behaviors_found') {
-    lines.push('Tier 2 read the report text and derived no behaviors to hunt.');
+    lines.push('Behavior Hunt read the report text and derived no behaviors to hunt.');
     return lines;
   }
   if (tier2.status === 'no_behaviors_validated') {
     lines.push(
-      'Tier 2 derived behaviors from the report text, but none survived ATT&CK catalog validation.'
+      'Behavior Hunt derived behaviors from the report text, but none survived ATT&CK catalog validation.'
     );
     return lines;
   }
@@ -163,11 +174,16 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
   const confirmed = behaviors.filter((b) => b.execution?.hit === true);
   const executed = behaviors.filter((b) => b.execution?.executed === true);
   lines.push(
-    `Tier 2 derived ${plural(behaviors.length, 'behavior')} from the report text and validated ${
+    `Behavior Hunt derived ${plural(
+      behaviors.length,
+      'behavior'
+    )} from the report text and validated ${
       behaviors.length === 1 ? 'it' : 'them'
     } against the ATT&CK catalog; ${
       executed.length
-    } executed as ES|QL against the Tier 2 targets and ${confirmed.length} matched live activity.`
+    } executed as ES|QL against the Behavior Hunt targets and ${
+      confirmed.length
+    } matched live activity.`
   );
   for (const behavior of behaviors.slice(0, MAX_BEHAVIORS_NARRATED)) {
     lines.push(describeBehavior(behavior));
@@ -184,25 +200,27 @@ const describeTier2 = (result: HuntCoordinatorCoreResult): string[] => {
 };
 
 const describeTier1 = (tier1: HuntForThreatResult, excludedIocCount = 0): string[] => {
-  const lines: string[] = ['**Tier 1: indicator and technique search**'];
+  const lines: string[] = ['**IOC Hunt: indicator and technique search**'];
   if (tier1.status === 'no_searchable_terms') {
     lines.push(
       excludedIocCount > 0
-        ? `Tier 1 had nothing to search: no eligible indicators remained (${plural(
+        ? `IOC Hunt had nothing to search: no eligible indicators remained (${plural(
             excludedIocCount,
             'indicator'
           )} excluded by adjudication) and the report exposed no searchable techniques.`
-        : 'Tier 1 had nothing to search: the report exposed no indicators or techniques that map to a searchable field.'
+        : 'IOC Hunt had nothing to search: the report exposed no indicators or techniques that map to a searchable field.'
     );
     return lines;
   }
   if (tier1.counts.total_hits === 0) {
-    lines.push('Tier 1 found no documents matching those indicators or techniques in the window.');
+    lines.push(
+      'IOC Hunt found no documents matching those indicators or techniques in the window.'
+    );
     return lines;
   }
 
   lines.push(
-    `Tier 1 matched ${plural(tier1.counts.total_hits, 'document')} across ${plural(
+    `IOC Hunt matched ${plural(tier1.counts.total_hits, 'document')} across ${plural(
       tier1.per_index.length,
       'index',
       'indices'
@@ -255,7 +273,7 @@ const describeSearch = (result: HuntCoordinatorCoreResult): string[] => {
   if (result.tier2_targets.length > 0) {
     const sources = result.tier2_target_sources.map((source) => TIER2_TARGET_SOURCE_LABELS[source]);
     lines.push(
-      `- **Tier 2 targets:** ${codeList(result.tier2_targets)}${
+      `- **Behavior Hunt targets:** ${codeList(result.tier2_targets)}${
         sources.length > 0 ? ` (from ${listOf(sources)})` : ''
       }`
     );
@@ -297,13 +315,37 @@ const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
       ? result.has_confirmed_hit
         ? '**Coverage: incomplete, retryable.** The confirmed hit stands, but part of the search did not run for a transient reason, so this run is not a statement about everything the report describes.'
         : '**Coverage: incomplete, retryable.** Part of the search did not run for a transient reason, so the report is not marked as hunted, stays eligible for a later sweep, and this run is not a statement that the environment is clean.'
-      : '**Coverage: incomplete.** Part of the search cannot run in this space, and repeating the run would not change that; the report is retired, but this run is not a statement that the environment is clean.',
+      : '**Coverage: incomplete.** Part of the search did not run, and repeating the run is not expected to change that; the report is retired, but this run is not a statement that the environment is clean.',
   ];
   for (const gap of gaps) {
     const key = `${gap.reason}:${gap.detail}`;
     if (seen.has(key)) continue;
     seen.add(key);
     lines.push(`- ${gap.reason.replace(/_/g, ' ')}: ${gap.detail}`);
+  }
+  // Name what a later run will pick up, so an analyst reading a recorded hit knows which part of
+  // the report is still unsearched. Only retryable gaps, and only the techniques the run carries
+  // forward: a final one, or one the run gave up on, is never searched.
+  const carriedForward =
+    result.pending_technique_ids === undefined ? undefined : new Set(result.pending_technique_ids);
+  const stillToSearch = [
+    ...new Set(
+      gaps
+        .filter(
+          ({ reason, technique_id: techniqueId }) =>
+            techniqueId &&
+            isRetryableIncompleteReason(reason) &&
+            (carriedForward === undefined || carriedForward.has(techniqueId))
+        )
+        .map(({ technique_id: techniqueId }) => techniqueId as string)
+    ),
+  ];
+  if (result.completeness === 'incomplete_retryable' && stillToSearch.length > 0) {
+    lines.push(
+      `**Still to be searched (${stillToSearch.length}):** ${codeList(
+        stillToSearch
+      )}. A later sweep continues with these while the report is still inside the sweep's publish-date window; techniques this run already searched are not repeated.`
+    );
   }
   return lines;
 };
@@ -347,7 +389,7 @@ const describeOutcome = (
   if (tier1Hit && tier2Hit) {
     return {
       heading: 'Hunt Watch confirmed a hit',
-      summary: `Hunt Watch confirmed a hit for ${report}: Tier 1 matched the report's indicators in the environment and Tier 2 confirmed ${plural(
+      summary: `Hunt Watch confirmed a hit for ${report}: IOC Hunt matched the report's indicators in the environment and Behavior Hunt confirmed ${plural(
         confirmedBehaviors.length,
         'behavior'
       )} derived from the report text.`,
@@ -356,21 +398,25 @@ const describeOutcome = (
   if (tier1Hit) {
     const tier2Note = result.tier2
       ? result.tier2.status === 'behaviors_proposed'
-        ? 'Tier 2 derived behaviors from the report text but none matched live activity.'
-        : 'Tier 2 derived no executable behaviors from the report text.'
+        ? 'Behavior Hunt derived behaviors from the report text but none matched live activity.'
+        : 'Behavior Hunt derived no executable behaviors from the report text.'
       : result.tier2_skipped_reason
-      ? describeTier2Skip(result.tier2_skipped_reason, result.unavailable_model_tiers)
+      ? describeTier2Skip(
+          result.tier2_skipped_reason,
+          result.unavailable_model_tiers,
+          result.tier2_skip_detail
+        )
       : '';
     return {
       heading: 'Hunt Watch confirmed a hit',
       summary:
-        `Hunt Watch confirmed a hit for ${report}: Tier 1 matched the report's indicators in the environment. ${tier2Note}`.trim(),
+        `Hunt Watch confirmed a hit for ${report}: IOC Hunt matched the report's indicators in the environment. ${tier2Note}`.trim(),
     };
   }
   if (tier2Hit) {
     return {
       heading: 'Hunt Watch confirmed a hit',
-      summary: `Hunt Watch confirmed a hit for ${report}: Tier 1 found no indicator matches, but Tier 2 confirmed ${plural(
+      summary: `Hunt Watch confirmed a hit for ${report}: IOC Hunt found no indicator matches, but Behavior Hunt confirmed ${plural(
         confirmedBehaviors.length,
         'behavior'
       )} derived from the report text.`,
@@ -396,21 +442,21 @@ export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => 
   const { tier1, tier2 } = result;
   const tier1Part =
     tier1.status === 'no_searchable_terms'
-      ? 'Tier 1 had nothing to search'
+      ? 'IOC Hunt had nothing to search'
       : tier1.counts.total_hits === 0
-      ? 'Tier 1 found no matches'
-      : `Tier 1 matched ${plural(tier1.counts.total_hits, 'document')}`;
+      ? 'IOC Hunt found no matches'
+      : `IOC Hunt matched ${plural(tier1.counts.total_hits, 'document')}`;
   let tier2Part: string;
   if (tier2) {
     const confirmed = tier2Confirmed(result).length;
     tier2Part =
       tier2.behaviors.length === 0
-        ? 'Tier 2 derived no behaviors'
-        : `Tier 2 confirmed ${confirmed} of ${plural(tier2.behaviors.length, 'behavior')}`;
+        ? 'Behavior Hunt derived no behaviors'
+        : `Behavior Hunt confirmed ${confirmed} of ${plural(tier2.behaviors.length, 'behavior')}`;
   } else if (result.tier2_skipped_reason === 'tier2_failed') {
-    tier2Part = 'Tier 2 failed';
+    tier2Part = 'Behavior Hunt failed';
   } else {
-    tier2Part = 'Tier 2 skipped';
+    tier2Part = 'Behavior Hunt skipped';
   }
   const outcome = result.has_confirmed_hit ? 'confirmed hit' : 'no confirmed hits';
   const coverage = result.completeness === 'complete' ? '' : '; coverage incomplete';
