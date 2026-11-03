@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiToolTip,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -26,7 +27,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { CellDefinition, CellType } from '../../common/types';
 import { CELL_NAME_PATTERN } from '../model/references';
 import { duplicateCell, type NewCellKind } from '../model/cell_factory';
-import type { CellRuntime } from '../model/types';
+import type { CellRuntime, CellStatus } from '../model/types';
 import { CellFooter } from './cell_footer';
 import { RunButton } from './run_button';
 import { useNotebook } from './notebook_context';
@@ -58,6 +59,24 @@ const getTypeLabel = (cell: CellDefinition): string => {
   return TYPE_LABELS[kind];
 };
 
+const getStatusBorderColor = (
+  status: CellStatus,
+  { colors }: UseEuiTheme['euiTheme']
+): string | undefined => {
+  switch (status) {
+    case 'stale':
+      return colors.borderStrongWarning;
+    case 'running':
+      return colors.borderStrongPrimary;
+    case 'error':
+      return colors.borderStrongDanger;
+    case 'blocked':
+      return colors.borderStrongNeutral;
+    default:
+      return undefined;
+  }
+};
+
 const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
 
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
@@ -83,6 +102,7 @@ export const CellFrame = ({
 }: PropsWithChildren<CellFrameProps>) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
+  const statusBorderColor = runtime && getStatusBorderColor(runtime.status, euiTheme);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -146,7 +166,12 @@ export const CellFrame = ({
         }
       `}
     >
-      <EuiPanel hasBorder paddingSize="s" data-test-subj={`notebookCell-${cell.name}`}>
+      <EuiPanel
+        hasBorder
+        paddingSize="s"
+        css={statusBorderColor && { borderColor: statusBorderColor }}
+        data-test-subj={`notebookCell-${cell.name}`}
+      >
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIconTip
