@@ -8,7 +8,6 @@
  */
 
 import Net from 'net';
-import execa from 'execa';
 import type { DoctorCheck, Fix } from '../types';
 import { fail, pass } from '../types';
 import { defaultConfig } from '../../../servers/configs/config_sets/default/stateful/base.config';
@@ -44,21 +43,8 @@ const stopScoutServersFix = async (pids: string[]): Promise<Fix> => {
   return { command: `kill -- ${targets.join(' ')}`, destructive: true };
 };
 
-// Docker publishes the ports of serverless containers, so stop the containers, not Docker
+// serverless containers publish their ports through Docker, which must not be killed
 const isDocker = (command?: string) => /^(com\.docker|docker)/.test(command ?? '');
-
-const stopContainersFix = (port: number): Fix => ({
-  command: `docker ps -q --filter publish=${port} | xargs docker kill`,
-  destructive: true,
-  run: async () => {
-    const ids = (await tryExec('docker', ['ps', '-q', '--filter', `publish=${port}`]))
-      ?.split('\n')
-      .filter(Boolean);
-    if (ids?.length) {
-      await execa('docker', ['kill', ...ids], { stdio: 'inherit' });
-    }
-  },
-});
 
 const portCheck = (name: string, port: number): DoctorCheck => ({
   title: `${name} port ${port}`,
@@ -83,9 +69,9 @@ const portCheck = (name: string, port: number): DoctorCheck => ({
       return fail(`${name} port ${port} is used`);
     }
     return fail(`${name} port ${port} is used${usedBy}`, {
-      fix: isDocker(owner.command)
-        ? stopContainersFix(port)
-        : { command: `kill ${owner.pid}`, destructive: true },
+      ...(isDocker(owner.command)
+        ? { hint: 'stop the Docker container that publishes it' }
+        : { fix: { command: `kill ${owner.pid}`, destructive: true } }),
     });
   },
 });

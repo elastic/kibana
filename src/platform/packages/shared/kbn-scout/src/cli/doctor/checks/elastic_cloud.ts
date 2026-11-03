@@ -226,9 +226,7 @@ const apiKeyCheck: DoctorCheck = {
       });
     }
 
-    // the same key name as QAF uses, e.g. api_key.qa or api_key.<EC_API_KEY_SET>_qa
-    const keySet = process.env.EC_API_KEY_SET;
-    const keyName = keySet ? `${keySet}_${getEnvironment()}` : getEnvironment();
+    const keyName = getEnvironment();
     const secrets = await readJson<CloudSecrets>(CLOUD_SECRETS_FILE);
     return secrets?.api_key?.[keyName]
       ? pass(`${tildify(CLOUD_SECRETS_FILE)} has API key "${keyName}"`)
@@ -237,6 +235,10 @@ const apiKeyCheck: DoctorCheck = {
         });
   },
 };
+
+/** For checks that run after scoutConfigCheck validated the file */
+const readScoutConfig = async (arch: DoctorArch) =>
+  ScoutTestConfigSchema.parse(await readJson(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[arch])));
 
 /** Validates a direct Scout run config with the schema Scout uses when it loads it */
 const scoutConfigCheck = (arch: DoctorArch): DoctorCheck => ({
@@ -279,20 +281,17 @@ const scoutUsersCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChec
   arch,
   dependsOn: configCheck,
   run: async () => {
-    const configFile = SCOUT_CLOUD_CONFIGS[arch];
-    const config = await readJson<{ cloudUsersFilePath: string; projectType?: string }>(
-      Path.resolve(REPO_ROOT, configFile)
-    );
+    const { cloudUsersFilePath, projectType } = await readScoutConfig(arch);
     // Scout resolves it against the working directory, which is the repo root
-    const usersFile = Path.resolve(REPO_ROOT, config?.cloudUsersFilePath ?? '');
+    const usersFile = Path.resolve(REPO_ROOT, cloudUsersFilePath);
     const users = await readJson<Users>(usersFile);
     if (!users) {
       return fail(`${displayPath(usersFile)} does not exist`, {
-        hint: `set as cloudUsersFilePath in ${configFile}`,
+        hint: `set as cloudUsersFilePath in ${SCOUT_CLOUD_CONFIGS[arch]}`,
       });
     }
 
-    return checkUsers(displayPath(usersFile), users, getRoles(arch, config?.projectType));
+    return checkUsers(displayPath(usersFile), users, getRoles(arch, projectType));
   },
 });
 
@@ -302,9 +301,7 @@ const scoutKibanaCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChe
   arch,
   dependsOn: configCheck,
   run: async () => {
-    const { hosts, auth } = ScoutTestConfigSchema.parse(
-      await readJson(Path.resolve(REPO_ROOT, SCOUT_CLOUD_CONFIGS[arch]))
-    );
+    const { hosts, auth } = await readScoutConfig(arch);
     const { host } = new URL(hosts.kibana);
     const remedy = { hint: 'the project or deployment may be deleted' };
     try {
@@ -323,7 +320,7 @@ const scoutKibanaCheck = (arch: DoctorArch, configCheck: DoctorCheck): DoctorChe
         return fail(`Kibana at ${host} responds with ${response.status}`, remedy);
       }
       const { version } = await response.json();
-      return pass(`Kibana ${version?.number ?? ''} at ${host} is up`.replace('  ', ' '));
+      return pass(`Kibana ${version?.number} at ${host} is up`);
     } catch (error) {
       return fail(
         `Kibana at ${host} is not reachable: ${error.cause?.code ?? error.message}`,
@@ -339,9 +336,7 @@ const scoutCustomRoleCheck = (arch: DoctorArch, configCheck: DoctorCheck): Docto
   dependsOn: configCheck,
   run: async () => {
     const configFile = SCOUT_CLOUD_CONFIGS[arch];
-    const { customSamlProviderName, cloudUsersFilePath } = ScoutTestConfigSchema.parse(
-      await readJson(Path.resolve(REPO_ROOT, configFile))
-    );
+    const { customSamlProviderName, cloudUsersFilePath } = await readScoutConfig(arch);
     if (arch === 'stateful') {
       return customSamlProviderName
         ? pass(`${configFile} logs in custom roles via SAML provider "${customSamlProviderName}"`)
@@ -359,31 +354,19 @@ const scoutCustomRoleCheck = (arch: DoctorArch, configCheck: DoctorCheck): Docto
   },
 });
 
-const qafRunFileCheck = (file: string, arch?: DoctorArch): DoctorCheck => ({
+const qafRunFilesCheck: DoctorCheck = {
   title: 'Files that block QAF runs',
-  arch,
-  run: async () =>
-    warn(`QAF won't run while ${file} exists`, {
-      hint: 'used by direct Scout runs',
-      fix: { command: `rm -f ${file}`, destructive: true },
-    }),
-});
-
-const getQafRunFileChecks = (): DoctorCheck[] => {
-  const checks = [
-    ...(existsInRepo(SCOUT_ROLE_USERS_FILE) ? [qafRunFileCheck(SCOUT_ROLE_USERS_FILE)] : []),
-    ...DOCTOR_ARCHS.filter((arch) => existsInRepo(SCOUT_CLOUD_CONFIGS[arch])).map((arch) =>
-      qafRunFileCheck(SCOUT_CLOUD_CONFIGS[arch], arch)
-    ),
-  ];
-  return checks.length
-    ? checks
-    : [
-        {
-          title: 'Files that block QAF runs',
-          run: async () => pass('No files that block QAF runs'),
-        },
-      ];
+  run: async () => {
+    const files = [SCOUT_ROLE_USERS_FILE, ...Object.values(SCOUT_CLOUD_CONFIGS)].filter(
+      existsInRepo
+    );
+    return files.length
+      ? warn(`QAF won't run while ${files.join(', ')} ${files.length > 1 ? 'exist' : 'exists'}`, {
+          hint: 'used by direct Scout runs',
+          fix: { command: `rm -f ${files.join(' ')}`, destructive: true },
+        })
+      : pass('No files that block QAF runs');
+  },
 };
 
 export const getQafCloudChecks = (): DoctorCheck[] => [
@@ -391,7 +374,7 @@ export const getQafCloudChecks = (): DoctorCheck[] => [
   apiKeyCheck,
   ...DOCTOR_ARCHS.map(cloudUsersCheck),
   qafCustomRoleCheck,
-  ...getQafRunFileChecks(),
+  qafRunFilesCheck,
 ];
 
 /** Checks for running Scout against Cloud without QAF, only when its config files exist */

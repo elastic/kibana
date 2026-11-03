@@ -7,25 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'fs';
-import Os from 'os';
-import Path from 'path';
 import chalk from 'chalk';
 import execa from 'execa';
 import { ES_SERVERLESS_DEFAULT_IMAGE, SERVERLESS_NODES, getUiamContainers } from '@kbn/es';
 import type { DoctorCheck, Fix } from '../types';
 import { fail, pass, warn } from '../types';
-import { formatAge, formatBytes, getScoutServerPids, tildify, tryExec } from '../utils';
+import { formatAge, formatBytes, getScoutServerPids, tryExec } from '../utils';
 
 const RECOMMENDED_CPUS = 12;
 const RECOMMENDED_MEMORY_GB = 15;
 const RECOMMENDED_MEMORY = RECOMMENDED_MEMORY_GB * 1024 ** 3;
-// Docker Desktop reports a bit less memory than it is given, e.g. 15.6 GB for 16 GB
-const DOCKER_DESKTOP_MEMORY_MIB = (RECOMMENDED_MEMORY_GB + 1) * 1024;
-const DOCKER_DESKTOP_SETTINGS = Path.join(
-  Os.homedir(),
-  'Library/Group Containers/group.com.docker/settings-store.json'
-);
 const DOCKER_START_TIMEOUT_MS = 120_000;
 
 const waitForDocker = async () => {
@@ -51,42 +42,6 @@ const startDockerFix = (): Fix => {
   };
 };
 
-/** Raises Docker Desktop resources on macOS; elsewhere Docker uses the host resources directly */
-const resizeDockerDesktopFix = (cpus: number, memoryBytes: number): Fix | undefined => {
-  const targetCpus = Math.max(cpus, Math.min(RECOMMENDED_CPUS, Os.cpus().length));
-  // leave the host at least 8 GB
-  const canRaiseMemory = Os.totalmem() >= DOCKER_DESKTOP_MEMORY_MIB * 1024 ** 2 + 8 * 1024 ** 3;
-  const raiseMemory = memoryBytes < RECOMMENDED_MEMORY && canRaiseMemory;
-  if (
-    process.platform !== 'darwin' ||
-    !Fs.existsSync(DOCKER_DESKTOP_SETTINGS) ||
-    (targetCpus === cpus && !raiseMemory)
-  ) {
-    return undefined;
-  }
-
-  const changes = {
-    ...(targetCpus > cpus ? { Cpus: targetCpus } : {}),
-    ...(raiseMemory ? { MemoryMiB: DOCKER_DESKTOP_MEMORY_MIB } : {}),
-  };
-  return {
-    command: `docker desktop stop, set ${Object.entries(changes)
-      .map(([key, value]) => `${key}=${value}`)
-      .join(' ')} in ${tildify(DOCKER_DESKTOP_SETTINGS)}, docker desktop start`,
-    destructive: true,
-    run: async () => {
-      await execa('docker', ['desktop', 'stop'], { stdio: 'inherit' });
-      const settings = JSON.parse(await Fs.promises.readFile(DOCKER_DESKTOP_SETTINGS, 'utf8'));
-      await Fs.promises.writeFile(
-        DOCKER_DESKTOP_SETTINGS,
-        JSON.stringify({ ...settings, ...changes }, null, 2)
-      );
-      await execa('docker', ['desktop', 'start'], { stdio: 'inherit' });
-      await waitForDocker();
-    },
-  };
-};
-
 const dockerDaemonCheck: DoctorCheck = {
   title: 'Docker daemon',
   arch: 'serverless',
@@ -103,15 +58,9 @@ const dockerDaemonCheck: DoctorCheck = {
     }
 
     const recommended = `${RECOMMENDED_CPUS} CPUs and ${RECOMMENDED_MEMORY_GB} GB RAM`;
-    const fix = resizeDockerDesktopFix(NCPU, MemTotal);
     return warn(
       `${details}, ${chalk.yellow(`multi-project serverless tests need ${recommended}`)}`,
-      {
-        fix,
-        hint: fix
-          ? 'restarts Docker Desktop and stops its containers'
-          : 'raise them in Docker Desktop settings → Resources',
-      }
+      { hint: 'raise them in Docker Desktop settings → Resources' }
     );
   },
 };

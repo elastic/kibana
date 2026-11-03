@@ -34,12 +34,11 @@ interface DoctorSection {
   /** Checks for all targets when not set */
   target?: DoctorTarget;
   checks: DoctorCheck[];
-  /** Shown when a check fails or warns; titles only, as the docs are internal */
+  /** Shown when a check fails or warns */
   docs?: string;
 }
 
-const CLOUD_DOCS =
-  'Kibana team docs "Run Scout tests on Elastic Cloud" and "Create Cloud users", QAF docs "Getting started"';
+const CLOUD_DOCS = 'See the Elastic Cloud testing docs for Scout and QAF';
 
 interface ReportedResult extends CheckResult {
   check: DoctorCheck;
@@ -186,7 +185,7 @@ const runChecks = async (log: ToolingLog, sections: DoctorSection[]) => {
       }
     });
     if (docs && results.some((result) => result && result.status !== 'pass')) {
-      log.write(chalk.dim(`   Docs: ${docs}`));
+      log.write(chalk.dim(`   ${docs}`));
     }
   }
   return reported;

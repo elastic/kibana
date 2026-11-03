@@ -18,9 +18,7 @@ export const qafChecks: DoctorCheck[] = [
       // qaf doctor exits with 0 even when checks fail, so read its ✓/✗ lines
       const output = await tryExec('qaf', ['doctor']);
       if (output === undefined) {
-        return fail('QAF is not installed', {
-          fix: { command: 'uv tool install --python 3.11 git+https://github.com/elastic/qaf' },
-        });
+        return fail('QAF is not installed', { hint: 'see the QAF getting started docs' });
       }
 
       const version = output.match(/QAF:\s*(\S+)/)?.[1] ?? 'unknown version';
