@@ -19,6 +19,8 @@ import { css } from '@emotion/react';
 import { useNotebook } from './notebook_context';
 
 const FLYOUT_WIDTH_STORAGE_KEY = 'notebooks:flyoutWidth';
+const ASIDE_MAX_WIDTH = 1000;
+const ASIDE_ASPECT_RATIO = 16 / 10;
 
 type NotebookFlyoutProps = Omit<EuiFlyoutResizableProps, 'size' | 'onResize'> & {
   /** Content shown over the page, left of the flyout; renders the flyout above the header. */
@@ -55,13 +57,20 @@ export const NotebookFlyout = ({ aside, ...props }: NotebookFlyoutProps) => {
               inset: 0 ${flyoutWidth}px 0 0;
               z-index: ${Number(euiTheme.levels.mask) - 1};
               display: flex;
-              padding: ${euiTheme.size.xl};
+              align-items: center;
+              justify-content: center;
+              padding: ${euiTheme.size.xxl};
             `}
           >
             <EuiPanel
-              paddingSize="m"
+              paddingSize="l"
               css={css`
-                flex: 1;
+                width: min(
+                  100%,
+                  ${ASIDE_MAX_WIDTH}px,
+                  calc((100vh - 2 * ${euiTheme.size.xxl}) * ${ASIDE_ASPECT_RATIO})
+                );
+                aspect-ratio: ${ASIDE_ASPECT_RATIO};
               `}
             >
               {aside}
