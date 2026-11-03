@@ -15,6 +15,8 @@ export interface HitDocument {
   index: string;
   timestamp?: string;
   source: Record<string, unknown>;
+  /** Named-query matches from ES when Tier 1 clauses carry `_name`. */
+  matched_queries?: string[];
 }
 
 const HASH_FIELD_PREFIXES = ['file', 'process', 'dll'] as const;
@@ -49,6 +51,31 @@ export const IOC_FIELDS_BY_TYPE: Record<string, string[]> = {
 };
 
 /**
+ * Bounded evidence keys copied onto wire hits (D8). Order is the priority when
+ * capping at 8 keys per event. Host and user are separate top-level fields.
+ */
+export const EVIDENCE_SOURCE_FIELDS = [
+  'process.name',
+  'process.command_line',
+  'process.parent.name',
+  'process.executable',
+  'file.path',
+  'file.hash.sha256',
+  'dns.question.name',
+  'destination.ip',
+  'destination.domain',
+  'source.ip',
+  'url.full',
+  'event.action',
+] as const;
+
+const MAX_EVIDENCE_FIELDS = 8;
+const MAX_EVIDENCE_VALUE_LENGTH = 256;
+
+/** Named Tier 1 clause: `ioc_<index>|<ecs.field>`. */
+const NAMED_CLAUSE_RE = /^ioc_(\d+)\|(.+)$/;
+
+/**
  * IOC types whose values name the same thing whatever their case. Hex digests are
  * case-insensitive as identifiers, and DNS names are case-insensitive by
  * definition, but the ECS fields holding both are `keyword`, so a report quoting
@@ -69,6 +96,17 @@ const asString = (value: unknown): string | undefined => {
   if (typeof value === 'string') return value;
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
   return undefined;
+};
+
+const firstStringValue = (value: unknown): string | undefined => {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const str = asString(item);
+      if (str !== undefined) return str;
+    }
+    return undefined;
+  }
+  return asString(value);
 };
 
 /** Flatten nested `_source`-shaped fields into dotted paths (arrays of objects flattened per item). */
@@ -119,21 +157,63 @@ const collectFieldValues = (
   return out;
 };
 
-const matchIoc = (
-  fields: Map<string, string[]>,
-  iocs: HuntIoc[]
-): { ioc: HuntIoc; field: string } | undefined => {
+interface IocFieldMatch {
+  type: string;
+  value: string;
+  field: string;
+}
+
+/**
+ * Every IOC that matches in `_source`. Used only when a hit has no
+ * `matched_queries` (D12); named clauses are authoritative when present.
+ */
+const matchIocs = (fields: Map<string, string[]>, iocs: HuntIoc[]): IocFieldMatch[] => {
+  const matches: IocFieldMatch[] = [];
   for (const ioc of iocs) {
     const candidates = IOC_FIELDS_BY_TYPE[ioc.type] ?? [];
     const wanted = normalizeIocValue(ioc.type, ioc.value);
     for (const field of candidates) {
       const values = fields.get(field) ?? [];
       if (values.some((v) => normalizeIocValue(ioc.type, v) === wanted)) {
-        return { ioc, field };
+        matches.push({ type: ioc.type, value: ioc.value, field });
       }
     }
   }
-  return undefined;
+  return matches;
+};
+
+const iocsFromMatchedQueries = (matchedQueries: string[], iocs: HuntIoc[]): IocFieldMatch[] => {
+  const matches: IocFieldMatch[] = [];
+  for (const name of matchedQueries) {
+    const parsed = NAMED_CLAUSE_RE.exec(name);
+    if (!parsed) continue;
+    const ioc = iocs[Number(parsed[1])];
+    if (!ioc) continue;
+    matches.push({ type: ioc.type, value: ioc.value, field: parsed[2] });
+  }
+  return matches;
+};
+
+const copyEvidenceFields = (
+  source: Record<string, unknown>
+): Record<string, string> | undefined => {
+  const fields: Record<string, string> = {};
+  for (const key of EVIDENCE_SOURCE_FIELDS) {
+    if (Object.keys(fields).length >= MAX_EVIDENCE_FIELDS) break;
+    // Prefer a top-level dotted key when the projection stored it that way; else walk nested.
+    const raw =
+      key in source
+        ? source[key]
+        : key.split('.').reduce<unknown>((node, part) => {
+            if (node == null || typeof node !== 'object' || Array.isArray(node)) return undefined;
+            return (node as Record<string, unknown>)[part];
+          }, source);
+    const str = firstStringValue(raw);
+    if (str === undefined) continue;
+    fields[key] =
+      str.length > MAX_EVIDENCE_VALUE_LENGTH ? str.slice(0, MAX_EVIDENCE_VALUE_LENGTH) : str;
+  }
+  return Object.keys(fields).length > 0 ? fields : undefined;
 };
 
 /**
@@ -171,33 +251,52 @@ const matchTechnique = (
  * Prefer IOC when both match (IOC hunts are the common path); technique alone
  * still attributes alert hits. `matched` is required for SSE technique scoping
  * and event attribution.
+ *
+ * When ES returns `matched_queries` for named Tier 1 clauses (`ioc_<i>|<field>`),
+ * those are authoritative for `matched.iocs` / `matched.field` (D12). Otherwise
+ * every `_source` match is collected as a fallback.
  */
 export const attributeHits = (
   docs: HitDocument[],
   iocs: HuntIoc[],
   techniques: string[]
 ): HuntForThreatHit[] =>
-  docs.map(({ id, index, timestamp, source }) => {
-    const fields = collectFieldValues(source);
-    const iocMatch = matchIoc(fields, iocs);
-    const techniqueMatch = matchTechnique(fields, techniques);
+  docs.map(({ id, index, timestamp, source, matched_queries }) => {
+    const fieldValues = collectFieldValues(source);
+    const iocMatches =
+      matched_queries && matched_queries.length > 0
+        ? iocsFromMatchedQueries(matched_queries, iocs)
+        : matchIocs(fieldValues, iocs);
+    const techniqueMatch = matchTechnique(fieldValues, techniques);
+
+    const host = fieldValues.get('host.name')?.[0];
+    const user = fieldValues.get('user.name')?.[0];
+    const evidence = copyEvidenceFields(source);
 
     const hit: HuntForThreatHit = {
       id,
       index,
       ...(timestamp ? { timestamp } : {}),
+      ...(host ? { host } : {}),
+      ...(user ? { user } : {}),
+      ...(evidence ? { fields: evidence } : {}),
     };
-    if (!iocMatch && !techniqueMatch) return hit;
+    if (iocMatches.length === 0 && !techniqueMatch) return hit;
 
+    const primary = iocMatches[0];
     const matched: HitMatched = {
-      ...(iocMatch
-        ? { ioc: { type: iocMatch.ioc.type, value: iocMatch.ioc.value }, field: iocMatch.field }
+      ...(primary
+        ? {
+            ioc: { type: primary.type, value: primary.value },
+            field: primary.field,
+            iocs: iocMatches,
+          }
         : {}),
       ...(techniqueMatch
         ? {
             technique_id: techniqueMatch.technique_id,
             // Prefer the IOC field when both match; technique field otherwise.
-            ...(iocMatch ? {} : { field: techniqueMatch.field }),
+            ...(primary ? {} : { field: techniqueMatch.field }),
           }
         : {}),
     };
@@ -206,11 +305,13 @@ export const attributeHits = (
 
 /**
  * Whether Tier 1 can turn this IOC into a query clause at all. Mirrors
- * `buildIocShould`: a hash needs a length in `HASH_ALGO_BY_LENGTH`, every other
+ * `buildIocClauses`: a hash needs a length in `HASH_ALGO_BY_LENGTH`, every other
  * type needs at least one ECS field to search. The coordinator uses this to
  * decide whether a report's IOCs justify a broad Tier 1 scope; an IOC list made
  * only of values Tier 1 will drop must not send a hunt across every dataset to
  * search for nothing.
+ *
+ * Hash IOCs whose length is not 32/40/64 (md5/sha1/sha256) are not searchable.
  */
 export const isTier1SearchableIoc = ({ type, value }: HuntIoc): boolean => {
   // `huntForThreat` trims every value and drops the blank ones before building any

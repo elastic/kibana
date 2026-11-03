@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   AffectedAsset,
+  HuntForThreatPerIoc,
   HuntForThreatResult,
   HuntIncompleteness,
   HuntIoc,
@@ -20,53 +21,104 @@ import {
   ALERT_TECHNIQUE_ID_FIELDS,
   attributeHits,
   CASE_INSENSITIVE_IOC_TYPES,
+  EVIDENCE_SOURCE_FIELDS,
   HASH_ALGO_BY_LENGTH,
   hashFieldsForAlgo,
   IOC_FIELDS_BY_TYPE,
+  isTier1SearchableIoc,
   normalizeIocValue,
   type HitDocument,
 } from './attribute_hits';
 import type { HuntForThreatParams, HuntForThreatServiceResult } from './types';
+
+/** Cap on the filters aggregation (one entry per searchable IOC). */
+const PER_IOC_FILTER_MAX = 100;
+/** Cap on `per_ioc` returned on the wire (schema max 30). */
+const PER_IOC_RESULT_MAX = 30;
+
+interface NamedIocClause {
+  /** `ioc_<i>|<field>` — authoritative for hit attribution via `matched_queries`. */
+  name: string;
+  iocIndex: number;
+  field: string;
+  clause: Record<string, unknown>;
+}
 
 /**
  * Folding the report's value is not enough on its own for a case-insensitive IOC
  * type: the document may be the side carrying the mixed case, and `term` on a
  * `keyword` field compares bytes. So the clause itself matches case-insensitively
  * and `normalizeIocValue` folds both sides during attribution.
+ *
+ * Always the object form so each clause can carry `_name` (D12).
  */
 const termClause = (
   field: string,
   value: string,
+  name: string,
   caseInsensitive = false
 ): Record<string, unknown> => ({
-  term: { [field]: caseInsensitive ? { value, case_insensitive: true } : value },
+  term: {
+    [field]: caseInsensitive
+      ? { value, case_insensitive: true, _name: name }
+      : { value, _name: name },
+  },
 });
 
 /**
- * Per-IOC `should` clause across every ECS field the value might reasonably
- * land in, not narrowed by event source since the same IOC type can appear
- * in several ECS slots depending on which integration produced the document.
- * Hash is the one type narrowed further, by length, to the matching algo's
- * fields — an md5 value has no business matching a sha256 field.
+ * Named per-IOC `should` clauses across every ECS field the value might land in.
+ * Hash is narrowed by length to the matching algo's fields — an md5 value has no
+ * business matching a sha256 field. Hash IOCs whose length is not 32/40/64 are
+ * not searchable and produce no clauses.
  */
-const buildIocShould = (iocs: HuntIoc[]): Array<Record<string, unknown>> => {
-  const clauses: Array<Record<string, unknown>> = [];
-  for (const { type, value } of iocs) {
+const buildIocClauses = (iocs: HuntIoc[]): NamedIocClause[] => {
+  const clauses: NamedIocClause[] = [];
+  iocs.forEach((ioc, iocIndex) => {
+    const { type, value } = ioc;
     if (type === 'hash') {
       const algo = HASH_ALGO_BY_LENGTH[value.length];
       // A `term` query is case-sensitive and integrations index digests
       // lowercase, so an uppercase digest from a report has to be folded to
-      // match the same file. `matchIoc` folds the same way.
+      // match the same file. Attribution folds the same way.
       const digest = normalizeIocValue(type, value);
-      if (algo) clauses.push(...hashFieldsForAlgo(algo).map((field) => termClause(field, digest)));
-      continue;
+      if (!algo) return;
+      for (const field of hashFieldsForAlgo(algo)) {
+        const name = `ioc_${iocIndex}|${field}`;
+        clauses.push({
+          name,
+          iocIndex,
+          field,
+          clause: termClause(field, digest, name),
+        });
+      }
+      return;
     }
     const caseInsensitive = CASE_INSENSITIVE_IOC_TYPES.has(type);
     for (const field of IOC_FIELDS_BY_TYPE[type] ?? []) {
-      clauses.push(termClause(field, value, caseInsensitive));
+      const name = `ioc_${iocIndex}|${field}`;
+      clauses.push({
+        name,
+        iocIndex,
+        field,
+        clause: termClause(field, value, name, caseInsensitive),
+      });
     }
-  }
+  });
   return clauses;
+};
+
+/** Collapse duplicate IOCs on normalized `(type, value)`; drop ones with no clauses. */
+const dedupeSearchableIocs = (iocs: HuntIoc[]): HuntIoc[] => {
+  const seen = new Set<string>();
+  const out: HuntIoc[] = [];
+  for (const ioc of iocs) {
+    if (!isTier1SearchableIoc(ioc)) continue;
+    const key = `${ioc.type}\0${normalizeIocValue(ioc.type, ioc.value)}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(ioc);
+  }
+  return out;
 };
 
 /**
@@ -98,7 +150,8 @@ const HOST_INDEX_MAX_BUCKETS = 20;
 
 /**
  * Fields the wire hit, the entity chips and the Tier 2 digest read, independent
- * of what was searched.
+ * of what was searched. Includes the D8 evidence allowlist so sampled hits carry
+ * values `attributeHits` copies onto `fields` (D11).
  */
 const DISPLAY_SOURCE_FIELDS = [
   '@timestamp',
@@ -117,16 +170,17 @@ const DISPLAY_SOURCE_FIELDS = [
   // array (`[{ tactic, technique: [{ id, subtechnique: [{ id }] }] }]`), so
   // the filter names the key as stored, not a path inside it.
   'kibana.alert.rule.threat',
+  ...EVIDENCE_SOURCE_FIELDS,
 ] as const;
 
 /**
  * The display fields plus every ECS field the searched IOC types can match on.
- * `attributeHits` re-derives `matched.ioc` by comparing `_source` against those
- * same fields, so a field that is searched but not projected yields a confirmed
- * hit that cannot say which IOC confirmed it — `related.ip`, `user.email`,
- * `dns.question.name`, `url.original` and the hash fields were all in that gap.
- * Scoped to the types actually present so an IP-only hunt does not pay for hash
- * fields.
+ * `attributeHits` falls back to comparing `_source` against those same fields
+ * when `matched_queries` is absent, so a field that is searched but not
+ * projected yields a confirmed hit that cannot say which IOC confirmed it —
+ * `related.ip`, `user.email`, `dns.question.name`, `url.original` and the hash
+ * fields were all in that gap. Scoped to the types actually present so an
+ * IP-only hunt does not pay for hash fields.
  */
 const sourceFieldsFor = (iocs: HuntIoc[]): string[] => {
   const fields = new Set<string>(DISPLAY_SOURCE_FIELDS);
@@ -188,8 +242,17 @@ export const emptyHuntForThreatResult = (
   message,
 });
 
+interface PerIocBucket {
+  doc_count: number;
+  host_count?: { value: number };
+  user_count?: { value: number };
+  first_seen?: { value: number | null; value_as_string?: string };
+  last_seen?: { value: number | null; value_as_string?: string };
+}
+
 interface HuntAggregations {
   per_index?: { buckets: Array<{ key: string; doc_count: number }> };
+  per_ioc?: { buckets: Record<string, PerIocBucket> };
   affected_hosts?: {
     buckets: Array<{
       key: string;
@@ -209,6 +272,83 @@ interface HuntAggregations {
     }>;
   };
 }
+
+const perIocFilterKey = (iocIndex: number): string => `ioc_${iocIndex}`;
+
+const buildPerIocFiltersAgg = (
+  searchableIocs: HuntIoc[],
+  namedClauses: NamedIocClause[]
+): Record<string, unknown> | undefined => {
+  if (searchableIocs.length === 0) return undefined;
+  const filters: Record<string, unknown> = {};
+  const limit = Math.min(searchableIocs.length, PER_IOC_FILTER_MAX);
+  for (let i = 0; i < limit; i++) {
+    const should = namedClauses.filter((c) => c.iocIndex === i).map((c) => c.clause);
+    if (should.length === 0) continue;
+    filters[perIocFilterKey(i)] = {
+      bool: { should, minimum_should_match: 1 },
+    };
+  }
+  if (Object.keys(filters).length === 0) return undefined;
+  return {
+    filters: { filters },
+    aggs: {
+      host_count: { cardinality: { field: 'host.name' } },
+      user_count: { cardinality: { field: 'user.name' } },
+      first_seen: { min: { field: '@timestamp' } },
+      last_seen: { max: { field: '@timestamp' } },
+    },
+  };
+};
+
+const buildPerIocResult = (
+  searchableIocs: HuntIoc[],
+  namedClauses: NamedIocClause[],
+  buckets: Record<string, PerIocBucket> | undefined
+): { per_ioc?: HuntForThreatPerIoc[]; per_ioc_truncated?: boolean } => {
+  if (!buckets) return {};
+  const firstFieldByIoc = new Map<number, string>();
+  for (const clause of namedClauses) {
+    if (!firstFieldByIoc.has(clause.iocIndex)) {
+      firstFieldByIoc.set(clause.iocIndex, clause.field);
+    }
+  }
+  const entries: HuntForThreatPerIoc[] = [];
+  for (const [key, bucket] of Object.entries(buckets)) {
+    if (bucket.doc_count <= 0) continue;
+    const match = /^ioc_(\d+)$/.exec(key);
+    if (!match) continue;
+    const iocIndex = Number(match[1]);
+    const ioc = searchableIocs[iocIndex];
+    const field = firstFieldByIoc.get(iocIndex);
+    if (!ioc || !field) continue;
+    const entry: HuntForThreatPerIoc = {
+      type: ioc.type,
+      value: ioc.value,
+      field,
+      count: bucket.doc_count,
+    };
+    if (typeof bucket.host_count?.value === 'number') {
+      entry.host_count = bucket.host_count.value;
+    }
+    if (typeof bucket.user_count?.value === 'number') {
+      entry.user_count = bucket.user_count.value;
+    }
+    if (bucket.first_seen?.value_as_string) {
+      entry.first_seen = bucket.first_seen.value_as_string;
+    }
+    if (bucket.last_seen?.value_as_string) {
+      entry.last_seen = bucket.last_seen.value_as_string;
+    }
+    entries.push(entry);
+  }
+  entries.sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+  const truncated = entries.length > PER_IOC_RESULT_MAX;
+  return {
+    per_ioc: entries.slice(0, PER_IOC_RESULT_MAX),
+    ...(truncated ? { per_ioc_truncated: true } : {}),
+  };
+};
 
 /**
  * AWS CloudTrail `user_identity.type` values that represent a non-person
@@ -302,9 +442,15 @@ export const huntForThreat = async (
   const techniques = rawTechniques
     .map((technique) => technique.trim().toUpperCase())
     .filter((technique) => technique.length > 0);
-  const iocs = rawIocs
+  const trimmedIocs = rawIocs
     .map((ioc) => ({ ...ioc, value: ioc.value.trim() }))
     .filter(({ value }) => value.length > 0);
+  // Deduped searchable IOCs drive named clauses, filters agg keys, and attribution
+  // indices (`ioc_<i>|…`). `resolved_iocs` still echoes every non-blank trimmed IOC
+  // the caller passed (including unsearchable hashes), so older readers keep seeing
+  // the full input list.
+  const searchableIocs = dedupeSearchableIocs(trimmedIocs);
+  const iocs = trimmedIocs;
 
   const from = time_range?.from ?? scope.window.from;
   const to = time_range?.to ?? scope.window.to;
@@ -324,9 +470,9 @@ export const huntForThreat = async (
     );
   }
 
-  const iocShould = buildIocShould(iocs);
+  const namedIocClauses = buildIocClauses(searchableIocs);
   const techniqueShould = buildTechniqueShould(techniques);
-  const should = [...iocShould, ...techniqueShould];
+  const should = [...namedIocClauses.map((c) => c.clause), ...techniqueShould];
 
   if (should.length === 0) {
     return emptyHuntForThreatResult(
@@ -357,6 +503,8 @@ export const huntForThreat = async (
     },
   };
 
+  const perIocAgg = buildPerIocFiltersAgg(searchableIocs, namedIocClauses);
+
   const response = await esClient.search({
     index: searchIndices,
     ignore_unavailable: true,
@@ -364,12 +512,13 @@ export const huntForThreat = async (
     size: rowLimit,
     track_total_hits: true,
     sort: [{ '@timestamp': { order: 'desc' } }],
-    _source: sourceFieldsFor(iocs),
+    _source: sourceFieldsFor(searchableIocs),
     query: huntQuery,
     aggs: {
       per_index: {
         terms: { field: '_index', size: PER_INDEX_MAX_BUCKETS },
       },
+      ...(perIocAgg ? { per_ioc: perIocAgg } : {}),
       affected_hosts: {
         terms: { field: 'host.name', size: maxAssets, show_term_doc_count_error: true },
         aggs: {
@@ -398,11 +547,15 @@ export const huntForThreat = async (
       typeof source['@timestamp'] === 'string' && source['@timestamp'].length > 0
         ? source['@timestamp']
         : undefined;
+    const matchedQueries = Array.isArray(hit.matched_queries)
+      ? hit.matched_queries.filter((name): name is string => typeof name === 'string')
+      : undefined;
     return {
       id: hit._id ?? '',
       index: hit._index,
       ...(timestamp ? { timestamp } : {}),
       source,
+      ...(matchedQueries && matchedQueries.length > 0 ? { matched_queries: matchedQueries } : {}),
     };
   });
   // Digests from full `_source` before wire hits drop source fields — Tier 2
@@ -410,7 +563,8 @@ export const huntForThreat = async (
   const sampleEventSummaries = docs.map((doc) =>
     summarizeHit({ id: doc.id, index: doc.index, source: doc.source })
   );
-  const hits = attributeHits(docs, iocs, techniques);
+  const hits = attributeHits(docs, searchableIocs, techniques);
+  const perIocResult = buildPerIocResult(searchableIocs, namedIocClauses, aggs?.per_ioc?.buckets);
 
   const hosts: AffectedAsset[] = (aggs?.affected_hosts?.buckets ?? []).map((b) => {
     const origin = b.by_index
@@ -477,6 +631,11 @@ export const huntForThreat = async (
     hits,
     affected_assets: { hosts, users, services },
     per_index: perIndex,
+    searched_ioc_count: searchableIocs.length,
+    ...(perIocResult.per_ioc && perIocResult.per_ioc.length > 0
+      ? { per_ioc: perIocResult.per_ioc }
+      : {}),
+    ...(perIocResult.per_ioc_truncated ? { per_ioc_truncated: true } : {}),
     ...(incomplete.length > 0 ? { incomplete } : {}),
     ...(sampleEventSummaries.length > 0 ? { sample_event_summaries: sampleEventSummaries } : {}),
   };
