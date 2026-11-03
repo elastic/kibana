@@ -164121,6 +164121,9 @@ components:
             type: string
           maxItems: 1000
           type: array
+          x-tf-ref:
+            id_attribute: tag_id
+            resource_type: elasticstack_kibana_tag
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:

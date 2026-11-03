@@ -72,5 +72,16 @@ export const tfJsonLeaf = (
 /** Hoists this object's properties into the parent Terraform object. */
 export const tfFlatten = (): { 'x-tf-flatten': true } => ({ 'x-tf-flatten': true });
 
+/** A string (or each string of a list) that is the ID of a resource of another Terraform resource type. */
+export interface TfRefMeta {
+  /** The Terraform resource type the ID belongs to, e.g. `elasticstack_kibana_tag`. */
+  resource_type: string;
+  /** The attribute of that resource holding the ID, e.g. `tag_id`. */
+  id_attribute: string;
+}
+
+/** Marks a string, or a list of strings, as IDs of resources the export can write and reference. */
+export const tfRef = (meta: TfRefMeta): { 'x-tf-ref': TfRefMeta } => ({ 'x-tf-ref': meta });
+
 /** API-only; not a Terraform attribute. */
 export const tfOmit = (): { 'x-tf-omit': true } => ({ 'x-tf-omit': true });

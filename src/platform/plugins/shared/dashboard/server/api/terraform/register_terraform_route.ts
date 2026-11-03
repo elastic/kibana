@@ -9,8 +9,16 @@
 
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { Logger, RequestHandlerContext } from '@kbn/core/server';
-import type { DashboardConverter, JsonObject, JsonValue } from '@kbn/as-code-dashboard-terraform';
+import type { Logger, RequestHandlerContext, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { AuthzDisabled } from '@kbn/core-security-server';
+import type {
+  DashboardConverter,
+  JsonObject,
+  JsonValue,
+  ReferencedObject,
+} from '@kbn/as-code-dashboard-terraform';
+import type { TagAttributes } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { MAX_TITLE_LENGTH } from '@kbn/as-code-shared-schemas';
 import { logRequest } from '@kbn/as-code-utils';
 import {
@@ -51,6 +59,32 @@ const describeDashboard = ({ panels, pinned_panels: pinnedPanels }: JsonObject):
     ', '
   )}]`;
 
+// With the user's own privileges, in the space the request is for; a tag the user cannot read is left out and stays
+// a literal ID in the dashboard.
+const readTags = async (
+  client: SavedObjectsClientContract,
+  ids: string[],
+  resourceType: string
+): Promise<ReferencedObject[]> => {
+  if (!ids.length) return [];
+  try {
+    const { saved_objects: tags } = await client.bulkGet<TagAttributes>(
+      ids.map((id) => ({ type: 'tag', id }))
+    );
+    return tags.flatMap((tag) => {
+      if (isSavedObjectErrorResult(tag)) return [];
+      const {
+        id,
+        attributes: { name, color, description },
+      } = tag;
+      return [{ resourceType, id, attributes: { name, color, description } }];
+    });
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isForbiddenError(e)) return [];
+    throw e;
+  }
+};
+
 /** Registers the internal, flag-gated route behind Export → Terraform. */
 export function registerTerraformRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -60,12 +94,7 @@ export function registerTerraformRoute(
     .post({
       path: `${DASHBOARD_INTERNAL_API_PATH}/_terraform`,
       summary: 'Convert a dashboard to Terraform',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'Converts the request body only; reads no saved objects',
-        },
-      },
+      security: { authz: AuthzDisabled.delegateToSOClient },
       access: 'internal',
       options: { body: { maxBytes: MAX_TERRAFORM_REQUEST_BYTES } },
     })
@@ -85,20 +114,46 @@ export function registerTerraformRoute(
         },
       },
       async (ctx, req, res) => {
-        const { featureFlags } = await ctx.core;
+        const { featureFlags, savedObjects } = await ctx.core;
         if (!(await featureFlags.getBooleanValue(DASHBOARD_TERRAFORM_EXPORT_FLAG, false))) {
           return res.notFound();
         }
-        const { DashboardConversionError, DASHBOARD_RESOURCE_TYPE, TERRAFORM_PROVIDER } =
-          await import('@kbn/as-code-dashboard-terraform');
+        const {
+          DashboardConversionError,
+          DASHBOARD_RESOURCE_TYPE,
+          TAG_RESOURCE,
+          TERRAFORM_PROVIDER,
+          linkReferences,
+          toResourceName,
+        } = await import('@kbn/as-code-dashboard-terraform');
         const dashboard = req.body.dashboard as JsonObject;
         try {
           const convert = await getConverter();
-          const { body, droppedFields, skippedPanels, partialPanels, jsonPanels } =
-            convert(dashboard);
+          const conversion = convert(dashboard);
+          const { droppedFields, skippedPanels, partialPanels, jsonPanels } = conversion;
+          const tagIds = [
+            ...new Set(
+              conversion.references
+                .filter(({ resourceType }) => resourceType === TAG_RESOURCE.type)
+                .map(({ id }) => id)
+            ),
+          ];
+          const tags = await readTags(savedObjects.client, tagIds, TAG_RESOURCE.type);
+          const { body, resources, links } = linkReferences(conversion, tags);
           const responseBody: DashboardTerraformResponseBody = {
             resource_type: DASHBOARD_RESOURCE_TYPE,
+            resource_name: toResourceName(req.body.dashboard.title ?? '', 'dashboard'),
             body,
+            resources,
+            links: links.map(({ path, resourceType, resourceName }) => ({
+              path,
+              resource_type: resourceType,
+              resource_name: resourceName,
+            })),
+            tag_resource: {
+              type: TAG_RESOURCE.type,
+              min_kibana_version: TAG_RESOURCE.minKibanaVersion,
+            },
             dropped_fields: droppedFields,
             skipped_panels: skippedPanels,
             partial_panels: partialPanels.map(({ droppedFields: dropped, ...panel }) => ({

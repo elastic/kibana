@@ -39,7 +39,7 @@ import {
   MAIN_FILE,
   buildModuleFiles,
   buildModuleZip,
-  toResourceName,
+  exportedTags,
   toZipFilename,
 } from './module_files';
 import { listProblems, ProblemsCallout } from './problems_callout';
@@ -145,34 +145,36 @@ export const TerraformExportFlyout = ({
   closeFlyout,
 }: TerraformExportFlyoutProps) => {
   const exportState = useTerraformExport(getExportJson);
-  const resourceName = toResourceName(title);
   const canAdopt = Boolean(dashboardId);
   const [modeKind, setModeKind] = useState<ModeKind>(canAdopt ? 'adopt' : 'copy');
   const conversion = exportState.status === 'success' ? exportState.conversion : undefined;
   const spaceId = exportState.status === 'success' ? exportState.spaceId : undefined;
-  const files = useMemo(() => {
-    if (!conversion || !spaceId) return [];
-    const mode: ExportMode =
-      modeKind === 'adopt' && dashboardId
-        ? { kind: 'adopt', spaceId, dashboardId }
-        : { kind: 'copy' };
-    return buildModuleFiles(conversion, resourceName, mode);
-  }, [conversion, dashboardId, modeKind, resourceName, spaceId]);
+  const mode = useMemo((): ExportMode | undefined => {
+    if (!spaceId) return undefined;
+    return modeKind === 'adopt' && dashboardId
+      ? { kind: 'adopt', spaceId, dashboardId }
+      : { kind: 'copy' };
+  }, [dashboardId, modeKind, spaceId]);
+  const files = useMemo(
+    () => (conversion && mode ? buildModuleFiles(conversion, mode) : []),
+    [conversion, mode]
+  );
   const [selectedName, setSelectedName] = useState(MAIN_FILE);
   const selected = files.find(({ name }) => name === selectedName) ?? files[0];
 
   const [isProblemsDismissed, setIsProblemsDismissed] = useState(false);
   const problems = useMemo(
     () =>
-      exportState.status === 'success'
+      exportState.status === 'success' && mode
         ? listProblems({
             conversion: exportState.conversion,
             sanitized: exportState.sanitized,
             isDirty,
             isSaved: canAdopt,
+            exportedTags: exportedTags(exportState.conversion, mode),
           })
         : [],
-    [canAdopt, exportState, isDirty]
+    [canAdopt, exportState, isDirty, mode]
   );
 
   const showProblems = problems.length > 0 && !isProblemsDismissed;
@@ -189,8 +191,12 @@ export const TerraformExportFlyout = ({
     scrollAreaHeight > 0 ? Math.max(scrollAreaHeight - bannerSpace - 2 * bodyPadding, 120) : '65vh';
 
   const onDownload = useCallback(async () => {
-    await downloadFileAs(toZipFilename(title), await buildModuleZip(resourceName, files));
-  }, [files, resourceName, title]);
+    if (!conversion) return;
+    await downloadFileAs(
+      toZipFilename(title),
+      await buildModuleZip(conversion.resource_name, files)
+    );
+  }, [conversion, files, title]);
 
   return (
     <>

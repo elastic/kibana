@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
-import type { PanelSummary } from '@kbn/as-code-dashboard-terraform';
+import type { LinkedResource, PanelSummary } from '@kbn/as-code-dashboard-terraform';
 import type { DashboardTerraformResponseBody } from '../../../../../server';
 import type { SanitizeDetails } from './use_terraform_export';
 
@@ -31,6 +31,8 @@ export interface ProblemsInput {
   sanitized: SanitizeDetails;
   isDirty: boolean;
   isSaved: boolean;
+  /** The tag resources the module writes for the chosen mode. */
+  exportedTags: readonly LinkedResource[];
 }
 
 type Severity = 'danger' | 'warning' | 'info';
@@ -84,15 +86,25 @@ export const listProblems = ({
   sanitized,
   isDirty,
   isSaved,
+  exportedTags,
 }: ProblemsInput): Problem[] => {
   const {
     skipped_panels: skippedPanels,
     partial_panels: partialPanels,
     json_panels: jsonPanels,
     dropped_fields: droppedFields,
+    tag_resource: tagResource,
   } = conversion;
-  const { warnings = [], related_items: relatedItems = [] } = sanitized;
-  const relatedItemsCount = sanitized.related_items_count ?? relatedItems.length;
+  const { warnings = [] } = sanitized;
+  // Exported tags are not among the objects the module only refers to.
+  const exportedTagIds = new Set(exportedTags.map(({ id }) => id));
+  const allRelatedItems = sanitized.related_items ?? [];
+  const relatedItems = allRelatedItems.filter(
+    ({ type, id }) => type !== 'tag' || !exportedTagIds.has(id)
+  );
+  const exportedTagCount = allRelatedItems.length - relatedItems.length;
+  const relatedItemsCount =
+    (sanitized.related_items_count ?? allRelatedItems.length) - exportedTagCount;
   const droppedInPanels = new Set(partialPanels.flatMap((panel) => panel.dropped_fields));
 
   // The sanitize step leaves out panels the Dashboards API has no schema for, before conversion.
@@ -172,6 +184,40 @@ export const listProblems = ({
         />
       ),
     })),
+    ...(exportedTags.length
+      ? [
+          {
+            key: 'created-tags',
+            severity: 'warning' as const,
+            content: (
+              <>
+                {i18n.translate('dashboard.exportTerraform.problems.createdTagsDescription', {
+                  defaultMessage:
+                    'A new copy creates {count, plural, one {# tag} other {# tags}}. Kibana refuses a tag whose name already exists, so apply fails if the target already has a tag with one of these names:',
+                  values: { count: exportedTags.length },
+                })}
+                <ul>
+                  {exportedTags.map(({ name, label }) => (
+                    <li key={name}>{label}</li>
+                  ))}
+                </ul>
+              </>
+            ),
+          },
+          {
+            key: 'tags-target-version',
+            severity: 'info' as const,
+            content: i18n.translate(
+              'dashboard.exportTerraform.problems.tagsTargetVersionDescription',
+              {
+                defaultMessage:
+                  'The tags file needs Kibana {version} or later where Terraform applies it.',
+                values: { version: tagResource.min_kibana_version },
+              }
+            ),
+          },
+        ]
+      : []),
     ...otherWarnings,
     ...(isDirty || !isSaved
       ? [
@@ -247,10 +293,7 @@ export interface ProblemsCalloutProps {
   onDismiss: () => void;
 }
 
-/**
- * Lists problems like the warnings of Export → JSON: a warning callout when something was lost, an info callout
- * when there are only notes.
- */
+/** Lists problems and notes in one callout, a warning callout when any entry is a problem. */
 export const ProblemsCallout = ({
   problems,
   onDismiss,
@@ -262,15 +305,9 @@ export const ProblemsCallout = ({
   return (
     <Callout
       size="s"
-      title={
-        problemCount
-          ? i18n.translate('dashboard.exportTerraform.problems.warningTitle', {
-              defaultMessage: 'Not everything on this dashboard is exported',
-            })
-          : i18n.translate('dashboard.exportTerraform.problems.notesTitle', {
-              defaultMessage: 'Check before you apply',
-            })
-      }
+      title={i18n.translate('dashboard.exportTerraform.problems.title', {
+        defaultMessage: 'Review this export',
+      })}
       text={summary(problemCount, problems.length - problemCount)}
       onDismiss={onDismiss}
       data-test-subj="dashboardTerraformExportProblems"

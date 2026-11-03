@@ -13,7 +13,7 @@ import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { OasDocument } from './oas_model';
 import type { JsonObject, JsonValue } from './convert_dashboard';
-import { createDashboardConverter } from './convert_dashboard';
+import { createDashboardConverter, linkReferences } from './convert_dashboard';
 
 const publishedOas: OasDocument = parse(
   readFileSync(join(REPO_ROOT, 'oas_docs/output/kibana.yaml'), 'utf8')
@@ -232,6 +232,87 @@ describe('createDashboardConverter', () => {
       },
     ]);
     expect(at(body, 'panels', 0, 'markdown_config', 'by_value', 'content')).toBe('kept');
+  });
+
+  describe('tags', () => {
+    const tag = (id: string, name: string, extra: JsonObject = {}) => ({
+      resourceType: 'elasticstack_kibana_tag',
+      id,
+      attributes: { name, color: '#772299', description: '', ...extra },
+    });
+
+    it('keeps tag IDs in the body as escaped text and reports each one as a reference to a tag resource', () => {
+      const { body, references } = convert({ title: 'Tagged', tags: ['tag-1', 'odd-${id}'] });
+
+      expect(body.tags).toEqual(['tag-1', 'odd-$${id}']);
+      expect(references).toEqual([
+        {
+          path: ['tags', 0],
+          resourceType: 'elasticstack_kibana_tag',
+          idAttribute: 'tag_id',
+          id: 'tag-1',
+        },
+        {
+          path: ['tags', 1],
+          resourceType: 'elasticstack_kibana_tag',
+          idAttribute: 'tag_id',
+          id: 'odd-${id}',
+        },
+      ]);
+    });
+
+    it('points the tags at new tag resources that pin no ID; references are not escaped, tag text is', () => {
+      const conversion = convert({ title: 'Costs ${env}', tags: ['tag-1', 'tag-2'] });
+      const { body, resources, links } = linkReferences(conversion, [
+        tag('tag-1', 'Production', { description: 'Owned by ${team}' }),
+        tag('tag-2', '100%{ok}', { color: '#000000' }),
+      ]);
+
+      expect(body.title).toBe('Costs $${env}');
+      expect(body.tags).toEqual([
+        '${elasticstack_kibana_tag.production.tag_id}',
+        '${elasticstack_kibana_tag._100_ok.tag_id}',
+      ]);
+      expect(resources).toEqual([
+        {
+          type: 'elasticstack_kibana_tag',
+          name: 'production',
+          id: 'tag-1',
+          label: 'Production',
+          body: { name: 'Production', color: '#772299', description: 'Owned by $${team}' },
+        },
+        {
+          type: 'elasticstack_kibana_tag',
+          name: '_100_ok',
+          id: 'tag-2',
+          label: '100%{ok}',
+          body: { name: '100%%{ok}', color: '#000000', description: '' },
+        },
+      ]);
+      expect(links).toEqual([
+        { path: ['tags', 0], resourceType: 'elasticstack_kibana_tag', resourceName: 'production' },
+        { path: ['tags', 1], resourceType: 'elasticstack_kibana_tag', resourceName: '_100_ok' },
+      ]);
+    });
+
+    it('gives tags whose names make the same resource name distinct names', () => {
+      const conversion = convert({ title: 'Tagged', tags: ['a', 'b', 'c'] });
+      const { resources } = linkReferences(conversion, [
+        tag('a', 'Team A'),
+        tag('b', 'team-a'),
+        tag('c', '!!!'),
+      ]);
+
+      expect(resources.map(({ name }) => name)).toEqual(['team_a', 'team_a_2', 'tag']);
+    });
+
+    it('leaves a tag it was not given as its literal ID', () => {
+      const conversion = convert({ title: 'Tagged', tags: ['tag-1', 'missing-${x}'] });
+      const { body, resources } = linkReferences(conversion, [tag('tag-1', 'Production')]);
+
+      expect(body.tags).toEqual(['${elasticstack_kibana_tag.production.tag_id}', 'missing-$${x}']);
+      expect(resources.map(({ id }) => id)).toEqual(['tag-1']);
+    });
   });
 
   it('puts pinned panels under the variant key of their type and values source', () => {

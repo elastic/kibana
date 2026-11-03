@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, tfUnion, tfOmit } from '@kbn/zod';
+import { z, tfUnion, tfOmit, tfRef } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import {
   asCodeEsqlApproximationSchema,
@@ -120,7 +120,9 @@ export function getDashboardDataSchema<P extends z.ZodTypeAny>(
       tags: getAsCodeTagsSchema(
         'Tag IDs to associate with this dashboard.',
         isDashboardAppRequest && isReadRequest ? Number.MAX_SAFE_INTEGER : undefined
-      ).optional(),
+      )
+        .meta(tfRef({ resource_type: 'elasticstack_kibana_tag', id_attribute: 'tag_id' }))
+        .optional(),
       time_range: timeRangeSchema.optional(),
       title: z.string().min(1).meta({ description: 'A human-readable title for the dashboard.' }),
       access_control: accessControlSchema,

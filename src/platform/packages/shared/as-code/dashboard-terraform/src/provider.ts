@@ -14,3 +14,6 @@ export const TERRAFORM_PROVIDER = { source: 'elastic/elasticstack', version: '0.
 
 /** The provider resource a dashboard is exported as. */
 export const DASHBOARD_RESOURCE_TYPE = 'elasticstack_kibana_dashboard';
+
+/** The tag resource type and the oldest Kibana Terraform can apply it to; update with `TERRAFORM_PROVIDER`. */
+export const TAG_RESOURCE = { type: 'elasticstack_kibana_tag', minKibanaVersion: '9.5.0' } as const;

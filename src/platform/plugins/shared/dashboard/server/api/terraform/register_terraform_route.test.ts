@@ -65,10 +65,93 @@ describe('POST /internal/dashboards/_terraform', () => {
       skippedPanels: [],
       partialPanels: [],
       jsonPanels: [],
+      references: [],
     });
     const result = await post({ dashboard: { title: 'Logs', panels: [] } });
     expect(result.status).toBe(200);
     expect(result.body.body).toEqual({ title: 'Logs' });
+  });
+
+  it('reads the tags the dashboard references with the user’s client and writes a resource for each readable one', async () => {
+    const { createDashboardConverter: createActual, loadDashboardOas: loadActual } =
+      jest.requireActual('@kbn/as-code-dashboard-terraform');
+    const actualConvert = createActual(await loadActual());
+    mockConvert.mockImplementationOnce(actualConvert);
+    const bulkGet = handlerContext.savedObjects.client.bulkGet as jest.Mock;
+    bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'tag-1',
+          type: 'tag',
+          attributes: { name: 'Production', color: '#772299', description: 'Owned by ${team}' },
+          references: [],
+        },
+        { id: 'tag-2', type: 'tag', error: { statusCode: 403, error: 'Forbidden', message: '' } },
+      ],
+    });
+
+    const result = await post({
+      dashboard: { title: 'Web logs', panels: [], tags: ['tag-1', 'tag-2'] },
+    });
+
+    expect(result.status).toBe(200);
+    expect(bulkGet).toHaveBeenCalledWith([
+      { type: 'tag', id: 'tag-1' },
+      { type: 'tag', id: 'tag-2' },
+    ]);
+    expect(result.body.resource_name).toBe('web_logs');
+    expect(result.body.body.tags).toEqual([
+      '${elasticstack_kibana_tag.production.tag_id}',
+      'tag-2',
+    ]);
+    expect(result.body.resources).toEqual([
+      {
+        type: 'elasticstack_kibana_tag',
+        name: 'production',
+        id: 'tag-1',
+        label: 'Production',
+        body: { name: 'Production', color: '#772299', description: 'Owned by $${team}' },
+      },
+    ]);
+    expect(result.body.links).toEqual([
+      { path: ['tags', 0], resource_type: 'elasticstack_kibana_tag', resource_name: 'production' },
+    ]);
+    expect(result.body.tag_resource).toEqual({
+      type: 'elasticstack_kibana_tag',
+      min_kibana_version: '9.5.0',
+    });
+  });
+
+  it.each([
+    ['2024 Q1 — Ünïcode!', '_2024_q1_unicode'],
+    ['!!!', 'dashboard'],
+    ['', 'dashboard'],
+  ])('names the resource of "%s" %s', async (title, name) => {
+    mockConvert.mockReturnValueOnce({
+      body: { title },
+      droppedFields: [],
+      skippedPanels: [],
+      partialPanels: [],
+      jsonPanels: [],
+      references: [],
+    });
+    const result = await post({ dashboard: { title, panels: [] } });
+    expect(result.body.resource_name).toBe(name);
+  });
+
+  it('reads no tags for a dashboard without any', async () => {
+    mockConvert.mockReturnValueOnce({
+      body: { title: 'Logs' },
+      droppedFields: [],
+      skippedPanels: [],
+      partialPanels: [],
+      jsonPanels: [],
+      references: [],
+    });
+    const result = await post({ dashboard: { title: 'Logs', panels: [] } });
+    expect(result.status).toBe(200);
+    expect(handlerContext.savedObjects.client.bulkGet).not.toHaveBeenCalled();
+    expect(result.body.resources).toEqual([]);
   });
 
   it('rejects a body larger than the bound without converting it', async () => {

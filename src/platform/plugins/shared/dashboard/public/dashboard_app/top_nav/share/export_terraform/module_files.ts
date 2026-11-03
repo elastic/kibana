@@ -8,6 +8,12 @@
  */
 
 import JSZip from 'jszip';
+import type {
+  JsonObject,
+  JsonValue,
+  LinkedResource,
+  TerraformPath,
+} from '@kbn/as-code-dashboard-terraform';
 import type { DashboardTerraformResponseBody } from '../../../../../server';
 
 export interface ModuleFile {
@@ -20,19 +26,8 @@ export interface ModuleFile {
 export type ExportMode = { kind: 'adopt'; spaceId: string; dashboardId: string } | { kind: 'copy' };
 
 export const MAIN_FILE = 'main.tf.json';
+const TAGS_FILE = 'tags.tf.json';
 const IMPORTS_FILE = 'imports.tf.json';
-
-/** A valid Terraform identifier from the title, `dashboard` when nothing in the title qualifies. */
-export const toResourceName = (title: string): string => {
-  const name = title
-    .normalize('NFKD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-  if (!name) return 'dashboard';
-  return /^[0-9]/.test(name) ? `_${name}` : name;
-};
 
 /** The zip's file name: the dashboard title without characters file systems reject. */
 export const toZipFilename = (title: string): string =>
@@ -51,7 +46,39 @@ const json = (value: object) => `${JSON.stringify(value, null, 2)}\n`;
 const escapeTemplate = (text: string): string =>
   text.replace(/\$\{/g, () => '$${').replace(/%\{/g, () => '%%{');
 
-const firstPlan = (mode: ExportMode) =>
+/** The tag resources the module writes: a new copy creates the dashboard's readable tags; adopting writes none yet. */
+export const exportedTags = (
+  { resources, tag_resource: tagResource }: DashboardTerraformResponseBody,
+  mode: ExportMode
+): LinkedResource[] =>
+  mode.kind === 'copy' ? resources.filter(({ type }) => type === tagResource.type) : [];
+
+// The same as the package's (which the browser cannot import): a path the route reported always exists.
+const setAt = (value: JsonValue, [step, ...rest]: TerraformPath, leaf: JsonValue): JsonValue => {
+  if (step === undefined) return leaf;
+  if (Array.isArray(value) && typeof step === 'number') {
+    return value.map((item, i) => (i === step ? setAt(item, rest, leaf) : item));
+  }
+  if (value && typeof value === 'object' && !Array.isArray(value) && typeof step === 'string') {
+    return { ...value, [step]: setAt(value[step], rest, leaf) };
+  }
+  throw new Error(`No value at ${JSON.stringify([step, ...rest])}`);
+};
+
+// The route links the body to every resource it wrote; a reference to a resource this mode does not write goes back
+// to the object's literal ID, escaped like the rest of the body.
+const dashboardBody = (
+  { body, links, resources }: DashboardTerraformResponseBody,
+  written: readonly LinkedResource[]
+): JsonObject =>
+  links.reduce<JsonObject>((linked, { path, resource_type: type, resource_name: name }) => {
+    const isWritten = written.some((r) => r.type === type && r.name === name);
+    const resource = resources.find((r) => r.type === type && r.name === name);
+    if (isWritten || !resource) return linked;
+    return setAt(linked, path, escapeTemplate(resource.id)) as JsonObject;
+  }, body);
+
+const firstPlan = (mode: ExportMode, tagCount: number) =>
   mode.kind === 'adopt'
     ? `This module adopts the existing dashboard \`${mode.dashboardId}\` in space \`${mode.spaceId}\`:
 Terraform manages it in place from now on. \`${IMPORTS_FILE}\` imports it, so the first plan should
@@ -65,15 +92,28 @@ first apply.`
     : `This module creates a new copy of the dashboard; the original is not changed. The first plan
 should show
 
-    Plan: 1 to add, 0 to change, 0 to destroy.`;
+    Plan: ${1 + tagCount} to add, 0 to change, 0 to destroy.`;
+
+const tagsSection = (count: number, minKibanaVersion: string): string =>
+  count
+    ? `
+\`${TAGS_FILE}\` creates the dashboard's tags (${count}) as new tags, and the dashboard refers to them.
+The tags file requires the Kibana Terraform applies to to be ${minKibanaVersion} or later, and Kibana
+refuses a tag whose name already exists. If the target is older, or already has tags with these names,
+delete \`${TAGS_FILE}\` and set the dashboard's \`tags\` in \`${MAIN_FILE}\` to the IDs of existing tags.
+The tags are created in the dashboard's space; if you set a \`space_id\` on the dashboard, set the same on each tag.
+`
+    : '';
 
 const readme = (
   { source, version }: DashboardTerraformResponseBody['provider'],
-  mode: ExportMode
+  mode: ExportMode,
+  tagCount: number,
+  minKibanaVersion: string
 ) => `# Dashboard exported from Kibana
 
-${firstPlan(mode)}
-
+${firstPlan(mode, tagCount)}
+${tagsSection(tagCount, minKibanaVersion)}
 It was generated for the ${source} provider; \`versions.tf.json\` requires version
 ${version} or later. This export is a technical preview.
 
@@ -91,10 +131,16 @@ Text from the dashboard that Terraform would read as a template (\`\${\` or \`%{
 /** The files of the module for the chosen mode, in the order the flyout lists them. */
 export const buildModuleFiles = (
   conversion: DashboardTerraformResponseBody,
-  resourceName: string,
   mode: ExportMode
 ): ModuleFile[] => {
-  const { provider, resource_type: resourceType, body } = conversion;
+  const {
+    provider,
+    resource_type: resourceType,
+    resource_name: resourceName,
+    tag_resource: tagResource,
+  } = conversion;
+  const tags = exportedTags(conversion, mode);
+  const body = dashboardBody(conversion, tags);
   return [
     {
       name: 'versions.tf.json',
@@ -126,6 +172,21 @@ export const buildModuleFiles = (
         },
       }),
     },
+    ...(tags.length
+      ? [
+          {
+            name: TAGS_FILE,
+            language: 'json' as const,
+            content: json({
+              resource: {
+                [tagResource.type]: Object.fromEntries(
+                  tags.map(({ name, body: tagBody }) => [name, tagBody])
+                ),
+              },
+            }),
+          },
+        ]
+      : []),
     ...(mode.kind === 'adopt'
       ? [
           {
@@ -142,7 +203,11 @@ export const buildModuleFiles = (
           },
         ]
       : []),
-    { name: 'README.md', language: 'markdown', content: readme(provider, mode) },
+    {
+      name: 'README.md',
+      language: 'markdown',
+      content: readme(provider, mode, tags.length, tagResource.min_kibana_version),
+    },
   ];
 };
 

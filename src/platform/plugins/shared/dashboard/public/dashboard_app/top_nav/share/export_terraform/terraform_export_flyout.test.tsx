@@ -34,7 +34,11 @@ jest.mock('@kbn/share-plugin/public', () => ({
 const sanitized = { title: 'Web logs', panels: [] };
 const conversion: DashboardTerraformResponseBody = {
   resource_type: 'elasticstack_kibana_dashboard',
+  resource_name: 'web_logs',
   body: { title: 'Web logs', description: 'Costs $${var.env}' },
+  resources: [],
+  links: [],
+  tag_resource: { type: 'elasticstack_kibana_tag', min_kibana_version: '9.5.0' },
   dropped_fields: [],
   skipped_panels: [],
   partial_panels: [],
@@ -216,7 +220,7 @@ describe('TerraformExportFlyout', () => {
     expect(modeButton('Adopt this dashboard')).toBeDisabled();
     expect(modeButton('New copy')).toHaveAttribute('aria-pressed', 'true');
     expect(fileNames()).not.toContain('imports.tf.json');
-    expect(screen.getByText('Check before you apply')).toBeInTheDocument();
+    expect(screen.getByText('Review this export')).toBeInTheDocument();
     expect(await problemDetails()).toEqual([
       'This export includes unsaved changes. This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.',
     ]);
@@ -228,7 +232,7 @@ describe('TerraformExportFlyout', () => {
 
     await screen.findByRole('list', { name: 'Module files' });
     expect(modeButton('Adopt this dashboard')).toBeEnabled();
-    expect(screen.getByText('Check before you apply')).toBeInTheDocument();
+    expect(screen.getByText('Review this export')).toBeInTheDocument();
     expect(screen.getByText('1 note about this export.')).toBeInTheDocument();
     expect(await problemDetails()).toEqual([
       'This export includes unsaved changes. The files differ from the saved dashboard. If you adopt it, the first plan shows these changes.',
@@ -288,9 +292,7 @@ describe('TerraformExportFlyout', () => {
     );
     renderFlyout('Web logs', { dashboardId: 'abc-123', isDirty: true });
 
-    expect(
-      await screen.findByText('Not everything on this dashboard is exported')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Review this export')).toBeInTheDocument();
     expect(screen.getByText('7 problems and 3 notes.')).toBeInTheDocument();
     expect(await problemDetails()).toEqual([
       'A panel of type map is not exported.',
@@ -338,19 +340,6 @@ describe('TerraformExportFlyout', () => {
     expect(JSON.parse(await showFile('imports.tf.json')).import[0].id).toBe(
       'default/id-$${x}-%%{y}'
     );
-  });
-
-  it.each([
-    ['2024 Q1 — Ünïcode!', '_2024_q1_unicode'],
-    ['!!!', 'dashboard'],
-    ['', 'dashboard'],
-  ])('names the resource of "%s" %s', async (title, name) => {
-    respondWith(async () => conversion);
-    renderFlyout(title);
-
-    await screen.findByRole('list', { name: 'Module files' });
-    const main = JSON.parse(await showFile('main.tf.json'));
-    expect(Object.keys(main.resource.elasticstack_kibana_dashboard)).toEqual([name]);
   });
 
   it('downloads one zip with every file shown, inside one folder', async () => {
@@ -440,5 +429,121 @@ describe('TerraformExportFlyout', () => {
     respondWith(async () => conversion);
     await userEvent.click(tryAgain);
     await waitFor(() => expect(screen.getByRole('list', { name: 'Module files' })));
+  });
+
+  describe('tags', () => {
+    const tagType = 'elasticstack_kibana_tag';
+    const tagged: DashboardTerraformResponseBody = {
+      ...conversion,
+      body: {
+        ...conversion.body,
+        tags: [
+          '${elasticstack_kibana_tag.production.tag_id}',
+          '${elasticstack_kibana_tag.team_a.tag_id}',
+          'unreadable-tag',
+        ],
+      },
+      resources: [
+        {
+          type: tagType,
+          name: 'production',
+          id: 'tag-1',
+          label: 'Production',
+          body: { name: 'Production', color: '#772299', description: 'Owned by $${team}' },
+        },
+        {
+          type: tagType,
+          name: 'team_a',
+          id: 'tag-${2}',
+          label: 'Team ${a}',
+          body: { name: 'Team $${a}', color: '#000000', description: '' },
+        },
+      ],
+      links: [
+        { path: ['tags', 0], resource_type: tagType, resource_name: 'production' },
+        { path: ['tags', 1], resource_type: tagType, resource_name: 'team_a' },
+      ],
+    };
+    const relatedItems = {
+      related_items: [
+        { type: 'tag', type_label: 'Tag', id: 'tag-1' },
+        { type: 'tag', type_label: 'Tag', id: 'tag-${2}' },
+        { type: 'tag', type_label: 'Tag', id: 'unreadable-tag' },
+        { type: 'lens', type_label: 'Visualization', id: 'v1' },
+      ],
+      related_items_count: 4,
+    };
+
+    it('writes the tags of a new copy as tag resources pinning no ID, which the dashboard references', async () => {
+      respondWith(async () => tagged);
+      renderFlyout();
+
+      await screen.findByRole('list', { name: 'Module files' });
+      expect(fileNames()).toEqual([
+        'versions.tf.json',
+        'main.tf.json',
+        'tags.tf.json',
+        'README.md',
+      ]);
+      expect(JSON.parse(await showFile('tags.tf.json'))).toEqual({
+        resource: {
+          elasticstack_kibana_tag: {
+            production: { name: 'Production', color: '#772299', description: 'Owned by $${team}' },
+            team_a: { name: 'Team $${a}', color: '#000000', description: '' },
+          },
+        },
+      });
+      const main = JSON.parse(await showFile('main.tf.json'));
+      expect(main.resource.elasticstack_kibana_dashboard.web_logs.tags).toEqual([
+        '${elasticstack_kibana_tag.production.tag_id}',
+        '${elasticstack_kibana_tag.team_a.tag_id}',
+        'unreadable-tag',
+      ]);
+      expect(await showFile('README.md')).toContain(
+        "delete `tags.tf.json` and set the dashboard's `tags` in `main.tf.json` to the IDs of existing tags"
+      );
+
+      const { entries } = await downloadZip();
+      expect(entries).toEqual(await shownFiles('web_logs'));
+    });
+
+    it('keeps the literal tag IDs of an adopted dashboard and writes no tags file', async () => {
+      respondWith(async () => tagged);
+      renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+      await screen.findByRole('list', { name: 'Module files' });
+      expect(fileNames()).not.toContain('tags.tf.json');
+      const main = JSON.parse(await showFile('main.tf.json'));
+      expect(main.resource.elasticstack_kibana_dashboard.web_logs.tags).toEqual([
+        'tag-1',
+        'tag-$${2}',
+        'unreadable-tag',
+      ]);
+      expect(await showFile('README.md')).not.toContain('tags.tf.json');
+    });
+
+    it('names the tags a new copy creates, warns about existing names, and notes the target Kibana version', async () => {
+      respondWith(async () => tagged, relatedItems);
+      renderFlyout('Web logs', { dashboardId: 'abc-123' });
+      await screen.findByRole('list', { name: 'Module files' });
+      await userEvent.click(modeButton('New copy'));
+
+      expect(await screen.findByText('Review this export')).toBeInTheDocument();
+      expect(screen.getByText('1 problem and 2 notes.')).toBeInTheDocument();
+      expect(await problemDetails()).toEqual([
+        'A new copy creates 2 tags. Kibana refuses a tag whose name already exists, so apply fails if the target already has a tag with one of these names:ProductionTeam ${a}',
+        'The tags file needs Kibana 9.5.0 or later where Terraform applies it.',
+        'The dashboard refers to 2 objects that are not exported. They must exist where Terraform runs.Tag: 1Visualization: 1',
+      ]);
+    });
+
+    it('lists the tags as objects not exported when adopting', async () => {
+      respondWith(async () => tagged, relatedItems);
+      renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+      expect(await problemDetails()).toEqual([
+        'The dashboard refers to 4 objects that are not exported. They must exist where Terraform runs.Tag: 3Visualization: 1',
+      ]);
+    });
   });
 });

@@ -11,16 +11,26 @@ import type {
   DASHBOARD_RESOURCE_TYPE,
   JsonObject,
   JsonStringPanel,
+  LinkedResource,
   PanelSummary,
   SkippedPanel,
+  TerraformPath,
 } from '@kbn/as-code-dashboard-terraform';
 
 /** The response body of the route converting a dashboard to Terraform. */
 export interface DashboardTerraformResponseBody {
   /** The provider resource type `body` is for. */
   resource_type: typeof DASHBOARD_RESOURCE_TYPE;
-  /** The resource body, in Terraform JSON syntax, with user text escaped. */
+  /** The name of the dashboard's resource, from its title. */
+  resource_name: string;
+  /** The resource body, in Terraform JSON syntax: user text escaped, references to `resources` not. */
   body: JsonObject;
+  /** Resources written for the objects the dashboard refers to (its readable tags); they pin no ID. */
+  resources: LinkedResource[];
+  /** Where `body` refers to one of `resources` instead of holding the object's ID. */
+  links: Array<{ path: TerraformPath; resource_type: string; resource_name: string }>;
+  /** The tag resource type, and the oldest Kibana Terraform can apply it to. */
+  tag_resource: { type: string; min_kibana_version: string };
   /** API paths of the fields the resource has no attribute for. */
   dropped_fields: string[];
   /** Panels left out of `body` because they could not be converted. */

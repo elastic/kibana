@@ -103,6 +103,7 @@ describe('published OpenAPI document', () => {
       'x-tf-flatten',
       'x-tf-json-leaf',
       'x-tf-omit',
+      'x-tf-ref',
       'x-tf-union',
       'x-tf-union-override',
       'x-tf-variant',

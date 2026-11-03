@@ -59,6 +59,7 @@
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/core-security-server",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/content-management-tabbed-table-list-view",

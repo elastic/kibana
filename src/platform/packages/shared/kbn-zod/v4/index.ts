@@ -24,8 +24,9 @@ export {
   tfJsonLeaf,
   tfFlatten,
   tfOmit,
+  tfRef,
 } from './terraform_meta';
-export type { TfUnionMeta, TfVariantMeta } from './terraform_meta';
+export type { TfRefMeta, TfUnionMeta, TfVariantMeta } from './terraform_meta';
 
 export {
   savedObjectId,

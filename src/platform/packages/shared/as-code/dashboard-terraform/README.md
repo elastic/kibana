@@ -24,6 +24,13 @@ published OpenAPI file. This package reads only that document.
   all of them, so it never reads as fully typed). A panel whose type the resource also accepts as a JSON string
   (`config_json`) falls back to that when its typed conversion fails, and is reported as a JSON-string panel. Every string is escaped (`${` → `$${`, `%{` → `%%{`) so Terraform
   does not evaluate user text as a template. The dashboard plugin's Export → Terraform route calls it.
+- `tfRef()` (`x-tf-ref`) marks a string, or a list of strings, as IDs of resources of another type (the dashboard's
+  `tags` are `elasticstack_kibana_tag` IDs). The converter reports each such ID as a reference and keeps it as a
+  literal in the body; `linkReferences` then writes one resource (pinning no ID) per referenced object it is given and
+  points the body at it with `${<type>.<name>.<id attribute>}`. Generated references are not escaped; the objects'
+  text is. The route reads the tags with the user's own saved objects client and gives `linkReferences` only those
+  the user can read, so the rest stay literal IDs. `TAG_RESOURCE` holds the oldest target Kibana the tag resource
+  supports, updated with the provider version.
 - At runtime the converter reads `src/dashboard_schemas.oas.json`, the dashboard schemas of the published OpenAPI
   file (the whole file is not shipped with Kibana). `TERRAFORM_PROVIDER` is the provider version the mapping was
   verified against; exports require `>=` it.

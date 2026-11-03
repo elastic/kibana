@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TfUnionMeta, TfVariantMeta } from '@kbn/zod';
+import type { TfRefMeta, TfUnionMeta, TfVariantMeta } from '@kbn/zod';
 
 // Reads the Dashboards API OpenAPI document and compiles it, together with its `x-tf-*` extensions (authored in
 // Kibana's Zod schemas with the `@kbn/zod` `tf*` helpers), into a small Terraform-oriented model.
@@ -41,6 +41,7 @@ export interface OasSchema {
   'x-tf-json-leaf'?: true | { attribute: string };
   'x-tf-flatten'?: true;
   'x-tf-omit'?: true;
+  'x-tf-ref'?: TfRefMeta;
   /** Compiler-internal: the attribute name a `json_leaves` entry gives this property. */
   jsonName?: string;
   /** Compiler-internal: the discriminator to drop from this branch once its own union is merged. */
@@ -73,7 +74,7 @@ export interface Variant {
 }
 
 export type TNode =
-  | { k: 'prim'; type: 'string' | 'number' | 'bool' }
+  | { k: 'prim'; type: 'string' | 'number' | 'bool'; ref?: TfRefMeta }
   | { k: 'json'; attribute?: string }
   | { k: 'object'; props: Prop[] }
   | { k: 'list'; items: TNode }
@@ -336,12 +337,11 @@ export class Compiler {
       }
       return this.compileKeyed(branches, m, nextStack, at);
     }
+    const ref = s['x-tf-ref'];
     if (s.type === 'array') {
       if (!s.items) return { k: 'json' };
-      return {
-        k: 'list',
-        items: this.compile(s.items, s['x-tf-union-override'], nextStack, `${at}[]`),
-      };
+      const items = this.compile(s.items, s['x-tf-union-override'], nextStack, `${at}[]`);
+      return { k: 'list', items: ref ? this.withRef(items, ref, at) : items };
     }
     if (s.properties) {
       const props: Prop[] = [];
@@ -367,7 +367,16 @@ export class Compiler {
       return { k: 'object', props };
     }
     if (s.type === 'object') return { k: 'json' }; // free-form object
-    return { k: 'prim', type: this.primType(s) };
+    const prim: TNode = { k: 'prim', type: this.primType(s) };
+    return ref ? this.withRef(prim, ref, at) : prim;
+  }
+
+  /** A string that holds the ID of another resource; a reference anywhere else is a mapping mistake. */
+  withRef(node: TNode, ref: TfRefMeta, location: string): TNode {
+    if (node.k !== 'prim' || node.type !== 'string') {
+      throw new Error(`x-tf-ref at ${location} is not on a string or a list of strings`);
+    }
+    return { ...node, ref };
   }
 
   /** The component a union branch comes from (also through `allOf` distribution), else its place in the union. */
