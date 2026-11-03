@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import {
-  ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID,
-  ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
-  ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
-
 export {
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
 
+/**
+ * Workflow ids are literals, not imports from `@kbn/workflows/managed`: that barrel requires `.yaml`
+ * files, which Jest transforms but the Playwright loader cannot parse, so importing it here breaks
+ * the config load. `constants.test.ts` pins them to the managed definitions.
+ */
 /** The runner is a global workflow; it runs in a space through the space-prefixed API path. */
-export const RUNNER_WORKFLOW_ID = ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID;
-export const REVIEW_WORKFLOW_ID = ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID;
+export const RUNNER_WORKFLOW_ID = 'system-security-attack-discovery-worker';
+export const REVIEW_WORKFLOW_ID = 'system-security-attack-discovery-review';
 /** The review's analysis child: its `analyze` step is where the review stage calls the model. */
-export const FP_TP_WORKFLOW_ID = ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW_ID;
+export const FP_TP_WORKFLOW_ID = 'system-security-attack-discovery-fp-tp-analysis';
 
 /** A dedicated space keeps the runner's per-space concurrency key and the seeded alerts apart. */
 export const EVAL_SPACE_ID = 'ad-worker-eval';
