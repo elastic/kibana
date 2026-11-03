@@ -179,7 +179,7 @@ export const getESQLQueryFromIndexPattern = ({
 
   if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
     const notDefinedKql = `NOT ${SERVICE_ENVIRONMENT} : *`;
-    query = query.pipe`WHERE KQL(${notDefinedKql})`;
+    query = query.where`KQL(${esql.str(notDefinedKql)})`;
   } else if (environment && environment !== ENVIRONMENT_ALL_VALUE) {
     query = query.where`${esql.col(SERVICE_ENVIRONMENT)} == ${environment}`;
   }
@@ -204,15 +204,13 @@ export const getESQLQueryFromIndexPattern = ({
   }
 
   if (exceptionsOnly) {
-    query = query.pipe`WHERE KQL(${UNPROCESSED_OTEL_EXCEPTION_KQL})`;
+    query = query.where`KQL(${esql.str(UNPROCESSED_OTEL_EXCEPTION_KQL)})`;
   }
 
   if (kuery) {
-    // The kuery comes from the user's query bar and may contain characters that are
-    // significant inside an ES|QL string literal (double quotes, backslashes, escaped
-    // spaces, wildcards). Interpolating it raw into a `.pipe` template produced invalid
-    // ES|QL and threw in the parser. `esql.str` emits a correctly escaped string literal,
-    // mirroring the KQL(${esql.str(...)}) pattern used elsewhere in the codebase.
+    // The kuery comes from the user's query bar and can contain any character. Pass it through
+    // `esql.str` so it is always embedded as a single, explicitly escaped string literal, the
+    // same way every other KQL clause in this file is built.
     query = query.where`KQL(${esql.str(kuery)})`;
   }
 
