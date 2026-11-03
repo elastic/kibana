@@ -23,12 +23,12 @@ const getCenteredCardLeft = (anchorRect: DOMRect, cardWidth: number): number => 
  *
  * @param cardRef - Wrapper around the card (must be `position: fixed`).
  * @param anchorRect - Viewport rect to align to, or `null` to skip positioning.
- * @param repositionTriggers - Extra values that should re-run layout (e.g. hovered element).
+ * @param repositionTrigger - Extra value that should re-run layout (e.g. hovered element).
  */
 export const useFontInspectCardPosition = (
   cardRef: RefObject<HTMLDivElement | null>,
   anchorRect: DOMRect | null,
-  ...repositionTriggers: ReadonlyArray<unknown>
+  repositionTrigger?: unknown
 ): void => {
   useEffect(() => {
     const el = cardRef.current;
@@ -42,5 +42,5 @@ export const useFontInspectCardPosition = (
     const clamped = clampToViewport(desiredLeft, desiredTop, width, height);
     el.style.left = `${clamped.left}px`;
     el.style.top = `${clamped.top}px`;
-  }, [anchorRect, cardRef, ...repositionTriggers]);
+  }, [anchorRect, cardRef, repositionTrigger]);
 };

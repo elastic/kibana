@@ -10,13 +10,13 @@
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/react';
-import { EuiPortal, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import { FontInfoCard } from './font_info_card';
 import { PinnedFontCard } from './pinned_font_card';
 import { getElementFromPoint } from '../../lib/dom/get_element_from_point';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 import { isIgnoredElement } from '../../lib/dom/is_ignored_element';
-import { FONT_INSPECT_OVERLAY_ID } from '../../lib/constants';
+import { useInspectionOverlayMount } from '../../lib/inspection_overlay_state';
 import { useEscapeKey } from '../../hooks/use_escape_key';
 import { useFontInspectCardPosition } from '../../hooks/use_font_inspect_card_position';
 import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
@@ -51,38 +51,21 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
   const [hoverElement, setHoverElement] = useState<HTMLElement | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const overlayCss = useMemo(
-    () =>
-      css({
-        backgroundColor: transparentize(euiTheme.colors.backgroundFilledText, 0.1),
-        inset: 0,
-        position: 'fixed',
-        zIndex: zIndex.overlay,
-        pointerEvents: 'none',
-      }),
-    [euiTheme.colors.backgroundFilledText, zIndex.overlay]
-  );
+  useInspectionOverlayMount('fontInspect');
 
   const handleEscape = useCallback(() => setIsInspectingFont(false), [setIsInspectingFont]);
   useEscapeKey(handleEscape);
 
   useFontInspectCardPosition(cardRef, hoverRect, hoverElement);
 
-  // Attached on `document` (capture phase), not via the backdrop's
-  // `onPointerMove`: the pinned card renders above the backdrop with
-  // `pointer-events: auto` (so its close button works), which means the
-  // backdrop never receives pointer events while the cursor is over a
-  // pinned panel - a document-level listener still fires regardless of
-  // which element ends up as the hit-test target.
+  // Attached on `document` (capture phase), not on a backdrop element: pinned
+  // cards use `pointer-events: auto` (close button), so a document listener
+  // still runs regardless of hit-test target.
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
       const { clientX, clientY } = event;
       const pointerTarget = event.target;
-      if (
-        pointerTarget instanceof Element &&
-        pointerTarget.id !== FONT_INSPECT_OVERLAY_ID &&
-        isIgnoredElement(pointerTarget)
-      ) {
+      if (pointerTarget instanceof Element && isIgnoredElement(pointerTarget)) {
         setHoverRect(null);
         setHoverElement(null);
         return;
@@ -143,8 +126,7 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
 
   useOverlayClickCapture({
     onActivate: handleClick,
-    shouldSkip: (eventTarget) =>
-      eventTarget.id !== FONT_INSPECT_OVERLAY_ID && isIgnoredElement(eventTarget),
+    shouldSkip: (eventTarget) => isIgnoredElement(eventTarget),
   });
 
   const hoverHighlightCss = useMemo(
@@ -159,13 +141,8 @@ export const FontInspectOverlay = ({ setIsInspectingFont }: Props) => {
 
   return (
     <EuiPortal>
+      <div data-test-subj="fontInspectOverlayContainer" hidden aria-hidden />
       <GlobalCursorOverride cursor="crosshair" allowButtons ignoredElementsCursor="default" />
-      <div
-        css={overlayCss}
-        id={FONT_INSPECT_OVERLAY_ID}
-        data-test-subj="fontInspectOverlayContainer"
-        aria-hidden="true"
-      />
       {hoverRect && (
         <div className={hoverHighlightCss} data-test-subj="fontInspectHoverHighlight" />
       )}

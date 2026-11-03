@@ -70,4 +70,35 @@ describe('useDesignTokenSections', () => {
 
     expect(result.current.rows.find((row) => row.label === 'Letter spacing')?.cssValue).toBe('1px');
   });
+
+  it('does not map fractional font size to an EUI scale token', () => {
+    mockComputedStyle({
+      fontFamily: '"Inter", sans-serif',
+      fontSize: '13.6px',
+      fontWeight: '400',
+      lineHeight: '20px',
+      letterSpacing: 'normal',
+      color: 'rgb(29, 42, 62)',
+    });
+
+    const { result } = renderHook(() => useDesignTokenSections(element));
+
+    expect(result.current.rows.find((row) => row.label === 'Size')?.cssValue).toBe('14px');
+    expect(result.current.rows.find((row) => row.label === 'Size')?.euiToken).toBeUndefined();
+  });
+
+  it('shows letter spacing when computed spacing is fractional but non-zero', () => {
+    mockComputedStyle({
+      fontFamily: '"Inter", sans-serif',
+      fontSize: '14px',
+      fontWeight: '400',
+      lineHeight: '20px',
+      letterSpacing: '0.4px',
+      color: 'rgb(29, 42, 62)',
+    });
+
+    const { result } = renderHook(() => useDesignTokenSections(element));
+
+    expect(result.current.rows.find((row) => row.label === 'Letter spacing')?.cssValue).toBe('0px');
+  });
 });

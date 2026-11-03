@@ -10,14 +10,14 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiPortal, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiPortal, useEuiTheme } from '@elastic/eui';
 import { SpacingMeasurement } from './spacing_measurement';
 import { getElementFromPoint } from '../../lib/dom/get_element_from_point';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 import { calculateSpacingLines } from '../../lib/dom/calculate_spacing';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
-import { MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { useInspectionOverlayMount } from '../../lib/inspection_overlay_state';
 import { useEscapeKey } from '../../hooks/use_escape_key';
 import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
 import {
@@ -46,17 +46,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
   const [spacingLines, setSpacingLines] = useState<SpacingLine[]>([]);
   const anchorBadgeRef = useRef<HTMLDivElement>(null);
 
-  const overlayCss = useMemo(
-    () =>
-      css({
-        backgroundColor: transparentize(euiTheme.colors.backgroundFilledText, 0.1),
-        inset: 0,
-        position: 'fixed',
-        zIndex: zIndex.overlay,
-        pointerEvents: 'none',
-      }),
-    [euiTheme.colors.backgroundFilledText, zIndex.overlay]
-  );
+  useInspectionOverlayMount('measure');
 
   const handleEscape = useCallback(() => setIsMeasuring(false), [setIsMeasuring]);
   useEscapeKey(handleEscape);
@@ -135,13 +125,8 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
 
   return (
     <EuiPortal>
+      <div data-test-subj="measureOverlayContainer" hidden aria-hidden />
       <GlobalCursorOverride cursor="crosshair" />
-      <div
-        css={overlayCss}
-        id={MEASURE_OVERLAY_ID}
-        data-test-subj="measureOverlayContainer"
-        aria-hidden="true"
-      />
       {anchorRect && (
         <>
           <div className={anchorHighlightCss} data-test-subj="measureAnchorHighlight" />

@@ -94,26 +94,13 @@ describe('FontInspectOverlay', () => {
     expect(screen.getByText('"Inter", sans-serif')).toBeInTheDocument();
   });
 
-  it('pins an element when the click lands on the overlay backdrop itself (defensive)', () => {
-    // The backdrop has pointer-events: none, so a real browser click never
-    // actually lands on it. Still, fire the click on it directly (rather
-    // than a detached test div) to catch a regression where the backdrop's
-    // own id is mistakenly treated as "ignored UI" if pointer-events ever
-    // changes back.
+  it('pins an element on click via document capture handler', () => {
     renderWithI18n(<FontInspectOverlay setIsInspectingFont={setIsInspectingFont} />);
 
-    const overlayContainer = screen.getByTestId('fontInspectOverlayContainer');
     mockHitTarget(elementA);
-    fireEvent.click(overlayContainer);
+    fireEvent.click(document.body);
 
     expect(screen.getByTestId('fontInfoCard')).toBeInTheDocument();
-  });
-
-  it('renders the backdrop with pointer-events: none so page scroll is not blocked', () => {
-    renderWithI18n(<FontInspectOverlay setIsInspectingFont={setIsInspectingFont} />);
-
-    const overlayContainer = screen.getByTestId('fontInspectOverlayContainer');
-    expect(window.getComputedStyle(overlayContainer).pointerEvents).toBe('none');
   });
 
   it('allows multiple elements to be pinned at the same time', () => {

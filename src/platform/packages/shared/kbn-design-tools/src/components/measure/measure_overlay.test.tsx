@@ -77,12 +77,11 @@ describe('MeasureOverlay', () => {
     expect(screen.getByText('100 x 50')).toBeInTheDocument();
   });
 
-  it('sets an anchor when the click lands on the overlay backdrop itself (real browser behavior)', () => {
+  it('sets an anchor when click resolves a page element via capture handler', () => {
     renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} />);
 
-    const overlayContainer = screen.getByTestId('measureOverlayContainer');
     mockHitTarget(elementA);
-    fireEvent.click(overlayContainer);
+    fireEvent.click(document.body);
 
     expect(screen.getByTestId('measureAnchorHighlight')).toBeInTheDocument();
   });
@@ -103,13 +102,6 @@ describe('MeasureOverlay', () => {
     expect(screen.getAllByTestId('spacingMeasurementLine').length).toBeGreaterThan(0);
 
     unrelatedNode.remove();
-  });
-
-  it('renders the backdrop with pointer-events: none so page scroll is not blocked', () => {
-    renderWithI18n(<MeasureOverlay setIsMeasuring={setIsMeasuring} />);
-
-    const overlayContainer = screen.getByTestId('measureOverlayContainer');
-    expect(window.getComputedStyle(overlayContainer).pointerEvents).toBe('none');
   });
 
   it('closes the overlay on Escape', () => {

@@ -11,7 +11,6 @@ import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getFontInfo } from '../lib/dom/get_font_info';
 import { colorToToken, toHex } from '../lib/dom/color_token_lookup';
-import { parsePx } from '../lib/dom/round_px_value';
 import { useEuiFontWeightLookup } from './use_eui_font_weight_lookup';
 import { useEuiFontScaleLookup } from './use_eui_font_scale_lookup';
 
@@ -46,20 +45,23 @@ const textColorRow = (cssValue: string): ElementStyleRow => {
 
 const mapToken = (
   lookup: Map<number, string>,
-  value: string,
+  rawValue: string,
   prefix: string
 ): string | undefined => {
-  const parsed = parseInt(value, 10);
-  if (isNaN(parsed)) return undefined;
+  const parsed = parseFloat(rawValue);
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) {
+    return undefined;
+  }
   const key = lookup.get(parsed);
   return key ? `${prefix}.${key}` : undefined;
 };
 
-const shouldShowLetterSpacing = (letterSpacing: string): boolean => {
-  if (letterSpacing === 'normal' || letterSpacing === '0px' || letterSpacing === '0') {
+const shouldShowLetterSpacing = (rawLetterSpacing: string): boolean => {
+  if (rawLetterSpacing === 'normal') {
     return false;
   }
-  return parsePx(letterSpacing) !== 0;
+  const raw = parseFloat(rawLetterSpacing);
+  return Number.isFinite(raw) && raw !== 0;
 };
 
 /**
@@ -71,7 +73,8 @@ export const useDesignTokenSections = (element: HTMLElement): ElementStyleSummar
 
   return useMemo(() => {
     const fontInfo = getFontInfo(element);
-    const textColor = getComputedStyle(element).color;
+    const computed = getComputedStyle(element);
+    const textColor = computed.color;
 
     const rows: ElementStyleRow[] = [
       {
@@ -79,14 +82,14 @@ export const useDesignTokenSections = (element: HTMLElement): ElementStyleSummar
           defaultMessage: 'Size',
         }),
         cssValue: fontInfo.fontSize,
-        euiToken: mapToken(fontScaleLookup, fontInfo.fontSize, 'font.scale'),
+        euiToken: mapToken(fontScaleLookup, computed.fontSize, 'font.scale'),
       },
       {
         label: i18n.translate('kbnDesignTools.fontInspect.card.weight', {
           defaultMessage: 'Weight',
         }),
         cssValue: fontInfo.fontWeight,
-        euiToken: mapToken(fontWeightLookup, fontInfo.fontWeight, 'font.weight'),
+        euiToken: mapToken(fontWeightLookup, computed.fontWeight, 'font.weight'),
       },
       {
         label: i18n.translate('kbnDesignTools.fontInspect.card.lineHeight', {
@@ -95,7 +98,7 @@ export const useDesignTokenSections = (element: HTMLElement): ElementStyleSummar
         cssValue: fontInfo.lineHeight,
       },
     ];
-    if (shouldShowLetterSpacing(fontInfo.letterSpacing)) {
+    if (shouldShowLetterSpacing(computed.letterSpacing)) {
       rows.push({
         label: i18n.translate('kbnDesignTools.fontInspect.card.letterSpacing', {
           defaultMessage: 'Letter spacing',
