@@ -6,7 +6,7 @@
  */
 
 import type { ServiceParams } from '@kbn/actions-plugin/server';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server/sub_action_framework/sub_action_connector';
 import type { AxiosError, Method } from 'axios';
 import { PassThrough } from 'stream';
 import type { IncomingMessage } from 'http';

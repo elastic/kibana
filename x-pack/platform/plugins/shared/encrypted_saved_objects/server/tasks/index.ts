@@ -14,6 +14,10 @@ import type {
 
 import { encryptedSavedObjectsBridge } from './bridge';
 import { ConfigSchema } from '../config';
+import { getCreateMigration } from '../create_migration';
+import type { CreateEncryptedSavedObjectsMigrationFn } from '../create_migration';
+import { getCreateEsoModelVersion } from '../create_model_version';
+import type { CreateEsoModelVersionFn } from '../create_model_version';
 import { EncryptedSavedObjectsService, EncryptionError } from '../crypto';
 import type { EncryptedSavedObjectTypeRegistration } from '../crypto';
 import { createCryptos } from '../crypto/create_cryptos';
@@ -23,6 +27,9 @@ import type { ClientInstanciator } from '../saved_objects';
 export interface EncryptedSavedObjectsTasksSetup {
   canEncrypt: boolean;
   registerType: (registration: EncryptedSavedObjectTypeRegistration) => void;
+  /** Migrations are built eagerly by plugins registering types, though a task runtime never runs them. */
+  createMigration: CreateEncryptedSavedObjectsMigrationFn;
+  createModelVersion: CreateEsoModelVersionFn;
 }
 
 export interface EncryptedSavedObjectsTasksStart {
@@ -35,8 +42,8 @@ export interface EncryptedSavedObjectsTasksStart {
  * the plugin, so tasks decrypt without calling Kibana. The runtime needs the same
  * `xpack.encryptedSavedObjects.encryptionKey` (and `keyRotation.decryptionOnlyKeys`) as Kibana in
  * its config, and one that has it can decrypt any encrypted saved object. Only what tasks use is
- * available (registering types, the client, `isEncryptionError`); migrations and model versions
- * are created by Kibana.
+ * available (registering types, the client, `isEncryptionError`, and the migration and model
+ * version helpers plugins call while registering types); Kibana runs the migrations.
  */
 class EncryptedSavedObjectsTasksPlugin
   implements TasksPlugin<EncryptedSavedObjectsTasksSetup, EncryptedSavedObjectsTasksStart>
@@ -59,7 +66,12 @@ class EncryptedSavedObjectsTasksPlugin
         'xpack.encryptedSavedObjects.encryptionKey is not set: decrypting saved objects will fail'
       );
     }
-    const service = new EncryptedSavedObjectsService({ ...createCryptos(config), logger });
+    const { primaryCrypto, decryptionOnlyCryptos } = createCryptos(config);
+    const service = new EncryptedSavedObjectsService({
+      primaryCrypto,
+      decryptionOnlyCryptos,
+      logger,
+    });
     this.getClient = setupSavedObjects({
       service,
       savedObjects: core.savedObjects as never,
@@ -69,6 +81,24 @@ class EncryptedSavedObjectsTasksPlugin
     return {
       canEncrypt,
       registerType: (registration) => service.registerType(registration),
+      createMigration: getCreateMigration(service, (registration) => {
+        const serviceForMigration = new EncryptedSavedObjectsService({
+          primaryCrypto,
+          decryptionOnlyCryptos,
+          logger,
+        });
+        serviceForMigration.registerType(registration);
+        return serviceForMigration;
+      }),
+      createModelVersion: getCreateEsoModelVersion(service, (registration) => {
+        const serviceForMigration = new EncryptedSavedObjectsService({
+          primaryCrypto,
+          decryptionOnlyCryptos,
+          logger,
+        });
+        serviceForMigration.registerType(registration);
+        return serviceForMigration;
+      }),
     };
   }
 

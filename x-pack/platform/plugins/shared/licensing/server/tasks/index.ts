@@ -4,58 +4,87 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { Logger } from '@kbn/core/server';
-import type { PluginInitializerContext, TasksPlugin } from '@kbn/core/server';
+import { Subject, firstValueFrom, timer, type Observable } from 'rxjs';
+import type {
+  CoreTasksSetup,
+  CoreTasksStart,
+  PluginInitializerContext,
+  TasksPlugin,
+} from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
 
+import { createLicenseUpdate } from '../../common/license_update';
 import { getLicenseFetcher } from '../license_fetcher';
-
-const LICENSE_CACHE_MS = 30_000;
-const MAX_RETRY_DELAY_MS = 30_000;
+import { config as licensingConfig, type LicenseConfigType } from '../licensing_config';
+import {
+  FeatureUsageService,
+  type FeatureUsageServiceSetup,
+  type FeatureUsageServiceStart,
+} from '../services';
+import { licensingBridge } from './bridge';
 
 /**
  * Licensing for tasks: the real license fetcher (same `_xpack` call, normalisation and `License`
- * model as the Licensing plugin) with a short cache. There is no `license$` stream; a task reads
- * the license per run.
+ * model as the Licensing plugin) polled like the plugin does, and the plugin's feature usage service.
+ * In Kibana both come from the Licensing plugin itself (see `bridge.ts`).
  */
-export interface LicensingTasksStart {
-  getLicense: () => Promise<ILicense>;
+export interface LicensingTasksSetup {
+  license$: Observable<ILicense>;
+  featureUsage: FeatureUsageServiceSetup;
 }
 
-class LicensingTasksPlugin implements TasksPlugin<void, LicensingTasksStart> {
-  private readonly logger: Logger;
+export interface LicensingTasksStart {
+  getLicense: () => Promise<ILicense>;
+  license$: Observable<ILicense>;
+  featureUsage: FeatureUsageServiceStart;
+}
 
-  constructor(context: PluginInitializerContext) {
-    this.logger = context.logger.get();
+class LicensingTasksPlugin implements TasksPlugin<LicensingTasksSetup, LicensingTasksStart> {
+  private readonly config: LicenseConfigType;
+  private readonly stop$ = new Subject<void>();
+  private readonly featureUsage = new FeatureUsageService();
+  private license$?: Observable<ILicense>;
+
+  constructor(private readonly context: PluginInitializerContext) {
+    this.config = context.config.get<LicenseConfigType>();
   }
 
-  setup() {}
+  setup(core: CoreTasksSetup): LicensingTasksSetup {
+    const real = licensingBridge.getSetup();
+    if (real) return real;
 
-  start(core: Parameters<TasksPlugin['start']>[0]): LicensingTasksStart {
-    const fetchLicense = getLicenseFetcher({
-      clusterClient: core.elasticsearch.client,
-      logger: this.logger,
-      cacheDurationMs: LICENSE_CACHE_MS,
-      maxRetryDelay: MAX_RETRY_DELAY_MS,
+    const pollingFrequency = this.config.api_polling_frequency.asMilliseconds();
+    const fetcher = getLicenseFetcher({
+      clusterClient: core
+        .getStartServices()
+        .then(([coreStart]: [CoreTasksStart, unknown, unknown]) => coreStart.elasticsearch.client),
+      logger: this.context.logger.get(),
+      cacheDurationMs: this.config.license_cache_duration.asMilliseconds(),
+      maxRetryDelay: pollingFrequency,
     });
-    // Kibana answers from the license it polls; a task runtime would otherwise call Elasticsearch for
-    // every `getLicense()`, so successful answers are reused for the cache period too.
-    let cached: { at: number; license: Promise<ILicense> } | undefined;
+    this.license$ = createLicenseUpdate(timer(0, pollingFrequency), this.stop$, fetcher).license$;
+    return { license$: this.license$, featureUsage: this.featureUsage.setup() };
+  }
+
+  start(): LicensingTasksStart {
+    const real = licensingBridge.getStart();
+    if (real) return real;
+
+    const license$ = this.license$!;
     return {
-      getLicense: () => {
-        if (cached && Date.now() - cached.at < LICENSE_CACHE_MS) return cached.license;
-        const license = fetchLicense();
-        const entry = { at: Date.now(), license };
-        cached = entry;
-        license.catch(() => {
-          if (cached === entry) cached = undefined;
-        });
-        return license;
-      },
+      license$,
+      getLicense: () => firstValueFrom(license$),
+      featureUsage: this.featureUsage.start(),
     };
+  }
+
+  stop() {
+    this.stop$.next();
+    this.stop$.complete();
   }
 }
 
 export const plugin = async (context: PluginInitializerContext) =>
   new LicensingTasksPlugin(context);
+
+export const config = licensingConfig;

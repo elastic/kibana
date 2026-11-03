@@ -41,7 +41,7 @@ import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
   isNotificationExecutionSource,
   NOTIFICATIONS_REQUESTER_ID,
-} from '@kbn/actions-plugin/server';
+} from '@kbn/actions-plugin/server/lib/action_execution_source';
 import {
   renderMustacheObject,
   renderMustacheString,

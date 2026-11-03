@@ -6,6 +6,7 @@
  */
 
 import { readFileSync } from 'fs';
+import { merge } from 'lodash';
 import { parse } from 'yaml';
 import { PodLogger } from './logger';
 import { bootTasksPlugins } from './boot_tasks_plugins';
@@ -19,9 +20,12 @@ import { startPodServer } from './server';
 export const startPod = async ({
   pluginIds,
   defaultPort,
+  baseConfig = {},
 }: {
   pluginIds: string[];
   defaultPort: number;
+  /** Config underneath `POD_CONFIG`, such as the keystore's settings. */
+  baseConfig?: Record<string, unknown>;
 }) => {
   // Without a cap, V8 sizes the young generation from the machine's heap limit and a pod can sit
   // ~100 MB higher than it needs to. `bin/kibana-task-pod` sets it.
@@ -37,7 +41,10 @@ export const startPod = async ({
   const config = process.env.POD_CONFIG
     ? (parse(readFileSync(process.env.POD_CONFIG, 'utf8')) as Record<string, unknown>) ?? {}
     : {};
-  const { taskDefinitions } = await bootTasksPlugins({ pluginIds, config: nestDottedKeys(config) });
+  const { taskDefinitions } = await bootTasksPlugins({
+    pluginIds,
+    config: merge({}, baseConfig, nestDottedKeys(config)),
+  });
   return startPodServer({ taskDefinitions, port: Number(process.env.PORT ?? defaultPort) });
 };
 

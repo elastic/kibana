@@ -19,7 +19,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
  */
 export async function getCurrentUserProfileIdFromRequest(
   requestWithAuth: KibanaRequest,
-  security: SecurityPluginStart | undefined,
+  security: Pick<SecurityPluginStart, 'userProfiles'> | undefined,
   logger: Logger
 ): Promise<string | undefined> {
   try {

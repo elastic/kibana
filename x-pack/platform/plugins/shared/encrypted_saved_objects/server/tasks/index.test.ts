@@ -127,8 +127,14 @@ describe('encrypted saved objects in a task runtime', () => {
   it('only provides what tasks use', async () => {
     const pod = await buildPod(KEY);
 
-    // Anything else (migrations, model versions) belongs to Kibana; the typed contract rules it out.
-    expect(Object.keys(pod.setup).sort()).toEqual(['canEncrypt', 'registerType']);
+    // Migrations and model versions are built eagerly by plugins that register types, though a task
+    // runtime never runs them; the rest of the plugin's contract belongs to Kibana.
+    expect(Object.keys(pod.setup).sort()).toEqual([
+      'canEncrypt',
+      'createMigration',
+      'createModelVersion',
+      'registerType',
+    ]);
     expect(Object.keys(pod.start).sort()).toEqual(['getClient', 'isEncryptionError']);
   });
 });

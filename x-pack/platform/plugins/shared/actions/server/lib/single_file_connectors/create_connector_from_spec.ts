@@ -20,7 +20,7 @@ import type {
   ActionTypeConfig,
   ActionType,
 } from '../../types';
-import type { PluginSetupContract as ActionsPluginSetupContract } from '../../plugin';
+import type { ActionsTasksSetup } from '../../tasks/runtime';
 
 import { generateParamsSchema } from './generate_params_schema';
 import { generateSecretsSchema } from './generate_secrets_schema';
@@ -56,7 +56,7 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
 
 export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
-  actions: ActionsPluginSetupContract
+  actions: ActionsTasksSetup
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
   const networkSettings = createConnectorNetworkSettings(configUtils);

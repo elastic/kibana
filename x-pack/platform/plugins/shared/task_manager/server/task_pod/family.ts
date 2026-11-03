@@ -20,6 +20,7 @@ export interface TaskPodFamily {
 /** Family name -> id of the plugin that owns its `task_pod.jsonc`. */
 export const FAMILY_OWNERS: Record<string, string> = {
   alerting_v2: 'alertingVTwo',
+  connectors: 'actions',
 };
 
 export const loadFamily = (name: string): TaskPodFamily => {

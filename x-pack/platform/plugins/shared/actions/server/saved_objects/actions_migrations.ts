@@ -25,7 +25,7 @@ type ActionMigration = (
 ) => SavedObjectUnsanitizedDoc<RawAction>;
 
 function createEsoMigration(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  encryptedSavedObjects: Pick<EncryptedSavedObjectsPluginSetup, 'createMigration'>,
   isMigrationNeededPredicate: IsMigrationNeededPredicate<RawAction, RawAction>,
   migrationFunc: ActionMigration
 ) {
@@ -37,7 +37,7 @@ function createEsoMigration(
 }
 
 export function getActionsMigrations(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: Pick<EncryptedSavedObjectsPluginSetup, 'createMigration'>
 ): SavedObjectMigrationMap {
   const migrationActionsTen = createEsoMigration(
     encryptedSavedObjects,

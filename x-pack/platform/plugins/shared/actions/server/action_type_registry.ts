@@ -9,9 +9,8 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
+import { TaskCost, TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionType as CommonActionType } from '../common';
 import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
@@ -28,12 +27,18 @@ import type {
 import { isSandboxCapableConnectorType } from './application/connector/lib/is_sandbox_capable_connector';
 
 export interface ActionTypeRegistryOpts {
-  licensing: LicensingPluginSetup;
-  taskManager: TaskManagerSetupContract;
+  licensing: Pick<LicensingPluginSetup, 'featureUsage'>;
+  taskManager: Pick<TaskManagerSetupContract, 'registerTaskDefinitions'>;
   taskRunnerFactory: TaskRunnerFactory;
   actionsConfigUtils: ActionsConfigurationUtilities;
   licenseState: ILicenseState;
   inMemoryConnectors: InMemoryConnector[];
+  /**
+   * Whether this process can check Kibana privileges (system and sub-feature connector types need
+   * them). A task pod has no authorization service, so it does not run those types: they get no task
+   * definition and Task Manager runs them in Kibana instead.
+   */
+  canRunPrivilegedActionTypes?: boolean;
 }
 
 interface ListOpts {
@@ -43,13 +48,14 @@ interface ListOpts {
 }
 
 export class ActionTypeRegistry {
-  private readonly taskManager: TaskManagerSetupContract;
+  private readonly taskManager: Pick<TaskManagerSetupContract, 'registerTaskDefinitions'>;
+  private readonly canRunPrivilegedActionTypes: boolean;
   private readonly actionTypes: Map<string, ActionType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
   private readonly inMemoryConnectors: InMemoryConnector[];
-  private readonly licensing: LicensingPluginSetup;
+  private readonly licensing: Pick<LicensingPluginSetup, 'featureUsage'>;
 
   constructor(constructorParams: ActionTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
@@ -58,6 +64,7 @@ export class ActionTypeRegistry {
     this.licenseState = constructorParams.licenseState;
     this.inMemoryConnectors = constructorParams.inMemoryConnectors;
     this.licensing = constructorParams.licensing;
+    this.canRunPrivilegedActionTypes = constructorParams.canRunPrivilegedActionTypes ?? true;
   }
 
   /**
@@ -233,7 +240,12 @@ export class ActionTypeRegistry {
     this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
 
     // Skip task type registration for connectors without execute/params
-    if (actionType.executor && actionType.validate.params) {
+    if (
+      actionType.executor &&
+      actionType.validate.params &&
+      (this.canRunPrivilegedActionTypes ||
+        !(actionType.isSystemActionType || actionType.subFeature))
+    ) {
       this.taskManager.registerTaskDefinitions({
         [`actions:${actionType.id}`]: {
           title: actionType.name,

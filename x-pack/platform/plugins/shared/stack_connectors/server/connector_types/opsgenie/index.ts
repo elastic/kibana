@@ -12,7 +12,7 @@ import {
   WorkflowsConnectorFeatureId,
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import { urlAllowListValidator } from '@kbn/actions-plugin/server/sub_action_framework/helpers';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {

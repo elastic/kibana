@@ -560,6 +560,17 @@ export class TaskManagerRunner implements TaskRunner {
               timeoutMs: parseIntervalAsMillisecond(this.timeout),
               signal: abortController.signal,
               setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+              // A pod that does not serve this type, such as a connector type that needs privileges
+              // only Kibana can check, leaves the run to this process.
+              fallback: () =>
+                definition.createTaskRunner({
+                  taskInstance: sanitizedTaskInstance,
+                  fakeRequest,
+                  enrichRequest,
+                  signal: abortController.signal,
+                  executionUuid: this.uuid,
+                  setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+                }),
             });
           } else {
             this.task = definition.createTaskRunner({

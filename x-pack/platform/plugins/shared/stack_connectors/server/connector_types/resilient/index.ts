@@ -14,7 +14,7 @@ import {
   WorkflowsConnectorFeatureId,
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { urlAllowListValidator } from '@kbn/actions-plugin/server';
+import { urlAllowListValidator } from '@kbn/actions-plugin/server/sub_action_framework/helpers';
 
 import type { ResilientConfig, ResilientSecrets } from '@kbn/connector-schemas/resilient';
 import {

@@ -18,14 +18,21 @@ program
   .version(kibanaPackageJson.version)
   .description(
     'Starts a task pod: a standby process that runs the tasks of one family on behalf of Kibana ' +
-      '(env: ES_URL, ES_USERNAME/ES_PASSWORD or ES_API_KEY, PORT, POD_CONFIG, LOG_LEVEL)'
+      '(env: ES_URL, ES_USERNAME/ES_PASSWORD or ES_API_KEY, PORT, POD_CONFIG, LOG_LEVEL; settings in\n' +
+      'kibana.keystore are read too)'
   )
   .requiredOption('--family <name>', 'The task pod family to run, e.g. alerting_v2')
   .option('--port <port>', 'Port to serve /run, /cancel and /health on', '3500')
   .action(async ({ family, port }: { family: string; port: string }) => {
     const { plugins } = loadFamily(family);
     process.env.PORT ??= port;
-    await startPod({ pluginIds: plugins, defaultPort: Number(port) });
+    // Secrets such as preconfigured connectors' live in the keystore, which Kibana reads the same way.
+    const { readKeystore } = await import('../keystore/lib/read_keystore');
+    await startPod({
+      pluginIds: plugins,
+      defaultPort: Number(port),
+      baseConfig: await readKeystore(),
+    });
   });
 
 program.parse(process.argv);

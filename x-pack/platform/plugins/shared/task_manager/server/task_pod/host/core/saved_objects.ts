@@ -139,6 +139,7 @@ export class PodSavedObjects {
     this.logger = logger;
     return {
       getTypeRegistry: () => this.getTypeRegistry(),
+      getAllIndices: () => ['.kibana'],
       createInternalRepository: (includedHiddenTypes?: string[]) =>
         this.getRepository(includedHiddenTypes),
       createSerializer: () => new this.internals!.SavedObjectsSerializer(this.getTypeRegistry()),
@@ -192,7 +193,16 @@ export class PodSavedObjects {
     includedHiddenTypes?: string[],
     extensions?: Record<string, unknown>
   ): ISavedObjectsRepository {
-    const hidden = (includedHiddenTypes ?? []).slice().sort();
+    // A pod loads a subset of the plugins, so the hidden types of plugins outside its family do not
+    // exist here; Kibana always has them.
+    const registry = this.getTypeRegistry();
+    let hidden = (includedHiddenTypes ?? []).filter((type) => registry.getType(type) !== undefined);
+    // A repository needs at least one type. Kibana always has visible ones; a pod whose plugins only
+    // register hidden types would otherwise be unable to create the internal repository.
+    if (hidden.length === 0 && registry.getVisibleTypes().length === 0) {
+      hidden = registry.getAllTypes().map((type) => type.name);
+    }
+    hidden = hidden.sort();
     const key = hidden.join(',');
     // Repositories with per-request extensions are not shared.
     const existing = extensions ? undefined : this.repositories.get(key);

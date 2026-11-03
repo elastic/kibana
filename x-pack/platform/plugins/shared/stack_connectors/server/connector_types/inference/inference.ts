@@ -7,7 +7,7 @@
 
 import { text as streamToString } from 'node:stream/consumers';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server/sub_action_framework/sub_action_connector';
 import { errors } from '@elastic/elasticsearch';
 import type {
   ElasticsearchClient,

@@ -15,7 +15,7 @@ import {
   throwIfResponseIsNotValid,
 } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib/get_basic_auth_header';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CONNECTOR_NAME } from '@kbn/connector-schemas/jira';
 import type {

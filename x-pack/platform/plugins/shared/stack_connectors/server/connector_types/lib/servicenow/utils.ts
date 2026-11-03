@@ -12,7 +12,7 @@ import { addTimeZoneToDate, getErrorMessage } from '@kbn/actions-plugin/server/l
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token';
-import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib/get_basic_auth_header';
 import type {
   ServiceNowSecretConfigurationType,
   ServiceNowPublicConfigurationType,

@@ -28,6 +28,7 @@ import type {
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
+import { licensingBridge } from './tasks/bridge';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 import type { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
@@ -94,6 +95,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     this.refresh = refresh;
     this.license$ = license$;
 
+    licensingBridge.setSetup({ license$, featureUsage: featureUsageSetup });
+
     return {
       refresh,
       license$,
@@ -157,11 +160,18 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     if (!this.refresh || !this.license$) {
       throw new Error('Setup has not been completed');
     }
+    const license$ = this.license$;
+    const featureUsage = this.featureUsage.start();
+    licensingBridge.setStart({
+      getLicense: async () => await firstValueFrom(license$),
+      license$,
+      featureUsage,
+    });
     return {
       refresh: this.refresh,
-      getLicense: async () => await firstValueFrom(this.license$!),
-      license$: this.license$,
-      featureUsage: this.featureUsage.start(),
+      getLicense: async () => await firstValueFrom(license$),
+      license$,
+      featureUsage,
       createLicensePoller: this.createLicensePoller.bind(this),
     };
   }

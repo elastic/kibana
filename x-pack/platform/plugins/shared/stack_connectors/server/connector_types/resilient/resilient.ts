@@ -8,7 +8,8 @@
 import type { AxiosError } from 'axios';
 import { omitBy, isNil, isObject } from 'lodash/fp';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
-import { CaseConnector, getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { CaseConnector } from '@kbn/actions-plugin/server/sub_action_framework/case';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib/get_basic_auth_header';
 import { z } from '@kbn/zod/v4';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';

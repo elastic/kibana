@@ -7,7 +7,7 @@
 
 import { LRUCache } from 'lru-cache';
 import hash from 'object-hash';
-import { SubActionConnector } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server/sub_action_framework/sub_action_connector';
 import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
 import {
   TestConnectorRequestSchema,

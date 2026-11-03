@@ -7,7 +7,7 @@
 
 import type { MCPConnectorSecrets, MCPConnectorConfig } from '@kbn/connector-schemas/mcp';
 import { API_KEY_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
-import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib/get_basic_auth_header';
 
 /**
  * Builds HTTP headers from MCP connector config and secrets based on the authentication type.

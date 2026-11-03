@@ -44,7 +44,7 @@ const connectorTokenTypeRegistrationV2: EncryptedSavedObjectTypeRegistration = {
 };
 
 export const connectorTokenModelVersions = (
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: Pick<EncryptedSavedObjectsPluginSetup, 'createModelVersion'>
 ): SavedObjectsModelVersionMap => ({
   '1': {
     changes: [],

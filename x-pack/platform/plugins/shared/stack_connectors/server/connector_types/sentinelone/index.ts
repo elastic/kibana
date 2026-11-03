@@ -8,7 +8,8 @@
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { EndpointSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
-import { urlAllowListValidator, ActionExecutionSourceType } from '@kbn/actions-plugin/server';
+import { urlAllowListValidator } from '@kbn/actions-plugin/server/sub_action_framework/helpers';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
   ENDPOINT_SECURITY_SUB_ACTIONS_EXECUTE_PRIVILEGE,

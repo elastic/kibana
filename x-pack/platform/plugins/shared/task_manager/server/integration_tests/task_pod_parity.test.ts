@@ -10,48 +10,28 @@
  * 2.0.
  */
 
-import { mkdtempSync, writeFileSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
-import { spawn, type ChildProcess } from 'child_process';
-import { request } from 'http';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { esTestConfig } from '@kbn/test';
-import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
-import { retry, setupTestServers } from './lib';
+import {
+  ENCRYPTION_KEY,
+  http,
+  listIndices,
+  retry,
+  setupTestServers,
+  startPodProcess,
+  waitForStableIndices,
+  type PodProcess,
+} from './lib';
 
-const ENCRYPTION_KEY = 'a'.repeat(32);
 const KIBANA_PORT = 5699;
+const POD_PORT = 3591;
 const POD_TASK_TYPES = ['alerting_v2:*'];
 
-// A small JSON client; the pod and Kibana are reached over localhost.
-const http = (
-  url: string,
-  init: { method?: string; headers?: Record<string, string>; body?: string } = {}
-) =>
-  new Promise<{ status: number; json: () => unknown }>((resolve, reject) => {
-    const req = request(url, { method: init.method ?? 'GET', headers: init.headers }, (res) => {
-      let data = '';
-      res.on('data', (chunk) => (data += chunk));
-      res.on('end', () => resolve({ status: res.statusCode ?? 0, json: () => JSON.parse(data) }));
-    });
-    req.on('error', reject);
-    req.end(init.body);
-  });
-
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
-
-const listIndices = async (kibanaServer: TestKibanaUtils) => {
-  const es = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
-  const indices = await es.cat.indices({ format: 'json', h: 'index', expand_wildcards: 'all' });
-  const dataStreams = await es.indices.getDataStream({ name: '*', expand_wildcards: 'all' });
-  return [
-    ...indices.map((i) => i.index as string),
-    ...dataStreams.data_streams.map((d) => d.name),
-  ].sort();
-};
 
 /**
  * Runs alerting v2 tasks in a task pod booted from the family manifest, against the same ES as
@@ -62,14 +42,13 @@ describe('task pod parity (alerting_v2 family)', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManager: TaskManagerStartContract;
-  let pod: ChildProcess;
   let podUrl: string;
+  let pod: PodProcess;
   let indicesBeforePod: string[];
 
   beforeAll(async () => {
     // Boot Kibana first so it installs indices, mappings and data streams; the pod comes after.
-    const podPortHolder = 3591;
-    podUrl = `http://localhost:${podPortHolder}`;
+    podUrl = `http://localhost:${POD_PORT}`;
     const setup = await setupTestServers({
       server: { port: KIBANA_PORT },
       xpack: {
@@ -81,48 +60,12 @@ describe('task pod parity (alerting_v2 family)', () => {
     kibanaServer = setup.kibanaServer;
     taskManager = taskManagerStartSpy.mock.results[0].value;
 
-    // Other plugins install their indices lazily after start; wait until the list is stable.
-    let previous = '';
-    await retry(
-      async () => {
-        indicesBeforePod = await listIndices(kibanaServer);
-        const current = indicesBeforePod.join();
-        const stable = current === previous;
-        previous = current;
-        expect(stable).toBe(true);
-      },
-      { times: 60, intervalMs: 3000 }
-    );
-
-    const dir = mkdtempSync(join(tmpdir(), 'task-pod-parity-'));
-    const podConfig = join(dir, 'pod.yml');
-    const { hostname, port } = new URL(esTestConfig.getUrl());
-    writeFileSync(podConfig, `xpack.encryptedSavedObjects.encryptionKey: ${ENCRYPTION_KEY}\n`);
-    // A separate process, as in production: in-process the pod would share Kibana's bridges.
-    pod = spawn(process.execPath, ['scripts/task_pod.js', '--family', 'alerting_v2'], {
-      cwd: REPO_ROOT,
-      env: {
-        ...process.env,
-        ES_URL: `http://${hostname}:${port}`,
-        ES_USERNAME: 'elastic',
-        ES_PASSWORD: 'changeme',
-        POD_CONFIG: podConfig,
-        PORT: String(podPortHolder),
-      },
-      stdio: ['ignore', 'inherit', 'inherit'],
-      // The launcher re-executes itself; a group lets us stop both processes.
-      detached: true,
-    });
-    await retry(
-      async () => {
-        expect((await http(`${podUrl}/health`)).status).toBe(200);
-      },
-      { times: 240, intervalMs: 500 }
-    );
+    indicesBeforePod = await waitForStableIndices(kibanaServer);
+    pod = await startPodProcess({ family: 'alerting_v2', port: POD_PORT });
   });
 
   afterAll(async () => {
-    if (pod?.pid) process.kill(-pod.pid, 'SIGTERM');
+    pod?.stop();
     await kibanaServer?.stop();
     await esServer?.stop();
   });

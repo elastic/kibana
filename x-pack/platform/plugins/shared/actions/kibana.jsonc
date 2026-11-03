@@ -32,6 +32,17 @@
     ],
     "extraPublicDirs": [
       "common"
-    ]
+    ],
+    "tasks": {
+      "requiredPlugins": [
+        "licensing",
+        "taskManager",
+        "encryptedSavedObjects",
+        "eventLog"
+      ],
+      "optionalPlugins": [
+        "spaces"
+      ]
+    }
   }
 }

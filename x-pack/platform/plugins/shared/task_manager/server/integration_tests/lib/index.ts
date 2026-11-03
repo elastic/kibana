@@ -8,3 +8,11 @@
 export { injectTask, injectTaskBulk } from './inject_task';
 export { setupTestServers } from './setup_test_servers';
 export { retry } from './retry';
+export {
+  http,
+  listIndices,
+  waitForStableIndices,
+  startPodProcess,
+  ENCRYPTION_KEY,
+} from './task_pod';
+export type { PodProcess } from './task_pod';

@@ -1,0 +1,16 @@
+{
+  // The task pod family for connectors: every plugin whose `server/tasks` entry the pod boots. A
+  // plugin's tasks dependencies must be listed here (checked at pod boot). Connector types that need
+  // Kibana privileges (system and sub-feature types) are not served by a pod, so Kibana runs them.
+  "family": "connectors",
+  "taskTypes": ["actions:.*"],
+  "plugins": [
+    "actions",
+    "stackConnectors",
+    "taskManager",
+    "spaces",
+    "licensing",
+    "eventLog",
+    "encryptedSavedObjects"
+  ]
+}

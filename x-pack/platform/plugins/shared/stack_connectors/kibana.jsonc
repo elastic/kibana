@@ -19,6 +19,7 @@
       "spaces"
     ],
     "optionalPlugins": ["usageCollection", "cloud"],
-    "extraPublicDirs": ["public/common"]
+    "extraPublicDirs": ["public/common"],
+    "tasks": { "requiredPlugins": ["actions", "licensing"] }
   }
 }

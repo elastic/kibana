@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { ActionsTasksSetup } from '@kbn/actions-plugin/server/tasks';
 
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMicrosoftDefenderEndpointConnectorType } from './microsoft_defender_endpoint';
@@ -57,7 +57,7 @@ export function registerConnectorTypes({
   getUiSettingsClient,
   getInternalEsClient,
 }: {
-  actions: ActionsPluginSetupContract;
+  actions: ActionsTasksSetup;
   publicBaseUrl?: string;
   experimentalFeatures: ExperimentalFeatures;
   isElasticCloudTrial?: () => Promise<boolean>;

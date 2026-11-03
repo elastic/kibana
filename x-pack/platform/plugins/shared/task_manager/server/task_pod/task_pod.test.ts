@@ -109,13 +109,18 @@ describe('task pod wire format', () => {
   });
 
   describe('RemoteTaskRunner', () => {
-    const build = (fetchFn: jest.Mock<any, any[]>, timeoutMs = 60000) => {
+    const build = (
+      fetchFn: jest.Mock<any, any[]>,
+      timeoutMs = 60000,
+      fallback?: () => { run: () => Promise<any>; cancel?: () => Promise<void> }
+    ) => {
       const setFields = jest.fn();
       const runner = new RemoteTaskRunner({
         pod: { url: 'http://pod' },
         request: { taskType: 't', taskInstance: {}, executionUuid: 'e1' },
         timeoutMs,
         setCustomTaskRunEventFields: setFields,
+        fallback,
         fetchFn,
       });
       return { runner, setFields };
@@ -181,6 +186,22 @@ describe('task pod wire format', () => {
       const error = await runner.run().catch((e) => e);
       expect(isRetryableError(error)).toBeTruthy();
       expect(cancelBody).toHaveBeenCalled();
+    });
+
+    test('a 404 runs the task in this process when there is a fallback', async () => {
+      const run = jest.fn(async () => ({ state: { local: true } }));
+      const cancel = jest.fn(async () => undefined);
+      const fetchFn = jest.fn<any, any[]>(async () => ({
+        ok: false,
+        status: 404,
+        body: { cancel: async () => undefined },
+      }));
+      const { runner } = build(fetchFn, 60000, () => ({ run, cancel }));
+      await expect(runner.run()).resolves.toEqual({ state: { local: true } });
+      await runner.cancel();
+      expect(cancel).toHaveBeenCalled();
+      // The pod was not asked to cancel a run it never started.
+      expect(fetchFn).toHaveBeenCalledTimes(1);
     });
 
     test('an unreachable pod is retried soon', async () => {

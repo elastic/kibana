@@ -60,9 +60,16 @@ export class RemoteTaskRunner implements CancellableTask {
       /** Aborted when Task Manager cancels the run. */
       signal?: AbortSignal;
       setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
+      /**
+       * Runs the task in this process instead. Used when the pod does not serve the task type, for
+       * example a connector type that needs privileges only Kibana can check.
+       */
+      fallback?: () => CancellableTask;
       fetchFn?: typeof fetch;
     }
   ) {}
+
+  private local?: CancellableTask;
 
   public async run(): Promise<RunResult | undefined | void> {
     const { pod, request, timeoutMs, signal, setCustomTaskRunEventFields } = this.params;
@@ -90,6 +97,11 @@ export class RemoteTaskRunner implements CancellableTask {
       if (!response.ok) {
         await response.body?.cancel().catch(() => undefined);
         const message = `Task pod ${pod.url} responded ${response.status} to /run`;
+        // The pod doesn't serve this task type: run it here when we can.
+        if (response.status === 404 && this.params.fallback) {
+          this.local = this.params.fallback();
+          return await this.local.run();
+        }
         // The pod is busy, draining, or doesn't serve this task type (yet): try again shortly.
         if (response.status === 503 || response.status === 404 || response.status === 409) {
           throw podUnavailable(message);
@@ -110,6 +122,9 @@ export class RemoteTaskRunner implements CancellableTask {
   }
 
   public async cancel() {
+    if (this.local) {
+      return this.local.cancel?.();
+    }
     const { pod, request } = this.params;
     const fetchFn = this.params.fetchFn ?? fetch;
     try {

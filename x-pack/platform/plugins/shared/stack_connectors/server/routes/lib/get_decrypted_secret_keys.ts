@@ -14,7 +14,7 @@ import type {
   KibanaResponseFactory,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
 import { CONNECTOR_ID_MAX_LENGTH } from '@kbn/actions-plugin/common';
 import { isBoom } from '@hapi/boom';
 

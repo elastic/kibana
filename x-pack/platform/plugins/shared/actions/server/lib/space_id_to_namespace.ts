@@ -7,6 +7,9 @@
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-export function spaceIdToNamespace(spaces?: SpacesPluginStart, spaceId?: string) {
+export function spaceIdToNamespace(
+  spaces?: Pick<SpacesPluginStart, 'spacesService'>,
+  spaceId?: string
+) {
   return spaces && spaceId ? spaces.spacesService.spaceIdToNamespace(spaceId) : undefined;
 }

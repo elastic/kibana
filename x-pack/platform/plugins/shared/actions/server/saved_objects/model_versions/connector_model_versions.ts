@@ -20,7 +20,7 @@ const storedIdentityPresent = (value: unknown): boolean =>
   typeof value === 'string' && value.length > 0;
 
 export const connectorModelVersions = (
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+  encryptedSavedObjects: Pick<EncryptedSavedObjectsPluginSetup, 'createModelVersion'>
 ): SavedObjectsModelVersionMap => ({
   '1': {
     changes: [],

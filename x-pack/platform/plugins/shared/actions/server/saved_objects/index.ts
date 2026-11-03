@@ -56,8 +56,11 @@ import { actionEncryptedRegistrationV3 } from './action_encryption';
 import { userConnectorTokenEncryptedRegistrationV2 } from './user_connector_token_encryption';
 
 export function setupSavedObjects(
-  savedObjects: SavedObjectsServiceSetup,
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  savedObjects: Pick<SavedObjectsServiceSetup, 'registerType'>,
+  encryptedSavedObjects: Pick<
+    EncryptedSavedObjectsPluginSetup,
+    'registerType' | 'createMigration' | 'createModelVersion'
+  >,
   actionTypeRegistry: ActionTypeRegistry,
   taskManagerIndex: string,
   inMemoryConnectors: InMemoryConnector[],

@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
 
-import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib/get_basic_auth_header';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { getProxySettings } from '@kbn/actions-utils';
 import {

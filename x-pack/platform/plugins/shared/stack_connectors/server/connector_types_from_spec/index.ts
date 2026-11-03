@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { type PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { ActionsTasksSetup } from '@kbn/actions-plugin/server/tasks';
 
 import { connectorsSpecs, isInboundOnlyConnectorSpec } from '@kbn/connector-specs';
 import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 
-export function registerConnectorTypesFromSpecs({
-  actions,
-}: {
-  actions: ActionsPluginSetupContract;
-}) {
+export function registerConnectorTypesFromSpecs({ actions }: { actions: ActionsTasksSetup }) {
   const configUtils = actions.getActionsConfigurationUtilities();
   const inboundEventsEnabled = configUtils.isInboundEventsEnabled();
   const connectorSigningKeysEnabled = configUtils.isConnectorSigningKeysEnabled();

@@ -27,7 +27,7 @@ type ActionTaskParamMigration = (
 ) => SavedObjectUnsanitizedDoc<ActionTaskParams>;
 
 function createEsoMigration(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  encryptedSavedObjects: Pick<EncryptedSavedObjectsPluginSetup, 'createMigration'>,
   isMigrationNeededPredicate: IsMigrationNeededPredicate<ActionTaskParams, ActionTaskParams>,
   migrationFunc: ActionTaskParamMigration
 ) {
@@ -39,7 +39,7 @@ function createEsoMigration(
 }
 
 export function getActionTaskParamsMigrations(
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
+  encryptedSavedObjects: Pick<EncryptedSavedObjectsPluginSetup, 'createMigration'>,
   inMemoryConnectors: InMemoryConnector[]
 ): SavedObjectMigrationMap {
   const migrationActionTaskParamsSixteen = createEsoMigration(
