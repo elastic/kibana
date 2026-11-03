@@ -187,6 +187,34 @@ describe('executeDeclarativeRequest', () => {
     expect(requests).toHaveLength(0);
   });
 
+  it('encodes URL template values as one path segment', async () => {
+    const { client } = createRecordingAxiosClient({}, () => ({
+      data: {},
+      status: 200,
+      headers: {},
+    }));
+    const requestSpy = jest.spyOn(client, 'request');
+    const input = { id: 'a/b?next=yes#section' };
+
+    await executeDeclarativeRequest({
+      client,
+      request: { method: 'GET', url: 'https://api.example/items/{{ input.id }}' },
+      input,
+      config: {},
+    });
+    await executeDeclarativeRequest({
+      client,
+      request: { method: 'GET', baseUrl: 'https://api.example', path: '/items/{{ input.id }}' },
+      input,
+      config: {},
+    });
+
+    expect(requestSpy).toHaveBeenCalledTimes(2);
+    for (const [request] of requestSpy.mock.calls) {
+      expect(request.url).toBe('https://api.example/items/a%2Fb%3Fnext%3Dyes%23section');
+    }
+  });
+
   it('retries a 429 and then returns the success response', async () => {
     const sleep = jest.fn(async () => undefined);
     let calls = 0;

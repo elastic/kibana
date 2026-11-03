@@ -19,6 +19,12 @@ import { DeclarativeConnectorSpecError } from './types';
 const isZodObject = (schema: z.ZodType): schema is z.ZodObject =>
   'shape' in schema && typeof (schema as z.ZodObject).extend === 'function';
 
+const defaultScopeForMethod = (method: string): 'read' | 'write' | 'destroy' => {
+  if (method === 'GET') return 'read';
+  if (method === 'DELETE') return 'destroy';
+  return 'write';
+};
+
 /** Turns a parsed catalog contract into a ConnectorSpec with executable handlers. */
 export const materializeDeclarativeConnectorSpec = (
   connector: DeclarativeConnectorSpec
@@ -36,7 +42,7 @@ export const materializeDeclarativeConnectorSpec = (
       {
         description: action.description,
         isTool: action.isTool,
-        scope: action.scope ?? (action.request.method === 'GET' ? 'read' : 'write'),
+        scope: action.scope ?? defaultScopeForMethod(action.request.method),
         input: declarativeJsonSchemaToZod(action.input),
         handler: async (ctx: ActionContext, input: unknown) =>
           executeDeclarativeRequest({

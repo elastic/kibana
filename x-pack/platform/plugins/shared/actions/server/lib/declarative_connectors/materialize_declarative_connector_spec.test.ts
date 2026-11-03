@@ -38,6 +38,20 @@ describe('materializeDeclarativeConnectorSpec', () => {
     expect(materialized.test.enabled).toBe(true);
   });
 
+  it('defaults DELETE actions to the destroy scope', () => {
+    const deleteSpec = materializeDeclarativeConnectorSpec({
+      ...connector,
+      actions: {
+        remove: {
+          ...connector.actions.checkIp,
+          scope: undefined,
+          request: { ...connector.actions.checkIp.request, method: 'DELETE' },
+        },
+      },
+    });
+    expect(deleteSpec.actions.remove.scope).toBe('destroy');
+  });
+
   it('registers through createConnectorTypeFromSpec and validates config, params, and secrets', () => {
     const actionType = createConnectorTypeFromSpec(materialized, createSetupMock());
 

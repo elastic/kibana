@@ -7,7 +7,7 @@
 
 import type { ActionContext } from '@kbn/connector-specs';
 import type { DeclarativeRequest, DeclarativeResponseMapping, DeclarativeRetry } from './types';
-import { renderTemplateValue, type TemplateContext } from './render_template';
+import { renderTemplateValue, renderUrlTemplate, type TemplateContext } from './render_template';
 
 export interface ExecuteDeclarativeRequestOptions {
   client: ActionContext['client'];
@@ -92,7 +92,7 @@ const assertHttpUrl = (value: string): string => {
 
 const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string => {
   if (request.url !== undefined) {
-    const renderedUrl = renderTemplateValue(request.url, context);
+    const renderedUrl = renderUrlTemplate(request.url, context, true);
     if (typeof renderedUrl !== 'string' || renderedUrl.length === 0) {
       throw new Error('Declarative request url must render to a string.');
     }
@@ -100,7 +100,8 @@ const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string
   }
 
   const renderedBaseUrl = renderTemplateValue(request.baseUrl, context);
-  const renderedPath = renderTemplateValue(request.path, context);
+  const renderedPath =
+    request.path === undefined ? undefined : renderUrlTemplate(request.path, context);
   if (typeof renderedBaseUrl !== 'string' || typeof renderedPath !== 'string') {
     throw new Error('Declarative requests require a rendered URL or base URL and path.');
   }

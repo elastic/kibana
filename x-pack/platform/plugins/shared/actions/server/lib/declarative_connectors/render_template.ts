@@ -61,6 +61,30 @@ const renderString = (value: string, context: TemplateContext): unknown => {
   });
 };
 
+/** Encodes interpolated URL values so they cannot change path or query structure. */
+export const renderUrlTemplate = (
+  value: string,
+  context: TemplateContext,
+  allowBaseUrlPrefix = false
+): string =>
+  value.replace(EMBEDDED_TEMPLATE, (_match, path: string, offset: number) => {
+    const resolved = resolveTemplatePath(path, context);
+    if (resolved === undefined || resolved === null) {
+      throw new TemplateRenderError(`Declarative template "${path}" did not resolve to a value.`);
+    }
+    if (
+      typeof resolved !== 'string' &&
+      typeof resolved !== 'number' &&
+      typeof resolved !== 'boolean'
+    ) {
+      throw new TemplateRenderError(`Declarative URL template "${path}" must resolve to a scalar.`);
+    }
+    const rendered = String(resolved);
+    return allowBaseUrlPrefix && offset === 0 && path === 'config.baseUrl'
+      ? rendered
+      : encodeURIComponent(rendered);
+  });
+
 /** Renders `{{ input.x }}` and `{{ config.x }}` templates. Exact templates keep the raw value. */
 export const renderTemplateValue = (value: unknown, context: TemplateContext): unknown => {
   if (typeof value === 'string') {
