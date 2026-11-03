@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import { v4 as uuidv4 } from 'uuid';
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  AnalyticsServiceSetup,
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import Boom from '@hapi/boom';
 import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
@@ -21,6 +27,12 @@ import { runResolutionScoringStep } from './maintainer/steps/run_resolution_scor
 import { fetchWatchlistConfigs } from './maintainer/utils/fetch_watchlist_configs';
 import type { RiskEngineDataWriter } from './risk_engine_data_writer';
 import { DEFAULT_ALERT_SAMPLE_SIZE } from './constants';
+import { createRunInstrumentation } from './maintainer/instrumentation/reporting';
+import type { RunInstrumentation } from './maintainer/instrumentation/reporting';
+import type {
+  PageProfilingOptions,
+  PageStepTimings,
+} from './maintainer/instrumentation/page_timing_types';
 import type { RiskEngineConfiguration } from '../types';
 
 export interface RecalculateEntityRiskScoreParams {
@@ -43,6 +55,8 @@ export interface RecalculateEntityRiskScoreParams {
    */
   idBasedRiskScoringEnabled: boolean;
   logger: Logger;
+  telemetry: AnalyticsServiceSetup;
+  profiling: PageProfilingOptions;
   alertSampleSizePerShard?: number;
   collectScores?: boolean;
 }
@@ -63,6 +77,8 @@ export const recalculateEntityRiskScore = async ({
   logger,
   alertSampleSizePerShard = DEFAULT_ALERT_SAMPLE_SIZE,
   collectScores = false,
+  telemetry,
+  profiling,
 }: RecalculateEntityRiskScoreParams) => {
   const engineConfig = await getConfiguration({
     savedObjectsClient: soClient,
@@ -107,26 +123,38 @@ export const recalculateEntityRiskScore = async ({
     return { baseScore: undefined, resolutionScore: undefined };
   }
 
-  const { scores: baseScores, scoresCalculated } = await scoreBaseEntities({
-    esClient,
-    crudClient,
+  const instrumentation = createRunInstrumentation({
     logger,
-    entityType: identifierType as EntityType,
-    alertFilters,
-    alertsIndex,
-    pageSize,
-    sampleSize,
-    now,
-    watchlistConfigs,
+    telemetry,
     calculationRunId,
-    writer,
-    idBasedRiskScoringEnabled,
-    // The entity was already confirmed to exist in buildScoringContext above, so there's nothing
-    // for create-if-missing to do here.
-    createMissingEntities: false,
-    refresh: 'wait_for',
-    collectScores,
+    namespace,
   });
+  const observation = { instrumentation, entityType: identifierType, profiling };
+  const { scores: baseScores, scoresCalculated } = await runScoringStage(
+    { ...observation, stage: 'base' },
+    (pageTimings) =>
+      scoreBaseEntities({
+        pageTimings,
+        esClient,
+        crudClient,
+        logger,
+        entityType: identifierType as EntityType,
+        alertFilters,
+        alertsIndex,
+        pageSize,
+        sampleSize,
+        now,
+        watchlistConfigs,
+        calculationRunId,
+        writer,
+        idBasedRiskScoringEnabled,
+        // The entity was already confirmed to exist in buildScoringContext above, so there's nothing
+        // for create-if-missing to do here.
+        createMissingEntities: false,
+        refresh: 'wait_for',
+        collectScores,
+      })
+  );
 
   // The alerts are filtered down to this one entity, so nothing calculated means it has no alert
   // in the engine's range. Write a zero score so the entity's current criticality and watchlists
@@ -150,31 +178,69 @@ export const recalculateEntityRiskScore = async ({
     });
   }
 
-  const { scores: resolutionScores } = await runResolutionScoringStep({
-    esClient,
-    crudClient,
-    logger,
-    entityType: identifierType as EntityType,
-    alertsIndex,
-    lookupIndex,
-    pageSize,
-    sampleSize,
-    now,
-    calculationRunId,
-    watchlistConfigs,
-    idBasedRiskScoringEnabled,
-    writer,
-    targetEntityIds: [resolutionTargetId],
-    alertFilters: resolutionAlertFilters,
-    refresh: 'wait_for',
-    collectScores: true,
-  });
+  const { scores: resolutionScores } = await runScoringStage(
+    { ...observation, stage: 'resolution' },
+    (pageTimings) =>
+      runResolutionScoringStep({
+        pageTimings,
+        esClient,
+        crudClient,
+        logger,
+        entityType: identifierType as EntityType,
+        alertsIndex,
+        lookupIndex,
+        pageSize,
+        sampleSize,
+        now,
+        calculationRunId,
+        watchlistConfigs,
+        idBasedRiskScoringEnabled,
+        writer,
+        targetEntityIds: [resolutionTargetId],
+        alertFilters: resolutionAlertFilters,
+        refresh: 'wait_for',
+        collectScores: true,
+      })
+  );
 
   return {
     baseScore: entityId in baseScores ? baseScores[entityId] : undefined,
     resolutionScore:
       resolutionTargetId in resolutionScores ? resolutionScores[resolutionTargetId] : undefined,
   };
+};
+
+const runScoringStage = async <T>(
+  {
+    instrumentation,
+    entityType,
+    stage,
+    profiling,
+  }: {
+    instrumentation: RunInstrumentation;
+    entityType: string;
+    stage: 'base' | 'resolution';
+    profiling: PageProfilingOptions;
+  },
+  run: (pageTimings: PageStepTimings) => Promise<T>
+): Promise<T> => {
+  const pageTimings = instrumentation.createPageTimings(entityType, stage, profiling);
+  const startedAt = performance.now();
+  let result: T;
+  try {
+    result = await run(pageTimings);
+  } catch (error) {
+    instrumentation.finishStage(
+      { entityType, stage, status: 'error', durationMs: performance.now() - startedAt },
+      pageTimings
+    );
+    throw error;
+  }
+  instrumentation.finishStage(
+    { entityType, stage, status: 'success', durationMs: performance.now() - startedAt },
+    pageTimings
+  );
+  return result;
 };
 
 async function buildScoringContext({

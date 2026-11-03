@@ -97,7 +97,7 @@ export const DURATION_PERCENTILE = 75;
 export const TEST_STEP_TIMEOUT_MINUTES = 50;
 
 /**
- * Agent disk sizes (GiB) per step type. `undefined` uses the agent image default;
+ * Agent disk sizes (GiB) per step type. `undefined` uses `DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb`;
  * set a number to override it.
  */
 export const AGENT_DISK_GIB: Readonly<
@@ -116,11 +116,13 @@ export const PIPELINES = {
   ES_SERVERLESS_VERIFY: 'kibana-elasticsearch-serverless-verify-and-promote',
 } as const;
 
-/** Buildkite step/group keys registered for cancel-on-gate-failure. */
+/** Buildkite step/group keys of the picker and the test steps it uploads. */
 export const STEP_KEYS = {
+  PICK_TEST_GROUP_RUN_ORDER: 'pick_test_group_run_order',
   JEST_UNIT: 'jest',
   JEST_INTEGRATION: 'jest-integration',
   FTR_GROUP: 'ftr-configs',
+  FTR_CONFIG_PREFIX: 'ftr_configs_',
 } as const;
 
 /** PR label that prevents selective testing. */

@@ -10,6 +10,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiText,
+  EuiTextBlockTruncate,
+  EuiScreenReaderOnly,
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +37,7 @@ import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { ErrorPreviewFlyout } from './error_preview_flyout';
+import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 
 export const ErrorGroupsList = ({
   groups,
@@ -101,13 +104,15 @@ export const ErrorGroupsList = ({
             <strong>{item.name}</strong>
           </EuiText>
           {item.sampleMessage !== item.name && (
-            <EuiText
-              size="xs"
-              color="subdued"
-              className="eui-textTruncate"
-              title={item.sampleMessage}
-            >
-              {item.sampleMessage}
+            <EuiText size="xs" color="subdued">
+              {/* A line clamp, unlike nowrap truncation, doesn't make the auto-layout column as wide as the message */}
+              <EuiTextBlockTruncate
+                lines={1}
+                title={item.sampleMessage}
+                css={{ overflowWrap: 'anywhere' }}
+              >
+                {item.sampleMessage}
+              </EuiTextBlockTruncate>
             </EuiText>
           )}
         </div>
@@ -316,12 +321,15 @@ const ExpandedGroupRow = ({
       align: 'right',
       render: (value: number) => {
         if (!value || isNaN(value)) return <>{'--'}</>;
-        if (value < 60000) return <EuiText size="s">{`${Math.round(value / 1000)}s`}</EuiText>;
-        return <EuiText size="s">{`${Math.round(value / 60000)}m`}</EuiText>;
+        return <EuiText size="s">{formatTestDuration(value, true)}</EuiText>;
       },
     },
     {
-      name: ACTIONS_LABEL,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>{ACTIONS_LABEL}</span>
+        </EuiScreenReaderOnly>
+      ),
       width: '40px',
       render: (item: ErrorGroupItem) => (
         <EuiToolTip content={PREVIEW_LABEL} disableScreenReaderOutput>

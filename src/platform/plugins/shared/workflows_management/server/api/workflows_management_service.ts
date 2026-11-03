@@ -88,6 +88,7 @@ import {
   waitForManagedWorkflowInstallReadiness,
 } from '../lib/wait_for_managed_workflow_install_readiness';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
+import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import {
@@ -639,15 +640,17 @@ export class WorkflowsService {
 
   public async markStepAsResponded(
     stepExecutionId: string,
+    executionId: string,
     request: KibanaRequest,
     channel: string | undefined,
     spaceId: string
-  ): Promise<boolean> {
+  ): Promise<HitlStepClaim | null> {
     await this.ensureInitialized();
     // Resolve responder identity server-side so callers cannot spoof audit metadata.
     const respondedBy = getAuthenticatedUser(request, this.coreStart?.security);
     return this.executionQueryService.markStepAsResponded(
       stepExecutionId,
+      executionId,
       { respondedBy, respondedAt: new Date().toISOString(), channel },
       spaceId
     );
@@ -655,15 +658,27 @@ export class WorkflowsService {
 
   public async claimHitlStepForExternalResume(
     stepExecutionId: string,
+    executionId: string,
     respondedBy: string,
     spaceId: string
-  ): Promise<boolean> {
+  ): Promise<HitlStepClaim | null> {
     await this.ensureInitialized();
     return this.executionQueryService.markStepAsResponded(
       stepExecutionId,
+      executionId,
       { respondedBy, respondedAt: new Date().toISOString(), channel: 'external' },
       spaceId
     );
+  }
+
+  /** Releases a step claim whose resume was not applied, and returns whether it was released. */
+  public async releaseHitlStepClaim(
+    stepExecutionId: string,
+    claim: HitlStepClaim,
+    spaceId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.executionQueryService.releaseHitlStepClaim(stepExecutionId, claim, spaceId);
   }
 
   public async getWaitingStepExecutionId(
