@@ -251,7 +251,10 @@ export class NotebookScheduler {
     }
     const staleParents = parents.filter((_parent, index) => parentStatuses[index] === 'stale');
     if (staleParents.length > 0) {
-      this.markStale(id, 'upstream', { staleParents });
+      const changedParams = [
+        ...new Set(staleParents.flatMap((parent) => this.runtime(parent).changedParams ?? [])),
+      ];
+      this.markStale(id, 'upstream', { staleParents, changedParams });
       return;
     }
 
@@ -307,9 +310,10 @@ export class NotebookScheduler {
   }
 
   private evaluateChart({ id, sourceCell, runMode }: ChartCellDefinition, forced: boolean): void {
-    const sourceOutput = sourceCell === null ? undefined : this.runtime(sourceCell).output;
+    const source = sourceCell === null ? undefined : this.runtime(sourceCell);
+    const sourceOutput = source?.output;
     const runtime = this.runtime(id);
-    if (!sourceOutput) {
+    if (!source || !sourceOutput || sourceCell === null) {
       this.publish(id, { status: 'idle' });
       return;
     }
@@ -318,11 +322,23 @@ export class NotebookScheduler {
       return;
     }
     if (runMode === 'manual' && !forced) {
-      const hasRun = runtime.output !== undefined && sourceCell !== null;
-      this.markStale(id, 'manual', hasRun ? { staleParents: [sourceCell] } : undefined);
+      const { output, runParams } = runtime;
+      this.markStale(
+        id,
+        'manual',
+        output && {
+          staleParents: [sourceCell],
+          changedParams: runParams ? getChangedParams(runParams, source.runParams ?? {}) : [],
+        }
+      );
       return;
     }
-    this.publish(id, { status: 'done', output: sourceOutput, lastRunAt: this.now().getTime() });
+    this.publish(id, {
+      status: 'done',
+      output: sourceOutput,
+      runParams: source.runParams,
+      lastRunAt: this.now().getTime(),
+    });
   }
 
   private async evaluateInput(

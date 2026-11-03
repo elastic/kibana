@@ -51,11 +51,21 @@ const MANUAL_TOOLTIP = i18n.translate('xpack.notebook.status.staleManualTooltip'
   defaultMessage: 'This cell is in manual run mode and has not run yet. Run it to see results.',
 });
 
+const formatParams = (params: readonly string[]): string =>
+  params.map((param) => `?${param}`).join(', ');
+
 const getChangedParamsTooltip = (params: readonly string[]): string =>
   i18n.translate('xpack.notebook.status.staleChangedParamsTooltip', {
     defaultMessage:
       '{params} changed since this cell last ran. It is in manual run mode, so run it to update its results.',
-    values: { params: params.map((param) => `?${param}`).join(', ') },
+    values: { params: formatParams(params) },
+  });
+
+const getChangedUpstreamTooltip = (params: readonly string[], names: readonly string[]): string =>
+  i18n.translate('xpack.notebook.status.staleChangedUpstreamTooltip', {
+    defaultMessage:
+      '{params} changed, but {count, plural, one {{names} has} other {{names} have}} not run yet. Run {count, plural, one {it} other {them}} to update this cell.',
+    values: { params: formatParams(params), names: names.join(', '), count: names.length },
   });
 
 const getUpdatedSourceTooltip = (names: readonly string[]): string =>
@@ -78,7 +88,11 @@ const getStaleTooltip = (
   changedParams: readonly string[]
 ): string => {
   if (reason === 'edited') return EDITED_TOOLTIP;
-  if (reason === 'upstream') return getUpstreamTooltip(parentNames);
+  if (reason === 'upstream') {
+    return changedParams.length > 0
+      ? getChangedUpstreamTooltip(changedParams, parentNames)
+      : getUpstreamTooltip(parentNames);
+  }
   if (changedParams.length > 0) return getChangedParamsTooltip(changedParams);
   if (parentNames.length > 0) return getUpdatedSourceTooltip(parentNames);
   return MANUAL_TOOLTIP;

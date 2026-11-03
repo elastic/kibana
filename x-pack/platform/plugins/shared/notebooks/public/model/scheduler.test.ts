@@ -215,6 +215,7 @@ describe('NotebookScheduler', () => {
         status: 'stale',
         staleReason: 'upstream',
         staleParents: ['q'],
+        changedParams: [],
       });
     });
 
@@ -588,6 +589,7 @@ describe('NotebookScheduler', () => {
         status: 'stale',
         staleReason: 'upstream',
         staleParents: ['q'],
+        changedParams: ['os'],
       });
       expect(env.output('q')).toBe(qOutput);
       expect(env.output('c')).toBe(qOutput);
@@ -637,6 +639,26 @@ describe('NotebookScheduler', () => {
         status: 'stale',
         staleReason: 'manual',
         staleParents: ['q'],
+      });
+    });
+
+    it('traces a manual chart back to the input that changed its source', async () => {
+      const query = 'FROM logs | WHERE ?os IS NULL OR os == ?os';
+      const env = track(
+        setup([dropdown('os'), esql('q', query), chart('c', 'q', { runMode: 'manual' })])
+      );
+      await env.open();
+      await env.scheduler.runCell('c');
+
+      env.store.setInputValue('os', { kind: 'dropdown', value: 'win 7' });
+      await env.scheduler.whenIdle();
+
+      expect(env.runtime('q').status).toBe('done');
+      expect(env.runtime('c')).toMatchObject({
+        status: 'stale',
+        staleReason: 'manual',
+        staleParents: ['q'],
+        changedParams: ['os'],
       });
     });
 
