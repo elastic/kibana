@@ -196,6 +196,8 @@ export interface ServiceNodeData extends BaseNodeData {
   alertsByStatus?: Partial<Record<AlertStatus, number>>;
   sloStatus?: SloStatus | 'noSLOs';
   sloCount?: number;
+  /** Only set when service map grouping is enabled and the service has transactions */
+  stats?: ServiceMapServiceStats;
 }
 
 export interface DependencyNodeData extends BaseNodeData {
