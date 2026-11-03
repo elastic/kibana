@@ -28,6 +28,7 @@ import { useCreateSources } from '../../data/sources/use_create_sources';
 import { useRecommendedSources } from '../../data/sources/use_recommended_sources';
 import type { SourceFormValues } from '../source_flyout/source_flyout';
 import {
+  ADD_SELECTED_SOURCE_LABEL,
   ADD_SELECTED_SOURCES_LABEL,
   CREATE_SOURCE_LABEL,
   EMPTY_RECOMMENDATIONS_HINT,
@@ -39,6 +40,8 @@ import {
   QUERY_COLUMN_HEADER,
   RETRY_LABEL,
   SOURCES_INTRODUCTION,
+  SOURCES_PAGE_INTRODUCTION,
+  SOURCES_PAGE_TABLE_CAPTION,
   SOURCES_TABLE_CAPTION,
   TABLE_CAPTION,
   TITLE_COLUMN_HEADER,
@@ -154,12 +157,15 @@ export const RecommendedSourcesTable = ({
           failedDraftIds.current.has(draftId) ||
           submittingDraftIds.current.has(draftId)
       );
+      const automaticallySelectedDraftIds = isSourcesPage
+        ? recommendedDrafts.map(({ draftId }) => draftId)
+        : newRecommendedDraftIds;
       return [
         ...retained,
-        ...newRecommendedDraftIds.filter((draftId) => !retained.includes(draftId)),
+        ...automaticallySelectedDraftIds.filter((draftId) => !retained.includes(draftId)),
       ];
     });
-  }, [recommendations.data]);
+  }, [isSourcesPage, recommendations.data]);
 
   const selectedDrafts = drafts.filter(({ draftId }) => selectedDraftIds.includes(draftId));
   const selectedRecommendedCount = selectedDrafts.filter(
@@ -168,6 +174,21 @@ export const RecommendedSourcesTable = ({
   const selectedCustomCount = selectedDrafts.length - selectedRecommendedCount;
   const editingDraft =
     flyout?.mode === 'edit' ? drafts.find(({ draftId }) => draftId === flyout.draftId) : undefined;
+  const submitLabel = isSourcesPage
+    ? ADD_SELECTED_SOURCE_LABEL
+    : isAddingSources
+    ? ADD_SELECTED_SOURCES_LABEL
+    : ENABLE_DETECTION_LABEL;
+  const introduction = isSourcesPage
+    ? SOURCES_PAGE_INTRODUCTION
+    : isAddingSources
+    ? SOURCES_INTRODUCTION
+    : INTRODUCTION;
+  const tableCaption = isSourcesPage
+    ? SOURCES_PAGE_TABLE_CAPTION
+    : isAddingSources
+    ? SOURCES_TABLE_CAPTION
+    : TABLE_CAPTION;
 
   const columns: Array<EuiBasicTableColumn<SourceDraft>> = [
     {
@@ -252,10 +273,14 @@ export const RecommendedSourcesTable = ({
   return (
     <>
       <EuiPanel hasBorder data-test-subj="nightshiftRecommendedSourcesTable">
-        <EuiText size="s">
-          <p>{isAddingSources ? SOURCES_INTRODUCTION : INTRODUCTION}</p>
-        </EuiText>
-        <EuiSpacer size="m" />
+        {(!isSourcesPage || drafts.length > 0) && (
+          <>
+            <EuiText size="s">
+              <p>{introduction}</p>
+            </EuiText>
+            <EuiSpacer size="m" />
+          </>
+        )}
 
         {recommendations.isLoading && drafts.length === 0 ? (
           <EuiSkeletonText lines={3} data-test-subj="nightshiftRecommendedSourcesLoading" />
@@ -285,11 +310,11 @@ export const RecommendedSourcesTable = ({
 
             {drafts.length > 0 ? (
               <EuiInMemoryTable
-                tableCaption={isAddingSources ? SOURCES_TABLE_CAPTION : TABLE_CAPTION}
+                tableCaption={tableCaption}
                 itemId="draftId"
                 items={drafts}
                 columns={columns}
-                selection={selection}
+                selection={isSourcesPage ? undefined : selection}
               />
             ) : (
               <EuiText size="s" color="subdued">
@@ -302,21 +327,27 @@ export const RecommendedSourcesTable = ({
         )}
 
         <EuiSpacer size="m" />
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="plus"
-              onClick={() => setFlyout({ mode: 'create' })}
-              data-test-subj="nightshiftRecommendedSourcesCreateButton"
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.CREATE_DRAFT_SOURCE,
-                element: NIGHTSHIFT_EBT_ELEMENTS.RECOMMENDED_SOURCES_TABLE,
-                detail: entry,
-              })}
-            >
-              {CREATE_SOURCE_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+        <EuiFlexGroup
+          justifyContent={isSourcesPage ? 'flexEnd' : 'spaceBetween'}
+          alignItems="center"
+          responsive={false}
+        >
+          {!isSourcesPage && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="plus"
+                onClick={() => setFlyout({ mode: 'create' })}
+                data-test-subj="nightshiftRecommendedSourcesCreateButton"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.CREATE_DRAFT_SOURCE,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.RECOMMENDED_SOURCES_TABLE,
+                  detail: entry,
+                })}
+              >
+                {CREATE_SOURCE_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
@@ -338,7 +369,7 @@ export const RecommendedSourcesTable = ({
                 }),
               })}
             >
-              {isAddingSources ? ADD_SELECTED_SOURCES_LABEL : ENABLE_DETECTION_LABEL}
+              {submitLabel}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

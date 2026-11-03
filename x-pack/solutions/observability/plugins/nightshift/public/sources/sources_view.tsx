@@ -50,10 +50,7 @@ import {
   RecommendedSourcesTable,
   type RecommendedSourcesCreationState,
 } from './recommended_sources/recommended_sources_table';
-import {
-  RECOMMENDED_SOURCES_TITLE,
-  SOURCES_NOT_ADDED_TITLE,
-} from './recommended_sources/translations';
+import { ADD_RECOMMENDED_SOURCES_TITLE } from './recommended_sources/translations';
 
 const SourceFlyout = React.lazy(() =>
   import('./source_flyout/source_flyout').then(({ SourceFlyout: Flyout }) => ({ default: Flyout }))
@@ -189,6 +186,7 @@ export function SourcesView() {
   };
 
   // With cached sources, a failed refetch keeps the table; the toast already reports it.
+  const hasSources = sources.length > 0;
   const hasSourcesLoadFailed = isSourcesError && sources.length === 0;
   const hasNoSources = sources.length === 0 && (!isSourcesError || hasShownEmptySourceSetup);
   const shouldRetainSourceCreation =
@@ -246,7 +244,7 @@ export function SourcesView() {
                 isClearable
               />
             </EuiFlexItem>
-            {canManage && (
+            {canManage && !showInitialSourceSetup && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="significantEventsAppCreateSourceButton"
@@ -258,7 +256,7 @@ export function SourcesView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            {canManage && (
+            {hasSources && canManage && (
               <EuiFlexItem grow={false}>
                 <GenerateSplitButton
                   size="s"
@@ -288,16 +286,18 @@ export function SourcesView() {
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <FindSignificantEventsButton
-                onRun={handleRun}
-                onCancel={handleCancel}
-                isRunning={isRunning}
-                isCanceling={isCanceling}
-                isDisabled={isRunning || blocksActivity}
-                disabledTooltip={activityBlockTooltip}
-              />
-            </EuiFlexItem>
+            {hasSources && (
+              <EuiFlexItem grow={false}>
+                <FindSignificantEventsButton
+                  onRun={handleRun}
+                  onCancel={handleCancel}
+                  isRunning={isRunning}
+                  isCanceling={isCanceling}
+                  isDisabled={isRunning || blocksActivity}
+                  disabledTooltip={activityBlockTooltip}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 
@@ -334,9 +334,7 @@ export function SourcesView() {
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="s">
                         <h2 data-test-subj="nightshiftRecommendedSourcesTitle">
-                          {sourceCreationState.hasFailedDrafts
-                            ? SOURCES_NOT_ADDED_TITLE
-                            : RECOMMENDED_SOURCES_TITLE}
+                          {ADD_RECOMMENDED_SOURCES_TITLE}
                         </h2>
                       </EuiTitle>
                       <EuiSpacer size="s" />
@@ -375,7 +373,7 @@ export function SourcesView() {
                 />
               </EuiFlexItem>
             )}
-            {sources.length > 0 && (
+            {hasSources && (
               <React.Fragment key="sourceCatalog">
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">{getSourcesCountLabel(sources.length)}</EuiText>

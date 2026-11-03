@@ -95,11 +95,10 @@ const TableHarness = ({ entry }: { entry: 'detections_page' | 'sources_page' }) 
   );
 };
 
-const renderTable = (entry: 'detections_page' | 'sources_page' = 'detections_page') =>
-  render(
-    <QueryClientProvider
-      client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
-    >
+const renderTable = (entry: 'detections_page' | 'sources_page' = 'detections_page') => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const renderRecommendedSourcesTable = () => (
+    <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <EuiProvider>
           <TableHarness entry={entry} />
@@ -107,6 +106,9 @@ const renderTable = (entry: 'detections_page' | 'sources_page' = 'detections_pag
       </I18nProvider>
     </QueryClientProvider>
   );
+  const view = render(renderRecommendedSourcesTable());
+  return { rerenderTable: () => view.rerender(renderRecommendedSourcesTable()) };
+};
 
 describe('RecommendedSourcesTable', () => {
   beforeEach(() => {
@@ -149,22 +151,38 @@ describe('RecommendedSourcesTable', () => {
   });
 
   it('uses source-specific action and success copy on the Sources page', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ source: makeSource('logs') })
-      .mockResolvedValueOnce({ source: makeSource('metrics') });
-    renderTable('sources_page');
-    await waitFor(() =>
-      expect(screen.getByTestId('checkboxSelectRow-recommended-logs')).toBeChecked()
-    );
+    mockRecommendations = [RECOMMENDATIONS[0]];
+    mockFetch.mockResolvedValueOnce({ source: makeSource('logs') });
+    const { rerenderTable } = renderTable('sources_page');
 
     const submitButton = screen.getByTestId('nightshiftRecommendedSourcesEnableButton');
-    expect(submitButton).toHaveTextContent('Add selected sources');
+    await waitFor(() => expect(submitButton).toBeEnabled());
+    expect(screen.queryByTestId('checkboxSelectAll')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('checkboxSelectRow-recommended-logs')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftRecommendedSourcesCreateButton')
+    ).not.toBeInTheDocument();
+    expect(submitButton).toHaveTextContent('Add selected source');
     expect(submitButton).toHaveAttribute('data-ebt-action', 'addRecommendedSources');
+
+    mockRecommendations = [];
+    rerenderTable();
+    await waitFor(() => expect(submitButton).toBeDisabled());
+    expect(
+      screen.queryByText('You can edit this recommendation before adding it to this space.')
+    ).not.toBeInTheDocument();
+
+    mockRecommendations = [RECOMMENDATIONS[0]];
+    rerenderTable();
+    await waitFor(() => expect(submitButton).toBeEnabled());
+    expect(
+      screen.getByText('You can edit this recommendation before adding it to this space.')
+    ).toBeInTheDocument();
     fireEvent.click(submitButton);
 
     await waitFor(() =>
       expect(mockToasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Added 2 sources',
+        title: 'Added 1 source',
         text: undefined,
       })
     );

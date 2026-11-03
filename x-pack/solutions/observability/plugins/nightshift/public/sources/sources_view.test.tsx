@@ -84,8 +84,14 @@ jest.mock('../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ blocksActivity: false }),
 }));
 jest.mock('../components/search_bar', () => ({ SignificantEventsSearchBar: () => null }));
-jest.mock('./onboarding/generate_split_button', () => ({ GenerateSplitButton: () => null }));
-jest.mock('./find_significant_events_button', () => ({ FindSignificantEventsButton: () => null }));
+jest.mock('./onboarding/generate_split_button', () => ({
+  GenerateSplitButton: () => <button data-test-subj="generateSplitButtonStub">Generate</button>,
+}));
+jest.mock('./find_significant_events_button', () => ({
+  FindSignificantEventsButton: () => (
+    <button data-test-subj="findSignificantEventsButtonStub">Find significant events</button>
+  ),
+}));
 let mockRecommendedSourcesTableMountCount = 0;
 jest.mock('./recommended_sources/recommended_sources_table', () => ({
   INITIAL_RECOMMENDED_SOURCES_CREATION_STATE: {
@@ -282,9 +288,12 @@ describe('SourcesView routes', () => {
     expect(screen.getByTestId('significantEventsAppSourcesEmptyPrompt')).toBeInTheDocument();
     expect(screen.getByText('Create your first source')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
-      'Recommended sources'
+      'Add Recommended Sources'
     );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('significantEventsAppCreateSourceButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('generateSplitButtonStub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('findSignificantEventsButtonStub')).not.toBeInTheDocument();
   });
 
   it('keeps failed drafts after partial creation adds a source', () => {
@@ -296,7 +305,7 @@ describe('SourcesView routes', () => {
 
     expect(screen.queryByTestId('significantEventsAppSourcesEmptyPrompt')).not.toBeInTheDocument();
     expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
-      'Sources not added'
+      'Add Recommended Sources'
     );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Source source-1' })).toBeInTheDocument();
@@ -344,7 +353,7 @@ describe('SourcesView routes', () => {
 
     expect(screen.getByTestId('significantEventsAppSourcesLoadErrorPrompt')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
-      'Sources not added'
+      'Add Recommended Sources'
     );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
   });
@@ -376,7 +385,7 @@ describe('SourcesView routes', () => {
 
     expect(screen.getByTestId('significantEventsAppSourcesLoadErrorPrompt')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftRecommendedSourcesTitle')).toHaveTextContent(
-      'Sources not added'
+      'Add Recommended Sources'
     );
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
   });
@@ -422,5 +431,6 @@ describe('SourcesView routes', () => {
     expect(mockToasts.addWarning).not.toHaveBeenCalled();
     expect(screen.getByTestId('significantEventsAppSourcesLoadErrorPrompt')).toBeInTheDocument();
     expect(screen.queryByTestId('recommendedSourcesTableStub')).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsAppCreateSourceButton')).toBeInTheDocument();
   });
 });

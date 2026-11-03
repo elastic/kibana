@@ -20,9 +20,21 @@ export const SOURCES_INTRODUCTION = i18n.translate(
   }
 );
 
+export const SOURCES_PAGE_INTRODUCTION = i18n.translate(
+  'xpack.nightshift.recommendedSources.sourcesPageIntroduction',
+  {
+    defaultMessage: 'You can edit this recommendation before adding it to this space.',
+  }
+);
+
 export const RECOMMENDED_SOURCES_TITLE = i18n.translate(
   'xpack.nightshift.recommendedSources.title',
   { defaultMessage: 'Recommended sources' }
+);
+
+export const ADD_RECOMMENDED_SOURCES_TITLE = i18n.translate(
+  'xpack.nightshift.recommendedSources.addRecommendedSourcesTitle',
+  { defaultMessage: 'Add Recommended Sources' }
 );
 
 export const SOURCES_NOT_ADDED_TITLE = i18n.translate(
@@ -49,6 +61,11 @@ export const SOURCES_TABLE_CAPTION = i18n.translate(
   { defaultMessage: 'Recommended sources to add' }
 );
 
+export const SOURCES_PAGE_TABLE_CAPTION = i18n.translate(
+  'xpack.nightshift.recommendedSources.sourcesPageTableCaption',
+  { defaultMessage: 'Recommended source to add' }
+);
+
 export const CREATE_SOURCE_LABEL = i18n.translate(
   'xpack.nightshift.recommendedSources.createSourceLabel',
   { defaultMessage: 'Create new source' }
@@ -62,6 +79,11 @@ export const ENABLE_DETECTION_LABEL = i18n.translate(
 export const ADD_SELECTED_SOURCES_LABEL = i18n.translate(
   'xpack.nightshift.recommendedSources.addSelectedSourcesLabel',
   { defaultMessage: 'Add selected sources' }
+);
+
+export const ADD_SELECTED_SOURCE_LABEL = i18n.translate(
+  'xpack.nightshift.recommendedSources.addSelectedSourceLabel',
+  { defaultMessage: 'Add selected source' }
 );
 
 export const LOAD_ERROR_TITLE = i18n.translate(
