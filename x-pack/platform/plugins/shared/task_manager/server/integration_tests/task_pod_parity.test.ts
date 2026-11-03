@@ -181,6 +181,25 @@ describe('task pod parity (alerting_v2 family)', () => {
     });
   });
 
+  it('runs the dispatcher in the pod and advances its watermark', async () => {
+    const es = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
+    const taskId = 'alerting_v2:dispatcher:1.0.0';
+    const watermark = async () => {
+      const doc = await es.get<{ task: { state: string } }>({
+        index: '.kibana_task_manager',
+        id: `task:${taskId}`,
+      });
+      return JSON.parse(doc._source!.task.state).eventWatermark as string | undefined;
+    };
+    const before = await watermark();
+    await taskManager.runSoon(taskId);
+    await retry(async () => {
+      const after = await watermark();
+      expect(after).toBeDefined();
+      expect(after).not.toEqual(before);
+    });
+  });
+
   it('did not create any index or data stream', async () => {
     const after = await listIndices(kibanaServer);
     const created = after.filter((i) => !indicesBeforePod.includes(i));
