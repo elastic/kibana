@@ -64,6 +64,8 @@ export const SESSION_MEMORY_INTERNAL_API_VERSION = '1';
 /** Elasticsearch `_context_engine` endpoints the session memory routes proxy to. */
 export const ES_SESSION_MEMORY_PATH = '/_context_engine/session_memory';
 export const ES_SESSION_EVENTS_PATH = '/_context_engine/session_events';
+/** Elasticsearch `_context_engine` AI index registry API, backed by the `.context-engine-ai-indices` system index. */
+export const ES_AI_INDEX_PATH = '/_context_engine/ai_index';
 
 /** Default and maximum number of hits for a session memory search. */
 export const DEFAULT_SESSION_MEMORY_SEARCH_SIZE = 10;

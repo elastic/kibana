@@ -12,7 +12,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { latestRevisionPipeline, probeColumns } from '../ai_indices/ki_list';
-import { aiIndicesIndexName, type StoredAiIndexDocument } from '../ai_indices/storage';
+import { listAiIndexRecords } from '../ai_indices/registry_api';
 import { formatErrorMessage } from '../utils/format_es_error';
 
 /** Upper bound on AI index entries read per collection. */
@@ -125,26 +125,16 @@ const fetchContextEngineUsage = async ({
   getManagedDest: (id: string) => AiIndexDest | undefined;
   logger: Logger;
 }): Promise<ContextEngineUsage> => {
-  const response = await esClient.search<StoredAiIndexDocument>({
-    index: aiIndicesIndexName,
-    ignore_unavailable: true,
-    size: MAX_COLLECTED_AI_INDICES,
-    track_total_hits: false,
-    _source: ['id', 'managed', 'dest'],
-  });
+  // No space: usage covers the whole deployment.
+  const records = await listAiIndexRecords(esClient, { size: MAX_COLLECTED_AI_INDICES });
 
   const aiIndices = { user: 0, managed: 0 };
   // Every dest counts once.
   const destOwners = new Map<string, { dest: AiIndexDest; owner: 'user' | 'managed' }>();
-  for (const hit of response.hits.hits) {
-    const source = hit._source;
-    if (source === undefined) {
-      continue;
-    }
-    const owner = source.managed === true ? 'managed' : 'user';
+  for (const record of records) {
+    const owner = record.managed === true ? 'managed' : 'user';
     aiIndices[owner] += 1;
-    const id = source.id ?? hit._id;
-    const dest = owner === 'managed' && id !== undefined ? getManagedDest(id) : source.dest;
+    const dest = owner === 'managed' ? getManagedDest(record.id) : record.dest;
     if (dest !== undefined && !isIndexPattern(dest.value) && !destOwners.has(dest.value)) {
       destOwners.set(dest.value, { dest, owner });
     }

@@ -24,11 +24,6 @@ const KI_COLUMNS = [
   'expires_at',
 ];
 
-const hit = (source: Record<string, unknown>) => ({
-  _index: '.contextengine-ai-indices',
-  _source: source,
-});
-
 const probeResponse = (columns: string[]) => ({
   columns: columns.map((name) => ({ name, type: 'keyword' })),
   values: [],
@@ -51,10 +46,8 @@ describe('context_engine usage collector', () => {
   let esqlResponses: Map<string, { columns?: string[]; counts?: Record<string, number> } | Error>;
   const managedDests = new Map<string, AiIndexDest>();
 
-  const setHits = (sources: Array<Record<string, unknown>>) => {
-    esClient.search.mockResolvedValue({
-      hits: { hits: sources.map(hit) },
-    } as unknown as Awaited<ReturnType<typeof esClient.search>>);
+  const setRecords = (records: Array<Record<string, unknown>>) => {
+    esClient.transport.request.mockResolvedValue({ count: records.length, results: records });
   };
 
   const fetch = () => collector.fetch(createCollectorFetchContextMock());
@@ -93,7 +86,7 @@ describe('context_engine usage collector', () => {
   });
 
   it('counts entries from all spaces', async () => {
-    setHits([
+    setRecords([
       { id: 'a', space: 'default', dest: { type: 'index', value: 'ai-index-idx-a' } },
       { id: 'b', space: 'other', dest: { type: 'data_stream', value: 'ai-index-ds-b' } },
       { id: 'c', space: 'third', managed: false, dest: { type: 'index', value: 'ai-index-idx-c' } },
@@ -106,9 +99,12 @@ describe('context_engine usage collector', () => {
 
     const usage = await fetch();
 
-    expect(esClient.search).toHaveBeenCalledWith(
-      expect.not.objectContaining({ query: expect.anything() })
-    );
+    // No space: usage covers the whole deployment.
+    expect(esClient.transport.request).toHaveBeenCalledWith({
+      method: 'GET',
+      path: '/_context_engine/ai_index',
+      querystring: { size: 10_000 },
+    });
     expect(usage).toEqual({
       ai_indices: { user: 3, managed: 0 },
       kis: {
@@ -124,7 +120,7 @@ describe('context_engine usage collector', () => {
 
   it('takes managed dest from the registration', async () => {
     managedDests.set('elastic', { type: 'index', value: '.ai-index-idx-elastic-index' });
-    setHits([
+    setRecords([
       { id: 'elastic', space: 'default', managed: true, dest: { type: 'index', value: 'stale' } },
       { id: 'elastic', space: 'other', managed: true, dest: { type: 'index', value: 'stale' } },
     ]);
@@ -149,7 +145,7 @@ describe('context_engine usage collector', () => {
   });
 
   it('skips pattern dests', async () => {
-    setHits([{ id: 'legacy', dest: { type: 'index', value: 'logs-*' } }]);
+    setRecords([{ id: 'legacy', dest: { type: 'index', value: 'logs-*' } }]);
 
     const usage = await fetch();
 
@@ -158,7 +154,7 @@ describe('context_engine usage collector', () => {
   });
 
   it('skips dests that fail to count', async () => {
-    setHits([
+    setRecords([
       { id: 'broken', dest: { type: 'index', value: 'ai-index-idx-broken' } },
       { id: 'ok', dest: { type: 'index', value: 'ai-index-idx-ok' } },
     ]);
@@ -181,7 +177,7 @@ describe('context_engine usage collector', () => {
   });
 
   it('sets a request timeout on every query', async () => {
-    setHits([{ id: 'a', dest: { type: 'index', value: 'ai-index-idx-a' } }]);
+    setRecords([{ id: 'a', dest: { type: 'index', value: 'ai-index-idx-a' } }]);
 
     await fetch();
 
@@ -192,7 +188,7 @@ describe('context_engine usage collector', () => {
   });
 
   it('leaves unmapped fields out of the query', async () => {
-    setHits([{ id: 'bare', dest: { type: 'data_stream', value: 'ai-index-ds-bare' } }]);
+    setRecords([{ id: 'bare', dest: { type: 'data_stream', value: 'ai-index-ds-bare' } }]);
     esqlResponses.set('ai-index-ds-bare', { columns: ['_id', '_index'], counts: { active: 2 } });
 
     await fetch();

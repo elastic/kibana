@@ -13,9 +13,13 @@ const CONTEXT_ENGINE_USER_INDEX_PREFIX = 'context-engine-';
 
 const CONTEXT_ENGINE_SYSTEM_INDEX_PREFIX = '.contextengine-';
 
+/** The Elasticsearch-owned Context Engine system indices and data streams (registry, session memory, events). */
+const CONTEXT_ENGINE_ES_SYSTEM_INDEX_PREFIX = '.context-engine-';
+
 const SELF_REFERENTIAL_PREFIXES = [
   CONTEXT_ENGINE_USER_INDEX_PREFIX,
   CONTEXT_ENGINE_SYSTEM_INDEX_PREFIX,
+  CONTEXT_ENGINE_ES_SYSTEM_INDEX_PREFIX,
   AGENT_BUILDER_TRACES_INDEX_PREFIX,
 ];
 

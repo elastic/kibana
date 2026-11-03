@@ -23,8 +23,10 @@ describe('isSelfReferentialTarget', () => {
     expect(isSelfReferentialTarget('traces-agent_builder.otel-*')).toBe(true);
   });
 
-  it('matches the AI index registry system index', () => {
+  it('matches the Kibana- and Elasticsearch-owned Context Engine system indices', () => {
     expect(isSelfReferentialTarget('.contextengine-ai-indices')).toBe(true);
+    expect(isSelfReferentialTarget('.context-engine-ai-indices')).toBe(true);
+    expect(isSelfReferentialTarget('.context-engine-session-memory')).toBe(true);
   });
 
   it('matches data-stream backing indices', () => {

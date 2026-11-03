@@ -44,9 +44,7 @@ import {
   AI_INDEX_PATH,
   AI_INDEX_QUERY_PATH,
 } from '../../common/constants';
-import { aiIndicesIndexName } from '../ai_indices/storage';
 import { kiIdQuery } from '../ai_indices/ki_get';
-import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 import { apiPrivileges } from '../../common/features';
 import type { AiIndexHttpItem, DescribeAiIndexResponse } from '../../common/http_api/ai_indices';
 import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
@@ -145,7 +143,7 @@ describe('ai indices routes', () => {
   let esGet: jest.Mock;
   let esDeleteDataStream: jest.Mock;
   let esDeleteIndex: jest.Mock;
-  let esInternalSearch: jest.Mock;
+  let esInternalRequest: jest.Mock;
   let spacesStart: ReturnType<typeof spacesMock.createStart>;
   let improvementsClients: unknown[];
   let improvementsSpaceIds: string[];
@@ -176,7 +174,7 @@ describe('ai indices routes', () => {
               },
             },
             asInternalUser: {
-              search: esInternalSearch,
+              transport: { request: esInternalRequest },
             },
           },
         },
@@ -219,7 +217,7 @@ describe('ai indices routes', () => {
       aliases: [],
       data_streams: [],
     });
-    esInternalSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+    esInternalRequest = jest.fn().mockResolvedValue({ count: 0, results: [] });
     spacesStart = spacesMock.createStart();
     aiIndexService = {
       create: jest.fn(),
@@ -1861,42 +1859,40 @@ describe('ai indices routes', () => {
           query: { delete_knowledge_indicators: true },
         });
 
-        expect(esInternalSearch).toHaveBeenCalledWith({
-          index: aiIndicesIndexName,
-          size: MAX_AI_INDICES,
-          track_total_hits: false,
-          query: {
-            bool: {
-              filter: [{ term: { 'dest.value': aiIndexItem.dest.value } }],
-              must_not: [createAiIndexIdentityDslFilter('customer_support', defaultSpaceId)],
-            },
-          },
+        expect(esInternalRequest).toHaveBeenCalledWith({
+          method: 'GET',
+          path: '/_context_engine/ai_index',
+          querystring: { dest: aiIndexItem.dest.value, size: MAX_AI_INDICES },
         });
         expect(esDeleteDataStream).toHaveBeenCalledWith({ name: aiIndexItem.dest.value });
         expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
       });
 
-      it('excludes the deleted entry from the request space, not always default', async () => {
+      it('keeps the backing store when the same id in another space still uses it', async () => {
         const spaces = spacesMock.createStart();
         spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
         getSpaces.mockResolvedValue(spaces);
         aiIndexService.delete.mockResolvedValue(undefined);
+        esInternalRequest.mockResolvedValue({
+          count: 2,
+          results: [
+            { id: 'customer_support', space: 'marketing' },
+            { id: 'customer_support', space: defaultSpaceId },
+          ],
+        });
 
         await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
           params: { aiIndexId: 'customer_support' },
           query: { delete_knowledge_indicators: true },
         });
 
-        expect(esInternalSearch).toHaveBeenCalledWith(
-          expect.objectContaining({
-            query: {
-              bool: {
-                filter: [{ term: { 'dest.value': aiIndexItem.dest.value } }],
-                must_not: [createAiIndexIdentityDslFilter('customer_support', 'marketing')],
-              },
-            },
-          })
-        );
+        expect(esDeleteDataStream).not.toHaveBeenCalled();
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            acknowledged: true,
+            errors: [expect.stringContaining(`${defaultSpaceId}/customer_support`)],
+          },
+        });
       });
 
       it('deletes the backing index when dest type is index', async () => {
@@ -1917,8 +1913,9 @@ describe('ai indices routes', () => {
 
       it('skips dest delete and warns when another AI index still uses the dest', async () => {
         aiIndexService.delete.mockResolvedValue(undefined);
-        esInternalSearch.mockResolvedValue({
-          hits: { hits: [{ _id: 'other_space_index' }] },
+        esInternalRequest.mockResolvedValue({
+          count: 1,
+          results: [{ id: 'other_space_index', space: defaultSpaceId }],
         });
 
         await callRoute('DELETE', AI_INDEX_BY_ID_PATH, {
@@ -1962,7 +1959,7 @@ describe('ai indices routes', () => {
         });
 
         expect(esDeleteDataStream).not.toHaveBeenCalled();
-        expect(esInternalSearch).not.toHaveBeenCalled();
+        expect(esInternalRequest).not.toHaveBeenCalled();
       });
 
       it('does not delete a dest that is an index pattern', async () => {
