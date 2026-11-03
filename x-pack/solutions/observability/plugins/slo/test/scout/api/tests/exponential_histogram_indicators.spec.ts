@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { ApiClientFixture, EsClient } from '@kbn/scout-oblt';
+import type { EsClient } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { CreateSLOInput } from '@kbn/slo-schema';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { apiTest, mergeSloApiHeaders, pollUntilTrue } from '../fixtures';
 
 const SOURCE_INDEX = 'slo-exponential-histogram-test';
@@ -111,7 +112,7 @@ const getRollupTotals = async (esClient: EsClient, sloId: string): Promise<Rollu
     unknown,
     Record<'numerator' | 'denominator' | 'goodSlices', { value: number }>
   >({
-    index: '.slo-observability.sli-v3*',
+    index: SLI_DESTINATION_INDEX_PATTERN,
     size: 0,
     track_total_hits: true,
     query: { term: { 'slo.id': sloId } },
@@ -131,44 +132,34 @@ const getRollupTotals = async (esClient: EsClient, sloId: string): Promise<Rollu
   };
 };
 
+const waitForRollupTotals = async (esClient: EsClient, sloId: string): Promise<RollupTotals> => {
+  let totals: RollupTotals = { docCount: 0, numerator: 0, denominator: 0, goodSlices: 0 };
+  await pollUntilTrue(
+    async () => {
+      totals = await getRollupTotals(esClient, sloId);
+      return totals.docCount === DOC_COUNT;
+    },
+    {
+      timeoutMs: ROLLUP_POLL_TIMEOUT_MS,
+      intervalMs: 3000,
+      label: `rollup data for SLO ${sloId} did not reach ${DOC_COUNT} documents`,
+    }
+  );
+
+  return totals;
+};
+
 apiTest.describe(
   'SLOs on exponential_histogram fields',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let headers: Record<string, string>;
+    let histogramSloId: string;
+    let customMetricSloId: string;
+    let timesliceMetricSloId: string;
 
-    const createSloAndWaitForRollup = async (
-      apiClient: ApiClientFixture,
-      esClient: EsClient,
-      slo: CreateSLOInput
-    ): Promise<RollupTotals> => {
-      const createResponse = await apiClient.post('api/observability/slos', {
-        headers,
-        body: slo,
-        responseType: 'json',
-      });
-      expect(createResponse).toHaveStatusCode(200);
-      const sloId = createResponse.body.id as string;
-
-      let totals: RollupTotals = { docCount: 0, numerator: 0, denominator: 0, goodSlices: 0 };
-      await pollUntilTrue(
-        async () => {
-          totals = await getRollupTotals(esClient, sloId);
-          return totals.docCount === DOC_COUNT;
-        },
-        {
-          timeoutMs: ROLLUP_POLL_TIMEOUT_MS,
-          intervalMs: 3000,
-          label: `rollup data for SLO ${sloId} did not reach ${DOC_COUNT} documents`,
-        }
-      );
-
-      return totals;
-    };
-
-    apiTest.beforeAll(async ({ esClient, requestAuth }) => {
+    apiTest.beforeAll(async ({ apiClient, esClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKey('admin');
-      headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
+      const headers = { ...mergeSloApiHeaders(apiKeyHeader), Accept: 'application/json' };
 
       await esClient.indices.delete({ index: SOURCE_INDEX, ignore_unavailable: true });
       await esClient.indices.create({
@@ -191,6 +182,18 @@ apiTest.describe(
       ]).flat();
       const bulkResponse = await esClient.bulk({ operations, refresh: 'wait_for' });
       expect(bulkResponse.errors).toBe(false);
+
+      [histogramSloId, customMetricSloId, timesliceMetricSloId] = await Promise.all(
+        [HISTOGRAM_SLO, CUSTOM_METRIC_SLO, TIMESLICE_METRIC_SLO].map(async (slo) => {
+          const createResponse = await apiClient.post('api/observability/slos', {
+            headers,
+            body: slo,
+            responseType: 'json',
+          });
+          expect(createResponse).toHaveStatusCode(200);
+          return createResponse.body.id as string;
+        })
+      );
     });
 
     apiTest.afterAll(async ({ apiServices, esClient }) => {
@@ -200,34 +203,31 @@ apiTest.describe(
 
     apiTest(
       'computes a histogram indicator with range and value_count aggregations',
-      async ({ apiClient, esClient }) => {
+      async ({ esClient }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
 
-        const totals = await createSloAndWaitForRollup(apiClient, esClient, HISTOGRAM_SLO);
+        const totals = await waitForRollupTotals(esClient, histogramSloId);
 
         expect(totals.numerator).toBe(DOC_COUNT * VALUES_UNDER_16_PER_DOC);
         expect(totals.denominator).toBe(DOC_COUNT * VALUES_PER_DOC);
       }
     );
 
-    apiTest(
-      'computes a custom metric indicator with a sum aggregation',
-      async ({ apiClient, esClient }) => {
-        apiTest.setTimeout(TEST_TIMEOUT_MS);
+    apiTest('computes a custom metric indicator with a sum aggregation', async ({ esClient }) => {
+      apiTest.setTimeout(TEST_TIMEOUT_MS);
 
-        const totals = await createSloAndWaitForRollup(apiClient, esClient, CUSTOM_METRIC_SLO);
+      const totals = await waitForRollupTotals(esClient, customMetricSloId);
 
-        expect(totals.numerator).toBe(DOC_COUNT * LATENCY_HISTOGRAM.sum);
-        expect(totals.denominator).toBe(DOC_COUNT * LATENCY_HISTOGRAM.sum * 2);
-      }
-    );
+      expect(totals.numerator).toBe(DOC_COUNT * LATENCY_HISTOGRAM.sum);
+      expect(totals.denominator).toBe(DOC_COUNT * LATENCY_HISTOGRAM.sum * 2);
+    });
 
     apiTest(
       'computes a timeslice metric indicator with avg, max, min and percentile aggregations',
-      async ({ apiClient, esClient }) => {
+      async ({ esClient }) => {
         apiTest.setTimeout(TEST_TIMEOUT_MS);
 
-        const totals = await createSloAndWaitForRollup(apiClient, esClient, TIMESLICE_METRIC_SLO);
+        const totals = await waitForRollupTotals(esClient, timesliceMetricSloId);
 
         expect(totals.goodSlices).toBe(DOC_COUNT);
       }
