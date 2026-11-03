@@ -132,7 +132,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureName: 'Frontier models',
       featureDescription:
         'Complex, single-pass work where output quality matters most, such as generating attack discoveries or drafting a detection rule. Choose your most capable model.',
-      recommendedEndpoints: [GPT_5_6_SOL, GPT_6_SOL, OPUS_5],
+      recommendedEndpoints: [GPT_6_SOL, GPT_5_6_SOL, OPUS_5],
     });
   });
 

@@ -46,12 +46,12 @@ const BALANCED_RECOMMENDED_ENDPOINTS = [
 
 // Attack Discovery reads a whole batch of alerts and rule creation drafts an ES|QL rule from a gap
 // description, both single-pass and both judged on the quality of one output, so every model here
-// is frontier-class. GPT-5.6 Sol leads because GPT-6 Sol scored lower than it on Attack Discovery
-// in the 2026-11 eval refresh. Opus sits last so losing OpenAI still leaves a frontier model, not
-// a mid-size one.
+// is frontier-class. GPT-6 Sol leads as the cheapest model with no significant loss to Opus on
+// this tier's workers in the 2026-11 eval refresh. Opus sits last so losing OpenAI still leaves a
+// frontier model, not a mid-size one.
 const FRONTIER_RECOMMENDED_ENDPOINTS = [
-  '.openai-gpt-5.6-sol-chat_completion', // GPT-5.6 Sol, GA 2026-07-09
   '.openai-gpt-6-sol-chat_completion', // GPT-6 Sol, GA 2026-09-28
+  '.openai-gpt-5.6-sol-chat_completion', // GPT-5.6 Sol, GA 2026-07-09
   '.anthropic-claude-5-opus-chat_completion', // Claude Opus 5, GA 2026-07-24
 ];
 
