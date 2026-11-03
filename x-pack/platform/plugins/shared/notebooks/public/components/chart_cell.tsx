@@ -165,37 +165,38 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
     if (!editor) return null;
     const { EditPanel, attributes: initial } = editor;
     return (
-      <NotebookFlyout
-        type="push"
-        ownFocus
-        paddingSize="m"
-        hideCloseButton
-        onClose={closeEditor}
-        aria-label={EDIT_CHART_LABEL}
-        data-test-subj="notebookChartEditFlyout"
-      >
-        <EditPanel
-          attributes={initial}
-          updatePanelState={(datasourceState, visualizationState, visualizationId) =>
-            setPreview(
-              applyEditorState(initial, datasourceState, visualizationState, visualizationId)
-            )
-          }
-          onApply={(applied) => {
-            setAttributes(stripTables(applied));
-            closeEditor();
-          }}
-          onCancel={closeEditor}
-          closeFlyout={closeEditor}
-          hideTextBasedEditor
-          displayFlyoutHeader
-        />
-      </NotebookFlyout>
+      <EditPanel
+        attributes={initial}
+        updatePanelState={(datasourceState, visualizationState, visualizationId) =>
+          setPreview(
+            applyEditorState(initial, datasourceState, visualizationState, visualizationId)
+          )
+        }
+        onApply={(applied) => {
+          setAttributes(stripTables(applied));
+          closeEditor();
+        }}
+        onCancel={closeEditor}
+        closeFlyout={closeEditor}
+        hideTextBasedEditor
+        displayFlyoutHeader
+      />
     );
   }, [editor, setAttributes, closeEditor]);
 
   const currentType = lensAttributes ? getChartType(lensAttributes) : undefined;
   const LensComponent = plugins.lens.EmbeddableComponent;
+  const renderChart = (chartId: string) =>
+    attributes && (
+      <LensComponent
+        id={chartId}
+        attributes={attributes}
+        style={{ height: '100%' }}
+        withDefaultActions={false}
+        disableTriggers
+        noPadding
+      />
+    );
 
   return (
     <CellFrame
@@ -295,14 +296,7 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
         data-test-subj="notebookChartContainer"
       >
         {attributes ? (
-          <LensComponent
-            id={`notebook-chart-${id}`}
-            attributes={attributes}
-            style={{ height: '100%' }}
-            withDefaultActions={false}
-            disableTriggers
-            noPadding
-          />
+          renderChart(`notebook-chart-${id}`)
         ) : (
           <EuiEmptyPrompt
             titleSize="xs"
@@ -318,7 +312,19 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
           />
         )}
       </div>
-      {editPanel}
+      {editPanel && (
+        <NotebookFlyout
+          ownFocus
+          paddingSize="m"
+          hideCloseButton
+          onClose={closeEditor}
+          aria-label={EDIT_CHART_LABEL}
+          aside={renderChart(`notebook-chart-preview-${id}`)}
+          data-test-subj="notebookChartEditFlyout"
+        >
+          {editPanel}
+        </NotebookFlyout>
+      )}
     </CellFrame>
   );
 };
