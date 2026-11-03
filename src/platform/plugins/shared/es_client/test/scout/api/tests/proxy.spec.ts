@@ -110,6 +110,43 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
     expect(deleteResponse).toHaveStatusCode(200);
   });
 
+  apiTest('forwards the query string', async ({ apiClient }) => {
+    const response = await apiClient.get(
+      `${PROXY_PATH}/${TEST_INDEX}/_mapping?filter_path=*.mappings.properties.message.type`,
+      { headers, responseType: 'json' }
+    );
+    expect(response).toHaveStatusCode(200);
+    expect(response.body).toStrictEqual({
+      [TEST_INDEX]: { mappings: { properties: { message: { type: 'text' } } } },
+    });
+  });
+
+  apiTest('forwards the accept header and returns the content type', async ({ apiClient }) => {
+    const catPath = `${PROXY_PATH}/_cat/count/${TEST_INDEX}?h=count`;
+
+    const textResponse = await apiClient.get(catPath, { headers, responseType: 'text' });
+    expect(textResponse).toHaveStatusCode(200);
+    expect(textResponse.headers['content-type']).toMatch(/^text\/plain/);
+    expect(textResponse.body.trim()).toMatch(/^\d+$/);
+
+    const jsonResponse = await apiClient.get(catPath, {
+      headers: { ...headers, accept: 'application/json' },
+      responseType: 'json',
+    });
+    expect(jsonResponse).toHaveStatusCode(200);
+    expect(jsonResponse.headers['content-type']).toMatch(/^application\/json/);
+    expect(jsonResponse.body).toStrictEqual([{ count: textResponse.body.trim() }]);
+  });
+
+  apiTest('forwards POST requests without a body', async ({ apiClient }) => {
+    const response = await apiClient.post(`${PROXY_PATH}/${TEST_INDEX}/_refresh`, {
+      headers,
+      responseType: 'json',
+    });
+    expect(response).toHaveStatusCode(200);
+    expect(response.body._shards.failed).toBe(0);
+  });
+
   apiTest('forwards DELETE requests', async ({ apiClient }) => {
     const response = await apiClient.delete(`${PROXY_PATH}/${TEST_INDEX}/_doc/1`, {
       headers,
