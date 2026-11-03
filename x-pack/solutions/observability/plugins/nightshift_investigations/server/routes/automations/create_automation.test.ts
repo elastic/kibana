@@ -27,14 +27,14 @@ const body = {
   runtime: { dailyDispatchLimit: 20 },
 };
 
-const call = (overrides: Record<string, unknown> = {}) =>
+const call = (overrides: Record<string, unknown> = {}, user?: Record<string, string>) =>
   handler({
     request: httpServerMock.createKibanaRequest(),
     params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
     getInvestigatorServiceAccountService: () => serviceAccountService,
-    context: createRouteContext(),
+    context: createRouteContext(user),
   } as never);
 
 let serviceAccountService = createServiceAccountService();
@@ -65,6 +65,15 @@ it('stores the current user as the author', async () => {
   expect(soClient.create).toHaveBeenCalledWith(
     'nightshift-automation',
     expect.objectContaining({ author: 'alice' })
+  );
+});
+
+it('stores the full name instead of an opaque username as the author', async () => {
+  await call({}, { username: '8675309', full_name: 'Foo Bar', email: 'foo@example.com' });
+
+  expect(soClient.create).toHaveBeenCalledWith(
+    'nightshift-automation',
+    expect.objectContaining({ author: 'Foo Bar' })
   );
 });
 

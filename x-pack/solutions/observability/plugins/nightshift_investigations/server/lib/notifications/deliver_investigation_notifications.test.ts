@@ -58,7 +58,7 @@ const setup = (spaceId = 'default') => {
 
 describe('investigation notification lifecycle', () => {
   it.each(['completed', 'failed'] as const)(
-    'posts a started root and a %s reply',
+    'posts a started root and edits it for %s',
     async (terminalPhase) => {
       const { send, execute, client } = setup();
       expect(await send('started')).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
@@ -69,7 +69,10 @@ describe('investigation notification lifecycle', () => {
       expect(execute.mock.calls[0][0].params.subActionParams).not.toHaveProperty('threadTs');
       expect(await send(terminalPhase)).toEqual({ sent: 1, failed: 0, unconfirmed: 0 });
       expect(execute.mock.calls[1][0]).toMatchObject({
-        params: { subActionParams: { channel: 'C123', threadTs: '1.000001' } },
+        params: {
+          subAction: 'updateMessage',
+          subActionParams: { channel: 'C123', messageTs: '1.000001' },
+        },
       });
       const routing = await client.get();
       expect(routing?.destinations[0].params).toEqual({ channel: '#alerts' });
@@ -86,11 +89,15 @@ describe('investigation notification lifecycle', () => {
     await send('started', 'exec-2', []);
     await send('completed', 'exec-2', []);
     expect(execute).toHaveBeenCalledTimes(4);
-    for (const [call] of execute.mock.calls.slice(1)) {
-      expect(call.params).toMatchObject({
-        subActionParams: { channel: 'C123', threadTs: '1.000001' },
-      });
-    }
+    // The later execution's started message replies in the thread, and its terminal phase edits it.
+    expect(execute.mock.calls[2][0].params).toMatchObject({
+      subAction: 'sendMessage',
+      subActionParams: { channel: 'C123', threadTs: '1.000001' },
+    });
+    expect(execute.mock.calls[3][0].params).toMatchObject({
+      subAction: 'updateMessage',
+      subActionParams: { channel: 'C123', messageTs: '1.000001' },
+    });
   });
 
   describe('under a caller-named parent message', () => {
