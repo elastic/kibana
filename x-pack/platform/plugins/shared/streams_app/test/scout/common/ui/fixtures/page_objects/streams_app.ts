@@ -188,7 +188,9 @@ export class StreamsApp {
   }
 
   async gotoStreamMainPage() {
-    await this.page.gotoApp(`streams`);
+    await this.page.gotoApp(`streams`, {
+      readyWhen: this.page.testSubj.locator('streamsTable'),
+    });
   }
 
   async gotoStreamManagementTab(
