@@ -8,6 +8,10 @@
       "url": "https://REPLACE_ME",
       "apiKey": "REPLACE_ME",
       "readableIndices": "REPLACE_ME"
+    },
+    "github": {
+      "gh": "REPLACE_ME",
+      "org": "REPLACE_ME"
     }
   },
   "nightshiftOrcaEs": {

@@ -292,6 +292,10 @@ reads it without adding Nightshift fields to the shared CLI or global config sch
     "url": "https://telemetry.example.com",
     "apiKey": "...",
     "readableIndices": "Read remote-a:logs-service-*"
+  },
+  "github": {
+    "gh": "...",
+    "org": "..."
   }
 }
 ```
@@ -304,7 +308,9 @@ URL and key are configured, and requires sandbox credentials for remote investig
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
 | `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL`     | Remote Elasticsearch endpoint. Requires the API key below.                                                     |
 | `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.                               |
-| `NIGHTSHIFT_SANDBOX_READABLE_INDICES`      | Optional note naming readable index patterns and explicit remote names. The eval adds it to the space's custom context. |
+| `NIGHTSHIFT_SANDBOX_READABLE_INDICES`      | Optional note naming readable index patterns and explicit remote names. The eval adds it to the space's custom context, except for customer0 datasets, whose production space has no index hint. |
+| `NIGHTSHIFT_GITHUB_GH_TOKEN`               | Bearer token for the customer0 `gh` connector. Required with remote telemetry outside the ORCA shard.                    |
+| `NIGHTSHIFT_GITHUB_ORG_TOKEN`              | Bearer token for the customer0 `github-elastic-org` connector. Required with that same telemetry.                        |
 | `NIGHTSHIFT_EXAMPLES_FILE`                 | The same file format documented above; only questions and stable case IDs are required.                        |
 
 With those variables and the sandbox credentials configured:
@@ -315,11 +321,15 @@ NIGHTSHIFT_DATASETS=trace-only NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.j
   --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
-Telemetry is an ordinary connector, set up the way a user would. The committed
-[`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml) creates the preconfigured
-`nightshift-evals-telemetry` HTTP (`.http`) connector with a secret `Authorization` header, and the
-eval then saves it on the Nightshift investigator through the Agent Builder agents API
-(`assignTelemetryConnector`), exactly as a user assigns a connector in the agent's settings. There
+Telemetry is an ordinary connector, set up the way a user would. Outside the ORCA shard,
+[`scout/kibana.customer0.yml`](scout/kibana.customer0.yml) creates the same sandbox connectors the
+customer0 investigator has: `c0-es` (`.http`, named `c0_es`), `gh`, and `github-elastic-org` (both
+`.github` Copilot MCP connectors). The hook reads `nightshift.github.gh` and `nightshift.github.org`
+and refuses to start customer0 telemetry when either token is missing. A customer0 dataset then
+saves those three ids on the investigator (`assignInvestigatorConnectors`). Other remote datasets
+on that stack save only `c0-es`. The ORCA shard keeps
+[`scout/kibana.telemetry.yml`](scout/kibana.telemetry.yml), which creates
+`nightshift-evals-telemetry`, and does not assign the customer0 GitHub connectors. There
 is no Nightshift-specific telemetry setting in `kibana.yml`. The existing credential resolver
 authorizes connector access and execution, checks the agent's allow-list, and exposes the API key
 only to the requesting sandbox command. Remote telemetry and sandbox credentials are supplied

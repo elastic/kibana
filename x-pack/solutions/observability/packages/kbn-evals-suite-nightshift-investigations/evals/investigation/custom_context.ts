@@ -28,20 +28,18 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
   "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game.";
 
-/**
- * The custom context snippets an investigation dataset runs with. Stored datasets are not named
- * `nightshift/customer0…`, so they are recognized by their `customer0` tag.
- */
-export const getDatasetCustomContext = ({
-  name,
-  tags = [],
-}: {
+export interface InvestigationDatasetIdentity {
   name: string;
   tags?: readonly string[];
-}): readonly string[] =>
-  name.startsWith('nightshift/customer0') || tags.includes('customer0')
-    ? [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT]
-    : [];
+}
+
+/** Stored datasets are not named `nightshift/customer0…`, so they are recognized by their tag. */
+export const isCustomer0Dataset = ({ name, tags = [] }: InvestigationDatasetIdentity): boolean =>
+  name.startsWith('nightshift/customer0') || tags.includes('customer0');
+
+/** The custom context snippets an investigation dataset runs with. */
+export const getDatasetCustomContext = (dataset: InvestigationDatasetIdentity): readonly string[] =>
+  isCustomer0Dataset(dataset) ? [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT] : [];
 
 /**
  * The operator's note on which indices the telemetry connector can read, as the space's custom
@@ -54,6 +52,18 @@ export const getReadableIndicesContext = (
   const readableIndices = env.NIGHTSHIFT_SANDBOX_READABLE_INDICES?.trim();
   return readableIndices ? [readableIndices] : [];
 };
+
+/**
+ * Custom context for one investigation dataset. Customer0 keeps the production snippet and the
+ * retrospective guardrail, and does not get the readable-indices hint production does not have.
+ */
+export const customContextForDataset = (
+  dataset: InvestigationDatasetIdentity,
+  env: NodeJS.ProcessEnv = process.env
+): readonly string[] => [
+  ...getDatasetCustomContext(dataset),
+  ...(isCustomer0Dataset(dataset) ? [] : getReadableIndicesContext(env)),
+];
 
 /** Replaces the space's custom context with exactly these snippets. */
 export const replaceCustomContext = async (

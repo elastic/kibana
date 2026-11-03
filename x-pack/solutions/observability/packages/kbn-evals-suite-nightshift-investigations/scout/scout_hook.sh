@@ -118,6 +118,16 @@ if [[ -z "$telemetry_url$telemetry_key" ]]; then
   telemetry_key="${NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY:-}"
 fi
 readable_indices="$(resolve NIGHTSHIFT_SANDBOX_READABLE_INDICES '.nightshift.telemetry.readableIndices')"
+# Customer0's investigator also has two GitHub Copilot MCP connectors. Tokens come from the profile
+# block, or from the shell when the block has neither. ORCA does not use them.
+github_gh="$(config_value '.nightshift.github.gh')"
+github_org="$(config_value '.nightshift.github.org')"
+if [[ -z "$github_gh" ]]; then
+  github_gh="${NIGHTSHIFT_GITHUB_GH_TOKEN:-}"
+fi
+if [[ -z "$github_org" ]]; then
+  github_org="${NIGHTSHIFT_GITHUB_ORG_TOKEN:-}"
+fi
 telemetry_config=''
 if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
   if [[ -z "$telemetry_url" || -z "$telemetry_key" ]]; then
@@ -134,7 +144,22 @@ if [[ -n "$telemetry_url$telemetry_key$readable_indices" ]]; then
     echo "nightshift-investigations scout hook: remote telemetry requires sandbox credentials" >&2
     exit 1
   fi
-  telemetry_config="$script_dir/kibana.telemetry.yml"
+  if [[ "$orca" == true ]]; then
+    telemetry_config="$script_dir/kibana.telemetry.yml"
+    github_gh=''
+    github_org=''
+  else
+    if [[ -z "$github_gh" || -z "$github_org" ]]; then
+      echo "nightshift-investigations scout hook: customer0 telemetry requires" \
+        "nightshift.github.gh and nightshift.github.org" >&2
+      exit 1
+    fi
+    telemetry_config="$script_dir/kibana.customer0.yml"
+  fi
+fi
+if [[ -z "$telemetry_config" ]]; then
+  github_gh=''
+  github_org=''
 fi
 
 if [[ -z "$api_key" ]]; then
@@ -179,6 +204,8 @@ HOOK_HOST="$host" \
   HOOK_TELEMETRY_KEY="$telemetry_key" \
   HOOK_READABLE_INDICES="$readable_indices" \
   HOOK_TELEMETRY_CONFIG="$telemetry_config" \
+  HOOK_GITHUB_GH="$github_gh" \
+  HOOK_GITHUB_ORG="$github_org" \
   HOOK_KIBANA_CONFIG="$script_dir/kibana.sandbox.yml" \
   jq -n '{
     env: ((if $ENV.HOOK_ORCA == "true" then {
@@ -198,5 +225,8 @@ HOOK_HOST="$host" \
       NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: $ENV.HOOK_TELEMETRY_KEY,
       NIGHTSHIFT_SANDBOX_READABLE_INDICES: $ENV.HOOK_READABLE_INDICES,
       NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: $ENV.HOOK_TELEMETRY_CONFIG
+    } else {} end) + (if $ENV.HOOK_GITHUB_GH != "" then {
+      NIGHTSHIFT_GITHUB_GH_TOKEN: $ENV.HOOK_GITHUB_GH,
+      NIGHTSHIFT_GITHUB_ORG_TOKEN: $ENV.HOOK_GITHUB_ORG
     } else {} end))
   }'

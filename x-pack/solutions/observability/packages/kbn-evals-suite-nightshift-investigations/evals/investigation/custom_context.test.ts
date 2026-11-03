@@ -8,6 +8,7 @@
 import {
   CUSTOMER0_CUSTOM_CONTEXT,
   RETROSPECTIVE_GUARDRAIL_CONTEXT,
+  customContextForDataset,
   getDatasetCustomContext,
   getReadableIndicesContext,
 } from './custom_context';
@@ -49,5 +50,25 @@ describe('getReadableIndicesContext', () => {
 
   it('adds nothing when no readable indices are configured', () => {
     expect(getReadableIndicesContext({})).toEqual([]);
+  });
+});
+
+describe('customContextForDataset', () => {
+  it('keeps the readable-indices hint off customer0, matching production', () => {
+    expect(
+      customContextForDataset(
+        { name: 'ns-investigation-golden', tags: ['customer0'] },
+        { NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'Read remote-a:logs-*' }
+      )
+    ).toEqual([...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT]);
+  });
+
+  it('keeps the readable-indices hint for other datasets', () => {
+    expect(
+      customContextForDataset(
+        { name: 'nightshift/orca-sampled50-v2' },
+        { NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'Read logs-orcabench.otel-*' }
+      )
+    ).toEqual(['Read logs-orcabench.otel-*']);
   });
 });
