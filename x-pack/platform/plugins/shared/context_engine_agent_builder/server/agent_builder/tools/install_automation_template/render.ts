@@ -26,6 +26,8 @@ export const AUTOMATION_TEMPLATE_TAGS: Record<AutomationTemplateId, string> = {
 
 export interface DocumentOrchestrationTemplateValues {
   aiIndexId: string;
+  /** Injected as `automation_name` in the workflow consts; used as the KI ID prefix. */
+  automationName: string;
   sourceIndex: string;
   titleField: string;
   bodyField: string;
@@ -36,19 +38,30 @@ export interface DocumentOrchestrationTemplateValues {
 
 export interface UnitProfileTemplateValues {
   aiIndexId: string;
+  /** Injected as `automation_name` in the workflow consts; used as the KI ID prefix. */
+  automationName: string;
   unitIndex: string;
   unitKey: string;
   activityField: string;
   breakdownField: string;
   /** A complete ES|QL line beginning with `| WHERE`, or empty to take every unit. */
   corpusFilter: string;
+  /** Numeric fields averaged per unit, appended after the fixed `unit_totals` columns. */
+  metricFields: readonly string[];
   maxUnits: number;
+}
+
+export interface IndexMetadataSource {
+  index: string;
+  categoryField: string;
 }
 
 export interface IndexMetadataTemplateValues {
   aiIndexId: string;
-  sourceIndex: string;
-  categoryField: string;
+  /** Injected as `automation_name` in the workflow consts; prefixes each KI ID. */
+  automationName: string;
+  /** One `index_metadata` KI is written per source. */
+  sources: readonly IndexMetadataSource[];
 }
 
 const yamlString = (value: string): string => JSON.stringify(value);
@@ -94,6 +107,7 @@ export const renderDocumentOrchestrationTemplate = (
 
   return replaceTokens(CONTEXT_ENGINE_DOCUMENT_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
+    __AUTOMATION_NAME__: yamlString(values.automationName),
     __SOURCE_INDEX__: yamlString(values.sourceIndex),
     __TITLE_FIELD__: yamlString(values.titleField),
     __BODY_FIELD__: yamlString(values.bodyField),
@@ -108,26 +122,50 @@ export const renderUnitProfileTemplate = (values: UnitProfileTemplateValues): st
   assertSafeIdentifier('unitKey', values.unitKey);
   assertSafeIdentifier('activityField', values.activityField);
   assertSafeIdentifier('breakdownField', values.breakdownField);
+  for (const field of values.metricFields) {
+    assertSafeIdentifier('metricFields', field);
+  }
 
   return replaceTokens(CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
+    __AUTOMATION_NAME__: yamlString(values.automationName),
     __UNIT_INDEX__: yamlString(values.unitIndex),
     __UNIT_KEY__: yamlString(values.unitKey),
     __ACTIVITY_FIELD__: yamlString(values.activityField),
     __BREAKDOWN_FIELD__: yamlString(values.breakdownField),
+    __METRIC_FIELDS__: JSON.stringify(values.metricFields),
     __CORPUS_FILTER__: yamlString(corpusFilterLine(values.corpusFilter)),
     __MAX_UNITS__: String(values.maxUnits),
   });
 };
 
 export const renderIndexMetadataTemplate = (values: IndexMetadataTemplateValues): string => {
-  assertSafeIdentifier('sourceIndex', values.sourceIndex);
-  assertSafeIdentifier('categoryField', values.categoryField);
+  if (values.sources.length === 0) {
+    throw new Error('Index metadata needs at least one source to profile.');
+  }
+
+  const seen = new Set<string>();
+  for (const { index, categoryField } of values.sources) {
+    assertSafeIdentifier('sourceIndex', index);
+    assertSafeIdentifier('categoryField', categoryField);
+    if (seen.has(index)) {
+      throw new Error(
+        `Index "${index}" is listed twice. Each source writes the KI "<name>/${index}", so a second entry would overwrite the first.`
+      );
+    }
+    seen.add(index);
+  }
 
   return replaceTokens(CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE, {
     __AI_INDEX_ID__: yamlString(values.aiIndexId),
-    __SOURCE_INDEX__: yamlString(values.sourceIndex),
-    __CATEGORY_FIELD__: yamlString(values.categoryField),
+    __AUTOMATION_NAME__: yamlString(values.automationName),
+    // JSON is valid YAML flow syntax, so the list renders on the const's own line.
+    __SOURCES__: JSON.stringify(
+      values.sources.map(({ index, categoryField }) => ({
+        index,
+        category_field: categoryField,
+      }))
+    ),
   });
 };
 

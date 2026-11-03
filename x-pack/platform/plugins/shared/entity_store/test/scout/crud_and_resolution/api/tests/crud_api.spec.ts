@@ -9,6 +9,7 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { Client } from '@elastic/elasticsearch';
 import { hashEuid, getEuidFromObject } from '../../../../../common/domain/euid';
+import { getBuiltInEntityDefinition } from '../../../../../common/domain/definitions/registry';
 import type { Entity, HostEntity } from '../../../../../common/domain/definitions/entity.gen';
 import {
   PUBLIC_HEADERS,
@@ -16,41 +17,18 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices } from '../../../common/fixtures/helpers';
+import { clearInstalledEntityStoreDocuments } from '../../../common/fixtures/helpers';
 
 apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ esClient, samlAuth }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...PUBLIC_HEADERS,
     };
-
-    // enable feature flag
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
-
-    // Install the entity store
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect([200, 201]).toContain(response.statusCode);
-  });
-
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
+    await clearInstalledEntityStoreDocuments(esClient);
   });
 
   apiTest('Should create an entity', async ({ apiClient, esClient }) => {
@@ -68,7 +46,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.body).toStrictEqual({ ok: true });
 
     expect(await countEntitiesByID(esClient, LATEST_ALIAS, entityObj.entity!.id!)).toBe(1);
-    const euid = getEuidFromObject('generic', entityObj) as string;
+    const euid = getEuidFromObject(getBuiltInEntityDefinition('generic'), entityObj) as string;
     const check = await esClient.get({ index: LATEST_ALIAS, id: hashEuid(euid) });
     expect(check.found).toBe(true);
   });
@@ -507,7 +485,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(resp.hits.hits).toHaveLength(1);
     expect(resp.hits.hits[0]._id).toBeDefined();
 
-    const euid = getEuidFromObject('generic', entityObj) as string;
+    const euid = getEuidFromObject(getBuiltInEntityDefinition('generic'), entityObj) as string;
 
     const expectedHashedEntityId = hashEuid(euid);
     const hashedEntityId = resp.hits.hits[0]._id as string;

@@ -5,7 +5,23 @@
  * 2.0.
  */
 
-import { deriveFpTpOutcome, type FpTpCheckResult } from './verdict_rules';
+import { parse } from 'yaml';
+import { ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW } from '@kbn/workflows/managed/definitions/alertzero';
+import { deriveFpTpOutcome, FP_TP_VERDICT_RULES, type FpTpCheckResult } from './verdict_rules';
+
+describe('managed FP/TP verdict rules', () => {
+  it('matches the rules used to derive the expected outcome', () => {
+    const workflow = parse(ALERTZERO_ATTACK_DISCOVERY_FP_TP_ANALYSIS_WORKFLOW.yaml) as {
+      steps: Array<{ name: string; with?: { message?: string } }>;
+    };
+    const message = workflow.steps.find(({ name }) => name === 'analyze')?.with?.message ?? '';
+    const [, rules = ''] =
+      /Choose the verdict by the first rule that matches:\n([\s\S]*?)\n\s*\n/.exec(message) ?? [];
+    const collapseWhitespace = (text: string) => text.replace(/\s+/g, ' ').trim();
+
+    expect(collapseWhitespace(rules)).toBe(collapseWhitespace(FP_TP_VERDICT_RULES));
+  });
+});
 
 describe('deriveFpTpOutcome', () => {
   it.each<[FpTpCheckResult, FpTpCheckResult, FpTpCheckResult, string]>([

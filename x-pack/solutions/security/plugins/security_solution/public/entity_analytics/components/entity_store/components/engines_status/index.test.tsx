@@ -21,6 +21,13 @@ jest.mock('../../hooks/use_entity_store', () => ({
   }),
 }));
 
+jest.mock('../../hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: () => ({
+    data: { has_install_permissions: true },
+    isLoading: false,
+  }),
+}));
+
 const mockDownloadBlob = jest.fn();
 jest.mock('../../../../../common/utils/download_blob', () => ({
   downloadBlob: () => mockDownloadBlob(),

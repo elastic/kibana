@@ -75,7 +75,7 @@ describe('RelatedAlertEpisodesList', () => {
     );
 
     // Short id instead of the full uuid, since there is no rule name to show.
-    expect(screen.getByText('Episode')).toBeInTheDocument();
+    expect(screen.getByText('Alert')).toBeInTheDocument();
     expect(screen.getByTestId('relatedAlertEpisodeShortId')).toHaveTextContent('ep-miss');
   });
 

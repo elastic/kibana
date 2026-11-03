@@ -9,9 +9,11 @@ import '@testing-library/jest-dom';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import { useQueryClient, type QueryClient } from '@kbn/react-query';
 import type { EmbeddableConversationCallbacks } from '../../../embeddable/types';
 import type { AgentBuilderInternalService } from '../../../services/types';
 import { storageKeys } from '../../storage_keys';
+import type { refreshListsOnAgentChanges } from '../../utils/refresh_lists_on_agent_changes';
 import type { ConversationContext } from './conversation_context';
 import { useConversationContext } from './conversation_context';
 import {
@@ -37,7 +39,19 @@ jest.mock('../streaming/streaming_context', () => ({
   StreamingProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('../../../services/events', () => ({
-  ConversationStreamService: class ConversationStreamService {},
+  ConversationStreamService: class ConversationStreamService {
+    dispose() {}
+  },
+}));
+const mockUnsubscribeListRefresh = jest.fn();
+const mockRefreshListsOnAgentChanges = jest.fn(
+  (_params: Parameters<typeof refreshListsOnAgentChanges>[0]) => ({
+    unsubscribe: mockUnsubscribeListRefresh,
+  })
+);
+jest.mock('../../utils/refresh_lists_on_agent_changes', () => ({
+  refreshListsOnAgentChanges: (...args: Parameters<typeof mockRefreshListsOnAgentChanges>) =>
+    mockRefreshListsOnAgentChanges(...args),
 }));
 // Rendered by the component but irrelevant here (it has its own dependencies).
 jest.mock('./conversation_change_notifier', () => ({ ConversationChangeNotifier: () => null }));
@@ -81,9 +95,11 @@ const seedPersistedConversation = (sessionTag: string, conversationId: string) =
 const renderEmbeddableProvider = ({
   sessionTag = TAG_A,
   getConversation = jest.fn().mockResolvedValue({ id: 'conversation-a' }),
+  children = <ContextSpy />,
 }: {
   sessionTag?: string;
   getConversation?: jest.Mock;
+  children?: React.ReactNode;
 } = {}) => {
   let callbacks: EmbeddableConversationCallbacks | undefined;
   const coreStart = coreMock.createStart();
@@ -95,7 +111,7 @@ const renderEmbeddableProvider = ({
     startDependencies: {},
   } as unknown as AgentBuilderInternalService;
 
-  render(
+  const { unmount } = render(
     <EmbeddableConversationsProvider
       coreStart={coreStart}
       services={services}
@@ -108,11 +124,13 @@ const renderEmbeddableProvider = ({
         callbacks = registered;
       }}
     >
-      <ContextSpy />
+      {children}
     </EmbeddableConversationsProvider>
   );
 
   return {
+    services,
+    unmount,
     getConversation,
     reopenWith: (nextSessionTag: string) => {
       act(() => {
@@ -249,5 +267,39 @@ describe('EmbeddableConversationsProvider initial message', () => {
 
     expect(await screen.findByText(`initialMessage:${INITIAL_MESSAGE}`)).toBeInTheDocument();
     expect(screen.getByText('conversationId:none')).toBeInTheDocument();
+  });
+});
+
+describe('EmbeddableConversationsProvider list refresh', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    localStorage.clear();
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: true,
+    });
+  });
+
+  it("refreshes the lists in the sidebar's own query client until it unmounts", async () => {
+    let sidebarQueryClient: QueryClient | undefined;
+    const QueryClientSpy = () => {
+      sidebarQueryClient = useQueryClient();
+      return <ContextSpy />;
+    };
+
+    const { services, unmount } = renderEmbeddableProvider({ children: <QueryClientSpy /> });
+    expect(await screen.findByText('conversationId:none')).toBeInTheDocument();
+
+    expect(mockRefreshListsOnAgentChanges).toHaveBeenCalledTimes(1);
+    expect(mockRefreshListsOnAgentChanges).toHaveBeenCalledWith({
+      eventsService: services.eventsService,
+      queryClient: sidebarQueryClient,
+    });
+    expect(mockUnsubscribeListRefresh).not.toHaveBeenCalled();
+
+    unmount();
+
+    expect(mockUnsubscribeListRefresh).toHaveBeenCalledTimes(1);
   });
 });

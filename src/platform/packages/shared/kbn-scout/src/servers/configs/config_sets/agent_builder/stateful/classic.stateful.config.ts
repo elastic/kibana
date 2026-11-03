@@ -66,6 +66,7 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.aiAssistant:preferredChatExperience=agent',
       '--xpack.agentBuilder.tracing.scheduledDelay=500',
       `--xpack.agentBuilder.githubBaseUrl=http://localhost:${AGENT_BUILDER_GITHUB_MOCK_PORT}`,
+      '--xpack.security.serviceAccounts.enabled=true',
       SML_TEST_TYPES_PLUGIN_PATH,
     ],
   },

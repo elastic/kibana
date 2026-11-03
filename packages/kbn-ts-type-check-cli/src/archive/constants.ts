@@ -59,9 +59,4 @@ export const TYPE_CHECK_CONFIG_GLOB = '**/tsconfig*.type_check.json';
  * Files that should be hashed and checked for cache invalidation.
  * If any of these files change, the cache should be invalidated.
  */
-export const CACHE_INVALIDATION_FILES = [
-  'pnpm-lock.yaml',
-  '.nvmrc',
-  '.node-version',
-  'tsconfig.base.json',
-];
+export const CACHE_INVALIDATION_FILES = ['pnpm-lock.yaml', '.nvmrc', 'tsconfig.base.json'];

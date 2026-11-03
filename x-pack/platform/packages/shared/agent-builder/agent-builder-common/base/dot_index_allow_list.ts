@@ -24,6 +24,7 @@
  */
 export const DOT_INDEX_ALLOW_LIST_PATTERNS: readonly string[] = [
   '.alerts-*',
+  '.ml-anomalies',
   '.ml-anomalies-*',
   '.slo-observability.*',
   '.entities.*',

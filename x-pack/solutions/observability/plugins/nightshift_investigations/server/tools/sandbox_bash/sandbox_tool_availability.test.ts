@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { NIGHTSHIFT_API_PRIVILEGES, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { createSandboxToolAvailability } from './sandbox_tool_availability';
+import { checkSandboxAccess, createSandboxToolAvailability } from './sandbox_tool_availability';
 
 const setup = ({
   enabled = true,
@@ -22,7 +23,7 @@ const setup = ({
   hasManagePrivilege?: boolean;
 } = {}) => {
   const { featureFlags } = coreMock.createStart();
-  featureFlags.getBooleanValue.mockResolvedValue(enabled);
+  featureFlags.getBooleanValue$.mockReturnValue(of(enabled));
   const checkPrivileges = jest.fn(async () => ({ hasAllRequested: hasManagePrivilege }));
   const security = {
     authz: {
@@ -50,7 +51,7 @@ describe('createSandboxToolAvailability', () => {
     const { check, featureFlags, checkPrivileges } = setup();
 
     await expect(check()).resolves.toEqual({ status: 'available' });
-    expect(featureFlags.getBooleanValue).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
+    expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(NIGHTSHIFT_ENABLED_FLAG, false);
     expect(checkPrivileges).toHaveBeenCalledWith({
       kibana: [`api:${NIGHTSHIFT_API_PRIVILEGES.manage}`],
     });
@@ -83,5 +84,31 @@ describe('createSandboxToolAvailability', () => {
 
     await expect(check()).resolves.toEqual({ status: 'available' });
     expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+});
+
+describe('checkSandboxAccess', () => {
+  const request = httpServerMock.createKibanaRequest();
+  const security = (hasAllRequested: boolean) =>
+    ({
+      authz: {
+        mode: { useRbacForRequest: () => true },
+        checkPrivilegesDynamicallyWithRequest: () => async () => ({ hasAllRequested }),
+        actions: { api: { get: (operation: string) => `api:${operation}` } },
+      },
+    } as unknown as SecurityPluginStart);
+  const { featureFlags } = coreMock.createStart();
+  featureFlags.getBooleanValue$.mockReturnValue(of(true));
+
+  it('denies a user without the manage privilege, for anything that reads a workspace', async () => {
+    await expect(
+      checkSandboxAccess({ request, featureFlags, security: security(false) })
+    ).resolves.toMatchObject({ status: 'unavailable' });
+  });
+
+  it('allows a user with it', async () => {
+    await expect(
+      checkSandboxAccess({ request, featureFlags, security: security(true) })
+    ).resolves.toEqual({ status: 'available' });
   });
 });

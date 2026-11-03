@@ -154,13 +154,10 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
   metadata: {
     id: '.google_cloud_monitoring',
     displayName: 'Google Cloud Monitoring',
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.googleCloudMonitoring.metadata.description',
-      {
-        defaultMessage:
-          'Find, mute, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.googleCloudMonitoring.metadata.description', {
+      defaultMessage:
+        'Find, mute, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data',
+    }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     // A new connector type must reach Production-NonCanary before it can declare
@@ -190,12 +187,9 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
         )
         .meta({
           widget: 'text',
-          label: i18n.translate(
-            'core.kibanaConnectorSpecs.googleCloudMonitoring.config.projectId.label',
-            {
-              defaultMessage: 'GCP Project ID',
-            }
-          ),
+          label: i18n.translate('connectorSpecs.googleCloudMonitoring.config.projectId.label', {
+            defaultMessage: 'GCP Project ID',
+          }),
           placeholder: 'my-gcp-project',
         }),
     })
@@ -604,13 +598,10 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate(
-      'core.kibanaConnectorSpecs.googleCloudMonitoring.test.description',
-      {
-        defaultMessage:
-          'Verifies Cloud Monitoring API access by listing alert policies in the configured project',
-      }
-    ),
+    description: i18n.translate('connectorSpecs.googleCloudMonitoring.test.description', {
+      defaultMessage:
+        'Verifies Cloud Monitoring API access by listing alert policies in the configured project',
+    }),
     handler: async (ctx) => {
       const projectId = getDefaultProjectId(ctx);
       try {

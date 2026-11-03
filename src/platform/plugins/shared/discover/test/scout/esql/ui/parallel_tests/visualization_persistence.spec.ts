@@ -10,10 +10,19 @@
 /** Migrated from `src/platform/test/functional/apps/discover/group10/_lens_vis.ts`. */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPage } from '../fixtures';
 import { spaceTest } from '../fixtures';
 
 const ESQL_LIMIT_QUERY = 'from logstash-* | limit 10';
 const ESQL_STATS_QUERY = 'from logstash-* | stats averageB = avg(bytes) by extension';
+const ESQL_CONTROL_QUERY_PREFIX = 'from logstash-* | where extension == ';
+
+// Saving a new session closes the modal before Discover has navigated to the session URL,
+// so wait for the session to be loaded before reloading or changing the page.
+const saveSession = async (discover: DiscoverPage, name: string) => {
+  await discover.saveSearch(name);
+  await expect(discover.getCurrentQueryNameLocator()).toHaveText(name);
+};
 
 spaceTest.describe(
   'Discover ES|QL visualization persistence',
@@ -71,6 +80,42 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'preserves the chart data view ID after reload with a selected ES|QL control',
+      async ({ page, pageObjects, scoutSpace }) => {
+        const { controls, discover } = pageObjects;
+        const sessionName = `ESQL control chart ${scoutSpace.id}`;
+        const getDataViewId = async (): Promise<string | undefined> =>
+          JSON.parse((await discover.getHistogramChart().getAttribute('data-request-data')) ?? '{}')
+            .dataViewId;
+
+        await discover.createEsqlControl(ESQL_CONTROL_QUERY_PREFIX, {
+          variableName: '?extension',
+          values: ['png'],
+        });
+
+        const controlId = await controls.getOnlyControlId();
+        await controls.optionsList.openPopover(controlId);
+        await controls.optionsList.selectOption('png');
+        await controls.optionsList.ensurePopoverIsClosed();
+        await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText('png');
+        await discover.waitUntilSearchingHasFinished();
+        const savedQuery = await discover.getEsqlQueryValue();
+        await discover.changeVisualizationShape('Line');
+
+        await expect.poll(getDataViewId).toMatch(/\S/);
+        const savedDataViewId = await getDataViewId();
+        await saveSession(discover, sessionName);
+        await page.reload();
+        await discover.waitUntilTabIsLoaded();
+
+        await expect(controls.optionsList.getSelectionsLocator(controlId)).toHaveText('png');
+        expect(await discover.getEsqlQueryValue()).toBe(savedQuery);
+        await expect.poll(getDataViewId).toBe(savedDataViewId);
+        expect(await discover.getVisualizationTitle()).toBe('Line');
+      }
+    );
+
+    spaceTest(
       'persists a Line histogram and reverts a shape change',
       async ({ pageObjects, scoutSpace }) => {
         const { discover } = pageObjects;
@@ -79,7 +124,7 @@ spaceTest.describe(
         await discover.writeAndSubmitEsqlQuery(ESQL_LIMIT_QUERY);
         await discover.changeVisualizationShape('Line');
         expect(await discover.getVisualizationTitle()).toBe('Line');
-        await discover.saveSearch(sessionName);
+        await saveSession(discover, sessionName);
         await discover.clickNewSearch();
         await discover.loadSavedSearch(sessionName);
         expect(await discover.getVisualizationTitle()).toBe('Line');
@@ -112,7 +157,7 @@ spaceTest.describe(
         await discover.chooseVisualizationSuggestion('treemap');
         await expect(page.testSubj.locator('partitionVisChart')).toBeVisible();
         expect(await discover.getHistogramSuggestionType()).toBe('lensSuggestion');
-        await discover.saveSearch(sessionName);
+        await saveSession(discover, sessionName);
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(page.testSubj.locator('partitionVisChart')).toBeVisible();
@@ -128,7 +173,7 @@ spaceTest.describe(
 
         await discover.writeAndSubmitEsqlQuery(ESQL_LIMIT_QUERY);
         await discover.changeVisualizationShape('Line');
-        await discover.saveSearch(sessionName);
+        await saveSession(discover, sessionName);
 
         await discover.writeAndSubmitEsqlQuery('from logstash-* | limit 100');
         await expect(discover.getHitCountLocator()).toHaveText('100');
@@ -154,14 +199,16 @@ spaceTest.describe(
       async ({ page, pageObjects, scoutSpace }) => {
         const { discover } = pageObjects;
         const sessionName = `ESQL invalidated visualization ${scoutSpace.id}`;
+        const treemapSessionName = `${sessionName} treemap`;
 
         await discover.writeAndSubmitEsqlQuery(ESQL_LIMIT_QUERY);
         await discover.changeVisualizationShape('Line');
-        await discover.saveSearch(sessionName);
+        await saveSession(discover, sessionName);
 
         await discover.writeAndSubmitEsqlQuery(ESQL_STATS_QUERY);
         await discover.chooseVisualizationSuggestion('treemap');
-        await discover.saveSearchAsNew(`${sessionName} treemap`);
+        await discover.saveSearchAsNew(treemapSessionName);
+        await expect(discover.getCurrentQueryNameLocator()).toHaveText(treemapSessionName);
         await page.reload();
         await discover.waitUntilTabIsLoaded();
         await expect(page.testSubj.locator('partitionVisChart')).toBeVisible();
@@ -187,7 +234,7 @@ spaceTest.describe(
 
         await discover.writeAndSubmitEsqlQuery(ESQL_STATS_QUERY);
         await discover.chooseVisualizationSuggestion('treemap');
-        await discover.saveSearch(sessionName);
+        await saveSession(discover, sessionName);
         await discover.changeVisualizationShape('Pie');
         expect(await discover.getVisualizationTitle()).toBe('Pie');
         await discover.saveUnsavedChanges();

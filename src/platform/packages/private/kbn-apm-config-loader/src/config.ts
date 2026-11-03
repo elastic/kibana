@@ -370,8 +370,14 @@ export class ApmConfiguration {
       this.getConfigFromKibanaConfig();
     const configFromEnv = this.getConfigFromEnv(configFromKibanaConfig);
     const config = merge({}, configFromKibanaConfig, configFromEnv);
+    const telemetryConfig = this.getTelemetryConfig();
 
-    if (config.active === false && config.contextPropagationOnly !== false) {
+    if (
+      config.active === false &&
+      config.contextPropagationOnly !== false &&
+      // If OTel tracing is enabled, we don't want to throw an error because we're using the context propagation provided by OTel.
+      telemetryConfig.tracing.enabled !== true
+    ) {
       throw new Error(
         'APM is disabled, but context propagation is enabled. Please disable context propagation with contextPropagationOnly:false'
       );

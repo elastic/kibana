@@ -98,6 +98,25 @@ describe('Authentication Host Table Component', () => {
     });
   });
 
+  it('labels the authentications query with the hosts page execution context', () => {
+    render(
+      <TestProviders>
+        <AuthenticationsHostTable {...defaultProps} />
+      </TestProviders>
+    );
+    expect(mockUseAuthentications).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-hosts_page',
+            id: 'authentications',
+          },
+        },
+      })
+    );
+  });
+
   it('toggleStatus=true, do not skip', () => {
     render(
       <TestProviders>

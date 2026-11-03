@@ -26,6 +26,7 @@ import { parse, stringify } from 'yaml';
 import type { FormValues, StateTransition, RuleQuery, RuleNoData, RuleRecovery } from '../types';
 import {
   apiStateTransitionToFormStateTransition,
+  attachPhaseOperator,
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
 } from './state_transition_helpers';
@@ -62,7 +63,7 @@ const parseArtifacts = (artifacts: unknown): FormValues['artifacts'] => {
 
 interface YamlRuleObject {
   kind: string;
-  metadata: { name: string; description?: string; tags?: string[] };
+  metadata: { name: string; description?: string; tags?: string[]; routing_tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback: string };
   query: Query;
@@ -98,17 +99,23 @@ const serializeStateTransition = (
   recoveryEnabled: boolean
 ): ApiStateTransition | undefined => {
   if (!st) return undefined;
-  const pending = {
-    ...(st.pendingCount != null ? { count: st.pendingCount } : {}),
-    ...(st.pendingTimeframe != null ? { timeframe: st.pendingTimeframe } : {}),
-  };
+  const pending = attachPhaseOperator(
+    {
+      ...(st.pendingCount != null ? { count: st.pendingCount } : {}),
+      ...(st.pendingTimeframe != null ? { timeframe: st.pendingTimeframe } : {}),
+    },
+    st.pendingOperator
+  );
   // The request mapper drops these when the rule never recovers on its own, so
   // emitting them here would preview a delay that the save silently discards.
   const recovering = recoveryEnabled
-    ? {
-        ...(st.recoveringCount != null ? { count: st.recoveringCount } : {}),
-        ...(st.recoveringTimeframe != null ? { timeframe: st.recoveringTimeframe } : {}),
-      }
+    ? attachPhaseOperator(
+        {
+          ...(st.recoveringCount != null ? { count: st.recoveringCount } : {}),
+          ...(st.recoveringTimeframe != null ? { timeframe: st.recoveringTimeframe } : {}),
+        },
+        st.recoveringOperator
+      )
     : {};
   const out: ApiStateTransition = {
     ...(Object.keys(pending).length ? { pending } : {}),
@@ -121,9 +128,9 @@ const serializeStateTransition = (
  * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility).
  *
  * Note: `metadata.enabled` is intentionally NOT serialized. The API's `metadataSchema`
- * is strict and only accepts { name, description?, tags? }; `enabled` lives at
- * the top level of the update/response schemas, never under metadata, and is not part
- * of the create payload at all.
+ * is strict and does not accept it; `enabled` lives at the top level of the
+ * update/response schemas, never under metadata, and is not part of the create
+ * payload at all.
  */
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const st = serializeStateTransition(values.stateTransition, isRecoveryEnabled(values));
@@ -137,6 +144,7 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       name: values.metadata.name,
       ...(values.metadata.description && { description: values.metadata.description }),
       ...(values.metadata.tags?.length && { tags: values.metadata.tags }),
+      ...(values.metadata.routingTags?.length && { routing_tags: values.metadata.routingTags }),
     },
     time_field: values.timeField,
     schedule: {
@@ -309,7 +317,10 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 
   // The request mappers drop these for signals, so accepting them here would
   // save a rule that silently differs from the YAML in front of the user.
-  const alertOnlyBlocks = ALERT_ONLY_KEYS.filter((key) => obj[key] != null);
+  const alertOnlyBlocks = [
+    ...ALERT_ONLY_KEYS.filter((key) => obj[key] != null),
+    ...(metadata?.routing_tags != null ? ['metadata.routing_tags'] : []),
+  ];
   if (!isAlert && alertOnlyBlocks.length > 0) {
     return {
       values: null,
@@ -352,7 +363,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       values: null,
       error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidStateTransitionError', {
         defaultMessage:
-          'Invalid state_transition. Set pending or recovering to a block with count and/or timeframe.',
+          'Invalid state_transition. Set pending or recovering to a block with count and/or timeframe. operator must be "and" or "or", and only when both are set.',
       }),
     };
   }
@@ -371,6 +382,9 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         enabled: metadata?.enabled !== false,
         description: typeof metadata?.description === 'string' ? metadata.description : undefined,
         tags: Array.isArray(metadata?.tags) ? (metadata.tags as string[]) : undefined,
+        routingTags: Array.isArray(metadata?.routing_tags)
+          ? (metadata.routing_tags as string[])
+          : undefined,
       },
       timeField: typeof obj.time_field === 'string' ? obj.time_field : '@timestamp',
       schedule: {

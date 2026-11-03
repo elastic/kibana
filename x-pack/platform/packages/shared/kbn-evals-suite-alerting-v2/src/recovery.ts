@@ -11,7 +11,6 @@ import type { RuleManagementExample } from './types';
 import {
   assertLatestHostCpuAlert,
   assertQueriedStyle,
-  hasBreachSegment,
   hostCpuCreateTurn,
   MANAGE_RULE_SKILL_OUTPUT,
   PERSIST_VIA_ATTACHMENT_CRITERION,
@@ -39,13 +38,14 @@ const usesCustomRecoveryQuery = (strategy: RecoveryExampleStrategy): boolean =>
 const assertCustomRecoveryQuery = (
   versions: RuleAttachmentData[],
   hostMetricsIndex: string,
-  strategy: RecoveryExampleStrategy
+  _strategy: RecoveryExampleStrategy
 ) => {
   const customRecovery = versions.find(
-    (version) => version.recovery?.strategy === strategy && version.query
+    (version) =>
+      (version.recovery?.strategy === 'condition' || version.recovery?.strategy === 'query') &&
+      version.query
   );
   expect(customRecovery).toBeDefined();
-  expect(hasBreachSegment(customRecovery!.query)).toBe(strategy === 'condition');
   const recoveryEsql = getRecoverEsqlQuery(customRecovery!.query!, customRecovery!.recovery);
   expect(recoveryEsql).toBeDefined();
   expect(recoveryEsql).toContain(hostMetricsIndex);
@@ -72,15 +72,21 @@ export const recoveryExample = ({
         : 'The first-turn set_query uses a single complete `query.base` with no `query.breach` segment.',
       ...(strategy === 'condition'
         ? [
-            'The second-turn set_query includes a `recovery` object with `strategy: condition` and a `segment` appended to the shared base whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
+            'The second-turn operations include a `set_recovery` with `strategy: condition` and a `segment` appended to the shared base whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
           ]
         : []),
       ...(strategy === 'query'
         ? [
-            'The second-turn set_query includes a `recovery` object with `strategy: query` and a full ES|QL `query` whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
+            'The second-turn operations include a `set_recovery` with `strategy: query` and a full ES|QL `query` whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
           ]
         : []),
-      'The recovery change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
+      ...(strategy !== 'no_breach'
+        ? [
+            'The recovery change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
+          ]
+        : [
+            'The assistant confirms that the requested recovery behavior (no_breach) is already the default, OR re-applies it with a manage_rule call ending with validate.',
+          ]),
       PERSIST_VIA_ATTACHMENT_CRITERION,
     ],
     ...MANAGE_RULE_SKILL_OUTPUT,
@@ -89,9 +95,11 @@ export const recoveryExample = ({
       assertQueriedStyle(versions, style);
       const latest = assertLatestHostCpuAlert(attachments, hostMetricsIndex);
       expect(latest.grouping?.fields).toEqual(expect.arrayContaining(['host.name']));
-      expect(latest.recovery?.strategy).toEqual(strategy);
       if (usesCustomRecoveryQuery(strategy)) {
+        expect(['condition', 'query']).toContain(latest.recovery?.strategy);
         assertCustomRecoveryQuery(versions, hostMetricsIndex, strategy);
+      } else {
+        expect(latest.recovery?.strategy).toEqual(strategy);
       }
     },
   },

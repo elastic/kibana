@@ -71,7 +71,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
     expect(definition.getLabel(withHits)).toBe('3 hits confirm: Suspicious lateral movement');
   });
 
-  it('credits the behavior, not the hit count, when only Tier 2 confirmed the finding', () => {
+  it('credits the behavior, not the hit count, when only Behavior Hunt confirmed the finding', () => {
     const definition = createSignificantSecurityEventAttachmentDefinition({ navigation });
     // The entry carries its report's Tier 1 counts, and a clean Tier 1 leaves them at zero.
     const tier2Only = {
@@ -94,7 +94,7 @@ describe('createSignificantSecurityEventAttachmentDefinition', () => {
                 technique_id: 'T1021',
                 tactic_ids: ['TA0008'],
                 confidence: 0.7,
-                rule_name: 'Lateral movement via RDP',
+                title: 'Lateral movement via RDP',
                 execution: { executed: true, row_count: 4, hit: true },
               },
             ],

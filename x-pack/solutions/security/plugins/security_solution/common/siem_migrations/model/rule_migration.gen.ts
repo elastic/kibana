@@ -132,11 +132,15 @@ export const ElasticRule = lazySchema(() =>
     /**
      * The translated elastic query.
      */
-    query: z.string().optional().describe('The translated elastic query.'),
+    query: z.string().nullable().optional().describe('The translated elastic query.'),
     /**
      * The translated elastic query language.
      */
-    query_language: z.literal('esql').optional().describe('The translated elastic query language.'),
+    query_language: z
+      .literal('esql')
+      .nullable()
+      .optional()
+      .describe('The translated elastic query language.'),
     /**
      * The Elastic prebuilt rule id matched.
      */

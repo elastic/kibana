@@ -6,6 +6,7 @@
  */
 
 import { firstValueFrom, type Observable } from 'rxjs';
+import { withTimeout } from '@kbn/std';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 
@@ -30,29 +31,18 @@ export const installWithTimeout = async ({
   timeoutMs = INSTALLATION_TIMEOUT,
 }: InstallWithTimeoutOpts): Promise<void> => {
   try {
-    let timeoutId: NodeJS.Timeout;
-    const install = async (): Promise<void> => {
-      await installFn();
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-
-    const throwTimeoutException = (): Promise<void> => {
-      return new Promise((_, reject) => {
-        timeoutId = setTimeout(() => {
-          const msg = `Timeout: it took more than ${timeoutMs}ms`;
-          reject(new Error(msg));
-        }, timeoutMs);
-
-        firstValueFrom(pluginStop$).then(() => {
-          clearTimeout(timeoutId);
-          reject(new InstallShutdownError());
-        });
+    const stopped = new Promise<never>((_, reject) => {
+      firstValueFrom(pluginStop$).then(() => {
+        reject(new InstallShutdownError());
       });
-    };
-
-    await Promise.race([install(), throwTimeoutException()]);
+    });
+    const outcome = await withTimeout({
+      promise: Promise.race([installFn(), stopped]),
+      timeoutMs,
+    });
+    if (outcome.timedout) {
+      throw new Error(`Timeout: it took more than ${timeoutMs}ms`);
+    }
   } catch (e) {
     if (e instanceof InstallShutdownError) {
       throw e;

@@ -63,6 +63,15 @@ const editorStyleMap = {
         lineHeight: '1.4',
       },
 
+      '.service-account-placeholder': {
+        color: euiTheme.colors.textSubdued,
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+        border: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBasePlain}`,
+        borderRadius: euiTheme.border.radius.small,
+        padding: `0 ${euiTheme.size.xs}`,
+        cursor: 'pointer',
+      },
+
       '.service-account-name-badge-unavailable': {
         display: 'inline-block',
         backgroundColor: euiTheme.colors.lightShade,
@@ -177,13 +186,12 @@ const editorStyleMap = {
       // Diff highlighting
       '.changed-line-highlight': {
         backgroundColor: euiTheme.colors.backgroundLightWarning,
-        borderLeft: `2px solid ${euiTheme.colors.warning}`,
-        opacity: 0.7,
+        borderLeft: `${euiTheme.border.width.thick} solid ${euiTheme.colors.warning}`,
       },
+      // A solid gutter bar marks changed lines without relying on background color alone
       '.changed-line-margin': {
         backgroundColor: euiTheme.colors.warning,
-        width: '2px',
-        opacity: 0.7,
+        width: euiTheme.size.xs,
       },
     }),
 
@@ -196,7 +204,6 @@ const editorStyleMap = {
       minWidth: 0,
       overflowY: 'auto',
       minHeight: 0,
-      paddingLeft: euiTheme.size.xl,
       backgroundColor: euiTheme.colors.backgroundBaseRecessed,
       [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
         backgroundColor: euiTheme.colors.backgroundBasePlain,

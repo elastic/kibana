@@ -7,6 +7,12 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
+import {
+  AI_ANONYMIZATION_SETTINGS,
+  CONTEXT_ENGINE_ENABLED_SETTING_ID,
+  CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID,
+} from '@kbn/management-settings-ids';
+import { SECURITY_CONTEXT_ENGINE_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { SecuritySolutionServerlessPlugin } from './plugin';
 import type { SecuritySolutionServerlessPluginSetupDeps } from './types';
 import { ProductLine, ProductTier } from '../common/product';
@@ -17,7 +23,6 @@ jest.mock('./config', () => ({
   createConfig: jest.fn().mockReturnValue({
     productTypes: [],
     experimentalFeatures: {
-      enableAlertsAndAttacksAlignment: false,
       ruleChangesHistoryEnabled: false,
     },
     usageApi: { enabled: false, url: undefined },
@@ -134,6 +139,91 @@ describe('SecuritySolutionServerlessPlugin', () => {
       expect(setupProjectSettings).toHaveBeenCalledTimes(1);
       const [settingsArray] = setupProjectSettings.mock.calls[0];
       expect(settingsArray).not.toContain(ALERTZERO_ENABLED_SETTING_ID);
+    });
+  });
+  describe('setup — AI anonymization project-setting allowlist', () => {
+    it('allowlists AI_ANONYMIZATION_SETTINGS so it is editable in Advanced Settings', () => {
+      const plugin = new SecuritySolutionServerlessPlugin(
+        coreMock.createPluginInitializerContext({
+          productTypes: [
+            { product_line: ProductLine.security, product_tier: ProductTier.complete },
+          ],
+          enableExperimental: [],
+          usageApi: { enabled: false },
+          usageReportingTaskInterval: '1h',
+          cloudSecurityUsageReportingTaskInterval: '30m',
+          ai4SocUsageReportingTaskInterval: '1h',
+          usageReportingTaskTimeout: '1m',
+          cloudSecurityMetering: { cspm: { enabled: false } },
+        })
+      );
+      const deps = createMinimalSetupDeps(undefined);
+
+      plugin.setup(coreMock.createSetup(), deps);
+
+      const [settingsArray] = (deps.serverless.setupProjectSettings as jest.Mock).mock.calls[0];
+      expect(settingsArray).toContain(AI_ANONYMIZATION_SETTINGS);
+    });
+  });
+
+  describe('setup — Context Engine project-setting allowlist', () => {
+    const { getSecurityAiSocProductTier } = jest.requireMock('./product_features') as {
+      getSecurityAiSocProductTier: jest.Mock;
+    };
+
+    it('allowlists Context Engine settings on complete tier', () => {
+      getSecurityAiSocProductTier.mockReturnValue(ProductTier.complete);
+
+      const plugin = new SecuritySolutionServerlessPlugin(
+        coreMock.createPluginInitializerContext({
+          productTypes: [
+            { product_line: ProductLine.security, product_tier: ProductTier.complete },
+          ],
+          enableExperimental: [],
+          usageApi: { enabled: false },
+          usageReportingTaskInterval: '1h',
+          cloudSecurityUsageReportingTaskInterval: '30m',
+          ai4SocUsageReportingTaskInterval: '1h',
+          usageReportingTaskTimeout: '1m',
+          cloudSecurityMetering: { cspm: { enabled: false } },
+        })
+      );
+      const deps = createMinimalSetupDeps(undefined);
+
+      plugin.setup(coreMock.createSetup(), deps);
+
+      const [settingsArray] = (deps.serverless.setupProjectSettings as jest.Mock).mock.calls[0];
+      expect(settingsArray).toEqual(
+        expect.arrayContaining(SECURITY_CONTEXT_ENGINE_PROJECT_SETTINGS)
+      );
+      expect(settingsArray).toContain(CONTEXT_ENGINE_ENABLED_SETTING_ID);
+      expect(settingsArray).toContain(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID);
+    });
+
+    it('omits Context Engine settings on essentials tier', () => {
+      getSecurityAiSocProductTier.mockReturnValue(ProductTier.essentials);
+
+      const plugin = new SecuritySolutionServerlessPlugin(
+        coreMock.createPluginInitializerContext({
+          productTypes: [
+            { product_line: ProductLine.security, product_tier: ProductTier.essentials },
+          ],
+          enableExperimental: [],
+          usageApi: { enabled: false },
+          usageReportingTaskInterval: '1h',
+          cloudSecurityUsageReportingTaskInterval: '30m',
+          ai4SocUsageReportingTaskInterval: '1h',
+          usageReportingTaskTimeout: '1m',
+          cloudSecurityMetering: { cspm: { enabled: false } },
+        })
+      );
+      const deps = createMinimalSetupDeps(undefined);
+
+      plugin.setup(coreMock.createSetup(), deps);
+
+      const [settingsArray] = (deps.serverless.setupProjectSettings as jest.Mock).mock.calls[0];
+      expect(settingsArray).not.toContain(CONTEXT_ENGINE_ENABLED_SETTING_ID);
+      expect(settingsArray).not.toContain(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID);
     });
   });
 });

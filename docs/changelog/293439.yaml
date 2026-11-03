@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293439
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix `create_detection_rule` tool reporting a generic error instead of the actual failure reason
-description: The AI detection rule creation tool now reports the underlying reason when rule creation fails, instead of a generic error message.

@@ -7,97 +7,19 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type {
-  Attachment,
-  AttachmentVersionRef,
-  AttachmentRefActor,
-  VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
-import {
-  AttachmentType,
-  getVersion,
-  isVersionedAttachmentOfType,
-} from '@kbn/agent-builder-common/attachments';
 import { ThumbnailAttachmentPill } from '../../conversation_input/thumbnail_attachment_pill';
-import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
-import type { ResolvedReference } from '../attachments/use_resolved_attachment_references';
-import { useResolvedAttachmentReferences } from '../attachments/use_resolved_attachment_references';
+import type { UserMessageThumbnail } from './use_user_message_thumbnails';
 
 export interface UserMessageImagesProps {
-  attachmentRefs?: AttachmentVersionRef[];
-  conversationAttachments?: VersionedAttachment[];
-  fallbackAttachments?: Attachment[];
-  actorFilter?: AttachmentRefActor[];
+  thumbnails: UserMessageThumbnail[];
   /** When set, the thumbnail whose data.name matches is highlighted. */
   hoveredImageName?: string | null;
 }
 
-interface ThumbnailInfo {
-  key: string;
-  attachmentId: string;
-  thumbnailUrl: string;
-  label: string;
-  isHighlighted: boolean;
-}
-
 export const UserMessageImages: React.FC<UserMessageImagesProps> = ({
-  attachmentRefs,
-  conversationAttachments,
-  fallbackAttachments,
-  actorFilter,
+  thumbnails,
   hoveredImageName,
 }) => {
-  const { attachmentsService } = useAgentBuilderServices();
-
-  const allResolved = useResolvedAttachmentReferences({
-    attachmentRefs,
-    conversationAttachments,
-    fallbackAttachments,
-    actorFilter,
-  });
-
-  const imageRefs = allResolved.filter(
-    (
-      ref
-    ): ref is ResolvedReference & {
-      attachment: VersionedAttachment<AttachmentType.image>;
-    } => isVersionedAttachmentOfType(ref.attachment, AttachmentType.image)
-  );
-
-  const thumbnails = imageRefs.reduce<ThumbnailInfo[]>((acc, ref) => {
-    const versionData = getVersion(ref.attachment, ref.version);
-    if (!versionData) {
-      return acc;
-    }
-
-    const uiDefinition = attachmentsService.getAttachmentUiDefinition(ref.attachment.type);
-    const attachmentForUi = {
-      id: ref.attachment.id,
-      type: ref.attachment.type,
-      data: versionData.data,
-      ...(ref.attachment.description !== undefined
-        ? { description: ref.attachment.description }
-        : {}),
-    };
-
-    const thumbnailUrl = uiDefinition?.getThumbnail?.(attachmentForUi);
-    if (!thumbnailUrl) {
-      return acc;
-    }
-
-    const label =
-      uiDefinition?.getLabel(attachmentForUi) ?? ref.attachment.description ?? ref.attachment.type;
-
-    acc.push({
-      key: `${ref.attachment.id}-v${ref.version}`,
-      attachmentId: ref.attachment.id,
-      thumbnailUrl,
-      label,
-      isHighlighted: hoveredImageName != null && hoveredImageName === versionData.data.name,
-    });
-    return acc;
-  }, []);
-
   if (thumbnails.length === 0) {
     return null;
   }
@@ -105,9 +27,12 @@ export const UserMessageImages: React.FC<UserMessageImagesProps> = ({
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="row" wrap responsive={false} gutterSize="s">
-        {thumbnails.map(({ key, ...pillProps }) => (
+        {thumbnails.map(({ key, name, ...pillProps }) => (
           <EuiFlexItem grow={false} key={key}>
-            <ThumbnailAttachmentPill {...pillProps} />
+            <ThumbnailAttachmentPill
+              {...pillProps}
+              isHighlighted={hoveredImageName != null && hoveredImageName === name}
+            />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>

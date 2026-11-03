@@ -92,13 +92,10 @@ const esqlApiTab: Required<DiscoverSessionApiEsqlTab> = {
   data_source: { type: 'esql', query: 'FROM logs-* | WHERE status == 500' },
   hide_chart: false,
   hide_table: true,
-  hide_aggregated_preview: true,
   row_height: 2,
   header_row_height: 'auto',
   rows_per_page: 25,
-  sample_size: 500,
   breakdown_field: 'service.name',
-  chart_interval: 'h',
   time_range: { from: 'now-24h', to: 'now' },
   refresh_interval: { pause: false, value: 30_000 },
   density: DataGridDensity.COMPACT,
@@ -173,7 +170,7 @@ const response: DiscoverSessionApiResponse = {
       esqlApiTab,
     ],
   },
-  meta: { managed: true },
+  meta: { managed: true, version: 'saved-version' },
 };
 
 describe('Discover session conversion and UI preparation', () => {
@@ -231,6 +228,7 @@ describe('Discover session conversion and UI preparation', () => {
         description: 'Operational logs',
         tags: ['tag-1'],
         managed: true,
+        version: 'saved-version',
       })
     );
     expect(session.tabs).toHaveLength(3);
@@ -452,6 +450,9 @@ describe('Discover session conversion and UI preparation', () => {
       counter_aggregation: 'max',
       gauge_aggregation: 'min',
       histogram_percentile: 'p99',
+      histogram_visualization: 'lnsHeatmap',
+      grid_sort_field: 'recency',
+      grid_sort_direction: 'desc',
     };
     const metricsResponse: DiscoverSessionApiResponse = {
       ...response,
@@ -467,13 +468,17 @@ describe('Discover session conversion and UI preparation', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p99',
+      histogramVisualization: 'lnsHeatmap',
+      gridSortField: 'recency',
+      gridSortDirection: 'desc',
     });
     expect(toDiscoverSessionApiData(session)).toStrictEqual(metricsResponse.data);
   });
 
-  it('rejects Metrics settings on a classic tab when building a save request', () => {
+  it('ignores Metrics settings on a classic tab when building a save request', () => {
     const session = fromDiscoverSessionApiResponse(response);
     const [classicTab] = session.tabs;
+    const requestWithoutSettings = toDiscoverSessionApiData(session);
     classicTab.tabTypeState = {
       type: DiscoverTabType.Metrics,
       dimensions: ['host.name'],
@@ -483,9 +488,7 @@ describe('Discover session conversion and UI preparation', () => {
       histogramPercentile: 'p99',
     };
 
-    expect(() => toDiscoverSessionApiData(session)).toThrow(
-      `Metrics tab "${classicTab.label}" with ID "${classicTab.id}" requires an ES|QL data source.`
-    );
+    expect(toDiscoverSessionApiData(session)).toStrictEqual(requestWithoutSettings);
   });
 
   it('preserves inline IDs and filter references without mutating the session', () => {
@@ -568,6 +571,7 @@ describe('Discover session conversion and UI preparation', () => {
     const session = assignSessionDataViewIds(fromDiscoverSessionApiResponse(response), []);
     const inlineTab = session.tabs[1];
     inlineTab.isTextBasedQuery = true;
+    inlineTab.hideAggregatedPreview = false;
     inlineTab.serializedSearchSource.filter = [
       {
         meta: { index: 'runtime-inline-id', type: FILTERS.PHRASE, key: 'service.name' },
@@ -591,25 +595,32 @@ describe('Discover session conversion and UI preparation', () => {
         data_view_id: 'runtime-inline-id',
       },
     ]);
+    expect(apiTab).toHaveProperty('hide_aggregated_preview', false);
     expect(session).toStrictEqual(beforeSave);
   });
 
-  it('converts ES|QL without approximation when the text-based flag is incorrectly false', () => {
-    const session = fromDiscoverSessionApiResponse(response);
-    const esqlTab = session.tabs[2];
-    esqlTab.isTextBasedQuery = false;
-    const beforeSave = cloneDeep(session);
+  it.each([true, false])(
+    'preserves ES|QL approximation %s when the text-based flag is incorrectly false',
+    (esqlApproximation) => {
+      const session = fromDiscoverSessionApiResponse(response);
+      const esqlTab = session.tabs[2];
+      esqlTab.isTextBasedQuery = false;
+      esqlTab.esqlApproximation = esqlApproximation;
+      esqlTab.hideAggregatedPreview = true;
+      const beforeSave = cloneDeep(session);
 
-    const apiTab = toDiscoverSessionApiData(session).tabs[2];
+      const apiTab = toDiscoverSessionApiData(session).tabs[2];
 
-    expect(apiTab.data_source).toStrictEqual({
-      type: 'esql',
-      query: 'FROM logs-* | WHERE status == 500',
-    });
-    expect(apiTab).not.toHaveProperty('filters');
-    expect(apiTab).not.toHaveProperty('esql_approximation');
-    expect(session).toStrictEqual(beforeSave);
-  });
+      expect(apiTab.data_source).toStrictEqual({
+        type: 'esql',
+        query: 'FROM logs-* | WHERE status == 500',
+      });
+      expect(apiTab).not.toHaveProperty('filters');
+      expect(apiTab).toHaveProperty('esql_approximation', esqlApproximation);
+      expect(apiTab).not.toHaveProperty('hide_aggregated_preview');
+      expect(session).toStrictEqual(beforeSave);
+    }
+  );
 
   it('round-trips pinned conditions as app filters without changing the local pin', () => {
     const session = fromDiscoverSessionApiResponse(response);
@@ -722,6 +733,42 @@ describe('Discover session conversion and UI preparation', () => {
     });
   });
 
+  it('replaces an unsupported Classic chart interval with auto before saving', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    session.tabs[0].chartInterval = '5m';
+
+    const data = toDiscoverSessionApiData(session);
+
+    expect(data.tabs[0]).toHaveProperty('chart_interval', 'auto');
+    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+    expect(session.tabs[0].chartInterval).toBe('5m');
+  });
+
+  it('raises a Classic sample size below the API minimum to 10 before saving', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    session.tabs[0].sampleSize = 1;
+
+    const data = toDiscoverSessionApiData(session);
+
+    expect(data.tabs[0]).toHaveProperty('sample_size', 10);
+    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+    expect(session.tabs[0].sampleSize).toBe(1);
+  });
+
+  it('omits the fields that ES|QL tabs do not use before saving', () => {
+    const session = fromDiscoverSessionApiResponse(response);
+    session.tabs[2].sampleSize = 500;
+    session.tabs[2].hideAggregatedPreview = true;
+    session.tabs[2].chartInterval = 'auto';
+
+    const data = toDiscoverSessionApiData(session);
+
+    expect(data.tabs[2]).not.toHaveProperty('sample_size');
+    expect(data.tabs[2]).not.toHaveProperty('hide_aggregated_preview');
+    expect(data.tabs[2]).not.toHaveProperty('chart_interval');
+    expect(discoverSessionInternalDataSchema.safeParse(data).success).toBe(true);
+  });
+
   it('normalizes the legacy ES|QL control type and camelCase config before saving', () => {
     const session = fromDiscoverSessionApiResponse(response);
     const controlGroup = JSON.parse(session.tabs[2].controlGroupJson ?? '{}');
@@ -789,9 +836,7 @@ describe('Discover session conversion and UI preparation', () => {
       'missing-type-control': { order: 0 },
     });
 
-    expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'controlGroupJson panels must have a type'
-    );
+    expect(() => toDiscoverSessionApiData(session)).toThrow('Control type is missing or invalid.');
   });
 
   it('uses zero for missing control order, matching the server transform', () => {
@@ -817,7 +862,7 @@ describe('Discover session conversion and UI preparation', () => {
     session.tabs[2].controlGroupJson = JSON.stringify({ 'broken-control': null });
 
     expect(() => toDiscoverSessionApiData(session)).toThrow(
-      'controlGroupJson panels must be JSON objects'
+      'Control configuration must be a JSON object.'
     );
   });
 });
@@ -884,7 +929,6 @@ describe('chart state from API responses', () => {
         ...esqlTab,
         vis_context: visContext,
         breakdown_field: 'host.name',
-        chart_interval: 'h',
       })
     ).toStrictEqual({
       suggestionType: visContext.suggestion_type,

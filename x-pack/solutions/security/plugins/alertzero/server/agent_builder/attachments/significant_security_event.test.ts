@@ -176,21 +176,21 @@ describe('createSignificantSecurityEventAttachmentType', () => {
                 technique_id: 'T1021',
                 tactic_ids: ['TA0008'],
                 confidence: 0.9,
-                rule_name: 'hit',
+                title: 'hit',
                 execution: { executed: true, row_count: 3, hit: true },
               },
               {
                 technique_id: 'T1078',
                 tactic_ids: [],
                 confidence: 0.5,
-                rule_name: 'clean',
+                title: 'clean',
                 execution: { executed: true, row_count: 0, hit: false },
               },
               {
                 technique_id: 'T1098',
                 tactic_ids: [],
                 confidence: 0.5,
-                rule_name: 'no verdict',
+                title: 'no verdict',
                 execution: {
                   executed: true,
                   row_count: 4,
@@ -202,21 +202,21 @@ describe('createSignificantSecurityEventAttachmentType', () => {
                 technique_id: 'T1110',
                 tactic_ids: [],
                 confidence: 0.5,
-                rule_name: 'never ran',
+                title: 'never ran',
                 execution: { executed: false, row_count: 0, hit: false },
               },
               {
                 technique_id: 'T1136',
                 tactic_ids: [],
                 confidence: 0.5,
-                rule_name: 'unreported',
+                title: 'unreported',
               },
             ],
           },
         },
       });
 
-      expect(value).toContain('Confirmed by: tier2');
+      expect(value).toContain('Confirmed by: Behavior Hunt');
       expect(value).toContain('hit — executed, hit (3 row(s) in required indices)');
       expect(value).toContain('clean — executed, no rows in required indices (clean)');
       expect(value).toContain(
@@ -238,7 +238,11 @@ describe('createSignificantSecurityEventAttachmentType', () => {
             status: 'no_environment_hits',
             counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
             per_index: [
-              { index: 'logs-endpoint.events.process-default', hit_count: 0, required: true },
+              {
+                index: 'logs-endpoint.events.process-default',
+                hit_count: 0,
+                required: true,
+              },
             ],
             resolved_iocs: [{ type: 'hash', value: 'abc123' }],
             per_index_truncated: true,
@@ -247,7 +251,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
           tier2: {
             status: 'behaviors_proposed',
             behaviors: [
-              { technique_id: 'T1021', tactic_ids: [], confidence: 0.5, rule_name: 'proposal' },
+              { technique_id: 'T1021', tactic_ids: [], confidence: 0.5, title: 'proposal' },
             ],
             behaviors_truncated: true,
           },
@@ -258,7 +262,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain('Per index (truncated by the producer: not the complete set):');
       expect(value).toContain('Resolved IOCs (truncated by the producer: not the complete set):');
       expect(value).toContain(
-        'Tier 2: behaviors_proposed (truncated by the producer: not the complete set)'
+        'Behavior Hunt: behaviors_proposed (truncated by the producer: not the complete set)'
       );
     });
   });
@@ -333,7 +337,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
               technique_id: 't'.repeat(32),
               tactic_ids: Array.from({ length: 20 }, () => 'x'.repeat(32)),
               confidence: 0.9,
-              rule_name: 'r'.repeat(256),
+              title: 'r'.repeat(256),
               execution: { executed: true, row_count: 1, hit: true },
             })),
           },
@@ -366,7 +370,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       for (const section of [
         'Timeline:',
         'Hunt result:',
-        'Confirmed by: tier1, tier2',
+        'Confirmed by: IOC Hunt, Behavior Hunt',
         'Security knowledge indicators',
         'Entities:',
         'Alerts:',

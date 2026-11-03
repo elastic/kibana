@@ -109,6 +109,21 @@ describe('RiskEngineDataClient', () => {
           enabled: false,
         });
       });
+
+      it('returns null when the configuration does not exist', async () => {
+        mockSavedObjectClient.get.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError()
+        );
+
+        await expect(riskEngineDataClient.getConfiguration()).resolves.toBeNull();
+      });
+
+      it('propagates saved object read failures', async () => {
+        const error = new Error('Saved Objects unavailable');
+        mockSavedObjectClient.get.mockRejectedValueOnce(error);
+
+        await expect(riskEngineDataClient.getConfiguration()).rejects.toBe(error);
+      });
     });
 
     describe('enableRiskEngine', () => {

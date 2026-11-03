@@ -27,6 +27,7 @@ import { BulkActionTaskType } from './bulk_action_types';
 import { MigrateActionRunner } from './migrate_action_runner';
 import { ChangePrivilegeActionRunner } from './change_privilege_runner';
 import { RollbackActionRunner } from './rollback_action_runner';
+import { RestartActionRunner } from './restart_action_runner';
 
 /**
  * Create and run retry tasks of agent bulk actions
@@ -53,6 +54,7 @@ export class BulkActionsResolver {
         [BulkActionTaskType.MIGRATE_RETRY]: MigrateActionRunner,
         [BulkActionTaskType.PRIVILEGE_LEVEL_CHANGE_RETRY]: ChangePrivilegeActionRunner,
         [BulkActionTaskType.ROLLBACK_RETRY]: RollbackActionRunner,
+        [BulkActionTaskType.RESTART_RETRY]: RestartActionRunner,
       };
 
       return createRetryTask(

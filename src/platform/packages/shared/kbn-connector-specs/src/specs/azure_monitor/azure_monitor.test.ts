@@ -8,6 +8,7 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
+import { createRecordingAxiosClient } from '../../lib/recording_axios_client';
 import { getConnectorSpec } from '../../..';
 import { AzureMonitor } from './azure_monitor';
 
@@ -200,6 +201,19 @@ describe('AzureMonitor', () => {
         { params: { 'api-version': '2023-10-01', metricnames: 'Percentage CPU,Network In' } }
       );
     });
+
+    it.each([
+      '/subscriptions/',
+      '/subscriptions//providers/Microsoft.Compute/virtualMachines/vm1',
+      '/subscriptions/x',
+      '/subscriptions/x/resourceGroups/rg1',
+      '/subscriptions/x/resourceGroups/rg1/providers/Microsoft.Compute/virtualMachines/vm1/',
+    ])('rejects the malformed resource id %s', (resourceId) => {
+      expect(
+        AzureMonitor.actions.queryMetrics.input.safeParse({ resourceId, metricNames: ['cpu'] })
+          .success
+      ).toBe(false);
+    });
   });
 
   describe('runLogQuery action', () => {
@@ -229,6 +243,32 @@ describe('AzureMonitor', () => {
         { headers: { Authorization: 'Bearer log-analytics-token' } }
       );
       expect(result).toEqual({ tables: [] });
+    });
+
+    it('sends neither the ARM token to the token endpoint nor to Log Analytics', async () => {
+      const { client, requests } = createRecordingAxiosClient(
+        { Authorization: 'Bearer arm-token' },
+        (url) => ({
+          data: url?.includes('/oauth2/')
+            ? { access_token: 'log-analytics-token' }
+            : { tables: [] },
+          status: 200,
+          headers: {},
+        })
+      );
+
+      await AzureMonitor.actions.runLogQuery.handler(
+        { ...mockContext, client } as unknown as ActionContext,
+        { workspaceId: WORKSPACE_ID, query: 'AzureActivity | take 1' }
+      );
+
+      expect(requests.map(({ url, headers }) => [url, headers.Authorization])).toEqual([
+        ['https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token', undefined],
+        [
+          `https://api.loganalytics.azure.com/v1/workspaces/${WORKSPACE_ID}/query`,
+          'Bearer log-analytics-token',
+        ],
+      ]);
     });
 
     it('throws a clear error when the connector is not configured with client-credentials secrets', async () => {

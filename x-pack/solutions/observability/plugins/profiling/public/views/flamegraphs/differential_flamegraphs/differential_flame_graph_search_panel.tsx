@@ -7,6 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
@@ -36,6 +37,7 @@ export function DifferentialFlameGraphSearchPanel() {
   } = useProfilingParams('/flamegraphs/differential');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
+  const { selectedSchema } = useProfilingSchema();
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -104,7 +106,7 @@ export function DifferentialFlameGraphSearchPanel() {
 
   return (
     <EuiFlexGroup direction="column">
-      <PrimaryAndComparisonSearchBar />
+      <PrimaryAndComparisonSearchBar schema={selectedSchema} />
       <EuiFlexGroup direction="row">
         <DifferentialComparisonMode
           comparisonMode={comparisonMode}

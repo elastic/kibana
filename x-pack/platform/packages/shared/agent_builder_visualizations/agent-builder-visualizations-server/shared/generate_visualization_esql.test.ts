@@ -9,6 +9,7 @@ import type { ModelProvider, ScopedModel, ToolEventEmitter } from '@kbn/agent-bu
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { buildEsqlEditContext, generateVisualizationEsql } from './generate_visualization_esql';
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
@@ -26,8 +27,15 @@ const events = {} as ToolEventEmitter;
 const defaultModel = { connector: { connectorId: 'default-connector' } } as ScopedModel;
 const getDefaultModel = jest.fn();
 const modelProvider = { getDefaultModel } as unknown as ModelProvider;
-const asCurrentUser = { name: 'current-user-client' };
-const esClient = { asCurrentUser } as unknown as IScopedClusterClient;
+const fieldCaps = jest.fn();
+const asCurrentUser = { name: 'current-user-client', fieldCaps };
+const asInternalUser = { name: 'internal-user-client' };
+const esClient = { asCurrentUser, asInternalUser } as unknown as IScopedClusterClient;
+
+const mockDateFields = (fieldNames: string[]) =>
+  fieldCaps.mockResolvedValue({
+    fields: Object.fromEntries(fieldNames.map((name) => [name, { date: { type: 'date' } }])),
+  });
 
 const params = {
   nlQuery: 'count logs by status',
@@ -42,6 +50,8 @@ describe('generateVisualizationEsql', () => {
   beforeEach(() => {
     mockedGenerateEsql.mockReset();
     getDefaultModel.mockReset().mockResolvedValue(defaultModel);
+    fieldCaps.mockReset();
+    mockDateFields(['@timestamp']);
   });
 
   it('returns the query and result columns when generation succeeds', async () => {
@@ -79,6 +89,7 @@ describe('generateVisualizationEsql', () => {
         nlQuery: 'count logs by status',
         index: 'logs-*',
         esClient: asCurrentUser,
+        internalEsClient: asInternalUser,
         additionalInstructions: 'esql-instructions',
         timeRange: { from: 'now-7d', to: 'now' },
         execute: 'schema',
@@ -110,6 +121,35 @@ describe('generateVisualizationEsql', () => {
     expect(mockedGenerateEsql).toHaveBeenCalledWith(
       expect.not.objectContaining({ timeRange: expect.anything() })
     );
+  });
+
+  describe('control values', () => {
+    const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
+
+    it('forwards the values of the dashboard controls to the generator', async () => {
+      mockedGenerateEsql.mockResolvedValue({ query: 'FROM logs-*' } as Awaited<
+        ReturnType<typeof generateEsql>
+      >);
+
+      await generateVisualizationEsql({ ...params, esqlVariables });
+
+      expect(mockedGenerateEsql).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('forwards them on the fallback attempt too', async () => {
+      mockedGenerateEsql
+        .mockResolvedValueOnce({ query: 'FROM a', error: 'bad' } as Awaited<
+          ReturnType<typeof generateEsql>
+        >)
+        .mockResolvedValueOnce({ query: 'FROM b' } as Awaited<ReturnType<typeof generateEsql>>);
+
+      await generateVisualizationEsql({ ...params, esqlVariables });
+
+      expect(mockedGenerateEsql).toHaveBeenCalledTimes(2);
+      expect(mockedGenerateEsql.mock.calls[1][0]).toEqual(
+        expect.objectContaining({ esqlVariables })
+      );
+    });
   });
 
   it('passes the request through unchanged when there are no existing queries', async () => {
@@ -190,6 +230,39 @@ describe('generateVisualizationEsql', () => {
 
       expect(result).toEqual({ error: 'second error' });
       expect(mockedGenerateEsql).toHaveBeenCalledTimes(2);
+    });
+
+    it('falls back when the query ignores the time picker on a source without @timestamp', async () => {
+      mockDateFields(['order_date']);
+      mockedGenerateEsql
+        .mockResolvedValueOnce({ query: 'FROM orders | STATS c = COUNT()' } as Awaited<
+          ReturnType<typeof generateEsql>
+        >)
+        .mockResolvedValueOnce({
+          query:
+            'FROM orders | WHERE order_date >= ?_tstart AND order_date < ?_tend | STATS c = COUNT()',
+        } as Awaited<ReturnType<typeof generateEsql>>);
+
+      const result = await generateVisualizationEsql({ ...params, index: 'orders' });
+
+      expect(result.query).toContain('order_date >= ?_tstart');
+      expect(mockedGenerateEsql).toHaveBeenCalledTimes(2);
+      const { additionalContext } = mockedGenerateEsql.mock.calls[1][0];
+      expect(additionalContext).toContain('FROM orders | STATS c = COUNT()');
+      expect(additionalContext).toContain('"orders" has no @timestamp field');
+    });
+
+    it('accepts a fallback query without a time filter rather than failing the chart', async () => {
+      mockDateFields(['order_date']);
+      mockedGenerateEsql.mockResolvedValue({ query: 'FROM orders | STATS c = COUNT()' } as Awaited<
+        ReturnType<typeof generateEsql>
+      >);
+
+      const result = await generateVisualizationEsql({ ...params, index: 'orders' });
+
+      expect(result).toEqual({ query: 'FROM orders | STATS c = COUNT()', columns: undefined });
+      expect(mockedGenerateEsql).toHaveBeenCalledTimes(2);
+      expect(fieldCaps).toHaveBeenCalledTimes(1);
     });
 
     it('propagates a thrown error without falling back', async () => {

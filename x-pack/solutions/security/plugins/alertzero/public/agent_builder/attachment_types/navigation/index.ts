@@ -16,6 +16,5 @@ export {
   buildEntityLookupEsql,
   buildEventLookupEsql,
   buildEventsLookupEsql,
-  buildThreatReportLookupEsql,
 } from './esql_queries';
 export type { AttachmentNavigationDeps } from './types';

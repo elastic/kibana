@@ -26,23 +26,30 @@ export const createDatasetWizardStrings = {
   datasetStepSubheader: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.datasetStepSubheader',
     {
-      defaultMessage: 'Select the source and define which dataset you want added',
+      defaultMessage: 'Select the specific data you want to query within a connected data source.',
     }
   ),
   additionalStepLabel: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.advancedStepLabel',
     {
-      defaultMessage: 'Additional settings',
+      defaultMessage: 'Optional settings',
+    }
+  ),
+  reviewNoAdditionalSettings: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.reviewNoAdditionalSettings',
+    {
+      defaultMessage: 'No additional settings configured.',
     }
   ),
   additionalStepSubheader: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.additionalStepSubheader',
     {
-      defaultMessage: 'Settings you leave unchanged use the default for your file format.',
+      defaultMessage:
+        'Customize how your files are read. Unchanged settings use the defaults for that file format.',
     }
   ),
   mappingStepLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappingStepLabel', {
-    defaultMessage: 'Mapping',
+    defaultMessage: 'Schema',
   }),
   mappingStepErrorsTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.mappingStepErrorsTitle',
@@ -53,7 +60,7 @@ export const createDatasetWizardStrings = {
   defineSchemaRequiresFieldError: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.defineSchemaRequiresField',
     {
-      defaultMessage: 'When Define schema is selected, you must map at least one field.',
+      defaultMessage: 'When Fixed schema is selected, you must define at least one field.',
     }
   ),
   configureSchemaResolutionOptional: i18n.translate(
@@ -65,7 +72,7 @@ export const createDatasetWizardStrings = {
   commonSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.commonSettingsSectionTitle',
     {
-      defaultMessage: 'Common settings (optional)',
+      defaultMessage: 'Commonly adjusted settings',
     }
   ),
 
@@ -78,7 +85,7 @@ export const createDatasetWizardStrings = {
   advancedSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.advancedSettingsSectionTitle',
     {
-      defaultMessage: 'Advanced settings (optional)',
+      defaultMessage: 'Advanced settings',
     }
   ),
   trueLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.trueLabel', {
@@ -137,31 +144,24 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Schema mapping mode',
     }
   ),
-  schemaMappingModeInferred: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.schemaMappingModeInferred',
-    {
-      defaultMessage: 'Inferred from dataset',
-    }
-  ),
-  schemaMappingModeDeclared: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.schemaMappingModeDeclared',
-    {
-      defaultMessage: 'Declared in wizard',
-    }
-  ),
-  dynamicFieldsLabel: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.dynamicFieldsLabel',
-    {
-      defaultMessage: 'Dynamic fields',
-    }
-  ),
-  mappedFieldsLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappedFieldsLabel', {
-    defaultMessage: 'Mapped fields',
+  inferSchemaLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaLabel', {
+    defaultMessage: 'Auto schema inference',
   }),
-  timestampMappingLabel: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.timestampMappingLabel',
+  defineSchemaLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaLabel', {
+    defaultMessage: 'Fixed schema',
+  }),
+  mappedFieldsLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.mappedFieldsLabel', {
+    defaultMessage: 'Defined fields',
+  }),
+  mappedFieldsCount: (count: number) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.mappedFieldsCount', {
+      defaultMessage: '{count, plural, one {# field} other {# fields}}',
+      values: { count },
+    }),
+  timeseriesDataLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.timeseriesToggleLabel',
     {
-      defaultMessage: 'Timeseries data',
+      defaultMessage: 'Enable time-based filtering',
     }
   ),
   timestampFieldLabel: i18n.translate(
@@ -176,20 +176,47 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Timestamp format',
     }
   ),
+  timestampTypeLabel: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.timestampTypeLabel',
+    {
+      defaultMessage: 'Timestamp field type',
+    }
+  ),
   onLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.onLabel', {
     defaultMessage: 'On',
   }),
   offLabel: i18n.translate('xpack.dataFederation.createDatasetWizard.offLabel', {
     defaultMessage: 'Off',
   }),
-  saveDatasetButton: i18n.translate(
-    'xpack.dataFederation.createDatasetWizard.saveDatasetButtonLabel',
+  addDatasetButton: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.addDatasetButtonLabel',
     {
-      defaultMessage: 'Save dataset',
+      defaultMessage: 'Add dataset',
     }
   ),
   saveErrorTitle: i18n.translate('xpack.dataFederation.createDatasetWizard.saveErrorTitle', {
     defaultMessage: 'Could not save the dataset',
+  }),
+  dataSourceRefreshAfterSaveError: (savedName: string, reason: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.dataSourceRefreshAfterSaveError', {
+      defaultMessage:
+        'Data source "{savedName}" was saved, but the data sources list could not be refreshed: {reason}',
+      values: { savedName, reason },
+    }),
+  refreshAfterSaveErrorTitle: (savedName: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.refreshAfterSaveErrorTitle', {
+      defaultMessage:
+        'Dataset "{savedName}" was saved, but the datasets list could not be refreshed',
+      values: { savedName },
+    }),
+  backButton: i18n.translate('xpack.dataFederation.createDatasetWizard.backButtonLabel', {
+    defaultMessage: 'Back',
+  }),
+  nextButton: i18n.translate('xpack.dataFederation.createDatasetWizard.nextButtonLabel', {
+    defaultMessage: 'Next',
+  }),
+  savingButton: i18n.translate('xpack.dataFederation.createDatasetWizard.savingButtonLabel', {
+    defaultMessage: 'Saving...',
   }),
 
   // Form strings
@@ -252,6 +279,21 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  dataSourceAuthenticationCalloutTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutTitle',
+    {
+      defaultMessage: 'Check data source permissions',
+    }
+  ),
+
+  dataSourceAuthenticationCalloutDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
+    {
+      defaultMessage:
+        'Make sure the selected data source has permission to read the data you want to query. You can update its permissions in your cloud provider.',
+    }
+  ),
+
   resourceLabel: i18n.translate('xpack.dataFederation.createDatasetForm.resourceLabel', {
     defaultMessage: 'Resource',
   }),
@@ -306,7 +348,7 @@ export const createDatasetWizardStrings = {
   settingsFormatCsvDescription: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatCsvDescription',
     {
-      defaultMessage: 'Comma-separated values with a header row.',
+      defaultMessage: 'Character-separated values using comma delimiters.',
     }
   ),
 
@@ -329,7 +371,7 @@ export const createDatasetWizardStrings = {
   settingsFormatTsvDescription: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsFormatTsvDescription',
     {
-      defaultMessage: 'Tab-separated values with a header row.',
+      defaultMessage: 'Character-separated values using tab delimiters.',
     }
   ),
 
@@ -439,13 +481,6 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsMaxErrorRatioInvalid',
     {
       defaultMessage: 'Must be a number between 0 and 1.',
-    }
-  ),
-
-  settingsSchemaSampleSizeLabel: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsSchemaSampleSizeLabel',
-    {
-      defaultMessage: 'Schema sample size',
     }
   ),
 
@@ -663,6 +698,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  comboBoxSelectValidOption: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.comboBoxSelectValidOption',
+    {
+      defaultMessage: 'Please select a valid option or clear your entry',
+    }
+  ),
+
   settingsModeQuoted: i18n.translate('xpack.dataFederation.createDatasetForm.settingsModeQuoted', {
     defaultMessage: 'Quoted',
   }),
@@ -717,6 +759,20 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsHeaderRowPlaceholder',
     {
       defaultMessage: 'Select header row',
+    }
+  ),
+
+  settingsHeaderRowTrueDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsHeaderRowTrueDescription',
+    {
+      defaultMessage: 'First row holds column names.',
+    }
+  ),
+
+  settingsHeaderRowFalseDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsHeaderRowFalseDescription',
+    {
+      defaultMessage: 'First row has data.',
     }
   ),
 
@@ -872,13 +928,6 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsCommentLabel: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsCommentLabel',
-    {
-      defaultMessage: 'Comment prefix',
-    }
-  ),
-
   settingsColumnPrefixLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsColumnPrefixLabel',
     {
@@ -932,34 +981,6 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatPlaceholder',
     {
       defaultMessage: 'Select or enter a datetime format',
-    }
-  ),
-
-  settingsMultiValueSyntaxLabel: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsMultiValueSyntaxLabel',
-    {
-      defaultMessage: 'Multi-value syntax',
-    }
-  ),
-
-  settingsMultiValueSyntaxNone: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsMultiValueSyntaxNone',
-    {
-      defaultMessage: 'None',
-    }
-  ),
-
-  settingsMultiValueSyntaxBrackets: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsMultiValueSyntaxBrackets',
-    {
-      defaultMessage: 'Brackets',
-    }
-  ),
-
-  settingsMaxFieldSizeLabel: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsMaxFieldSizeLabel',
-    {
-      defaultMessage: 'Max field size',
     }
   ),
 

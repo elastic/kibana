@@ -8,6 +8,12 @@ exports[`FlowTargetSelect Component it renders the FlowTargetSelect 1`] = `
     type="hidden"
     value="source"
   />
+  <span
+    class="emotion-euiScreenReaderOnly"
+    id="generated-id_label"
+  >
+    Flow target
+  </span>
   <div
     class="euiFormControlLayout emotion-euiFormControlLayout"
   >
@@ -17,8 +23,9 @@ exports[`FlowTargetSelect Component it renders the FlowTargetSelect 1`] = `
     >
       <button
         aria-haspopup="listbox"
-        aria-label="Flow target"
+        aria-labelledby="generated-id_button generated-id_label"
         class="euiSuperSelectControl emotion-euiSuperSelect__control"
+        id="generated-id_button"
         type="button"
       >
         Source

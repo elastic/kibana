@@ -11,7 +11,10 @@ import type { GetTableProp } from './types';
 import { MoreActionsRowControlColumn } from './more_actions_row_control_column';
 import { OpenFlyoutRowControlColumn } from './open_flyout_row_control_column';
 
-export type ActionsCellProps = Pick<ComponentProps<GetTableProp<'renderActionsCell'>>, 'alert'>;
+export type ActionsCellProps = Pick<
+  ComponentProps<GetTableProp<'renderActionsCell'>>,
+  'alert' | 'onRemoveFromCase'
+>;
 
 /**
  * Component used in EASE alert summary table.
@@ -21,13 +24,13 @@ export type ActionsCellProps = Pick<ComponentProps<GetTableProp<'renderActionsCe
  * - assistant
  * - more actions
  */
-export const ActionsCell = memo(({ alert }: ActionsCellProps) => (
+export const ActionsCell = memo(({ alert, onRemoveFromCase }: ActionsCellProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs">
     <EuiFlexItem>
       <OpenFlyoutRowControlColumn alert={alert} />
     </EuiFlexItem>
     <EuiFlexItem>
-      <MoreActionsRowControlColumn alert={alert} />
+      <MoreActionsRowControlColumn alert={alert} onRemoveFromCase={onRemoveFromCase} />
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

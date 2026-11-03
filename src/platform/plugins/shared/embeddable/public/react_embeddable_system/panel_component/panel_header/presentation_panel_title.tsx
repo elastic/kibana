@@ -77,6 +77,14 @@ export const PresentationPanelTitle = ({
         pointer-events: none; // prevent drag event from triggering onClick
       }
     `;
+    const editableTitleStyles = css`
+      text-decoration: none;
+
+      &:hover,
+      &:focus {
+        text-decoration: none;
+      }
+    `;
 
     const titleContent =
       titleHighlight && panelTitle ? (
@@ -100,7 +108,7 @@ export const PresentationPanelTitle = ({
         color="text"
         onClick={onClick}
         onKeyDown={onKeyDown}
-        css={titleStyles}
+        css={[titleStyles, editableTitleStyles]}
         aria-label={i18n.translate('embeddableApi.header.titleAriaLabel', {
           defaultMessage: 'Click to edit title: {title}',
           values: { title: panelTitle },

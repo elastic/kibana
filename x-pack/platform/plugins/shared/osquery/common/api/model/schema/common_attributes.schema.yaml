@@ -270,6 +270,68 @@ components:
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
 
+    # Request shape of a pack query version. Empty string inherits the pack's
+    # `min_osquery_version` (no constraint if the pack has none). Kept separate
+    # from `Version`, which saved queries and live queries share and where the
+    # value never reaches osqueryd, so it stays unvalidated there.
+    PackQueryVersionInput:
+      description: 'Uses the Osquery versions greater than or equal to the specified version string. Formatted as a numeric version string, e.g. `"5.10.0"`, or an empty string to inherit the pack''s `min_osquery_version` (no constraint if the pack has none). Non-numeric values (e.g. `"latest"`) are rejected.'
+      type: string
+      maxLength: 64
+      pattern: '^(\d+(\.\d+){0,2})?$'
+      example: '5.10.0'
+
+    # Not nullable: the request codec has never accepted `null` for a query's
+    # `version` (omit the field instead).
+    PackQueryVersionInputOrUndefined:
+      $ref: '#/components/schemas/PackQueryVersionInput'
+
+    # Request shape of a pack query. Same fields as `ObjectQueriesItem` (the
+    # response shape), except `version` is format-checked. Responses keep
+    # `ObjectQueriesItem` because stored legacy values are returned as-is.
+    ObjectQueriesItemInput:
+      type: object
+      properties:
+        query:
+          $ref: '#/components/schemas/Query'
+        id:
+          $ref: '#/components/schemas/QueryId'
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        version:
+          $ref: '#/components/schemas/PackQueryVersionInputOrUndefined'
+        platform:
+          $ref: '#/components/schemas/PlatformOrUndefined'
+        saved_query_id:
+          $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+        interval:
+          description: >
+            Interval for this query, in seconds. Overrides the pack's `interval` when this
+            query also has `schedule_type: interval`. If you send `interval` without
+            `schedule_type: interval`, Kibana removes it when saving, and the query uses
+            the pack's `interval` instead. Ignored when the pack's `schedule_type` is
+            `rrule`.
+          type: integer
+          nullable: true
+        schedule_type:
+          $ref: '#/components/schemas/ScheduleTypeOrUndefined'
+        rrule_schedule:
+          $ref: '#/components/schemas/RRuleScheduleConfigOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/QueryEnabled'
+        result_type:
+          $ref: '#/components/schemas/ResultType'
+
+    ObjectQueriesInput:
+      type: object
+      description: 'An object of queries.'
+      additionalProperties:
+        $ref: '#/components/schemas/ObjectQueriesItemInput'
+
     Queries:
       oneOf:
         - $ref: '#/components/schemas/ArrayQueries'
@@ -422,13 +484,26 @@ components:
       $ref: '#/components/schemas/ResultType'
       nullable: true
 
+    # Response shape. No `pattern`: packs saved before format validation can
+    # still hold a non-numeric value (e.g. `"latest"`), which reads return as-is.
     MinOsqueryVersion:
-      description: 'Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.'
+      description: 'Minimum osquery version required to run this pack or query, e.g. `"5.10.0"`.'
       type: string
       minLength: 1
       maxLength: 64
       example: '5.10.0'
 
-    MinOsqueryVersionOrUndefined:
-      $ref: '#/components/schemas/MinOsqueryVersion'
+    # Request shape. osqueryd skips a query whose version it can't compare
+    # numerically (and osquerybeat skips RRULE queries it can't parse), so
+    # non-numeric values are rejected at the API edge.
+    MinOsqueryVersionInput:
+      description: 'Minimum osquery version required to run this pack or query. Formatted as a numeric version string, e.g. `"5.10.0"`. Non-numeric values (e.g. `"latest"`) are rejected.'
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: '^\d+(\.\d+){0,2}$'
+      example: '5.10.0'
+
+    MinOsqueryVersionInputOrUndefined:
+      $ref: '#/components/schemas/MinOsqueryVersionInput'
       nullable: true

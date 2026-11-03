@@ -281,7 +281,7 @@ export const PresentationPanelHoverActions = ({
   }, [api, quickActions]);
 
   const contextMenuClasses = classNames({
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     embPanel__optionsMenuPopover: true,
   });
 
@@ -343,7 +343,7 @@ export const PresentationPanelHoverActions = ({
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
 
-  return (
+  return viewMode === 'non-interactive' ? null : (
     <>
       {api && (quickActionElements.length || showContextMenu) && (
         <div

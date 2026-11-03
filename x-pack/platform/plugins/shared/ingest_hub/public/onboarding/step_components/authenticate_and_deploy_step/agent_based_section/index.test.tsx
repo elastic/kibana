@@ -76,6 +76,7 @@ function setup(props: Partial<React.ComponentProps<typeof AgentBasedSection>> = 
   mockUseOnboardingFlow.mockReturnValue({
     agentBasedDeployment: makeDefaultAgentBasedDeployment(),
     setAgentBasedDeployment: jest.fn(),
+    detectAndReviewStep: { policyIdsByInstance: {} },
   });
 
   return render(
@@ -110,6 +111,7 @@ describe('AgentBasedSection — requiresCredentials prop change', () => {
     mockUseOnboardingFlow.mockReturnValue({
       agentBasedDeployment: makeDefaultAgentBasedDeployment(),
       setAgentBasedDeployment: jest.fn(),
+      detectAndReviewStep: { policyIdsByInstance: {} },
     });
 
     rerender(

@@ -24,6 +24,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
@@ -37,6 +38,7 @@ import {
   isOnPolicyFormView,
   isOnPolicyTrustedDevicesView,
   isOnBlocklistsView,
+  isOnCustomYaraSignaturesView,
   isOnProtectionUpdatesView,
   isOnEndpointExceptionsView,
 } from './policy_common_selectors';
@@ -104,6 +106,7 @@ export const isOnPolicyDetailsPage = (state: Immutable<PolicyDetailsState>) =>
   isOnPolicyEventFiltersView(state) ||
   isOnHostIsolationExceptionsView(state) ||
   isOnBlocklistsView(state) ||
+  isOnCustomYaraSignaturesView(state) ||
   isOnEndpointExceptionsView(state) ||
   isOnProtectionUpdatesView(state);
 
@@ -125,6 +128,7 @@ export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => strin
           MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_HOST_ISOLATION_EXCEPTIONS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+          MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
           MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
         ],
@@ -178,6 +182,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         popup: windows.popup,
         antivirus_registration: windows.antivirus_registration,
         attack_surface_reduction: windows.attack_surface_reduction,
+        ai_data_collection: windows.ai_data_collection,
       },
       mac: {
         advanced: mac.advanced,
@@ -188,6 +193,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         memory_protection: mac.memory_protection,
         device_control: mac.device_control,
         popup: mac.popup,
+        ai_data_collection: mac.ai_data_collection,
       },
       linux: {
         advanced: linux.advanced,
@@ -196,6 +202,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
         behavior_protection: linux.behavior_protection,
         memory_protection: linux.memory_protection,
         popup: linux.popup,
+        ai_data_collection: linux.ai_data_collection,
       },
     };
   }

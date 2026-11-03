@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -29,17 +29,19 @@ const MAX_SEARCH_LENGTH = 256;
 /**
  * Body schema for `POST /internal/timelines/_by_ids`. Internal-only
  */
-export const GetTimelinesByIdsRequestBody = z.object({
-  ids: z.array(z.string().min(1).max(MAX_ID_LENGTH)).min(1).max(MAX_IDS_PER_REQUEST),
-  pageSize: z.number().int().positive().optional(),
-  pageIndex: z.number().int().positive().optional(),
-  search: z.string().max(MAX_SEARCH_LENGTH).optional(),
-  sortField: SortFieldTimeline.optional(),
-  sortOrder: SortDirection.optional(),
-  status: TimelineStatus.optional(),
-  timelineType: TimelineType.optional(),
-  onlyUserFavorite: z.boolean().optional(),
-});
+export const GetTimelinesByIdsRequestBody = lazySchema(() =>
+  z.object({
+    ids: z.array(z.string().min(1).max(MAX_ID_LENGTH)).min(1).max(MAX_IDS_PER_REQUEST),
+    pageSize: z.number().int().positive().optional(),
+    pageIndex: z.number().int().positive().optional(),
+    search: z.string().max(MAX_SEARCH_LENGTH).optional(),
+    sortField: SortFieldTimeline.optional(),
+    sortOrder: SortDirection.optional(),
+    status: TimelineStatus.optional(),
+    timelineType: TimelineType.optional(),
+    onlyUserFavorite: z.boolean().optional(),
+  })
+);
 
 export type GetTimelinesByIdsRequestBody = z.infer<typeof GetTimelinesByIdsRequestBody>;
 

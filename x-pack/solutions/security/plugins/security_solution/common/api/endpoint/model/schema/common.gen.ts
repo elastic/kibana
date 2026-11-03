@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /**
  * A unique identifier
@@ -293,11 +293,11 @@ export const ResponseActionDetails = lazySchema(() =>
     /**
      * The response action start time
      */
-    startedAt: z.string().datetime().optional().describe('The response action start time'),
+    startedAt: isoDateTime().optional().describe('The response action start time'),
     /**
      * The response action completion time
      */
-    completedAt: z.string().datetime().optional().describe('The response action completion time'),
+    completedAt: isoDateTime().optional().describe('The response action completion time'),
     /**
      * The user who created the response action
      */

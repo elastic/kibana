@@ -24,7 +24,7 @@
 - 'Feature:ExpressionLanguage':
     - 'src/platform/plugins/shared/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
-- 'Team:obs-signals-logs':
+- 'Team:obs-signals-rum':
     - 'x-pack/solutions/observability/plugins/ux/**/*.*'
 - 'Team:obs-signals-traces':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'

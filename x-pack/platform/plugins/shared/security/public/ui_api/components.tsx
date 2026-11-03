@@ -22,6 +22,7 @@ import { getChangePasswordComponent } from './change_password/change_password_as
 import { getCreateServiceAccountComponent } from './create_service_account';
 import { LazyWrapper } from './lazy_wrapper';
 import { getPersonalInfoComponent } from './personal_info/personal_info_async';
+import { getServiceAccountPickerComponent } from './service_account_picker';
 
 export interface GetComponentsOptions {
   core: CoreStart;
@@ -44,6 +45,9 @@ export const getComponents = ({
   }
 
   return {
+    getServiceAccountPicker: wrapLazy(() =>
+      getServiceAccountPickerComponent(core, isServerless, roleManagementEnabled)
+    ),
     getCreateServiceAccount: wrapLazy(() =>
       getCreateServiceAccountComponent(core, isServerless, roleManagementEnabled)
     ),

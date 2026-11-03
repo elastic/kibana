@@ -1,0 +1,120 @@
+# REDUCTION FUNCTIONS
+
+Reduction functions reduce a multi-value to a single value.
+
+### General functions
+
+- `MV_COUNT` counts the values in a multi-value field.
+
+### Selection functions
+
+Selection functions keep one of the existing values.
+
+- `MV_FIRST` returns the first value. Storage order is not guaranteed; use `MV_MIN` when you need the smallest value.
+- `MV_LAST` returns the last value. Use `MV_MAX` when you need the largest value.
+- `MV_MIN` returns the smallest value.
+- `MV_MAX` returns the largest value.
+
+### Numeric aggregation functions
+
+These calculate one value from a numeric multi-value (`double`, `integer`, `long`, and similar types).
+
+- `MV_AVG` averages the values.
+- `MV_SUM` sums the values.
+- `MV_MEDIAN` returns the median. For an even count, it averages the two middle values and rounds toward zero for non-floating-point columns.
+- `MV_MEDIAN_ABSOLUTE_DEVIATION` returns the median of the absolute differences from the median.
+- `MV_PERCENTILE` returns the value at a given percentile.
+- `MV_PSERIES_WEIGHTED_SUM` multiplies each value by its corresponding P-series term and sums the results.
+
+### String aggregation functions
+
+These calculate one value from a string multi-value (`text`, `keyword`).
+
+- `MV_CONCAT` concatenates the values with a delimiter.
+
+## Syntax
+
+`MV_COUNT(field)`
+
+`MV_FIRST(field)`
+
+`MV_LAST(field)`
+
+`MV_MIN(field)`
+
+`MV_MAX(field)`
+
+`MV_AVG(number)`
+
+`MV_SUM(number)`
+
+`MV_MEDIAN(number)`
+
+`MV_MEDIAN_ABSOLUTE_DEVIATION(number)`
+
+`MV_PERCENTILE(number, percentile)`
+
+`MV_PSERIES_WEIGHTED_SUM(number, p)`
+
+`MV_CONCAT(string, delim)`
+
+### Parameters
+
+#### field
+
+The multi-value expression to reduce. Used by `MV_COUNT`, `MV_FIRST`, `MV_LAST`, `MV_MIN`, and `MV_MAX`.
+
+#### number
+
+The numeric multi-value expression to aggregate. Used by `MV_AVG`, `MV_SUM`, `MV_MEDIAN`, `MV_MEDIAN_ABSOLUTE_DEVIATION`, `MV_PERCENTILE`, and `MV_PSERIES_WEIGHTED_SUM`.
+
+#### percentile
+
+The percentile `MV_PERCENTILE` calculates. Must be a number between 0 and 100. Out-of-range values return null.
+
+#### p
+
+The P-series parameter for `MV_PSERIES_WEIGHTED_SUM`. A constant number that changes each element's contribution to the weighted sum.
+
+#### string
+
+The multi-value string expression `MV_CONCAT` concatenates.
+
+#### delim
+
+The delimiter `MV_CONCAT` inserts between values.
+
+## Examples
+
+Counts how many values are in `a`:
+
+```esql
+ROW a=["foo", "zoo", "bar"]
+| EVAL count_a = MV_COUNT(a)
+```
+
+Calculates the 50th percentile of a numeric multi-value:
+
+```esql
+ROW values = [5, 5, 10, 12, 5000]
+| EVAL p50 = MV_PERCENTILE(values, 50), median = MV_MEDIAN(values)
+```
+
+Calculates a P-series weighted sum. This is `MV_PSERIES_WEIGHTED_SUM`, not a percentile function:
+
+```esql
+ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]
+| EVAL sum = MV_PSERIES_WEIGHTED_SUM(a, 1.5)
+| KEEP sum
+```
+
+Concatenates string values with a delimiter:
+
+```esql
+ROW a=["foo", "zoo", "bar"]
+| EVAL j = MV_CONCAT(a, ", ")
+```
+
+## Limitations
+
+`MV_FIRST` and `MV_LAST` depend on value order. The order read from storage is not guaranteed. Use `MV_MIN` and `MV_MAX` when you need the smallest or largest value.

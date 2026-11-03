@@ -12,7 +12,7 @@ export interface Dataset {
   settings?: DatasetSettings;
   /**
    * Optional dataset mapping declaration. When provided, it controls exposed column names and types.
-   * See: https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-datasets#declare-a-dataset-mapping
+   * See: https://www.elastic.co/docs/reference/query-languages/esql/esql-data-federation-schema#declare-a-schema-explicitly
    */
   mappings?: DatasetMappings;
 }

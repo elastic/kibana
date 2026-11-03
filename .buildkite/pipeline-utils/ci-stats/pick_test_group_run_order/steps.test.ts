@@ -25,7 +25,6 @@ describe('buildJestStep', () => {
     label: 'Jest Tests',
     parallelism: 4,
     key: 'jest' as const,
-    agentDiskSize: 110,
     envFromLabels: { FOO: 'bar' },
     dependsOn: ['build'],
     retryCount: 2,

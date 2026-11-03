@@ -45,6 +45,10 @@ interface ScheduleEveryAggregationResult {
   };
 }
 
+interface TemplateCountsAggregationResult {
+  template_counts?: { buckets: Array<{ key: string; doc_count: number }> };
+}
+
 interface MatchCountAggregationResult {
   match_count: { value: number };
 }
@@ -86,9 +90,16 @@ export type BulkCreateResultItem =
       error: SavedObjectError;
     };
 
-export interface RulesFindAllResultItem {
+type RuleAttributeName = keyof RuleSavedObjectAttributes;
+
+export interface FindByIdsOptions<TField extends RuleAttributeName = RuleAttributeName> {
+  spaceId?: string;
+  fields?: TField[];
+}
+
+export interface RulesFindAllResultItem<TField extends RuleAttributeName = RuleAttributeName> {
   id: string;
-  attributes: RuleSavedObjectAttributes;
+  attributes: Pick<RuleSavedObjectAttributes, TField>;
   namespaces?: string[];
   /** Always populated by the real SO service; optional on test mocks. */
   references?: SavedObjectReference[];
@@ -112,6 +123,14 @@ export interface CountByQueryParams {
   searchFields?: string[];
 }
 
+export interface FindTagsParams {
+  search?: string;
+  filter?: string;
+  size?: number;
+  /** The rule metadata field to aggregate. */
+  field?: 'tags' | 'routing_tags';
+}
+
 export interface RulesSavedObjectServiceContract {
   create(params: {
     attrs: RuleSavedObjectAttributes;
@@ -120,7 +139,10 @@ export interface RulesSavedObjectServiceContract {
   }): Promise<RuleWriteResult>;
   get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
-  findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
+  findByIds<TField extends RuleAttributeName = RuleAttributeName>(
+    ruleIds: string[],
+    options?: FindByIdsOptions<TField>
+  ): Promise<Array<RulesFindAllResultItem<TField>>>;
   update(params: {
     id: string;
     attrs: RuleSavedObjectAttributes;
@@ -155,7 +177,8 @@ export interface RulesSavedObjectServiceContract {
   }): Promise<SavedObjectsFindResponse<RuleSavedObjectAttributes>>;
   getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
   countByQuery(params: CountByQueryParams): Promise<number>;
-  findTags(params?: { search?: string; filter?: string; size?: number }): Promise<string[]>;
+  findTags(params?: FindTagsParams): Promise<string[]>;
+  countByTemplateIds(templateIds: string[]): Promise<Record<string, number>>;
   getTotalScheduledPerMinute(): Promise<number>;
 }
 
@@ -272,7 +295,10 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     });
   }
 
-  public async findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]> {
+  public async findByIds<TField extends RuleAttributeName = RuleAttributeName>(
+    ruleIds: string[],
+    { spaceId, fields }: FindByIdsOptions<TField> = {}
+  ): Promise<Array<RulesFindAllResultItem<TField>>> {
     if (ruleIds.length === 0) {
       return [];
     }
@@ -282,14 +308,15 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       .map((id) => `${RULE_SAVED_OBJECT_TYPE}.id: "${RULE_SAVED_OBJECT_TYPE}:${id}"`)
       .join(' OR ');
 
-    const finder = this.client.createPointInTimeFinder<RuleSavedObjectAttributes>({
+    const finder = this.client.createPointInTimeFinder<Pick<RuleSavedObjectAttributes, TField>>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 1000,
       namespaces: namespace ? [namespace] : ['*'],
       filter,
+      fields,
     });
 
-    const results: RulesFindAllResultItem[] = [];
+    const results: Array<RulesFindAllResultItem<TField>> = [];
     for await (const response of finder.find()) {
       for (const doc of response.saved_objects) {
         results.push({
@@ -534,7 +561,8 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     search,
     filter,
     size = TAGS_RESPONSE_LIMIT,
-  }: { search?: string; filter?: string; size?: number } = {}): Promise<string[]> {
+    field = 'tags',
+  }: FindTagsParams = {}): Promise<string[]> {
     const resolvedSize = Math.min(Math.max(size, 1), MAX_FIND_TAGS_SIZE);
     const result = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
@@ -543,7 +571,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       aggs: {
         tags: {
           terms: {
-            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
+            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.${field}`,
             size: resolvedSize,
             order: { _count: 'desc' },
             ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
@@ -555,5 +583,39 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     const aggs = result.aggregations as { tags?: { buckets: Array<{ key: string }> } } | undefined;
 
     return aggs?.tags?.buckets.map((bucket) => bucket.key) ?? [];
+  }
+
+  /**
+   * Counts the rules in the current space that were created from each of the given
+   * rule templates. Templates with no rules are omitted from the result. `templateIds`
+   * must be distinct.
+   *
+   * The terms aggregation is limited to the requested ids with an exact-value
+   * `include`, so its cost scales with the number of ids and not with the number
+   * of templates that have rules.
+   */
+  public async countByTemplateIds(templateIds: string[]): Promise<Record<string, number>> {
+    if (templateIds.length === 0) {
+      return {};
+    }
+
+    const result = await this.client.find<RuleSavedObjectAttributes>({
+      type: RULE_SAVED_OBJECT_TYPE,
+      perPage: 0,
+      aggs: {
+        template_counts: {
+          terms: {
+            field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.template.id`,
+            size: templateIds.length,
+            include: templateIds,
+          },
+        },
+      },
+    });
+
+    const aggs = result.aggregations as TemplateCountsAggregationResult | undefined;
+    const buckets = aggs?.template_counts?.buckets ?? [];
+
+    return Object.fromEntries(buckets.map(({ key, doc_count: count }) => [key, count]));
   }
 }

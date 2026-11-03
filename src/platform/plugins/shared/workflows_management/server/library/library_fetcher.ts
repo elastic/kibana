@@ -31,7 +31,7 @@ import { LibrarySource } from './library_source';
 import { resolveVersionId } from './resolve_version_id';
 
 /**
- * Default CDN URL the Workflow Template Library fetches its catalog from when
+ * Default CDN URL the Workflow Template library fetches its catalog from when
  * `workflowsManagement.library.registryUrl` is not explicitly configured. Kept
  * here (instead of on the config schema as a `defaultValue`) so the
  * `registryUrl` / `bundlePath` mutual-exclusion validator can distinguish "user
@@ -162,7 +162,7 @@ export class LibraryFetcher extends LibrarySource {
     if (!this.cache.catalog) {
       // Defensive: ensureFresh either loaded a catalog or threw.
       throw new LibraryFetchError(
-        'Workflow Template Library catalog could not be loaded.',
+        'Workflow Template library catalog could not be loaded.',
         'unavailable'
       );
     }

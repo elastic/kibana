@@ -77,6 +77,12 @@ export interface DocumentDetailFlyoutProps {
   skipNextEventReport?: boolean;
   size?: EuiFlyoutProps['size'];
   historyKey?: symbol;
+  /**
+   * Absolute window to search the document in. Hosts rendered outside the page that owns the
+   * global time filter (e.g. a trace waterfall flyout embedded in a chat) must pass it; defaults
+   * to the global time filter.
+   */
+  timeRange?: { from: string; to: string };
 }
 
 export function DocumentDetailFlyout({
@@ -92,10 +98,11 @@ export function DocumentDetailFlyout({
   skipNextEventReport,
   size,
   historyKey,
+  timeRange,
 }: DocumentDetailFlyoutProps) {
   const contextHistoryKey = useFlyoutHistoryKey();
   const resolvedHistoryKey = historyKey ?? contextHistoryKey;
-  const data = useDocumentFlyoutData({ type, docId, traceId, docIndex });
+  const data = useDocumentFlyoutData({ type, docId, traceId, docIndex, timeRange });
 
   const flyoutConfig = getFlyoutConfig(type);
 
