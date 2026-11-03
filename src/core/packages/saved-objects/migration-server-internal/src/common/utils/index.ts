@@ -9,3 +9,4 @@
 
 export { logActionResponse, logStateTransition, type LogAwareState } from './logs';
 export { createDelayFn, type RetryableState } from './delay';
+export { isDiscardFlagActive, isDiscardFlagMismatched } from './discard_flag';

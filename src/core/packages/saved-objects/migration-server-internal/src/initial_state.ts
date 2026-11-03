@@ -22,6 +22,7 @@ import {
 } from './get_outdated_documents_query';
 import type { InitState } from './state';
 import { buildExcludeUnusedTypesQuery } from './core';
+import { isDiscardFlagActive, isDiscardFlagMismatched } from './common/utils';
 
 export interface CreateInitialStateParams extends OutdatedDocumentsQueryParams {
   kibanaVersion: string;
@@ -70,19 +71,13 @@ export const createInitialState = ({
   // short key to access savedObjects entries directly from docLinks
   const migrationDocLinks = docLinks.links.kibanaUpgradeSavedObjects;
 
-  if (
-    migrationsConfig.discardUnknownObjects &&
-    migrationsConfig.discardUnknownObjects !== kibanaVersion
-  ) {
+  if (isDiscardFlagMismatched(migrationsConfig.discardUnknownObjects, kibanaVersion)) {
     logger.warn(
       'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
     );
   }
 
-  if (
-    migrationsConfig.discardCorruptObjects &&
-    migrationsConfig.discardCorruptObjects !== kibanaVersion
-  ) {
+  if (isDiscardFlagMismatched(migrationsConfig.discardCorruptObjects, kibanaVersion)) {
     logger.warn(
       'The flag `migrations.discardCorruptObjects` is defined but does not match the current kibana version; corrupt objects will NOT be discarded.'
     );
@@ -108,8 +103,14 @@ export const createInitialState = ({
     maxBatchSize: migrationsConfig.batchSize,
     maxBatchSizeBytes: migrationsConfig.maxBatchSizeBytes.getValueInBytes(),
     maxReadBatchSizeBytes: migrationsConfig.maxReadBatchSizeBytes.getValueInBytes(),
-    discardUnknownObjects: migrationsConfig.discardUnknownObjects === kibanaVersion,
-    discardCorruptObjects: migrationsConfig.discardCorruptObjects === kibanaVersion,
+    discardUnknownObjects: isDiscardFlagActive(
+      migrationsConfig.discardUnknownObjects,
+      kibanaVersion
+    ),
+    discardCorruptObjects: isDiscardFlagActive(
+      migrationsConfig.discardCorruptObjects,
+      kibanaVersion
+    ),
     logs: [],
     excludeOnUpgradeQuery: buildExcludeUnusedTypesQuery(typeRegistry.getLegacyTypes()),
     knownTypes,

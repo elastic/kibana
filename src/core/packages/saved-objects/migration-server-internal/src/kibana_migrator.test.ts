@@ -13,6 +13,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
+  type MigrationAlgorithm,
   type MigrationResult,
   SavedObjectTypeRegistry,
 } from '@kbn/core-saved-objects-base-server-internal';
@@ -262,7 +263,7 @@ describe('KibanaMigrator', () => {
   });
 });
 
-const mockOptions = (algorithm: 'v2' | 'zdt' = 'v2'): KibanaMigratorOptions => {
+const mockOptions = (algorithm: MigrationAlgorithm = 'v2'): KibanaMigratorOptions => {
   const mockedClient = elasticsearchClientMock.createElasticsearchClient();
   (mockedClient as any).child = jest.fn().mockImplementation(() => mockedClient);
 

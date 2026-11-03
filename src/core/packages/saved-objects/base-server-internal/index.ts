@@ -35,6 +35,8 @@ export {
   SavedObjectConfig,
   type SavedObjectsConfigType,
   type SavedObjectsMigrationConfigType,
+  type MigrationAlgorithm,
+  type DiscardObjectsFlag,
 } from './src/saved_objects_config';
 export type { ISavedObjectTypeRegistryInternal } from './src/saved_objects_type_registry';
 export { SavedObjectTypeRegistry } from './src/saved_objects_type_registry';
