@@ -8,18 +8,15 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import {
   EuiButton,
-  EuiCode,
-  EuiCopy,
-  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiLoadingLogo,
-  EuiPageHeader,
   EuiPageSection,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
+  copyToClipboard,
 } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -33,6 +30,7 @@ import { useApiClient } from '../../hooks/use_api_client';
 import { useApplicationLinks } from '../../hooks/use_application_links';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useFormatters } from '../../hooks/use_formatters';
+import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { SESSIONS_LABEL } from '../../labels';
 import { pickSessionsListQuery } from '../sessions/hooks/use_sessions_list_query';
 import { PageJourney } from './components/page_journey';
@@ -48,8 +46,16 @@ const BACK_TO_SESSIONS = i18n.translate(
   { defaultMessage: 'Back to sessions' }
 );
 
-const COPY_ID_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.copyIdAriaLabel', {
-  defaultMessage: 'Copy session ID',
+const SESSION_ID_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.sessionIdLabel', {
+  defaultMessage: 'Session ID',
+});
+
+const COPY_ID_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.copyIdLabel', {
+  defaultMessage: 'Copy ID',
+});
+
+const ID_COPIED_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.idCopiedToast', {
+  defaultMessage: 'Session ID copied',
 });
 
 const loadingPrompt = (
@@ -184,6 +190,7 @@ export function SessionDetailPage({
   sessionId: string;
 }) {
   const apiClient = useApiClient();
+  const { notifications } = useKibanaServices();
   const formatters = useFormatters();
   const { query } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
   const { overviewHref, sessionsHref } = useApplicationLinks(serviceName, query.source);
@@ -267,58 +274,40 @@ export function SessionDetailPage({
     return <SessionDetail detail={detail} formatters={formatters} />;
   };
 
+  const copySessionId = () => {
+    if (copyToClipboard(sessionId)) {
+      notifications.toasts.addSuccess(ID_COPIED_LABEL);
+    }
+  };
+
   return (
-    // The app shell is unpadded since each page pads its own content (see `render_app.tsx`).
-    <EuiPageSection
-      paddingSize="m"
-      restrictWidth={false}
-      data-test-subj="digitalExperienceSessionPage"
-    >
-      <EuiPageHeader
-        pageTitle={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
+    <div data-test-subj="digitalExperienceSessionPage">
+      {/* The header's back is the way to the list, so there is no in-page back button, and Chrome
+      Next shows a single back control. */}
+      <AppHeader
+        title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
           defaultMessage: 'Session',
         })}
-        // The header renders the description in a paragraph, so only inline elements go here.
-        description={
-          <>
-            <EuiCode data-test-subj="digitalExperienceSessionId">{sessionId}</EuiCode>{' '}
-            <EuiCopy textToCopy={sessionId}>
-              {(copy) => (
-                <EuiToolTip content={COPY_ID_LABEL} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    data-test-subj="digitalExperienceSessionIdCopy"
-                    {...getEbtProps({
-                      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.COPY_SESSION_ID,
-                      element: SESSIONS_EBT_ELEMENTS.SESSION_ID_COPY,
-                    })}
-                    iconType="copy"
-                    size="xs"
-                    aria-label={COPY_ID_LABEL}
-                    onClick={copy}
-                  />
-                </EuiToolTip>
-              )}
-            </EuiCopy>
-          </>
-        }
-        rightSideItems={[
-          <EuiButton
-            key="back"
-            data-test-subj="digitalExperienceSessionBack"
-            {...getEbtProps({
-              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.BACK_TO_SESSIONS,
-              element: SESSIONS_EBT_ELEMENTS.SESSION_BACK,
-            })}
-            iconType="chevronSingleLeft"
-            href={backHref}
-          >
-            {BACK_TO_SESSIONS}
-          </EuiButton>,
+        back={{ href: backHref, label: SESSIONS_LABEL }}
+        metadata={[
+          {
+            type: 'text',
+            label: SESSION_ID_LABEL,
+            value: sessionId,
+            'data-test-subj': 'digitalExperienceSessionId',
+          },
+          {
+            type: 'button',
+            label: COPY_ID_LABEL,
+            onClick: copySessionId,
+            'data-test-subj': 'digitalExperienceSessionIdCopy',
+          },
         ]}
-        bottomBorder
       />
-      <EuiSpacer size="m" />
-      {renderContent()}
-    </EuiPageSection>
+      {/* The app shell is unpadded, so the header spans the page; the content pads itself. */}
+      <EuiPageSection paddingSize="m" restrictWidth={false}>
+        {renderContent()}
+      </EuiPageSection>
+    </div>
   );
 }

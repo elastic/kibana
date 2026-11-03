@@ -77,7 +77,8 @@ export class DigitalExperiencePage {
     this.sessionsKpis = page.getByTestId('digitalExperienceSessionsKpis');
     this.sessionsEmpty = page.getByTestId('digitalExperienceSessionsEmpty');
     this.sessionSummary = page.getByTestId('digitalExperienceSessionSummary');
-    this.sessionBack = page.getByTestId('digitalExperienceSessionBack');
+    // The session page's AppHeader back control.
+    this.sessionBack = page.getByTestId('appHeaderBack');
     this.sessionWaterfallSegments = page.getByTestId('digitalExperienceSessionWaterfallSegment');
     this.sessionWaterfallErrors = page.getByTestId('digitalExperienceSessionWaterfallError');
     this.sessionPageVisits = page.getByTestId('digitalExperiencePageVisit');
