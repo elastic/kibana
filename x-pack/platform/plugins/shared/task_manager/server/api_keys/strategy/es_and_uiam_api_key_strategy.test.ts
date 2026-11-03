@@ -7,11 +7,11 @@
 
 import { coreMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { ApiKeyType } from '../config';
-import type { ConcreteTaskInstance } from '../task';
-import { TaskStatus } from '../task';
+import { ApiKeyType } from '../../config';
+import type { ConcreteTaskInstance } from '../../task';
+import { TaskStatus } from '../../task';
 import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
-import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { taskManagerUiamTelemetry } from '../uiam_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 import {
@@ -19,12 +19,12 @@ import {
   hasApiKey,
   getApiKeyFromRequest,
   shouldCloneApiKeyFromRequest,
-} from '../lib/api_key_utils';
+} from '../api_key_utils';
 
 // `getUiamApiKeySecret` is a pure format helper the assertions below rely on, so it keeps its real
 // implementation while the credential-minting helpers are stubbed.
-jest.mock('../lib/api_key_utils', () => ({
-  ...jest.requireActual('../lib/api_key_utils'),
+jest.mock('../api_key_utils', () => ({
+  ...jest.requireActual('../api_key_utils'),
   createApiKey: jest.fn(),
   hasApiKey: jest.fn(),
   getApiKeyFromRequest: jest.fn(),

@@ -39,7 +39,7 @@ import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import type { TaskManagerBackpressure } from './task_events';
 import { TaskEventType } from './task_events';
-import { EsApiKeyStrategy } from './api_key_strategy';
+import { EsApiKeyStrategy } from './api_keys/strategy';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
 import { taskExecutionControlServiceMock } from './execution_control/task_execution_control_service.mock';

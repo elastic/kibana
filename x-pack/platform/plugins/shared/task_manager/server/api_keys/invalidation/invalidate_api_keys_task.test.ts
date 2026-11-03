@@ -7,8 +7,8 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { TaskManagerPluginsStart, TaskManagerStartContract } from '../plugin';
-import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
+import type { TaskManagerPluginsStart, TaskManagerStartContract } from '../../plugin';
+import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../../saved_objects';
 import { runInvalidate } from '@kbn/response-ops-api-keys';
 import { taskRunner } from './invalidate_api_keys_task';
 

@@ -11,7 +11,7 @@ import { isUiamCredential } from '@kbn/core-security-server';
 import { decodeApiKey, encodeApiKey } from '@kbn/response-ops-api-keys';
 import { truncate } from 'lodash';
 import type { TaskInstance, TaskUserScope } from '../task';
-import type { GrantApiKeysOpts } from '../api_key_strategy/api_key_strategy';
+import type { GrantApiKeysOpts } from './strategy/api_key_strategy';
 
 export interface APIKeyResult {
   id: string;

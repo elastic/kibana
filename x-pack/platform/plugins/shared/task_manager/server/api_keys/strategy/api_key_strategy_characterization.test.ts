@@ -13,11 +13,11 @@ import { isExternalUiamCredential } from '@kbn/core-security-server';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { MockedLogger } from '@kbn/logging-mocks';
-import { ApiKeyType } from '../config';
-import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../task';
-import { TaskStatus } from '../task';
-import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
-import { buildTaskFakeRequest } from '../task_running/fake_request_factory';
+import { ApiKeyType } from '../../config';
+import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../../task';
+import { TaskStatus } from '../../task';
+import { taskManagerUiamTelemetry } from '../uiam_telemetry';
+import { buildTaskFakeRequest } from '../fake_request';
 import type {
   ApiKeyInvalidationSource,
   ApiKeySOFields,

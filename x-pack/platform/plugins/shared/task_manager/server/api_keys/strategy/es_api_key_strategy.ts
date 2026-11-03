@@ -11,9 +11,9 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { ApiKeyType } from '../config';
-import type { ConcreteTaskInstance, TaskInstance } from '../task';
-import { getApiKeyAndUserScope } from '../lib/api_key_utils';
+import { ApiKeyType } from '../../config';
+import type { ConcreteTaskInstance, TaskInstance } from '../../task';
+import { getApiKeyAndUserScope } from '../api_key_utils';
 import type {
   ApiKeyInvalidationSource,
   ApiKeySOFields,

@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { isExternalUiamCredential } from '@kbn/core-security-server';
-import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
+import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request';
 
 describe('buildTaskFakeRequest', () => {
   const apiKey = 'abc';

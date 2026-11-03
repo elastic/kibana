@@ -42,8 +42,8 @@ import { TASK_MANAGER_RUN_TRANSACTION_TYPE } from './task_runner';
 import { schema } from '@kbn/config-schema';
 import * as nextRunAtUtils from '../lib/get_next_run_at';
 import { configMock } from '../config.mock';
-import { EsApiKeyStrategy } from '../api_key_strategy';
-import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { EsApiKeyStrategy } from '../api_keys/strategy';
+import { taskManagerUiamTelemetry } from '../api_keys/uiam_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 const baseDelay = 5 * 60 * 1000;

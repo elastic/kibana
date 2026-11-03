@@ -6,11 +6,11 @@
  */
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ApiKeyType } from '../config';
-import type { ConcreteTaskInstance } from '../task';
-import { TaskStatus } from '../task';
+import { ApiKeyType } from '../../config';
+import type { ConcreteTaskInstance } from '../../task';
+import { TaskStatus } from '../../task';
 import { EsApiKeyStrategy } from './es_api_key_strategy';
-import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+import { taskManagerUiamTelemetry } from '../uiam_telemetry';
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({

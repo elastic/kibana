@@ -10,7 +10,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { CoreStart } from '@kbn/core/server';
 import type { TaskManagerPluginsStart, TaskManagerStartContract } from '../plugin';
-import { taskRunner } from '../invalidate_api_keys/invalidate_api_keys_task';
+import { taskRunner } from '../api_keys/invalidation/invalidate_api_keys_task';
 import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
 import type { ApiKeyToInvalidate } from '../saved_objects/schemas/api_key_to_invalidate';
 import { TaskStatus } from '../task';

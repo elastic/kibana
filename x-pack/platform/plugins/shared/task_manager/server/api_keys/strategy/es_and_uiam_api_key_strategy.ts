@@ -15,14 +15,14 @@ import type {
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
 import { getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
-import { ApiKeyType } from '../config';
-import type { ConcreteTaskInstance, TaskInstance } from '../task';
+import { ApiKeyType } from '../../config';
+import type { ConcreteTaskInstance, TaskInstance } from '../../task';
 import {
   createApiKey,
   getApiKeyFromRequest,
   hasApiKey,
   shouldCloneApiKeyFromRequest,
-} from '../lib/api_key_utils';
+} from '../api_key_utils';
 import type {
   ApiKeyInvalidationSource,
   ApiKeySOFields,
@@ -35,8 +35,8 @@ import {
   UIAM_LOGS_CREDENTIALS_TAGS,
   UIAM_LOGS_GRANT_TAGS,
   UIAM_LOGS_USAGE_TAGS,
-} from '../constants';
-import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
+} from '../log_tags';
+import { taskManagerUiamTelemetry } from '../uiam_telemetry';
 
 interface UiamApiKeyResult {
   apiKey: string;

@@ -6,7 +6,7 @@
  */
 
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ApiKeyType } from '../config';
+import { ApiKeyType } from '../../config';
 import { createApiKeyStrategy } from './create_api_key_strategy';
 import { EsApiKeyStrategy } from './es_api_key_strategy';
 import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';

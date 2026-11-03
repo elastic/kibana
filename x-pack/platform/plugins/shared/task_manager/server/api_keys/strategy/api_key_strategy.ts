@@ -12,16 +12,16 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { queueInvalidationTargets } from '@kbn/response-ops-api-keys';
-import type { ApiKeyType } from '../config';
-import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../task';
-import { INVALIDATE_API_KEY_SO_NAME } from '../saved_objects';
+import type { ApiKeyType } from '../../config';
+import type { ConcreteTaskInstance, TaskInstance, TaskUserScope } from '../../task';
+import { INVALIDATE_API_KEY_SO_NAME } from '../../saved_objects';
 import {
   taskManagerUiamTelemetry,
   type CredentialReason,
   type CredentialType,
-} from '../otel/uiam_telemetry';
+} from '../uiam_telemetry';
 
-export type { ApiKeyType } from '../config';
+export type { ApiKeyType } from '../../config';
 
 export interface ApiKeySOFields {
   apiKey?: string;

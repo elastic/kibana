@@ -8,9 +8,9 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { RunningTask } from '@kbn/response-ops-api-keys';
-import { TASK_SO_NAME } from '../saved_objects';
-import type { SerializedConcreteTaskInstance } from '../task';
-import { TaskStatus } from '../task';
+import { TASK_SO_NAME } from '../../saved_objects';
+import type { SerializedConcreteTaskInstance } from '../../task';
+import { TaskStatus } from '../../task';
 
 /**
  * Returns the ids of the pending invalidation SOs whose key was replaced during a task run that is

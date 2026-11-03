@@ -41,19 +41,19 @@ import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk, isOk } from './lib/result_type';
 import { MsearchError } from './lib/errors';
 import { getBackpressureReason } from './lib/backpressure_reason';
-import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import { getApiKeyAndUserScope } from './api_keys/api_key_utils';
 import type {
   EncryptedSavedObjectsClient,
   EncryptedSavedObjectsClientOptions,
 } from '@kbn/encrypted-saved-objects-shared';
 import { TaskValidator } from './task_validator';
-import { EsApiKeyStrategy } from './api_key_strategy';
+import { EsApiKeyStrategy } from './api_keys/strategy';
 import { asSpaceId, brandSpaceId } from '@kbn/core-spaces-common';
 
 let mockGetValidatedTaskInstanceFromReading: jest.SpyInstance;
 let mockGetValidatedTaskInstanceForUpdating: jest.SpyInstance;
 
-jest.mock('./lib/api_key_utils', () => ({
+jest.mock('./api_keys/api_key_utils', () => ({
   getApiKeyAndUserScope: jest.fn(),
 }));
 

@@ -84,8 +84,8 @@ import { LicenseSubscriber } from './license_subscriber';
 import {
   registerInvalidateApiKeyTask,
   scheduleInvalidateApiKeyTask,
-} from './invalidate_api_keys/invalidate_api_keys_task';
-import { createApiKeyStrategy } from './api_key_strategy';
+} from './api_keys/invalidation/invalidate_api_keys_task';
+import { createApiKeyStrategy } from './api_keys/strategy';
 
 export interface TaskManagerSetupContract {
   /**

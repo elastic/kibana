@@ -10,11 +10,11 @@ import type { CoreStart } from '@kbn/core-lifecycle-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '@kbn/response-ops-api-keys';
 import { runInvalidate } from '@kbn/response-ops-api-keys';
-import type { TaskScheduling } from '../task_scheduling';
-import type { TaskTypeDictionary } from '../task_type_dictionary';
-import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
-import type { TaskManagerStartContract } from '..';
-import type { TaskManagerPluginsStart } from '../plugin';
+import type { TaskScheduling } from '../../task_scheduling';
+import type { TaskTypeDictionary } from '../../task_type_dictionary';
+import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../../saved_objects';
+import type { TaskManagerStartContract } from '../..';
+import type { TaskManagerPluginsStart } from '../../plugin';
 import { getSOIdsUsedByRunningTasks } from './get_so_ids_used_by_running_tasks';
 
 export const TASK_ID = 'invalidate_api_keys';

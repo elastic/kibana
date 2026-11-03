@@ -6,7 +6,7 @@
  */
 
 import type { Logger, SecurityServiceStart } from '@kbn/core/server';
-import type { ApiKeyType } from '../config';
+import type { ApiKeyType } from '../../config';
 import type { ApiKeyStrategy } from './api_key_strategy';
 import { EsApiKeyStrategy } from './es_api_key_strategy';
 import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
