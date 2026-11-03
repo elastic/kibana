@@ -14,6 +14,7 @@ import { createAttackDiscoveryBasicEvaluator } from '../../src/evaluators/attack
 import { createAuditConditionalRemediationEvaluator } from '../../src/evaluators/audit_conditional_remediation_evaluator';
 import { createAuditEntityCoOccurrenceEvaluator } from '../../src/evaluators/audit_entity_co_occurrence_evaluator';
 import { createAuditForbiddenJoinEvaluator } from '../../src/evaluators/audit_forbidden_join_evaluator';
+import { createAuditMetaAlertAsEvidenceEvaluator } from '../../src/evaluators/audit_meta_alert_as_evidence_evaluator';
 import { createAuditNegativeControlEvaluator } from '../../src/evaluators/audit_negative_control_evaluator';
 import { createAuditPositiveControlRecallEvaluator } from '../../src/evaluators/audit_positive_control_recall_evaluator';
 import { runAttackDiscovery } from '../../src/task/run_attack_discovery';
@@ -23,7 +24,11 @@ import type { AttackDiscoveryDatasetExample } from '../../src/types';
  * Synthetic bundledAlerts scenarios, each run as a baseline and an enriched input variant.
  * Failure classes: invented entity joins, threshold/meta alerts treated as evidence,
  * unconditional containment advice, and no negative control. Scoring is deterministic code only;
- * the LLM rubric is deliberately not attached.
+ * the LLM rubric is deliberately not attached. Gold and the anonymization replacements are
+ * looked up from the registry by `metadata.scenarioId`; the evaluators map tokens in the model
+ * output back to original values before comparing.
+ *
+ * Opt-in: `playwright.config.ts` ignores this spec unless `EVAL_AUDIT_FAILURE_CLASSES=1`.
  */
 evaluate.describe('Attack Discovery audit failure classes', { tag: tags.stateful.classic }, () => {
   evaluate(
@@ -54,6 +59,7 @@ evaluate.describe('Attack Discovery audit failure classes', { tag: tags.stateful
           createAttackDiscoveryBasicEvaluator(),
           createAuditForbiddenJoinEvaluator(),
           createAuditEntityCoOccurrenceEvaluator(),
+          createAuditMetaAlertAsEvidenceEvaluator(),
           createAuditNegativeControlEvaluator(),
           createAuditPositiveControlRecallEvaluator(),
           createAuditConditionalRemediationEvaluator(),

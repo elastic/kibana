@@ -6,9 +6,15 @@
  */
 
 import { createAuditNegativeControlEvaluator } from './audit_negative_control_evaluator';
-import { emptyInput, makeDiscovery, makeGold, makeOutput } from './audit_test_utils';
+import {
+  emptyInput,
+  makeDiscovery,
+  makeGold,
+  makeOutput,
+  resolveReferenceFromMetadata,
+} from './audit_test_utils';
 
-const evaluator = createAuditNegativeControlEvaluator();
+const evaluator = createAuditNegativeControlEvaluator(resolveReferenceFromMetadata);
 
 const run = (expectedDiscoveries: 'none' | 'atLeastOne', count: number) =>
   evaluator.evaluate({

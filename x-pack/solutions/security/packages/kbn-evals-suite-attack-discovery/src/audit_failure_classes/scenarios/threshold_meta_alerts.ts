@@ -129,8 +129,16 @@ const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, drafts);
 
 /**
  * Threshold and aggregate rules fire on counts of other alerts. They carry no behaviour of
- * their own, so they are not evidence. Next to a handful of benign low-severity alerts they must
- * not produce a discovery.
+ * their own, so they are not evidence.
+ *
+ * Gold decision: the four underlying alerts do not form a discovery either, so
+ * `expectedDiscoveries` is `'none'`. They are low severity (21), each is a single failed logon
+ * that preceded a success, and their own messages tie them to the nightly backup job (the one
+ * `m.novak` alert to a password typo). Two hosts share a service account, which is what a backup
+ * service account does. There is no lateral tool, no privilege change and no post-logon
+ * behaviour. The meta alerts exist only to tempt a model into reading "5 alerts for user
+ * svc-backup" as a campaign; `MetaAlertAsEvidence` scores a discovery that cites only them, and
+ * `NegativeControl` scores any discovery at all.
  */
 export const thresholdMetaAlertsScenario: AuditScenario = {
   id: SCENARIO_ID,
@@ -142,6 +150,7 @@ export const thresholdMetaAlertsScenario: AuditScenario = {
     alertGroups,
     forbiddenCoCitation: [],
     expectedDiscoveries: 'none',
-    confirmed: false,
+    confirmedGroups: [],
+    metaAlertGroups: ['meta-alerts'],
   },
 };

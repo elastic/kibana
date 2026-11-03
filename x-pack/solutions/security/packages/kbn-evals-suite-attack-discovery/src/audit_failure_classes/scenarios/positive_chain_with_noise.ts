@@ -13,7 +13,7 @@ const SCENARIO_ID = 'positive-chain-with-noise';
 const HOST = 'WS-FIN-214';
 const USER = 'j.meyer';
 const POWERSHELL = 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe';
-const LOADER = 'C:\\ProgramData\\knz_8fq2t1vw.zbuild\\zbuild.exe';
+const LOADER = 'C:\\ProgramData\\k3x9q2\\svc_helper.exe';
 
 interface ChainStage {
   key: string;
@@ -28,10 +28,10 @@ interface ChainStage {
 }
 
 /**
- * The MIMICRAT ClickFix chain (obfuscated PowerShell from the Run dialog, AMSI bypass, dropped
- * loader, HTTPS command and control), authored as detection alerts. It mirrors the scenario in
- * the false-positive/true-positive suite, which cannot be imported: that package renders raw
- * endpoint events and seeds a live cluster rather than exporting alert documents.
+ * A ClickFix-style chain (obfuscated PowerShell from the Run dialog, AMSI bypass, dropped
+ * loader, HTTPS command and control), authored as detection alerts. Addresses come from the
+ * RFC 5737 documentation ranges and the loader name is invented, so nothing here identifies a
+ * real campaign or infrastructure.
  */
 const STAGES: readonly ChainStage[] = [
   {
@@ -50,7 +50,7 @@ const STAGES: readonly ChainStage[] = [
         "powershell.exe -WInDo Min $RdLU='aZmEwGEtHPckKyBXPxMRi.neTwOrkicsGf';$OnRa=($RdLU.Substring(17,12))",
       'process.parent.name': 'explorer.exe',
     },
-    network: { 'destination.ip': '45.13.212.250' },
+    network: { 'destination.ip': '192.0.2.44' },
   },
   {
     key: 'amsi',
@@ -76,9 +76,10 @@ const STAGES: readonly ChainStage[] = [
     severity: 'high',
     riskScore: 73,
     tactic: 'Execution',
-    message: 'powershell.exe wrote zbuild.exe to a random ProgramData folder and started it',
+    message:
+      'powershell.exe wrote svc_helper.exe to a randomly named ProgramData folder and started it',
     process: {
-      'process.name': 'zbuild.exe',
+      'process.name': 'svc_helper.exe',
       'process.pid': 5220,
       'process.executable': LOADER,
       'process.parent.name': 'powershell.exe',
@@ -92,21 +93,21 @@ const STAGES: readonly ChainStage[] = [
     severity: 'critical',
     riskScore: 91,
     tactic: 'Command and Control',
-    message: 'zbuild.exe made repeated HTTPS requests to a CloudFront host',
+    message: 'svc_helper.exe made repeated HTTPS requests to an external host',
     process: {
-      'process.name': 'zbuild.exe',
+      'process.name': 'svc_helper.exe',
       'process.pid': 5220,
       'process.executable': LOADER,
       'process.parent.name': 'powershell.exe',
     },
-    network: { 'destination.ip': '18.245.139.12', 'network.protocol': 'https' },
+    network: { 'destination.ip': '198.51.100.23', 'network.protocol': 'https' },
   },
 ];
 
 const chainDrafts: AlertDraft[] = STAGES.map(
   ({ key, time, rule, severity, riskScore, tactic, message, process, network }) => ({
     key: `chain-${key}`,
-    group: 'mimicrat-chain',
+    group: 'clickfix-chain',
     fields: {
       '@timestamp': time,
       'kibana.alert.rule.name': rule,
@@ -134,21 +135,26 @@ const noiseDrafts = buildSharedCiEgressDrafts().map((draft) => ({
 const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, [...chainDrafts, ...noiseDrafts]);
 
 /**
- * Positive control. A real four-stage chain on one workstation, mixed with the shared-egress
- * cloud noise. A model that is merely quiet scores well on the other scenarios; this one only
- * scores when it still finds the chain without joining the noise to it.
+ * Positive control. A four-stage chain on one workstation, mixed with the shared-egress cloud
+ * noise. A model that is merely quiet scores well on the other scenarios; this one only scores
+ * when it still finds the chain without joining the noise to it.
+ *
+ * The `enriched` additional context is shared by every scenario. Here it is relevant to the
+ * noise: its egress-NAT line explains the cloud alerts' shared `source.ip`, and its
+ * account-identity line applies to those cloud alerts. It says nothing about the chain, which
+ * is the same in both variants; the context is a distractor for the chain itself.
  */
 export const positiveChainWithNoiseScenario: AuditScenario = {
   id: SCENARIO_ID,
   description:
-    'Positive control: a MIMICRAT ClickFix chain mixed with unrelated shared-egress cloud alerts.',
+    'Positive control: a ClickFix-style endpoint chain mixed with unrelated shared-egress cloud alerts.',
   provenance: 'authored',
   alerts,
   gold: {
     alertGroups,
-    forbiddenCoCitation: SHARED_CI_EGRESS_GROUPS.map((group) => ['mimicrat-chain', group] as const),
+    forbiddenCoCitation: SHARED_CI_EGRESS_GROUPS.map((group) => ['clickfix-chain', group] as const),
     expectedDiscoveries: 'atLeastOne',
-    requiredGroup: 'mimicrat-chain',
-    confirmed: true,
+    requiredGroup: 'clickfix-chain',
+    confirmedGroups: ['clickfix-chain'],
   },
 };

@@ -11,7 +11,10 @@ const SCENARIO_ID = 'benign-batch';
 
 const HOSTS = ['WS-HR-101', 'WS-HR-102', 'WS-ENG-201', 'WS-ENG-202', 'WS-FIN-301', 'SRV-PRINT-01'];
 
-const USERS = ['a.kowalski', 'b.nowak', 'c.wisniewski', 'd.wojcik', 'e.kaminski', 'f.lewandowski'];
+interface Signature {
+  subjectName: string;
+  signingId: string;
+}
 
 interface BenignPattern {
   rule: string;
@@ -19,9 +22,34 @@ interface BenignPattern {
   processName: string;
   executable: string;
   commandLine: string;
+  workingDirectory: string;
   message: string;
+  signature: Signature;
+  parentName: string;
+  parentExecutable: string;
+  parentSignature: Signature;
 }
 
+const MICROSOFT_WINDOWS: Signature = {
+  subjectName: 'Microsoft Windows',
+  signingId: 'Microsoft.Windows',
+};
+const MICROSOFT_CORPORATION: Signature = {
+  subjectName: 'Microsoft Corporation',
+  signingId: 'Microsoft.Corporation',
+};
+
+/**
+ * Every pattern runs as the SYSTEM account, is vendor-signed, runs from the vendor's install path under a known parent, and
+ * has a neutral rule name. The alert data alone gives no reason to suspect any of them: nothing
+ * is unsigned, nothing runs from a user-writable or temporary path, and no rule name names an
+ * attack technique.
+ *
+ * The earlier draft used "Credential Dumping Tool Name Match in Backup Agent" and "Remote
+ * Management Tool Connection". Both read as attack indicators, which made a discovery
+ * defensible, so they were reworked into neutral signed-vendor rules here rather than kept
+ * under a negative-control label.
+ */
 const PATTERNS: readonly BenignPattern[] = [
   {
     rule: 'Scheduled Task Created by Management Agent',
@@ -29,7 +57,12 @@ const PATTERNS: readonly BenignPattern[] = [
     processName: 'CcmExec.exe',
     executable: 'C:\\Windows\\CCM\\CcmExec.exe',
     commandLine: 'CcmExec.exe /runservice',
+    workingDirectory: 'C:\\Windows\\CCM\\',
     message: 'The endpoint management agent registered a maintenance task',
+    signature: MICROSOFT_CORPORATION,
+    parentName: 'services.exe',
+    parentExecutable: 'C:\\Windows\\System32\\services.exe',
+    parentSignature: MICROSOFT_WINDOWS,
   },
   {
     rule: 'PowerShell Script from Software Distribution Share',
@@ -37,40 +70,71 @@ const PATTERNS: readonly BenignPattern[] = [
     processName: 'powershell.exe',
     executable: 'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
     commandLine: 'powershell.exe -File \\\\fileshare\\deploy\\inventory.ps1',
+    workingDirectory: 'C:\\Windows\\CCM\\SystemTemp\\',
     message: 'PowerShell ran the weekly inventory script from the software distribution share',
+    signature: MICROSOFT_WINDOWS,
+    parentName: 'CcmExec.exe',
+    parentExecutable: 'C:\\Windows\\CCM\\CcmExec.exe',
+    parentSignature: MICROSOFT_CORPORATION,
   },
   {
-    rule: 'Unsigned DLL Loaded by Browser Update Service',
+    rule: 'Browser Update Service Ran a Scheduled Update',
     tactic: 'Defense Evasion',
     processName: 'GoogleUpdate.exe',
     executable: 'C:\\Program Files (x86)\\Google\\Update\\GoogleUpdate.exe',
     commandLine: 'GoogleUpdate.exe /ua /installsource scheduler',
-    message: 'The browser updater loaded a helper library during a scheduled update',
+    workingDirectory: 'C:\\Program Files (x86)\\Google\\Update\\',
+    message: 'The browser updater ran its scheduled update check',
+    signature: { subjectName: 'Google LLC', signingId: 'GoogleUpdate.exe' },
+    parentName: 'svchost.exe',
+    parentExecutable: 'C:\\Windows\\System32\\svchost.exe',
+    parentSignature: MICROSOFT_WINDOWS,
   },
   {
-    rule: 'Remote Management Tool Connection',
+    rule: 'Remote Support Service Started a Session',
     tactic: 'Command and Control',
     processName: 'TeamViewer_Service.exe',
     executable: 'C:\\Program Files\\TeamViewer\\TeamViewer_Service.exe',
     commandLine: 'TeamViewer_Service.exe',
-    message: 'The IT-approved remote support service opened a session',
+    workingDirectory: 'C:\\Program Files\\TeamViewer\\',
+    message: 'The IT-approved remote support service started a helpdesk session',
+    signature: { subjectName: 'TeamViewer GmbH', signingId: 'TeamViewer_Service.exe' },
+    parentName: 'services.exe',
+    parentExecutable: 'C:\\Windows\\System32\\services.exe',
+    parentSignature: MICROSOFT_WINDOWS,
   },
   {
-    rule: 'Credential Dumping Tool Name Match in Backup Agent',
-    tactic: 'Credential Access',
+    rule: 'Backup Agent Created a Volume Snapshot',
+    tactic: 'Collection',
     processName: 'backup_agent.exe',
     executable: 'C:\\Program Files\\BackupAgent\\backup_agent.exe',
     commandLine: 'backup_agent.exe --snapshot --volume C:',
-    message: 'The backup agent matched a name heuristic while creating a volume snapshot',
+    workingDirectory: 'C:\\Program Files\\BackupAgent\\',
+    message: 'The backup agent created its scheduled volume snapshot',
+    signature: { subjectName: 'Example Backup Software Inc.', signingId: 'backup_agent.exe' },
+    parentName: 'services.exe',
+    parentExecutable: 'C:\\Windows\\System32\\services.exe',
+    parentSignature: MICROSOFT_WINDOWS,
   },
 ];
+
+const signatureFields = (
+  prefix: string,
+  { subjectName, signingId }: Signature,
+  withId: boolean
+) => ({
+  [`${prefix}.exists`]: 'true',
+  ...(withId ? { [`${prefix}.signing_id`]: signingId } : {}),
+  [`${prefix}.status`]: 'trusted',
+  [`${prefix}.subject_name`]: subjectName,
+  [`${prefix}.trusted`]: 'true',
+});
 
 const COUNT = 36;
 
 const drafts: AlertDraft[] = Array.from({ length: COUNT }, (_, index) => {
   const pattern = PATTERNS[index % PATTERNS.length];
   const host = HOSTS[(index * 5) % HOSTS.length];
-  const user = USERS[(index * 7 + 2) % USERS.length];
   const minute = String((index * 13) % 60).padStart(2, '0');
   const hour = String(8 + (index % 9)).padStart(2, '0');
   return {
@@ -85,13 +149,16 @@ const drafts: AlertDraft[] = Array.from({ length: COUNT }, (_, index) => {
       'kibana.alert.rule.threat.tactic.name': pattern.tactic,
       'event.category': 'process',
       'host.name': host,
-      'user.name': user,
-      'user.id': `S-1-5-21-1004336348-1177238915-682003330-${
-        1100 + ((index * 7 + 2) % USERS.length)
-      }`,
+      'user.name': 'SYSTEM',
+      'user.id': 'S-1-5-18',
       'process.name': pattern.processName,
       'process.executable': pattern.executable,
       'process.command_line': pattern.commandLine,
+      'process.working_directory': pattern.workingDirectory,
+      'process.parent.name': pattern.parentName,
+      'process.parent.executable': pattern.parentExecutable,
+      ...signatureFields('process.code_signature', pattern.signature, true),
+      ...signatureFields('process.parent.code_signature', pattern.parentSignature, false),
       message: pattern.message,
     },
   };
@@ -100,19 +167,20 @@ const drafts: AlertDraft[] = Array.from({ length: COUNT }, (_, index) => {
 const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, drafts);
 
 /**
- * Negative control: 36 routine management, update and backup alerts spread over six hosts and
- * six users with no attack behaviour. Reporting any discovery is a false positive.
+ * Negative control: 36 alerts from vendor-signed management, update, remote-support and backup
+ * software, run from their install paths under service parents, spread over six hosts. Nothing
+ * in the alert data is anomalous, so reporting any discovery is a false positive.
  */
 export const benignBatchScenario: AuditScenario = {
   id: SCENARIO_ID,
   description:
-    'Negative control: a batch of 36 routine enterprise-tooling alerts that contain no attack.',
+    'Negative control: a batch of 36 alerts from vendor-signed enterprise tooling running from known paths, with no attack.',
   provenance: 'authored',
   alerts,
   gold: {
     alertGroups,
     forbiddenCoCitation: [],
     expectedDiscoveries: 'none',
-    confirmed: false,
+    confirmedGroups: [],
   },
 };

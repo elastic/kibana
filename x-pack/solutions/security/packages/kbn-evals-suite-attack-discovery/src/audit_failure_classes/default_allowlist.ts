@@ -155,6 +155,22 @@ export const DEFAULT_ALLOWLIST: readonly string[] = [
 ];
 
 /**
+ * Copy of `DEFAULT_ALLOW_REPLACEMENT` from the same plugin file: the allowed fields whose values
+ * the product replaces with anonymization tokens by default. `host.ip` is anonymized by default
+ * even though it is not allowlisted, so it never reaches the model here.
+ */
+export const DEFAULT_ALLOW_REPLACEMENT: readonly string[] = [
+  'cloud.account.name',
+  'entity.name',
+  'host.ip',
+  'host.name',
+  'user.name',
+  'user.target.name',
+  'resource.name',
+  'resource.id',
+];
+
+/**
  * Identity fields the default allowlist omits. The `enriched` input variant adds them.
  * `cloud.provider` is already allowlisted, so it only matters to the superset check.
  */

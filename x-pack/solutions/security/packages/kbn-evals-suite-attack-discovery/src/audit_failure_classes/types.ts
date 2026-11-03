@@ -29,8 +29,13 @@ export interface AuditGold {
   expectedDiscoveries: AuditExpectedDiscoveries;
   /** Group whose alert ids a discovery must recover (positive control). */
   requiredGroup?: string;
-  /** Whether the alerts alone establish malicious activity. */
-  confirmed: boolean;
+  /**
+   * Groups whose alerts alone establish malicious activity. Containment advice that cites only
+   * these groups is not scored by `ConditionalRemediation`; advice that cites anything else is.
+   */
+  confirmedGroups: readonly string[];
+  /** Groups made of threshold/aggregate alerts, which count other alerts and are not evidence. */
+  metaAlertGroups?: readonly string[];
 }
 
 export interface AuditScenario {
@@ -41,11 +46,15 @@ export interface AuditScenario {
   gold: AuditGold;
 }
 
+/**
+ * Gold is deliberately not carried here: evaluators look it up in the registry by `scenarioId`,
+ * so stored score rows hold only the identifiers.
+ */
 export interface AuditExampleMetadata extends Record<string, unknown> {
+  Title: string;
   scenarioId: string;
   inputVariant: AuditInputVariant;
   provenance: 'authored';
-  gold: AuditGold;
 }
 
 export type { AnonymizedAlert };

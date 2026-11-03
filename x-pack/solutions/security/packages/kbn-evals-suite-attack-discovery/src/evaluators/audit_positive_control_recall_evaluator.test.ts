@@ -6,9 +6,15 @@
  */
 
 import { createAuditPositiveControlRecallEvaluator } from './audit_positive_control_recall_evaluator';
-import { emptyInput, makeDiscovery, makeGold, makeOutput } from './audit_test_utils';
+import {
+  emptyInput,
+  makeDiscovery,
+  makeGold,
+  makeOutput,
+  resolveReferenceFromMetadata,
+} from './audit_test_utils';
 
-const evaluator = createAuditPositiveControlRecallEvaluator();
+const evaluator = createAuditPositiveControlRecallEvaluator(resolveReferenceFromMetadata);
 
 const gold = makeGold({
   alertGroups: { chain: ['c1', 'c2', 'c3', 'c4', 'c5'], noise: ['n1'] },

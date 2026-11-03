@@ -7,13 +7,18 @@
 
 import { alertHasValue, parseAlerts } from './alert_csv';
 import { toAlertId } from './define_alerts';
+import { DEFAULT_ALLOW_REPLACEMENT } from './default_allowlist';
 import {
   AUDIT_INPUT_VARIANTS,
   AUDIT_SCENARIOS,
   buildAuditExamples,
   getAuditExampleName,
+  getAuditRendering,
+  resolveAuditReference,
 } from './registry';
-import { getVariantFields, renderAlert } from './render_alert';
+import { deanonymize, getVariantFields, renderAlert } from './render_alert';
+import { NON_IDENTIFYING_BASELINE_FIELDS } from './scenarios/same_display_name_cross_account';
+import type { AuditInputVariant, AuditScenario } from './types';
 
 const allGroupedIds = (scenario: (typeof AUDIT_SCENARIOS)[number]): string[] =>
   Object.values(scenario.gold.alertGroups).flat();
@@ -24,6 +29,97 @@ describe('audit failure class registry', () => {
     expect(new Set(ids).size).toBe(ids.length);
     const names = buildAuditExamples().map(({ metadata }) => metadata?.Title);
     expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('gives every example a unique id of the form <scenario>.<variant>', () => {
+    const examples = buildAuditExamples();
+    const exampleIds = examples.map(({ id }) => id);
+    expect(exampleIds.every((id) => typeof id === 'string')).toBe(true);
+    expect(new Set(exampleIds).size).toBe(examples.length);
+    expect([...exampleIds].sort()).toEqual(
+      AUDIT_SCENARIOS.flatMap(({ id }) =>
+        AUDIT_INPUT_VARIANTS.map((variant) => `${id}.${variant}`)
+      ).sort()
+    );
+    for (const example of examples) {
+      const { scenarioId, inputVariant } = example.metadata ?? {};
+      expect(example.id).toBe(`${scenarioId}.${inputVariant}`);
+    }
+  });
+
+  it('keeps gold out of example metadata, and resolves it from the registry by scenarioId', () => {
+    for (const example of buildAuditExamples()) {
+      expect(Object.keys(example.metadata ?? {}).sort()).toEqual([
+        'Title',
+        'inputVariant',
+        'provenance',
+        'scenarioId',
+      ]);
+      const reference = resolveAuditReference(example.metadata);
+      const scenario = AUDIT_SCENARIOS.find(({ id }) => id === example.metadata?.scenarioId);
+      expect(reference?.gold).toBe(scenario?.gold);
+    }
+    expect(resolveAuditReference({ scenarioId: 'nope', inputVariant: 'baseline' })).toBeUndefined();
+    expect(
+      resolveAuditReference({ scenarioId: 'benign-batch', inputVariant: 'x' })
+    ).toBeUndefined();
+    expect(resolveAuditReference(undefined)).toBeUndefined();
+  });
+
+  describe.each(AUDIT_SCENARIOS.map((scenario) => [scenario.id, scenario] as const))(
+    'gold validation: %s',
+    (_id, scenario) => {
+      const alertIds = new Set(scenario.alerts.map(({ id }) => id));
+      const groups = Object.keys(scenario.gold.alertGroups);
+
+      it('declares each forbidden pair as a tuple of two distinct existing group ids', () => {
+        for (const pair of scenario.gold.forbiddenCoCitation) {
+          expect(Array.isArray(pair)).toBe(true);
+          expect(pair).toHaveLength(2);
+          for (const group of pair) {
+            expect(groups).toContain(group);
+          }
+          expect(pair[0]).not.toBe(pair[1]);
+        }
+      });
+
+      it('cites only alert ids that exist in the scenario alerts', () => {
+        for (const group of groups) {
+          expect(scenario.gold.alertGroups[group].length).toBeGreaterThan(0);
+          for (const id of scenario.gold.alertGroups[group]) {
+            expect(alertIds).toContain(id);
+          }
+        }
+      });
+
+      it('references only existing groups from requiredGroup, confirmedGroups and metaAlertGroups', () => {
+        const referenced = [
+          ...(scenario.gold.requiredGroup ? [scenario.gold.requiredGroup] : []),
+          ...scenario.gold.confirmedGroups,
+          ...(scenario.gold.metaAlertGroups ?? []),
+        ];
+        for (const group of referenced) {
+          expect(groups).toContain(group);
+        }
+      });
+    }
+  );
+
+  it('rejects malformed gold in a scenario the way the checks above would see it', () => {
+    const broken: AuditScenario = {
+      ...AUDIT_SCENARIOS[0],
+      gold: {
+        ...AUDIT_SCENARIOS[0].gold,
+        forbiddenCoCitation: [['no-such-group', 'also-missing']],
+        alertGroups: { only: ['not-an-alert'] },
+      },
+    };
+    const groups = Object.keys(broken.gold.alertGroups);
+    const alertIds = new Set(broken.alerts.map(({ id }) => id));
+    expect(
+      broken.gold.forbiddenCoCitation.every((pair) => pair.every((g) => groups.includes(g)))
+    ).toBe(false);
+    expect(broken.gold.alertGroups.only.every((id) => alertIds.has(id))).toBe(false);
   });
 
   it('covers the five authored scenarios', () => {
@@ -63,6 +159,12 @@ describe('audit failure class registry', () => {
         expect(groups).toContain(right);
         expect(left).not.toBe(right);
       }
+      for (const group of [
+        ...scenario.gold.confirmedGroups,
+        ...(scenario.gold.metaAlertGroups ?? []),
+      ]) {
+        expect(groups).toContain(group);
+      }
       if (scenario.gold.requiredGroup) {
         expect(groups).toContain(scenario.gold.requiredGroup);
       }
@@ -77,7 +179,7 @@ describe('audit failure class registry', () => {
     }
     expect(
       AUDIT_SCENARIOS.some(
-        ({ gold }) => gold.expectedDiscoveries === 'atLeastOne' && gold.confirmed
+        ({ gold }) => gold.expectedDiscoveries === 'atLeastOne' && gold.confirmedGroups.length > 0
       )
     ).toBe(true);
   });
@@ -145,11 +247,11 @@ describe('audit failure class registry', () => {
         const example = examples.find(
           ({ metadata }) => metadata?.Title === getAuditExampleName(scenario.id, variant)
         );
-        expect(example?.metadata).toMatchObject({
+        expect(example?.metadata).toEqual({
+          Title: getAuditExampleName(scenario.id, variant),
           scenarioId: scenario.id,
           inputVariant: variant,
           provenance: 'authored',
-          gold: scenario.gold,
         });
         expect(example?.input?.mode).toBe('bundledAlerts');
         if (example?.input?.mode === 'bundledAlerts') {
@@ -165,24 +267,122 @@ describe('audit failure class registry', () => {
     expect(scenario?.gold.forbiddenCoCitation.length).toBeGreaterThan(0);
     const parsed = parseAlerts((scenario?.alerts ?? []).map((a) => renderAlert(a, 'baseline')));
     expect(parsed.every((alert) => alertHasValue(alert, 'source.ip', '203.0.113.50'))).toBe(true);
+    expect(DEFAULT_ALLOW_REPLACEMENT).not.toContain('source.ip');
   });
 
-  it('same-display-name-cross-account: both groups share a user.name but not a user.id', () => {
+  it('anonymizes user.name, host.name and cloud.account.name like the product, and de-anonymizes back', () => {
+    for (const scenario of AUDIT_SCENARIOS) {
+      for (const variant of AUDIT_INPUT_VARIANTS) {
+        const { anonymizedAlerts, replacements } = getAuditRendering(scenario, variant);
+        const parsed = parseAlerts(anonymizedAlerts);
+        scenario.alerts.forEach((alert, index) => {
+          for (const field of DEFAULT_ALLOW_REPLACEMENT) {
+            const raw = alert.fields[field];
+            const rendered = parsed[index].fields[field];
+            if (raw === undefined || !getVariantFields(variant).has(field)) {
+              expect(rendered).toBeUndefined();
+            } else {
+              expect(rendered).toBeDefined();
+              expect(rendered).not.toEqual([String(raw)]);
+              expect(replacements[rendered?.[0] ?? '']).toBe(String(raw));
+            }
+          }
+          const restored = parseAlerts([
+            {
+              pageContent: deanonymize(anonymizedAlerts[index].pageContent, replacements),
+              metadata: {},
+            },
+          ])[0];
+          for (const field of DEFAULT_ALLOW_REPLACEMENT) {
+            if (alert.fields[field] !== undefined && getVariantFields(variant).has(field)) {
+              expect(restored.fields[field]).toEqual([String(alert.fields[field])]);
+            }
+          }
+        });
+      }
+    }
+  });
+
+  it('renders deterministically: the same scenario and variant give the same prompt text', () => {
+    const scenario = AUDIT_SCENARIOS[1];
+    const first = renderAlert(scenario.alerts[0], 'baseline', 'seed-a');
+    expect(renderAlert(scenario.alerts[0], 'baseline', 'seed-a')).toEqual(first);
+    expect(renderAlert(scenario.alerts[0], 'baseline', 'seed-b')).not.toEqual(first);
+  });
+
+  describe('same-display-name-cross-account: what separates the two groups', () => {
     const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'same-display-name-cross-account');
     const [left, right] = scenario?.gold.forbiddenCoCitation[0] ?? ['', ''];
-    const names = (group: string) =>
-      new Set(
-        (scenario?.alerts ?? [])
-          .filter(({ id }) => scenario?.gold.alertGroups[group]?.includes(id))
-          .map(({ fields }) => String(fields['user.name']))
+
+    /** Fields whose set of values differs between the two groups in the rendered alerts. */
+    const separatingFields = (variant: AuditInputVariant): string[] => {
+      if (!scenario) return [];
+      const { anonymizedAlerts } = getAuditRendering(scenario, variant);
+      const parsed = parseAlerts(anonymizedAlerts);
+      const valuesOf = (group: string): Map<string, Set<string>> => {
+        const byField = new Map<string, Set<string>>();
+        parsed
+          .filter(({ id }) => scenario.gold.alertGroups[group]?.includes(id))
+          .forEach(({ fields }) => {
+            for (const [field, values] of Object.entries(fields)) {
+              const set = byField.get(field) ?? new Set<string>();
+              values.forEach((value) => set.add(value));
+              byField.set(field, set);
+            }
+          });
+        return byField;
+      };
+      const a = valuesOf(left);
+      const b = valuesOf(right);
+      return [...new Set([...a.keys(), ...b.keys()])].filter((field) => {
+        const x = [...(a.get(field) ?? [])].sort().join('|');
+        const y = [...(b.get(field) ?? [])].sort().join('|');
+        return x !== y;
+      });
+    };
+
+    it('shares a user.name but not a user.id between the groups', () => {
+      const values = (group: string, field: string) =>
+        new Set(
+          (scenario?.alerts ?? [])
+            .filter(({ id }) => scenario?.gold.alertGroups[group]?.includes(id))
+            .map(({ fields }) => String(fields[field]))
+        );
+      expect([...values(left, 'user.name')]).toEqual([...values(right, 'user.name')]);
+      expect([...values(left, 'user.id')].some((arn) => values(right, 'user.id').has(arn))).toBe(
+        false
       );
-    const arns = (group: string) =>
-      new Set(
-        (scenario?.alerts ?? [])
-          .filter(({ id }) => scenario?.gold.alertGroups[group]?.includes(id))
-          .map(({ fields }) => String(fields['user.id']))
+    });
+
+    it('baseline: no field separates the groups except the documented non-identifying ones', () => {
+      const separating = separatingFields('baseline');
+      expect(
+        separating.filter((field) => !NON_IDENTIFYING_BASELINE_FIELDS.includes(field))
+      ).toEqual([]);
+    });
+
+    it('baseline: no cloud.account.name is rendered, and source IPs, rules and messages overlap', () => {
+      const parsed = parseAlerts(
+        scenario ? getAuditRendering(scenario, 'baseline').anonymizedAlerts : []
       );
-    expect([...names(left)]).toEqual([...names(right)]);
-    expect([...arns(left)].some((arn) => arns(right).has(arn))).toBe(false);
+      expect(parsed.some(({ fields }) => fields['cloud.account.name'] !== undefined)).toBe(false);
+      for (const field of [
+        'source.ip',
+        'kibana.alert.rule.name',
+        'message',
+        'kibana.alert.severity',
+      ]) {
+        expect(separatingFields('baseline')).not.toContain(field);
+      }
+      expect(parsed.map(({ fields }) => fields.message?.[0] ?? '').join(' ')).not.toMatch(
+        /pipeline/i
+      );
+    });
+
+    it('enriched: user.id, cloud.account.id and user_agent.original separate the groups', () => {
+      expect(separatingFields('enriched')).toEqual(
+        expect.arrayContaining(['user.id', 'cloud.account.id', 'user_agent.original'])
+      );
+    });
   });
 });

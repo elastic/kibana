@@ -6,6 +6,7 @@
  */
 import type { Evaluator } from '@kbn/evals';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
+import type { AuditReferenceResolver } from '../audit_failure_classes/registry';
 import { notApplicable, resolveAuditInputs } from './audit_evaluator_helpers';
 
 export const AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME = 'PositiveControlRecall';
@@ -14,15 +15,14 @@ export const AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME = 'PositiveControlReca
 export const POSITIVE_CONTROL_RECALL_THRESHOLD = 0.6;
 
 /** Fraction of the required group's alert ids cited by any discovery. */
-export const createAuditPositiveControlRecallEvaluator = (): Evaluator<
-  AttackDiscoveryDatasetExample,
-  AttackDiscoveryTaskOutput
-> => ({
+export const createAuditPositiveControlRecallEvaluator = (
+  resolveReference?: AuditReferenceResolver
+): Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput> => ({
   name: AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME,
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
-    const resolved = resolveAuditInputs({ metadata, output });
+    const resolved = resolveAuditInputs({ metadata, output, resolveReference });
     if ('result' in resolved) return resolved.result;
 
     const { gold, discoveries } = resolved;

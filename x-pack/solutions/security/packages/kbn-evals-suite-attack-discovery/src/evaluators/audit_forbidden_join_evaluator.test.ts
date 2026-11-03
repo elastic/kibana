@@ -6,9 +6,15 @@
  */
 
 import { createAuditForbiddenJoinEvaluator } from './audit_forbidden_join_evaluator';
-import { emptyInput, makeDiscovery, makeGold, makeOutput } from './audit_test_utils';
+import {
+  emptyInput,
+  makeDiscovery,
+  makeGold,
+  makeOutput,
+  resolveReferenceFromMetadata,
+} from './audit_test_utils';
 
-const evaluator = createAuditForbiddenJoinEvaluator();
+const evaluator = createAuditForbiddenJoinEvaluator(resolveReferenceFromMetadata);
 
 const run = (gold: ReturnType<typeof makeGold>, alertIds: string[][]) =>
   evaluator.evaluate({
@@ -66,5 +72,39 @@ describe('ForbiddenJoin evaluator', () => {
       metadata: {},
     } as never);
     expect(result).toMatchObject({ score: null, label: 'N/A' });
+  });
+
+  describe('no_citations', () => {
+    const runDiscoveries = (discoveries: Array<Parameters<typeof makeDiscovery>[0]>) =>
+      evaluator.evaluate({
+        input: emptyInput,
+        output: makeOutput(discoveries.map(makeDiscovery)),
+        expected: undefined,
+        metadata: { gold },
+      } as never);
+
+    it('is null when the only discovery cites no alert, even if its text joins the pair', async () => {
+      const result = await runDiscoveries([
+        {
+          alertIds: [],
+          title: 'Principals a and b are one actor',
+          detailsMarkdown: 'Group a (a1) and group b (b1) share one actor.',
+        },
+      ]);
+      expect(result).toMatchObject({ score: null, label: 'no_citations' });
+    });
+
+    it('judges only the citing discoveries in a mix, and reports the skipped ones', async () => {
+      const clean = await runDiscoveries([{ alertIds: [] }, { alertIds: ['a1'] }]);
+      expect(clean).toMatchObject({ score: 1, label: 'no_forbidden_join' });
+      expect(clean.explanation).toContain('1 discoveries without citations');
+
+      const joined = await runDiscoveries([{ alertIds: [] }, { alertIds: ['a1', 'b1'] }]);
+      expect(joined).toMatchObject({ score: 0, label: 'forbidden_join' });
+    });
+
+    it('keeps score 1 when there are no discoveries at all', async () => {
+      expect(await runDiscoveries([])).toMatchObject({ score: 1, label: 'no_forbidden_join' });
+    });
   });
 });

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AuditReferenceResolver } from '../audit_failure_classes/registry';
 import type { AuditGold } from '../audit_failure_classes/types';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 
@@ -22,9 +23,21 @@ export const makeGold = (overrides: Partial<AuditGold> = {}): AuditGold => ({
   alertGroups: {},
   forbiddenCoCitation: [],
   expectedDiscoveries: 'atLeastOne',
-  confirmed: false,
+  confirmedGroups: [],
   ...overrides,
 });
+
+/**
+ * Test seam for the registry lookup: reads `{ gold, replacements }` straight from the example
+ * metadata, so unit tests can use ad-hoc gold without registering a scenario.
+ */
+export const resolveReferenceFromMetadata: AuditReferenceResolver = (metadata) => {
+  const { gold, replacements } = (metadata ?? {}) as {
+    gold?: AuditGold;
+    replacements?: Replacements;
+  };
+  return gold ? { gold, replacements: replacements ?? {} } : undefined;
+};
 
 export const makeOutput = (insights: AttackDiscovery[] | null): AttackDiscoveryTaskOutput => ({
   insights,

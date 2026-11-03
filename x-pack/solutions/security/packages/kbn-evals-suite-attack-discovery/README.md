@@ -205,58 +205,79 @@ nvm use && ATTACK_DISCOVERY_DATASET_JSONL_PATH=data/eval_dataset_attack_discover
 
 `evals/attack_discovery/audit_failure_classes.spec.ts` runs authored `bundledAlerts` scenarios that
 reproduce four failure classes seen when auditing Attack Discovery output. It is independent of the
-dataset-backed spec above and is not part of the weekly run.
+dataset-backed spec above and is **opt-in**: `playwright.config.ts` ignores the spec unless
+`EVAL_AUDIT_FAILURE_CLASSES=1`, so the default and weekly runs only execute `attack_discovery.spec.ts`.
 
 | Failure class | Scenario |
 |---|---|
 | Invented entity joins | `shared-ci-egress`, `same-display-name-cross-account` |
 | Threshold / meta alerts treated as evidence | `threshold-meta-alerts` |
 | Unconditional containment advice | `same-display-name-cross-account` (unconfirmed) |
-| No negative control | `benign-batch` (36 alerts, nothing to find) |
-| Positive control under noise | `positive-chain-with-noise` (a four-alert chain next to shared-egress noise) |
+| No negative control | `benign-batch` (36 vendor-signed, SYSTEM-context alerts, nothing to find) |
+| Positive control under noise | `positive-chain-with-noise` (a four-alert `clickfix-chain` next to shared-egress noise) |
 
-Each scenario declares its gold as data (`alertGroups`, `forbiddenCoCitation`,
-`expectedDiscoveries`, `requiredGroup`, `confirmed`), so the evaluators stay generic. Alert ids are
-opaque hashes so an id never reveals its group. Alerts are rendered to `pageContent` in the product
-`field,value` format with `transformRawData`; values are not anonymized, so evaluators can compare
-what a model cites with what the alert contains.
+Each scenario declares its gold as data in the registry (`alertGroups`, `forbiddenCoCitation`,
+`expectedDiscoveries`, `requiredGroup`, `confirmedGroups`, `metaAlertGroups`), so the evaluators stay
+generic. Alert ids are opaque hashes so an id never reveals its group. The registry validates that
+gold only references groups and alert ids that exist.
+
+Gold is **not** stored in example metadata. Metadata carries `Title`, `scenarioId`, `inputVariant` and
+`provenance`; evaluators look the gold up from the registry by `scenarioId`. Example ids are
+`<scenario>.<variant>`, which is the id stored on every score row.
+
+### Anonymization
+
+Alerts are rendered the way the product renders them: `transformRawData` with the default
+anonymization fields (`src/audit_failure_classes/default_allowlist.ts`, a copy of the plugin default
+checked by a drift test), and a deterministic seeded `getAnonymizedValue`. The model therefore sees
+`user.name`, `host.name` and `cloud.account.name` as tokens, as in production. Discoveries are
+de-anonymized with the product `replaceAnonymizedValuesWithOriginalValues` before the evaluators run,
+so evaluators compare real values.
 
 ### Input variants
 
-Every scenario runs twice, recorded as `metadata.inputVariant` and in the example name
-(`<scenario>.<variant>`):
+Every scenario runs twice, recorded as `metadata.inputVariant` and in the example name:
 
-- `baseline`: only fields in the product default allowlist (`src/audit_failure_classes/default_allowlist.ts`
-  is a copy of it; a test fails if it drifts from the plugin), no additional context.
+- `baseline`: only fields in the product default allowlist, no additional context.
 - `enriched`: the baseline fields plus `cloud.account.id`, `user.id` (IAM ARN),
   `source.as.organization.name`, `source.as.number`, `user_agent.original`, and an additional-context
   block saying the egress NAT is shared and that `user.name` is not unique across accounts.
-  `cloud.provider` is listed as enriched but is already in the default allowlist.
 
-Running the same suite per model gives a model x input-variant grid: filter the results by example
-name suffix (`.baseline` / `.enriched`).
+In `same-display-name-cross-account` the two accounts raise identical alerts; the baseline differs
+only in `_id` and `@timestamp` (`NON_IDENTIFYING_BASELINE_FIELDS`), so a model cannot tell the
+accounts apart from baseline input and must not join them. Only the enriched variant carries
+separators (`user.id`, `cloud.account.id`, `user_agent.original`).
+
+Filter results by example-name suffix (`.baseline` / `.enriched`) for a model x input-variant grid.
 
 ### Evaluators (code only, no LLM)
 
 | Evaluator | Scores |
 |---|---|
-| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; N/A without forbidden pairs |
+| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; N/A without forbidden pairs; N/A (null, `no_citations`) when the discovery cites no alert ids |
+| `MetaAlertAsEvidence` | 0 if a discovery's citations are only meta-alert groups (`metaAlertGroups`); N/A without meta-alert gold |
 | `EntityCoOccurrence` | Grounded / asserted pairs of a `user.*` token with a `source.ip`, `cloud.account.id` or `host.*` token in one discovery; a pair is grounded when one cited alert carries both values; N/A with no asserted pair |
 | `NegativeControl` | 1 only if a `none`-expected scenario produced zero discoveries; otherwise N/A |
 | `PositiveControlRecall` | Fraction of the required group's alert ids that any discovery cites; label `recalled` at >= 0.6 |
-| `ConditionalRemediation` | For unconfirmed scenarios, 0 when the markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend or deactivate without a conditional |
+| `ConditionalRemediation` | Scores each discovery that is not fully backed by a confirmed group; 0 when its markdown tells the reader to revoke, rotate, disable, delete, block, isolate, terminate, quarantine, suspend or deactivate without a conditional; N/A when nothing is scored |
 
-A run with no parsed insights is reported as `task_error` with a null score, never as a pass.
+A run with no parsed insights is reported as `task_error` with a null score, never as a pass. A null
+score is stored as a null `evaluator.score` with the label `N/A` (or `no_citations`) and is left out of
+the per-evaluator mean: in a smoke run the report table averaged `ForbiddenJoin` over the 6 scored
+rows of 10, not all 10.
 
 ### Heuristic limits
 
-- `ConditionalRemediation` is keyword based. A conditional split across sentences ("Verify first.
-  Then revoke.") is flagged; past or passive forms ("the key was revoked") are never flagged; a
-  negated instruction is not recognised. Use it as a screen and read the flagged text.
-- `EntityCoOccurrence` reads only `{{ field value }}` tokens. Entities in plain prose assert
-  nothing, and every user x linked-entity pair inside a discovery counts even if the sentence does
-  not link them. A value that the variant does not render (for example `cloud.account.id` in
-  `baseline`) can never be grounded, so compare variants rather than reading one in isolation.
+- `ConditionalRemediation` is keyword based. Directives under a conditional header stay conditional,
+  but a conditional split across sentences ("Verify first. Then revoke.") is flagged, past or passive
+  forms ("the key was revoked") are never flagged, and a negated instruction is not recognised. Use
+  it as a screen and read the flagged text.
+- `EntityCoOccurrence` reads `{{ field value }}` tokens and, when a discovery has none, falls back to
+  matching plain text against the alert values. Every user x linked-entity pair inside a discovery
+  counts even if the sentence does not link them. A value the variant does not render (for example
+  `cloud.account.id` in `baseline`) can never be grounded, so compare variants rather than reading one
+  in isolation.
+- `ForbiddenJoin` cannot judge a discovery that cites no alert ids; it reports `no_citations`.
 - `NegativeControl` treats any discovery as a failure; it does not judge whether the discovery is
   reasonable.
 
@@ -265,7 +286,8 @@ A run with no parsed insights is reported as `task_error` with a null score, nev
 With the Scout stack up (`node scripts/evals scout`), per model:
 
 ```bash
-nvm use && ATTACK_DISCOVERY_EVAL_CONCURRENCY=1 node scripts/evals run --suite attack-discovery \
+nvm use && EVAL_AUDIT_FAILURE_CLASSES=1 ATTACK_DISCOVERY_EVAL_CONCURRENCY=1 \
+  node scripts/evals run --suite attack-discovery \
   --model <model> --judge <judge> \
   --grep "Attack Discovery audit failure classes" --repetitions 1
 ```

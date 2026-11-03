@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { renderAlert } from '../audit_failure_classes/render_alert';
+import { renderAlerts } from '../audit_failure_classes/render_alert';
 import type { AuditAlert } from '../audit_failure_classes/types';
 import type { AttackDiscoveryDatasetExample } from '../types';
 import { createAuditEntityCoOccurrenceEvaluator } from './audit_entity_co_occurrence_evaluator';
-import { makeDiscovery, makeGold, makeOutput } from './audit_test_utils';
+import {
+  makeDiscovery,
+  makeGold,
+  makeOutput,
+  resolveReferenceFromMetadata,
+} from './audit_test_utils';
 
-const evaluator = createAuditEntityCoOccurrenceEvaluator();
+const evaluator = createAuditEntityCoOccurrenceEvaluator(resolveReferenceFromMetadata);
 
 const alerts: AuditAlert[] = [
   {
@@ -24,9 +29,11 @@ const alerts: AuditAlert[] = [
   },
 ];
 
+const { anonymizedAlerts, replacements } = renderAlerts(alerts, 'enriched', 'entity-test');
+
 const input: AttackDiscoveryDatasetExample['input'] = {
   mode: 'bundledAlerts',
-  anonymizedAlerts: alerts.map((alert) => renderAlert(alert, 'enriched')),
+  anonymizedAlerts,
 };
 
 const run = (discoveries: Array<Parameters<typeof makeDiscovery>[0]>) =>
@@ -34,7 +41,7 @@ const run = (discoveries: Array<Parameters<typeof makeDiscovery>[0]>) =>
     input,
     output: makeOutput(discoveries.map(makeDiscovery)),
     expected: undefined,
-    metadata: { gold: makeGold() },
+    metadata: { gold: makeGold(), replacements },
   } as never);
 
 describe('EntityCoOccurrence evaluator', () => {
@@ -101,8 +108,56 @@ describe('EntityCoOccurrence evaluator', () => {
   it('is N/A when no user and linked-entity pair is asserted', async () => {
     const onlyUser = await run([{ alertIds: ['a1'], detailsMarkdown: '{{ user.name alice }}' }]);
     expect(onlyUser).toMatchObject({ score: null, label: 'N/A' });
-    const noTokens = await run([{ alertIds: ['a1'], detailsMarkdown: 'alice used 203.0.113.50' }]);
-    expect(noTokens).toMatchObject({ score: null, label: 'N/A' });
+  });
+
+  it('reads the alert values behind anonymization tokens', () => {
+    const userLine = anonymizedAlerts[0].pageContent
+      .split('\n')
+      .find((line) => /^user\.name,/.test(line));
+    expect(userLine).not.toContain('alice');
+    expect(Object.values(replacements)).toContain('alice');
+  });
+
+  it('matches model output that repeats anonymization tokens', async () => {
+    const [token] = Object.entries(replacements).find(([, value]) => value === 'alice') ?? [];
+    const result = await run([
+      {
+        alertIds: ['a1'],
+        detailsMarkdown: `{{ user.name ${token} }} used {{ source.ip 203.0.113.50 }}`,
+      },
+    ]);
+    expect(result).toMatchObject({ score: 1, label: 'grounded' });
+  });
+
+  describe('plain-text fallback when the discovery has no tokens', () => {
+    it('grounds a user and IP in one cited alert', async () => {
+      const result = await run([
+        { alertIds: ['a1'], detailsMarkdown: 'alice used 203.0.113.50 to sign in' },
+      ]);
+      expect(result).toMatchObject({ score: 1, label: 'grounded' });
+    });
+
+    it('flags a user paired with an IP no cited alert carries', async () => {
+      const result = await run([
+        {
+          alertIds: ['b1'],
+          detailsMarkdown: 'alice used 203.0.113.50 to sign in',
+        },
+      ]);
+      expect(result).toMatchObject({ score: 0, label: 'ungrounded_pairs' });
+    });
+
+    it('does not match a value inside a longer one', async () => {
+      const result = await run([
+        { alertIds: ['a1'], detailsMarkdown: 'alice used 203.0.113.500 to sign in' },
+      ]);
+      expect(result).toMatchObject({ score: null, label: 'N/A' });
+    });
+
+    it('is N/A when only one entity is named', async () => {
+      const result = await run([{ alertIds: ['a1'], detailsMarkdown: 'alice signed in' }]);
+      expect(result).toMatchObject({ score: null, label: 'N/A' });
+    });
   });
 
   it('is N/A with no discoveries', async () => {

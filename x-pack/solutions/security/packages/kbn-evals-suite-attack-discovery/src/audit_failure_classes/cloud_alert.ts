@@ -44,6 +44,7 @@ export const cloudAlertFields = ({
   userAgent,
   asn,
   outcome = 'success',
+  includeAccountName = true,
 }: {
   time: string;
   rule: string;
@@ -59,6 +60,11 @@ export const cloudAlertFields = ({
   userAgent?: string;
   asn?: { number: number; organization: string };
   outcome?: 'success' | 'failure';
+  /**
+   * The CloudTrail integration populates `cloud.account.id` but usually no account name; pass
+   * `false` for alerts that must not carry one.
+   */
+  includeAccountName?: boolean;
 }): AuditAlert['fields'] => ({
   '@timestamp': time,
   'kibana.alert.rule.name': rule,
@@ -72,7 +78,7 @@ export const cloudAlertFields = ({
   message,
   'cloud.provider': 'aws',
   'cloud.region': region,
-  'cloud.account.name': account.name,
+  ...(includeAccountName ? { 'cloud.account.name': account.name } : {}),
   'cloud.account.id': account.id,
   ...(principal ? { 'user.name': principal.name, 'user.id': principal.arn } : {}),
   ...(sourceIp ? { 'source.ip': sourceIp } : {}),

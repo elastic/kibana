@@ -5,32 +5,8 @@
  * 2.0.
  */
 
-import { getAuditGold } from './gold';
-import { getDiscoveryMarkdown, parseFieldTokens } from './discovery_text';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-
-describe('getAuditGold', () => {
-  const gold = {
-    alertGroups: { a: ['1'] },
-    forbiddenCoCitation: [],
-    expectedDiscoveries: 'none',
-    confirmed: false,
-  };
-
-  it('returns the gold from metadata', () => {
-    expect(getAuditGold({ gold })).toBe(gold);
-  });
-
-  it.each([
-    ['no metadata', undefined],
-    ['no gold', {}],
-    ['bad expectedDiscoveries', { gold: { ...gold, expectedDiscoveries: 'some' } }],
-    ['missing confirmed', { gold: { ...gold, confirmed: undefined } }],
-    ['array alertGroups', { gold: { ...gold, alertGroups: [] } }],
-  ])('returns undefined for %s', (_name, metadata) => {
-    expect(getAuditGold(metadata)).toBeUndefined();
-  });
-});
+import { getDiscoveryMarkdown, parseFieldTokens } from './discovery_text';
 
 describe('parseFieldTokens', () => {
   it('extracts field and value from {{ field value }} tokens', () => {

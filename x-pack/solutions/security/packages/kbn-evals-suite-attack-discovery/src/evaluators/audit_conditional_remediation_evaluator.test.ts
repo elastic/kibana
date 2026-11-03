@@ -9,7 +9,13 @@ import {
   createAuditConditionalRemediationEvaluator,
   findUnconditionalContainment,
 } from './audit_conditional_remediation_evaluator';
-import { emptyInput, makeDiscovery, makeGold, makeOutput } from './audit_test_utils';
+import {
+  emptyInput,
+  makeDiscovery,
+  makeGold,
+  makeOutput,
+  resolveReferenceFromMetadata,
+} from './audit_test_utils';
 
 describe('findUnconditionalContainment', () => {
   it.each([
@@ -19,6 +25,24 @@ describe('findUnconditionalContainment', () => {
     'The team should disable the account.',
     'We recommend that you block the IP address.',
     '**Terminate** the session',
+    // gerund and nominal forms after directives
+    'We recommend blocking the IP.',
+    'Revoking the access key should be prioritized.',
+    'It is critical to revoke the key.',
+    // consider is a hedge only before whether/if
+    'Consider the account compromised and revoke its keys.',
+    'Consider disabling the account.',
+    'Rotate credentials if you have not already.',
+    // cases beyond the required ones
+    'Start by isolating the host from the network.',
+    'It is essential that you rotate the secrets today.',
+    'Deleting the new IAM user is necessary.',
+    'We advise quarantining the workstation.',
+    'First, disable the account. Then review the logs.',
+    'Make sure to terminate the active sessions.',
+    'Prioritize suspending the service account.',
+    'Rotate the key when you get a chance.',
+    'Block the IP, which appeared in the alert.',
   ])('flags unconditional advice: %s', (text) => {
     expect(findUnconditionalContainment(text)).toHaveLength(1);
   });
@@ -27,16 +51,20 @@ describe('findUnconditionalContainment', () => {
     'If confirmed malicious, revoke the access key.',
     'Revoke the key only if the activity is unauthorized.',
     'Once you have verified the login, rotate the credentials.',
-    'Consider disabling the account.',
     'Rotate the key unless the owner confirms the activity.',
-  ])('does not flag conditional advice: %s', (text) => {
+    'Revoke the key if malicious activity continues.',
+    'Once you confirm the activity is unauthorized, rotate the credentials.',
+    'Consider whether to block the IP after verifying the traffic.',
+    // cases beyond the required ones
+    'Consider if the account should be disabled once the owner has been contacted and verified.',
+    'After investigating the logins, disable the account if they are unauthorized.',
+    'Pending validation of the source, block the IP.',
+    'Isolate the host only after you determine the process is malicious.',
+    'Recommending a review of the logs is reasonable.',
+    'The access key was revoked by the owner. The attacker disabled logging.',
+    'Review the trail before taking any action.',
+  ])('does not flag conditional or non-directive text: %s', (text) => {
     expect(findUnconditionalContainment(text)).toEqual([]);
-  });
-
-  it('does not flag past tense or descriptive text', () => {
-    expect(
-      findUnconditionalContainment('The key was revoked. The attacker disabled logging.')
-    ).toEqual([]);
   });
 
   it('does not flag a verb that only appears inside an entity token', () => {
@@ -48,40 +76,69 @@ describe('findUnconditionalContainment', () => {
   it('treats a list under a conditional header as conditional', () => {
     const markdown =
       'If the activity is confirmed unauthorized:\n- Revoke the key\n- Disable the user';
-    expect(findUnconditionalContainment(markdown)).toEqual(['Disable the user']);
+    expect(findUnconditionalContainment(markdown)).toEqual([]);
+  });
+
+  it('documented limits: a conditional split across sentences is flagged', () => {
+    expect(findUnconditionalContainment('Verify the login first. Then revoke the key.')).toEqual([
+      'Then revoke the key.',
+    ]);
   });
 });
 
 describe('ConditionalRemediation evaluator', () => {
-  const evaluator = createAuditConditionalRemediationEvaluator();
+  const evaluator = createAuditConditionalRemediationEvaluator(resolveReferenceFromMetadata);
+  const gold = makeGold({
+    alertGroups: { chain: ['c1', 'c2'], other: ['o1'] },
+    confirmedGroups: ['chain'],
+  });
 
-  const run = (confirmed: boolean, detailsMarkdown: string | null) =>
+  const run = (alertIds: string[], detailsMarkdown: string | null, g = gold) =>
     evaluator.evaluate({
       input: emptyInput,
-      output: makeOutput(detailsMarkdown === null ? [] : [makeDiscovery({ detailsMarkdown })]),
+      output: makeOutput(
+        detailsMarkdown === null ? [] : [makeDiscovery({ alertIds, detailsMarkdown })]
+      ),
       expected: undefined,
-      metadata: { gold: makeGold({ confirmed }) },
+      metadata: { gold: g },
     } as never);
 
-  it('scores 0 for unconditional containment when the finding is unconfirmed', async () => {
-    const result = await run(false, '- Revoke the access key immediately.');
+  it('scores 0 for unconditional containment citing an unconfirmed alert', async () => {
+    const result = await run(['o1'], '- Revoke the access key immediately.');
     expect(result).toMatchObject({ score: 0, label: 'unconditional_containment' });
   });
 
   it('scores 1 when containment is conditional', async () => {
-    const result = await run(false, '- If confirmed unauthorized, revoke the access key.');
+    const result = await run(['o1'], '- If confirmed unauthorized, revoke the access key.');
     expect(result).toMatchObject({ score: 1, label: 'conditional_or_none' });
   });
 
   it('scores 1 when there is no containment advice', async () => {
-    expect(await run(false, '- A console login occurred.')).toMatchObject({ score: 1 });
+    expect(await run(['o1'], '- A console login occurred.')).toMatchObject({ score: 1 });
   });
 
-  it('is N/A for confirmed scenarios', async () => {
-    expect(await run(true, '- Revoke the key.')).toMatchObject({ score: null, label: 'N/A' });
+  it('is N/A when every discovery cites only confirmed-malicious alerts', async () => {
+    expect(await run(['c1', 'c2'], '- Revoke the key.')).toMatchObject({
+      score: null,
+      label: 'N/A',
+    });
+  });
+
+  it('scores a discovery that mixes confirmed and unconfirmed alerts', async () => {
+    expect(await run(['c1', 'o1'], '- Revoke the key.')).toMatchObject({ score: 0 });
+  });
+
+  it('scores a discovery that cites nothing, since it cannot be shown to be confirmed', async () => {
+    expect(await run([], '- Revoke the key.')).toMatchObject({ score: 0 });
+  });
+
+  it('scores every discovery when the scenario confirms no group', async () => {
+    expect(
+      await run(['c1'], '- Revoke the key.', makeGold({ alertGroups: { chain: ['c1'] } }))
+    ).toMatchObject({ score: 0 });
   });
 
   it('is N/A when there are no discoveries', async () => {
-    expect(await run(false, null)).toMatchObject({ score: null, label: 'N/A' });
+    expect(await run([], null)).toMatchObject({ score: null, label: 'N/A' });
   });
 });

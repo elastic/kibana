@@ -6,20 +6,20 @@
  */
 import type { Evaluator } from '@kbn/evals';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
+import type { AuditReferenceResolver } from '../audit_failure_classes/registry';
 import { notApplicable, resolveAuditInputs } from './audit_evaluator_helpers';
 
 export const AUDIT_NEGATIVE_CONTROL_EVALUATOR_NAME = 'NegativeControl';
 
 /** For scenarios with nothing to find: 1 only when the model reports no discoveries. */
-export const createAuditNegativeControlEvaluator = (): Evaluator<
-  AttackDiscoveryDatasetExample,
-  AttackDiscoveryTaskOutput
-> => ({
+export const createAuditNegativeControlEvaluator = (
+  resolveReference?: AuditReferenceResolver
+): Evaluator<AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput> => ({
   name: AUDIT_NEGATIVE_CONTROL_EVALUATOR_NAME,
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
-    const resolved = resolveAuditInputs({ metadata, output });
+    const resolved = resolveAuditInputs({ metadata, output, resolveReference });
     if ('result' in resolved) return resolved.result;
 
     const { gold, discoveries } = resolved;

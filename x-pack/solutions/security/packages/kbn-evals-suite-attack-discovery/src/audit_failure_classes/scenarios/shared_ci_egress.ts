@@ -159,6 +159,6 @@ export const sharedCiEgressScenario: AuditScenario = {
       ['bob-bucket-listings', 'ci-runner-assume-roles'],
     ],
     expectedDiscoveries: 'none',
-    confirmed: false,
+    confirmedGroups: [],
   },
 };
