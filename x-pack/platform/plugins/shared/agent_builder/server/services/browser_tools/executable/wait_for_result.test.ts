@@ -143,6 +143,30 @@ describe('waitForBrowserToolResult', () => {
     expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 
+  it('resolves an error result when the document is answered without a result', async () => {
+    callClient.get.mockImplementation(async (_, toolCallId) =>
+      record(toolCallId, BrowserToolCallStatus.answered)
+    );
+
+    const state = track(
+      waitForBrowserToolResult({
+        callClient,
+        logger,
+        executionId: 'exec-1',
+        toolCallId: 'call-1',
+        expiresAt: expiresIn(10_000),
+        pollIntervalMs: POLL_MS,
+      })
+    );
+
+    await jest.advanceTimersByTimeAsync(0);
+
+    expect(state.outcome).toEqual({
+      type: 'answered',
+      result: { status: 'error', message: 'Browser answered without a result' },
+    });
+  });
+
   it('resolves aborted when the signal fires', async () => {
     callClient.get.mockImplementation(async (_, toolCallId) =>
       record(toolCallId, BrowserToolCallStatus.pending)

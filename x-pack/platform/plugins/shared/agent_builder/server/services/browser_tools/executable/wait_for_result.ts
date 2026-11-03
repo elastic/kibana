@@ -64,8 +64,14 @@ export const waitForBrowserToolResult = async ({
 
     try {
       const call = await callClient.get(executionId, toolCallId);
-      if (call?.status === BrowserToolCallStatus.answered && call.result) {
-        return { type: 'answered', result: call.result };
+      if (call?.status === BrowserToolCallStatus.answered) {
+        return {
+          type: 'answered',
+          result: call.result ?? {
+            status: 'error',
+            message: 'Browser answered without a result',
+          },
+        };
       }
     } catch (error) {
       logger.warn(

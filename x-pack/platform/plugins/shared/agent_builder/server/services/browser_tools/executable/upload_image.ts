@@ -19,6 +19,16 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 
 const extensionFor = (mimeType: string) => (mimeType === 'image/jpeg' ? 'jpg' : 'png');
 
+const DATA_URL_PREFIX = /^data:[^;,]*;base64,/;
+
+const decodeImage = (base64: string): Buffer => {
+  const buffer = Buffer.from(base64.replace(DATA_URL_PREFIX, ''), 'base64');
+  if (buffer.length === 0) {
+    throw new Error('Image is empty');
+  }
+  return buffer;
+};
+
 /**
  * Stores an image returned by a browser tool as a chat image file, adds it as an image
  * attachment, and returns the image marker referencing that attachment.
@@ -33,6 +43,7 @@ export const createUploadBrowserToolImage = ({
     if (!(SUPPORTED_IMAGE_MIME_TYPES as readonly string[]).includes(mimeType)) {
       throw new Error(`Unsupported image mime type: ${mimeType}`);
     }
+    const content = decodeImage(image.base64);
     const name = image.name ?? `${toolId}_screenshot.${extensionFor(mimeType)}`;
 
     const file = await files.fileServiceFactory.asScoped(request).create({
@@ -43,7 +54,7 @@ export const createUploadBrowserToolImage = ({
 
     let attachmentId: string;
     try {
-      await file.uploadContent(Readable.from(Buffer.from(image.base64, 'base64')));
+      await file.uploadContent(Readable.from(content));
       const attachment = await attachments.add(
         {
           type: AttachmentType.image,

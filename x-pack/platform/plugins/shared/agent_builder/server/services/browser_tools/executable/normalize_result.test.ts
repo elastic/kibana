@@ -110,6 +110,58 @@ describe('normalizeBrowserToolResult', () => {
     ]);
   });
 
+  it('keeps content and earlier image markers when a later image upload fails', async () => {
+    const first: BrowserToolImagePayload = { mime_type: 'image/png', base64: 'AAA', name: 'a' };
+    const second: BrowserToolImagePayload = { mime_type: 'image/png', base64: 'BBB', name: 'b' };
+    uploadImage.mockImplementation(async (image) => {
+      if (image === second) {
+        throw new Error('file too large');
+      }
+      return imageResultFor(image);
+    });
+
+    const results = await normalizeBrowserToolResult({
+      result: { status: 'ok', content: 'two screenshots', images: [first, second] },
+      uploadImage,
+    });
+
+    expect(results).toEqual([
+      {
+        tool_result_id: expect.any(String),
+        type: ToolResultType.other,
+        data: { content: 'two screenshots' },
+      },
+      imageResultFor(first),
+      expect.objectContaining({
+        type: ToolResultType.error,
+        data: { message: 'Image b could not be stored: file too large' },
+      }),
+    ]);
+  });
+
+  it('returns an error result per failed image', async () => {
+    const named: BrowserToolImagePayload = { mime_type: 'image/png', base64: 'AAA', name: 'a' };
+    const unnamed: BrowserToolImagePayload = { mime_type: 'image/png', base64: 'BBB' };
+    uploadImage.mockRejectedValue(new Error('boom'));
+
+    const results = await normalizeBrowserToolResult({
+      result: { status: 'ok', images: [named, unnamed] },
+      uploadImage,
+    });
+
+    expect(uploadImage).toHaveBeenCalledTimes(2);
+    expect(results).toEqual([
+      expect.objectContaining({
+        type: ToolResultType.error,
+        data: { message: 'Image a could not be stored: boom' },
+      }),
+      expect.objectContaining({
+        type: ToolResultType.error,
+        data: { message: 'Image 2 could not be stored: boom' },
+      }),
+    ]);
+  });
+
   it('images without content → image markers only', async () => {
     const image: BrowserToolImagePayload = { mime_type: 'image/png', base64: 'AAA', name: 'a' };
 

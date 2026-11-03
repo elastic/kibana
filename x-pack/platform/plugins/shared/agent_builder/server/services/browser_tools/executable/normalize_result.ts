@@ -44,9 +44,16 @@ export const normalizeBrowserToolResult = async ({
     results.push(otherResult(content));
   }
 
-  // sequential, so image attachments are added in the order the browser sent them
-  for (const image of images) {
-    results.push(await uploadImage(image));
+  // sequential, so image attachments are added in the order the browser sent them;
+  // a failed image is reported on its own and does not discard the rest of the answer
+  for (const [index, image] of images.entries()) {
+    try {
+      results.push(await uploadImage(image));
+    } catch (error) {
+      const label = image.name ?? String(index + 1);
+      const message = error instanceof Error ? error.message : String(error);
+      results.push(createErrorResult(`Image ${label} could not be stored: ${message}`));
+    }
   }
 
   if (results.length === 0) {
