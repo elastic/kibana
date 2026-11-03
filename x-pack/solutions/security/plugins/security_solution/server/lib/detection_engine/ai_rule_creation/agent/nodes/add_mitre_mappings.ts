@@ -9,20 +9,23 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
-import type { MitreEntitySummaryBuckets } from '@kbn/security-mitre-attack-common';
+import type { MitreEntitySummaryBuckets, MitreFramework } from '@kbn/security-mitre-attack-common';
+import { MITRE_FRAMEWORKS, THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
 import type { RuleCreationState } from '../state';
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
-import { resolveMitreBuckets } from '../../../mitre/resolve_mitre_buckets';
+import { resolveMitreBucketsByFramework } from '../../../mitre/resolve_mitre_buckets';
 import type {
   Threat,
   ThreatTechnique,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 
 interface MitreMappingSelectionResponse {
-  tactics: string[]; // Array of tactic IDs like ["TA0001", "TA0002"]
+  // Array of tactic IDs like ["TA0001", "TA0002"] (ATT&CK) or ["AML.TA0000"] (ATLAS)
+  tactics: string[];
   techniques: Array<{
     id: string;
-    subtechnique?: string[]; // Array of subtechnique IDs like ["T1078.001"]
+    // Array of subtechnique IDs like ["T1078.001"] (ATT&CK) or ["AML.T0024.002"] (ATLAS)
+    subtechnique?: string[];
   }>;
 }
 
@@ -40,17 +43,43 @@ interface AddMitreMappingsNodeParams {
  */
 export const formatMitreMapping = (
   response: MitreMappingSelectionResponse,
-  buckets: MitreEntitySummaryBuckets
+  bucketsByFramework: Partial<Record<MitreFramework, MitreEntitySummaryBuckets>>
 ): Array<Threat> => {
   const threatMappings: Array<Threat> = [];
 
-  const tacticsMap = new Map(buckets.tactics.map((t) => [t.id, t]));
-  const techniquesMap = new Map(buckets.techniques.map((t) => [t.id, t]));
-  const subtechniquesMap = new Map(buckets.subtechniques.map((s) => [s.id, s]));
+  const lookups = MITRE_FRAMEWORKS.flatMap((framework) => {
+    const buckets = bucketsByFramework[framework];
+    if (!buckets) {
+      return [];
+    }
+    return [
+      {
+        framework,
+        tacticsMap: new Map(buckets.tactics.map((t) => [t.id, t])),
+        techniquesMap: new Map(buckets.techniques.map((t) => [t.id, t])),
+        subtechniquesMap: new Map(buckets.subtechniques.map((s) => [s.id, s])),
+      },
+    ];
+  });
 
-  for (const tacticId of response.tactics || []) {
-    const tacticData = tacticsMap.get(tacticId);
-    if (tacticData) {
+  // A valid technique picked under the wrong tactic is re-homed under its own tactic instead
+  // of being dropped, but only when it belongs to exactly one tactic. A multi-tactic technique
+  // has no unambiguous home, so when none of its tactics was selected it is dropped.
+  const tacticIds = new Set(response.tactics ?? []);
+  for (const { id } of response.techniques ?? []) {
+    const techData = lookups
+      .find(({ techniquesMap }) => techniquesMap.has(id))
+      ?.techniquesMap.get(id);
+    if (techData?.tactic_ids.length === 1) {
+      tacticIds.add(techData.tactic_ids[0]);
+    }
+  }
+
+  for (const tacticId of tacticIds) {
+    const lookup = lookups.find(({ tacticsMap }) => tacticsMap.has(tacticId));
+    const tacticData = lookup?.tacticsMap.get(tacticId);
+    if (lookup && tacticData) {
+      const { framework, techniquesMap, subtechniquesMap } = lookup;
       // Find techniques that belong to this tactic and validate them against managed data
       const relevantTechniques = (response.techniques || [])
         .map((tech) => {
@@ -103,7 +132,7 @@ export const formatMitreMapping = (
       });
 
       threatMappings.push({
-        framework: 'MITRE ATT&CK',
+        framework: THREAT_FRAMEWORK_NAME[framework],
         tactic: {
           id: tacticData.id,
           name: tacticData.name,
@@ -125,9 +154,7 @@ export const addMitreMappingsNode = ({
   const jsonParser = new JsonOutputParser<MitreMappingSelectionResponse>();
 
   return async (state: RuleCreationState): Promise<RuleCreationState> => {
-    events?.reportProgress(
-      'Analyzing rule to identify relevant MITRE ATT&CK tactics and techniques...'
-    );
+    events?.reportProgress('Analyzing rule to identify relevant MITRE tactics and techniques...');
 
     try {
       const mitreSelectionChain = MITRE_MAPPING_SELECTION_PROMPT.pipe(model).pipe(jsonParser);
@@ -139,12 +166,18 @@ export const addMitreMappingsNode = ({
         esql_query: state?.rule?.query || '',
         rule_tags: ruleTags,
       });
-      const mitreBuckets = await resolveMitreBuckets(mitreDataClient);
+      const bucketsByFramework = await resolveMitreBucketsByFramework(
+        mitreDataClient,
+        MITRE_FRAMEWORKS
+      );
+      if (Object.keys(bucketsByFramework).length === 0) {
+        throw new Error('MITRE data is unavailable');
+      }
 
-      const threatMappings = formatMitreMapping(mitreSelectionResult, mitreBuckets);
+      const threatMappings = formatMitreMapping(mitreSelectionResult, bucketsByFramework);
 
       events?.reportProgress(
-        `Identified ${threatMappings.length} MITRE ATT&CK mapping(s) with ${threatMappings.reduce(
+        `Identified ${threatMappings.length} MITRE mapping(s) with ${threatMappings.reduce(
           (sum, m) => sum + (m.technique?.length || 0),
           0
         )} technique(s)`

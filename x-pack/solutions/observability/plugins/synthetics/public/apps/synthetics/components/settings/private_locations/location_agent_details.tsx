@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -294,7 +295,7 @@ export const LocationAgentDetails = ({
             <EuiFlexItem grow={false}>
               <EuiLink
                 data-test-subj="syntheticsManageAgentsInFleetLink"
-                href={fleetAgentsHref(`policy_id:"${agentPolicyId}"`)}
+                href={fleetAgentsHref(buildPolicyBaseIdWithFallbackKuery(agentPolicyId))}
                 target="_blank"
                 external
               >

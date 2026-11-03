@@ -14,6 +14,7 @@ import { DetailsBlock } from './detail_block';
 import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
+import { OverviewLoadingSection } from './overview_loading_section';
 import { WhatsHappenedBlock } from './whats_happened_block';
 
 export interface OverviewTabProps {
@@ -34,6 +35,11 @@ export interface OverviewTabProps {
   sections?: OverviewSections;
   /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
   proposedActionsCount?: React.ReactNode;
+  /**
+   * Whether an agent is still working on the investigation. While it is, the tab ends in a
+   * skeleton section: what is already there is partial, and more arrives as the agent writes it.
+   */
+  isRunning?: boolean;
 }
 
 /** Host-rendered overview sections, in the order the tab shows them. */
@@ -47,8 +53,12 @@ export interface OverviewSections {
   impact?: React.ReactNode;
   /** The conclusion, as markdown. */
   conclusion?: string;
-  /** How the investigation got there: hypotheses and their evidence. */
-  trace?: React.ReactNode;
+  /**
+   * How the investigation got there, such as an entry point to its hypotheses. Shown right under
+   * the conclusion, in the same place whether or not there is one, so it keeps its state when the
+   * conclusion arrives.
+   */
+  reasoning?: React.ReactNode;
 }
 
 export const OverviewTab = memo<OverviewTabProps>(
@@ -59,8 +69,9 @@ export const OverviewTab = memo<OverviewTabProps>(
     proposedActionsContent,
     proposedActionsCount,
     sections = {},
+    isRunning = false,
   }) => {
-    const { subjects, impact, conclusion, trace } = sections;
+    const { subjects, impact, conclusion, reasoning } = sections;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -94,6 +105,14 @@ export const OverviewTab = memo<OverviewTabProps>(
           </EuiFlexItem>
         )}
 
+        {/* Its own slot whether or not there is a conclusion, so a conclusion arriving does not
+            remount it and drop the state it holds (such as an open hypothesis tree). */}
+        {reasoning && (
+          <EuiFlexItem grow={false} data-test-subj="investigationOverviewReasoning">
+            {reasoning}
+          </EuiFlexItem>
+        )}
+
         {proposedActionsContent && (
           <EuiFlexItem>
             <DetailsBlock
@@ -105,9 +124,9 @@ export const OverviewTab = memo<OverviewTabProps>(
           </EuiFlexItem>
         )}
 
-        {trace && (
-          <EuiFlexItem data-test-subj="investigationOverviewTrace">
-            <DetailsBlock title={OVERVIEW_SECTION_LABELS.trace}>{trace}</DetailsBlock>
+        {isRunning && (
+          <EuiFlexItem grow={false}>
+            <OverviewLoadingSection />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

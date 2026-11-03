@@ -10,13 +10,10 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCard,
   EuiConfirmModal,
   EuiDescriptionList,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -25,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   RELAY_APP_CONNECTION_STATUS,
@@ -36,35 +34,79 @@ import { SettingsSection } from '../settings_section';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';
 
-interface AppsSectionProps {
+interface SlackChannelsSectionProps {
   canEdit: boolean;
 }
 
-export function AppsSection({ canEdit }: AppsSectionProps) {
-  const { isLoading, hasStatusRequestError, available, retryStatusRequest } =
-    useRelayAppConnection();
+/**
+ * The Slack channels the Elastic Slack App answers in. Connecting the workspace lives here too,
+ * since the channels only exist once it is connected. Hidden when the deployment has no Slack App.
+ */
+export function SlackChannelsSection({ canEdit }: SlackChannelsSectionProps) {
+  const connection = useRelayAppConnection();
+  const {
+    isLoading,
+    hasStatusRequestError,
+    status,
+    error,
+    workspace,
+    createdBy,
+    createdAt,
+    isMutating,
+    retryStatusRequest,
+    connect,
+    confirm,
+    disconnect,
+  } = connection;
+  const available = connection.available && !hasStatusRequestError;
+
+  if (isLoading || (!available && !hasStatusRequestError)) {
+    return null;
+  }
+
+  const isConnected = available && status === RELAY_APP_CONNECTION_STATUS.connected;
 
   return (
     <>
       <EuiSpacer />
       <SettingsSection
-        title={i18n.translate('xpack.nightshift.settings.apps.sectionTitle', {
-          defaultMessage: 'Apps',
+        title={i18n.translate('xpack.nightshift.settings.apps.slackChannelsSectionTitle', {
+          defaultMessage: 'Slack channels',
         })}
-        data-test-subj="nightshiftAppsSection"
+        titleAdornment={
+          isConnected ? (
+            <EuiBadge
+              color="success"
+              iconType="check"
+              data-test-subj="nightshiftSlackConnectedBadge"
+            >
+              {i18n.translate('xpack.nightshift.settings.apps.slackConnected', {
+                defaultMessage: 'Connected',
+              })}
+            </EuiBadge>
+          ) : undefined
+        }
+        headerAction={
+          isConnected ? (
+            <DisconnectWorkspaceButton
+              canEdit={canEdit}
+              isMutating={isMutating}
+              onDisconnect={disconnect}
+            />
+          ) : undefined
+        }
+        data-test-subj="nightshiftSlackChannelsSection"
       >
-        {isLoading && <EuiLoadingSpinner size="m" />}
-
-        {!isLoading && hasStatusRequestError && (
+        {hasStatusRequestError ? (
           <KbnDangerCallout
             announceOnMount
-            data-test-subj="nightshiftAppsStatusError"
+            data-test-subj="nightshiftSlackStatusError"
             title={i18n.translate('xpack.nightshift.settings.apps.statusErrorTitle', {
-              defaultMessage: 'Unable to check app availability',
+              defaultMessage: 'Unable to check the Slack App status',
             })}
             text={i18n.translate('xpack.nightshift.settings.apps.statusErrorDescription', {
               defaultMessage:
-                'Nightshift could not load the current app status. Check the connection and try again.',
+                'Nightshift could not load the Slack App status. Check the connection and try again.',
             })}
             actionProps={{
               primary: {
@@ -73,122 +115,35 @@ export function AppsSection({ canEdit }: AppsSectionProps) {
                 }),
                 iconType: 'refresh',
                 onClick: retryStatusRequest,
-                'data-test-subj': 'nightshiftAppsStatusRetryButton',
+                'data-test-subj': 'nightshiftSlackStatusRetryButton',
               },
             }}
           />
-        )}
-
-        {!isLoading && !hasStatusRequestError && !available && (
-          <EuiEmptyPrompt
-            data-test-subj="nightshiftAppsUnavailable"
-            iconType="info"
-            title={
-              <h4>
-                {i18n.translate('xpack.nightshift.settings.apps.unavailableTitle', {
-                  defaultMessage: 'Apps are unavailable',
-                })}
-              </h4>
-            }
-            body={
-              <p>
-                {i18n.translate('xpack.nightshift.settings.apps.unavailableDescription', {
-                  defaultMessage:
-                    'No Nightshift apps are available in this deployment. Apps require Agent Builder and a configured Relay service.',
-                })}
-              </p>
-            }
-          />
-        )}
-
-        {!isLoading && !hasStatusRequestError && available && (
-          <EuiFlexGroup gutterSize="l" wrap>
-            <EuiFlexItem grow={false} css={{ minWidth: 320, maxWidth: 600 }}>
-              <SlackAppCard canEdit={canEdit} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </SettingsSection>
-    </>
-  );
-}
-
-export interface SlackAppCardProps {
-  canEdit: boolean;
-  /** Replaces the default description. */
-  description?: string;
-  /** Shows the card with a note instead of nothing when the Slack App is unavailable. */
-  showWhenUnavailable?: boolean;
-}
-
-/** The Elastic Slack App card: connect or disconnect the workspace and manage its channels. */
-export function SlackAppCard({
-  canEdit,
-  description,
-  showWhenUnavailable = false,
-}: SlackAppCardProps): React.ReactElement | null {
-  const connection = useRelayAppConnection();
-  const {
-    isLoading,
-    hasStatusRequestError,
-    status,
-    error,
-    workspace,
-    isMutating,
-    connect,
-    confirm,
-    disconnect,
-  } = connection;
-  const available = connection.available && !hasStatusRequestError;
-
-  if (isLoading || (!available && !showWhenUnavailable)) {
-    return null;
-  }
-
-  return (
-    <EuiCard
-      display="subdued"
-      textAlign="left"
-      icon={<EuiIcon type="logoSlack" size="xl" aria-hidden={true} />}
-      data-test-subj="streamsSlackAppCard"
-      title={i18n.translate('xpack.nightshift.settings.apps.slackWorkspaceTitle', {
-        defaultMessage: 'Elastic Slack App',
-      })}
-      description={
-        description ??
-        i18n.translate('xpack.nightshift.settings.apps.slackCardDescription', {
-          defaultMessage:
-            'Send Significant Event notifications to Slack and invoke Elastic agents from a channel.',
-        })
-      }
-      footer={
-        available ? (
-          <SlackCardFooter
+        ) : (
+          <SlackConnectionBody
             status={status}
             error={error}
             workspace={workspace}
+            createdBy={createdBy}
+            createdAt={createdAt}
             canEdit={canEdit}
             isMutating={isMutating}
             onConnect={connect}
             onConfirm={confirm}
             onDisconnect={disconnect}
           />
-        ) : (
-          <EuiText size="s" color="subdued" data-test-subj="streamsSlackAppUnavailable">
-            {i18n.translate('xpack.nightshift.settings.apps.slackUnavailable', {
-              defaultMessage: 'The Elastic Slack App is not available on this deployment.',
-            })}
-          </EuiText>
-        )
-      }
-    />
+        )}
+      </SettingsSection>
+    </>
   );
 }
 
-interface SlackCardFooterProps {
+interface SlackConnectionBodyProps {
   status: RelayAppConnectionStatus;
   error?: string;
   workspace?: SlackAppWorkspace;
+  createdBy?: string;
+  createdAt?: string;
   canEdit: boolean;
   isMutating: boolean;
   onConnect: () => void;
@@ -196,18 +151,19 @@ interface SlackCardFooterProps {
   onDisconnect: (tenantKey?: string) => Promise<void>;
 }
 
-function SlackCardFooter({
+/** The section body for each connection state: confirm, waiting, the channels, or connect. */
+function SlackConnectionBody({
   status,
   error,
   workspace,
+  createdBy,
+  createdAt,
   canEdit,
   isMutating,
   onConnect,
   onConfirm,
   onDisconnect,
-}: SlackCardFooterProps) {
-  const [showChannels, setShowChannels] = useState(false);
-
+}: SlackConnectionBodyProps) {
   if (status === RELAY_APP_CONNECTION_STATUS.pendingConfirmation && workspace) {
     return (
       <ConfirmWorkspaceCallout
@@ -260,66 +216,12 @@ function SlackCardFooter({
 
   if (status === RELAY_APP_CONNECTION_STATUS.connected) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-        {workspace && (
-          <EuiFlexItem grow={false}>
-            <WorkspaceLabel workspace={workspace} />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false} css={{ width: '100%' }}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="success" iconType="check">
-                    {i18n.translate('xpack.nightshift.settings.apps.slackConnected', {
-                      defaultMessage: 'Connected',
-                    })}
-                  </EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <DisconnectWorkspaceButton
-                    canEdit={canEdit}
-                    isMutating={isMutating}
-                    onDisconnect={onDisconnect}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType={showChannels ? 'chevronSingleDown' : 'chevronSingleRight'}
-                onClick={() => setShowChannels((value) => !value)}
-                aria-expanded={showChannels}
-                data-test-subj="streamsSlackAppToggleChannelsButton"
-                {...getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.TOGGLE_SLACK_CHANNELS,
-                  element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
-                })}
-              >
-                {showChannels
-                  ? i18n.translate('xpack.nightshift.settings.apps.slackHideChannels', {
-                      defaultMessage: 'Hide channels',
-                    })
-                  : i18n.translate('xpack.nightshift.settings.apps.slackShowChannels', {
-                      defaultMessage: 'Show channels',
-                    })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {showChannels && (
-          <EuiFlexItem grow={false} css={{ width: '100%' }}>
-            <SlackConnectionBindings canEdit={canEdit} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <>
+        {workspace && <WorkspaceLabel workspace={workspace} />}
+        {createdAt && <ConnectedByLabel createdBy={createdBy} createdAt={createdAt} />}
+        {(workspace || createdAt) && <EuiSpacer size="m" />}
+        <SlackConnectionBindings canEdit={canEdit} onReconnect={onConnect} />
+      </>
     );
   }
 
@@ -331,6 +233,22 @@ function SlackCardFooter({
           <KbnDangerCallout announceOnMount size="s" title={error} />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" data-test-subj="streamsSlackAppDescription">
+          {i18n.translate('xpack.nightshift.settings.apps.slackDescription', {
+            defaultMessage:
+              'Connect the Elastic Slack App to get investigation updates in Slack and ask Nightshift for help from a channel.',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued" data-test-subj="streamsSlackAppPrivateChannelsNote">
+          {i18n.translate('xpack.nightshift.settings.apps.slackPrivateChannelsNote', {
+            defaultMessage:
+              'To use private channels, allow private channel access when authorizing Slack. It applies to the whole workspace, including every Elastic deployment connected to it.',
+          })}
+        </EuiText>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
@@ -372,6 +290,27 @@ function WorkspaceLabel({ workspace: { tenantKey, name, url } }: { workspace: Sl
       </strong>{' '}
       {name ?? host ?? tenantKey}
       {name && host && <EuiTextColor color="subdued">{` (${host})`}</EuiTextColor>}
+    </EuiText>
+  );
+}
+
+function ConnectedByLabel({ createdBy, createdAt }: { createdBy?: string; createdAt: string }) {
+  const date = <FormattedDate value={createdAt} year="numeric" month="short" day="numeric" />;
+  return (
+    <EuiText size="s" color="subdued" data-test-subj="streamsSlackAppConnectedBy">
+      {createdBy ? (
+        <FormattedMessage
+          id="xpack.nightshift.settings.apps.slackSetUpByOn"
+          defaultMessage="Set up by {user} on {date}"
+          values={{ user: createdBy, date }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.nightshift.settings.apps.slackSetUpOn"
+          defaultMessage="Set up on {date}"
+          values={{ date }}
+        />
+      )}
     </EuiText>
   );
 }

@@ -22,6 +22,14 @@ export interface EpisodeDataSourceServices {
   http: HttpStart;
 }
 
+export interface EpisodeSearchField {
+  name: string;
+  type: string;
+  esTypes: string[];
+  searchable: boolean;
+  aggregatable: boolean;
+}
+
 interface EpisodeDataSourceBaseParams {
   services: EpisodeDataSourceServices;
   abortSignal?: AbortSignal;
@@ -94,7 +102,6 @@ export interface SeverityExtension {
   label: string;
   color: string;
   sortRank: number;
-  filterDotColor?: string;
 }
 
 export interface EpisodeDataSource {
@@ -102,11 +109,13 @@ export interface EpisodeDataSource {
   label: string;
   icon?: IconType;
   queryKeyPrefix: readonly unknown[];
+  ruleTypeIds?: string[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
   fetchKpis?: (params: FetchSourceKpisParams) => Promise<EpisodeSourceKpis>;
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
   actionExtensions?: Array<EpisodeActionExtension<any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   severityExtensions?: SeverityExtension[];

@@ -66,7 +66,7 @@ export const createSeriesActionRouteForType = <
   @injectable()
   class CreateTypedSeriesActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_INTERNAL_SERIES_API_PATH}/{group_hash}/${pathSuffix}`;
+    static path = `${ALERTING_V2_INTERNAL_SERIES_API_PATH}/{series_id}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -93,7 +93,7 @@ export const createSeriesActionRouteForType = <
         },
         404: {
           body: () => errorResponseSchema,
-          description: 'Indicates the alert episode series was not found.',
+          description: 'Indicates the alert episode series was not found in the current space.',
         },
         ...additionalResponses,
       },
@@ -112,7 +112,7 @@ export const createSeriesActionRouteForType = <
 
     protected async execute() {
       await this.alertActionsClient.createSeriesAction({
-        groupHash: this.request.params.group_hash,
+        seriesId: this.request.params.series_id,
         action: {
           action_type: actionType,
           ...this.request.body,

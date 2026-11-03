@@ -7,4 +7,5 @@
 
 export const TRANSACTION_FLYOUT_EBT_ELEMENTS = {
   TABS: 'transactionFlyoutTabs',
+  ACTIONS_MENU: 'transactionFlyoutActionsMenu',
 } as const;

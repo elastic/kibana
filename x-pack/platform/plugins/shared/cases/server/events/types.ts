@@ -42,7 +42,7 @@ export interface CaseStatusChangedEventPayload extends BaseCaseEventPayload {
  */
 export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
-  readonly attachmentIds: string[];
+  readonly ids: string[];
   readonly attachmentType: string;
 }
 
@@ -54,7 +54,7 @@ export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
  */
 export interface AttachmentsDeletedEventPayload extends BaseCaseEventPayload {
   readonly caseId: string;
-  readonly attachmentIds: string[];
+  readonly ids: string[];
   readonly attachmentType: string;
   /** Alert IDs referenced by the deleted alert attachments. */
   readonly alertIds?: string[];

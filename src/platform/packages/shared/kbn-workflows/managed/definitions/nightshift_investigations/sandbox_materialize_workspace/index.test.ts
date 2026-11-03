@@ -74,7 +74,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
     expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.id).toBe(
       NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID
     );
-    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(5);
+    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(6);
     expect(workflow.triggers[0].inputs.properties.round_execution_index).toMatchObject({
       type: 'integer',
       default: 0,
@@ -131,6 +131,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
                 with: {
                   sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
                   prompt: '{{ inputs.prompt }}',
+                  agent_id: '{{ inputs.agent_id }}',
                 },
               }),
             ],

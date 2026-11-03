@@ -9,13 +9,11 @@ import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ServiceAccountWorkloadsModal } from './view_service_account_workloads_modal';
-import type {
-  ListServiceAccountWorkloadsResponse,
-  ServiceAccountBoundWorkload,
-} from '../../service_accounts';
+import type { ListServiceAccountWorkloadsResponse } from '../../service_accounts';
 
 const serviceAccount = { id: 'kibana/workflow-runner', name: 'workflow-runner' };
 
@@ -29,6 +27,8 @@ const workload = (workloadId: string): ServiceAccountBoundWorkload => ({
 });
 
 describe('ServiceAccountWorkloadsModal', () => {
+  jest.setTimeout(30_000);
+
   const renderModal = (listWorkloads: jest.Mock) => {
     const onClose = jest.fn();
     const onError = jest.fn();

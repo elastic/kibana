@@ -6,6 +6,7 @@
  */
 
 import { techniqueLabel } from './coverage_text';
+import { describeGaps, gapCountPhrase, type DedupedCoverageGaps } from './dedupe_coverage_gaps';
 import type { ReportHuntContext } from './load_report_hunt_context';
 import { toCoverageBehaviors } from './select_coverage_behavior';
 import type { CoordinatorInputs, CurrentRunState, DecidePackageReportResult } from './types';
@@ -138,6 +139,14 @@ const packagingLine = ({
 };
 
 /**
+ * Appearing in an attack says nothing about how much an identity matters to the organization, so
+ * asset criticality is the customer's to set. AlertZero never proposes changing it; it only points
+ * the analyst at the rating.
+ */
+const ASSET_CRITICALITY_NOTE =
+  'Asset criticality: the identities above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.';
+
+/**
  * What this hunt run did, for a run that confirmed a hit. Unlike the Investigation's closing
  * line it keeps every deduped evidence line and the full host and user names.
  */
@@ -178,11 +187,14 @@ export const buildInvestigationSummary = ({
     proposal.title ? [proposal.title] : []
   );
 
+  const identities = [...state.users, ...state.services];
   const sections = [
     outcome,
     ...(corroborated.length > 0 ? [`Techniques corroborated: ${corroborated.join(', ')}`] : []),
     ...(hosts.length > 0 ? [`Hosts: ${hosts.join(', ')}`] : []),
     ...(state.users.length > 0 ? [`Users: ${state.users.join(', ')}`] : []),
+    ...(state.services.length > 0 ? [`Services: ${state.services.join(', ')}`] : []),
+    ...(state.hasConfirmedHit && identities.length > 0 ? [ASSET_CRITICALITY_NOTE] : []),
     packagingLine({
       decided,
       mintSuppression,
@@ -205,14 +217,27 @@ export const buildCleanInvestigationSummary = ({
   inputs,
   reportContext,
   dismissHold = 'none',
+  retired = false,
+  unsearched,
 }: {
   inputs: CoordinatorInputs;
   reportContext?: ReportHuntContext;
   dismissHold?: 'none' | 'open_proposal' | 'check_failed';
+  /** The hunt retired the report after a gap no rerun can close, so "nothing matched" is not the whole story. */
+  retired?: boolean;
+  unsearched?: DedupedCoverageGaps;
 }): string => {
   const executed = toCoverageBehaviors(inputs.behaviors ?? []);
+  const notSearched = unsearched ? describeGaps(unsearched) : undefined;
+  const outcome = retired
+    ? `Outcome: no confirmed hits, but ${
+        unsearched && unsearched.gaps.length > 0
+          ? `${gapCountPhrase(unsearched)} left part of the report unsearched`
+          : 'part of the report could not be searched'
+      }; the report is retired without a full search.`
+    : 'Outcome: no confirmed hits. Nothing in this environment matched the report at the confirming-index bar.';
   const sections = [
-    'Outcome: no confirmed hits. Nothing in this environment matched the report at the confirming-index bar.',
+    outcome,
     ...(reportContext?.title ? [`Report: ${reportContext.title}`] : []),
     ...(executed.length > 0
       ? [
@@ -228,6 +253,7 @@ export const buildCleanInvestigationSummary = ({
             .join(', ')}`,
         ]
       : []),
+    ...(retired && notSearched ? [`Not searched: ${notSearched}`] : []),
     packagingLine({
       decided: { dismiss: true, proposals: [] },
       mintSuppression: 'none',

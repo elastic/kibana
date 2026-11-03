@@ -9,6 +9,7 @@ export { FlyoutRow } from './flyout_row';
 export { useSpaceId } from './use_space_id';
 export {
   ALERT_SUBTITLE,
+  ALERTS_FALLBACK_TITLE,
   ATTACK_SUBTITLE,
   IOCS_TITLE,
   RULE_FALLBACK_TITLE,
@@ -19,4 +20,4 @@ export {
   attacksTitle,
   rulesTitle,
 } from './translations';
-export { buildPageTimerange, encodePageParam } from './page_url';
+export { buildPageTimerange, encodePageParam } from '@kbn/securitysolution-alerts-page-url';

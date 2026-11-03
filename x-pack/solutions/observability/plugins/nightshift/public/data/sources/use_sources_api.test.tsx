@@ -9,16 +9,20 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
-import {
-  DISCOVERY_QUERIES_QUERY_KEY,
-  DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY,
-  FEATURES_QUERY_KEY,
-  SOURCES_QUERY_KEY,
-} from '../query_keys';
+import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY, SOURCES_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSourcesApi } from './use_sources_api';
 
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+
+let mockIsPaused = false;
+jest.mock('../maintenance/use_significant_events_maintenance', () => ({
+  useBlocksNewActivity: () => ({ isBlocked: mockIsPaused }),
+}));
+
+afterEach(() => {
+  mockIsPaused = false;
+});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
@@ -40,7 +44,6 @@ const nginxSource: NightshiftSource = {
 const KNOWLEDGE_PREFIXES = [
   [...FEATURES_QUERY_KEY],
   [...DISCOVERY_QUERIES_QUERY_KEY],
-  [...DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY],
   ['queryOccurrenceStats'],
 ];
 
@@ -54,9 +57,10 @@ const setup = () => {
   const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   const invalidateQueries = jest.spyOn(queryClient, 'invalidateQueries');
   const fetch = jest.fn().mockResolvedValue({ source: nginxSource });
+  const addSuccess = jest.fn();
   mockUseKibana.mockReturnValue({
     services: {
-      notifications: { toasts: { addError: jest.fn(), addSuccess: jest.fn() } },
+      notifications: { toasts: { addError: jest.fn(), addSuccess } },
       nightshiftSources: { getClient: jest.fn().mockResolvedValue({ fetch }) },
     },
   } as never);
@@ -64,7 +68,7 @@ const setup = () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
   const { result } = renderHook(() => useSourcesApi(), { wrapper });
-  return { result, invalidateQueries, fetch };
+  return { result, invalidateQueries, fetch, addSuccess };
 };
 
 describe('useSourcesApi requests', () => {
@@ -77,6 +81,25 @@ describe('useSourcesApi requests', () => {
     expect(fetch).toHaveBeenCalledWith('POST /internal/nightshift/sources', {
       params: { body: { ...UPDATE_BODY, title: 'New source' } },
       signal: null,
+    });
+  });
+
+  it('says onboarding is paused only when a source is created in a paused space', async () => {
+    const created = async (isPaused: boolean) => {
+      mockIsPaused = isPaused;
+      const { result, addSuccess } = setup();
+      act(() => result.current.createSource.mutate(UPDATE_BODY));
+      await waitFor(() => expect(result.current.createSource.isSuccess).toBe(true));
+      return addSuccess;
+    };
+
+    expect(await created(false)).toHaveBeenCalledWith({
+      title: 'Source "Nginx errors" created',
+      text: undefined,
+    });
+    expect(await created(true)).toHaveBeenCalledWith({
+      title: 'Source "Nginx errors" created',
+      text: expect.stringContaining('Onboarding is paused'),
     });
   });
 

@@ -62,19 +62,17 @@ describe('EscalationQueue', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('counts the matching rows in the badge while filtered, with "+" when more can load', () => {
+  it('shows the server total in the badge while filtered, which the server already narrowed', () => {
     renderWithKibanaRenderContext(
       <EscalationQueue
         status="open"
         escalations={[openItem]}
-        loadedCount={3}
         totalItemCount={5}
         isFiltered
         renderAssignees={() => <span />}
       />
     );
-    expect(screen.getByText('1+')).toBeInTheDocument();
-    expect(screen.queryByText('5')).not.toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
   });
 
   it('renders a card for each escalation', () => {
@@ -83,12 +81,17 @@ describe('EscalationQueue', () => {
     expect(screen.getByTestId('escalationCard-esc-3')).toBeInTheDocument();
   });
 
-  it('renders "No escalations" when the list is empty', () => {
+  it('renders "No open escalations" when the open list is empty', () => {
     renderQueue('open', []);
-    expect(screen.getByText('No escalations')).toBeInTheDocument();
+    expect(screen.getByText('No open escalations')).toBeInTheDocument();
   });
 
-  it('replaces "No escalations" with the note when the list is empty', () => {
+  it('renders "No closed escalations" when the closed list is empty', () => {
+    renderQueue('closed', []);
+    expect(screen.getByText('No closed escalations')).toBeInTheDocument();
+  });
+
+  it('replaces the empty-queue line with the note when the list is empty', () => {
     renderWithKibanaRenderContext(
       <EscalationQueue
         status="open"
@@ -97,7 +100,7 @@ describe('EscalationQueue', () => {
         renderAssignees={() => <span />}
       />
     );
-    expect(screen.queryByText('No escalations')).not.toBeInTheDocument();
+    expect(screen.queryByText('No open escalations')).not.toBeInTheDocument();
     expect(screen.getByTestId('escalationQueueNote-open')).toHaveTextContent('About escalations');
   });
 
@@ -205,19 +208,18 @@ describe('EscalationQueue', () => {
     expect(screen.getByText('No escalations match the current filter.')).toBeInTheDocument();
   });
 
-  it('computes "Show more" from the unfiltered loaded count', () => {
+  it('computes "Show more" from the loaded count and the server total', () => {
     renderWithKibanaRenderContext(
       <EscalationQueue
         status="open"
         escalations={[openItem]}
-        loadedCount={3}
         totalItemCount={5}
         isFiltered
         onLoadMore={jest.fn()}
         renderAssignees={() => <span />}
       />
     );
-    expect(screen.getByTestId('escalationQueueLoadMore-open')).toHaveTextContent('2');
+    expect(screen.getByTestId('escalationQueueLoadMore-open')).toHaveTextContent('4');
   });
 
   it('keeps "Show more" available when the filter hides every loaded row', () => {
@@ -226,7 +228,6 @@ describe('EscalationQueue', () => {
       <EscalationQueue
         status="closed"
         escalations={[]}
-        loadedCount={10}
         totalItemCount={15}
         isFiltered
         onLoadMore={onLoadMore}

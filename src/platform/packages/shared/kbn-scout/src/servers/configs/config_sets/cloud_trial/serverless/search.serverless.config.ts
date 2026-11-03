@@ -23,6 +23,7 @@ export const servers: ScoutServerConfig = {
       '--xpack.cloud.serverless.in_trial=true',
       '--xpack.cloud.csp=aws',
       '--xpack.cloud.region=us-east-1',
+      '--feature_flags.overrides.subscriptionStatus.enabled=true',
     ],
   },
 };

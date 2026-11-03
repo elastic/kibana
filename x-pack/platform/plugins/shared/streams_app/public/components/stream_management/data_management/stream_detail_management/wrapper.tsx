@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiCallOut, EuiSpacer, EuiTourStep } from '@elastic/eui';
+import { EuiBetaBadge, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import type {
@@ -45,7 +45,6 @@ import {
 } from '../../../stream_badges';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
-import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../../streams_tour';
 
 export interface ManagementTab {
   content: JSX.Element;
@@ -84,7 +83,6 @@ export function Wrapper({
     },
     services,
   } = useKibana();
-  const { getStepPropsByStepId } = useStreamsTour();
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -354,32 +352,6 @@ export function Wrapper({
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
       />
-      {Object.keys(tabs).map((tabName) => {
-        const tourStepId = TAB_TO_TOUR_STEP_ID[tabName];
-        const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
-
-        if (!stepProps) {
-          return null;
-        }
-
-        return (
-          <EuiTourStep
-            key={tabName}
-            step={stepProps.step}
-            stepsTotal={stepProps.stepsTotal}
-            title={stepProps.title}
-            subtitle={stepProps.subtitle}
-            content={stepProps.content}
-            anchorPosition={stepProps.anchorPosition}
-            offset={stepProps.offset}
-            maxWidth={stepProps.maxWidth}
-            isStepOpen={stepProps.isStepOpen}
-            footerAction={stepProps.footerAction}
-            onFinish={stepProps.onFinish}
-            anchor={`[data-test-subj="${getTabTestSubj(tabName, tabs[tabName])}"]`}
-          />
-        );
-      })}
       <StreamsAppPageTemplate.Body
         noPadding={tab === 'partitioning' || tab === 'processing'}
         paddingSize="m"

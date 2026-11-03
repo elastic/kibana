@@ -158,12 +158,9 @@ export const CHART_RULES: Record<ChartRuleId, DashboardRule<ChartRuleId>> = {
       }
       const styling = isRecord(config.styling) ? config.styling : {};
       const areas = isRecord(styling.areas) ? styling.areas : {};
-      return areas.fill === 'gradient'
-        ? undefined
-        : {
-            detail: `area fill is ${String(areas.fill ?? 'solid (default)')}`,
-            path: 'styling.areas.fill',
-          };
+      return areas.fill === 'solid'
+        ? { detail: 'area fill is solid', path: 'styling.areas.fill' }
+        : undefined;
     },
   }),
   xy_legend: panelRule('xy_legend', {

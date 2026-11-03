@@ -14,7 +14,7 @@ import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyou
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 
 export interface UseOpenAttackFlyoutParams {
-  /** The attack document `_id`, saved as the attachment id. */
+  /** The attack document `_id`. */
   attackId: string;
   /** The index the attack lives in, taken from the attachment metadata. */
   indexName: string;
@@ -22,13 +22,7 @@ export interface UseOpenAttackFlyoutParams {
   attackTitle?: string;
 }
 
-/**
- * Opens the attack flyout on an attached attack, from either the new flyout or the legacy
- * expandable one.
- *
- * Shared by the row's "Show attack details" action and its title link, which open the same
- * flyout for the same reason a rule name and its row action both open the rule.
- */
+/** Opens the attack flyout on an attached attack, in either the new or the legacy flyout. */
 export const useOpenAttackFlyout = ({
   attackId,
   indexName,
@@ -38,9 +32,7 @@ export const useOpenAttackFlyout = ({
   const { openAttackFlyout } = useFlyoutApi();
   const { openFlyout } = useExpandableFlyoutApi();
 
-  // The flyout looks the attack up by id against this index, so it needs a pattern the user can
-  // read — not the concrete backing index the attachment snapshotted. See
-  // {@link toReadableAttackIndexPattern}.
+  // The snapshotted backing index is not readable by most users; see `toReadableAttackIndexPattern`.
   const flyoutIndexName = useMemo(() => toReadableAttackIndexPattern(indexName), [indexName]);
 
   return useCallback(() => {
@@ -54,8 +46,7 @@ export const useOpenAttackFlyout = ({
       return;
     }
 
-    // Legacy expandable flyout path. No telemetry here — the new-flyout path reports telemetry
-    // internally via openAttackFlyout, and the legacy path is being deprecated.
+    // No telemetry: the new flyout reports it internally and the legacy path is deprecated.
     openFlyout({
       right: {
         id: AttackDetailsRightPanelKey,

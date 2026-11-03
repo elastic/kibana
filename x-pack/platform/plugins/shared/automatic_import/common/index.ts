@@ -85,7 +85,7 @@ export {
   type AutomaticImportTelemetryEventPayload,
 } from './telemetry/types';
 
-export { MAX_STRING_LENGTH } from './constants';
+export { MAX_STRING_LENGTH, MAX_USER_CONTEXT_DESCRIPTION_LENGTH } from './constants';
 
 export {
   DATA_STREAM_PHASES,

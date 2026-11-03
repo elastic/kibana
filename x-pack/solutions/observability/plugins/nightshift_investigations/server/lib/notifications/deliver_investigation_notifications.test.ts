@@ -93,18 +93,67 @@ describe('investigation notification lifecycle', () => {
     }
   });
 
-  it('preserves an explicitly supplied parent timestamp', async () => {
-    const { send, execute, client } = setup();
+  describe('under a caller-named parent message', () => {
     const input = { ...destination, params: { channel: '#alerts', thread_ts: '0.000001' } };
-    await send('started', 'exec-1', [input]);
-    await send('completed', 'exec-1', [input]);
-    expect(execute.mock.calls[0][0].params).toMatchObject({
-      subActionParams: { threadTs: '0.000001' },
+
+    it.each(['completed', 'failed'] as const)(
+      'posts the started reply there and edits it for %s',
+      async (terminalPhase) => {
+        const { send, execute, client } = setup();
+        await send('started', 'exec-1', [input]);
+        await send(terminalPhase, 'exec-1', [input]);
+        expect(execute.mock.calls[0][0].params).toMatchObject({
+          subAction: 'sendMessage',
+          subActionParams: { threadTs: '0.000001', blocks: expect.any(Array) },
+        });
+        expect(execute.mock.calls[1][0].params).toEqual({
+          subAction: 'updateMessage',
+          subActionParams: {
+            channel: 'C123',
+            messageTs: '1.000001',
+            text: expect.any(String),
+            blocks: expect.any(Array),
+          },
+        });
+        expect((await client.get())?.destinations[0].thread?.thread_ts).toBe('0.000001');
+      }
+    );
+
+    it('retries without blocks when Slack rejects the blocks', async () => {
+      const { send, execute, client } = setup();
+      execute.mockResolvedValueOnce({ status: 'error', message: 'invalid_blocks' } as never);
+      expect(await send('started', 'exec-1', [input])).toEqual({
+        sent: 1,
+        failed: 0,
+        unconfirmed: 0,
+      });
+      expect(execute).toHaveBeenCalledTimes(2);
+      expect(execute.mock.calls[1][0].params.subActionParams).not.toHaveProperty('blocks');
+      expect((await client.get())?.attempts[0]).toMatchObject({
+        status: 'sent',
+        message_ts: '1.000001',
+      });
     });
-    expect(execute.mock.calls[1][0].params).toMatchObject({
-      subActionParams: { threadTs: '0.000001' },
+
+    it('posts a terminal reply when the started reply was not confirmed', async () => {
+      const { send, execute } = setup();
+      execute.mockResolvedValueOnce({ status: 'error', message: 'not_in_channel' } as never);
+      await send('started', 'exec-1', [input]);
+      await send('completed', 'exec-1', [input]);
+      expect(execute.mock.calls[1][0].params).toMatchObject({
+        subAction: 'sendMessage',
+        subActionParams: { channel: '#alerts', threadTs: '0.000001' },
+      });
     });
-    expect((await client.get())?.destinations[0].thread?.thread_ts).toBe('0.000001');
+
+    it('leaves the thread to later executions that do not ask for it', async () => {
+      const { send, execute } = setup();
+      await send('started', 'exec-1', [input]);
+      await send('completed', 'exec-1', [input]);
+      expect(await send('started', 'exec-2', [])).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+      expect(await send('completed', 'exec-2', [])).toEqual({ sent: 0, failed: 0, unconfirmed: 0 });
+      expect(execute).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('fans out lifecycle messages and isolates destination connector errors', async () => {

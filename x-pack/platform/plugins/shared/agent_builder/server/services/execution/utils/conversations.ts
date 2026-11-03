@@ -48,6 +48,7 @@ import {
   roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
 import type { ActivityContext, ConversationClient } from '../../conversation';
+import type { AcquireActiveExecution } from '../../conversation/client/types';
 import {
   roundToEvents,
   userMessageEvent,
@@ -61,6 +62,7 @@ import { createConversationUpdatedEvent, createConversationCreatedEvent } from '
 import { getPendingResumeRound } from './pending_round';
 import { toClientError } from './convert_errors';
 import { serializeExecutionError } from './serialize_execution_error';
+import { interleaveAttachmentEvents } from './interleave_attachment_events';
 
 /**
  * Resolves a persisted timeline event by id from the write result we just committed.
@@ -138,6 +140,7 @@ export const persistUserMessage = async ({
   attachments,
   activity,
   appendRefresh,
+  activeExecution,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -158,15 +161,14 @@ export const persistUserMessage = async ({
    * origin lookup finds conversations by search.
    */
   appendRefresh?: Refresh;
+  /** Makes the execution this message opens the conversation's active execution. */
+  activeExecution?: AcquireActiveExecution;
 }): Promise<string> => {
   const event = userMessageEvent(
     {
       id: eventId,
       createdAt: receivedAt.toISOString(),
-      input: {
-        message: input.message?.trim() ?? '',
-        ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
-      },
+      input: { message: input.message?.trim() ?? '' },
       ...(author ? { author } : {}),
       ...(origin ? { origin } : {}),
     },
@@ -198,6 +200,7 @@ export const persistUserMessage = async ({
           ...(conversation.parent_conversation
             ? { parent_conversation: conversation.parent_conversation }
             : {}),
+          ...(activeExecution ? { activeExecution } : {}),
         },
         { source: 'execution', ...(activity ? { activity } : {}) }
       );
@@ -210,7 +213,12 @@ export const persistUserMessage = async ({
   }
 
   await conversationClient.appendEvents(
-    { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
+    {
+      id: conversation.id,
+      events,
+      ...(attachments ? { attachments } : {}),
+      ...(activeExecution ? { activeExecution } : {}),
+    },
     {
       access: 'converse',
       source: 'execution',
@@ -226,12 +234,15 @@ export const appendRoundTerminated$ = ({
   conversationClient,
   roundCompletedEvents$,
   title$,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   /** When provided, its resolved value is persisted as the title alongside the END append. */
   title$?: Observable<string>;
+  /** The execution this terminal write releases as the conversation's active execution. */
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   return roundCompletedEvents$.pipe(
     switchMap((roundCompletedEvent) => {
@@ -244,10 +255,10 @@ export const appendRoundTerminated$ = ({
             workspace_id: workspaceId,
           } = roundCompletedEvent.data;
 
-          const events: TimelineEvent[] = [
-            ...roundToEvents(round, conversation),
-            ...(roundCompletedEvent.data.attachment_events ?? []),
-          ];
+          const events = interleaveAttachmentEvents(
+            roundToEvents(round, conversation),
+            roundCompletedEvent.data.attachment_events ?? []
+          );
 
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 
@@ -268,6 +279,7 @@ export const appendRoundTerminated$ = ({
                   }
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
+              activeExecution: { action: 'release', executionId: releaseExecutionId },
             },
             { access: 'converse', source: 'execution' }
           );
@@ -308,6 +320,7 @@ export const appendResumeExecution$ = ({
   input,
   author,
   title$,
+  releaseExecutionId,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -317,6 +330,8 @@ export const appendResumeExecution$ = ({
   author?: ConversationRoundAuthor;
   /** When provided, its resolved value is persisted as the title alongside the resume append. */
   title$?: Observable<string>;
+  /** The execution this terminal write releases as the conversation's active execution. */
+  releaseExecutionId: string;
 }): Observable<ChatEvent> => {
   return roundCompletedEvents$.pipe(
     switchMap((roundCompletedEvent) =>
@@ -381,7 +396,10 @@ export const appendResumeExecution$ = ({
           const persisted = await conversationClient.appendEvents(
             {
               id: conversation.id,
-              events: [promptResponse, ...executionEvents, ...attachmentEvents],
+              events: interleaveAttachmentEvents(
+                [promptResponse, ...executionEvents],
+                attachmentEvents
+              ),
               status: round.status,
               ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
               ...(conversationState ? { state: conversationState } : {}),
@@ -394,6 +412,7 @@ export const appendResumeExecution$ = ({
                   }
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
+              activeExecution: { action: 'release', executionId: releaseExecutionId },
             },
             { access: 'converse', source: 'execution' }
           );
@@ -420,6 +439,27 @@ export const appendResumeExecution$ = ({
   );
 };
 
+/** Clears the conversation's active execution when this execution still holds it. */
+export const releaseActiveExecution = async ({
+  conversationClient,
+  conversationId,
+  executionId,
+}: {
+  conversationClient: ConversationClient;
+  conversationId: string;
+  executionId: string;
+}): Promise<void> => {
+  await conversationClient.update(
+    { id: conversationId },
+    {
+      source: 'execution',
+      access: 'converse',
+      retryOnConflict: true,
+      activeExecution: { action: 'release', executionId },
+    }
+  );
+};
+
 /** True when the conversation's last round is paused on a prompt: the next input resumes it. */
 export const isPendingResumeConversation = (conversation: Conversation): boolean =>
   getPendingResumeRound(conversation) !== undefined;
@@ -443,6 +483,8 @@ export interface PersistExecutionInterruptionParams {
   interrupted?: RoundInterruptedEventData;
   /** The `round_complete` payload, when the run completed but the success write failed. */
   completed?: RoundCompleteEventData;
+  /** The execution this terminal write releases as the conversation's active execution. */
+  releaseExecutionId: string;
   logger: Logger;
 }
 
@@ -450,7 +492,7 @@ export interface PersistExecutionInterruptionParams {
  * Persists a failed or aborted execution as a full projection with exactly one terminal event.
  *
  * - Fresh round: `replaceRoundEvents` with `user_message` (rebuilt with the inputs of the receipt
- *   write, its `data` upgraded to the processed input when known) + `execution_started` + steps +
+ *   write, its `data` always the `{ message }` receipt input) + `execution_started` + steps +
  *   terminal + attachment events. `status: completed`; `state` only carries a compaction summary
  *   produced by the run, the rest of it is left as stored.
  * - HITL resume: `appendEvents` with `prompt_response(k)` + the `exec_k` projection + attachment
@@ -475,6 +517,7 @@ export const persistExecutionInterruption = async (
     error,
     interrupted,
     completed,
+    releaseExecutionId,
     logger,
   } = params;
 
@@ -512,7 +555,8 @@ export const persistExecutionInterruption = async (
               : {}),
           }
         : { time_to_last_token: Math.max(0, Date.now() - new Date(startedAt).getTime()) });
-    const processedInput = interrupted?.input ?? completed?.round.input;
+    // On a resume, `completed.round` is the folded round, whose input can still hold legacy refs.
+    const processedInput = interrupted?.input ?? completed?.resume_execution?.follow_up_round.input;
     const attachments = interrupted?.attachments ?? completed?.attachments;
     const attachmentEvents = interrupted?.attachment_events ?? completed?.attachment_events ?? [];
     const workspaceId = interrupted?.workspace_id ?? completed?.workspace_id;
@@ -552,17 +596,15 @@ export const persistExecutionInterruption = async (
     };
 
     if (!isResume) {
-      // Rebuilt with the exact inputs `persistUserMessage` used, so id, actor and created_at match
-      // the receipt-time event; only `data` is upgraded to the processed input when known.
+      // Rebuilt with the exact inputs `persistUserMessage` used, so the stored message is never rewritten.
       const receiptInput: RoundInput = {
         message: input.message?.trim() ?? '',
-        ...(input.attachment_refs ? { attachment_refs: input.attachment_refs } : {}),
       };
       const userMessage = userMessageEvent(
         {
           id: roundUserMessageEventId(roundId),
           createdAt: receivedAt.toISOString(),
-          input: processedInput ?? receiptInput,
+          input: receiptInput,
           ...(author ? { author } : {}),
           ...(origin ? { origin } : {}),
         },
@@ -582,9 +624,10 @@ export const persistExecutionInterruption = async (
         {
           id: conversation.id,
           roundId,
-          events: [userMessage, ...executionEvents, ...attachmentEvents],
+          events: interleaveAttachmentEvents([userMessage, ...executionEvents], attachmentEvents),
           status: ConversationRoundStatus.completed,
           skipIfTerminalExistsFor: executionId,
+          activeExecution: { action: 'release', executionId: releaseExecutionId },
           ...attachmentsUpdate,
           ...workspaceUpdate,
           ...stateUpdate,
@@ -627,9 +670,13 @@ export const persistExecutionInterruption = async (
     const persisted = await conversationClient.appendEvents(
       {
         id: conversation.id,
-        events: [promptResponse, ...executionEvents, ...resumeAttachmentEvents],
+        events: interleaveAttachmentEvents(
+          [promptResponse, ...executionEvents],
+          resumeAttachmentEvents
+        ),
         status: ConversationRoundStatus.completed,
         skipIfTerminalExistsFor: executionId,
+        activeExecution: { action: 'release', executionId: releaseExecutionId },
         ...attachmentsUpdate,
         ...workspaceUpdate,
         ...stateUpdate,
@@ -673,15 +720,6 @@ export const getConversation = async ({
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
-    const conversation = origin ? await conversationClient.getByOrigin(origin) : undefined;
-
-    if (conversation) {
-      return {
-        ...conversation,
-        operation: 'UPDATE',
-      };
-    }
-
     return {
       ...placeholderConversation({ agentId, accessControl, origin, readOnly }),
       operation: 'CREATE',

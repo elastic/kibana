@@ -7,17 +7,19 @@
 
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 
 interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
   dashboardApi: DashboardApi;
+  dashboardLocator?: DashboardRendererProps['locator'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
 }
 
 export const previewAttachmentInDashboard = async ({
   attachment,
   dashboardApi,
+  dashboardLocator,
   checkSavedDashboardExist,
 }: PreviewAttachmentInDashboardParams) => {
   const dashboardState = attachmentDataToDashboardState(attachment.data);
@@ -26,7 +28,7 @@ export const previewAttachmentInDashboard = async ({
   // a) Viewing saved dashboard + attachment linked to same dashboard -> apply state
   // Also handles both being undefined (unsaved dashboard, unlinked attachment)
   if (attachment.origin === currentSavedObjectId) {
-    dashboardApi.setState(dashboardState);
+    dashboardApi.setState(dashboardState, { changedBy: ['agent'] });
     return;
   }
 
@@ -37,17 +39,20 @@ export const previewAttachmentInDashboard = async ({
 
   if (!currentSavedObjectId && !linkedDashboardExists) {
     // b) Viewing unsaved dashboard + attachment linked to deleted dashboard
-    dashboardApi.setState(dashboardState);
+    dashboardApi.setState(dashboardState, { changedBy: ['agent'] });
     return;
   }
 
   // c) Attachment linked to different existing dashboard -> navigate to linked dashboard or a new unsaved dashboard with the attachment's state
-  dashboardApi.locator?.navigate({
+  // A host app's own `dashboardApi.locator` (e.g. Security's) may keep only `dashboardId` and drop
+  // the attachment's panels, so navigate through the Dashboard app locator instead.
+  await dashboardLocator?.navigate({
     title: dashboardState.title,
     description: dashboardState.description,
     panels: dashboardState.panels,
     time_range: dashboardState.time_range,
     dashboardId: linkedDashboardExists ? attachment.origin : undefined,
     viewMode: 'edit',
+    changedBy: ['agent'],
   });
 };

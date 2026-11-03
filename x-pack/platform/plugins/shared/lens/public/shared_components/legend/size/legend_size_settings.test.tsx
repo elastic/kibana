@@ -34,7 +34,7 @@ describe('legend size settings', () => {
 
   it('defaults to correct value', () => {
     renderLegendSizeSettings();
-    expect(screen.getByRole('button')).toHaveTextContent('Medium');
+    expect(screen.getByRole('button')).toHaveTextContent('Auto');
   });
 
   it('reflects current setting in select', () => {
@@ -48,8 +48,10 @@ describe('legend size settings', () => {
     renderLegendSizeSettings({ onLegendSizeChange: onSizeChange });
     await chooseOption('Extra large');
     await chooseOption('Medium');
+    await chooseOption('Auto');
     expect(onSizeChange).toHaveBeenNthCalledWith(1, LegendSize.EXTRA_LARGE);
-    expect(onSizeChange).toHaveBeenNthCalledWith(2, undefined);
+    expect(onSizeChange).toHaveBeenNthCalledWith(2, LegendSize.MEDIUM);
+    expect(onSizeChange).toHaveBeenNthCalledWith(3, undefined);
   });
 
   it('always includes the auto option', async () => {
