@@ -29,16 +29,15 @@ const DEFAULT_PORTS: Readonly<Record<string, number>> = {
   'wss:': 443,
 };
 
-/** A sanitized `url.full`, as the OkHttp instrumentation redacts credentials in URLs. */
-const redactUserInfo = (url: URL): string => {
-  if (!url.username && !url.password) {
-    return url.href;
-  }
-  const redacted = new URL(url.href);
-  redacted.username = 'REDACTED';
-  redacted.password = url.password ? 'REDACTED' : '';
-  return redacted.href;
-};
+const REDACTED = 'REDACTED';
+// How EDOT Android's HttpSpanNameInterceptor finds the host in `url.full`
+const HTTP_SPAN_NAME_PATTERN = /^https?:\/\/([^/]+).*$/;
+
+/** `url.full` as the OkHttp instrumentation sanitizes it: any user info becomes `REDACTED:REDACTED`. */
+const sanitizeUrl = (url: URL): string =>
+  url.username || url.password
+    ? `${url.protocol}//${REDACTED}:${REDACTED}@${url.host}${url.pathname}${url.search}${url.hash}`
+    : url.href;
 
 /** A stable address from the documentation range for each host. */
 const peerAddressOf = (hostname: string): string => {
@@ -72,6 +71,10 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     spanId,
   }: HttpRequestOptions): EdotReactNativeSpan {
     const parsedUrl = new URL(url);
+    const urlFull = sanitizeUrl(parsedUrl);
+    // EDOT Android renames the span at export after what precedes the path in the sanitized URL:
+    // the host, the port when it isn't the default one, and the redacted user info
+    const [, authority] = HTTP_SPAN_NAME_PATTERN.exec(urlFull) ?? [];
     const serverPort: number | undefined =
       Number(parsedUrl.port) || DEFAULT_PORTS[parsedUrl.protocol];
     const isError = errorType !== undefined || (statusCode !== undefined && statusCode >= 400);
@@ -80,14 +83,13 @@ export class EdotAndroidClient extends EdotReactNativeClientBase {
     return this.span({
       traceId,
       spanId,
-      // Renamed at export by EDOT Android; `host` only has the port when it isn't the default
-      name: `${method} ${parsedUrl.host}`,
+      name: authority ? `${method} ${authority}` : method,
       kind: 'Client',
       scope: HTTP_SCOPE,
       status: isError ? 'Error' : 'Unset',
       attributes: {
         'http.request.method': method,
-        'url.full': redactUserInfo(parsedUrl),
+        'url.full': urlFull,
         'server.address': parsedUrl.hostname,
         ...(serverPort !== undefined ? { 'server.port': serverPort } : {}),
         ...(statusCode !== undefined

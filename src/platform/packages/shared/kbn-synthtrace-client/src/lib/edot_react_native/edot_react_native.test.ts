@@ -279,6 +279,24 @@ describe('edotReactNative', () => {
       expect(span.attributes).not.toHaveProperty('error.type');
     });
 
+    it('redacts user info of OkHttp spans and names them after what precedes the path', () => {
+      const spanOf = (url: string) =>
+        (
+          android()
+            .httpRequest({ method: 'GET', url, statusCode: 200 })
+            .serialize() as EdotReactNativeSpanDocument[]
+        )[0];
+
+      const withCredentials = spanOf('https://user:secret@api.example.com:8443/v1/files');
+      expect(withCredentials.attributes['url.full']).toBe(
+        'https://REDACTED:REDACTED@api.example.com:8443/v1/files'
+      );
+      expect(withCredentials.name).toBe('GET REDACTED:REDACTED@api.example.com:8443');
+      expect(spanOf('https://user@api.example.com/').attributes['url.full']).toBe(
+        'https://REDACTED:REDACTED@api.example.com/'
+      );
+    });
+
     it('writes URLSession CLIENT spans without the port unless the URL has one on iOS', () => {
       const [span] = ios()
         .httpRequest({
