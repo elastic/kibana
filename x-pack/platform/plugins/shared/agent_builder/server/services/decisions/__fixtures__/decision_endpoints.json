@@ -1,0 +1,16 @@
+{
+  "endpoints": [
+    {
+      "inference_id": ".jev-1.13-decision",
+      "task_type": "decision",
+      "service": "elastic",
+      "service_settings": { "model_id": "jev-1.13" }
+    },
+    {
+      "inference_id": ".other-decision",
+      "task_type": "decision",
+      "service": "elastic",
+      "service_settings": { "model_id": "other" }
+    }
+  ]
+}

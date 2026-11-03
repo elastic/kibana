@@ -34,6 +34,15 @@ export const configSchema = schema.object({
     scheduledDelay,
   }),
   /**
+   * Decision model used for quick decisions, such as whether `trigger_mode: 'auto'` runs the agent.
+   * Without `inferenceId`, the first `decision` inference endpoint on the cluster is used.
+   */
+  decisionModel: schema.object({
+    inferenceId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
+    triggerThreshold: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
+    timeoutMs: schema.number({ defaultValue: 2000, min: 100, max: 30000 }),
+  }),
+  /**
    * Internal-only Deductive AI integration. `register` gates whether the built-in
    * `deductive.ai` agent and its Advanced Settings are registered at all. It is unset
    * (default `false`) on customer deployments, so they never see or expose the

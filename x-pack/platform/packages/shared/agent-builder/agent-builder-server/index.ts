@@ -250,3 +250,10 @@ export {
   getAgentConnectorDetail,
   resolveAllowedConnectorIds,
 } from './agent_connectors';
+export type {
+  DecisionQuestion,
+  DecisionAnswer,
+  DecideParams,
+  DecideResult,
+  DecisionsStart,
+} from './decisions';
