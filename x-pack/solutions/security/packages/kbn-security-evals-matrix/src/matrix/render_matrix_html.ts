@@ -414,7 +414,6 @@ const renderSummaryTable = (matrix: Matrix): string => {
   return `<table><thead>${header}</thead><tbody>${rows}</tbody></table>`;
 };
 
-/** Worst-case spread across repetitions as a `±` badge; empty for single-rep cells. */
 const compactCount = (n: number): string =>
   n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(Math.round(n));
 
@@ -428,6 +427,7 @@ const tokensLabel = (trace?: { inputTokens?: number; outputTokens?: number }): s
 const formatLatency = (ms: number): string =>
   ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${Math.round(ms)}ms`;
 
+/** Worst-case spread across repetitions as a `±` badge; empty for single-rep cells. */
 const spreadLabel = (trace?: { spread?: Record<string, number> }): string => {
   const values = Object.values(trace?.spread ?? {});
   if (values.length === 0) {
@@ -566,7 +566,10 @@ const renderModelCard = (
                   trace.toolTrail.join(', ')
                 )}</code></p>`;
               }
-              if (trace?.answer) {
+              if (trace?.traceFetchFailed) {
+                body +=
+                  '<p class="empty">Trace fetch failed — the run exists but its tool calls could not be retrieved.</p>';
+              } else if (trace?.answer) {
                 body += `<div class="answer">${mdToHtml(trace.answer)}</div>`;
               } else if (trace?.question || (trace?.stepCount ?? 0) > 0) {
                 body +=

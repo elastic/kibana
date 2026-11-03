@@ -131,6 +131,9 @@ const extractTraceFromScore = (
     steps: steps.length > 0 ? steps : undefined,
     stepCount: steps.length,
     toolCount: toolTrail.length,
+    ...(traceId && score.task?.output == null && summaries.get(traceId) === null
+      ? { traceFetchFailed: true }
+      : {}),
     ...(summary?.inputTokens !== undefined ? { inputTokens: summary.inputTokens } : {}),
     ...(summary?.outputTokens !== undefined ? { outputTokens: summary.outputTokens } : {}),
     ...(summary?.latencyMs !== undefined ? { latencyMs: summary.latencyMs } : {}),
@@ -140,11 +143,15 @@ const extractTraceFromScore = (
 /**
  * Aborted runs can write partial docs with a null score or output; those are incomplete.
  * Current evals runs no longer persist `task.output`; a scored doc with a `task.trace_id`
- * is complete because its steps are hydrated from the trace route.
+ * is complete because its steps are hydrated from the trace route. A doc whose trace fetch
+ * failed (`null` summary) is incomplete: rendering it as complete would show 0 steps, which
+ * reads as "the agent called no tools" rather than "the trace could not be retrieved".
  */
-const isCompleteScore = (score: EvaluationScoreDocument): boolean => {
+const isCompleteScore = (score: EvaluationScoreDocument, summaries: TraceSummaries): boolean => {
   if (score.evaluator?.score == null) return false;
-  return score.task?.output != null || Boolean(score.task?.trace_id);
+  if (score.task?.output != null) return true;
+  const traceId = score.task?.trace_id;
+  return Boolean(traceId) && summaries.get(traceId as string) !== null;
 };
 
 const TRACE_FETCH_CONCURRENCY = 8;
@@ -313,6 +320,7 @@ const processExampleBatch = (
    */
   scoringPolicy?: ScoringPolicy
 ): boolean => {
+  const isComplete = (score: EvaluationScoreDocument): boolean => isCompleteScore(score, summaries);
   const relevant = withHydratedOutput(scores, summaries)
     .filter((score) => score.task?.model?.id === modelId)
     .filter((score) => score.metadata?.execution_id === executionId)
@@ -358,7 +366,7 @@ const processExampleBatch = (
   entry.repetitions = countRepetitions(relevant);
   const exampleId = relevant[0].example?.id;
 
-  const complete = isCompleteScore(relevant[0]);
+  const complete = isComplete(relevant[0]);
 
   // Only the direct example key carries `repTrails`: the prefix and suite keys
   // alias `entry`, so trails there would be counted once per alias.
@@ -398,13 +406,13 @@ const processExampleBatch = (
   }
 
   if (!complete) {
-    const firstComplete = relevant.find(isCompleteScore);
+    const firstComplete = relevant.find(isComplete);
     if (firstComplete) {
       const fallbackEntry = extractTraceFromScore(firstComplete, summaries);
-      fallbackEntry.scores = exampleScoresByEvaluator(admitted.filter(isCompleteScore));
+      fallbackEntry.scores = exampleScoresByEvaluator(admitted.filter(isComplete));
       const fid = firstComplete.example?.id;
       if (fid) {
-        const completeDocs = relevant.filter(isCompleteScore);
+        const completeDocs = relevant.filter(isComplete);
         const trails = trailsFromDocs(completeDocs);
         traces[directTraceKey(modelId, suiteId, fid)] =
           trails.length > 0
@@ -691,33 +699,35 @@ export const queryMatrixTraces = async (
     await mapWithConcurrency(pairs.slice(1), 8, fetchPair);
   }
 
-  // Per-cell failures are swallowed above, so surface a total fetch failure explicitly.
-  const fetchedCells = [...exampleScores.values()].filter((docs) => docs.length > 0).length;
-  if (pairs.length > 0 && fetchedCells === 0) {
-    log.warning(
-      `Trace fetch returned no documents for any of ${pairs.length} (execution, example) pairs — ` +
-        `every trace card will render empty. The scores above are unaffected. ` +
-        `Re-run with --trace-cache <path> to read score documents straight from ES.`
+  const hasRunDocs = (ref: RunRef, exampleId: string): boolean =>
+    (exampleScores.get(cacheKey(ref, exampleId)) ?? []).some(
+      (score) =>
+        score.task?.model?.id === ref.modelId && score.metadata?.execution_id === ref.executionId
     );
-  }
 
   // Example ids that are bare indices are shared by thousands of runs, so an example route that
   // ignores execution filters can fill its 10k window with other runs' documents and return none
   // of ours. The enumeration route filters correctly, so its documents stand in for the cell.
   for (const ref of runRefs) {
     for (const exampleId of ref.exampleIds) {
-      const key = cacheKey(ref, exampleId);
-      const hasOwnDocs = (exampleScores.get(key) ?? []).some(
-        (score) =>
-          score.task?.model?.id === ref.modelId && score.metadata?.execution_id === ref.executionId
-      );
-      if (!hasOwnDocs) {
+      if (!hasRunDocs(ref, exampleId)) {
         exampleScores.set(
-          key,
+          cacheKey(ref, exampleId),
           ref.enumerated.filter((score) => score.example?.id === exampleId)
         );
       }
     }
+  }
+
+  // Per-cell failures are swallowed above, so surface a total fetch failure explicitly. Judged
+  // after the enumeration fallback: a fallback that filled cells is not a total loss.
+  const fetchedCells = pairs.filter(({ ref, exampleId }) => hasRunDocs(ref, exampleId)).length;
+  if (pairs.length > 0 && fetchedCells === 0) {
+    log.warning(
+      `Trace fetch returned no documents for any of ${pairs.length} (execution, example) pairs — ` +
+        `every trace card will render empty. The scores above are unaffected. ` +
+        `Re-run with --trace-cache <path> to read score documents straight from ES.`
+    );
   }
 
   // Current evals runs persist `task.trace_id` but no `task.output`; hydrate tool trails,

@@ -1294,6 +1294,7 @@ describe('queryMatrixTraces trace hydration', () => {
     expect(entry.outputTokens).toBe(450);
     expect(entry.latencyMs).toBeCloseTo(16340.4);
     expect(entry.answer).toBeUndefined();
+    expect(entry.traceFetchFailed).toBeUndefined();
     expect(entry.repTrails).toEqual([
       ['attachments.read', 'load_skill', 'security.security_labs_search'],
     ]);
@@ -1401,6 +1402,42 @@ describe('queryMatrixTraces trace hydration', () => {
     expect(traces['model-x:suite-1']).toBeDefined();
   });
 
+  it('does not warn about total trace loss when the enumeration fallback filled the cells', async () => {
+    const otherRun = {
+      ...scoredDoc({ trace_id: 'other-trace' }),
+      metadata: { execution_id: 'exec-other' },
+    } as unknown as EvaluationScoreDocument;
+    const client = {
+      getExperimentScores: jest.fn(async () => [scoredDoc({ trace_id: 'trace-1' })]),
+      getExampleScores: jest.fn(async () => [otherRun]),
+      getTrace: jest.fn(async () => traceResponse),
+    };
+    const log = makeLog();
+
+    await queryMatrixTraces(client as never, log as never, aggregated as never);
+
+    expect(log.warning).not.toHaveBeenCalledWith(
+      expect.stringContaining('Trace fetch returned no documents')
+    );
+  });
+
+  it('negative control: still warns when neither route yields documents for the run', async () => {
+    const client = {
+      getExperimentScores: jest.fn(
+        async () => [{ example: { id: 'example-1' } }] as EvaluationScoreDocument[]
+      ),
+      getExampleScores: jest.fn(async () => [] as EvaluationScoreDocument[]),
+      getTrace: jest.fn(async () => traceResponse),
+    };
+    const log = makeLog();
+
+    await queryMatrixTraces(client as never, log as never, aggregated as never);
+
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringContaining('Trace fetch returned no documents')
+    );
+  });
+
   it('negative control: keeps the example-route docs when they belong to the run', async () => {
     const getTrace = jest.fn(async () => traceResponse);
     const enumerationDoc = scoredDoc({ trace_id: 'enumeration-only-trace' });
@@ -1443,7 +1480,12 @@ describe('queryMatrixTraces trace hydration', () => {
       await jest.advanceTimersByTimeAsync(1000);
       const degradedTraces = await degraded;
       expect(failing).toHaveBeenCalledTimes(2);
-      expect(degradedTraces['model-x:direct:suite-1:example-1'].stepCount).toBe(0);
+      // A failed fetch is "unavailable", not "the agent called no tools".
+      expect(degradedTraces['model-x:direct:suite-1:example-1'].traceFetchFailed).toBe(true);
+      expect(degradedTraces['model-x:suite-1']).toBeUndefined();
+      expect(log.warning).toHaveBeenCalledWith(
+        expect.stringContaining('No complete score documents found')
+      );
       expect(log.info).toHaveBeenCalledWith(expect.stringContaining('Hydrated 0/1 traces'));
       expect(log.info).toHaveBeenCalledWith(expect.stringContaining('(1 failed)'));
     } finally {

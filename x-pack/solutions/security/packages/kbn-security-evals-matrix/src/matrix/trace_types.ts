@@ -45,6 +45,8 @@ export interface MatrixTraceEntry {
   outputTokens?: number;
   /** Wall-clock duration of the shown run in ms (root span of the trace). */
   latencyMs?: number;
+  /** The run has a trace id but fetching the trace failed, so the empty trail is not evidence. */
+  traceFetchFailed?: boolean;
   /** Per-evaluator mean score for this example over its repetitions. */
   scores?: Record<string, number>;
   /** Number of repetitions aggregated into this entry's scores. */

@@ -194,6 +194,21 @@ describe('renderMatrixHtml', () => {
     expect(html).not.toContain('out tokens');
   });
 
+  it('says the trace fetch failed instead of implying the agent called no tools', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'What is this alert?',
+        stepCount: 0,
+        toolCount: 0,
+        traceFetchFailed: true,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    expect(html).toContain('Trace fetch failed');
+    expect(html).not.toContain('No final answer message captured');
+  });
+
   describe('untrusted model output in answers', () => {
     const renderAnswer = (answer: string) =>
       renderMatrixHtml(
