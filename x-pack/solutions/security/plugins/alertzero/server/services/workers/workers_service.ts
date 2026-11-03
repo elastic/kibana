@@ -445,6 +445,32 @@ export class WorkersService {
           await rollbackHuntSupplyIfNeeded();
           return { outcome: 'unavailable' };
         }
+        if (status.status === 'invalid') {
+          // The values rendered a workflow that fails install-time validation (for example text
+          // that collides with the template syntax). Left in place it would report success while
+          // every run fails, so put back what the Worker had before the save.
+          this.logger.error(
+            `Worker "${registration.id}" settings produced an invalid workflow; restoring the previous settings`
+          );
+          try {
+            await this.persistWorker(request, registration, {
+              spaceId,
+              workflowIdSuffix: spaceId,
+              values: currentState?.templateValues ?? registration.settings.createDefaultValues(),
+            });
+          } catch (err) {
+            this.logger.error(
+              `Worker "${registration.id}" previous settings could not be restored: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
+          await rollbackHuntSupplyIfNeeded();
+          return {
+            outcome: 'invalid',
+            message: 'the settings produce a workflow that fails validation',
+          };
+        }
         const persisted = await managedWorkflows.getInstalledWorkflowState(
           status.workflowId,
           spaceId

@@ -1203,7 +1203,7 @@ describe('WatchDetailPage', () => {
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 
-  it('blocks Save while the additional context is an expression and frees it on Discard', () => {
+  it('blocks Save while the additional context holds template syntax and frees it on Discard', () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, floorWorkers);
     const context = screen.getByTestId('alertZeroAdditionalContext');
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
@@ -1211,7 +1211,7 @@ describe('WatchDetailPage', () => {
     fireEvent.change(context, { target: { value: 'Pay hosts are pay-*.' } });
     expect(save).toBeEnabled();
 
-    fireEvent.change(context, { target: { value: '${{ kibanaUrl }}' } });
+    fireEvent.change(context, { target: { value: 'Hosts use {{ braces }}' } });
 
     expect(screen.getByTestId('alertZeroAdditionalContextError')).toBeInTheDocument();
     expect(save).toBeDisabled();
@@ -1237,10 +1237,10 @@ describe('WatchDetailPage', () => {
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
 
     fireEvent.change(interval, { target: { value: '1.9' } });
-    fireEvent.change(context, { target: { value: '${{ kibanaUrl }}' } });
+    fireEvent.change(context, { target: { value: 'Hosts use {{ braces }}' } });
     expect(save).toBeDisabled();
 
-    fireEvent.change(context, { target: { value: 'ok ${{ kibanaUrl }}' } });
+    fireEvent.change(context, { target: { value: 'Hosts use braces' } });
     expect(save).toBeDisabled();
 
     fireEvent.change(interval, { target: { value: '6' } });

@@ -64,6 +64,8 @@ interface PersistentWorkerDocument {
   values: Record<string, unknown> | null;
   yaml: string;
   version: number;
+  /** What install stores when the rendered YAML fails validation: a document with no definition. */
+  invalid: boolean;
 }
 
 const renderManagedWorkflowYaml = (id: string, values: Record<string, unknown> | null): string => {
@@ -85,6 +87,8 @@ const storedIdFromReport = (workflowId: string) =>
 
 const createPersistentHarness = () => {
   const documents = new Map<string, PersistentWorkerDocument>();
+  /** Stands in for install-time validation: a document whose YAML matches is stored invalid. */
+  let isYamlInvalid = (_yaml: string): boolean => false;
   const documentId = (id: string, spaceId: string) => `${id}-${spaceId}`;
   const findDocument = (workflowId: string) => documents.get(storedIdFromReport(workflowId));
   const install = jest.fn(
@@ -106,6 +110,7 @@ const createPersistentHarness = () => {
         values,
         yaml,
         version: existing?.yaml === yaml ? existing.version : (existing?.version ?? 0) + 1,
+        invalid: isYamlInvalid(yaml),
       });
     }
   );
@@ -113,13 +118,19 @@ const createPersistentHarness = () => {
     const idWithSuffix = documentId(id, options.spaceId);
     const document = documents.get(idWithSuffix);
     return {
-      status: document ? (document.enabled ? 'intact' : 'disabled') : 'missing',
+      status: document
+        ? document.invalid
+          ? 'invalid'
+          : document.enabled
+          ? 'intact'
+          : 'disabled'
+        : 'missing',
       workflowId: reportedWorkflowId(id, options.spaceId),
       definitionId: id,
       spaceId: options.spaceId,
       installed: Boolean(document),
       enabled: document?.enabled ?? null,
-      valid: document ? true : null,
+      valid: document ? !document.invalid : null,
       managedBy: document ? 'alertzero' : null,
       storedVersion: document ? 1 : null,
       registryVersion: 1,
@@ -179,6 +190,9 @@ const createPersistentHarness = () => {
 
   return {
     documents,
+    failValidationWhen: (predicate: (yaml: string) => boolean) => {
+      isYamlInvalid = predicate;
+    },
     install,
     management,
     managedWorkflows,
@@ -453,6 +467,62 @@ describe('WorkersService', () => {
         request
       )
     ).resolves.toEqual({ outcome: 'failed' });
+  });
+
+  describe('a save whose rendered workflow fails validation', () => {
+    // Any value the schema accepts but install-time validation rejects. The schema now blocks
+    // the known Liquid collisions, so the harness marks this one invalid to exercise the guard.
+    const COLLIDING_CONTEXT = 'Hosts that collide with validation';
+    const saveAdditionalContext = (
+      service: WorkersService,
+      additionalContext: string,
+      settingsRevision: number | null
+    ) =>
+      service.update(
+        ATTACK_DISCOVERY,
+        { settings: { extras: { additionalContext } }, settingsRevision },
+        SPACE,
+        request
+      );
+
+    it('reports invalid, not updated, and puts the previous settings back', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      const first = await saveAdditionalContext(service, 'Payment hosts are named pay-*.', null);
+      if (first.outcome !== 'updated') throw new Error('Expected the first save to succeed');
+      harness.failValidationWhen((yaml) => yaml.includes(COLLIDING_CONTEXT));
+      harness.updateWorkflow.mockClear();
+
+      const result = await saveAdditionalContext(
+        service,
+        COLLIDING_CONTEXT,
+        first.response.worker.settingsRevision
+      );
+
+      expect(result).toEqual({
+        outcome: 'invalid',
+        message: 'the settings produce a workflow that fails validation',
+      });
+      const document = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`);
+      expect(document?.invalid).toBe(false);
+      expect(document?.values).toMatchObject({
+        extras: { additionalContext: 'Payment hosts are named pay-*.' },
+      });
+      expect(harness.updateWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('reports invalid and installs the defaults when nothing was installed before', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      harness.failValidationWhen((yaml) => yaml.includes(COLLIDING_CONTEXT));
+
+      const result = await saveAdditionalContext(service, COLLIDING_CONTEXT, null);
+
+      expect(result).toMatchObject({ outcome: 'invalid' });
+      const document = harness.documents.get(`${ATTACK_DISCOVERY}-${SPACE}`);
+      expect(document?.invalid).toBe(false);
+      expect(document?.yaml).not.toContain(COLLIDING_CONTEXT);
+    });
   });
 
   it('resyncs Task Manager after a settings-only save', async () => {
@@ -1761,6 +1831,7 @@ describe('WorkersService', () => {
           values: null,
           yaml: '',
           version: 1,
+          invalid: false,
         });
       }
       const fake = createKeyedSupplyStore({

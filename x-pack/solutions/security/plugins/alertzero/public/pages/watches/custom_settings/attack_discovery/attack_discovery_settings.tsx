@@ -88,7 +88,7 @@ export const AttackDiscoverySettings: WorkerCustomSettingsComponent = ({
       />
       {isInvalid && (
         <EuiFormErrorText data-test-subj="alertZeroAdditionalContextError">
-          {i18n.ADDITIONAL_CONTEXT_EXPRESSION_ERROR}
+          {i18n.ADDITIONAL_CONTEXT_TEMPLATE_SYNTAX_ERROR}
         </EuiFormErrorText>
       )}
     </SettingRow>

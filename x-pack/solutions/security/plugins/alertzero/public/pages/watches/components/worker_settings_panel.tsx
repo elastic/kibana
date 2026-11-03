@@ -70,7 +70,7 @@ interface WorkerSettingsPanelProps {
   onEnabledChange: (enabled: boolean) => void;
   onSettingsChange: (patch: WorkerSettingsWrite) => void;
   /** Raised when one of this Worker's controls holds a value that cannot be committed. */
-  onTriggerValidityChange?: (isValid: boolean) => void;
+  onTriggerValidityChange?: (workerId: string, isValid: boolean) => void;
   /** Bumped by the page on Discard so controls holding a flagged draft clear it. */
   draftResetKey?: number;
 }
@@ -139,11 +139,13 @@ export const WorkerSettingsPanel = React.memo(function WorkerSettingsPanel({
   const [isCustomSettingsValid, setIsCustomSettingsValid] = useState(true);
   const isDraftValid = isTriggerValid && isCustomSettingsValid;
   useEffect(() => {
-    onTriggerValidityChange?.(isDraftValid);
-  }, [isDraftValid, onTriggerValidityChange]);
+    onTriggerValidityChange?.(worker.id, isDraftValid);
+  }, [isDraftValid, onTriggerValidityChange, worker.id]);
   const onTriggerValidityChangeRef = useRef(onTriggerValidityChange);
   onTriggerValidityChangeRef.current = onTriggerValidityChange;
-  useEffect(() => () => onTriggerValidityChangeRef.current?.(true), []);
+  const workerIdRef = useRef(worker.id);
+  workerIdRef.current = worker.id;
+  useEffect(() => () => onTriggerValidityChangeRef.current?.(workerIdRef.current, true), []);
   const autonomyIntro = getAutonomyLevelCards(worker.id)?.intro;
 
   const accordionHeaderStyles = useMemo(

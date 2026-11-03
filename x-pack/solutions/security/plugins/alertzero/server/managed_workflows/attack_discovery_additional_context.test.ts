@@ -19,6 +19,7 @@ import { validateWorkflowInputs } from '@kbn/workflows-execution-engine/server/l
 import type { WorkflowExecutionRepository } from '@kbn/workflows-execution-engine/server/repositories/workflow_execution_repository';
 import { WorkflowTemplatingEngine } from '@kbn/workflows-execution-engine/server/templating_engine';
 import { AdditionalContext } from '@kbn/alertzero-common';
+import { isStoredValidAtInstall } from './test_helpers/workflow_schema';
 
 interface ParsedStep {
   name: string;
@@ -94,15 +95,16 @@ const renderStepInputs = (
  * value to the batched generation workflow; that workflow starts (input validation again) and its
  * `run_batch` step reads `inputs.additional_context`. Returns what the generation step receives.
  */
+const renderFloorYaml = (additionalContext?: string): string =>
+  definitionOf(ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID).yamlTemplate?.({
+    autonomyLevel: 'manual',
+    scheduleInterval: '24h',
+    settingsVersion: 1,
+    extras: additionalContext === undefined ? {} : { additionalContext },
+  }) ?? '';
+
 const runChain = async (additionalContext?: string): Promise<unknown> => {
-  const floor = parse(
-    definitionOf(ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID).yamlTemplate?.({
-      autonomyLevel: 'manual',
-      scheduleInterval: '24h',
-      settingsVersion: 1,
-      extras: additionalContext === undefined ? {} : { additionalContext },
-    }) ?? ''
-  ) as ParsedWorkflow;
+  const floor = parse(renderFloorYaml(additionalContext)) as ParsedWorkflow;
   const runner = parse(
     definitionOf(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID).yaml ?? ''
   ) as ParsedWorkflow;
@@ -133,16 +135,46 @@ describe('Attack Discovery additional context, floor to runner', () => {
   // Each of these is a value the settings schema accepts. The engine must hand it on unchanged.
   it.each([
     'Payment hosts are named pay-*.',
-    'x ${{ kibanaUrl }}',
-    '${{ kibanaUrl }} y',
-    ' ${{ kibanaUrl }}',
-    '${{ kibanaUrl }}\n',
-    'Hosts use {{ braces }} and {% tags %}.',
+    'stray }} and %} closers',
+    'a } b { c',
     'say "hi"\nline two \\ end',
   ])('keeps the accepted value %j literal all the way to the generation step', async (text) => {
     expect(AdditionalContext.safeParse(text).success).toBe(true);
 
     await expect(runChain(text)).resolves.toBe(text);
+  });
+
+  // Install validates Liquid in every YAML string, the rendered const included, and stores a
+  // failing workflow as `valid: false, definition: null`, which a run then refuses to start.
+  it.each([
+    undefined,
+    'Payment hosts are named pay-*.',
+    'stray }} and %} closers',
+    'a } b { c',
+    'say "hi"\nline two \\ end',
+  ])('installs the floor workflow as valid when the accepted context is %j', async (text) => {
+    if (text !== undefined) expect(AdditionalContext.safeParse(text).success).toBe(true);
+
+    await expect(isStoredValidAtInstall(renderFloorYaml(text))).resolves.toBe(true);
+  });
+
+  // Each of these makes install store the floor workflow invalid, so the schema must reject it.
+  // The second assertion is the mutation proof: without the schema the rendered YAML is invalid.
+  it.each([
+    'Hosts {{ unclosed',
+    'Use {% foo %} tags',
+    'a {{ x | nosuchfilter }}',
+    '{% include "x" %}',
+    'Hosts use {{ braces }} and {% tags %}.',
+  ])('rejects %j, which would install an invalid floor workflow', async (text) => {
+    expect(AdditionalContext.safeParse(text).success).toBe(false);
+
+    await expect(isStoredValidAtInstall(renderFloorYaml(text))).resolves.toBe(false);
+  });
+
+  // Install accepts this one, but any `{{` is banned so the rule stays one simple check.
+  it('rejects "x ${{ kibanaUrl }}" because it contains the opening delimiter', () => {
+    expect(AdditionalContext.safeParse('x ${{ kibanaUrl }}').success).toBe(false);
   });
 
   it('leaves the generation input undefined, not an empty string, when no context is set', async () => {

@@ -74,14 +74,14 @@ export const AlertTriageWorkerExtras = lazySchema(() =>
 export type AlertTriageWorkerExtras = z.infer<typeof AlertTriageWorkerExtras>;
 
 /**
- * Free-text guidance appended to the Attack Discovery generation prompt on every scheduled run, such as environment details or what the analysts care about. Sent to the model as written and not anonymized, so it must not hold sensitive identifiers. Must contain a non-whitespace character and must not be a single template expression (a value that starts with `${{` and ends with `}}`), because the workflow engine would evaluate it instead of treating it as text. The text is stored in workflow consts and execution inputs, so users who can read workflows or executions in the space can see it.
+ * Free-text guidance appended to the Attack Discovery generation prompt on every scheduled run, such as environment details or what the analysts care about. Sent to the model as written and not anonymized, so it must not hold sensitive identifiers. Must contain a non-whitespace character and must not contain `{{` or `{%`, because the workflow engine parses the text as a Liquid template when the Worker's workflow is saved, and evaluates a value that is wholly a `${{ … }}` expression instead of treating it as text. The text is stored in workflow consts and execution inputs, so users who can read workflows or executions in the space can see it.
  */
 export const AdditionalContext = lazySchema(() =>
   z
     .string()
     .min(1)
     .max(4000)
-    .regex(/^(?!\$\{\{[\s\S]*\}\}$)[\s\S]*\S[\s\S]*$/)
+    .regex(/^(?![\s\S]*\{[{%])[\s\S]*\S[\s\S]*$/)
 );
 export type AdditionalContext = z.infer<typeof AdditionalContext>;
 

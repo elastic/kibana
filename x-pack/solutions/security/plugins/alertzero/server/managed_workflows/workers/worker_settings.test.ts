@@ -239,18 +239,31 @@ describe('createWorkerSettingsRegistration', () => {
         }
       );
 
+      it.each(['stray }} and %} closers', 'a } b { c'])(
+        'accepts the value %j, which the engine keeps as text',
+        (value) => {
+          expect(applyContext(value)).toEqual({
+            values: expect.objectContaining({ extras: { additionalContext: value } }),
+          });
+        }
+      );
+
+      // Install parses every YAML string as Liquid, so any braces-template syntax can store the
+      // Worker's workflow as invalid even when the engine would keep the text literal.
       it.each([
+        '${{ unterminated',
+        'Hosts {{ unclosed',
+        'Use {% foo %} tags',
+        'a {{ x | nosuchfilter }}',
+        '{% include "x" %}',
+        'Hosts use {{ braces }} and {% tags %}.',
         'x ${{ kibanaUrl }}',
         '${{ kibanaUrl }} y',
         ' ${{ kibanaUrl }}',
-        '${{ kibanaUrl }} ',
         '${{ kibanaUrl }}\n',
-        '${{ unterminated',
-        'Hosts use {{ braces }} and {% tags %}.',
-      ])('accepts the value %j, which the engine keeps as text', (value) => {
-        expect(applyContext(value)).toEqual({
-          values: expect.objectContaining({ extras: { additionalContext: value } }),
-        });
+        '{%',
+      ])('rejects the braces-template value %j', (value) => {
+        expect(expectInvalid(applyContext(value))).toMatch(/additionalContext/);
       });
 
       it('rejects an unknown extras field', () => {

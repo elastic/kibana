@@ -122,33 +122,55 @@ describe('AttackDiscoverySettings', () => {
     expect(onExtrasChange).toHaveBeenLastCalledWith({ additionalContext: ' a' });
   });
 
-  describe('a value the workflow engine would evaluate', () => {
-    const EXPRESSION = '${{ kibanaUrl }}';
+  it('settles the box back to the stored value on blur when the typed text is valid', () => {
+    renderSettings({ ...attackDiscovery.settings, extras: {} });
+    const box = screen.getByTestId('alertZeroAdditionalContext');
+
+    fireEvent.change(box, { target: { value: '  ' } });
+    expect(box).toHaveValue('  ');
+    fireEvent.blur(box);
+
+    expect(box).toHaveValue('');
+  });
+
+  it('keeps flagged text in the box on blur so it can be corrected', () => {
+    renderSettings({ ...attackDiscovery.settings, extras: {} });
+    const box = screen.getByTestId('alertZeroAdditionalContext');
+
+    fireEvent.change(box, { target: { value: 'Hosts use {{ braces }}' } });
+    fireEvent.blur(box);
+
+    expect(box).toHaveValue('Hosts use {{ braces }}');
+    expect(screen.getByTestId('alertZeroAdditionalContextError')).toBeInTheDocument();
+  });
+
+  describe('a value with template syntax', () => {
+    const TEMPLATE = 'Hosts use {{ braces }}';
 
     it('shows the error, does not publish the value, and reports the draft invalid', () => {
       const onValidityChange = jest.fn();
       const onExtrasChange = renderSettings(undefined, jest.fn(), undefined, onValidityChange);
 
       fireEvent.change(screen.getByTestId('alertZeroAdditionalContext'), {
-        target: { value: EXPRESSION },
+        target: { value: TEMPLATE },
       });
 
       expect(screen.getByTestId('alertZeroAdditionalContextError')).toBeInTheDocument();
-      expect(screen.getByTestId('alertZeroAdditionalContext')).toHaveValue(EXPRESSION);
+      expect(screen.getByTestId('alertZeroAdditionalContext')).toHaveValue(TEMPLATE);
       expect(onExtrasChange).not.toHaveBeenCalled();
       expect(onValidityChange).toHaveBeenLastCalledWith(false);
     });
 
-    it('clears the error and publishes once text surrounds the expression', () => {
+    it('clears the error and publishes once the template syntax is removed', () => {
       const onValidityChange = jest.fn();
       const onExtrasChange = renderSettings(undefined, jest.fn(), undefined, onValidityChange);
       const box = screen.getByTestId('alertZeroAdditionalContext');
 
-      fireEvent.change(box, { target: { value: EXPRESSION } });
-      fireEvent.change(box, { target: { value: `Base ${EXPRESSION}` } });
+      fireEvent.change(box, { target: { value: TEMPLATE } });
+      fireEvent.change(box, { target: { value: 'Hosts use braces' } });
 
       expect(screen.queryByTestId('alertZeroAdditionalContextError')).not.toBeInTheDocument();
-      expect(onExtrasChange).toHaveBeenLastCalledWith({ additionalContext: `Base ${EXPRESSION}` });
+      expect(onExtrasChange).toHaveBeenLastCalledWith({ additionalContext: 'Hosts use braces' });
       expect(onValidityChange).toHaveBeenLastCalledWith(true);
     });
 
@@ -157,7 +179,7 @@ describe('AttackDiscoverySettings', () => {
       const onExtrasChange = renderSettings(undefined, jest.fn(), undefined, onValidityChange);
 
       fireEvent.change(screen.getByTestId('alertZeroAdditionalContext'), {
-        target: { value: EXPRESSION },
+        target: { value: TEMPLATE },
       });
       onExtrasChange.discard(1);
 
