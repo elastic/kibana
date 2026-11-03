@@ -77,7 +77,12 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       <>
         <EuiLink
           href={getDetailViewLink?.(item)}
-          onClick={onClickTitleHandler}
+          onClick={() => {
+            const now = performance.now();
+            window.NAVIGATION_START_TIME = now;
+            // eslint-disable-next-line no-console
+            console.log('EVENT: navigate to dashboard');
+          }}
           data-test-subj={`${id}ListingTitleLink-${item.attributes.title.split(' ').join('-')}`}
         >
           <EuiHighlight highlightAll search={escapeRegExp(searchTerm)}>
@@ -102,7 +107,6 @@ export function ItemDetails<T extends UserContentCommonSchema>({
     getOnClickTitle,
     id,
     item,
-    onClickTitleHandler,
     searchTerm,
     title,
     isFavoritesEnabled,

@@ -186,6 +186,8 @@ export function loadEmbeddableData(
   };
 
   const onRenderComplete = () => {
+    // eslint-disable-next-line no-console
+    console.log(`EVENT: chart drawn (took ${performance.now() - window.DATA_RECEIVED_TIME}ms)`);
     updateMessages(getUserMessages('embeddableBadge'));
     // No issues so far, blocking errors are handled directly by Lens from this point on
     if (!dispatchBlockingErrorIfAny()) {

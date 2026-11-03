@@ -171,7 +171,23 @@ export class Fetch {
     let body = null;
 
     try {
+      if (fetchOptions.trackPerformance) {
+        const now = performance.now();
+        window.DATA_REQUESTED_TIME = now;
+        // eslint-disable-next-line no-console
+        console.log(
+          `EVENT: data requested (took ${
+            window.NAVIGATION_START_TIME ? now - window.NAVIGATION_START_TIME : now
+          }ms)`
+        );
+      }
       response = await window.fetch(request);
+      if (fetchOptions.trackPerformance) {
+        const now = performance.now();
+        window.DATA_RECEIVED_TIME = now;
+        // eslint-disable-next-line no-console
+        console.log(`EVENT: data received (took ${now - window.DATA_REQUESTED_TIME}ms)`);
+      }
     } catch (err) {
       throw new HttpFetchError(err.message, err.name ?? 'Error', request);
     }
@@ -194,6 +210,12 @@ export class Fetch {
           body = JSON.parse(text);
         } catch (err) {
           body = text;
+        }
+      }
+      if (fetchOptions.trackPerformance) {
+        if (body && typeof body === 'object' && ('response' in body || 'took' in body)) {
+          // eslint-disable-next-line no-console
+          console.log(`EVENT: ES took ${body.took ?? body.response.took}ms`);
         }
       }
     } catch (err) {
