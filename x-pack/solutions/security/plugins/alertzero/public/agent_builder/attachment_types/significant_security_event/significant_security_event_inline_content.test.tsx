@@ -1376,6 +1376,31 @@ describe('SignificantSecurityEventInlineContent', () => {
     expect(screen.getByText('deadbeef')).toBeInTheDocument();
   });
 
+  it('renders when resolved_iocs is absent on the hunt result', () => {
+    const { resolved_iocs: _omit, ...tier1WithoutResolved } = huntResult.tier1;
+    renderWithI18n(
+      <SignificantSecurityEventInlineContent
+        {...renderProps(
+          buildAttachment({
+            ...baseData,
+            hunt_result: {
+              ...huntResult,
+              tier1: {
+                ...tier1WithoutResolved,
+                searched_ioc_count: 2,
+              },
+            },
+          })
+        )}
+      />
+    );
+
+    expect(screen.getByTestId(SSE_ATTACHMENT_TEST_ID)).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('alertzeroSignificantSecurityEventHuntResultResolvedIocs')
+    ).not.toBeInTheDocument();
+  });
+
   it('distinguishes a hunt that could not run from one that ran and found nothing', () => {
     // `no_searchable_terms` and `no_environment_hits` both render as zero counts, so the
     // outcome badges are the only thing that tells an analyst which one happened.

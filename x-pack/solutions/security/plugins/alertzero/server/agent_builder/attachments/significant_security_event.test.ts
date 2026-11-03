@@ -90,6 +90,35 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain('taxonomy labels, not Discover IOCs');
     });
 
+    it('omits the Evaluation record line when evaluation_record_ref is absent', async () => {
+      const { evaluation_record_ref: _omit, ...withoutEval } = validPayload;
+      const value = await formatToText(attachmentType, formatContext, withoutEval);
+
+      expect(value).not.toContain('Evaluation record:');
+    });
+
+    it('formats a hunt_result without resolved_iocs', async () => {
+      const value = await formatToText(attachmentType, formatContext, {
+        ...validPayload,
+        hunt_result: {
+          has_confirmed_hit: true,
+          hit_sources: ['tier1'],
+          time_range: { from: '2026-01-01T00:00:00Z', to: '2026-01-02T00:00:00Z' },
+          tier1: {
+            status: 'environment_hits_found',
+            counts: { total_hits: 2, returned_hits: 2, affected_hosts: 1, affected_users: 0 },
+            per_index: [
+              { index: 'logs-endpoint.events.process-default', hit_count: 2, required: true },
+            ],
+            searched_ioc_count: 1,
+          },
+        },
+      });
+
+      expect(value).toContain('Tier 1: environment_hits_found');
+      expect(value).not.toContain('Resolved IOCs');
+    });
+
     it('includes the report_id so the agent can tie the event back to its threat report', async () => {
       const value = await formatToText(attachmentType, formatContext, validPayload);
 

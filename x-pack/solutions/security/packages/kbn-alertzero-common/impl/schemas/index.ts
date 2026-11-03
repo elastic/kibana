@@ -62,6 +62,7 @@ export {
   HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
+  HuntForThreatPerIoc,
   HuntForThreatResult,
   HuntForThreatStatus,
   HuntIncompleteness,
@@ -102,4 +103,13 @@ export {
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './hunt/write_hunt_evidence_route.gen';
-export { huntResultSchema, isoDatetimeSchema, type HuntResult } from './hunt/hunt_result';
+export {
+  HUNT_EVIDENCE_FIELD_KEYS,
+  HUNT_EVIDENCE_FIELDS_MAX_KEYS,
+  HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  huntEvidenceFieldsSchema,
+  huntResultSchema,
+  isoDatetimeSchema,
+  type HuntEvidenceFieldKey,
+  type HuntResult,
+} from './hunt/hunt_result';

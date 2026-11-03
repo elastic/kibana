@@ -161,6 +161,7 @@ export {
   HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
+  HuntForThreatPerIoc,
   HuntForThreatRequestBody,
   HuntForThreatResponse,
   HuntForThreatResult,
@@ -169,6 +170,10 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
+  HUNT_EVIDENCE_FIELD_KEYS,
+  HUNT_EVIDENCE_FIELDS_MAX_KEYS,
+  HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  huntEvidenceFieldsSchema,
   huntResultSchema,
   isoDatetimeSchema,
   HuntIndexScopeResponse,
@@ -194,7 +199,7 @@ export {
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
-export type { HuntResult } from './impl/schemas';
+export type { HuntEvidenceFieldKey, HuntResult } from './impl/schemas';
 
 export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
 

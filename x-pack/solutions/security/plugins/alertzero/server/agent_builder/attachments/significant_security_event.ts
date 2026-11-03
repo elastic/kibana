@@ -126,9 +126,10 @@ const formatSignificantSecurityEventForAgent = (
           `    ${entry.index}: ${entry.hit_count} hit(s)${entry.required ? ' (required)' : ''}`
       );
     }
-    if (tier1.resolved_iocs.length > 0) {
+    const resolvedIocs = tier1.resolved_iocs ?? [];
+    if (resolvedIocs.length > 0) {
       lines.push(`  Resolved IOCs${truncationNote(tier1.resolved_iocs_truncated)}:`);
-      pushBoundedSection(lines, tier1.resolved_iocs, (ioc) => `    ${ioc.type}: ${ioc.value}`);
+      pushBoundedSection(lines, resolvedIocs, (ioc) => `    ${ioc.type}: ${ioc.value}`);
     }
     if (tier2) {
       lines.push(`Tier 2: ${tier2.status}${truncationNote(tier2.behaviors_truncated)}`);
@@ -205,7 +206,9 @@ const formatSignificantSecurityEventForAgent = (
     pushBoundedSection(lines, data.evidence_against, (item) => `  - ${item}`);
   }
 
-  lines.push('', `Evaluation record: ${data.evaluation_record_ref}`);
+  if (data.evaluation_record_ref) {
+    lines.push('', `Evaluation record: ${data.evaluation_record_ref}`);
+  }
 
   if (data.truncated) {
     lines.push(
