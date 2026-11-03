@@ -2437,6 +2437,9 @@ importers:
       '@kbn/index-editor':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-index-editor
+      '@kbn/index-explorer-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/index_explorer
       '@kbn/index-lifecycle-management-common-shared':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared
@@ -9346,6 +9349,8 @@ importers:
 
   x-pack/platform/plugins/private/grokdebugger: {}
 
+  x-pack/platform/plugins/private/index_explorer: {}
+
   x-pack/platform/plugins/private/index_lifecycle_management: {}
 
   x-pack/platform/plugins/private/indices_metadata: {}
@@ -14273,6 +14278,7 @@ packages:
   '@smithy/core@3.36.2':
     resolution: {integrity: sha512-oRw0rB9QSUiCZfEs23G5F4Af+b2rQt1lItIICWu5IejFNd+uPM8SWqiKLMpQ6bX1Q7slsLbjuoE2niErFtkVPQ==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}
