@@ -804,10 +804,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless:
-            elasticsearch: ga
-            observability: ga
-            vectordb: ga
+          serverless: ga
 
   - group: Presentation Labs
     id: presentation-labs

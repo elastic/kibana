@@ -23,7 +23,6 @@ export type {
   SignificantEventsSortOrder,
 } from './events_list';
 
-export { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from './feature_flags';
 export {
   DETECTION_ENGINE_SERVICE_ACCOUNT_NAME,
   DETECTION_ENGINE_SERVICE_ACCOUNT_ROLE,

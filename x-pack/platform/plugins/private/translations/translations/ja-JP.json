@@ -30920,8 +30920,6 @@
     "xpack.ml.alertContext.timestampIso8601Description": "ISO8601形式の異常の時間バケット",
     "xpack.ml.alertContext.topInfluencersDescription": "トップ影響因子",
     "xpack.ml.alertContext.topRecordsDescription": "上位のレコード",
-    "xpack.ml.alerts.actions.addToCase": "既存のケースに追加",
-    "xpack.ml.alerts.actions.addToNewCase": "新しいケースに追加",
     "xpack.ml.alertsTable.actionsPopoverAriaLabel": "アラートアクション",
     "xpack.ml.alertsTable.columns.anomalyScore": "最新の異常スコア",
     "xpack.ml.alertsTable.columns.anomalyTime": "最新の異常時間",
