@@ -12,6 +12,8 @@ import {
   ONGOING_FAST_REPEAT_MS,
   ONGOING_FAST_REPEAT_UNTIL_MS,
   ONGOING_REPORT_AFTER_MS,
+  ONGOING_REPORT_BURST,
+  ONGOING_REPORT_REFILL_MS,
   REPORT_BURST,
   REPORT_REFILL_MS,
 } from './constants';
@@ -45,15 +47,46 @@ interface OngoingBlock {
   phase: Phase;
   /** When the next ongoing report is due. */
   nextReportAt: number;
+  /** The block's first ongoing report has asked for a token, granted or not. */
+  tokenChecked: boolean;
   /** An ongoing warning was written for this block. */
   reportedOngoing: boolean;
+}
+
+/** A rate limit: a burst of tokens, then one more per refill interval (D14). */
+class ReportTokens {
+  private tokens: number;
+  private lastRefillAt?: number;
+
+  constructor(private readonly burst: number, private readonly refillMs: number) {
+    this.tokens = burst;
+  }
+
+  public take(now: number): boolean {
+    if (this.lastRefillAt === undefined) {
+      this.lastRefillAt = now;
+    } else {
+      const refills = Math.floor((now - this.lastRefillAt) / this.refillMs);
+      if (refills > 0) {
+        this.tokens = Math.min(this.burst, this.tokens + refills);
+        this.lastRefillAt += refills * this.refillMs;
+      }
+    }
+    if (this.tokens <= 0) {
+      return false;
+    }
+    this.tokens--;
+    return true;
+  }
 }
 
 /** Clock-injected state machine detecting blocks from a stale heartbeat (milliseconds). */
 export class BlockDetector {
   private ongoing?: OngoingBlock;
-  private reportTokens = REPORT_BURST;
-  private lastRefillAt?: number;
+  /** For the end of each block. */
+  private readonly endTokens = new ReportTokens(REPORT_BURST, REPORT_REFILL_MS);
+  /** For the first ongoing report of each block; separate, so neither drains the other. */
+  private readonly ongoingTokens = new ReportTokens(ONGOING_REPORT_BURST, ONGOING_REPORT_REFILL_MS);
   private suppressedBlocks = 0;
 
   /**
@@ -74,6 +107,7 @@ export class BlockDetector {
         startedAt: lastHeartbeat,
         phase,
         nextReportAt: lastHeartbeat + Math.max(thresholdMs, ONGOING_REPORT_AFTER_MS),
+        tokenChecked: false,
         reportedOngoing: false,
       };
       // Due right away when the threshold is the longer of the two.
@@ -83,7 +117,7 @@ export class BlockDetector {
       return this.pollOngoing(now, ongoing);
     }
     this.ongoing = undefined;
-    const report = this.takeReportToken(now);
+    const report = this.endTokens.take(now);
     const suppressedBlocks = report ? this.suppressedBlocks : 0;
     // A block whose ongoing warning was written isn't one without a warning, even if its end is.
     if (report) {
@@ -105,9 +139,15 @@ export class BlockDetector {
 
   /**
    * An ongoing report is due once the block has lasted the ongoing mark, then every fast repeat
-   * interval early in the block, then every refill interval. It doesn't take or check a report
-   * token, so warnings on earlier short blocks can't suppress it. Only one block is ongoing at a
-   * time, so this schedule bounds the ongoing reports.
+   * interval early in the block, then every refill interval. The first one takes a token from the
+   * ongoing bucket, never from the end-of-block bucket, so warnings on earlier short blocks can't
+   * suppress it. When it's denied, the schedule goes on and the next due report (the first fast
+   * repeat, about 4 s into the block) is written without a token, as are all later repeats.
+   *
+   * The bound: the ongoing bucket caps blocks that end before their first fast repeat at its burst,
+   * then one per refill interval. A block that lasts longer adds one report per fast repeat
+   * interval up to the cut-over, then one per refill interval, so back-to-back long blocks log up to
+   * about one report per fast repeat interval of blocked main thread.
    */
   private pollOngoing(now: number, ongoing: OngoingBlock): DetectedBlock | undefined {
     if (now < ongoing.nextReportAt) {
@@ -118,6 +158,12 @@ export class BlockDetector {
       fastRepeatAt - ongoing.startedAt <= ONGOING_FAST_REPEAT_UNTIL_MS
         ? fastRepeatAt
         : now + REPORT_REFILL_MS;
+    if (!ongoing.tokenChecked) {
+      ongoing.tokenChecked = true;
+      if (!this.ongoingTokens.take(now)) {
+        return;
+      }
+    }
     ongoing.reportedOngoing = true;
     return {
       phase: ongoing.phase,
@@ -130,22 +176,5 @@ export class BlockDetector {
       ongoing: true,
       reportedOngoing: true,
     };
-  }
-
-  private takeReportToken(now: number): boolean {
-    if (this.lastRefillAt === undefined) {
-      this.lastRefillAt = now;
-    } else {
-      const refills = Math.floor((now - this.lastRefillAt) / REPORT_REFILL_MS);
-      if (refills > 0) {
-        this.reportTokens = Math.min(REPORT_BURST, this.reportTokens + refills);
-        this.lastRefillAt += refills * REPORT_REFILL_MS;
-      }
-    }
-    if (this.reportTokens <= 0) {
-      return false;
-    }
-    this.reportTokens--;
-    return true;
   }
 }

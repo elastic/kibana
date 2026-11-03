@@ -22,9 +22,16 @@ export const REPORT_REFILL_MS = 60_000;
 /**
  * A block still ongoing after this long (or after the phase threshold, if that is longer) is
  * reported before it ends, so a block that outlives the process still leaves a log line.
- * Ongoing reports don't take report tokens: their schedule below is their bound.
+ * Ongoing reports don't take end-of-block tokens, so short blocks can't suppress them. Only the
+ * first ongoing report of a block takes a token, from its own bucket (ONGOING_REPORT_BURST); when
+ * it's denied, the block's first fast repeat reports instead. Repeats take no token: one block
+ * logs at most 5 ongoing reports in its first 15 s, then one every REPORT_REFILL_MS.
  */
 export const ONGOING_REPORT_AFTER_MS = 1_000;
+/** First ongoing reports that may be logged in a burst; same value as REPORT_BURST, own state. */
+export const ONGOING_REPORT_BURST = REPORT_BURST;
+/** Interval at which one first ongoing report is allowed again once its burst is used up. */
+export const ONGOING_REPORT_REFILL_MS = REPORT_REFILL_MS;
 /** Ongoing reports repeat this often early in a block, while a liveness probe may still kill it. */
 export const ONGOING_FAST_REPEAT_MS = 3_000;
 /** No fast repeat is due later than this into a block; later repeats are REPORT_REFILL_MS apart. */
