@@ -17,6 +17,3 @@ xpack.features.overrides:
   alerting_v2_alerts.hidden: true
   alerting_v2_action_policies.hidden: true
   alerting_v2_execution_history.hidden: true
-  ### Agentic investigations sits on the workflows platform, which is unavailable above, so no
-  ### proposal can be created in this tier. Hiding keeps its privileges out of Role management.
-  # agenticInvestigations.hidden: true # TODO: uncomment when agentic investigations plugin is enabled

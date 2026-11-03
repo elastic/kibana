@@ -8,7 +8,7 @@ Security Watch investigation queue and catalog behind the `securitySolution:enab
 
 In stateful deployments (including ECH) AlertZero and its runtime dependencies are **on by default**, so no `kibana.yml` changes are needed. Users turn AlertZero on per space with `securitySolution:enableAlertZero` (below) and then go through onboarding.
 
-In serverless, `xpack.alertzero.enabled`, `xpack.proposals.enabled` and `xpack.agenticInvestigations.enabled` still default to `false`.
+In serverless, `xpack.alertzero.enabled`, `xpack.proposals.enabled` and `xpack.agenticInvestigations.enabled` default to `false`. `config/serverless.security.complete.yml` turns all three on, so AlertZero is available only in the Security **Complete** tier.
 
 ### Runtime dependencies
 
