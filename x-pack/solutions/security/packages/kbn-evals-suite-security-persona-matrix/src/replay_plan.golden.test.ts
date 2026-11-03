@@ -10,7 +10,7 @@ import { GOLDEN_SCORES_SAMPLE } from './__fixtures__/golden_scores_sample';
 import { planReplay, summarizePlan } from '@kbn/security-evals-matrix';
 
 /**
- * Contract test against REAL golden documents (482 score docs, 40 cells,
+ * Contract test against REAL golden documents (42 score docs, 14 cells,
  * captured 2026-09-06 from the persona-matrix re-judge waves) joined against
  * the REAL suite dataset.
  *

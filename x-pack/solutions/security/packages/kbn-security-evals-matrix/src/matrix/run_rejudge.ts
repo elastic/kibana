@@ -107,6 +107,7 @@ export async function runRejudge({
           failures.push({
             executionId: cell.executionId,
             exampleId: cell.exampleId,
+            repetition: cell.repetition,
             reason: describeJudgeFailure(error),
           });
         }
@@ -121,7 +122,9 @@ export async function runRejudge({
     )
   );
   failures.sort((a, b) =>
-    `${a.executionId}${a.exampleId}`.localeCompare(`${b.executionId}${b.exampleId}`)
+    `${a.executionId}${a.exampleId}${a.repetition ?? 0}`.localeCompare(
+      `${b.executionId}${b.exampleId}${b.repetition ?? 0}`
+    )
   );
 
   return { results, failures };

@@ -31,9 +31,8 @@ interface AgentBuilderTool {
 
 /**
  * Returns the subset of `toolIds` that are NOT registered in Agent Builder.
- * Custom eval-seeded tools live in the Agent Builder registry; platform
- * built-ins (platform.core.*, security.*) are always present and not listed
- * here, so this check targets the eval-seeded surface only.
+ * Works for any tool id the registry lists: custom eval-seeded tools and, where
+ * the caller asks, availability-gated built-ins (platform.core.*, security.*).
  */
 export async function findUnregisteredToolIds(
   kbnClient: KbnClient,
@@ -104,9 +103,9 @@ export async function assertPersonaMatrixToolsRegistered({
   examples?: Array<{ metadata?: { expectedTools?: string[] } }>;
 }): Promise<void> {
   const expected = collectExpectedToolIds(examples);
-  // Only custom (eval-seeded) tools are listed in the Agent Builder registry;
-  // platform.* and security.* built-ins are always available and not registered
-  // as custom tools, so they're excluded from the registry check below.
+  // Custom (eval-seeded) tools must be registered by the suite; built-ins
+  // (platform.* / security.*) are not seeded, so they skip the registration
+  // check here and are asserted against the public tools list separately below.
   const custom = expected.filter((id) => !id.includes('.'));
   if (custom.length === 0) {
     log.info('[persona-matrix] pre-flight: no custom expectedTools to verify');

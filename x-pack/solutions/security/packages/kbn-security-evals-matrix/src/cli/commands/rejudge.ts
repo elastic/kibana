@@ -285,6 +285,9 @@ export const rejudgeCmd: Command<void> = {
     const dryRun = flagsReader.boolean('dry-run');
     const outDir = flagsReader.string('out') ?? DEFAULT_OUT_DIR;
     const concurrency = Number(flagsReader.string('concurrency') ?? '5');
+    if (!Number.isInteger(concurrency) || concurrency < 1) {
+      throw createFlagError('--concurrency must be a positive integer');
+    }
     const asOfFlag = flagsReader.string('as-of');
     if (asOfFlag && Number.isNaN(Date.parse(asOfFlag))) {
       throw createFlagError(`--as-of must be an ISO date, got "${asOfFlag}"`);
@@ -377,6 +380,16 @@ export const rejudgeCmd: Command<void> = {
         JSON.parse(Fs.readFileSync(resolved, 'utf8')) as PublishedMatrixRow[],
         modelFilter
       );
+
+      if (executionIds.length === 0) {
+        // An empty list reads as "unscoped" downstream and would silently grade
+        // the newest runs per model instead of the published ones.
+        throw createFlagError(
+          `--from-matrix selected no published executions from ${matrixDebugPath}${
+            modelFilter.size > 0 ? ` for --models ${[...modelFilter].join(',')}` : ''
+          }`
+        );
+      }
 
       log.info(`Selected ${executionIds.length} published execution(s) from ${matrixDebugPath}`);
     }
@@ -519,6 +532,8 @@ export const rejudgeCmd: Command<void> = {
         {
           judgeTag,
           blind,
+          // Blind results carry aliases in `modelId`; keep the map so they can be unblinded.
+          ...(blind ? { aliases: Object.fromEntries(aliases) } : {}),
           generatedAt: new Date().toISOString(),
           planned: plan.cells.length,
           judged: results.length,

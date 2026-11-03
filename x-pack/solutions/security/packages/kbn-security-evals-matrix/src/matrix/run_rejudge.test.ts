@@ -61,6 +61,24 @@ describe('runRejudge', () => {
     ]);
   });
 
+  it('records the repetition of a failing cell so repetitions stay distinguishable', async () => {
+    const judge: CellJudge = async (c) => {
+      if (c.repetition === 1) throw new Error('judge 500');
+      return okJudge(c);
+    };
+
+    const result = await runRejudge({
+      cells: [cell({ repetition: 0 }), cell({ repetition: 1 })],
+      judge,
+      judgeTag: 'haiku',
+      concurrency: 2,
+    });
+
+    expect(result.failures).toEqual([
+      expect.objectContaining({ exampleId: 'ex-a', repetition: 1 }),
+    ]);
+  });
+
   it('respects the concurrency limit', async () => {
     // Unbounded fan-out over ~400 cells rate-limits the judge connector and
     // turns a cheap replay into a retry storm.
