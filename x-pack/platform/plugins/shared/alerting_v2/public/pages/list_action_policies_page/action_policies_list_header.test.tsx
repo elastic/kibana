@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ActionPoliciesListHeader } from './action_policies_list_header';
 
@@ -70,6 +70,13 @@ const renderHeader = (props?: Partial<React.ComponentProps<typeof ActionPolicies
   );
 
 describe('ActionPoliciesListHeader', () => {
+  // `AppHeader` renders its menu behind a `React.lazy` boundary: resolve it once here so every test can query the menu synchronously.
+  beforeAll(async () => {
+    renderHeader();
+    await screen.findByTestId('createActionPolicyButton');
+    cleanup();
+  }, 60_000);
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockPhase = 'populated';
@@ -80,13 +87,11 @@ describe('ActionPoliciesListHeader', () => {
     mockIsLicenseValid = true;
   });
 
-  it('renders the create split button when the user can write and the list is populated', async () => {
+  it('renders the create split button when the user can write and the list is populated', () => {
     renderHeader();
 
-    expect(await screen.findByTestId('createActionPolicyButton')).toBeInTheDocument();
-    expect(
-      await screen.findByTestId('createActionPolicyButton-secondary-button')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument();
+    expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeInTheDocument();
   });
 
   it('calls onCreatePolicy when the primary create button is clicked', () => {
