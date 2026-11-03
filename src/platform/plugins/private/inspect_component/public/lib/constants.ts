@@ -15,6 +15,8 @@ export const INSPECT_FLYOUT_ID = 'inspectComponentFlyout';
 export const EUI_PORTAL_ATTRIBUTE = '[data-euiportal="true"]';
 export const EUI_DOCS_BASE = 'https://eui.elastic.co/docs';
 export const INSPECT_FLYOUT_MAX_WIDTH = 480;
+/** How long the copied / failed feedback stays visible on the grab highlight. */
+export const GRAB_FEEDBACK_DURATION_MS = 1500;
 
 export const EXCLUDED_COMPONENT_TYPES = [
   'Emotion',

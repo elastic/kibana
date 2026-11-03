@@ -7,9 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isKeyboardShortcut } from './keyboard_shortcut';
+import { isGrabKeyboardShortcut, isKeyboardShortcut } from './keyboard_shortcut';
 
 describe('keyboard_shortcut', () => {
+  describe('isGrabKeyboardShortcut', () => {
+    it('should only match when the shift key is pressed together with the inspect shortcut', () => {
+      const event = { metaKey: true, ctrlKey: false, code: 'Quote', key: '"' } as KeyboardEvent;
+
+      expect(isGrabKeyboardShortcut({ ...event, shiftKey: true } as KeyboardEvent)).toBe(true);
+      expect(isKeyboardShortcut({ ...event, shiftKey: true } as KeyboardEvent)).toBe(false);
+      expect(isGrabKeyboardShortcut({ ...event, shiftKey: false } as KeyboardEvent)).toBe(false);
+    });
+  });
+
   describe('isKeyboardShortcut', () => {
     it('should return true when meta key and single quote are pressed', () => {
       const event = {

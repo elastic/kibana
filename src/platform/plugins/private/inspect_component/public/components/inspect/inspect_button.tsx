@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import type { MouseEvent } from 'react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiHeaderSectionItemButton,
@@ -19,8 +20,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
-import { isKeyboardShortcut } from '../../lib/keyboard_shortcut/keyboard_shortcut';
+import {
+  isGrabKeyboardShortcut,
+  isKeyboardShortcut,
+} from '../../lib/keyboard_shortcut/keyboard_shortcut';
 import { InspectOverlay } from './overlay/inspect_overlay';
+import type { InspectMode } from './overlay/inspect_overlay';
 
 const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel', {
   defaultMessage: 'Inspect component',
@@ -31,18 +36,59 @@ const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.toolti
   defaultMessage: 'Inspect component {keyboardShortcut}',
 });
 
+const GRAB_ARIA_LABEL = i18n.translate('kbnInspectComponent.grabButton.ariaLabel', {
+  defaultMessage: 'Grab component context for coding agents',
+});
+
+const GRAB_TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.grabButton.tooltip', {
+  values: { keyboardShortcut: isMac ? "⌘ ⇧ '" : "Ctrl Shift '" },
+  defaultMessage: 'Grab component context for coding agents {keyboardShortcut}',
+});
+
+interface ModeConfig {
+  ariaLabel: string;
+  tooltipContent: string;
+  iconType: IconType;
+  testSubj: string;
+  isShortcut: (event: KeyboardEvent) => boolean;
+}
+
+const MODE_CONFIG: Record<InspectMode, ModeConfig> = {
+  inspect: {
+    ariaLabel: ARIA_LABEL,
+    tooltipContent: TOOLTIP_CONTENT,
+    iconType: 'inspect',
+    testSubj: 'inspectComponentButton',
+    isShortcut: isKeyboardShortcut,
+  },
+  grab: {
+    ariaLabel: GRAB_ARIA_LABEL,
+    tooltipContent: GRAB_TOOLTIP_CONTENT,
+    iconType: 'copy',
+    testSubj: 'grabComponentButton',
+    isShortcut: isGrabKeyboardShortcut,
+  },
+};
+
 interface Props {
   core: CoreStart;
   branch: string;
   buttonLocation?: 'header' | 'developerToolbar';
+  mode?: InspectMode;
 }
 
 /**
- * The entry point for the plugin. Toggles inspect mode.
+ * The entry point for the plugin. Toggles inspect or grab mode.
  */
-export const InspectButton = ({ core, branch, buttonLocation = 'header' }: Props) => {
+export const InspectButton = ({
+  core,
+  branch,
+  buttonLocation = 'header',
+  mode = 'inspect',
+}: Props) => {
   const [isInspecting, setIsInspecting] = useState(false);
   const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef | null>(null);
+  const { ariaLabel, tooltipContent, iconType, testSubj, isShortcut } = MODE_CONFIG[mode];
 
   const buttonStyle = css`
     & > .euiButtonEmpty__content > svg {
@@ -51,7 +97,7 @@ export const InspectButton = ({ core, branch, buttonLocation = 'header' }: Props
   `;
 
   const handleKeydown = (event: KeyboardEvent) => {
-    if (isKeyboardShortcut(event)) {
+    if (isShortcut(event)) {
       event.preventDefault();
       setIsInspecting((prev) => !prev);
     }
@@ -78,16 +124,16 @@ export const InspectButton = ({ core, branch, buttonLocation = 'header' }: Props
   return (
     <>
       <EuiWindowEvent event="keydown" handler={handleKeydown} />
-      <EuiToolTip content={isInspecting ? '' : TOOLTIP_CONTENT} position="bottom">
+      <EuiToolTip content={isInspecting ? '' : tooltipContent} position="bottom">
         <ButtonComponent
           onClick={handleTogglingInspectMode}
           onMouseDown={preventTargetFromLosingFocus}
-          iconType="inspect"
+          iconType={iconType}
           isSelected={isInspecting}
           aria-pressed={isInspecting}
           css={buttonStyle}
-          aria-label={ARIA_LABEL}
-          data-test-subj="inspectComponentButton"
+          aria-label={ariaLabel}
+          data-test-subj={testSubj}
           {...(buttonLocation === 'developerToolbar'
             ? {
                 color: 'text',
@@ -99,6 +145,7 @@ export const InspectButton = ({ core, branch, buttonLocation = 'header' }: Props
         <InspectOverlay
           core={core}
           branch={branch}
+          mode={mode}
           setFlyoutOverlayRef={setFlyoutOverlayRef}
           setIsInspecting={setIsInspecting}
         />

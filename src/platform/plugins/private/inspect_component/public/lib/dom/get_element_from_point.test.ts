@@ -48,6 +48,20 @@ describe('getElementFromPoint', () => {
     expect(result).toBe(mockValidElement);
   });
 
+  it('should skip overlay descendants such as the highlight box', () => {
+    const mockOverlayElement = document.createElement('div');
+    mockOverlayElement.id = INSPECT_OVERLAY_ID;
+    const mockHighlightBox = document.createElement('div');
+    mockOverlayElement.appendChild(mockHighlightBox);
+    const mockValidElement = document.createElement('div');
+
+    document.elementsFromPoint = jest.fn().mockReturnValue([mockHighlightBox, mockValidElement]);
+
+    const result = getElementFromPoint(mockEvent);
+
+    expect(result).toBe(mockValidElement);
+  });
+
   it('skips SVG path elements', () => {
     const mockSvgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     const mockValidElement = document.createElement('div');

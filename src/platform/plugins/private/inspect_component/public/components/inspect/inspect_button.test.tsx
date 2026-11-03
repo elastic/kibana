@@ -13,16 +13,21 @@ import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { InspectButton } from './inspect_button';
 import { coreMock } from '@kbn/core/public/mocks';
-import { isKeyboardShortcut } from '../../lib/keyboard_shortcut/keyboard_shortcut';
+import {
+  isGrabKeyboardShortcut,
+  isKeyboardShortcut,
+} from '../../lib/keyboard_shortcut/keyboard_shortcut';
 import { mockBranch } from '../../__mocks__/mocks';
 
 jest.mock('../../lib/keyboard_shortcut/keyboard_shortcut', () => ({
   isKeyboardShortcut: jest.fn(),
+  isGrabKeyboardShortcut: jest.fn(),
   isMac: jest.fn(),
   isEscapeKey: jest.fn(),
 }));
 
 const mockedIsKeyboardShortcut = jest.mocked(isKeyboardShortcut);
+const mockedIsGrabKeyboardShortcut = jest.mocked(isGrabKeyboardShortcut);
 
 describe('InspectButton', () => {
   const mockCoreStart = coreMock.createStart();
@@ -75,6 +80,23 @@ describe('InspectButton', () => {
     fireEvent.keyDown(window, { code: 'Quote', ctrlKey: true });
 
     expect(screen.queryByTestId('inspectOverlayContainer')).not.toBeInTheDocument();
+  });
+
+  it('should render grab button and toggle grab mode with its own keyboard shortcut', async () => {
+    renderWithI18n(<InspectButton core={mockCoreStart} branch={mockBranch} mode="grab" />);
+
+    expect(screen.getByTestId('grabComponentButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('inspectComponentButton')).not.toBeInTheDocument();
+
+    mockedIsKeyboardShortcut.mockReturnValue(true);
+    fireEvent.keyDown(window, { code: 'Quote', ctrlKey: true });
+
+    expect(screen.queryByTestId('inspectOverlayContainer')).not.toBeInTheDocument();
+
+    mockedIsGrabKeyboardShortcut.mockReturnValue(true);
+    fireEvent.keyDown(window, { code: 'Quote', ctrlKey: true, shiftKey: true });
+
+    expect(screen.getByTestId('inspectOverlayContainer')).toBeInTheDocument();
   });
 
   it('should prevent target from losing focus on mouse down', async () => {

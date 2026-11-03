@@ -8,6 +8,7 @@
  */
 
 import { handleEventPropagation } from './handle_event_propagation';
+import { INSPECT_OVERLAY_ID } from '../constants';
 
 describe('handleEventPropagation', () => {
   let callbackMock: jest.Mock;
@@ -60,6 +61,21 @@ describe('handleEventPropagation', () => {
 
     expect(callbackMock).toHaveBeenCalledTimes(1);
     expect(callbackMock).toHaveBeenCalledWith(eventMock);
+  });
+
+  it('should leave pointerdown events originating from the overlay untouched', () => {
+    const overlay = document.createElement('div');
+    overlay.id = INSPECT_OVERLAY_ID;
+    const highlightBox = document.createElement('div');
+    overlay.appendChild(highlightBox);
+
+    eventMock = { ...eventMock, target: highlightBox } as unknown as MouseEvent;
+
+    handleEventPropagation({ event: eventMock, callback: callbackMock });
+
+    expect(eventMock.stopPropagation).not.toHaveBeenCalled();
+    expect(eventMock.preventDefault).not.toHaveBeenCalled();
+    expect(callbackMock).not.toHaveBeenCalled();
   });
 
   it('should not call callback when event is not click and element is not disabled', () => {

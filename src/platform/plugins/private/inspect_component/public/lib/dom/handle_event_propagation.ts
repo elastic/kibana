@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isInsideOverlay } from './is_inside_overlay';
+
 /**
  * Options for {@link handleEventPropagation}
  */
@@ -30,6 +32,14 @@ export const handleEventPropagation = ({
   event,
   callback,
 }: HandleEventPropagationOptions): void => {
+  /**
+   * A cancelled 'pointerdown' suppresses native drag and drop, so pointer downs on the overlay
+   * itself (the draggable highlight box) are left untouched.
+   */
+  if (event.type === 'pointerdown' && isInsideOverlay(event.target)) {
+    return;
+  }
+
   event.stopPropagation();
   event.preventDefault();
   const eventTarget = event.target as HTMLElement;

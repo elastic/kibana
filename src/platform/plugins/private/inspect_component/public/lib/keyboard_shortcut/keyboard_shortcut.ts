@@ -20,8 +20,15 @@ const isSingleQuote = (event: KeyboardEvent): boolean =>
  * @param {KeyboardEvent} event The keyboard event.
  * @return {boolean} 'true' if the keyboard shortcut is pressed, 'false' otherwise.
  */
+const isModifierKey = (event: KeyboardEvent): boolean => event.metaKey || event.ctrlKey;
+
+/** ⌘ + ' or Ctrl + ' toggles inspect mode. */
 export const isKeyboardShortcut = (event: KeyboardEvent) =>
-  (event.metaKey || event.ctrlKey) && isSingleQuote(event);
+  isModifierKey(event) && !event.shiftKey && isSingleQuote(event);
+
+/** ⌘ + Shift + ' or Ctrl + Shift + ' toggles grab mode. */
+export const isGrabKeyboardShortcut = (event: KeyboardEvent) =>
+  isModifierKey(event) && event.shiftKey && isSingleQuote(event);
 
 /**
  * Check if Escape key was pressed.

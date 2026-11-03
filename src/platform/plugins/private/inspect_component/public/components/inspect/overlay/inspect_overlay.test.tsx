@@ -10,14 +10,20 @@
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { CoreStart } from '@kbn/core/public';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, createEvent, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { copyToClipboard } from '@elastic/eui';
 import { InspectOverlay } from './inspect_overlay';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { findSourceComponent } from '../../../lib/fiber/find_source_component';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import { isEscapeKey } from '../../../lib/keyboard_shortcut/keyboard_shortcut';
 import { mockBranch } from '../../../__mocks__/mocks';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  copyToClipboard: jest.fn(() => true),
+}));
 
 jest.mock('../../../lib/dom/get_element_from_point', () => ({
   getElementFromPoint: jest.fn(),
@@ -112,6 +118,55 @@ describe('InspectOverlay', () => {
       expect(mockCoreStart.overlays.openFlyout).toHaveBeenCalledTimes(1);
       expect(setFlyoutOverlayRef).toHaveBeenCalledWith(flyoutMock);
       expect(setIsInspecting).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('grab mode', () => {
+    const setFlyoutOverlayRef = jest.fn();
+    const setIsInspecting = jest.fn();
+    let fakeTarget: HTMLElement;
+
+    beforeEach(() => {
+      fakeTarget = document.createElement('div');
+      fakeTarget.textContent = 'Save';
+      (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
+
+      renderWithI18n(
+        <InspectOverlay
+          core={mockCoreStart}
+          mode="grab"
+          setFlyoutOverlayRef={setFlyoutOverlayRef}
+          setIsInspecting={setIsInspecting}
+          branch={mockBranch}
+        />
+      );
+    });
+
+    it('should copy the element context on click, show feedback and stay in grab mode', async () => {
+      fireEvent.click(document, { target: fakeTarget });
+
+      await waitFor(() => {
+        expect(copyToClipboard).toHaveBeenCalledWith('<div>Save</div>');
+      });
+      expect(screen.getByText('Copied to clipboard')).toBeInTheDocument();
+      expect(mockCoreStart.overlays.openFlyout).not.toHaveBeenCalled();
+      expect(setFlyoutOverlayRef).not.toHaveBeenCalled();
+      expect(setIsInspecting).not.toHaveBeenCalled();
+    });
+
+    it('should carry the element context and use the element as drag image on drag start', () => {
+      const dataTransfer = { setData: jest.fn(), setDragImage: jest.fn(), effectAllowed: 'none' };
+      const highlightBox = screen.getByTestId('inspectHighlightBox');
+      // jsdom has no DragEvent, so pointer coordinates have to be defined on the plain event
+      const dragStartEvent = createEvent.dragStart(highlightBox, { dataTransfer });
+      Object.defineProperties(dragStartEvent, { clientX: { value: 15 }, clientY: { value: 25 } });
+
+      fireEvent(highlightBox, dragStartEvent);
+
+      expect(dataTransfer.effectAllowed).toBe('copy');
+      expect(dataTransfer.setData).toHaveBeenCalledWith('text/plain', '<div>Save</div>');
+      expect(dataTransfer.setDragImage).toHaveBeenCalledWith(fakeTarget, 15, 25);
+      expect(copyToClipboard).toHaveBeenCalledWith('<div>Save</div>');
     });
   });
 
