@@ -811,7 +811,7 @@ export const extractAgentAlertRetrievalPopulation = (
 };
 
 /**
- * Whether the run's scoped alerts retrievals happened but carried no alert
+ * Whether the run's scoped alerts retrievals returned rows but carried no alert
  * identity in ANY of them — the case `extractAgentAlertRetrievalPopulation`
  * reports as `null` even though rows came back, and which the count's
  * provenance has to distinguish from "no scoped retrieval ran".
@@ -823,9 +823,10 @@ export const extractAgentAlertRetrievalPopulation = (
  * contradicts the row counts recorded beside it, which is what made a correct
  * 2-of-2 retrieval read as a missing one.
  *
- * `false` when no scoped retrieval ran at all, and when at least one scoped
- * retrieval carried identities (the union then covers every alert any of them
- * observed).
+ * `false` when no scoped retrieval ran at all, when none of them returned a row
+ * (an empty result is an empty retrieval, not an unattributable one, whatever
+ * its projection), and when at least one scoped retrieval carried identities
+ * (the union then covers every alert any of them observed).
  */
 export const hasScopedAgentAlertRetrievalWithoutIdentity = (
   steps: AttackDiscoveryAgentBuilderTaskOutput['steps'],
@@ -833,7 +834,10 @@ export const hasScopedAgentAlertRetrievalWithoutIdentity = (
 ): boolean => {
   const { scoped } = classifyAgentAlertRetrievals(steps, retrievalScope);
 
-  return scoped.length > 0 && scoped.every((result) => result.alertIds === null);
+  return (
+    scoped.some((result) => result.rowCount > 0) &&
+    scoped.every((result) => result.alertIds === null)
+  );
 };
 
 /**

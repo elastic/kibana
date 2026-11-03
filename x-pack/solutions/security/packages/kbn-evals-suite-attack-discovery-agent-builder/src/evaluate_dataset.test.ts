@@ -1208,6 +1208,18 @@ describe('a scoped retrieval whose rows carry no identity is attributed', () => 
     expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([2]);
   });
 
+  it('does not call an empty scoped retrieval unidentified, whatever its projection', () => {
+    const steps = [recordedEsqlStep({ query: scopedQuery, rows: 0, includeIdColumn: false })];
+    const workflow = workflowFor(steps);
+
+    expect(hasScopedAgentAlertRetrievalWithoutIdentity(steps, AD2_SCENARIO_SEED_LABEL)).toBe(
+      false
+    );
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('none');
+    expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([0]);
+  });
+
   // The other half of the fix, end to end: the same scoped retrieval WITH an
   // identity is the fixture's population and is attributed as such.
   it('attributes a scoped retrieval that returned the expected population', () => {
