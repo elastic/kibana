@@ -338,6 +338,18 @@ function keepsAgentVersionConditions({
   );
 }
 
+/**
+ * Whether adding a package policy of this package leaves the agent version conditions of its
+ * agent policies unchanged.
+ */
+function addsNoAgentVersionConditions(
+  pkgInfo: PackageInfo,
+  assetsMap: PackagePolicyAssetsMap
+): boolean {
+  // The manifest condition counts even when `hasAgentVersionCondition` is gated off.
+  return !pkgInfo.conditions?.agent?.version && !hasAgentVersionCondition(pkgInfo, assetsMap);
+}
+
 export async function getPackagePolicySavedObjectType() {
   return (await isSpaceAwarenessEnabled())
     ? PACKAGE_POLICY_SAVED_OBJECT_TYPE
@@ -860,6 +872,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         enrichedPackagePolicy.policy_ids,
         {
           user: options?.user,
+          agentVersionConditionsUnchanged: addsNoAgentVersionConditions(pkgInfo, assetsMap),
         }
       );
     }
@@ -1008,6 +1021,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+    agentVersionConditionsUnchanged: boolean;
   }> {
     // Normalize policy_id <-> policy_ids up front so the agent policy ids below are
     // derived from the canonical shape, including callers passing the legacy policy_id.
@@ -1229,14 +1243,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     }
 
+    let agentVersionConditionsUnchanged = true;
     for (const newSo of newSos) {
       const pkgInfo = packageInfos.get(
         `${newSo.attributes.package?.name}-${newSo.attributes.package?.version}`
       )!;
+      const assetsMap = packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)
+        ?.assetsMap!;
+      agentVersionConditionsUnchanged &&= addsNoAgentVersionConditions(pkgInfo, assetsMap);
       await this.compilePackagePolicyForVersions(
         soClient,
         pkgInfo,
-        packageInfosandAssetsMap.get(`${pkgInfo.name}-${pkgInfo.version}`)?.assetsMap!,
+        assetsMap,
         mapPackagePolicySavedObjectToPackagePolicy(newSo)
       );
     }
@@ -1247,12 +1265,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       await this.bumpAgentPoliciesRevision({ soClient, esClient }, [...agentPolicyIds], {
         user: options?.user,
         asyncDeploy: options?.asyncDeploy,
+        agentVersionConditionsUnchanged,
       });
     }
     logger.debug(`Created new package policies`);
     return {
       created: newSos.map((newSo) => mapPackagePolicySavedObjectToPackagePolicy(newSo)),
       failed: failedPolicies,
+      agentVersionConditionsUnchanged,
     };
   }
 
@@ -2193,6 +2213,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
     }>;
+    agentVersionConditionsUnchanged: boolean;
   }> {
     const logger = this.getLogger('bulkUpdate');
 
@@ -2746,7 +2767,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         `Done. Successful updates: [${updatedPoliciesSuccess.length}] | Failures: [${failedPolicies.length}]`
     );
 
-    return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
+    return {
+      updatedPolicies: updatedPoliciesSuccess,
+      failedPolicies,
+      agentVersionConditionsUnchanged,
+    };
   }
 
   public async delete(
@@ -3972,6 +3997,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
   ): Promise<{
     created: PackagePolicy[];
     failed: Array<{ packagePolicy: NewPackagePolicy; error?: Error | SavedObjectError }>;
+    agentVersionConditionsUnchanged: boolean;
   }> {
     await this.#runPreflight({
       fleetAuthz: {
