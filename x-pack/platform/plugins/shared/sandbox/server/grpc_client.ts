@@ -8,8 +8,8 @@
 /* eslint-disable no-bitwise */
 // Protobuf encoding/decoding uses intentional bitwise operations throughout.
 
-import { promisify } from 'util';
 import * as grpc from '@grpc/grpc-js';
+import type { Logger } from '@kbn/core/server';
 
 // ---------------------------------------------------------------------------
 // Protobuf encode/decode for SandboxService RPCs
@@ -441,14 +441,62 @@ const FILE_RPC_DEADLINE_MS = 30_000;
 const DEFAULT_COMMAND_TIMEOUT_SECONDS = 600;
 const COMMAND_DEADLINE_MARGIN_MS = 10_000;
 
+// The Elastic Cloud proxy in front of sandbox-api assigns a unique id to every request, forwards it
+// to sandbox-api as this header and echoes it back in the response. The proxy logs it as
+// `request_id`.
+const REQUEST_ID_HEADER = 'x-cloud-request-id';
+const MAX_REQUEST_ID_LENGTH = 128;
+const RPC_SYSTEM = 'grpc';
+
+type SandboxRpcMethod = 'runCommand' | 'statFiles' | 'readFiles' | 'writeFiles' | 'mkdirs';
+
+type UnaryRpc<TRequest, TResponse> = (
+  request: TRequest,
+  metadata: grpc.Metadata,
+  options: grpc.CallOptions,
+  callback: (err: grpc.ServiceError | null, response: TResponse) => void
+) => grpc.ClientUnaryCall;
+
+/**
+ * Reads the request id the proxy echoes back. The proxy appends its own value to one a client
+ * supplied, so when several are present the last one wins.
+ */
+const getRequestId = (metadata?: grpc.Metadata): string | undefined => {
+  const lastValue = metadata?.get(REQUEST_ID_HEADER).map(String).pop()?.split(',').pop()?.trim();
+  return lastValue ? lastValue.slice(0, MAX_REQUEST_ID_LENGTH) : undefined;
+};
+
+/**
+ * Client for the sandbox-api gRPC service, over one shared connection.
+ *
+ * Every RPC writes one debug log line, so that Kibana's logs can be joined per call with the
+ * proxy's and sandbox-api's. sandbox-api is expected to log the same fields, with the same values,
+ * for the same call. The `rpc.*` fields follow the OpenTelemetry semantic conventions as of
+ * `@opentelemetry/semantic-conventions` 1.43.0 (the version Kibana pins); `http.request.id` and
+ * `event.duration` are ECS fields.
+ *
+ * | Field                      | Value                                               | sandbox-api source                   |
+ * | -------------------------- | --------------------------------------------------- | ------------------------------------ |
+ * | `http.request.id`          | proxy request id from the response (omitted if none) | `x-cloud-request-id` request header |
+ * | `sandbox.conversation_id`  | `<space>__<conversation>`                           | `x-conversation-id` request header   |
+ * | `rpc.system.name`          | `grpc`                                              | `grpc`                               |
+ * | `rpc.method`               | `sandbox.SandboxService/RunCommand`, ...            | fully-qualified gRPC method          |
+ * | `rpc.response.status_code` | gRPC status name, for example `OK`, `UNAVAILABLE`   | gRPC status name                     |
+ * | `event.duration`           | nanoseconds, measured client-side                   | nanoseconds, server-side             |
+ *
+ * `http.request.id` is missing when no response arrives, for example on connection errors and
+ * deadline timeouts.
+ */
 export class SandboxApiClient {
   private readonly client: grpc.Client;
   private readonly apiKey: string;
+  private readonly logger: Logger;
 
   constructor({
     host,
     port,
     apiKey,
+    logger,
     rootCertPem,
     clientCertPem,
     clientKeyPem,
@@ -456,6 +504,7 @@ export class SandboxApiClient {
     host: string;
     port: number;
     apiKey: string;
+    logger: Logger;
     rootCertPem?: Buffer;
     clientCertPem?: Buffer;
     clientKeyPem?: Buffer;
@@ -475,6 +524,7 @@ export class SandboxApiClient {
       'grpc.keepalive_permit_without_calls': 1,
     });
     this.apiKey = apiKey;
+    this.logger = logger;
   }
 
   private metadata(conversationId: string): grpc.Metadata {
@@ -488,20 +538,62 @@ export class SandboxApiClient {
     return { deadline: Date.now() + deadlineMs };
   }
 
+  /**
+   * Runs one unary RPC and writes its debug log line when the call completes. The log line is
+   * written from the `status` event, which fires for both success and failure, because the request
+   * id arrives in the response metadata and the promise settles before the status is known.
+   */
+  private invoke<TRequest, TResponse>(
+    method: SandboxRpcMethod,
+    request: TRequest,
+    conversationId: string,
+    deadlineMs: number
+  ): Promise<TResponse> {
+    const rpcMethod = sandboxServiceDef[method].path.slice(1);
+    const rpc = (this.client as unknown as Record<SandboxRpcMethod, UnaryRpc<TRequest, TResponse>>)[
+      method
+    ];
+
+    return new Promise<TResponse>((resolve, reject) => {
+      const startedAt = process.hrtime.bigint();
+      let requestId: string | undefined;
+
+      const call = rpc.call(
+        this.client,
+        request,
+        this.metadata(conversationId),
+        this.callOptions(deadlineMs),
+        (err, response) => (err ? reject(err) : resolve(response))
+      );
+      call.on('metadata', (metadata) => {
+        requestId = getRequestId(metadata);
+      });
+      call.on('status', (status) => {
+        // A response without initial metadata, such as a trailers-only error, carries the id in the
+        // trailers.
+        requestId = requestId ?? getRequestId(status.metadata);
+        const statusName = grpc.status[status.code] ?? String(status.code);
+        this.logger.debug(`Sandbox RPC ${rpcMethod} finished with gRPC status ${statusName}`, {
+          ...(requestId ? { http: { request: { id: requestId } } } : {}),
+          sandbox: { conversation_id: conversationId },
+          rpc: {
+            system: { name: RPC_SYSTEM },
+            method: rpcMethod,
+            response: { status_code: statusName },
+          },
+          event: { duration: Number(process.hrtime.bigint() - startedAt) },
+        });
+      });
+    });
+  }
+
   async runCommand(conversationId: string, params: RunCommandParams): Promise<RunCommandResult> {
-    const call = promisify(
-      (this.client as any).runCommand.bind(this.client) as (
-        request: RunCommandRequestProto,
-        metadata: grpc.Metadata,
-        options: grpc.CallOptions,
-        callback: (err: grpc.ServiceError | null, response: RunCommandResult) => void
-      ) => void
-    );
     const timeoutSeconds =
       params.timeout_seconds && params.timeout_seconds > 0
         ? params.timeout_seconds
         : DEFAULT_COMMAND_TIMEOUT_SECONDS;
-    return call(
+    return this.invoke(
+      'runCommand',
       {
         command: params.command,
         directory: params.directory ?? '',
@@ -509,63 +601,31 @@ export class SandboxApiClient {
         timeout_seconds: params.timeout_seconds ?? 0,
         task_group_id: '',
       },
-      this.metadata(conversationId),
-      this.callOptions(timeoutSeconds * 1_000 + COMMAND_DEADLINE_MARGIN_MS)
+      conversationId,
+      timeoutSeconds * 1_000 + COMMAND_DEADLINE_MARGIN_MS
     );
   }
 
   async statFiles(conversationId: string, paths: string[]): Promise<FileMetadata[]> {
-    const call = promisify(
-      (this.client as any).statFiles.bind(this.client) as (
-        request: string[],
-        metadata: grpc.Metadata,
-        options: grpc.CallOptions,
-        callback: (err: grpc.ServiceError | null, response: FileMetadata[]) => void
-      ) => void
-    );
-    return call(paths, this.metadata(conversationId), this.callOptions(FILE_RPC_DEADLINE_MS));
+    return this.invoke('statFiles', paths, conversationId, FILE_RPC_DEADLINE_MS);
   }
 
   async readFiles(
     conversationId: string,
     requests: Array<{ path: string; maxReadBytes?: number }>
   ): Promise<ReadFileResult[]> {
-    const call = promisify(
-      (this.client as any).readFiles.bind(this.client) as (
-        request: Array<{ path: string; maxReadBytes?: number }>,
-        metadata: grpc.Metadata,
-        options: grpc.CallOptions,
-        callback: (err: grpc.ServiceError | null, response: ReadFileResult[]) => void
-      ) => void
-    );
-    return call(requests, this.metadata(conversationId), this.callOptions(FILE_RPC_DEADLINE_MS));
+    return this.invoke('readFiles', requests, conversationId, FILE_RPC_DEADLINE_MS);
   }
 
   async writeFiles(
     conversationId: string,
     requests: Array<{ path: string; content: Buffer }>
   ): Promise<WriteFileResult[]> {
-    const call = promisify(
-      (this.client as any).writeFiles.bind(this.client) as (
-        request: Array<{ path: string; content: Buffer }>,
-        metadata: grpc.Metadata,
-        options: grpc.CallOptions,
-        callback: (err: grpc.ServiceError | null, response: WriteFileResult[]) => void
-      ) => void
-    );
-    return call(requests, this.metadata(conversationId), this.callOptions(FILE_RPC_DEADLINE_MS));
+    return this.invoke('writeFiles', requests, conversationId, FILE_RPC_DEADLINE_MS);
   }
 
   async mkdirs(conversationId: string, paths: string[]): Promise<boolean[]> {
-    const call = promisify(
-      (this.client as any).mkdirs.bind(this.client) as (
-        request: string[],
-        metadata: grpc.Metadata,
-        options: grpc.CallOptions,
-        callback: (err: grpc.ServiceError | null, response: boolean[]) => void
-      ) => void
-    );
-    return call(paths, this.metadata(conversationId), this.callOptions(FILE_RPC_DEADLINE_MS));
+    return this.invoke('mkdirs', paths, conversationId, FILE_RPC_DEADLINE_MS);
   }
 
   close(): void {

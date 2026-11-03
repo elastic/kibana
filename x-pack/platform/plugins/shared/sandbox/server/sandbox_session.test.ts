@@ -69,7 +69,7 @@ describe('SandboxSessionImpl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggerMock.create();
-    apiClient = new SandboxApiClient(sandboxConfig);
+    apiClient = new SandboxApiClient({ ...sandboxConfig, logger: loggerMock.create() });
     session = new SandboxSessionImpl('space:conv-1', apiClient, logger);
     runCommand = jest.spyOn(apiClient, 'runCommand');
   });
@@ -164,6 +164,7 @@ describe('SandboxApiClient', () => {
       host: 'sandbox-api',
       port: 50051,
       apiKey: 'secret-key',
+      logger: loggerMock.create(),
       rootCertPem: Buffer.from('mock-ca'),
       clientCertPem: Buffer.from('mock-cert'),
       clientKeyPem: Buffer.from('mock-key'),
