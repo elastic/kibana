@@ -579,7 +579,11 @@ describe('NotebookScheduler', () => {
       env.store.setInputValue('os', { kind: 'dropdown', value: 'win 7' });
       await env.scheduler.whenIdle();
 
-      expect(env.runtime('q')).toMatchObject({ status: 'stale', staleReason: 'manual' });
+      expect(env.runtime('q')).toMatchObject({
+        status: 'stale',
+        staleReason: 'manual',
+        changedParams: ['os'],
+      });
       expect(env.runtime('c')).toMatchObject({
         status: 'stale',
         staleReason: 'upstream',
@@ -627,6 +631,13 @@ describe('NotebookScheduler', () => {
       expect(env.runtime('c').status).toBe('done');
       expect(env.output('c')).toBe(env.output('q'));
       expect(env.fake.calls).toHaveLength(1);
+
+      await env.scheduler.runCell('q');
+      expect(env.runtime('c')).toMatchObject({
+        status: 'stale',
+        staleReason: 'manual',
+        staleParents: ['q'],
+      });
     });
 
     it('runs a stale manual cell when it is switched to auto', async () => {

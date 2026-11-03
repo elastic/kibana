@@ -33,8 +33,12 @@ export interface CellRuntime {
   output?: CellOutput;
   error?: string;
   staleReason?: StaleReason;
-  /** Ids of the stale parents when `staleReason` is `upstream`. */
+  /** Ids of the parents that made the cell stale: stale parents, or a manual chart's updated source. */
   staleParents?: readonly string[];
+  /** Params whose values changed since a manual ES|QL cell last ran. */
+  changedParams?: readonly string[];
+  /** Params the last ES|QL run used, to report what changed while a manual cell is stale. */
+  runParams?: ParamMap;
   lastRunAt?: number;
   durationMs?: number;
   memoKey?: string;

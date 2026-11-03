@@ -24,6 +24,7 @@ import type {
   CellRuntime,
   CellStatus,
   InputValue,
+  ParamMap,
   RunQuery,
   RunQueryArgs,
   RunQueryResult,
@@ -61,17 +62,28 @@ const RUNTIME_FIELDS = [
   'lastRunAt',
   'durationMs',
   'memoKey',
+  'runParams',
 ] as const satisfies ReadonlyArray<keyof CellRuntime>;
 
 const isSameRuntime = (a: CellRuntime, b: CellRuntime): boolean =>
-  RUNTIME_FIELDS.every((field) => a[field] === b[field]) && isEqual(a.staleParents, b.staleParents);
+  RUNTIME_FIELDS.every((field) => a[field] === b[field]) &&
+  isEqual(a.staleParents, b.staleParents) &&
+  isEqual(a.changedParams, b.changedParams);
 
 const withoutStatusDetails = ({
   error: _error,
   staleReason: _staleReason,
   staleParents: _staleParents,
+  changedParams: _changedParams,
   ...runtime
 }: CellRuntime): CellRuntime => runtime;
+
+type StaleDetails = Pick<CellRuntime, 'staleParents' | 'changedParams'>;
+
+const getChangedParams = (previous: ParamMap, next: ParamMap): string[] =>
+  [...new Set([...Object.keys(previous), ...Object.keys(next)])].filter(
+    (name) => previous[name] !== next[name]
+  );
 
 const isMemoHit = (runtime: CellRuntime, memoKey: string, forced: boolean): boolean =>
   !forced && runtime.output !== undefined && runtime.memoKey === memoKey;
@@ -239,7 +251,7 @@ export class NotebookScheduler {
     }
     const staleParents = parents.filter((_parent, index) => parentStatuses[index] === 'stale');
     if (staleParents.length > 0) {
-      this.markStale(id, 'upstream', staleParents);
+      this.markStale(id, 'upstream', { staleParents });
       return;
     }
 
@@ -273,7 +285,12 @@ export class NotebookScheduler {
       return;
     }
     if (runMode === 'manual' && !forced) {
-      this.markStale(id, 'manual');
+      const { runParams } = this.runtime(id);
+      this.markStale(
+        id,
+        'manual',
+        runParams && { changedParams: getChangedParams(runParams, params) }
+      );
       return;
     }
     this.setStatus(id, 'running');
@@ -283,6 +300,7 @@ export class NotebookScheduler {
       status: 'done',
       output: { kind: 'table', table, truncated },
       memoKey,
+      runParams: params,
       lastRunAt: this.now().getTime(),
       durationMs,
     });
@@ -300,7 +318,8 @@ export class NotebookScheduler {
       return;
     }
     if (runMode === 'manual' && !forced) {
-      this.markStale(id, 'manual');
+      const hasRun = runtime.output !== undefined && sourceCell !== null;
+      this.markStale(id, 'manual', hasRun ? { staleParents: [sourceCell] } : undefined);
       return;
     }
     this.publish(id, { status: 'done', output: sourceOutput, lastRunAt: this.now().getTime() });
@@ -393,12 +412,12 @@ export class NotebookScheduler {
     this.publish(id, { ...withoutStatusDetails(this.runtime(id)), status });
   }
 
-  private markStale(id: string, staleReason: StaleReason, staleParents?: readonly string[]): void {
+  private markStale(id: string, staleReason: StaleReason, details?: StaleDetails): void {
     this.publish(id, {
       ...withoutStatusDetails(this.runtime(id)),
       status: 'stale',
       staleReason,
-      ...(staleParents && { staleParents }),
+      ...details,
     });
   }
 

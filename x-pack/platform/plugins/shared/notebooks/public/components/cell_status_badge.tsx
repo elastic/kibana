@@ -43,15 +43,27 @@ const BLOCKED_TOOLTIP = i18n.translate('xpack.notebook.status.blockedTooltip', {
   defaultMessage: 'An upstream cell has an error, so this cell did not run.',
 });
 
-const STALE_TOOLTIPS: Record<Exclude<StaleReason, 'upstream'>, string> = {
-  edited: i18n.translate('xpack.notebook.status.staleEditedTooltip', {
-    defaultMessage: 'The query was edited but not run. Run the cell to update its results.',
-  }),
-  manual: i18n.translate('xpack.notebook.status.staleManualTooltip', {
+const EDITED_TOOLTIP = i18n.translate('xpack.notebook.status.staleEditedTooltip', {
+  defaultMessage: 'The query was edited but not run. Run the cell to update its results.',
+});
+
+const MANUAL_TOOLTIP = i18n.translate('xpack.notebook.status.staleManualTooltip', {
+  defaultMessage: 'This cell is in manual run mode and has not run yet. Run it to see results.',
+});
+
+const getChangedParamsTooltip = (params: readonly string[]): string =>
+  i18n.translate('xpack.notebook.status.staleChangedParamsTooltip', {
     defaultMessage:
-      'This cell is in manual run mode and its results may be out of date. Run the cell to update them.',
-  }),
-};
+      '{params} changed since this cell last ran. It is in manual run mode, so run it to update its results.',
+    values: { params: params.map((param) => `?${param}`).join(', ') },
+  });
+
+const getUpdatedSourceTooltip = (names: readonly string[]): string =>
+  i18n.translate('xpack.notebook.status.staleUpdatedSourceTooltip', {
+    defaultMessage:
+      '{names} has new results since this cell last ran. It is in manual run mode, so run it to update.',
+    values: { names: names.join(', ') },
+  });
 
 const getUpstreamTooltip = (names: readonly string[]): string =>
   i18n.translate('xpack.notebook.status.staleUpstreamTooltip', {
@@ -60,22 +72,32 @@ const getUpstreamTooltip = (names: readonly string[]): string =>
     values: { count: names.length, names: names.join(', ') },
   });
 
+const getStaleTooltip = (
+  reason: StaleReason,
+  parentNames: readonly string[],
+  changedParams: readonly string[]
+): string => {
+  if (reason === 'edited') return EDITED_TOOLTIP;
+  if (reason === 'upstream') return getUpstreamTooltip(parentNames);
+  if (changedParams.length > 0) return getChangedParamsTooltip(changedParams);
+  if (parentNames.length > 0) return getUpdatedSourceTooltip(parentNames);
+  return MANUAL_TOOLTIP;
+};
+
 export const CellStatusBadge = ({ runtime }: { runtime: CellRuntime }) => {
   const { store } = useNotebook();
   const cells = useStateFromPublishingSubject(store.cells$);
   const { color, label } = STATUS_BADGES[runtime.status];
 
   const getTooltip = (): string | undefined => {
-    const { status, error, staleReason, staleParents = [] } = runtime;
+    const { status, error, staleReason, staleParents = [], changedParams = [] } = runtime;
     if (status === 'blocked') return BLOCKED_TOOLTIP;
     if (status !== 'stale' || !staleReason) return error;
-    if (staleReason !== 'upstream') return STALE_TOOLTIPS[staleReason];
-    return getUpstreamTooltip(
-      staleParents.flatMap((parentId) => {
-        const parent = cells[parentId];
-        return parent ? [parent.name] : [];
-      })
-    );
+    const parentNames = staleParents.flatMap((parentId) => {
+      const parent = cells[parentId];
+      return parent ? [parent.name] : [];
+    });
+    return getStaleTooltip(staleReason, parentNames, changedParams);
   };
   const tooltip = getTooltip();
   const badge = (
