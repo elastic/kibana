@@ -232,7 +232,7 @@ export const selectProcessActions = ({
     return {
       rule: 'critical_ioc_match',
       actions: ['kill'],
-      why: `Rule: critical IOC match; severity is critical and ${process} was the Tier 1 IOC match, so it is killed rather than suspended`,
+      why: `Rule: critical IOC match; severity is critical and ${process} was the IOC Hunt match, so it is killed rather than suspended`,
     };
   }
 

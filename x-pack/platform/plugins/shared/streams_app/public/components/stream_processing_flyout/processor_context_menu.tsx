@@ -25,6 +25,8 @@ const menuLabel = i18n.translate('xpack.streams.processingFlyout.contextMenu.lab
 
 interface ProcessorContextMenuProps {
   isDisabled: boolean;
+  /** Set when Kibana cannot edit this processor's type, while it can still move or remove it. */
+  isEditDisabled?: boolean;
   isFirst: boolean;
   isLast: boolean;
   onMoveUp: () => void;
@@ -36,6 +38,7 @@ interface ProcessorContextMenuProps {
 
 export function ProcessorContextMenu({
   isDisabled,
+  isEditDisabled = false,
   isFirst,
   isLast,
   onMoveUp,
@@ -100,6 +103,7 @@ export function ProcessorContextMenu({
           <EuiContextMenuItem
             key="edit"
             icon="pencil"
+            disabled={isEditDisabled}
             onClick={run(onEdit)}
             data-test-subj="streamsProcessingFlyoutStepEdit"
           >

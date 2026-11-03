@@ -73,6 +73,7 @@
     "@kbn/eval-kql",
     "@kbn/rrule",
     "@kbn/cloud-plugin",
-    "@kbn/connector-specs"
+    "@kbn/connector-specs",
+    "@kbn/inference-tracing"
   ]
 }
