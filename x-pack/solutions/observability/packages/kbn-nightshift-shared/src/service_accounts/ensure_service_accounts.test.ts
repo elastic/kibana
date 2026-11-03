@@ -241,6 +241,16 @@ describe('createHttpServiceAccountsApi', () => {
   });
 });
 
+describe('ensureNightshiftServiceAccounts listing', () => {
+  it('lists the accounts once for both kinds', async () => {
+    const { api } = createApi();
+
+    await ensureNightshiftServiceAccounts(api, { isServerless: false });
+
+    expect(api.listServiceAccounts).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('ensureNightshiftServiceAccount', () => {
   it('creates the detection account alone, so a deployment without the other roles can set it up', async () => {
     const { api } = createApi({ roles: ['_nightshift_detection'] });
