@@ -931,6 +931,29 @@ exports[`pull_request pipeline scenarios gen ai evals 1`] = `
 ]
 `;
 
+exports[`pull_request pipeline scenarios kbn handlebars definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
+  "kbn_handlebars",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
 exports[`pull_request pipeline scenarios kbn-handlebars path 1`] = `
 [
   "build",
@@ -1144,6 +1167,29 @@ exports[`pull_request pipeline scenarios prompt change path 1`] = `
   "security-serverless-explore",
   "security-investigations",
   "security-serverless-investigations",
+  "prompt_changes",
+  "check_saved_objects",
+  "warm_start_memory_bench",
+  "wait",
+  "Post-Build",
+]
+`;
+
+exports[`pull_request pipeline scenarios prompt changes definition path 1`] = `
+[
+  "build",
+  "quick_checks",
+  "checks",
+  "linting",
+  "linting_with_types",
+  "check_types",
+  "pick_test_group_run_order",
+  "build_scout_tests",
+  "ci_stats_ready",
+  "report_package_metrics",
+  "check",
+  "check_oas_snapshot",
+  "check_api_contracts",
   "prompt_changes",
   "check_saved_objects",
   "warm_start_memory_bench",
