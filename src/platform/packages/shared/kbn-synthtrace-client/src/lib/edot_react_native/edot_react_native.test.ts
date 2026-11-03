@@ -717,7 +717,8 @@ describe('edotReactNative', () => {
         httpLatency: { median: 3_000, sigma: 1 },
       });
       (['android', 'ios'] as const).forEach((platform) => {
-        const exportDelay = 0;
+        // EDOT Android also loses the spans still waiting in its export queue
+        const exportDelay = platform === 'android' ? 1_000 : 0;
         for (let i = 0; i < 20; i++) {
           const docs = simulate({
             platform,

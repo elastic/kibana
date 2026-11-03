@@ -105,9 +105,9 @@ const WARM_LAUNCH_FACTOR = 0.25;
 const MAX_TAPS_PER_SCREEN = 2;
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
 // How long before a crash a span may have ended and still wait in the SDK's export queue, which a
-// crash loses
+// crash loses. EDOT Android exports spans every second, and its crash handler only flushes logs.
 const SPAN_EXPORT_DELAY_MS: Readonly<Record<MobilePlatform, number>> = {
-  android: 0,
+  android: 1_000,
   ios: 0,
 };
 const FAULT_ADDRESS_RANGE = 2 ** 32;
@@ -178,7 +178,7 @@ const TRANSPORT_ERRORS: Readonly<Record<MobilePlatform, readonly TransportError[
  * - the crash: EDOT Android writes it right away, EDOT iOS on the next launch. When the session
  *   ends with an iOS crash, the user relaunches the app within the session to report it. Spans
  *   that hadn't been exported yet are lost: the screen span and requests still running at the
- *   crash.
+ *   crash and, on Android, spans that ended within a second before it.
  *
  * Planning and simulation draw from the same `random` source, so a seed reproduces a session.
  */
