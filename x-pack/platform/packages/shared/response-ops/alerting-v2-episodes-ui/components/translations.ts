@@ -266,3 +266,65 @@ export const CLASSIC_ALERT_DETAILS_TITLE = i18n.translate(
     defaultMessage: 'Classic rule alert',
   }
 );
+
+/** --- Episodes table --- */
+export const EPISODES_LIST_TABLE_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.tableAriaLabel',
+  {
+    defaultMessage: 'Alerts table',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_ALERT_TAGS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.columns.tags',
+  {
+    defaultMessage: 'Alert tags',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_RULE_TAGS = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.columns.ruleTags',
+  {
+    defaultMessage: 'Rule tags',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.columns.assignees',
+  {
+    defaultMessage: 'Assignee',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_SOURCE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.columns.source',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_SUPPRESSED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.columns.suppressed',
+  {
+    defaultMessage: 'Suppressed',
+  }
+);
+
+export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodes.itemCount', {
+    defaultMessage: 'Showing {count, plural, one {# alert} other {# alerts}}',
+    values: { count },
+  });
+
+export const EPISODES_LIST_ITEM_COUNT_CAPPED = (count: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodes.itemCountCapped', {
+    defaultMessage: 'Showing first {count} alerts',
+    values: { count },
+  });
+
+export const EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP = (count: number) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.episodes.itemCountCappedTooltip', {
+    defaultMessage:
+      'The table loads at most {count} alerts. Narrow the time range or filters to find others.',
+    values: { count },
+  });

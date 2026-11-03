@@ -207,6 +207,15 @@ describe('recalculateEntityRiskScore', () => {
     );
   });
 
+  it('waits for the entity store refresh on every write, so the caller can read the scores back', async () => {
+    (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [storeEntity(70)] });
+
+    await run();
+
+    expect(mockScoreBaseEntities.mock.calls[0][0]).not.toHaveProperty('entityStoreRefresh');
+    expect(mockRunResolutionScoringStep.mock.calls[0][0]).not.toHaveProperty('entityStoreRefresh');
+  });
+
   it('writes no zero base score for an entity that has never been scored', async () => {
     // Writing one would put a score of 0 on screen for an entity that had none.
     (crudClient.listEntities as jest.Mock).mockResolvedValue({ entities: [storeEntity()] });
