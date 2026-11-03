@@ -34,7 +34,7 @@ const validateStoredAllowlist = (hosts: string[]): string | undefined => {
     : 'must list unique, canonical lowercase egress firewall rules or hostnames';
 };
 
-const nightshiftSandboxAllowlistAttributesSchemaV1 = schema.object({
+export const nightshiftSandboxAllowlistAttributesSchemaV1 = schema.object({
   hosts: schema.arrayOf(schema.string({ maxLength: MAX_SANDBOX_ALLOWLIST_RULE_LENGTH }), {
     maxSize: MAX_SANDBOX_ALLOWLIST_HOSTS,
     validate: validateStoredAllowlist,

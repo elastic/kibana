@@ -15,7 +15,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
   NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_TYPE,
-  nightshiftSandboxAllowlistSavedObjectType,
+  nightshiftSandboxAllowlistAttributesSchemaV1,
 } from '../saved_objects';
 import { createSandboxAllowlistClient } from './sandbox_allowlist_client';
 import { SandboxAllowlistDisabledError, SandboxAllowlistValidationError } from './errors';
@@ -169,8 +169,9 @@ describe('createSandboxAllowlistClient', () => {
           attributes: { hosts },
         };
       });
-      scoped.create.mockImplementation(async (type, attributes: { hosts: string[] }) => {
-        bySpace.set(space, attributes.hosts);
+      scoped.create.mockImplementation(async (type, attributes) => {
+        const { hosts } = attributes as { hosts: string[] };
+        bySpace.set(space, hosts);
         return {
           id: NIGHTSHIFT_SANDBOX_ALLOWLIST_SO_ID,
           type,
@@ -205,7 +206,7 @@ describe('createSandboxAllowlistClient', () => {
 });
 
 describe('nightshiftSandboxAllowlistSavedObjectType schema', () => {
-  const schema = nightshiftSandboxAllowlistSavedObjectType.modelVersions![1].schemas.create;
+  const schema = nightshiftSandboxAllowlistAttributesSchemaV1;
 
   it('accepts a normalized list of hosts and DSL rules including rules over 253 chars up to 512 chars', () => {
     const prefix = 'allow https api.github.com:443 GET /';
