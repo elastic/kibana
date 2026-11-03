@@ -197,4 +197,5 @@ func (c *NodeClient) CheckPrivileges(ctx context.Context, esHeaders map[string]s
 func (c *NodeClient) setSidecarHeaders(req *http.Request) {
 	req.Header.Set(sidecarSecretHeader, c.secret)
 	req.Header.Set("kbn-xsrf", "true")
+	req.Header.Set("x-elastic-internal-origin", "kibana")
 }

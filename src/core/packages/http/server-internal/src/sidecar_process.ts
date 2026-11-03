@@ -12,13 +12,25 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { randomBytes } from 'node:crypto';
-import { Readable } from 'node:stream';
+import type { Readable } from 'node:stream';
 import type { Logger } from '@kbn/logging';
 import type { HttpConfig } from './http_config';
 
 const READY_TIMEOUT_MS = 30_000;
 const MAX_RESTART_ATTEMPTS = 5;
 const INITIAL_BACKOFF_MS = 1_000;
+
+interface SidecarElasticsearchConfig {
+  hosts: string[];
+  requestHeadersWhitelist: string[];
+  customHeaders: Record<string, string>;
+  ssl: {
+    verificationMode: 'none' | 'certificate' | 'full';
+    certificateAuthorities?: string[];
+    certificate?: string;
+    key?: string;
+  };
+}
 
 interface SidecarBootstrapConfig {
   host: string;
@@ -29,6 +41,7 @@ interface SidecarBootstrapConfig {
     certificate: string;
     key: string;
   };
+  elasticsearch?: SidecarElasticsearchConfig;
 }
 
 export class SidecarProcess {
@@ -43,7 +56,8 @@ export class SidecarProcess {
   constructor(
     private readonly config: HttpConfig,
     private readonly sidecarBinPath: string,
-    private readonly log: Logger
+    private readonly log: Logger,
+    private readonly esConfig?: SidecarElasticsearchConfig
   ) {}
 
   public async start(): Promise<void> {
@@ -87,6 +101,10 @@ export class SidecarProcess {
           key: sslConfig.key,
         };
       }
+    }
+
+    if (this.esConfig) {
+      bootstrapConfig.elasticsearch = this.esConfig;
     }
 
     const configJson = JSON.stringify(bootstrapConfig);

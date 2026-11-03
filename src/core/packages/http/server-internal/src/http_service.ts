@@ -132,8 +132,14 @@ export class HttpService
     const config = await firstValueFrom(this.config$);
 
     if (config.sidecar.enabled) {
-      const sidecarBinPath = pathResolve(this.env.homeDir, 'src/platform/sidecar/kbn-sidecar');
-      this.sidecar = new SidecarProcess(config, sidecarBinPath, this.log.get('sidecar'));
+      const sidecarBinPath = pathResolve(this.env.homeDir, 'src/platform/sidecar/kbn_sidecar');
+      const esBootstrapConfig = await this.buildElasticsearchBootstrapConfig();
+      this.sidecar = new SidecarProcess(
+        config,
+        sidecarBinPath,
+        this.log.get('sidecar'),
+        esBootstrapConfig
+      );
       await this.sidecar.start();
       this.sidecarSocketPath = this.sidecar.socketPath;
       config.socketPath = this.sidecarSocketPath;
@@ -438,6 +444,39 @@ export class HttpService
    * */
   private shouldListen(config: HttpConfig) {
     return config.autoListen;
+  }
+
+  private async buildElasticsearchBootstrapConfig() {
+    const { readFileSync } = await import('node:fs');
+    const esRaw = await firstValueFrom(
+      this.coreContext.configService.atPath<Record<string, any>>('elasticsearch')
+    );
+
+    const hosts = Array.isArray(esRaw.hosts)
+      ? esRaw.hosts
+      : [esRaw.hosts ?? 'http://localhost:9200'];
+    const ssl = esRaw.ssl ?? {};
+
+    const readFile = (filePath: string) => readFileSync(filePath, 'utf8');
+    const readCAs = (ca: string | string[] | undefined): string[] | undefined => {
+      if (!ca) return undefined;
+      const paths = Array.isArray(ca) ? ca : [ca];
+      return paths.map(readFile);
+    };
+
+    return {
+      hosts,
+      requestHeadersWhitelist: Array.isArray(esRaw.requestHeadersWhitelist)
+        ? esRaw.requestHeadersWhitelist
+        : ['authorization', 'es-client-authentication'],
+      customHeaders: esRaw.customHeaders ?? {},
+      ssl: {
+        verificationMode: ssl.verificationMode ?? 'full',
+        certificateAuthorities: readCAs(ssl.certificateAuthorities),
+        certificate: ssl.certificate ? readFile(ssl.certificate) : undefined,
+        key: ssl.key ? readFile(ssl.key) : undefined,
+      },
+    };
   }
 
   public async stop() {
