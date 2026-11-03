@@ -450,7 +450,9 @@ export class NodesFactory {
           this.stepExecutionRuntimeFactory
         );
       default:
-        throw new Error(`Unknown node type: ${node.stepType}`);
+        throw new Error(
+          `Unknown node type: ${node.stepType}. If this step is registered by another plugin, that plugin's steps are not available in this workflow runtime (a task pod only has the plugins of its family).`
+        );
     }
   }
 }

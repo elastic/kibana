@@ -8,12 +8,12 @@
  */
 
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   asNotificationExecutionSource,
   WORKFLOWS_NOTIFICATION_REQUESTER_ID,
-} from '@kbn/actions-plugin/server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+} from '@kbn/actions-plugin/server/lib/action_execution_source';
 
 function getWorkflowConnectorExecutionSource(actionTypeId: string, actionId: string) {
   if (actionTypeId.replace(/^\./, '') !== 'email') {

@@ -9,3 +9,8 @@
 ./x-pack/platform/plugins/shared/licensing/server/tasks: 10
 ./x-pack/platform/plugins/shared/event_log/server/tasks: 15
 ./x-pack/platform/plugins/shared/security/server/tasks: 8
+./x-pack/platform/plugins/shared/actions/server/tasks: 91
+./x-pack/platform/plugins/shared/stack_connectors/server/tasks: 112
+./src/platform/plugins/shared/workflows_execution_engine/server/tasks: 104
+./src/platform/plugins/shared/workflows_extensions/server/tasks: 36
+./src/platform/plugins/shared/workflows_management/server/tasks: 57
