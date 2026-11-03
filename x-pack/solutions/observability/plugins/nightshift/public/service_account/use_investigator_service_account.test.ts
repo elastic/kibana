@@ -15,8 +15,8 @@ import {
 } from './use_investigator_service_account';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('@kbn/nightshift-investigations-plugin/common', () => ({
-  ...jest.requireActual('@kbn/nightshift-investigations-plugin/common'),
+jest.mock('@kbn/nightshift-shared', () => ({
+  ...jest.requireActual('@kbn/nightshift-shared'),
   ensureNightshiftServiceAccounts: jest
     .fn()
     .mockResolvedValue({ agent: 'kibana/nightshift_agent', automations: 'kibana/auto' }),
