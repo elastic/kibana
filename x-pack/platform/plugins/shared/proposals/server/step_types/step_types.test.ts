@@ -626,7 +626,7 @@ describe('proposals.updateProposal step', () => {
       request: FAKE_REQUEST,
     });
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ decidedBy: workerUser }),
+      expect.objectContaining({ decidedBy: workerUser, decisionMode: 'auto' }),
       SPACE_ID
     );
   });
@@ -651,6 +651,7 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({
         decidedBy: { username: 'analyst', fullName: null, email: null },
+        decisionMode: 'manual',
       }),
       SPACE_ID
     );
@@ -687,7 +688,7 @@ describe('proposals.updateProposal step', () => {
     );
 
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ decidedBy: undefined }),
+      expect.objectContaining({ decidedBy: undefined, decisionMode: undefined }),
       SPACE_ID
     );
     expect(resolveUser).not.toHaveBeenCalled();

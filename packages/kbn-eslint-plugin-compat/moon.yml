@@ -24,8 +24,11 @@ tags:
   - private
 fileGroups:
   src:
+    - rules/**/*
     - eslint8_context.js
     - formatjs.js
+    - index.js
     - mocha.js
     - no_unsanitized.js
+    - oxlint_plugin.js
 tasks: {}
