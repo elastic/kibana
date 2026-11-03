@@ -6,7 +6,9 @@
  */
 
 import {
+  EuiAccordion,
   EuiBadge,
+  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -15,6 +17,7 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
@@ -34,6 +37,36 @@ const scoreLabel = i18n.translate('xpack.contextEngine.sessionMemory.card.score'
   defaultMessage: 'Score',
 });
 
+const detailsLabel = i18n.translate('xpack.contextEngine.sessionMemory.card.details', {
+  defaultMessage: 'Details',
+});
+
+const MAX_MEDIA_VALUE_PREVIEW_LENGTH = 80;
+
+/** The stored memory as JSON, with inline media payloads shortened so the block stays readable. */
+export const formatMemoryJson = (memory: SessionMemory): string =>
+  JSON.stringify(
+    {
+      ...memory,
+      ...(memory.media
+        ? {
+            media: memory.media.map((item) =>
+              item.value.length > MAX_MEDIA_VALUE_PREVIEW_LENGTH
+                ? {
+                    ...item,
+                    value: `${item.value.slice(0, MAX_MEDIA_VALUE_PREVIEW_LENGTH)}… (${
+                      item.value.length
+                    } chars)`,
+                  }
+                : item
+            ),
+          }
+        : {}),
+    },
+    null,
+    2
+  );
+
 interface SessionMemoryCardProps {
   memory: SessionMemory;
   /** Search relevance; the meter is relative to `maxScore` so the best hit fills it. */
@@ -51,6 +84,7 @@ export const SessionMemoryCard = ({
 }: SessionMemoryCardProps) => {
   const imageSrc = getImagePreviewSrc(memory.media);
   const hasPdf = memory.media?.some(({ type }) => type === 'pdf') ?? false;
+  const detailsId = useGeneratedHtmlId({ prefix: 'sessionMemoryDetails' });
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj={dataTestSubj}>
@@ -137,6 +171,24 @@ export const SessionMemoryCard = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiAccordion
+        id={detailsId}
+        buttonContent={detailsLabel}
+        paddingSize="s"
+        data-test-subj={`${dataTestSubj}-details`}
+      >
+        <EuiCodeBlock
+          language="json"
+          fontSize="s"
+          paddingSize="s"
+          isCopyable
+          overflowHeight={320}
+          data-test-subj={`${dataTestSubj}-json`}
+        >
+          {formatMemoryJson(memory)}
+        </EuiCodeBlock>
+      </EuiAccordion>
     </EuiPanel>
   );
 };

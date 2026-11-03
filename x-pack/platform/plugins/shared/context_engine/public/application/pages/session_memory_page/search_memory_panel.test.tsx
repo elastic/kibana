@@ -226,6 +226,33 @@ describe('SearchMemoryPanel', () => {
     );
   });
 
+  it('expands a result to its raw JSON with long media values shortened', () => {
+    const value = `data:image/png;base64,${'A'.repeat(200)}`;
+    mockUseSearchSessionMemory.mockReturnValue(
+      mutationResult({
+        data: {
+          count: 1,
+          results: [
+            {
+              _score: 1,
+              memory: {
+                ...memory,
+                attributes: { source: 'chat' },
+                media: [{ type: 'image', value, format: 'base64' }],
+              },
+            },
+          ],
+        },
+      })
+    );
+    renderWithProviders(<SearchMemoryPanel />);
+
+    const json = screen.getByTestId('contextSessionMemoryResult-json');
+    expect(json).toHaveTextContent('"source": "chat"');
+    expect(json).toHaveTextContent('… (222 chars)');
+    expect(json).not.toHaveTextContent('A'.repeat(100));
+  });
+
   it('shows the empty prompt when nothing matches', () => {
     mockUseSearchSessionMemory.mockReturnValue(mutationResult({ data: { count: 0, results: [] } }));
     renderWithProviders(<SearchMemoryPanel />);

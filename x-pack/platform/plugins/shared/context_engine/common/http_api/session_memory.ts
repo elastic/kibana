@@ -22,6 +22,7 @@ export interface SessionMemoryMediaItem {
 /** Suggested memory categories; `type` is free text, so any other value is accepted too. */
 export const SESSION_MEMORY_TYPE_SUGGESTIONS = [
   'preference',
+  'constraint',
   'fact',
   'statement',
   'summary',

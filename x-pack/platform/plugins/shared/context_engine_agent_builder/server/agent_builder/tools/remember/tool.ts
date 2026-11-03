@@ -87,7 +87,8 @@ export const createRememberTool = ({
     Store a memory for the current user and session in Context Engine session memory.
     Memories are scoped to the user, the session (the current conversation), and this agent, and
     can be recalled across sessions. Record what will be useful later: preferences the user
-    stated, facts established, decisions made, or a summary of what was tried. Optionally scope
+    stated, constraints to respect, facts established, decisions made, or a summary of what was
+    tried. Optionally scope
     the memory to an AI index with aiIndexId. For MCP calls, omit sessionId unless continuing with
     the sessionId returned by an earlier remember call. Agent Builder calls ignore sessionId and use
     the current conversation ID.
