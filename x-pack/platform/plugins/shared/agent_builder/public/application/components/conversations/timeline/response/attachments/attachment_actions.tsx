@@ -175,6 +175,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                     defaultMessage: 'More actions',
                   })}
                   onClick={togglePopover}
+                  isDisabled={isAnyLoading}
                   size="s"
                 />
               </EuiToolTip>
@@ -192,7 +193,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                   items: overflowButtons.map((button) => ({
                     name: button.label,
                     icon: button.icon,
-                    disabled: button.disabled,
+                    disabled: button.disabled || isAnyLoading,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
                     href: button.href,
                     target: button.href && button.openInNewTab ? '_blank' : undefined,

@@ -429,6 +429,17 @@ export const createSkillAttachmentDefinition = ({
         try {
           await updateOrigin(response.id);
         } catch (error) {
+          if (addToAgentError) {
+            notifications.toasts.addError(addToAgentError, {
+              title: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.skill.addToAgentErrorToast',
+                {
+                  defaultMessage: 'Skill "{skillId}" created, but could not be added to this agent',
+                  values: { skillId: response.id },
+                }
+              ),
+            });
+          }
           notifications.toasts.addError(error as Error, {
             title: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.createErrorToast', {
               defaultMessage: 'Could not create skill from draft',
