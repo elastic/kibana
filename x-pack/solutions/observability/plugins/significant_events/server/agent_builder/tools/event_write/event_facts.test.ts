@@ -65,6 +65,7 @@ const makeCandidate = (
   index: 0,
   eventId: 'checkout-stable',
   status,
+  change: { kind: 'assessment', outcome: 'breached' },
   latest: stored,
   priorDocs: stored ? [stored] : [],
   input: {

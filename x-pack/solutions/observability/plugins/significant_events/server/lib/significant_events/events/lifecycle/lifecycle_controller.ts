@@ -37,6 +37,12 @@ export type StatusChange =
   /** The rule backing the event no longer exists. */
   | { kind: 'rule_deleted' };
 
+/** What decided a written status, for telemetry; every `StatusChange` is assignable to it. */
+export type StatusChangeCause =
+  | { kind: 'assessment'; outcome: StatusOutcome }
+  | { kind: 'operator' }
+  | { kind: 'rule_deleted' };
+
 /** Named constructors for a `StatusChange`, so callers never spell out the union. */
 export const StatusChange = {
   /** The status an operator chose, through the update route or a chat tool. */

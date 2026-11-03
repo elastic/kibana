@@ -57,6 +57,7 @@ import {
   decideStatusChange,
   requestedStatus,
   type StatusChange,
+  type StatusChangeCause,
   type LifecycleSkipReason,
 } from './lifecycle/lifecycle_controller';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
@@ -984,11 +985,13 @@ export class RuleEventsClient {
   async createEvent({
     event,
     actor,
+    change,
   }: {
     event: SignificantEvent;
     actor: SignificantEventActor;
+    change: StatusChangeCause;
   }): Promise<void> {
-    await this.writeVersion({ event, actor });
+    await this.writeVersion({ event, actor, change });
   }
 
   /** Writes the next version only while `prior` is still the head (best effort, not atomic). */
@@ -996,10 +999,12 @@ export class RuleEventsClient {
     event,
     prior,
     actor,
+    change,
   }: {
     event: SignificantEvent;
     prior: SignificantEvent;
     actor: SignificantEventActor;
+    change: StatusChangeCause;
   }): Promise<UpdateEventResult> {
     // A head that cannot be read back is not a version to build on.
     const head = await this.findLatestByEventId(event.event_id);
@@ -1007,7 +1012,7 @@ export class RuleEventsClient {
       return { updated: false, head };
     }
 
-    await this.writeVersion({ event, prior, actor });
+    await this.writeVersion({ event, prior, actor, change });
     return { updated: true };
   }
 
@@ -1049,7 +1054,12 @@ export class RuleEventsClient {
       return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
     }
 
-    const written = await this.updateEvent({ event: decision.event, prior: latest, actor });
+    const written = await this.updateEvent({
+      event: decision.event,
+      prior: latest,
+      actor,
+      change,
+    });
     if (!written.updated) {
       return {
         updated: 0,
@@ -1066,10 +1076,12 @@ export class RuleEventsClient {
     event,
     prior,
     actor,
+    change,
   }: {
     event: SignificantEvent;
     prior?: SignificantEvent;
     actor: SignificantEventActor;
+    change: StatusChangeCause;
   }): Promise<void> {
     const { getAlertEventsClient, emitTrigger, telemetry, logger, space } = this.clients;
     if (!getAlertEventsClient) {
@@ -1079,11 +1091,11 @@ export class RuleEventsClient {
     const alertEventsClient = await getAlertEventsClient();
     // `createAlertEvent` waits for a refresh, so the new version is readable immediately.
     await alertEventsClient.createAlertEvent(toRuleEvent(event));
+    reportEventStatusChange({ telemetry, logger, event, prior, actor, change, spaceId: space });
     emitSignificantEventWriteTriggers({
       emitTrigger,
       significantEvent: event,
       priorSignificantEvent: prior,
     });
-    reportEventStatusChange({ telemetry, logger, event, prior, actor, spaceId: space });
   }
 }

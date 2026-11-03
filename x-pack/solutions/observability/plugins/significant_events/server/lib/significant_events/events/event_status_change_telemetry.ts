@@ -16,21 +16,26 @@ import type {
   EventStatusChangedProps,
   SignificantEventActor,
 } from '../../telemetry/ebt';
+import type { StatusChangeCause } from './lifecycle/lifecycle_controller';
 
 export type EventStatusChangeReporter = Pick<EbtTelemetryClient, 'trackEventStatusChanged'>;
+
+interface EventStatusChange {
+  event: SignificantEvent;
+  prior: Pick<SignificantEvent, 'status'> | undefined;
+  actor: SignificantEventActor;
+  change: StatusChangeCause;
+  spaceId: string;
+}
 
 /** The status-change record for a written version; undefined when the status did not change. */
 export const buildEventStatusChangedProps = ({
   event,
   prior,
   actor,
+  change,
   spaceId,
-}: {
-  event: SignificantEvent;
-  prior: Pick<SignificantEvent, 'status'> | undefined;
-  actor: SignificantEventActor;
-  spaceId: string;
-}): EventStatusChangedProps | undefined => {
+}: EventStatusChange): EventStatusChangedProps | undefined => {
   if (prior !== undefined && prior.status === event.status) {
     return undefined;
   }
@@ -43,13 +48,15 @@ export const buildEventStatusChangedProps = ({
     ...(prior !== undefined ? { previous_status: prior.status } : {}),
     status: event.status,
     actor,
+    change_kind: change.kind,
+    ...(change.kind === 'assessment' ? { outcome: change.outcome } : {}),
     severity: event.severity,
     confidence: event.confidence,
     signal_count: signals.length,
     confirmed_signal_count: signals.filter(({ verdict }) => verdict === 'confirms').length,
     source_ids: event.source_ids,
     ...(event.workflow_execution_id !== undefined
-      ? { workflow_execution_id: event.workflow_execution_id }
+      ? { execution_id: event.workflow_execution_id }
       : {}),
   };
 };
@@ -59,13 +66,9 @@ export const reportEventStatusChange = ({
   telemetry,
   logger,
   ...change
-}: {
+}: EventStatusChange & {
   telemetry: EventStatusChangeReporter | undefined;
   logger?: Logger;
-  event: SignificantEvent;
-  prior: Pick<SignificantEvent, 'status'> | undefined;
-  actor: SignificantEventActor;
-  spaceId: string;
 }): void => {
   if (!telemetry) return;
   const props = buildEventStatusChangedProps(change);

@@ -821,7 +821,7 @@ describe('events_write tool', () => {
         fingerprint: 'event-1',
         event_id: 'event-1',
         space_id: 'tool-space',
-        workflow_execution_id: 'wf-exec-1',
+        execution_id: 'wf-exec-1',
         severity: 'high',
       })
     );
@@ -832,10 +832,10 @@ describe('events_write tool', () => {
       space_id: 'tool-space',
       success: false,
     });
-    expect(second).not.toHaveProperty('workflow_execution_id');
+    expect(second).not.toHaveProperty('execution_id');
   });
 
-  it('still reports the request space when scoping fails', async () => {
+  it('identifies the alert on failed-write telemetry', async () => {
     const telemetry = { trackAgentToolEventsWrite: jest.fn() };
     const getScopedClients = jest.fn().mockRejectedValue(new Error('no clients'));
     const failingTool = createEventsWriteTool({

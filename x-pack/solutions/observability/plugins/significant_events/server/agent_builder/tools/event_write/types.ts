@@ -8,6 +8,7 @@
 import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
 import type { SeriesHead } from '../../../lib/significant_events/events/rule_events_client';
+import type { StatusChangeCause } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
@@ -131,7 +132,10 @@ export type LoadedCandidate = WriteCandidate & {
 };
 
 /** A loaded candidate whose status is decided: by the lifecycle, or the caller's own. */
-export type ResolvedWriteCandidate = LoadedCandidate & { status: SignificantEvent['status'] };
+export type ResolvedWriteCandidate = LoadedCandidate & {
+  status: SignificantEvent['status'];
+  change: StatusChangeCause;
+};
 
 export type EventsWriteBulkResult =
   | EventsWriteResult

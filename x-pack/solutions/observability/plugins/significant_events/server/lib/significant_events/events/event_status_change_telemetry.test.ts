@@ -43,6 +43,7 @@ describe('buildEventStatusChangedProps', () => {
         event: event({ workflow_execution_id: 'wf-exec-1' }),
         prior: undefined,
         actor: 'agent',
+        change: { kind: 'assessment', outcome: 'breached' },
         spaceId: 'ops',
       })
     ).toEqual({
@@ -52,20 +53,23 @@ describe('buildEventStatusChangedProps', () => {
       entity_type: 'significant_event',
       status: 'active',
       actor: 'agent',
+      change_kind: 'assessment',
+      outcome: 'breached',
       severity: 'high',
       confidence: 0.8,
       signal_count: 3,
       confirmed_signal_count: 2,
       source_ids: ['logs.checkout', 'logs.payments'],
-      workflow_execution_id: 'wf-exec-1',
+      execution_id: 'wf-exec-1',
     });
   });
 
-  it('describes a transition with the previous status', () => {
+  it('describes an operator close with the previous status and no outcome', () => {
     const props = buildEventStatusChangedProps({
       event: event({ status: 'inactive', severity: 'low', signals: undefined }),
       prior: { status: 'recovering' },
       actor: 'human',
+      change: { kind: 'operator' },
       spaceId: 'default',
     });
 
@@ -73,11 +77,13 @@ describe('buildEventStatusChangedProps', () => {
       previous_status: 'recovering',
       status: 'inactive',
       actor: 'human',
+      change_kind: 'operator',
       severity: 'low',
       signal_count: 0,
       confirmed_signal_count: 0,
     });
-    expect(props).not.toHaveProperty('workflow_execution_id');
+    expect(props).not.toHaveProperty('outcome');
+    expect(props).not.toHaveProperty('execution_id');
   });
 
   it('returns nothing when the status is unchanged', () => {
@@ -86,6 +92,7 @@ describe('buildEventStatusChangedProps', () => {
         event: event({ status: 'active', severity: 'critical' }),
         prior: { status: 'active' },
         actor: 'agent',
+        change: { kind: 'assessment', outcome: 'breached' },
         spaceId: 'default',
       })
     ).toBeUndefined();
@@ -97,6 +104,7 @@ describe('reportEventStatusChange', () => {
     event: event(),
     prior: undefined,
     actor: 'system' as const,
+    change: { kind: 'rule_deleted' as const },
     spaceId: 'default',
   };
 

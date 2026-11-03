@@ -8,6 +8,10 @@
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { SIGNIFICANT_EVENT_ENTITY_TYPE } from './constants';
+import type {
+  StatusChangeCause,
+  StatusOutcome,
+} from '../../significant_events/events/lifecycle/lifecycle_controller';
 
 type SignificantEventActor = 'agent' | 'human' | 'system';
 
@@ -88,18 +92,20 @@ interface AgentToolEventStatusUpdateProps extends AlertIdentityProps {
   error_message?: string;
 }
 
-/** A written Significant Event version whose status differs from the stored one; the first version has no `previous_status`. */
+/** A written version whose status differs from the stored one; the first version has no `previous_status`. */
 interface EventStatusChangedProps extends AlertIdentityProps {
   entity_type: typeof SIGNIFICANT_EVENT_ENTITY_TYPE;
   previous_status?: SignificantEventStatus;
   status: SignificantEventStatus;
   actor: SignificantEventActor;
+  change_kind: StatusChangeCause['kind'];
+  outcome?: StatusOutcome;
   severity: Severity;
   confidence: number;
   signal_count: number;
   confirmed_signal_count: number;
   source_ids: string[];
-  workflow_execution_id?: string;
+  execution_id?: string;
 }
 
 interface DiscoveryTriggeredProps {
@@ -134,7 +140,7 @@ interface DetectionScanProps {
   default_bucket_interval: string;
   /** The Kibana space in which the scan ran. */
   space_id: string;
-  workflow_execution_id?: string;
+  execution_id?: string;
 }
 
 interface KnowledgeIndicatorOnboardingScheduledProps {
@@ -157,7 +163,7 @@ interface AgentToolEventWriteProps extends AlertIdentityProps {
   error_message?: string;
   /** Tier actually stored. Present only when written is true. */
   severity?: Severity;
-  workflow_execution_id?: string;
+  execution_id?: string;
 }
 
 interface AgentToolEventSearchProps {

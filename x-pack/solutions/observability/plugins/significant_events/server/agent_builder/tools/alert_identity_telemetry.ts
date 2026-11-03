@@ -10,7 +10,6 @@ import type { AlertIdentityProps } from '../../lib/telemetry/ebt';
 
 export const UNKNOWN_TELEMETRY_VALUE = 'unknown';
 
-/** Alert identity of the Significant Event an agent-tool telemetry event is about. */
 export const alertIdentity = (
   eventId: string | undefined,
   spaceId: string

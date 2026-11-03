@@ -99,7 +99,7 @@ steps:
       body:
         lookback: '{{ inputs.lookback }}'
         bucketInterval: '{{ inputs.bucketInterval }}'
-        workflowExecutionId: '{{ execution.id }}'
+        executionId: '{{ execution.id }}'
 
   # -----------------------------------------------------------------------
   # Step 2: Build the round-robin batch — select the stalest subset of active rules so that

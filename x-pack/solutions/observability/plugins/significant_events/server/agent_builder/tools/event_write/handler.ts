@@ -219,7 +219,11 @@ const decideStatuses = ({
   const stage: Stage<ResolvedWriteCandidate> = { kept: [], skipped: [] };
   candidates.forEach((candidate) => {
     if (candidate.input.status !== undefined) {
-      stage.kept.push({ ...candidate, status: candidate.input.status });
+      stage.kept.push({
+        ...candidate,
+        status: candidate.input.status,
+        change: { kind: 'operator' },
+      });
       return;
     }
 
@@ -234,16 +238,14 @@ const decideStatuses = ({
         ? input.signals ?? []
         : mergeSignalsLatestPerRule(episodeHistory(priorDocs), input.signals ?? [], timestamp);
     const outcome = assessMembers(signals);
-    const decision = decideLifecycle({
-      state: { status: latest?.status },
-      change: StatusChange.assessed(outcome),
-    });
+    const change = StatusChange.assessed(outcome);
+    const decision = decideLifecycle({ state: { status: latest?.status }, change });
     // A continuation names an event that exists. Only a breach may open one under an id it names;
     // a healthy or unjudged item for an unknown id is set aside, never created.
     const continuesUnknownEvent =
       latest === undefined && input.event_id !== undefined && outcome !== 'breached';
     if (decision.write && !continuesUnknownEvent) {
-      stage.kept.push({ ...candidate, status: decision.status });
+      stage.kept.push({ ...candidate, status: decision.status, change });
       return;
     }
     if (latest === undefined && input.event_id !== undefined) {
@@ -410,13 +412,18 @@ const writeVersions = ({
       writeLimit(async (): Promise<CompactBulkError | undefined> => {
         try {
           if (candidate.latest === undefined) {
-            await eventSearchClient.createEvent({ event: document, actor: 'agent' });
+            await eventSearchClient.createEvent({
+              event: document,
+              actor: 'agent',
+              change: candidate.change,
+            });
             return undefined;
           }
           const written = await eventSearchClient.updateEvent({
             event: document,
             prior: candidate.latest,
             actor: 'agent',
+            change: candidate.change,
           });
           return written.updated
             ? undefined

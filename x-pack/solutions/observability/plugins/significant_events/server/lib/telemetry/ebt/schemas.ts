@@ -439,6 +439,21 @@ const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
         'Who caused the write: `agent` (discovery or chat agent), `human` (operator update) or `system` (maintenance, e.g. rule deletion)',
     },
   },
+  change_kind: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'What decided the written status: `assessment` (the member verdicts of a discovery write), `operator` (a status chosen through the update route or a chat tool) or `rule_deleted` (the backing rule no longer exists). With `actor`, separates a human close from a data-driven recovery.',
+    },
+  },
+  outcome: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'For an `assessment` change, what the member verdicts added up to: `breached`, `recovered` or `no_data`; absent for other change kinds',
+      optional: true,
+    },
+  },
   severity: {
     type: 'keyword',
     _meta: {
@@ -476,11 +491,11 @@ const eventStatusChangedSchema: RootSchema<EventStatusChangedProps> = {
       description: 'The Nightshift source ids the event covers',
     },
   },
-  workflow_execution_id: {
+  execution_id: {
     type: 'keyword',
     _meta: {
       description:
-        'The workflow execution that produced this version, when written by a workflow; joins the discovery run and workflow engine events',
+        'The pipeline execution the written version records as having produced it (`workflow_execution_id` on the stored version, set by the writer); absent when the writer recorded none. Same id space as `execution_id` on the other pipeline events.',
       optional: true,
     },
   },
@@ -577,11 +592,11 @@ const detectionScanSchema: RootSchema<DetectionScanProps> = {
       description: 'The Kibana space in which the scan ran',
     },
   },
-  workflow_execution_id: {
+  execution_id: {
     type: 'keyword',
     _meta: {
       description:
-        'The detection workflow execution that requested the scan; absent when the route was called directly',
+        'The detection pipeline execution that requested the scan; absent when the route was called directly. Same id space as `execution_id` on the other pipeline events.',
       optional: true,
     },
   },
@@ -681,11 +696,11 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
       optional: true,
     },
   },
-  workflow_execution_id: {
+  execution_id: {
     type: 'keyword',
     _meta: {
       description:
-        'The discovery workflow execution the agent wrote on behalf of, when the item carried one',
+        'The pipeline execution the agent recorded on the item (`workflow_execution_id` in the write input); absent when the item carried none. Same id space as `execution_id` on the other pipeline events.',
       optional: true,
     },
   },

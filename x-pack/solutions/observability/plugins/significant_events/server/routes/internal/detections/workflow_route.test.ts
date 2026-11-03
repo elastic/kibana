@@ -29,12 +29,12 @@ const makeLink = (sourceId: string, ruleId: string): QueryLink =>
     query: { id: `${ruleId}-query`, severity_score: 90 },
   } as QueryLink);
 
-const setup = ({ workflowExecutionId }: { workflowExecutionId?: string } = {}) => {
+const setup = ({ executionId }: { executionId?: string } = {}) => {
   const runChangePointScan = jest.fn().mockResolvedValue({ took: 1, by_rule: { buckets: [] } });
   const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
   const trackSignificantEventsDetectionScan = jest.fn();
   const handlerParams = {
-    params: { body: { lookback: 'now-1440m', bucketInterval: '60m', workflowExecutionId } },
+    params: { body: { lookback: 'now-1440m', bucketInterval: '60m', executionId } },
     request: {},
     getScopedClients: jest.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },
@@ -71,15 +71,15 @@ describe('change point scan route', () => {
     expect(scannedRuleIds).toEqual(['rule-1']);
   });
 
-  it('carries the workflow execution id onto the scan telemetry', async () => {
+  it('carries the calling execution id onto the scan telemetry', async () => {
     const { handlerParams, trackSignificantEventsDetectionScan } = setup({
-      workflowExecutionId: 'wf-exec-1',
+      executionId: 'exec-1',
     });
 
     await scanRoute.handler(handlerParams);
 
     expect(trackSignificantEventsDetectionScan).toHaveBeenCalledWith(
-      expect.objectContaining({ space_id: 'default', workflow_execution_id: 'wf-exec-1' })
+      expect.objectContaining({ space_id: 'default', execution_id: 'exec-1' })
     );
   });
 });

@@ -8,11 +8,7 @@
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { EbtTelemetryService } from './service';
 
-/**
- * The EBT event types this plugin emits. Adding or removing one is a telemetry contract change:
- * downstream dashboards and the program's telemetry catalog key on these names, so update them
- * together with this list.
- */
+/** Downstream dashboards key on these names; changing the list is a telemetry contract change. */
 const REGISTERED_EVENT_TYPES = [
   'significant-events-significant-events-queries-generated',
   'significant-events-features-identified',

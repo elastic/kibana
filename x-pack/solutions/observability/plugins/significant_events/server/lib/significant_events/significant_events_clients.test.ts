@@ -90,6 +90,7 @@ describe('createSignificantEventsClients', () => {
         confidence: 0.8,
       },
       actor: 'agent',
+      change: { kind: 'assessment', outcome: 'breached' },
     });
 
     expect(createAlertEvent).toHaveBeenCalledWith(
