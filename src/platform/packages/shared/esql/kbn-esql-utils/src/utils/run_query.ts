@@ -31,11 +31,14 @@ import {
 } from '@kbn/esql-types';
 import { getESQLQueryVariables } from './query_parsing_helpers';
 
-export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
+const hasNamedParam = (query: string, name: string) => new RegExp(`\\?${name}\\b`, 'i').test(query);
+
+export const hasStartEndParams = (query: string) =>
+  hasNamedParam(query, '_tstart') || hasNamedParam(query, '_tend');
 
 export const getStartEndParams = (query: string, time?: TimeRange) => {
-  const startNamedParams = /\?_tstart/i.test(query);
-  const endNamedParams = /\?_tend/i.test(query);
+  const startNamedParams = hasNamedParam(query, '_tstart');
+  const endNamedParams = hasNamedParam(query, '_tend');
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
@@ -58,8 +61,6 @@ export interface GeoPrecisionParams {
   zoom: number;
   resolution?: GRID_RESOLUTION;
 }
-
-const hasNamedParam = (query: string, name: string) => new RegExp(`\\?${name}\\b`, 'i').test(query);
 
 export const hasGeotilePrecisionParam = (query: string) =>
   hasNamedParam(query, GEOTILE_PRECISION_PARAM);
