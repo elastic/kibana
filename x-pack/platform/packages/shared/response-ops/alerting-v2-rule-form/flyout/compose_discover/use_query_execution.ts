@@ -12,6 +12,7 @@ import { Parser } from '@elastic/esql';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { ProjectRouting } from '@kbn/es-query';
 import { getRuleProjectRouting } from '../../utils/get_rule_project_routing';
 
 export interface QueryColumn extends EuiDataGridColumn {
@@ -55,6 +56,7 @@ interface TabExecution {
   query: string;
   timeRange: TimeRange;
   timeField: string;
+  projectRouting: ProjectRouting;
 }
 
 const DEFAULT_TAB = 'default';
@@ -107,10 +109,7 @@ export const useQueryExecution = ({
   const executionQuery = activeExecution?.query ?? null;
   const executionTimeRange = activeExecution?.timeRange ?? null;
   const executionTimeField = activeExecution?.timeField ?? null;
-  // Resolved on every render since the CPS space default loads asynchronously
-  const executionProjectRouting = executionQuery
-    ? getRuleProjectRouting(executionQuery, cps)
-    : undefined;
+  const executionProjectRouting = activeExecution?.projectRouting;
 
   const canExecute = Boolean(executionQuery?.trim() && executionTimeField?.trim());
 
@@ -174,23 +173,27 @@ export const useQueryExecution = ({
     const trimmed = q.trim();
     if (!trimmed) return;
 
+    // Resolved on each run since the CPS space default loads asynchronously
+    const projectRouting = getRuleProjectRouting(trimmed, cps);
+
     const rangeChanged = exec?.timeRange.from !== tr.from || exec?.timeRange.to !== tr.to;
     const fieldChanged = exec?.timeField !== tf;
-    if (exec && trimmed === exec.query && !rangeChanged && !fieldChanged) {
+    const routingChanged = exec?.projectRouting !== projectRouting;
+    if (exec && trimmed === exec.query && !rangeChanged && !fieldChanged && !routingChanged) {
       queryClient.invalidateQueries({
         queryKey: [
           'composeDiscoverQuery',
           exec.query,
           exec.timeRange,
           exec.timeField,
-          getRuleProjectRouting(exec.query, cps),
+          exec.projectRouting,
         ],
         exact: true,
       });
     } else {
       setExecutionsByTab((prev) => ({
         ...prev,
-        [activeTab]: { query: trimmed, timeRange: { ...tr }, timeField: tf },
+        [activeTab]: { query: trimmed, timeRange: { ...tr }, timeField: tf, projectRouting },
       }));
     }
   }, [queryClient, cps]);

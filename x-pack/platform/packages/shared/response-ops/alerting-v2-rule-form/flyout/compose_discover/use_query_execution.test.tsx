@@ -71,12 +71,12 @@ describe('useQueryExecution', () => {
     );
   });
 
-  it('runs the query again when the space default routing changes', async () => {
+  it('uses the latest space default routing when run again', async () => {
     mockGetESQLResults.mockResolvedValue({ response: { columns: [], values: [] } });
     const mockCps = cpsPluginMock.createStartContract();
     const mockGetDefaultProjectRouting = jest.mocked(mockCps.cpsManager!.getDefaultProjectRouting);
 
-    const { result, rerender } = renderHook(
+    const { result } = renderHook(
       () =>
         useQueryExecution({
           query: 'FROM logs-*',
@@ -91,9 +91,9 @@ describe('useQueryExecution', () => {
     act(() => result.current.run());
     await waitFor(() => expect(mockGetESQLResults).toHaveBeenCalledTimes(1));
 
-    // CPS finishes loading the space default after the first run
+    // CPS finishes loading the space default after the first run, without a re-render
     mockGetDefaultProjectRouting.mockReturnValue('_alias:_origin');
-    rerender();
+    act(() => result.current.run());
 
     await waitFor(() =>
       expect(mockGetESQLResults).toHaveBeenLastCalledWith(
