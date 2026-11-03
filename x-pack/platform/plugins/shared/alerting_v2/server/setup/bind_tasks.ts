@@ -7,7 +7,7 @@
 
 import { PluginSetup } from '@kbn/core-di';
 import type { KibanaContainerModuleLoadOptions } from '@kbn/core-di';
-import { PluginInitializer } from '@kbn/core-di-server';
+import { ConfigService } from '../lib/services/config_service/config_service';
 import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
 import { AlertActionsCleanupTaskDefinition } from '../lib/tasks/alert_actions_cleanup/task_definition';
 import { ApiKeyInvalidationTaskDefinition } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
@@ -18,7 +18,6 @@ import {
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import type { AlertingServerSetupDependencies } from '../types';
-import type { PluginConfig } from '../config';
 
 export function bindTasks({ bind, onSetup }: KibanaContainerModuleLoadOptions) {
   // Bind task definitions - add more tasks here as needed
@@ -34,11 +33,9 @@ export function bindTasks({ bind, onSetup }: KibanaContainerModuleLoadOptions) {
   onSetup(
     TaskDefinition,
     PluginSetup<AlertingServerSetupDependencies['taskManager']>('taskManager'),
-    PluginInitializer('config'),
+    ConfigService,
     TaskRunnerFactoryToken,
-    (_, definition, taskManager, configAccessor, taskRunnerFactory) => {
-      const config = configAccessor.get<PluginConfig>();
-
+    (_, definition, taskManager, configService, taskRunnerFactory) => {
       const createTaskRunner = taskRunnerFactory({
         taskRunnerClass: definition.taskRunnerClass,
         taskType: definition.taskType,
@@ -46,7 +43,7 @@ export function bindTasks({ bind, onSetup }: KibanaContainerModuleLoadOptions) {
       });
 
       const timeout = definition.resolveTimeout
-        ? definition.resolveTimeout(config)
+        ? definition.resolveTimeout(configService)
         : definition.timeout;
 
       taskManager.registerTaskDefinitions({

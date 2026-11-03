@@ -103,6 +103,7 @@ import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
+import { ConfigService } from '../lib/services/config_service/config_service';
 import { UserService } from '../lib/services/user_service/user_service';
 import { WorkflowService } from '../lib/services/workflow_service/workflow_service';
 import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
@@ -218,6 +219,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(EbtService).toSelf().inSingletonScope();
   bind(EbtServiceToken).toService(EbtService);
   bind(ResourceManager).toSelf().inSingletonScope();
+  bind(ConfigService).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
     .toResolvedValue(

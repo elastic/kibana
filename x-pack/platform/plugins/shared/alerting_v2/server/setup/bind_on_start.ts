@@ -6,7 +6,7 @@
  */
 
 import { Logger, OnStart, PluginStart } from '@kbn/core-di';
-import { CoreStart, PluginInitializer } from '@kbn/core-di-server';
+import { CoreStart } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
 import { ChangeHistoryClientToken } from '../lib/rule_changes_history';
@@ -14,7 +14,7 @@ import { ResourceManager } from '../lib/services/resource_service/resource_manag
 import { initializeResources } from '../resources/register_resources';
 import { scheduleApiKeyInvalidationTask } from '../lib/tasks/invalidate_pending_api_keys/schedule_task';
 import { INVALIDATE_API_KEYS_TASK_ID } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
-import type { PluginConfig } from '../config';
+import { ConfigService } from '../lib/services/config_service/config_service';
 import type { AlertingServerStartDependencies } from '../types';
 import { scheduleAlertActionsCleanupTask } from '../lib/tasks/alert_actions_cleanup/schedule_task';
 import { ALERT_ACTIONS_CLEANUP_TASK_ID } from '../lib/tasks/alert_actions_cleanup/constants';
@@ -37,19 +37,18 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         changeHistoryClient,
         userProfileService,
         taskManager,
-        configAccessor,
+        configService,
         workflowsExtensions
       ) =>
       async (container) => {
         const tasksLogger = loggerService.forSubsystem('tasks');
-        const config = configAccessor.get<PluginConfig>();
 
         initializeResources({
           resourceManager,
           esClient,
           coreLogger,
           changeHistoryClient,
-          retention: config.retention,
+          retention: configService.get('retention'),
           userProfileService,
         });
 
@@ -61,7 +60,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
           coreLogger.warn('Failed to install alerting v2 managed workflows', { error });
         }
 
-        if (config.dispatcher.paused) {
+        if (configService.get('dispatcher.paused')) {
           tasksLogger.warn({
             code: ALERTING_LOG_CODES.DISPATCHER_PAUSED,
             labels: { task_id: DISPATCHER_TASK_ID },
@@ -82,7 +81,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         scheduleApiKeyInvalidationTask({
           logger: tasksLogger,
           taskManager,
-          interval: config.invalidateApiKeysTask.interval,
+          interval: configService.get('invalidateApiKeysTask.interval'),
         }).catch((error) => {
           tasksLogger.error({
             error,
@@ -94,7 +93,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
         scheduleAlertActionsCleanupTask({
           logger: tasksLogger,
           taskManager,
-          enabled: config.retention.alertActions.dispatcher.enabled,
+          enabled: configService.get('retention.alertActions.dispatcher.enabled'),
         }).catch((error) => {
           tasksLogger.error({
             error,
@@ -122,7 +121,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       ChangeHistoryClientToken,
       CoreStart('userProfile'),
       PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager'),
-      PluginInitializer('config'),
+      ConfigService,
       PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions'),
     ]
   );
