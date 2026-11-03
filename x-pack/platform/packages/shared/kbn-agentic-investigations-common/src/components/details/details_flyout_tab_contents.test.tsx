@@ -183,9 +183,7 @@ describe('OverviewTab', () => {
     const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
     expect(headings).toEqual(["What's happened", 'Impact', 'Conclusion', 'Proposed actions']);
     expect(screen.queryByRole('heading', { name: 'Subject' })).not.toBeInTheDocument();
-    expect(screen.getByTestId('investigationOverviewSubjects')).toHaveTextContent(
-      'checkout alert'
-    );
+    expect(screen.getByTestId('investigationOverviewSubjects')).toHaveTextContent('checkout alert');
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
     expect(screen.getByText('bad')).toBeInTheDocument();
     expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
