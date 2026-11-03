@@ -20,6 +20,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-chrome-forward-testing.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-chromium-linux-build.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-code-quality-fallow.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-connector-vendor-api-drift.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-console-definitions-sync.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-console-packaging-publish.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-cloud.yml

@@ -70,6 +70,7 @@ describe('EventLoopWatchdog', () => {
       unref: true,
       logger,
       resourceLimits: { maxOldGenerationSizeMb: 32, maxYoungGenerationSizeMb: 16 },
+      restart: { maxAttempts: Infinity },
       workerData: {
         shared: expect.any(SharedArrayBuffer),
         thresholdsMs: { starting: 300, running: 200 },
