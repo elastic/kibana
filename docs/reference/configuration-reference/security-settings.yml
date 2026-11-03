@@ -520,7 +520,7 @@ groups:
         default: true
         applies_to:
           stack: ga 9.6+
-          ech: unavailable
+          ech: ga 9.6+
           ece: ga
           eck: ga
           self: ga
