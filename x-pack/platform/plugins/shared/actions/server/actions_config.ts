@@ -23,7 +23,7 @@ import {
 import type { ActionsConfig } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
-import { ActionTypeDisabledError } from './lib';
+import { ActionTypeDisabledError } from './lib/errors';
 import { parseDuration } from './lib/parse_date';
 import type { AwsSesConfig, ResponseSettings } from './types';
 import type { ValidateEmailAddressesOptions } from '../common';

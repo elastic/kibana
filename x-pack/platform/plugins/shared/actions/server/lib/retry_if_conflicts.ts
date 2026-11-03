@@ -10,7 +10,7 @@
 // This is a copy of the retryIfConflicts function from the alerting plugin
 
 import type { Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 type RetryableForConflicts<T> = () => Promise<T>;
 

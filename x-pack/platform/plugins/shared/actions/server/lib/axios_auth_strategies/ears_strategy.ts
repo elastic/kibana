@@ -7,7 +7,8 @@
 
 import { AxiosError } from 'axios';
 import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { normalizeAuthorizationHeaderValue, type GetTokenOpts } from '@kbn/connector-specs';
+import type { GetTokenOpts } from '@kbn/connector-specs';
+import { normalizeAuthorizationHeaderValue } from '@kbn/connector-specs/lite';
 import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getEarsAccessToken } from '../ears';
 import type { AxiosAuthStrategy, AuthStrategyDeps } from './types';

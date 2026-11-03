@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorSpec } from './connector_spec';
 import { getConnectorSpec } from './get_connector_spec';
+import { connectorSpecHasEvents } from './spec_has_events';
 
-/** True when the spec declares inbound event definitions (inbound-only or dual). */
-export const connectorSpecHasEvents = (spec: ConnectorSpec): boolean =>
-  spec.events !== undefined && Object.keys(spec.events.definitions).length > 0;
+export { connectorSpecHasEvents };
 
 /** True when the registered spec for this type id accepts inbound hub events. */
 export const connectorTypeHasInboundEvents = (actionTypeId: string): boolean => {

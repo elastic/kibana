@@ -8,7 +8,8 @@
 import Boom from '@hapi/boom';
 import { connectorTypeHasInboundEvents, connectorTypePublishesKeys } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import {
   createConnectorSigningKey,
@@ -18,10 +19,14 @@ import { resolveInboundEventsSpaceId } from '../../../../inbound/resolve_inbound
 import type { Connector } from '../../types';
 import type { ConnectorCreateParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
+import {
+  validateConfig,
+  validateConnector,
+  validateSecrets,
+} from '../../../../lib/validate_with_schema';
 import { isConnectorDeprecated } from '../../lib';
 import type { HookServices, RawAction } from '../../../../types';
-import { tryCatch } from '../../../../lib';
+import { tryCatch } from '../../../../lib/try_catch';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import {
   getConnectorAuthType,

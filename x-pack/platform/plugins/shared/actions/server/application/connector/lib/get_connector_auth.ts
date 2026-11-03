@@ -12,7 +12,7 @@ import { isPreconfigured } from '../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../lib/is_system_action';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../constants/saved_objects';
 import type { ActionsClientContext } from '../../../actions_client';
-import { validateSecrets } from '../../../lib';
+import { validateSecrets } from '../../../lib/validate_with_schema';
 
 export interface ResolvedConnectorAuth {
   connectorId: string;

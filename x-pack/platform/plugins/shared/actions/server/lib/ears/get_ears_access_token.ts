@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AuthMode } from '@kbn/connector-specs';
-import { EARS_AUTH_ID } from '@kbn/connector-specs';
+import { EARS_AUTH_ID } from '@kbn/connector-specs/lite';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
 import type { ConnectorTokenClientContract } from '../../types';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';

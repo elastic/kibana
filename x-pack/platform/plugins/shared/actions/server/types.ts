@@ -32,7 +32,7 @@ import type { SubActionConnector } from './sub_action_framework/sub_action_conne
 import type { ServiceParams } from './sub_action_framework/types';
 
 export type { ActionTypeExecutorRawResult, ActionTypeExecutorResult } from '../common';
-export { ActionExecutionSourceType } from './lib';
+export { ActionExecutionSourceType } from './lib/action_execution_source';
 export { ConnectorUsageCollector } from './usage';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;

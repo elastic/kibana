@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
-import { ConnectorAuthorizationError } from '@kbn/connector-specs';
+import { ConnectorAuthorizationError } from '@kbn/connector-specs/lite';
 import type { OAuthTokenResponse } from './request_oauth_token';
 import type { ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
 

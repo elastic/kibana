@@ -14,7 +14,6 @@ import type {
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import {
   connectorIngressCredentialMappings,
   connectorSigningKeyMappings,
@@ -81,7 +80,7 @@ export function setupSavedObjects(
       importableAndExportable: true,
       // An import cannot create the signing key, so these connectors must be created again.
       isExportable: (savedObject: SavedObject<RawAction>) =>
-        !connectorTypePublishesKeys(savedObject.attributes.actionTypeId),
+        actionTypeRegistry.getSpec(savedObject.attributes.actionTypeId)?.signingKey === undefined,
       getTitle(savedObject: SavedObject<RawAction>) {
         return `Connector: [${savedObject.attributes.name}]`;
       },

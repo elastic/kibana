@@ -12,7 +12,8 @@ import jwt from 'jsonwebtoken';
 import type { TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { ISavedObjectsRepository, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { buildConnectorPublicKeyUrls } from '../../common';
 import {

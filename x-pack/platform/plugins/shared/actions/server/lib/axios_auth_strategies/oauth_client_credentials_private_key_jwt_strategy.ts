@@ -7,7 +7,7 @@
 
 import type { AxiosInstance } from 'axios';
 import type { CertificateBindingKind, GetTokenOpts, JwtAlgorithm } from '@kbn/connector-specs';
-import { CLIENT_ASSERTION_TYPE } from '@kbn/connector-specs';
+import { CLIENT_ASSERTION_TYPE } from '@kbn/connector-specs/lite';
 import type { CertificateBinding } from '../build_client_assertion';
 import { buildClientAssertion } from '../build_client_assertion';
 import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_credentials_access_token';

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { retryIfConflicts, RetryForConflictsAttempts } from './retry_if_conflicts';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
-jest.mock('@kbn/core/server');
+jest.mock('@kbn/core-saved-objects-server');
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

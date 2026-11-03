@@ -18,7 +18,7 @@ import type {
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { AxiosInstance } from 'axios';
@@ -46,7 +46,7 @@ import type {
 import type { ActionTypeRegistry } from '../action_type_registry';
 import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import type { ActionExecutorContract } from '../lib';
-import { parseDate } from '../lib';
+import { parseDate } from '../lib/parse_date';
 import type {
   ActionResult,
   RawAction,

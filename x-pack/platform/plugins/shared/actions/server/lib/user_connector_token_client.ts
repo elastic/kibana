@@ -15,8 +15,8 @@ import type {
   SavedObjectsClientContract,
   SavedObjectAttributes,
 } from '@kbn/core/server';
-import { SavedObjectsUtils } from '@kbn/core/server';
-import { EARS_AUTH_ID } from '@kbn/connector-specs';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { EARS_AUTH_ID } from '@kbn/connector-specs/lite';
 import { retryIfConflicts } from './retry_if_conflicts';
 import { revokeEarsCredentials } from './ears/revoke_ears_credentials';
 import { getEarsErrorLogFields, logEarsEvent } from './ears/log_ears_event';

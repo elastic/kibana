@@ -17,7 +17,7 @@ import type { ActionType as CommonActionType } from '../common';
 import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { ActionExecutionSourceType, ILicenseState, TaskRunnerFactory } from './lib';
-import { getActionTypeFeatureUsageName } from './lib';
+import { getActionTypeFeatureUsageName } from './lib/get_action_type_feature_usage_name';
 import type {
   ActionType,
   ActionTypeConfig,

@@ -7,7 +7,7 @@
 
 import type { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type {
   ActionTypeRegistryContract as ConnectorTypeRegistryContract,
@@ -16,7 +16,8 @@ import type {
 import { UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import type { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
-import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import { extractSavedObjectReferences } from './lib/action_task_params_utils';
+import { isSavedObjectExecutionSource } from './lib/action_execution_source';
 import type { ExecutionResponseItem } from './create_execute_function';
 import { ExecutionResponseType } from './create_execute_function';
 import type { ActionsConfigurationUtilities } from './actions_config';

@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import { isKibanaManagedAuthTypeId } from '@kbn/connector-specs';
+import { isKibanaManagedAuthTypeId } from '@kbn/connector-specs/lite';
 
 interface EnsureNotKibanaManagedAuthTypeParams {
   actionTypeId: string;

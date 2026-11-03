@@ -15,6 +15,7 @@ import { createMockInMemoryConnector } from '../application/connector/mocks';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { setupSavedObjects } from '.';
 import type { RawAction } from '../types';
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ActionTypeRegistry } from '../action_type_registry';
 
 describe('setupSavedObjects - onImport', () => {
@@ -140,10 +141,15 @@ describe('setupSavedObjects - isExportable', () => {
       registerType: jest.fn(),
     } as unknown as jest.Mocked<SavedObjectsServiceSetup>;
 
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    actionTypeRegistry.getSpec.mockImplementation((id: string) =>
+      id === '.ssf' ? ({ signingKey: {} } as unknown as ConnectorSpec) : undefined
+    );
+
     setupSavedObjects(
       savedObjectsSetup,
       encryptedSavedObjectsMock.createSetup(),
-      actionTypeRegistryMock.create() as unknown as ActionTypeRegistry,
+      actionTypeRegistry as unknown as ActionTypeRegistry,
       '.kibana_task_manager',
       [],
       () => undefined as unknown as ISavedObjectsRepository

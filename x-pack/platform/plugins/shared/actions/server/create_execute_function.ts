@@ -11,12 +11,13 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import type { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
-import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
+import { extractSavedObjectReferences } from './lib/action_task_params_utils';
+import { isSavedObjectExecutionSource } from './lib/action_execution_source';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import { hasReachedTheQueuedActionsLimit } from './lib/has_reached_queued_actions_limit';
 

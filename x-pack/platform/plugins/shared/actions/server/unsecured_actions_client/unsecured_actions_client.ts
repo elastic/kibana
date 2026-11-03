@@ -13,7 +13,10 @@ import type {
   ExecuteOptions,
   ExecutionResponse,
 } from '../create_unsecured_execute_function';
-import { asNotificationExecutionSource, NOTIFICATIONS_REQUESTER_ID } from '../lib';
+import {
+  asNotificationExecutionSource,
+  NOTIFICATIONS_REQUESTER_ID,
+} from '../lib/action_execution_source';
 import type { RelatedSavedObjects, ActionExecutorContract } from '../lib';
 import type { ActionTypeExecutorResult, InMemoryConnector } from '../types';
 import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';

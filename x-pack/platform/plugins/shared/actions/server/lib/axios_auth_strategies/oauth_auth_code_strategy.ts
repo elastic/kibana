@@ -6,7 +6,8 @@
  */
 
 import type { AxiosInstance } from 'axios';
-import { normalizeAuthorizationHeaderValue, type GetTokenOpts } from '@kbn/connector-specs';
+import type { GetTokenOpts } from '@kbn/connector-specs';
+import { normalizeAuthorizationHeaderValue } from '@kbn/connector-specs/lite';
 import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getOAuthAuthorizationCodeAccessToken } from '../get_oauth_authorization_code_access_token';
 import { buildTokenResponseOptions } from '../request_oauth_token';

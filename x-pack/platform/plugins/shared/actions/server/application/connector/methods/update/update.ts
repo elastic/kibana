@@ -14,13 +14,17 @@ import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
-import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
+import {
+  validateConfig,
+  validateConnector,
+  validateSecrets,
+} from '../../../../lib/validate_with_schema';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
-import { tryCatch } from '../../../../lib';
+import { tryCatch } from '../../../../lib/try_catch';
 import {
   hasInboundEventIdentityAttributes,
   invalidateStoredConnectorEventIdentity,

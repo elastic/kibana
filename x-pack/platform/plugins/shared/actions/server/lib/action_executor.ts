@@ -7,11 +7,8 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
-import {
-  type AuthenticatedUser,
-  type SecurityServiceStart,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { AuthenticatedUser, SecurityServiceStart } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { cloneDeep, startsWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
@@ -20,9 +17,12 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { EARS_AUTH_ID, isConnectorAuthorizationError } from '@kbn/connector-specs';
+import {
+  createTaskRunError,
+  getErrorSource as getTaskManagerErrorSource,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running/errors';
+import { EARS_AUTH_ID, isConnectorAuthorizationError } from '@kbn/connector-specs/lite';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { logEarsEvent } from './ears/log_ears_event';
@@ -35,10 +35,7 @@ import {
   recordConnectorAuth,
   recordConnectorExecute,
 } from './connector_metrics';
-import {
-  getGenAiTokenTracking,
-  shouldTrackGenAiToken,
-} from './token_tracking/gen_ai_token_tracking';
+import { shouldTrackGenAiToken } from './token_tracking/should_track_gen_ai_token';
 import {
   validateConfig,
   validateConnector,
@@ -816,12 +813,16 @@ export class ActionExecutor {
           result.status === 'ok' &&
           shouldTrackGenAiToken(actionTypeId, `${validatedParams.subAction}`)
         ) {
-          getGenAiTokenTracking({
-            actionTypeId,
-            logger,
-            result,
-            validatedParams,
-          })
+          // The token counting code pulls in tokenizers and stream codecs, so it loads on first use.
+          import('./token_tracking/gen_ai_token_tracking')
+            .then(({ getGenAiTokenTracking }) =>
+              getGenAiTokenTracking({
+                actionTypeId,
+                logger,
+                result,
+                validatedParams,
+              })
+            )
             .then((tokenTracking) => {
               if (tokenTracking != null) {
                 set(event, 'kibana.action.execution.gen_ai.usage', {

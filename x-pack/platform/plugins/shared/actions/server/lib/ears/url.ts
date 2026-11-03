@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EARS_PROVIDERS } from '@kbn/connector-specs';
+import { EARS_PROVIDERS } from '@kbn/connector-specs/lite';
 
 const SUPPORTED_EARS_PROVIDERS = new Set<string>(EARS_PROVIDERS);
 const EARS_API_VERSION = 'v1';
