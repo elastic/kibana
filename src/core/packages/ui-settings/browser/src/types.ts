@@ -21,7 +21,6 @@ export type UiSettingsRuntimeState = Record<string, UiSettingsRuntimeEntry & Use
 
 /**
  * @deprecated Use {@link UiSettingsRuntimeState} instead.
- * @removeBy 9.0
  */
 export type UiSettingsState = Record<string, PublicUiSettingsParams & UserProvidedValues>;
 

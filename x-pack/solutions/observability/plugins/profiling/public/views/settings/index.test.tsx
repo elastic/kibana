@@ -65,7 +65,7 @@ describe('Settings', () => {
     expect(screen.queryByTestId('profilingSettingsLoadError')).not.toBeInTheDocument();
   });
 
-  it('shows a single error callout instead of the spinners when the setting definitions fail to load', () => {
+  it('shows a single error callout that replaces spinners when the setting definitions fail to load', () => {
     mockUseEditableSettings.mockReturnValue({
       ...editableSettings,
       loadError: new Error('Internal Server Error'),

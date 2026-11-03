@@ -163,7 +163,7 @@ describe('SettingsTab', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('should show an error callout instead of the spinner when the setting definitions fail to load', async () => {
+    it('should show an error callout that replaces the spinner when the setting definitions fail to load', async () => {
       coreStartMock.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
 
       const { findByTestId, queryByTestId } = renderSettingsTab();

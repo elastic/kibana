@@ -203,7 +203,7 @@ describe('GenAiSettingsApp', () => {
       expect(screen.queryByTestId('genAiSettingsLoadError')).not.toBeInTheDocument();
     });
 
-    it('should show an error callout instead of the spinner when the setting definitions fail to load', async () => {
+    it('should show an error callout that replaces the spinner when the setting definitions fail to load', async () => {
       coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
 
       renderComponent(

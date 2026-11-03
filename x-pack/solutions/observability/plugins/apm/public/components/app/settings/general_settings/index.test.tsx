@@ -59,7 +59,7 @@ describe('GeneralSettings', () => {
     expect(screen.queryByTestId('apmGeneralSettingsLoadError')).not.toBeInTheDocument();
   });
 
-  it('shows an error callout instead of the spinner when the setting definitions fail to load', () => {
+  it('shows an error callout that replaces the spinner when the setting definitions fail to load', () => {
     mockUseEditableSettings.mockReturnValue({
       ...editableSettings,
       loadError: new Error('Internal Server Error'),
