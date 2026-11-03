@@ -165,6 +165,7 @@ describe('WorkflowExecutionsFilters', () => {
 
     await waitFor(() => expect(screen.getByTestId('filterControls')).toBeInTheDocument());
     const { transformControls } = mockFilterControls.mock.calls[0][0];
+    expect(transformControls).toEqual(expect.any(Function));
     expect(
       transformControls?.([
         { field_name: 'status', selected_options: ['failed'] },
@@ -202,8 +203,10 @@ describe('WorkflowExecutionsFilters', () => {
     ]);
     expect(controlsUrlState).toEqual([{ field_name: 'status' }]);
     expect(dataViewSpec).toEqual(getWorkflowExecutionsFilterDataViewSpec(false));
-    expect(dataViewSpec?.fields).not.toHaveProperty(EXECUTED_BY_FILTER_FIELD);
-    expect(dataViewSpec?.fields).not.toHaveProperty(LEGACY_EXECUTED_BY_FILTER_FIELD);
+    const fields = dataViewSpec?.fields ?? {};
+    expect(Object.keys(fields)).not.toContain(EXECUTED_BY_FILTER_FIELD);
+    expect(Object.keys(fields)).not.toContain(LEGACY_EXECUTED_BY_FILTER_FIELD);
+    expect(transformControls).toEqual(expect.any(Function));
     expect(
       transformControls?.([
         { field_name: 'status' },
