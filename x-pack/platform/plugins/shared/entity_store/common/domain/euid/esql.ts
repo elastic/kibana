@@ -6,6 +6,7 @@
  */
 
 import { entityStoreConditionToESQL as conditionToESQL } from '../../esql/condition_to_esql';
+import { castField } from '../../esql/cast';
 import type { CastFieldOptions } from '../../esql/cast';
 import type {
   EntityDefinitionWithoutId,
@@ -460,7 +461,17 @@ export function getEuidEsqlDocumentsContainsIdFilter(
 export function getEuidEsqlEvaluation(
   entityDefinition: EntityDefinitionWithoutId,
   outputColumn: string,
-  { withTypeId = true }: { withTypeId?: boolean } = {}
+  {
+    withTypeId = true,
+    reduceMultiValued = true,
+  }: {
+    withTypeId?: boolean;
+    /**
+     * `false` leaves a single-field identity (e.g. `entity.id`) as it is, multi-valued included,
+     * for callers that expand the values into one row each afterwards (the graph).
+     */
+    reduceMultiValued?: boolean;
+  } = {}
 ): string {
   const { identityField, type: entityType } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
@@ -468,7 +479,9 @@ export function getEuidEsqlEvaluation(
   if (isSingleFieldIdentity(identityField)) {
     const expression = appendTypeIdIfNeeded(
       entityType,
-      esqlIdentityValue(identityField.singleField),
+      reduceMultiValued
+        ? esqlIdentityValue(identityField.singleField)
+        : castField(identityField.singleField),
       mustPrependTypeId
     );
     return `${outputColumn} = ${expression}`;

@@ -107,6 +107,12 @@ describe('getTargetEuidEsqlEvaluation', () => {
 
       expect(esql).not.toContain('CONCAT("generic:"');
     });
+
+    it('leaves a multi-valued entity.target.id unreduced, for the graph to expand into one row each', () => {
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.generic, '_target_generic_euid');
+
+      expect(esql).toBe('_target_generic_euid = TO_STRING(entity.target.id)');
+    });
   });
 });
 

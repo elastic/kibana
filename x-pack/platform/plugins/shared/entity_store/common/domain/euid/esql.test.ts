@@ -351,6 +351,14 @@ describe('getEuidEsqlEvaluation', () => {
     expect(normalize(result)).toBe(`entity.id = ${esqlIdentityValue('entity.id')}`);
   });
 
+  it('leaves a single-field identity unreduced with reduceMultiValued: false', () => {
+    const result = getEuidEsqlEvaluation(getBuiltInEntityDefinition('generic'), 'entity.id', {
+      reduceMultiValued: false,
+    });
+
+    expect(normalize(result)).toBe('entity.id = TO_STRING(entity.id)');
+  });
+
   it('returns bare assignment for single-field identity (service)', () => {
     const result = getEuidEsqlEvaluation(getBuiltInEntityDefinition('service'), 'entity.id');
 
