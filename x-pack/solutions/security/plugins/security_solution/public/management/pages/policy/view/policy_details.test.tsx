@@ -138,7 +138,7 @@ describe('Policy Details', () => {
           if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
-              results: { events: 0, active: 5, online: 3, error: 1, offline: 1 },
+              results: { events: 0, active: 7, online: 3, error: 1, offline: 1 },
               success: true,
             });
           }
@@ -271,23 +271,19 @@ describe('Policy Details', () => {
       expect(backButton).toHaveAttribute('href', `/app/security${policyListPath}`);
     });
 
-    it('should display agent stats as three health metadata items, with no "Total agents" item', async () => {
+    it('should display Total, Healthy and Unhealthy agent counts as header metadata', async () => {
       renderResult = render();
       await asyncActions;
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('policyAgentsSummary-healthy')).toHaveTextContent(
-          'Healthy: 3'
-        );
+        expect(renderResult.getByTestId('policyAgentsSummary-total')).toHaveTextContent('Total: 7');
       });
+      expect(renderResult.getByTestId('policyAgentsSummary-healthy')).toHaveTextContent(
+        'Healthy: 3'
+      );
       expect(renderResult.getByTestId('policyAgentsSummary-unhealthy')).toHaveTextContent(
         'Unhealthy: 1'
       );
-      expect(renderResult.getByTestId('policyAgentsSummary-offline')).toHaveTextContent(
-        'Offline: 1'
-      );
-      expect(renderResult.queryByTestId('policyAgentsSummary')).not.toBeInTheDocument();
-      expect(renderResult.queryByText(/Total agents/)).not.toBeInTheDocument();
     });
 
     it('should display event filters tab', async () => {

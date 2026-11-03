@@ -47,12 +47,23 @@ const PolicyDetailsLoaded = React.memo<{
   const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
   const { tabs, body } = usePolicyTabs();
 
+  // `AppHeader` metadata renders at most 3 items. Total (Fleet's `active` count) is not the sum of
+  // the shown states (it also counts updating, orphaned and uninstalled agents), so it is kept over
+  // Offline. Total is not a health state, so it renders as a plain text item.
   const metadata: AppHeaderMetadataItems = useMemo(() => {
+    const total = policyAgentStatusSummary?.active ?? 0;
     const online = policyAgentStatusSummary?.online ?? 0;
     const error = policyAgentStatusSummary?.error ?? 0;
-    const offline = policyAgentStatusSummary?.offline ?? 0;
 
     return [
+      {
+        type: 'text',
+        label: i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.totalMetadata',
+          { defaultMessage: 'Total: {count, number}', values: { count: total } }
+        ),
+        'data-test-subj': 'policyAgentsSummary-total',
+      },
       {
         type: 'health',
         color: 'success',
@@ -70,15 +81,6 @@ const PolicyDetailsLoaded = React.memo<{
           { defaultMessage: 'Unhealthy: {count, number}', values: { count: error } }
         ),
         'data-test-subj': 'policyAgentsSummary-unhealthy',
-      },
-      {
-        type: 'health',
-        color: 'subdued',
-        label: i18n.translate(
-          'xpack.securitySolution.endpoint.policyDetails.agentsSummary.offlineMetadata',
-          { defaultMessage: 'Offline: {count, number}', values: { count: offline } }
-        ),
-        'data-test-subj': 'policyAgentsSummary-offline',
       },
     ];
   }, [policyAgentStatusSummary]);
