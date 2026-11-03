@@ -57,18 +57,27 @@ describe('useEditableSettings', () => {
     expect(coreStart.settings.metadata.getAll).toHaveBeenCalledWith('namespace');
   });
 
-  it('shows a danger toast when the setting definitions fail to load', async () => {
+  it('reports loading until the setting definitions have loaded', async () => {
+    const { renderEditableSettings } = setup();
+
+    const { result } = renderEditableSettings();
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.loadError).toBeUndefined();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.loadError).toBeUndefined();
+  });
+
+  it('exposes the error when the setting definitions fail to load', async () => {
     const { coreStart, renderEditableSettings } = setup();
     coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Request failed'));
 
     const { result } = renderEditableSettings();
 
-    await waitFor(() =>
-      expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Unable to load settings',
-        text: 'Request failed',
-      })
-    );
+    expect(result.current.isLoading).toBe(true);
+    await waitFor(() => expect(result.current.loadError).toEqual(new Error('Request failed')));
+    expect(result.current.isLoading).toBe(false);
+    expect(coreStart.notifications.toasts.addDanger).not.toHaveBeenCalled();
     expect(result.current.fields).toEqual({});
   });
 });

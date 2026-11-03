@@ -11,6 +11,7 @@
     "@kbn/management-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/ui-callout",
     "@kbn/typed-react-router-config",
     "@kbn/core-chrome-browser",
     "@kbn/observability-ai-assistant-plugin",

@@ -106,17 +106,25 @@ describe('settings_context', () => {
     });
   });
 
-  it('should show a danger toast when the setting definitions fail to load', async () => {
+  it('should report loading until the setting definitions have loaded', async () => {
+    const { result } = setupSettingsContext();
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.loadError).toBeUndefined();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.loadError).toBeUndefined();
+  });
+
+  it('should expose the error when the setting definitions fail to load', async () => {
     const { result, addDanger } = setupSettingsContext({
       getDefinitions: jest.fn().mockRejectedValue(new Error('Internal Server Error')),
     });
 
     await waitFor(() => {
-      expect(addDanger).toHaveBeenCalledWith({
-        title: 'Unable to load settings',
-        text: 'Internal Server Error',
-      });
+      expect(result.current.loadError).toEqual(new Error('Internal Server Error'));
     });
+    expect(result.current.isLoading).toBe(false);
+    expect(addDanger).not.toHaveBeenCalled();
     expect(result.current.fields).toEqual({});
   });
 

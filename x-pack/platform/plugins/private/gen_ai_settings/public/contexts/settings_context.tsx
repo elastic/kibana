@@ -140,14 +140,6 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
       return getSettingsFields({ settingsKeys, uiSettings: settings?.client, definitions });
     },
     refetchOnWindowFocus: true,
-    onError(error: Error) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('xpack.genAiSettings.load.error', {
-          defaultMessage: 'Unable to load settings',
-        }),
-        text: error.message,
-      });
-    },
   });
 
   // Subscribe to UI settings changes to update in real-time when values change
@@ -267,6 +259,8 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
 
   return {
     fields: fieldsQuery.data ?? {},
+    isLoading: fieldsQuery.isLoading,
+    loadError: fieldsQuery.error instanceof Error ? fieldsQuery.error : undefined,
     unsavedChanges,
     handleFieldChange,
     saveAll: saveAllMutation.mutateAsync,

@@ -7,7 +7,6 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { IUiSettingsClient, UiSettingsMetadataState, UiSettingsType } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {
@@ -52,7 +51,7 @@ function getSettingsFields({
 
 export function useEditableSettings(settingsKeys: string[]) {
   const {
-    services: { settings, notifications },
+    services: { settings },
   } = useKibana();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -61,6 +60,8 @@ export function useEditableSettings(settingsKeys: string[]) {
     {}
   );
   const [definitions, setDefinitions] = useState<UiSettingsMetadataState>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<Error | undefined>();
 
   useEffect(() => {
     if (!settings) {
@@ -72,16 +73,13 @@ export function useEditableSettings(settingsKeys: string[]) {
       (result) => {
         if (isCurrent) {
           setDefinitions(result);
+          setIsLoading(false);
         }
       },
       (error: Error) => {
         if (isCurrent) {
-          notifications?.toasts.addDanger({
-            title: i18n.translate('xpack.observabilityShared.editableSettings.loadError', {
-              defaultMessage: 'Unable to load settings',
-            }),
-            text: error.message,
-          });
+          setIsLoading(false);
+          setLoadError(error);
         }
       }
     );
@@ -89,7 +87,7 @@ export function useEditableSettings(settingsKeys: string[]) {
     return () => {
       isCurrent = false;
     };
-  }, [settings, notifications]);
+  }, [settings]);
 
   const fields = useMemo(
     () => {
@@ -157,6 +155,8 @@ export function useEditableSettings(settingsKeys: string[]) {
 
   return {
     fields,
+    isLoading,
+    loadError,
     unsavedChanges,
     handleFieldChange,
     saveAll,

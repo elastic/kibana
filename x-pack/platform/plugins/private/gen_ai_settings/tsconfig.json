@@ -11,6 +11,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/ui-callout",
     "@kbn/spaces-plugin",
     "@kbn/shared-ux-router",
     "@kbn/config-schema",

@@ -18,10 +18,14 @@ import {
   SettingsApplication,
   DATA_TEST_SUBJ_SETTINGS_TITLE,
   DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR,
+  DATA_TEST_SUBJ_SETTINGS_LOADING,
   SPACE_SETTINGS_TAB_ID,
   GLOBAL_SETTINGS_TAB_ID,
 } from './application';
-import { DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR } from './query_input';
+import {
+  DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR,
+  DATA_TEST_SUBJ_DISABLED_CATEGORY_FILTER,
+} from './query_input';
 import {
   DATA_TEST_SUBJ_SETTINGS_EMPTY_STATE,
   DATA_TEST_SUBJ_SETTINGS_CLEAR_SEARCH_LINK,
@@ -127,6 +131,34 @@ describe('Settings application', () => {
     for (const category of spaceCategories) {
       expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
     }
+  });
+
+  it('shows a spinner and disables the search and category filter while the settings load', async () => {
+    const resolvers: Array<(value: Record<string, never>) => void> = [];
+    const services: SettingsApplicationServices = {
+      ...createSettingsApplicationServicesMock(),
+      getAllowlistedSettings: () =>
+        new Promise<Record<string, never>>((resolve) => {
+          resolvers.push(resolve);
+        }),
+    };
+
+    const { findByTestId, getByTestId, queryByTestId } = render(
+      wrap(<SettingsApplication />, services)
+    );
+
+    expect(await findByTestId(DATA_TEST_SUBJ_SETTINGS_TITLE)).toBeInTheDocument();
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeInTheDocument();
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeDisabled();
+    expect(getByTestId(DATA_TEST_SUBJ_DISABLED_CATEGORY_FILTER)).toBeDisabled();
+
+    await act(async () => {
+      resolvers.forEach((resolve) => resolve({}));
+    });
+
+    await waitFor(() => expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeNull());
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeEnabled();
+    expect(queryByTestId(DATA_TEST_SUBJ_DISABLED_CATEGORY_FILTER)).toBeNull();
   });
 
   it('shows an error instead of the form when the settings fail to load', async () => {

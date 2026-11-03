@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   apmServiceGroupMaxNumberOfServices,
   apmMaxNumberOfServices,
@@ -70,8 +71,16 @@ export function GeneralSettings() {
     (application.capabilities.apm['settings:save'] as boolean);
   const isProfilingPluginEnabled = useProfilingPluginSetting();
   const apmSettingsKeys = getApmSettingsKeys(isProfilingPluginEnabled);
-  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(apmSettingsKeys);
+  const {
+    fields,
+    isLoading,
+    loadError,
+    handleFieldChange,
+    unsavedChanges,
+    saveAll,
+    isSaving,
+    cleanUnsavedChanges,
+  } = useEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
     try {
@@ -99,6 +108,22 @@ export function GeneralSettings() {
   return (
     <>
       <EuiSpacer />
+      {isLoading && (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" data-test-subj="apmGeneralSettingsLoading" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {loadError && (
+        <KbnDangerCallout
+          title={i18n.translate('xpack.apm.apmSettings.load.error', {
+            defaultMessage: 'Unable to load settings',
+          })}
+          text={loadError.message}
+          data-test-subj="apmGeneralSettingsLoadError"
+        />
+      )}
       {apmSettingsKeys.map((settingKey) => {
         const field = fields[settingKey];
         if (!field) {

@@ -33,6 +33,7 @@ import { useServices } from './services';
 
 export const DATA_TEST_SUBJ_SETTINGS_TITLE = 'managementSettingsTitle';
 export const DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR = 'managementSettingsLoadError';
+export const DATA_TEST_SUBJ_SETTINGS_LOADING = 'managementSettingsLoading';
 export const SPACE_SETTINGS_TAB_ID = 'space-settings';
 export const GLOBAL_SETTINGS_TAB_ID = 'global-settings';
 
@@ -97,23 +98,9 @@ export const SettingsApplication = () => {
     setBadge(readOnlyBadge);
   }
 
-  if (isLoading) {
-    return <EuiLoadingSpinner size="xl" />;
-  }
-
-  if (loadError) {
-    return (
-      <KbnDangerCallout
-        title={i18nTexts.loadErrorTitle}
-        text={loadError.message}
-        data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR}
-      />
-    );
-  }
-
-  // Only enabled the Global settings tab if there are any global settings
-  // and if global settings can be shown
-  const globalTabEnabled = globalAllFields.length > 0 && canShowGlobalSettings;
+  // Only enable the Global settings tab if global settings can be shown and there are any global
+  // settings. Whether there are any is unknown until the settings load, so keep the tab until then.
+  const globalTabEnabled = canShowGlobalSettings && (isLoading || globalAllFields.length > 0);
 
   const tabs: SettingsTabs = {
     [SPACE_SETTINGS_TAB_ID]: {
@@ -138,21 +125,36 @@ export const SettingsApplication = () => {
     };
   }
 
-  const selectedTab = tabs[selectedTabId];
+  const selectedTab = tabs[selectedTabId] ?? tabs[SPACE_SETTINGS_TAB_ID];
+
+  const title = (
+    <EuiText>
+      <h1 data-test-subj={DATA_TEST_SUBJ_SETTINGS_TITLE}>{i18nTexts.advancedSettingsTitle}</h1>
+    </EuiText>
+  );
+
+  if (loadError) {
+    return (
+      <div>
+        {title}
+        <EuiSpacer size="m" />
+        <KbnDangerCallout
+          title={i18nTexts.loadErrorTitle}
+          text={loadError.message}
+          data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR}
+        />
+      </div>
+    );
+  }
 
   return (
     <div>
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText>
-            <h1 data-test-subj={DATA_TEST_SUBJ_SETTINGS_TITLE}>
-              {i18nTexts.advancedSettingsTitle}
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
+        <EuiFlexItem>{title}</EuiFlexItem>
         <EuiFlexItem>
           <QueryInput
             {...{ categories: Object.keys(selectedTab.categoryCounts), query, onQueryChange }}
+            isDisabled={isLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -179,7 +181,13 @@ export const SettingsApplication = () => {
         </>
       )}
       <EuiSpacer size="xl" />
-      {selectedTab.fields.length ? (
+      {isLoading ? (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" data-test-subj={DATA_TEST_SUBJ_SETTINGS_LOADING} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : selectedTab.fields.length ? (
         <>
           <Form
             fields={selectedTab.fields}
