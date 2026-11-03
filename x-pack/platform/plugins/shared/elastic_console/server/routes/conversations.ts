@@ -21,9 +21,9 @@ import {
 import { isElasticConsoleEnabled } from './is_enabled';
 
 // Identifier-like fields (conversation ids, agent ids, conversation round keys).
-const MAX_IDENTIFIER_LENGTH = 1_024;
+export const MAX_IDENTIFIER_LENGTH = 1_024;
 // Conversation titles are short, user-facing labels.
-const MAX_TITLE_LENGTH = 1_024;
+export const MAX_TITLE_LENGTH = 1_024;
 
 const getSpace = (basePath: string): string => {
   const spaceMatch = basePath.match(/(?:^|\/)s\/([^/]+)/);
