@@ -22,6 +22,7 @@ import {
   WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
 } from '@kbn/workflows';
+import { WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH } from '@kbn/workflows/common/constants';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import { resolveExecutedByProfiles } from '../utils/resolve_executed_by_profiles';
@@ -85,6 +86,14 @@ export function registerGetWorkflowExecutionsRoute({
             params: workflowIdParamSchema,
             query: schema.object(
               {
+                runName: schema.maybe(
+                  schema.string({
+                    maxLength: WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH,
+                    meta: {
+                      description: 'Filter by execution name using a case-insensitive substring.',
+                    },
+                  })
+                ),
                 statuses: schema.maybe(
                   schema.oneOf(
                     [
@@ -269,6 +278,7 @@ export function registerGetWorkflowExecutionsRoute({
           }
           const params: SearchWorkflowExecutionsParams = {
             workflowId,
+            runName: request.query.runName,
             statuses: parseExecutionStatuses(request.query.statuses),
             executionTypes: parseExecutionTypes(request.query.executionTypes),
             executedBy: Array.isArray(executedBy)
