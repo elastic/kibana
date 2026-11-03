@@ -10,7 +10,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -48,7 +47,7 @@ import { useOnboarding, useStartOnboardingSuggestions } from './use_onboarding';
 import { groupHasConnector } from '../sandbox_connectors/connect_sources_grid';
 import { useConnectorsByType } from '../sandbox_connectors/use_connectors_by_type';
 
-/** Steps after enable; driven by Proceed / Skip / Back. */
+/** Steps after enable; driven by Proceed / Skip. */
 type NavigableStep = Exclude<OnboardingStepId, 'enable'>;
 
 /** Shown until the suggestions run is created — same gathering UI, no blank spinner. */
@@ -95,6 +94,10 @@ const OPTIONAL_HINT = i18n.translate('xpack.nightshift.onboarding.steps.optional
   defaultMessage: 'Optional',
 });
 
+const ENABLE_HINT = i18n.translate('xpack.nightshift.onboarding.steps.enableHint', {
+  defaultMessage: 'One-time setup of this space',
+});
+
 const PROCEED_LABEL = i18n.translate('xpack.nightshift.onboarding.proceedButton', {
   defaultMessage: 'Proceed',
 });
@@ -103,18 +106,10 @@ const SKIP_STEP_LABEL = i18n.translate('xpack.nightshift.onboarding.skipStepButt
   defaultMessage: 'Skip this step',
 });
 
-const BACK_LABEL = i18n.translate('xpack.nightshift.onboarding.backButton', {
-  defaultMessage: 'Back',
-});
-
 const INVESTIGATE_SECTION_TITLE = i18n.translate(
   'xpack.nightshift.onboarding.investigate.sectionTitle',
   { defaultMessage: 'Try your first investigation' }
 );
-
-const backButtonStyles = css`
-  width: 100%;
-`;
 
 /**
  * First-run Nightshift: add signals and alerts, try a first investigation, create a first
@@ -143,7 +138,7 @@ export function NightshiftOnboarding({
   const { groups: connectorGroups } = useConnectorsByType();
   const hasTelemetryConnector = groupHasConnector(connectorGroups, 'telemetry');
   const hasAdditionalConnector = groupHasConnector(connectorGroups, 'additional');
-  // Null until the user moves; then Proceed / Skip / Back own the step.
+  // Null until the user moves; then Proceed / Skip own the step.
   const [activeStep, setActiveStep] = useState<NavigableStep | null>(null);
   const [skippedInvestigate, setSkippedInvestigate] = useState(false);
   // Filled the moment Investigate succeeds, so step 5 shows the trial card before the list refetches.
@@ -260,9 +255,11 @@ export function NightshiftOnboarding({
     step === 'automate' ? 'current' : 'disabled';
 
   // Completed steps (except enable) are links so the user can jump back; enable stays locked.
+  // Hints (Optional / enable setup) only show on the current step.
   const steps: Record<OnboardingStepId, OnboardingStepState> = {
     enable: {
       status: isEnabled ? 'complete' : 'current',
+      hint: step === 'enable' ? ENABLE_HINT : undefined,
     },
     connect: {
       status: connectStatus,
@@ -270,139 +267,100 @@ export function NightshiftOnboarding({
     },
     sources: {
       status: sourcesStatus,
-      hint: OPTIONAL_HINT,
+      hint: step === 'sources' ? OPTIONAL_HINT : undefined,
       onClick: sourcesStatus === 'complete' ? () => goTo('sources') : undefined,
     },
     investigate: {
       status: investigateStatus,
       hint:
-        step === 'investigate' && (!execution || execution.status === 'running')
-          ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
-              defaultMessage: 'Analyzing your data…',
-            })
-          : OPTIONAL_HINT,
+        step === 'investigate'
+          ? !execution || execution.status === 'running'
+            ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
+                defaultMessage: 'Analyzing your data…',
+              })
+            : OPTIONAL_HINT
+          : undefined,
       onClick: investigateStatus === 'complete' ? () => goTo('investigate') : undefined,
     },
     automate: {
       status: automateStatus,
-      hint: OPTIONAL_HINT,
+      hint: step === 'automate' ? OPTIONAL_HINT : undefined,
     },
   };
 
   const stepAction =
     step === 'connect' ? (
       hasTelemetryConnector ? (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiButton
-            fill
-            fullWidth
-            size="s"
-            iconType="sortRight"
-            iconSide="right"
-            onClick={() => goTo('sources')}
-            data-test-subj="nightshiftOnboardingContinueButton"
-          >
-            {PROCEED_LABEL}
-          </EuiButton>
-        </EuiFlexGroup>
-      ) : undefined
-    ) : step === 'sources' ? (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {hasAdditionalConnector ? (
-          <EuiButton
-            fill
-            fullWidth
-            size="s"
-            iconType="sortRight"
-            iconSide="right"
-            isLoading={startSuggestions.isLoading}
-            onClick={goToInvestigate}
-            data-test-subj="nightshiftOnboardingContinueButton"
-          >
-            {PROCEED_LABEL}
-          </EuiButton>
-        ) : (
-          <EuiButton
-            fill
-            fullWidth
-            size="s"
-            iconType="sortRight"
-            iconSide="right"
-            isLoading={startSuggestions.isLoading}
-            onClick={goToInvestigate}
-            data-test-subj="nightshiftOnboardingStartButton"
-          >
-            {SKIP_STEP_LABEL}
-          </EuiButton>
-        )}
-        <EuiButtonEmpty
-          size="s"
-          iconType="sortLeft"
-          iconSide="left"
-          css={backButtonStyles}
-          onClick={() => goTo('connect')}
-          data-test-subj="nightshiftOnboardingBackToTelemetryButton"
-        >
-          {BACK_LABEL}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
-    ) : step === 'investigate' ? (
-      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiButton
           fill
           fullWidth
           size="s"
           iconType="sortRight"
           iconSide="right"
-          onClick={() => {
-            setSkippedInvestigate(true);
-            goTo('automate');
-          }}
-          data-test-subj="nightshiftOnboardingSkipInvestigationButton"
-        >
-          {SKIP_STEP_LABEL}
-        </EuiButton>
-        <EuiButtonEmpty
-          size="s"
-          iconType="sortLeft"
-          iconSide="left"
-          css={backButtonStyles}
           onClick={() => goTo('sources')}
-          data-test-subj="nightshiftOnboardingBackToConnectButton"
+          data-test-subj="nightshiftOnboardingContinueButton"
         >
-          {BACK_LABEL}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
-    ) : step === 'automate' ? (
-      <EuiFlexGroup direction="column" gutterSize="s">
+          {PROCEED_LABEL}
+        </EuiButton>
+      ) : undefined
+    ) : step === 'sources' ? (
+      hasAdditionalConnector ? (
         <EuiButton
+          fill
           fullWidth
           size="s"
           iconType="sortRight"
           iconSide="right"
-          onClick={onFinish}
-          data-test-subj="nightshiftOnboardingFinishButton"
+          isLoading={startSuggestions.isLoading}
+          onClick={goToInvestigate}
+          data-test-subj="nightshiftOnboardingContinueButton"
         >
-          {trialInvestigation?.in_progress
-            ? SKIP_STEP_LABEL
-            : i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-                defaultMessage: "I'll do it later",
-              })}
+          {PROCEED_LABEL}
         </EuiButton>
-        <EuiButtonEmpty
+      ) : (
+        <EuiButton
+          fill
+          fullWidth
           size="s"
-          iconType="sortLeft"
-          iconSide="left"
-          css={backButtonStyles}
-          onClick={() => {
-            setSkippedInvestigate(false);
-            goTo('investigate');
-          }}
-          data-test-subj="nightshiftOnboardingBackToInvestigateButton"
+          iconType="sortRight"
+          iconSide="right"
+          isLoading={startSuggestions.isLoading}
+          onClick={goToInvestigate}
+          data-test-subj="nightshiftOnboardingStartButton"
         >
-          {BACK_LABEL}
-        </EuiButtonEmpty>
-      </EuiFlexGroup>
+          {SKIP_STEP_LABEL}
+        </EuiButton>
+      )
+    ) : step === 'investigate' ? (
+      <EuiButton
+        fill
+        fullWidth
+        size="s"
+        iconType="sortRight"
+        iconSide="right"
+        onClick={() => {
+          setSkippedInvestigate(true);
+          goTo('automate');
+        }}
+        data-test-subj="nightshiftOnboardingSkipInvestigationButton"
+      >
+        {SKIP_STEP_LABEL}
+      </EuiButton>
+    ) : step === 'automate' ? (
+      <EuiButton
+        fullWidth
+        size="s"
+        iconType="sortRight"
+        iconSide="right"
+        onClick={onFinish}
+        data-test-subj="nightshiftOnboardingFinishButton"
+      >
+        {trialInvestigation?.in_progress
+          ? SKIP_STEP_LABEL
+          : i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
+              defaultMessage: "I'll do it later",
+            })}
+      </EuiButton>
     ) : undefined;
 
   const sectionTitle =
