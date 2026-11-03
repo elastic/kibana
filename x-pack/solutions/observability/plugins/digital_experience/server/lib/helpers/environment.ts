@@ -11,6 +11,7 @@ import {
   SERVICE_ENVIRONMENT,
 } from '@kbn/apm-types';
 import { termQuery } from '@kbn/es-query';
+import { MAX_ENVIRONMENT_LENGTH } from '../constants';
 
 /**
  * Documents without an environment, as APM's `environmentQuery` defines them: the "Not defined"
@@ -49,4 +50,16 @@ export const environmentFilter = (fields: string[], environment?: string) => {
 export const withNotDefined = (environments: string[], notDefinedCount: number): string[] => {
   const names = environments.filter((name) => name !== ENVIRONMENT_NOT_DEFINED_VALUE);
   return notDefinedCount > 0 ? [...names, ENVIRONMENT_NOT_DEFINED_VALUE] : names;
+};
+
+/** Dedupes the environments into "Not defined" first, then the accepted names alphabetically. */
+export const sortEnvironments = (environments: Iterable<string>): string[] => {
+  const unique = new Set(environments);
+  const names = [...unique]
+    .filter((name) => name !== ENVIRONMENT_NOT_DEFINED_VALUE)
+    .filter((name) => name.length <= MAX_ENVIRONMENT_LENGTH)
+    .sort();
+  return unique.has(ENVIRONMENT_NOT_DEFINED_VALUE)
+    ? [ENVIRONMENT_NOT_DEFINED_VALUE, ...names]
+    : names;
 };

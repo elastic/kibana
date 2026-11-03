@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/nightshift-shared'
   - '@kbn/agent-builder-server'
   - '@kbn/agentic-investigations-plugin'
+  - '@kbn/evals-plugin'
   - '@kbn/storage-adapter'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/i18n'
@@ -75,12 +76,15 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/eval-kql'
   - '@kbn/rrule'
+  - '@kbn/inference-tracing'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
