@@ -177,12 +177,16 @@ const mapFetchError = (error: unknown): GenerateConnectorTypeError => {
     return error;
   }
   const message = error instanceof Error ? error.message : 'Failed to fetch the documentation.';
+  const cause = typeof error === 'object' && error && 'cause' in error ? error.cause : undefined;
   const code =
     typeof error === 'object' && error && 'code' in error
-      ? String((error as { code?: unknown }).code ?? '')
+      ? String(error.code ?? '')
+      : typeof cause === 'object' && cause && 'code' in cause
+      ? String(cause.code ?? '')
       : '';
   if (
     code === 'ERR_FR_MAX_BODY_LENGTH_EXCEEDED' ||
+    code === 'UND_ERR_RES_EXCEEDED_MAX_SIZE' ||
     /maxContentLength|maxBodyLength|maxResponseSize|entity too large/i.test(message)
   ) {
     return new GenerateConnectorTypeError('too_large', message, 400);
@@ -277,54 +281,63 @@ export const fetchDocumentation = async ({
       throw new GenerateConnectorTypeError('blocked_destination', message, 400);
     }
 
-    let response: DocumentationResponse;
+    const dispatcher = createDispatcher(configurationUtilities, timeout, maxContentLength);
     const abort = abortAfter(timeout);
     try {
-      logger.debug(`Fetching connector documentation from ${current}`);
-      response = await fetchImpl(current, {
-        method: 'GET',
-        redirect: 'manual',
-        headers: { accept: ACCEPT_HEADER },
-        signal: abort.signal,
-        dispatcher: createDispatcher(configurationUtilities, timeout, maxContentLength),
-      });
-    } catch (error) {
-      throw mapFetchError(error);
-    } finally {
-      abort.cancel();
-    }
-
-    if (response.status >= 300 && response.status < 400) {
-      if (followed >= maxRedirects) {
-        throw new GenerateConnectorTypeError('fetch_failed', 'Too many redirects.', 400);
+      let response: DocumentationResponse;
+      try {
+        logger.debug(`Fetching connector documentation from ${current}`);
+        response = await fetchImpl(current, {
+          method: 'GET',
+          redirect: 'manual',
+          headers: { accept: ACCEPT_HEADER },
+          signal: abort.signal,
+          dispatcher,
+        });
+      } catch (error) {
+        throw mapFetchError(error);
       }
-      const location = readHeader(response.headers, 'location');
-      if (!location) {
+
+      if (response.status >= 300 && response.status < 400) {
+        if (followed >= maxRedirects) {
+          throw new GenerateConnectorTypeError('fetch_failed', 'Too many redirects.', 400);
+        }
+        const location = readHeader(response.headers, 'location');
+        if (!location) {
+          throw new GenerateConnectorTypeError(
+            'fetch_failed',
+            'Redirect is missing a Location header.',
+            400
+          );
+        }
+        currentUrl = parseHttpUrl(location, currentUrl);
+        continue;
+      }
+
+      const contentType = readHeader(response.headers, 'content-type') ?? '';
+      const mediaType = mediaTypeOf(contentType);
+      if (!ALLOWED_CONTENT_TYPES.has(mediaType)) {
         throw new GenerateConnectorTypeError(
-          'fetch_failed',
-          'Redirect is missing a Location header.',
+          'unsupported_content',
+          `Unsupported content type "${mediaType || 'unknown'}".`,
           400
         );
       }
-      currentUrl = parseHttpUrl(location, currentUrl);
-      continue;
-    }
 
-    const contentType = readHeader(response.headers, 'content-type') ?? '';
-    const mediaType = mediaTypeOf(contentType);
-    if (!ALLOWED_CONTENT_TYPES.has(mediaType)) {
-      throw new GenerateConnectorTypeError(
-        'unsupported_content',
-        `Unsupported content type "${mediaType || 'unknown'}".`,
-        400
-      );
+      let body: string;
+      try {
+        body = await readBody(response, maxContentLength);
+      } catch (error) {
+        throw mapFetchError(error);
+      }
+      return {
+        url: current,
+        contentType: mediaType,
+        text: extractText({ contentType: mediaType, body }),
+      };
+    } finally {
+      abort.cancel();
+      await dispatcher.destroy();
     }
-
-    const body = await readBody(response, maxContentLength);
-    return {
-      url: current,
-      contentType: mediaType,
-      text: extractText({ contentType: mediaType, body }),
-    };
   }
 };

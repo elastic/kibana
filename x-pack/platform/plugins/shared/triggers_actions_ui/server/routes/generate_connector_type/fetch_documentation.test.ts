@@ -104,6 +104,8 @@ describe('fetchDocumentation', () => {
       contentType: 'text/plain',
       text: 'hello',
     });
+    expect(fetchMock.mock.calls[0][1].dispatcher.destroyed).toBe(true);
+    expect(fetchMock.mock.calls[1][1].dispatcher.destroyed).toBe(true);
   });
 
   it('stops after max redirects', async () => {
@@ -143,6 +145,42 @@ describe('fetchDocumentation', () => {
 
     await expect(fetchDocumentation(fetchOpts())).rejects.toMatchObject({
       reason: 'too_large',
+      statusCode: 400,
+    });
+  });
+
+  it('maps a body stream size error to too_large', async () => {
+    fetchMock.mockResolvedValue({
+      status: 200,
+      headers: { get: () => 'text/plain' },
+      text: async () => {
+        throw new TypeError('terminated', {
+          cause: Object.assign(new Error('Response size exceeded'), {
+            code: 'UND_ERR_RES_EXCEEDED_MAX_SIZE',
+          }),
+        });
+      },
+    });
+
+    await expect(fetchDocumentation(fetchOpts())).rejects.toMatchObject({
+      reason: 'too_large',
+      statusCode: 400,
+    });
+  });
+
+  it('maps a body stream timeout to fetch_failed', async () => {
+    fetchMock.mockResolvedValue({
+      status: 200,
+      headers: { get: () => 'text/plain' },
+      text: async () => {
+        throw new TypeError('terminated', {
+          cause: Object.assign(new Error('Body timeout'), { code: 'UND_ERR_BODY_TIMEOUT' }),
+        });
+      },
+    });
+
+    await expect(fetchDocumentation(fetchOpts())).rejects.toMatchObject({
+      reason: 'fetch_failed',
       statusCode: 400,
     });
   });
