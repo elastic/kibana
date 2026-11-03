@@ -89,7 +89,7 @@ ca="$(pem_path SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 # A connector set is the group of preconfigured connectors one Scout stack starts with,
 # scout/connector_sets/<set>.yml. The eval saves every connector in the set on the investigator, as
 # a user would, and the agent finds them in connectors.md like in production. The ORCA shard uses
-# `orcabench`; any other run with customer0 Elasticsearch credentials uses `customer0`.
+# `orcabench`; any other run with Elasticsearch credentials uses `default`.
 
 connector_set=''
 es_url=''
@@ -108,26 +108,26 @@ if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcaben
   es_url="$(config_value '.nightshiftOrcaEs.url')"
   es_key="$(config_value '.nightshiftOrcaEs.apiKey')"
 else
-  # The c0-es URL and key come from one source, so a partial profile block is never completed from
-  # the shell. The Vault field keeps its original name, `nightshift.telemetry`.
+  # The Elasticsearch URL and key come from one source, so a partial profile block is never
+  # completed from the shell. The Vault field keeps its original name, `nightshift.telemetry`.
   es_url="$(config_value '.nightshift.telemetry.url')"
   es_key="$(config_value '.nightshift.telemetry.apiKey')"
   if [[ -z "$es_url$es_key" ]]; then
-    es_url="${NIGHTSHIFT_C0_ES_URL:-}"
-    es_key="${NIGHTSHIFT_C0_ES_API_KEY:-}"
+    es_url="${NIGHTSHIFT_ES_URL:-}"
+    es_key="${NIGHTSHIFT_ES_API_KEY:-}"
   fi
   if [[ -n "$es_url$es_key" ]]; then
     if [[ -z "$es_url" || -z "$es_key" ]]; then
-      echo "nightshift-investigations scout hook: the customer0 connector set requires both the" \
-        "c0-es URL and API key from one source (nightshift.telemetry or NIGHTSHIFT_C0_ES_*)" >&2
+      echo "nightshift-investigations scout hook: the default connector set requires both the" \
+        "Elasticsearch URL and API key from one source (nightshift.telemetry or NIGHTSHIFT_ES_*)" >&2
       exit 1
     fi
     # The URL becomes unredacted connector config, so credentials belong in the API key alone.
     if [[ "$es_url" == *@* ]]; then
-      echo "nightshift-investigations scout hook: the c0-es URL must not embed credentials" >&2
+      echo "nightshift-investigations scout hook: the Elasticsearch URL must not embed credentials" >&2
       exit 1
     fi
-    connector_set=customer0
+    connector_set=default
   fi
 fi
 if [[ -n "$connector_set" && -z "$api_key" ]]; then
@@ -190,13 +190,10 @@ HOOK_HOST="$host" \
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
     } + (if $ENV.HOOK_CONNECTOR_SET == "" then {} else {
       NIGHTSHIFT_CONNECTOR_SET: $ENV.HOOK_CONNECTOR_SET,
-      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: $ENV.HOOK_CONNECTORS_CONFIG
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: $ENV.HOOK_CONNECTORS_CONFIG,
+      NIGHTSHIFT_ES_URL: $ENV.HOOK_ES_URL,
+      NIGHTSHIFT_ES_API_KEY: $ENV.HOOK_ES_KEY
     } end) + (if $ENV.HOOK_CONNECTOR_SET == "orcabench" then {
-      NIGHTSHIFT_DATASETS: "orcabench",
-      NIGHTSHIFT_ORCABENCH_ES_URL: $ENV.HOOK_ES_URL,
-      NIGHTSHIFT_ORCABENCH_ES_API_KEY: $ENV.HOOK_ES_KEY
-    } elif $ENV.HOOK_CONNECTOR_SET == "customer0" then {
-      NIGHTSHIFT_C0_ES_URL: $ENV.HOOK_ES_URL,
-      NIGHTSHIFT_C0_ES_API_KEY: $ENV.HOOK_ES_KEY
+      NIGHTSHIFT_DATASETS: "orcabench"
     } else {} end))
   }'

@@ -162,7 +162,7 @@ describe('ORCA selection', () => {
       });
     }
   );
-  it.each([{}, { NIGHTSHIFT_CONNECTOR_SET: 'customer0' }])(
+  it.each([{}, { NIGHTSHIFT_CONNECTOR_SET: 'default' }])(
     'rejects an ORCA run on a reused server with another connector set: %j',
     (connectorSet) => {
       expect(() =>

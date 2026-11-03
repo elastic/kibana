@@ -32,17 +32,17 @@ const putBody = (fetch: jest.Mock) => {
 };
 
 describe('saveConnectorSetOnInvestigator', () => {
-  it('saves the customer0 set and keeps the rest of the saved agent', async () => {
+  it('saves the default set and keeps the rest of the saved agent', async () => {
     const fetch = fetchAgent();
 
-    await saveConnectorSetOnInvestigator(fetch, { NIGHTSHIFT_CONNECTOR_SET: 'customer0' });
+    await saveConnectorSetOnInvestigator(fetch, { NIGHTSHIFT_CONNECTOR_SET: 'default' });
 
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch.mock.calls[0][0]).toBe('/api/agent_builder/agents/nightshift.investigation');
     expect(putBody(fetch as unknown as jest.Mock)).toEqual({
       configuration: {
         ...savedAgent.configuration,
-        connector_ids: ['c0-es'],
+        connector_ids: ['elasticsearch'],
       },
     });
   });

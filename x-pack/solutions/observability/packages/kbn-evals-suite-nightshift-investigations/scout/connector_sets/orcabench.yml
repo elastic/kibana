@@ -6,9 +6,9 @@ xpack.actions.preconfigured.orcabench-es:
   name: orcabench_es
   actionTypeId: .http
   config:
-    url: ${NIGHTSHIFT_ORCABENCH_ES_URL}
+    url: ${NIGHTSHIFT_ES_URL}
     hasAuth: false
     authType: null
   secrets:
     secretHeaders:
-      Authorization: "ApiKey ${NIGHTSHIFT_ORCABENCH_ES_API_KEY}"
+      Authorization: "ApiKey ${NIGHTSHIFT_ES_API_KEY}"

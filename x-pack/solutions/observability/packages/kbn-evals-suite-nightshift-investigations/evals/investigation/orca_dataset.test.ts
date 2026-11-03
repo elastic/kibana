@@ -133,8 +133,8 @@ describe('ORCA telemetry evidence', () => {
 
 describe('ORCA source preflight', () => {
   const env = {
-    NIGHTSHIFT_ORCABENCH_ES_URL: 'https://orca.example',
-    NIGHTSHIFT_ORCABENCH_ES_API_KEY: 'private-key',
+    NIGHTSHIFT_ES_URL: 'https://orca.example',
+    NIGHTSHIFT_ES_API_KEY: 'private-key',
     NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
   };
   it('checks all three historical signals with the read key', async () => {

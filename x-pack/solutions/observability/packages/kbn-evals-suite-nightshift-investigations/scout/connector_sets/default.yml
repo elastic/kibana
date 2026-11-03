@@ -1,0 +1,14 @@
+# The `default` connector set: one Elasticsearch connector to the cluster in the suite config's
+# `nightshift.telemetry` block. evals/investigation/connector_sets.ts lists this id and saves it on
+# the investigator. Credentials stay in the hook environment.
+# `.http` is required because sandbox credential injection does not support `.webhook`.
+xpack.actions.preconfigured.elasticsearch:
+  name: elasticsearch
+  actionTypeId: .http
+  config:
+    url: ${NIGHTSHIFT_ES_URL}
+    hasAuth: false
+    authType: null
+  secrets:
+    secretHeaders:
+      Authorization: "ApiKey ${NIGHTSHIFT_ES_API_KEY}"

@@ -28,18 +28,20 @@ export const CUSTOMER0_CUSTOM_CONTEXT: readonly string[] = [
 export const RETROSPECTIVE_GUARDRAIL_CONTEXT =
   "Evaluation guardrail: this alert fired in the past and has since been resolved. Investigate it as if it is the alert's timestamp now, using only evidence that existed then. Bound every telemetry query to end no later than one hour after the alert's timestamp. Do not read human discussion of this incident (Slack or chat threads, including replies under the alert, incident or ticket records, status-page post-mortems, post-incident reviews), and do not use GitHub issues, pull requests, commits or comments created after the alert's timestamp. Code, commits, deploys and config changes from before the alert are fair game.";
 
-export interface InvestigationDatasetIdentity {
+/**
+ * The custom context snippets an investigation dataset runs with. Stored datasets are not named
+ * `nightshift/customer0…`, so they are recognized by their `customer0` tag.
+ */
+export const getDatasetCustomContext = ({
+  name,
+  tags = [],
+}: {
   name: string;
   tags?: readonly string[];
-}
-
-/** Stored datasets are not named `nightshift/customer0…`, so they are recognized by their tag. */
-export const isCustomer0Dataset = ({ name, tags = [] }: InvestigationDatasetIdentity): boolean =>
-  name.startsWith('nightshift/customer0') || tags.includes('customer0');
-
-/** The custom context snippets an investigation dataset runs with. */
-export const getDatasetCustomContext = (dataset: InvestigationDatasetIdentity): readonly string[] =>
-  isCustomer0Dataset(dataset) ? [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT] : [];
+}): readonly string[] =>
+  name.startsWith('nightshift/customer0') || tags.includes('customer0')
+    ? [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT]
+    : [];
 
 /** Replaces the space's custom context with exactly these snippets. */
 export const replaceCustomContext = async (

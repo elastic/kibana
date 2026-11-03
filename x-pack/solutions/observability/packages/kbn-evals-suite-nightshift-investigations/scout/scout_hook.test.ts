@@ -233,7 +233,7 @@ describe('nightshift-investigations scout hook', () => {
       const { status } = runHook(
         {
           nightshift: {
-            telemetry: { url: 'https://remote.example.com', apiKey: 'SECRET_C0_ES_KEY' },
+            telemetry: { url: 'https://remote.example.com', apiKey: 'SECRET_ES_KEY' },
           },
           sandbox: { ...SANDBOX, apiKey: 'SECRET_API_KEY' },
         },
@@ -242,7 +242,7 @@ describe('nightshift-investigations scout hook', () => {
       expect(status).toBe(0);
       const argv = readFileSync(argvLog, 'utf8');
       expect(argv).not.toContain('SECRET_API_KEY');
-      expect(argv).not.toContain('SECRET_C0_ES_KEY');
+      expect(argv).not.toContain('SECRET_ES_KEY');
     } finally {
       rmSync(shimDir, { recursive: true, force: true });
     }
@@ -265,15 +265,15 @@ describe('nightshift-investigations scout hook', () => {
     expect(result.output).toEqual({});
   });
 
-  it('exports the customer0 connector set from the profile, with shell fallback', () => {
+  it('exports the default connector set from the profile, with shell fallback', () => {
     const shell = {
-      NIGHTSHIFT_C0_ES_URL: 'https://shell.example.com',
-      NIGHTSHIFT_C0_ES_API_KEY: 'shell-key',
+      NIGHTSHIFT_ES_URL: 'https://shell.example.com',
+      NIGHTSHIFT_ES_API_KEY: 'shell-key',
     };
     expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
       ...shell,
-      NIGHTSHIFT_CONNECTOR_SET: 'customer0',
-      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/customer0.yml'),
+      NIGHTSHIFT_CONNECTOR_SET: 'default',
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/default.yml'),
     });
     expect(
       runHook(
@@ -286,17 +286,17 @@ describe('nightshift-investigations scout hook', () => {
         shell
       ).output.env
     ).toMatchObject({
-      NIGHTSHIFT_C0_ES_URL: 'https://profile.example.com',
-      NIGHTSHIFT_C0_ES_API_KEY: 'profile-key',
+      NIGHTSHIFT_ES_URL: 'https://profile.example.com',
+      NIGHTSHIFT_ES_API_KEY: 'profile-key',
     });
   });
 
   it.each([{ url: 'https://remote.example.com' }, { apiKey: 'key' }])(
-    'rejects incomplete c0-es settings %j',
+    'rejects incomplete Elasticsearch settings %j',
     (telemetry) => {
       const result = runHook({ sandbox: SANDBOX, nightshift: { telemetry } });
       expect(result.status).not.toBe(0);
-      expect(result.stderr).toContain('requires both the c0-es URL and API key');
+      expect(result.stderr).toContain('requires both the Elasticsearch URL and API key');
     }
   );
 
@@ -305,22 +305,22 @@ describe('nightshift-investigations scout hook', () => {
       nightshift: { telemetry: { url: 'https://remote.example.com', apiKey: 'key' } },
     });
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain('customer0 connector set requires sandbox credentials');
+    expect(result.stderr).toContain('default connector set requires sandbox credentials');
   });
 
-  describe('customer0 connector set', () => {
-    const C0_ES = { url: 'https://remote.example.com', apiKey: 'remote-key' };
-    const PROFILE = { sandbox: SANDBOX, nightshift: { telemetry: C0_ES } };
+  describe('default connector set', () => {
+    const ES = { url: 'https://remote.example.com', apiKey: 'remote-key' };
+    const PROFILE = { sandbox: SANDBOX, nightshift: { telemetry: ES } };
 
-    it('preconfigures the c0-es connector', () => {
+    it('preconfigures the elasticsearch connector', () => {
       const { output } = runHook(PROFILE);
       expect(output).toEqual({
         env: {
           ...runHook({ sandbox: SANDBOX }).output.env,
-          NIGHTSHIFT_CONNECTOR_SET: 'customer0',
-          NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/customer0.yml'),
-          NIGHTSHIFT_C0_ES_URL: 'https://remote.example.com',
-          NIGHTSHIFT_C0_ES_API_KEY: 'remote-key',
+          NIGHTSHIFT_CONNECTOR_SET: 'default',
+          NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/default.yml'),
+          NIGHTSHIFT_ES_URL: 'https://remote.example.com',
+          NIGHTSHIFT_ES_API_KEY: 'remote-key',
         },
       });
 
@@ -331,8 +331,8 @@ describe('nightshift-investigations scout hook', () => {
           output.env.SANDBOX_KIBANA_CONFIG,
           output.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG,
         ]);
-        expect(xpack.actions.preconfigured['c0-es']).toMatchObject({
-          name: 'c0_es',
+        expect(xpack.actions.preconfigured.elasticsearch).toMatchObject({
+          name: 'elasticsearch',
           config: { url: 'https://remote.example.com' },
           secrets: { secretHeaders: { Authorization: 'ApiKey remote-key' } },
         });
@@ -347,20 +347,20 @@ describe('nightshift-investigations scout hook', () => {
       expect(
         runHook({
           ...PROFILE,
-          nightshift: { ...PROFILE.nightshift, telemetry: { ...C0_ES, readableIndices: 'logs-*' } },
+          nightshift: { ...PROFILE.nightshift, telemetry: { ...ES, readableIndices: 'logs-*' } },
         }).output
       ).toEqual(runHook(PROFILE).output);
     });
 
     it.each([{ url: 'https://other.example.com' }, { apiKey: 'rotated-key' }])(
-      'changes the Scout fingerprint when c0-es settings change: %j',
+      'changes the Scout fingerprint when Elasticsearch settings change: %j',
       (settings) => {
         // The evals CLI restarts a reused Scout whenever the hook's env output changes.
         const configured = runHook(PROFILE).output;
         expect(
           runHook({
             ...PROFILE,
-            nightshift: { ...PROFILE.nightshift, telemetry: { ...C0_ES, ...settings } },
+            nightshift: { ...PROFILE.nightshift, telemetry: { ...ES, ...settings } },
           }).output
         ).not.toEqual(configured);
         expect(runHook({ sandbox: SANDBOX }).output).not.toEqual(configured);
@@ -368,38 +368,41 @@ describe('nightshift-investigations scout hook', () => {
     );
 
     it.each([
-      [{ url: 'https://profile.example.com' }, { NIGHTSHIFT_C0_ES_API_KEY: 'k' }],
-      [{ apiKey: 'profile-key' }, { NIGHTSHIFT_C0_ES_URL: 'https://shell.example.com' }],
-    ])('rejects profile c0-es %j with env %j: URL and key need one source', (telemetry, env) => {
-      const { status, stderr } = runHook({ sandbox: SANDBOX, nightshift: { telemetry } }, env);
-      expect(status).toBe(1);
-      expect(stderr).toContain('requires both the c0-es URL and API key from one source');
-    });
+      [{ url: 'https://profile.example.com' }, { NIGHTSHIFT_ES_API_KEY: 'k' }],
+      [{ apiKey: 'profile-key' }, { NIGHTSHIFT_ES_URL: 'https://shell.example.com' }],
+    ])(
+      'rejects profile Elasticsearch %j with env %j: URL and key need one source',
+      (telemetry, env) => {
+        const { status, stderr } = runHook({ sandbox: SANDBOX, nightshift: { telemetry } }, env);
+        expect(status).toBe(1);
+        expect(stderr).toContain('requires both the Elasticsearch URL and API key from one source');
+      }
+    );
 
     it.each<Record<string, string>>([
-      { NIGHTSHIFT_C0_ES_URL: 'https://shell.example.com' },
-      { NIGHTSHIFT_C0_ES_API_KEY: 'SECRET_SHELL_KEY' },
-    ])('rejects incomplete shell c0-es settings %j without echoing credentials', (env) => {
+      { NIGHTSHIFT_ES_URL: 'https://shell.example.com' },
+      { NIGHTSHIFT_ES_API_KEY: 'SECRET_SHELL_KEY' },
+    ])('rejects incomplete shell Elasticsearch settings %j without echoing credentials', (env) => {
       const { status, stderr } = runHook({ sandbox: SANDBOX }, env);
       expect(status).toBe(1);
-      expect(stderr).toContain('requires both the c0-es URL and API key from one source');
+      expect(stderr).toContain('requires both the Elasticsearch URL and API key from one source');
       expect(stderr).not.toContain('SECRET_SHELL_KEY');
     });
 
     it.each(['profile', 'shell'])('rejects embedded URL credentials from %s', (source) => {
-      const url = 'https://elastic:SECRET_PASSWORD@c0.example.com';
+      const url = 'https://elastic:SECRET_PASSWORD@es.example.com';
       const { status, stderr } =
         source === 'profile'
           ? runHook({
               ...PROFILE,
-              nightshift: { ...PROFILE.nightshift, telemetry: { ...C0_ES, url } },
+              nightshift: { ...PROFILE.nightshift, telemetry: { ...ES, url } },
             })
           : runHook(
               { sandbox: SANDBOX },
-              { NIGHTSHIFT_C0_ES_URL: url, NIGHTSHIFT_C0_ES_API_KEY: 'remote-key' }
+              { NIGHTSHIFT_ES_URL: url, NIGHTSHIFT_ES_API_KEY: 'remote-key' }
             );
       expect(status).toBe(1);
-      expect(stderr).toContain('c0-es URL must not embed credentials');
+      expect(stderr).toContain('Elasticsearch URL must not embed credentials');
       expect(stderr).not.toContain('SECRET_PASSWORD');
     });
   });
@@ -409,7 +412,7 @@ describe('ORCA CI shard', () => {
   const orca = { url: 'https://orca.example:443', apiKey: 'orca-key' };
   const existing = {
     sandbox: SANDBOX,
-    nightshift: { telemetry: { url: 'https://customer0.example', apiKey: 'customer0-key' } },
+    nightshift: { telemetry: { url: 'https://default.example', apiKey: 'default-key' } },
   };
   it('starts the orcabench connector set and preserves sandbox authentication', () => {
     const { status, output, stderr } = runHook(
@@ -423,8 +426,8 @@ describe('ORCA CI shard', () => {
       NIGHTSHIFT_DATASETS: 'orcabench',
       NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
       NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/orcabench.yml'),
-      NIGHTSHIFT_ORCABENCH_ES_URL: orca.url,
-      NIGHTSHIFT_ORCABENCH_ES_API_KEY: orca.apiKey,
+      NIGHTSHIFT_ES_URL: orca.url,
+      NIGHTSHIFT_ES_API_KEY: orca.apiKey,
     });
   });
   it('ignores a readable-indices hint left in the ORCA block', () => {
@@ -447,17 +450,17 @@ describe('ORCA CI shard', () => {
     expect(status).toBe(1);
     expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
   });
-  it('keeps the customer0 connector set in the customer0 shard', () => {
+  it('keeps the default connector set in the customer0 shard', () => {
     const { output } = runHook(
       { ...existing, nightshiftOrcaEs: orca },
       { EVAL_SHARD_ID: 'customer0' }
     );
     expect(output.env).toMatchObject({
-      NIGHTSHIFT_CONNECTOR_SET: 'customer0',
-      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/customer0.yml'),
-      NIGHTSHIFT_C0_ES_URL: existing.nightshift.telemetry.url,
+      NIGHTSHIFT_CONNECTOR_SET: 'default',
+      NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: Path.join(__dirname, 'connector_sets/default.yml'),
+      NIGHTSHIFT_ES_URL: existing.nightshift.telemetry.url,
+      NIGHTSHIFT_ES_API_KEY: existing.nightshift.telemetry.apiKey,
     });
-    expect(output.env).not.toHaveProperty('NIGHTSHIFT_ORCABENCH_ES_API_KEY');
   });
   it('selects ORCA from NIGHTSHIFT_DATASETS for local runs outside CI', () => {
     const { output, status } = runHook(
@@ -465,8 +468,8 @@ describe('ORCA CI shard', () => {
       { NIGHTSHIFT_DATASETS: 'orcabench' }
     );
     expect(status).toBe(0);
-    expect(output.env.NIGHTSHIFT_ORCABENCH_ES_API_KEY).toBe(orca.apiKey);
-    expect(output.env).not.toHaveProperty('NIGHTSHIFT_C0_ES_API_KEY');
+    expect(output.env.NIGHTSHIFT_CONNECTOR_SET).toBe('orcabench');
+    expect(output.env.NIGHTSHIFT_ES_API_KEY).toBe(orca.apiKey);
   });
   it.each([
     undefined,
@@ -474,7 +477,7 @@ describe('ORCA CI shard', () => {
     { apiKey: orca.apiKey },
     { ...orca, url: 'https://user:password@orca.example' },
   ])(
-    'fails without a complete ORCA credential instead of using the customer0 set: %j',
+    'fails without a complete ORCA credential instead of using the default set: %j',
     (nightshiftOrcaEs) => {
       const { status, stderr } = runHook(
         { ...existing, nightshiftOrcaEs },
@@ -482,7 +485,7 @@ describe('ORCA CI shard', () => {
       );
       expect(status).toBe(1);
       expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
-      expect(stderr).not.toContain('customer0-key');
+      expect(stderr).not.toContain('default-key');
     }
   );
 });

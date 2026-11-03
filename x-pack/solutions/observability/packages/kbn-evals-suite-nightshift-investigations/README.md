@@ -276,25 +276,25 @@ the agent in `connectors.md`. There is no eval-only telemetry setting, start par
 hint; the agent finds the data through the connectors, as it must for a customer. A connector set
 is the group of preconfigured connectors one Scout stack starts with:
 
-| Set         | Kibana config                                                              | Connectors               | Credentials (Vault / profile JSON)  |
-| ----------- | -------------------------------------------------------------------------- | ------------------------ | ----------------------------------- |
-| `customer0` | [`scout/connector_sets/customer0.yml`](scout/connector_sets/customer0.yml) | `c0-es` (`.http`)        | `nightshift.telemetry.{url,apiKey}` |
-| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.http`) | `nightshiftOrcaEs.{url,apiKey}`     |
+| Set         | Kibana config                                                              | Connectors                | Credentials (Vault / profile JSON)  |
+| ----------- | -------------------------------------------------------------------------- | ------------------------- | ----------------------------------- |
+| `default`   | [`scout/connector_sets/default.yml`](scout/connector_sets/default.yml)     | `elasticsearch` (`.http`) | `nightshift.telemetry.{url,apiKey}` |
+| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.http`)  | `nightshiftOrcaEs.{url,apiKey}`     |
 
 To add a connector to a set, declare it in the set's YAML and add its id to `CONNECTOR_SETS`. The
-hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `customer0`
-whenever c0-es credentials are configured. It exports `NIGHTSHIFT_CONNECTOR_SET` and points the
+hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
+whenever Elasticsearch credentials are configured. It exports `NIGHTSHIFT_CONNECTOR_SET` and points the
 Scout config set at the set's YAML; the eval then saves every connector in the set on the
 investigator through the Agent Builder agents API (`saveConnectorSetOnInvestigator` in
 [`connector_sets.ts`](evals/investigation/connector_sets.ts)), as a user would in the agent's
 settings. Without a connector set, nothing is saved. One stack runs one set; the eval does not
 switch connectors per example.
 
-The c0-es credentials keep the Vault field name `nightshift.telemetry`:
+The `default` set's credentials keep the Vault field name `nightshift.telemetry`:
 
 ```json
 "nightshift": {
-  "telemetry": { "url": "https://c0.example.com", "apiKey": "..." }
+  "telemetry": { "url": "https://es.example.com", "apiKey": "..." }
 }
 ```
 
@@ -302,10 +302,10 @@ The c0-es credentials keep the Vault field name `nightshift.telemetry`:
 Profile values take precedence over these shell fallbacks, which replace the former
 `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` and `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY`:
 
-| Variable                   | Purpose                                                                                 |
-| -------------------------- | --------------------------------------------------------------------------------------- |
-| `NIGHTSHIFT_C0_ES_URL`     | c0-es Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
-| `NIGHTSHIFT_C0_ES_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.        |
+| Variable                | Purpose                                                                            |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `NIGHTSHIFT_ES_URL`     | Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
+| `NIGHTSHIFT_ES_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.   |
 
 A `readableIndices` field left in Vault is ignored.
 
@@ -327,7 +327,7 @@ response: confirm it queried the intended connector and returned data from the i
 remote/index and time range without query or remote failures. A `connector_id`, exit code zero,
 completed investigation or placeholder score alone does not prove connectivity.
 
-Leave the c0-es settings unset for the bundled synthetic examples; they need no connector. The
+Leave the Elasticsearch settings unset for the bundled synthetic examples; they need no connector. The
 former `remote` selection and `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file
 workflow.
 

@@ -157,8 +157,8 @@ export const assertOrcaSource = async (
   request: typeof globalThis.fetch = globalThis.fetch,
   env: NodeJS.ProcessEnv = process.env
 ): Promise<void> => {
-  const url = env.NIGHTSHIFT_ORCABENCH_ES_URL;
-  const apiKey = env.NIGHTSHIFT_ORCABENCH_ES_API_KEY;
+  const url = env.NIGHTSHIFT_ES_URL;
+  const apiKey = env.NIGHTSHIFT_ES_API_KEY;
   assert(
     url && apiKey && getConnectorSet(env) === 'orcabench',
     'ORCA requires a Scout server started with the orcabench connector set'

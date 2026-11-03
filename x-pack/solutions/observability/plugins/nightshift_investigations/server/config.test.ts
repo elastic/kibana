@@ -29,10 +29,10 @@ describe('Nightshift investigations configuration deprecations', () => {
           nightshift_investigations: {
             cortex: { enabled: false },
             sandbox: {
-              telemetry_connector_id: 'c0-es',
+              telemetry_connector_id: 'elasticsearch',
               telemetry_readable_indices: 'logs-*',
-              telemetry_targets: { c0: { connector_id: 'c0-es' } },
-              default_telemetry_target: 'c0',
+              telemetry_targets: { remote: { connector_id: 'elasticsearch' } },
+              default_telemetry_target: 'remote',
             },
           },
         },

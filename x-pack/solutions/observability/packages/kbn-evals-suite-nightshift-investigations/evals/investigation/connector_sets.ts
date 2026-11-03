@@ -13,7 +13,7 @@ export const ORCABENCH_ES_CONNECTOR_ID = 'orcabench-es';
 
 /** Connector ids each Scout connector set preconfigures, in `scout/connector_sets/<set>.yml`. */
 export const CONNECTOR_SETS = {
-  customer0: ['c0-es'],
+  default: ['elasticsearch'],
   orcabench: [ORCABENCH_ES_CONNECTOR_ID],
 } as const;
 

@@ -28,8 +28,8 @@ it('resolves credentials from the environment and preserves other preconfigured 
     SANDBOX_CLIENT_KEY_PATH: '/certs/tls.key',
     SANDBOX_CA_CERT_PATH: '',
     NIGHTSHIFT_TRACING_EXPORTERS: JSON.stringify(exporters),
-    NIGHTSHIFT_ORCABENCH_ES_URL: 'https://orca.example.com',
-    NIGHTSHIFT_ORCABENCH_ES_API_KEY: 'remote-key',
+    NIGHTSHIFT_ES_URL: 'https://orca.example.com',
+    NIGHTSHIFT_ES_API_KEY: 'remote-key',
   };
   try {
     const config = getConfigFromFiles([
@@ -86,10 +86,8 @@ it.each(Object.entries(CONNECTOR_SETS))(
     const originalEnv = process.env;
     process.env = {
       ...originalEnv,
-      NIGHTSHIFT_C0_ES_URL: 'https://c0.example.com',
-      NIGHTSHIFT_C0_ES_API_KEY: 'c0-key',
-      NIGHTSHIFT_ORCABENCH_ES_URL: 'https://orca.example.com',
-      NIGHTSHIFT_ORCABENCH_ES_API_KEY: 'orca-key',
+      NIGHTSHIFT_ES_URL: 'https://es.example.com',
+      NIGHTSHIFT_ES_API_KEY: 'es-key',
     };
     try {
       const config = getConfigFromFiles([
