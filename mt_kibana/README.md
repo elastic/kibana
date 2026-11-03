@@ -1,8 +1,8 @@
 # Multi-tenant Kibana M1 spike
 
-One Kibana dev server routes API requests to three local Elasticsearch clusters: `project-a`, `project-b`, and `project-c`. The `x-elastic-project-id` header picks the cluster, and [`tenants.yml`](tenants.yml) holds each project's credentials. With no header, requests go to the home cluster (`elasticsearch.hosts`, which is `project-a`).
+One Kibana dev server routes API requests to three local Elasticsearch clusters: `project-a`, `project-b`, and `project-c`. The `x-elastic-project-id` header picks the cluster, and [`tenants.yml`](tenants.yml) holds each project's credentials and saved objects encryption key. With no header, requests go to the home cluster (`elasticsearch.hosts`, which is `project-a`).
 
-The core change lives in `src/core/packages/elasticsearch/server-internal/src/elasticsearch_service.ts` (plus `multi_tenancy/tenants_file.ts`) and stays off unless `elasticsearch.multiTenancy.tenantsFile` is set.
+The core change lives in `src/core/packages/elasticsearch/server-internal/src/`. `elasticsearch_service.ts` wires it in, and `multi_tenancy/` holds the logic: `tenants_file.ts` reads `tenants.yml`, and `tenant_clients.ts` manages the project clients and the unknown-project guard. It stays off unless `elasticsearch.multiTenancy.tenantsFile` is set. Beyond M1, `request.projectId`, request-aware internal saved objects repositories, and per-project encrypted saved objects build on it.
 
 Run every command from the repo root. Remove this folder (`git rm -r mt_kibana`) before opening a PR.
 
@@ -35,7 +35,7 @@ With all three clusters running, and nothing else on port 5601:
 mt_kibana/init_tenant.sh a && mt_kibana/init_tenant.sh b && mt_kibana/init_tenant.sh c
 ```
 
-Each run boots single-tenant Kibana against one cluster until "Kibana is now available", then stops it (about 30 seconds). This creates the `.kibana*` indices and registers Kibana's privileges. Logs go to `.es/mt/init-<a|b|c>.log`.
+Each run boots single-tenant Kibana against one cluster until "Kibana is now available", then stops it (about 30 seconds). This creates the `.kibana*` indices and registers Kibana's privileges. It also passes the project's encryption key from `tenants.yml` (`a`, `b`, or `c` repeated 32 times), so anything encrypted during init uses it. Logs go to `.es/mt/init-<a|b|c>.log`.
 
 ## 3. Run multi-tenant Kibana
 
@@ -50,6 +50,11 @@ Drop the last flag to get the single-tenant "red" baseline: `smoke.sh` then pass
 
 `mt_kibana/smoke.sh` prints `PASS` for each project whose `/api/stats` `cluster_uuid` (internal-user path) and console proxy `cluster_name` (current-user path) come from that project's cluster. The console proxy is an internal API, so its calls send `x-elastic-internal-origin: kibana` like the browser does.
 
+`mt_kibana/so_check.sh` writes a data view, an advanced setting, and a space through `project-b`, then checks where each one is stored and who can see it. The setting check through `project-a` fails because advanced settings are cached per space for the whole process, not per project (see [`FINDINGS.md`](FINDINGS.md)).
+
+`mt_kibana/eso_check.sh` creates `.index` and webhook connectors through `project-b` and `project-c` and runs them, including in parallel. It checks that each run reads its own project's connector, decrypts its secrets, and writes only to its own cluster. It also prints where the connector's event log entries landed.
+
+Isolation check for the per-project keys: create a webhook connector with a secret through `project-b`. Then start single-tenant Kibana against cluster B with the default key: `node scripts/kibana --dev --no-base-path --no-optimizer --elasticsearch.hosts=http://localhost:9201 --elasticsearch.password=changeme-b`. Running the connector fails with `Failed to decrypt attribute "secrets"`.
 Misrouting checks:
 
 ```bash

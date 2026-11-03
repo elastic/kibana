@@ -1,4 +1,5 @@
-# Local dev passwords only. Put real credentials in a *.local.yml file, which git ignores.
-project-a: { hosts: ['http://localhost:9200'], username: kibana_system, password: changeme-a }
-project-b: { hosts: ['http://localhost:9201'], username: kibana_system, password: changeme-b }
-project-c: { hosts: ['http://localhost:9202'], username: kibana_system, password: changeme-c }
+# Local dev passwords and keys only. Put real credentials in a *.local.yml file, which git ignores.
+# project-a's encryptionKey matches the dev default, so the home project keeps its key.
+project-a: { hosts: ['http://localhost:9200'], username: kibana_system, password: changeme-a, encryptionKey: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa }
+project-b: { hosts: ['http://localhost:9201'], username: kibana_system, password: changeme-b, encryptionKey: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb }
+project-c: { hosts: ['http://localhost:9202'], username: kibana_system, password: changeme-c, encryptionKey: cccccccccccccccccccccccccccccccc }
