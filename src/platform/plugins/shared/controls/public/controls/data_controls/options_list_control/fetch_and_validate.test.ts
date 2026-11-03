@@ -42,7 +42,7 @@ const buildApi = ({
     loadMoreSubject: new Subject<void>(),
     loadingSuggestions$: new BehaviorSubject<boolean>(false),
     debouncedSearchString: new BehaviorSubject<string>(''),
-    dataViews$: new BehaviorSubject<unknown>(undefined),
+    dataSources$: new BehaviorSubject<unknown>(undefined),
     field$: new BehaviorSubject<unknown>(undefined),
     esqlQuery$: new BehaviorSubject<string>('FROM logs | KEEP host'),
     valuesSource$: new BehaviorSubject<ControlValuesSource>(ControlValuesSource.ESQL),

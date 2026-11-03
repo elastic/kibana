@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 3928
   advancedSettings: 1981
-  agentBuilder: 644
+  agentBuilder: 745
   agentBuilderDashboards: 3743
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
@@ -13,7 +13,7 @@ pageLoadAssetSize:
   aiops: 586
   alerting: 8789
   alertingVTwo: 24358
-  alertzero: 8277
+  alertzero: 9130
   apm: 35746
   apmShared: 2226
   apmSourcesAccess: 1174
@@ -34,7 +34,7 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 3166
   contentManagement: 6737
-  contextEngine: 3172
+  contextEngine: 3495
   contextEngineAgentBuilder: 2553
   controls: 4166
   core: 320
@@ -67,7 +67,7 @@ pageLoadAssetSize:
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
-  entityInventoryApp: 1216
+  entityInventoryApp: 2682
   entityStore: 2508
   esql: 382
   esqlDataGrid: 215
@@ -106,7 +106,7 @@ pageLoadAssetSize:
   indexManagement: 583
   inference: 5940
   inferenceWorkflows: 1139
-  infra: 45799
+  infra: 45553
   ingestHub: 8059
   ingestPipelines: 534
   inputControlVis: 3213
@@ -135,9 +135,9 @@ pageLoadAssetSize:
   mitreAttack: 2022
   ml: 950
   monitoring: 22416
-  navigation: 332
+  navigation: 13400
   newsfeed: 10708
-  nightshift: 3160
+  nightshift: 4343
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -194,11 +194,10 @@ pageLoadAssetSize:
   share: 379
   shared-core: 311749
   shared-misc: 155260
-  shared-packages: 5513030
+  shared-packages: 6066047
   shared-plugins: 13536562
   shared-solution-packages: 386709
   significantEvents: 4439
-  significantEventsApp: 5759
   slo: 19531
   snapshotRestore: 16909
   spaces: 25351

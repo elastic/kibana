@@ -36,7 +36,8 @@ export function buildAgentBasedTargets(
   instances: ServiceInstance[],
   selectedServiceIds: string[],
   servicesMap: Map<string, AwsServiceMatrixEntry>,
-  storedServiceVars: Record<string, ServiceVars> = {}
+  storedServiceVars: Record<string, ServiceVars> = {},
+  globalNamespace?: string
 ): DeployGroup[] {
   const resolved: ServiceInstance[] = reconcileInstances(
     instances,
@@ -57,5 +58,6 @@ export function buildAgentBasedTargets(
     }
   }
 
-  return groupByPackage(originals, duplicates, storedServiceVars);
+  // No default namespace: an empty one means the namespace of the agent policy.
+  return groupByPackage(originals, duplicates, storedServiceVars, undefined, globalNamespace);
 }

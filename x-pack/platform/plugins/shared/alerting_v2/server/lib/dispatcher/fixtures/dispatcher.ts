@@ -14,7 +14,12 @@ import type {
   SeriesSuppressionRow,
 } from '../types';
 
-export const createDispatchableAlertEventsResponse = (alerts: Alert[]): EsqlQueryResponse => {
+/** A dispatchable alert events query row; `alert_url` is added when the row is parsed. */
+export type DispatchableAlertEventRow = Omit<Alert, 'alert_url'>;
+
+export const createDispatchableAlertEventsResponse = (
+  alerts: DispatchableAlertEventRow[]
+): EsqlQueryResponse => {
   return {
     columns: [
       { name: 'last_event_timestamp', type: 'date' },

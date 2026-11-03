@@ -25,6 +25,7 @@ import {
   CASES_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
+  MANAGE_PATH,
   RULES_ADD_PATH,
   RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
@@ -227,11 +228,21 @@ export const isCloudSecurityPosturePath = (pathname: string): boolean =>
   });
 
 /**
- * Matches the Shared Exception Lists page, whose app header owns the page actions.
+ * Matches the Shared Exception Lists and Exception list details pages, whose app headers own the page actions.
  */
-export const isSharedExceptionListsPath = (pathname: string): boolean =>
+export const isExceptionsPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: EXCEPTIONS_PATH,
+    exact: false,
+    strict: false,
+  });
+
+/**
+ * Matches the Manage landing page, whose app header owns the page actions.
+ */
+export const isManageLandingPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: MANAGE_PATH,
     exact: true,
     strict: false,
   });

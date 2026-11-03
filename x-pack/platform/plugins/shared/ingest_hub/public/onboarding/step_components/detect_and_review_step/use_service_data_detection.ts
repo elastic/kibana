@@ -14,7 +14,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DATA_STREAM_API_ROUTES, isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
+import { deploysAsPolicy, getEffectiveNamespace } from '../../common/effective_namespace';
 import { getServiceIndexPatterns } from '../../common/service_index_patterns';
 import type { HasDataResponse } from '../../../../common/core/detection_api';
 import {
@@ -54,15 +55,20 @@ function batchPatterns(patterns: string[]): string[] {
   return batches;
 }
 
-// The index patterns of one instance, in its own namespace. Instances that cannot use the Fleet
+// The index patterns of one instance, in its effective namespace. Instances that cannot use the Fleet
 // agent data API are detected through these.
 function getInstancePatterns(
   entry: AwsServiceMatrixEntry,
   instanceId: string,
-  serviceSettings: ServiceSettingsPersistedState
+  serviceSettings: ServiceSettingsPersistedState,
+  deploymentMethod: DeploymentMethod | undefined
 ): string[] {
-  const { serviceVars = {} } = serviceSettings;
-  return getServiceIndexPatterns(entry, serviceVars[instanceId]?.namespace);
+  const { serviceVars = {}, namespace } = serviceSettings;
+  // An ECF service has no namespace: its data does not follow the setting.
+  const effectiveNamespace = deploysAsPolicy(entry, deploymentMethod)
+    ? getEffectiveNamespace(instanceId, serviceVars, namespace)
+    : undefined;
+  return getServiceIndexPatterns(entry, effectiveNamespace);
 }
 
 /** The Fleet agent behind a service tile — the worst instance when a service is duplicated. */
@@ -85,8 +91,13 @@ export interface ServiceDataDetectionResult {
 
 export function useServiceDataDetection(): ServiceDataDetectionResult {
   const { services } = useKibana<CoreStart>();
-  const { servicesStep, detectAndReviewStep, awsServicesMap, updateDetectAndReviewStep } =
-    useOnboardingFlow();
+  const {
+    servicesStep,
+    detectAndReviewStep,
+    awsServicesMap,
+    deploymentMethod,
+    updateDetectAndReviewStep,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
   const { serviceStatuses, deployErrors, policyIdsByInstance = {} } = detectAndReviewStep;
   const [storedSettings] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -149,11 +160,20 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
       const entry = awsServicesMap?.get(serviceId);
       if (!entry) continue;
       for (const instanceId of instanceIds.filter(isPatternInstance)) {
-        byId.set(instanceId, getInstancePatterns(entry, instanceId, serviceSettings));
+        byId.set(
+          instanceId,
+          getInstancePatterns(entry, instanceId, serviceSettings, deploymentMethod)
+        );
       }
     }
     return byId;
-  }, [instanceIdsByServiceId, awsServicesMap, serviceSettings, isPatternInstance]);
+  }, [
+    instanceIdsByServiceId,
+    awsServicesMap,
+    serviceSettings,
+    isPatternInstance,
+    deploymentMethod,
+  ]);
 
   const allPatterns = useMemo(() => {
     const patterns = new Set<string>();

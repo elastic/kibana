@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/security-plugin-types-server'
   - '@kbn/workflows-extensions'
   - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/connector-specs'
 tags:
   - plugin
   - prod

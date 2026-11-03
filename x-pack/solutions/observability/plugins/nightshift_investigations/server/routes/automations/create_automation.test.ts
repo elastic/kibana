@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
 import { createAutomationRoute } from './create_automation';
-import { createRouteContext } from './test_helpers';
+import { createRouteContext, createServiceAccountService } from './test_helpers';
 
 const { handler, params } = createAutomationRoute['POST /internal/nightshift/automations'];
 
@@ -33,11 +33,15 @@ const call = (overrides: Record<string, unknown> = {}) =>
     params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
   } as never);
 
+let serviceAccountService = createServiceAccountService();
+
 beforeEach(() => {
   jest.clearAllMocks();
+  serviceAccountService = createServiceAccountService();
   soClient.create.mockResolvedValue({ id: 'automation-1' });
   createWorkflow.mockResolvedValue({ id: 'workflow-1' });
 });
@@ -113,6 +117,11 @@ describe('request validation', () => {
 
   it('rejects Slack events other than message', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
+  });
+
+  it('rejects a daily dispatch limit of zero and accepts an omitted one', () => {
+    expect(() => params.parse({ body: { ...body, runtime: { dailyDispatchLimit: 0 } } })).toThrow();
+    expect(params.parse({ body: { ...body, runtime: {} } }).body.runtime).toEqual({});
   });
 
   it('rejects oversized instructions during request parsing before writes', () => {
@@ -196,6 +205,22 @@ it.each([
   await expect(
     call({ execution: { promptTemplate: 'Review health.' }, ...overrides })
   ).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(soClient.create).not.toHaveBeenCalled();
+  expect(createWorkflow).not.toHaveBeenCalled();
+});
+
+it('runs the automation as the automations service account', async () => {
+  await call();
+
+  expect(parse(createWorkflow.mock.calls[0][0].yaml).settings.run_as).toBe(
+    'kibana/nightshift_automations'
+  );
+});
+
+it('refuses callers who cannot write a bound workflow before writing anything', async () => {
+  serviceAccountService.resolveAutomationRunAs.mockRejectedValue(new Error('manage_security'));
+
+  await expect(call()).rejects.toThrow('manage_security');
   expect(soClient.create).not.toHaveBeenCalled();
   expect(createWorkflow).not.toHaveBeenCalled();
 });

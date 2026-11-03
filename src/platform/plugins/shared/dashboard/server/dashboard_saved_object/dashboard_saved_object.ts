@@ -46,10 +46,20 @@ export const createDashboardSavedObjectType = ({
     },
     onExport: (ctx, objects) => {
       // deduplicate references by name
-      return objects.map((obj) => ({
-        ...obj,
-        references: uniqBy(obj.references, 'name'),
-      }));
+      return objects.map(
+        ({
+          attributes: {
+            // drop the history sequence since it belongs to this cluster's change history and exporting it causes version number conflicts on re-import
+            historySequence,
+            ...attributes
+          },
+          ...obj
+        }) => ({
+          ...obj,
+          attributes,
+          references: uniqBy(obj.references, 'name'),
+        })
+      );
     },
   },
   modelVersions: {
