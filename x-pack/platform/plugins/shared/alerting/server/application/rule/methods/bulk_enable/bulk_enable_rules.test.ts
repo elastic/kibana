@@ -46,6 +46,10 @@ import {
 } from '../../../../rules_client/tests/test_helpers';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
@@ -54,6 +58,17 @@ import { RecoveredActionGroup } from '../../../../../common';
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
+  bulkMigrateLegacyActions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../get_schedule_frequency', () => ({
   validateScheduleLimit: jest.fn(),
@@ -115,6 +130,7 @@ beforeEach(() => {
       } as unknown as BulkUpdateTaskResult)
   );
   (auditLogger.log as jest.Mock).mockClear();
+  (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
 });
 
 setGlobalDate();
@@ -244,6 +260,21 @@ describe('bulkEnableRules', () => {
     const bulkCreatePayload = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
     const writtenAttributes = bulkCreatePayload[0].attributes;
     expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
+  });
+
+  test('should delete the migrated legacy actions only for the rules that were saved', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['id1', 'id2']);
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledRuleForBulkOps1, savedObjectWith500Error],
+    });
+
+    await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['id1']);
+    expect(
+      (unsecuredSavedObjectsClient.bulkCreate as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
   });
 
   test('should enable two rules and return right actions', async () => {
