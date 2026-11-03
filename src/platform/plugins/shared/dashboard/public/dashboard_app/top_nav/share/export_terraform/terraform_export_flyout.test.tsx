@@ -17,8 +17,10 @@ import type { DashboardTerraformResponseBody } from '../../../../../server';
 import { TerraformExportFlyout } from './terraform_export_flyout';
 
 const mockPost = jest.fn();
+const mockGetActiveSpace = jest.fn();
 jest.mock('../../../../services/kibana_services', () => ({
   coreServices: { http: { post: (...args: unknown[]) => mockPost(...args) } },
+  spacesService: { getActiveSpace: () => mockGetActiveSpace() },
 }));
 
 const mockDownloadFileAs = jest.fn();
@@ -40,10 +42,15 @@ const respondWith = (terraform: () => Promise<DashboardTerraformResponseBody>) =
     path.endsWith('/_sanitize') ? { data: sanitized, warnings: [] } : terraform()
   );
 
-const renderFlyout = (title = 'Web logs') =>
+const renderFlyout = (
+  title = 'Web logs',
+  { dashboardId, isDirty = false }: { dashboardId?: string; isDirty?: boolean } = {}
+) =>
   renderWithI18n(
     <TerraformExportFlyout
       title={title}
+      dashboardId={dashboardId}
+      isDirty={isDirty}
       getExportJson={() => ({ title })}
       closeFlyout={jest.fn()}
     />
@@ -51,14 +58,42 @@ const renderFlyout = (title = 'Web logs') =>
 
 const fileList = () => screen.getByRole('list', { name: 'Module files' });
 
+const fileNames = () =>
+  within(fileList())
+    .getAllByRole('button', { name: /^(?!Download )/ })
+    .map((button) => button.textContent);
+
 const showFile = async (name: string) => {
   await userEvent.click(within(fileList()).getByRole('button', { name }));
   return screen.getByTestId('dashboardTerraformExportFileContent').textContent ?? '';
 };
 
+const downloadZip = async () => {
+  mockDownloadFileAs.mockClear();
+  await userEvent.click(screen.getByRole('button', { name: 'Download zip' }));
+  expect(mockDownloadFileAs).toHaveBeenCalledTimes(1);
+  const [filename, blob] = mockDownloadFileAs.mock.calls[0];
+  const zip = await JSZip.loadAsync(await new Response(blob).arrayBuffer());
+  const entries: Record<string, string> = {};
+  for (const file of Object.values(zip.files).filter(({ dir }) => !dir)) {
+    entries[file.name] = await file.async('string');
+  }
+  return { filename, entries };
+};
+
+const shownFiles = async (folder: string) => {
+  const shown: Record<string, string> = {};
+  for (const name of fileNames()) shown[`${folder}/${name}`] = await showFile(name ?? '');
+  return shown;
+};
+
+const modeButton = (name: string) => screen.getByRole('button', { name });
+
 beforeEach(() => {
   mockPost.mockReset();
   mockDownloadFileAs.mockReset();
+  mockGetActiveSpace.mockReset();
+  mockGetActiveSpace.mockResolvedValue({ id: 'default' });
 });
 
 describe('TerraformExportFlyout', () => {
@@ -101,6 +136,106 @@ describe('TerraformExportFlyout', () => {
       },
     });
     expect(await showFile('README.md')).toContain('terraform init');
+  });
+
+  it('adopts a saved dashboard: pins its ID and space and imports it', async () => {
+    mockGetActiveSpace.mockResolvedValue({ id: 'marketing' });
+    respondWith(async () => conversion);
+    renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+    await screen.findByRole('list', { name: 'Module files' });
+    expect(modeButton('Adopt this dashboard')).toHaveAttribute('aria-pressed', 'true');
+    expect(fileNames()).toEqual([
+      'versions.tf.json',
+      'main.tf.json',
+      'imports.tf.json',
+      'README.md',
+    ]);
+    const main = JSON.parse(await showFile('main.tf.json'));
+    expect(main.resource.elasticstack_kibana_dashboard.web_logs).toEqual({
+      space_id: 'marketing',
+      dashboard_id: 'abc-123',
+      title: 'Web logs',
+      description: 'Costs $${var.env}',
+    });
+    expect(JSON.parse(await showFile('imports.tf.json'))).toEqual({
+      import: [{ to: 'elasticstack_kibana_dashboard.web_logs', id: 'marketing/abc-123' }],
+    });
+    expect(await showFile('README.md')).toContain(
+      '1 to import, 0 to add, 0 to change, 0 to destroy'
+    );
+
+    const { entries } = await downloadZip();
+    expect(entries).toEqual(await shownFiles('web_logs'));
+  });
+
+  it('switches a saved dashboard to a new copy: no IDs and no imports, in the files and the zip', async () => {
+    respondWith(async () => conversion);
+    renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+    await screen.findByRole('list', { name: 'Module files' });
+    await userEvent.click(modeButton('New copy'));
+
+    expect(modeButton('New copy')).toHaveAttribute('aria-pressed', 'true');
+    expect(fileNames()).toEqual(['versions.tf.json', 'main.tf.json', 'README.md']);
+    const main = JSON.parse(await showFile('main.tf.json'));
+    expect(main.resource.elasticstack_kibana_dashboard.web_logs).toEqual(conversion.body);
+    expect(await showFile('README.md')).toContain('1 to add, 0 to change, 0 to destroy');
+
+    const { entries } = await downloadZip();
+    expect(Object.keys(entries)).toEqual([
+      'web_logs/versions.tf.json',
+      'web_logs/main.tf.json',
+      'web_logs/README.md',
+    ]);
+    expect(entries).toEqual(await shownFiles('web_logs'));
+  });
+
+  it('offers only a new copy of a dashboard that was never saved, and says why', async () => {
+    respondWith(async () => conversion);
+    renderFlyout('Web logs');
+
+    await screen.findByRole('list', { name: 'Module files' });
+    expect(modeButton('Adopt this dashboard')).toBeDisabled();
+    expect(modeButton('New copy')).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('This export includes unsaved changes')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.'
+      )
+    ).toBeInTheDocument();
+    expect(fileNames()).not.toContain('imports.tf.json');
+  });
+
+  it('says when the export of a saved dashboard includes unsaved changes', async () => {
+    respondWith(async () => conversion);
+    renderFlyout('Web logs', { dashboardId: 'abc-123', isDirty: true });
+
+    await screen.findByRole('list', { name: 'Module files' });
+    expect(screen.getByText('This export includes unsaved changes')).toBeInTheDocument();
+    expect(modeButton('Adopt this dashboard')).toBeEnabled();
+  });
+
+  it('says nothing about unsaved changes when the dashboard is saved as shown', async () => {
+    respondWith(async () => conversion);
+    renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+    await screen.findByRole('list', { name: 'Module files' });
+    expect(screen.queryByText('This export includes unsaved changes')).not.toBeInTheDocument();
+  });
+
+  it('writes template sequences in an adopted ID literally', async () => {
+    respondWith(async () => conversion);
+    renderFlyout('Web logs', { dashboardId: 'id-${x}-%{y}' });
+
+    await screen.findByRole('list', { name: 'Module files' });
+    const main = JSON.parse(await showFile('main.tf.json'));
+    expect(main.resource.elasticstack_kibana_dashboard.web_logs.dashboard_id).toBe(
+      'id-$${x}-%%{y}'
+    );
+    expect(JSON.parse(await showFile('imports.tf.json')).import[0].id).toBe(
+      'default/id-$${x}-%%{y}'
+    );
   });
 
   it.each([

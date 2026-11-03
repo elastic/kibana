@@ -16,7 +16,11 @@ export interface ModuleFile {
   content: string;
 }
 
+/** Adopt manages the saved dashboard in place; copy creates a new dashboard and pins nothing. */
+export type ExportMode = { kind: 'adopt'; spaceId: string; dashboardId: string } | { kind: 'copy' };
+
 export const MAIN_FILE = 'main.tf.json';
+const IMPORTS_FILE = 'imports.tf.json';
 
 /** A valid Terraform identifier from the title, `dashboard` when nothing in the title qualifies. */
 export const toResourceName = (title: string): string => {
@@ -42,12 +46,33 @@ export const toZipFilename = (title: string): string =>
 
 const json = (value: object) => `${JSON.stringify(value, null, 2)}\n`;
 
-const readme = ({
-  source,
-  version,
-}: DashboardTerraformResponseBody['provider']) => `# Dashboard exported from Kibana
+// Saved object IDs may be any string, and strings in Terraform JSON syntax are templates, so `${` and `%{`
+// in an ID are written in their literal forms, as the conversion does for the dashboard's text.
+const escapeTemplate = (text: string): string =>
+  text.replace(/\$\{/g, () => '$${').replace(/%\{/g, () => '%%{');
 
-This module creates a new copy of the dashboard; the original is not changed.
+const firstPlan = (mode: ExportMode) =>
+  mode.kind === 'adopt'
+    ? `This module adopts the existing dashboard \`${mode.dashboardId}\` in space \`${mode.spaceId}\`:
+Terraform manages it in place from now on. \`${IMPORTS_FILE}\` imports it, so the first plan should
+show
+
+    Plan: 1 to import, 0 to add, 0 to change, 0 to destroy.
+
+A change in that plan means the export differs from the saved dashboard, for example because it
+includes unsaved changes; review it before you apply. You can delete \`${IMPORTS_FILE}\` after the
+first apply.`
+    : `This module creates a new copy of the dashboard; the original is not changed. The first plan
+should show
+
+    Plan: 1 to add, 0 to change, 0 to destroy.`;
+
+const readme = (
+  { source, version }: DashboardTerraformResponseBody['provider'],
+  mode: ExportMode
+) => `# Dashboard exported from Kibana
+
+${firstPlan(mode)}
 
 It was generated for the ${source} provider; \`versions.tf.json\` requires version
 ${version} or later. This export is a technical preview.
@@ -63,10 +88,11 @@ Text from the dashboard that Terraform would read as a template (\`\${\` or \`%{
 \`$\${\` or \`%%{\`, so Terraform keeps it as it is.
 `;
 
-/** The files of a module creating a new copy of the dashboard, in the order the flyout lists them. */
+/** The files of the module for the chosen mode, in the order the flyout lists them. */
 export const buildModuleFiles = (
   conversion: DashboardTerraformResponseBody,
-  resourceName: string
+  resourceName: string,
+  mode: ExportMode
 ): ModuleFile[] => {
   const { provider, resource_type: resourceType, body } = conversion;
   return [
@@ -85,9 +111,38 @@ export const buildModuleFiles = (
     {
       name: MAIN_FILE,
       language: 'json',
-      content: json({ resource: { [resourceType]: { [resourceName]: body } } }),
+      content: json({
+        resource: {
+          [resourceType]: {
+            [resourceName]:
+              mode.kind === 'adopt'
+                ? {
+                    space_id: mode.spaceId,
+                    dashboard_id: escapeTemplate(mode.dashboardId),
+                    ...body,
+                  }
+                : body,
+          },
+        },
+      }),
     },
-    { name: 'README.md', language: 'markdown', content: readme(provider) },
+    ...(mode.kind === 'adopt'
+      ? [
+          {
+            name: IMPORTS_FILE,
+            language: 'json' as const,
+            content: json({
+              import: [
+                {
+                  to: `${resourceType}.${resourceName}`,
+                  id: escapeTemplate(`${mode.spaceId}/${mode.dashboardId}`),
+                },
+              ],
+            }),
+          },
+        ]
+      : []),
+    { name: 'README.md', language: 'markdown', content: readme(provider, mode) },
   ];
 };
 

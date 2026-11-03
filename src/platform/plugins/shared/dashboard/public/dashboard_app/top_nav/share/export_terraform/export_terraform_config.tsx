@@ -18,10 +18,19 @@ import { topNavStrings } from '../../../_dashboard_app_strings';
 import { TerraformExportFlyout } from './terraform_export_flyout';
 
 const ExportDashboardTerraformFlyout = ({ closeFlyout }: { closeFlyout: () => void }) => {
-  const { sharingData } = useShareTypeContext('integration', 'exportDerivatives');
+  const { sharingData, objectId, isDirty } = useShareTypeContext(
+    'integration',
+    'exportDerivatives'
+  );
   const { title, getExportJson } = sharingData as unknown as ExportJsonSharingData<DashboardState>;
   return (
-    <TerraformExportFlyout title={title} getExportJson={getExportJson} closeFlyout={closeFlyout} />
+    <TerraformExportFlyout
+      title={title}
+      dashboardId={objectId}
+      isDirty={isDirty}
+      getExportJson={getExportJson}
+      closeFlyout={closeFlyout}
+    />
   );
 };
 

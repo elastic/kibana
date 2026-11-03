@@ -13,6 +13,7 @@ import {
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiButtonIcon,
   EuiCode,
   EuiCodeBlock,
@@ -30,8 +31,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadFileAs } from '@kbn/share-plugin/public';
-import { KbnDangerCallout } from '@kbn/ui-callout';
-import type { ModuleFile } from './module_files';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import type { ExportMode, ModuleFile } from './module_files';
 import {
   MAIN_FILE,
   buildModuleFiles,
@@ -43,9 +44,61 @@ import { useTerraformExport } from './use_terraform_export';
 
 export interface TerraformExportFlyoutProps {
   title: string;
+  /** The saved dashboard's ID; without one the dashboard can only be exported as a new copy. */
+  dashboardId?: string;
+  isDirty: boolean;
   getExportJson: () => object;
   closeFlyout: () => void;
 }
+
+type ModeKind = ExportMode['kind'];
+
+const modeOptions = (canAdopt: boolean) => [
+  {
+    id: 'adopt',
+    label: i18n.translate('dashboard.exportTerraform.adoptModeButtonLabel', {
+      defaultMessage: 'Adopt this dashboard',
+    }),
+    isDisabled: !canAdopt,
+    toolTipContent: canAdopt
+      ? undefined
+      : i18n.translate('dashboard.exportTerraform.adoptUnavailableTooltip', {
+          defaultMessage: 'Save the dashboard to adopt it.',
+        }),
+    'data-test-subj': 'dashboardTerraformExportModeAdopt',
+  },
+  {
+    id: 'copy',
+    label: i18n.translate('dashboard.exportTerraform.copyModeButtonLabel', {
+      defaultMessage: 'New copy',
+    }),
+    'data-test-subj': 'dashboardTerraformExportModeCopy',
+  },
+];
+
+const UnsavedChangesCallout = ({ isSaved }: { isSaved: boolean }) => (
+  <>
+    <KbnInfoCallout
+      size="s"
+      data-test-subj="dashboardTerraformExportUnsavedChanges"
+      title={i18n.translate('dashboard.exportTerraform.unsavedChangesTitle', {
+        defaultMessage: 'This export includes unsaved changes',
+      })}
+      text={
+        isSaved
+          ? i18n.translate('dashboard.exportTerraform.unsavedChangesDescription', {
+              defaultMessage:
+                'The files differ from the saved dashboard. If you adopt it, the first plan shows these changes.',
+            })
+          : i18n.translate('dashboard.exportTerraform.unsavedDashboardDescription', {
+              defaultMessage:
+                'This dashboard has never been saved, so it can only be exported as a new copy. Save it to adopt it.',
+            })
+      }
+    />
+    <EuiSpacer size="m" />
+  </>
+);
 
 const DownloadFileButton = ({ name, content }: Pick<ModuleFile, 'name' | 'content'>) => {
   const label = i18n.translate('dashboard.exportTerraform.downloadFileLabel', {
@@ -104,19 +157,28 @@ const FileList = ({
   </ul>
 );
 
-/** Export → Terraform: the files of a module creating a new copy of the dashboard. */
+/** Export → Terraform: the files of a module adopting the dashboard or creating a new copy. */
 export const TerraformExportFlyout = ({
   title,
+  dashboardId,
+  isDirty,
   getExportJson,
   closeFlyout,
 }: TerraformExportFlyoutProps) => {
   const exportState = useTerraformExport(getExportJson);
   const resourceName = toResourceName(title);
+  const canAdopt = Boolean(dashboardId);
+  const [modeKind, setModeKind] = useState<ModeKind>(canAdopt ? 'adopt' : 'copy');
   const conversion = exportState.status === 'success' ? exportState.conversion : undefined;
-  const files = useMemo(
-    () => (conversion ? buildModuleFiles(conversion, resourceName) : []),
-    [conversion, resourceName]
-  );
+  const spaceId = exportState.status === 'success' ? exportState.spaceId : undefined;
+  const files = useMemo(() => {
+    if (!conversion || !spaceId) return [];
+    const mode: ExportMode =
+      modeKind === 'adopt' && dashboardId
+        ? { kind: 'adopt', spaceId, dashboardId }
+        : { kind: 'copy' };
+    return buildModuleFiles(conversion, resourceName, mode);
+  }, [conversion, dashboardId, modeKind, resourceName, spaceId]);
   const [selectedName, setSelectedName] = useState(MAIN_FILE);
   const selected = files.find(({ name }) => name === selectedName) ?? files[0];
 
@@ -165,19 +227,48 @@ export const TerraformExportFlyout = ({
               </EuiBadge>
             </EuiFlexItem>
           )}
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="dashboard.exportTerraform.newCopyDescription"
-                defaultMessage="Creates a new copy of {title} in Terraform JSON syntax ({extension})."
-                values={{ title: <strong>{title}</strong>, extension: <EuiCode>.tf.json</EuiCode> }}
-              />
+            <EuiButtonGroup
+              legend={i18n.translate('dashboard.exportTerraform.modeAriaLabel', {
+                defaultMessage: 'What Terraform does with the dashboard',
+              })}
+              buttonSize="compressed"
+              idSelected={modeKind}
+              onChange={(id) => setModeKind(id as ModeKind)}
+              options={modeOptions(canAdopt)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" data-test-subj="dashboardTerraformExportModeText">
+              {modeKind === 'adopt' ? (
+                <FormattedMessage
+                  id="dashboard.exportTerraform.adoptDescription"
+                  defaultMessage="Terraform imports {title} and updates it in place. Terraform JSON syntax ({extension})."
+                  values={{
+                    title: <strong>{title}</strong>,
+                    extension: <EuiCode>.tf.json</EuiCode>,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="dashboard.exportTerraform.newCopyDescription"
+                  defaultMessage="Creates a new copy of {title}; the original is not changed. Terraform JSON syntax ({extension})."
+                  values={{
+                    title: <strong>{title}</strong>,
+                    extension: <EuiCode>.tf.json</EuiCode>,
+                  }}
+                />
+              )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {(isDirty || !canAdopt) && <UnsavedChangesCallout isSaved={canAdopt} />}
         {exportState.status === 'loading' && (
           <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: '100%' }}>
             <EuiLoadingSpinner
